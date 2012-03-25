@@ -9,7 +9,9 @@ public class ListDbOpenHelper extends SQLiteOpenHelper {
     public static final String KEY_PACKAGE = "package";
     public static final String KEY_VERSION_NUMBER = "ver_num";    
     public static final String KEY_VERSION_NAME = "ver_name";
-    public static final String KEY_ICON_CACHE = "ver_name";
+    public static final String KEY_TITLE = "icon";    
+    public static final String KEY_ICON_CACHE = "icon";
+    public static final String KEY_STATUS = "status";
     
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "app_watcher";    
