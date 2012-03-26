@@ -24,6 +24,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+		<provider
+      		android:name=".AppListContentProvider"
+      		android:authorities="com.anod.appwatcher" >
+   		</provider>        
     </application>
 
 </manifest>
