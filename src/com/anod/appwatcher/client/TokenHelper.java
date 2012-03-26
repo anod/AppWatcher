@@ -17,7 +17,7 @@ public class TokenHelper {
 	}
 
 	public String requestToken() {
-		return updateToken(true);
+		return updateToken(false);
 	}
 	
 	private String updateToken(boolean invalidateToken) {

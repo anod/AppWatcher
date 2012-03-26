@@ -24,6 +24,14 @@
             </intent-filter>
         </activity>
         
+		<activity android:name=".MarketSearchableActivity" >
+	        <intent-filter>
+	            <action android:name="android.intent.action.SEARCH" />
+	        </intent-filter>
+	        <meta-data android:name="android.app.searchable"
+	                   android:resource="@xml/searchable_market"/>
+	    </activity>
+	            
 		<provider
       		android:name=".AppListContentProvider"
       		android:authorities="com.anod.appwatcher" >
