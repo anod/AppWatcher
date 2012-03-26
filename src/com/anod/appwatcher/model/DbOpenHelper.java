@@ -10,12 +10,13 @@ public class DbOpenHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "app_watcher";
     private static final String TABLE_CREATE =
     	"CREATE TABLE " + AppListTable.TABLE_NAME + " (" +
-			AppListTable.KEY_PACKAGE + " TEXT not null," +
-			AppListTable.KEY_VERSION_NUMBER + " INTEGER," +
-			AppListTable.KEY_VERSION_NAME + " INTEGER," +    		
-			AppListTable.KEY_TITLE + " TEXT," +
-			AppListTable.KEY_ICON_CACHE + " BLOB," +
-			AppListTable.KEY_STATUS + " INTEGER" +    		
+    		AppListTable.Columns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+			AppListTable.Columns.KEY_PACKAGE + " TEXT not null," +
+			AppListTable.Columns.KEY_VERSION_NUMBER + " INTEGER," +
+			AppListTable.Columns.KEY_VERSION_NAME + " INTEGER," +    		
+			AppListTable.Columns.KEY_TITLE + " TEXT," +
+			AppListTable.Columns.KEY_ICON_CACHE + " BLOB," +
+			AppListTable.Columns.KEY_STATUS + " INTEGER" +    		
 		") ";
 
     public DbOpenHelper(Context context) {
