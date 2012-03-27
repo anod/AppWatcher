@@ -1,23 +1,31 @@
 package com.anod.appwatcher;
 
+import android.app.ListActivity;
+import android.app.SearchManager;
+import android.content.Context;
+import android.content.Intent;
+import android.database.DataSetObserver;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.telephony.TelephonyManager;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.TextView;
+
 import com.gc.android.market.api.MarketSession;
 import com.gc.android.market.api.MarketSession.Callback;
+import com.gc.android.market.api.model.Market.App;
 import com.gc.android.market.api.model.Market.AppsRequest;
 import com.gc.android.market.api.model.Market.AppsResponse;
 import com.gc.android.market.api.model.Market.ResponseContext;
+import com.google.protobuf.*;
 
-import android.app.ListActivity;
-import android.app.SearchManager;
-import android.content.Intent;
-import android.database.DataSetObserver;
-import android.os.Bundle;
-import android.telephony.TelephonyManager;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ListAdapter;
-
+@SuppressWarnings("unused")
 public class MarketSearchActivity extends ListActivity {
     
+	public static final String EXTRA_TOKEN = "extra_token";
 	private AppsResponseAdapter mAdapter;
 	private MarketSession mMarketSession;
 	/* (non-Javadoc)
@@ -52,37 +60,54 @@ public class MarketSearchActivity extends ListActivity {
     }
 
     private void handleIntent(Intent intent) {
+        final Bundle appData = intent.getBundleExtra(SearchManager.APP_DATA);
+        String authSubToken = appData.getString(EXTRA_TOKEN);
+		mMarketSession.setAuthSubToken(authSubToken);
     	if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             // handles a search query
             String query = intent.getStringExtra(SearchManager.QUERY);
-            showResults(query);
+            new RetreiveResultsTask().execute(query);
         }
     }
 
-	private void showResults(String query) {
-		AppsRequest appsRequest = AppsRequest.newBuilder()
-            .setQuery(query)
-            .setStartIndex(0).setEntriesCount(10)
-            .setWithExtendedInfo(true)
-            .build();
-		                       
-		mMarketSession.append(appsRequest, new Callback<AppsResponse>() {
-	         @Override
-	         public void onResult(ResponseContext context, AppsResponse response) {
-	                  // Your code here
-	                  // response.getApp(0).getCreator() ...
-	                  // see AppsResponse class definition for more infos
+    class RetreiveResultsTask extends AsyncTask<String, Void, AppsResponse> {
+
+    	class ResponseWrapper {
+    		AppsResponse response;
+    	}
+        protected AppsResponse doInBackground(String... queries) {
+    		AppsRequest appsRequest = AppsRequest.newBuilder()
+	            .setQuery(queries[0])
+	            .setStartIndex(0).setEntriesCount(10)
+	            .setWithExtendedInfo(false)
+	            .build();
+    		final ResponseWrapper respWrapper = new ResponseWrapper();
+			mMarketSession.append(appsRequest, new Callback<AppsResponse>() {
+		         @Override
+		         public void onResult(ResponseContext context, AppsResponse response) {
+		        	 respWrapper.response = response;
+		         }
+			});
+			mMarketSession.flush();
+        	
+            return respWrapper.response;
+        }
+        
+        @Override
+        protected void onPostExecute(AppsResponse response) {
+        	if (response != null) {
 	        	 mAdapter.setAppsResponse(response);
-	         }
-		});
-		
-	}
+        	}
+        }
+    };
+  
  
-	class AppsResponseAdapter implements ListAdapter {
+	class AppsResponseAdapter extends BaseAdapter {
 		AppsResponse mAppsResponse = null;
 		
 		public void setAppsResponse(AppsResponse response) {
 			mAppsResponse = response;
+			notifyDataSetChanged();
 		}
 
 		@Override
@@ -102,14 +127,20 @@ public class MarketSearchActivity extends ListActivity {
 
 		@Override
 		public int getItemViewType(int position) {
-			// TODO Auto-generated method stub
 			return 0;
 		}
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
-			// TODO Auto-generated method stub
-			return null;
+			View v = convertView;
+            if (v == null) {
+                LayoutInflater vi = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                v = vi.inflate(R.layout.market_app_row, null);
+            }
+            TextView titleView = (TextView)v.findViewById(R.id.title);
+            App app = (App)getItem(position);
+            titleView.setText(app.getTitle()+" "+app.getVersion());
+			return v;
 		}
 
 		@Override
@@ -139,14 +170,12 @@ public class MarketSearchActivity extends ListActivity {
 
 		@Override
 		public boolean areAllItemsEnabled() {
-			// TODO Auto-generated method stub
-			return false;
+			return true;
 		}
 
 		@Override
 		public boolean isEnabled(int position) {
-			// TODO Auto-generated method stub
-			return false;
+			return true;
 		}
 		
 	}	

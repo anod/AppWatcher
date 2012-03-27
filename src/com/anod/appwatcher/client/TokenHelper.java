@@ -2,40 +2,70 @@ package com.anod.appwatcher.client;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 
 public class TokenHelper {
 	
+	private static final String AUTH_TOKEN_TYPE = "android";
 	private static final String ACCOUNT_TYPE = "com.google";
-	private Activity mActivity;
+	private Context mContext;
+	private CallBack mCallback;
+    private AccountManagerCallback<Bundle> myCallback = new AccountManagerCallback<Bundle>() {
+        @Override
+        public void run(final AccountManagerFuture<Bundle> future) {
+        	String authToken = null;
+            try {
+            	authToken = future.getResult().get(AccountManager.KEY_AUTHTOKEN).toString();
+           } catch (Exception e) {
+               // handle error
+           }
+           onTokenReceive(authToken);
+        };
+        
+    };
+	private boolean mInvalidateToken;
+	private AccountManager mAccountManager;
 
-	public TokenHelper(Activity activity) {
-		mActivity = activity;
+    public interface CallBack {
+		public void onTokenReceive(String authToken);
+    }
+    
+	public TokenHelper(Context context, TokenHelper.CallBack callback) {
+		mContext = context;
+		mCallback = callback;
+        mAccountManager = AccountManager.get(mContext);
 	}
 
-	public String requestToken() {
-		return updateToken(false);
+	protected void onTokenReceive(String authToken) {
+        if(mInvalidateToken) {
+        	mAccountManager.invalidateAuthToken(ACCOUNT_TYPE, authToken);
+            updateToken(false);
+        }
+        if (mCallback!=null) {
+     	   mCallback.onTokenReceive(authToken);
+        }
+		
+	}
+
+	public void requestToken() {
+		updateToken(false);
 	}
 	
-	private String updateToken(boolean invalidateToken) {
-	    String authToken = null;
+	@SuppressWarnings("deprecation")
+	private void updateToken(boolean invalidateToken) {
 	    try {
-	        AccountManager am = AccountManager.get((Context)mActivity);
-	        Account[] accounts = am.getAccountsByType(ACCOUNT_TYPE);
-	        AccountManagerFuture<Bundle> accountManagerFuture;
-            accountManagerFuture = am.getAuthToken(accounts[0], "android", null, mActivity, null, null);
-	        Bundle authTokenBundle = accountManagerFuture.getResult();
-	        authToken = authTokenBundle.getString(AccountManager.KEY_AUTHTOKEN).toString();
-	        if(invalidateToken) {
-	            am.invalidateAuthToken(ACCOUNT_TYPE, authToken);
-	            authToken = updateToken(false);
-	        }
+	        Account[] accounts = mAccountManager.getAccountsByType(ACCOUNT_TYPE);
+	        // Take first account, not impoertant
+	        mAccountManager.getAuthToken(
+	        	accounts[0],
+	        	AUTH_TOKEN_TYPE,
+	        	true, myCallback, null
+	        );
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	    }
-	    return authToken;
 	}
 }
