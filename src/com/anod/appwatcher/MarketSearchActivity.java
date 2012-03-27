@@ -8,6 +8,7 @@ import android.database.DataSetObserver;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +21,6 @@ import com.gc.android.market.api.model.Market.App;
 import com.gc.android.market.api.model.Market.AppsRequest;
 import com.gc.android.market.api.model.Market.AppsResponse;
 import com.gc.android.market.api.model.Market.ResponseContext;
-import com.google.protobuf.*;
 
 @SuppressWarnings("unused")
 public class MarketSearchActivity extends ListActivity {
@@ -78,18 +78,22 @@ public class MarketSearchActivity extends ListActivity {
         protected AppsResponse doInBackground(String... queries) {
     		AppsRequest appsRequest = AppsRequest.newBuilder()
 	            .setQuery(queries[0])
-	            .setStartIndex(0).setEntriesCount(10)
-	            .setWithExtendedInfo(false)
+	            .setStartIndex(0).setEntriesCount(20)
+	            .setWithExtendedInfo(true)
 	            .build();
     		final ResponseWrapper respWrapper = new ResponseWrapper();
-			mMarketSession.append(appsRequest, new Callback<AppsResponse>() {
-		         @Override
-		         public void onResult(ResponseContext context, AppsResponse response) {
-		        	 respWrapper.response = response;
-		         }
-			});
-			mMarketSession.flush();
-        	
+    		try {
+				mMarketSession.append(appsRequest, new Callback<AppsResponse>() {
+			         @Override
+			         public void onResult(ResponseContext context, AppsResponse response) {
+			        	 respWrapper.response = response;
+			         }
+				});
+				mMarketSession.flush();
+    		} catch(Exception e) {
+    			Log.e("AppWatcher", e.getMessage());
+    			return null;
+    		}
             return respWrapper.response;
         }
         
@@ -104,7 +108,9 @@ public class MarketSearchActivity extends ListActivity {
  
 	class AppsResponseAdapter extends BaseAdapter {
 		AppsResponse mAppsResponse = null;
-		
+		class ViewHolder {
+			TextView title;
+		}
 		public void setAppsResponse(AppsResponse response) {
 			mAppsResponse = response;
 			notifyDataSetChanged();
@@ -121,25 +127,21 @@ public class MarketSearchActivity extends ListActivity {
 		}
 
 		@Override
-		public long getItemId(int position) {
-			return (mAppsResponse == null) ? 0 : position;
-		}
-
-		@Override
-		public int getItemViewType(int position) {
-			return 0;
-		}
-
-		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
+			ViewHolder holder;
 			View v = convertView;
             if (v == null) {
                 LayoutInflater vi = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 v = vi.inflate(R.layout.market_app_row, null);
+                holder = new ViewHolder();
+                holder.title = (TextView)v.findViewById(R.id.title);
+                
+                v.setTag(holder);
+            } else {
+            	holder = (ViewHolder)v.getTag();
             }
-            TextView titleView = (TextView)v.findViewById(R.id.title);
             App app = (App)getItem(position);
-            titleView.setText(app.getTitle()+" "+app.getVersion());
+            holder.title.setText(app.getTitle()+" "+app.getVersion());
 			return v;
 		}
 
@@ -159,23 +161,8 @@ public class MarketSearchActivity extends ListActivity {
 		}
 
 		@Override
-		public void registerDataSetObserver(DataSetObserver observer) {
-		}
-
-		@Override
-		public void unregisterDataSetObserver(DataSetObserver observer) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public boolean areAllItemsEnabled() {
-			return true;
-		}
-
-		@Override
-		public boolean isEnabled(int position) {
-			return true;
+		public long getItemId(int position) {
+			return position;
 		}
 		
 	}	
