@@ -43,7 +43,7 @@ public class MarketSearchActivity extends ListActivity {
 		
 		TelephonyManager tm = (TelephonyManager) getSystemService(TELEPHONY_SERVICE); 
 		mMarketSession.setOperator(
-			tm.getNetworkOperatorName(), 
+			tm.getSimOperatorName(), 
 			tm.getSimOperator()
 		) ; 
 		 
@@ -78,15 +78,18 @@ public class MarketSearchActivity extends ListActivity {
         protected AppsResponse doInBackground(String... queries) {
     		AppsRequest appsRequest = AppsRequest.newBuilder()
 	            .setQuery(queries[0])
-	            .setStartIndex(0).setEntriesCount(20)
+	            .setStartIndex(0).setEntriesCount(10)
 	            .setWithExtendedInfo(true)
 	            .build();
     		final ResponseWrapper respWrapper = new ResponseWrapper();
+    		Log.i("AppWatcher", mMarketSession.toString());
+    		Log.i("AppWatcher", appsRequest.toString());
     		try {
 				mMarketSession.append(appsRequest, new Callback<AppsResponse>() {
 			         @Override
 			         public void onResult(ResponseContext context, AppsResponse response) {
 			        	 respWrapper.response = response;
+			        	 Log.i("AppWatcher", response.toString());
 			         }
 				});
 				mMarketSession.flush();
