@@ -1,6 +1,7 @@
 package com.anod.appwatcher;
 
 import android.app.SearchManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,13 +27,13 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getSupportMenuInflater().inflate(R.menu.main, menu);
         
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
-            SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-            SearchView searchView = (SearchView) menu.findItem(R.id.menu_add).getActionView();
-            searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-            searchView.setIconifiedByDefault(false);
-            searchView.setSubmitButtonEnabled(true);
-        }
+//        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
+//            SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+//            SearchView searchView = (SearchView) menu.findItem(R.id.menu_add).getActionView();
+//            searchView.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(this, MarketSearchActivity.class)));
+//            searchView.setIconifiedByDefault(false);
+//            searchView.setSubmitButtonEnabled(true);
+//        }
         
         return true;
     }
@@ -48,6 +49,7 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
         	} else {
         		
         	}
+        	onSearchRequested();
         	return true;
         case R.id.menu_refresh:
         	return true;        	

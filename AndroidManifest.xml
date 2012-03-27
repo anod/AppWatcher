@@ -23,15 +23,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             
-            <!-- Receives the search request. -->
-            <intent-filter>
-                <action android:name="android.intent.action.SEARCH" />
-                <!-- No category needed, because the Intent will specify this class component-->
-            </intent-filter>
-
-            <!-- Points to searchable meta data. -->
-            <meta-data android:name="android.app.searchable"
-                       android:resource="@xml/searchable_market" />            
+	        <!-- enable the search dialog to send searches to SearchableActivity -->
+	        <meta-data android:name="android.app.default_searchable"
+	                   android:value=".MarketSearchActivity" />            
         </activity>
 	      
         <activity
@@ -52,7 +46,7 @@
 		<provider
       		android:name=".AppListContentProvider"
       		android:authorities="com.anod.appwatcher" >
-   		</provider>        
+   		</provider>
     </application>
 
 </manifest>
