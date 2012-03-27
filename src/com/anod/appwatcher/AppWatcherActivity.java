@@ -1,7 +1,7 @@
 package com.anod.appwatcher;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -12,6 +12,7 @@ import com.anod.appwatcher.client.TokenHelper.CallBack;
 
 public class AppWatcherActivity extends SherlockFragmentActivity {
 	protected String mAuthToken;
+	private AppWatcherActivity mContext;
 
 	/* (non-Javadoc)
 	 * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
@@ -20,33 +21,12 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        mContext = this;
 	}
     
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getSupportMenuInflater().inflate(R.menu.main, menu);
-        
-//        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
-//            SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-//            SearchView searchView = (SearchView) menu.findItem(R.id.menu_add).getActionView();
-//            searchView.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(this, MarketSearchActivity.class)));
-//            searchView.setIconifiedByDefault(false);
-//            searchView.setSubmitButtonEnabled(true);
-//        }
-        
-        return true;
-    }
-
-    @Override
-    public boolean onSearchRequested() {
-    	if (mAuthToken == null) {
-    		Log.w("AppWatcher", "Empty Auth Token");
-    		return false;
-    	}
-    	
-        Bundle appData = new Bundle();
-        appData.putString(MarketSearchActivity.EXTRA_TOKEN, mAuthToken);
-        startSearch(null, false, appData, false);
+        getSupportMenuInflater().inflate(R.menu.main, menu);       
         return true;
     }
     
@@ -61,8 +41,9 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
 		        	if (authToken == null) {
 		        		Toast.makeText(AppWatcherActivity.this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
 		        	} else {
-		        		mAuthToken = authToken;
-		        		onSearchRequested();
+		        		Intent intent = new Intent(mContext, MarketSearchActivity.class);
+		        		intent.putExtra(MarketSearchActivity.EXTRA_TOKEN, authToken);
+		        		startActivity(intent);
 		        	}
 				}
 			});

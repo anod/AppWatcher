@@ -1,10 +1,7 @@
 package com.anod.appwatcher;
 
-import android.app.ListActivity;
-import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
-import android.database.DataSetObserver;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
@@ -13,8 +10,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockListActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
+import com.anod.appwatcher.client.TokenHelper;
+import com.anod.appwatcher.client.TokenHelper.CallBack;
 import com.gc.android.market.api.MarketSession;
 import com.gc.android.market.api.MarketSession.Callback;
 import com.gc.android.market.api.model.Market.App;
@@ -23,7 +28,7 @@ import com.gc.android.market.api.model.Market.AppsResponse;
 import com.gc.android.market.api.model.Market.ResponseContext;
 
 @SuppressWarnings("unused")
-public class MarketSearchActivity extends ListActivity {
+public class MarketSearchActivity extends SherlockListActivity {
     
 	public static final String EXTRA_TOKEN = "extra_token";
 	private AppsResponseAdapter mAdapter;
@@ -47,6 +52,10 @@ public class MarketSearchActivity extends ListActivity {
 			tm.getSimOperator()
 		) ; 
 		 
+		ActionBar bar = getSupportActionBar();
+		bar.setCustomView(R.layout.searchbox);
+		bar.setDisplayShowCustomEnabled(true);
+		
 		handleIntent(getIntent());
 	}
 
@@ -60,16 +69,33 @@ public class MarketSearchActivity extends ListActivity {
     }
 
     private void handleIntent(Intent intent) {
-        final Bundle appData = intent.getBundleExtra(SearchManager.APP_DATA);
-        String authSubToken = appData.getString(EXTRA_TOKEN);
+        String authSubToken = intent.getStringExtra(EXTRA_TOKEN);
 		mMarketSession.setAuthSubToken(authSubToken);
-    	if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            // handles a search query
-            String query = intent.getStringExtra(SearchManager.QUERY);
-            new RetreiveResultsTask().execute(query);
-        }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getSupportMenuInflater().inflate(R.menu.searchbox, menu);
+        return true;
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        case R.id.menu_search:
+    		
+    		EditText editText = (EditText)getSupportActionBar().getCustomView();
+    		String query = editText.getText().toString();
+    		if (query.length() > 0) {
+    			new RetreiveResultsTask().execute(query);
+    		}
+        	return true;        	
+        default:
+            return onOptionsItemSelected(item);
+        }
+    }    
+
+    
     class RetreiveResultsTask extends AsyncTask<String, Void, AppsResponse> {
 
     	class ResponseWrapper {
