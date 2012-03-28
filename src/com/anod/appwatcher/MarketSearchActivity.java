@@ -1,6 +1,5 @@
 package com.anod.appwatcher;
 
-import java.io.FileOutputStream;
 import java.util.List;
 
 import android.app.AlertDialog;
@@ -17,6 +16,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -25,15 +25,11 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockListActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.anod.appwatcher.market.AppIconLoader;
 import com.anod.appwatcher.market.AppsResponseLoader;
 import com.commonsware.cwac.endless.EndlessAdapter;
 import com.gc.android.market.api.MarketSession;
-import com.gc.android.market.api.MarketSession.Callback;
 import com.gc.android.market.api.model.Market.App;
-import com.gc.android.market.api.model.Market.GetImageRequest;
-import com.gc.android.market.api.model.Market.GetImageRequest.AppImageUsage;
-import com.gc.android.market.api.model.Market.GetImageResponse;
-import com.gc.android.market.api.model.Market.ResponseContext;
 
 public class MarketSearchActivity extends SherlockListActivity {
     
@@ -50,10 +46,6 @@ public class MarketSearchActivity extends SherlockListActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.market_search);
 		mContext = (Context)this;
-		mAdapter = new AppsAdapter(this,R.layout.market_app_row);
-
-		setListAdapter(mAdapter);
-		getListView().setOnItemClickListener(itemClickListener);
 
 		mMarketSession = new MarketSession();
 		TelephonyManager tm = (TelephonyManager) getSystemService(TELEPHONY_SERVICE); 
@@ -63,6 +55,12 @@ public class MarketSearchActivity extends SherlockListActivity {
 			tm.getNetworkOperator(),
 			tm.getSimOperator()
 		);
+
+		mAdapter = new AppsAdapter(this,R.layout.market_app_row, mMarketSession);
+
+		setListAdapter(mAdapter);
+		getListView().setOnItemClickListener(itemClickListener);
+
 		
 		ActionBar bar = getSupportActionBar();
 		bar.setCustomView(R.layout.searchbox);
@@ -182,10 +180,15 @@ public class MarketSearchActivity extends SherlockListActivity {
     class AppsAdapter extends ArrayAdapter<App> {
 		class ViewHolder {
 			TextView title;
+			TextView details;
+			ImageView icon;
 		}
 
-		public AppsAdapter(Context context, int textViewResourceId) {
+		private AppIconLoader mIconLoader;
+
+		public AppsAdapter(Context context, int textViewResourceId, MarketSession session) {
 			super(context, textViewResourceId);
+			mIconLoader = new AppIconLoader(session);
 		}
  
 		@Override
@@ -197,37 +200,21 @@ public class MarketSearchActivity extends SherlockListActivity {
                 v = vi.inflate(R.layout.market_app_row, null);
                 holder = new ViewHolder();
                 holder.title = (TextView)v.findViewById(R.id.title);
-                
+                holder.details = (TextView)v.findViewById(R.id.details);
                 v.setTag(holder);
             } else {
             	holder = (ViewHolder)v.getTag();
             }
             App app = (App)getItem(position);
             holder.title.setText(app.getTitle()+" "+app.getVersion());
+            holder.details.setText(app.getCreator());
+            ImageView icon = (ImageView)v.findViewById(R.id.icon);
+            mIconLoader.loadImage(app.getId(), icon);
+            
 			return v;
 		}
 
     }
     	
-	private void loadAppIcon(String appId) {
-		 GetImageRequest imgReq = GetImageRequest
-		 	.newBuilder()
-		 	.setAppId(appId)
-		 	.setImageUsage(AppImageUsage.ICON)
-		 	.build();
 
-		 mMarketSession.append(imgReq, new Callback<GetImageResponse>() {
-	         @Override
-	         public void onResult(ResponseContext context, GetImageResponse response) {
-                 try {
-                     FileOutputStream fos = new FileOutputStream("icon.png");
-                     fos.write(response.getImageData().toByteArray());
-                     fos.close();
-                 } catch(Exception ex) {
-                     ex.printStackTrace();
-                 }
-	         }
-		 });
-		 mMarketSession.flush();
-	}
 }

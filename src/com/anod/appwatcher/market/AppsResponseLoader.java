@@ -50,20 +50,17 @@ public class AppsResponseLoader {
 			.setOrderType(AppsRequest.OrderType.POPULAR)
 			.setWithExtendedInfo(false).build();
 		final ResponseWrapper respWrapper = new ResponseWrapper();
-		Log.i("AppWatcher", mMarketSession.toString());
-		Log.i("AppWatcher", appsRequest.toString());
+
 		try {
 			mMarketSession.append(appsRequest, new Callback<AppsResponse>() {
 				@Override
-				public void onResult(ResponseContext context,
-						AppsResponse response) {
+				public void onResult(ResponseContext context, AppsResponse response) {
 					respWrapper.response = response;
-					Log.i("AppWatcher", response.toString());
 				}
 			});
 			mMarketSession.flush();
 		} catch (Exception e) {
-			Log.e("AppWatcher", e.getMessage());
+			Log.e("AppWatcher", e.toString());
 			mHasNext = false;
 			return null;
 		}
