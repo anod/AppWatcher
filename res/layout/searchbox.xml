@@ -5,6 +5,8 @@
 	android:layout_height="wrap_content"
 	android:ems="10"
 	android:hint="@string/search_hint"
-	android:inputType="textAutoComplete">
+	android:inputType="textAutoComplete"
+	android:imeOptions="actionSearch"
+	>
 	<requestFocus />
 </EditText>

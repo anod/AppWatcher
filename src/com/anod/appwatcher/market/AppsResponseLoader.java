@@ -47,6 +47,7 @@ public class AppsResponseLoader {
 			.setQuery(mQuery)
 			.setStartIndex(mIndex)
 			.setEntriesCount(PAGE_COUNT)
+			.setOrderType(AppsRequest.OrderType.POPULAR)
 			.setWithExtendedInfo(false).build();
 		final ResponseWrapper respWrapper = new ResponseWrapper();
 		Log.i("AppWatcher", mMarketSession.toString());

@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockListActivity;
@@ -65,10 +67,28 @@ public class MarketSearchActivity extends SherlockListActivity {
 		ActionBar bar = getSupportActionBar();
 		bar.setCustomView(R.layout.searchbox);
 		bar.setDisplayShowCustomEnabled(true);
-		
+		EditText edit = (EditText)bar.getCustomView();
+		edit.setOnEditorActionListener(new OnEditorActionListener() {
+			
+			@Override
+			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+				showResults();
+				return true;
+			}
+		});
 		handleIntent(getIntent());
 	}
 
+	private void showResults() {
+    	mAdapter.clear();
+		EditText editText = (EditText)getSupportActionBar().getCustomView();
+		String query = editText.getText().toString();
+		if (query.length() > 0) {
+			mResponseLoader = new AppsResponseLoader(mMarketSession, query);
+			new RetreiveResultsTask().execute();
+		}
+	}
+	
     @Override
     protected void onNewIntent(Intent intent) {
         // Because this activity has set launchMode="singleTop", the system calls this method
@@ -93,13 +113,7 @@ public class MarketSearchActivity extends SherlockListActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case R.id.menu_search:
-        	mAdapter.clear();
-    		EditText editText = (EditText)getSupportActionBar().getCustomView();
-    		String query = editText.getText().toString();
-    		if (query.length() > 0) {
-    			mResponseLoader = new AppsResponseLoader(mMarketSession, query);
-    			new RetreiveResultsTask().execute();
-    		}
+        	showResults();
         	return true;        	
         default:
             return onOptionsItemSelected(item);
