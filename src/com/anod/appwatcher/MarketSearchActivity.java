@@ -1,38 +1,45 @@
 package com.anod.appwatcher;
 
+import java.io.FileOutputStream;
+import java.util.List;
+
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ListAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockListActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.anod.appwatcher.client.TokenHelper;
-import com.anod.appwatcher.client.TokenHelper.CallBack;
+import com.anod.appwatcher.market.AppsResponseLoader;
+import com.commonsware.cwac.endless.EndlessAdapter;
 import com.gc.android.market.api.MarketSession;
 import com.gc.android.market.api.MarketSession.Callback;
 import com.gc.android.market.api.model.Market.App;
-import com.gc.android.market.api.model.Market.AppsRequest;
-import com.gc.android.market.api.model.Market.AppsResponse;
+import com.gc.android.market.api.model.Market.GetImageRequest;
+import com.gc.android.market.api.model.Market.GetImageRequest.AppImageUsage;
+import com.gc.android.market.api.model.Market.GetImageResponse;
 import com.gc.android.market.api.model.Market.ResponseContext;
 
-@SuppressWarnings("unused")
 public class MarketSearchActivity extends SherlockListActivity {
     
 	public static final String EXTRA_TOKEN = "extra_token";
-	private AppsResponseAdapter mAdapter;
+	private AppsAdapter mAdapter;
 	private MarketSession mMarketSession;
+	private AppsResponseLoader mResponseLoader;
+	private Context mContext;
 	/* (non-Javadoc)
 	 * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
 	 */
@@ -40,18 +47,21 @@ public class MarketSearchActivity extends SherlockListActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.market_search);
-		
-		mAdapter = new AppsResponseAdapter();
+		mContext = (Context)this;
+		mAdapter = new AppsAdapter(this,R.layout.market_app_row);
+
 		setListAdapter(mAdapter);
-		
+		getListView().setOnItemClickListener(itemClickListener);
+
 		mMarketSession = new MarketSession();
-		
 		TelephonyManager tm = (TelephonyManager) getSystemService(TELEPHONY_SERVICE); 
 		mMarketSession.setOperator(
+			tm.getNetworkOperatorName(), 
 			tm.getSimOperatorName(), 
+			tm.getNetworkOperator(),
 			tm.getSimOperator()
-		) ; 
-		 
+		);
+		
 		ActionBar bar = getSupportActionBar();
 		bar.setCustomView(R.layout.searchbox);
 		bar.setDisplayShowCustomEnabled(true);
@@ -83,11 +93,12 @@ public class MarketSearchActivity extends SherlockListActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case R.id.menu_search:
-    		
+        	mAdapter.clear();
     		EditText editText = (EditText)getSupportActionBar().getCustomView();
     		String query = editText.getText().toString();
     		if (query.length() > 0) {
-    			new RetreiveResultsTask().execute(query);
+    			mResponseLoader = new AppsResponseLoader(mMarketSession, query);
+    			new RetreiveResultsTask().execute();
     		}
         	return true;        	
         default:
@@ -95,66 +106,74 @@ public class MarketSearchActivity extends SherlockListActivity {
         }
     }    
 
-    
-    class RetreiveResultsTask extends AsyncTask<String, Void, AppsResponse> {
-
-    	class ResponseWrapper {
-    		AppsResponse response;
-    	}
-        protected AppsResponse doInBackground(String... queries) {
-    		AppsRequest appsRequest = AppsRequest.newBuilder()
-	            .setQuery(queries[0])
-	            .setStartIndex(0).setEntriesCount(10)
-	            .setWithExtendedInfo(true)
-	            .build();
-    		final ResponseWrapper respWrapper = new ResponseWrapper();
-    		Log.i("AppWatcher", mMarketSession.toString());
-    		Log.i("AppWatcher", appsRequest.toString());
-    		try {
-				mMarketSession.append(appsRequest, new Callback<AppsResponse>() {
-			         @Override
-			         public void onResult(ResponseContext context, AppsResponse response) {
-			        	 respWrapper.response = response;
-			        	 Log.i("AppWatcher", response.toString());
-			         }
-				});
-				mMarketSession.flush();
-    		} catch(Exception e) {
-    			Log.e("AppWatcher", e.getMessage());
-    			return null;
-    		}
-            return respWrapper.response;
+    final OnItemClickListener itemClickListener  = new OnItemClickListener() {
+		@Override
+		public void onItemClick (AdapterView<?> parent, View view, int position, long id) {
+			App app = mAdapter.getItem(position);
+			AlertDialog dialog = (new AlertDialog.Builder(mContext))
+				.setMessage(app.toString())
+				.setCancelable(true)
+				.create();
+			dialog.show();
+		}
+    };     
+   
+    class RetreiveResultsTask extends AsyncTask<String, Void, List<App>> {
+        protected List<App> doInBackground(String... queries) {
+        	return mResponseLoader.load();
         }
         
         @Override
-        protected void onPostExecute(AppsResponse response) {
-        	if (response != null) {
-	        	 mAdapter.setAppsResponse(response);
+        protected void onPostExecute(List<App> list) {
+        	if (list == null) {
+        		return;
         	}
+    		mAdapter.addAll(list);
+    		if (mResponseLoader.hasNext()) {
+    			getListView().setAdapter(new AppsEndlessAdapter(
+    				mContext, mAdapter, R.layout.pending
+    			));
+    		}
         }
     };
   
+    class AppsEndlessAdapter extends EndlessAdapter {
+
+		private List<App> mCache;
+
+		public AppsEndlessAdapter(Context context, ListAdapter wrapped,
+				int pendingResource) {
+			super(context, wrapped, pendingResource);
+		}
+
+		@Override
+		protected boolean cacheInBackground() throws Exception {
+			if (mResponseLoader.moveToNext()) {
+				mCache = mResponseLoader.load();
+				return (mCache == null) ? false : true;
+			}
+			return false;
+		}
+
+		@Override
+		protected void appendCachedData() {
+			if (mCache != null) {
+				AppsAdapter adapter = (AppsAdapter)getWrappedAdapter();
+				adapter.addAll(mCache);
+			}
+		}
+    	
+    }
  
-	class AppsResponseAdapter extends BaseAdapter {
-		AppsResponse mAppsResponse = null;
+    class AppsAdapter extends ArrayAdapter<App> {
 		class ViewHolder {
 			TextView title;
 		}
-		public void setAppsResponse(AppsResponse response) {
-			mAppsResponse = response;
-			notifyDataSetChanged();
-		}
 
-		@Override
-		public int getCount() {
-			return (mAppsResponse == null) ? 0 : mAppsResponse.getAppCount();
+		public AppsAdapter(Context context, int textViewResourceId) {
+			super(context, textViewResourceId);
 		}
-
-		@Override
-		public Object getItem(int position) {
-			return (mAppsResponse == null) ? null : mAppsResponse.getApp(position);
-		}
-
+ 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			ViewHolder holder;
@@ -174,25 +193,27 @@ public class MarketSearchActivity extends SherlockListActivity {
 			return v;
 		}
 
-		@Override
-		public int getViewTypeCount() {
-			return 1;
-		}
+    }
+    	
+	private void loadAppIcon(String appId) {
+		 GetImageRequest imgReq = GetImageRequest
+		 	.newBuilder()
+		 	.setAppId(appId)
+		 	.setImageUsage(AppImageUsage.ICON)
+		 	.build();
 
-		@Override
-		public boolean hasStableIds() {
-			return false;
-		}
-
-		@Override
-		public boolean isEmpty() {
-			return (mAppsResponse == null) ? true : (mAppsResponse.getAppCount() == 0);
-		}
-
-		@Override
-		public long getItemId(int position) {
-			return position;
-		}
-		
-	}	
+		 mMarketSession.append(imgReq, new Callback<GetImageResponse>() {
+	         @Override
+	         public void onResult(ResponseContext context, GetImageResponse response) {
+                 try {
+                     FileOutputStream fos = new FileOutputStream("icon.png");
+                     fos.write(response.getImageData().toByteArray());
+                     fos.close();
+                 } catch(Exception ex) {
+                     ex.printStackTrace();
+                 }
+	         }
+		 });
+		 mMarketSession.flush();
+	}
 }
