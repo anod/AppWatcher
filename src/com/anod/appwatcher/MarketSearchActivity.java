@@ -6,8 +6,10 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -56,6 +58,10 @@ public class MarketSearchActivity extends SherlockListActivity {
 			tm.getSimOperator()
 		);
 
+		String deviceAndSdkVersion = Build.MODEL + ":" + Build.VERSION.SDK_INT;
+		Log.d("AppWatcher", "DeviceAndSdkVersion:" +deviceAndSdkVersion);
+		mMarketSession.getContext().setDeviceAndSdkVersion(deviceAndSdkVersion);
+		
 		mAdapter = new AppsAdapter(this,R.layout.market_app_row, mMarketSession);
 
 		setListAdapter(mAdapter);

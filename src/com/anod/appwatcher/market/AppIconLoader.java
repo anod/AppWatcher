@@ -2,7 +2,6 @@ package com.anod.appwatcher.market;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.util.Log;
 
 import com.anod.appwatcher.utils.ImageLoader;
 import com.gc.android.market.api.MarketSession;
