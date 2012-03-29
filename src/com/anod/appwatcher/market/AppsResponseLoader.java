@@ -47,18 +47,20 @@ public class AppsResponseLoader {
 			.setQuery(mQuery)
 			.setStartIndex(mIndex)
 			.setEntriesCount(PAGE_COUNT)
-			.setOrderType(AppsRequest.OrderType.POPULAR)
+//			.setOrderType(AppsRequest.OrderType.FEATURED)
 			.setWithExtendedInfo(false).build();
 		final ResponseWrapper respWrapper = new ResponseWrapper();
 
 		try {
-			mMarketSession.append(appsRequest, new Callback<AppsResponse>() {
-				@Override
-				public void onResult(ResponseContext context, AppsResponse response) {
-					respWrapper.response = response;
-				}
-			});
-			mMarketSession.flush();
+			synchronized (mMarketSession) {	
+				mMarketSession.append(appsRequest, new Callback<AppsResponse>() {
+					@Override
+					public void onResult(ResponseContext context, AppsResponse response) {
+						respWrapper.response = response;
+					}
+				});
+				mMarketSession.flush();
+			}
 		} catch (Exception e) {
 			Log.e("AppWatcher", e.toString());
 			mHasNext = false;

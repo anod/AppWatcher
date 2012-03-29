@@ -6,23 +6,24 @@ import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.anod.appwatcher.R;
-
 import android.app.Activity;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.widget.ImageView;
 
 abstract public class ImageLoader {
 	private MemoryCache mMemoryCache=new MemoryCache();
 	private Map<ImageView, String> mImageViews=Collections.synchronizedMap(new WeakHashMap<ImageView, String>());
 	private ExecutorService mExecutorService; 
-	    
+	
 	public ImageLoader(){
 		mExecutorService=Executors.newFixedThreadPool(5);
 	}
-	    
+
 	abstract protected Bitmap loadBitmap(String imgUID);
+	
+	protected void cacheImage(String imgUID, Bitmap bmp) {
+        mMemoryCache.put(imgUID, bmp);
+	}
 	
 	public void loadImage(String imgUID, ImageView imageView)
 	{
@@ -54,25 +55,24 @@ abstract public class ImageLoader {
 	    
     class PhotosLoader implements Runnable {
         PhotoToLoad mPhotoToLoad;
-		private Bitmap mDefaultBitmap;
         PhotosLoader(PhotoToLoad photoToLoad){
             mPhotoToLoad=photoToLoad;
         }
         
         @Override
         public void run() {
-            if(imageViewReused(mPhotoToLoad))
+            if(imageViewReused(mPhotoToLoad)) {
                 return;
+            }
             Bitmap bmp=loadBitmap(mPhotoToLoad.imgUID);
-            mMemoryCache.put(mPhotoToLoad.imgUID, bmp);
-            if(imageViewReused(mPhotoToLoad))
+            cacheImage(mPhotoToLoad.imgUID, bmp);
+            if(imageViewReused(mPhotoToLoad)) {
                 return;
+            }
             Activity a=(Activity)mPhotoToLoad.imageView.getContext();
             if (bmp == null) {
-            	if (mDefaultBitmap == null) {
-            		mDefaultBitmap = BitmapFactory.decodeResource(a.getResources(), R.drawable.ic_launcher);
-            	}
-            	bmp = mDefaultBitmap;
+            	mImageViews.remove(mPhotoToLoad.imgUID);
+            	return;
             }
             BitmapDisplayer bd=new BitmapDisplayer(bmp, mPhotoToLoad);
             a.runOnUiThread(bd);
@@ -103,7 +103,6 @@ abstract public class ImageLoader {
                 return;
             if(mBitmap!=null) {
                 mPhotoToLoad.imageView.setImageBitmap(mBitmap);
-            } else {
             }
         }
     }

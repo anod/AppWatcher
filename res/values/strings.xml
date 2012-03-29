@@ -7,5 +7,7 @@
     <string name="failed_gain_access">Failed to gain permission. The permission is required in order to communicate with Android Play Store.</string>
     <string name="search_hint">Search an app</string>
     <string name="search_action">Search</string>
+    <string name="search_for_app">Search for an application and click on it to add to the watch list.</string>
+    <string name="loading">Loading&#8230;</string>
 
 </resources>

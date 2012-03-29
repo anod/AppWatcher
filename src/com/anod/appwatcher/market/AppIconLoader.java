@@ -23,6 +23,14 @@ public class AppIconLoader extends ImageLoader {
 		mMarketSession = session;
 	}
 
+	public void precacheIcon(String appId) {
+        Bitmap bmp=loadBitmap(appId);
+        if (bmp != null) {
+        	cacheImage(appId, bmp);
+        }
+	}
+	
+	
 	@Override
 	protected Bitmap loadBitmap(String imgUID) {
 		GetImageRequest imgReq = GetImageRequest
@@ -32,17 +40,19 @@ public class AppIconLoader extends ImageLoader {
 		 	.build();
 	
 		final IconWrapper wrapper = new IconWrapper();
-		mMarketSession.append(imgReq, new Callback<GetImageResponse>() {
-	         @Override
-	         public void onResult(ResponseContext context, GetImageResponse response) {
-	            try {
-	            	wrapper.icon = response.getImageData().toByteArray();
-	            } catch(Exception ex) {
-	                ex.printStackTrace();
-	            }
-	         }
-		});
-		mMarketSession.flush();
+		synchronized (mMarketSession) {
+			mMarketSession.append(imgReq, new Callback<GetImageResponse>() {
+				@Override
+				public void onResult(ResponseContext context, GetImageResponse response) {
+					try {
+						wrapper.icon = response.getImageData().toByteArray();
+					} catch(Exception ex) {
+						ex.printStackTrace();
+					}
+				}
+			});
+			mMarketSession.flush();
+		}
 		 
 		try {
 			 return BitmapFactory.decodeByteArray(wrapper.icon, 0, wrapper.icon.length);
