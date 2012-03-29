@@ -58,8 +58,8 @@ public class MarketSearchActivity extends SherlockListActivity {
 			tm.getSimOperator()
 		);
 
-		String deviceAndSdkVersion = Build.MODEL + ":" + Build.VERSION.SDK_INT;
-		Log.d("AppWatcher", "DeviceAndSdkVersion:" +deviceAndSdkVersion);
+		String deviceAndSdkVersion = Build.PRODUCT + ":" + Build.VERSION.SDK_INT;
+		Log.d("AppWatcher", "DeviceAndSdkVersion:" +deviceAndSdkVersion); 
 		mMarketSession.getContext().setDeviceAndSdkVersion(deviceAndSdkVersion);
 		
 		mAdapter = new AppsAdapter(this,R.layout.market_app_row, mMarketSession);
