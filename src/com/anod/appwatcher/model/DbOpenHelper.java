@@ -11,10 +11,12 @@ public class DbOpenHelper extends SQLiteOpenHelper {
     private static final String TABLE_CREATE =
     	"CREATE TABLE " + AppListTable.TABLE_NAME + " (" +
     		AppListTable.Columns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+			AppListTable.Columns.KEY_APPID + " TEXT not null," +
 			AppListTable.Columns.KEY_PACKAGE + " TEXT not null," +
 			AppListTable.Columns.KEY_VERSION_NUMBER + " INTEGER," +
-			AppListTable.Columns.KEY_VERSION_NAME + " INTEGER," +    		
-			AppListTable.Columns.KEY_TITLE + " TEXT," +
+			AppListTable.Columns.KEY_VERSION_NAME + " TEXT," +    		
+			AppListTable.Columns.KEY_TITLE + " TEXT not null," +
+			AppListTable.Columns.KEY_CREATOR + " TEXT," +			
 			AppListTable.Columns.KEY_ICON_CACHE + " BLOB," +
 			AppListTable.Columns.KEY_STATUS + " INTEGER" +    		
 		") ";

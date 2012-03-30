@@ -9,5 +9,7 @@
     <string name="search_action">Search</string>
     <string name="search_for_app">Search for an application and click on it to add to the watch list.</string>
     <string name="loading">Loading&#8230;</string>
-
+    <string name="no_result_found">No results for "%s"</string>
+    <string name="error_insert_app">Failed to add application to the whatch list.</string>
+    <string name="application_icon">Application icon</string>
 </resources>

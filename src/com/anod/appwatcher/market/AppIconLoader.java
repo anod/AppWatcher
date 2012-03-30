@@ -22,7 +22,7 @@ public class AppIconLoader extends ImageLoader {
 		super();
 		mMarketSession = session;
 	}
-
+	
 	public void precacheIcon(String appId) {
         Bitmap bmp=loadBitmap(appId);
         if (bmp != null) {

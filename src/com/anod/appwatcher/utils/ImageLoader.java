@@ -21,6 +21,10 @@ abstract public class ImageLoader {
 
 	abstract protected Bitmap loadBitmap(String imgUID);
 	
+	public Bitmap getCachedImage(String imgUID) {
+		return mMemoryCache.get(imgUID);
+	}
+	
 	protected void cacheImage(String imgUID, Bitmap bmp) {
         mMemoryCache.put(imgUID, bmp);
 	}

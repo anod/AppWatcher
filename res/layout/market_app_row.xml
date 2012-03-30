@@ -10,11 +10,11 @@
         android:layout_width="@dimen/icon_size"
         android:layout_height="@dimen/icon_size"
         android:layout_margin="4dip"
-        android:src="@drawable/ic_launcher" />
+        android:src="@drawable/ic_empty"
+        android:contentDescription="@string/application_icon" />
 
     <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/linearLayout1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical|clip_vertical"

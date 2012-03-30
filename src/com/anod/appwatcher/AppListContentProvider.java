@@ -2,9 +2,11 @@ package com.anod.appwatcher;
 
 import android.content.ContentProvider;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
@@ -30,7 +32,7 @@ public class AppListContentProvider extends ContentProvider {
 	public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE
 			+ "/app";
 	
-	private static final UriMatcher sURIMatcher = new UriMatcher(	UriMatcher.NO_MATCH);
+	private static final UriMatcher sURIMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 	static {
 		sURIMatcher.addURI(AUTHORITY, BASE_PATH, LIST);
 	}
@@ -48,8 +50,21 @@ public class AppListContentProvider extends ContentProvider {
 
 	@Override
 	public Uri insert(Uri uri, ContentValues values) {
-		// TODO Auto-generated method stub
-		return null;
+		if (sURIMatcher.match(uri) != LIST) { 
+			throw new IllegalArgumentException("Unknown URI " + uri); 
+		}
+        if (values == null || values.size() == 0) {
+        	throw new IllegalArgumentException("Values cannot be empty");
+        }
+
+        SQLiteDatabase db = mDatabaseOpenHelper.getWritableDatabase();
+        long rowId = db.insert(AppListTable.TABLE_NAME, null, values);
+        if (rowId > 0) {
+        	Uri noteUri = ContentUris.withAppendedId(CONTENT_URI, rowId);
+        	getContext().getContentResolver().notifyChange(noteUri, null);
+        	return noteUri;
+        }
+        throw new SQLException("Failed to insert row into " + uri);
 	}
 
 	@Override

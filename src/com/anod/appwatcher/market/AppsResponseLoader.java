@@ -31,6 +31,9 @@ public class AppsResponseLoader {
 		mHasNext = true;
 	}
 
+	public String getQuery() {
+		return mQuery;
+	}
 	public boolean hasNext() {
 		return mHasNext;
 	}

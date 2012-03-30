@@ -2,11 +2,12 @@ package com.anod.appwatcher;
 
 import java.util.List;
 
-import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -27,6 +28,7 @@ import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockListActivity;
@@ -34,6 +36,8 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.anod.appwatcher.market.AppIconLoader;
 import com.anod.appwatcher.market.AppsResponseLoader;
+import com.anod.appwatcher.model.AppListTable;
+import com.anod.appwatcher.utils.BitmapUtils;
 import com.commonsware.cwac.endless.EndlessAdapter;
 import com.gc.android.market.api.MarketSession;
 import com.gc.android.market.api.model.Market.App;
@@ -41,6 +45,7 @@ import com.gc.android.market.api.model.Market.App;
 public class MarketSearchActivity extends SherlockListActivity {
     
 	public static final String EXTRA_TOKEN = "extra_token";
+	protected static final String TAG = "AppWatcher";
 	private AppsAdapter mAdapter;
 	private MarketSession mMarketSession;
 	private AppIconLoader mIconLoader;
@@ -75,11 +80,10 @@ public class MarketSearchActivity extends SherlockListActivity {
 		mIconLoader = new AppIconLoader(mMarketSession);
 		
 		mAdapter = new AppsAdapter(this,R.layout.market_app_row);
-
 		
 		setListAdapter(mAdapter);
 		getListView().setOnItemClickListener(itemClickListener);
-		
+
 		ActionBar bar = getSupportActionBar();
 		bar.setCustomView(R.layout.searchbox);
 		bar.setDisplayShowCustomEnabled(true);
@@ -89,9 +93,6 @@ public class MarketSearchActivity extends SherlockListActivity {
 			@Override
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 		        if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-		            // hide virtual keyboard
-		            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-		            imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 		            showResults();
 		            return true;
 		        }
@@ -103,13 +104,23 @@ public class MarketSearchActivity extends SherlockListActivity {
 
 
 	private void showResults() {
-    	ArrayAdapter<App> aa = (ArrayAdapter<App>)getListAdapter();
-		aa.clear();
-		getListView().setVisibility(View.GONE);
-		getListView().getEmptyView().setVisibility(View.GONE);		
-		mLoading.setVisibility(View.VISIBLE);
 		EditText editText = (EditText)getSupportActionBar().getCustomView();
 		String query = editText.getText().toString();
+		
+        // hide virtual keyboard
+        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+
+    	@SuppressWarnings("unchecked")
+		ArrayAdapter<App> aa = (ArrayAdapter<App>)getListAdapter();
+		aa.clear();
+
+		mIconLoader.clearCache();
+
+		getListView().setVisibility(View.GONE);
+		getListView().getEmptyView().setVisibility(View.GONE);		
+		
+		mLoading.setVisibility(View.VISIBLE);
 		if (query.length() > 0) {
 			mResponseLoader = new AppsResponseLoader(mMarketSession, query);
 			new RetreiveResultsTask().execute();
@@ -151,26 +162,52 @@ public class MarketSearchActivity extends SherlockListActivity {
 		@Override
 		public void onItemClick (AdapterView<?> parent, View view, int position, long id) {
 			App app = mAdapter.getItem(position);
-			AlertDialog dialog = (new AlertDialog.Builder(mContext))
-				.setMessage(app.toString())
-				.setCancelable(true)
-				.create();
-			dialog.show();
+			ContentValues values = createContentValues(app);
+            Uri uri = getContentResolver().insert(AppListContentProvider.CONTENT_URI, values);
+
+            if (uri == null) {
+                Toast.makeText(mContext, R.string.error_insert_app, Toast.LENGTH_SHORT).show();
+            } else {
+            	finish();
+            }
 		}
     };     
-   
+
+    private ContentValues createContentValues(App app) {
+    	ContentValues values = new ContentValues();
+    	
+   	    values.put(AppListTable.Columns.KEY_APPID, app.getId());    	
+   	    values.put(AppListTable.Columns.KEY_PACKAGE, app.getPackageName());
+   	    values.put(AppListTable.Columns.KEY_TITLE, app.getTitle());
+   	    values.put(AppListTable.Columns.KEY_VERSION_NUMBER, app.getVersionCode());  	    
+   	    values.put(AppListTable.Columns.KEY_VERSION_NAME, app.getVersion());
+   	    values.put(AppListTable.Columns.KEY_CREATOR, app.getCreator());
+   	    Bitmap icon = mIconLoader.getCachedImage(app.getId());
+   	    if (icon != null) {
+   	    	byte[] iconData = BitmapUtils.flattenBitmap(icon);
+   	   	    values.put(AppListTable.Columns.KEY_ICON_CACHE, iconData);
+   	    }
+   	    
+   	    return values;
+    }
+    
     class RetreiveResultsTask extends AsyncTask<String, Void, List<App>> {
         protected List<App> doInBackground(String... queries) {
         	List<App> apps = mResponseLoader.load();
-        	for (App app: apps) {
-        		mIconLoader.precacheIcon(app.getId());
+        	if (apps != null) {
+	        	for (App app: apps) {
+	        		mIconLoader.precacheIcon(app.getId());
+	        	}
         	}
         	return apps;
         }
         
         @Override
         protected void onPostExecute(List<App> list) {
-        	if (list == null) {
+        	if (list == null || list.size() == 0) {
+        		String noResStr = getString(R.string.no_result_found, mResponseLoader.getQuery());
+        		TextView tv = (TextView)getListView().getEmptyView();
+        		tv.setText(noResStr);
         		return;
         	}
     		mLoading.setVisibility(View.GONE);
@@ -246,7 +283,7 @@ public class MarketSearchActivity extends SherlockListActivity {
             holder.details.setText(app.getCreator());
             ImageView icon = (ImageView)v.findViewById(R.id.icon);
         	if (mDefaultIcon == null) {
-        		mDefaultIcon = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_launcher);
+        		mDefaultIcon = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_empty);
         	}
         	icon.setImageBitmap(mDefaultIcon);
             mIconLoader.loadImage(app.getId(), icon);
