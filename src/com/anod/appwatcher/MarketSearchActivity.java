@@ -204,13 +204,15 @@ public class MarketSearchActivity extends SherlockListActivity {
         
         @Override
         protected void onPostExecute(List<App> list) {
+        	mLoading.setVisibility(View.GONE);
+        	
         	if (list == null || list.size() == 0) {
         		String noResStr = getString(R.string.no_result_found, mResponseLoader.getQuery());
         		TextView tv = (TextView)getListView().getEmptyView();
         		tv.setText(noResStr);
+        		tv.setVisibility(View.VISIBLE);
         		return;
         	}
-    		mLoading.setVisibility(View.GONE);
         	
     		mAdapter.addAll(list);
     		
