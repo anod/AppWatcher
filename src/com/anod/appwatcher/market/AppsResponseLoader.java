@@ -7,6 +7,7 @@ import android.util.Log;
 import com.gc.android.market.api.MarketSession;
 import com.gc.android.market.api.MarketSession.Callback;
 import com.gc.android.market.api.model.Market.App;
+import com.gc.android.market.api.model.Market.AppType;
 import com.gc.android.market.api.model.Market.AppsRequest;
 import com.gc.android.market.api.model.Market.AppsResponse;
 import com.gc.android.market.api.model.Market.ResponseContext;
@@ -16,7 +17,7 @@ public class AppsResponseLoader {
 	private static final int MAX_APPS = 100;
 
 	private String mQuery;
-	private int mIndex;
+	private int mStartIndex;
 	private boolean mHasNext;
 	private MarketSession mMarketSession;
 
@@ -27,7 +28,7 @@ public class AppsResponseLoader {
 	public AppsResponseLoader(MarketSession session, String query) {
 		mMarketSession = session;
 		mQuery = query;
-		mIndex = 0;
+		mStartIndex = 0;
 		mHasNext = true;
 	}
 
@@ -39,7 +40,7 @@ public class AppsResponseLoader {
 	}
 	public boolean moveToNext() {
 		if (mHasNext) {
-			mIndex += PAGE_COUNT;
+			mStartIndex += PAGE_COUNT;
 			return true;
 		}
 		return false;
@@ -48,8 +49,9 @@ public class AppsResponseLoader {
 	public List<App> load() {
 		AppsRequest appsRequest = AppsRequest.newBuilder()
 			.setQuery(mQuery)
-			.setStartIndex(mIndex)
+			.setStartIndex(mStartIndex)
 			.setEntriesCount(PAGE_COUNT)
+			.setAppType(AppType.NONE)
 //			.setOrderType(AppsRequest.OrderType.FEATURED)
 			.setWithExtendedInfo(false).build();
 		final ResponseWrapper respWrapper = new ResponseWrapper();
@@ -69,14 +71,19 @@ public class AppsResponseLoader {
 			mHasNext = false;
 			return null;
 		}
+		List<App> apps = respWrapper.response.getAppList();
 		int appCount = respWrapper.response.getEntriesCount();
+		
+		if (apps.size() < mStartIndex) {
+			appCount = apps.size();
+		}
 		int totalCount = Math.min(appCount, MAX_APPS);
-		int nextCount = mIndex + PAGE_COUNT;
+		int nextCount = mStartIndex + PAGE_COUNT;
 		if (nextCount > totalCount) {
 			mHasNext = false;
 		}
 		
-		return respWrapper.response.getAppList();
+		return apps;
 	}
 
 }

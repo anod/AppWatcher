@@ -73,7 +73,7 @@ public class MarketSearchActivity extends SherlockListActivity {
 			tm.getNetworkOperator(),
 			tm.getSimOperator()
 		);
-
+		//getDeviceId ()
 		String deviceAndSdkVersion = Build.PRODUCT + ":" + Build.VERSION.SDK_INT;
 		Log.d("AppWatcher", "DeviceAndSdkVersion:" +deviceAndSdkVersion); 
 		mMarketSession.getContext().setDeviceAndSdkVersion(deviceAndSdkVersion);
@@ -111,10 +111,9 @@ public class MarketSearchActivity extends SherlockListActivity {
         InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
 
-    	@SuppressWarnings("unchecked")
-		ArrayAdapter<App> aa = (ArrayAdapter<App>)getListAdapter();
-		aa.clear();
-
+		setListAdapter(mAdapter);
+		
+		mAdapter.clear();
 		mIconLoader.clearCache();
 
 		getListView().setVisibility(View.GONE);
@@ -237,7 +236,7 @@ public class MarketSearchActivity extends SherlockListActivity {
 		protected boolean cacheInBackground() throws Exception {
 			if (mResponseLoader.moveToNext()) {
 				mCache = mResponseLoader.load();
-				return (mCache == null) ? false : true;
+				return (mCache == null || mCache.size() == 0) ? false : true;
 			}
 			return false;
 		}

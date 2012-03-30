@@ -2,6 +2,7 @@ package com.anod.appwatcher.market;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
 import com.anod.appwatcher.utils.ImageLoader;
 import com.gc.android.market.api.MarketSession;
@@ -40,18 +41,23 @@ public class AppIconLoader extends ImageLoader {
 		 	.build();
 	
 		final IconWrapper wrapper = new IconWrapper();
-		synchronized (mMarketSession) {
-			mMarketSession.append(imgReq, new Callback<GetImageResponse>() {
-				@Override
-				public void onResult(ResponseContext context, GetImageResponse response) {
-					try {
-						wrapper.icon = response.getImageData().toByteArray();
-					} catch(Exception ex) {
-						ex.printStackTrace();
+		try {
+			synchronized (mMarketSession) {
+				mMarketSession.append(imgReq, new Callback<GetImageResponse>() {
+					@Override
+					public void onResult(ResponseContext context, GetImageResponse response) {
+						try {
+							wrapper.icon = response.getImageData().toByteArray();
+						} catch(Exception ex) {
+							ex.printStackTrace();
+						}
 					}
-				}
-			});
-			mMarketSession.flush();
+				});
+				mMarketSession.flush();
+			}
+		} catch (Exception e) {
+			Log.e("AppWatcher", e.toString());
+			return null;
 		}
 		 
 		try {
