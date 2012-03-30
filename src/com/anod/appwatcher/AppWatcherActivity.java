@@ -13,6 +13,7 @@ import com.anod.appwatcher.client.TokenHelper.CallBack;
 public class AppWatcherActivity extends SherlockFragmentActivity {
 	protected String mAuthToken;
 	private AppWatcherActivity mContext;
+	private Preferences mPrefences;
 
 	/* (non-Javadoc)
 	 * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
@@ -22,6 +23,11 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
 		super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         mContext = this;
+        mPrefences = new Preferences(mContext);
+        
+        if (mPrefences.getDeviceId() == null) {
+        	
+        }
 	}
     
     @Override

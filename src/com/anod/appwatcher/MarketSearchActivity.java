@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -64,7 +65,6 @@ public class MarketSearchActivity extends SherlockListActivity {
 		mLoading = (LinearLayout)findViewById(R.id.loading);
 		mLoading.setVisibility(View.GONE);
 		
-		
 		mMarketSession = new MarketSession();
 		TelephonyManager tm = (TelephonyManager) getSystemService(TELEPHONY_SERVICE); 
 		mMarketSession.setOperator(
@@ -73,12 +73,15 @@ public class MarketSearchActivity extends SherlockListActivity {
 			tm.getNetworkOperator(),
 			tm.getSimOperator()
 		);
-		//getDeviceId ()
-		String deviceAndSdkVersion = Build.PRODUCT + ":" + Build.VERSION.SDK_INT;
-		Log.d("AppWatcher", "DeviceAndSdkVersion:" +deviceAndSdkVersion); 
-		mMarketSession.getContext().setDeviceAndSdkVersion(deviceAndSdkVersion);
-		mIconLoader = new AppIconLoader(mMarketSession);
+
+		Preferences prefs = new Preferences(this);
+		String id = prefs.getDeviceId();
+		mMarketSession.getContext().setAndroidId(id);
 		
+		String deviceAndSdkVersion = Build.PRODUCT + ":" + Build.VERSION.SDK_INT;
+		mMarketSession.getContext().setDeviceAndSdkVersion(deviceAndSdkVersion);
+
+		mIconLoader = new AppIconLoader(mMarketSession);
 		mAdapter = new AppsAdapter(this,R.layout.market_app_row);
 		
 		setListAdapter(mAdapter);

@@ -12,4 +12,13 @@
     <string name="no_result_found">No results for "%s"</string>
     <string name="error_insert_app">Failed to add application to the whatch list.</string>
     <string name="application_icon">Application icon</string>
+    <string name="welcome_to_app_watcher">Do not get search results?</string>
+    <string name="for_proper_work_of_application">Some devices requires to set Device Id manually. This id required in order to communicate with Google Play Store. Please follow instruction below in order to set it up.</string>
+    <string name="background_image">background image</string>
+    <string name="device_id">Device Id</string>
+    <string name="save_device_id">Save Device Id</string>
+    <string name="device_id_explanation">Device id is a 16 length string that contains numbers and characters a-f. The string can be found in GTalk Service Monitor information screen.</string>
+    <string name="how_to_find_device_id">How to find Device Id?</string>
+    <string name="dial">To open Gtalk Monitro Service click on the button</string>
+    <string name="open_gtalk_monitor">Open GTalk Monitor Service: *#*#8255#*#*</string>
 </resources>
