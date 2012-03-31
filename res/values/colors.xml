@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black_transp">#CC000000</color>
+    <color name="white">#FFFFFFFF</color>    
+    <color name="blue_shadow">#FF64B7C3</color>
+</resources>

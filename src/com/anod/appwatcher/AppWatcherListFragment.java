@@ -13,6 +13,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockListFragment;
@@ -22,7 +24,12 @@ import com.anod.appwatcher.model.AppListTable;
 
 public class AppWatcherListFragment extends SherlockListFragment implements LoaderManager.LoaderCallbacks<Cursor>{
     private CursorAdapter mAdapter;
-
+	class ViewHolder {
+		TextView title;
+		TextView details;
+		ImageView icon;
+		LinearLayout options;
+	}
 	/** Called when the activity is first created. */
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -46,15 +53,27 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
         // or start a new one.
         getLoaderManager().initLoader(0, null, this); 
     }
+
     
-    private class ListCursorAdapter extends CursorAdapter {
+    /* (non-Javadoc)
+	 * @see android.support.v4.app.ListFragment#onListItemClick(android.widget.ListView, android.view.View, int, long)
+	 */
+	@Override
+	public void onListItemClick(ListView l, View v, int position, long id) {
+		ViewHolder holder = (ViewHolder)v.getTag();
+		if (holder.options.getVisibility() == View.VISIBLE) {
+			holder.options.setVisibility(View.GONE);
+		} else {
+			holder.options.setVisibility(View.VISIBLE);
+		}
+		
+	}
+
+
+	private class ListCursorAdapter extends CursorAdapter {
         private LayoutInflater mInflater;
         private Bitmap mDefaultIcon;
-    	class ViewHolder {
-			TextView title;
-			TextView details;
-			ImageView icon;
-		}
+
 		public ListCursorAdapter(Context context, Cursor c, int flags) {
 			super(context, c, flags);
 	        mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);			
@@ -84,6 +103,8 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
             holder.title = (TextView)v.findViewById(R.id.title);
             holder.details = (TextView)v.findViewById(R.id.details);
             holder.icon = (ImageView)v.findViewById(R.id.icon);            
+            holder.options = (LinearLayout)v.findViewById(R.id.options);
+            holder.options.setVisibility(View.GONE);
             v.setTag(holder);
             
 			return v;
