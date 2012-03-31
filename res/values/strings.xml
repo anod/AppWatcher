@@ -21,4 +21,9 @@
     <string name="how_to_find_device_id">How to find Device Id?</string>
     <string name="dial">To open Gtalk Monitro Service click on the button</string>
     <string name="open_gtalk_monitor">Open GTalk Monitor Service: *#*#8255#*#*</string>
+    <string name="results_are_not_correct">Results are not correct?</string>
+    <string name="improve">Improve</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="screenshot">Screenshot</string>
+    <string name="menu_set_device_id">Set Device Id</string>
 </resources>

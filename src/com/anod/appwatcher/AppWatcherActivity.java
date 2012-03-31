@@ -56,7 +56,11 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
         	helper.requestToken();
         	return true;
         case R.id.menu_refresh:
-        	return true;        	
+        	return true;       
+        case R.id.menu_device_id:
+			Intent intent = new Intent(mContext, DeviceIdActivity.class);
+			startActivity(intent);
+        	return false;
         default:
             return onOptionsItemSelected(item);
         }

@@ -11,22 +11,26 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
+import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
@@ -53,6 +57,7 @@ public class MarketSearchActivity extends SherlockListActivity {
 	private AppsResponseLoader mResponseLoader;
 	private Context mContext;
 	private LinearLayout mLoading;
+	private RelativeLayout mDeviceIdMessage = null;
 	/* (non-Javadoc)
 	 * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
 	 */
@@ -65,22 +70,14 @@ public class MarketSearchActivity extends SherlockListActivity {
 		mLoading = (LinearLayout)findViewById(R.id.loading);
 		mLoading.setVisibility(View.GONE);
 		
-		mMarketSession = new MarketSession();
-		TelephonyManager tm = (TelephonyManager) getSystemService(TELEPHONY_SERVICE); 
-		mMarketSession.setOperator(
-			tm.getNetworkOperatorName(), 
-			tm.getSimOperatorName(), 
-			tm.getNetworkOperator(),
-			tm.getSimOperator()
-		);
-
-		Preferences prefs = new Preferences(this);
-		String id = prefs.getDeviceId();
-		mMarketSession.getContext().setAndroidId(id);
-		
-		String deviceAndSdkVersion = Build.PRODUCT + ":" + Build.VERSION.SDK_INT;
-		mMarketSession.getContext().setDeviceAndSdkVersion(deviceAndSdkVersion);
-
+		final Preferences prefs = new Preferences(this);
+		String deviceId = prefs.getDeviceId();
+		initDeviceIdMessage(prefs);		
+		if (deviceId == null) {
+			deviceId = Secure.getString(getApplicationContext().getContentResolver(), Secure.ANDROID_ID);
+		}
+		initMarketSession(deviceId);
+        
 		mIconLoader = new AppIconLoader(mMarketSession);
 		mAdapter = new AppsAdapter(this,R.layout.market_app_row);
 		
@@ -103,6 +100,65 @@ public class MarketSearchActivity extends SherlockListActivity {
 			}
 		});
 		handleIntent(getIntent());
+	}
+
+
+	/**
+	 * 
+	 */
+	private void initDeviceIdMessage(final Preferences prefs) {
+		mDeviceIdMessage = (RelativeLayout)findViewById(R.id.device_id_message);
+		mDeviceIdMessage.setVisibility(View.GONE);
+		
+		if (prefs.isDeviceIdMessageEnabled() == false) {
+			mDeviceIdMessage = null;
+			return;
+		}
+		
+		Button dismissBtn = (Button)mDeviceIdMessage.findViewById(R.id.dismiss_btn);
+		dismissBtn.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				prefs.disableDeviceIdMessage();
+    			Animation anim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.flyout);
+    			mDeviceIdMessage.setAnimation(anim);
+    	        anim.start();			
+				mDeviceIdMessage.setVisibility(View.GONE);
+			}
+		});
+        
+		Button improveBtn = (Button)mDeviceIdMessage.findViewById(R.id.improve_btn);
+		improveBtn.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent(mContext, DeviceIdActivity.class);
+				startActivity(intent);
+				mDeviceIdMessage.setVisibility(View.GONE);
+			}
+		});
+	}
+
+
+	/**
+	 * @param deviceId
+	 */
+	private void initMarketSession(String deviceId) {
+		mMarketSession = new MarketSession();
+		TelephonyManager tm = (TelephonyManager) getSystemService(TELEPHONY_SERVICE); 
+		mMarketSession.setOperator(
+			tm.getNetworkOperatorName(), 
+			tm.getSimOperatorName(), 
+			tm.getNetworkOperator(),
+			tm.getSimOperator()
+		);
+
+
+		mMarketSession.getContext().setAndroidId(deviceId);
+
+		String deviceAndSdkVersion = Build.PRODUCT + ":" + Build.VERSION.SDK_INT;
+		mMarketSession.getContext().setDeviceAndSdkVersion(deviceAndSdkVersion);
 	}
 
 
@@ -222,6 +278,13 @@ public class MarketSearchActivity extends SherlockListActivity {
     			getListView().setAdapter(new AppsEndlessAdapter(
     				mContext, mAdapter, R.layout.pending
     			));
+    		}
+    		
+    		if (mDeviceIdMessage!=null) {
+    			Animation anim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.flyin);
+    			mDeviceIdMessage.setAnimation(anim);
+    	        anim.start();
+    	        mDeviceIdMessage.setVisibility(View.VISIBLE);
     		}
         }
     };

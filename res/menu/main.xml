@@ -14,4 +14,10 @@
         android:icon="@drawable/ic_action_refresh">
     </item>
 
+    <item
+        android:id="@+id/menu_device_id"
+        android:showAsAction="never|withText"
+        android:title="@string/menu_set_device_id">
+    </item>
+    
 </menu>

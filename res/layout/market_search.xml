@@ -1,43 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
- <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-     android:layout_width="fill_parent"
-     android:layout_height="fill_parent"
-     >
-     <ListView  
-         android:id="@android:id/list"
-         android:layout_width="fill_parent" 
-         android:layout_height="wrap_content" 
-     />
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
 
-     <TextView
-         android:id="@android:id/empty"
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content"
-         android:layout_centerHorizontal="true"
-         android:layout_centerVertical="true"
-         android:text="@string/search_for_app"
-         android:gravity="center_horizontal"
-         android:layout_margin="25dip" />
+    <ListView
+        android:id="@android:id/list"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
 
+    <TextView
+        android:id="@android:id/empty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_margin="25dip"
+        android:gravity="center_horizontal"
+        android:text="@string/search_for_app" />
 
-     <LinearLayout 
-         android:id="@+id/loading"
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content"
-         android:layout_centerVertical="true"
-         android:layout_centerHorizontal="true" 
-         android:orientation="horizontal"
-         android:gravity="center_vertical"
-         >
-	     <ProgressBar
-	         android:layout_width="wrap_content"
-	         android:layout_height="wrap_content"
-	      />
-	     <TextView
-	         android:layout_width="wrap_content"
-	         android:layout_height="wrap_content"
-	         android:text="@string/loading"
-		  />
-     </LinearLayout>
+    <LinearLayout
+        android:id="@+id/loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal" >
 
- </RelativeLayout>
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/loading" />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/device_id_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:background="@color/black_transp"
+        android:padding="2dip" >
+
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/improve_btn"
+            android:layout_alignParentTop="true"
+            android:layout_toLeftOf="@+id/improve_btn"
+            android:gravity="center_horizontal|center_vertical"
+            android:text="@string/results_are_not_correct"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/white" />
+
+        <Button
+            android:id="@+id/dismiss_btn"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:text="@string/dismiss"
+            android:textColor="@color/white" />
+
+        <Button
+            android:id="@+id/improve_btn"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toLeftOf="@+id/dismiss_btn"
+            android:text="@string/improve"
+            android:textColor="@color/white" />
+    </RelativeLayout>
+
+</RelativeLayout>
