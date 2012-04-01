@@ -46,31 +46,50 @@
 	    android:layout_width="match_parent"
 	    android:layout_height="match_parent"
 	    android:gravity="center_vertical"
-	    android:orientation="horizontal">
+	    android:orientation="horizontal"
+	    >
+
+		<Button
+		    android:id="@+id/Button01"
+		    style="?android:attr/buttonStyleSmall"
+		    android:layout_width="0dp"
+		    android:layout_height="wrap_content"
+		    android:drawableLeft="@drawable/ic_whatsnew"
+		    android:focusable="false"
+		    android:shadowColor="@color/blue_shadow"
+		    android:shadowDx="0.0"
+		    android:shadowDy="0.0"
+		    android:shadowRadius="8"
+		    android:text="@string/whats_new" 
+		    android:layout_weight="1" />
 
 	    <Button
 	        android:id="@+id/button3"
 	        style="?android:attr/buttonStyleSmall"
-	        android:layout_width="wrap_content"
+	        android:layout_width="0dp"
 	        android:layout_height="wrap_content"
 	        android:drawableLeft="@drawable/ic_play_store"
+	        android:focusable="false"
 	        android:shadowColor="@color/blue_shadow"
 	        android:shadowRadius="8"
 	        android:shadowDx="0.0"
 	       	android:shadowDy="0.0"
-	        android:text="@string/play_store" />
+	        android:text="@string/play_store"
+	        android:layout_weight="1"  />
 
 	    <Button
-	        android:id="@+id/button2"
+	        android:id="@+id/remove_btn"
 	        style="?android:attr/buttonStyleSmall"
-	        android:layout_width="wrap_content"
+	        android:layout_width="0dp"
 	        android:layout_height="wrap_content"
+		    android:focusable="false"	        
 	        android:drawableLeft="@drawable/ic_remove"
 	        android:shadowColor="@color/blue_shadow"
 	        android:shadowRadius="8"	        
 	        android:shadowDx="0.0"
 	       	android:shadowDy="0.0"	        
-	        android:text="@string/remove" />
+	        android:text="@string/remove"
+	        android:layout_weight="1"  />
 	</LinearLayout>
 			
 </LinearLayout>

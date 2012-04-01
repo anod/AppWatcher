@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -11,7 +12,9 @@ import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -25,10 +28,12 @@ import com.anod.appwatcher.model.AppListTable;
 public class AppWatcherListFragment extends SherlockListFragment implements LoaderManager.LoaderCallbacks<Cursor>{
     private CursorAdapter mAdapter;
 	class ViewHolder {
+		String appId;
 		TextView title;
 		TextView details;
 		ImageView icon;
 		LinearLayout options;
+		Button removeBtn;
 	}
 	/** Called when the activity is first created. */
     @Override
@@ -86,6 +91,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 			ViewHolder holder = (ViewHolder)view.getTag();
             holder.title.setText(app.getTitle()+" "+app.getVersionName());
             holder.details.setText(app.getCreator());
+			holder.removeBtn.setTag(app.getRowId());
             Bitmap icon = app.getIcon();
             if (icon == null) {
 	           	if (mDefaultIcon == null) {
@@ -106,6 +112,16 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
             holder.options = (LinearLayout)v.findViewById(R.id.options);
             holder.options.setVisibility(View.GONE);
             v.setTag(holder);
+            
+            holder.removeBtn = (Button)holder.options.findViewById(R.id.remove_btn);
+            holder.removeBtn.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					Integer rowId = (Integer)v.getTag();
+					Uri deleteUri = AppListContentProvider.CONTENT_URI.buildUpon().appendPath(String.valueOf(rowId)).build();
+		            getActivity().getContentResolver().delete(deleteUri, null, null);
+				}
+			});
             
 			return v;
 		}

@@ -21,9 +21,11 @@ public class AppListContentProvider extends ContentProvider {
 	
 	// Used for the UriMacher
 	private static final int LIST = 10;
+	private static final int ROW = 20;
 	
 	private static final String AUTHORITY = "com.anod.appwatcher";	
 	private static final String BASE_PATH = "apps";
+	private static final String APP_PATH = "apps/#";
 	public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY
 			+ "/" + BASE_PATH);
 	
@@ -35,12 +37,23 @@ public class AppListContentProvider extends ContentProvider {
 	private static final UriMatcher sURIMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 	static {
 		sURIMatcher.addURI(AUTHORITY, BASE_PATH, LIST);
+		sURIMatcher.addURI(AUTHORITY, APP_PATH, ROW);
+		
 	}
 
 	@Override
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
-		// TODO Auto-generated method stub
-		return 0;
+		if (sURIMatcher.match(uri) != ROW) { 
+			throw new IllegalArgumentException("Unknown URI " + uri); 
+		}
+		String rowId = uri.getLastPathSegment();
+		
+        SQLiteDatabase db = mDatabaseOpenHelper.getWritableDatabase();
+        int count = db.delete(AppListTable.TABLE_NAME, AppListTable.Columns._ID+"=?", new String[] { rowId });
+        if (count > 0) {
+        	getContext().getContentResolver().notifyChange(CONTENT_URI, null);
+        }
+        return count;
 	}
 
 	@Override

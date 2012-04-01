@@ -269,6 +269,7 @@ public class MarketSearchActivity extends SherlockListActivity {
         		TextView tv = (TextView)getListView().getEmptyView();
         		tv.setText(noResStr);
         		tv.setVisibility(View.VISIBLE);
+        		showDeviceIdMessage();        		
         		return;
         	}
         	
@@ -280,13 +281,17 @@ public class MarketSearchActivity extends SherlockListActivity {
     			));
     		}
     		
-    		if (mDeviceIdMessage!=null) {
+    		showDeviceIdMessage();
+        }
+
+		private void showDeviceIdMessage() {
+			if (mDeviceIdMessage!=null) {
     			Animation anim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.flyin);
     			mDeviceIdMessage.setAnimation(anim);
     	        anim.start();
     	        mDeviceIdMessage.setVisibility(View.VISIBLE);
     		}
-        }
+		}
     };
   
     class AppsEndlessAdapter extends EndlessAdapter {

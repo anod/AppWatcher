@@ -1,13 +1,12 @@
 package com.anod.appwatcher.model;
 
-import com.anod.appwatcher.model.AppListTable.Columns;
-
 import android.database.Cursor;
 import android.database.CursorWrapper;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 public class AppListCursor extends CursorWrapper {
+    private static final int IDX_ROWID = 0;	
     private static final int IDX_APPID = 1;	
     private static final int IDX_PACKAGE = 2;
     private static final int IDX_VERSION_NUMBER = 3;    
@@ -28,6 +27,7 @@ public class AppListCursor extends CursorWrapper {
 			icon = BitmapFactory.decodeByteArray(iconData, 0, iconData.length);
 		}
 		return new AppInfo(
+			getInt(IDX_ROWID),
 			getString(IDX_APPID),				
 			getString(IDX_PACKAGE),
 			getInt(IDX_VERSION_NUMBER),

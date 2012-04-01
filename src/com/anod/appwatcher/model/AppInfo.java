@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 
 
 public class AppInfo {
+	private int rowId;
 	private String appId;
 	private String packageName;
 	private int versionNumber;
@@ -12,8 +13,9 @@ public class AppInfo {
 	private String creator;	
 	private Bitmap icon;
 	private int status;
-	public AppInfo(String appId, String pname, int versionNumber, String versionName,
+	public AppInfo(int rowId, String appId, String pname, int versionNumber, String versionName,
 			String title, String creator, Bitmap icon, int status) {
+		this.rowId = rowId;
 		this.appId = appId;		
 		this.packageName = pname;
 		this.versionNumber = versionNumber;
@@ -23,7 +25,14 @@ public class AppInfo {
 		this.icon = icon;
 		this.status = status;
 	}
-	
+	/**
+	 * 
+	 * @return
+	 */
+	public int getRowId() {
+		return rowId;
+	}
+
 	/**
 	 * @return the appId
 	 */
