@@ -1,6 +1,7 @@
 package com.anod.appwatcher;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -34,7 +35,10 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 		ImageView icon;
 		LinearLayout options;
 		Button removeBtn;
+		Button marketBtn;
+		Button changelogBtn;
 	}
+	
 	/** Called when the activity is first created. */
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -76,7 +80,8 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 
 
 	private class ListCursorAdapter extends CursorAdapter {
-        private LayoutInflater mInflater;
+        private static final String URL_PLAY_STORE = "https://play.google.com/store/apps/details?id=%s";
+		private LayoutInflater mInflater;
         private Bitmap mDefaultIcon;
 
 		public ListCursorAdapter(Context context, Cursor c, int flags) {
@@ -92,7 +97,9 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
             holder.title.setText(app.getTitle()+" "+app.getVersionName());
             holder.details.setText(app.getCreator());
 			holder.removeBtn.setTag(app.getRowId());
-            Bitmap icon = app.getIcon();
+			holder.marketBtn.setTag(app.getPackageName());
+			holder.changelogBtn.setTag(app.getAppId());
+			Bitmap icon = app.getIcon();
             if (icon == null) {
 	           	if (mDefaultIcon == null) {
 	           		mDefaultIcon = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_empty);
@@ -122,7 +129,30 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 		            getActivity().getContentResolver().delete(deleteUri, null, null);
 				}
 			});
-            
+
+            holder.marketBtn = (Button)holder.options.findViewById(R.id.market_btn);
+            holder.marketBtn.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					String pkg = (String)v.getTag();
+					String url = String.format(URL_PLAY_STORE, pkg);
+					Intent intent = new Intent(Intent.ACTION_VIEW);
+					intent.setData(Uri.parse(url));
+					startActivity(intent);
+				}
+			});
+
+            holder.changelogBtn = (Button)holder.options.findViewById(R.id.changelog_btn);
+            holder.changelogBtn.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					String appId = (String)v.getTag();
+					Intent intent = new Intent(getActivity(), AppChangelogActivity.class);
+					intent.putExtra(AppChangelogActivity.EXTRA_APP_ID, appId);
+					startActivity(intent);
+				}
+			});
+
 			return v;
 		}
     	

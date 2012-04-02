@@ -50,7 +50,7 @@
 	    >
 
 		<Button
-		    android:id="@+id/Button01"
+		    android:id="@+id/changelog_btn"
 		    style="?android:attr/buttonStyleSmall"
 		    android:layout_width="0dp"
 		    android:layout_height="wrap_content"
@@ -64,7 +64,7 @@
 		    android:layout_weight="1" />
 
 	    <Button
-	        android:id="@+id/button3"
+	        android:id="@+id/market_btn"
 	        style="?android:attr/buttonStyleSmall"
 	        android:layout_width="0dp"
 	        android:layout_height="wrap_content"
