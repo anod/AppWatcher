@@ -9,6 +9,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.anod.appwatcher.client.TokenHelper;
 import com.anod.appwatcher.client.TokenHelper.CallBack;
+import com.anod.appwatcher.market.MarketSessionHelper;
 
 public class AppWatcherActivity extends SherlockFragmentActivity {
 	protected String mAuthToken;
@@ -41,14 +42,13 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
         switch (item.getItemId()) {
         case R.id.menu_add:
         	TokenHelper helper = new TokenHelper(this, new CallBack() {
-
 				@Override
 				public void onTokenReceive(String authToken) {
 		        	if (authToken == null) {
 		        		Toast.makeText(AppWatcherActivity.this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
 		        	} else {
 		        		Intent intent = new Intent(mContext, MarketSearchActivity.class);
-		        		intent.putExtra(MarketSearchActivity.EXTRA_TOKEN, authToken);
+		        		intent.putExtra(MarketSessionHelper.EXTRA_TOKEN, authToken);
 		        		startActivity(intent);
 		        	}
 				}

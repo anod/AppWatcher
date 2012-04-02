@@ -41,6 +41,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.anod.appwatcher.market.AppIconLoader;
 import com.anod.appwatcher.market.AppsResponseLoader;
+import com.anod.appwatcher.market.MarketSessionHelper;
 import com.anod.appwatcher.model.AppListTable;
 import com.anod.appwatcher.utils.BitmapUtils;
 import com.commonsware.cwac.endless.EndlessAdapter;
@@ -48,8 +49,6 @@ import com.gc.android.market.api.MarketSession;
 import com.gc.android.market.api.model.Market.App;
 
 public class MarketSearchActivity extends SherlockListActivity {
-    
-	public static final String EXTRA_TOKEN = "extra_token";
 	protected static final String TAG = "AppWatcher";
 	private AppsAdapter mAdapter;
 	private MarketSession mMarketSession;
@@ -73,10 +72,8 @@ public class MarketSearchActivity extends SherlockListActivity {
 		final Preferences prefs = new Preferences(this);
 		String deviceId = prefs.getDeviceId();
 		initDeviceIdMessage(prefs);		
-		if (deviceId == null) {
-			deviceId = Secure.getString(getApplicationContext().getContentResolver(), Secure.ANDROID_ID);
-		}
-		initMarketSession(deviceId);
+		MarketSessionHelper helper = new MarketSessionHelper(mContext);
+		mMarketSession = helper.create(deviceId, null);
         
 		mIconLoader = new AppIconLoader(mMarketSession);
 		mAdapter = new AppsAdapter(this,R.layout.market_app_row);
@@ -141,27 +138,6 @@ public class MarketSearchActivity extends SherlockListActivity {
 	}
 
 
-	/**
-	 * @param deviceId
-	 */
-	private void initMarketSession(String deviceId) {
-		mMarketSession = new MarketSession();
-		TelephonyManager tm = (TelephonyManager) getSystemService(TELEPHONY_SERVICE); 
-		mMarketSession.setOperator(
-			tm.getNetworkOperatorName(), 
-			tm.getSimOperatorName(), 
-			tm.getNetworkOperator(),
-			tm.getSimOperator()
-		);
-
-
-		mMarketSession.getContext().setAndroidId(deviceId);
-
-		String deviceAndSdkVersion = Build.PRODUCT + ":" + Build.VERSION.SDK_INT;
-		mMarketSession.getContext().setDeviceAndSdkVersion(deviceAndSdkVersion);
-	}
-
-
 	private void showResults() {
 		EditText editText = (EditText)getSupportActionBar().getCustomView();
 		String query = editText.getText().toString();
@@ -195,7 +171,7 @@ public class MarketSearchActivity extends SherlockListActivity {
     }
 
     private void handleIntent(Intent intent) {
-        String authSubToken = intent.getStringExtra(EXTRA_TOKEN);
+        String authSubToken = intent.getStringExtra(MarketSessionHelper.EXTRA_TOKEN);
 		mMarketSession.setAuthSubToken(authSubToken);
     }
 

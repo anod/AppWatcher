@@ -20,8 +20,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockListFragment;
+import com.anod.appwatcher.client.TokenHelper;
+import com.anod.appwatcher.client.TokenHelper.CallBack;
+import com.anod.appwatcher.market.MarketSessionHelper;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListCursor;
 import com.anod.appwatcher.model.AppListTable;
@@ -136,9 +140,10 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 				public void onClick(View v) {
 					String pkg = (String)v.getTag();
 					String url = String.format(URL_PLAY_STORE, pkg);
-					Intent intent = new Intent(Intent.ACTION_VIEW);
-					intent.setData(Uri.parse(url));
+					Intent intent = new Intent (Intent.ACTION_VIEW, Uri.parse(url));
+					intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);				
 					startActivity(intent);
+				
 				}
 			});
 
@@ -146,10 +151,21 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
             holder.changelogBtn.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					String appId = (String)v.getTag();
-					Intent intent = new Intent(getActivity(), AppChangelogActivity.class);
-					intent.putExtra(AppChangelogActivity.EXTRA_APP_ID, appId);
-					startActivity(intent);
+					final String appId = (String)v.getTag();
+		        	TokenHelper helper = new TokenHelper(getActivity(), new CallBack() {
+						@Override
+						public void onTokenReceive(String authToken) {
+				        	if (authToken == null) {
+				        		Toast.makeText(getActivity(), R.string.failed_gain_access, Toast.LENGTH_LONG).show();
+				        	} else {
+								Intent intent = new Intent(getActivity(), AppChangelogActivity.class);
+								intent.putExtra(AppChangelogActivity.EXTRA_APP_ID, appId);
+								intent.putExtra(MarketSessionHelper.EXTRA_TOKEN, authToken);
+				        		startActivity(intent);
+				        	}
+						}
+					});
+		        	helper.requestToken();
 				}
 			});
 
