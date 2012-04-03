@@ -96,6 +96,7 @@ public class AppListContentProvider extends ContentProvider {
 		int uriType = sURIMatcher.match(uri);
 		switch (uriType) {
 			case LIST:
+				
 				break;
 			default:
 				throw new IllegalArgumentException("Unknown URI: " + uri);

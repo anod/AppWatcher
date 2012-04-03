@@ -31,4 +31,5 @@
     <string name="whats_new">What\'s new</string>
     <string name="whats_new_title">What\'s new</string>
     <string name="problem_occured">Problem occured during recieving infomation.</string>
+    <string name="appwatcher_account">AppWatcher Account</string>
 </resources>
