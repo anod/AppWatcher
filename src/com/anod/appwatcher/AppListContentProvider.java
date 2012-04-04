@@ -23,7 +23,7 @@ public class AppListContentProvider extends ContentProvider {
 	private static final int LIST = 10;
 	private static final int ROW = 20;
 	
-	private static final String AUTHORITY = "com.anod.appwatcher";	
+	public static final String AUTHORITY = "com.anod.appwatcher";	
 	private static final String BASE_PATH = "apps";
 	private static final String APP_PATH = "apps/#";
 	public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY

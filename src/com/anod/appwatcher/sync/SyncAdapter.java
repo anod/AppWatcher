@@ -13,6 +13,7 @@ import android.content.SyncResult;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.util.Log;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private final AccountManager mAccountManager;
@@ -29,8 +30,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 	public void onPerformSync(Account account, Bundle extras, String authority,
 			ContentProviderClient provider, SyncResult syncResult) {
 
+		Log.v("AppWatcher", "onPerformSync()");
 		try {
-			AppListCursor apps = loadApps(provider);
+			AppListCursor apps = loadApps(provider); 
 			
 			
 		} catch (RemoteException e) {

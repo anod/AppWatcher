@@ -1,7 +1,9 @@
 package com.anod.appwatcher;
 
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -10,6 +12,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.anod.appwatcher.client.TokenHelper;
 import com.anod.appwatcher.client.TokenHelper.CallBack;
 import com.anod.appwatcher.market.MarketSessionHelper;
+import com.anod.appwatcher.sync.Authenticator;
 
 public class AppWatcherActivity extends SherlockFragmentActivity {
 	protected String mAuthToken;
@@ -24,11 +27,8 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
 		super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         mContext = this;
-        mPrefences = new Preferences(mContext);
         
-        if (mPrefences.getDeviceId() == null) {
-        	
-        }
+        ContentResolver.setSyncAutomatically(Authenticator.getAccount(), AppListContentProvider.AUTHORITY, true);
 	}
     
     @Override
@@ -56,6 +56,13 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
         	helper.requestToken();
         	return true;
         case R.id.menu_refresh:
+        	Log.d("AppWatcher", "Refresh pressed");
+            Bundle params = new Bundle();
+            params.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, false);
+            params.putBoolean(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY, false);
+            params.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+            
+        	ContentResolver.requestSync(Authenticator.getAccount(), AppListContentProvider.AUTHORITY, params);
         	return true;       
         case R.id.menu_device_id:
 			Intent intent = new Intent(mContext, DeviceIdActivity.class);

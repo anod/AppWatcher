@@ -9,8 +9,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.anod.appwatcher.R;
-
 public class Authenticator extends AbstractAccountAuthenticator {
 	private static final String ACCOUNT_NAME = "AppWatcherAccount";	
     private static final String ACCOUNT_TOKEN = "com.anod.appwatcher.account.token";
@@ -19,6 +17,11 @@ public class Authenticator extends AbstractAccountAuthenticator {
     // Authentication Service context
     private final Context mContext;
     private AccountManager mAccountManager;
+    
+    
+    public static Account getAccount() {
+    	return new Account(ACCOUNT_NAME, ACCOUNT_TYPE);
+    }
     
 	public Authenticator(Context context) {
 		super(context);
@@ -39,7 +42,7 @@ public class Authenticator extends AbstractAccountAuthenticator {
         
 		bundle.putString(AccountManager.KEY_ACCOUNT_NAME, ACCOUNT_NAME);
 		bundle.putString(AccountManager.KEY_ACCOUNT_TYPE, ACCOUNT_TYPE);
-
+		bundle.putString(AccountManager.KEY_AUTHTOKEN, ACCOUNT_TOKEN);
 
         //return result
         response.onResult(bundle);
