@@ -6,8 +6,7 @@
 
     <fragment android:name="com.anod.appwatcher.AppWatcherListFragment"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent" >
-    </fragment>
+            android:layout_height="fill_parent" ></fragment>
     <!--
  <ListView android:id="@android:id/list"
                android:layout_width="match_parent"

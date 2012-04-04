@@ -2,5 +2,7 @@
 <resources>
     <color name="black_transp">#CC000000</color>
     <color name="white">#FFFFFFFF</color>    
-    <color name="blue_shadow">#FF64B7C3</color>
+    <color name="blue_shadow">#FFCCFF33</color>
+    <color name="blue_new">#FF33B5E5</color>
 </resources>
+

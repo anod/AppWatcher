@@ -37,6 +37,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 		TextView title;
 		TextView details;
 		ImageView icon;
+		LinearLayout newIndicator;
 		LinearLayout options;
 		Button removeBtn;
 		Button marketBtn;
@@ -110,7 +111,12 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 	           	}
 	           	icon = mDefaultIcon;
             }
-            holder.icon.setImageBitmap(icon);            
+            holder.icon.setImageBitmap(icon);
+            if (app.getStatus() == AppInfo.STATUS_UPDATED) {
+            	holder.newIndicator.setVisibility(View.VISIBLE);
+            } else {
+            	holder.newIndicator.setVisibility(View.INVISIBLE);
+            }
 		}
 
 		@Override
@@ -121,6 +127,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
             holder.details = (TextView)v.findViewById(R.id.details);
             holder.icon = (ImageView)v.findViewById(R.id.icon);            
             holder.options = (LinearLayout)v.findViewById(R.id.options);
+            holder.newIndicator = (LinearLayout)v.findViewById(R.id.new_indicator);
             holder.options.setVisibility(View.GONE);
             v.setTag(holder);
             

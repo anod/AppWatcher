@@ -11,6 +11,15 @@
 	    android:gravity="center_vertical"
 	    android:orientation="horizontal" >
 
+	    <LinearLayout
+	        android:id="@+id/new_indicator"
+	    	android:layout_width="5dip"
+	    	android:layout_height="match_parent"
+	    	android:gravity="center_vertical"
+	    	android:orientation="horizontal"
+	    	android:background="@color/blue_shadow" >
+	    </LinearLayout>
+	    
 	    <ImageView
 	        android:id="@+id/icon"
 	        android:layout_width="@dimen/icon_size"
