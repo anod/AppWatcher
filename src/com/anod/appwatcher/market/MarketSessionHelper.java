@@ -39,8 +39,12 @@ public class MarketSessionHelper {
 		
 		if (authSubToken !=null) {
 			session.setAuthSubToken(authSubToken);
+		} else {
+			
 		}
 		
 		return session;
-	}	
+	}
+	
+	
 }

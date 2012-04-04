@@ -9,8 +9,8 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.anod.appwatcher.client.TokenHelper;
-import com.anod.appwatcher.client.TokenHelper.CallBack;
+import com.anod.appwatcher.accounts.MarketTokenHelper;
+import com.anod.appwatcher.accounts.MarketTokenHelper.CallBack;
 import com.anod.appwatcher.market.MarketSessionHelper;
 import com.anod.appwatcher.sync.Authenticator;
 
@@ -41,7 +41,7 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case R.id.menu_add:
-        	TokenHelper helper = new TokenHelper(this, new CallBack() {
+        	MarketTokenHelper helper = new MarketTokenHelper(this, true, new CallBack() {
 				@Override
 				public void onTokenReceive(String authToken) {
 		        	if (authToken == null) {

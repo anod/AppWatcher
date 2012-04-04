@@ -115,8 +115,20 @@ public class AppListContentProvider extends ContentProvider {
 	@Override
 	public int update(Uri uri, ContentValues values, String selection,
 			String[] selectionArgs) {
-		// TODO Auto-generated method stub
-		return 0;
+		if (sURIMatcher.match(uri) != ROW) { 
+			throw new IllegalArgumentException("Unknown URI " + uri); 
+		}
+        if (values == null || values.size() == 0) {
+        	throw new IllegalArgumentException("Values cannot be empty");
+        }
+		String rowId = uri.getLastPathSegment();
+
+        SQLiteDatabase db = mDatabaseOpenHelper.getWritableDatabase();
+        int count  = db.update(AppListTable.TABLE_NAME, values,  AppListTable.Columns._ID+"=?", new String[] { rowId });
+        if (count > 0) {
+        	getContext().getContentResolver().notifyChange(CONTENT_URI, null);
+        }
+        return count;
 	}
 
 }

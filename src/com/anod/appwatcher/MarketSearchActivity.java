@@ -9,10 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings.Secure;
-import android.telephony.TelephonyManager;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,6 +39,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.anod.appwatcher.market.AppIconLoader;
 import com.anod.appwatcher.market.AppsResponseLoader;
 import com.anod.appwatcher.market.MarketSessionHelper;
+import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListTable;
 import com.anod.appwatcher.utils.BitmapUtils;
 import com.commonsware.cwac.endless.EndlessAdapter;
@@ -216,6 +214,7 @@ public class MarketSearchActivity extends SherlockListActivity {
    	    values.put(AppListTable.Columns.KEY_VERSION_NUMBER, app.getVersionCode());  	    
    	    values.put(AppListTable.Columns.KEY_VERSION_NAME, app.getVersion());
    	    values.put(AppListTable.Columns.KEY_CREATOR, app.getCreator());
+   	    values.put(AppListTable.Columns.KEY_STATUS, AppInfo.STATUS_NORMAL );
    	    Bitmap icon = mIconLoader.getCachedImage(app.getId());
    	    if (icon != null) {
    	    	byte[] iconData = BitmapUtils.flattenBitmap(icon);

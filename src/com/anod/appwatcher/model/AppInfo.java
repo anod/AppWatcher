@@ -4,6 +4,10 @@ import android.graphics.Bitmap;
 
 
 public class AppInfo {
+	
+	public static final int STATUS_NORMAL = 0;	
+	public static final int STATUS_UPDATED = 1;
+	
 	private int rowId;
 	private String appId;
 	private String packageName;
@@ -49,7 +53,7 @@ public class AppInfo {
 	/**
 	 * @return the versionNumber
 	 */
-	public int getVersionNumber() {
+	public int getVersionCode() {
 		return versionNumber;
 	}
 	/**

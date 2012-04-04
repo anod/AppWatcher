@@ -23,8 +23,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockListFragment;
-import com.anod.appwatcher.client.TokenHelper;
-import com.anod.appwatcher.client.TokenHelper.CallBack;
+import com.anod.appwatcher.accounts.MarketTokenHelper;
+import com.anod.appwatcher.accounts.MarketTokenHelper.CallBack;
 import com.anod.appwatcher.market.MarketSessionHelper;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListCursor;
@@ -84,7 +84,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 
 
 	private class ListCursorAdapter extends CursorAdapter {
-        private static final String URL_PLAY_STORE = "https://play.google.com/store/apps/details?id=%s";
+        private static final String URL_PLAY_STORE = "market://details?id=%s";
 		private LayoutInflater mInflater;
         private Bitmap mDefaultIcon;
 
@@ -152,7 +152,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 				@Override
 				public void onClick(View v) {
 					final String appId = (String)v.getTag();
-		        	TokenHelper helper = new TokenHelper(getActivity(), new CallBack() {
+		        	MarketTokenHelper helper = new MarketTokenHelper(getActivity(), true, new CallBack() {
 						@Override
 						public void onTokenReceive(String authToken) {
 				        	if (authToken == null) {

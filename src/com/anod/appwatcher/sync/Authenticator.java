@@ -14,8 +14,7 @@ public class Authenticator extends AbstractAccountAuthenticator {
     private static final String ACCOUNT_TOKEN = "com.anod.appwatcher.account.token";
 	private static final String ACCOUNT_TYPE = "com.anod.appwatcher.account";
 	private static final String TAG = "Authenticator";	
-    // Authentication Service context
-    private final Context mContext;
+
     private AccountManager mAccountManager;
     
     
@@ -25,7 +24,6 @@ public class Authenticator extends AbstractAccountAuthenticator {
     
 	public Authenticator(Context context) {
 		super(context);
-        mContext = context;
         mAccountManager = AccountManager.get(context);        
 	}
 

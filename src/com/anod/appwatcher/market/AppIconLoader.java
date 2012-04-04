@@ -31,6 +31,9 @@ public class AppIconLoader extends ImageLoader {
         }
 	}
 	
+	public Bitmap loadImageUncached(String imgUID) {
+		return loadBitmap(imgUID);
+	}
 	
 	@Override
 	protected Bitmap loadBitmap(String imgUID) {

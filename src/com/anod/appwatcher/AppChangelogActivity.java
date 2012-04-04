@@ -8,7 +8,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockActivity;
-import com.anod.appwatcher.market.AppExtendedInfoLoader;
+import com.anod.appwatcher.market.AppLoader;
 import com.anod.appwatcher.market.MarketSessionHelper;
 import com.gc.android.market.api.MarketSession;
 import com.gc.android.market.api.model.Market.App;
@@ -16,7 +16,7 @@ import com.gc.android.market.api.model.Market.App;
 public class AppChangelogActivity extends SherlockActivity {
 
 	public static final String EXTRA_APP_ID = "app_id";
-	private AppExtendedInfoLoader mLoader;
+	private AppLoader mLoader;
 	private ProgressBar mLoadingView;
 	private TextView mChangelog;
 
@@ -38,7 +38,7 @@ public class AppChangelogActivity extends SherlockActivity {
         MarketSessionHelper helper = new MarketSessionHelper(this);
         final MarketSession session = helper.create(deviceId, authSubToken);
         
-        mLoader = new AppExtendedInfoLoader(session, appId);
+        mLoader = new AppLoader(session, true);
 		
         mLoadingView = (ProgressBar)findViewById(R.id.progress_bar);
         mChangelog = (TextView)findViewById(R.id.changelog);
@@ -48,8 +48,8 @@ public class AppChangelogActivity extends SherlockActivity {
 
 	
     class RetreiveResultsTask extends AsyncTask<String, Void, App> {
-        protected App doInBackground(String... queries) {
-        	return mLoader.load();
+        protected App doInBackground(String... appsId) {
+        	return mLoader.load(appsId[0]);
         }
         
         @Override
