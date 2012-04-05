@@ -70,7 +70,8 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
         
         // Prepare the loader.  Either re-connect with an existing one,
         // or start a new one.
-        getLoaderManager().initLoader(0, null, this); 
+        getLoaderManager().initLoader(0, null, this);
+        
     }
 
     

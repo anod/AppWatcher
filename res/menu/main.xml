@@ -3,13 +3,13 @@
 
     <item
         android:id="@+id/menu_add"
-        android:showAsAction="always|collapseActionView"
+        android:showAsAction="always"
         android:title="@string/menu_add"
         android:icon="@drawable/ic_action_add">
     </item>
     <item
         android:id="@+id/menu_refresh"
-        android:showAsAction="always|collapseActionView"
+        android:showAsAction="always"
         android:title="@string/menu_refresh"
         android:icon="@drawable/ic_action_refresh">
     </item>
