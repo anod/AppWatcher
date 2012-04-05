@@ -15,7 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -33,16 +33,18 @@ import com.anod.appwatcher.model.AppListTable;
 public class AppWatcherListFragment extends SherlockListFragment implements LoaderManager.LoaderCallbacks<Cursor>{
     private CursorAdapter mAdapter;
 	class ViewHolder {
+		int rowId;
 		String appId;
 		TextView title;
 		TextView details;
 		ImageView icon;
 		LinearLayout newIndicator;
 		LinearLayout options;
-		Button removeBtn;
-		Button marketBtn;
-		Button changelogBtn;
+		ImageButton removeBtn;
+		ImageButton marketBtn;
+		ImageButton changelogBtn;
 	}
+	private ViewHolder mSelectedHolder = null;
 	
 	/** Called when the activity is first created. */
     @Override
@@ -60,6 +62,9 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
         mAdapter = new ListCursorAdapter(getActivity(), null, 0);
         setListAdapter(mAdapter);
 
+        getListView().setItemsCanFocus(true);
+        getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        
         // Start out with a progress indicator.
         setListShown(false);        
         
@@ -75,12 +80,23 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		ViewHolder holder = (ViewHolder)v.getTag();
-		if (holder.options.getVisibility() == View.VISIBLE) {
-			holder.options.setVisibility(View.GONE);
-		} else {
-			holder.options.setVisibility(View.VISIBLE);
+		if (mSelectedHolder == null) {
+			mSelectedHolder = holder;
+			mSelectedHolder.options.setVisibility(View.VISIBLE);
+			return;
 		}
-		
+		if (mSelectedHolder.rowId == holder.rowId) {
+			if (holder.options.getVisibility() == View.VISIBLE) {
+				holder.options.setVisibility(View.GONE);
+				mSelectedHolder = null;
+			} else {
+				holder.options.setVisibility(View.VISIBLE);
+			}
+		} else {
+			mSelectedHolder.options.setVisibility(View.GONE);
+			mSelectedHolder = holder;
+			mSelectedHolder.options.setVisibility(View.VISIBLE);
+		}
 	}
 
 
@@ -99,6 +115,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 			AppListCursor wrapper = new AppListCursor(cursor);
 			AppInfo app = wrapper.getAppInfo();
 			ViewHolder holder = (ViewHolder)view.getTag();
+			holder.rowId = app.getRowId();		
             holder.title.setText(app.getTitle()+" "+app.getVersionName());
             holder.details.setText(app.getCreator());
 			holder.removeBtn.setTag(app.getRowId());
@@ -123,6 +140,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 		public View newView(Context context, Cursor cursor, ViewGroup parent) {
 			View v = mInflater.inflate(R.layout.list_row, parent, false);
 			ViewHolder holder = new ViewHolder();
+			holder.rowId = -1;
             holder.title = (TextView)v.findViewById(R.id.title);
             holder.details = (TextView)v.findViewById(R.id.details);
             holder.icon = (ImageView)v.findViewById(R.id.icon);            
@@ -131,7 +149,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
             holder.options.setVisibility(View.GONE);
             v.setTag(holder);
             
-            holder.removeBtn = (Button)holder.options.findViewById(R.id.remove_btn);
+            holder.removeBtn = (ImageButton)holder.options.findViewById(R.id.remove_btn);
             holder.removeBtn.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
@@ -141,7 +159,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 				}
 			});
 
-            holder.marketBtn = (Button)holder.options.findViewById(R.id.market_btn);
+            holder.marketBtn = (ImageButton)holder.options.findViewById(R.id.market_btn);
             holder.marketBtn.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
@@ -154,7 +172,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 				}
 			});
 
-            holder.changelogBtn = (Button)holder.options.findViewById(R.id.changelog_btn);
+            holder.changelogBtn = (ImageButton)holder.options.findViewById(R.id.changelog_btn);
             holder.changelogBtn.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {

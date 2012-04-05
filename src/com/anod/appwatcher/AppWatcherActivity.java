@@ -17,7 +17,6 @@ import com.anod.appwatcher.sync.Authenticator;
 public class AppWatcherActivity extends SherlockFragmentActivity {
 	protected String mAuthToken;
 	private AppWatcherActivity mContext;
-	private Preferences mPrefences;
 
 	/* (non-Javadoc)
 	 * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
@@ -28,13 +27,19 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
         setContentView(R.layout.main);
         mContext = this;
         
-        ContentResolver.setSyncAutomatically(Authenticator.getAccount(), AppListContentProvider.AUTHORITY, true);
+        setSync();
 	}
     
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getSupportMenuInflater().inflate(R.menu.main, menu);       
         return true;
+    }
+    
+    private void setSync() {
+    	ContentResolver.setIsSyncable(Authenticator.getAccount(), AppListContentProvider.AUTHORITY, 1);
+//TODO
+        ContentResolver.setSyncAutomatically(Authenticator.getAccount(), AppListContentProvider.AUTHORITY, true);
     }
     
     @Override

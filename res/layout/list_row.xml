@@ -17,7 +17,7 @@
 	    	android:layout_height="match_parent"
 	    	android:gravity="center_vertical"
 	    	android:orientation="horizontal"
-	    	android:background="@color/blue_shadow" >
+	    	android:background="@color/blue_new" >
 	    </LinearLayout>
 	    
 	    <ImageView
@@ -49,56 +49,55 @@
 		        android:textAppearance="?android:attr/textAppearanceSmall" />
 		</LinearLayout>
 	</LinearLayout>
-
+
 	<LinearLayout
 	    android:id="@+id/options"
 	    android:layout_width="match_parent"
 	    android:layout_height="match_parent"
-	    android:gravity="center_vertical"
-	    android:orientation="horizontal"
-	    >
+	    android:gravity="center_horizontal|center_vertical"
+	    android:orientation="horizontal" >
 
-		<Button
+		<ImageButton
 		    android:id="@+id/changelog_btn"
 		    style="?android:attr/buttonStyleSmall"
-		    android:layout_width="0dp"
+		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
-		    android:drawableLeft="@drawable/ic_whatsnew"
-		    android:focusable="false"
-		    android:shadowColor="@color/blue_shadow"
-		    android:shadowDx="0.0"
-		    android:shadowDy="0.0"
-		    android:shadowRadius="8"
-		    android:text="@string/whats_new" 
-		    android:layout_weight="1" />
-
-	    <Button
+		    android:src="@drawable/ic_about"
+		    android:background="@android:color/transparent"
+		    android:contentDescription="@string/whats_new"
+		    />
+	    <View
+	        android:layout_width="1dp"
+	        android:layout_height="match_parent"
+	        android:layout_marginTop="5dip"
+	        android:layout_marginBottom="5dip"
+		    android:background="@drawable/divider_vertical_dark" 
+	    />
+	    
+	    <ImageButton
 	        android:id="@+id/market_btn"
 	        style="?android:attr/buttonStyleSmall"
-	        android:layout_width="0dp"
+	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
-	        android:drawableLeft="@drawable/ic_play_store"
-	        android:focusable="false"
-	        android:shadowColor="@color/blue_shadow"
-	        android:shadowRadius="8"
-	        android:shadowDx="0.0"
-	       	android:shadowDy="0.0"
-	        android:text="@string/play_store"
-	        android:layout_weight="1"  />
+	        android:src="@drawable/ic_play_store"
+		    android:background="@android:color/transparent"
+	        android:contentDescription="@string/play_store" />
 
-	    <Button
+	    <View
+	        android:layout_width="1dp"
+	        android:layout_height="match_parent"
+	        android:layout_marginTop="5dip"
+	        android:layout_marginBottom="5dip"
+		    android:background="@drawable/divider_vertical_dark" 
+	    />	    
+	    <ImageButton
 	        android:id="@+id/remove_btn"
 	        style="?android:attr/buttonStyleSmall"
-	        android:layout_width="0dp"
-	        android:layout_height="wrap_content"
-		    android:focusable="false"	        
-	        android:drawableLeft="@drawable/ic_remove"
-	        android:shadowColor="@color/blue_shadow"
-	        android:shadowRadius="8"	        
-	        android:shadowDx="0.0"
-	       	android:shadowDy="0.0"	        
-	        android:text="@string/remove"
-	        android:layout_weight="1"  />
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"        
+	        android:src="@drawable/ic_remove"
+		    android:background="@android:color/transparent"
+	        android:contentDescription="@string/remove"  />
 	</LinearLayout>
 			
 </LinearLayout>
