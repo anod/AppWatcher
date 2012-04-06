@@ -72,7 +72,10 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
         		//StopAnimation
         		mRefreshView.clearAnimation();
         		mRefreshMenuItem.setActionView(null);
-        		//int updatesCount = intent.getIntExtra(SyncAdapter.EXTRA_UPDATES_COUNT, 0);
+        		int updatesCount = intent.getIntExtra(SyncAdapter.EXTRA_UPDATES_COUNT, 0);
+        		if (updatesCount == 0) {
+        			Toast.makeText(AppWatcherActivity.this, R.string.no_updates_found, Toast.LENGTH_SHORT).show();
+        		}
         	}
         }
     };

@@ -40,5 +40,11 @@
     <string name="alert_dialog_remove">Remove</string>
     <string name="alert_dialog_cancel">Cancel</string>
     <string name="version">Version %s</string>
-    <string name="update">Updated to %s</string>   
+    <string name="update">Updated to %s</string>
+    <string name="notification_one_updated">%s updated</string>
+    <string name="notification_many_updates">%d updates found</string>
+    <string name="notification_2_apps">%0$s, %1$s</string>
+    <string name="notification_2_apps_more">%0$s, %1$s and more</string>    
+    <string name="notification_click">Click to show</string>
+    <string name="no_updates_found">No updates found.</string>
 </resources>
