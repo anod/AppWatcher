@@ -2,11 +2,14 @@ package com.anod.appwatcher;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -15,7 +18,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -37,14 +42,16 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 		String appId;
 		TextView title;
 		TextView details;
+		TextView version;
 		ImageView icon;
 		LinearLayout newIndicator;
 		LinearLayout options;
-		ImageButton removeBtn;
-		ImageButton marketBtn;
-		ImageButton changelogBtn;
+		Button removeBtn;
+		Button marketBtn;
+		Button changelogBtn;
 	}
 	private ViewHolder mSelectedHolder = null;
+	private Animation mAnimSlideOut;
 	
 	/** Called when the activity is first created. */
     @Override
@@ -68,10 +75,12 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
         // Start out with a progress indicator.
         setListShown(false);        
         
+        mAnimSlideOut = AnimationUtils.loadAnimation(getActivity(), R.anim.slideout);
+        
         // Prepare the loader.  Either re-connect with an existing one,
         // or start a new one.
         getLoaderManager().initLoader(0, null, this);
-        
+
     }
 
     
@@ -83,6 +92,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 		ViewHolder holder = (ViewHolder)v.getTag();
 		if (mSelectedHolder == null) {
 			mSelectedHolder = holder;
+			mSelectedHolder.options.startAnimation(mAnimSlideOut);
 			mSelectedHolder.options.setVisibility(View.VISIBLE);
 			return;
 		}
@@ -96,7 +106,8 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 		} else {
 			mSelectedHolder.options.setVisibility(View.GONE);
 			mSelectedHolder = holder;
-			mSelectedHolder.options.setVisibility(View.VISIBLE);
+			holder.options.startAnimation(mAnimSlideOut);			
+			holder.options.setVisibility(View.VISIBLE);
 		}
 	}
 
@@ -105,10 +116,18 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
         private static final String URL_PLAY_STORE = "market://details?id=%s";
 		private LayoutInflater mInflater;
         private Bitmap mDefaultIcon;
+		private String mVersionText;
+		private String mUpdateText;
+		private int mDefColor;
+		private int mUpdateTextColor;
 
 		public ListCursorAdapter(Context context, Cursor c, int flags) {
 			super(context, c, flags);
-	        mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);			
+	        mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	        Resources r = getResources();
+	        mVersionText = r.getString(R.string.version);
+	        mUpdateText = r.getString(R.string.update);
+	        mUpdateTextColor = r.getColor(R.color.blue_new);
 		}
 
 		@Override
@@ -117,9 +136,9 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 			AppInfo app = wrapper.getAppInfo();
 			ViewHolder holder = (ViewHolder)view.getTag();
 			holder.rowId = app.getRowId();		
-            holder.title.setText(app.getTitle()+" "+app.getVersionName());
+            holder.title.setText(app.getTitle());
             holder.details.setText(app.getCreator());
-			holder.removeBtn.setTag(app.getRowId());
+			holder.removeBtn.setTag(app);
 			holder.marketBtn.setTag(app.getPackageName());
 			holder.changelogBtn.setTag(app.getAppId());
 			Bitmap icon = app.getIcon();
@@ -131,9 +150,16 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
             }
             holder.icon.setImageBitmap(icon);
             if (app.getStatus() == AppInfo.STATUS_UPDATED) {
+                holder.version.setText(String.format(mUpdateText, app.getVersionName()));
+                holder.version.setTextColor(mUpdateTextColor);
             	holder.newIndicator.setVisibility(View.VISIBLE);
             } else {
+                holder.version.setText(String.format(mVersionText, app.getVersionName()));
+                holder.version.setTextColor(mDefColor);
+              
+                //TextView.getTextColors().getDefaultColor()
             	holder.newIndicator.setVisibility(View.INVISIBLE);
+
             }
 		}
 
@@ -144,23 +170,27 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 			holder.rowId = -1;
             holder.title = (TextView)v.findViewById(R.id.title);
             holder.details = (TextView)v.findViewById(R.id.details);
-            holder.icon = (ImageView)v.findViewById(R.id.icon);            
+            holder.icon = (ImageView)v.findViewById(R.id.icon);
+            holder.version = (TextView)v.findViewById(R.id.version);
+            mDefColor = holder.version.getTextColors().getDefaultColor();            
             holder.options = (LinearLayout)v.findViewById(R.id.options);
             holder.newIndicator = (LinearLayout)v.findViewById(R.id.new_indicator);
             holder.options.setVisibility(View.GONE);
             v.setTag(holder);
             
-            holder.removeBtn = (ImageButton)holder.options.findViewById(R.id.remove_btn);
+            holder.removeBtn = (Button)holder.options.findViewById(R.id.remove_btn);
             holder.removeBtn.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					Integer rowId = (Integer)v.getTag();
-					Uri deleteUri = AppListContentProvider.CONTENT_URI.buildUpon().appendPath(String.valueOf(rowId)).build();
-		            getActivity().getContentResolver().delete(deleteUri, null, null);
+					AppInfo app = (AppInfo)v.getTag();
+					DialogFragment removeDialog = RemoveDialogFragment.newInstance(
+						app.getTitle(), app.getRowId()
+					);
+				    removeDialog.show(getFragmentManager(), "dialog");
 				}
 			});
 
-            holder.marketBtn = (ImageButton)holder.options.findViewById(R.id.market_btn);
+            holder.marketBtn = (Button)holder.options.findViewById(R.id.market_btn);
             holder.marketBtn.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
@@ -173,7 +203,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 				}
 			});
 
-            holder.changelogBtn = (ImageButton)holder.options.findViewById(R.id.changelog_btn);
+            holder.changelogBtn = (Button)holder.options.findViewById(R.id.changelog_btn);
             holder.changelogBtn.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
@@ -204,7 +234,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new CursorLoader(getActivity(), AppListContentProvider.CONTENT_URI,
         		AppListTable.APPLIST_PROJECTION, null, null,
-        		AppListTable.Columns.KEY_TITLE + " COLLATE LOCALIZED ASC");
+        		AppListTable.Columns.KEY_STATUS + " DESC, " +AppListTable.Columns.KEY_TITLE + " COLLATE LOCALIZED ASC");
     }
 
 	@Override

@@ -3,21 +3,30 @@
 
     <item
         android:id="@+id/menu_add"
+        android:icon="@drawable/ic_action_add"
         android:showAsAction="always"
-        android:title="@string/menu_add"
-        android:icon="@drawable/ic_action_add">
+        android:title="@string/menu_add">
     </item>
     <item
         android:id="@+id/menu_refresh"
+        android:icon="@drawable/ic_action_refresh"
         android:showAsAction="always"
-        android:title="@string/menu_refresh"
-        android:icon="@drawable/ic_action_refresh">
+        android:title="@string/menu_refresh">
     </item>
-
+    <item
+        android:id="@+id/manu_auto_update"
+        android:checkable="true"
+        android:title="@string/menu_auto_update">
+    </item>
+    <item
+        android:id="@+id/menu_wifi_only"
+        android:checkable="true"
+        android:title="@string/menu_wifi_only">
+    </item>
     <item
         android:id="@+id/menu_device_id"
         android:showAsAction="never|withText"
         android:title="@string/menu_set_device_id">
     </item>
-    
+
 </menu>

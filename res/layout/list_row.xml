@@ -4,100 +4,123 @@
     android:layout_height="wrap_content"
     android:gravity="center_vertical|clip_vertical"
     android:orientation="vertical" >
-        
-	<LinearLayout 
-	    android:layout_width="match_parent"
-	    android:layout_height="match_parent"
-	    android:gravity="center_vertical"
-	    android:orientation="horizontal" >
 
-	    <LinearLayout
-	        android:id="@+id/new_indicator"
-	    	android:layout_width="5dip"
-	    	android:layout_height="match_parent"
-	    	android:gravity="center_vertical"
-	    	android:orientation="horizontal"
-	    	android:background="@color/blue_new" >
-	    </LinearLayout>
-	    
-	    <ImageView
-	        android:id="@+id/icon"
-	        android:layout_width="@dimen/icon_size"
-	        android:layout_height="@dimen/icon_size"
-	        android:layout_margin="4dip"
-	        android:src="@drawable/ic_empty"
-	        android:contentDescription="@string/application_icon" />
-	
-	    <LinearLayout
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content"
-	        android:gravity="center_vertical|clip_vertical"
-	        android:orientation="vertical" >
-	 
-		    <TextView
-		        android:id="@+id/title"
-		        android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        android:text="@string/app_name"
-		        android:textAppearance="?android:attr/textAppearanceMedium" />
-		    
-		    <TextView
-		        android:id="@+id/details"
-		        android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        android:text="@string/app_name"
-		        android:textAppearance="?android:attr/textAppearanceSmall" />
-		</LinearLayout>
-	</LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:orientation="horizontal" >
+
+        <LinearLayout
+            android:id="@+id/new_indicator"
+            android:layout_width="5dip"
+            android:layout_height="match_parent"
+            android:background="@color/blue_new"
+            android:gravity="center_vertical"
+            android:orientation="horizontal" >
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="@dimen/icon_size"
+            android:layout_height="@dimen/icon_size"
+            android:layout_margin="4dip"
+            android:contentDescription="@string/application_icon"
+            android:src="@drawable/ic_empty" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|clip_vertical"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/app_name"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <TextView
+                android:id="@+id/details"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/app_name"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
 
-	<LinearLayout
-	    android:id="@+id/options"
-	    android:layout_width="match_parent"
-	    android:layout_height="match_parent"
-	    android:gravity="center_horizontal|center_vertical"
-	    android:orientation="horizontal" >
-
-		<ImageButton
-		    android:id="@+id/changelog_btn"
-		    style="?android:attr/buttonStyleSmall"
-		    android:layout_width="wrap_content"
-		    android:layout_height="wrap_content"
-		    android:src="@drawable/ic_about"
-		    android:background="@android:color/transparent"
-		    android:contentDescription="@string/whats_new"
-		    />
-	    <View
-	        android:layout_width="1dp"
-	        android:layout_height="match_parent"
-	        android:layout_marginTop="5dip"
-	        android:layout_marginBottom="5dip"
-		    android:background="@drawable/divider_vertical_dark" 
-	    />
-	    
-	    <ImageButton
-	        android:id="@+id/market_btn"
-	        style="?android:attr/buttonStyleSmall"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:src="@drawable/ic_play_store"
-		    android:background="@android:color/transparent"
-	        android:contentDescription="@string/play_store" />
+            <TextView
+                android:id="@+id/version"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/app_name"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+            />
 
-	    <View
-	        android:layout_width="1dp"
-	        android:layout_height="match_parent"
-	        android:layout_marginTop="5dip"
-	        android:layout_marginBottom="5dip"
-		    android:background="@drawable/divider_vertical_dark" 
-	    />	    
-	    <ImageButton
-	        android:id="@+id/remove_btn"
-	        style="?android:attr/buttonStyleSmall"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"        
-	        android:src="@drawable/ic_remove"
-		    android:background="@android:color/transparent"
-	        android:contentDescription="@string/remove"  />
-	</LinearLayout>
-			
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/options"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal|center_vertical"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/changelog_btn"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="4dp"
+            android:layout_weight="1"
+            android:background="@drawable/app_act_button"
+            android:contentDescription="@string/whats_new"
+            android:drawableLeft="@drawable/ic_about"
+            android:focusable="false"
+            android:text="@string/whats_new" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="5dip"
+            android:layout_marginTop="5dip"
+            android:background="@drawable/divider_vertical_dark" />
+
+        <Button
+            android:id="@+id/market_btn"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="4dp"
+            android:layout_weight="1"
+            android:background="@drawable/app_act_button"
+            android:contentDescription="@string/play_store"
+            android:drawableLeft="@drawable/ic_play_store"
+            android:focusable="false"
+            android:text="@string/play_store" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="5dip"
+            android:layout_marginTop="5dip"
+            android:background="@drawable/divider_vertical_dark" />
+
+        <Button
+            android:id="@+id/remove_btn"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="4dp"
+            android:layout_weight="1"
+            android:background="@drawable/app_act_button"
+            android:contentDescription="@string/remove"
+            android:drawableLeft="@drawable/ic_remove"
+            android:focusable="false"
+            android:text="@string/remove" />
+    </LinearLayout>
+
 </LinearLayout>
