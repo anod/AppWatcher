@@ -2,7 +2,6 @@ package com.anod.appwatcher;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -134,6 +133,10 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 		public void bindView(View view, Context context, Cursor cursor) {
 			AppListCursor wrapper = new AppListCursor(cursor);
 			AppInfo app = wrapper.getAppInfo();
+			boolean hide = false;
+            if (mSelectedHolder != null && mSelectedHolder.rowId != app.getRowId()) {
+            	hide = true;
+            }			
 			ViewHolder holder = (ViewHolder)view.getTag();
 			holder.rowId = app.getRowId();		
             holder.title.setText(app.getTitle());
@@ -147,6 +150,9 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 	           		mDefaultIcon = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_empty);
 	           	}
 	           	icon = mDefaultIcon;
+            }
+            if (hide) {
+            	holder.options.setVisibility(View.GONE);
             }
             holder.icon.setImageBitmap(icon);
             if (app.getStatus() == AppInfo.STATUS_UPDATED) {

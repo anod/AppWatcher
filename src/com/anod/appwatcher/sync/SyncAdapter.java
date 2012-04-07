@@ -19,7 +19,6 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
-import android.util.Log;
 
 import com.anod.appwatcher.AppListContentProvider;
 import com.anod.appwatcher.AppWatcherActivity;
@@ -33,6 +32,7 @@ import com.anod.appwatcher.market.MarketSessionHelper;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListCursor;
 import com.anod.appwatcher.model.AppListTable;
+import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.BitmapUtils;
 import com.gc.android.market.api.MarketSession;
 import com.gc.android.market.api.model.Market.App;
@@ -59,48 +59,76 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 		mContext.sendBroadcast(startIntent);
 		
 		Intent finishIntent = new Intent(SYNC_STOP);
-		ArrayList<String> updatedTitles = new ArrayList<String>();
+		ArrayList<String> updatedTitles = null;
 		try {
-			Preferences pref = new Preferences(mContext);
-			MarketSession session = createAppInfoLoader(pref);
-			AppIconLoader iconLoader = new AppIconLoader(session);
-			AppLoader loader = new AppLoader(session, false);
-			
-			AppListCursor apps = loadApps(provider); 
-			if (apps!=null && apps.moveToFirst()) {
-				apps.moveToPosition(-1);
-				
-				while(apps.moveToNext()) {
-					AppInfo localApp = apps.getAppInfo();
-					Log.v("AppWatcher", "Checking for updates '"+localApp.getTitle()+"' ...");
-					App marketApp = loader.load(localApp.getAppId());
-					if (marketApp == null) {
-						Log.e("AppWatcher", "Cannot retrieve information about application");
-						continue;
-					}
-					if (marketApp.getVersionCode() > localApp.getVersionCode()) {
-						Log.v("AppWatcher", "New version found ["+marketApp.getVersionCode()+"]");
-						Bitmap icon = iconLoader.loadImageUncached(marketApp.getId());
-						ContentValues values = createContentValues(marketApp, icon);
-						Uri updateUri = AppListContentProvider.CONTENT_URI.buildUpon().appendPath(String.valueOf(localApp.getRowId())).build();
-			            provider.update(updateUri, values, null, null);
-			            updatedTitles.add(marketApp.getTitle());
-					} else {
-						Log.v("AppWatcher", "No update found.");
-					}
-				}
-			}
+			updatedTitles = doSync(provider);
 		} catch (RemoteException e) {
 			
-			
 		}
-		finishIntent.putExtra(EXTRA_UPDATES_COUNT, updatedTitles.size());
+		int size = (updatedTitles!=null) ? updatedTitles.size() : 0;
+		finishIntent.putExtra(EXTRA_UPDATES_COUNT, size);
 		mContext.sendBroadcast(finishIntent);
-		if (updatedTitles.size() > 0) {
+		if (size > 0) {
 			showNotification(updatedTitles);
 		}
-		Log.v("AppWatcher", "Finish::onPerformSync()");
+		AppLog.d("Finish::onPerformSync()");
 	
+	}
+
+	/**
+	 * @param provider
+	 * @param updatedTitles
+	 * @throws RemoteException
+	 */
+	private ArrayList<String> doSync(ContentProviderClient provider ) throws RemoteException {
+		ArrayList<String> updatedTitles = new ArrayList<String>();
+		Preferences pref = new Preferences(mContext);
+		MarketSession session = createAppInfoLoader(pref);
+		AppIconLoader iconLoader = new AppIconLoader(session);
+		AppLoader loader = new AppLoader(session, false);
+		
+		AppListCursor apps = loadApps(provider); 
+		if (apps==null || apps.moveToFirst() == false) {
+			return updatedTitles;
+		}
+		apps.moveToPosition(-1);
+			
+		while(apps.moveToNext()) {
+			AppInfo localApp = apps.getAppInfo();
+			AppLog.d("Checking for updates '"+localApp.getTitle()+"' ...");
+			App marketApp = loader.load(localApp.getAppId());
+			if (marketApp == null) {
+				AppLog.e("Cannot retrieve information about application");
+				continue;
+			}
+			if (marketApp.getVersionCode() > localApp.getVersionCode()) {
+				AppLog.d("New version found ["+marketApp.getVersionCode()+"]");
+				Bitmap icon = iconLoader.loadImageUncached(marketApp.getId());
+				ContentValues values = createContentValues(marketApp, icon);
+				updateApp(provider, localApp.getRowId(), values);
+	            updatedTitles.add(marketApp.getTitle());
+			} else {
+				AppLog.d("No update found.");
+				if (localApp.getStatus() == AppInfo.STATUS_UPDATED) {
+					AppLog.d("Mark application as old");
+					ContentValues values = new ContentValues();
+					values.put(AppListTable.Columns.KEY_STATUS, AppInfo.STATUS_NORMAL );
+					updateApp(provider, localApp.getRowId(), values);							
+				}
+			}
+		}
+		return updatedTitles;
+	}
+
+	/**
+	 * @param provider
+	 * @param localApp
+	 * @param values
+	 * @throws RemoteException
+	 */
+	private void updateApp(ContentProviderClient provider, int rowId, ContentValues values) throws RemoteException {
+		Uri updateUri = AppListContentProvider.CONTENT_URI.buildUpon().appendPath(String.valueOf(rowId)).build();
+		provider.update(updateUri, values, null, null);
 	}
 
     private ContentValues createContentValues(App app, Bitmap icon) {
@@ -139,27 +167,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 		Intent notificationIntent = new Intent(mContext, AppWatcherActivity.class);
 		PendingIntent contentIntent = PendingIntent.getActivity(mContext, 0, notificationIntent, 0);
 		
-		String title;
-		String text;
-		int count = updatedTitles.size();
-		if (count > 1) {
-			title = mContext.getString(R.string.notification_one_updated, updatedTitles.get(0));
-			text = mContext.getString(R.string.notification_click);
-		} else {
-			title = mContext.getString(R.string.notification_many_updates, count);
-			if (count > 2) {
-				text = mContext.getString(
-					R.string.notification_2_apps_more,
-					updatedTitles.get(0),
-					updatedTitles.get(1)						
-				);
-			} else { 
-				text = mContext.getString(R.string.notification_2_apps,
-					updatedTitles.get(0),
-					updatedTitles.get(1)						
-				);				
-			}
-		}
+		String title = renderNotificationTitle(updatedTitles);
+		String text = renderNotificationText(updatedTitles);
 		
 		Builder builder = new NotificationCompat.Builder(mContext);	
 		Notification notification = builder
@@ -173,6 +182,44 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
 		NotificationManager mNotificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
 		mNotificationManager.notify(NOTIFICATION_ID, notification);
+	}
+
+	/**
+	 * @param updatedTitles
+	 * @return
+	 */
+	private String renderNotificationText(ArrayList<String> updatedTitles) {
+		int count = updatedTitles.size();
+		if (count == 1) {
+			return mContext.getString(R.string.notification_click);
+		}
+		if (count > 2) {
+			return mContext.getString(
+				R.string.notification_2_apps_more,
+				updatedTitles.get(0),
+				updatedTitles.get(1)						
+			);
+		} 
+		return mContext.getString(R.string.notification_2_apps,
+			updatedTitles.get(0),
+			updatedTitles.get(1)						
+		);				
+	}
+
+	/**
+	 * @param updatedTitles
+	 * @param count
+	 * @return
+	 */
+	private String renderNotificationTitle(ArrayList<String> updatedTitles) {
+		String title;
+		int count = updatedTitles.size();
+		if (count == 1) {
+			title = mContext.getString(R.string.notification_one_updated, updatedTitles.get(0));
+		} else {
+			title = mContext.getString(R.string.notification_many_updates, count);
+		}
+		return title;
 	}
 	
 	/**

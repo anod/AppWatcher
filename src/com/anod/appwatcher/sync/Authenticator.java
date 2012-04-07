@@ -7,13 +7,13 @@ import android.accounts.AccountManager;
 import android.accounts.NetworkErrorException;
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
+
+import com.anod.appwatcher.utils.AppLog;
 
 public class Authenticator extends AbstractAccountAuthenticator {
 	private static final String ACCOUNT_NAME = "AppWatcherAccount";	
     private static final String ACCOUNT_TOKEN = "com.anod.appwatcher.account.token";
 	private static final String ACCOUNT_TYPE = "com.anod.appwatcher.account";
-	private static final String TAG = "Authenticator";	
 
     private AccountManager mAccountManager;
     
@@ -52,7 +52,7 @@ public class Authenticator extends AbstractAccountAuthenticator {
 	public Bundle confirmCredentials(AccountAuthenticatorResponse response,
 			Account account, Bundle options) throws NetworkErrorException {
         final Bundle bundle = new Bundle();
-        Log.v(TAG, "confirmCredentials() " + account.toString());        
+        AppLog.d("confirmCredentials() " + account.toString());        
         bundle.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, true);
 		return bundle;
 	}
@@ -67,7 +67,7 @@ public class Authenticator extends AbstractAccountAuthenticator {
 	public Bundle getAuthToken(AccountAuthenticatorResponse response,
 			Account account, String authTokenType, Bundle options)
 			throws NetworkErrorException {
-		Log.v(TAG, "getAuthToken()");
+		AppLog.d("getAuthToken()");
         final Bundle result = new Bundle();
         result.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
         result.putString(AccountManager.KEY_ACCOUNT_TYPE, ACCOUNT_TYPE);
@@ -78,7 +78,7 @@ public class Authenticator extends AbstractAccountAuthenticator {
 	@Override
 	public String getAuthTokenLabel(String authTokenType) {
         // null means we don't support multiple authToken types
-        Log.v(TAG, "getAuthTokenLabel()");
+		AppLog.d("getAuthTokenLabel()");
 		return null;
 	}
 
@@ -88,7 +88,7 @@ public class Authenticator extends AbstractAccountAuthenticator {
         // This call is used to query whether the Authenticator supports
         // specific features. We don't expect to get called, so we always
         // return false (no) for any queries.
-        Log.v(TAG, "hasFeatures()");
+		AppLog.d("hasFeatures()");
         final Bundle result = new Bundle();
         result.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, false);
         return result;
@@ -98,7 +98,7 @@ public class Authenticator extends AbstractAccountAuthenticator {
 	public Bundle updateCredentials(AccountAuthenticatorResponse response,
 			Account account, String authTokenType, Bundle options)
 			throws NetworkErrorException {
-        Log.v(TAG, "updateCredentials()");
+		AppLog.d("updateCredentials()");
         return null;
 	}
 
