@@ -17,7 +17,7 @@ public class DeviceIdHelper {
 		if (deviceId != null) {
 			return deviceId;
 		}
-		ContentResolver cr = context.getContentResolver();
+		ContentResolver cr = context.getApplicationContext().getContentResolver();
 
 		deviceId = loadDeviceId(cr);
 		if (deviceId == null) {
