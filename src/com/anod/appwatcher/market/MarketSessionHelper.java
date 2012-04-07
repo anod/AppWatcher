@@ -2,7 +2,6 @@ package com.anod.appwatcher.market;
 
 import android.content.Context;
 import android.os.Build;
-import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
 
 import com.gc.android.market.api.MarketSession;
@@ -31,20 +30,15 @@ public class MarketSessionHelper {
 		
 		String deviceAndSdkVersion = Build.PRODUCT + ":" + Build.VERSION.SDK_INT;
 		session.getContext().setDeviceAndSdkVersion(deviceAndSdkVersion);
-		
-		if (deviceId == null) {
-			deviceId = Secure.getString(mContext.getApplicationContext().getContentResolver(), Secure.ANDROID_ID);
-		}
 		session.getContext().setAndroidId(deviceId);
 		
 		if (authSubToken !=null) {
 			session.setAuthSubToken(authSubToken);
-		} else {
-			
 		}
 		
 		return session;
 	}
 	
-	
+
+
 }

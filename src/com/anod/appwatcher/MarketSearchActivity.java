@@ -38,6 +38,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.anod.appwatcher.market.AppIconLoader;
 import com.anod.appwatcher.market.AppsResponseLoader;
+import com.anod.appwatcher.market.DeviceIdHelper;
 import com.anod.appwatcher.market.MarketSessionHelper;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListTable;
@@ -68,7 +69,7 @@ public class MarketSearchActivity extends SherlockListActivity {
 		mLoading.setVisibility(View.GONE);
 		
 		final Preferences prefs = new Preferences(this);
-		String deviceId = prefs.getDeviceId();
+		String deviceId = DeviceIdHelper.getDeviceId(this,prefs);
 		initDeviceIdMessage(prefs);		
 		MarketSessionHelper helper = new MarketSessionHelper(mContext);
 		mMarketSession = helper.create(deviceId, null);
