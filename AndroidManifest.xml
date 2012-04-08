@@ -20,6 +20,8 @@
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"></uses-permission>
     
 	<uses-permission android:name="android.permission.INTERNET"></uses-permission>
+	<!-- for checkin Wi-Fi -->
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     
     <application
         android:icon="@drawable/ic_launcher"
