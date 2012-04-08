@@ -16,7 +16,9 @@
     <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
     <uses-permission android:name="android.permission.READ_SYNC_STATS" />
-	
+	<!-- for device id -->
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"></uses-permission>
+    
 	<uses-permission android:name="android.permission.INTERNET"></uses-permission>
     
     <application

@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.anod.appwatcher.market.AppLoader;
+import com.anod.appwatcher.market.DeviceIdHelper;
 import com.anod.appwatcher.market.MarketSessionHelper;
 import com.gc.android.market.api.MarketSession;
 import com.gc.android.market.api.model.Market.App;
@@ -33,7 +34,7 @@ public class AppChangelogActivity extends SherlockActivity {
 		String appId = data.getStringExtra(EXTRA_APP_ID);
         String authSubToken = data.getStringExtra(MarketSessionHelper.EXTRA_TOKEN);
         final Preferences prefs = new Preferences(this);
-        String deviceId = prefs.getDeviceId();
+        String deviceId = DeviceIdHelper.getDeviceId(this, prefs);
         
         MarketSessionHelper helper = new MarketSessionHelper(this);
         final MarketSession session = helper.create(deviceId, authSubToken);

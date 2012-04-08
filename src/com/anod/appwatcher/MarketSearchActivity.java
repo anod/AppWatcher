@@ -106,7 +106,7 @@ public class MarketSearchActivity extends SherlockListActivity {
 		mDeviceIdMessage = (RelativeLayout)findViewById(R.id.device_id_message);
 		mDeviceIdMessage.setVisibility(View.GONE);
 		
-		if (prefs.isDeviceIdMessageEnabled() == false) {
+		if (prefs.getDeviceId() == null || prefs.isDeviceIdMessageEnabled() == false) {
 			mDeviceIdMessage = null;
 			return;
 		}

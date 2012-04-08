@@ -36,7 +36,7 @@ public class DeviceIdHelper {
 		}
 		String str = null;
 		try {
-		    str = Long.toHexString(Long.parseLong(cursor.getString(0)));
+		    str = Long.toHexString(Long.parseLong(cursor.getString(1)));
 		} catch (NumberFormatException localNumberFormatException) {
 			
 		}
