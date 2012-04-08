@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 public class Preferences {
+	private static final String FIRST_TIME = "first_time";
 	private static final String WIFI_ONLY = "wifi_only";
 	private static final String AUTO_SYNC = "auto_sync";
 	private static final String DEVICE_ID = "device_id";
@@ -29,6 +30,10 @@ public class Preferences {
 	
 	public String getDeviceId() {
 		return mSettings.getString(DEVICE_ID, null);
+	}
+	
+	public boolean isFirstTime() {
+		return mSettings.getBoolean(FIRST_TIME, true);
 	}
 	
 	public boolean isAutoSync() {
@@ -58,6 +63,12 @@ public class Preferences {
 	public void saveWifiOnly(boolean useWifiOnly) {
 		SharedPreferences.Editor editor = mSettings.edit();
 		editor.putBoolean(WIFI_ONLY, useWifiOnly);
+		editor.commit();
+	}
+	
+	public void saveFirstTime(boolean firstTime) {
+		SharedPreferences.Editor editor = mSettings.edit();
+		editor.putBoolean(FIRST_TIME, firstTime);
 		editor.commit();
 	}	
 }

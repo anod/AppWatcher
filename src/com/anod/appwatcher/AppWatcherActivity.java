@@ -1,5 +1,6 @@
 package com.anod.appwatcher;
 
+import android.accounts.Account;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -51,7 +52,7 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
 	    LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	    mRefreshView = (ImageView) inflater.inflate(R.layout.refresh_action_view, null);
 	    mPreferences = new Preferences(this);
-	    
+	    	    
         setSync();
 	}
     
@@ -72,13 +73,23 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
     }
     
     private void setSync() {
-    	if (mPreferences.isAutoSync()) { 
-    		ContentResolver.setIsSyncable(Authenticator.getAccount(), AppListContentProvider.AUTHORITY, 1);
-    		long pollFrequency = (mPreferences.isWifiOnly()) ?  THREE_HOURS_IN_SEC : EIGHT_HOURS_IN_SEC;
-    		ContentResolver.addPeriodicSync(Authenticator.getAccount(), AppListContentProvider.AUTHORITY, new Bundle(), pollFrequency);
-    	} else {
-    		ContentResolver.setIsSyncable(Authenticator.getAccount(), AppListContentProvider.AUTHORITY, 0);
+    	Account account = Authenticator.getAccount();
+    	Bundle params = new Bundle();
+    	
+    	//initialize for 1st time
+    	if (ContentResolver.getIsSyncable(account, AppListContentProvider.AUTHORITY) < 0) {
+    		ContentResolver.setIsSyncable(account, AppListContentProvider.AUTHORITY, 1);
     	}
+    	
+    	if (mPreferences.isAutoSync()) { 
+    		long pollFrequency = (mPreferences.isWifiOnly()) ?  THREE_HOURS_IN_SEC : EIGHT_HOURS_IN_SEC;
+    		ContentResolver.setSyncAutomatically(account, AppListContentProvider.AUTHORITY, true);
+    		ContentResolver.addPeriodicSync(Authenticator.getAccount(), AppListContentProvider.AUTHORITY, params, pollFrequency);
+    	} else {
+    		ContentResolver.removePeriodicSync(account, AppListContentProvider.AUTHORITY, params);
+    		ContentResolver.setSyncAutomatically(account, AppListContentProvider.AUTHORITY, false);   		
+    	}
+    	
     }
     
     private BroadcastReceiver mSyncFinishedReceiver = new BroadcastReceiver() {
@@ -137,10 +148,7 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
         case R.id.menu_refresh:
         	Log.d("AppWatcher", "Refresh pressed");
             Bundle params = new Bundle();
-            params.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, false);
-            params.putBoolean(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY, false);
-            params.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-            
+            params.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);            
         	ContentResolver.requestSync(Authenticator.getAccount(), AppListContentProvider.AUTHORITY, params);
         	return true;       
         case R.id.menu_device_id:

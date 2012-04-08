@@ -8,6 +8,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -60,11 +61,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
 		Preferences pref = new Preferences(mContext);
 		
-		if (pref.isWifiOnly() && !isWifiEnabled()) {
-			AppLog.d("Wifi not enabled, skipping update check....");
-			return;
+		if (extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, false) == false) {
+			if (pref.isWifiOnly() && !isWifiEnabled()) {
+				AppLog.d("Wifi not enabled, skipping update check....");
+				return;
+			}
 		}
-
 		
 		Intent startIntent = new Intent(SYNC_PROGRESS);
 		mContext.sendBroadcast(startIntent);
