@@ -26,7 +26,9 @@
     <application
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:name=".AppWatcherApplication" >
+        android:name=".AppWatcherApplication" 
+        android:backupAgent=".backup.BackupFileHelperAgent"
+       >
 
         <activity
             android:name=".AppChangelogActivity"
@@ -80,6 +82,9 @@
 			<meta-data android:name="android.content.SyncAdapter"
 				android:resource="@xml/syncadapter" />
 		</service>
+		
+		<meta-data android:name="com.google.android.backup.api_key"
+    		android:value="AEdPqrEAAAAIWapJJclZH281aXWN3VunYCHInRkwJag2VkVSIw" />
     </application>
 
 </manifest>
