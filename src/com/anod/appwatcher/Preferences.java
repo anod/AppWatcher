@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 public class Preferences {
+	private static final String WIFI_ONLY = "wifi_only";
+	private static final String AUTO_SYNC = "auto_sync";
 	private static final String DEVICE_ID = "device_id";
 	private static final String DEVICE_ID_MESSAGE = "device_id_message";
 	
@@ -29,6 +31,14 @@ public class Preferences {
 		return mSettings.getString(DEVICE_ID, null);
 	}
 	
+	public boolean isAutoSync() {
+		return mSettings.getBoolean(AUTO_SYNC, true);
+	}
+	
+	public boolean isWifiOnly() {
+		return mSettings.getBoolean(WIFI_ONLY, false);
+	}
+	
 	public void saveDeviceId(String deviceId) {
 		SharedPreferences.Editor editor = mSettings.edit();
 		if (deviceId == null || deviceId.length() == 0 ) {
@@ -37,5 +47,17 @@ public class Preferences {
 			editor.putString(DEVICE_ID, deviceId);
 		}
 		editor.commit();		
+	}
+	
+	public void saveAutoSync(boolean useAutoSync) {
+		SharedPreferences.Editor editor = mSettings.edit();
+		editor.putBoolean(AUTO_SYNC, useAutoSync);
+		editor.commit();
+	}
+	
+	public void saveWifiOnly(boolean useWifiOnly) {
+		SharedPreferences.Editor editor = mSettings.edit();
+		editor.putBoolean(WIFI_ONLY, useWifiOnly);
+		editor.commit();
 	}	
 }

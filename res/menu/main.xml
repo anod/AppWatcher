@@ -14,7 +14,7 @@
         android:title="@string/menu_refresh">
     </item>
     <item
-        android:id="@+id/manu_auto_update"
+        android:id="@+id/menu_auto_update"
         android:checkable="true"
         android:title="@string/menu_auto_update">
     </item>

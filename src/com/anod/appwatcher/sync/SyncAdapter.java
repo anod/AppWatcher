@@ -14,6 +14,8 @@ import android.content.Intent;
 import android.content.SyncResult;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -56,13 +58,21 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 	public void onPerformSync(Account account, Bundle extras, String authority,
 			ContentProviderClient provider, SyncResult syncResult) {
 
+		Preferences pref = new Preferences(mContext);
+		
+		if (pref.isWifiOnly() && !isWifiEnabled()) {
+			AppLog.d("Wifi not enabled, skipping update check....");
+			return;
+		}
+
+		
 		Intent startIntent = new Intent(SYNC_PROGRESS);
 		mContext.sendBroadcast(startIntent);
 		
 		Intent finishIntent = new Intent(SYNC_STOP);
 		ArrayList<String> updatedTitles = null;
 		try {
-			updatedTitles = doSync(provider);
+			updatedTitles = doSync(pref, provider);
 		} catch (RemoteException e) {
 			
 		}
@@ -75,15 +85,22 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 		AppLog.d("Finish::onPerformSync()");
 	
 	}
+	
+	private boolean isWifiEnabled() {
+		ConnectivityManager cm = (ConnectivityManager)mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+		return (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI);
+	}
 
 	/**
 	 * @param provider
 	 * @param updatedTitles
 	 * @throws RemoteException
 	 */
-	private ArrayList<String> doSync(ContentProviderClient provider ) throws RemoteException {
+	private ArrayList<String> doSync(Preferences pref, ContentProviderClient provider) throws RemoteException {
 		ArrayList<String> updatedTitles = new ArrayList<String>();
-		Preferences pref = new Preferences(mContext);
+
+		
 		MarketSession session = createAppInfoLoader(pref);
 		AppIconLoader iconLoader = new AppIconLoader(session);
 		AppLoader loader = new AppLoader(session, false);
