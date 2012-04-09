@@ -8,23 +8,27 @@ import android.accounts.NetworkErrorException;
 import android.content.Context;
 import android.os.Bundle;
 
+import com.anod.appwatcher.R;
 import com.anod.appwatcher.utils.AppLog;
 
 public class Authenticator extends AbstractAccountAuthenticator {
-	private static final String ACCOUNT_NAME = "AppWatcherAccount";	
+
     private static final String ACCOUNT_TOKEN = "com.anod.appwatcher.account.token";
 	private static final String ACCOUNT_TYPE = "com.anod.appwatcher.account";
 
     private AccountManager mAccountManager;
+	private Context mContext;
     
     
-    public static Account getAccount() {
-    	return new Account(ACCOUNT_NAME, ACCOUNT_TYPE);
+    public static Account getAccount(Context context) {
+    	String accountName = context.getString(R.string.account_name); 
+    	return new Account(accountName, ACCOUNT_TYPE);
     }
     
 	public Authenticator(Context context) {
 		super(context);
-        mAccountManager = AccountManager.get(context);        
+        mAccountManager = AccountManager.get(context);
+        mContext = context;
 	}
 
 	@Override
@@ -34,11 +38,11 @@ public class Authenticator extends AbstractAccountAuthenticator {
 			throws NetworkErrorException {
 
 		// add the account to the AccountManager /
-		Account account = new Account(ACCOUNT_NAME, ACCOUNT_TYPE);
+		String accountName = mContext.getString(R.string.account_name); 
+		Account account = new Account(accountName, ACCOUNT_TYPE);
 		mAccountManager.addAccountExplicitly(account, null, null);
 		final Bundle bundle = new Bundle();
-        
-		bundle.putString(AccountManager.KEY_ACCOUNT_NAME, ACCOUNT_NAME);
+		bundle.putString(AccountManager.KEY_ACCOUNT_NAME, accountName);
 		bundle.putString(AccountManager.KEY_ACCOUNT_TYPE, ACCOUNT_TYPE);
 		bundle.putString(AccountManager.KEY_AUTHTOKEN, ACCOUNT_TOKEN);
 

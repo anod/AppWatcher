@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 public class Preferences {
+	private static final String LAST_UPDATE_TIME = "last_update_time";
 	private static final String FIRST_TIME = "first_time";
 	private static final String WIFI_ONLY = "wifi_only";
 	private static final String AUTO_SYNC = "auto_sync";
@@ -18,6 +19,10 @@ public class Preferences {
 		mSettings = context.getSharedPreferences(PREFS_NAME, 0);		
 	}
 
+	public long getLastUpdateTime() {
+		return mSettings.getLong(LAST_UPDATE_TIME, -1);
+	}
+	
 	public boolean isDeviceIdMessageEnabled() {
 		return mSettings.getBoolean(DEVICE_ID_MESSAGE, true);
 	}
@@ -70,5 +75,11 @@ public class Preferences {
 		SharedPreferences.Editor editor = mSettings.edit();
 		editor.putBoolean(FIRST_TIME, firstTime);
 		editor.commit();
-	}	
+	}
+	
+	public void updateLastTime(long time) {
+		SharedPreferences.Editor editor = mSettings.edit();
+		editor.putLong(LAST_UPDATE_TIME, time);
+		editor.commit();
+	}
 }

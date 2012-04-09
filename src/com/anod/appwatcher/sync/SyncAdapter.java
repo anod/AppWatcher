@@ -49,7 +49,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     public static final String SYNC_STOP = "com.anod.appwatcher.sync.start";
     public static final String SYNC_PROGRESS = "com.anod.appwatcher.sync.progress";
     public static final String EXTRA_UPDATES_COUNT = "extra_updates_count";
-    public static final String SYNC_EXTRA_CHANGE_SETTINGS = "sync_extra_change_settings";
     
 	public SyncAdapter(Context context, boolean autoInitialize) {
 		super(context, autoInitialize);
@@ -60,18 +59,18 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 	public void onPerformSync(Account account, Bundle extras, String authority,
 			ContentProviderClient provider, SyncResult syncResult) {
 
-		if (extras.getBoolean(SYNC_EXTRA_CHANGE_SETTINGS, false) == true) {
-			AppLog.d("Settings update, skipping...");
-			return;
-		}
-		
 		Preferences pref = new Preferences(mContext);
-		
+
 		if (extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, false) == false) {
 			if (pref.isWifiOnly() && !isWifiEnabled()) {
 				AppLog.d("Wifi not enabled, skipping update check....");
 				return;
 			}
+			long updateTime = pref.getLastUpdateTime();
+			if (updateTime != -1 && (System.currentTimeMillis() - updateTime < 1000)) {
+				AppLog.d("Last update less than second, skipping...");
+				return;
+			}			
 		}
 		
 		Intent startIntent = new Intent(SYNC_PROGRESS);
@@ -87,9 +86,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 		int size = (updatedTitles!=null) ? updatedTitles.size() : 0;
 		finishIntent.putExtra(EXTRA_UPDATES_COUNT, size);
 		mContext.sendBroadcast(finishIntent);
+
+		pref.updateLastTime(System.currentTimeMillis());
+		
 		if (size > 0) {
 			showNotification(updatedTitles);
 		}
+
 		AppLog.d("Finish::onPerformSync()");
 	
 	}

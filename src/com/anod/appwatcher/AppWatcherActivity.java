@@ -37,6 +37,7 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
 	private MenuItem mRefreshMenuItem;
 	private Preferences mPreferences;
 	private MenuItem mWifiMenuItem;
+	private Account mSyncAccount;
 
 	/* (non-Javadoc)
 	 * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
@@ -55,14 +56,9 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
 	    mPreferences = new Preferences(this);
 	    	    
         AccountManager accountManager = AccountManager.get(this);
-        Account account = Authenticator.getAccount();
-        if (accountManager.getAccountsByType(account.type).length == 0) {
-        	accountManager.addAccountExplicitly(Authenticator.getAccount(), null, null);
-        	/*
-	        accountManager.addAccount(
-	        		account.type, 	
-	        		accountType, authTokenType, requiredFeatures, addAccountOptions, activity, callback, handler)
-	        */
+        mSyncAccount = Authenticator.getAccount(this);
+        if (accountManager.getAccountsByType(mSyncAccount.type).length == 0) {
+        	accountManager.addAccountExplicitly(mSyncAccount, null, null);
         }
 	    
         setSync();
@@ -85,22 +81,20 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
     }
     
     private void setSync() {
-    	Account account = Authenticator.getAccount();
     	Bundle params = new Bundle();
-    	params.putBoolean(SyncAdapter.SYNC_EXTRA_CHANGE_SETTINGS, true);
 
     	//initialize for 1st time
-    	if (ContentResolver.getIsSyncable(account, AppListContentProvider.AUTHORITY) < 1) {
-    		ContentResolver.setIsSyncable(account, AppListContentProvider.AUTHORITY, 1);
+    	if (ContentResolver.getIsSyncable(mSyncAccount, AppListContentProvider.AUTHORITY) < 1) {
+    		ContentResolver.setIsSyncable(mSyncAccount, AppListContentProvider.AUTHORITY, 1);
     	}
     	
     	if (mPreferences.isAutoSync()) { 
     		long pollFrequency = (mPreferences.isWifiOnly()) ?  THREE_HOURS_IN_SEC : EIGHT_HOURS_IN_SEC;
-    		ContentResolver.setSyncAutomatically(account, AppListContentProvider.AUTHORITY, true);
-    		ContentResolver.addPeriodicSync(account, AppListContentProvider.AUTHORITY, params, pollFrequency);
+    		ContentResolver.setSyncAutomatically(mSyncAccount, AppListContentProvider.AUTHORITY, true);
+    		ContentResolver.addPeriodicSync(mSyncAccount, AppListContentProvider.AUTHORITY, params, pollFrequency);
     	} else {
-    		ContentResolver.removePeriodicSync(account, AppListContentProvider.AUTHORITY, params);
-    		ContentResolver.setSyncAutomatically(account, AppListContentProvider.AUTHORITY, false);   		
+    		ContentResolver.removePeriodicSync(mSyncAccount, AppListContentProvider.AUTHORITY, params);
+    		ContentResolver.setSyncAutomatically(mSyncAccount, AppListContentProvider.AUTHORITY, false);   		
     	}
     	
     }
@@ -129,7 +123,7 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
 	    filter.addAction(SyncAdapter.SYNC_PROGRESS);
 	    filter.addAction(SyncAdapter.SYNC_STOP);
 	    registerReceiver(mSyncFinishedReceiver, filter);
-	    if (!ContentResolver.isSyncActive(Authenticator.getAccount(), AppListContentProvider.AUTHORITY)) {
+	    if (!ContentResolver.isSyncActive(mSyncAccount, AppListContentProvider.AUTHORITY)) {
 	    	stopRefreshAnim();
 	    }
 	}
@@ -180,7 +174,7 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
         	AppLog.d("Refresh pressed");
             Bundle params = new Bundle();
             params.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);            
-        	ContentResolver.requestSync(Authenticator.getAccount(), AppListContentProvider.AUTHORITY, params);
+        	ContentResolver.requestSync(mSyncAccount, AppListContentProvider.AUTHORITY, params);
         	return true;       
         case R.id.menu_device_id:
         	DeviceIdDialog deviceIdDialog = DeviceIdDialog.newInstance();
