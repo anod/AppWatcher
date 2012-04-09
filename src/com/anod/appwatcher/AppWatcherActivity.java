@@ -1,6 +1,7 @@
 package com.anod.appwatcher;
 
 import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -53,6 +54,17 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
 	    mRefreshView = (ImageView) inflater.inflate(R.layout.refresh_action_view, null);
 	    mPreferences = new Preferences(this);
 	    	    
+        AccountManager accountManager = AccountManager.get(this);
+        Account account = Authenticator.getAccount();
+        if (accountManager.getAccountsByType(account.type).length == 0) {
+        	accountManager.addAccountExplicitly(Authenticator.getAccount(), null, null);
+        	/*
+	        accountManager.addAccount(
+	        		account.type, 	
+	        		accountType, authTokenType, requiredFeatures, addAccountOptions, activity, callback, handler)
+	        */
+        }
+	    
         setSync();
 	}
     
@@ -75,16 +87,17 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
     private void setSync() {
     	Account account = Authenticator.getAccount();
     	Bundle params = new Bundle();
-    	
+    	params.putBoolean(SyncAdapter.SYNC_EXTRA_CHANGE_SETTINGS, true);
+
     	//initialize for 1st time
-    	if (ContentResolver.getIsSyncable(account, AppListContentProvider.AUTHORITY) < 0) {
+    	if (ContentResolver.getIsSyncable(account, AppListContentProvider.AUTHORITY) < 1) {
     		ContentResolver.setIsSyncable(account, AppListContentProvider.AUTHORITY, 1);
     	}
     	
     	if (mPreferences.isAutoSync()) { 
     		long pollFrequency = (mPreferences.isWifiOnly()) ?  THREE_HOURS_IN_SEC : EIGHT_HOURS_IN_SEC;
     		ContentResolver.setSyncAutomatically(account, AppListContentProvider.AUTHORITY, true);
-    		ContentResolver.addPeriodicSync(Authenticator.getAccount(), AppListContentProvider.AUTHORITY, params, pollFrequency);
+    		ContentResolver.addPeriodicSync(account, AppListContentProvider.AUTHORITY, params, pollFrequency);
     	} else {
     		ContentResolver.removePeriodicSync(account, AppListContentProvider.AUTHORITY, params);
     		ContentResolver.setSyncAutomatically(account, AppListContentProvider.AUTHORITY, false);   		
@@ -97,19 +110,16 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
         	if (intent.getAction().equals(SyncAdapter.SYNC_PROGRESS)) {
-        		//StartAnimation
-        		mRefreshMenuItem.setActionView(mRefreshView);
-        		mRefreshView.startAnimation(mAnimRotation);
+        		startRefreshAnim();
         	} else if (intent.getAction().equals(SyncAdapter.SYNC_STOP)) {
-        		//StopAnimation
-        		mRefreshView.clearAnimation();
-        		mRefreshMenuItem.setActionView(null);
-        		int updatesCount = intent.getIntExtra(SyncAdapter.EXTRA_UPDATES_COUNT, 0);
-        		if (updatesCount == 0) {
-        			Toast.makeText(AppWatcherActivity.this, R.string.no_updates_found, Toast.LENGTH_SHORT).show();
-        		}
+    			int updatesCount = intent.getIntExtra(SyncAdapter.EXTRA_UPDATES_COUNT, 0);        		
+        		stopRefreshAnim();
+    			if (updatesCount == 0) {
+    				Toast.makeText(AppWatcherActivity.this, R.string.no_updates_found, Toast.LENGTH_SHORT).show();
+    			}
         	}
         }
+
     };
     
 	@Override
@@ -119,12 +129,33 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
 	    filter.addAction(SyncAdapter.SYNC_PROGRESS);
 	    filter.addAction(SyncAdapter.SYNC_STOP);
 	    registerReceiver(mSyncFinishedReceiver, filter);
+	    if (!ContentResolver.isSyncActive(Authenticator.getAccount(), AppListContentProvider.AUTHORITY)) {
+	    	stopRefreshAnim();
+	    }
 	}
 	
 	@Override
 	protected void onPause() {
 	    super.onPause();
 	    unregisterReceiver(mSyncFinishedReceiver);
+	}
+
+	/**
+	 * 
+	 */
+	private void stopRefreshAnim() {
+		//StopAnimation
+		mRefreshView.clearAnimation();
+		mRefreshMenuItem.setActionView(null);
+	}
+
+	/**
+	 * 
+	 */
+	private void startRefreshAnim() {
+		//StartAnimation
+		mRefreshMenuItem.setActionView(mRefreshView);
+		mRefreshView.startAnimation(mAnimRotation);
 	}
 	
 	@Override

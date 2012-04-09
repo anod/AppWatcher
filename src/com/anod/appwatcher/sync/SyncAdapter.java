@@ -49,6 +49,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     public static final String SYNC_STOP = "com.anod.appwatcher.sync.start";
     public static final String SYNC_PROGRESS = "com.anod.appwatcher.sync.progress";
     public static final String EXTRA_UPDATES_COUNT = "extra_updates_count";
+    public static final String SYNC_EXTRA_CHANGE_SETTINGS = "sync_extra_change_settings";
     
 	public SyncAdapter(Context context, boolean autoInitialize) {
 		super(context, autoInitialize);
@@ -59,6 +60,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 	public void onPerformSync(Account account, Bundle extras, String authority,
 			ContentProviderClient provider, SyncResult syncResult) {
 
+		if (extras.getBoolean(SYNC_EXTRA_CHANGE_SETTINGS, false) == true) {
+			AppLog.d("Settings update, skipping...");
+			return;
+		}
+		
 		Preferences pref = new Preferences(mContext);
 		
 		if (extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, false) == false) {
