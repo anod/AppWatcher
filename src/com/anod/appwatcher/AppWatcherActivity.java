@@ -23,6 +23,7 @@ import com.anod.appwatcher.accounts.MarketTokenHelper.CallBack;
 import com.anod.appwatcher.market.MarketSessionHelper;
 import com.anod.appwatcher.sync.Authenticator;
 import com.anod.appwatcher.sync.SyncAdapter;
+import com.anod.appwatcher.utils.AppLog;
 
 public class AppWatcherActivity extends SherlockFragmentActivity {
 	private static final int MENU_REFRESH_IDX = 1;
@@ -177,14 +178,14 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
         	helper.requestToken();
         	return true;
         case R.id.menu_refresh:
-        	Log.d("AppWatcher", "Refresh pressed");
+        	AppLog.d("Refresh pressed");
             Bundle params = new Bundle();
             params.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);            
         	ContentResolver.requestSync(Authenticator.getAccount(), AppListContentProvider.AUTHORITY, params);
         	return true;       
         case R.id.menu_device_id:
-			Intent intent = new Intent(mContext, DeviceIdActivity.class);
-			startActivity(intent);
+        	DeviceIdDialog deviceIdDialog = DeviceIdDialog.newInstance();
+			deviceIdDialog.show(getSupportFragmentManager(), "deviceIdDialog");
         	return false;
         case R.id.menu_auto_update:
         	boolean useAutoSync = !item.isChecked();
@@ -203,8 +204,12 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
        		mPreferences.saveWifiOnly(useWifiOnly);
        		setSync();
         	return true;
+        case R.id.menu_about:
+        	AboutDialog aboutDialog = AboutDialog.newInstance();
+        	aboutDialog.show(getSupportFragmentManager(), "aboutDialog");        	
+        	return true;
         default:
-            return onOptionsItemSelected(item);
+            return true;
         }
     }    
 

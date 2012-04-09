@@ -16,17 +16,18 @@
     <item
         android:id="@+id/menu_auto_update"
         android:checkable="true"
-        android:title="@string/menu_auto_update">
+        android:title="@string/menu_auto_update" android:showAsAction="never|withText">
     </item>
     <item
         android:id="@+id/menu_wifi_only"
         android:checkable="true"
-        android:title="@string/menu_wifi_only">
+        android:title="@string/menu_wifi_only" android:showAsAction="never|withText">
     </item>
     <item
         android:id="@+id/menu_device_id"
         android:showAsAction="never|withText"
         android:title="@string/menu_set_device_id">
     </item>
+    <item android:id="@+id/menu_about" android:title="@string/about" android:showAsAction="never|withText"></item>
 
 </menu>

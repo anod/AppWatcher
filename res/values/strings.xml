@@ -13,19 +13,15 @@
     <string name="error_insert_app">Failed to add application to the whatch list.</string>
     <string name="application_icon">Application icon</string>
     <string name="welcome_to_app_watcher">Do not get search results?</string>
-    <string name="for_proper_work_of_application">Some devices requires to set Device Id manually. This id required in order to communicate with Google Play Store. Please follow instruction below in order to set it up.</string>
     <string name="background_image">background image</string>
     <string name="device_id">Device Id</string>
-    <string name="save_device_id">Save Device Id</string>
-    <string name="device_id_explanation">Device id is a 16 length string that contains numbers and characters a-f. The string can be found in GTalk Service Monitor information screen.</string>
-    <string name="how_to_find_device_id">How to find Device Id?</string>
-    <string name="dial">To open Gtalk Monitro Service click on the button</string>
-    <string name="open_gtalk_monitor">Open GTalk Monitor Service: *#*#8255#*#*</string>
+    <string name="save_device_id">Save</string>
+    <string name="device_id_explanation">This id required in order to communicate with Google Play Store.\nThe string can be found in GTalk Service Monitor information screen.\nTo open it press *#*#8255#8#* in phone dialer.\nDevice id is a 16 length string that contains numbers and characters a-f.</string>
     <string name="results_are_not_correct">Results are not correct?</string>
     <string name="improve">Improve</string>
     <string name="dismiss">Dismiss</string>
     <string name="screenshot">Screenshot</string>
-    <string name="menu_set_device_id">Set Device Id</string>
+    <string name="menu_set_device_id">Device Id</string>
     <string name="play_store">Play Store</string>
     <string name="remove">Remove</string>
     <string name="whats_new">What\'s new</string>
@@ -43,8 +39,11 @@
     <string name="update">Updated to %s</string>
     <string name="notification_one_updated">%s updated</string>
     <string name="notification_many_updates">%d updates found</string>
-    <string name="notification_2_apps">%0$s, %1$s</string>
-    <string name="notification_2_apps_more">%0$s, %1$s and more</string>    
+    <string name="notification_2_apps">%1$s, %2$s</string>
+    <string name="notification_2_apps_more">%1$s, %2$s and more</string>    
     <string name="notification_click">Click to show</string>
     <string name="no_updates_found">No updates found.</string>
+    <string name="about">About</string>
+    <string name="dialog_about_title">About</string>    
+    <string name="dialog_about_text">%1$s ver. %2$s\nAuthor: Alex Gavrishev.\n&lt;a href=&quot;https://play.google.com/store/apps/developer?id=Alex+Gavrishev&quot;&gt;Google Play Store&lt;/a&gt;\nProject is licensed under a &lt;a href=&quot;http://creativecommons.org/licenses/by-sa/3.0/&quot;&gt;Creative Commons Attribution-ShareAlike 3.0 Unported License.&lt;/a&gt;\nSource Code available at &lt;a href=&quot;https://github.com/anod/AppWatcher&quot;&gt;github.com&lt;/a&gt;.</string>
 </resources>

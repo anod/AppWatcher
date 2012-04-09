@@ -38,7 +38,7 @@
         
         
         <activity
-            android:name=".DeviceIdActivity"
+            android:name=".DeviceIdDialog"
             android:label="@string/app_name" 
             android:theme="@style/Theme.Sherlock">
         </activity>

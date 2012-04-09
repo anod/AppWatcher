@@ -129,7 +129,7 @@ public class MarketSearchActivity extends SherlockListActivity {
 			
 			@Override
 			public void onClick(View v) {
-				Intent intent = new Intent(mContext, DeviceIdActivity.class);
+				Intent intent = new Intent(mContext, DeviceIdDialog.class);
 				startActivity(intent);
 				mDeviceIdMessage.setVisibility(View.GONE);
 			}

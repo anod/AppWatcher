@@ -8,7 +8,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -189,10 +188,10 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 				@Override
 				public void onClick(View v) {
 					AppInfo app = (AppInfo)v.getTag();
-					DialogFragment removeDialog = RemoveDialogFragment.newInstance(
+					RemoveDialogFragment removeDialog = RemoveDialogFragment.newInstance(
 						app.getTitle(), app.getRowId()
 					);
-				    removeDialog.show(getFragmentManager(), "dialog");
+				    removeDialog.show(getFragmentManager(), "removeDialog");
 				}
 			});
 
