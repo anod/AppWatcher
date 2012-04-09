@@ -16,7 +16,7 @@
     <string name="background_image">background image</string>
     <string name="device_id">Device Id</string>
     <string name="save_device_id">Save</string>
-    <string name="device_id_explanation">This id required in order to communicate with Google Play Store.\nThe string can be found in GTalk Service Monitor information screen.\nTo open it press *#*#8255#8#* in phone dialer.\nDevice id is a 16 length string that contains numbers and characters a-f.</string>
+    <string name="device_id_explanation">This id required in order to communicate with Google Play Store.\nThe string can be found in GTalk Service Monitor information screen.\nTo open it press *#*#8255#*#* inside phone dialer app.\nDevice id is a 16 length string that contains numbers and characters a-f.</string>
     <string name="results_are_not_correct">Results are not correct?</string>
     <string name="improve">Improve</string>
     <string name="dismiss">Dismiss</string>
@@ -44,6 +44,6 @@
     <string name="notification_click">Click to show</string>
     <string name="no_updates_found">No updates found.</string>
     <string name="about">About</string>
-    <string name="dialog_about_title">About</string>    
-    <string name="dialog_about_text">%1$s ver. %2$s\nAuthor: Alex Gavrishev.\n&lt;a href=&quot;https://play.google.com/store/apps/developer?id=Alex+Gavrishev&quot;&gt;Google Play Store&lt;/a&gt;\nProject is licensed under a &lt;a href=&quot;http://creativecommons.org/licenses/by-sa/3.0/&quot;&gt;Creative Commons Attribution-ShareAlike 3.0 Unported License.&lt;/a&gt;\nSource Code available at &lt;a href=&quot;https://github.com/anod/AppWatcher&quot;&gt;github.com&lt;/a&gt;.</string>
+    <string name="dialog_about_title">%1$s ver. %2$s</string>    
+    <string name="dialog_about_text">Author: Alex Gavrishev&lt;br/&gt;&lt;a href=&quot;https://play.google.com/store/apps/developer?id=Alex+Gavrishev&quot;&gt;Google Play Store&lt;/a&gt;&lt;br/&gt;&lt;br/&gt;Project is licensed under a &lt;a href=&quot;http://creativecommons.org/licenses/by-sa/3.0/&quot;&gt;Creative Commons Attribution-ShareAlike 3.0 Unported License.&lt;/a&gt;&lt;br/&gt;&lt;br/&gt;Source Code available at &lt;a href=&quot;https://github.com/anod/AppWatcher&quot;&gt;github.com&lt;/a&gt;.</string>
 </resources>

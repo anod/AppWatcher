@@ -4,6 +4,8 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -21,24 +23,19 @@ public class DeviceIdDialog extends SherlockDialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
     	final Preferences preferences = new Preferences(getActivity());
-    	final EditText input = new EditText(getActivity());
-    	input.setHint(R.string.device_id);
+    	
+    	LayoutInflater inflater = getActivity().getLayoutInflater();
+    	View messageView = (View)inflater.inflate(R.layout.device_id, null);
+    	final EditText input = (EditText)messageView.findViewById(R.id.deviceid_edit);
+    			
     	String dId = preferences.getDeviceId();
     	if (dId != null) {
     		input.setText(dId);
     	}
-/*
-		Intent intent = new Intent(Intent.ACTION_VIEW);
-		intent.setData(
-			Uri.parse(String.format("tel:%s", Uri.encode("*#*#8255#*#*")))
-		);
-		startActivity(intent);
-	*/	
-        return new AlertDialog.Builder(getActivity())
-             //   .setIcon(R.drawable.alert_dialog_icon)
+
+    	return new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.device_id)
-                .setMessage(R.string.device_id_explanation)
-                .setView(input)
+                .setView(messageView)
                 .setPositiveButton(R.string.save_device_id, 
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
