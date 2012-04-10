@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -253,7 +254,7 @@ public class MarketSearchActivity extends SherlockFragmentActivity {
         		return;
         	}
         	
-    		mAdapter.addAll(list);
+        	adapterAddAll(mAdapter,list);
     		
     		if (mResponseLoader.hasNext()) {
     			mListView.setAdapter(new AppsEndlessAdapter(
@@ -274,6 +275,16 @@ public class MarketSearchActivity extends SherlockFragmentActivity {
 		}
     };
   
+    private void adapterAddAll(ArrayAdapter<App> adapter, List<App> list) {
+    	if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+    		adapter.addAll(list);
+    	} else {
+    		for(App app: list) {
+    			adapter.add(app);
+    		}
+    	}
+    }
+    
     class AppsEndlessAdapter extends EndlessAdapter {
 
 		private List<App> mCache;
@@ -296,7 +307,7 @@ public class MarketSearchActivity extends SherlockFragmentActivity {
 		protected void appendCachedData() {
 			if (mCache != null) {
 				AppsAdapter adapter = (AppsAdapter)getWrappedAdapter();
-				adapter.addAll(mCache);
+				adapterAddAll(adapter,mCache);
 			}
 		}
     	
