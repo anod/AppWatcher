@@ -9,6 +9,8 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.app.ShareCompat;
+import android.support.v4.app.ShareCompat.IntentBuilder;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
@@ -19,6 +21,7 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -34,6 +37,9 @@ import com.anod.appwatcher.model.AppListCursor;
 import com.anod.appwatcher.model.AppListTable;
 
 public class AppWatcherListFragment extends SherlockListFragment implements LoaderManager.LoaderCallbacks<Cursor>{
+    private static final String URL_PLAY_STORE = "market://details?id=%s";
+    private static final String URL_WEB_PLAY_STORE = "https://play.google.com/store/apps/details?id=%s";
+    
     private CursorAdapter mAdapter;
 	class ViewHolder {
 		int rowId;
@@ -44,9 +50,10 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 		ImageView icon;
 		LinearLayout newIndicator;
 		LinearLayout options;
-		Button removeBtn;
+		ImageButton removeBtn;
 		Button marketBtn;
 		Button changelogBtn;
+		ImageButton shareBtn;
 	}
 	private ViewHolder mSelectedHolder = null;
 	private Animation mAnimSlideOut;
@@ -81,37 +88,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 
     }
 
-    
-    /* (non-Javadoc)
-	 * @see android.support.v4.app.ListFragment#onListItemClick(android.widget.ListView, android.view.View, int, long)
-	 */
-	@Override
-	public void onListItemClick(ListView l, View v, int position, long id) {
-		ViewHolder holder = (ViewHolder)v.getTag();
-		if (mSelectedHolder == null) {
-			mSelectedHolder = holder;
-			mSelectedHolder.options.startAnimation(mAnimSlideOut);
-			mSelectedHolder.options.setVisibility(View.VISIBLE);
-			return;
-		}
-		if (mSelectedHolder.rowId == holder.rowId) {
-			if (holder.options.getVisibility() == View.VISIBLE) {
-				holder.options.setVisibility(View.GONE);
-				mSelectedHolder = null;
-			} else {
-				holder.options.setVisibility(View.VISIBLE);
-			}
-		} else {
-			mSelectedHolder.options.setVisibility(View.GONE);
-			mSelectedHolder = holder;
-			holder.options.startAnimation(mAnimSlideOut);			
-			holder.options.setVisibility(View.VISIBLE);
-		}
-	}
-
-
 	private class ListCursorAdapter extends CursorAdapter {
-        private static final String URL_PLAY_STORE = "market://details?id=%s";
 		private LayoutInflater mInflater;
         private Bitmap mDefaultIcon;
 		private String mVersionText;
@@ -143,6 +120,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 			holder.removeBtn.setTag(app);
 			holder.marketBtn.setTag(app.getPackageName());
 			holder.changelogBtn.setTag(app.getAppId());
+			holder.shareBtn.setTag(app);
 			Bitmap icon = app.getIcon();
             if (icon == null) {
 	           	if (mDefaultIcon == null) {
@@ -164,13 +142,21 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
               
                 //TextView.getTextColors().getDefaultColor()
             	holder.newIndicator.setVisibility(View.INVISIBLE);
-
             }
 		}
 
 		@Override
 		public View newView(Context context, Cursor cursor, ViewGroup parent) {
 			View v = mInflater.inflate(R.layout.list_row, parent, false);
+		    v.setClickable(true);
+		    v.setFocusable(true);
+		    v.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					onItemClick(v);
+				}
+			});
+		    
 			ViewHolder holder = new ViewHolder();
 			holder.rowId = -1;
             holder.title = (TextView)v.findViewById(R.id.title);
@@ -183,27 +169,21 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
             holder.options.setVisibility(View.GONE);
             v.setTag(holder);
             
-            holder.removeBtn = (Button)holder.options.findViewById(R.id.remove_btn);
+            holder.removeBtn = (ImageButton)holder.options.findViewById(R.id.remove_btn);
             holder.removeBtn.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					AppInfo app = (AppInfo)v.getTag();
-					RemoveDialogFragment removeDialog = RemoveDialogFragment.newInstance(
-						app.getTitle(), app.getRowId()
-					);
-				    removeDialog.show(getFragmentManager(), "removeDialog");
+					onRemoveClick(v);
 				}
+
+
 			});
 
             holder.marketBtn = (Button)holder.options.findViewById(R.id.market_btn);
             holder.marketBtn.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					String pkg = (String)v.getTag();
-					String url = String.format(URL_PLAY_STORE, pkg);
-					Intent intent = new Intent (Intent.ACTION_VIEW, Uri.parse(url));
-					intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);				
-					startActivity(intent);
+					onPlayStoreClick(v);
 				
 				}
 			});
@@ -212,29 +192,94 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
             holder.changelogBtn.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					final String appId = (String)v.getTag();
-		        	MarketTokenHelper helper = new MarketTokenHelper(getActivity(), true, new CallBack() {
-						@Override
-						public void onTokenReceive(String authToken) {
-				        	if (authToken == null) {
-				        		Toast.makeText(getActivity(), R.string.failed_gain_access, Toast.LENGTH_LONG).show();
-				        	} else {
-								Intent intent = new Intent(getActivity(), AppChangelogActivity.class);
-								intent.putExtra(AppChangelogActivity.EXTRA_APP_ID, appId);
-								intent.putExtra(MarketSessionHelper.EXTRA_TOKEN, authToken);
-				        		startActivity(intent);
-				        	}
-						}
-					});
-		        	helper.requestToken();
+					onChangelogClick(v);
 				}
 			});
 
+            holder.shareBtn = (ImageButton)holder.options.findViewById(R.id.share_btn);
+            holder.shareBtn.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					onShareClick(v);
+				}
+
+			});
 			return v;
 		}
     	
     }
     
+	public void onItemClick(View v) {
+		ViewHolder holder = (ViewHolder)v.getTag();
+		if (mSelectedHolder == null) {
+			mSelectedHolder = holder;
+			mSelectedHolder.options.startAnimation(mAnimSlideOut);
+			mSelectedHolder.options.setVisibility(View.VISIBLE);
+			return;
+		}
+		if (mSelectedHolder.rowId == holder.rowId) {
+			if (holder.options.getVisibility() == View.VISIBLE) {
+				holder.options.setVisibility(View.GONE);
+				mSelectedHolder = null;
+			} else {
+				holder.options.setVisibility(View.VISIBLE);
+			}
+		} else {
+			mSelectedHolder.options.setVisibility(View.GONE);
+			mSelectedHolder = holder;
+			holder.options.startAnimation(mAnimSlideOut);			
+			holder.options.setVisibility(View.VISIBLE);
+		}
+	}
+
+	private void onRemoveClick(View v) {
+		AppInfo app = (AppInfo)v.getTag();
+		RemoveDialogFragment removeDialog = RemoveDialogFragment.newInstance(
+			app.getTitle(), app.getRowId()
+		);
+	    removeDialog.show(getFragmentManager(), "removeDialog");
+	}
+	
+	private void onPlayStoreClick(View v) {
+		String pkg = (String)v.getTag();
+		String url = String.format(URL_PLAY_STORE, pkg);
+		Intent intent = new Intent (Intent.ACTION_VIEW, Uri.parse(url));
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);				
+		startActivity(intent);
+	}
+	
+
+	private void onShareClick(View v) {
+		AppInfo app = (AppInfo)v.getTag();
+		IntentBuilder builder = ShareCompat.IntentBuilder.from(getActivity());
+		if (app.getStatus() == AppInfo.STATUS_UPDATED) {
+			builder.setSubject(getString(R.string.share_subject_updated, app.getTitle()));
+		} else {
+			builder.setSubject(getString(R.string.share_subject_normal, app.getTitle()));
+		}
+		builder.setText(String.format(URL_WEB_PLAY_STORE, app.getPackageName()));
+		builder.setType("text/plain");
+		builder.startChooser();
+	}
+	
+	private void onChangelogClick(View v) {
+		final String appId = (String)v.getTag();
+    	MarketTokenHelper helper = new MarketTokenHelper(getActivity(), true, new CallBack() {
+			@Override
+			public void onTokenReceive(String authToken) {
+	        	if (authToken == null) {
+	        		Toast.makeText(getActivity(), R.string.failed_gain_access, Toast.LENGTH_LONG).show();
+	        	} else {
+					Intent intent = new Intent(getActivity(), AppChangelogActivity.class);
+					intent.putExtra(AppChangelogActivity.EXTRA_APP_ID, appId);
+					intent.putExtra(MarketSessionHelper.EXTRA_TOKEN, authToken);
+	        		startActivity(intent);
+	        	}
+			}
+		});
+    	helper.requestToken();
+	}
+	
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new CursorLoader(getActivity(), AppListContentProvider.CONTENT_URI,

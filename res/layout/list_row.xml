@@ -66,6 +66,25 @@
         android:gravity="center_horizontal|center_vertical"
         android:orientation="horizontal" >
 
+        <ImageButton
+            android:id="@+id/share_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="4dp"
+            android:background="@drawable/app_act_button"
+            android:contentDescription="@string/share"
+            android:src="@drawable/ic_action_share"
+            android:focusable="false"
+            android:text="@string/share" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="5dip"
+            android:layout_marginTop="5dip"
+            android:background="@drawable/divider_vertical_dark" />
+                
         <Button
             android:id="@+id/changelog_btn"
             style="?android:attr/buttonStyleSmall"
@@ -89,7 +108,7 @@
 
         <Button
             android:id="@+id/market_btn"
-            style="?android:attr/buttonStyleSmall"
+            style="?android:attr/buttonStyleSmall"            
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="4dp"
@@ -108,19 +127,17 @@
             android:layout_marginTop="5dip"
             android:background="@drawable/divider_vertical_dark" />
 
-        <Button
+        <ImageButton
             android:id="@+id/remove_btn"
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="4dp"
             android:layout_marginRight="4dp"
-            android:layout_weight="1"
             android:background="@drawable/app_act_button"
             android:contentDescription="@string/remove"
-            android:drawableLeft="@drawable/ic_remove"
+            android:src="@drawable/ic_remove"
             android:focusable="false"
-            android:text="@string/remove" />
+		/>
     </LinearLayout>
 
 </LinearLayout>
