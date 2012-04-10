@@ -84,7 +84,7 @@
             android:layout_marginBottom="5dip"
             android:layout_marginTop="5dip"
             android:background="@drawable/divider_vertical_dark" />
-                
+                
         <Button
             android:id="@+id/changelog_btn"
             style="?android:attr/buttonStyleSmall"
@@ -97,7 +97,8 @@
             android:contentDescription="@string/whats_new"
             android:drawableLeft="@drawable/ic_about"
             android:focusable="false"
-            android:text="@string/whats_new" />
+            android:text="@string/whats_new"
+            android:textColor="@color/white" />
 
         <View
             android:layout_width="1dp"
@@ -105,10 +106,10 @@
             android:layout_marginBottom="5dip"
             android:layout_marginTop="5dip"
             android:background="@drawable/divider_vertical_dark" />
-
+
         <Button
             android:id="@+id/market_btn"
-            style="?android:attr/buttonStyleSmall"            
+            style="?android:attr/buttonStyleSmall"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="4dp"
@@ -118,7 +119,8 @@
             android:contentDescription="@string/play_store"
             android:drawableLeft="@drawable/ic_play_store"
             android:focusable="false"
-            android:text="@string/play_store" />
+            android:text="@string/play_store"
+            android:textColor="@color/white" />
 
         <View
             android:layout_width="1dp"
