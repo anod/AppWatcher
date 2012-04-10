@@ -3,23 +3,28 @@ package com.anod.appwatcher;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.Loader;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.anod.appwatcher.accounts.MarketTokenLoader;
 import com.anod.appwatcher.market.AppLoader;
 import com.anod.appwatcher.market.DeviceIdHelper;
 import com.anod.appwatcher.market.MarketSessionHelper;
 import com.gc.android.market.api.MarketSession;
 import com.gc.android.market.api.model.Market.App;
 
-public class AppChangelogActivity extends SherlockActivity {
+public class AppChangelogActivity extends SherlockFragmentActivity implements LoaderCallbacks<String>{
 
 	public static final String EXTRA_APP_ID = "app_id";
 	private AppLoader mLoader;
 	private ProgressBar mLoadingView;
 	private TextView mChangelog;
+	private MarketSession mMarketSession;
+	private String mAppId;
 
 	/* (non-Javadoc)
 	 * @see android.app.Activity#onCreate(android.os.Bundle)
@@ -31,20 +36,20 @@ public class AppChangelogActivity extends SherlockActivity {
 		
 		Intent data = getIntent();
 		
-		String appId = data.getStringExtra(EXTRA_APP_ID);
-        String authSubToken = data.getStringExtra(MarketSessionHelper.EXTRA_TOKEN);
-        final Preferences prefs = new Preferences(this);
+		mAppId = data.getStringExtra(EXTRA_APP_ID);
+
+		final Preferences prefs = new Preferences(this);
         String deviceId = DeviceIdHelper.getDeviceId(this, prefs);
         
         MarketSessionHelper helper = new MarketSessionHelper(this);
-        final MarketSession session = helper.create(deviceId, authSubToken);
+        mMarketSession = helper.create(deviceId, null);
         
-        mLoader = new AppLoader(session, true);
+        mLoader = new AppLoader(mMarketSession, true);
 		
         mLoadingView = (ProgressBar)findViewById(R.id.progress_bar);
         mChangelog = (TextView)findViewById(R.id.changelog);
         mChangelog.setVisibility(View.GONE);
-        new RetreiveResultsTask().execute(appId);
+        getSupportLoaderManager().initLoader(0, null, this).forceLoad();
 	}
 
 	
@@ -60,5 +65,28 @@ public class AppChangelogActivity extends SherlockActivity {
         	mChangelog.setText(app.getExtendedInfo().getRecentChanges());
         }
 
-    };	
+    }
+
+
+	@Override
+	public Loader<String> onCreateLoader(int id, Bundle a) {
+		return new MarketTokenLoader(this);
+	}
+
+
+	@Override
+	public void onLoadFinished(Loader<String> arg0, String authSubToken) {
+		if (authSubToken == null) {
+			finish();
+		}
+		mMarketSession.setAuthSubToken(authSubToken);
+        new RetreiveResultsTask().execute(mAppId);
+	}
+
+
+	@Override
+	public void onLoaderReset(Loader<String> arg0) {
+		// TODO Auto-generated method stub
+		
+	};	
 }

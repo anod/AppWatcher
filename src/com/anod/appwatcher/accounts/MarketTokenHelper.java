@@ -2,7 +2,6 @@ package com.anod.appwatcher.accounts;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
 import android.content.Context;
 import android.os.Bundle;
@@ -12,67 +11,40 @@ public class MarketTokenHelper {
 	private static final String AUTH_TOKEN_TYPE = "android";
 	private static final String ACCOUNT_TYPE = "com.google";
 	private Context mContext;
-	private CallBack mCallback;
-    private AccountManagerCallback<Bundle> mAccountCallback = new AccountManagerCallback<Bundle>() {
-        @Override
-        public void run(final AccountManagerFuture<Bundle> future) {
-           onTokenReceive(future);
-        };
-        
-    };
-    
-    
 	private boolean mInvalidateToken;
 	private AccountManager mAccountManager;
-	private boolean mAsync;
 
-    public interface CallBack {
-		public void onTokenReceive(String authToken);
-    }
-    
-	public MarketTokenHelper(Context context,boolean async, MarketTokenHelper.CallBack callback) {
+	public MarketTokenHelper(Context context) {
 		mContext = context;
-		mCallback = callback;
-		mAsync = async;
         mAccountManager = AccountManager.get(mContext);
 	}
 
-	protected void onTokenReceive(final AccountManagerFuture<Bundle> future) {
-    	String authToken = null;
-        try {
-        	authToken = future.getResult().get(AccountManager.KEY_AUTHTOKEN).toString();
-       } catch (Exception e) {
-           // handle error
-       }		
-       if(mInvalidateToken) {
-        	mAccountManager.invalidateAuthToken(ACCOUNT_TYPE, authToken);
-            updateToken(false);
-       }
-       if (mCallback!=null) {
-    	   mCallback.onTokenReceive(authToken);
-       }
-		
-	}
-
-	public void requestToken() {
-		updateToken(false);
+	public String requestToken() {
+		String token = blockingGetAuthToken();
+		if (token == null) {
+			return null;
+		}
+		if(mInvalidateToken) {
+			mAccountManager.invalidateAuthToken(ACCOUNT_TYPE, token);
+			token = blockingGetAuthToken();
+		}
+		return token;
 	}
 	
 	@SuppressWarnings("deprecation")
-	private void updateToken(boolean invalidateToken) {
-	    try {
+	private String blockingGetAuthToken() {
+    	String authToken = null;
+		try {
 	        Account[] accounts = mAccountManager.getAccountsByType(ACCOUNT_TYPE);
-	        // Take first account, not impoertant
-	        final AccountManagerFuture<Bundle> future = mAccountManager.getAuthToken(
+	        // Take first account, not important
+	        authToken = mAccountManager.blockingGetAuthToken(
 	        	accounts[0],
 	        	AUTH_TOKEN_TYPE,
-	        	true, (mAsync) ? mAccountCallback : null, null
+	        	true
 	        );
-	        if (!mAsync) {
-	        	onTokenReceive(future);
-	        }
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	    }
+	    return authToken;
 	}
 }

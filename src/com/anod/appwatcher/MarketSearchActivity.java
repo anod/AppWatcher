@@ -4,13 +4,14 @@ import java.util.List;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.Loader;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,6 +39,7 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.anod.appwatcher.accounts.MarketTokenLoader;
 import com.anod.appwatcher.market.AppIconLoader;
 import com.anod.appwatcher.market.AppsResponseLoader;
 import com.anod.appwatcher.market.DeviceIdHelper;
@@ -49,7 +51,7 @@ import com.commonsware.cwac.endless.EndlessAdapter;
 import com.gc.android.market.api.MarketSession;
 import com.gc.android.market.api.model.Market.App;
 
-public class MarketSearchActivity extends SherlockFragmentActivity {
+public class MarketSearchActivity extends SherlockFragmentActivity implements LoaderCallbacks<String>{
 	protected static final String TAG = "AppWatcher";
 	private AppsAdapter mAdapter;
 	private MarketSession mMarketSession;
@@ -83,7 +85,7 @@ public class MarketSearchActivity extends SherlockFragmentActivity {
 		mListView = (ListView)findViewById(android.R.id.list);
 		mListView.setEmptyView(findViewById(android.R.id.empty));
 		mListView.setAdapter(mAdapter);
-		mListView.setOnItemClickListener(itemClickListener);
+		mListView.setOnItemClickListener(itemClickListener); 
 
 		ActionBar bar = getSupportActionBar();
 		bar.setCustomView(R.layout.searchbox);
@@ -100,10 +102,10 @@ public class MarketSearchActivity extends SherlockFragmentActivity {
 		        return false;
 			}
 		});
-		handleIntent(getIntent());
+		getSupportLoaderManager().initLoader(0, null, this).forceLoad();
 	}
 
-
+	
 	/**
 	 * 
 	 */
@@ -165,20 +167,6 @@ public class MarketSearchActivity extends SherlockFragmentActivity {
 		}
 	}
 	
-    @Override
-    protected void onNewIntent(Intent intent) {
-        // Because this activity has set launchMode="singleTop", the system calls this method
-        // to deliver the intent if this activity is currently the foreground activity when
-        // invoked again (when the user executes a search from this activity, we don't create
-        // a new instance of this activity, so the system delivers the search intent here)
-        handleIntent(intent);
-    }
-
-    private void handleIntent(Intent intent) {
-        String authSubToken = intent.getStringExtra(MarketSessionHelper.EXTRA_TOKEN);
-		mMarketSession.setAuthSubToken(authSubToken);
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getSupportMenuInflater().inflate(R.menu.searchbox, menu);
@@ -355,6 +343,24 @@ public class MarketSearchActivity extends SherlockFragmentActivity {
 		}
 
     }
-    	
 
+	@Override
+	public Loader<String> onCreateLoader(int id, Bundle args) {
+		return new MarketTokenLoader(this);
+	}
+
+	@Override
+	public void onLoadFinished(Loader<String> loader, String authSubToken) {
+		if (authSubToken == null) {
+			finish();
+		}
+		mMarketSession.setAuthSubToken(authSubToken);
+	}
+
+
+	@Override
+	public void onLoaderReset(Loader<String> loader) {
+		// TODO Auto-generated method stub
+	}
+    	
 }

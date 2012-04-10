@@ -28,7 +28,6 @@ import com.anod.appwatcher.AppWatcherActivity;
 import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.accounts.MarketTokenHelper;
-import com.anod.appwatcher.accounts.MarketTokenHelper.CallBack;
 import com.anod.appwatcher.market.AppIconLoader;
 import com.anod.appwatcher.market.AppLoader;
 import com.anod.appwatcher.market.DeviceIdHelper;
@@ -181,15 +180,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 		String deviceId = DeviceIdHelper.getDeviceId(mContext, prefs);
 		final MarketSession session = helper.create(deviceId, null);
 
-    	MarketTokenHelper tokenHelper = new MarketTokenHelper(mContext, false, new CallBack() {
-			@Override
-			public void onTokenReceive(String authToken) {
-	        	if (authToken != null) {
-	        		session.setAuthSubToken(authToken);
-	        	}
-			}
-		});
-    	tokenHelper.requestToken();
+    	MarketTokenHelper tokenHelper = new MarketTokenHelper(mContext);
+    	String authToken = tokenHelper.requestToken();
+    	if (authToken != null) {
+    		session.setAuthSubToken(authToken);
+    	}
     	return session;
 	}
 	
