@@ -27,13 +27,14 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockListActivity;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.anod.appwatcher.market.AppIconLoader;
@@ -47,7 +48,7 @@ import com.commonsware.cwac.endless.EndlessAdapter;
 import com.gc.android.market.api.MarketSession;
 import com.gc.android.market.api.model.Market.App;
 
-public class MarketSearchActivity extends SherlockListActivity {
+public class MarketSearchActivity extends SherlockFragmentActivity {
 	protected static final String TAG = "AppWatcher";
 	private AppsAdapter mAdapter;
 	private MarketSession mMarketSession;
@@ -56,6 +57,7 @@ public class MarketSearchActivity extends SherlockListActivity {
 	private Context mContext;
 	private LinearLayout mLoading;
 	private RelativeLayout mDeviceIdMessage = null;
+	private ListView mListView;
 	/* (non-Javadoc)
 	 * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
 	 */
@@ -77,8 +79,10 @@ public class MarketSearchActivity extends SherlockListActivity {
 		mIconLoader = new AppIconLoader(mMarketSession);
 		mAdapter = new AppsAdapter(this,R.layout.market_app_row);
 		
-		setListAdapter(mAdapter);
-		getListView().setOnItemClickListener(itemClickListener);
+		mListView = (ListView)findViewById(android.R.id.list);
+		mListView.setEmptyView(findViewById(android.R.id.empty));
+		mListView.setAdapter(mAdapter);
+		mListView.setOnItemClickListener(itemClickListener);
 
 		ActionBar bar = getSupportActionBar();
 		bar.setCustomView(R.layout.searchbox);
@@ -106,7 +110,7 @@ public class MarketSearchActivity extends SherlockListActivity {
 		mDeviceIdMessage = (RelativeLayout)findViewById(R.id.device_id_message);
 		mDeviceIdMessage.setVisibility(View.GONE);
 		
-		if (prefs.getDeviceId() == null || prefs.isDeviceIdMessageEnabled() == false) {
+		if (prefs.getDeviceId() != null || prefs.isDeviceIdMessageEnabled() == false) {
 			mDeviceIdMessage = null;
 			return;
 		}
@@ -129,8 +133,8 @@ public class MarketSearchActivity extends SherlockListActivity {
 			
 			@Override
 			public void onClick(View v) {
-				Intent intent = new Intent(mContext, DeviceIdDialog.class);
-				startActivity(intent);
+	        	DeviceIdDialog deviceIdDialog = DeviceIdDialog.newInstance();
+				deviceIdDialog.show(getSupportFragmentManager(), "deviceIdDialog");				
 				mDeviceIdMessage.setVisibility(View.GONE);
 			}
 		});
@@ -145,13 +149,13 @@ public class MarketSearchActivity extends SherlockListActivity {
         InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
 
-		setListAdapter(mAdapter);
+        mListView.setAdapter(mAdapter);
 		
 		mAdapter.clear();
 		mIconLoader.clearCache();
 
-		getListView().setVisibility(View.GONE);
-		getListView().getEmptyView().setVisibility(View.GONE);		
+		mListView.setVisibility(View.GONE);
+		mListView.getEmptyView().setVisibility(View.GONE);		
 		
 		mLoading.setVisibility(View.VISIBLE);
 		if (query.length() > 0) {
@@ -242,7 +246,7 @@ public class MarketSearchActivity extends SherlockListActivity {
         	
         	if (list == null || list.size() == 0) {
         		String noResStr = getString(R.string.no_result_found, mResponseLoader.getQuery());
-        		TextView tv = (TextView)getListView().getEmptyView();
+        		TextView tv = (TextView)mListView.getEmptyView();
         		tv.setText(noResStr);
         		tv.setVisibility(View.VISIBLE);
         		showDeviceIdMessage();        		
@@ -252,7 +256,7 @@ public class MarketSearchActivity extends SherlockListActivity {
     		mAdapter.addAll(list);
     		
     		if (mResponseLoader.hasNext()) {
-    			getListView().setAdapter(new AppsEndlessAdapter(
+    			mListView.setAdapter(new AppsEndlessAdapter(
     				mContext, mAdapter, R.layout.pending
     			));
     		}
