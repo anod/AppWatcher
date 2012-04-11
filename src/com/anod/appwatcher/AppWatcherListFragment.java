@@ -26,12 +26,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockListFragment;
-import com.anod.appwatcher.accounts.MarketTokenHelper;
-import com.anod.appwatcher.accounts.MarketTokenHelper.CallBack;
-import com.anod.appwatcher.market.MarketSessionHelper;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListCursor;
 import com.anod.appwatcher.model.AppListTable;
@@ -278,20 +274,9 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 	}
 	
 	private void onChangelogClick(final String appId) {
-    	MarketTokenHelper helper = new MarketTokenHelper(getActivity(), true, new CallBack() {
-			@Override
-			public void onTokenReceive(String authToken) {
-	        	if (authToken == null) {
-	        		Toast.makeText(getActivity(), R.string.failed_gain_access, Toast.LENGTH_LONG).show();
-	        	} else {
-					Intent intent = new Intent(getActivity(), AppChangelogActivity.class);
-					intent.putExtra(AppChangelogActivity.EXTRA_APP_ID, appId);
-					intent.putExtra(MarketSessionHelper.EXTRA_TOKEN, authToken);
-	        		startActivity(intent);
-	        	}
-			}
-		});
-    	helper.requestToken();
+		Intent intent = new Intent(getActivity(), AppChangelogActivity.class);
+		intent.putExtra(AppChangelogActivity.EXTRA_APP_ID, appId);
+		startActivity(intent);
 	}
 	
     @Override
