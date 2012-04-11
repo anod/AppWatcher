@@ -78,6 +78,7 @@ public class AppChangelogActivity extends SherlockFragmentActivity implements Lo
 	public void onLoadFinished(Loader<String> arg0, String authSubToken) {
 		if (authSubToken == null) {
 			finish();
+			return;
 		}
 		mMarketSession.setAuthSubToken(authSubToken);
         new RetreiveResultsTask().execute(mAppId);

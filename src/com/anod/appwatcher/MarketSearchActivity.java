@@ -307,13 +307,11 @@ public class MarketSearchActivity extends SherlockFragmentActivity implements Lo
 			super(context, textViewResourceId);
 		}
 
-
 		class ViewHolder {
 			TextView title;
 			TextView details;
 			ImageView icon;
 		}
-
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
@@ -352,7 +350,8 @@ public class MarketSearchActivity extends SherlockFragmentActivity implements Lo
 	@Override
 	public void onLoadFinished(Loader<String> loader, String authSubToken) {
 		if (authSubToken == null) {
-			finish();
+			//finish();
+			return;
 		}
 		mMarketSession.setAuthSubToken(authSubToken);
 	}
