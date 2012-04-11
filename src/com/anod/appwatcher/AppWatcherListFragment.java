@@ -57,6 +57,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 	}
 	private ViewHolder mSelectedHolder = null;
 	private Animation mAnimSlideOut;
+	private boolean mIsBigScreen;
 	
 	/** Called when the activity is first created. */
     @Override
@@ -77,6 +78,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
         getListView().setItemsCanFocus(true);
         getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         
+        mIsBigScreen = getResources().getBoolean(R.bool.is_large_screen);
         // Start out with a progress indicator.
         setListShown(false);        
         
@@ -114,7 +116,8 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
             	hide = true;
             }			
 			ViewHolder holder = (ViewHolder)view.getTag();
-			holder.rowId = app.getRowId();		
+			holder.rowId = app.getRowId();
+			holder.appId = app.getAppId();
             holder.title.setText(app.getTitle());
             holder.details.setText(app.getCreator());
 			holder.removeBtn.setTag(app);
@@ -150,12 +153,6 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 			View v = mInflater.inflate(R.layout.list_row, parent, false);
 		    v.setClickable(true);
 		    v.setFocusable(true);
-		    v.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					onItemClick(v);
-				}
-			});
 		    
 			ViewHolder holder = new ViewHolder();
 			holder.rowId = -1;
@@ -166,8 +163,27 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
             mDefColor = holder.version.getTextColors().getDefaultColor();            
             holder.options = (LinearLayout)v.findViewById(R.id.options);
             holder.newIndicator = (LinearLayout)v.findViewById(R.id.new_indicator);
-            holder.options.setVisibility(View.GONE);
             v.setTag(holder);
+            
+            if (!mIsBigScreen) {
+            	holder.options.setVisibility(View.GONE);
+            	v.setOnClickListener(new OnClickListener() {
+    				@Override
+    				public void onClick(View v) {
+    					onItemClick(v);
+    				}
+    			});
+            } else {
+            	v.setOnClickListener(new OnClickListener() {
+    				@Override
+    				public void onClick(View v) {
+    					ViewHolder holder = (ViewHolder)v.getTag();
+    					final String appId = holder.appId;
+    					onChangelogClick(appId);
+    				}
+    			});
+            }
+
             
             holder.removeBtn = (ImageButton)holder.options.findViewById(R.id.remove_btn);
             holder.removeBtn.setOnClickListener(new OnClickListener() {
@@ -175,8 +191,6 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 				public void onClick(View v) {
 					onRemoveClick(v);
 				}
-
-
 			});
 
             holder.marketBtn = (Button)holder.options.findViewById(R.id.market_btn);
@@ -192,7 +206,8 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
             holder.changelogBtn.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					onChangelogClick(v);
+					final String appId = (String)v.getTag();
+					onChangelogClick(appId);
 				}
 			});
 
@@ -262,8 +277,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 		builder.startChooser();
 	}
 	
-	private void onChangelogClick(View v) {
-		final String appId = (String)v.getTag();
+	private void onChangelogClick(final String appId) {
     	MarketTokenHelper helper = new MarketTokenHelper(getActivity(), true, new CallBack() {
 			@Override
 			public void onTokenReceive(String authToken) {

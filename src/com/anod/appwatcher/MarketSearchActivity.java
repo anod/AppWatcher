@@ -2,6 +2,7 @@ package com.anod.appwatcher;
 
 import java.util.List;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -275,7 +276,8 @@ public class MarketSearchActivity extends SherlockFragmentActivity {
 		}
     };
   
-    private void adapterAddAll(ArrayAdapter<App> adapter, List<App> list) {
+    @SuppressLint("NewApi")
+	private void adapterAddAll(ArrayAdapter<App> adapter, List<App> list) {
     	if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
     		adapter.addAll(list);
     	} else {

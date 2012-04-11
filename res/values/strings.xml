@@ -13,7 +13,6 @@
     <string name="error_insert_app">Failed to add application to the whatch list.</string>
     <string name="application_icon">Application icon</string>
     <string name="welcome_to_app_watcher">Do not get search results?</string>
-    <string name="background_image">background image</string>
     <string name="device_id">Device Id</string>
     <string name="save_device_id">Save</string>
     <string name="device_id_explanation">This id required in order to communicate with Google Play Store.\nThe string can be found in GTalk Service Monitor information screen.\nTo open it press *#*#8255#*#* inside phone dialer app.\nDevice id is a 16 length string that contains numbers and characters a-f.</string>
@@ -37,11 +36,11 @@
     <string name="alert_dialog_cancel">Cancel</string>
     <string name="version">Version %s</string>
     <string name="update">Updated to %s</string>
-    <string name="notification_one_updated">%s updated</string>
+    <string name="notification_one_updated">%s update found</string>
     <string name="notification_many_updates">%d updates found</string>
     <string name="notification_2_apps">%1$s, %2$s</string>
     <string name="notification_2_apps_more">%1$s, %2$s and more</string>    
-    <string name="notification_click">Click to show</string>
+    <string name="notification_click">Click to see details</string>
     <string name="no_updates_found">No updates found.</string>
     <string name="about">About</string>
     <string name="dialog_about_title">%1$s ver. %2$s</string>    
