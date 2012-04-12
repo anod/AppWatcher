@@ -51,7 +51,6 @@ public class AppChangelogActivity extends SherlockFragmentActivity implements Lo
         mChangelog.setVisibility(View.GONE);
         getSupportLoaderManager().initLoader(0, null, this).forceLoad();
 	}
-
 	
     class RetreiveResultsTask extends AsyncTask<String, Void, App> {
         protected App doInBackground(String... appsId) {

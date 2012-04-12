@@ -19,7 +19,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -93,11 +92,8 @@ public class MarketSearchActivity extends SherlockFragmentActivity implements Lo
 			
 			@Override
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-		        if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-		            showResults();
-		            return true;
-		        }
-		        return false;
+	            showResults();
+	            return true;
 			}
 		});
 		getSupportLoaderManager().initLoader(0, null, this).forceLoad();
@@ -310,12 +306,11 @@ public class MarketSearchActivity extends SherlockFragmentActivity implements Lo
 	@Override
 	public void onLoadFinished(Loader<String> loader, String authSubToken) {
 		if (authSubToken == null) {
-			//finish();
+			finish();
 			return;
 		}
 		mMarketSession.setAuthSubToken(authSubToken);
 	}
-
 
 	@Override
 	public void onLoaderReset(Loader<String> loader) {

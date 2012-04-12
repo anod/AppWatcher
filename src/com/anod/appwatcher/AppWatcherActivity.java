@@ -82,6 +82,9 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
         return true;
     }
     
+    /**
+     * setup sync according to currnt settings
+     */
     private void setSync() {
     	Bundle params = new Bundle();
 
@@ -101,6 +104,9 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
     	
     }
     
+    /**
+     * Receive notifications from SyncAdapter 
+     */
     private BroadcastReceiver mSyncFinishedReceiver = new BroadcastReceiver() {
 
         @Override
@@ -199,6 +205,11 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
         }
     }    
 
+	/**
+	 * For devices prior to honeycomb add enable/disable text
+	 * @param item
+	 * @param titleRes
+	 */
 	private void menuTitleUpdateCompat(MenuItem item, int titleRes) {
 		
 		String title = getString(titleRes);
