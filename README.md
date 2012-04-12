@@ -4,6 +4,7 @@ App Watcher for Android
 App Watcher helps you to receive notifications about updates for application from Play Store even the app is not installed currently on your device
 
 Features:
+
 * Search and add app from Play Market to watch list
 * Manual and automatic updates
 * Quick shortcut to see what's new in app
@@ -13,17 +14,16 @@ Features:
 
 ## Implementation highlights
 
-* sqlite database to store the data
-* ContentProvider to provide access to the data
-* Access to 3rd party account
+* SQLite database - store the data
+* ContentProvider - access to the data
+* AccountManager - access to 3rd party account on device
 * Android's backup service
-* Android account authentification & synchronization
-* Compatibility library 
-** Fragments
-** LoadManager
-** ActionBar
-** NotificationCompat
-** ShareCompat
+* SyncAdapter & AccountAuthenticator - create android account for synchronization
+* Fragments
+* LoadManager
+* ActionBar
+* NotificationCompat
+* ShareCompat
 
 ## Dependencies
  * SherlockActionBar library 
