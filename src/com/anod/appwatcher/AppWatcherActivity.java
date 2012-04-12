@@ -162,10 +162,6 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
             params.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);            
         	ContentResolver.requestSync(mSyncAccount, AppListContentProvider.AUTHORITY, params);
         	return true;       
-        case R.id.menu_device_id:
-        	DeviceIdDialog deviceIdDialog = DeviceIdDialog.newInstance();
-			deviceIdDialog.show(getSupportFragmentManager(), "deviceIdDialog");
-        	return false;
         case R.id.menu_auto_update:
         	boolean useAutoSync = !item.isChecked();
         	item.setChecked(useAutoSync);

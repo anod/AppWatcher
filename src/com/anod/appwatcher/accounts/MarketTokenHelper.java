@@ -2,9 +2,7 @@ package com.anod.appwatcher.accounts;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.accounts.AccountManagerFuture;
 import android.content.Context;
-import android.os.Bundle;
 
 public class MarketTokenHelper {
 	
@@ -31,7 +29,6 @@ public class MarketTokenHelper {
 		return token;
 	}
 	
-	@SuppressWarnings("deprecation")
 	private String blockingGetAuthToken() {
     	String authToken = null;
 		try {

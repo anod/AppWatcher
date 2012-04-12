@@ -16,7 +16,6 @@ import android.support.v4.content.Loader;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -25,7 +24,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -76,7 +74,6 @@ public class MarketSearchActivity extends SherlockFragmentActivity implements Lo
 		
 		final Preferences prefs = new Preferences(this);
 		String deviceId = DeviceIdHelper.getDeviceId(this,prefs);
-		initDeviceIdMessage(prefs);		
 		MarketSessionHelper helper = new MarketSessionHelper(mContext);
 		mMarketSession = helper.create(deviceId, null);
         
@@ -105,45 +102,6 @@ public class MarketSearchActivity extends SherlockFragmentActivity implements Lo
 		});
 		getSupportLoaderManager().initLoader(0, null, this).forceLoad();
 	}
-
-	
-	/**
-	 * 
-	 */
-	private void initDeviceIdMessage(final Preferences prefs) {
-		mDeviceIdMessage = (RelativeLayout)findViewById(R.id.device_id_message);
-		mDeviceIdMessage.setVisibility(View.GONE);
-		
-		if (prefs.getDeviceId() != null || prefs.isDeviceIdMessageEnabled() == false) {
-			mDeviceIdMessage = null;
-			return;
-		}
-		
-		Button dismissBtn = (Button)mDeviceIdMessage.findViewById(R.id.dismiss_btn);
-		dismissBtn.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				prefs.disableDeviceIdMessage();
-    			Animation anim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.flyout);
-    			mDeviceIdMessage.setAnimation(anim);
-    	        anim.start();			
-				mDeviceIdMessage.setVisibility(View.GONE);
-			}
-		});
-        
-		Button improveBtn = (Button)mDeviceIdMessage.findViewById(R.id.improve_btn);
-		improveBtn.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-	        	DeviceIdDialog deviceIdDialog = DeviceIdDialog.newInstance();
-				deviceIdDialog.show(getSupportFragmentManager(), "deviceIdDialog");				
-				mDeviceIdMessage.setVisibility(View.GONE);
-			}
-		});
-	}
-
 
 	private void showResults() {
 		EditText editText = (EditText)getSupportActionBar().getCustomView();
