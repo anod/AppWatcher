@@ -42,5 +42,7 @@
     <string name="account_name">App Watcher</string>
     <string name="share">Share</string>
     <string name="share_subject_normal">Check out \"%s\"</string>
-    <string name="share_subject_updated">Check out new version of \"%s\"</string>    
+    <string name="share_subject_updated">Check out new version of \"%s\"</string>
+    <string name="disabled">Disabled</string>
+    <string name="enabled">Enabled</string>    
 </resources>

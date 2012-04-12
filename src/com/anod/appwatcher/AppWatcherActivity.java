@@ -7,6 +7,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.animation.Animation;
@@ -74,6 +75,10 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
         if (useAutoSync == false) {
         	mWifiMenuItem.setEnabled(false);
         }
+    	if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+    		menuTitleUpdateCompat(autoSync, R.string.menu_auto_update);
+    		menuTitleUpdateCompat(mWifiMenuItem, R.string.menu_wifi_only);    		
+    	}        
         return true;
     }
     
@@ -171,12 +176,18 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
             } else {
             	mWifiMenuItem.setEnabled(true);
             }
+        	if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+        		menuTitleUpdateCompat(item, R.string.menu_auto_update);
+        	}
        		setSync();
         	return true;
         case R.id.menu_wifi_only:
         	boolean useWifiOnly = !item.isChecked();
         	item.setChecked(useWifiOnly);
        		mPreferences.saveWifiOnly(useWifiOnly);
+        	if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+        		menuTitleUpdateCompat(item, R.string.menu_wifi_only);
+        	}       		
        		setSync();
         	return true;
         case R.id.menu_about:
@@ -188,5 +199,16 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
         }
     }    
 
+	private void menuTitleUpdateCompat(MenuItem item, int titleRes) {
+		
+		String title = getString(titleRes);
+		String state = null;
+		if (item.isChecked()) {
+			state = getString(R.string.enabled);
+		} else {
+			state = getString(R.string.disabled);
+		}
+		item.setTitle(String.format("%s (%s)", title, state));
+	}
 	
 }
