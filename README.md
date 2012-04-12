@@ -18,8 +18,12 @@ Features:
 * Access to 3rd party account
 * Android's backup service
 * Android account authentification & synchronization
-* Compatibility library
-* 3rd party libraries
+* Compatibility library 
+** Fragments
+** LoadManager
+** ActionBar
+** NotificationCompat
+** ShareCompat
 
 ## Dependencies
  * SherlockActionBar library 

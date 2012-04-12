@@ -25,8 +25,8 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
 	private static final int MENU_REFRESH_IDX = 1;
 	private static final int MENU_AUTOSYNC_IDX = 2;
 	private static final int MENU_WIFI_IDX = 3;
-	private static final int THREE_HOURS_IN_SEC = 10800;
-	private static final int EIGHT_HOURS_IN_SEC = 28800;
+	private static final int TWO_HOURS_IN_SEC = 7200 ;
+	private static final int SIX_HOURS_IN_SEC = 21600;
 	protected String mAuthToken;
 	private AppWatcherActivity mContext;
 	private Animation mAnimRotation;
@@ -86,7 +86,7 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
     	}
     	
     	if (mPreferences.isAutoSync()) { 
-    		long pollFrequency = (mPreferences.isWifiOnly()) ?  THREE_HOURS_IN_SEC : EIGHT_HOURS_IN_SEC;
+    		long pollFrequency = (mPreferences.isWifiOnly()) ?  TWO_HOURS_IN_SEC : SIX_HOURS_IN_SEC;
     		ContentResolver.setSyncAutomatically(mSyncAccount, AppListContentProvider.AUTHORITY, true);
     		ContentResolver.addPeriodicSync(mSyncAccount, AppListContentProvider.AUTHORITY, params, pollFrequency);
     	} else {
