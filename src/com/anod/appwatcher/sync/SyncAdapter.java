@@ -41,7 +41,9 @@ import com.gc.android.market.api.MarketSession;
 import com.gc.android.market.api.model.Market.App;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
-    private final Context mContext;
+    private static final int ONE_SEC_IN_MILLIS = 1000;
+
+	private final Context mContext;
     
 	private static final int NOTIFICATION_ID = 1;
 	
@@ -60,22 +62,24 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
 		Preferences pref = new Preferences(mContext);
 
+		// Skip any check if sync requested from application
 		if (extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, false) == false) {
 			if (pref.isWifiOnly() && !isWifiEnabled()) {
 				AppLog.d("Wifi not enabled, skipping update check....");
 				return;
 			}
 			long updateTime = pref.getLastUpdateTime();
-			if (updateTime != -1 && (System.currentTimeMillis() - updateTime < 1000)) {
+			if (updateTime != -1 && (System.currentTimeMillis() - updateTime < ONE_SEC_IN_MILLIS)) {
 				AppLog.d("Last update less than second, skipping...");
 				return;
 			}			
 		}
+		AppLog.v("Perform synchronization");
 		
+		//Broadcast progress intent
 		Intent startIntent = new Intent(SYNC_PROGRESS);
 		mContext.sendBroadcast(startIntent);
 		
-		Intent finishIntent = new Intent(SYNC_STOP);
 		ArrayList<String> updatedTitles = null;
 		try {
 			updatedTitles = doSync(pref, provider);
@@ -83,6 +87,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 			
 		}
 		int size = (updatedTitles!=null) ? updatedTitles.size() : 0;
+		Intent finishIntent = new Intent(SYNC_STOP);
 		finishIntent.putExtra(EXTRA_UPDATES_COUNT, size);
 		mContext.sendBroadcast(finishIntent);
 
@@ -96,6 +101,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 	
 	}
 	
+	/**
+	 * Check if device has wi-fi connection
+	 * @return
+	 */
 	private boolean isWifiEnabled() {
 		ConnectivityManager cm = (ConnectivityManager)mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
@@ -106,6 +115,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 	 * @param provider
 	 * @param updatedTitles
 	 * @throws RemoteException
+	 * @return list of titles that were updated
 	 */
 	private ArrayList<String> doSync(Preferences pref, ContentProviderClient provider) throws RemoteException {
 		ArrayList<String> updatedTitles = new ArrayList<String>();
@@ -129,20 +139,34 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 				AppLog.e("Cannot retrieve information about application");
 				continue;
 			}
+			ContentValues values;
 			if (marketApp.getVersionCode() > localApp.getVersionCode()) {
 				AppLog.d("New version found ["+marketApp.getVersionCode()+"]");
 				Bitmap icon = iconLoader.loadImageUncached(marketApp.getId());
-				ContentValues values = createContentValues(marketApp, icon);
+				values = createContentValues(marketApp, icon);
 				updateApp(provider, localApp.getRowId(), values);
 	            updatedTitles.add(marketApp.getTitle());
-			} else {
-				AppLog.d("No update found.");
-				if (localApp.getStatus() == AppInfo.STATUS_UPDATED) {
-					AppLog.d("Mark application as old");
-					ContentValues values = new ContentValues();
-					values.put(AppListTable.Columns.KEY_STATUS, AppInfo.STATUS_NORMAL );
-					updateApp(provider, localApp.getRowId(), values);							
-				}
+	            continue;
+			}
+			
+			AppLog.d("No update found.");
+			values = new ContentValues();
+			//Mark updated app as normal 
+			if (localApp.getStatus() == AppInfo.STATUS_UPDATED) {
+				AppLog.d("Mark application as old");
+				values.put(AppListTable.Columns.KEY_STATUS, AppInfo.STATUS_NORMAL );
+			}
+			//Refresh app icon if it wasn't fetched previously
+			if (localApp.getIcon() == null) {
+				AppLog.d("Fetch missing icon");
+				Bitmap icon = iconLoader.loadImageUncached(localApp.getAppId());
+		   	    if (icon != null) {
+		   	    	byte[] iconData = BitmapUtils.flattenBitmap(icon);
+		   	   	    values.put(AppListTable.Columns.KEY_ICON_CACHE, iconData);
+		   	    }			
+			}
+			if (values.size() > 0) {
+				updateApp(provider, localApp.getRowId(), values);
 			}
 		}
 		return updatedTitles;
@@ -159,6 +183,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 		provider.update(updateUri, values, null, null);
 	}
 
+	/**
+	 * Create content values for new app
+	 * @param app
+	 * @param icon
+	 * @return
+	 */
     private ContentValues createContentValues(App app, Bitmap icon) {
     	ContentValues values = new ContentValues();
 
@@ -197,6 +227,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 		
 		Builder builder = new NotificationCompat.Builder(mContext);	
 		Notification notification = builder
+			.setAutoCancel(true)
 			.setSmallIcon(R.drawable.ic_stat_update)
 			.setContentTitle(title)
 			.setContentText(text)

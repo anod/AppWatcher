@@ -36,6 +36,7 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
 	private Preferences mPreferences;
 	private MenuItem mWifiMenuItem;
 	private Account mSyncAccount;
+	private MenuItem mAutoSyncMenuItem;
 
 	/* (non-Javadoc)
 	 * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
@@ -55,45 +56,54 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
 	    	    
         AccountManager accountManager = AccountManager.get(this);
         mSyncAccount = Authenticator.getAccount(this);
+        boolean autoSync = true;
         if (accountManager.getAccountsByType(mSyncAccount.type).length == 0) {
+        	//Create a sync account for the first time
         	accountManager.addAccountExplicitly(mSyncAccount, null, null);
+        } else {
+        	autoSync = ContentResolver.getSyncAutomatically(mSyncAccount, AppListContentProvider.AUTHORITY);
         }
-	    
-        setSync();
+        setSync(autoSync);
 	}
     
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getSupportMenuInflater().inflate(R.menu.main, menu);
         mRefreshMenuItem = menu.getItem(MENU_REFRESH_IDX);
-        MenuItem autoSync = menu.getItem(MENU_AUTOSYNC_IDX);
+        mAutoSyncMenuItem = menu.getItem(MENU_AUTOSYNC_IDX);
         mWifiMenuItem = menu.getItem(MENU_WIFI_IDX);
-
-        boolean useAutoSync = mPreferences.isAutoSync();
-        autoSync.setChecked(useAutoSync);
+        refreshMenuState();
+        return true;
+    }
+    
+    /**
+     * Update menu states when activity restored
+     */
+    private void refreshMenuState() {
+        boolean useAutoSync = ContentResolver.getSyncAutomatically(mSyncAccount, AppListContentProvider.AUTHORITY);
+        mAutoSyncMenuItem.setChecked(useAutoSync);
         mWifiMenuItem.setChecked(mPreferences.isWifiOnly());
         if (useAutoSync == false) {
         	mWifiMenuItem.setEnabled(false);
         }
     	if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
-    		menuTitleUpdateCompat(autoSync, R.string.menu_auto_update);
+    		menuTitleUpdateCompat(mAutoSyncMenuItem, R.string.menu_auto_update);
     		menuTitleUpdateCompat(mWifiMenuItem, R.string.menu_wifi_only);    		
-    	}        
-        return true;
+    	} 	
     }
     
     /**
-     * setup sync according to currnt settings
+     * setup sync according to current settings
      */
-    private void setSync() {
+    private void setSync(boolean autoSync) {
     	Bundle params = new Bundle();
 
     	//initialize for 1st time
     	if (ContentResolver.getIsSyncable(mSyncAccount, AppListContentProvider.AUTHORITY) < 1) {
     		ContentResolver.setIsSyncable(mSyncAccount, AppListContentProvider.AUTHORITY, 1);
     	}
-    	
-    	if (mPreferences.isAutoSync()) { 
+
+    	if (autoSync) { 
     		long pollFrequency = (mPreferences.isWifiOnly()) ?  TWO_HOURS_IN_SEC : SIX_HOURS_IN_SEC;
     		ContentResolver.setSyncAutomatically(mSyncAccount, AppListContentProvider.AUTHORITY, true);
     		ContentResolver.addPeriodicSync(mSyncAccount, AppListContentProvider.AUTHORITY, params, pollFrequency);
@@ -133,7 +143,10 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
 	    registerReceiver(mSyncFinishedReceiver, filter);
 	    if (!ContentResolver.isSyncActive(mSyncAccount, AppListContentProvider.AUTHORITY)) {
 	    	stopRefreshAnim();
+	    } else {
+	    	startRefreshAnim();
 	    }
+	    refreshMenuState();
 	}
 	
 	@Override
@@ -143,7 +156,7 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
 	}
 
 	/**
-	 * 
+	 * stop refresh button animation
 	 */
 	private void stopRefreshAnim() {
 		//StopAnimation
@@ -152,7 +165,7 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
 	}
 
 	/**
-	 * 
+	 * Animate refresh button
 	 */
 	private void startRefreshAnim() {
 		//StartAnimation
@@ -176,16 +189,16 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
         case R.id.menu_auto_update:
         	boolean useAutoSync = !item.isChecked();
         	item.setChecked(useAutoSync);
-       		mPreferences.saveAutoSync(useAutoSync);
             if (useAutoSync == false) {
             	mWifiMenuItem.setEnabled(false);
             } else {
             	mWifiMenuItem.setEnabled(true);
             }
+            // on old version there is no checkboxes
         	if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
         		menuTitleUpdateCompat(item, R.string.menu_auto_update);
         	}
-       		setSync();
+       		setSync(useAutoSync);
         	return true;
         case R.id.menu_wifi_only:
         	boolean useWifiOnly = !item.isChecked();
@@ -193,8 +206,8 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
        		mPreferences.saveWifiOnly(useWifiOnly);
         	if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
         		menuTitleUpdateCompat(item, R.string.menu_wifi_only);
-        	}       		
-       		setSync();
+        	} 
+       		setSync(true);
         	return true;
         case R.id.menu_about:
         	AboutDialog aboutDialog = AboutDialog.newInstance();

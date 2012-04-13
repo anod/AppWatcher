@@ -8,6 +8,7 @@ import android.support.v4.content.Loader;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.anod.appwatcher.accounts.MarketTokenLoader;
@@ -17,7 +18,7 @@ import com.anod.appwatcher.market.MarketSessionHelper;
 import com.gc.android.market.api.MarketSession;
 import com.gc.android.market.api.model.Market.App;
 
-public class AppChangelogActivity extends SherlockFragmentActivity implements LoaderCallbacks<String>{
+public class ChangelogActivity extends SherlockFragmentActivity implements LoaderCallbacks<String>{
 
 	public static final String EXTRA_APP_ID = "app_id";
 	private AppLoader mLoader;
@@ -76,6 +77,7 @@ public class AppChangelogActivity extends SherlockFragmentActivity implements Lo
 	@Override
 	public void onLoadFinished(Loader<String> arg0, String authSubToken) {
 		if (authSubToken == null) {
+			Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
 			finish();
 			return;
 		}

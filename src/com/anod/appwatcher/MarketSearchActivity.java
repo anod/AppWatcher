@@ -306,6 +306,7 @@ public class MarketSearchActivity extends SherlockFragmentActivity implements Lo
 	@Override
 	public void onLoadFinished(Loader<String> loader, String authSubToken) {
 		if (authSubToken == null) {
+			Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
 			finish();
 			return;
 		}

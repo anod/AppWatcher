@@ -274,8 +274,8 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 	}
 	
 	private void onChangelogClick(final String appId) {
-		Intent intent = new Intent(getActivity(), AppChangelogActivity.class);
-		intent.putExtra(AppChangelogActivity.EXTRA_APP_ID, appId);
+		Intent intent = new Intent(getActivity(), ChangelogActivity.class);
+		intent.putExtra(ChangelogActivity.EXTRA_APP_ID, appId);
 		startActivity(intent);
 	}
 	
