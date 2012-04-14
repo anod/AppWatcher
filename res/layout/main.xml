@@ -1,22 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/fragment_container"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
-    <fragment android:name="com.anod.appwatcher.AppWatcherListFragment"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent" ></fragment>
-    <!--
- <ListView android:id="@android:id/list"
-               android:layout_width="match_parent"
-               android:layout_height="0dip"
-               android:layout_weight="1"
-               android:drawSelectorOnTop="false"/>
-
-     <TextView android:id="@android:id/empty"
-               android:layout_width="match_parent"
-               android:layout_height="match_parent"
-               android:text="@string/no_data"/>
- //-->
 </LinearLayout>
