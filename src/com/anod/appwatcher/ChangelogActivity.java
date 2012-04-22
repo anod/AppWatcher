@@ -36,7 +36,7 @@ public class ChangelogActivity extends SherlockFragmentActivity implements Loade
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.app_changelog);
-		
+        
 		Intent data = getIntent();
 		
 		mAppId = data.getStringExtra(EXTRA_APP_ID);

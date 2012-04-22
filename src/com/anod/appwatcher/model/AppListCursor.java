@@ -38,4 +38,10 @@ public class AppListCursor extends CursorWrapper {
 			getInt(IDX_STATUS)
 		);
 	}
+	
+	protected void finalize() throws Throwable {
+	    // Do not remove this empty method. It is designed to prevent calls to super.
+	    // Fixes bug on Droid 2, Droid Razr, where CursorWrapper finalizer closes the Cursor!
+		// @see http://stackoverflow.com/questions/6552405/android-compatibility-library-cursorloader-java-lang-illegalstateexception-cu
+	}	
 }
