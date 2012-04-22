@@ -30,6 +30,18 @@
         android:backupAgent=".backup.BackupFileHelperAgent"
        >
 
+		<activity 
+		    android:name=".ShareRecieverActivity"
+		    android:label="@string/app_name"
+		    android:icon="@drawable/ic_launcher"
+		>
+			<intent-filter>
+			   <action android:name="android.intent.action.SEND" />
+			   <category android:name="android.intent.category.DEFAULT" />
+			   <data android:mimeType="text/plain" />
+			</intent-filter> 
+		</activity>
+
         <activity
             android:name=".ChangelogActivity"
             android:label="@string/whats_new_title" 

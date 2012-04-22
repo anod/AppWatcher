@@ -5,6 +5,7 @@ import java.util.List;
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -13,6 +14,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,7 +52,7 @@ import com.gc.android.market.api.MarketSession;
 import com.gc.android.market.api.model.Market.App;
 
 public class MarketSearchActivity extends SherlockFragmentActivity implements LoaderCallbacks<String>{
-	protected static final String TAG = "AppWatcher";
+	public static final String EXTRA_KEYWORD = "keyword";
 	private AppsAdapter mAdapter;
 	private MarketSession mMarketSession;
 	private AppIconLoader mIconLoader;
@@ -59,6 +61,7 @@ public class MarketSearchActivity extends SherlockFragmentActivity implements Lo
 	private LinearLayout mLoading;
 	private RelativeLayout mDeviceIdMessage = null;
 	private ListView mListView;
+	private EditText mSearchEdit;
 	/* (non-Javadoc)
 	 * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
 	 */
@@ -87,8 +90,8 @@ public class MarketSearchActivity extends SherlockFragmentActivity implements Lo
 		ActionBar bar = getSupportActionBar();
 		bar.setCustomView(R.layout.searchbox);
 		bar.setDisplayShowCustomEnabled(true);
-		EditText edit = (EditText)bar.getCustomView();
-		edit.setOnEditorActionListener(new OnEditorActionListener() {
+		mSearchEdit = (EditText)bar.getCustomView();
+		mSearchEdit.setOnEditorActionListener(new OnEditorActionListener() {
 			
 			@Override
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -96,16 +99,18 @@ public class MarketSearchActivity extends SherlockFragmentActivity implements Lo
 	            return true;
 			}
 		});
+		
+		initSearchBar();
+		
 		getSupportLoaderManager().initLoader(0, null, this).forceLoad();
 	}
 
 	private void showResults() {
-		EditText editText = (EditText)getSupportActionBar().getCustomView();
-		String query = editText.getText().toString();
+		String query = mSearchEdit.getText().toString();
 		
         // hide virtual keyboard
         InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+        imm.hideSoftInputFromWindow(mSearchEdit.getWindowToken(), 0);
 
         mListView.setAdapter(mAdapter);
 		
@@ -311,6 +316,20 @@ public class MarketSearchActivity extends SherlockFragmentActivity implements Lo
 			return;
 		}
 		mMarketSession.setAuthSubToken(authSubToken);
+		if (!TextUtils.isEmpty(mSearchEdit.getText())) {
+			showResults();
+		}
+	}
+
+	private void initSearchBar() {
+		Intent i = getIntent();
+		if (i == null) {
+			return;
+		}
+		String keyword = i.getStringExtra(EXTRA_KEYWORD);
+		if (keyword != null) {
+			mSearchEdit.setText(keyword);
+		}
 	}
 
 	@Override

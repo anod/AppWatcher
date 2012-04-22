@@ -5,6 +5,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
+import android.text.method.LinkMovementMethod;
+import android.text.util.Linkify;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -62,6 +64,7 @@ public class ChangelogActivity extends SherlockFragmentActivity implements Loade
         protected void onPostExecute(App app) {
         	mLoadingView.setVisibility(View.GONE);
         	mChangelog.setVisibility(View.VISIBLE);
+        	mChangelog.setAutoLinkMask(Linkify.ALL);
         	mChangelog.setText(app.getExtendedInfo().getRecentChanges());
         }
 
