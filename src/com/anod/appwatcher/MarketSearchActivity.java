@@ -53,6 +53,9 @@ import com.gc.android.market.api.model.Market.App;
 
 public class MarketSearchActivity extends SherlockFragmentActivity implements LoaderCallbacks<String>{
 	public static final String EXTRA_KEYWORD = "keyword";
+	public static final String EXTRA_EXACT = "exact";
+	public static final String EXTRA_SHARE = "share";
+
 	private AppsAdapter mAdapter;
 	private MarketSession mMarketSession;
 	private AppIconLoader mIconLoader;
@@ -62,6 +65,9 @@ public class MarketSearchActivity extends SherlockFragmentActivity implements Lo
 	private RelativeLayout mDeviceIdMessage = null;
 	private ListView mListView;
 	private EditText mSearchEdit;
+	private boolean mFirstTimeRun = false; 
+	private boolean mShareSource = false;
+
 	/* (non-Javadoc)
 	 * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
 	 */
@@ -100,7 +106,7 @@ public class MarketSearchActivity extends SherlockFragmentActivity implements Lo
 			}
 		});
 		
-		initSearchBar();
+		initFromIntent(getIntent());
 		
 		getSupportLoaderManager().initLoader(0, null, this).forceLoad();
 	}
@@ -154,10 +160,14 @@ public class MarketSearchActivity extends SherlockFragmentActivity implements Lo
             if (uri == null) {
                 Toast.makeText(mContext, R.string.error_insert_app, Toast.LENGTH_SHORT).show();
             } else {
+            	if (mShareSource) {
+            		String msg =getString(R.string.app_stored, app.getTitle());
+                    Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();            		
+            	}
             	finish();
             }
 		}
-    };     
+    };
 
     private ContentValues createContentValues(App app) {
     	ContentValues values = new ContentValues();
@@ -316,13 +326,16 @@ public class MarketSearchActivity extends SherlockFragmentActivity implements Lo
 			return;
 		}
 		mMarketSession.setAuthSubToken(authSubToken);
-		if (!TextUtils.isEmpty(mSearchEdit.getText())) {
+		if (mFirstTimeRun && !TextUtils.isEmpty(mSearchEdit.getText())) {
 			showResults();
+		} else {
+	        // hide virtual keyboard
+	        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+	        imm.showSoftInput(mSearchEdit, 0);
 		}
 	}
 
-	private void initSearchBar() {
-		Intent i = getIntent();
+	private void initFromIntent(Intent i) {
 		if (i == null) {
 			return;
 		}
@@ -330,6 +343,8 @@ public class MarketSearchActivity extends SherlockFragmentActivity implements Lo
 		if (keyword != null) {
 			mSearchEdit.setText(keyword);
 		}
+		mFirstTimeRun = i.getBooleanExtra(EXTRA_EXACT, false);
+		mShareSource = i.getBooleanExtra(EXTRA_SHARE, false);
 	}
 
 	@Override
