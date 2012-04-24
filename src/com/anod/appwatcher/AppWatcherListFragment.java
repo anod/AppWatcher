@@ -28,14 +28,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockListFragment;
+import com.anod.appwatcher.market.MarketInfo;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListCursor;
 import com.anod.appwatcher.model.AppListTable;
-import com.anod.appwatcher.utils.AppLog;
 
 public class AppWatcherListFragment extends SherlockListFragment implements LoaderManager.LoaderCallbacks<Cursor>{
-    private static final String URL_PLAY_STORE = "market://details?id=%s";
-    private static final String URL_WEB_PLAY_STORE = "https://play.google.com/store/apps/details?id=%s";
     
     private CursorAdapter mAdapter;
 	class ViewHolder {
@@ -271,7 +269,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 	
 	private void onPlayStoreClick(View v) {
 		String pkg = (String)v.getTag();
-		String url = String.format(URL_PLAY_STORE, pkg);
+		String url = String.format(MarketInfo.URL_PLAY_STORE, pkg);
 		Intent intent = new Intent (Intent.ACTION_VIEW, Uri.parse(url));
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
 		startActivity(intent);
@@ -285,7 +283,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 		} else {
 			builder.setSubject(getString(R.string.share_subject_normal, app.getTitle()));
 		}
-		builder.setText(String.format(URL_WEB_PLAY_STORE, app.getPackageName()));
+		builder.setText(String.format(MarketInfo.URL_WEB_PLAY_STORE, app.getPackageName()));
 		builder.setType("text/plain");
 		builder.startChooser();
 	}

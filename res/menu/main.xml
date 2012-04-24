@@ -26,6 +26,11 @@
         android:title="@string/menu_wifi_only" android:icon="@drawable/ic_menu_wifi">
     </item>
     <item
+        android:id="@+id/menu_rateapp"
+        android:showAsAction="never|withText"
+        android:title="@string/rate_app" android:icon="@drawable/ic_menu_rating">
+    </item>    
+    <item
         android:id="@+id/menu_about"
         android:showAsAction="never|withText"
         android:title="@string/about" android:icon="@drawable/ic_menu_about">

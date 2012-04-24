@@ -7,6 +7,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
@@ -19,6 +20,7 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.anod.appwatcher.market.MarketInfo;
 import com.anod.appwatcher.sync.Authenticator;
 import com.anod.appwatcher.sync.SyncAdapter;
 import com.anod.appwatcher.utils.AppLog;
@@ -215,6 +217,13 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
         		menuTitleUpdateCompat(item, R.string.menu_wifi_only);
         	} 
        		setSync(true);
+        	return true;
+        case R.id.menu_rateapp:
+    		String pkg = getPackageName(); 
+    		String url = String.format(MarketInfo.URL_PLAY_STORE, pkg);
+    		Intent rateIntent = new Intent (Intent.ACTION_VIEW, Uri.parse(url));
+    		rateIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+    		startActivity(rateIntent);
         	return true;
         case R.id.menu_about:
         	AboutDialog aboutDialog = AboutDialog.newInstance();

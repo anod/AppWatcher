@@ -46,4 +46,5 @@
     <string name="disabled">Disabled</string>
     <string name="enabled">Enabled</string>
     <string name="app_stored">\"%s\" added to the watch list</string>
+    <string name="rate_app">Rate this app</string>
 </resources>
