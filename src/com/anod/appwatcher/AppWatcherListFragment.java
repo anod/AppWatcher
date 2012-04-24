@@ -9,7 +9,6 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.app.ShareCompat;
@@ -35,14 +34,14 @@ import com.anod.appwatcher.market.MarketInfo;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListCursor;
 import com.anod.appwatcher.model.AppListTable;
+import com.anod.appwatcher.utils.IntentUtils;
 
 public class AppWatcherListFragment extends SherlockListFragment implements LoaderManager.LoaderCallbacks<Cursor>{
     
     private CursorAdapter mAdapter;
 	class ViewHolder {
-		int rowId;
+		AppInfo app;
 		int position;
-		String appId;
 		TextView title;
 		TextView details;
 		TextView version;
@@ -114,19 +113,19 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 			AppListCursor wrapper = new AppListCursor(cursor);
 			AppInfo app = wrapper.getAppInfo();
 			boolean hide = false;
-            if (mSelectedHolder != null && mSelectedHolder.rowId != app.getRowId()) {
+            if (mSelectedHolder != null && mSelectedHolder.app.getRowId() != app.getRowId()) {
             	hide = true;
             }			
 			ViewHolder holder = (ViewHolder)view.getTag();
 			holder.position = cursor.getPosition();
-			holder.rowId = app.getRowId();
-			holder.appId = app.getAppId();
+			holder.app = app;
             holder.title.setText(app.getTitle());
             holder.details.setText(app.getCreator());
 			holder.removeBtn.setTag(app);
 			holder.marketBtn.setTag(app.getPackageName());
 			holder.changelogBtn.setTag(app.getAppId());
 			holder.shareBtn.setTag(app);
+			holder.icon.setTag(holder);
 			Bitmap icon = app.getIcon();
             if (icon == null) {
 	           	if (mDefaultIcon == null) {
@@ -151,25 +150,10 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
             boolean isInstalled = isAppInstalled(app);
             if (isInstalled) {
             	holder.installed.setVisibility(View.VISIBLE);
+            	
             } else {
             	holder.installed.setVisibility(View.GONE);
             }
-		}
-
-		/**
-		 * 
-		 * @param app
-		 * @return
-		 */
-		private boolean isAppInstalled(AppInfo app) {
-			if (mInstalledCache.containsKey(app.getRowId())) {
-				return mInstalledCache.get(app.getRowId());
-			}
-			
-			Intent appIntent = mPackageManager.getLaunchIntentForPackage(app.getPackageName());
-			boolean isInstalled = (appIntent != null);
-			mInstalledCache.put(app.getRowId(), isInstalled);
-			return isInstalled;
 		}
 
 		@Override
@@ -177,20 +161,29 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 			View v = mInflater.inflate(R.layout.list_row, parent, false);
 		    v.setClickable(true);
 		    v.setFocusable(true);
-		    
+
+		    ViewHolder holder = newViewHolder(v);
+			v.setTag(holder);
+			return v;
+		}
+
+		/**
+		 * @param v
+		 * @param holder
+		 */
+		private ViewHolder newViewHolder(View v) {
 			ViewHolder holder = new ViewHolder();
-			holder.rowId = -1;
+			holder.app = null;
 			holder.position = 0;
             holder.title = (TextView)v.findViewById(R.id.title);
             holder.details = (TextView)v.findViewById(R.id.details);
             holder.icon = (ImageView)v.findViewById(R.id.app_icon);
             holder.version = (TextView)v.findViewById(R.id.version);
             holder.installed = (TextView)v.findViewById(R.id.text_installed);
-            mDefColor = holder.version.getTextColors().getDefaultColor();            
             holder.options = (LinearLayout)v.findViewById(R.id.options);
             holder.newIndicator = (LinearLayout)v.findViewById(R.id.new_indicator);
-            v.setTag(holder);
             
+            mDefColor = holder.version.getTextColors().getDefaultColor();            
             if (!mIsBigScreen) {
             	holder.options.setVisibility(View.GONE);
             	v.setOnClickListener(new OnClickListener() {
@@ -204,7 +197,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
     				@Override
     				public void onClick(View v) {
     					ViewHolder holder = (ViewHolder)v.getTag();
-    					final String appId = holder.appId;
+    					final String appId = holder.app.getAppId();
     					onChangelogClick(appId);
     				}
     			});
@@ -245,18 +238,31 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 				}
 
 			});
-			return v;
+            
+            holder.icon.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					onIconClick(v);
+				}
+			});
+            return holder;
 		}
-    	
     }
     
 	public void onItemClick(View v) {
 		ViewHolder holder = (ViewHolder)v.getTag();
+		switchItemOptions(holder);
+	}
+
+	/**
+	 * @param holder
+	 */
+	public void switchItemOptions(ViewHolder holder) {
 		if (mSelectedHolder == null) {
 			expandItemOptions(holder);
 			return;
 		}
-		if (mSelectedHolder.rowId == holder.rowId) {
+		if (mSelectedHolder.app.getRowId() == holder.app.getRowId()) {
 			if (holder.options.getVisibility() == View.VISIBLE) {
 				holder.options.setVisibility(View.GONE);
 				mSelectedHolder = null;
@@ -297,9 +303,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 	
 	private void onPlayStoreClick(View v) {
 		String pkg = (String)v.getTag();
-		String url = String.format(MarketInfo.URL_PLAY_STORE, pkg);
-		Intent intent = new Intent (Intent.ACTION_VIEW, Uri.parse(url));
-		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+		Intent intent = IntentUtils.createPlayStoreIntent(pkg);
 		startActivity(intent);
 	}
 
@@ -320,6 +324,37 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 		Intent intent = new Intent(getActivity(), ChangelogActivity.class);
 		intent.putExtra(ChangelogActivity.EXTRA_APP_ID, appId);
 		startActivity(intent);
+	}
+	
+	/**
+	 * 
+	 * @param v
+	 */
+	private void onIconClick(View v) {
+		ViewHolder holder = (ViewHolder)v.getTag();
+		boolean isInstalled = isAppInstalled(holder.app);
+		if (isInstalled) {
+			Intent appInfo = IntentUtils.createApplicationDetailsIntent(holder.app.getPackageName());
+			startActivity(appInfo);
+		} else {
+			switchItemOptions(holder);
+		}
+	}
+	
+	/**
+	 * 
+	 * @param app
+	 * @return
+	 */
+	private boolean isAppInstalled(AppInfo app) {
+		if (mInstalledCache.containsKey(app.getRowId())) {
+			return mInstalledCache.get(app.getRowId());
+		}
+		
+		Intent appIntent = mPackageManager.getLaunchIntentForPackage(app.getPackageName());
+		boolean isInstalled = (appIntent != null);
+		mInstalledCache.put(app.getRowId(), isInstalled);
+		return isInstalled;
 	}
 	
     @Override

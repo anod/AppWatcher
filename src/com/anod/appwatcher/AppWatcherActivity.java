@@ -7,7 +7,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
@@ -20,10 +19,10 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.anod.appwatcher.market.MarketInfo;
 import com.anod.appwatcher.sync.Authenticator;
 import com.anod.appwatcher.sync.SyncAdapter;
 import com.anod.appwatcher.utils.AppLog;
+import com.anod.appwatcher.utils.IntentUtils;
 
 public class AppWatcherActivity extends SherlockFragmentActivity {
 	private static final int MENU_REFRESH_IDX = 1;
@@ -220,9 +219,7 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
         	return true;
         case R.id.menu_rateapp:
     		String pkg = getPackageName(); 
-    		String url = String.format(MarketInfo.URL_PLAY_STORE, pkg);
-    		Intent rateIntent = new Intent (Intent.ACTION_VIEW, Uri.parse(url));
-    		rateIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+    		Intent rateIntent = IntentUtils.createPlayStoreIntent(pkg);
     		startActivity(rateIntent);
         	return true;
         case R.id.menu_about:
@@ -232,7 +229,7 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
         default:
             return true;
         }
-    }    
+    }
 
 	/**
 	 * For devices prior to honeycomb add enable/disable text
