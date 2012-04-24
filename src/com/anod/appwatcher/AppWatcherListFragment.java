@@ -31,6 +31,7 @@ import com.actionbarsherlock.app.SherlockListFragment;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListCursor;
 import com.anod.appwatcher.model.AppListTable;
+import com.anod.appwatcher.utils.AppLog;
 
 public class AppWatcherListFragment extends SherlockListFragment implements LoaderManager.LoaderCallbacks<Cursor>{
     private static final String URL_PLAY_STORE = "market://details?id=%s";
@@ -39,6 +40,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
     private CursorAdapter mAdapter;
 	class ViewHolder {
 		int rowId;
+		int position;
 		String appId;
 		TextView title;
 		TextView details;
@@ -112,6 +114,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
             	hide = true;
             }			
 			ViewHolder holder = (ViewHolder)view.getTag();
+			holder.position = cursor.getPosition();
 			holder.rowId = app.getRowId();
 			holder.appId = app.getAppId();
             holder.title.setText(app.getTitle());
@@ -152,6 +155,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 		    
 			ViewHolder holder = new ViewHolder();
 			holder.rowId = -1;
+			holder.position = 0;
             holder.title = (TextView)v.findViewById(R.id.title);
             holder.details = (TextView)v.findViewById(R.id.details);
             holder.icon = (ImageView)v.findViewById(R.id.icon);
@@ -223,9 +227,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 	public void onItemClick(View v) {
 		ViewHolder holder = (ViewHolder)v.getTag();
 		if (mSelectedHolder == null) {
-			mSelectedHolder = holder;
-			mSelectedHolder.options.startAnimation(mAnimSlideOut);
-			mSelectedHolder.options.setVisibility(View.VISIBLE);
+			expandItemOptions(holder);
 			return;
 		}
 		if (mSelectedHolder.rowId == holder.rowId) {
@@ -236,10 +238,26 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 				holder.options.setVisibility(View.VISIBLE);
 			}
 		} else {
+			//getListView().scr
 			mSelectedHolder.options.setVisibility(View.GONE);
-			mSelectedHolder = holder;
-			holder.options.startAnimation(mAnimSlideOut);			
-			holder.options.setVisibility(View.VISIBLE);
+			expandItemOptions(holder);
+		}
+	}
+
+	/**
+	 * replace current selected holder
+	 * and scroll down
+	 * @param holder
+	 */
+	private void expandItemOptions(ViewHolder holder) {
+		mSelectedHolder = holder;
+		mSelectedHolder.options.startAnimation(mAnimSlideOut);
+		mSelectedHolder.options.setVisibility(View.VISIBLE);
+		
+		int lastVisiblePos = getListView().getLastVisiblePosition();
+		if (lastVisiblePos == holder.position
+		 || lastVisiblePos == (holder.position + 1)) {
+			getListView().smoothScrollToPosition(lastVisiblePos);
 		}
 	}
 
@@ -258,7 +276,6 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
 		startActivity(intent);
 	}
-	
 
 	private void onShareClick(View v) {
 		AppInfo app = (AppInfo)v.getTag();
