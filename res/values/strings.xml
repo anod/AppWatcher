@@ -7,7 +7,7 @@
     <string name="failed_gain_access">Please allow access. The permission is required in order to communicate with Google Play Store.</string>
     <string name="search_hint">Search an app</string>
     <string name="search_action">Search</string>
-    <string name="search_for_app">Search for an application and click on it to add to the watch list.</string>
+    <string name="search_for_app">Search for an application and click on it to add to the watch list.\n( Tip: you can add apps directly from Play Store using \"Share\" button )</string>
     <string name="loading">Loading&#8230;</string>
     <string name="no_result_found">No results for \"%s\"</string>
     <string name="error_insert_app">Failed to add application to the whatch list.</string>
@@ -47,4 +47,5 @@
     <string name="enabled">Enabled</string>
     <string name="app_stored">\"%s\" added to the watch list</string>
     <string name="rate_app">Rate this app</string>
+    <string name="installed">Installed</string>
 </resources>

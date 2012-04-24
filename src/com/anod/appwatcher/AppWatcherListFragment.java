@@ -1,7 +1,10 @@
 package com.anod.appwatcher;
 
+import java.util.HashMap;
+
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -43,6 +46,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 		TextView title;
 		TextView details;
 		TextView version;
+		TextView installed;
 		ImageView icon;
 		LinearLayout newIndicator;
 		LinearLayout options;
@@ -54,7 +58,8 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 	private ViewHolder mSelectedHolder = null;
 	private Animation mAnimSlideOut;
 	private boolean mIsBigScreen;
-	
+	private PackageManager mPackageManager;
+	private HashMap<Integer, Boolean> mInstalledCache = new HashMap<Integer, Boolean>();
 	/** Called when the activity is first created. */
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -80,6 +85,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
         
         mAnimSlideOut = AnimationUtils.loadAnimation(getActivity(), R.anim.slideout);
         
+        mPackageManager = getActivity().getPackageManager();
         // Prepare the loader.  Either re-connect with an existing one,
         // or start a new one.
         getLoaderManager().initLoader(0, null, this);
@@ -139,10 +145,31 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
             } else {
                 holder.version.setText(String.format(mVersionText, app.getVersionName()));
                 holder.version.setTextColor(mDefColor);
-              
-                //TextView.getTextColors().getDefaultColor()
             	holder.newIndicator.setVisibility(View.INVISIBLE);
             }
+            
+            boolean isInstalled = isAppInstalled(app);
+            if (isInstalled) {
+            	holder.installed.setVisibility(View.VISIBLE);
+            } else {
+            	holder.installed.setVisibility(View.GONE);
+            }
+		}
+
+		/**
+		 * 
+		 * @param app
+		 * @return
+		 */
+		private boolean isAppInstalled(AppInfo app) {
+			if (mInstalledCache.containsKey(app.getRowId())) {
+				return mInstalledCache.get(app.getRowId());
+			}
+			
+			Intent appIntent = mPackageManager.getLaunchIntentForPackage(app.getPackageName());
+			boolean isInstalled = (appIntent != null);
+			mInstalledCache.put(app.getRowId(), isInstalled);
+			return isInstalled;
 		}
 
 		@Override
@@ -156,8 +183,9 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 			holder.position = 0;
             holder.title = (TextView)v.findViewById(R.id.title);
             holder.details = (TextView)v.findViewById(R.id.details);
-            holder.icon = (ImageView)v.findViewById(R.id.icon);
+            holder.icon = (ImageView)v.findViewById(R.id.app_icon);
             holder.version = (TextView)v.findViewById(R.id.version);
+            holder.installed = (TextView)v.findViewById(R.id.text_installed);
             mDefColor = holder.version.getTextColors().getDefaultColor();            
             holder.options = (LinearLayout)v.findViewById(R.id.options);
             holder.newIndicator = (LinearLayout)v.findViewById(R.id.new_indicator);
