@@ -1,0 +1,16 @@
+App Watcher Changelog
+
+1.1
+
+Add app directly from Play Store using share button
+Click on installed icon open App Info
+Add indicator for installed applications
+Add "Rate this app" menu item
+Detect links in app change log
+Fix small ui issues
+
+1.0.2
+Fix for crashes on Motorola devices
+
+1.0
+Initial version.
