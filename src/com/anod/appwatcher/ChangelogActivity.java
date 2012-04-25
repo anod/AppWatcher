@@ -5,7 +5,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
-import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -65,17 +64,19 @@ public class ChangelogActivity extends SherlockFragmentActivity implements Loade
         	mLoadingView.setVisibility(View.GONE);
         	mChangelog.setVisibility(View.VISIBLE);
         	mChangelog.setAutoLinkMask(Linkify.ALL);
-        	mChangelog.setText(app.getExtendedInfo().getRecentChanges());
+        	String changes = app.getExtendedInfo().getRecentChanges();
+        	if (changes.equals("")) {
+        		mChangelog.setText(R.string.no_recent_changes);
+        	} else {
+        		mChangelog.setText(app.getExtendedInfo().getRecentChanges());
+        	}
         }
-
     }
-
 
 	@Override
 	public Loader<String> onCreateLoader(int id, Bundle a) {
 		return new MarketTokenLoader(this);
 	}
-
 
 	@Override
 	public void onLoadFinished(Loader<String> arg0, String authSubToken) {
@@ -87,7 +88,6 @@ public class ChangelogActivity extends SherlockFragmentActivity implements Loade
 		mMarketSession.setAuthSubToken(authSubToken);
         new RetreiveResultsTask().execute(mAppId);
 	}
-
 
 	@Override
 	public void onLoaderReset(Loader<String> arg0) {
