@@ -29,7 +29,7 @@
     <string name="alert_dialog_remove">Verwijderen</string>
     <string name="alert_dialog_cancel">Annuleren</string>
     <string name="version">Versie %s</string>
-    <string name="update">Ge��pdate naar %s</string>
+    <string name="update">Geupdate naar %s</string>
     <string name="notification_one_updated">%s update gevonden</string>
     <string name="notification_many_updates">%d updates gevonden</string>
     <string name="notification_2_apps">%1$s, %2$s</string>
