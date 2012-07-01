@@ -1,7 +1,6 @@
 package com.anod.appwatcher;
 
 import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -19,7 +18,7 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.anod.appwatcher.sync.Authenticator;
+import com.anod.appwatcher.sync.AccountHelper;
 import com.anod.appwatcher.sync.SyncAdapter;
 import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.IntentUtils;
@@ -61,14 +60,10 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
 	    LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	    mRefreshView = (ImageView) inflater.inflate(R.layout.refresh_action_view, null);
 	    mPreferences = new Preferences(this);
-	    	    
-        AccountManager accountManager = AccountManager.get(this);
-        mSyncAccount = Authenticator.getAccount(this);
+
+	    mSyncAccount = AccountHelper.getAccount(this);
         boolean autoSync = true;
-        if (accountManager.getAccountsByType(mSyncAccount.type).length == 0) {
-        	//Create a sync account for the first time
-        	accountManager.addAccountExplicitly(mSyncAccount, null, null);
-        } else {
+        if (!mPreferences.checkFirstLaunch()) {
         	autoSync = ContentResolver.getSyncAutomatically(mSyncAccount, AppListContentProvider.AUTHORITY);
         }
         setSync(autoSync);
@@ -105,7 +100,7 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
      */
     private void setSync(boolean autoSync) {
     	Bundle params = new Bundle();
-
+    	
     	//initialize for 1st time
     	if (ContentResolver.getIsSyncable(mSyncAccount, AppListContentProvider.AUTHORITY) < 1) {
     		ContentResolver.setIsSyncable(mSyncAccount, AppListContentProvider.AUTHORITY, 1);
@@ -191,7 +186,7 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
         case R.id.menu_refresh:
         	AppLog.d("Refresh pressed");
             Bundle params = new Bundle();
-            params.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);            
+            params.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true); 
         	ContentResolver.requestSync(mSyncAccount, AppListContentProvider.AUTHORITY, params);
         	return true;       
         case R.id.menu_auto_update:

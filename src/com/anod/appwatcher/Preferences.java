@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 public class Preferences {
+	private static final String FIRT_LAUNCH = "firt_launch";
 	private static final String LAST_UPDATE_TIME = "last_update_time";
 	private static final String WIFI_ONLY = "wifi_only";
 	private static final String DEVICE_ID = "device_id";
@@ -17,6 +18,16 @@ public class Preferences {
 		mSettings = context.getSharedPreferences(PREFS_NAME, 0);		
 	}
 
+	public boolean checkFirstLaunch() {
+		boolean value = mSettings.getBoolean(FIRT_LAUNCH, true);
+		if (value) {
+			SharedPreferences.Editor editor = mSettings.edit();
+			editor.putBoolean(FIRT_LAUNCH, false);
+			editor.commit();	
+		}
+		return value;
+	}
+	
 	public long getLastUpdateTime() {
 		return mSettings.getLong(LAST_UPDATE_TIME, -1);
 	}
