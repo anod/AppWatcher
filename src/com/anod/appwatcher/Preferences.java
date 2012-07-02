@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 public class Preferences {
+	private static final String VIEWED = "viewed";
 	private static final String FIRT_LAUNCH = "firt_launch";
 	private static final String LAST_UPDATE_TIME = "last_update_time";
 	private static final String WIFI_ONLY = "wifi_only";
@@ -70,5 +71,15 @@ public class Preferences {
 		SharedPreferences.Editor editor = mSettings.edit();
 		editor.putLong(LAST_UPDATE_TIME, time);
 		editor.commit();
+	}
+
+	public void markViewed(boolean viewed) {
+		SharedPreferences.Editor editor = mSettings.edit();
+		editor.putBoolean(VIEWED, viewed);
+		editor.commit();
+	}
+
+	public boolean isLastUpdatesViewed() {
+		return mSettings.getBoolean(VIEWED, true);
 	}
 }

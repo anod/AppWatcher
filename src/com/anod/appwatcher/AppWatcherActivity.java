@@ -150,6 +150,7 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
 	    	startRefreshAnim();
 	    }
 	    refreshMenuState();
+	    mPreferences.markViewed(true);
 	}
 	
 	@Override
@@ -158,6 +159,7 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
 	    unregisterReceiver(mSyncFinishedReceiver);
 	}
 
+	
 	/**
 	 * stop refresh button animation
 	 */

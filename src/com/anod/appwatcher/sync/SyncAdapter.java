@@ -130,7 +130,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 			return updatedTitles;
 		}
 		apps.moveToPosition(-1);
-			
+		
+		boolean lastUpdatesViewed = pref.isLastUpdatesViewed();
+		
 		while(apps.moveToNext()) {
 			AppInfo localApp = apps.getAppInfo();
 			AppLog.d("Checking for updates '"+localApp.getTitle()+"' ...");
@@ -152,7 +154,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 			AppLog.d("No update found.");
 			values = new ContentValues();
 			//Mark updated app as normal 
-			if (localApp.getStatus() == AppInfo.STATUS_UPDATED) {
+			if (localApp.getStatus() == AppInfo.STATUS_UPDATED && lastUpdatesViewed) {
 				AppLog.d("Mark application as old");
 				values.put(AppListTable.Columns.KEY_STATUS, AppInfo.STATUS_NORMAL );
 			}
@@ -168,6 +170,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 			if (values.size() > 0) {
 				updateApp(provider, localApp.getRowId(), values);
 			}
+		}
+		if (lastUpdatesViewed && updatedTitles.size() > 0) {
+			pref.markViewed(false);
 		}
 		return updatedTitles;
 	}
