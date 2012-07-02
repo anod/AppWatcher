@@ -21,7 +21,6 @@
     <string name="whats_new_title">What\'s new</string>
     <string name="problem_occured">Problem occured during recieving infomation.</string>
     <string name="appwatcher_account">AppWatcher Account</string>
-    <string name="applications">Applications</string>
     <string name="menu_auto_update">Automatic update</string>
     <string name="menu_wifi_only">Wi-Fi Only</string>
     <string name="alert_dialog_remove_title">Remove?</string>

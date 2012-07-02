@@ -67,7 +67,7 @@
       		android:name=".AppListContentProvider"
       		android:authorities="com.anod.appwatcher"
       		android:syncable="true"
-      		android:label="@string/applications"
+      		android:label="@string/app_name"
 		>
    		</provider>
 
