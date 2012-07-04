@@ -13,6 +13,7 @@ public class AppListTable {
 	    public static final String KEY_CREATOR = "creator";	    
 	    public static final String KEY_ICON_CACHE = "icon";
 	    public static final String KEY_STATUS = "status";
+	    public static final String KEY_UPDATE_DATE = "update_date";
 	}
 	
 	public static final String TABLE_NAME = "app_list";
@@ -26,7 +27,8 @@ public class AppListTable {
     	Columns.KEY_TITLE,
     	Columns.KEY_CREATOR,
     	Columns.KEY_ICON_CACHE,
-    	Columns.KEY_STATUS
+    	Columns.KEY_STATUS,
+    	Columns.KEY_UPDATE_DATE
     };
     
 }

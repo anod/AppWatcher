@@ -1,5 +1,6 @@
 package com.anod.appwatcher;
 
+import java.util.Date;
 import java.util.HashMap;
 
 import android.content.Context;
@@ -16,6 +17,7 @@ import android.support.v4.app.ShareCompat.IntentBuilder;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
+import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -53,6 +55,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 		Button marketBtn;
 		Button changelogBtn;
 		ImageButton shareBtn;
+		TextView updateDate;
 	}
 	private ViewHolder mSelectedHolder = null;
 	private Animation mAnimSlideOut;
@@ -98,6 +101,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 		private String mUpdateText;
 		private int mDefColor;
 		private int mUpdateTextColor;
+		private java.text.DateFormat mDateFormat;
 
 		public ListCursorAdapter(Context context, Cursor c, int flags) {
 			super(context, c, flags);
@@ -106,6 +110,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 	        mVersionText = r.getString(R.string.version);
 	        mUpdateText = r.getString(R.string.update);
 	        mUpdateTextColor = r.getColor(R.color.blue_new);
+	        mDateFormat = android.text.format.DateFormat.getDateFormat(getActivity().getApplicationContext());
 		}
 
 		@Override
@@ -115,7 +120,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 			boolean hide = false;
             if (mSelectedHolder != null && mSelectedHolder.app.getRowId() != app.getRowId()) {
             	hide = true;
-            }			
+            }
 			ViewHolder holder = (ViewHolder)view.getTag();
 			holder.position = cursor.getPosition();
 			holder.app = app;
@@ -154,6 +159,14 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
             } else {
             	holder.installed.setVisibility(View.GONE);
             }
+            int updateTime = app.getUpdateTime();
+            if (updateTime > 0) {
+            	Date date = new Date(updateTime);
+            	holder.updateDate.setText(mDateFormat.format(date));
+            	holder.updateDate.setVisibility(View.VISIBLE);
+            } else {
+            	holder.updateDate.setVisibility(View.GONE);
+            }
 		}
 
 		@Override
@@ -182,6 +195,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
             holder.installed = (TextView)v.findViewById(R.id.text_installed);
             holder.options = (LinearLayout)v.findViewById(R.id.options);
             holder.newIndicator = (LinearLayout)v.findViewById(R.id.new_indicator);
+            holder.updateDate = (TextView)v.findViewById(R.id.update_date);
             
             mDefColor = holder.version.getTextColors().getDefaultColor();            
             if (!mIsBigScreen) {

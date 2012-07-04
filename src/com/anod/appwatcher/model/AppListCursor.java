@@ -15,6 +15,7 @@ public class AppListCursor extends CursorWrapper {
     private static final int IDX_CREATOR = 6;    
     private static final int IDX_ICON_CACHE = 7;
     private static final int IDX_STATUS = 8;
+    private static final int IDX_UPDATE_DATE = 9;
 
 	public AppListCursor(Cursor cursor) {
 		super(cursor);
@@ -28,14 +29,15 @@ public class AppListCursor extends CursorWrapper {
 		}
 		return new AppInfo(
 			getInt(IDX_ROWID),
-			getString(IDX_APPID),				
+			getString(IDX_APPID),
 			getString(IDX_PACKAGE),
 			getInt(IDX_VERSION_NUMBER),
 			getString(IDX_VERSION_NAME),
 			getString(IDX_TITLE),
 			getString(IDX_CREATOR),			
 			icon,
-			getInt(IDX_STATUS)
+			getInt(IDX_STATUS),
+			getInt(IDX_UPDATE_DATE)
 		);
 	}
 	

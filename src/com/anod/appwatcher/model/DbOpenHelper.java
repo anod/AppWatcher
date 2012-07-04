@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DbOpenHelper extends SQLiteOpenHelper {
 	    
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
     public static final String DATABASE_NAME = "app_watcher";
     private static final String TABLE_CREATE =
     	"CREATE TABLE " + AppListTable.TABLE_NAME + " (" +
@@ -14,11 +14,11 @@ public class DbOpenHelper extends SQLiteOpenHelper {
 			AppListTable.Columns.KEY_APPID + " TEXT not null," +
 			AppListTable.Columns.KEY_PACKAGE + " TEXT not null," +
 			AppListTable.Columns.KEY_VERSION_NUMBER + " INTEGER," +
-			AppListTable.Columns.KEY_VERSION_NAME + " TEXT," +    		
+			AppListTable.Columns.KEY_VERSION_NAME + " TEXT," + 
 			AppListTable.Columns.KEY_TITLE + " TEXT not null," +
-			AppListTable.Columns.KEY_CREATOR + " TEXT," +			
+			AppListTable.Columns.KEY_CREATOR + " TEXT," + 
 			AppListTable.Columns.KEY_ICON_CACHE + " BLOB," +
-			AppListTable.Columns.KEY_STATUS + " INTEGER" +    		
+			AppListTable.Columns.KEY_STATUS + " INTEGER" +
 		") ";
 
     public DbOpenHelper(Context context) {
@@ -34,7 +34,8 @@ public class DbOpenHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		// TODO Auto-generated method stub
+		// Version 2
+		db.execSQL("ALTER TABLE "+AppListTable.TABLE_NAME + " ADD COLUMN " + AppListTable.Columns.KEY_UPDATE_DATE + " DATE");
 		
 	}
 

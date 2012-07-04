@@ -2,35 +2,34 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="center_vertical|clip_vertical"
     android:baselineAligned="false"
+    android:gravity="center_vertical|clip_vertical"
     android:orientation="horizontal" >
 
-       <FrameLayout 
-           android:layout_width="@dimen/icon_wrapper"
-           android:layout_height="match_parent"         
-       >
-           
+    <FrameLayout
+        android:layout_width="@dimen/icon_wrapper"
+        android:layout_height="match_parent" >
+
         <ImageView
             android:id="@+id/app_icon"
             android:layout_width="@dimen/icon_size"
             android:layout_height="@dimen/icon_size"
+            android:layout_gravity="center_vertical"
             android:layout_margin="4dip"
             android:contentDescription="@string/application_icon"
-            android:src="@drawable/ic_empty"
-            android:layout_gravity="center_vertical" />
+            android:src="@drawable/ic_empty" />
 
-           <TextView
-               android:id="@+id/text_installed"
-               android:layout_width="match_parent"
-               android:layout_height="wrap_content"
-               android:background="#66000000"
-               android:gravity="center_horizontal"
-               android:text="@string/installed"
-               android:textColor="#FFFFFFFF"
-               android:textSize="10dp"
-               android:layout_gravity="bottom" /> 
-               
+        <TextView
+            android:id="@+id/text_installed"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="#66000000"
+            android:gravity="center_horizontal"
+            android:text="@string/installed"
+            android:textColor="#FFFFFFFF"
+            android:textSize="10dp" />
+
         <LinearLayout
             android:id="@+id/new_indicator"
             android:layout_width="5dip"
@@ -39,41 +38,51 @@
             android:gravity="left|center_vertical"
             android:orientation="horizontal" >
         </LinearLayout>
-                               
-       </FrameLayout>
+    </FrameLayout>
 
-   <LinearLayout
-       android:layout_width="0dp"
-       android:layout_height="wrap_content"
-       android:layout_weight="1"
-       android:gravity="center_vertical|clip_vertical"
-       android:orientation="vertical" >
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center_vertical|clip_vertical"
+        android:orientation="vertical" >
 
-       <TextView
-           android:id="@+id/title"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"
-           android:text="@string/app_name"
-           android:textAppearance="?android:attr/textAppearanceMedium" />
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
-       <TextView
-           android:id="@+id/details"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"
-           android:text="@string/app_name"
-           android:textAppearance="?android:attr/textAppearanceSmall" />
+        <TextView
+            android:id="@+id/details"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
 
+        <RelativeLayout
+            android:id="@+id/version_row"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="@dimen/info_margin_right" >
 
+            <TextView
+                android:id="@+id/version"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/app_name"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
 
-       <TextView
-           android:id="@+id/version"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"
-           android:text="@string/app_name"
-           android:textAppearance="?android:attr/textAppearanceSmall"
-       />
-
-   </LinearLayout>
+            <TextView
+                android:id="@+id/update_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:text="@string/app_name" />
+        </RelativeLayout>
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/options"
@@ -90,8 +99,8 @@
             android:layout_marginRight="4dp"
             android:background="@drawable/app_act_button"
             android:contentDescription="@string/share"
-            android:src="@drawable/ic_action_share"
             android:focusable="false"
+            android:src="@drawable/ic_action_share"
             android:text="@string/share" />
 
         <View
@@ -100,7 +109,6 @@
             android:layout_marginBottom="5dip"
             android:layout_marginTop="5dip"
             android:background="@drawable/divider_vertical_dark" />
-                
 
         <Button
             android:id="@+id/changelog_btn"
@@ -122,7 +130,6 @@
             android:layout_marginBottom="5dip"
             android:layout_marginTop="5dip"
             android:background="@drawable/divider_vertical_dark" />
-
 
         <Button
             android:id="@+id/market_btn"
@@ -153,9 +160,8 @@
             android:layout_marginRight="4dp"
             android:background="@drawable/app_act_button"
             android:contentDescription="@string/remove"
-            android:src="@drawable/ic_remove"
             android:focusable="false"
-		/>
+            android:src="@drawable/ic_remove" />
     </LinearLayout>
 
 </LinearLayout>

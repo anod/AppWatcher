@@ -17,8 +17,10 @@ public class AppInfo {
 	private String creator;	
 	private Bitmap icon;
 	private int status;
+	private int updateTime;
+	
 	public AppInfo(int rowId, String appId, String pname, int versionNumber, String versionName,
-			String title, String creator, Bitmap icon, int status) {
+			String title, String creator, Bitmap icon, int status, int updateTime) {
 		this.rowId = rowId;
 		this.appId = appId;		
 		this.packageName = pname;
@@ -28,6 +30,7 @@ public class AppInfo {
 		this.creator = creator;
 		this.icon = icon;
 		this.status = status;
+		this.updateTime = updateTime;
 	}
 	/**
 	 * 
@@ -86,6 +89,10 @@ public class AppInfo {
 	public int getStatus() {
 		return status;
 	}
-	
-	
+	/**
+	 * @return the last update time
+	 */
+	public int getUpdateTime() {
+		return updateTime;
+	}
 }

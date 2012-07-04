@@ -147,8 +147,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 				Bitmap icon = iconLoader.loadImageUncached(marketApp.getId());
 				values = createContentValues(marketApp, icon);
 				updateApp(provider, localApp.getRowId(), values);
-	            updatedTitles.add(marketApp.getTitle());
-	            continue;
+				updatedTitles.add(marketApp.getTitle());
+				continue;
 			}
 			
 			AppLog.d("No update found.");
@@ -198,18 +198,20 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     	ContentValues values = new ContentValues();
 
    	    values.put(AppListTable.Columns.KEY_TITLE, app.getTitle());
-   	    values.put(AppListTable.Columns.KEY_VERSION_NUMBER, app.getVersionCode());  	    
+   	    values.put(AppListTable.Columns.KEY_VERSION_NUMBER, app.getVersionCode());
    	    values.put(AppListTable.Columns.KEY_VERSION_NAME, app.getVersion());
    	    values.put(AppListTable.Columns.KEY_CREATOR, app.getCreator());
    	    values.put(AppListTable.Columns.KEY_STATUS, AppInfo.STATUS_UPDATED );
+   	    values.put(AppListTable.Columns.KEY_UPDATE_DATE, System.currentTimeMillis());
+
    	    if (icon != null) {
    	    	byte[] iconData = BitmapUtils.flattenBitmap(icon);
    	   	    values.put(AppListTable.Columns.KEY_ICON_CACHE, iconData);
    	    }
-   	    
+
    	    return values;
     }
-    
+
 	private MarketSession createAppInfoLoader(Preferences prefs) {
 		MarketSessionHelper helper = new MarketSessionHelper(mContext);
 		String deviceId = DeviceIdHelper.getDeviceId(mContext, prefs);
