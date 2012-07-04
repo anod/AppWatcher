@@ -19,6 +19,7 @@ public class DbOpenHelper extends SQLiteOpenHelper {
 			AppListTable.Columns.KEY_CREATOR + " TEXT," + 
 			AppListTable.Columns.KEY_ICON_CACHE + " BLOB," +
 			AppListTable.Columns.KEY_STATUS + " INTEGER" +
+			AppListTable.Columns.KEY_UPDATE_DATE + " INTEGER" +
 		") ";
 
     public DbOpenHelper(Context context) {
@@ -35,7 +36,7 @@ public class DbOpenHelper extends SQLiteOpenHelper {
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		// Version 2
-		db.execSQL("ALTER TABLE "+AppListTable.TABLE_NAME + " ADD COLUMN " + AppListTable.Columns.KEY_UPDATE_DATE + " DATE");
+		db.execSQL("ALTER TABLE "+AppListTable.TABLE_NAME + " ADD COLUMN " + AppListTable.Columns.KEY_UPDATE_DATE + " INTEGER");
 		
 	}
 

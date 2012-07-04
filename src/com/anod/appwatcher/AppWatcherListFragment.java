@@ -1,7 +1,6 @@
 package com.anod.appwatcher;
 
-import java.util.Date;
-import java.util.HashMap;
+import java.sql.Timestamp;
 
 import android.content.Context;
 import android.content.Intent;
@@ -17,7 +16,7 @@ import android.support.v4.app.ShareCompat.IntentBuilder;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
-import android.text.format.DateFormat;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -36,6 +35,7 @@ import com.anod.appwatcher.market.MarketInfo;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListCursor;
 import com.anod.appwatcher.model.AppListTable;
+import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.IntentUtils;
 
 public class AppWatcherListFragment extends SherlockListFragment implements LoaderManager.LoaderCallbacks<Cursor>{
@@ -61,7 +61,8 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 	private Animation mAnimSlideOut;
 	private boolean mIsBigScreen;
 	private PackageManager mPackageManager;
-	private HashMap<Integer, Boolean> mInstalledCache = new HashMap<Integer, Boolean>();
+	private SparseBooleanArray mInstalledCache = new SparseBooleanArray();
+	
 	/** Called when the activity is first created. */
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -102,6 +103,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 		private int mDefColor;
 		private int mUpdateTextColor;
 		private java.text.DateFormat mDateFormat;
+		private Timestamp mTimestamp;
 
 		public ListCursorAdapter(Context context, Cursor c, int flags) {
 			super(context, c, flags);
@@ -111,6 +113,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 	        mUpdateText = r.getString(R.string.update);
 	        mUpdateTextColor = r.getColor(R.color.blue_new);
 	        mDateFormat = android.text.format.DateFormat.getDateFormat(getActivity().getApplicationContext());
+            mTimestamp = new Timestamp(System.currentTimeMillis());
 		}
 
 		@Override
@@ -160,9 +163,11 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
             	holder.installed.setVisibility(View.GONE);
             }
             int updateTime = app.getUpdateTime();
+            
+            AppLog.d("Update time:" + updateTime);
             if (updateTime > 0) {
-            	Date date = new Date(updateTime);
-            	holder.updateDate.setText(mDateFormat.format(date));
+            	mTimestamp.setNanos(updateTime);
+            	holder.updateDate.setText(mDateFormat.format(mTimestamp));
             	holder.updateDate.setVisibility(View.VISIBLE);
             } else {
             	holder.updateDate.setVisibility(View.GONE);
@@ -361,7 +366,7 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 	 * @return
 	 */
 	private boolean isAppInstalled(AppInfo app) {
-		if (mInstalledCache.containsKey(app.getRowId())) {
+		if (mInstalledCache.indexOfKey(app.getRowId()) >= 0) {
 			return mInstalledCache.get(app.getRowId());
 		}
 		

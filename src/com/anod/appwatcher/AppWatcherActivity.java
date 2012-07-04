@@ -155,6 +155,7 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
 	    	startRefreshAnim();
 	    }
 	    refreshMenuState();
+	    AppLog.d("Mark updates as viewed.");
 	    mPreferences.markViewed(true);
 	}
 	

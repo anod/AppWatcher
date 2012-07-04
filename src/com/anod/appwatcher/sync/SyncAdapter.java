@@ -1,5 +1,6 @@
 package com.anod.appwatcher.sync;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 
 import android.accounts.Account;
@@ -62,8 +63,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
 		Preferences pref = new Preferences(mContext);
 
+		boolean manualSync = extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, false);
 		// Skip any check if sync requested from application
-		if (extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, false) == false) {
+		if (manualSync == false) {
 			if (pref.isWifiOnly() && !isWifiEnabled()) {
 				AppLog.d("Wifi not enabled, skipping update check....");
 				return;
@@ -80,9 +82,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 		Intent startIntent = new Intent(SYNC_PROGRESS);
 		mContext.sendBroadcast(startIntent);
 		
+		
+		boolean lastUpdatesViewed = pref.isLastUpdatesViewed();
+		AppLog.d("Last update viewed: "+lastUpdatesViewed);
+		
 		ArrayList<String> updatedTitles = null;
 		try {
-			updatedTitles = doSync(pref, provider);
+			updatedTitles = doSync(pref, provider, lastUpdatesViewed);
 		} catch (RemoteException e) {
 			
 		}
@@ -92,9 +98,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 		mContext.sendBroadcast(finishIntent);
 
 		pref.updateLastTime(System.currentTimeMillis());
-		
+				
 		if (size > 0) {
 			showNotification(updatedTitles);
+			if (!manualSync && lastUpdatesViewed) {
+				pref.markViewed(false);
+			}
 		}
 
 		AppLog.d("Finish::onPerformSync()");
@@ -117,7 +126,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 	 * @throws RemoteException
 	 * @return list of titles that were updated
 	 */
-	private ArrayList<String> doSync(Preferences pref, ContentProviderClient provider) throws RemoteException {
+	private ArrayList<String> doSync(Preferences pref, ContentProviderClient provider, boolean lastUpdatesViewed) throws RemoteException {
 		ArrayList<String> updatedTitles = new ArrayList<String>();
 
 		
@@ -130,8 +139,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 			return updatedTitles;
 		}
 		apps.moveToPosition(-1);
-		
-		boolean lastUpdatesViewed = pref.isLastUpdatesViewed();
 		
 		while(apps.moveToNext()) {
 			AppInfo localApp = apps.getAppInfo();
@@ -171,9 +178,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 				updateApp(provider, localApp.getRowId(), values);
 			}
 		}
-		if (lastUpdatesViewed && updatedTitles.size() > 0) {
-			pref.markViewed(false);
-		}
 		return updatedTitles;
 	}
 
@@ -202,7 +206,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
    	    values.put(AppListTable.Columns.KEY_VERSION_NAME, app.getVersion());
    	    values.put(AppListTable.Columns.KEY_CREATOR, app.getCreator());
    	    values.put(AppListTable.Columns.KEY_STATUS, AppInfo.STATUS_UPDATED );
-   	    values.put(AppListTable.Columns.KEY_UPDATE_DATE, System.currentTimeMillis());
+
+   	    Timestamp t = new Timestamp(System.currentTimeMillis());
+   	    values.put(AppListTable.Columns.KEY_UPDATE_DATE, t.getNanos() );
 
    	    if (icon != null) {
    	    	byte[] iconData = BitmapUtils.flattenBitmap(icon);
@@ -227,6 +233,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 	
 	private void showNotification(ArrayList<String> updatedTitles) {
 		Intent notificationIntent = new Intent(mContext, AppWatcherActivity.class);
+		notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		PendingIntent contentIntent = PendingIntent.getActivity(mContext, 0, notificationIntent, 0);
 		
 		String title = renderNotificationTitle(updatedTitles);
