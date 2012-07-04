@@ -130,7 +130,7 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
         	if (intent.getAction().equals(SyncAdapter.SYNC_PROGRESS)) {
-        		startRefreshAnim();
+        		//startRefreshAnim();
         	} else if (intent.getAction().equals(SyncAdapter.SYNC_STOP)) {
     			int updatesCount = intent.getIntExtra(SyncAdapter.EXTRA_UPDATES_COUNT, 0);        		
         		stopRefreshAnim();
@@ -193,6 +193,11 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
         	return true;
         case R.id.menu_refresh:
         	AppLog.d("Refresh pressed");
+        	if (ContentResolver.isSyncPending(mSyncAccount, AppListContentProvider.AUTHORITY)) {
+        		AppLog.d("Sync requested already. Skipping... ");
+        		return true;
+        	}
+        	startRefreshAnim();
             Bundle params = new Bundle();
             params.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true); 
         	ContentResolver.requestSync(mSyncAccount, AppListContentProvider.AUTHORITY, params);
