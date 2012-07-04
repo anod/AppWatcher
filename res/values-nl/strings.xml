@@ -12,15 +12,11 @@
     <string name="no_result_found">Geen resultaten voor \"%s\"</string>
     <string name="error_insert_app">Applicatie toevoegen aan de volglijst is mislukt.</string>
     <string name="application_icon">Applicatie icoon</string>
-    <string name="welcome_to_app_watcher">Krijg geen zoekresultaten?</string>
-    <string name="screenshot">Screenshot</string>
-    <string name="menu_set_device_id">Apparaat ID</string>
     <string name="play_store">Play Store</string>
     <string name="remove">Verwijderen</string>
     <string name="whats_new">Nieuwe functies</string>
     <string name="whats_new_title">Nieuwe functies</string>
     <string name="problem_occured">Er is een probleem opgetreden bij het opzoeken van de informatie.</string>
-    <string name="appwatcher_account">AppWatcher Account</string>
     <string name="menu_auto_update">Automatisch bijwerken</string>
     <string name="menu_wifi_only">Enkel Wi-Fi</string>
     <string name="alert_dialog_remove_title">Verwijderen?</string>
@@ -38,8 +34,7 @@
     <string name="about">Over</string>
     <string name="dialog_about_title">%1$s ver. %2$s</string>    
     <string name="dialog_about_text">Auteur: Alex Gavrishev&lt;br/&gt;&lt;a href=&quot;https://play.google.com/store/apps/developer?id=Alex+Gavrishev&quot;&gt;Google Play Store&lt;/a&gt;&lt;br/&gt;&lt;br/&gt;Dit project is onderhevig aan de volgende licentie: &lt;a href=&quot;http://creativecommons.org/licenses/by-sa/3.0/&quot;&gt;Creative Commons Attribution-ShareAlike 3.0 Unported License.&lt;/a&gt;&lt;br/&gt;&lt;br/&gt;De broncode is beschikbaar op &lt;a href=&quot;https://github.com/anod/AppWatcher&quot;&gt;github.com&lt;/a&gt;.</string>
-    <string name="account_name">App Watcher</string>
-    <string name="share">Delen</string>
+   <string name="share">Delen</string>
     <string name="share_subject_normal"> Check \"%s\" out</string>
     <string name="share_subject_updated">Check de nieuwe versie van \"%s\" out.</string>
     <string name="disabled">uitgeschakeld</string>

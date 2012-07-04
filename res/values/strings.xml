@@ -10,21 +10,17 @@
     <string name="search_for_app">Search for an application and click on it to add to the watch list.\n( Tip: you can add apps directly from Play Store using \"Share\" button )</string>
     <string name="loading">Loading&#8230;</string>
     <string name="no_result_found">No results for \"%s\"</string>
-    <string name="error_insert_app">Failed to add application to the whatch list.</string>
+    <string name="error_insert_app">Failed to add application to the watch list.</string>
     <string name="application_icon">Application icon</string>
-    <string name="welcome_to_app_watcher">Do not get search results?</string>
-    <string name="screenshot">Screenshot</string>
-    <string name="menu_set_device_id">Device Id</string>
     <string name="play_store">Play Store</string>
     <string name="remove">Remove</string>
     <string name="whats_new">What\'s new</string>
     <string name="whats_new_title">What\'s new</string>
-    <string name="problem_occured">Problem occured during recieving infomation.</string>
-    <string name="appwatcher_account">AppWatcher Account</string>
+    <string name="problem_occured">Problem occured during receiving information.</string>
     <string name="menu_auto_update">Automatic update</string>
     <string name="menu_wifi_only">Wi-Fi Only</string>
     <string name="alert_dialog_remove_title">Remove?</string>
-    <string name="alert_dialog_remove_message">Do you want to stop wathcing after \"%s\" updates?</string>
+    <string name="alert_dialog_remove_message">Do you want to stop watching after \"%s\" updates?</string>
     <string name="alert_dialog_remove">Remove</string>
     <string name="alert_dialog_cancel">Cancel</string>
     <string name="version">Version %s</string>
@@ -38,7 +34,6 @@
     <string name="about">About</string>
     <string name="dialog_about_title">%1$s ver. %2$s</string>    
     <string name="dialog_about_text">Author: Alex Gavrishev&lt;br/&gt;&lt;a href=&quot;https://play.google.com/store/apps/developer?id=Alex+Gavrishev&quot;&gt;Google Play Store&lt;/a&gt;&lt;br/&gt;&lt;br/&gt;Project is licensed under a &lt;a href=&quot;http://creativecommons.org/licenses/by-sa/3.0/&quot;&gt;Creative Commons Attribution-ShareAlike 3.0 Unported License.&lt;/a&gt;&lt;br/&gt;&lt;br/&gt;Source Code available at &lt;a href=&quot;https://github.com/anod/AppWatcher&quot;&gt;github.com&lt;/a&gt;.</string>
-    <string name="account_name">App Watcher</string>
     <string name="share">Share</string>
     <string name="share_subject_normal">Check out \"%s\"</string>
     <string name="share_subject_updated">Check out new version of \"%s\"</string>
@@ -47,6 +42,6 @@
     <string name="app_stored">\"%s\" added to the watch list</string>
     <string name="rate_app">Rate this app</string>
     <string name="installed">Installed</string>
-    <string name="no_recent_changes">No information about recent changed was provided.</string>
+    <string name="no_recent_changes">No information about recent changesНет информации о последних изменениях не было. was provided.</string>
     <string name="google_account_not_found">Google account not found.</string>
 </resources>
