@@ -11,7 +11,9 @@ public class AccountHelper {
     public static Account getAccount(Context context) {
     	AccountManager am = AccountManager.get(context);
     	Account[] accounts = am.getAccountsByType(ACCOUNT_TYPE);
-    	// TODO Check if account exists
+    	if (accounts.length == 0) {
+    		return null;
+    	}
     	return accounts[0];
     }
 

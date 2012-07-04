@@ -48,4 +48,5 @@
     <string name="rate_app">Rate this app</string>
     <string name="installed">Installed</string>
     <string name="no_recent_changes">No information about recent changed was provided.</string>
+    <string name="google_account_not_found">Google account not found.</string>
 </resources>

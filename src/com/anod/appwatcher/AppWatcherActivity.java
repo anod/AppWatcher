@@ -62,6 +62,11 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
 	    mPreferences = new Preferences(this);
 
 	    mSyncAccount = AccountHelper.getAccount(this);
+	    if (mSyncAccount == null) {
+	    	Toast.makeText(this, R.string.google_account_not_found, Toast.LENGTH_LONG).show();
+	    	finish();
+	    	return;
+	    }
         boolean autoSync = true;
         if (!mPreferences.checkFirstLaunch()) {
         	autoSync = ContentResolver.getSyncAutomatically(mSyncAccount, AppListContentProvider.AUTHORITY);
