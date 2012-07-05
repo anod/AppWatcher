@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.res.XmlResourceParser;
 import android.os.Bundle;
 import android.view.InflateException;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -51,6 +52,7 @@ public class ActionBarHelperBase extends ActionBarHelper {
     private static final String MENU_ATTR_SHOW_AS_ACTION = "showAsAction";
 
     protected Set<Integer> mActionItemIds = new HashSet<Integer>();
+	private View mCustomView;
 
     protected ActionBarHelperBase(Activity activity) {
         super(activity);
@@ -153,6 +155,19 @@ public class ActionBarHelperBase extends ActionBarHelper {
         return new WrappedMenuInflater(mActivity, superMenuInflater);
     }
 
+    @Override
+    public void setActionBarCustomView(int resource) {
+    	final ViewGroup actionBar =getActionBarCompat();
+    	LayoutInflater inflater = (LayoutInflater)mActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    	mCustomView = (View)inflater.inflate(resource, actionBar, false);
+		//bar.setCustomView(resource);
+		//bar.setDisplayShowCustomEnabled(true);
+    }
+    
+    @Override
+	public View getCustomView() {
+		return mCustomView;
+	}
     /**
      * Returns the {@link android.view.ViewGroup} for the action bar on phones (compatibility action
      * bar). Can return null, and will return null on Honeycomb.

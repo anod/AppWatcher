@@ -3,7 +3,6 @@ package com.anod.appwatcher;
 import java.util.List;
 
 import android.annotation.SuppressLint;
-import android.app.ActionBar;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -93,13 +92,8 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 		mListView.setAdapter(mAdapter);
 		mListView.setOnItemClickListener(itemClickListener); 
 
-		/*
-		ActionBar bar = getActionBar();
-		bar.setCustomView(R.layout.searchbox);
-		bar.setDisplayShowCustomEnabled(true);
-		mSearchEdit = (EditText)bar.getCustomView();
-		 */
-		mSearchEdit = new EditText(this);
+		getActionBarHelper().setActionBarCustomView(R.layout.searchbox);
+		mSearchEdit = (EditText)getActionBarHelper().getCustomView();
 		mSearchEdit.setOnEditorActionListener(new OnEditorActionListener() {
 			
 			@Override

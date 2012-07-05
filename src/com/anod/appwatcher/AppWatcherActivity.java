@@ -32,8 +32,6 @@ public class AppWatcherActivity extends ActionBarActivity {
 	private static final int SIX_HOURS_IN_SEC = 21600;
 	protected String mAuthToken;
 	private AppWatcherActivity mContext;
-	private Animation mAnimRotation;
-	private ImageView mRefreshView;
 	private MenuItem mRefreshMenuItem;
 	private Preferences mPreferences;
 	private MenuItem mWifiMenuItem;
@@ -54,12 +52,6 @@ public class AppWatcherActivity extends ActionBarActivity {
         transaction.commit();
             
         mContext = this;
-        
-	    mAnimRotation = AnimationUtils.loadAnimation(this, R.anim.rotate);
-	    mAnimRotation.setRepeatCount(Animation.INFINITE);
-
-	    LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-	    mRefreshView = (ImageView) inflater.inflate(R.layout.refresh_action_view, null);
 	    mPreferences = new Preferences(this);
 
 	    mSyncAccount = AccountHelper.getAccount(this);
@@ -172,18 +164,14 @@ public class AppWatcherActivity extends ActionBarActivity {
 	 * stop refresh button animation
 	 */
 	private void stopRefreshAnim() {
-		//StopAnimation
-		mRefreshView.clearAnimation();
-	//	mRefreshMenuItem.setActionView(null);
+		getActionBarHelper().setRefreshActionItemState(false);
 	}
 
 	/**
 	 * Animate refresh button
 	 */
 	private void startRefreshAnim() {
-		//StartAnimation
-	//	mRefreshMenuItem.setActionView(mRefreshView);
-		mRefreshView.startAnimation(mAnimRotation);
+		getActionBarHelper().setRefreshActionItemState(true);
 	}
 	
 	@Override

@@ -16,17 +16,30 @@
 
 package com.anod.appwatcher.actionbarcompat;
 
+import android.annotation.TargetApi;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
+import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
+
+import com.anod.appwatcher.R;
 
 /**
  * An extension of {@link ActionBarHelper} that provides Android 3.0-specific functionality for
  * Honeycomb tablets. It thus requires API level 11.
  */
+@TargetApi(11)
 public class ActionBarHelperHoneycomb extends ActionBarHelper {
     private Menu mOptionsMenu;
-
+	private Animation mAnimRotation;
+	private ImageView mRefreshView;
+    
     protected ActionBarHelperHoneycomb(Activity activity) {
         super(activity);
     }
@@ -45,6 +58,26 @@ public class ActionBarHelperHoneycomb extends ActionBarHelper {
             return;
         }
 
+        final MenuItem refreshItem = mOptionsMenu.findItem(R.id.menu_refresh);
+        if (refreshItem != null) {
+            if (refreshing) {
+                if (mRefreshView == null) {
+            	    mAnimRotation = AnimationUtils.loadAnimation(mActivity, R.anim.rotate);
+            	    mAnimRotation.setRepeatCount(Animation.INFINITE);
+
+            	    LayoutInflater inflater = (LayoutInflater) mActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            	    mRefreshView = (ImageView) inflater.inflate(R.layout.refresh_action_view, null);
+                }
+
+                refreshItem.setActionView(mRefreshView);
+                mRefreshView.startAnimation(mAnimRotation);
+            } else {
+            	if (mRefreshView != null) {
+            		 mRefreshView.clearAnimation();
+            	}
+                refreshItem.setActionView(null);
+            }
+        }
     }
 
     /**
@@ -55,4 +88,16 @@ public class ActionBarHelperHoneycomb extends ActionBarHelper {
     protected Context getActionBarThemedContext() {
         return mActivity;
     }
+    
+    @Override
+    public void setActionBarCustomView(int resource) {
+		ActionBar bar = mActivity.getActionBar();
+		bar.setCustomView(resource);
+		bar.setDisplayShowCustomEnabled(true);
+    }
+    
+    @Override
+	public View getCustomView() {
+		return mActivity.getActionBar().getCustomView();
+	}
 }
