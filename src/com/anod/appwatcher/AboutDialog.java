@@ -5,15 +5,14 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.widget.TextView;
 
-import com.actionbarsherlock.app.SherlockDialogFragment;
-
-public class AboutDialog extends SherlockDialogFragment {
+public class AboutDialog extends DialogFragment {
 	
 	public static AboutDialog newInstance() {
 		AboutDialog frag = new AboutDialog();

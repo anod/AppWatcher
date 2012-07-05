@@ -3,4 +3,8 @@
     <dimen name="icon_size">48dip</dimen>
 	<dimen name="icon_wrapper">57dip</dimen>
     <dimen name="info_margin_right">4dp</dimen>
+
+    <dimen name="actionbar_compat_height">48dp</dimen>
+    <dimen name="actionbar_compat_button_width">48dp</dimen>
+    <dimen name="actionbar_compat_button_home_width">56dp</dimen>
 </resources>

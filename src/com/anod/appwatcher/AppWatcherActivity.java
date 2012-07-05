@@ -10,20 +10,21 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
+import com.anod.appwatcher.actionbarcompat.ActionBarActivity;
 import com.anod.appwatcher.sync.AccountHelper;
 import com.anod.appwatcher.sync.SyncAdapter;
 import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.IntentUtils;
 
-public class AppWatcherActivity extends SherlockFragmentActivity {
+public class AppWatcherActivity extends ActionBarActivity {
 	private static final int MENU_REFRESH_IDX = 1;
 	private static final int MENU_AUTOSYNC_IDX = 2;
 	private static final int MENU_WIFI_IDX = 3;
@@ -73,15 +74,16 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
         }
         setSync(autoSync);
 	}
-    
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getSupportMenuInflater().inflate(R.menu.main, menu);
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.main, menu);
         mRefreshMenuItem = menu.getItem(MENU_REFRESH_IDX);
         mAutoSyncMenuItem = menu.getItem(MENU_AUTOSYNC_IDX);
         mWifiMenuItem = menu.getItem(MENU_WIFI_IDX);
         refreshMenuState();
-        return true;
+        return super.onCreateOptionsMenu(menu);
     }
     
     /**
@@ -172,7 +174,7 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
 	private void stopRefreshAnim() {
 		//StopAnimation
 		mRefreshView.clearAnimation();
-		mRefreshMenuItem.setActionView(null);
+	//	mRefreshMenuItem.setActionView(null);
 	}
 
 	/**
@@ -180,7 +182,7 @@ public class AppWatcherActivity extends SherlockFragmentActivity {
 	 */
 	private void startRefreshAnim() {
 		//StartAnimation
-		mRefreshMenuItem.setActionView(mRefreshView);
+	//	mRefreshMenuItem.setActionView(mRefreshView);
 		mRefreshView.startAnimation(mAnimRotation);
 	}
 	
