@@ -3,5 +3,5 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:src="@drawable/ic_action_refresh"
+    style="@style/ActionButton"
     android:contentDescription="@string/menu_refresh"/>
-<!--      style="@style/Widget.Sherlock.ActionButton"   -->
