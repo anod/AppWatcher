@@ -43,7 +43,7 @@
         <activity
             android:name=".ChangelogActivity"
             android:label="@string/whats_new_title" 
-            android:theme="@android:style/Theme.Holo.Light.Dialog">
+            android:theme="@style/AppThemeLight.Dialog">
         </activity>
                 
         <activity

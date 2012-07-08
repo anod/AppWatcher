@@ -23,8 +23,10 @@
 
     <style name="AppThemeLight"></style>
     
-    <style name="AppThemeLight.DarkActionBar">
-        <item name="android:actionBarStyle">@style/ActionBar</item>
+    <style name="AppThemeLight.Dialog" parent="android:style/Theme.Holo.Light.Dialog"></style>
+    
+    <style name="AppThemeLight.DarkActionBar" parent="android:style/Theme.Holo.Light.DarkActionBar">
+        <item name="android:actionBarStyle">@style/ActionBar.Light.Inverse</item>
         <item name="android:windowContentOverlay">@drawable/actionbar_shadow</item>
     </style>
     
