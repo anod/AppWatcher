@@ -112,7 +112,8 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 	        mVersionText = r.getString(R.string.version);
 	        mUpdateText = r.getString(R.string.update);
 	        mUpdateTextColor = r.getColor(R.color.blue_new);
-	        mDateFormat = android.text.format.DateFormat.getDateFormat(getActivity().getApplicationContext());
+			mDateFormat = android.text.format.DateFormat
+					.getMediumDateFormat(getActivity().getApplicationContext());
             mTimestamp = new Timestamp(System.currentTimeMillis());
 		}
 
@@ -135,43 +136,45 @@ public class AppWatcherListFragment extends SherlockListFragment implements Load
 			holder.shareBtn.setTag(app);
 			holder.icon.setTag(holder);
 			Bitmap icon = app.getIcon();
-            if (icon == null) {
-	           	if (mDefaultIcon == null) {
-	           		mDefaultIcon = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_empty);
-	           	}
-	           	icon = mDefaultIcon;
-            }
-            if (hide) {
-            	holder.options.setVisibility(View.GONE);
-            }
-            holder.icon.setImageBitmap(icon);
-            if (app.getStatus() == AppInfo.STATUS_UPDATED) {
-                holder.version.setText(String.format(mUpdateText, app.getVersionName()));
-                holder.version.setTextColor(mUpdateTextColor);
-            	holder.newIndicator.setVisibility(View.VISIBLE);
-            } else {
-                holder.version.setText(String.format(mVersionText, app.getVersionName()));
-                holder.version.setTextColor(mDefColor);
-            	holder.newIndicator.setVisibility(View.INVISIBLE);
-            }
-            
-            boolean isInstalled = isAppInstalled(app);
-            if (isInstalled) {
-            	holder.installed.setVisibility(View.VISIBLE);
-            	
-            } else {
-            	holder.installed.setVisibility(View.GONE);
-            }
-            int updateTime = app.getUpdateTime();
-            
-            AppLog.d("Update time:" + updateTime);
-            if (updateTime > 0) {
-            	mTimestamp.setNanos(updateTime);
-            	holder.updateDate.setText(mDateFormat.format(mTimestamp));
-            	holder.updateDate.setVisibility(View.VISIBLE);
-            } else {
-            	holder.updateDate.setVisibility(View.GONE);
-            }
+			if (icon == null) {
+			   	if (mDefaultIcon == null) {
+			   		mDefaultIcon = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_empty);
+			   	}
+			   	icon = mDefaultIcon;
+			}
+			if (hide) {
+				holder.options.setVisibility(View.GONE);
+			}
+			holder.icon.setImageBitmap(icon);
+			if (app.getStatus() == AppInfo.STATUS_UPDATED) {
+			    holder.version.setText(String.format(mUpdateText, app.getVersionName()));
+			    holder.version.setTextColor(mUpdateTextColor);
+				holder.newIndicator.setVisibility(View.VISIBLE);
+			} else {
+			    holder.version.setText(String.format(mVersionText, app.getVersionName()));
+			    holder.version.setTextColor(mDefColor);
+				holder.newIndicator.setVisibility(View.INVISIBLE);
+			}
+			
+			boolean isInstalled = isAppInstalled(app);
+			if (isInstalled) {
+				holder.installed.setVisibility(View.VISIBLE);
+				
+			} else {
+				holder.installed.setVisibility(View.GONE);
+			}
+			
+			
+			long updateTime = app.getUpdateTime();
+			
+			if (updateTime > 0) {
+				mTimestamp.setTime(updateTime);
+				AppLog.d("Update time [" + updateTime + "]:" + mTimestamp.toString());
+				holder.updateDate.setText(mDateFormat.format(mTimestamp));
+				holder.updateDate.setVisibility(View.VISIBLE);
+			} else {
+				holder.updateDate.setVisibility(View.GONE);
+			}
 		}
 
 		@Override

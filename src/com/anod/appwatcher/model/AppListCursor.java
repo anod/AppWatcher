@@ -37,7 +37,7 @@ public class AppListCursor extends CursorWrapper {
 			getString(IDX_CREATOR),			
 			icon,
 			getInt(IDX_STATUS),
-			getInt(IDX_UPDATE_DATE)
+			getLong(IDX_UPDATE_DATE)
 		);
 	}
 	

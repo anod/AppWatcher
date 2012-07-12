@@ -207,8 +207,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
    	    values.put(AppListTable.Columns.KEY_CREATOR, app.getCreator());
    	    values.put(AppListTable.Columns.KEY_STATUS, AppInfo.STATUS_UPDATED );
 
-   	    Timestamp t = new Timestamp(System.currentTimeMillis());
-   	    values.put(AppListTable.Columns.KEY_UPDATE_DATE, t.getNanos() );
+        // Gets the current system time in milliseconds
+        Long now = Long.valueOf(System.currentTimeMillis());
+		Timestamp timestamp =  new Timestamp(now);
+		AppLog.d("Saving time [" + now + "]:" + timestamp.toString());
+   	    values.put(AppListTable.Columns.KEY_UPDATE_DATE, now );
 
    	    if (icon != null) {
    	    	byte[] iconData = BitmapUtils.flattenBitmap(icon);
