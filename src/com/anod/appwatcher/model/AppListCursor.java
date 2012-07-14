@@ -1,11 +1,17 @@
 package com.anod.appwatcher.model;
 
+import android.database.CrossProcessCursor;
 import android.database.Cursor;
+import android.database.CursorWindow;
 import android.database.CursorWrapper;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-
-public class AppListCursor extends CursorWrapper {
+/**
+ * 
+ * @author alex
+ *
+ */
+public class AppListCursor extends CursorWrapper implements CrossProcessCursor {
     private static final int IDX_ROWID = 0;	
     private static final int IDX_APPID = 1;	
     private static final int IDX_PACKAGE = 2;
@@ -34,7 +40,7 @@ public class AppListCursor extends CursorWrapper {
 			getInt(IDX_VERSION_NUMBER),
 			getString(IDX_VERSION_NAME),
 			getString(IDX_TITLE),
-			getString(IDX_CREATOR),			
+			getString(IDX_CREATOR),
 			icon,
 			getInt(IDX_STATUS),
 			getLong(IDX_UPDATE_DATE)
@@ -45,5 +51,68 @@ public class AppListCursor extends CursorWrapper {
 	    // Do not remove this empty method. It is designed to prevent calls to super.
 	    // Fixes bug on Droid 2, Droid Razr, where CursorWrapper finalizer closes the Cursor!
 		// @see http://stackoverflow.com/questions/6552405/android-compatibility-library-cursorloader-java-lang-illegalstateexception-cu
+	}
+
+	/**
+	 * Wrapper of cursor that runs in another process should implement CrossProcessCursor
+	 * http://stackoverflow.com/questions/3976515/cursor-wrapping-unwrapping-in-contentprovider
+	 */
+	@Override
+	public void fillWindow(int position, CursorWindow window) {
+		if (position < 0 || position > getCount()) {
+			return;
+		}
+		window.acquireReference();
+		try {
+			moveToPosition(position - 1);
+			window.clear();
+			window.setStartPosition(position);
+			int columnNum = getColumnCount();
+			window.setNumColumns(columnNum);
+			while (moveToNext() && window.allocRow()) {
+				for (int i = 0; i < columnNum; i++) {
+					boolean putNull = true;;
+					if (IDX_ICON_CACHE == i) {
+						byte[] iconData = getBlob(IDX_ICON_CACHE);
+						if (iconData!= null && iconData.length > 0) {
+							putNull = false;
+							if (!window.putBlob(iconData, getPosition(), i)) {
+								window.freeLastRow();
+								break;
+							}
+						}
+					} else {
+						String field = getString(i);
+						if (field != null) {
+							putNull = false;
+							if (!window.putString(field, getPosition(), i)) {
+								window.freeLastRow();
+								break;
+							}
+						}
+					}
+					if (putNull) {
+						if (!window.putNull(getPosition(), i)) {
+							window.freeLastRow();
+							break;
+						}
+					}
+				}
+			}
+		} catch (IllegalStateException e) {
+			// simply ignore it
+		} finally {
+			window.releaseReference();
+		}
+	}
+
+	@Override
+	public CursorWindow getWindow() {
+		return null;
+	}
+
+	@Override
+	public boolean onMove(int oldPosition, int newPosition) {
+		return true;
 	}	
 }
