@@ -82,31 +82,37 @@ public class ActionBarHelperBase extends ActionBarHelper {
         }
     }
 
-    /**
-     * Sets up the compatibility action bar with the given title.
-     */
-    private void setupActionBar() {
-        final ViewGroup actionBarCompat = getActionBarCompat();
-        if (actionBarCompat == null) {
-            return;
-        }
+	/**
+	 * Sets up the compatibility action bar with the given title.
+	 */
+	private void setupActionBar() {
+		final ViewGroup actionBarCompat = getActionBarCompat();
+		if (actionBarCompat == null) {
+			return;
+		}
 
-        LinearLayout.LayoutParams springLayoutParams = new LinearLayout.LayoutParams(
-                0, ViewGroup.LayoutParams.FILL_PARENT);
-        springLayoutParams.weight = 1;
+		LinearLayout.LayoutParams springLayoutParams = new LinearLayout.LayoutParams(
+			0, ViewGroup.LayoutParams.FILL_PARENT
+		);
+		springLayoutParams.weight = 1;
 
-        // Add Home button
-        SimpleMenu tempMenu = new SimpleMenu(mActivity);
-        SimpleMenuItem homeItem = new SimpleMenuItem(
-                tempMenu, android.R.id.home, 0, mActivity.getString(R.string.app_name));
-        homeItem.setIcon(R.drawable.ic_launcher);
-        addActionItemCompatFromMenuItem(homeItem);
+		// Add Home button
+		SimpleMenu tempMenu = new SimpleMenu(mActivity);
+		SimpleMenuItem homeItem = new SimpleMenuItem(
+			tempMenu, android.R.id.home, 0, mActivity.getString(R.string.app_name)
+		);
+		homeItem.setIcon(R.drawable.ic_launcher);
+		addActionItemCompatFromMenuItem(homeItem);
 
-        // Add title text
-        TextView titleText = new TextView(mActivity, null, R.attr.actionbarCompatTitleStyle);
-        titleText.setLayoutParams(springLayoutParams);
-        titleText.setText(mActivity.getTitle());
-        actionBarCompat.addView(titleText);
+		if (mCustomView != null) {
+			actionBarCompat.addView(mCustomView);
+		} else {
+			// Add title text
+			TextView titleText = new TextView(mActivity, null, R.attr.actionbarCompatTitleStyle);
+			titleText.setLayoutParams(springLayoutParams);
+			titleText.setText(mActivity.getTitle());
+			actionBarCompat.addView(titleText);
+		}
     }
 
     /**{@inheritDoc}*/

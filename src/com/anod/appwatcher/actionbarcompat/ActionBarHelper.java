@@ -98,10 +98,7 @@ public abstract class ActionBarHelper {
         return superMenuInflater;
     }
     
-    public void setActionBarCustomView(int resource) {
-    }
+    public abstract void setActionBarCustomView(int resource);
 
-	public View getCustomView() {
-		return null;
-	}
+	public abstract View getCustomView();
 }

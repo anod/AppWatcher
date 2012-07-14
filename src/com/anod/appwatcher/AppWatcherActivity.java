@@ -9,13 +9,9 @@ import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.anod.appwatcher.actionbarcompat.ActionBarActivity;
@@ -25,14 +21,13 @@ import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.IntentUtils;
 
 public class AppWatcherActivity extends ActionBarActivity {
-	private static final int MENU_REFRESH_IDX = 1;
+
 	private static final int MENU_AUTOSYNC_IDX = 2;
 	private static final int MENU_WIFI_IDX = 3;
 	private static final int TWO_HOURS_IN_SEC = 7200 ;
 	private static final int SIX_HOURS_IN_SEC = 21600;
 	protected String mAuthToken;
 	private AppWatcherActivity mContext;
-	private MenuItem mRefreshMenuItem;
 	private Preferences mPreferences;
 	private MenuItem mWifiMenuItem;
 	private Account mSyncAccount;
@@ -71,7 +66,6 @@ public class AppWatcherActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.main, menu);
-        mRefreshMenuItem = menu.getItem(MENU_REFRESH_IDX);
         mAutoSyncMenuItem = menu.getItem(MENU_AUTOSYNC_IDX);
         mWifiMenuItem = menu.getItem(MENU_WIFI_IDX);
         refreshMenuState();
