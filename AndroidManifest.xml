@@ -62,12 +62,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-	                      
+
 		<provider
-      		android:name=".AppListContentProvider"
-      		android:authorities="com.anod.appwatcher"
-      		android:syncable="true"
-      		android:label="@string/app_name"
+			android:name=".AppListContentProvider"
+			android:authorities="com.anod.appwatcher"
+			android:syncable="true"
+			android:label="@string/app_name"
 		>
    		</provider>
 
