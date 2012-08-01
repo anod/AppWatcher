@@ -18,7 +18,7 @@ public class DbOpenHelper extends SQLiteOpenHelper {
 			AppListTable.Columns.KEY_TITLE + " TEXT not null," +
 			AppListTable.Columns.KEY_CREATOR + " TEXT," + 
 			AppListTable.Columns.KEY_ICON_CACHE + " BLOB," +
-			AppListTable.Columns.KEY_STATUS + " INTEGER" +
+			AppListTable.Columns.KEY_STATUS + " INTEGER," +
 			AppListTable.Columns.KEY_UPDATE_DATE + " INTEGER" +
 		") ";
 
