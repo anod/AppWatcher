@@ -5,10 +5,9 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 
-import com.actionbarsherlock.app.SherlockDialogFragment;
-
-public class RemoveDialogFragment extends SherlockDialogFragment {
+public class RemoveDialogFragment extends DialogFragment {
 	
     private static final String ARG_ROW_ID = "rowId";
 	private static final String ARG_TITLE = "title";

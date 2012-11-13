@@ -1,0 +1,21 @@
+<resources>
+    <declare-styleable name="AppTheme">
+        <attr name="actionbarCompatTitleStyle" format="reference" />
+        <attr name="actionbarCompatItemStyle" format="reference" />
+        <attr name="actionbarCompatItemHomeStyle" format="reference" />
+        <attr name="actionbarCompatProgressIndicatorStyle" format="reference" />
+
+        <attr name="windowMinWidthMajor" format="dimension" />
+        <attr name="windowMinWidthMinor" format="dimension" />
+
+        <attr name="windowActionBar" format="boolean"/>
+        <!-- This Drawable is overlaid over the foreground of the Window's content area, usually
+             to place a shadow below the title.  -->
+        <attr name="windowContentOverlay" format="reference" />
+
+    </declare-styleable>
+    <declare-styleable name="BezelImageView">
+        <attr name="maskDrawable" format="reference" />
+        <attr name="borderDrawable" format="reference" />
+    </declare-styleable>
+</resources>

@@ -3,6 +3,7 @@ package com.anod.appwatcher;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
 import android.text.util.Linkify;
@@ -11,7 +12,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.anod.appwatcher.accounts.MarketTokenLoader;
 import com.anod.appwatcher.market.AppLoader;
 import com.anod.appwatcher.market.DeviceIdHelper;
@@ -19,7 +19,7 @@ import com.anod.appwatcher.market.MarketSessionHelper;
 import com.gc.android.market.api.MarketSession;
 import com.gc.android.market.api.model.Market.App;
 
-public class ChangelogActivity extends SherlockFragmentActivity implements LoaderCallbacks<String>{
+public class ChangelogActivity extends FragmentActivity implements LoaderCallbacks<String>{
 
 	public static final String EXTRA_APP_ID = "app_id";
 	private AppLoader mLoader;

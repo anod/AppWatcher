@@ -17,6 +17,8 @@ import android.support.v4.content.Loader;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -35,11 +37,8 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
 import com.anod.appwatcher.accounts.MarketTokenLoader;
+import com.anod.appwatcher.actionbarcompat.ActionBarActivity;
 import com.anod.appwatcher.market.AppIconLoader;
 import com.anod.appwatcher.market.AppsResponseLoader;
 import com.anod.appwatcher.market.DeviceIdHelper;
@@ -51,7 +50,7 @@ import com.commonsware.cwac.endless.EndlessAdapter;
 import com.gc.android.market.api.MarketSession;
 import com.gc.android.market.api.model.Market.App;
 
-public class MarketSearchActivity extends SherlockFragmentActivity implements LoaderCallbacks<String>{
+public class MarketSearchActivity extends ActionBarActivity implements LoaderCallbacks<String>{
 	public static final String EXTRA_KEYWORD = "keyword";
 	public static final String EXTRA_EXACT = "exact";
 	public static final String EXTRA_SHARE = "share";
@@ -93,10 +92,8 @@ public class MarketSearchActivity extends SherlockFragmentActivity implements Lo
 		mListView.setAdapter(mAdapter);
 		mListView.setOnItemClickListener(itemClickListener); 
 
-		ActionBar bar = getSupportActionBar();
-		bar.setCustomView(R.layout.searchbox);
-		bar.setDisplayShowCustomEnabled(true);
-		mSearchEdit = (EditText)bar.getCustomView();
+		getActionBarHelper().setActionBarCustomView(R.layout.searchbox);
+		mSearchEdit = (EditText)getActionBarHelper().getCustomView();
 		mSearchEdit.setOnEditorActionListener(new OnEditorActionListener() {
 			
 			@Override
@@ -135,7 +132,7 @@ public class MarketSearchActivity extends SherlockFragmentActivity implements Lo
 	
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getSupportMenuInflater().inflate(R.menu.searchbox, menu);
+        getMenuInflater().inflate(R.menu.searchbox, menu);
         return true;
     }
     
