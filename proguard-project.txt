@@ -29,6 +29,7 @@
 -keep class com.gc.android.market.api.** { *; }
 -keep class com.google.protobuf.** { *; }
 -keep class com.google.protobuf.** { *; }
+-keepattributes SourceFile,LineNumberTable
 
 -dontskipnonpubliclibraryclasses
 -dontwarn com.gc.android.**
