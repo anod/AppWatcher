@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+ <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+         android:orientation="vertical"
+         android:layout_width="match_parent"
+         android:layout_height="match_parent"
+>
+	 
+	 <LinearLayout
+	 	android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="4dip"
+        android:paddingLeft="8dip"
+        android:paddingRight="8dip"
+        android:gravity="center_horizontal"       
+	 >
+     	<TextView  
+     		android:layout_height="wrap_content" 
+     		android:layout_width="match_parent"
+     		android:text="@string/list_export" 
+     		style="@android:style/TextAppearance.WindowTitle"
+     	 />	 
+	 	<Button 
+	 		android:id="@+id/backup_button" 
+         	android:layout_width="wrap_content"
+         	android:minWidth="300dp"
+         	android:layout_height="match_parent"
+         	android:text="@string/list_export"	
+
+	 	/>
+     	<TextView android:id="@+id/last_backup" 
+     		android:layout_height="wrap_content" 
+     		android:layout_width="match_parent"
+     		android:text="@string/last_export"
+     		android:gravity="center_horizontal"       
+     	/>
+	 </LinearLayout>
+	 
+     <TextView android:id="@+id/header" 
+     	android:layout_height="wrap_content" 
+     	android:layout_width="match_parent"
+     	android:text="@string/list_import" 
+        android:paddingLeft="8dip"
+        android:paddingRight="8dip"
+     	style="@android:style/TextAppearance.WindowTitle" />
+
+     <ListView android:id="@android:id/list"
+               android:layout_width="match_parent"
+               android:layout_height="0dip"
+               android:layout_weight="1"
+               android:drawSelectorOnTop="false"/>
+
+     <TextView android:id="@android:id/empty"
+               android:layout_width="match_parent"
+               android:layout_height="match_parent"
+               android:gravity="center"
+               android:text="@string/no_files_found"/>
+ </LinearLayout>
+ 

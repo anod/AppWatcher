@@ -44,4 +44,18 @@
     <string name="installed">Installed</string>
     <string name="no_recent_changes">No information about recent changes was provided.</string>
     <string name="google_account_not_found">Google account not found.</string>
+    <string name="list_export">Export</string>
+    <string name="last_export">Last Export</string>
+    <string name="list_import">Import</string>
+    <string name="no_files_found">No files found</string>
+    <string name="please_wait">Please, wait&#8230;</string>
+    <string name="export_done">Done</string>
+    <string name="unable_delete_file">Unable to delete file</string>
+    <string name="import_done">Import finished</string>
+    <string name="external_storage_not_available">External storage not available</string>
+    <string name="restore_deserialize_failed">Cannot read JSON data</string>
+    <string name="failed_to_read_file">Cannot read file</string>
+    <string name="file_not_exist">File not exist</string>
+    <string name="never">Never</string>
+    <string name="failed_to_write_file">Failed to write into file</string>
 </resources>
