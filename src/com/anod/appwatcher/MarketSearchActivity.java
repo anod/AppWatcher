@@ -98,7 +98,7 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 			
 			@Override
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-	            showResults();
+	            searchResults();
 	            return true;
 			}
 		});
@@ -108,7 +108,7 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 		getSupportLoaderManager().initLoader(0, null, this).forceLoad();
 	}
 
-	private void showResults() {
+	private void searchResults() {
 		String query = mSearchEdit.getText().toString();
 		
         // hide virtual keyboard
@@ -127,6 +127,26 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 		if (query.length() > 0) {
 			mResponseLoader = new AppsResponseLoader(mMarketSession, query);
 			new RetreiveResultsTask().execute();
+		} else {
+			showNoResults("");
+		}
+	}
+	
+	private void showNoResults(String query) {
+		mLoading.setVisibility(View.GONE);
+		String noResStr = (query.length() > 0) ? getString(R.string.no_result_found, query) : getString(R.string.search_for_app);
+		TextView tv = (TextView)mListView.getEmptyView();
+		tv.setText(noResStr);
+		tv.setVisibility(View.VISIBLE);
+		showDeviceIdMessage();
+	}
+	
+	private void showDeviceIdMessage() {
+		if (mDeviceIdMessage!=null) {
+			Animation anim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.flyin);
+			mDeviceIdMessage.setAnimation(anim);
+	        anim.start();
+	        mDeviceIdMessage.setVisibility(View.VISIBLE);
 		}
 	}
 	
@@ -140,7 +160,7 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case R.id.menu_search:
-        	showResults();
+        	searchResults();
         	return true;        	
         default:
             return onOptionsItemSelected(item);
@@ -198,17 +218,11 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
         
         @Override
         protected void onPostExecute(List<App> list) {
-        	mLoading.setVisibility(View.GONE);
-        	
         	if (list == null || list.size() == 0) {
-        		String noResStr = getString(R.string.no_result_found, mResponseLoader.getQuery());
-        		TextView tv = (TextView)mListView.getEmptyView();
-        		tv.setText(noResStr);
-        		tv.setVisibility(View.VISIBLE);
-        		showDeviceIdMessage();        		
+        		showNoResults(mResponseLoader.getQuery());
         		return;
         	}
-        	
+        	mLoading.setVisibility(View.GONE);
         	adapterAddAll(mAdapter,list);
     		
     		if (mResponseLoader.hasNext()) {
@@ -220,14 +234,8 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
     		showDeviceIdMessage();
         }
 
-		private void showDeviceIdMessage() {
-			if (mDeviceIdMessage!=null) {
-    			Animation anim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.flyin);
-    			mDeviceIdMessage.setAnimation(anim);
-    	        anim.start();
-    	        mDeviceIdMessage.setVisibility(View.VISIBLE);
-    		}
-		}
+
+
     };
   
     @SuppressLint("NewApi")
@@ -324,7 +332,7 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 		}
 		mMarketSession.setAuthSubToken(authSubToken);
 		if (mFirstTimeRun && !TextUtils.isEmpty(mSearchEdit.getText())) {
-			showResults();
+			searchResults();
 		} else {
 	        // hide virtual keyboard
 	        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
