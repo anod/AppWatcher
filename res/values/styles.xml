@@ -44,6 +44,7 @@
         <item name="android:minHeight">@dimen/abs__alert_dialog_title_height</item>
         <item name="android:paddingLeft">16dip</item>
         <item name="android:paddingRight">16dip</item>
+        <item name="android:background">@drawable/abs__ab_transparent_dark_holo</item>
     </style>
     
     <style name="AppThemeLight.Dialog" parent="android:style/Theme.Light">
@@ -58,7 +59,7 @@
         <item name="android:windowActionBar">false</item>
         <item name="android:windowActionModeOverlay">true</item>
         <item name="android:windowCloseOnTouchOutside">true</item>
-        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowNoTitle">false</item>
         <item name="android:backgroundDimAmount">0.6</item>
         
         <item name="android:colorBackgroundCacheHint">@null</item>

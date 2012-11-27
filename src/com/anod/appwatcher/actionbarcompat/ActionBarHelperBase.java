@@ -101,7 +101,7 @@ public class ActionBarHelperBase extends ActionBarHelper {
 		SimpleMenuItem homeItem = new SimpleMenuItem(
 			tempMenu, android.R.id.home, 0, mActivity.getString(R.string.app_name)
 		);
-		homeItem.setIcon(R.drawable.ic_launcher);
+		homeItem.setIcon(R.drawable.ic_home);
 		addActionItemCompatFromMenuItem(homeItem);
 
 		if (mCustomView != null) {

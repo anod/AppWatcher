@@ -16,6 +16,7 @@
 
 package com.anod.appwatcher.actionbarcompat;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.view.ActionProvider;
@@ -124,12 +125,14 @@ public class SimpleMenuItem implements MenuItem {
         return null;
     }
 
-    public MenuItem setActionProvider(ActionProvider actionProvider) {
+    @SuppressLint("NewApi")
+	public MenuItem setActionProvider(ActionProvider actionProvider) {
         // Noop
         return this;
     }
 
-    public ActionProvider getActionProvider() {
+    @SuppressLint("NewApi")
+	public ActionProvider getActionProvider() {
         // Noop
         return null;
     }
@@ -149,7 +152,8 @@ public class SimpleMenuItem implements MenuItem {
         return false;
     }
 
-    @Override
+    @SuppressLint("NewApi")
+	@Override
     public MenuItem setOnActionExpandListener(OnActionExpandListener onActionExpandListener) {
         // Noop
         return this;

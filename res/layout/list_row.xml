@@ -33,7 +33,7 @@
                 android:gravity="center_horizontal"
                 android:text="@string/installed"
                 android:textColor="#FFFFFFFF"
-                android:textSize="10dp" />
+                android:textSize="10sp" />
 
             <LinearLayout
                 android:id="@+id/new_indicator"
