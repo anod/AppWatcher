@@ -42,6 +42,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.anod.appwatcher.R;
+import com.example.android.cheatsheet.CheatSheet;
 
 /**
  * A class that implements the action bar pattern for pre-Honeycomb devices.
@@ -219,6 +220,9 @@ public class ActionBarHelperBase extends ActionBarHelper {
             }
         });
 
+        if (itemId != android.R.id.home) {
+        	CheatSheet.setup(actionButton, item.getTitle());
+        }
         actionBar.addView(actionButton);
 
         if (item.getItemId() == R.id.menu_refresh) {
