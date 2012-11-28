@@ -1,5 +1,7 @@
 package com.anod.appwatcher.model;
 
+import com.anod.appwatcher.utils.BitmapUtils;
+
 import android.database.CrossProcessCursor;
 import android.database.Cursor;
 import android.database.CursorWindow;
@@ -28,11 +30,9 @@ public class AppListCursor extends CursorWrapper implements CrossProcessCursor {
 	}
 
 	public AppInfo getAppInfo() {
-		Bitmap icon = null;
 		byte[] iconData = getBlob(IDX_ICON_CACHE);
-		if (iconData != null && iconData.length > 0) {
-			icon = BitmapFactory.decodeByteArray(iconData, 0, iconData.length);
-		}
+		Bitmap icon = BitmapUtils.unFlattenBitmap(iconData);
+
 		return new AppInfo(
 			getInt(IDX_ROWID),
 			getString(IDX_APPID),

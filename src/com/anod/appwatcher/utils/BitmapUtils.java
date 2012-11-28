@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 
 public class BitmapUtils {
@@ -21,5 +22,13 @@ public class BitmapUtils {
             Log.w("Favorite", "Could not write icon");
             return null;
         }
+    }
+    
+    public static Bitmap unFlattenBitmap(byte[] bitmapData) {
+    	Bitmap bitmap = null;
+		if (bitmapData != null && bitmapData.length > 0) {
+			bitmap = BitmapFactory.decodeByteArray(bitmapData, 0, bitmapData.length);
+		}
+		return bitmap;
     }
 }

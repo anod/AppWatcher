@@ -1,10 +1,24 @@
 package com.anod.appwatcher.backup;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.os.Environment;
+
+import com.android.util.JsonWriter;
+import com.anod.appwatcher.AppListContentProvider;
+import com.anod.appwatcher.model.AppInfo;
+import com.anod.appwatcher.model.AppListCursor;
+import com.anod.appwatcher.model.AppListTable;
+import com.anod.appwatcher.utils.BitmapUtils;
 
 public class ListExportManager {
 	private static final String DIR_BACKUP = "/data/com.anod.appwatcher/backup";
@@ -59,7 +73,7 @@ public class ListExportManager {
     	return saveDir.listFiles(filter);
     }
     
-	public int doBackupMain(String filename) {
+	public int doExport(String filename) {
         if (!checkMediaWritable()) {
         	return ERROR_STORAGE_NOT_AVAILABLE;
         }
@@ -71,30 +85,63 @@ public class ListExportManager {
         
         File dataFile = new File(saveDir, filename+FILE_EXT_DAT);
 
-        //PreferencesStorage storage = new PreferencesStorage(mContext, appWidgetId);
-        //Preferences prefsMain = storage.load();
-        //PreferencesBackup prefs = new PreferencesBackup(
-        //	createCalendarsMD5(appWidgetId, storage),
-        //	createTasksMD5(appWidgetId,prefsMain),
-        //	prefsMain
-        //);
-        //try {
+        Cursor cr = mContext.getContentResolver().query(
+        	AppListContentProvider.CONTENT_URI,
+        	AppListTable.APPLIST_PROJECTION, null, null,
+        	AppListTable.Columns.KEY_STATUS + " DESC, " +AppListTable.Columns.KEY_TITLE + " COLLATE LOCALIZED ASC"
+        );
+        AppListCursor listCursor = new AppListCursor(cr);
+        try {
             synchronized (ListExportManager.sDataLock) {
-            	//FileOutputStream fos = new FileOutputStream(dataFile);
-            	//ObjectOutputStream oos = new ObjectOutputStream(fos);
-                //oos.writeObject(prefs);
-                //oos.close();
-                //Log.d("CarHomeWidget",oos.toString());
+            	BufferedWriter buf = new BufferedWriter(new FileWriter(dataFile));
+            	writeJSONAppsList(buf, listCursor);
             }
-		//} catch (IOException e) {
-		//	e.printStackTrace();
-		//	return ERROR_FILE_WRITE;
-		//}
+		} catch (IOException e) {
+			e.printStackTrace();
+			listCursor.close();
+			return ERROR_FILE_WRITE;
+		} finally {
+			if (listCursor != null) {
+				listCursor.close();
+			}
+		}
 		saveDir.setLastModified(System.currentTimeMillis());
 		return RESULT_DONE;
 	}
 
-	public int doRestoreMain(String filename) {
+	private void writeJSONAppsList(Writer file, AppListCursor listCursor) throws IOException {
+		JsonWriter writer = new JsonWriter(file);
+		writer.setIndent("  ");
+		writer.beginArray();
+		listCursor.moveToPosition(-1);
+		while (listCursor.moveToNext()) {
+			writeApp(writer, listCursor.getAppInfo());
+		}
+		writer.endArray();
+		writer.close();
+	}
+
+	private void writeApp(JsonWriter writer, AppInfo appInfo) throws IOException {
+		writer.beginObject();
+		writer.name("id").value(appInfo.getAppId());
+		writer.name("packageName").value(appInfo.getPackageName());
+		writer.name("title").value(appInfo.getTitle());
+		writer.name("creator").value(appInfo.getCreator());
+		writer.name("updateTime").value(appInfo.getUpdateTime());
+		writer.name("versionName").value(appInfo.getVersionName());
+		writer.name("versionCode").value(appInfo.getVersionCode());
+		writer.name("status").value(appInfo.getStatus());
+		Bitmap icon = appInfo.getIcon();
+   	    if (icon != null) {
+   	    	byte[] iconData = BitmapUtils.flattenBitmap(icon);
+   			writer.name("icon").value(new String(iconData));
+   	    } else {
+   			writer.name("icon").value("");
+   	    }
+		writer.endObject();
+	}
+
+	public int doImport(String filename) {
 		if (!checkMediaReadable()) {
 			return ERROR_STORAGE_NOT_AVAILABLE;
 		}

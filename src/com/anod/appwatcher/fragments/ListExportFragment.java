@@ -1,7 +1,10 @@
 package com.anod.appwatcher.fragments;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -27,8 +30,8 @@ import com.anod.appwatcher.R;
 import com.anod.appwatcher.backup.ListExportManager;
 
 public class ListExportFragment extends ListFragment {
-	private RestoreAdapter mAdapter;
-	private RestoreClickListener mRestoreListener;
+	private ImportListAdapter mAdapter;
+	private ImportClickListener mRestoreListener;
 	private DeleteClickListener mDeleteListener;
 
 	private String mLastBackupStr;
@@ -40,6 +43,7 @@ public class ListExportFragment extends ListFragment {
 	private static final int DIALOG_WAIT = 1;
 
 	private static final int DATE_FORMAT = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_YEAR;
+	private static final String DATE_FORMAT_FILENAME = "yyyy-MM-dd_HH:mm:ss.SSS";
 
 	@Override
 	public void onAttach(Activity activity) {
@@ -68,22 +72,22 @@ public class ListExportFragment extends ListFragment {
 		backupButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				new BackupTask().execute("");
+				new ExportTask().execute("");
 			}
 		});
 		mLastBackup = (TextView) mContext.findViewById(R.id.last_backup);
 
-		mRestoreListener = new RestoreClickListener();
+		mRestoreListener = new ImportClickListener();
 		mDeleteListener = new DeleteClickListener();
-		mAdapter = new RestoreAdapter(mContext, R.layout.restore_item, new ArrayList<File>());
+		mAdapter = new ImportListAdapter(mContext, R.layout.restore_item, new ArrayList<File>());
 	}
 
 	public void load() {
-		updateBackupTime();
+		updateExportTime();
 		new FileListTask().execute(0);
 	}
 
-	public RestoreAdapter getAdapter() {
+	public ImportListAdapter getAdapter() {
 		return mAdapter;
 	}
 
@@ -99,7 +103,7 @@ public class ListExportFragment extends ListFragment {
 		return null;
 	}
 
-	private class BackupTask extends AsyncTask<String, Void, Integer> {
+	private class ExportTask extends AsyncTask<String, Void, Integer> {
 
 		@Override
 		protected void onPreExecute() {
@@ -107,19 +111,19 @@ public class ListExportFragment extends ListFragment {
 		}
 
 		protected Integer doInBackground(String... filenames) {
-			String filename = filenames[0];
-			return mBackupManager.doBackupMain(filename);
+			SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT_FILENAME, Locale.US);
+			String filename =  sdf.format(new Date(System.currentTimeMillis()));
+			return mBackupManager.doExport(filename);
 		}
-
 		protected void onPostExecute(Integer result) {
-			onBackupFinish(result);
+			onExportFinish(result);
 		}
 	}
 
-	private void onBackupFinish(int code) {
+	private void onExportFinish(int code) {
 		Resources r = getResources();
 		if (code == ListExportManager.RESULT_DONE) {
-			updateBackupTime();
+			updateExportTime();
 			new FileListTask().execute(0);
 			Toast.makeText(mContext, r.getString(R.string.export_done), Toast.LENGTH_SHORT).show();
 			return;
@@ -138,7 +142,7 @@ public class ListExportFragment extends ListFragment {
 		}
 	}
 
-	private void updateBackupTime() {
+	private void updateExportTime() {
 		String summary;
 		long timeMain = mBackupManager.getMainTime();
 		if (timeMain > 0) {
@@ -176,7 +180,7 @@ public class ListExportFragment extends ListFragment {
 		}
 	}
 
-	private class RestoreTask extends AsyncTask<String, Void, Integer> {
+	private class ImportTask extends AsyncTask<String, Void, Integer> {
 
 		@Override
 		protected void onPreExecute() {
@@ -185,15 +189,15 @@ public class ListExportFragment extends ListFragment {
 
 		protected Integer doInBackground(String... filenames) {
 			String filename = filenames[0];
-			return mBackupManager.doRestoreMain(filename);
+			return mBackupManager.doImport(filename);
 		}
 
 		protected void onPostExecute(Integer result) {
-			onRestoreFinish(result);
+			onImportFinish(result);
 		}
 	}
 
-	private void onRestoreFinish(int code) {
+	private void onImportFinish(int code) {
 		try {
 			// dismissDialog(DIALOG_WAIT);
 		} catch (IllegalArgumentException e) {
@@ -218,10 +222,10 @@ public class ListExportFragment extends ListFragment {
 		}
 	}
 
-	private class RestoreAdapter extends ArrayAdapter<File> {
+	private class ImportListAdapter extends ArrayAdapter<File> {
 		private int resource;
 
-		public RestoreAdapter(Context _context, int _resource, ArrayList<File> _items) {
+		public ImportListAdapter(Context _context, int _resource, ArrayList<File> _items) {
 			super(_context, _resource, _items);
 			resource = _resource;
 		}
@@ -255,10 +259,10 @@ public class ListExportFragment extends ListFragment {
 		}
 	}
 
-	private class RestoreClickListener implements View.OnClickListener {
+	private class ImportClickListener implements View.OnClickListener {
 		@Override
 		public void onClick(View v) {
-			new RestoreTask().execute((String) v.getTag());
+			new ImportTask().execute((String) v.getTag());
 		}
 	}
 
