@@ -1,4 +1,4 @@
-package com.anod.appwatcher;
+package com.anod.appwatcher.fragments;
 
 import java.sql.Timestamp;
 
@@ -31,6 +31,16 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.anod.appwatcher.AppListContentProvider;
+import com.anod.appwatcher.ChangelogActivity;
+import com.anod.appwatcher.R;
+import com.anod.appwatcher.R.anim;
+import com.anod.appwatcher.R.bool;
+import com.anod.appwatcher.R.color;
+import com.anod.appwatcher.R.drawable;
+import com.anod.appwatcher.R.id;
+import com.anod.appwatcher.R.layout;
+import com.anod.appwatcher.R.string;
 import com.anod.appwatcher.market.MarketInfo;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListCursor;

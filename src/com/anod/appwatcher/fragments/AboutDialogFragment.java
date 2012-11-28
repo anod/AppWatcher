@@ -1,4 +1,8 @@
-package com.anod.appwatcher;
+package com.anod.appwatcher.fragments;
+
+import com.anod.appwatcher.R;
+import com.anod.appwatcher.R.layout;
+import com.anod.appwatcher.R.string;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -12,10 +16,10 @@ import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.widget.TextView;
 
-public class AboutDialog extends DialogFragment {
+public class AboutDialogFragment extends DialogFragment {
 	
-	public static AboutDialog newInstance() {
-		AboutDialog frag = new AboutDialog();
+	public static AboutDialogFragment newInstance() {
+		AboutDialogFragment frag = new AboutDialogFragment();
         Bundle args = new Bundle();
         frag.setArguments(args);
         return frag;

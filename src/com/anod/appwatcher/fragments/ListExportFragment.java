@@ -1,4 +1,4 @@
-package com.anod.appwatcher;
+package com.anod.appwatcher.fragments;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -23,6 +23,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.anod.appwatcher.R;
+import com.anod.appwatcher.R.id;
+import com.anod.appwatcher.R.layout;
+import com.anod.appwatcher.R.string;
 import com.anod.appwatcher.backup.ListExportManager;
 
 public class ListExportFragment extends ListFragment {

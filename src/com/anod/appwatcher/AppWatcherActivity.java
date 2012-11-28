@@ -15,6 +15,8 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.anod.appwatcher.actionbarcompat.ActionBarActivity;
+import com.anod.appwatcher.fragments.AboutDialogFragment;
+import com.anod.appwatcher.fragments.AppWatcherListFragment;
 import com.anod.appwatcher.sync.AccountHelper;
 import com.anod.appwatcher.sync.SyncAdapter;
 import com.anod.appwatcher.utils.AppLog;
@@ -215,7 +217,7 @@ public class AppWatcherActivity extends ActionBarActivity {
     		startActivity(rateIntent);
         	return true;
         case R.id.menu_about:
-        	AboutDialog aboutDialog = AboutDialog.newInstance();
+        	AboutDialogFragment aboutDialog = AboutDialogFragment.newInstance();
         	aboutDialog.show(getSupportFragmentManager(), "aboutDialog");        	
         	return true;
         default:
