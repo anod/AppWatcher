@@ -1,9 +1,5 @@
 package com.anod.appwatcher.fragments;
 
-import com.anod.appwatcher.R;
-import com.anod.appwatcher.R.layout;
-import com.anod.appwatcher.R.string;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -15,6 +11,8 @@ import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.widget.TextView;
+
+import com.anod.appwatcher.R;
 
 public class AboutDialogFragment extends DialogFragment {
 	

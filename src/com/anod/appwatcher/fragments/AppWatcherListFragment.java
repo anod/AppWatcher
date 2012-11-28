@@ -34,13 +34,6 @@ import android.widget.TextView;
 import com.anod.appwatcher.AppListContentProvider;
 import com.anod.appwatcher.ChangelogActivity;
 import com.anod.appwatcher.R;
-import com.anod.appwatcher.R.anim;
-import com.anod.appwatcher.R.bool;
-import com.anod.appwatcher.R.color;
-import com.anod.appwatcher.R.drawable;
-import com.anod.appwatcher.R.id;
-import com.anod.appwatcher.R.layout;
-import com.anod.appwatcher.R.string;
 import com.anod.appwatcher.market.MarketInfo;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListCursor;
@@ -129,6 +122,7 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 
 		@Override
 		public void bindView(View view, Context context, Cursor cursor) {
+			@SuppressWarnings("resource")
 			AppListCursor wrapper = new AppListCursor(cursor);
 			AppInfo app = wrapper.getAppInfo();
 			boolean hide = false;

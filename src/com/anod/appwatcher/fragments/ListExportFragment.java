@@ -24,9 +24,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.anod.appwatcher.R;
-import com.anod.appwatcher.R.id;
-import com.anod.appwatcher.R.layout;
-import com.anod.appwatcher.R.string;
 import com.anod.appwatcher.backup.ListExportManager;
 
 public class ListExportFragment extends ListFragment {
@@ -52,9 +49,6 @@ public class ListExportFragment extends ListFragment {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		if (container == null) {
-			return null;
-		}
 		return inflater.inflate(R.layout.restore_list, null);
 	}
 

@@ -4,84 +4,88 @@
     android:versionCode="8"
     android:versionName="1.3" >
 
-    <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="17"/>
+    <uses-sdk
+        android:minSdkVersion="8"
+        android:targetSdkVersion="17" />
 
     <!-- for google account token -->
-	<uses-permission android:name="android.permission.MANAGE_ACCOUNTS"></uses-permission>
-	<uses-permission android:name="android.permission.GET_ACCOUNTS"></uses-permission>
-	<uses-permission android:name="android.permission.USE_CREDENTIALS"></uses-permission>
-	<!-- for sync adapter -->
+    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
+    <!-- for sync adapter -->
     <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
     <uses-permission android:name="android.permission.READ_SYNC_STATS" />
-	<!-- for device id -->
-    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"></uses-permission>
-    
-	<uses-permission android:name="android.permission.INTERNET"></uses-permission>
-	<!-- for checkin Wi-Fi -->
-	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    
+    <!-- for device id -->
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- for checkin Wi-Fi -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
-        android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name"
-        android:name=".AppWatcherApplication" 
-        android:backupAgent=".backup.BackupFileHelperAgent"
+        android:name=".AppWatcherApplication"
         android:allowBackup="true"
-       >
-
-		<activity 
-			android:name=".ShareRecieverActivity"
-		    android:label="@string/app_name"
-		    android:icon="@drawable/ic_launcher"
-		>
-			<intent-filter>
-			   <action android:name="android.intent.action.SEND" />
-			   <category android:name="android.intent.category.DEFAULT" />
-			   <data android:mimeType="text/plain" />
-			</intent-filter> 
-		</activity>
-
+        android:backupAgent=".backup.BackupFileHelperAgent"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name" >
+        <activity
+            android:name=".ShareRecieverActivity"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".ChangelogActivity"
-            android:label="@string/whats_new_title" 
-            android:theme="@style/AppThemeLight.Dialog">
+            android:label="@string/whats_new_title"
+            android:theme="@style/AppThemeLight.Dialog" >
         </activity>
-                
         <activity
             android:name=".MarketSearchActivity"
-            android:label="@string/app_name" 
-            android:theme="@style/AppThemeLight.DarkActionBar">
+            android:label="@string/app_name"
+            android:theme="@style/AppThemeLight.DarkActionBar" >
         </activity>
-        
         <activity
             android:name=".AppWatcherActivity"
-            android:label="@string/app_name" 
-            android:theme="@style/AppTheme"
-            android:clearTaskOnLaunch="true">
+            android:clearTaskOnLaunch="true"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="ListExportActivity"
+            android:label="@string/import_export"
+            android:theme="@style/AppTheme" />
+        
+        <provider
+            android:name=".AppListContentProvider"
+            android:authorities="com.anod.appwatcher"
+            android:label="@string/app_name"
+            android:syncable="true" >
+        </provider>
 
-		<provider
-			android:name=".AppListContentProvider"
-			android:authorities="com.anod.appwatcher"
-			android:syncable="true"
-			android:label="@string/app_name"
-		>
-   		</provider>
+        <service
+            android:name=".sync.SyncService"
+            android:exported="true"
+            android:process=":sync" >
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter" />
+            </intent-filter>
 
-		<service android:name=".sync.SyncService" android:exported="true" android:process=":sync">
-			<intent-filter>
-				<action android:name="android.content.SyncAdapter" />
-			</intent-filter>
-			<meta-data android:name="android.content.SyncAdapter"
-				android:resource="@xml/syncadapter" />
-		</service>
-		
-		<meta-data android:name="com.google.android.backup.api_key"
-    		android:value="AEdPqrEAAAAIWapJJclZH281aXWN3VunYCHInRkwJag2VkVSIw" />
+            <meta-data
+                android:name="android.content.SyncAdapter"
+                android:resource="@xml/syncadapter" />
+        </service>
+
+        <meta-data
+            android:name="com.google.android.backup.api_key"
+            android:value="AEdPqrEAAAAIWapJJclZH281aXWN3VunYCHInRkwJag2VkVSIw" />
     </application>
 
 </manifest>

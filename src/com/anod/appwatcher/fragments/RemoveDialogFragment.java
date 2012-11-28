@@ -1,15 +1,14 @@
 package com.anod.appwatcher.fragments;
 
-import com.anod.appwatcher.AppListContentProvider;
-import com.anod.appwatcher.R;
-import com.anod.appwatcher.R.string;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+
+import com.anod.appwatcher.AppListContentProvider;
+import com.anod.appwatcher.R;
 
 public class RemoveDialogFragment extends DialogFragment {
 	
