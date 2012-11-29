@@ -7,15 +7,11 @@ import java.util.Date;
 import java.util.Locale;
 
 import android.app.Activity;
-import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
-import android.text.format.DateUtils;
-import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -26,6 +22,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.anod.appwatcher.ListExportActivity;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.backup.ListExportManager;
 
@@ -34,15 +31,9 @@ public class ListExportFragment extends ListFragment {
 	private ImportClickListener mRestoreListener;
 	private DeleteClickListener mDeleteListener;
 
-	private String mLastBackupStr;
-	private TextView mLastBackup;
-	private SparseArray<Dialog> mManagedDialogs;
 	private ListExportManager mBackupManager;
 	private Activity mContext;
 
-	private static final int DIALOG_WAIT = 1;
-
-	private static final int DATE_FORMAT = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_YEAR;
 	private static final String DATE_FORMAT_FILENAME = "yyyy-MM-dd_HH:mm:ss.SSS";
 
 	@Override
@@ -67,7 +58,6 @@ public class ListExportFragment extends ListFragment {
 	public void init() {
 		mBackupManager = new ListExportManager(mContext);
 
-		mLastBackupStr = getString(R.string.last_export);
 		Button backupButton = (Button) mContext.findViewById(R.id.backup_button);
 		backupButton.setOnClickListener(new OnClickListener() {
 			@Override
@@ -75,7 +65,6 @@ public class ListExportFragment extends ListFragment {
 				new ExportTask().execute("");
 			}
 		});
-		mLastBackup = (TextView) mContext.findViewById(R.id.last_backup);
 
 		mRestoreListener = new ImportClickListener();
 		mDeleteListener = new DeleteClickListener();
@@ -83,24 +72,11 @@ public class ListExportFragment extends ListFragment {
 	}
 
 	public void load() {
-		updateExportTime();
 		new FileListTask().execute(0);
 	}
 
 	public ImportListAdapter getAdapter() {
 		return mAdapter;
-	}
-
-	private Dialog createDialog(int id) {
-		switch (id) {
-		case DIALOG_WAIT:
-			ProgressDialog waitDialog = new ProgressDialog(mContext);
-			waitDialog.setCancelable(true);
-			String message = getString(R.string.please_wait);
-			waitDialog.setMessage(message);
-			return waitDialog;
-		}
-		return null;
 	}
 
 	private class ExportTask extends AsyncTask<String, Void, Integer> {
@@ -123,15 +99,11 @@ public class ListExportFragment extends ListFragment {
 	private void onExportFinish(int code) {
 		Resources r = getResources();
 		if (code == ListExportManager.RESULT_DONE) {
-			updateExportTime();
 			new FileListTask().execute(0);
 			Toast.makeText(mContext, r.getString(R.string.export_done), Toast.LENGTH_SHORT).show();
 			return;
 		}
-		try {
-			// dismissDialog(DIALOG_WAIT);
-		} catch (IllegalArgumentException e) {
-		}
+		dismissDialog();
 		switch (code) {
 		case ListExportManager.ERROR_STORAGE_NOT_AVAILABLE:
 			Toast.makeText(mContext, r.getString(R.string.external_storage_not_available), Toast.LENGTH_SHORT).show();
@@ -142,21 +114,10 @@ public class ListExportFragment extends ListFragment {
 		}
 	}
 
-	private void updateExportTime() {
-		String summary;
-		long timeMain = mBackupManager.getUpdateTime();
-		if (timeMain > 0) {
-			summary = DateUtils.formatDateTime(mContext, timeMain, DATE_FORMAT);
-		} else {
-			summary = getString(R.string.never);
-		}
-		mLastBackup.setText(String.format(mLastBackupStr, summary));
-	}
-
 	private class FileListTask extends AsyncTask<Integer, Void, File[]> {
 		@Override
 		protected void onPreExecute() {
-			// showDialog(DIALOG_WAIT);
+			showDialog();
 			mAdapter.clear();
 			mAdapter.notifyDataSetChanged();
 		}
@@ -172,19 +133,25 @@ public class ListExportFragment extends ListFragment {
 					mAdapter.notifyDataSetChanged();
 				}
 			}
-			try {
-				// dismissDialog(DIALOG_WAIT);
-			} catch (IllegalArgumentException e) {
-			}
+			dismissDialog();
 
 		}
+	}
+	
+	
+	private void showDialog() {
+		((ListExportActivity)getActivity()).showDialog();
+	}
+
+	private void dismissDialog() {
+		((ListExportActivity)getActivity()).dismissDialog();
 	}
 
 	private class ImportTask extends AsyncTask<String, Void, Integer> {
 
 		@Override
 		protected void onPreExecute() {
-			// showDialog(DIALOG_WAIT);
+			showDialog();
 		}
 
 		protected Integer doInBackground(String... filenames) {
@@ -198,10 +165,8 @@ public class ListExportFragment extends ListFragment {
 	}
 
 	private void onImportFinish(int code) {
-		try {
-			// dismissDialog(DIALOG_WAIT);
-		} catch (IllegalArgumentException e) {
-		}
+		dismissDialog();
+		
 		if (code == ListExportManager.RESULT_DONE) {
 			Toast.makeText(mContext, getString(R.string.import_done), Toast.LENGTH_SHORT).show();
 			return;
@@ -278,7 +243,7 @@ public class ListExportFragment extends ListFragment {
 
 		@Override
 		protected void onPreExecute() {
-			// showDialog(DIALOG_WAIT);
+			showDialog();
 		}
 
 		protected Boolean doInBackground(File... files) {
@@ -286,6 +251,7 @@ public class ListExportFragment extends ListFragment {
 		}
 
 		protected void onPostExecute(Boolean result) {
+			dismissDialog();
 			if (!result) {
 				Toast.makeText(mContext, getString(R.string.unable_delete_file), Toast.LENGTH_SHORT).show();
 			} else {
