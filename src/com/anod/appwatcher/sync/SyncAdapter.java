@@ -34,6 +34,7 @@ import com.anod.appwatcher.market.AppLoader;
 import com.anod.appwatcher.market.DeviceIdHelper;
 import com.anod.appwatcher.market.MarketSessionHelper;
 import com.anod.appwatcher.model.AppInfo;
+import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.model.AppListCursor;
 import com.anod.appwatcher.model.AppListTable;
 import com.anod.appwatcher.utils.AppLog;
@@ -58,8 +59,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 	}
 
 	@Override
-	public void onPerformSync(Account account, Bundle extras, String authority,
-			ContentProviderClient provider, SyncResult syncResult) {
+	public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
 
 		Preferences pref = new Preferences(mContext);
 
@@ -87,8 +87,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 		AppLog.d("Last update viewed: "+lastUpdatesViewed);
 		
 		ArrayList<String> updatedTitles = null;
+		AppListContentProviderClient appListProvider = new AppListContentProviderClient(provider);
 		try {
-			updatedTitles = doSync(pref, provider, lastUpdatesViewed);
+			updatedTitles = doSync(pref, appListProvider, lastUpdatesViewed);
 		} catch (RemoteException e) {
 			
 		}
@@ -126,7 +127,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 	 * @throws RemoteException
 	 * @return list of titles that were updated
 	 */
-	private ArrayList<String> doSync(Preferences pref, ContentProviderClient provider, boolean lastUpdatesViewed) throws RemoteException {
+	private ArrayList<String> doSync(Preferences pref, AppListContentProviderClient client, boolean lastUpdatesViewed) throws RemoteException {
 		ArrayList<String> updatedTitles = new ArrayList<String>();
 
 		
@@ -134,7 +135,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 		AppIconLoader iconLoader = new AppIconLoader(session);
 		AppLoader loader = new AppLoader(session, false);
 		
-		AppListCursor apps = loadApps(provider); 
+		AppListCursor apps = client.queryAll();
 		if (apps==null || apps.moveToFirst() == false) {
 			return updatedTitles;
 		}
@@ -148,20 +149,20 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 				AppLog.e("Cannot retrieve information about application");
 				continue;
 			}
-			ContentValues values;
 			if (marketApp.getVersionCode() > localApp.getVersionCode()) {
 				AppLog.d("New version found ["+marketApp.getVersionCode()+"]");
 				Bitmap icon = iconLoader.loadImageUncached(marketApp.getId());
-				values = createContentValues(marketApp, icon);
-				updateApp(provider, localApp.getRowId(), values);
+				AppInfo newApp = createNewVersion(marketApp, localApp, icon);
+				client.update(newApp);
 				updatedTitles.add(marketApp.getTitle());
 				continue;
 			}
 			
 			AppLog.d("No update found.");
-			values = new ContentValues();
+			ContentValues values = new ContentValues();
 			//Mark updated app as normal 
 			if (localApp.getStatus() == AppInfo.STATUS_UPDATED && lastUpdatesViewed) {
+				localApp.setStatus(AppInfo.STATUS_NORMAL);
 				AppLog.d("Mark application as old");
 				values.put(AppListTable.Columns.KEY_STATUS, AppInfo.STATUS_NORMAL );
 			}
@@ -175,7 +176,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 		   	    }			
 			}
 			if (values.size() > 0) {
-				updateApp(provider, localApp.getRowId(), values);
+				client.update(localApp.getRowId(), values);
 			}
 		}
 		return updatedTitles;
@@ -187,39 +188,19 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 	 * @param values
 	 * @throws RemoteException
 	 */
-	private void updateApp(ContentProviderClient provider, int rowId, ContentValues values) throws RemoteException {
-		Uri updateUri = AppListContentProvider.CONTENT_URI.buildUpon().appendPath(String.valueOf(rowId)).build();
-		provider.update(updateUri, values, null, null);
-	}
-
-	/**
-	 * Create content values for new app
-	 * @param app
-	 * @param icon
-	 * @return
-	 */
-    private ContentValues createContentValues(App app, Bitmap icon) {
-    	ContentValues values = new ContentValues();
-
-   	    values.put(AppListTable.Columns.KEY_TITLE, app.getTitle());
-   	    values.put(AppListTable.Columns.KEY_VERSION_NUMBER, app.getVersionCode());
-   	    values.put(AppListTable.Columns.KEY_VERSION_NAME, app.getVersion());
-   	    values.put(AppListTable.Columns.KEY_CREATOR, app.getCreator());
-   	    values.put(AppListTable.Columns.KEY_STATUS, AppInfo.STATUS_UPDATED );
+	private AppInfo createNewVersion(App marketApp, AppInfo localApp, Bitmap newIcon)  {
 
         // Gets the current system time in milliseconds
         Long now = Long.valueOf(System.currentTimeMillis());
-		Timestamp timestamp =  new Timestamp(now);
-		AppLog.d("Saving time [" + now + "]:" + timestamp.toString());
-   	    values.put(AppListTable.Columns.KEY_UPDATE_DATE, now );
 
-   	    if (icon != null) {
-   	    	byte[] iconData = BitmapUtils.flattenBitmap(icon);
-   	   	    values.put(AppListTable.Columns.KEY_ICON_CACHE, iconData);
-   	    }
+		AppInfo newApp = new AppInfo(marketApp, newIcon);
+		newApp.setRowId(localApp.getRowId());
+		newApp.setStatus(AppInfo.STATUS_UPDATED);
+		newApp.setUpdateTime(now);
 
-   	    return values;
-    }
+		return newApp;
+	}
+
 
 	private MarketSession createAppInfoLoader(Preferences prefs) {
 		MarketSessionHelper helper = new MarketSessionHelper(mContext);
@@ -295,21 +276,5 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 		return title;
 	}
 	
-	/**
-	 * @param provider
-	 * @throws RemoteException
-	 */
-	private AppListCursor loadApps(ContentProviderClient provider)
-			throws RemoteException {
-		Cursor cursor = provider.query(
-			AppListContentProvider.CONTENT_URI,
-			AppListTable.APPLIST_PROJECTION, 
-			null, null, null
-		);
-		if (cursor!=null) {
-			return new AppListCursor(cursor);
-		}
-		return null;
-	}
 
 }

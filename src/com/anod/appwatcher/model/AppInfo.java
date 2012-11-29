@@ -129,4 +129,25 @@ public class AppInfo {
 	public long getUpdateTime() {
 		return updateTime;
 	}
+
+	/**
+	 * @param rowId
+	 */
+	public void setRowId(int rowId) {
+		this.rowId = rowId;
+	}
+	
+	/**
+	 * @param status
+	 */
+	public void setStatus(int status) {
+		this.status = status;
+	}
+
+	/**
+	 * @param updateTime
+	 */
+	public void setUpdateTime(Long updateTime) {
+		this.updateTime = updateTime;
+	}
 }

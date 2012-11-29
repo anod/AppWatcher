@@ -22,7 +22,7 @@ import com.android.util.JsonToken;
 import com.android.util.JsonWriter;
 import com.android.util.MalformedJsonException;
 import com.anod.appwatcher.model.AppInfo;
-import com.anod.appwatcher.model.AppListContentResolver;
+import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.model.AppListCursor;
 import com.anod.appwatcher.utils.BitmapUtils;
 
@@ -110,8 +110,8 @@ public class ListExportManager {
 
 		File dataFile = new File(saveDir, filename + FILE_EXT_DAT);
 
-		AppListContentResolver cr = new AppListContentResolver(mContext);
-		AppListCursor listCursor = cr.queryAll();
+		AppListContentProviderClient cr = new AppListContentProviderClient(mContext);
+		AppListCursor listCursor = cr.queryAllSorted();
 		try {
 			synchronized (ListExportManager.sDataLock) {
 				BufferedWriter buf = new BufferedWriter(
@@ -126,6 +126,7 @@ public class ListExportManager {
 			if (listCursor != null) {
 				listCursor.close();
 			}
+			cr.release();
 		}
 		saveDir.setLastModified(System.currentTimeMillis());
 		return RESULT_DONE;
@@ -210,13 +211,14 @@ public class ListExportManager {
 			return ERROR_FILE_READ;
 		}
 		if (appList != null && appList.size() > 0) {
-			AppListContentResolver cr = new AppListContentResolver(mContext);
+			AppListContentProviderClient cr = new AppListContentProviderClient(mContext);
 			Map<String, Boolean> currentIds = cr.queryIdsMap();
 			for(AppInfo app : appList) {
 				if (currentIds.get(app.getAppId()) == null) {
 					cr.insert(app);
 				}
 			}
+			cr.release();
 		}
 		return RESULT_DONE;
 	}

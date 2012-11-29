@@ -3,7 +3,6 @@ package com.anod.appwatcher;
 import java.util.List;
 
 import android.annotation.SuppressLint;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -44,7 +43,7 @@ import com.anod.appwatcher.market.AppsResponseLoader;
 import com.anod.appwatcher.market.DeviceIdHelper;
 import com.anod.appwatcher.market.MarketSessionHelper;
 import com.anod.appwatcher.model.AppInfo;
-import com.anod.appwatcher.model.AppListContentResolver;
+import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.commonsware.cwac.endless.EndlessAdapter;
 import com.gc.android.market.api.MarketSession;
 import com.gc.android.market.api.model.Market.App;
@@ -170,74 +169,68 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 		@Override
 		public void onItemClick (AdapterView<?> parent, View view, int position, long id) {
 			App app = mAdapter.getItem(position);
-	   	    Bitmap icon = mIconLoader.getCachedImage(app.getId());
+			Bitmap icon = mIconLoader.getCachedImage(app.getId());
 			AppInfo info = new AppInfo(app, icon);
-			AppListContentResolver cr = new AppListContentResolver(MarketSearchActivity.this);
-            Uri uri = cr.insert(info);
-
-            if (uri == null) {
-                Toast.makeText(mContext, R.string.error_insert_app, Toast.LENGTH_SHORT).show();
-            } else {
-            	if (mShareSource) {
-            		String msg =getString(R.string.app_stored, app.getTitle());
-                    Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();            		
-            	}
-            	finish();
-            }
+			AppListContentProviderClient cr = new AppListContentProviderClient(MarketSearchActivity.this);
+			Uri uri = cr.insert(info);
+			cr.release();
+			
+			if (uri == null) {
+				Toast.makeText(mContext, R.string.error_insert_app, Toast.LENGTH_SHORT).show();
+			} else {
+				if (mShareSource) {
+					String msg = getString(R.string.app_stored, app.getTitle());
+					Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
+				}
+				finish();
+			}
 		}
-    };
+	};
 
-    
-    class RetreiveResultsTask extends AsyncTask<String, Void, List<App>> {
-        protected List<App> doInBackground(String... queries) {
-        	List<App> apps = mResponseLoader.load();
-        	if (apps != null) {
-	        	for (App app: apps) {
-	        		mIconLoader.precacheIcon(app.getId());
-	        	}
-        	}
-        	return apps;
-        }
-        
-        @Override
-        protected void onPostExecute(List<App> list) {
-        	if (list == null || list.size() == 0) {
-        		showNoResults(mResponseLoader.getQuery());
-        		return;
-        	}
-        	mLoading.setVisibility(View.GONE);
-        	adapterAddAll(mAdapter,list);
-    		
-    		if (mResponseLoader.hasNext()) {
-    			mListView.setAdapter(new AppsEndlessAdapter(
-    				mContext, mAdapter, R.layout.pending
-    			));
-    		}
-    		
-    		showDeviceIdMessage();
-        }
+	class RetreiveResultsTask extends AsyncTask<String, Void, List<App>> {
+		protected List<App> doInBackground(String... queries) {
+			List<App> apps = mResponseLoader.load();
+			if (apps != null) {
+				for (App app : apps) {
+					mIconLoader.precacheIcon(app.getId());
+				}
+			}
+			return apps;
+		}
 
+		@Override
+		protected void onPostExecute(List<App> list) {
+			if (list == null || list.size() == 0) {
+				showNoResults(mResponseLoader.getQuery());
+				return;
+			}
+			mLoading.setVisibility(View.GONE);
+			adapterAddAll(mAdapter, list);
 
+			if (mResponseLoader.hasNext()) {
+				mListView.setAdapter(new AppsEndlessAdapter(mContext, mAdapter, R.layout.pending));
+			}
 
-    };
-  
-    @SuppressLint("NewApi")
+			showDeviceIdMessage();
+		}
+	};
+
+	@SuppressLint("NewApi")
 	private void adapterAddAll(ArrayAdapter<App> adapter, List<App> list) {
-    	if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-    		adapter.addAll(list);
-    	} else {
-    		for(App app: list) {
-    			adapter.add(app);
-    		}
-    	}
-    }
-    
-    class AppsEndlessAdapter extends EndlessAdapter {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			adapter.addAll(list);
+		} else {
+			for (App app : list) {
+				adapter.add(app);
+			}
+		}
+	}
+
+	class AppsEndlessAdapter extends EndlessAdapter {
 
 		private List<App> mCache;
 
-		public AppsEndlessAdapter(Context context, ListAdapter wrapped,
-				int pendingResource) {
+		public AppsEndlessAdapter(Context context, ListAdapter wrapped, int pendingResource) {
 			super(context, wrapped, pendingResource);
 		}
 
@@ -253,15 +246,16 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 		@Override
 		protected void appendCachedData() {
 			if (mCache != null) {
-				AppsAdapter adapter = (AppsAdapter)getWrappedAdapter();
-				adapterAddAll(adapter,mCache);
+				AppsAdapter adapter = (AppsAdapter) getWrappedAdapter();
+				adapterAddAll(adapter, mCache);
 			}
 		}
-    	
-    }
- 
-    class AppsAdapter extends ArrayAdapter<App> {
-    	private Bitmap mDefaultIcon;
+
+	}
+
+	class AppsAdapter extends ArrayAdapter<App> {
+		private Bitmap mDefaultIcon;
+
 		public AppsAdapter(Context context, int textViewResourceId) {
 			super(context, textViewResourceId);
 		}
@@ -276,30 +270,30 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 		public View getView(int position, View convertView, ViewGroup parent) {
 			ViewHolder holder;
 			View v = convertView;
-            if (v == null) {
-                LayoutInflater vi = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                v = vi.inflate(R.layout.market_app_row, null);
-                holder = new ViewHolder();
-                holder.title = (TextView)v.findViewById(R.id.title);
-                holder.details = (TextView)v.findViewById(R.id.details);
-                v.setTag(holder);
-            } else {
-            	holder = (ViewHolder)v.getTag();
-            }
-            App app = (App)getItem(position);
-            holder.title.setText(app.getTitle()+" "+app.getVersion());
-            holder.details.setText(app.getCreator());
-            ImageView icon = (ImageView)v.findViewById(R.id.icon);
-        	if (mDefaultIcon == null) {
-        		mDefaultIcon = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_empty);
-        	}
-        	icon.setImageBitmap(mDefaultIcon);
-            mIconLoader.loadImage(app.getId(), icon);
-            
+			if (v == null) {
+				LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				v = vi.inflate(R.layout.market_app_row, null);
+				holder = new ViewHolder();
+				holder.title = (TextView) v.findViewById(R.id.title);
+				holder.details = (TextView) v.findViewById(R.id.details);
+				v.setTag(holder);
+			} else {
+				holder = (ViewHolder) v.getTag();
+			}
+			App app = (App) getItem(position);
+			holder.title.setText(app.getTitle() + " " + app.getVersion());
+			holder.details.setText(app.getCreator());
+			ImageView icon = (ImageView) v.findViewById(R.id.icon);
+			if (mDefaultIcon == null) {
+				mDefaultIcon = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_empty);
+			}
+			icon.setImageBitmap(mDefaultIcon);
+			mIconLoader.loadImage(app.getId(), icon);
+
 			return v;
 		}
 
-    }
+	}
 
 	@Override
 	public Loader<String> onCreateLoader(int id, Bundle args) {
@@ -317,9 +311,9 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 		if (mFirstTimeRun && !TextUtils.isEmpty(mSearchEdit.getText())) {
 			searchResults();
 		} else {
-	        // hide virtual keyboard
-	        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-	        imm.showSoftInput(mSearchEdit, 0);
+			// hide virtual keyboard
+			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+			imm.showSoftInput(mSearchEdit, 0);
 		}
 	}
 
@@ -339,5 +333,5 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 	public void onLoaderReset(Loader<String> loader) {
 		// TODO Auto-generated method stub
 	}
-    	
+
 }
