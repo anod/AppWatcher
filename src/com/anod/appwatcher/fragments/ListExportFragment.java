@@ -144,7 +144,7 @@ public class ListExportFragment extends ListFragment {
 
 	private void updateExportTime() {
 		String summary;
-		long timeMain = mBackupManager.getMainTime();
+		long timeMain = mBackupManager.getUpdateTime();
 		if (timeMain > 0) {
 			summary = DateUtils.formatDateTime(mContext, timeMain, DATE_FORMAT);
 		} else {
@@ -162,7 +162,7 @@ public class ListExportFragment extends ListFragment {
 		}
 
 		protected File[] doInBackground(Integer... params) {
-			return mBackupManager.getMainBackups();
+			return mBackupManager.getFileList();
 		}
 
 		protected void onPostExecute(File[] result) {

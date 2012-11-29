@@ -44,8 +44,7 @@ import com.anod.appwatcher.market.AppsResponseLoader;
 import com.anod.appwatcher.market.DeviceIdHelper;
 import com.anod.appwatcher.market.MarketSessionHelper;
 import com.anod.appwatcher.model.AppInfo;
-import com.anod.appwatcher.model.AppListTable;
-import com.anod.appwatcher.utils.BitmapUtils;
+import com.anod.appwatcher.model.AppListContentResolver;
 import com.commonsware.cwac.endless.EndlessAdapter;
 import com.gc.android.market.api.MarketSession;
 import com.gc.android.market.api.model.Market.App;
@@ -171,8 +170,10 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 		@Override
 		public void onItemClick (AdapterView<?> parent, View view, int position, long id) {
 			App app = mAdapter.getItem(position);
-			ContentValues values = createContentValues(app);
-            Uri uri = getContentResolver().insert(AppListContentProvider.CONTENT_URI, values);
+	   	    Bitmap icon = mIconLoader.getCachedImage(app.getId());
+			AppInfo info = new AppInfo(app, icon);
+			AppListContentResolver cr = new AppListContentResolver(MarketSearchActivity.this);
+            Uri uri = cr.insert(info);
 
             if (uri == null) {
                 Toast.makeText(mContext, R.string.error_insert_app, Toast.LENGTH_SHORT).show();
@@ -186,24 +187,6 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 		}
     };
 
-    private ContentValues createContentValues(App app) {
-    	ContentValues values = new ContentValues();
-    	
-   	    values.put(AppListTable.Columns.KEY_APPID, app.getId());    	
-   	    values.put(AppListTable.Columns.KEY_PACKAGE, app.getPackageName());
-   	    values.put(AppListTable.Columns.KEY_TITLE, app.getTitle());
-   	    values.put(AppListTable.Columns.KEY_VERSION_NUMBER, app.getVersionCode());  	    
-   	    values.put(AppListTable.Columns.KEY_VERSION_NAME, app.getVersion());
-   	    values.put(AppListTable.Columns.KEY_CREATOR, app.getCreator());
-   	    values.put(AppListTable.Columns.KEY_STATUS, AppInfo.STATUS_NORMAL );
-   	    Bitmap icon = mIconLoader.getCachedImage(app.getId());
-   	    if (icon != null) {
-   	    	byte[] iconData = BitmapUtils.flattenBitmap(icon);
-   	   	    values.put(AppListTable.Columns.KEY_ICON_CACHE, iconData);
-   	    }
-   	    
-   	    return values;
-    }
     
     class RetreiveResultsTask extends AsyncTask<String, Void, List<App>> {
         protected List<App> doInBackground(String... queries) {
