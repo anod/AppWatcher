@@ -11,6 +11,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -208,10 +209,15 @@ public class ListExportManager {
 			e.printStackTrace();
 			return ERROR_FILE_READ;
 		}
-		//cr = AppListContentResolver(mContext);
-		// PreferencesStorage storage = new PreferencesStorage(mContext,
-		// appWidgetId);
-		// storage.save(prefs.getMain());
+		if (appList != null && appList.size() > 0) {
+			AppListContentResolver cr = new AppListContentResolver(mContext);
+			Map<String, Boolean> currentIds = cr.queryIdsMap();
+			for(AppInfo app : appList) {
+				if (currentIds.get(app.getAppId()) == null) {
+					cr.insert(app);
+				}
+			}
+		}
 		return RESULT_DONE;
 	}
 
