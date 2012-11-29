@@ -2,6 +2,7 @@ package com.anod.appwatcher.backup;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -141,7 +142,6 @@ public class ListExportManager {
 	private void writeJSONAppsList(Writer file, AppListCursor listCursor)
 			throws IOException {
 		JsonWriter writer = new JsonWriter(file);
-		writer.setIndent("  ");
 		writer.beginArray();
 		listCursor.moveToPosition(-1);
 		while (listCursor.moveToNext()) {
@@ -171,9 +171,13 @@ public class ListExportManager {
 		Bitmap icon = appInfo.getIcon();
 		if (icon != null) {
 			byte[] iconData = BitmapUtils.flattenBitmap(icon);
-			writer.name("icon").value(new String(iconData));
+			writer.name("icon").beginArray();
+			for(int i=0; i<iconData.length; i++) {
+				writer.value(iconData[i]);
+			}
+			writer.endArray();
 		} else {
-			writer.name("icon").value("");
+			writer.name("icon").beginArray().endArray();
 		}
 		writer.endObject();
 	}
@@ -253,7 +257,7 @@ public class ListExportManager {
 	 * @throws IOException
 	 */
 	private AppInfo readAppInfo(JsonReader reader) throws IOException {
-		String appId = null, pname = null, versionName = "", title = "", creator = "", iconStr = "";
+		String appId = null, pname = null, versionName = "", title = "", creator = "";
 		int versionNumber = 0, status = 0;
 		long updateTime = 0;
 		Bitmap icon = null;
@@ -278,10 +282,13 @@ public class ListExportManager {
 			} else if (name.equals("status")) {
 				status = reader.nextInt();
 			} else if (name.equals("icon")) {
-				iconStr = reader.nextString();
-				if (iconStr != null && iconStr.length() > 0) {
-					icon = BitmapUtils.unFlattenBitmap(iconStr.getBytes());
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				reader.beginArray();
+				while(reader.hasNext()) {
+					baos.write(reader.nextInt());
 				}
+				reader.endArray();
+				icon = BitmapUtils.unFlattenBitmap(baos.toByteArray());
 			} else {
 				reader.skipValue();
 			}
