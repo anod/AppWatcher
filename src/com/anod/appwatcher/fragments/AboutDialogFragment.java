@@ -8,14 +8,17 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.text.Html;
 import android.text.Spanned;
+import android.text.format.DateUtils;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.widget.TextView;
 
+import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.R;
 
 public class AboutDialogFragment extends DialogFragment {
-	
+	private static final int DATE_FORMAT = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_YEAR;
+
 	public static AboutDialogFragment newInstance() {
 		AboutDialogFragment frag = new AboutDialogFragment();
         Bundle args = new Bundle();
@@ -32,12 +35,19 @@ public class AboutDialogFragment extends DialogFragment {
 
     	
 		String title = getString(R.string.dialog_about_title, getString(R.string.app_name), versionName);
-    	Spanned text = Html.fromHtml(getString(R.string.dialog_about_text));
-    	
+		
+		Preferences pref = new Preferences(getActivity());
+		long time = pref.getLastUpdateTime();
+		String lastUpdateTime = DateUtils.formatDateTime(getActivity(), time, DATE_FORMAT);
+		String lastUpdate = getString(R.string.last_update, lastUpdateTime);
+		
+		String text = getString(R.string.dialog_about_text) + "<br/><br/>" + lastUpdate;
+		
+    	Spanned message = Html.fromHtml(text);
     	LayoutInflater inflater = getActivity().getLayoutInflater();
     	TextView messageView = (TextView)inflater.inflate(R.layout.about, null);
     	messageView.setMovementMethod(LinkMovementMethod.getInstance());
-    	messageView.setText(text);
+    	messageView.setText(message);
     	
         return new AlertDialog.Builder(getActivity())
             .setTitle(title)

@@ -45,7 +45,7 @@
     <string name="no_recent_changes">No information about recent changes was provided.</string>
     <string name="google_account_not_found">Google account not found.</string>
     <string name="list_export">Export</string>
-    <string name="last_export">Last Export</string>
+    <string name="last_update">Last Update: %1$s</string>
     <string name="list_import">Import</string>
     <string name="no_files_found">No files found</string>
     <string name="please_wait">Please, wait&#8230;</string>
