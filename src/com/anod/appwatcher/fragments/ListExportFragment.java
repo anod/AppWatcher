@@ -34,7 +34,7 @@ public class ListExportFragment extends ListFragment {
 	private ListExportManager mBackupManager;
 	private Activity mContext;
 
-	private static final String DATE_FORMAT_FILENAME = "yyyy-MM-dd_HH:mm:ss.SSS";
+	private static final String DATE_FORMAT_FILENAME = "yyyyMMdd_HHmmss.SSS";
 
 	@Override
 	public void onAttach(Activity activity) {
