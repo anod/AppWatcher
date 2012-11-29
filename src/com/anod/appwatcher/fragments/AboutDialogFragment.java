@@ -38,10 +38,13 @@ public class AboutDialogFragment extends DialogFragment {
 		
 		Preferences pref = new Preferences(getActivity());
 		long time = pref.getLastUpdateTime();
-		String lastUpdateTime = DateUtils.formatDateTime(getActivity(), time, DATE_FORMAT);
-		String lastUpdate = getString(R.string.last_update, lastUpdateTime);
 		
-		String text = getString(R.string.dialog_about_text) + "<br/><br/>" + lastUpdate;
+		String text = getString(R.string.dialog_about_text);
+		if (time > 0) {
+			String lastUpdate = getString(R.string.last_update, DateUtils.formatDateTime(getActivity(), time, DATE_FORMAT));
+			text += "<br/><br/>" + lastUpdate;
+		}
+
 		
     	Spanned message = Html.fromHtml(text);
     	LayoutInflater inflater = getActivity().getLayoutInflater();
