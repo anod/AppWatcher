@@ -56,7 +56,6 @@
     <string name="restore_deserialize_failed">Cannot read JSON data</string>
     <string name="failed_to_read_file">Cannot read file</string>
     <string name="file_not_exist">File not exist</string>
-    <string name="never">Never</string>
     <string name="failed_to_write_file">Failed to write into file</string>
     <string name="import_export">Import/Export</string>
 </resources>

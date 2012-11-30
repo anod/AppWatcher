@@ -161,7 +161,7 @@ public final class JsonWriter implements Closeable {
      * @param indent a string containing only whitespace.
      */
     public void setIndent(String indent) {
-        if (indent.isEmpty()) {
+        if (indent == null || indent.length()==0) {
             this.indent = null;
             this.separator = ":";
         } else {

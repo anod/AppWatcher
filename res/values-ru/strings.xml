@@ -44,4 +44,18 @@
     <string name="installed">Установленно</string>
     <string name="no_recent_changes">Нет информации о последних изменениях.</string>
     <string name="google_account_not_found">Google аккаунт не найден.</string>
+    <string name="list_export">Экспорт</string>
+    <string name="last_update">Последнее обновление: %1$s</string>
+    <string name="list_import">Импорт</string>
+    <string name="no_files_found">Файлы не найдены</string>
+    <string name="please_wait">Please, wait&#8230;</string>
+    <string name="export_done">Завершено</string>
+    <string name="unable_delete_file">Невозможно удалить файл</string>
+    <string name="import_done">Импорт завершен</string>
+    <string name="external_storage_not_available">Внешнее устройство хранения данных не доступно</string>
+    <string name="restore_deserialize_failed">Не возможно прочитать данные JSON</string>
+    <string name="failed_to_read_file">Не возможно прочитать файл</string>
+    <string name="file_not_exist">Файл не существует</string>
+    <string name="failed_to_write_file">Не удалось записать файл</string>
+    <string name="import_export">Импорт/Экспорт</string>
 </resources>

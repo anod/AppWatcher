@@ -656,7 +656,7 @@ public final class JsonReader implements Closeable {
                 checkLenient();
                 pos--;
                 name = nextLiteral(false);
-                if (name.length() == 0) {
+                if (name == null || name.length() == 0) {
                     throw syntaxError("Expected name");
                 }
         }
