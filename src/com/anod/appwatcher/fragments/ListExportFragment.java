@@ -97,6 +97,10 @@ public class ListExportFragment extends ListFragment {
 	}
 
 	private void onExportFinish(int code) {
+		//Avoid crash when fragment not attached to activity
+		if (!isAdded()) {
+			return;
+		}
 		Resources r = getResources();
 		if (code == ListExportManager.RESULT_DONE) {
 			new FileListTask().execute(0);
@@ -127,6 +131,11 @@ public class ListExportFragment extends ListFragment {
 		}
 
 		protected void onPostExecute(File[] result) {
+			//Avoid crash when fragment not attached to activity
+			if (!isAdded()) {
+				return;
+			}
+
 			if (result != null) {
 				for (int i = 0; i < result.length; i++) {
 					mAdapter.add(result[i]);
@@ -137,7 +146,6 @@ public class ListExportFragment extends ListFragment {
 
 		}
 	}
-	
 	
 	private void showDialog() {
 		((ListExportActivity)getActivity()).showDialog();
@@ -165,6 +173,11 @@ public class ListExportFragment extends ListFragment {
 	}
 
 	private void onImportFinish(int code) {
+		//Avoid crash when fragment not attached to activity
+		if (!isAdded()) {
+			return;
+		}
+
 		dismissDialog();
 		
 		if (code == ListExportManager.RESULT_DONE) {
@@ -251,6 +264,11 @@ public class ListExportFragment extends ListFragment {
 		}
 
 		protected void onPostExecute(Boolean result) {
+			//Avoid crash when fragment not attached to activity
+			if (!isAdded()) {
+				return;
+			}
+
 			dismissDialog();
 			if (!result) {
 				Toast.makeText(mContext, getString(R.string.unable_delete_file), Toast.LENGTH_SHORT).show();
