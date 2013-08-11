@@ -16,3 +16,13 @@ gen/
 local.properties
 project.properties
 /proguard
+
+# Gradle
+.gradle
+build
+
+# OS X
+.DS_Store
+
+#IntelliJ
+.idea
