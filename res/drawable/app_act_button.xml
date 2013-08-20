@@ -6,5 +6,5 @@
           android:drawable="@color/blue_shadow" /> <!-- focused -->
     <item android:state_hovered="true"
           android:drawable="@color/blue_shadow" /> <!-- hovered -->
-    <item android:drawable="@android:color/transparent" /> <!-- default -->
+    <item android:drawable="@color/white" /> <!-- default -->
 </selector>

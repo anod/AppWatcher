@@ -1,12 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<EditText xmlns:android="http://schemas.android.com/apk/res/android"
-	android:id="@+id/searchbox"
-	android:layout_width="match_parent"
-	android:layout_height="wrap_content"
-	android:ems="10"
-	android:hint="@string/search_hint"
-	android:inputType="textAutoComplete"
-	android:imeOptions="actionSearch"
-	>
+<FrameLayout
+xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+>
+
+<EditText
+		android:id="@+id/searchbox"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:ems="10"
+		android:hint="@string/search_hint"
+		android:inputType="textAutoComplete"
+		android:imeOptions="actionSearch" >
 	<requestFocus />
 </EditText>
+
+<ImageButton
+		android:id="@+id/searchbox_clear"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginRight="10dp"
+		android:background="@drawable/clear_btn_bg"
+		android:src="@drawable/ic_action_clear"
+		android:layout_gravity="center_vertical|right"/>
+
+</FrameLayout>

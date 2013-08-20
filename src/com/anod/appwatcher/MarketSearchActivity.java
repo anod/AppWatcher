@@ -29,6 +29,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
@@ -70,6 +71,7 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 
 	private int mColorBgWhite;
 	private int mColorBgGray;
+	private ImageButton mSearchClear;
 
 
 	/* (non-Javadoc)
@@ -104,7 +106,7 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 		mListView.setOnItemClickListener(itemClickListener); 
 
 		getActionBarHelper().setActionBarCustomView(R.layout.searchbox);
-		mSearchEdit = (EditText)getActionBarHelper().getCustomView();
+		mSearchEdit = (EditText)getActionBarHelper().getCustomView().findViewById(R.id.searchbox);
 		mSearchEdit.setOnEditorActionListener(new OnEditorActionListener() {
 			
 			@Override
@@ -113,7 +115,13 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 	            return true;
 			}
 		});
-
+		mSearchClear = (ImageButton)getActionBarHelper().getCustomView().findViewById(R.id.searchbox_clear);
+		mSearchClear.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				mSearchEdit.setText("");
+			}
+		});
 		initFromIntent(getIntent());
 		
 		getSupportLoaderManager().initLoader(0, null, this).forceLoad();

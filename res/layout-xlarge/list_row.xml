@@ -119,7 +119,7 @@
             android:layout_marginRight="4dp"
             android:background="@drawable/app_act_button"
             android:contentDescription="@string/whats_new"
-            android:drawableLeft="@drawable/ic_about"
+            android:drawableLeft="@drawable/ic_action_info"
             android:focusable="false"
             android:text="@string/whats_new"
             android:textColor="@color/white" />
@@ -161,7 +161,7 @@
             android:background="@drawable/app_act_button"
             android:contentDescription="@string/remove"
             android:focusable="false"
-            android:src="@drawable/ic_remove" />
+            android:src="@drawable/ic_action_cancel" />
     </LinearLayout>
 
 </LinearLayout>

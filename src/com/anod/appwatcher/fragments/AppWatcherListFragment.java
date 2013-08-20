@@ -89,12 +89,15 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
         mAdapter = new ListCursorAdapter(getActivity(), null, 0);
         setListAdapter(mAdapter);
 
-        getListView().setItemsCanFocus(true);
-        getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-		getListView().setDividerHeight(0);
-		getListView().setDivider(null);
-		
-        mIsBigScreen = getResources().getBoolean(R.bool.is_large_screen);
+		Resources r = getResources();
+		ListView lv = getListView();
+		int sidePadding = (int)r.getDimension(R.dimen.list_padding_side);
+        lv.setItemsCanFocus(true);
+		lv.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+		lv.setDividerHeight(0);
+		lv.setDivider(null);
+		lv.setPadding(sidePadding,sidePadding,sidePadding,sidePadding);
+        mIsBigScreen = r.getBoolean(R.bool.is_large_screen);
         // Start out with a progress indicator.
         setListShown(false);        
         
