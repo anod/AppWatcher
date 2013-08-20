@@ -59,4 +59,6 @@
     <string name="failed_to_write_file">Failed to write into file</string>
     <string name="import_export">Import/Export</string>
     <string name="export_path">/sdcard/data/com.anod.appwatcher/backup/</string>
+	<string name="recently_updated">Recently updated</string>
+	<string name="watching">Watching</string>
 </resources>

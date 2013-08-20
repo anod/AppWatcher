@@ -16,19 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="AppTheme" parent="android:style/Theme">
-        <item name="android:windowTitleSize">@dimen/actionbar_compat_height</item>
-        <item name="android:windowTitleBackgroundStyle">@style/ActionBarCompat</item>
-        <item name="android:windowContentOverlay">@drawable/actionbar_shadow</item>
-
-        <!-- for programmatic instantiation -->
-        <item name="actionbarCompatTitleStyle">@style/ActionBarCompatTitle</item>
-        <item name="actionbarCompatItemStyle">@style/ActionBarCompatItem</item>
-        <item name="actionbarCompatItemHomeStyle">@style/ActionBarCompatHomeItem</item>
-        <item name="actionbarCompatProgressIndicatorStyle">@style/ActionBarCompatProgressIndicator</item>
+    <style name="AppThemeLight" parent="android:style/Theme.Light">
+		<item name="android:background">@color/list_background</item>
     </style>
-
-    <style name="AppThemeLight" parent="android:style/Theme.Light"></style>
 
     <style name="Widget"></style>
     
@@ -137,5 +127,20 @@
         <item name="android:paddingRight">12dip</item>
         <item name="android:scaleType">center</item>
     </style>
+
+	<style name="ListItem">
+		<item name="android:layout_width">match_parent</item>
+		<item name="android:layout_height">wrap_content</item>
+		<item name="android:gravity">center_vertical|clip_vertical</item>
+		<item name="android:layout_marginLeft">4dp</item>
+		<item name="android:layout_marginRight">4dp</item>
+	</style>
+
+	<style name="ListHeader">
+		<item name="android:layout_height">wrap_content</item>
+		<item name="android:textSize">24dp</item>
+		<item name="android:typeface">sans</item>
+		<item name="android:textStyle">italic</item>
+	</style>
 
 </resources>

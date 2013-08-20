@@ -1,15 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:gravity="center_vertical|clip_vertical"
-    android:orientation="vertical" >
+	android:orientation="vertical"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:paddingBottom="4dp"
+			  >
+
+	<include layout="@layout/list_header" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center_vertical"
-        android:orientation="horizontal" >
+        android:orientation="horizontal"
+		android:background="@color/white"
+		style="@style/ListItem"
+			>
 
         <FrameLayout
             android:layout_width="@dimen/icon_wrapper"
@@ -95,7 +101,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center_horizontal|center_vertical"
-        android:orientation="horizontal" >
+        android:orientation="horizontal"
+		style="@style/ListItem"
+			>
 
         <ImageButton
             android:id="@+id/share_btn"
@@ -126,10 +134,10 @@
             android:layout_weight="1"
             android:background="@drawable/app_act_button"
             android:contentDescription="@string/whats_new"
-            android:drawableLeft="@drawable/ic_about"
+            android:drawableLeft="@drawable/ic_action_info"
             android:focusable="false"
             android:text="@string/whats_new"
-            android:textColor="@color/white" />
+            android:textColor="@color/text_dark" />
 
         <View
             android:layout_width="1dp"
@@ -151,7 +159,7 @@
             android:drawableLeft="@drawable/ic_play_store"
             android:focusable="false"
             android:text="@string/play_store"
-            android:textColor="@color/white" />
+            android:textColor="@color/text_dark" />
 
         <View
             android:layout_width="1dp"
@@ -169,7 +177,7 @@
             android:background="@drawable/app_act_button"
             android:contentDescription="@string/remove"
             android:focusable="false"
-            android:src="@drawable/ic_remove" />
+            android:src="@drawable/ic_action_cancel" />
     </LinearLayout>
 
 </LinearLayout>

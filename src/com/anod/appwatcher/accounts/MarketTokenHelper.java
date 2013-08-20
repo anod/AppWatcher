@@ -3,8 +3,11 @@ package com.anod.appwatcher.accounts;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerFuture;
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Looper;
+import android.widget.Toast;
 
 public class MarketTokenHelper {
 	
@@ -18,30 +21,39 @@ public class MarketTokenHelper {
         mAccountManager = AccountManager.get(mContext);
 	}
 
-	public String requestToken() {
-		String token = getAuthToken();
+	public String requestToken(Activity activity) {
+		String token = getAuthToken(activity);
 		if (token == null) {
 			return null;
 		}
 		mAccountManager.invalidateAuthToken(ACCOUNT_TYPE, token);
-		token = getAuthToken();
+		token = getAuthToken(activity);
 		return token;
 	}
 	
-	private String getAuthToken() {
+	private String getAuthToken(Activity activity) {
     	String authToken = null;
 		try {
 	        Account[] accounts = mAccountManager.getAccountsByType(ACCOUNT_TYPE);
 	        // Take first account, not important
-	        @SuppressWarnings("deprecation")
-			AccountManagerFuture<Bundle> future = mAccountManager.getAuthToken(
-	        	accounts[0], AUTH_TOKEN_TYPE, true, null, null
-	        );
+			AccountManagerFuture<Bundle> future;
+
+			if (activity == null) {
+				future = mAccountManager.getAuthToken(
+					accounts[0], AUTH_TOKEN_TYPE, true, null, null
+				);
+			} else {
+				future = mAccountManager.getAuthToken(
+						accounts[0], AUTH_TOKEN_TYPE, null, activity , null, null
+				);
+			}
 	        authToken = future.getResult().getString(AccountManager.KEY_AUTHTOKEN);
 	    } catch (Exception e) {
 	        e.printStackTrace();
-	    }
+			//Toast.makeText(mContext.getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+		}
 	    return authToken;
 	}
+
 
 }

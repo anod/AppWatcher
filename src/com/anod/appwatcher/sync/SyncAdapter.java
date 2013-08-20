@@ -118,8 +118,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 	}
 
 	/**
-	 * @param provider
-	 * @param updatedTitles
+	 * @param pref
+	 * @param client
 	 * @throws RemoteException
 	 * @return list of titles that were updated
 	 */
@@ -175,13 +175,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 				client.update(localApp.getRowId(), values);
 			}
 		}
+		apps.close();
 		return updatedTitles;
 	}
 
 	/**
-	 * @param provider
+	 * @param marketApp
 	 * @param localApp
-	 * @param values
+	 * @param newIcon
 	 * @throws RemoteException
 	 */
 	private AppInfo createNewVersion(App marketApp, AppInfo localApp, Bitmap newIcon)  {
@@ -204,7 +205,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 		final MarketSession session = helper.create(deviceId, null);
 
     	MarketTokenHelper tokenHelper = new MarketTokenHelper(mContext);
-    	String authToken = tokenHelper.requestToken();
+    	String authToken = tokenHelper.requestToken(null);
     	if (authToken != null) {
     		session.setAuthSubToken(authToken);
     	}

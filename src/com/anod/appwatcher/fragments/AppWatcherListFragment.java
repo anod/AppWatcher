@@ -37,6 +37,7 @@ import com.anod.appwatcher.R;
 import com.anod.appwatcher.market.MarketInfo;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListCursor;
+import com.anod.appwatcher.model.AppListCursorLoader;
 import com.anod.appwatcher.model.AppListTable;
 import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.IntentUtils;
@@ -44,9 +45,15 @@ import com.anod.appwatcher.utils.IntentUtils;
 public class AppWatcherListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>{
     
     private CursorAdapter mAdapter;
+	private int mNewAppsCount;
+	private int mTotalCount;
+
 	class ViewHolder {
 		AppInfo app;
 		int position;
+		View section;
+		TextView sectionText;
+		TextView sectionCount;
 		TextView title;
 		TextView details;
 		TextView version;
@@ -84,7 +91,9 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 
         getListView().setItemsCanFocus(true);
         getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        
+		getListView().setDividerHeight(0);
+		getListView().setDivider(null);
+		
         mIsBigScreen = getResources().getBoolean(R.bool.is_large_screen);
         // Start out with a progress indicator.
         setListShown(false);        
@@ -122,8 +131,7 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 
 		@Override
 		public void bindView(View view, Context context, Cursor cursor) {
-			@SuppressWarnings("resource")
-			AppListCursor wrapper = new AppListCursor(cursor);
+			AppListCursor wrapper = (AppListCursor)cursor;
 			AppInfo app = wrapper.getAppInfo();
 			boolean hide = false;
             if (mSelectedHolder != null && mSelectedHolder.app.getRowId() != app.getRowId()) {
@@ -167,7 +175,22 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 			} else {
 				holder.installed.setVisibility(View.GONE);
 			}
-			
+
+			if (mNewAppsCount > 0) {
+				if (holder.position == 0) {
+					holder.sectionText.setText(context.getString(R.string.recently_updated));
+					holder.sectionCount.setText(mNewAppsCount);
+					holder.section.setVisibility(View.VISIBLE);
+				} else if (holder.position == (mNewAppsCount - 1)) {
+					holder.sectionText.setText(context.getString(R.string.watching));
+					holder.sectionCount.setText(mTotalCount - mNewAppsCount);
+					holder.section.setVisibility(View.VISIBLE);
+				} else {
+					holder.section.setVisibility(View.GONE);
+				}
+			} else {
+				holder.section.setVisibility(View.GONE);
+			}
 			
 			long updateTime = app.getUpdateTime();
 			
@@ -194,12 +217,14 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 
 		/**
 		 * @param v
-		 * @param holder
 		 */
 		private ViewHolder newViewHolder(View v) {
 			ViewHolder holder = new ViewHolder();
 			holder.app = null;
 			holder.position = 0;
+			holder.section = (View)v.findViewById(R.id.sec_header);
+			holder.sectionText = (TextView)v.findViewById(R.id.sec_header_title);
+			holder.sectionCount = (TextView)v.findViewById(R.id.sec_header_count);
             holder.title = (TextView)v.findViewById(R.id.title);
             holder.details = (TextView)v.findViewById(R.id.details);
             holder.icon = (ImageView)v.findViewById(R.id.app_icon);
@@ -385,9 +410,7 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 	
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(getActivity(), AppListContentProvider.CONTENT_URI,
-        		AppListTable.APPLIST_PROJECTION, null, null,
-        		AppListTable.Columns.KEY_STATUS + " DESC, " +AppListTable.Columns.KEY_TITLE + " COLLATE LOCALIZED ASC");
+        return new AppListCursorLoader(getActivity());
     }
 
 	@Override
@@ -395,7 +418,9 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
         // Swap the new cursor in.  (The framework will take care of closing the
         // old cursor once we return.)
         mAdapter.swapCursor(data);
-        
+		mNewAppsCount = ((AppListCursorLoader)loader).getNewCount();
+		mTotalCount = data.getCount();
+		
         // The list should now be shown.
         if (isResumed()) {
             setListShown(true);

@@ -25,7 +25,8 @@ public class AppLoader {
 	public App load(String appId) {
 		AppsRequest appsRequest = AppsRequest.newBuilder()
 			.setAppId(appId)
-			.setWithExtendedInfo(mExtended).build();
+			.setWithExtendedInfo(mExtended)
+			.build();
 		final ResponseWrapper respWrapper = new ResponseWrapper();
 
 		try {
@@ -42,7 +43,7 @@ public class AppLoader {
 			Log.e("AppWatcher", e.toString());
 			return null;
 		}
-		if (respWrapper.response.getAppCount() > 0) {
+		if (respWrapper.response != null && respWrapper.response.getAppCount() > 0) {
 			return respWrapper.response.getApp(0);
 		}
 		return null;

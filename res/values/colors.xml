@@ -10,5 +10,9 @@
     <color name="abs__bright_foreground_holo_light">@color/abs__background_holo_dark</color>
     <color name="abs__bright_foreground_disabled_holo_dark">#ff4c4c4c</color>
     <color name="abs__bright_foreground_disabled_holo_light">#ffb2b2b2</color>
+
+	<color name="text_dark">#ff292929</color>
+	<color name="row_grayout">#ffcccccc</color>
+	<color name="list_background">#ffe7e7e7</color>
 </resources>
 

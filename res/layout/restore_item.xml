@@ -49,7 +49,7 @@
         android:gravity="center"
         android:scaleType="center"
         android:background="@android:drawable/list_selector_background"
-        android:src="@drawable/ic_action_delete"
+        android:src="@drawable/ic_action_cancel"
         android:paddingLeft="14dip"
         android:paddingRight="14dip"
     />        

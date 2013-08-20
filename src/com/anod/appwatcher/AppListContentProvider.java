@@ -33,7 +33,7 @@ public class AppListContentProvider extends ContentProvider {
 			+ "/list";
 	public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE
 			+ "/app";
-	
+
 	private static final UriMatcher sURIMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 	static {
 		sURIMatcher.addURI(AUTHORITY, BASE_PATH, LIST);

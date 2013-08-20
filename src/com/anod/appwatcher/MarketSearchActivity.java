@@ -1,10 +1,12 @@
 package com.anod.appwatcher;
 
+import java.util.HashMap;
 import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -64,6 +66,11 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 	private EditText mSearchEdit;
 	private boolean mFirstTimeRun = false; 
 	private boolean mShareSource = false;
+	private HashMap<String,Boolean> mAddedApps;
+
+	private int mColorBgWhite;
+	private int mColorBgGray;
+
 
 	/* (non-Javadoc)
 	 * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
@@ -73,6 +80,12 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.market_search);
 		mContext = (Context)this;
+
+		Resources r = mContext.getResources();
+		mColorBgGray = r.getColor(R.color.row_grayout);
+		mColorBgWhite = r.getColor(R.color.white);
+
+		mAddedApps = new HashMap<String, Boolean>();
 
 		mLoading = (LinearLayout)findViewById(R.id.loading);
 		mLoading.setVisibility(View.GONE);
@@ -100,7 +113,7 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 	            return true;
 			}
 		});
-		
+
 		initFromIntent(getIntent());
 		
 		getSupportLoaderManager().initLoader(0, null, this).forceLoad();
@@ -119,7 +132,7 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 		mIconLoader.clearCache();
 
 		mListView.setVisibility(View.GONE);
-		mListView.getEmptyView().setVisibility(View.GONE);		
+		mListView.getEmptyView().setVisibility(View.GONE);
 		
 		mLoading.setVisibility(View.VISIBLE);
 		if (query.length() > 0) {
@@ -169,6 +182,10 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 		@Override
 		public void onItemClick (AdapterView<?> parent, View view, int position, long id) {
 			App app = mAdapter.getItem(position);
+			String appId = app.getId();
+			if (mAddedApps.containsKey(app.getId())) {
+				return;
+			}
 			Bitmap icon = mIconLoader.getCachedImage(app.getId());
 			AppInfo info = new AppInfo(app, icon);
 			AppListContentProviderClient cr = new AppListContentProviderClient(MarketSearchActivity.this);
@@ -178,11 +195,9 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 			if (uri == null) {
 				Toast.makeText(mContext, R.string.error_insert_app, Toast.LENGTH_SHORT).show();
 			} else {
-				if (mShareSource) {
-					String msg = getString(R.string.app_stored, app.getTitle());
-					Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
-				}
-				finish();
+				String msg = getString(R.string.app_stored, app.getTitle());
+				Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
+				mAddedApps.put(appId, true);
 			}
 		}
 	};
@@ -261,6 +276,7 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 		}
 
 		class ViewHolder {
+			View row;
 			TextView title;
 			TextView details;
 			ImageView icon;
@@ -274,6 +290,7 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 				LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 				v = vi.inflate(R.layout.market_app_row, null);
 				holder = new ViewHolder();
+				holder.row = (View) v.findViewById(R.id.approw);
 				holder.title = (TextView) v.findViewById(R.id.title);
 				holder.details = (TextView) v.findViewById(R.id.details);
 				v.setTag(holder);
@@ -283,6 +300,13 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 			App app = (App) getItem(position);
 			holder.title.setText(app.getTitle() + " " + app.getVersion());
 			holder.details.setText(app.getCreator());
+
+			if (mAddedApps.containsKey(app.getId())) {
+				holder.row.setBackgroundColor(mColorBgGray);
+			} else {
+				holder.row.setBackgroundColor(mColorBgWhite);
+			}
+
 			ImageView icon = (ImageView) v.findViewById(R.id.icon);
 			if (mDefaultIcon == null) {
 				mDefaultIcon = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_empty);

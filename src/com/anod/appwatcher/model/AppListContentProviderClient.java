@@ -42,18 +42,18 @@ public class AppListContentProviderClient {
 	 * @return
 	 */
 	public AppListCursor queryAllSorted() {
-		return query(DEFAULT_SORT_ORDER);
+		return query(DEFAULT_SORT_ORDER, null, null);
 	}
 	
 	public AppListCursor queryAll() {
-		return query(null);
+		return query(null, null, null);
 	}
 	
-	public AppListCursor query(String sortOrder) {
+	public AppListCursor query(String sortOrder, String selection, String[] selectionArgs) {
 		Cursor cr = null;
 		try {
 			cr = mContentProviderClient.query(AppListContentProvider.CONTENT_URI,
-				AppListTable.APPLIST_PROJECTION, null, null, sortOrder
+				AppListTable.APPLIST_PROJECTION, selection, null, sortOrder
 			);
 		} catch (RemoteException e) {
 			AppLog.e(e.getMessage());
@@ -62,9 +62,22 @@ public class AppListContentProviderClient {
 		if (cr == null) {
 			return null;
 		}
-		return new AppListCursor(cr);	
+		return new AppListCursor(cr);
 	}
-	
+
+
+	public int queryUpdatesCount() {
+		String selection = AppListTable.Columns.KEY_STATUS + " = ?";
+		String[] selectionArgs = new String[] { String.valueOf(AppInfo.STATUS_UPDATED) };
+		AppListCursor cr = query(null,selection,selectionArgs);
+
+		if (cr == null) {
+			return 0;
+		}
+		int count = cr.getCount();
+		cr.close();
+		return count;
+	}
 	
 	/**
 	 * 
@@ -80,6 +93,7 @@ public class AppListContentProviderClient {
 		while(cursor.moveToNext()) {
 			result.put(cursor.getAppInfo().getAppId(), true);
 		}
+		cursor.close();
 		return result;
 	}
 	
