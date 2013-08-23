@@ -57,7 +57,7 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 		TextView title;
 		TextView details;
 		TextView version;
-		TextView installed;
+		ImageView installed;
 		ImageView icon;
 		LinearLayout newIndicator;
 		LinearLayout options;
@@ -232,7 +232,7 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
             holder.details = (TextView)v.findViewById(R.id.details);
             holder.icon = (ImageView)v.findViewById(R.id.app_icon);
             holder.version = (TextView)v.findViewById(R.id.version);
-            holder.installed = (TextView)v.findViewById(R.id.text_installed);
+            holder.installed = (ImageView)v.findViewById(R.id.installed);
             holder.options = (LinearLayout)v.findViewById(R.id.options);
             holder.newIndicator = (LinearLayout)v.findViewById(R.id.new_indicator);
             holder.updateDate = (TextView)v.findViewById(R.id.update_date);

@@ -140,7 +140,7 @@
             android:layout_marginRight="4dp"
             android:background="@drawable/app_act_button"
             android:contentDescription="@string/play_store"
-            android:drawableLeft="@drawable/ic_play_store"
+            android:drawableLeft="@drawable/ic_action_playback_play"
             android:focusable="false"
             android:text="@string/play_store"
             android:textColor="@color/white" />

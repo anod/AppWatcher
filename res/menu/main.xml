@@ -3,12 +3,6 @@
 		xmlns:appwatcher="http://schemas.android.com/apk/res-auto"
 		xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <item
-        android:id="@+id/menu_add"
-        android:icon="@drawable/ic_action_add"
-		appwatcher:showAsAction="ifRoom"
-        android:title="@string/menu_add">
-    </item>
 	<item
 			android:id="@+id/menu_filter"
 			android:icon="@drawable/ic_action_search"

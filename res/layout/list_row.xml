@@ -4,7 +4,7 @@
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
 	android:paddingBottom="4dp"
-			  >
+	android:baselineAligned="false">
 
 	<include layout="@layout/list_header" />
 
@@ -26,20 +26,17 @@
                 android:layout_width="@dimen/icon_size"
                 android:layout_height="@dimen/icon_size"
                 android:layout_gravity="center_vertical"
-                android:layout_margin="4dip"
+                android:layout_marginLeft="4dip"
                 android:contentDescription="@string/application_icon"
                 android:src="@drawable/ic_empty" />
 
-            <TextView
-                android:id="@+id/text_installed"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:background="#66000000"
-                android:gravity="center_horizontal"
-                android:text="@string/installed"
-                android:textColor="#FFFFFFFF"
-                android:textSize="10sp" />
+			<ImageView
+					android:id="@+id/installed"
+					android:layout_height="wrap_content"
+					android:layout_width="wrap_content"
+					android:src="@drawable/ic_action_installed"
+					android:layout_gravity="right"
+				/>
 
             <LinearLayout
                 android:id="@+id/new_indicator"
@@ -135,6 +132,7 @@
             android:focusable="false"
             android:text="@string/whats_new"
 			android:paddingLeft="4dp"
+			android:drawablePadding="0dp"
             android:textColor="@color/text_dark" />
 
         <Button
@@ -147,10 +145,11 @@
             android:layout_weight="1"
             android:background="@drawable/app_act_button"
             android:contentDescription="@string/play_store"
-            android:drawableLeft="@drawable/ic_play_store"
+            android:drawableLeft="@drawable/ic_action_playback_play"
             android:focusable="false"
             android:text="@string/play_store"
 			android:paddingLeft="4dp"
+			android:drawablePadding="0dp"
             android:textColor="@color/text_dark" />
 
         <ImageButton

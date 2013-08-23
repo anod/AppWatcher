@@ -206,10 +206,10 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.menu_add:
-			Intent intent = new Intent(mContext, MarketSearchActivity.class);
-			startActivity(intent);
-			return true;
+		//case R.id.menu_add:
+		//	Intent intent = new Intent(mContext, MarketSearchActivity.class);
+		//	startActivity(intent);
+		//	return true;
 		//case R.id.menu_filter:
 			//getSupportActionBar().setCustomView(R.layout.searchbox);
 			//mFilterVisible = true;
