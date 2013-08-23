@@ -1,43 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+<menu
+		xmlns:appwatcher="http://schemas.android.com/apk/res-auto"
+		xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
         android:id="@+id/menu_add"
         android:icon="@drawable/ic_action_add"
-        android:showAsAction="ifRoom"
+		appwatcher:showAsAction="ifRoom"
         android:title="@string/menu_add">
     </item>
+	<item
+			android:id="@+id/menu_filter"
+			android:icon="@drawable/ic_action_search"
+			appwatcher:showAsAction="ifRoom|collapseActionView"
+			android:title="@string/menu_filter"
+			appwatcher:actionViewClass="android.support.v7.widget.SearchView">
+	</item>
     <item
         android:id="@id/menu_refresh"
         android:icon="@drawable/ic_action_refresh"
-        android:showAsAction="always"
+		appwatcher:showAsAction="ifRoom"
         android:title="@string/menu_refresh">
     </item>
     <item
         android:id="@+id/menu_auto_update"
         android:checkable="true"
-        android:showAsAction="never|withText"
+		appwatcher:showAsAction="never|withText"
         android:title="@string/menu_auto_update" android:icon="@drawable/ic_menu_autoupdate">
     </item>
     <item
         android:id="@+id/menu_wifi_only"
         android:checkable="true"
-        android:showAsAction="never|withText"
+		appwatcher:showAsAction="never|withText"
         android:title="@string/menu_wifi_only" android:icon="@drawable/ic_menu_wifi">
     </item>
     <item
         android:id="@+id/menu_import_export"
-        android:showAsAction="never|withText"
+		appwatcher:showAsAction="never|withText"
         android:title="@string/import_export" android:icon="@drawable/ic_menu_export">
     </item>
     <item
         android:id="@+id/menu_rateapp"
-        android:showAsAction="never|withText"
+		appwatcher:showAsAction="never|withText"
         android:title="@string/rate_app" android:icon="@drawable/ic_menu_rating">
     </item>
     <item
         android:id="@+id/menu_about"
-        android:showAsAction="never|withText"
+		appwatcher:showAsAction="never|withText"
         android:title="@string/about" android:icon="@drawable/ic_menu_about">
     </item>
 

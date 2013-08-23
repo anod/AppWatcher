@@ -15,6 +15,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
+import android.support.v7.app.ActionBarActivity;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -22,6 +23,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
@@ -40,7 +42,6 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.anod.appwatcher.accounts.MarketTokenLoader;
-import com.anod.appwatcher.actionbarcompat.ActionBarActivity;
 import com.anod.appwatcher.market.AppIconLoader;
 import com.anod.appwatcher.market.AppsResponseLoader;
 import com.anod.appwatcher.market.DeviceIdHelper;
@@ -80,6 +81,7 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
 		setContentView(R.layout.market_search);
 		mContext = (Context)this;
 
@@ -105,8 +107,10 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 		mListView.setAdapter(mAdapter);
 		mListView.setOnItemClickListener(itemClickListener); 
 
-		getActionBarHelper().setActionBarCustomView(R.layout.searchbox);
-		mSearchEdit = (EditText)getActionBarHelper().getCustomView().findViewById(R.id.searchbox);
+		getSupportActionBar().setCustomView(R.layout.searchbox);
+
+
+		mSearchEdit = (EditText)getSupportActionBar().getCustomView().findViewById(R.id.searchbox);
 		mSearchEdit.setOnEditorActionListener(new OnEditorActionListener() {
 			
 			@Override
@@ -115,7 +119,7 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 	            return true;
 			}
 		});
-		mSearchClear = (ImageButton)getActionBarHelper().getCustomView().findViewById(R.id.searchbox_clear);
+		mSearchClear = (ImageButton)getSupportActionBar().getCustomView().findViewById(R.id.searchbox_clear);
 		mSearchClear.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {

@@ -9,12 +9,22 @@ import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.SearchView;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.Window;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.anod.appwatcher.actionbarcompat.ActionBarActivity;
 import com.anod.appwatcher.fragments.AboutDialogFragment;
 import com.anod.appwatcher.fragments.AppWatcherListFragment;
 import com.anod.appwatcher.sync.AccountHelper;
@@ -22,7 +32,7 @@ import com.anod.appwatcher.sync.SyncAdapter;
 import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.IntentUtils;
 
-public class AppWatcherActivity extends ActionBarActivity {
+public class AppWatcherActivity extends ActionBarActivity implements TextView.OnEditorActionListener {
 
 	private static final int MENU_AUTOSYNC_IDX = 2;
 	private static final int MENU_WIFI_IDX = 3;
@@ -34,15 +44,18 @@ public class AppWatcherActivity extends ActionBarActivity {
 	private MenuItem mWifiMenuItem;
 	private Account mSyncAccount;
 	private MenuItem mAutoSyncMenuItem;
+	private boolean mFilterVisible;
+	private MenuItem mRefreshMenuItem;
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
-	 */
+		 * (non-Javadoc)
+		 *
+		 * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
+		 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
 		setContentView(R.layout.main);
 
 		AppWatcherListFragment newFragment = new AppWatcherListFragment();
@@ -68,14 +81,26 @@ public class AppWatcherActivity extends ActionBarActivity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater menuInflater = getMenuInflater();
-		menuInflater.inflate(R.menu.main, menu);
-		mAutoSyncMenuItem = menu.getItem(MENU_AUTOSYNC_IDX);
-		mWifiMenuItem = menu.getItem(MENU_WIFI_IDX);
+		// Inflate the menu
+		getMenuInflater().inflate(R.menu.main, menu);
+
+		mAutoSyncMenuItem = menu.findItem(R.id.menu_auto_update);
+		mWifiMenuItem = menu.findItem(R.id.menu_wifi_only);
+		mRefreshMenuItem = menu.findItem(R.id.menu_refresh);
+
+		MenuItem searchItem = menu.findItem(R.id.menu_filter);
+		SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+
 		refreshMenuState();
+
+		if (!ContentResolver.isSyncActive(mSyncAccount, AppListContentProvider.AUTHORITY)) {
+			stopRefreshAnim();
+		} else {
+			startRefreshAnim();
+		}
+
 		return super.onCreateOptionsMenu(menu);
 	}
-
 	/**
 	 * Update menu states when activity restored
 	 */
@@ -141,11 +166,7 @@ public class AppWatcherActivity extends ActionBarActivity {
 		filter.addAction(SyncAdapter.SYNC_PROGRESS);
 		filter.addAction(SyncAdapter.SYNC_STOP);
 		registerReceiver(mSyncFinishedReceiver, filter);
-		if (!ContentResolver.isSyncActive(mSyncAccount, AppListContentProvider.AUTHORITY)) {
-			stopRefreshAnim();
-		} else {
-			startRefreshAnim();
-		}
+
 		AppLog.d("Mark updates as viewed.");
 		mPreferences.markViewed(true);
 	}
@@ -160,14 +181,26 @@ public class AppWatcherActivity extends ActionBarActivity {
 	 * stop refresh button animation
 	 */
 	private void stopRefreshAnim() {
-		getActionBarHelper().setRefreshActionItemState(false);
+		View actionView = MenuItemCompat.getActionView(mRefreshMenuItem);
+		if (actionView != null) {
+			actionView.clearAnimation();
+			MenuItemCompat.setActionView(mRefreshMenuItem,null);
+			actionView = null;
+		}
 	}
 
 	/**
 	 * Animate refresh button
 	 */
 	private void startRefreshAnim() {
-		getActionBarHelper().setRefreshActionItemState(true);
+		LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		ImageView iv = (ImageView) inflater.inflate(R.layout.refresh_action_view, null);
+
+		Animation rotation = AnimationUtils.loadAnimation(this, R.anim.rotate);
+		rotation.setRepeatCount(Animation.INFINITE);
+		iv.startAnimation(rotation);
+
+		MenuItemCompat.setActionView(mRefreshMenuItem, iv);
 	}
 
 	@Override
@@ -177,6 +210,12 @@ public class AppWatcherActivity extends ActionBarActivity {
 			Intent intent = new Intent(mContext, MarketSearchActivity.class);
 			startActivity(intent);
 			return true;
+		//case R.id.menu_filter:
+			//getSupportActionBar().setCustomView(R.layout.searchbox);
+			//mFilterVisible = true;
+			///EditText editView = (EditText) getSupportActionBar().getCustomView().findViewById(R.id.searchbox);
+			//editView.setOnEditorActionListener(this);
+			//return true;
 		case R.id.menu_refresh:
 			AppLog.d("Refresh pressed");
 			if (ContentResolver.isSyncPending(mSyncAccount, AppListContentProvider.AUTHORITY)) {
@@ -228,7 +267,14 @@ public class AppWatcherActivity extends ActionBarActivity {
 			return true;
 		}
 	}
-
+	@Override
+	public void onBackPressed() {
+		if (mFilterVisible) {
+			getSupportActionBar().setCustomView(null);
+			mFilterVisible = false;
+		}
+		super.onBackPressed();
+	}
 	/**
 	 * For devices prior to honeycomb add enable/disable text
 	 * 
@@ -247,4 +293,10 @@ public class AppWatcherActivity extends ActionBarActivity {
 		item.setTitle(String.format("%s (%s)", title, state));
 	}
 
+	@Override
+	public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
+		// TODO
+
+		return false;
+	}
 }
