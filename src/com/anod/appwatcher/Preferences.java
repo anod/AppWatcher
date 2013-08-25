@@ -1,5 +1,6 @@
 package com.anod.appwatcher;
 
+import android.accounts.Account;
 import android.content.Context;
 import android.content.SharedPreferences;
 
@@ -10,13 +11,28 @@ public class Preferences {
 	private static final String WIFI_ONLY = "wifi_only";
 	private static final String DEVICE_ID = "device_id";
 	private static final String DEVICE_ID_MESSAGE = "device_id_message";
-	
+	private static final String ACCOUNT_NAME = "account_name";
+	private static final String ACCOUNT_TYPE = "account_type";
+
+
 	private static final String PREFS_NAME = "WatcherPrefs";
 	
 	private SharedPreferences mSettings;
 	
 	public Preferences(Context context) {
-		mSettings = context.getSharedPreferences(PREFS_NAME, 0);		
+		mSettings = context.getSharedPreferences(PREFS_NAME, 0);
+	}
+
+	public Account getAccount() {
+		String name = mSettings.getString(ACCOUNT_NAME, null);
+
+		if (name == null ){
+			return null;
+		}
+
+		String type = mSettings.getString(ACCOUNT_TYPE, null);
+
+		return new Account(name, type);
 	}
 
 	public boolean checkFirstLaunch() {
@@ -24,7 +40,7 @@ public class Preferences {
 		if (value) {
 			SharedPreferences.Editor editor = mSettings.edit();
 			editor.putBoolean(FIRT_LAUNCH, false);
-			editor.commit();	
+			editor.commit();
 		}
 		return value;
 	}
@@ -40,7 +56,7 @@ public class Preferences {
 	public void disableDeviceIdMessage() {
 		SharedPreferences.Editor editor = mSettings.edit();
 		editor.putBoolean(DEVICE_ID_MESSAGE, false);
-		editor.commit();		
+		editor.commit();
 	}
 	
 	public String getDeviceId() {
@@ -58,7 +74,7 @@ public class Preferences {
 		} else {
 			editor.putString(DEVICE_ID, deviceId);
 		}
-		editor.commit();		
+		editor.commit();
 	}
 	
 	public void saveWifiOnly(boolean useWifiOnly) {
@@ -76,6 +92,13 @@ public class Preferences {
 	public void markViewed(boolean viewed) {
 		SharedPreferences.Editor editor = mSettings.edit();
 		editor.putBoolean(VIEWED, viewed);
+		editor.commit();
+	}
+
+	public void updateAccount(Account account) {
+		SharedPreferences.Editor editor = mSettings.edit();
+		editor.putString(ACCOUNT_NAME, account.name);
+		editor.putString(ACCOUNT_TYPE, account.type);
 		editor.commit();
 	}
 

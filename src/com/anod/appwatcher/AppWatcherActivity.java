@@ -26,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.anod.appwatcher.fragments.AboutDialogFragment;
+import com.anod.appwatcher.fragments.AccountChooserFragment;
 import com.anod.appwatcher.fragments.AppWatcherListFragment;
 import com.anod.appwatcher.sync.AccountHelper;
 import com.anod.appwatcher.sync.SyncAdapter;
@@ -262,6 +263,10 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 		case R.id.menu_import_export:
 			Intent listExport = new Intent(this, ListExportActivity.class);
 			startActivity(listExport);
+			return true;
+		case R.id.menu_accounts:
+			AccountChooserFragment accountsDialog = AccountChooserFragment.newInstance();
+			accountsDialog.show(getSupportFragmentManager(), "accountsDialog");
 			return true;
 		default:
 			return true;

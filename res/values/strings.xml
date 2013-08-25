@@ -62,4 +62,6 @@
 	<string name="recently_updated">Recently updated</string>
 	<string name="watching">Watching</string>
 	<string name="menu_filter">Filter</string>
+	<string name="accounts">Accounts</string>
+	<string name="choose_an_account">Choose an account</string>
 </resources>

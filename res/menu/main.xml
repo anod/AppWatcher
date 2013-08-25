@@ -22,6 +22,11 @@
 		appwatcher:showAsAction="never|withText"
         android:title="@string/menu_auto_update" android:icon="@drawable/ic_menu_autoupdate">
     </item>
+	<item
+			android:id="@+id/menu_accounts"
+			appwatcher:showAsAction="never|withText"
+			android:title="@string/accounts" >
+	</item>
     <item
         android:id="@+id/menu_wifi_only"
         android:checkable="true"

@@ -9,14 +9,14 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.widget.Toast;
 
-public class MarketTokenHelper {
+public class AccountHelper {
 	
 	private static final String AUTH_TOKEN_TYPE = "android";
-	private static final String ACCOUNT_TYPE = "com.google";
+	public static final String ACCOUNT_TYPE = "com.google";
 	private Context mContext;
 	private AccountManager mAccountManager;
 
-	public MarketTokenHelper(Context context) {
+	public AccountHelper(Context context) {
 		mContext = context;
         mAccountManager = AccountManager.get(mContext);
 	}
