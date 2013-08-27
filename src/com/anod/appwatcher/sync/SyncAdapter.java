@@ -1,7 +1,5 @@
 package com.anod.appwatcher.sync;
 
-import java.util.ArrayList;
-
 import android.accounts.Account;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -24,7 +22,6 @@ import android.support.v4.app.NotificationCompat.Builder;
 import com.anod.appwatcher.AppWatcherActivity;
 import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.R;
-import com.anod.appwatcher.accounts.AccountHelper;
 import com.anod.appwatcher.market.AppIconLoader;
 import com.anod.appwatcher.market.AppLoader;
 import com.anod.appwatcher.market.DeviceIdHelper;
@@ -37,6 +34,8 @@ import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.BitmapUtils;
 import com.gc.android.market.api.MarketSession;
 import com.gc.android.market.api.model.Market.App;
+
+import java.util.ArrayList;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private static final int ONE_SEC_IN_MILLIS = 1000;

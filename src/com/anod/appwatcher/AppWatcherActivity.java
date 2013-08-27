@@ -33,7 +33,7 @@ import com.anod.appwatcher.sync.SyncAdapter;
 import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.IntentUtils;
 
-public class AppWatcherActivity extends ActionBarActivity implements TextView.OnEditorActionListener {
+public class AppWatcherActivity extends ActionBarActivity implements TextView.OnEditorActionListener, AccountChooserFragment.OnAccountSelectionListener {
 
 	private static final int MENU_AUTOSYNC_IDX = 2;
 	private static final int MENU_WIFI_IDX = 3;
@@ -67,12 +67,16 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 		mContext = this;
 		mPreferences = new Preferences(this);
 
-		mSyncAccount = AccountHelper.getAccount(this);
+		mSyncAccount = mPreferences.getAccount();
 		if (mSyncAccount == null) {
-			Toast.makeText(this, R.string.google_account_not_found, Toast.LENGTH_LONG).show();
-			finish();
-			return;
+			AccountChooserFragment accountsDialog = AccountChooserFragment.newInstance();
+			accountsDialog.show(getSupportFragmentManager(), "accountsDialog");
+		} else {
+			initAutoSync();
 		}
+	}
+
+	private void initAutoSync() {
 		boolean autoSync = true;
 		if (!mPreferences.checkFirstLaunch()) {
 			autoSync = ContentResolver.getSyncAutomatically(mSyncAccount, AppListContentProvider.AUTHORITY);
@@ -303,5 +307,15 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 		// TODO
 
 		return false;
+	}
+
+	@Override
+	public void onAccountSelected(Account account) {
+		if (mSyncAccount == null) {
+			mSyncAccount = account;
+			initAutoSync();
+		} else {
+			mSyncAccount = account;
+		}
 	}
 }

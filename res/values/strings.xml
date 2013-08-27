@@ -41,7 +41,7 @@
     <string name="enabled">Enabled</string>
     <string name="app_stored">\"%s\" added to the watch list</string>
     <string name="rate_app">Rate this app</string>
-    <string name="installed">Installed</string>
+    <string name="installed">INSTALLED</string>
     <string name="no_recent_changes">No information about recent changes was provided.</string>
     <string name="google_account_not_found">Google account not found.</string>
     <string name="list_export">Export</string>

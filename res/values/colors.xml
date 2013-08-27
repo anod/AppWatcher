@@ -14,5 +14,6 @@
 	<color name="text_dark">#ff292929</color>
 	<color name="row_grayout">#ffcccccc</color>
 	<color name="list_background">#ffe7e7e7</color>
+	<color name="green">#FF33B5E5</color>
 </resources>
 

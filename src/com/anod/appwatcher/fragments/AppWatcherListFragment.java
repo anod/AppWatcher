@@ -57,7 +57,7 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 		TextView title;
 		TextView details;
 		TextView version;
-		ImageView installed;
+		TextView price;
 		ImageView icon;
 		LinearLayout newIndicator;
 		LinearLayout options;
@@ -173,10 +173,10 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 			
 			boolean isInstalled = isAppInstalled(app);
 			if (isInstalled) {
-				holder.installed.setVisibility(View.VISIBLE);
+				holder.price.setText(R.string.installed);
 				
 			} else {
-				holder.installed.setVisibility(View.GONE);
+				holder.price.setText("Price");
 			}
 
 			if (mNewAppsCount > 0) {
@@ -232,7 +232,7 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
             holder.details = (TextView)v.findViewById(R.id.details);
             holder.icon = (ImageView)v.findViewById(R.id.app_icon);
             holder.version = (TextView)v.findViewById(R.id.version);
-            holder.installed = (ImageView)v.findViewById(R.id.installed);
+            holder.price = (TextView)v.findViewById(R.id.price);
             holder.options = (LinearLayout)v.findViewById(R.id.options);
             holder.newIndicator = (LinearLayout)v.findViewById(R.id.new_indicator);
             holder.updateDate = (TextView)v.findViewById(R.id.update_date);

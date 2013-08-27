@@ -18,11 +18,18 @@ import com.anod.appwatcher.accounts.AccountHelper;
  */
 public class AccountChooserFragment extends DialogFragment implements DialogInterface.OnClickListener{
 
+	private int mSelectedItem;
+
 	public static AccountChooserFragment newInstance() {
 		AccountChooserFragment frag = new AccountChooserFragment();
 		Bundle args = new Bundle();
 		frag.setArguments(args);
 		return frag;
+	}
+
+	// Container Activity must implement this interface
+	public interface OnAccountSelectionListener {
+		public void onAccountSelected(Account account);
 	}
 
 	private AccountManager mAccountManager;
@@ -45,7 +52,7 @@ public class AccountChooserFragment extends DialogFragment implements DialogInte
 		builder.setTitle(R.string.choose_an_account)
 				.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
-						// FIRE ZE MISSILES!
+						saveAccount();
 					}
 				})
 				.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
@@ -54,8 +61,8 @@ public class AccountChooserFragment extends DialogFragment implements DialogInte
 					}
 				});
 
-		int selectedItem = getSelectedItem();
-		builder.setSingleChoiceItems(getChoiceItems(), selectedItem, this);
+		mSelectedItem = getSelectedItem();
+		builder.setSingleChoiceItems(getChoiceItems(), mSelectedItem, this);
 
 		// Create the AlertDialog object and return it
 		return builder.create();
@@ -90,9 +97,13 @@ public class AccountChooserFragment extends DialogFragment implements DialogInte
 
 	@Override
 	public void onClick(DialogInterface dialogInterface, int i) {
-		Account acc = mAccounts[i];
-		mPreferences.updateAccount(acc);
+		mSelectedItem = i;
 	}
 
-
+	private void saveAccount() {
+		Account acc = mAccounts[mSelectedItem];
+		mPreferences.updateAccount(acc);
+		OnAccountSelectionListener listener = (OnAccountSelectionListener)getActivity();
+		listener.onAccountSelected(acc);
+	}
 }

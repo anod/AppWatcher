@@ -30,14 +30,6 @@
                 android:contentDescription="@string/application_icon"
                 android:src="@drawable/ic_empty" />
 
-			<ImageView
-					android:id="@+id/installed"
-					android:layout_height="wrap_content"
-					android:layout_width="wrap_content"
-					android:src="@drawable/ic_action_installed"
-					android:layout_gravity="right"
-				/>
-
             <LinearLayout
                 android:id="@+id/new_indicator"
                 android:layout_width="5dip"
@@ -48,7 +40,7 @@
             </LinearLayout>
         </FrameLayout>
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical|clip_vertical"
@@ -60,38 +52,50 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/app_name"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
+				android:layout_alignParentTop="true"
+				android:layout_alignParentLeft="true"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+			/>
 
             <TextView
                 android:id="@+id/details"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/app_name"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
+                android:textAppearance="?android:attr/textAppearanceSmall"
+				android:layout_alignParentLeft="true"
+				android:layout_below="@+id/title"
+				android:textSize="12sp" />
 
-            <RelativeLayout
-                android:id="@+id/version_row"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="@dimen/info_margin_right" >
+			<TextView
+				android:id="@+id/version"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/app_name"
+				android:layout_alignParentLeft="true"
+				android:layout_below="@+id/details"
+				android:textAppearance="?android:attr/textAppearanceSmall"
+				android:textSize="12sp"/>
 
-                <TextView
-                    android:id="@+id/version"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/app_name"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
+			<TextView
+					android:id="@+id/update_date"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_alignParentRight="true"
+					android:layout_above="@+id/price"
+					android:text="@string/app_name" />
 
-                <TextView
-                    android:id="@+id/update_date"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_alignParentTop="true"
-                    android:text="@string/app_name" />
-                
-            </RelativeLayout>
-        </LinearLayout>
+			<TextView
+					android:id="@+id/price"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_alignParentRight="true"
+					android:layout_alignParentBottom="true"
+					android:textColor="@color/green"
+					android:textSize="10sp"
+					android:text="@string/installed" />
+
+        </RelativeLayout>
     </LinearLayout>
 
     <LinearLayout
