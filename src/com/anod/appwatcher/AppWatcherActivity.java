@@ -12,6 +12,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SearchView;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -35,6 +36,10 @@ import com.anod.appwatcher.utils.IntentUtils;
 
 public class AppWatcherActivity extends ActionBarActivity implements TextView.OnEditorActionListener, AccountChooserFragment.OnAccountSelectionListener, SearchView.OnQueryTextListener {
 
+	public interface QueryChangeListener {
+		void onQueryTextChanged(String newQuery);
+	}
+
 	private static final int TWO_HOURS_IN_SEC = 7200;
 	private static final int SIX_HOURS_IN_SEC = 21600;
 	protected String mAuthToken;
@@ -43,9 +48,10 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 	private MenuItem mWifiMenuItem;
 	private Account mSyncAccount;
 	private MenuItem mAutoSyncMenuItem;
-	private boolean mFilterVisible;
 	private MenuItem mRefreshMenuItem;
 	private MenuItem mSearchMenuItem;
+
+	private QueryChangeListener mQueryChangeListener;
 
 	/*
 		 * (non-Javadoc)
@@ -93,6 +99,19 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 		mRefreshMenuItem = menu.findItem(R.id.menu_refresh);
 
 		mSearchMenuItem = menu.findItem(R.id.menu_filter);
+		mSearchMenuItem.setOnActionExpandListener( new MenuItem.OnActionExpandListener() {
+			@Override
+			public boolean onMenuItemActionExpand(MenuItem menuItem) {
+				return true;
+			}
+
+			@Override
+			public boolean onMenuItemActionCollapse(MenuItem menuItem) {
+				notifyQueryChange("");
+				return true;
+			}
+		});
+
 		final SearchView searchView = (SearchView) MenuItemCompat.getActionView(mSearchMenuItem);
 		searchView.setOnQueryTextListener(this);
 
@@ -265,14 +284,7 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 			return true;
 		}
 	}
-	@Override
-	public void onBackPressed() {
-		if (mFilterVisible) {
-			getSupportActionBar().setCustomView(null);
-			mFilterVisible = false;
-		}
-		super.onBackPressed();
-	}
+
 	/**
 	 * For devices prior to honeycomb add enable/disable text
 	 * 
@@ -310,7 +322,7 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 
 	@Override
 	public boolean onQueryTextSubmit(String s) {
-		if (s.isEmpty()) {
+		if (TextUtils.isEmpty(s)) {
 			MenuItemCompat.collapseActionView(mSearchMenuItem);
 		} else {
 			Intent searchIntent = new Intent(mContext, MarketSearchActivity.class);
@@ -323,6 +335,17 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 
 	@Override
 	public boolean onQueryTextChange(String s) {
-		return false;
+		notifyQueryChange(s);
+		return true;
+	}
+
+	public void notifyQueryChange(String s) {
+		if (mQueryChangeListener != null) {
+			mQueryChangeListener.onQueryTextChanged(s);
+		}
+	}
+
+	public void setQueryChangeListener(QueryChangeListener listener) {
+		mQueryChangeListener = listener;
 	}
 }

@@ -1,7 +1,5 @@
 package com.anod.appwatcher.fragments;
 
-import java.sql.Timestamp;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -14,9 +12,9 @@ import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.app.ShareCompat;
 import android.support.v4.app.ShareCompat.IntentBuilder;
-import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
+import android.text.TextUtils;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,22 +29,24 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.anod.appwatcher.AppListContentProvider;
+import com.anod.appwatcher.AppWatcherActivity;
 import com.anod.appwatcher.ChangelogActivity;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.market.MarketInfo;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListCursor;
 import com.anod.appwatcher.model.AppListCursorLoader;
-import com.anod.appwatcher.model.AppListTable;
 import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.IntentUtils;
 
-public class AppWatcherListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>{
+import java.sql.Timestamp;
+
+public class AppWatcherListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>,AppWatcherActivity.QueryChangeListener {
     
     private CursorAdapter mAdapter;
 	private int mNewAppsCount;
 	private int mTotalCount;
+	private String mCurFilter = "";
 
 	class ViewHolder {
 		AppInfo app;
@@ -99,11 +99,13 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 		lv.setPadding(sidePadding,sidePadding,sidePadding,sidePadding);
         mIsBigScreen = r.getBoolean(R.bool.is_large_screen);
         // Start out with a progress indicator.
-        setListShown(false);        
-        
+        setListShown(false);
+
         mAnimSlideOut = AnimationUtils.loadAnimation(getActivity(), R.anim.slideout);
         
         mPackageManager = getActivity().getPackageManager();
+
+		((AppWatcherActivity)getActivity()).setQueryChangeListener(this);
         // Prepare the loader.  Either re-connect with an existing one,
         // or start a new one.
         getLoaderManager().initLoader(0, null, this);
@@ -123,13 +125,14 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 		public ListCursorAdapter(Context context, Cursor c, int flags) {
 			super(context, c, flags);
 	        mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-	        Resources r = getResources();
+	        Resources r = context.getResources();
 	        mVersionText = r.getString(R.string.version);
 	        mUpdateText = r.getString(R.string.update);
 	        mUpdateTextColor = r.getColor(R.color.blue_new);
 			mDateFormat = android.text.format.DateFormat
-					.getMediumDateFormat(getActivity().getApplicationContext());
+					.getMediumDateFormat(context.getApplicationContext());
             mTimestamp = new Timestamp(System.currentTimeMillis());
+
 		}
 
 		@Override
@@ -413,7 +416,7 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 	
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new AppListCursorLoader(getActivity());
+        return new AppListCursorLoader(getActivity(), mCurFilter);
     }
 
 	@Override
@@ -438,6 +441,15 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
         // above is about to be closed.  We need to make sure we are no
         // longer using it.
         mAdapter.swapCursor(null);
+	}
+
+	@Override
+	public void onQueryTextChanged(String newQuery) {
+		String newFilter = !TextUtils.isEmpty(newQuery) ? newQuery : "";
+		if (!TextUtils.equals(newFilter,mCurFilter)) {
+			mCurFilter = newFilter;
+			getLoaderManager().restartLoader(0, null, this);
+		}
 	}
 
 }

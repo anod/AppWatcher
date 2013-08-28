@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.support.v4.content.CursorLoader;
+import android.text.TextUtils;
 
 import com.anod.appwatcher.AppListContentProvider;
 
@@ -14,13 +15,17 @@ import com.anod.appwatcher.AppListContentProvider;
 public class AppListCursorLoader extends CursorLoader {
 	private int mNewCount;
 
-	public AppListCursorLoader(Context context) {
+	public AppListCursorLoader(Context context, String titleFilter) {
 		super(
 			context,
 			AppListContentProvider.CONTENT_URI,
 			AppListTable.APPLIST_PROJECTION, null, null,
 			AppListTable.Columns.KEY_STATUS + " DESC, " +AppListTable.Columns.KEY_TITLE + " COLLATE LOCALIZED ASC"
 		);
+		if (!TextUtils.isEmpty(titleFilter)) {
+			setSelection(AppListTable.Columns.KEY_TITLE + " LIKE ?");
+			setSelectionArgs(new String[] { "%"+titleFilter+"%" });
+		}
 	}
 
 	@Override
