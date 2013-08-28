@@ -23,7 +23,7 @@ public class ShareRecieverActivity extends Activity {
 			UrlQuerySanitizer sanitizer = new UrlQuerySanitizer(text);
 			String id = sanitizer.getValue("id");
 			if (id != null) {
-				searchIntent.putExtra(MarketSearchActivity.EXTRA_KEYWORD, "id:"+id);
+				searchIntent.putExtra(MarketSearchActivity.EXTRA_KEYWORD, id);
 				searchIntent.putExtra(MarketSearchActivity.EXTRA_EXACT, true);
 				fallback = false;
 			}
@@ -34,13 +34,13 @@ public class ShareRecieverActivity extends Activity {
 			if (title != null && !title.equals("")) {
 				searchIntent.putExtra(MarketSearchActivity.EXTRA_KEYWORD, title);
 			} else if (text != null && !text.equals("")) {
-				searchIntent.putExtra(MarketSearchActivity.EXTRA_KEYWORD, text);				
+				searchIntent.putExtra(MarketSearchActivity.EXTRA_KEYWORD, text);
 			} else {
 				searchIntent.putExtra(MarketSearchActivity.EXTRA_KEYWORD, "");
 			}
-			searchIntent.putExtra(MarketSearchActivity.EXTRA_EXACT, false);			
+			searchIntent.putExtra(MarketSearchActivity.EXTRA_EXACT, false);
 		}
-		searchIntent.putExtra(MarketSearchActivity.EXTRA_SHARE, true);		
+		searchIntent.putExtra(MarketSearchActivity.EXTRA_SHARE, true);
 		startActivity(searchIntent);
 		finish();
 	}

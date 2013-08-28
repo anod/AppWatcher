@@ -22,17 +22,17 @@
 		appwatcher:showAsAction="never|withText"
         android:title="@string/menu_auto_update" android:icon="@drawable/ic_menu_autoupdate">
     </item>
-	<item
-			android:id="@+id/menu_accounts"
-			appwatcher:showAsAction="never|withText"
-			android:title="@string/accounts" >
-	</item>
     <item
         android:id="@+id/menu_wifi_only"
         android:checkable="true"
 		appwatcher:showAsAction="never|withText"
         android:title="@string/menu_wifi_only" android:icon="@drawable/ic_menu_wifi">
     </item>
+	<item
+			android:id="@+id/menu_accounts"
+			appwatcher:showAsAction="never|withText"
+			android:title="@string/accounts" >
+	</item>
     <item
         android:id="@+id/menu_import_export"
 		appwatcher:showAsAction="never|withText"

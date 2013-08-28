@@ -33,10 +33,8 @@ import com.anod.appwatcher.sync.SyncAdapter;
 import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.IntentUtils;
 
-public class AppWatcherActivity extends ActionBarActivity implements TextView.OnEditorActionListener, AccountChooserFragment.OnAccountSelectionListener {
+public class AppWatcherActivity extends ActionBarActivity implements TextView.OnEditorActionListener, AccountChooserFragment.OnAccountSelectionListener, SearchView.OnQueryTextListener {
 
-	private static final int MENU_AUTOSYNC_IDX = 2;
-	private static final int MENU_WIFI_IDX = 3;
 	private static final int TWO_HOURS_IN_SEC = 7200;
 	private static final int SIX_HOURS_IN_SEC = 21600;
 	protected String mAuthToken;
@@ -47,6 +45,7 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 	private MenuItem mAutoSyncMenuItem;
 	private boolean mFilterVisible;
 	private MenuItem mRefreshMenuItem;
+	private MenuItem mSearchMenuItem;
 
 	/*
 		 * (non-Javadoc)
@@ -93,8 +92,9 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 		mWifiMenuItem = menu.findItem(R.id.menu_wifi_only);
 		mRefreshMenuItem = menu.findItem(R.id.menu_refresh);
 
-		MenuItem searchItem = menu.findItem(R.id.menu_filter);
-		SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+		mSearchMenuItem = menu.findItem(R.id.menu_filter);
+		final SearchView searchView = (SearchView) MenuItemCompat.getActionView(mSearchMenuItem);
+		searchView.setOnQueryTextListener(this);
 
 		refreshMenuState();
 
@@ -190,7 +190,6 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 		if (actionView != null) {
 			actionView.clearAnimation();
 			MenuItemCompat.setActionView(mRefreshMenuItem,null);
-			actionView = null;
 		}
 	}
 
@@ -211,16 +210,6 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		//case R.id.menu_add:
-		//	Intent intent = new Intent(mContext, MarketSearchActivity.class);
-		//	startActivity(intent);
-		//	return true;
-		//case R.id.menu_filter:
-			//getSupportActionBar().setCustomView(R.layout.searchbox);
-			//mFilterVisible = true;
-			///EditText editView = (EditText) getSupportActionBar().getCustomView().findViewById(R.id.searchbox);
-			//editView.setOnEditorActionListener(this);
-			//return true;
 		case R.id.menu_refresh:
 			AppLog.d("Refresh pressed");
 			if (ContentResolver.isSyncPending(mSyncAccount, AppListContentProvider.AUTHORITY)) {
@@ -317,5 +306,23 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 		} else {
 			mSyncAccount = account;
 		}
+	}
+
+	@Override
+	public boolean onQueryTextSubmit(String s) {
+		if (s.isEmpty()) {
+			MenuItemCompat.collapseActionView(mSearchMenuItem);
+		} else {
+			Intent searchIntent = new Intent(mContext, MarketSearchActivity.class);
+			searchIntent.putExtra(MarketSearchActivity.EXTRA_KEYWORD, s);
+			searchIntent.putExtra(MarketSearchActivity.EXTRA_EXACT, true);
+			startActivity(searchIntent);
+		}
+		return true;
+	}
+
+	@Override
+	public boolean onQueryTextChange(String s) {
+		return false;
 	}
 }

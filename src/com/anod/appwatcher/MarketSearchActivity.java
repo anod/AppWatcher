@@ -15,7 +15,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -65,14 +67,13 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 	private LinearLayout mLoading;
 	private RelativeLayout mDeviceIdMessage = null;
 	private ListView mListView;
-	private EditText mSearchEdit;
-	private boolean mFirstTimeRun = false; 
+	private boolean mFirstTimeRun = false;
 	private boolean mShareSource = false;
 	private HashMap<String,Boolean> mAddedApps;
 
 	private int mColorBgWhite;
 	private int mColorBgGray;
-	private ImageButton mSearchClear;
+	private SearchView mSearchView;
 
 
 	/* (non-Javadoc)
@@ -107,36 +108,14 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 		mListView.setAdapter(mAdapter);
 		mListView.setOnItemClickListener(itemClickListener); 
 
-		getSupportActionBar().setCustomView(R.layout.searchbox);
-
-
-		mSearchEdit = (EditText)getSupportActionBar().getCustomView().findViewById(R.id.searchbox);
-		mSearchEdit.setOnEditorActionListener(new OnEditorActionListener() {
-			
-			@Override
-			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-	            searchResults();
-	            return true;
-			}
-		});
-		mSearchClear = (ImageButton)getSupportActionBar().getCustomView().findViewById(R.id.searchbox_clear);
-		mSearchClear.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				mSearchEdit.setText("");
-			}
-		});
-		initFromIntent(getIntent());
-		
-		getSupportLoaderManager().initLoader(0, null, this).forceLoad();
 	}
 
 	private void searchResults() {
-		String query = mSearchEdit.getText().toString();
-		
+		String query = mSearchView.getQuery().toString();
+
         // hide virtual keyboard
         InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(mSearchEdit.getWindowToken(), 0);
+        imm.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
 
         mListView.setAdapter(mAdapter);
 		
@@ -176,6 +155,29 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.searchbox, menu);
+
+
+		final MenuItem searchItem = menu.findItem(R.id.menu_search);
+		mSearchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+		mSearchView.setIconifiedByDefault(false);
+		MenuItemCompat.expandActionView(searchItem);
+
+		mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+			@Override
+			public boolean onQueryTextSubmit(String s) {
+				searchResults();
+				return false;
+			}
+
+			@Override
+			public boolean onQueryTextChange(String s) {
+				return false;
+			}
+		});
+
+		initFromIntent(getIntent());
+		getSupportLoaderManager().initLoader(0, null, this).forceLoad();
+
         return true;
     }
     
@@ -184,7 +186,7 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
         switch (item.getItemId()) {
         case R.id.menu_search:
         	searchResults();
-        	return true;        	
+        	return true;
         default:
             return onOptionsItemSelected(item);
         }
@@ -344,12 +346,12 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 			return;
 		}
 		mMarketSession.setAuthSubToken(authSubToken);
-		if (mFirstTimeRun && !TextUtils.isEmpty(mSearchEdit.getText())) {
+		if (mFirstTimeRun && !TextUtils.isEmpty(mSearchView.getQuery())) {
 			searchResults();
 		} else {
 			// hide virtual keyboard
 			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-			imm.showSoftInput(mSearchEdit, 0);
+			imm.showSoftInput(mSearchView, 0);
 		}
 	}
 
@@ -359,7 +361,7 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 		}
 		String keyword = i.getStringExtra(EXTRA_KEYWORD);
 		if (keyword != null) {
-			mSearchEdit.setText(keyword);
+			mSearchView.setQuery(keyword, true);
 		}
 		mFirstTimeRun = i.getBooleanExtra(EXTRA_EXACT, false);
 		mShareSource = i.getBooleanExtra(EXTRA_SHARE, false);
