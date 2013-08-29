@@ -18,10 +18,8 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,15 +27,20 @@ import android.widget.Toast;
 import com.anod.appwatcher.fragments.AboutDialogFragment;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
 import com.anod.appwatcher.fragments.AppWatcherListFragment;
-import com.anod.appwatcher.sync.AccountHelper;
 import com.anod.appwatcher.sync.SyncAdapter;
 import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.IntentUtils;
+
+import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshAttacher;
 
 public class AppWatcherActivity extends ActionBarActivity implements TextView.OnEditorActionListener, AccountChooserFragment.OnAccountSelectionListener, SearchView.OnQueryTextListener {
 
 	public interface QueryChangeListener {
 		void onQueryTextChanged(String newQuery);
+	}
+
+	public interface RefreshListener {
+		void onRefreshFinish();
 	}
 
 	private static final int TWO_HOURS_IN_SEC = 7200;
@@ -52,6 +55,9 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 	private MenuItem mSearchMenuItem;
 
 	private QueryChangeListener mQueryChangeListener;
+	private RefreshListener mRefreshListener;
+
+	private PullToRefreshAttacher mPullToRefreshAttacher;
 
 	/*
 		 * (non-Javadoc)
@@ -63,6 +69,12 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.main);
+
+		/**
+		 * Here we create a PullToRefreshAttacher manually without an Options instance.
+		 * PullToRefreshAttacher will manually create one using default values.
+		 */
+		mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
 
 		AppWatcherListFragment newFragment = new AppWatcherListFragment();
 		FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -79,6 +91,10 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 		} else {
 			initAutoSync();
 		}
+	}
+
+	public PullToRefreshAttacher getPullToRefreshAttacher() {
+		return mPullToRefreshAttacher;
 	}
 
 	private void initAutoSync() {
@@ -99,7 +115,7 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 		mRefreshMenuItem = menu.findItem(R.id.menu_refresh);
 
 		mSearchMenuItem = menu.findItem(R.id.menu_filter);
-		mSearchMenuItem.setOnActionExpandListener( new MenuItem.OnActionExpandListener() {
+		MenuItemCompat.setOnActionExpandListener(mSearchMenuItem, new MenuItemCompat.OnActionExpandListener() {
 			@Override
 			public boolean onMenuItemActionExpand(MenuItem menuItem) {
 				return true;
@@ -178,6 +194,9 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 				if (updatesCount == 0) {
 					Toast.makeText(AppWatcherActivity.this, R.string.no_updates_found, Toast.LENGTH_SHORT).show();
 				}
+				if (mRefreshListener != null) {
+					mRefreshListener.onRefreshFinish();
+				}
 			}
 		}
 
@@ -193,6 +212,11 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 
 		AppLog.d("Mark updates as viewed.");
 		mPreferences.markViewed(true);
+
+		notifyQueryChange("");
+		if (mSearchMenuItem != null) {
+			MenuItemCompat.collapseActionView(mSearchMenuItem);
+		}
 	}
 
 	@Override
@@ -230,15 +254,7 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.menu_refresh:
-			AppLog.d("Refresh pressed");
-			if (ContentResolver.isSyncPending(mSyncAccount, AppListContentProvider.AUTHORITY)) {
-				AppLog.d("Sync requested already. Skipping... ");
-				return true;
-			}
-			startRefreshAnim();
-			Bundle params = new Bundle();
-			params.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-			ContentResolver.requestSync(mSyncAccount, AppListContentProvider.AUTHORITY, params);
+			requestRefresh();
 			return true;
 		case R.id.menu_auto_update:
 			boolean useAutoSync = !item.isChecked();
@@ -283,6 +299,18 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 		default:
 			return true;
 		}
+	}
+
+	public void requestRefresh() {
+		AppLog.d("Refresh pressed");
+		if (ContentResolver.isSyncPending(mSyncAccount, AppListContentProvider.AUTHORITY)) {
+			AppLog.d("Sync requested already. Skipping... ");
+			return;
+		}
+		startRefreshAnim();
+		Bundle params = new Bundle();
+		params.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+		ContentResolver.requestSync(mSyncAccount, AppListContentProvider.AUTHORITY, params);
 	}
 
 	/**
@@ -347,5 +375,9 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 
 	public void setQueryChangeListener(QueryChangeListener listener) {
 		mQueryChangeListener = listener;
+	}
+
+	public void setRefreshListener(RefreshListener listener) {
+		mRefreshListener = listener;
 	}
 }

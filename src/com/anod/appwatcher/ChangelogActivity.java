@@ -64,7 +64,10 @@ public class ChangelogActivity extends FragmentActivity implements LoaderCallbac
         	mLoadingView.setVisibility(View.GONE);
         	mChangelog.setVisibility(View.VISIBLE);
         	mChangelog.setAutoLinkMask(Linkify.ALL);
-        	String changes = app.getExtendedInfo().getRecentChanges();
+        	String changes = "";
+			if (app.getExtendedInfo() != null) {
+				changes = app.getExtendedInfo().getRecentChanges();
+			}
         	if (changes.equals("")) {
         		mChangelog.setText(R.string.no_recent_changes);
         	} else {

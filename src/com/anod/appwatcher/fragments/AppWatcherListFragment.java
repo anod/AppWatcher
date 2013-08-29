@@ -41,12 +41,20 @@ import com.anod.appwatcher.utils.IntentUtils;
 
 import java.sql.Timestamp;
 
-public class AppWatcherListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>,AppWatcherActivity.QueryChangeListener {
+import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshAttacher;
+import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
+
+public class AppWatcherListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>,AppWatcherActivity.QueryChangeListener,PullToRefreshAttacher.OnRefreshListener, AppWatcherActivity.RefreshListener {
     
     private CursorAdapter mAdapter;
 	private int mNewAppsCount;
 	private int mTotalCount;
 	private String mCurFilter = "";
+
+	public ListView mList;
+	private boolean mListShown;
+	private View mProgressContainer;
+	private View mListContainer;
 
 	class ViewHolder {
 		AppInfo app;
@@ -72,45 +80,101 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 	private boolean mIsBigScreen;
 	private PackageManager mPackageManager;
 	private SparseBooleanArray mInstalledCache = new SparseBooleanArray();
-	
+
+	private PullToRefreshAttacher mPullToRefreshAttacher;
+
 	/** Called when the activity is first created. */
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+    }
 
-        // Give some text to display if there is no data.  In a real
-        // application this would come from a resource.
-        setEmptyText(getString(R.string.no_data));
-        
-        // We have a menu item to show in action bar.
-        setHasOptionsMenu(true);
-        
-        // Create an empty adapter we will use to display the loaded data.
-        mAdapter = new ListCursorAdapter(getActivity(), null, 0);
-        setListAdapter(mAdapter);
+	public void setListShown(boolean shown, boolean animate){
+		if (mListShown == shown) {
+			return;
+		}
+		mListShown = shown;
+		if (shown) {
+			if (animate) {
+				mProgressContainer.startAnimation(AnimationUtils.loadAnimation(
+						getActivity(), android.R.anim.fade_out));
+				mListContainer.startAnimation(AnimationUtils.loadAnimation(
+						getActivity(), android.R.anim.fade_in));
+			}
+			mProgressContainer.setVisibility(View.GONE);
+			mListContainer.setVisibility(View.VISIBLE);
+		} else {
+			if (animate) {
+				mProgressContainer.startAnimation(AnimationUtils.loadAnimation(
+						getActivity(), android.R.anim.fade_in));
+				mListContainer.startAnimation(AnimationUtils.loadAnimation(
+						getActivity(), android.R.anim.fade_out));
+			}
+			mProgressContainer.setVisibility(View.VISIBLE);
+			mListContainer.setVisibility(View.INVISIBLE);
+		}
+	}
+	public void setListShown(boolean shown){
+		setListShown(shown, true);
+	}
+	public void setListShownNoAnimation(boolean shown) {
+		setListShown(shown, false);
+	}
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+							 Bundle savedInstanceState) {
+		int INTERNAL_EMPTY_ID = 0x00ff0001;
+		View root = inflater.inflate(R.layout.applist_fragment, container, false);
+		(root.findViewById(R.id.internalEmpty)).setId(INTERNAL_EMPTY_ID);
+		mList = (ListView) root.findViewById(android.R.id.list);
+		mListContainer =  root.findViewById(R.id.listContainer);
+		mProgressContainer = root.findViewById(R.id.progressContainer);
+		mListShown = true;
+		return root;
+	}
+
+
+	@Override
+	public void onViewCreated(View view, Bundle savedInstanceState) {
+		super.onViewCreated(view, savedInstanceState);
+
+		// We have a menu item to show in action bar.
+		setHasOptionsMenu(true);
+
+		// Create an empty adapter we will use to display the loaded data.
+		mAdapter = new ListCursorAdapter(getActivity(), null, 0);
+		setListAdapter(mAdapter);
 
 		Resources r = getResources();
-		ListView lv = getListView();
-		int sidePadding = (int)r.getDimension(R.dimen.list_padding_side);
-        lv.setItemsCanFocus(true);
-		lv.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-		lv.setDividerHeight(0);
-		lv.setDivider(null);
-		lv.setPadding(sidePadding,sidePadding,sidePadding,sidePadding);
-        mIsBigScreen = r.getBoolean(R.bool.is_large_screen);
-        // Start out with a progress indicator.
-        setListShown(false);
+		mIsBigScreen = r.getBoolean(R.bool.is_large_screen);
+		// Start out with a progress indicator.
+		setListShown(false);
 
-        mAnimSlideOut = AnimationUtils.loadAnimation(getActivity(), R.anim.slideout);
-        
-        mPackageManager = getActivity().getPackageManager();
+		mAnimSlideOut = AnimationUtils.loadAnimation(getActivity(), R.anim.slideout);
 
-		((AppWatcherActivity)getActivity()).setQueryChangeListener(this);
-        // Prepare the loader.  Either re-connect with an existing one,
-        // or start a new one.
-        getLoaderManager().initLoader(0, null, this);
+		mPackageManager = getActivity().getPackageManager();
 
-    }
+		AppWatcherActivity act = (AppWatcherActivity)getActivity();
+
+		act.setQueryChangeListener(this);
+		act.setRefreshListener(this);
+
+		mPullToRefreshAttacher = act.getPullToRefreshAttacher();
+
+		// Retrieve the PullToRefreshLayout from the content view
+		PullToRefreshLayout ptrLayout = (PullToRefreshLayout) view.findViewById(R.id.ptr_layout);
+
+		// Give the PullToRefreshAttacher to the PullToRefreshLayout, along with a refresh listener.
+		ptrLayout.setPullToRefreshAttacher(mPullToRefreshAttacher, this);
+
+		// Set the Refreshable View to be the ListView and the refresh listener to be this.
+		//mPullToRefreshAttacher.addRefreshableView(getListView(), this);
+
+		// Prepare the loader.  Either re-connect with an existing one,
+		// or start a new one.
+		getLoaderManager().initLoader(0, null, this);
+	}
 
 	private class ListCursorAdapter extends CursorAdapter {
 		private LayoutInflater mInflater;
@@ -218,6 +282,7 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 
 		    ViewHolder holder = newViewHolder(v);
 			v.setTag(holder);
+
 			return v;
 		}
 
@@ -452,4 +517,13 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 		}
 	}
 
+	@Override
+	public void onRefreshStarted(View view) {
+		((AppWatcherActivity)getActivity()).requestRefresh();
+	}
+
+	@Override
+	public void onRefreshFinish() {
+		mPullToRefreshAttacher.setRefreshComplete();
+	}
 }

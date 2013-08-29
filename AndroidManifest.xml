@@ -6,7 +6,7 @@
 
     <uses-sdk
         android:minSdkVersion="8"
-        android:targetSdkVersion="17" />
+        android:targetSdkVersion="18" />
 
     <!-- for google account token -->
     <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
