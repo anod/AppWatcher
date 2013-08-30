@@ -246,14 +246,14 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 				holder.price.setText("Price");
 			}
 
-			if (mNewAppsCount > 0) {
+			if (mNewAppsCount > 0 && TextUtils.isEmpty(mCurFilter)) {
 				if (holder.position == 0) {
 					holder.sectionText.setText(context.getString(R.string.recently_updated));
-					holder.sectionCount.setText(mNewAppsCount);
+					holder.sectionCount.setText(String.valueOf(mNewAppsCount));
 					holder.section.setVisibility(View.VISIBLE);
-				} else if (holder.position == (mNewAppsCount - 1)) {
+				} else if (holder.position == mNewAppsCount) {
 					holder.sectionText.setText(context.getString(R.string.watching));
-					holder.sectionCount.setText(mTotalCount - mNewAppsCount);
+					holder.sectionCount.setText(String.valueOf(mTotalCount - mNewAppsCount));
 					holder.section.setVisibility(View.VISIBLE);
 				} else {
 					holder.section.setVisibility(View.GONE);

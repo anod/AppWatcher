@@ -74,6 +74,7 @@
     <orderEntry type="library" exported="" name="ComAndroidSupportAppcompatV71800.aar" level="project" />
     <orderEntry type="library" exported="" name="ComGithubChrisbanesActionbarpulltorefreshLibrary071.aar" level="project" />
     <orderEntry type="library" exported="" name="ComGithubChrisbanesActionbarpulltorefreshExtraAbc071.aar" level="project" />
+    <orderEntry type="library" exported="" name="acra-4.5.0" level="project" />
   </component>
 </module>
 

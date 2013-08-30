@@ -64,4 +64,6 @@
 	<string name="menu_filter">Filter</string>
 	<string name="accounts">Accounts</string>
 	<string name="choose_an_account">Choose an account</string>
+	<string name="crash_toast_text">AppWatcher Crashed</string>
+	<string name="app_already_added">App alreay in the watch list</string>
 </resources>

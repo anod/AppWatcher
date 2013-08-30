@@ -2,7 +2,7 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 			  android:orientation="horizontal"
-			  android:padding="10dp"
+			  android:padding="4dp"
 			  android:id="@+id/sec_header"
 			  android:layout_width="match_parent"
 			  android:layout_height="wrap_content"
@@ -13,6 +13,7 @@
 			android:layout_width="0dp"
 			android:layout_weight="1"
 			android:text="Recently updated"
+			android:textColor="@color/gray_light"
 			style="@style/ListHeader"></TextView>
 
 	<TextView
@@ -20,6 +21,6 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:text="6"
-			style="@style/ListHeader"
-			></TextView>
+			android:textColor="@color/gray_light"
+			style="@style/ListHeader"></TextView>
 </LinearLayout>

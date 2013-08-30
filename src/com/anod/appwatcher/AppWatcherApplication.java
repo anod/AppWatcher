@@ -9,7 +9,7 @@ public class AppWatcherApplication extends Application {
 
 	 @Override
 	 public void onCreate() {
-	     super.onCreate();
+		super.onCreate();
 
 		 try {
 			 ViewConfiguration config = ViewConfiguration.get(this);

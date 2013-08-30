@@ -200,9 +200,18 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 			if (mAddedApps.containsKey(app.getId())) {
 				return;
 			}
+			AppListContentProviderClient cr = new AppListContentProviderClient(MarketSearchActivity.this);
+
+			AppInfo existingApp = cr.queryAppId(app.getId());
+			if (existingApp != null) {
+				Toast.makeText(mContext, R.string.app_already_added, Toast.LENGTH_SHORT).show();
+				mAddedApps.put(appId, true);
+				return;
+			}
+
 			Bitmap icon = mIconLoader.getCachedImage(app.getId());
 			AppInfo info = new AppInfo(app, icon);
-			AppListContentProviderClient cr = new AppListContentProviderClient(MarketSearchActivity.this);
+
 			Uri uri = cr.insert(info);
 			cr.release();
 			

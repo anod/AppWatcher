@@ -53,7 +53,7 @@ public class AppListContentProviderClient {
 		Cursor cr = null;
 		try {
 			cr = mContentProviderClient.query(AppListContentProvider.CONTENT_URI,
-				AppListTable.APPLIST_PROJECTION, selection, null, sortOrder
+				AppListTable.APPLIST_PROJECTION, selection, selectionArgs, sortOrder
 			);
 		} catch (RemoteException e) {
 			AppLog.e(e.getMessage());
@@ -158,6 +158,14 @@ public class AppListContentProviderClient {
 	}
 
 
+	public AppInfo queryAppId(String id) {
+		AppListCursor cr = query(null, AppListTable.Columns.KEY_APPID + " = ?", new String[]{id});
+		if (cr == null || cr.getCount() == 0) {
+			return null;
+		}
+		AppInfo info = cr.getAppInfo();
+		cr.close();
 
-
+		return info;
+	}
 }
