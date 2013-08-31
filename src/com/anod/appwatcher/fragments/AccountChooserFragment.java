@@ -30,6 +30,7 @@ public class AccountChooserFragment extends DialogFragment implements DialogInte
 	// Container Activity must implement this interface
 	public interface OnAccountSelectionListener {
 		public void onAccountSelected(Account account);
+		public void onAccountNotFound();
 	}
 
 	private AccountManager mAccountManager;
@@ -55,14 +56,20 @@ public class AccountChooserFragment extends DialogFragment implements DialogInte
 						saveAccount();
 					}
 				})
-				.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						// User cancelled the dialog
-					}
-				});
+		;
 
-		mSelectedItem = getSelectedItem();
-		builder.setSingleChoiceItems(getChoiceItems(), mSelectedItem, this);
+		if (mAccounts.length == 0) {
+			builder.setMessage("No registered google accounts");
+		} else {
+			mSelectedItem = getSelectedItem();
+			builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+				}
+			});
+			builder.setSingleChoiceItems(getChoiceItems(), mSelectedItem, this);
+
+		}
+
 
 		// Create the AlertDialog object and return it
 		return builder.create();
@@ -101,9 +108,13 @@ public class AccountChooserFragment extends DialogFragment implements DialogInte
 	}
 
 	private void saveAccount() {
-		Account acc = mAccounts[mSelectedItem];
-		mPreferences.updateAccount(acc);
 		OnAccountSelectionListener listener = (OnAccountSelectionListener)getActivity();
-		listener.onAccountSelected(acc);
+		if (mAccounts.length > 0) {
+			Account acc = mAccounts[mSelectedItem];
+			mPreferences.updateAccount(acc);
+			listener.onAccountSelected(acc);
+		} else {
+			listener.onAccountNotFound();
+		}
 	}
 }

@@ -14,8 +14,9 @@
         android:gravity="center_vertical"
         android:orientation="horizontal"
 		android:background="@color/white"
-		style="@style/ListItem"
-			>
+		android:paddingTop="4dp"
+		android:paddingBottom="4dp"
+	>
 
         <FrameLayout
             android:layout_width="@dimen/icon_wrapper"
@@ -45,7 +46,8 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical|clip_vertical"
             android:orientation="vertical"
-			android:paddingLeft="4dp">
+			android:paddingLeft="4dp"
+			android:paddingRight="4dp">
 
             <TextView
                 android:id="@+id/title"
@@ -81,19 +83,19 @@
 					android:id="@+id/update_date"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:layout_alignParentRight="true"
-					android:layout_above="@+id/price"
-					android:text="@string/app_name" />
+					android:text="@string/app_name"
+					android:layout_alignBaseline="@+id/details"
+					android:layout_alignRight="@+id/price"/>
 
 			<TextView
 					android:id="@+id/price"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:layout_alignParentRight="true"
-					android:layout_alignParentBottom="true"
 					android:textColor="@color/green"
 					android:textSize="10sp"
-					android:text="@string/installed" />
+					android:text="@string/installed"
+					android:layout_alignParentBottom="true"
+					android:layout_alignParentRight="true"/>
 
         </RelativeLayout>
     </LinearLayout>

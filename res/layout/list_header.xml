@@ -14,6 +14,9 @@
 			android:layout_weight="1"
 			android:text="Recently updated"
 			android:textColor="@color/gray_light"
+			android:ellipsize="end"
+			android:focusable="false"
+			android:singleLine="true"
 			style="@style/ListHeader"></TextView>
 
 	<TextView

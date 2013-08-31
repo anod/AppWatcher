@@ -14,6 +14,11 @@ public class AppListTable {
 	    public static final String KEY_ICON_CACHE = "icon";
 	    public static final String KEY_STATUS = "status";
 	    public static final String KEY_UPDATE_DATE = "update_date";
+		public static final String KEY_PRICE_TEXT = "price_text";
+		public static final String KEY_PRICE_CURRENCY = "price_currency";
+		public static final String KEY_PRICE_MICROS = "price_micros";
+
+
 	}
 	
 	public static final String TABLE_NAME = "app_list";
@@ -28,7 +33,10 @@ public class AppListTable {
     	Columns.KEY_CREATOR,
     	Columns.KEY_ICON_CACHE,
     	Columns.KEY_STATUS,
-    	Columns.KEY_UPDATE_DATE
+    	Columns.KEY_UPDATE_DATE,
+		Columns.KEY_PRICE_TEXT,
+		Columns.KEY_PRICE_CURRENCY,
+		Columns.KEY_PRICE_MICROS
     };
     
 }

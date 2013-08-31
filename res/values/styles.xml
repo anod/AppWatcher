@@ -124,11 +124,6 @@
         <item name="android:scaleType">center</item>
     </style>
 
-	<style name="ListItem">
-		<item name="android:layout_width">match_parent</item>
-		<item name="android:layout_height">wrap_content</item>
-		<item name="android:gravity">center_vertical|clip_vertical</item>
-	</style>
 
 	<style name="ListHeader">
 		<item name="android:layout_height">wrap_content</item>

@@ -349,6 +349,11 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 	}
 
 	@Override
+	public void onAccountNotFound() {
+		finish();
+	}
+
+	@Override
 	public boolean onQueryTextSubmit(String s) {
 		if (TextUtils.isEmpty(s)) {
 			MenuItemCompat.collapseActionView(mSearchMenuItem);

@@ -1,167 +1,176 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:baselineAligned="false"
-    android:gravity="center_vertical|clip_vertical"
-    android:orientation="horizontal" >
+			  android:orientation="vertical"
+			  android:layout_width="match_parent"
+			  android:layout_height="wrap_content"
+			  android:paddingBottom="4dp"
+			  android:baselineAligned="false">
 
-    <FrameLayout
-        android:layout_width="@dimen/icon_wrapper"
-        android:layout_height="match_parent" >
+	<include layout="@layout/list_header" />
 
-        <ImageView
-            android:id="@+id/app_icon"
-            android:layout_width="@dimen/icon_size"
-            android:layout_height="@dimen/icon_size"
-            android:layout_gravity="center_vertical"
-            android:layout_margin="4dip"
-            android:contentDescription="@string/application_icon"
-            android:src="@drawable/ic_empty" />
+	<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:gravity="center_vertical"
+			android:orientation="horizontal"
+			android:background="@color/white"
+			android:paddingTop="4dp"
+			android:paddingBottom="4dp"
+	>
 
-        <TextView
-            android:id="@+id/text_installed"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:background="#66000000"
-            android:gravity="center_horizontal"
-            android:text="@string/installed"
-            android:textColor="#FFFFFFFF"
-            android:textSize="10sp" />
+		<FrameLayout
+				android:layout_width="@dimen/icon_wrapper"
+				android:layout_height="match_parent" >
 
-        <LinearLayout
-            android:id="@+id/new_indicator"
-            android:layout_width="5dip"
-            android:layout_height="match_parent"
-            android:background="@color/blue_new"
-            android:gravity="left|center_vertical"
-            android:orientation="horizontal" >
-        </LinearLayout>
-    </FrameLayout>
+			<ImageView
+					android:id="@+id/app_icon"
+					android:layout_width="@dimen/icon_size"
+					android:layout_height="@dimen/icon_size"
+					android:layout_gravity="center_vertical"
+					android:layout_marginLeft="4dip"
+					android:contentDescription="@string/application_icon"
+					android:src="@drawable/ic_empty" />
 
-    <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:gravity="center_vertical|clip_vertical"
-        android:orientation="vertical" >
+			<LinearLayout
+					android:id="@+id/new_indicator"
+					android:layout_width="5dip"
+					android:layout_height="match_parent"
+					android:background="@color/blue_new"
+					android:gravity="left|center_vertical"
+					android:orientation="horizontal" >
+			</LinearLayout>
+		</FrameLayout>
 
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/app_name"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+		<RelativeLayout
+				android:layout_width="400dp"
+				android:layout_height="wrap_content"
+				android:gravity="center_vertical|clip_vertical"
+				android:paddingLeft="4dp"
+				android:paddingRight="4dp">
 
-        <TextView
-            android:id="@+id/details"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/app_name"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
+			<TextView
+					android:id="@+id/title"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@string/app_name"
+					android:layout_alignParentTop="true"
+					android:layout_alignParentLeft="true"
+					android:textAppearance="?android:attr/textAppearanceMedium"
+					/>
 
-        <RelativeLayout
-            android:id="@+id/version_row"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="@dimen/info_margin_right" >
+			<TextView
+					android:id="@+id/details"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@string/app_name"
+					android:textAppearance="?android:attr/textAppearanceSmall"
+					android:layout_alignParentLeft="true"
+					android:layout_below="@+id/title"
+					android:textSize="12sp" />
 
-            <TextView
-                android:id="@+id/version"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/app_name"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
+			<TextView
+					android:id="@+id/version"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@string/app_name"
+					android:layout_alignParentLeft="true"
+					android:layout_below="@+id/details"
+					android:textAppearance="?android:attr/textAppearanceSmall"
+					android:textSize="12sp"/>
 
-            <TextView
-                android:id="@+id/update_date"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentTop="true"
-                android:text="@string/app_name" />
-        </RelativeLayout>
-    </LinearLayout>
+			<TextView
+					android:id="@+id/update_date"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_alignParentRight="true"
+					android:layout_above="@+id/price"
+					android:text="@string/app_name" />
 
-    <LinearLayout
-        android:id="@+id/options"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:gravity="center_horizontal|center_vertical"
-        android:orientation="horizontal" >
+			<TextView
+					android:id="@+id/price"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_alignParentRight="true"
+					android:layout_alignParentBottom="true"
+					android:textColor="@color/green"
+					android:textSize="10sp"
+					android:text="@string/installed" />
 
-        <ImageButton
-            android:id="@+id/share_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="4dp"
-            android:layout_marginRight="4dp"
-            android:background="@drawable/app_act_button"
-            android:contentDescription="@string/share"
-            android:focusable="false"
-            android:src="@drawable/ic_action_share"
-            android:text="@string/share" />
+		</RelativeLayout>
 
-        <View
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="5dip"
-            android:layout_marginTop="5dip"
-            android:background="@drawable/divider_vertical_dark" />
+		<LinearLayout
+				android:id="@+id/options"
+				android:layout_width="match_parent"
+				android:layout_height="match_parent"
+				android:gravity="center_horizontal|center_vertical"
+				android:orientation="horizontal"
+				android:paddingTop="2dp"
+				android:paddingBottom="2dp"
+				>
 
-        <Button
-            android:id="@+id/changelog_btn"
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="4dp"
-            android:layout_marginRight="4dp"
-            android:background="@drawable/app_act_button"
-            android:contentDescription="@string/whats_new"
-            android:drawableLeft="@drawable/ic_action_info"
-            android:focusable="false"
-            android:text="@string/whats_new"
-            android:textColor="@color/white" />
+			<ImageButton
+					android:id="@+id/share_btn"
+					android:layout_width="wrap_content"
+					android:layout_height="match_parent"
+					android:layout_marginLeft="0dp"
+					android:layout_marginRight="1dp"
+					android:paddingLeft="10dp"
+					android:paddingRight="10dp"
+					android:background="@drawable/app_act_button"
+					android:contentDescription="@string/share"
+					android:focusable="false"
+					android:src="@drawable/ic_action_share"
+					android:text="@string/share" />
 
-        <View
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="5dip"
-            android:layout_marginTop="5dip"
-            android:background="@drawable/divider_vertical_dark" />
+			<Button
+					android:id="@+id/changelog_btn"
+					style="?android:attr/buttonStyleSmall"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_marginLeft="1dp"
+					android:layout_marginRight="1dp"
+					android:layout_weight="1"
+					android:background="@drawable/app_act_button"
+					android:contentDescription="@string/whats_new"
+					android:drawableLeft="@drawable/ic_action_info"
+					android:focusable="false"
+					android:text="@string/whats_new"
+					android:paddingLeft="4dp"
+					android:drawablePadding="0dp"
+					android:textColor="@color/text_dark" />
 
-        <Button
-            android:id="@+id/market_btn"
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="4dp"
-            android:layout_marginRight="4dp"
-            android:background="@drawable/app_act_button"
-            android:contentDescription="@string/play_store"
-            android:drawableLeft="@drawable/ic_action_playback_play"
-            android:focusable="false"
-            android:text="@string/play_store"
-            android:textColor="@color/white" />
+			<Button
+					android:id="@+id/market_btn"
+					style="?android:attr/buttonStyleSmall"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_marginLeft="1dp"
+					android:layout_marginRight="1dp"
+					android:layout_weight="1"
+					android:background="@drawable/app_act_button"
+					android:contentDescription="@string/play_store"
+					android:drawableLeft="@drawable/ic_action_playback_play"
+					android:focusable="false"
+					android:text="@string/play_store"
+					android:paddingLeft="4dp"
+					android:drawablePadding="0dp"
+					android:textColor="@color/text_dark" />
 
-        <View
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="5dip"
-            android:layout_marginTop="5dip"
-            android:background="@drawable/divider_vertical_dark" />
+			<ImageButton
+					android:id="@+id/remove_btn"
+					android:layout_width="wrap_content"
+					android:layout_height="match_parent"
+					android:layout_marginLeft="1dp"
+					android:layout_marginRight="0dp"
+					android:paddingLeft="10dp"
+					android:paddingRight="10dp"
+					android:background="@drawable/app_act_button"
+					android:contentDescription="@string/remove"
+					android:focusable="false"
+					android:src="@drawable/ic_action_cancel" />
+		</LinearLayout>
+	</LinearLayout>
 
-        <ImageButton
-            android:id="@+id/remove_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="4dp"
-            android:layout_marginRight="4dp"
-            android:background="@drawable/app_act_button"
-            android:contentDescription="@string/remove"
-            android:focusable="false"
-            android:src="@drawable/ic_action_cancel" />
-    </LinearLayout>
+
 
 </LinearLayout>

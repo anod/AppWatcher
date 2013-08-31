@@ -19,8 +19,11 @@ public class DbOpenHelper extends SQLiteOpenHelper {
 			AppListTable.Columns.KEY_CREATOR + " TEXT," + 
 			AppListTable.Columns.KEY_ICON_CACHE + " BLOB," +
 			AppListTable.Columns.KEY_STATUS + " INTEGER," +
-			AppListTable.Columns.KEY_UPDATE_DATE + " INTEGER" +
-		") ";
+			AppListTable.Columns.KEY_UPDATE_DATE + " INTEGER," +
+			AppListTable.Columns.KEY_PRICE_TEXT + " TEXT," +
+			AppListTable.Columns.KEY_PRICE_CURRENCY + " TEXT," +
+			AppListTable.Columns.KEY_PRICE_MICROS + " INTEGER" +
+	") ";
 
     public DbOpenHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -36,7 +39,14 @@ public class DbOpenHelper extends SQLiteOpenHelper {
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		// Version 2
-		db.execSQL("ALTER TABLE "+AppListTable.TABLE_NAME + " ADD COLUMN " + AppListTable.Columns.KEY_UPDATE_DATE + " INTEGER");
+		if (oldVersion == 1) {
+			db.execSQL("ALTER TABLE "+AppListTable.TABLE_NAME + " ADD COLUMN " + AppListTable.Columns.KEY_UPDATE_DATE + " INTEGER");
+		}
+		if (oldVersion == 2) {
+			db.execSQL("ALTER TABLE "+AppListTable.TABLE_NAME + " ADD COLUMN " + AppListTable.Columns.KEY_PRICE_TEXT + " TEXT");
+			db.execSQL("ALTER TABLE "+AppListTable.TABLE_NAME + " ADD COLUMN " + AppListTable.Columns.KEY_PRICE_CURRENCY + " TEXT");
+			db.execSQL("ALTER TABLE "+AppListTable.TABLE_NAME + " ADD COLUMN " + AppListTable.Columns.KEY_PRICE_MICROS + " INTEGER");
+		}
 	}
 
 }
