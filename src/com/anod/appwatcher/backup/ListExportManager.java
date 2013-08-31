@@ -296,7 +296,7 @@ public class ListExportManager {
 		reader.endObject();
 		if (appId != null && pname != null) {
 			return new AppInfo(0, appId, pname, versionNumber, versionName,
-					title, creator, icon, status, updateTime);
+					title, creator, icon, status, updateTime, null, null, null);
 		}
 		return null;
 	}

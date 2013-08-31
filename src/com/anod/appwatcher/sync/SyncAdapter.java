@@ -168,7 +168,16 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 		   	    if (icon != null) {
 		   	    	byte[] iconData = BitmapUtils.flattenBitmap(icon);
 		   	   	    values.put(AppListTable.Columns.KEY_ICON_CACHE, iconData);
-		   	    }			
+		   	    }
+			}
+			if (!marketApp.getPriceCurrency().equals(localApp.getPriceCur())) {
+				values.put(AppListTable.Columns.KEY_PRICE_CURRENCY, marketApp.getPriceCurrency());
+			}
+			if (!marketApp.getPrice().equals(localApp.getPriceText())) {
+				values.put(AppListTable.Columns.KEY_PRICE_TEXT, marketApp.getPrice());
+			}
+			if (localApp.getPriceMicros() != marketApp.getPriceMicros()) {
+				values.put(AppListTable.Columns.KEY_PRICE_MICROS, marketApp.getPriceMicros());
 			}
 			if (values.size() > 0) {
 				client.update(localApp.getRowId(), values);

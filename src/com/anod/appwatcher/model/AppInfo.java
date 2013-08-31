@@ -20,7 +20,10 @@ public class AppInfo {
 	private Bitmap icon;
 	private int status;
 	private long updateTime;
-	
+	private String priceText;
+	private String priceCur;
+	private Integer priceMicros;
+
 	/**
 	 * 
 	 * @param rowId
@@ -35,7 +38,7 @@ public class AppInfo {
 	 * @param updateTime
 	 */
 	public AppInfo(int rowId, String appId, String pname, int versionNumber, String versionName,
-			String title, String creator, Bitmap icon, int status, long updateTime) {
+			String title, String creator, Bitmap icon, int status, long updateTime, String priceText, String priceCur, Integer priceMicros) {
 		this.rowId = rowId;
 		this.appId = appId;		
 		this.packageName = pname;
@@ -46,6 +49,10 @@ public class AppInfo {
 		this.icon = icon;
 		this.status = status;
 		this.updateTime = updateTime;
+
+		this.priceText = priceText;
+		this.priceCur = priceCur;
+		this.priceMicros = priceMicros;
 	}
 	
 	/**
@@ -64,6 +71,9 @@ public class AppInfo {
 		this.status = STATUS_NORMAL;
 		this.updateTime = 0;
 		this.icon = icon;
+		this.priceMicros = app.getPriceMicros();
+		this.priceText = app.getPrice();
+		this.priceCur = app.getPriceCurrency();
 	}
 	
 	/**
@@ -149,5 +159,17 @@ public class AppInfo {
 	 */
 	public void setUpdateTime(Long updateTime) {
 		this.updateTime = updateTime;
+	}
+
+	public String getPriceText() {
+		return priceText;
+	}
+
+	public String getPriceCur() {
+		return priceCur;
+	}
+
+	public Integer getPriceMicros() {
+		return priceMicros;
 	}
 }

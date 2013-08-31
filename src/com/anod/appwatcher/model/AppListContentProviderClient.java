@@ -149,6 +149,11 @@ public class AppListContentProviderClient {
 		values.put(AppListTable.Columns.KEY_CREATOR, app.getCreator());
 		values.put(AppListTable.Columns.KEY_STATUS, app.getStatus());
    	    values.put(AppListTable.Columns.KEY_UPDATE_DATE, app.getUpdateTime() );
+
+		values.put(AppListTable.Columns.KEY_PRICE_TEXT, app.getPriceText());
+		values.put(AppListTable.Columns.KEY_PRICE_CURRENCY, app.getPriceCur());
+		values.put(AppListTable.Columns.KEY_PRICE_MICROS, app.getPriceMicros() );
+
 		Bitmap icon = app.getIcon();
 		if (icon != null) {
 			byte[] iconData = BitmapUtils.flattenBitmap(icon);
