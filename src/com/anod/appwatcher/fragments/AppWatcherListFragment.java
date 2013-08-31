@@ -241,10 +241,12 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 			boolean isInstalled = isAppInstalled(app);
 			if (isInstalled) {
 				holder.price.setText(R.string.installed);
-				holder.price.setVisibility(View.VISIBLE);
 			} else {
-				holder.price.setText("Price");
-				holder.price.setVisibility(View.INVISIBLE);
+				if (app.getPriceMicros() == 0 ) {
+					holder.price.setText(R.string.free);
+				} else {
+					holder.price.setText(app.getPriceText());
+				}
 			}
 
 			if (mNewAppsCount > 0 && TextUtils.isEmpty(mCurFilter)) {

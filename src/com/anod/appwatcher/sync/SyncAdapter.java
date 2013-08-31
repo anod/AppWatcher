@@ -179,6 +179,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 			if (localApp.getPriceMicros() != marketApp.getPriceMicros()) {
 				values.put(AppListTable.Columns.KEY_PRICE_MICROS, marketApp.getPriceMicros());
 			}
+
+			AppLog.d("ContentValues: "+values.toString());
+
 			if (values.size() > 0) {
 				client.update(localApp.getRowId(), values);
 			}

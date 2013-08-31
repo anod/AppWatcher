@@ -66,4 +66,5 @@
 	<string name="choose_an_account">Choose an account</string>
 	<string name="crash_toast_text">AppWatcher Crashed</string>
 	<string name="app_already_added">App alreay in the watch list</string>
+	<string name="free">FREE</string>
 </resources>
