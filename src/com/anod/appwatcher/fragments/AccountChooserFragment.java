@@ -19,6 +19,7 @@ import com.anod.appwatcher.accounts.AccountHelper;
 public class AccountChooserFragment extends DialogFragment implements DialogInterface.OnClickListener{
 
 	private int mSelectedItem;
+	private Account mCurrentAccount;
 
 	public static AccountChooserFragment newInstance() {
 		AccountChooserFragment frag = new AccountChooserFragment();
@@ -43,6 +44,7 @@ public class AccountChooserFragment extends DialogFragment implements DialogInte
 		mAccountManager = AccountManager.get(getActivity());
 		mPreferences = new Preferences(getActivity());
 		mAccounts = mAccountManager.getAccountsByType(AccountHelper.ACCOUNT_TYPE);
+		mCurrentAccount = mPreferences.getAccount();
 	}
 
 	@Override
@@ -64,6 +66,10 @@ public class AccountChooserFragment extends DialogFragment implements DialogInte
 			mSelectedItem = getSelectedItem();
 			builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
+					if (mCurrentAccount == null) {
+						OnAccountSelectionListener listener = (OnAccountSelectionListener)getActivity();
+						listener.onAccountNotFound();
+					}
 				}
 			});
 			builder.setSingleChoiceItems(getChoiceItems(), mSelectedItem, this);
@@ -77,13 +83,13 @@ public class AccountChooserFragment extends DialogFragment implements DialogInte
 
 	private int getSelectedItem() {
 
-		Account acc = mPreferences.getAccount();
-		if (acc == null) {
+
+		if (mCurrentAccount == null) {
 			return 0;
 		}
 
 		for( int i = 0; i < mAccounts.length; i++) {
-			if (mAccounts[i].equals(acc)) {
+			if (mAccounts[i].equals(mCurrentAccount)) {
 				return i;
 			}
 		}

@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.widget.Toast;
 
+import com.anod.appwatcher.Preferences;
+
 public class AccountHelper {
 	
 	private static final String AUTH_TOKEN_TYPE = "android";
@@ -33,21 +35,26 @@ public class AccountHelper {
 	
 	private String getAuthToken(Activity activity) {
     	String authToken = null;
+		Account acc = (new Preferences(mContext)).getAccount();
+		if (acc == null) {
+			return null;
+		}
 		try {
-	        Account[] accounts = mAccountManager.getAccountsByType(ACCOUNT_TYPE);
 	        // Take first account, not important
 			AccountManagerFuture<Bundle> future;
 
 			if (activity == null) {
 				future = mAccountManager.getAuthToken(
-					accounts[0], AUTH_TOKEN_TYPE, true, null, null
+					acc, AUTH_TOKEN_TYPE, true, null, null
 				);
 			} else {
 				future = mAccountManager.getAuthToken(
-						accounts[0], AUTH_TOKEN_TYPE, null, activity , null, null
+					acc, AUTH_TOKEN_TYPE, null, activity , null, null
 				);
 			}
-	        authToken = future.getResult().getString(AccountManager.KEY_AUTHTOKEN);
+
+
+			authToken = future.getResult().getString(AccountManager.KEY_AUTHTOKEN);
 	    } catch (Exception e) {
 	        e.printStackTrace();
 			//Toast.makeText(mContext.getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();

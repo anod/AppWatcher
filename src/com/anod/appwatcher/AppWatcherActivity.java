@@ -24,6 +24,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.anod.appwatcher.accounts.AccountHelper;
 import com.anod.appwatcher.fragments.AboutDialogFragment;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
 import com.anod.appwatcher.fragments.AppWatcherListFragment;
@@ -34,6 +35,8 @@ import com.anod.appwatcher.utils.IntentUtils;
 import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshAttacher;
 
 public class AppWatcherActivity extends ActionBarActivity implements TextView.OnEditorActionListener, AccountChooserFragment.OnAccountSelectionListener, SearchView.OnQueryTextListener {
+
+	private AccountHelper mAccountHelper;
 
 	public interface QueryChangeListener {
 		void onQueryTextChanged(String newQuery);
@@ -89,6 +92,9 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 			AccountChooserFragment accountsDialog = AccountChooserFragment.newInstance();
 			accountsDialog.show(getSupportFragmentManager(), "accountsDialog");
 		} else {
+			mAccountHelper = new AccountHelper(mContext);
+			mAccountHelper.requestToken(this);
+
 			initAutoSync();
 		}
 	}
@@ -102,6 +108,7 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 		if (!mPreferences.checkFirstLaunch()) {
 			autoSync = ContentResolver.getSyncAutomatically(mSyncAccount, AppListContentProvider.AUTHORITY);
 		}
+
 		setSync(autoSync);
 	}
 
@@ -342,8 +349,10 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 	public void onAccountSelected(Account account) {
 		if (mSyncAccount == null) {
 			mSyncAccount = account;
+			mAccountHelper.requestToken(this);
 			initAutoSync();
 		} else {
+			mAccountHelper.requestToken(this);
 			mSyncAccount = account;
 		}
 	}
