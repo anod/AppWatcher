@@ -29,20 +29,16 @@ public class AppLoader {
 			.build();
 		final ResponseWrapper respWrapper = new ResponseWrapper();
 
-		try {
-			synchronized (mMarketSession) {	
-				mMarketSession.append(appsRequest, new Callback<AppsResponse>() {
+		synchronized (mMarketSession) {
+			mMarketSession.append(appsRequest, new Callback<AppsResponse>() {
 					@Override
 					public void onResult(ResponseContext context, AppsResponse response) {
-						respWrapper.response = response;
-					}
-				});
-				mMarketSession.flush();
+					respWrapper.response = response;
 			}
-		} catch (Exception e) {
-			Log.e("AppWatcher", e.toString());
-			return null;
+				});
+			mMarketSession.flush();
 		}
+
 		if (respWrapper.response != null && respWrapper.response.getAppCount() > 0) {
 			return respWrapper.response.getApp(0);
 		}

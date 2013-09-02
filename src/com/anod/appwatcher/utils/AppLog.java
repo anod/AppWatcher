@@ -19,7 +19,11 @@ public class AppLog {
 	public static void e(String msg) {
 		Log.e(TAG, format(msg));
 	}
-	
+
+	public static void e(String msg, Throwable tr) {
+		Log.e(TAG, format(msg), tr);
+	}
+
     /**
      * Format given time for debugging output.
      *

@@ -135,13 +135,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 			return updatedTitles;
 		}
 		apps.moveToPosition(-1);
-		
+		// TODO: implement multiple calls
 		while(apps.moveToNext()) {
+			App marketApp = null;
 			AppInfo localApp = apps.getAppInfo();
 			AppLog.d("Checking for updates '"+localApp.getTitle()+"' ...");
-			App marketApp = loader.load(localApp.getAppId());
-			if (marketApp == null) {
-				AppLog.e("Cannot retrieve information about application");
+			try {
+				marketApp = loader.load(localApp.getAppId());
+			} catch (Exception e) {
+				AppLog.e("Cannot retrieve information for "+localApp.getTitle(), e);
 				continue;
 			}
 			if (marketApp.getVersionCode() > localApp.getVersionCode()) {

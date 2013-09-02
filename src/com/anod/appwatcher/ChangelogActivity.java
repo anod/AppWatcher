@@ -16,6 +16,7 @@ import com.anod.appwatcher.accounts.MarketTokenLoader;
 import com.anod.appwatcher.market.AppLoader;
 import com.anod.appwatcher.market.DeviceIdHelper;
 import com.anod.appwatcher.market.MarketSessionHelper;
+import com.anod.appwatcher.utils.AppLog;
 import com.gc.android.market.api.MarketSession;
 import com.gc.android.market.api.model.Market.App;
 
@@ -37,7 +38,7 @@ public class ChangelogActivity extends FragmentActivity implements LoaderCallbac
 		setContentView(R.layout.app_changelog);
         
 		Intent data = getIntent();
-		
+
 		mAppId = data.getStringExtra(EXTRA_APP_ID);
 
 		final Preferences prefs = new Preferences(this);
@@ -54,9 +55,15 @@ public class ChangelogActivity extends FragmentActivity implements LoaderCallbac
         getSupportLoaderManager().initLoader(0, null, this).forceLoad();
 	}
 	
-    class RetreiveResultsTask extends AsyncTask<String, Void, App> {
+    class RetrieveResultsTask extends AsyncTask<String, Void, App> {
         protected App doInBackground(String... appsId) {
-        	return mLoader.load(appsId[0]);
+			AppLog.d("App Id: "+appsId[0]);
+			try {
+				return mLoader.load(appsId[0]);
+			} catch (Exception e) {
+				AppLog.e("Retrieve change log error", e);
+				return null;
+			}
         }
         
         @Override
@@ -64,6 +71,9 @@ public class ChangelogActivity extends FragmentActivity implements LoaderCallbac
         	mLoadingView.setVisibility(View.GONE);
         	mChangelog.setVisibility(View.VISIBLE);
         	mChangelog.setAutoLinkMask(Linkify.ALL);
+			if (app == null) {
+				mChangelog.setText(getString(R.string.error_fetchin_info));
+			}
         	String changes = "";
 			if (app.getExtendedInfo() != null) {
 				changes = app.getExtendedInfo().getRecentChanges();
@@ -89,7 +99,7 @@ public class ChangelogActivity extends FragmentActivity implements LoaderCallbac
 			return;
 		}
 		mMarketSession.setAuthSubToken(authSubToken);
-        new RetreiveResultsTask().execute(mAppId);
+        new RetrieveResultsTask().execute(mAppId);
 	}
 
 	@Override
