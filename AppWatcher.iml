@@ -70,6 +70,7 @@
     <orderEntry type="library" exported="" name="support-v4-18.0.0" level="project" />
     <orderEntry type="library" exported="" name="ComAndroidSupportAppcompatV71800.aar" level="project" />
     <orderEntry type="library" exported="" name="ComGithubChrisbanesActionbarpulltorefreshLibrary072.aar" level="project" />
+    <orderEntry type="library" exported="" name="ComGoogleAndroidGmsPlayServices3136.aar" level="project" />
     <orderEntry type="library" exported="" name="android-agent-2.426.0" level="project" />
     <orderEntry type="library" exported="" name="CWAC-AdapterWrapper" level="project" />
     <orderEntry type="library" exported="" name="protobuf-java-2.4.1" level="project" />

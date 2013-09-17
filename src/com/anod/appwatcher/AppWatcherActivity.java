@@ -24,7 +24,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.anod.appwatcher.accounts.AccountHelper;
+import com.anod.appwatcher.accounts.AccountChooserHelper;
 import com.anod.appwatcher.fragments.AboutDialogFragment;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
 import com.anod.appwatcher.fragments.AppWatcherListFragment;
@@ -336,11 +336,13 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 	}
 
 	@Override
-	public void onAccountSelected(Account account) {
+	public void onAccountSelected(Account account, String authToken) {
 		if (mSyncAccount == null) {
+			mSyncAccount = account;
 			initAutoSync(account);
+		} else {
+			mSyncAccount = account;
 		}
-		mSyncAccount = account;
 	}
 
 	@Override

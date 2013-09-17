@@ -1,10 +1,11 @@
-package com.anod.appwatcher;
+package com.anod.appwatcher.accounts;
 
 import android.accounts.Account;
 import android.app.Activity;
 import android.content.Context;
 import android.support.v7.app.ActionBarActivity;
 
+import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.accounts.AccountHelper;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
 
@@ -23,7 +24,7 @@ public class AccountChooserHelper implements AccountChooserFragment.OnAccountSel
 
 	// Container Activity must implement this interface
 	public interface OnAccountSelectionListener {
-		public void onAccountSelected(Account account);
+		public void onAccountSelected(final Account account,final String authSubToken);
 		public void onAccountNotFound();
 	}
 
@@ -42,21 +43,45 @@ public class AccountChooserHelper implements AccountChooserFragment.OnAccountSel
 			accountsDialog.show(mActivity.getSupportFragmentManager(), "accountsDialog");
 			accountsDialog.setListener(this);
 		} else {
-			mAccountHelper.requestToken(mActivity);
+			mAccountHelper.requestToken(mActivity, mSyncAccount, new AccountHelper.AuthenticateCallback() {
+				@Override
+				public void onAuthTokenAvailable(String token) {
+					mListener.onAccountSelected(mSyncAccount, token);
+				}
 
-			mListener.onAccountSelected(mSyncAccount);
+				@Override
+				public void onUnRecoverableException(String errorMessage) {
+
+				}
+			});
+
+
 		}
 	}
 
 	@Override
-	public void onAccountSelected(Account account) {
+	public void onAccountSelected(final Account account) {
 		mSyncAccount = account;
-		mAccountHelper.requestToken(mActivity);
-		mListener.onAccountSelected(account);
+		mAccountHelper.requestToken(mActivity, account, new AccountHelper.AuthenticateCallback() {
+			@Override
+			public void onAuthTokenAvailable(String token) {
+				if (mListener != null) {
+					mListener.onAccountSelected(account, token);
+				}
+			}
+
+			@Override
+			public void onUnRecoverableException(String errorMessage) {
+
+			}
+		});
+
 	}
 
 	@Override
 	public void onAccountNotFound() {
-		mListener.onAccountNotFound();
+		if (mListener != null) {
+			mListener.onAccountNotFound();
+		}
 	}
 }

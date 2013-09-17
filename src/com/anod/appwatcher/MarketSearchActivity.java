@@ -3,6 +3,7 @@ package com.anod.appwatcher;
 import java.util.HashMap;
 import java.util.List;
 
+import android.accounts.Account;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
@@ -13,37 +14,30 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.LoaderManager.LoaderCallbacks;
-import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
-import com.anod.appwatcher.accounts.MarketTokenLoader;
+import com.anod.appwatcher.accounts.AccountChooserHelper;
 import com.anod.appwatcher.market.AppIconLoader;
 import com.anod.appwatcher.market.AppsResponseLoader;
 import com.anod.appwatcher.market.DeviceIdHelper;
@@ -54,7 +48,7 @@ import com.commonsware.cwac.endless.EndlessAdapter;
 import com.gc.android.market.api.MarketSession;
 import com.gc.android.market.api.model.Market.App;
 
-public class MarketSearchActivity extends ActionBarActivity implements LoaderCallbacks<String>{
+public class MarketSearchActivity extends ActionBarActivity implements AccountChooserHelper.OnAccountSelectionListener {
 	public static final String EXTRA_KEYWORD = "keyword";
 	public static final String EXTRA_EXACT = "exact";
 	public static final String EXTRA_SHARE = "share";
@@ -106,7 +100,7 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 		mListView = (ListView)findViewById(android.R.id.list);
 		mListView.setEmptyView(findViewById(android.R.id.empty));
 		mListView.setAdapter(mAdapter);
-		mListView.setOnItemClickListener(itemClickListener); 
+		mListView.setOnItemClickListener(itemClickListener);
 
 	}
 
@@ -128,7 +122,7 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 		mLoading.setVisibility(View.VISIBLE);
 		if (query.length() > 0) {
 			mResponseLoader = new AppsResponseLoader(mMarketSession, query);
-			new RetreiveResultsTask().execute();
+			new RetrieveResultsTask().execute();
 		} else {
 			showNoResults("");
 		}
@@ -176,7 +170,9 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 		});
 
 		initFromIntent(getIntent());
-		getSupportLoaderManager().initLoader(0, null, this).forceLoad();
+
+		AccountChooserHelper accChooserHelper = new AccountChooserHelper(this, new Preferences(this), this);
+		accChooserHelper.init();
 
         return true;
     }
@@ -225,7 +221,31 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 		}
 	};
 
-	class RetreiveResultsTask extends AsyncTask<String, Void, List<App>> {
+	@Override
+	public void onAccountSelected(Account account, String authSubToken) {
+		if (authSubToken == null) {
+			Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
+			finish();
+			return;
+		}
+		mMarketSession.setAuthSubToken(authSubToken);
+		if (mFirstTimeRun && !TextUtils.isEmpty(mSearchView.getQuery())) {
+			searchResults();
+		} else {
+			// hide virtual keyboard
+			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+			imm.showSoftInput(mSearchView, 0);
+		}
+	}
+
+	@Override
+	public void onAccountNotFound() {
+		Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
+		finish();
+
+	}
+
+	class RetrieveResultsTask extends AsyncTask<String, Void, List<App>> {
 		protected List<App> doInBackground(String... queries) {
 			List<App> apps = mResponseLoader.load();
 			if (apps != null) {
@@ -342,27 +362,6 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 
 	}
 
-	@Override
-	public Loader<String> onCreateLoader(int id, Bundle args) {
-		return new MarketTokenLoader(this);
-	}
-
-	@Override
-	public void onLoadFinished(Loader<String> loader, String authSubToken) {
-		if (authSubToken == null) {
-			Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
-			finish();
-			return;
-		}
-		mMarketSession.setAuthSubToken(authSubToken);
-		if (mFirstTimeRun && !TextUtils.isEmpty(mSearchView.getQuery())) {
-			searchResults();
-		} else {
-			// hide virtual keyboard
-			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-			imm.showSoftInput(mSearchView, 0);
-		}
-	}
 
 	private void initFromIntent(Intent i) {
 		if (i == null) {
@@ -375,10 +374,4 @@ public class MarketSearchActivity extends ActionBarActivity implements LoaderCal
 		mFirstTimeRun = i.getBooleanExtra(EXTRA_EXACT, false);
 		mShareSource = i.getBooleanExtra(EXTRA_SHARE, false);
 	}
-
-	@Override
-	public void onLoaderReset(Loader<String> loader) {
-		// TODO Auto-generated method stub
-	}
-
 }

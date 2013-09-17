@@ -12,7 +12,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.anod.appwatcher.accounts.MarketTokenLoader;
+import com.anod.appwatcher.accounts.AccountHelper;
 import com.anod.appwatcher.market.AppLoader;
 import com.anod.appwatcher.market.DeviceIdHelper;
 import com.anod.appwatcher.market.MarketSessionHelper;
@@ -20,7 +20,7 @@ import com.anod.appwatcher.utils.AppLog;
 import com.gc.android.market.api.MarketSession;
 import com.gc.android.market.api.model.Market.App;
 
-public class ChangelogActivity extends FragmentActivity implements LoaderCallbacks<String>{
+public class ChangelogActivity extends FragmentActivity{
 
 	public static final String EXTRA_APP_ID = "app_id";
 	private AppLoader mLoader;
@@ -52,7 +52,21 @@ public class ChangelogActivity extends FragmentActivity implements LoaderCallbac
         mLoadingView = (ProgressBar)findViewById(R.id.progress_bar);
         mChangelog = (TextView)findViewById(R.id.changelog);
         mChangelog.setVisibility(View.GONE);
-        getSupportLoaderManager().initLoader(0, null, this).forceLoad();
+
+		AccountHelper accHelper = new AccountHelper(this);
+		accHelper.requestToken(this, prefs.getAccount(), new AccountHelper.AuthenticateCallback() {
+			@Override
+			public void onAuthTokenAvailable(String token) {
+				mMarketSession.setAuthSubToken(token);
+				new RetrieveResultsTask().execute(mAppId);
+			}
+
+			@Override
+			public void onUnRecoverableException(String errorMessage) {
+
+			}
+		});
+
 	}
 	
     class RetrieveResultsTask extends AsyncTask<String, Void, App> {
@@ -86,25 +100,4 @@ public class ChangelogActivity extends FragmentActivity implements LoaderCallbac
         }
     }
 
-	@Override
-	public Loader<String> onCreateLoader(int id, Bundle a) {
-		return new MarketTokenLoader(this);
-	}
-
-	@Override
-	public void onLoadFinished(Loader<String> arg0, String authSubToken) {
-		if (authSubToken == null) {
-			Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
-			finish();
-			return;
-		}
-		mMarketSession.setAuthSubToken(authSubToken);
-        new RetrieveResultsTask().execute(mAppId);
-	}
-
-	@Override
-	public void onLoaderReset(Loader<String> arg0) {
-		// TODO Auto-generated method stub
-		
-	};	
 }
