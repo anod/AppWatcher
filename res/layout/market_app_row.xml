@@ -5,7 +5,9 @@
     android:gravity="center_vertical"
 	android:id="@+id/approw"
 	android:background="@color/white"
-    android:orientation="horizontal" >
+    android:orientation="horizontal"
+	android:paddingBottom="4dp"
+	>
 
     <ImageView
         android:id="@+id/icon"

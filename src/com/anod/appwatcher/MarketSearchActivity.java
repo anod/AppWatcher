@@ -201,6 +201,7 @@ public class MarketSearchActivity extends ActionBarActivity implements AccountCh
 			AppInfo existingApp = cr.queryAppId(app.getId());
 			if (existingApp != null) {
 				Toast.makeText(mContext, R.string.app_already_added, Toast.LENGTH_SHORT).show();
+				view.setBackgroundColor(mColorBgGray);
 				mAddedApps.put(appId, true);
 				return;
 			}
@@ -216,6 +217,7 @@ public class MarketSearchActivity extends ActionBarActivity implements AccountCh
 			} else {
 				String msg = getString(R.string.app_stored, app.getTitle());
 				Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
+				view.setBackgroundColor(mColorBgGray);
 				mAddedApps.put(appId, true);
 			}
 		}
