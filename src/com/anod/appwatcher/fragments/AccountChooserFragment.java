@@ -18,9 +18,6 @@ import com.anod.appwatcher.accounts.AccountHelper;
  */
 public class AccountChooserFragment extends DialogFragment implements DialogInterface.OnClickListener{
 
-	private int mSelectedItem;
-	private Account mCurrentAccount;
-
 	public static AccountChooserFragment newInstance() {
 		AccountChooserFragment frag = new AccountChooserFragment();
 		Bundle args = new Bundle();
@@ -34,9 +31,17 @@ public class AccountChooserFragment extends DialogFragment implements DialogInte
 		public void onAccountNotFound();
 	}
 
+	private int mSelectedItem;
+	private Account mCurrentAccount;
+	private OnAccountSelectionListener mListener;
+
 	private AccountManager mAccountManager;
 	private Account[] mAccounts;
 	private Preferences mPreferences;
+
+	public void setListener(OnAccountSelectionListener listener) {
+		mListener = listener;
+	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -114,13 +119,17 @@ public class AccountChooserFragment extends DialogFragment implements DialogInte
 	}
 
 	private void saveAccount() {
-		OnAccountSelectionListener listener = (OnAccountSelectionListener)getActivity();
+		OnAccountSelectionListener listener = mListener;
 		if (mAccounts.length > 0) {
 			Account acc = mAccounts[mSelectedItem];
 			mPreferences.updateAccount(acc);
-			listener.onAccountSelected(acc);
+			if (mListener != null) {
+				listener.onAccountSelected(acc);
+			}
 		} else {
-			listener.onAccountNotFound();
+			if (mListener != null) {
+				listener.onAccountNotFound();
+			}
 		}
 	}
 }

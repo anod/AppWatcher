@@ -34,9 +34,7 @@ import com.anod.appwatcher.utils.IntentUtils;
 
 import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshAttacher;
 
-public class AppWatcherActivity extends ActionBarActivity implements TextView.OnEditorActionListener, AccountChooserFragment.OnAccountSelectionListener, SearchView.OnQueryTextListener {
-
-	private AccountHelper mAccountHelper;
+public class AppWatcherActivity extends ActionBarActivity implements TextView.OnEditorActionListener, SearchView.OnQueryTextListener, AccountChooserHelper.OnAccountSelectionListener {
 
 	public interface QueryChangeListener {
 		void onQueryTextChanged(String newQuery);
@@ -87,26 +85,18 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 		mContext = this;
 		mPreferences = new Preferences(this);
 
-		mSyncAccount = mPreferences.getAccount();
-		if (mSyncAccount == null) {
-			AccountChooserFragment accountsDialog = AccountChooserFragment.newInstance();
-			accountsDialog.show(getSupportFragmentManager(), "accountsDialog");
-		} else {
-			mAccountHelper = new AccountHelper(mContext);
-			mAccountHelper.requestToken(this);
-
-			initAutoSync();
-		}
+		AccountChooserHelper accChooserHelper = new AccountChooserHelper(this, mPreferences, this);
+		accChooserHelper.init();
 	}
 
 	public PullToRefreshAttacher getPullToRefreshAttacher() {
 		return mPullToRefreshAttacher;
 	}
 
-	private void initAutoSync() {
+	private void initAutoSync(Account syncAccount) {
 		boolean autoSync = true;
 		if (!mPreferences.checkFirstLaunch()) {
-			autoSync = ContentResolver.getSyncAutomatically(mSyncAccount, AppListContentProvider.AUTHORITY);
+			autoSync = ContentResolver.getSyncAutomatically(syncAccount, AppListContentProvider.AUTHORITY);
 		}
 
 		setSync(autoSync);
@@ -348,13 +338,9 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 	@Override
 	public void onAccountSelected(Account account) {
 		if (mSyncAccount == null) {
-			mSyncAccount = account;
-			mAccountHelper.requestToken(this);
-			initAutoSync();
-		} else {
-			mAccountHelper.requestToken(this);
-			mSyncAccount = account;
+			initAutoSync(account);
 		}
+		mSyncAccount = account;
 	}
 
 	@Override
