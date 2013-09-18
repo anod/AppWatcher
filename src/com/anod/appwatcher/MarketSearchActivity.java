@@ -222,6 +222,9 @@ public class MarketSearchActivity extends ActionBarActivity implements AccountCh
 				Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
 				bgView.setBackgroundColor(mColorBgGray);
 				mAddedApps.put(appId, true);
+				if (mShareSource) {
+					finish();
+				}
 			}
 		}
 	};
