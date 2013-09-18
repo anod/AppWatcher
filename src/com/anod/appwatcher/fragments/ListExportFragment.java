@@ -26,15 +26,13 @@ import com.anod.appwatcher.ListExportActivity;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.backup.ListExportManager;
 
-public class ListExportFragment extends ListFragment {
+public class ListExportFragment extends ListFragment implements ListExportActivity.ExportListener{
 	private ImportListAdapter mAdapter;
 	private ImportClickListener mRestoreListener;
 	private DeleteClickListener mDeleteListener;
 
 	private ListExportManager mBackupManager;
 	private Activity mContext;
-
-	private static final String DATE_FORMAT_FILENAME = "yyyyMMdd_HHmmss.SSS";
 
 	@Override
 	public void onAttach(Activity activity) {
@@ -56,16 +54,8 @@ public class ListExportFragment extends ListFragment {
 	}
 
 	public void init() {
-		mBackupManager = new ListExportManager(mContext);
-
-		Button backupButton = (Button) mContext.findViewById(R.id.backup_button);
-		backupButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				new ExportTask().execute("");
-			}
-		});
-
+		((ListExportActivity)getActivity()).setExportListener(this);
+		mBackupManager = ((ListExportActivity)getActivity()).getBackupManager();
 		mRestoreListener = new ImportClickListener();
 		mDeleteListener = new DeleteClickListener();
 		mAdapter = new ImportListAdapter(mContext, R.layout.restore_item, new ArrayList<File>());
@@ -79,44 +69,11 @@ public class ListExportFragment extends ListFragment {
 		return mAdapter;
 	}
 
-	private class ExportTask extends AsyncTask<String, Void, Integer> {
-
-		@Override
-		protected void onPreExecute() {
-			// showDialog(DIALOG_WAIT);
-		}
-
-		protected Integer doInBackground(String... filenames) {
-			SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT_FILENAME, Locale.US);
-			String filename =  sdf.format(new Date(System.currentTimeMillis()));
-			return mBackupManager.doExport(filename);
-		}
-		protected void onPostExecute(Integer result) {
-			onExportFinish(result);
-		}
+	@Override
+	public void OnFinish() {
+		new FileListTask().execute(0);
 	}
 
-	private void onExportFinish(int code) {
-		//Avoid crash when fragment not attached to activity
-		if (!isAdded()) {
-			return;
-		}
-		Resources r = getResources();
-		if (code == ListExportManager.RESULT_DONE) {
-			new FileListTask().execute(0);
-			Toast.makeText(mContext, r.getString(R.string.export_done), Toast.LENGTH_SHORT).show();
-			return;
-		}
-		dismissDialog();
-		switch (code) {
-		case ListExportManager.ERROR_STORAGE_NOT_AVAILABLE:
-			Toast.makeText(mContext, r.getString(R.string.external_storage_not_available), Toast.LENGTH_SHORT).show();
-			break;
-		case ListExportManager.ERROR_FILE_WRITE:
-			Toast.makeText(mContext, r.getString(R.string.failed_to_write_file), Toast.LENGTH_SHORT).show();
-			break;
-		}
-	}
 
 	private class FileListTask extends AsyncTask<Integer, Void, File[]> {
 		@Override

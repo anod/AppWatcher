@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+		xmlns:appwatcher="http://schemas.android.com/apk/res-auto"
+		xmlns:android="http://schemas.android.com/apk/res/android" >
+
+	<item
+			android:id="@+id/menu_export"
+			android:icon="@drawable/ic_action_export"
+			appwatcher:showAsAction="ifRoom"
+			android:title="@string/list_export"
+			>
+	</item>
+
+</menu>

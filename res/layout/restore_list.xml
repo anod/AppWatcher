@@ -4,42 +4,26 @@
          android:layout_width="match_parent"
          android:layout_height="match_parent"
 >
-	 
-	 <LinearLayout
-	 	android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="4dip"
-        android:paddingLeft="8dip"
-        android:paddingRight="8dip"
-        android:gravity="center_horizontal"       
-	 >	 
-	 	<Button 
-	 		android:id="@+id/backup_button" 
-         	android:layout_width="wrap_content"
-         	android:minWidth="300dp"
-         	android:layout_height="match_parent"
-         	android:text="@string/list_export"	
 
-	 	/>
-
-	 	<TextView
-	 	    android:id="@+id/textView2"
-	 	    android:layout_width="wrap_content"
-	 	    android:layout_height="wrap_content"
-	 	    android:text="@string/export_path"
-	 	    android:textAppearance="?android:attr/textAppearanceSmall" />
-	 </LinearLayout>
 
 	 	<TextView
 	 	    android:id="@+id/textView1"
 	 	    android:layout_width="match_parent"
 	 	    android:layout_height="wrap_content"
-	 	    android:background="@drawable/abs__ab_transparent_dark_holo"
+
 	 	    android:gravity="center_horizontal"
 	 	    android:text="@string/list_import"
 	 	    android:textAppearance="?android:attr/textAppearanceLarge" />
-	 
+
+		<TextView
+				android:id="@+id/textView2"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:text="@string/export_path"
+				android:gravity="center_horizontal"
+				android:background="@drawable/abs__ab_transparent_dark_holo"
+				android:textAppearance="?android:attr/textAppearanceSmall" />
+
      <ListView android:id="@android:id/list"
                android:layout_width="match_parent"
                android:layout_height="0dip"

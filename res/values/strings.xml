@@ -33,7 +33,7 @@
     <string name="no_updates_found">No updates found.</string>
     <string name="about">About</string>
     <string name="dialog_about_title">%1$s ver. %2$s</string>    
-    <string name="dialog_about_text">Author: Alex Gavrishev&lt;br/&gt;&lt;a href=&quot;https://play.google.com/store/apps/developer?id=Alex+Gavrishev&quot;&gt;Google Play Store&lt;/a&gt;&lt;br/&gt;&lt;br/&gt;Project is licensed under a &lt;a href=&quot;http://creativecommons.org/licenses/by-sa/3.0/&quot;&gt;Creative Commons Attribution-ShareAlike 3.0 Unported License.&lt;/a&gt;&lt;br/&gt;&lt;br/&gt;Source Code available at &lt;a href=&quot;https://github.com/anod/AppWatcher&quot;&gt;github.com&lt;/a&gt;.</string>
+    <string name="dialog_about_text">Author: Alex Gavrishev&lt;br/&gt;&lt;a href=&quot;https://play.google.com/store/apps/developer?id=Alex+Gavrishev&quot;&gt;Google Play Store&lt;/a&gt;&lt;br/&gt;&lt;br/&gt;</string>
     <string name="share">Share</string>
     <string name="share_subject_normal">Check out \"%s\"</string>
     <string name="share_subject_updated">Check out new version of \"%s\"</string>
