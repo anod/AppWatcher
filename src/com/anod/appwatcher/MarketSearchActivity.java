@@ -44,6 +44,7 @@ import com.anod.appwatcher.market.DeviceIdHelper;
 import com.anod.appwatcher.market.MarketSessionHelper;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListContentProviderClient;
+import com.anod.appwatcher.utils.PackageManagerUtils;
 import com.commonsware.cwac.endless.EndlessAdapter;
 import com.gc.android.market.api.MarketSession;
 import com.gc.android.market.api.model.Market.App;
@@ -198,10 +199,12 @@ public class MarketSearchActivity extends ActionBarActivity implements AccountCh
 			}
 			AppListContentProviderClient cr = new AppListContentProviderClient(MarketSearchActivity.this);
 
+			View bgView = view.findViewById(R.id.approw);
+
 			AppInfo existingApp = cr.queryAppId(app.getId());
 			if (existingApp != null) {
 				Toast.makeText(mContext, R.string.app_already_added, Toast.LENGTH_SHORT).show();
-				view.setBackgroundColor(mColorBgGray);
+				bgView.setBackgroundColor(mColorBgGray);
 				mAddedApps.put(appId, true);
 				return;
 			}
@@ -217,7 +220,7 @@ public class MarketSearchActivity extends ActionBarActivity implements AccountCh
 			} else {
 				String msg = getString(R.string.app_stored, app.getTitle());
 				Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
-				view.setBackgroundColor(mColorBgGray);
+				bgView.setBackgroundColor(mColorBgGray);
 				mAddedApps.put(appId, true);
 			}
 		}
@@ -314,16 +317,20 @@ public class MarketSearchActivity extends ActionBarActivity implements AccountCh
 	}
 
 	class AppsAdapter extends ArrayAdapter<App> {
+		private final PackageManagerUtils mPMUtils;
 		private Bitmap mDefaultIcon;
 
 		public AppsAdapter(Context context, int textViewResourceId) {
 			super(context, textViewResourceId);
+			mPMUtils = new PackageManagerUtils(context.getPackageManager());
 		}
 
 		class ViewHolder {
 			View row;
 			TextView title;
 			TextView details;
+			TextView version;
+			TextView price;
 			ImageView icon;
 		}
 
@@ -338,6 +345,9 @@ public class MarketSearchActivity extends ActionBarActivity implements AccountCh
 				holder.row = (View) v.findViewById(R.id.approw);
 				holder.title = (TextView) v.findViewById(R.id.title);
 				holder.details = (TextView) v.findViewById(R.id.details);
+				holder.version = (TextView) v.findViewById(R.id.version);
+				holder.price = (TextView) v.findViewById(R.id.price);
+				holder.icon = (ImageView) v.findViewById(R.id.app_icon);
 				v.setTag(holder);
 			} else {
 				holder = (ViewHolder) v.getTag();
@@ -345,6 +355,7 @@ public class MarketSearchActivity extends ActionBarActivity implements AccountCh
 			App app = (App) getItem(position);
 			holder.title.setText(app.getTitle() + " " + app.getVersion());
 			holder.details.setText(app.getCreator());
+			holder.version.setText(app.getVersion());
 
 			if (mAddedApps.containsKey(app.getId())) {
 				holder.row.setBackgroundColor(mColorBgGray);
@@ -352,12 +363,22 @@ public class MarketSearchActivity extends ActionBarActivity implements AccountCh
 				holder.row.setBackgroundColor(mColorBgWhite);
 			}
 
-			ImageView icon = (ImageView) v.findViewById(R.id.icon);
 			if (mDefaultIcon == null) {
 				mDefaultIcon = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_empty);
 			}
-			icon.setImageBitmap(mDefaultIcon);
-			mIconLoader.loadImage(app.getId(), icon);
+			holder.icon.setImageBitmap(mDefaultIcon);
+			mIconLoader.loadImage(app.getId(), holder.icon);
+
+			boolean isInstalled = mPMUtils.isAppInstalled(app.getPackageName());
+			if (isInstalled) {
+				holder.price.setText(R.string.installed);
+			} else {
+				if (app.getPriceMicros() == 0 ) {
+					holder.price.setText(R.string.free);
+				} else {
+					holder.price.setText(app.getPrice());
+				}
+			}
 
 			return v;
 		}

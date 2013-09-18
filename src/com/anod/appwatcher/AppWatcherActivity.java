@@ -300,7 +300,7 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 
 	public void requestRefresh() {
 		AppLog.d("Refresh pressed");
-		if (ContentResolver.isSyncPending(mSyncAccount, AppListContentProvider.AUTHORITY)) {
+		if (ContentResolver.isSyncPending(mSyncAccount, AppListContentProvider.AUTHORITY) || ContentResolver.isSyncActive(mSyncAccount, AppListContentProvider.AUTHORITY)) {
 			AppLog.d("Sync requested already. Skipping... ");
 			return;
 		}

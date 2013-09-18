@@ -38,6 +38,7 @@ import com.anod.appwatcher.model.AppListCursor;
 import com.anod.appwatcher.model.AppListCursorLoader;
 import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.IntentUtils;
+import com.anod.appwatcher.utils.PackageManagerUtils;
 
 import java.sql.Timestamp;
 
@@ -78,8 +79,7 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 	private ViewHolder mSelectedHolder = null;
 	private Animation mAnimSlideOut;
 	private boolean mIsBigScreen;
-	private PackageManager mPackageManager;
-	private SparseBooleanArray mInstalledCache = new SparseBooleanArray();
+	private PackageManagerUtils mPMUtils;
 
 	private PullToRefreshAttacher mPullToRefreshAttacher;
 
@@ -153,7 +153,7 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 
 		mAnimSlideOut = AnimationUtils.loadAnimation(getActivity(), R.anim.slideout);
 
-		mPackageManager = getActivity().getPackageManager();
+		mPMUtils = new PackageManagerUtils(getActivity().getPackageManager());
 
 		AppWatcherActivity act = (AppWatcherActivity)getActivity();
 
@@ -238,7 +238,7 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 				holder.newIndicator.setVisibility(View.INVISIBLE);
 			}
 			
-			boolean isInstalled = isAppInstalled(app);
+			boolean isInstalled = mPMUtils.isAppInstalled(app.getPackageName());
 			if (isInstalled) {
 				holder.price.setText(R.string.installed);
 			} else {
@@ -457,7 +457,7 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 	 */
 	private void onIconClick(View v) {
 		ViewHolder holder = (ViewHolder)v.getTag();
-		boolean isInstalled = isAppInstalled(holder.app);
+		boolean isInstalled = mPMUtils.isAppInstalled(holder.app.getPackageName());
 		if (isInstalled) {
 			Intent appInfo = IntentUtils.createApplicationDetailsIntent(holder.app.getPackageName());
 			startActivity(appInfo);
@@ -465,22 +465,7 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 			switchItemOptions(holder);
 		}
 	}
-	
-	/**
-	 * 
-	 * @param app
-	 * @return
-	 */
-	private boolean isAppInstalled(AppInfo app) {
-		if (mInstalledCache.indexOfKey(app.getRowId()) >= 0) {
-			return mInstalledCache.get(app.getRowId());
-		}
-		
-		Intent appIntent = mPackageManager.getLaunchIntentForPackage(app.getPackageName());
-		boolean isInstalled = (appIntent != null);
-		mInstalledCache.put(app.getRowId(), isInstalled);
-		return isInstalled;
-	}
+
 	
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
