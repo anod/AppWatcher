@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DbOpenHelper extends SQLiteOpenHelper {
 	    
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
     public static final String DATABASE_NAME = "app_watcher";
     private static final String TABLE_CREATE =
     	"CREATE TABLE " + AppListTable.TABLE_NAME + " (" +
@@ -38,14 +38,14 @@ public class DbOpenHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		// Version 2
-		if (oldVersion == 1) {
-			db.execSQL("ALTER TABLE "+AppListTable.TABLE_NAME + " ADD COLUMN " + AppListTable.Columns.KEY_UPDATE_DATE + " INTEGER");
-		}
-		if (oldVersion == 2) {
-			db.execSQL("ALTER TABLE "+AppListTable.TABLE_NAME + " ADD COLUMN " + AppListTable.Columns.KEY_PRICE_TEXT + " TEXT");
-			db.execSQL("ALTER TABLE "+AppListTable.TABLE_NAME + " ADD COLUMN " + AppListTable.Columns.KEY_PRICE_CURRENCY + " TEXT");
-			db.execSQL("ALTER TABLE "+AppListTable.TABLE_NAME + " ADD COLUMN " + AppListTable.Columns.KEY_PRICE_MICROS + " INTEGER");
+		switch (oldVersion) {
+			case 1:
+				db.execSQL("ALTER TABLE "+AppListTable.TABLE_NAME + " ADD COLUMN " + AppListTable.Columns.KEY_UPDATE_DATE + " INTEGER");
+			case 2:
+			case 3:
+				db.execSQL("ALTER TABLE "+AppListTable.TABLE_NAME + " ADD COLUMN " + AppListTable.Columns.KEY_PRICE_TEXT + " TEXT");
+				db.execSQL("ALTER TABLE "+AppListTable.TABLE_NAME + " ADD COLUMN " + AppListTable.Columns.KEY_PRICE_CURRENCY + " TEXT");
+				db.execSQL("ALTER TABLE "+AppListTable.TABLE_NAME + " ADD COLUMN " + AppListTable.Columns.KEY_PRICE_MICROS + " INTEGER");
 		}
 	}
 
