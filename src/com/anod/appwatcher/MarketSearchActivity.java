@@ -38,6 +38,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.anod.appwatcher.accounts.AccountChooserHelper;
+import com.anod.appwatcher.fragments.AccountChooserFragment;
 import com.anod.appwatcher.market.AppIconLoader;
 import com.anod.appwatcher.market.AppsResponseLoader;
 import com.anod.appwatcher.market.DeviceIdHelper;
@@ -49,7 +50,7 @@ import com.commonsware.cwac.endless.EndlessAdapter;
 import com.gc.android.market.api.MarketSession;
 import com.gc.android.market.api.model.Market.App;
 
-public class MarketSearchActivity extends ActionBarActivity implements AccountChooserHelper.OnAccountSelectionListener {
+public class MarketSearchActivity extends ActionBarActivity implements AccountChooserHelper.OnAccountSelectionListener, AccountChooserFragment.OnAccountSelectionListener {
 	public static final String EXTRA_KEYWORD = "keyword";
 	public static final String EXTRA_EXACT = "exact";
 	public static final String EXTRA_SHARE = "share";
@@ -69,6 +70,7 @@ public class MarketSearchActivity extends ActionBarActivity implements AccountCh
 	private int mColorBgWhite;
 	private int mColorBgGray;
 	private SearchView mSearchView;
+	private AccountChooserHelper mAccChooserHelper;
 
 
 	/* (non-Javadoc)
@@ -172,8 +174,8 @@ public class MarketSearchActivity extends ActionBarActivity implements AccountCh
 
 		initFromIntent(getIntent());
 
-		AccountChooserHelper accChooserHelper = new AccountChooserHelper(this, new Preferences(this), this);
-		accChooserHelper.init();
+		mAccChooserHelper = new AccountChooserHelper(this, new Preferences(this), this);
+		mAccChooserHelper.init();
 
         return true;
     }
@@ -230,7 +232,7 @@ public class MarketSearchActivity extends ActionBarActivity implements AccountCh
 	};
 
 	@Override
-	public void onAccountSelected(Account account, String authSubToken) {
+	public void onHelperAccountSelected(Account account, String authSubToken) {
 		if (authSubToken == null) {
 			Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
 			finish();
@@ -247,10 +249,20 @@ public class MarketSearchActivity extends ActionBarActivity implements AccountCh
 	}
 
 	@Override
-	public void onAccountNotFound() {
+	public void onHelperAccountNotFound() {
 		Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
 		finish();
 
+	}
+
+	@Override
+	public void onDialogAccountSelected(Account account) {
+		mAccChooserHelper.onDialogAccountSelected(account);
+	}
+
+	@Override
+	public void onDialogAccountNotFound() {
+		mAccChooserHelper.onDialogAccountNotFound();
 	}
 
 	class RetrieveResultsTask extends AsyncTask<String, Void, List<App>> {

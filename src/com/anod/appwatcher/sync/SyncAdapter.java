@@ -1,6 +1,8 @@
 package com.anod.appwatcher.sync;
 
 import android.accounts.Account;
+import android.accounts.AuthenticatorException;
+import android.accounts.OperationCanceledException;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -22,6 +24,7 @@ import android.support.v4.app.NotificationCompat.Builder;
 import com.anod.appwatcher.AppWatcherActivity;
 import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.R;
+import com.anod.appwatcher.accounts.AccountHelper;
 import com.anod.appwatcher.market.AppIconLoader;
 import com.anod.appwatcher.market.AppLoader;
 import com.anod.appwatcher.market.DeviceIdHelper;
@@ -35,6 +38,7 @@ import com.anod.appwatcher.utils.BitmapUtils;
 import com.gc.android.market.api.MarketSession;
 import com.gc.android.market.api.model.Market.App;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
@@ -70,6 +74,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 				AppLog.d("Last update less than second, skipping...");
 				return;
 			}			
+		}
+		if (pref.getAccount() == null) {
+			AppLog.d("No active account, skipping sync...");
+			return;
 		}
 		AppLog.v("Perform synchronization");
 		
@@ -127,6 +135,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
 		
 		MarketSession session = createAppInfoLoader(pref);
+		if (session == null) {
+			return updatedTitles;
+		}
 		AppIconLoader iconLoader = new AppIconLoader(session);
 		AppLoader loader = new AppLoader(session, false);
 		
@@ -213,15 +224,24 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
 
 	private MarketSession createAppInfoLoader(Preferences prefs) {
+		AccountHelper tokenHelper = new AccountHelper(mContext);
+		String authToken = null;
+		try {
+			authToken = tokenHelper.requestTokenBlocking(null, prefs.getAccount());
+		} catch (IOException e) {
+			AppLog.e("AuthToken IOException: " + e.getMessage(), e);
+		} catch (AuthenticatorException e) {
+			AppLog.e("AuthToken AuthenticatorException: " + e.getMessage(), e);
+		} catch (OperationCanceledException e) {
+			AppLog.e("AuthToken OperationCanceledException: " + e.getMessage(), e);
+		}
+		if (authToken == null) {
+			return null;
+		}
 		MarketSessionHelper helper = new MarketSessionHelper(mContext);
 		String deviceId = DeviceIdHelper.getDeviceId(mContext, prefs);
 		final MarketSession session = helper.create(deviceId, null);
-
-    	AccountHelper tokenHelper = new AccountHelper(mContext);
-    	String authToken = tokenHelper.requestToken(null);
-    	if (authToken != null) {
-    		session.setAuthSubToken(authToken);
-    	}
+   		session.setAuthSubToken(authToken);
     	return session;
 	}
 	

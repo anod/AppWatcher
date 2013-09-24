@@ -6,19 +6,21 @@ import android.accounts.AccountManagerFuture;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Looper;
 import android.widget.Toast;
 
+import com.anod.appwatcher.AppListContentProvider;
 import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.utils.AppLog;
 
 import java.io.IOException;
 
 public class AccountHelper {
-	
+
 	private static final String AUTH_TOKEN_TYPE = "android";
 	public static final String ACCOUNT_TYPE = "com.google";
 	private final AccountManager mAccountManager;
@@ -27,10 +29,38 @@ public class AccountHelper {
 		mAccountManager = AccountManager.get(context);
 	}
 
+
+	public String requestTokenBlocking(Activity activity, Account acc) throws AuthenticatorException, OperationCanceledException, IOException {
+		String token = getAuthToken(activity, acc);
+
+		if (token != null) {
+			mAccountManager.invalidateAuthToken(ACCOUNT_TYPE, token);
+		}
+
+		token = getAuthToken(activity, acc);
+		return token;
+	}
+
 	public void requestToken(Activity activity, Account acc, AuthenticateCallback callback) {
 
-		(new GetTokenTask(activity, acc, mAccountManager, callback)).execute(null);
+		(new GetTokenTask(activity, acc, mAccountManager, this, callback)).execute(null);
 
+	}
+
+	private String getAuthToken(Activity activity, Account acc) throws AuthenticatorException, OperationCanceledException, IOException {
+		String authToken = null;
+		if (acc == null) {
+			return null;
+		}
+		AccountManagerFuture<Bundle> future;
+
+
+		future = mAccountManager.getAuthToken(
+				acc, AUTH_TOKEN_TYPE, null, activity , null, null
+		);
+
+		authToken = future.getResult().getString(AccountManager.KEY_AUTHTOKEN);
+		return authToken;
 	}
 
 	public static interface AuthenticateCallback {
@@ -39,57 +69,38 @@ public class AccountHelper {
 	}
 
 	private static class GetTokenTask extends AsyncTask<Void, Void, String> {
+		private final AccountHelper mAccountHelper;
 		private Account mAccount;
 		private Activity mActivity;
 		private AuthenticateCallback mCallback;
 		private final AccountManager mAccountManager;
 
-		public GetTokenTask(Activity activity, Account acc, AccountManager accountManager, AuthenticateCallback callback) {
+		public GetTokenTask(Activity activity, Account acc, AccountManager accountManager, AccountHelper helper, AuthenticateCallback callback) {
 			mAccount = acc;
 			mActivity = activity;
 			mCallback = callback;
 			mAccountManager = accountManager;
+			mAccountHelper = helper;
 		}
 
 		@Override
 		protected String doInBackground(Void... params) {
 			try {
-				String token = getAuthToken(mActivity, mAccount);
-
-				if (token != null) {
-					mAccountManager.invalidateAuthToken(ACCOUNT_TYPE, token);
-				}
-
-				token = getAuthToken(mActivity, mAccount);
+				String token = mAccountHelper.requestTokenBlocking(mActivity, mAccount);
 				return token;
 			} catch (IOException e) {
-				AppLog.d("transient error encountered: " + e.getMessage());
+				AppLog.e("transient error encountered: " + e.getMessage(), e);
 				mCallback.onUnRecoverableException(e.getMessage());
 			} catch (AuthenticatorException e) {
-				AppLog.d("transient error encountered: " + e.getMessage());
+				AppLog.e("transient error encountered: " + e.getMessage(), e);
 				mCallback.onUnRecoverableException(e.getMessage());
 			} catch (OperationCanceledException e) {
-				AppLog.d("transient error encountered: " + e.getMessage());
+				AppLog.e("transient error encountered: " + e.getMessage(), e);
 				mCallback.onUnRecoverableException(e.getMessage());
 			}
 			return null;
 		}
 
-		private String getAuthToken(Activity activity, Account acc) throws AuthenticatorException, OperationCanceledException, IOException {
-			String authToken = null;
-			if (acc == null) {
-				return null;
-			}
-			AccountManagerFuture<Bundle> future;
-
-
-			future = mAccountManager.getAuthToken(
-				acc, AUTH_TOKEN_TYPE, null, activity , null, null
-			);
-
-			authToken = future.getResult().getString(AccountManager.KEY_AUTHTOKEN);
-			return authToken;
-		}
 
 		@Override
 		protected void onPostExecute(String token) {
@@ -98,4 +109,38 @@ public class AccountHelper {
 		}
 	}
 
+
+	public void setAccountSyncable(Account account) {
+
+		Account[] accounts = mAccountManager.getAccountsByType(ACCOUNT_TYPE);
+		for(int i = 0; i < accounts.length; i++) {
+			int syncable = 0;
+			if (accounts[i].equals(account)) {
+				syncable = 1;
+			}
+			AppLog.d("Set "+accounts[i].name+" syncable = "+syncable);
+			ContentResolver.setIsSyncable(accounts[i], AppListContentProvider.AUTHORITY, syncable);
+		}
+		// initialize for 1st time
+		//if (ContentResolver.getIsSyncable(mSyncAccount, AppListContentProvider.AUTHORITY) < 1) {
+		//	ContentResolver.setIsSyncable(mSyncAccount, AppListContentProvider.AUTHORITY, 1);
+		//}
+	}
+
+	/**
+	 * setup sync according to current settings
+	 */
+	public void setSync(Account account, boolean autoSync, long pollFrequency) {
+		Bundle params = new Bundle();
+
+		AppLog.d("Set sync for "+account.name + ", autoSync" + autoSync);
+		if (autoSync) {
+			ContentResolver.setSyncAutomatically(account, AppListContentProvider.AUTHORITY, true);
+			ContentResolver.addPeriodicSync(account, AppListContentProvider.AUTHORITY, params, pollFrequency);
+		} else {
+			ContentResolver.removePeriodicSync(account, AppListContentProvider.AUTHORITY, params);
+			ContentResolver.setSyncAutomatically(account, AppListContentProvider.AUTHORITY, false);
+		}
+
+	}
 }

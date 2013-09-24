@@ -34,31 +34,30 @@ import com.anod.appwatcher.utils.IntentUtils;
 
 import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshAttacher;
 
-public class AppWatcherActivity extends ActionBarActivity implements TextView.OnEditorActionListener, SearchView.OnQueryTextListener, AccountChooserHelper.OnAccountSelectionListener {
+public class AppWatcherActivity extends ActionBarActivity implements TextView.OnEditorActionListener, SearchView.OnQueryTextListener, AccountChooserHelper.OnAccountSelectionListener, AccountChooserFragment.OnAccountSelectionListener {
 
 	public interface QueryChangeListener {
+
 		void onQueryTextChanged(String newQuery);
 	}
-
 	public interface RefreshListener {
+
 		void onRefreshFinish();
 	}
-
-	private static final int TWO_HOURS_IN_SEC = 7200;
-	private static final int SIX_HOURS_IN_SEC = 21600;
 	protected String mAuthToken;
+
 	private AppWatcherActivity mContext;
 	private Preferences mPreferences;
 	private MenuItem mWifiMenuItem;
 	private Account mSyncAccount;
-	private MenuItem mAutoSyncMenuItem;
 	private MenuItem mRefreshMenuItem;
 	private MenuItem mSearchMenuItem;
-
 	private QueryChangeListener mQueryChangeListener;
-	private RefreshListener mRefreshListener;
 
+	private RefreshListener mRefreshListener;
 	private PullToRefreshAttacher mPullToRefreshAttacher;
+
+	private AccountChooserHelper mAccountChooserHelper;
 
 	/*
 		 * (non-Javadoc)
@@ -85,21 +84,12 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 		mContext = this;
 		mPreferences = new Preferences(this);
 
-		AccountChooserHelper accChooserHelper = new AccountChooserHelper(this, mPreferences, this);
-		accChooserHelper.init();
+		mAccountChooserHelper = new AccountChooserHelper(this, mPreferences, this);
+		mAccountChooserHelper.init();
 	}
 
 	public PullToRefreshAttacher getPullToRefreshAttacher() {
 		return mPullToRefreshAttacher;
-	}
-
-	private void initAutoSync(Account syncAccount) {
-		boolean autoSync = true;
-		if (!mPreferences.checkFirstLaunch()) {
-			autoSync = ContentResolver.getSyncAutomatically(syncAccount, AppListContentProvider.AUTHORITY);
-		}
-
-		setSync(autoSync);
 	}
 
 	@Override
@@ -107,7 +97,7 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 		// Inflate the menu
 		getMenuInflater().inflate(R.menu.main, menu);
 
-		mAutoSyncMenuItem = menu.findItem(R.id.menu_auto_update);
+		MenuItem autoSyncMenuItem = menu.findItem(R.id.menu_auto_update);
 		mWifiMenuItem = menu.findItem(R.id.menu_wifi_only);
 		mRefreshMenuItem = menu.findItem(R.id.menu_refresh);
 
@@ -128,53 +118,31 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 		final SearchView searchView = (SearchView) MenuItemCompat.getActionView(mSearchMenuItem);
 		searchView.setOnQueryTextListener(this);
 
-		refreshMenuState();
-
-		if (!ContentResolver.isSyncActive(mSyncAccount, AppListContentProvider.AUTHORITY)) {
-			stopRefreshAnim();
-		} else {
-			startRefreshAnim();
-		}
-
-		return super.onCreateOptionsMenu(menu);
-	}
-	/**
-	 * Update menu states when activity restored
-	 */
-	private void refreshMenuState() {
 		boolean useAutoSync = ContentResolver.getSyncAutomatically(mSyncAccount, AppListContentProvider.AUTHORITY);
-		mAutoSyncMenuItem.setChecked(useAutoSync);
+		autoSyncMenuItem.setChecked(useAutoSync);
+
 		mWifiMenuItem.setChecked(mPreferences.isWifiOnly());
 		if (useAutoSync == false) {
 			mWifiMenuItem.setEnabled(false);
 		}
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
-			menuTitleUpdateCompat(mAutoSyncMenuItem, R.string.menu_auto_update);
+			menuTitleUpdateCompat(autoSyncMenuItem, R.string.menu_auto_update);
 			menuTitleUpdateCompat(mWifiMenuItem, R.string.menu_wifi_only);
 		}
+
+		updateSyncStatus();
+
+		return super.onCreateOptionsMenu(menu);
 	}
 
-	/**
-	 * setup sync according to current settings
-	 */
-	private void setSync(boolean autoSync) {
-		Bundle params = new Bundle();
-
-		// initialize for 1st time
-		if (ContentResolver.getIsSyncable(mSyncAccount, AppListContentProvider.AUTHORITY) < 1) {
-			ContentResolver.setIsSyncable(mSyncAccount, AppListContentProvider.AUTHORITY, 1);
-		}
-
-		if (autoSync) {
-			long pollFrequency = (mPreferences.isWifiOnly()) ? TWO_HOURS_IN_SEC : SIX_HOURS_IN_SEC;
-			ContentResolver.setSyncAutomatically(mSyncAccount, AppListContentProvider.AUTHORITY, true);
-			ContentResolver.addPeriodicSync(mSyncAccount, AppListContentProvider.AUTHORITY, params, pollFrequency);
+	private void updateSyncStatus() {
+		if (!ContentResolver.isSyncActive(mSyncAccount, AppListContentProvider.AUTHORITY)) {
+			stopRefreshAnim();
 		} else {
-			ContentResolver.removePeriodicSync(mSyncAccount, AppListContentProvider.AUTHORITY, params);
-			ContentResolver.setSyncAutomatically(mSyncAccount, AppListContentProvider.AUTHORITY, false);
+			startRefreshAnim();
 		}
-
 	}
+
 
 	/**
 	 * Receive notifications from SyncAdapter
@@ -184,7 +152,7 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (intent.getAction().equals(SyncAdapter.SYNC_PROGRESS)) {
-				// startRefreshAnim();
+				startRefreshAnim();
 			} else if (intent.getAction().equals(SyncAdapter.SYNC_STOP)) {
 				int updatesCount = intent.getIntExtra(SyncAdapter.EXTRA_UPDATES_COUNT, 0);
 				stopRefreshAnim();
@@ -214,6 +182,8 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 		if (mSearchMenuItem != null) {
 			MenuItemCompat.collapseActionView(mSearchMenuItem);
 		}
+
+		updateSyncStatus();
 	}
 
 	@Override
@@ -226,6 +196,9 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 	 * stop refresh button animation
 	 */
 	private void stopRefreshAnim() {
+		if (mRefreshMenuItem == null) {
+			return;
+		}
 		View actionView = MenuItemCompat.getActionView(mRefreshMenuItem);
 		if (actionView != null) {
 			actionView.clearAnimation();
@@ -237,6 +210,14 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 	 * Animate refresh button
 	 */
 	private void startRefreshAnim() {
+		if (mRefreshMenuItem == null) {
+			return;
+		}
+		View actionView = MenuItemCompat.getActionView(mRefreshMenuItem);
+		//already animating
+		if (actionView != null) {
+			return;
+		}
 		LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		ImageView iv = (ImageView) inflater.inflate(R.layout.refresh_action_view, null);
 
@@ -265,7 +246,7 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
 				menuTitleUpdateCompat(item, R.string.menu_auto_update);
 			}
-			setSync(useAutoSync);
+			mAccountChooserHelper.setSync(useAutoSync);
 			return true;
 		case R.id.menu_wifi_only:
 			boolean useWifiOnly = !item.isChecked();
@@ -274,7 +255,7 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
 				menuTitleUpdateCompat(item, R.string.menu_wifi_only);
 			}
-			setSync(true);
+			mAccountChooserHelper.setSync(true);
 			return true;
 		case R.id.menu_rateapp:
 			String pkg = getPackageName();
@@ -300,6 +281,12 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 
 	public void requestRefresh() {
 		AppLog.d("Refresh pressed");
+
+		if (mAuthToken == null) {
+			Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
+			return;
+		}
+
 		if (ContentResolver.isSyncPending(mSyncAccount, AppListContentProvider.AUTHORITY) || ContentResolver.isSyncActive(mSyncAccount, AppListContentProvider.AUTHORITY)) {
 			AppLog.d("Sync requested already. Skipping... ");
 			return;
@@ -336,17 +323,32 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 	}
 
 	@Override
-	public void onAccountSelected(Account account, String authToken) {
+	public void onHelperAccountSelected(Account account, String authToken) {
+		mAuthToken = authToken;
+		if (authToken == null) {
+			Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
+			return;
+		}
 		if (mSyncAccount == null) {
 			mSyncAccount = account;
-			initAutoSync(account);
 		} else {
 			mSyncAccount = account;
 		}
 	}
 
 	@Override
-	public void onAccountNotFound() {
+	public void onDialogAccountSelected(Account account) {
+		mAccountChooserHelper.onDialogAccountSelected(account);
+	}
+
+	@Override
+	public void onDialogAccountNotFound() {
+		mAccountChooserHelper.onDialogAccountNotFound();
+	}
+
+	@Override
+	public void onHelperAccountNotFound() {
+		Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
 		finish();
 	}
 

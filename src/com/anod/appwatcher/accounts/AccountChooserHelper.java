@@ -1,12 +1,12 @@
 package com.anod.appwatcher.accounts;
 
 import android.accounts.Account;
-import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.support.v7.app.ActionBarActivity;
 
+import com.anod.appwatcher.AppListContentProvider;
 import com.anod.appwatcher.Preferences;
-import com.anod.appwatcher.accounts.AccountHelper;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
 
 /**
@@ -21,11 +21,14 @@ public class AccountChooserHelper implements AccountChooserFragment.OnAccountSel
 	private Preferences mPreferences;
 	private Account mSyncAccount;
 
+	private static final int TWO_HOURS_IN_SEC = 7200;
+	private static final int SIX_HOURS_IN_SEC = 21600;
+
 
 	// Container Activity must implement this interface
 	public interface OnAccountSelectionListener {
-		public void onAccountSelected(final Account account,final String authSubToken);
-		public void onAccountNotFound();
+		public void onHelperAccountSelected(final Account account, final String authSubToken);
+		public void onHelperAccountNotFound();
 	}
 
 	public AccountChooserHelper(ActionBarActivity activity, Preferences preferences, OnAccountSelectionListener listener) {
@@ -41,12 +44,12 @@ public class AccountChooserHelper implements AccountChooserFragment.OnAccountSel
 		if (mSyncAccount == null) {
 			AccountChooserFragment accountsDialog = AccountChooserFragment.newInstance();
 			accountsDialog.show(mActivity.getSupportFragmentManager(), "accountsDialog");
-			accountsDialog.setListener(this);
 		} else {
 			mAccountHelper.requestToken(mActivity, mSyncAccount, new AccountHelper.AuthenticateCallback() {
 				@Override
 				public void onAuthTokenAvailable(String token) {
-					mListener.onAccountSelected(mSyncAccount, token);
+					initAutoSync(mSyncAccount);
+					mListener.onHelperAccountSelected(mSyncAccount, token);
 				}
 
 				@Override
@@ -59,14 +62,29 @@ public class AccountChooserHelper implements AccountChooserFragment.OnAccountSel
 		}
 	}
 
+	public void setSync(boolean autoSync) {
+		long pollFrequency = (mPreferences.isWifiOnly()) ? TWO_HOURS_IN_SEC : SIX_HOURS_IN_SEC;
+		mAccountHelper.setSync(mSyncAccount, autoSync, pollFrequency);
+	}
+
+	private void initAutoSync(Account account) {
+		boolean autoSync = true;
+		if (!mPreferences.checkFirstLaunch()) {
+			autoSync = ContentResolver.getSyncAutomatically(account, AppListContentProvider.AUTHORITY);
+		}
+		mAccountHelper.setAccountSyncable(account);
+		setSync(autoSync);
+	}
+
 	@Override
-	public void onAccountSelected(final Account account) {
+	public void onDialogAccountSelected(final Account account) {
 		mSyncAccount = account;
 		mAccountHelper.requestToken(mActivity, account, new AccountHelper.AuthenticateCallback() {
 			@Override
 			public void onAuthTokenAvailable(String token) {
+				initAutoSync(account);
 				if (mListener != null) {
-					mListener.onAccountSelected(account, token);
+					mListener.onHelperAccountSelected(account, token);
 				}
 			}
 
@@ -79,9 +97,9 @@ public class AccountChooserHelper implements AccountChooserFragment.OnAccountSel
 	}
 
 	@Override
-	public void onAccountNotFound() {
+	public void onDialogAccountNotFound() {
 		if (mListener != null) {
-			mListener.onAccountNotFound();
+			mListener.onHelperAccountNotFound();
 		}
 	}
 }

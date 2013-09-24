@@ -2,6 +2,7 @@ package com.anod.appwatcher.fragments;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -27,8 +28,8 @@ public class AccountChooserFragment extends DialogFragment implements DialogInte
 
 	// Container Activity must implement this interface
 	public interface OnAccountSelectionListener {
-		public void onAccountSelected(Account account);
-		public void onAccountNotFound();
+		public void onDialogAccountSelected(Account account);
+		public void onDialogAccountNotFound();
 	}
 
 	private int mSelectedItem;
@@ -39,10 +40,6 @@ public class AccountChooserFragment extends DialogFragment implements DialogInte
 	private Account[] mAccounts;
 	private Preferences mPreferences;
 
-	public void setListener(OnAccountSelectionListener listener) {
-		mListener = listener;
-	}
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -50,6 +47,21 @@ public class AccountChooserFragment extends DialogFragment implements DialogInte
 		mPreferences = new Preferences(getActivity());
 		mAccounts = mAccountManager.getAccountsByType(AccountHelper.ACCOUNT_TYPE);
 		mCurrentAccount = mPreferences.getAccount();
+	}
+
+
+	@Override
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+
+		// This makes sure that the container activity has implemented
+		// the callback interface. If not, it throws an exception
+		try {
+			mListener = (OnAccountSelectionListener) activity;
+		} catch (ClassCastException e) {
+			throw new ClassCastException(activity.toString()
+					+ " must implement OnAccountSelectionListener");
+		}
 	}
 
 	@Override
@@ -73,7 +85,7 @@ public class AccountChooserFragment extends DialogFragment implements DialogInte
 				public void onClick(DialogInterface dialog, int id) {
 					if (mCurrentAccount == null) {
 						OnAccountSelectionListener listener = (OnAccountSelectionListener)getActivity();
-						listener.onAccountNotFound();
+						listener.onDialogAccountNotFound();
 					}
 				}
 			});
@@ -124,11 +136,11 @@ public class AccountChooserFragment extends DialogFragment implements DialogInte
 			Account acc = mAccounts[mSelectedItem];
 			mPreferences.updateAccount(acc);
 			if (mListener != null) {
-				listener.onAccountSelected(acc);
+				listener.onDialogAccountSelected(acc);
 			}
 		} else {
 			if (mListener != null) {
-				listener.onAccountNotFound();
+				listener.onDialogAccountNotFound();
 			}
 		}
 	}
