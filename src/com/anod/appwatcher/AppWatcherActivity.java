@@ -196,6 +196,9 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 	 * stop refresh button animation
 	 */
 	private void stopRefreshAnim() {
+		if (mPullToRefreshAttacher != null) {
+			mPullToRefreshAttacher.setRefreshComplete();
+		}
 		if (mRefreshMenuItem == null) {
 			return;
 		}
@@ -226,6 +229,7 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 		iv.startAnimation(rotation);
 
 		MenuItemCompat.setActionView(mRefreshMenuItem, iv);
+
 	}
 
 	@Override
