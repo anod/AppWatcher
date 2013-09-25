@@ -11,10 +11,14 @@ import android.text.Spanned;
 import android.text.format.DateUtils;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.R;
+
+import de.psdev.licensesdialog.LicensesDialog;
 
 public class AboutDialogFragment extends DialogFragment {
 	private static final int DATE_FORMAT = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_YEAR;
@@ -48,13 +52,22 @@ public class AboutDialogFragment extends DialogFragment {
 		
     	Spanned message = Html.fromHtml(text);
     	LayoutInflater inflater = getActivity().getLayoutInflater();
-    	TextView messageView = (TextView)inflater.inflate(R.layout.about, null);
+		View aboutView = inflater.inflate(R.layout.about, null);
+    	TextView messageView = (TextView)aboutView.findViewById(R.id.about_text);
     	messageView.setMovementMethod(LinkMovementMethod.getInstance());
     	messageView.setText(message);
-    	
+
+		Button licencesButton = (Button)aboutView.findViewById(R.id.licences);
+		licencesButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+			   new LicensesDialog(getActivity(), R.raw.notices, false, true).show();
+			}
+		});
+
         return new AlertDialog.Builder(getActivity())
             .setTitle(title)
-            .setView(messageView)
+            .setView(aboutView)
             .setPositiveButton(android.R.string.ok, 
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
