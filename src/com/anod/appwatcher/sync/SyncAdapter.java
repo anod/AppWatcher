@@ -154,7 +154,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 			try {
 				marketApp = loader.load(localApp.getAppId());
 			} catch (Exception e) {
-				AppLog.e("Cannot retrieve information for "+localApp.getTitle(), e);
+				AppLog.e("Cannot retrieve information for "+localApp.getTitle() + ", id:"+localApp.getAppId(), e);
+				continue;
+			}
+			if (marketApp == null) {
+				AppLog.e("Cannot retrieve information for "+localApp.getTitle() + ", id:"+localApp.getAppId());
 				continue;
 			}
 			if (marketApp.getVersionCode() > localApp.getVersionCode()) {
