@@ -168,7 +168,11 @@ public class AppListContentProviderClient {
 		if (cr == null || cr.getCount() == 0) {
 			return null;
 		}
-		AppInfo info = cr.getAppInfo();
+		cr.moveToPosition(-1);
+		AppInfo info = null;
+		if (cr.moveToNext()) {
+			info = cr.getAppInfo();
+		}
 		cr.close();
 
 		return info;
