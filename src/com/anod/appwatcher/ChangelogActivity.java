@@ -8,6 +8,7 @@ import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
 import android.text.util.Linkify;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,6 +29,7 @@ public class ChangelogActivity extends FragmentActivity{
 	private TextView mChangelog;
 	private MarketSession mMarketSession;
 	private String mAppId;
+	private Button mRetryButton;
 
 	/* (non-Javadoc)
 	 * @see android.app.Activity#onCreate(android.os.Bundle)
@@ -51,7 +53,16 @@ public class ChangelogActivity extends FragmentActivity{
 		
         mLoadingView = (ProgressBar)findViewById(R.id.progress_bar);
         mChangelog = (TextView)findViewById(R.id.changelog);
-        mChangelog.setVisibility(View.GONE);
+		mRetryButton = (Button)findViewById(R.id.retry);
+		mLoadingView.setVisibility(View.VISIBLE);
+		mRetryButton.setVisibility(View.GONE);
+		mChangelog.setVisibility(View.GONE);
+		mRetryButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				new RetrieveResultsTask().execute(mAppId);
+			}
+		});
 
 		AccountHelper accHelper = new AccountHelper(this);
 		accHelper.requestToken(this, prefs.getAccount(), new AccountHelper.AuthenticateCallback() {
@@ -70,7 +81,15 @@ public class ChangelogActivity extends FragmentActivity{
 	}
 	
     class RetrieveResultsTask extends AsyncTask<String, Void, App> {
-        protected App doInBackground(String... appsId) {
+
+		@Override
+		protected void onPreExecute() {
+			mLoadingView.setVisibility(View.VISIBLE);
+			mRetryButton.setVisibility(View.GONE);
+			mChangelog.setVisibility(View.GONE);
+		}
+
+		protected App doInBackground(String... appsId) {
 			AppLog.d("App Id: "+appsId[0]);
 			try {
 				return mLoader.load(appsId[0]);
@@ -87,7 +106,10 @@ public class ChangelogActivity extends FragmentActivity{
         	mChangelog.setAutoLinkMask(Linkify.ALL);
 			if (app == null) {
 				mChangelog.setText(getString(R.string.error_fetchin_info));
+				mRetryButton.setVisibility(View.VISIBLE);
+				return;
 			}
+			mRetryButton.setVisibility(View.GONE);
         	String changes = "";
 			if (app.getExtendedInfo() != null) {
 				changes = app.getExtendedInfo().getRecentChanges();

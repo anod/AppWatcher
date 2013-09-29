@@ -22,4 +22,12 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true" />
 
+	<Button
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/retry"
+			android:id="@+id/retry"
+			android:layout_below="@+id/changelog"
+			android:layout_centerHorizontal="true"/>
+
 </RelativeLayout>
