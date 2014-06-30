@@ -74,7 +74,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="appcompat-v7-21.0.0-rc1" level="project" />
     <orderEntry type="library" exported="" name="support-annotations-21.0.0-rc1" level="project" />
-    <orderEntry type="library" exported="" name="android-agent-2.426.0" level="project" />
     <orderEntry type="library" exported="" name="support-v4-21.0.0-rc1" level="project" />
     <orderEntry type="library" exported="" name="CWAC-AdapterWrapper" level="project" />
     <orderEntry type="library" exported="" name="library-0.7.3" level="project" />
@@ -83,6 +82,7 @@
     <orderEntry type="library" exported="" name="protobuf-java-2.4.1" level="project" />
     <orderEntry type="library" exported="" name="acra-4.5.0" level="project" />
     <orderEntry type="library" exported="" name="androidmarketapi-0.6" level="project" />
+    <orderEntry type="library" exported="" name="android-agent-3.407.0" level="project" />
   </component>
 </module>
 
