@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+			 android:layout_width="match_parent"
+			 android:layout_height="match_parent">
+
+	<LinearLayout android:id="@+id/progressContainer"
+				  android:orientation="vertical"
+				  android:layout_width="match_parent"
+				  android:layout_height="match_parent"
+				  android:visibility="gone"
+				  android:gravity="center">
+
+		<ProgressBar style="?android:attr/progressBarStyleLarge"
+					 android:layout_width="wrap_content"
+					 android:layout_height="wrap_content" />
+		<TextView android:layout_width="wrap_content"
+				  android:layout_height="wrap_content"
+				  android:textAppearance="?android:attr/textAppearanceSmall"
+				  android:text=""
+				  android:paddingTop="4dip"
+				  android:singleLine="true" />
+
+	</LinearLayout>
+
+	<FrameLayout android:id="@+id/listContainer"
+				 android:layout_width="match_parent"
+				 android:layout_height="match_parent"
+				 android:paddingTop="@dimen/list_padding_vertical"
+				 android:paddingBottom="@dimen/list_padding_vertical"
+				 android:paddingLeft="@dimen/list_padding_side"
+				 android:paddingRight="@dimen/list_padding_side"
+			>
+		<uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout
+				xmlns:android="http://schemas.android.com/apk/res/android"
+				android:id="@+id/ptr_layout"
+				android:layout_width="fill_parent"
+				android:layout_height="fill_parent">
+		<ListView android:id="@android:id/list"
+				  android:layout_width="match_parent"
+				  android:layout_height="match_parent"
+				  android:divider="@null"
+				  android:dividerHeight="0dp"
+				  android:drawSelectorOnTop="false" />
+		</uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout>
+		<TextView android:id="@+id/internalEmpty"
+				  android:layout_width="match_parent"
+				  android:layout_height="match_parent"
+				  android:gravity="center"
+				  android:textAppearance="?android:attr/textAppearanceLarge" />
+	</FrameLayout>
+
+</FrameLayout>

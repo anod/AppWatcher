@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="icon_size">40dip</dimen>
+	<dimen name="icon_wrapper">56dip</dimen>
+    <dimen name="info_margin_right">4dp</dimen>
+
+    <dimen name="actionbar_compat_height">48dp</dimen>
+    <dimen name="actionbar_compat_button_width">48dp</dimen>
+    <dimen name="actionbar_compat_button_home_width">56dp</dimen>
+    
+    <!-- Dialog title height -->
+    <dimen name="abs__alert_dialog_title_height">64dip</dimen>
+    
+    <!-- The platform's desired minimum size for a dialog's width when it
+         is along the major axis (that is the screen is landscape).  This may
+         be either a fraction or a dimension. -->
+    <item type="dimen" name="abs__dialog_min_width_major">65%</item>
+    <!-- The platform's desired minimum size for a dialog's width when it
+         is along the minor axis (that is the screen is portrait).  This may
+         be either a fraction or a dimension. -->
+    <item type="dimen" name="abs__dialog_min_width_minor">95%</item>
+
+	<dimen name="list_padding_side">8dp</dimen>
+	<dimen name="row_margin_bottom">10dp</dimen>
+	<dimen name="list_padding_vertical">4dp</dimen>
+</resources>
