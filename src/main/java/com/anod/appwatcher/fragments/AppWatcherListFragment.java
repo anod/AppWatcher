@@ -2,7 +2,6 @@ package com.anod.appwatcher.fragments;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -14,8 +13,8 @@ import android.support.v4.app.ShareCompat;
 import android.support.v4.app.ShareCompat.IntentBuilder;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.TextUtils;
-import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -42,10 +41,7 @@ import com.anod.appwatcher.utils.PackageManagerUtils;
 
 import java.sql.Timestamp;
 
-import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshAttacher;
-import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
-
-public class AppWatcherListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>,AppWatcherActivity.QueryChangeListener,PullToRefreshAttacher.OnRefreshListener, AppWatcherActivity.RefreshListener {
+public class AppWatcherListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>,AppWatcherActivity.QueryChangeListener,AppWatcherActivity.RefreshListener, SwipeRefreshLayout.OnRefreshListener {
     
     private CursorAdapter mAdapter;
 	private int mNewAppsCount;
@@ -56,8 +52,9 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 	private boolean mListShown;
 	private View mProgressContainer;
 	private View mListContainer;
+    private SwipeRefreshLayout mSwipeLayout;
 
-	class ViewHolder {
+    class ViewHolder {
 		AppInfo app;
 		int position;
 		View section;
@@ -81,7 +78,6 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 	private boolean mIsBigScreen;
 	private PackageManagerUtils mPMUtils;
 
-	private PullToRefreshAttacher mPullToRefreshAttacher;
 
 	/** Called when the activity is first created. */
     @Override
@@ -131,7 +127,15 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 		mListContainer =  root.findViewById(R.id.listContainer);
 		mProgressContainer = root.findViewById(R.id.progressContainer);
 		mListShown = true;
-		return root;
+
+        mSwipeLayout = (SwipeRefreshLayout) root.findViewById(R.id.swipe_container);
+        mSwipeLayout.setOnRefreshListener(this);
+        mSwipeLayout.setColorScheme(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
+
+        return root;
 	}
 
 
@@ -159,17 +163,6 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 
 		act.setQueryChangeListener(this);
 		act.setRefreshListener(this);
-
-		mPullToRefreshAttacher = act.getPullToRefreshAttacher();
-
-		// Retrieve the PullToRefreshLayout from the content view
-		PullToRefreshLayout ptrLayout = (PullToRefreshLayout) view.findViewById(R.id.ptr_layout);
-
-		// Give the PullToRefreshAttacher to the PullToRefreshLayout, along with a refresh listener.
-		ptrLayout.setPullToRefreshAttacher(mPullToRefreshAttacher, this);
-
-		// Set the Refreshable View to be the ListView and the refresh listener to be this.
-		//mPullToRefreshAttacher.addRefreshableView(getListView(), this);
 
 		// Prepare the loader.  Either re-connect with an existing one,
 		// or start a new one.
@@ -299,9 +292,9 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 			holder.section = (View)v.findViewById(R.id.sec_header);
 			holder.sectionText = (TextView)v.findViewById(R.id.sec_header_title);
 			holder.sectionCount = (TextView)v.findViewById(R.id.sec_header_count);
-            holder.title = (TextView)v.findViewById(R.id.title);
+            holder.title = (TextView)v.findViewById(android.R.id.title);
             holder.details = (TextView)v.findViewById(R.id.details);
-            holder.icon = (ImageView)v.findViewById(R.id.app_icon);
+            holder.icon = (ImageView)v.findViewById(android.R.id.icon);
             holder.version = (TextView)v.findViewById(R.id.version);
             holder.price = (TextView)v.findViewById(R.id.price);
             holder.options = (LinearLayout)v.findViewById(R.id.options);
@@ -505,13 +498,13 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 		}
 	}
 
-	@Override
-	public void onRefreshStarted(View view) {
-		((AppWatcherActivity)getActivity()).requestRefresh();
+	public void onRefreshFinish() {
+        mSwipeLayout.setRefreshing(false);
 	}
 
-	@Override
-	public void onRefreshFinish() {
-		mPullToRefreshAttacher.setRefreshComplete();
-	}
+
+    @Override
+    public void onRefresh() {
+        ((AppWatcherActivity)getActivity()).requestRefresh();
+    }
 }

@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.anod.appwatcher"
-    android:versionCode="16"
-    android:versionName="1.5.3" >
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.anod.appwatcher">
 
     <uses-sdk
-        android:minSdkVersion="8"
-        android:targetSdkVersion="L" />
-
+        tools:node="replace" />
     <!-- for google account token -->
     <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />

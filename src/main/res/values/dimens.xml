@@ -23,4 +23,6 @@
 	<dimen name="list_padding_side">8dp</dimen>
 	<dimen name="row_margin_bottom">10dp</dimen>
 	<dimen name="list_padding_vertical">4dp</dimen>
+    <dimen name="textSize">10sp</dimen>
+    <dimen name="textSizeTitle">14sp</dimen>
 </resources>

@@ -19,7 +19,7 @@ public class ShareRecieverActivity extends Activity {
 		
     	Intent searchIntent = new Intent(this, MarketSearchActivity.class);
     	boolean fallback = true;
-		if (URL_PLAYSTORE.startsWith(text)) {
+		if (text != null && text.startsWith(URL_PLAYSTORE)) {
 			UrlQuerySanitizer sanitizer = new UrlQuerySanitizer(text);
 			String id = sanitizer.getValue("id");
 			if (id != null) {

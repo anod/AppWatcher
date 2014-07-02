@@ -23,17 +23,16 @@
             android:layout_width="@dimen/icon_wrapper"
 			android:layout_height="match_parent" >
 
-            <com.makeramen.RoundedImageView
-                android:id="@+id/app_icon"
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@android:id/icon"
                 android:layout_width="@dimen/icon_size"
                 android:layout_height="@dimen/icon_size"
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="8dip"
                 android:contentDescription="@string/application_icon"
                 android:src="@drawable/ic_empty"
-				android:scaleType="centerCrop"
-				appwatcher:corner_radius="@dimen/icon_size"
-				appwatcher:mutate_background="true"
+                appwatcher:border_width="1dp"
+                appwatcher:border_color="#FFEEEEEE"
 			/>
 
             <LinearLayout
@@ -55,14 +54,14 @@
 			android:paddingRight="8dp">
 
             <TextView
-                android:id="@+id/title"
+                android:id="@android:id/title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/app_name"
 				android:layout_alignParentTop="true"
 				android:layout_alignParentLeft="true"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-				android:textSize="14sp"
+				android:textSize="@dimen/textSizeTitle"
 			/>
 
             <TextView
@@ -72,8 +71,8 @@
                 android:text="@string/app_name"
                 android:textAppearance="?android:attr/textAppearanceSmall"
 				android:layout_alignParentLeft="true"
-				android:layout_below="@+id/title"
-				android:textSize="10sp" />
+				android:layout_below="@android:id/title"
+				android:textSize="@dimen/textSize" />
 
 			<TextView
 				android:id="@+id/version"
@@ -83,7 +82,7 @@
 				android:layout_alignParentLeft="true"
 				android:layout_below="@+id/details"
 				android:textAppearance="?android:attr/textAppearanceSmall"
-				android:textSize="10sp"/>
+				android:textSize="@dimen/textSize"/>
 
 			<TextView
 					android:id="@+id/update_date"
@@ -92,14 +91,14 @@
 					android:text="@string/app_name"
 					android:layout_alignBaseline="@+id/details"
 					android:layout_alignRight="@+id/price"
-					android:textSize="10sp"/>
+					android:textSize="@dimen/textSize"/>
 
 			<TextView
 					android:id="@+id/price"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:textColor="@color/green"
-					android:textSize="10sp"
+					android:textSize="@dimen/textSize"
 					android:text="@string/installed"
 					android:layout_alignParentBottom="true"
 					android:layout_alignParentRight="true"/>
@@ -146,7 +145,7 @@
             android:text="@string/whats_new"
 			android:paddingLeft="4dp"
 			android:drawablePadding="0dp"
-			android:textSize="10dp"
+			android:textSize="@dimen/textSize"
             android:textColor="@color/text_dark" />
 
         <Button
@@ -164,7 +163,7 @@
             android:text="@string/play_store"
 			android:paddingLeft="4dp"
 			android:drawablePadding="0dp"
-			android:textSize="10dp"
+			android:textSize="@dimen/textSize"
             android:textColor="@color/text_dark" />
 
         <ImageButton

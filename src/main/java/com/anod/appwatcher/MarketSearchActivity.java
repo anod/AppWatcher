@@ -374,11 +374,11 @@ public class MarketSearchActivity extends ActionBarActivity implements AccountCh
 				v = vi.inflate(R.layout.market_app_row, null);
 				holder = new ViewHolder();
 				holder.row = (View) v.findViewById(R.id.approw);
-				holder.title = (TextView) v.findViewById(R.id.title);
+				holder.title = (TextView) v.findViewById(android.R.id.title);
 				holder.details = (TextView) v.findViewById(R.id.details);
 				holder.version = (TextView) v.findViewById(R.id.version);
 				holder.price = (TextView) v.findViewById(R.id.price);
-				holder.icon = (ImageView) v.findViewById(R.id.app_icon);
+				holder.icon = (ImageView) v.findViewById(android.R.id.icon);
 				v.setTag(holder);
 			} else {
 				holder = (ViewHolder) v.getTag();

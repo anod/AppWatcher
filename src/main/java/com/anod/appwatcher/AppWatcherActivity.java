@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
@@ -30,17 +31,14 @@ import com.anod.appwatcher.fragments.AccountChooserFragment;
 import com.anod.appwatcher.fragments.AppWatcherListFragment;
 import com.anod.appwatcher.sync.SyncAdapter;
 import com.anod.appwatcher.utils.AppLog;
-import com.anod.appwatcher.utils.IntentUtils;
 
 import org.acra.ACRA;
-
-import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshAttacher;
 
 public class AppWatcherActivity extends ActionBarActivity implements TextView.OnEditorActionListener, SearchView.OnQueryTextListener, AccountChooserHelper.OnAccountSelectionListener, AccountChooserFragment.OnAccountSelectionListener {
 
 	private boolean mSyncFinishedReceiverRegistered;
 
-	public interface QueryChangeListener {
+    public interface QueryChangeListener {
 
 		void onQueryTextChanged(String newQuery);
 	}
@@ -59,7 +57,6 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 	private QueryChangeListener mQueryChangeListener;
 
 	private RefreshListener mRefreshListener;
-	private PullToRefreshAttacher mPullToRefreshAttacher;
 
 	private AccountChooserHelper mAccountChooserHelper;
 
@@ -74,12 +71,6 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 
 		setContentView(R.layout.main);
 
-		/**
-		 * Here we create a PullToRefreshAttacher manually without an Options instance.
-		 * PullToRefreshAttacher will manually create one using default values.
-		 */
-		mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
-
 		AppWatcherListFragment newFragment = new AppWatcherListFragment();
 		FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 		transaction.add(R.id.fragment_container, newFragment);
@@ -92,9 +83,6 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 		mAccountChooserHelper.init();
 	}
 
-	public PullToRefreshAttacher getPullToRefreshAttacher() {
-		return mPullToRefreshAttacher;
-	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -206,9 +194,9 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 	 * stop refresh button animation
 	 */
 	private void stopRefreshAnim() {
-		if (mPullToRefreshAttacher != null) {
-			mPullToRefreshAttacher.setRefreshComplete();
-		}
+		//if (mSwipeLayout != null) {
+        //    mSwipeLayout.setRefreshing(false);
+		//}
 		if (mRefreshMenuItem == null) {
 			return;
 		}
