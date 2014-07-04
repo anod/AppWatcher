@@ -29,6 +29,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
@@ -63,7 +64,7 @@ public class MarketSearchActivity extends ActionBarActivity implements AccountCh
 	private LinearLayout mLoading;
 	private RelativeLayout mDeviceIdMessage = null;
 	private ListView mListView;
-	private boolean mFirstTimeRun = false;
+	private boolean mInitiateSearch = false;
 	private boolean mShareSource = false;
 	private HashMap<String,Boolean> mAddedApps;
 
@@ -71,11 +72,13 @@ public class MarketSearchActivity extends ActionBarActivity implements AccountCh
 	private int mColorBgGray;
 	private SearchView mSearchView;
 	private AccountChooserHelper mAccChooserHelper;
+    private LinearLayout mRetryView;
+    private Button mRetryButton;
 
 
-	/* (non-Javadoc)
-	 * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
-	 */
+    /* (non-Javadoc)
+     * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
+     */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -105,9 +108,24 @@ public class MarketSearchActivity extends ActionBarActivity implements AccountCh
 		mListView.setAdapter(mAdapter);
 		mListView.setOnItemClickListener(itemClickListener);
 
-	}
+        mRetryView = (LinearLayout)findViewById(R.id.retry_box);
+        mRetryButton = (Button)findViewById(R.id.retry);
+        mRetryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                retrySearchResult();
+            }
+        });
 
-	private void searchResults() {
+        mListView.setVisibility(View.GONE);
+        mListView.getEmptyView().setVisibility(View.GONE);
+        mLoading.setVisibility(View.VISIBLE);
+        mRetryView.setVisibility(View.GONE);
+
+        mResponseLoader = new AppsResponseLoader(mMarketSession);
+    }
+
+    private void searchResults() {
 		String query = mSearchView.getQuery().toString();
 
         // hide virtual keyboard
@@ -119,26 +137,16 @@ public class MarketSearchActivity extends ActionBarActivity implements AccountCh
 		mAdapter.clear();
 		mIconLoader.clearCache();
 
-		mListView.setVisibility(View.GONE);
-		mListView.getEmptyView().setVisibility(View.GONE);
-		
-		mLoading.setVisibility(View.VISIBLE);
+        showLoading();
+
 		if (query.length() > 0) {
-			mResponseLoader = new AppsResponseLoader(mMarketSession, query);
+            mResponseLoader.setQuery(query);
 			new RetrieveResultsTask().execute();
 		} else {
 			showNoResults("");
 		}
 	}
-	
-	private void showNoResults(String query) {
-		mLoading.setVisibility(View.GONE);
-		String noResStr = (query.length() > 0) ? getString(R.string.no_result_found, query) : getString(R.string.search_for_app);
-		TextView tv = (TextView)mListView.getEmptyView();
-		tv.setText(noResStr);
-		tv.setVisibility(View.VISIBLE);
-		showDeviceIdMessage();
-	}
+
 	
 	private void showDeviceIdMessage() {
 		if (mDeviceIdMessage!=null) {
@@ -162,7 +170,7 @@ public class MarketSearchActivity extends ActionBarActivity implements AccountCh
 		mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 			@Override
 			public boolean onQueryTextSubmit(String s) {
-				searchResults();
+                searchResultsDelayed();
 				return false;
 			}
 
@@ -179,12 +187,20 @@ public class MarketSearchActivity extends ActionBarActivity implements AccountCh
 
         return true;
     }
-    
+
+    private void searchResultsDelayed() {
+        if (mMarketSession.getAuthSubToken() == null) {
+            mInitiateSearch = true;
+        } else {
+            searchResults();
+        }
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case R.id.menu_search:
-        	searchResults();
+            searchResultsDelayed();
         	return true;
         default:
             return onOptionsItemSelected(item);
@@ -239,7 +255,7 @@ public class MarketSearchActivity extends ActionBarActivity implements AccountCh
 			return;
 		}
 		mMarketSession.setAuthSubToken(authSubToken);
-		if (mFirstTimeRun && !TextUtils.isEmpty(mSearchView.getQuery())) {
+		if (mInitiateSearch && !TextUtils.isEmpty(mSearchView.getQuery())) {
 			searchResults();
 		} else {
 			// hide virtual keyboard
@@ -285,6 +301,8 @@ public class MarketSearchActivity extends ActionBarActivity implements AccountCh
 
 		@Override
 		protected void onPostExecute(Result result) {
+            mLoading.setVisibility(View.GONE);
+
 			if (result.networkError) {
 				showRetryButton();
 				return;
@@ -293,7 +311,6 @@ public class MarketSearchActivity extends ActionBarActivity implements AccountCh
 				showNoResults(mResponseLoader.getQuery());
 				return;
 			}
-			mLoading.setVisibility(View.GONE);
 			adapterAddAll(mAdapter, result.apps);
 
 			if (mResponseLoader.hasNext()) {
@@ -305,9 +322,35 @@ public class MarketSearchActivity extends ActionBarActivity implements AccountCh
 	}
 
 	private void showRetryButton() {
-	}
+        mListView.setVisibility(View.GONE);
+        mListView.getEmptyView().setVisibility(View.GONE);
+        mRetryView.setVisibility(View.VISIBLE);
+	};
 
-	;
+
+    private void showLoading() {
+        mListView.setVisibility(View.GONE);
+        mListView.getEmptyView().setVisibility(View.GONE);
+        mLoading.setVisibility(View.VISIBLE);
+        mRetryView.setVisibility(View.GONE);
+    }
+
+    private void showNoResults(String query) {
+        mLoading.setVisibility(View.GONE);
+        String noResStr = (query.length() > 0) ? getString(R.string.no_result_found, query) : getString(R.string.search_for_app);
+        TextView tv = (TextView)mListView.getEmptyView();
+        tv.setText(noResStr);
+        tv.setVisibility(View.VISIBLE);
+        showDeviceIdMessage();
+    }
+
+    private void retrySearchResult() {
+        if (mAdapter.isEmpty()) {
+            searchResultsDelayed();
+        } else {
+            new RetrieveResultsTask().execute();
+        }
+    }
 
 	@SuppressLint("NewApi")
 	private void adapterAddAll(ArrayAdapter<App> adapter, List<App> list) {
@@ -324,12 +367,13 @@ public class MarketSearchActivity extends ActionBarActivity implements AccountCh
 
 		private List<App> mCache;
 
-		public AppsEndlessAdapter(Context context, ListAdapter wrapped, int pendingResource) {
+        public AppsEndlessAdapter(Context context, ListAdapter wrapped, int pendingResource) {
 			super(context, wrapped, pendingResource);
 		}
 
 		@Override
 		protected boolean cacheInBackground() throws Exception {
+            mCache = null;
 			if (mResponseLoader.moveToNext()) {
 				mCache = mResponseLoader.load();
 				return (mCache == null || mCache.size() == 0) ? false : true;
@@ -425,7 +469,7 @@ public class MarketSearchActivity extends ActionBarActivity implements AccountCh
 		if (keyword != null) {
 			mSearchView.setQuery(keyword, true);
 		}
-		mFirstTimeRun = i.getBooleanExtra(EXTRA_EXACT, false);
+		mInitiateSearch = i.getBooleanExtra(EXTRA_EXACT, false);
 		mShareSource = i.getBooleanExtra(EXTRA_SHARE, false);
 	}
 }

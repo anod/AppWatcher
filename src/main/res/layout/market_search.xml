@@ -10,6 +10,7 @@
         android:layout_height="wrap_content"
 		android:paddingLeft="@dimen/list_padding_side"
 		android:paddingRight="@dimen/list_padding_side"
+        android:visibility="gone"
 		tools:listitem="@layout/market_app_row"/>
 
     <TextView
@@ -41,4 +42,24 @@
             android:text="@string/loading" />
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/retry_box"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:gravity="center"
+        android:orientation="vertical" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/problem_occured" />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/retry"
+            android:id="@+id/retry"
+        />
+    </LinearLayout>
 </RelativeLayout>

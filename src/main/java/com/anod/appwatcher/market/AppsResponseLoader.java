@@ -21,18 +21,31 @@ public class AppsResponseLoader {
 	private boolean mHasNext;
 	private MarketSession mMarketSession;
 
+    private static boolean SIMULATE_NETWORK_ERROR = false;
+    private int mRequestCount;
+
 	class ResponseWrapper {
 		AppsResponse response;
 	}
 
-	public AppsResponseLoader(MarketSession session, String query) {
+	public AppsResponseLoader(MarketSession session) {
 		mMarketSession = session;
-		mQuery = query;
-		mStartIndex = 0;
-		mHasNext = true;
-		mNetworkError = false;
+        reset();
 	}
 
+    public void reset() {
+        mStartIndex = 0;
+        mHasNext = true;
+        mNetworkError = false;
+        mRequestCount = 0;
+    }
+
+    public void setQuery(String query) {
+        if (!query.equals(mQuery)) {
+            reset();
+        }
+        mQuery = query;
+    }
 	public String getQuery() {
 		return mQuery;
 	}
@@ -52,6 +65,7 @@ public class AppsResponseLoader {
 	}
 
 	public List<App> load() {
+        mNetworkError = false;
 		AppsRequest appsRequest = AppsRequest.newBuilder()
 			.setQuery(mQuery)
 			.setStartIndex(mStartIndex)
@@ -62,6 +76,7 @@ public class AppsResponseLoader {
 			.setWithExtendedInfo(false).build();
 		final ResponseWrapper respWrapper = new ResponseWrapper();
 
+        mRequestCount++;
 		try {
 			synchronized (mMarketSession) {	
 				mMarketSession.append(appsRequest, new Callback<AppsResponse>() {
@@ -74,10 +89,17 @@ public class AppsResponseLoader {
 			}
 		} catch (Exception e) {
 			AppLog.e("Error search market", e);
-			mHasNext = false;
 			mNetworkError = true;
 			return null;
 		}
+
+        if (SIMULATE_NETWORK_ERROR) {
+            if (mRequestCount == 1 || mRequestCount == 3) {
+                mNetworkError = true;
+                return null;
+            }
+        }
+
 		List<App> apps = respWrapper.response.getAppList();
 		int appCount = respWrapper.response.getEntriesCount();
 		
@@ -89,7 +111,7 @@ public class AppsResponseLoader {
 		if (nextCount > totalCount) {
 			mHasNext = false;
 		}
-		
+
 		return apps;
 	}
 

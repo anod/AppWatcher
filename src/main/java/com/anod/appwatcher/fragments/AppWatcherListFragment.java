@@ -170,7 +170,8 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 	}
 
 	private class ListCursorAdapter extends CursorAdapter {
-		private LayoutInflater mInflater;
+        private final String mInstalledText;
+        private LayoutInflater mInflater;
         private Bitmap mDefaultIcon;
 		private String mVersionText;
 		private String mUpdateText;
@@ -185,6 +186,7 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 	        Resources r = context.getResources();
 	        mVersionText = r.getString(R.string.version);
 	        mUpdateText = r.getString(R.string.update);
+            mInstalledText = r.getString(R.string.installed);
 	        mUpdateTextColor = r.getColor(R.color.blue_new);
 			mDateFormat = android.text.format.DateFormat
 					.getMediumDateFormat(context.getApplicationContext());
@@ -233,7 +235,12 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 			
 			boolean isInstalled = mPMUtils.isAppInstalled(app.getPackageName());
 			if (isInstalled) {
-				holder.price.setText(R.string.installed);
+                PackageManagerUtils.InstalledInfo installed = mPMUtils.getInstalledInfo(app.getPackageName());
+                if (TextUtils.isEmpty(installed.versionName)) {
+                    holder.price.setText(mInstalledText);
+                } else {
+                    holder.price.setText(mInstalledText + " " + installed.versionName);
+                }
 			} else {
 				if (app.getPriceMicros() == 0 ) {
 					holder.price.setText(R.string.free);

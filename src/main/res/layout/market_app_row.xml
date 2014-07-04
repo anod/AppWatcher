@@ -16,7 +16,7 @@
         android:paddingBottom="4dp"
         android:paddingTop="4dp">
 
-        <de.hdodenhof.circleimageview.CircleImageView
+        <ImageView
             android:id="@android:id/icon"
             android:layout_width="@dimen/icon_size"
             android:layout_height="@dimen/icon_size"
@@ -24,8 +24,6 @@
             android:layout_marginLeft="8dip"
             android:contentDescription="@string/application_icon"
             android:src="@drawable/ic_empty"
-            appwatcher:border_width="1dp"
-            appwatcher:border_color="#FFEEEEEE"
             />
 
         <RelativeLayout
