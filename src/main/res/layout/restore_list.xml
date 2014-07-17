@@ -3,20 +3,9 @@
          android:orientation="vertical"
          android:layout_width="match_parent"
          android:layout_height="match_parent"
+        android:paddingTop="4dp"
 >
-
-
-	 	<TextView
-	 	    android:id="@+id/textView1"
-	 	    android:layout_width="match_parent"
-	 	    android:layout_height="wrap_content"
-
-	 	    android:gravity="center_horizontal"
-	 	    android:text="@string/list_import"
-	 	    android:textAppearance="?android:attr/textAppearanceLarge" />
-
 		<TextView
-				android:id="@+id/textView2"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:text="@string/export_path"

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string name="app_name">App Watcher</string>
     <string name="no_data">Click on \"Plus\" to add an app.</string>
     <string name="menu_add">Add</string>
@@ -8,7 +9,7 @@
     <string name="search_hint">Search an app</string>
     <string name="search_action">Search</string>
     <string name="search_for_app">Search for an application and click on it to add to the watch list.\n( Tip: you can add apps directly from Play Store using \"Share\" button )</string>
-    <string name="loading">Loading&#8230;</string>
+    <string name="loading">Loading…</string>
     <string name="no_result_found">No results for \"%s\"</string>
     <string name="error_insert_app">Failed to add application to the watch list.</string>
     <string name="application_icon">Application icon</string>
@@ -28,12 +29,12 @@
     <string name="notification_one_updated">%s update found</string>
     <string name="notification_many_updates">%d updates found</string>
     <string name="notification_2_apps">%1$s, %2$s</string>
-    <string name="notification_2_apps_more">%1$s, %2$s and more</string>    
+    <string name="notification_2_apps_more">%1$s, %2$s and more</string>
     <string name="notification_click">Click to see details</string>
     <string name="no_updates_found">No updates found.</string>
     <string name="about">About</string>
-    <string name="dialog_about_title">%1$s ver. %2$s</string>    
-    <string name="dialog_about_text">Author: Alex Gavrishev&lt;br/&gt;&lt;a href=&quot;https://play.google.com/store/apps/developer?id=Alex+Gavrishev&quot;&gt;</string>
+    <string name="dialog_about_title">%1$s ver. %2$s</string>
+    <string name="dialog_about_text">Author: Alex Gavrishev&lt;br/>&lt;a href="https://play.google.com/store/apps/developer?id=Alex+Gavrishev"></string>
     <string name="share">Share</string>
     <string name="share_subject_normal">Check out \"%s\"</string>
     <string name="share_subject_updated">Check out new version of \"%s\"</string>
@@ -48,7 +49,7 @@
     <string name="last_update">Last Update: %1$s</string>
     <string name="list_import">Import</string>
     <string name="no_files_found">No files found</string>
-    <string name="please_wait">Please, wait&#8230;</string>
+    <string name="please_wait">Please, wait…</string>
     <string name="export_done">Done</string>
     <string name="unable_delete_file">Unable to delete file</string>
     <string name="import_done">Import finished</string>
@@ -57,16 +58,19 @@
     <string name="failed_to_read_file">Cannot read file</string>
     <string name="file_not_exist">File not exist</string>
     <string name="failed_to_write_file">Failed to write into file</string>
-    <string name="import_export">Import/Export</string>
+    <string name="import_export">Import</string>
     <string name="export_path">/sdcard/data/com.anod.appwatcher/backup/</string>
-	<string name="recently_updated">Recently updated</string>
-	<string name="watching">Watching</string>
-	<string name="menu_filter">Filter</string>
-	<string name="accounts">Accounts</string>
-	<string name="choose_an_account">Choose an account</string>
-	<string name="crash_toast_text">AppWatcher Crashed</string>
-	<string name="app_already_added">App alreay in the watch list</string>
-	<string name="free">FREE</string>
-	<string name="error_fetchin_info">Error fetching information. Please, try again</string>
-	<string name="retry">Retry</string>
+    <string name="recently_updated">Recently updated</string>
+    <string name="watching">Watching</string>
+    <string name="menu_filter">Filter</string>
+    <string name="accounts">Accounts</string>
+    <string name="choose_an_account">Choose an account</string>
+    <string name="crash_toast_text">AppWatcher Crashed</string>
+    <string name="app_already_added">App already in the watch list</string>
+    <string name="free">FREE</string>
+    <string name="error_fetchin_info">Error fetching information. Please, try again</string>
+    <string name="retry">Retry</string>
+    <string name="title_activity_settings">SettingsActivity</string>
+    <string name="google_drive_sync">Google Drive Sync</string>
+
 </resources>

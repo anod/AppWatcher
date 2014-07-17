@@ -28,20 +28,31 @@
 		appwatcher:showAsAction="never|withText"
         android:title="@string/menu_wifi_only" android:icon="@drawable/ic_menu_wifi">
     </item>
-	<item
-			android:id="@+id/menu_accounts"
-			appwatcher:showAsAction="never|withText"
-			android:title="@string/accounts" >
-	</item>
+    <item
+        android:id="@+id/menu_accounts"
+        appwatcher:showAsAction="never|withText"
+        android:title="@string/accounts" >
+    </item>
+    <item
+        android:id="@+id/menu_more"
+        appwatcher:showAsAction="never|withText"
+        android:title="More..." >
+    </item>
+<!--
     <item
         android:id="@+id/menu_import_export"
 		appwatcher:showAsAction="never|withText"
         android:title="@string/import_export" android:icon="@drawable/ic_menu_export">
     </item>
     <item
+        android:id="@+id/menu_gdrive_sync"
+        appwatcher:showAsAction="never|withText"
+        android:title="@string/gdrive_sync" android:icon="@drawable/ic_menu_gdrive" android:checkable="true">
+    </item>
+    <item
         android:id="@+id/menu_about"
 		appwatcher:showAsAction="never|withText"
         android:title="@string/about" android:icon="@drawable/ic_menu_about">
     </item>
-
+-->
 </menu>

@@ -512,6 +512,8 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 
     @Override
     public void onRefresh() {
-        ((AppWatcherActivity)getActivity()).requestRefresh();
+        if (!mSwipeLayout.isRefreshing()) {
+            ((AppWatcherActivity) getActivity()).requestRefresh();
+        }
     }
 }

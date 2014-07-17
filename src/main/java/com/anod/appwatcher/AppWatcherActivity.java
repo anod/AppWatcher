@@ -259,18 +259,24 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 			}
 			mAccountChooserHelper.setSync(true);
 			return true;
+        case R.id.menu_accounts:
+            AccountChooserFragment accountsDialog = AccountChooserFragment.newInstance();
+            accountsDialog.show(getSupportFragmentManager(), "accountsDialog");
+            return true;
+        case R.id.menu_more:
+            Intent gdriveSync = new Intent(this, SettingsActivity.class);
+            startActivity(gdriveSync);
+            return true;
+        /*
 		case R.id.menu_about:
 			AboutDialogFragment aboutDialog = AboutDialogFragment.newInstance();
 			aboutDialog.show(getSupportFragmentManager(), "aboutDialog");
 			return true;
-		case R.id.menu_import_export:
-			Intent listExport = new Intent(this, ListExportActivity.class);
-			startActivity(listExport);
-			return true;
-		case R.id.menu_accounts:
-			AccountChooserFragment accountsDialog = AccountChooserFragment.newInstance();
-			accountsDialog.show(getSupportFragmentManager(), "accountsDialog");
-			return true;
+        case R.id.menu_gdrive_sync:
+            Intent gdriveSync = new Intent(this, GDriveSyncActivity.class);
+            startActivity(gdriveSync);
+            return true;
+            */
 		default:
 			return true;
 		}

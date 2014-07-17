@@ -1,5 +1,6 @@
 package com.anod.appwatcher.utils;
 
+import android.content.IntentSender;
 import android.text.format.Time;
 import android.util.Log;
 
@@ -24,18 +25,14 @@ public class AppLog {
 		Log.e(TAG, format(msg), tr);
 	}
 
-    /**
-     * Format given time for debugging output.
-     *
-     * @param unixTime Target time to report.
-     * @param now Current system time from {@link System#currentTimeMillis()}
-     *            for calculating time difference.
-     */
+    public static void ex(Throwable e) { Log.e(TAG, e.getMessage(), e); }
+
     public static String format(String msg) {
     	long unixTime = System.currentTimeMillis();
         Time time = new Time();
         time.set(unixTime);
 
         return String.format("[%s] %s ", time.format("%d-%m-%Y %H:%M:%S"), msg);
-    }	
+    }
+
 }

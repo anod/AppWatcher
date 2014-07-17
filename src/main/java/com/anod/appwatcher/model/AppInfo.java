@@ -5,11 +5,8 @@ import android.graphics.Bitmap;
 import com.gc.android.market.api.model.Market.App;
 
 
-public class AppInfo {
-	
-	public static final int STATUS_NORMAL = 0;	
-	public static final int STATUS_UPDATED = 1;
-	
+public class AppInfo extends AppInfoMetadata{
+
 	private int rowId;
 	private String appId;
 	private String packageName;
@@ -39,15 +36,14 @@ public class AppInfo {
 	 */
 	public AppInfo(int rowId, String appId, String pname, int versionNumber, String versionName,
 			String title, String creator, Bitmap icon, int status, long updateTime, String priceText, String priceCur, Integer priceMicros) {
+        super(appId,status);
 		this.rowId = rowId;
-		this.appId = appId;		
 		this.packageName = pname;
 		this.versionNumber = versionNumber;
 		this.versionName = versionName;
 		this.title = title;
 		this.creator = creator;
 		this.icon = icon;
-		this.status = status;
 		this.updateTime = updateTime;
 
 		this.priceText = priceText;
@@ -61,14 +57,14 @@ public class AppInfo {
 	 * @param icon
 	 */
 	public AppInfo(App app, Bitmap icon) {
-		this.rowId = 0;
-		this.appId = app.getId();    	
+        super(app.getId(), STATUS_NORMAL);
+        this.rowId = 0;
+		this.appId = app.getId();
 		this.packageName = app.getPackageName();
 		this.title = app.getTitle();
-		this.versionNumber = app.getVersionCode();  	    
+		this.versionNumber = app.getVersionCode();
 		this.versionName = app.getVersion();
 		this.creator = app.getCreator();
-		this.status = STATUS_NORMAL;
 		this.updateTime = 0;
 		this.icon = icon;
 		this.priceMicros = app.getPriceMicros();
@@ -82,13 +78,6 @@ public class AppInfo {
 	 */
 	public int getRowId() {
 		return rowId;
-	}
-
-	/**
-	 * @return the appId
-	 */
-	public String getAppId() {
-		return appId;
 	}
 
 	/**
@@ -127,12 +116,7 @@ public class AppInfo {
 	public Bitmap getIcon() {
 		return icon;
 	}
-	/**
-	 * @return the status
-	 */
-	public int getStatus() {
-		return status;
-	}
+
 	/**
 	 * @return the last update time
 	 */

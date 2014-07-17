@@ -1,0 +1,31 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:background="@android:color/transparent"
+ >
+    <!--
+     style="?android:attr/preferenceFragmentListStyle"
+     -->
+
+    <ListView android:id="@android:id/list"
+        android:layout_width="match_parent"
+        android:layout_height="0px"
+        android:layout_weight="1"
+        android:paddingTop="0dip"
+        android:paddingBottom="0dip"
+        android:scrollbarStyle="outsideOverlay"
+        android:clipToPadding="false"
+        android:drawSelectorOnTop="false"
+        android:cacheColorHint="@android:color/transparent"
+        android:padding="@dimen/preference_item_padding_side"
+        android:scrollbarAlwaysDrawVerticalTrack="true" />
+
+    <TextView android:id="@android:id/empty"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="@dimen/preference_item_padding_side"
+        android:gravity="center"
+        android:visibility="gone" />
+
+</LinearLayout>

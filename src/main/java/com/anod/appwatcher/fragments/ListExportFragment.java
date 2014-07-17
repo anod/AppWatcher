@@ -26,7 +26,7 @@ import com.anod.appwatcher.ListExportActivity;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.backup.ListExportManager;
 
-public class ListExportFragment extends ListFragment implements ListExportActivity.ExportListener{
+public class ListExportFragment extends ListFragment {
 	private ImportListAdapter mAdapter;
 	private ImportClickListener mRestoreListener;
 	private DeleteClickListener mDeleteListener;
@@ -54,7 +54,6 @@ public class ListExportFragment extends ListFragment implements ListExportActivi
 	}
 
 	public void init() {
-		((ListExportActivity)getActivity()).setExportListener(this);
 		mBackupManager = ((ListExportActivity)getActivity()).getBackupManager();
 		mRestoreListener = new ImportClickListener();
 		mDeleteListener = new DeleteClickListener();
@@ -69,18 +68,9 @@ public class ListExportFragment extends ListFragment implements ListExportActivi
 		return mAdapter;
 	}
 
-	@Override
-	public void OnFinish() {
-		new FileListTask().execute(0);
-	}
-
-
 	private class FileListTask extends AsyncTask<Integer, Void, File[]> {
 		@Override
 		protected void onPreExecute() {
-			showDialog();
-			mAdapter.clear();
-			mAdapter.notifyDataSetChanged();
 		}
 
 		protected File[] doInBackground(Integer... params) {
@@ -92,31 +82,20 @@ public class ListExportFragment extends ListFragment implements ListExportActivi
 			if (!isAdded()) {
 				return;
 			}
-
+            mAdapter.clear();
 			if (result != null) {
 				for (int i = 0; i < result.length; i++) {
 					mAdapter.add(result[i]);
-					mAdapter.notifyDataSetChanged();
 				}
 			}
-			dismissDialog();
-
+            mAdapter.notifyDataSetChanged();
 		}
 	}
-	
-	private void showDialog() {
-		((ListExportActivity)getActivity()).showDialog();
-	}
-
-	private void dismissDialog() {
-		((ListExportActivity)getActivity()).dismissDialog();
-	}
-
 	private class ImportTask extends AsyncTask<String, Void, Integer> {
 
 		@Override
 		protected void onPreExecute() {
-			showDialog();
+
 		}
 
 		protected Integer doInBackground(String... filenames) {
@@ -135,8 +114,7 @@ public class ListExportFragment extends ListFragment implements ListExportActivi
 			return;
 		}
 
-		dismissDialog();
-		
+
 		if (code == ListExportManager.RESULT_DONE) {
 			Toast.makeText(mContext, getString(R.string.import_done), Toast.LENGTH_SHORT).show();
 			return;
@@ -213,7 +191,7 @@ public class ListExportFragment extends ListFragment implements ListExportActivi
 
 		@Override
 		protected void onPreExecute() {
-			showDialog();
+
 		}
 
 		protected Boolean doInBackground(File... files) {
@@ -226,7 +204,6 @@ public class ListExportFragment extends ListFragment implements ListExportActivi
 				return;
 			}
 
-			dismissDialog();
 			if (!result) {
 				Toast.makeText(mContext, getString(R.string.unable_delete_file), Toast.LENGTH_SHORT).show();
 			} else {
