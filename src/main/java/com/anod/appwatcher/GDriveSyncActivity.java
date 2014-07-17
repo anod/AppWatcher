@@ -33,6 +33,11 @@ public class GDriveSyncActivity extends FragmentActivity implements GDriveBackup
     }
 
     @Override
+    public void onGDriveConnect() {
+
+    }
+
+    @Override
     public void onGDriveActionStart() {
 
     }

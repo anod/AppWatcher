@@ -45,6 +45,8 @@ public class GDriveBackup implements GoogleApiClient.ConnectionCallbacks,
 
 
     private static final int ACTION_SYNC = 1;
+    private static final int ACTION_CONNECT = 2;
+
     public static final String APPLIST_JSON = "applist.json";
     private final Listener mListener;
 
@@ -57,6 +59,7 @@ public class GDriveBackup implements GoogleApiClient.ConnectionCallbacks,
 	private boolean mSupported;
 
     public interface Listener {
+        void onGDriveConnect();
 		void onGDriveActionStart();
 		void onGDriveDownloadFinish();
 		void onGDriveUploadFinish();
@@ -125,16 +128,30 @@ public class GDriveBackup implements GoogleApiClient.ConnectionCallbacks,
 	}
 
 	public void connect() {
-		if (mGoogleApiClient == null) {
-			mGoogleApiClient = new GoogleApiClient.Builder(mContext)
-				.addApi(Drive.API)
-				.addScope(Drive.SCOPE_APPFOLDER)
-				.addConnectionCallbacks(this)
-				.addOnConnectionFailedListener(this)
-				.build();
-		}
-		mGoogleApiClient.connect();
+        connectWithAction(ACTION_CONNECT);
 	}
+
+    public void sync() {
+        mListener.onGDriveActionStart();
+        if (!isConnected()) {
+            connectWithAction(ACTION_SYNC);
+        } else {
+            requestFileConnected();
+        }
+    }
+
+    protected void connectWithAction(int action) {
+        mOnConnectAction = action;
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(mContext)
+                    .addApi(Drive.API)
+                    .addScope(Drive.SCOPE_APPFOLDER)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .build();
+        }
+        mGoogleApiClient.connect();
+    }
 
 	public void disconnect() {
 		if (mGoogleApiClient != null) {
@@ -144,6 +161,7 @@ public class GDriveBackup implements GoogleApiClient.ConnectionCallbacks,
 
 	@Override
 	public void onConnected(Bundle bundle) {
+        mListener.onGDriveConnect();
 		if (mOnConnectAction == ACTION_SYNC) {
 			requestFileConnected();
 		}
@@ -173,16 +191,6 @@ public class GDriveBackup implements GoogleApiClient.ConnectionCallbacks,
 	}
 
 
-	public void sync() {
-		mListener.onGDriveActionStart();
-		if (!isConnected()) {
-            mOnConnectAction = ACTION_SYNC;
-			connect();
-		} else {
-			requestFileConnected();
-		}
-	}
-
 	private void requestFileConnected() {
 
         Query query = new Query.Builder()
@@ -206,7 +214,7 @@ public class GDriveBackup implements GoogleApiClient.ConnectionCallbacks,
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
 		if (requestCode == REQUEST_CODE_RESOLUTION && resultCode == Activity.RESULT_OK) {
-			connect();
+			connectWithAction(mOnConnectAction);
         }
 	}
 

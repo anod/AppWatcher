@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -59,6 +60,15 @@ abstract public class SettingsActionBarActivity extends ActionBarActivity implem
             super(title, R.layout.preference_holo);
             this.summaryRes = summaryRes;
             this.action = action;
+        }
+    }
+
+    public static class CheckboxItem extends Item {
+        public boolean checked = false;
+
+        public CheckboxItem(int title, int summaryRes, int action) {
+            super(title, summaryRes, action);
+            this.widget = R.layout.preference_widget_checkbox;
         }
     }
 
@@ -115,7 +125,15 @@ abstract public class SettingsActionBarActivity extends ActionBarActivity implem
 
                 final ViewGroup widgetFrame = (ViewGroup) view.findViewById(android.R.id.widget_frame);
                 if (item.widget > 0) {
-                    mInflater.inflate(item.widget, widgetFrame);
+
+                    if (item instanceof CheckboxItem) {
+                        CheckBox checkBox = (CheckBox) widgetFrame.findViewById(android.R.id.checkbox);
+                        if (checkBox == null) {
+                            mInflater.inflate(item.widget, widgetFrame);
+                            checkBox = (CheckBox) widgetFrame.findViewById(android.R.id.checkbox);
+                        }
+                        checkBox.setChecked(((CheckboxItem) item).checked);
+                    }
                 } else {
                     widgetFrame.setVisibility(View.GONE);
                 }
@@ -156,6 +174,7 @@ abstract public class SettingsActionBarActivity extends ActionBarActivity implem
     protected abstract void init();
     protected abstract ArrayList<Preference> getPreferenceItems();
     protected abstract void onPreferenceItemClick(int action, Item pref);
+
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Preference pref = (Preference) mListView.getItemAtPosition(position);
@@ -164,4 +183,10 @@ abstract public class SettingsActionBarActivity extends ActionBarActivity implem
             onPreferenceItemClick(action, (Item) pref);
         }
     }
+
+    protected void notifyDataSetChanged() {
+        PreferenceAdapter adapter = (PreferenceAdapter) mListView.getAdapter();
+        adapter.notifyDataSetChanged();
+    }
+
 }
