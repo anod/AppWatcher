@@ -206,8 +206,8 @@ public class SettingsActivity extends ActionBarActivity implements ExportTask.Li
             Throwable ex = new Throwable("Report a problem");
             rs.handleException(ex);
         } else {
-            if (mAboutCounter >=2) {
-                Toast.makeText(this, (5 - mAboutCounter + 1) + " taps to report a problem", Toast.LENGTH_SHORT).show();
+            if (mAboutCounter ==3 ) {
+                Toast.makeText(this, "1 more tap to report a problem", Toast.LENGTH_SHORT).show();
             }
             mAboutCounter++;
         }
