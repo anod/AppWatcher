@@ -1,6 +1,7 @@
 package com.anod.appwatcher.model;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import android.content.ContentProviderClient;
@@ -36,6 +37,8 @@ public class AppListContentProviderClient {
 	public AppListContentProviderClient(ContentProviderClient provider) {
 		mContentProviderClient = provider;
 	}
+
+
 	
 	/**
 	 * Query all applications in db
@@ -177,4 +180,13 @@ public class AppListContentProviderClient {
 
 		return info;
 	}
+
+    public void insertList(List<AppInfo> appList) {
+        Map<String, Boolean> currentIds = queryIdsMap();
+        for(AppInfo app : appList) {
+            if (currentIds.get(app.getAppId()) == null) {
+                insert(app);
+            }
+        }
+    }
 }

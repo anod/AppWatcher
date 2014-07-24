@@ -66,6 +66,13 @@ public class GDriveBackup implements GoogleApiClient.ConnectionCallbacks,
 		void onGDriveError();
 	}
 
+
+    public GDriveBackup(Activity activity, Listener listener) {
+        mContext = activity.getApplicationContext();
+        mActivity = activity;
+        mListener = listener;
+    }
+
     private ResultCallback<DriveApi.ContentsResult> mFileCreateRequest = new ResultCallback<DriveApi.ContentsResult>() {
         @Override
         public void onResult(DriveApi.ContentsResult contentsResult) {
@@ -121,11 +128,6 @@ public class GDriveBackup implements GoogleApiClient.ConnectionCallbacks,
 
     }
 
-    public GDriveBackup(Activity activity, Listener listener) {
-		mContext = activity.getApplicationContext();
-		mActivity = activity;
-		mListener = listener;
-	}
 
 	public void connect() {
         connectWithAction(ACTION_CONNECT);
@@ -136,7 +138,7 @@ public class GDriveBackup implements GoogleApiClient.ConnectionCallbacks,
         if (!isConnected()) {
             connectWithAction(ACTION_SYNC);
         } else {
-            requestFileConnected();
+            retrieveFileConnected();
         }
     }
 
@@ -163,7 +165,7 @@ public class GDriveBackup implements GoogleApiClient.ConnectionCallbacks,
 	public void onConnected(Bundle bundle) {
         mListener.onGDriveConnect();
 		if (mOnConnectAction == ACTION_SYNC) {
-			requestFileConnected();
+			retrieveFileConnected();
 		}
 	}
 
@@ -191,7 +193,7 @@ public class GDriveBackup implements GoogleApiClient.ConnectionCallbacks,
 	}
 
 
-	private void requestFileConnected() {
+	private void retrieveFileConnected() {
 
         Query query = new Query.Builder()
                 .addFilter(Filters.eq(SearchableField.TITLE, APPLIST_JSON))

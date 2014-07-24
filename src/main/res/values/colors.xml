@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="white">#FFFFFFFF</color>    
-    <color name="blue_shadow">#FFCCFF33</color>
-    <color name="blue_new">#FF33B5E5</color>
+    <color name="blue_focused">#b3e5fc</color>
+    <color name="blue_pressed">#81d4fa</color>
+    <color name="blue_new">#FF03a9f4</color>
     
     <color name="abs__background_holo_dark">#ff000000</color>
     <color name="abs__background_holo_light">#fff3f3f3</color>
@@ -13,8 +14,9 @@
 
 	<color name="text_dark">#ff292929</color>
 	<color name="row_grayout">#ffcccccc</color>
-	<color name="list_background">#ffe7e7e7</color>
-	<color name="green">#FF33B5E5</color>
-	<color name="gray_light">#ffB8B8B8</color>
+	<color name="list_background">#e1f5fe</color>
+	<color name="green">#FF03a9f4</color>
+	<color name="gray_light">#b3e5fc</color>
+
 </resources>
 

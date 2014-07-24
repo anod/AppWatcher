@@ -20,6 +20,7 @@ import com.android.util.MalformedJsonException;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.model.AppListCursor;
+import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.BitmapUtils;
 
 /**
@@ -107,29 +108,37 @@ public class ListExportManager {
 
 		File dataFile = new File(saveDir, filename + FILE_EXT_DAT);
 
-		AppListContentProviderClient cr = new AppListContentProviderClient(mContext);
-		AppListCursor listCursor = cr.queryAllSorted();
-        AppListWriter writer = new AppListWriter();
-		try {
-			synchronized (ListExportManager.sDataLock) {
-				BufferedWriter buf = new BufferedWriter(new FileWriter(dataFile));
-                writer.writeJSON(buf, listCursor);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-			listCursor.close();
-			return ERROR_FILE_WRITE;
-		} finally {
-			if (listCursor != null) {
-				listCursor.close();
-			}
-			cr.release();
-		}
-		saveDir.setLastModified(System.currentTimeMillis());
+        if (!writeList(dataFile)) {
+            return ERROR_FILE_WRITE;
+        }
+        saveDir.setLastModified(System.currentTimeMillis());
 		return RESULT_DONE;
 	}
 
-	/**
+    public boolean writeList(File dataFile) {
+        AppListWriter writer = new AppListWriter();
+        AppListContentProviderClient cr = new AppListContentProviderClient(mContext);
+        AppListCursor listCursor = cr.queryAllSorted();
+        try {
+            synchronized (ListExportManager.sDataLock) {
+                BufferedWriter buf = new BufferedWriter(new FileWriter(dataFile));
+                writer.writeJSON(buf, listCursor);
+            }
+        } catch (IOException e) {
+            AppLog.ex(e);
+            listCursor.close();
+            cr.release();
+            return false;
+        } finally {
+            if (listCursor != null) {
+                listCursor.close();
+            }
+            cr.release();
+        }
+        return true;
+    }
+
+    /**
 	 * Import list from backup
 	 * @param filename
 	 * @return
@@ -148,28 +157,23 @@ public class ListExportManager {
 			return ERROR_FILE_READ;
 		}
 
-		List<AppInfo> appList = null;
         AppListReader reader = new AppListReader();
-		try {
+        List<AppInfo> appList = null;
+        try {
 			synchronized (ListExportManager.sDataLock) {
 				BufferedReader buf = new BufferedReader(new FileReader(dataFile));
 				appList = reader.readFromJson(buf);
 			}
 		} catch (MalformedJsonException e) {
-			e.printStackTrace();
+            AppLog.ex(e);
 			return ERROR_DESERIALIZE;
 		} catch (IOException e) {
-			e.printStackTrace();
+            AppLog.ex(e);
 			return ERROR_FILE_READ;
 		}
 		if (appList != null && appList.size() > 0) {
 			AppListContentProviderClient cr = new AppListContentProviderClient(mContext);
-			Map<String, Boolean> currentIds = cr.queryIdsMap();
-			for(AppInfo app : appList) {
-				if (currentIds.get(app.getAppId()) == null) {
-					cr.insert(app);
-				}
-			}
+            cr.insertList(appList);
 			cr.release();
 		}
 		return RESULT_DONE;
