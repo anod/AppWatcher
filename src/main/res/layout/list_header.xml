@@ -17,7 +17,7 @@
 			android:ellipsize="end"
 			android:focusable="false"
 			android:singleLine="true"
-			style="@style/ListHeader"></TextView>
+			style="@style/ListHeader"/>
 
 	<TextView
 			android:id="@+id/sec_header_count"
@@ -25,5 +25,5 @@
 			android:layout_height="wrap_content"
 			android:text="6"
 			android:textColor="@color/gray_light"
-			style="@style/ListHeader"></TextView>
+			style="@style/ListHeader"/>
 </LinearLayout>

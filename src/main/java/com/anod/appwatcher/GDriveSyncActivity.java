@@ -4,20 +4,20 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 
-import com.anod.appwatcher.backup.GDriveBackup;
+import com.anod.appwatcher.backup.GDriveSync;
 
-public class GDriveSyncActivity extends FragmentActivity implements GDriveBackup.Listener {
+public class GDriveSyncActivity extends FragmentActivity implements GDriveSync.Listener {
 
-    private GDriveBackup mGDriveBackup;
+    private GDriveSync mGDriveSync;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gdrive_sync);
 
-        mGDriveBackup = new GDriveBackup(this, this);
+        mGDriveSync = new GDriveSync(this, this);
 
-        if (!mGDriveBackup.isSupported()) {
+        if (!mGDriveSync.isSupported()) {
             // TODO: toast
             finish();
             return;
@@ -28,7 +28,7 @@ public class GDriveSyncActivity extends FragmentActivity implements GDriveBackup
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        mGDriveBackup.onActivityResult(requestCode,resultCode,data);
+        mGDriveSync.onActivityResult(requestCode,resultCode,data);
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -43,12 +43,12 @@ public class GDriveSyncActivity extends FragmentActivity implements GDriveBackup
     }
 
     @Override
-    public void onGDriveDownloadFinish() {
+    public void onGDriveSyncProgress() {
 
     }
 
     @Override
-    public void onGDriveUploadFinish() {
+    public void onGDriveSyncStart() {
 
     }
 

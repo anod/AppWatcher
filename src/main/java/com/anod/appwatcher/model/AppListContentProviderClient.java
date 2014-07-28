@@ -130,6 +130,20 @@ public class AppListContentProviderClient {
 		}
 		return 0;
 	}
+
+    public int cleanDeleted() {
+        int numRows = 0;
+        try {
+            numRows=mContentProviderClient.delete(
+                AppListContentProvider.CONTENT_URI,
+                AppListTable.Columns.KEY_STATUS + " = ?",
+                new String[]{ String.valueOf(AppInfoMetadata.STATUS_DELETED)}
+            );
+        } catch (RemoteException e) {
+            AppLog.ex(e);
+        }
+        return numRows;
+    }
 	
 	public void release() {
 		if (mContentProviderClient != null) {

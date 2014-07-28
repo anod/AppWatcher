@@ -61,6 +61,7 @@
     </content>
     <orderEntry type="jdk" jdkName="Android API 19 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" exported="" name="android-agent-3.419.0" level="project" />
     <orderEntry type="library" exported="" name="appcompat-v7-19.1.0" level="project" />
     <orderEntry type="library" exported="" name="CWAC-AdapterWrapper" level="project" />
     <orderEntry type="library" exported="" name="support-v4-19.1.0" level="project" />
@@ -69,7 +70,6 @@
     <orderEntry type="library" exported="" name="circleimageview-1.1.0" level="project" />
     <orderEntry type="library" exported="" name="acra-4.5.0" level="project" />
     <orderEntry type="library" exported="" name="androidmarketapi-0.6" level="project" />
-    <orderEntry type="library" exported="" name="android-agent-3.407.0" level="project" />
   </component>
 </module>
 

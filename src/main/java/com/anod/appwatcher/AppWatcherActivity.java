@@ -267,16 +267,6 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
             Intent gdriveSync = new Intent(this, SettingsActivity.class);
             startActivity(gdriveSync);
             return true;
-        /*
-		case R.id.menu_about:
-			AboutDialogFragment aboutDialog = AboutDialogFragment.newInstance();
-			aboutDialog.show(getSupportFragmentManager(), "aboutDialog");
-			return true;
-        case R.id.menu_gdrive_sync:
-            Intent gdriveSync = new Intent(this, GDriveSyncActivity.class);
-            startActivity(gdriveSync);
-            return true;
-            */
 		default:
 			return true;
 		}

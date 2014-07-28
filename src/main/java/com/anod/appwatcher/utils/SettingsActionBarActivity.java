@@ -1,9 +1,6 @@
 package com.anod.appwatcher.utils;
 
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.text.TextUtils;
@@ -16,21 +13,11 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.anod.appwatcher.ListExportActivity;
 import com.anod.appwatcher.R;
-import com.anod.appwatcher.backup.ExportTask;
-import com.anod.appwatcher.backup.GDriveBackup;
-import com.anod.appwatcher.backup.ListExportManager;
-
-import org.acra.ACRA;
-import org.acra.ErrorReporter;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import de.psdev.licensesdialog.LicensesDialog;
 
 abstract public class SettingsActionBarActivity extends ActionBarActivity implements AdapterView.OnItemClickListener {
     protected ListView mListView;

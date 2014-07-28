@@ -6,7 +6,7 @@ import android.content.res.Resources;
 import android.widget.Toast;
 
 import com.anod.appwatcher.backup.ExportTask;
-import com.anod.appwatcher.backup.GDriveBackup;
+import com.anod.appwatcher.backup.GDriveSync;
 import com.anod.appwatcher.backup.ListExportManager;
 import com.anod.appwatcher.utils.EmailReportSender;
 import com.anod.appwatcher.utils.SettingsActionBarActivity;
@@ -18,7 +18,7 @@ import java.util.ArrayList;
 
 import de.psdev.licensesdialog.LicensesDialog;
 
-public class SettingsActivity extends SettingsActionBarActivity implements ExportTask.Listener, GDriveBackup.Listener {
+public class SettingsActivity extends SettingsActionBarActivity implements ExportTask.Listener, GDriveSync.Listener {
     private static final int ACTION_EXPORT = 3;
     private static final int ACTION_IMPORT = 4;
     private static final int ACTION_LICENSES = 6;
@@ -27,7 +27,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     private static final int ACTION_SYNC_NOW = 2;
 
     private int mAboutCounter;
-    private GDriveBackup mGDriveBackup;
+    private GDriveSync mGDriveSync;
     private CheckboxItem mSyncEnabledItem;
     private Item mSyncNowItem;
 
@@ -56,7 +56,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
 
     @Override
     protected void init() {
-        mGDriveBackup = new GDriveBackup(this, this);
+        mGDriveSync = new GDriveSync(this, this);
         mAboutCounter = 0;
     }
 
@@ -68,7 +68,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
 
         mSyncEnabledItem = new CheckboxItem(R.string.pref_title_drive_sync_enabled, R.string.pref_descr_drive_sync_enabled, ACTION_SYNC_ENABLE);
         mSyncNowItem = new Item(R.string.pref_title_drive_sync_now, R.string.pref_descr_drive_sync_now, ACTION_SYNC_NOW);
-        if (!mGDriveBackup.isSupported()) {
+        if (!mGDriveSync.isSupported()) {
             mSyncEnabledItem.checked = false;
             mSyncEnabledItem.enabled = false;
             mSyncNowItem.enabled = false;
@@ -96,7 +96,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        mGDriveBackup.onActivityResult(requestCode, resultCode, data);
+        mGDriveSync.onActivityResult(requestCode, resultCode, data);
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -114,10 +114,10 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
             mSyncEnabledItem.checked=!mSyncEnabledItem.checked;
             notifyDataSetChanged();
             if (mSyncEnabledItem.checked) {
-                mGDriveBackup.connect();
+                mGDriveSync.connect();
             }
         } if (action==ACTION_SYNC_NOW) {
-            mGDriveBackup.sync();
+            mGDriveSync.sync();
         }
     }
 
@@ -167,14 +167,15 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     }
 
     @Override
-    public void onGDriveDownloadFinish() {
-        Toast.makeText(this,"Google Drive finish",Toast.LENGTH_SHORT).show();
+    public void onGDriveSyncProgress() {
+
     }
 
     @Override
-    public void onGDriveUploadFinish() {
-        Toast.makeText(this,"Google Drive finish",Toast.LENGTH_SHORT).show();
+    public void onGDriveSyncStart() {
+
     }
+
 
     @Override
     public void onGDriveError() {

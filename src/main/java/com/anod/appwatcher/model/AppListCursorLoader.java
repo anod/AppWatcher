@@ -23,9 +23,18 @@ public class AppListCursorLoader extends CursorLoader {
 			AppListTable.Columns.KEY_STATUS + " DESC, " +AppListTable.Columns.KEY_TITLE + " COLLATE LOCALIZED ASC"
 		);
 		if (!TextUtils.isEmpty(titleFilter)) {
-			setSelection(AppListTable.Columns.KEY_TITLE + " LIKE ?");
-			setSelectionArgs(new String[] { "%"+titleFilter+"%" });
-		}
+			setSelection(
+                    AppListTable.Columns.KEY_STATUS + " != ? AND " +
+                    AppListTable.Columns.KEY_TITLE + " LIKE ?"
+            );
+			setSelectionArgs(new String[] {
+                    String.valueOf( AppInfoMetadata.STATUS_DELETED ),
+                    "%"+titleFilter+"%"
+            });
+		} else {
+            setSelection(AppListTable.Columns.KEY_STATUS + " != ? ");
+            setSelectionArgs(new String[] { String.valueOf( AppInfoMetadata.STATUS_DELETED ) });
+        }
 	}
 
 	@Override

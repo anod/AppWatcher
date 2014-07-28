@@ -47,7 +47,7 @@ public class AppListReader {
      * @return app info
      * @throws IOException
      */
-    private AppInfo readAppInfo(JsonReader reader) throws IOException {
+    public AppInfo readAppInfo(JsonReader reader) throws IOException {
         String appId = null, pname = null, versionName = "", title = "", creator = "";
         int versionNumber = 0, status = 0;
         long updateTime = 0;
