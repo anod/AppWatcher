@@ -248,7 +248,6 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 					holder.price.setText(app.getPriceText());
 				}
 			}
-
 			if (mNewAppsCount > 0 && TextUtils.isEmpty(mCurFilter)) {
 				if (holder.position == 0) {
 					holder.sectionText.setText(context.getString(R.string.recently_updated));
@@ -512,8 +511,6 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 
     @Override
     public void onRefresh() {
-        if (!mSwipeLayout.isRefreshing()) {
-            ((AppWatcherActivity) getActivity()).requestRefresh();
-        }
+        ((AppWatcherActivity) getActivity()).requestRefresh();
     }
 }

@@ -13,7 +13,7 @@
 			android:layout_width="0dp"
 			android:layout_weight="1"
 			android:text="Recently updated"
-			android:textColor="@color/gray_light"
+			android:textColor="@color/list_header_text"
 			android:ellipsize="end"
 			android:focusable="false"
 			android:singleLine="true"
@@ -24,6 +24,6 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:text="6"
-			android:textColor="@color/gray_light"
+			android:textColor="@color/list_header_text"
 			style="@style/ListHeader"/>
 </LinearLayout>
