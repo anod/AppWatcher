@@ -6,7 +6,7 @@
     <string name="pref_title_drive_sync_enabled">Google Drive sync</string>
     <string name="pref_descr_drive_sync_enabled">Synchronize current list with Google Drive</string>
     <string name="pref_title_drive_sync_now">Sync now</string>
-    <string name="pref_descr_drive_sync_now">Last synced %$1s</string>
+    <string name="pref_descr_drive_sync_now">Last synced: %1$s</string>
 
     <!-- Example settings for List backup -->
     <string name="pref_header_backup">List backup</string>

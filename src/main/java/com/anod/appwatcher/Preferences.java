@@ -5,104 +5,119 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 public class Preferences {
-	private static final String VIEWED = "viewed";
-	private static final String FIRT_LAUNCH = "firt_launch";
-	private static final String LAST_UPDATE_TIME = "last_update_time";
-	private static final String WIFI_ONLY = "wifi_only";
-	private static final String DEVICE_ID = "device_id";
-	private static final String DEVICE_ID_MESSAGE = "device_id_message";
-	private static final String ACCOUNT_NAME = "account_name";
-	private static final String ACCOUNT_TYPE = "account_type";
+    private static final String VIEWED = "viewed";
+    private static final String FIRT_LAUNCH = "firt_launch";
+    private static final String LAST_UPDATE_TIME = "last_update_time";
+    private static final String WIFI_ONLY = "wifi_only";
+    private static final String DEVICE_ID = "device_id";
+    private static final String DEVICE_ID_MESSAGE = "device_id_message";
+    private static final String ACCOUNT_NAME = "account_name";
+    private static final String ACCOUNT_TYPE = "account_type";
 
 
-	private static final String PREFS_NAME = "WatcherPrefs";
-	
-	private SharedPreferences mSettings;
-	
-	public Preferences(Context context) {
-		mSettings = context.getSharedPreferences(PREFS_NAME, 0);
-	}
+    private static final String PREFS_NAME = "WatcherPrefs";
+    public static final String DRIVE_SYNC = "drive_sync";
+    public static final String DRIVE_SYNC_TIME = "drive_sync_time";
 
-	public Account getAccount() {
-		String name = mSettings.getString(ACCOUNT_NAME, null);
+    private SharedPreferences mSettings;
 
-		if (name == null ){
-			return null;
-		}
+    public Preferences(Context context) {
+        mSettings = context.getSharedPreferences(PREFS_NAME, 0);
+    }
 
-		String type = mSettings.getString(ACCOUNT_TYPE, null);
+    public Account getAccount() {
+        String name = mSettings.getString(ACCOUNT_NAME, null);
 
-		return new Account(name, type);
-	}
+        if (name == null) {
+            return null;
+        }
 
-	public boolean checkFirstLaunch() {
-		boolean value = mSettings.getBoolean(FIRT_LAUNCH, true);
-		if (value) {
-			SharedPreferences.Editor editor = mSettings.edit();
-			editor.putBoolean(FIRT_LAUNCH, false);
-			editor.commit();
-		}
-		return value;
-	}
-	
-	public long getLastUpdateTime() {
-		return mSettings.getLong(LAST_UPDATE_TIME, -1);
-	}
-	
-	public boolean isDeviceIdMessageEnabled() {
-		return mSettings.getBoolean(DEVICE_ID_MESSAGE, true);
-	}
-	
-	public void disableDeviceIdMessage() {
-		SharedPreferences.Editor editor = mSettings.edit();
-		editor.putBoolean(DEVICE_ID_MESSAGE, false);
-		editor.commit();
-	}
-	
-	public String getDeviceId() {
-		return mSettings.getString(DEVICE_ID, null);
-	}
-	
-	public boolean isWifiOnly() {
-		return mSettings.getBoolean(WIFI_ONLY, false);
-	}
-	
-	public void saveDeviceId(String deviceId) {
-		SharedPreferences.Editor editor = mSettings.edit();
-		if (deviceId == null || deviceId.length() == 0 ) {
-			editor.remove(DEVICE_ID);
-		} else {
-			editor.putString(DEVICE_ID, deviceId);
-		}
-		editor.commit();
-	}
-	
-	public void saveWifiOnly(boolean useWifiOnly) {
-		SharedPreferences.Editor editor = mSettings.edit();
-		editor.putBoolean(WIFI_ONLY, useWifiOnly);
-		editor.commit();
-	}
+        String type = mSettings.getString(ACCOUNT_TYPE, null);
 
-	public void updateLastTime(long time) {
-		SharedPreferences.Editor editor = mSettings.edit();
-		editor.putLong(LAST_UPDATE_TIME, time);
-		editor.commit();
-	}
+        return new Account(name, type);
+    }
 
-	public void markViewed(boolean viewed) {
-		SharedPreferences.Editor editor = mSettings.edit();
-		editor.putBoolean(VIEWED, viewed);
-		editor.commit();
-	}
+    public boolean checkFirstLaunch() {
+        boolean value = mSettings.getBoolean(FIRT_LAUNCH, true);
+        if (value) {
+            saveBoolean(FIRT_LAUNCH, false);
+        }
+        return value;
+    }
 
-	public void updateAccount(Account account) {
-		SharedPreferences.Editor editor = mSettings.edit();
-		editor.putString(ACCOUNT_NAME, account.name);
-		editor.putString(ACCOUNT_TYPE, account.type);
-		editor.commit();
-	}
+    public long getLastUpdateTime() {
+        return mSettings.getLong(LAST_UPDATE_TIME, -1);
+    }
 
-	public boolean isLastUpdatesViewed() {
-		return mSettings.getBoolean(VIEWED, true);
-	}
+
+    public String getDeviceId() {
+        return mSettings.getString(DEVICE_ID, null);
+    }
+
+    public boolean isWifiOnly() {
+        return mSettings.getBoolean(WIFI_ONLY, false);
+    }
+
+    public void saveDeviceId(String deviceId) {
+        SharedPreferences.Editor editor = mSettings.edit();
+        if (deviceId == null || deviceId.length() == 0) {
+            editor.remove(DEVICE_ID);
+        } else {
+            editor.putString(DEVICE_ID, deviceId);
+        }
+        editor.commit();
+    }
+
+    public void saveWifiOnly(boolean useWifiOnly) {
+        saveBoolean(WIFI_ONLY, useWifiOnly);
+    }
+
+
+    public void updateLastTime(long time) {
+        saveLong(LAST_UPDATE_TIME, time);
+    }
+
+    public void markViewed(boolean viewed) {
+        saveBoolean(VIEWED, viewed);
+    }
+
+    public void updateAccount(Account account) {
+        SharedPreferences.Editor editor = mSettings.edit();
+        editor.putString(ACCOUNT_NAME, account.name);
+        editor.putString(ACCOUNT_TYPE, account.type);
+        editor.commit();
+    }
+
+    public boolean isLastUpdatesViewed() {
+        return mSettings.getBoolean(VIEWED, true);
+    }
+
+    public boolean isDriveSyncEnabled() {
+        return mSettings.getBoolean(DRIVE_SYNC, false);
+    }
+
+    public void saveDriveSyncEnabled(boolean enabled) {
+        saveBoolean(DRIVE_SYNC, enabled);
+    }
+
+    public long getLastDriveSyncTime() {
+        return mSettings.getLong(DRIVE_SYNC_TIME, -1);
+    }
+
+    public void saveDriveSyncTime(long time) {
+        saveLong(DRIVE_SYNC_TIME, time);
+
+    }
+
+    private void saveBoolean(String key, boolean value) {
+        SharedPreferences.Editor editor = mSettings.edit();
+        editor.putBoolean(key, value);
+        editor.commit();
+    }
+
+    private void saveLong(String key, long value) {
+        SharedPreferences.Editor editor = mSettings.edit();
+        editor.putLong(key, value);
+        editor.commit();
+    }
 }

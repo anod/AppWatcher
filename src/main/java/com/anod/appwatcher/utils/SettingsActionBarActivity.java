@@ -38,7 +38,7 @@ abstract public class SettingsActionBarActivity extends ActionBarActivity implem
 
     public static class Item extends Preference {
         final int action;
-        final int summaryRes;
+        public int summaryRes;
         public String summary;
         public int widget;
         public boolean enabled = true;

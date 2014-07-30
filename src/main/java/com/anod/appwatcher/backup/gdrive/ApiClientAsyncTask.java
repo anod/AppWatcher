@@ -31,7 +31,6 @@ public abstract class ApiClientAsyncTask<Params, Progress, Result>
 
     @Override
     protected final Result doInBackground(Params... params) {
-        android.os.Debug.waitForDebugger();
         Log.d("TAG", "in background");
         final CountDownLatch latch = new CountDownLatch(1);
         mClient.registerConnectionCallbacks(new ConnectionCallbacks() {

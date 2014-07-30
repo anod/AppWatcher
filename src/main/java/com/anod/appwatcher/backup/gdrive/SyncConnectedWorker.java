@@ -31,51 +31,24 @@ import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 /**
- * Created by alex on 7/29/14.
+ * Created by alex on 7/30/14.
  */
-public class SyncTask extends ApiClientAsyncTask<Boolean, Boolean, SyncTask.Result> {
+public class SyncConnectedWorker {
     public static final String APPLIST_JSON = "applist.json";
     public static final String MIME_TYPE = "application/json";
-    private final Listener mListener;
 
-    public static class Result {
-        public boolean status;
-        public Exception ex;
+    private final Context mContext;
+    private final GoogleApiClient mGoogleApiClient;
 
-        public Result(boolean status, Exception ex) {
-            this.status = status;
-            this.ex = ex;
-        }
+    public SyncConnectedWorker(Context context, GoogleApiClient client) {
+        mContext = context;
+        mGoogleApiClient = client;
     }
 
-    public interface Listener {
-        public void onResult(Result result);
+    public GoogleApiClient getGoogleApiClient() {
+        return mGoogleApiClient;
     }
-
-    public SyncTask(Context context, Listener listener, GoogleApiClient client) {
-        super(context, client);
-        mListener = listener;
-    }
-
-    @Override
-    protected Result doInBackgroundConnected(Boolean... params) {
-
-        try {
-            doSyncInBackground();
-        } catch (Exception e) {
-            AppLog.ex(e);
-            return new Result(false, e);
-        }
-
-        return new Result(true, null);
-    }
-
-    @Override
-    protected void onPostExecute(Result result) {
-        mListener.onResult(result);
-    }
-
-    private void doSyncInBackground() throws Exception {
+    public void doSyncInBackground() throws Exception {
         DriveId driveId = retrieveFileDriveId();
 
         InputStreamReader driveFileReader = null;
@@ -119,6 +92,7 @@ public class SyncTask extends ApiClientAsyncTask<Boolean, Boolean, SyncTask.Resu
             if (listCursor != null) {
                 listCursor.close();
             }
+            outputStream.close();;
         }
         com.google.android.gms.common.api.Status status = target.commitAndCloseContents(
                 getGoogleApiClient(), contentsResult.getContents()).await();
@@ -184,7 +158,7 @@ public class SyncTask extends ApiClientAsyncTask<Boolean, Boolean, SyncTask.Resu
         MetadataBuffer metadataList = metadataBufferResult.getMetadataBuffer();
         if (metadataList.getCount() == 0) {
             AppLog.d("File not found " + APPLIST_JSON);
-           return null;
+            return null;
         } else {
             Metadata metadata = metadataList.get(0);
             return metadata.getDriveId();

@@ -3,6 +3,7 @@ package com.anod.appwatcher;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.text.format.DateUtils;
 import android.widget.Toast;
 
 import com.anod.appwatcher.backup.ExportTask;
@@ -30,15 +31,16 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     private GDriveSync mGDriveSync;
     private CheckboxItem mSyncEnabledItem;
     private Item mSyncNowItem;
+    private Preferences mPrefs;
 
     @Override
     public void onExportStart() {
-        setSupportProgressBarIndeterminate(true);
+        setSupportProgressBarIndeterminateVisibility(true);
     }
 
     @Override
     public void onExportFinish(int code) {
-        setSupportProgressBarIndeterminate(true);
+        setSupportProgressBarIndeterminateVisibility(false);
         Resources r = getResources();
         if (code == ListExportManager.RESULT_DONE) {
             Toast.makeText(this, r.getString(R.string.export_done), Toast.LENGTH_SHORT).show();
@@ -57,6 +59,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     @Override
     protected void init() {
         mGDriveSync = new GDriveSync(this, this);
+        mPrefs = new Preferences(this);
         mAboutCounter = 0;
     }
 
@@ -67,14 +70,24 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
         preferences.add(new Category(R.string.pref_header_drive_sync));
 
         mSyncEnabledItem = new CheckboxItem(R.string.pref_title_drive_sync_enabled, R.string.pref_descr_drive_sync_enabled, ACTION_SYNC_ENABLE);
-        mSyncNowItem = new Item(R.string.pref_title_drive_sync_now, R.string.pref_descr_drive_sync_now, ACTION_SYNC_NOW);
+        mSyncNowItem = new Item(R.string.pref_title_drive_sync_now, 0, ACTION_SYNC_NOW);
         if (!mGDriveSync.isSupported()) {
             mSyncEnabledItem.checked = false;
             mSyncEnabledItem.enabled = false;
             mSyncNowItem.enabled = false;
+            mSyncEnabledItem.summaryRes=0;
+            mSyncEnabledItem.summary = mGDriveSync.getPlayServiceStatusText();
         } else {
-            mSyncEnabledItem.checked = false;
+            mSyncEnabledItem.checked = mPrefs.isDriveSyncEnabled();
             mSyncNowItem.enabled = mSyncEnabledItem.checked;
+            long time = mPrefs.getLastDriveSyncTime();
+            if (time == -1) {
+                mSyncNowItem.summary = getString(R.string.pref_descr_drive_sync_now, getString(R.string.never));
+            } else {
+                mSyncNowItem.summary = getString(R.string.pref_descr_drive_sync_now,
+                        DateUtils.getRelativeDateTimeString(this, time, 0, DateUtils.WEEK_IN_MILLIS, DateUtils.FORMAT_ABBREV_ALL)
+                );
+            }
         }
         preferences.add(mSyncEnabledItem);
         preferences.add(mSyncNowItem);
@@ -114,6 +127,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
             mSyncEnabledItem.checked=!mSyncEnabledItem.checked;
             notifyDataSetChanged();
             if (mSyncEnabledItem.checked) {
+                setSupportProgressBarIndeterminateVisibility(true);
                 mGDriveSync.connect();
             }
         } if (action==ACTION_SYNC_NOW) {
@@ -156,7 +170,9 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
         mSyncEnabledItem.checked=true;
         mSyncEnabledItem.enabled=true;
         mSyncNowItem.enabled=true;
+        mPrefs.saveDriveSyncEnabled(true);
         notifyDataSetChanged();
+        setSupportProgressBarIndeterminateVisibility(false);
 
         Toast.makeText(this,"Google Drive connected",Toast.LENGTH_SHORT).show();
     }
@@ -168,22 +184,23 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
 
     @Override
     public void onGDriveSyncStart() {
+        setSupportProgressBarIndeterminateVisibility(true);
         Toast.makeText(this,"Google Drive start",Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onGDriveSyncFinish() {
+        setSupportProgressBarIndeterminateVisibility(false);
+        mPrefs.saveDriveSyncTime(System.currentTimeMillis());
+        mSyncNowItem.summary = getString(R.string.pref_descr_drive_sync_now, getString(R.string.now));
+        notifyDataSetChanged();
         Toast.makeText(this,"Google Drive finish",Toast.LENGTH_SHORT).show();
     }
 
 
     @Override
     public void onGDriveError() {
-        mSyncEnabledItem.checked=false;
-        mSyncEnabledItem.enabled=false;
-        mSyncNowItem.enabled=false;
-        notifyDataSetChanged();
-
+        setSupportProgressBarIndeterminateVisibility(false);
         Toast.makeText(this,"Google Drive error",Toast.LENGTH_SHORT).show();
     }
 }
