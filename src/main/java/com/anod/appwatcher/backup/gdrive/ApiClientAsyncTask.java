@@ -1,6 +1,6 @@
 // Copyright 2013 Google Inc. All Rights Reserved.
 
-package com.anod.appwatcher.gms;
+package com.anod.appwatcher.backup.gdrive;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -23,16 +23,15 @@ public abstract class ApiClientAsyncTask<Params, Progress, Result>
 
     private GoogleApiClient mClient;
 	protected Context mContext;
-    public ApiClientAsyncTask(Context context) {
-        GoogleApiClient.Builder builder = new GoogleApiClient.Builder(context)
-                .addApi(Drive.API)
-                .addScope(Drive.SCOPE_FILE);
-        mClient = builder.build();
+    public ApiClientAsyncTask(Context context, GoogleApiClient client) {
+
+        mClient = client;
 		mContext = context;
     }
 
     @Override
     protected final Result doInBackground(Params... params) {
+        android.os.Debug.waitForDebugger();
         Log.d("TAG", "in background");
         final CountDownLatch latch = new CountDownLatch(1);
         mClient.registerConnectionCallbacks(new ConnectionCallbacks() {

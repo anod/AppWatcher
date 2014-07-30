@@ -42,7 +42,6 @@ public class GDriveSync implements GoogleApiClient.ConnectionCallbacks,
 
     public interface Listener {
         void onGDriveConnect();
-		void onGDriveActionStart();
         void onGDriveSyncProgress();
         void onGDriveSyncStart();
         void onGDriveSyncFinish();
@@ -61,20 +60,25 @@ public class GDriveSync implements GoogleApiClient.ConnectionCallbacks,
 	}
 
     public void sync() {
-        mListener.onGDriveActionStart();
+        mListener.onGDriveSyncStart();
         if (!isConnected()) {
             connectWithAction(ACTION_SYNC);
         } else {
-            new SyncTask(mContext, this).execute(true);
+            new SyncTask(mContext, this, createGoogleApiClientBuilder().build()).execute(true);
         }
+    }
+
+    protected GoogleApiClient.Builder createGoogleApiClientBuilder() {
+        return new GoogleApiClient.Builder(mContext)
+                .addApi(Drive.API)
+                .addScope(Drive.SCOPE_APPFOLDER);
     }
 
     protected void connectWithAction(int action) {
         mOnConnectAction = action;
         if (mGoogleApiClient == null) {
-            mGoogleApiClient = new GoogleApiClient.Builder(mContext)
-                    .addApi(Drive.API)
-                    .addScope(Drive.SCOPE_APPFOLDER)
+
+            mGoogleApiClient = createGoogleApiClientBuilder()
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
                     .build();
@@ -92,7 +96,7 @@ public class GDriveSync implements GoogleApiClient.ConnectionCallbacks,
 	public void onConnected(Bundle bundle) {
         mListener.onGDriveConnect();
 		if (mOnConnectAction == ACTION_SYNC) {
-            new SyncTask(mContext, this).execute(true);
+            new SyncTask(mContext, this, createGoogleApiClientBuilder().build()).execute(true);
         }
 	}
 
@@ -136,6 +140,11 @@ public class GDriveSync implements GoogleApiClient.ConnectionCallbacks,
 
     @Override
     public void onResult(SyncTask.Result result) {
+        if (result == null) {
+            //Connection error
+            mListener.onGDriveError();
+            return;
+        }
         if (result.status) {
             mListener.onGDriveSyncFinish();
         } else {

@@ -1,16 +1,14 @@
 package com.anod.appwatcher.backup.gdrive;
 
 import android.content.Context;
-import android.os.AsyncTask;
-import android.widget.Toast;
 
 import com.anod.appwatcher.backup.AppListReaderIterator;
 import com.anod.appwatcher.backup.AppListWriter;
-import com.anod.appwatcher.gms.ApiClientAsyncTask;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.model.AppListCursor;
 import com.anod.appwatcher.utils.AppLog;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.drive.Drive;
 import com.google.android.gms.drive.DriveApi;
 import com.google.android.gms.drive.DriveFile;
@@ -54,8 +52,8 @@ public class SyncTask extends ApiClientAsyncTask<Boolean, Boolean, SyncTask.Resu
         public void onResult(Result result);
     }
 
-    public SyncTask(Context context, Listener listener) {
-        super(context);
+    public SyncTask(Context context, Listener listener, GoogleApiClient client) {
+        super(context, client);
         mListener = listener;
     }
 

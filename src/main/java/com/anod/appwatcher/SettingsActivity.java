@@ -162,23 +162,18 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     }
 
     @Override
-    public void onGDriveActionStart() {
-        Toast.makeText(this,"Google Drive start",Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
     public void onGDriveSyncProgress() {
 
     }
 
     @Override
     public void onGDriveSyncStart() {
-
+        Toast.makeText(this,"Google Drive start",Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onGDriveSyncFinish() {
-
+        Toast.makeText(this,"Google Drive finish",Toast.LENGTH_SHORT).show();
     }
 
 
