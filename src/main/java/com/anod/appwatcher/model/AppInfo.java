@@ -8,14 +8,12 @@ import com.gc.android.market.api.model.Market.App;
 public class AppInfo extends AppInfoMetadata{
 
 	private int rowId;
-	private String appId;
 	private String packageName;
 	private int versionNumber;
 	private String versionName;
 	private String title;
 	private String creator;	
 	private Bitmap icon;
-	private int status;
 	private long updateTime;
 	private String priceText;
 	private String priceCur;
@@ -131,12 +129,6 @@ public class AppInfo extends AppInfoMetadata{
 		this.rowId = rowId;
 	}
 	
-	/**
-	 * @param status
-	 */
-	public void setStatus(int status) {
-		this.status = status;
-	}
 
 	/**
 	 * @param updateTime

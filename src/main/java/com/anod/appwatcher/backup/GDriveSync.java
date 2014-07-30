@@ -7,33 +7,15 @@ import android.content.IntentSender;
 import android.os.Bundle;
 import android.widget.Toast;
 
-import com.anod.appwatcher.backup.gdrive.ReadTask;
-import com.anod.appwatcher.backup.gdrive.WriteTask;
-import com.anod.appwatcher.model.AppInfo;
-import com.anod.appwatcher.model.AppListContentProviderClient;
-import com.anod.appwatcher.model.AppListCursor;
+import com.anod.appwatcher.backup.gdrive.SyncTask;
 import com.anod.appwatcher.utils.ActivityListener;
 import com.anod.appwatcher.utils.AppLog;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.drive.Drive;
-import com.google.android.gms.drive.DriveApi;
-import com.google.android.gms.drive.DriveFolder;
-import com.google.android.gms.drive.DriveId;
-import com.google.android.gms.drive.Metadata;
-import com.google.android.gms.drive.MetadataBuffer;
-import com.google.android.gms.drive.MetadataChangeSet;
-import com.google.android.gms.drive.query.Filters;
-import com.google.android.gms.drive.query.Query;
-import com.google.android.gms.drive.query.SearchableField;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author alex
@@ -41,18 +23,12 @@ import java.util.Map;
  */
 public class GDriveSync implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
-        ActivityListener.ResultListener,
-        ReadTask.Listener, WriteTask.Listener
-{
+        ActivityListener.ResultListener, SyncTask.Listener {
 	public static final int REQUEST_CODE_RESOLUTION = 123;
-
-	public static final String MIME_TYPE = "application/json";
-
 
     private static final int ACTION_SYNC = 1;
     private static final int ACTION_CONNECT = 2;
 
-    public static final String APPLIST_JSON = "applist.json";
     private final Listener mListener;
 
     private GoogleApiClient mGoogleApiClient;
@@ -63,11 +39,13 @@ public class GDriveSync implements GoogleApiClient.ConnectionCallbacks,
 	private File mFile;
 	private boolean mSupported;
 
+
     public interface Listener {
         void onGDriveConnect();
 		void onGDriveActionStart();
         void onGDriveSyncProgress();
         void onGDriveSyncStart();
+        void onGDriveSyncFinish();
 		void onGDriveError();
 	}
 
@@ -75,102 +53,6 @@ public class GDriveSync implements GoogleApiClient.ConnectionCallbacks,
         mContext = activity.getApplicationContext();
         mActivity = activity;
         mListener = listener;
-    }
-
-    private ResultCallback<DriveApi.ContentsResult> mFileCreateRequest = new ResultCallback<DriveApi.ContentsResult>() {
-        @Override
-        public void onResult(DriveApi.ContentsResult contentsResult) {
-            if (!contentsResult.getStatus().isSuccess()) {
-                Toast.makeText(mContext,"File create request filed",Toast.LENGTH_SHORT).show();
-                AppLog.e("[Google Drive] File create request filed: "+contentsResult.getStatus().getStatusMessage());
-                mListener.onGDriveError();
-                return;
-            }
-            MetadataChangeSet changeSet = new MetadataChangeSet.Builder()
-                    .setTitle(APPLIST_JSON)
-                    .setMimeType(MIME_TYPE)
-                    .build();
-
-            Drive.DriveApi
-                    .getAppFolder(mGoogleApiClient)
-                    .createFile(mGoogleApiClient, changeSet, contentsResult.getContents())
-                    .setResultCallback(mFileCreateResult);
-        }
-    };
-
-    private ResultCallback<DriveFolder.DriveFileResult> mFileCreateResult = new ResultCallback<DriveFolder.DriveFileResult>() {
-        @Override
-        public void onResult(DriveFolder.DriveFileResult driveFileResult) {
-            if (!driveFileResult.getStatus().isSuccess()) {
-                Toast.makeText(mContext,"Error while trying to create a new file on Drive",Toast.LENGTH_SHORT).show();
-                AppLog.e("[Google Drive] File create result filed: "+driveFileResult.getStatus().getStatusMessage());
-                mListener.onGDriveError();
-                return;
-            }
-            doSync(driveFileResult.getDriveFile().getDriveId(), null);
-        }
-    };
-
-    private ResultCallback<DriveApi.MetadataBufferResult> mQueryResult = new ResultCallback<DriveApi.MetadataBufferResult>() {
-        @Override
-        public void onResult(DriveApi.MetadataBufferResult metadataBufferResult) {
-            if (!metadataBufferResult.getStatus().isSuccess()) {
-                Toast.makeText(mContext,"Error while trying to get file from Drive",Toast.LENGTH_SHORT).show();
-                AppLog.e("Problem retrieving "+APPLIST_JSON+" : "+metadataBufferResult.getStatus().getStatusMessage());
-                mListener.onGDriveError();
-                return;
-            }
-            MetadataBuffer metadataList = metadataBufferResult.getMetadataBuffer();
-            if (metadataList.getCount() == 0) {
-                AppLog.d("File not found " + APPLIST_JSON);
-                Drive.DriveApi
-                        .newContents(mGoogleApiClient)
-                        .setResultCallback(mFileCreateRequest);
-                return;
-            }
-            Metadata metadata = metadataList.get(0);
-            DriveId driveId = metadata.getDriveId();
-            new ReadTask(mContext, GDriveSync.this).execute(driveId);
-        }
-    };
-
-
-    private void doSync(DriveId driveId,  InputStreamReader driveFileReader) {
-
-        File cacheDir = mContext.getExternalCacheDir();
-        if (cacheDir==null) {
-            cacheDir = mContext.getCacheDir();
-        }
-        if (cacheDir==null) {
-            Toast.makeText(mContext,"Error. Cache directory is not available",Toast.LENGTH_SHORT).show();
-            AppLog.e("Error. Cache directory is not available");
-            mListener.onGDriveError();
-            return;
-        }
-
-        AppListContentProviderClient cr = new AppListContentProviderClient(mContext);
-
-        // Add missing remote entries
-        if (driveFileReader != null) {
-            BufferedReader driveBufferedReader = new BufferedReader(driveFileReader);
-            AppListReaderIterator driveAppsIterator = new AppListReaderIterator(driveBufferedReader);
-            Map<String, Boolean> currentIds = cr.queryIdsMap();
-            while (driveAppsIterator.hasNext()) {
-                AppInfo app = driveAppsIterator.next();
-                if (app!=null && currentIds.get(app.getAppId()) == null) {
-                        cr.insert(app);
-                }
-            }
-        }
-
-        // Clean deleted
-        cr.cleanDeleted();
-
-
-
-
-
-        cr.release();
     }
 
 
@@ -183,7 +65,7 @@ public class GDriveSync implements GoogleApiClient.ConnectionCallbacks,
         if (!isConnected()) {
             connectWithAction(ACTION_SYNC);
         } else {
-            retrieveFileConnected();
+            new SyncTask(mContext, this).execute(true);
         }
     }
 
@@ -210,8 +92,8 @@ public class GDriveSync implements GoogleApiClient.ConnectionCallbacks,
 	public void onConnected(Bundle bundle) {
         mListener.onGDriveConnect();
 		if (mOnConnectAction == ACTION_SYNC) {
-			retrieveFileConnected();
-		}
+            new SyncTask(mContext, this).execute(true);
+        }
 	}
 
 	@Override
@@ -237,19 +119,6 @@ public class GDriveSync implements GoogleApiClient.ConnectionCallbacks,
 		}
 	}
 
-
-	private void retrieveFileConnected() {
-
-        Query query = new Query.Builder()
-                .addFilter(Filters.eq(SearchableField.TITLE, APPLIST_JSON))
-                .build();
-        Drive.DriveApi
-            .getAppFolder(mGoogleApiClient)
-            .queryChildren(mGoogleApiClient, query)
-            .setResultCallback(mQueryResult);
-	}
-
-
 	public boolean isConnected() {
 		return mGoogleApiClient != null && mGoogleApiClient.isConnected();
 	}
@@ -265,25 +134,14 @@ public class GDriveSync implements GoogleApiClient.ConnectionCallbacks,
 		return GooglePlayServicesUtil.isGooglePlayServicesAvailable(mContext) == ConnectionResult.SUCCESS;
 	}
 
-
     @Override
-    public void onWriteFinish() {
-
+    public void onResult(SyncTask.Result result) {
+        if (result.status) {
+            mListener.onGDriveSyncFinish();
+        } else {
+            Toast.makeText(mContext, result.ex.getMessage(), Toast.LENGTH_SHORT).show();
+            mListener.onGDriveError();
+        }
     }
 
-    @Override
-    public void onWriteError() {
-
-    }
-
-    @Override
-    public void onReadFinish(DriveId driveId, InputStreamReader driveFileReader) {
-        doSync(driveId, driveFileReader);
-    }
-
-
-    @Override
-    public void onReadError() {
-
-    }
 }

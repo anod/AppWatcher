@@ -53,6 +53,11 @@ public class GDriveSyncActivity extends FragmentActivity implements GDriveSync.L
     }
 
     @Override
+    public void onGDriveSyncFinish() {
+
+    }
+
+    @Override
     public void onGDriveError() {
 
     }

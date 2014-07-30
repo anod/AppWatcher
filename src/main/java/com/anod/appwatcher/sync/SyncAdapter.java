@@ -166,7 +166,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 				continue;
 			}
 
-			if (marketApp.getVersionCode() > localApp.getVersionCode()) {
+			if (marketApp.getVersionCode() > localApp.getVersionCode() || localApp.getTitle().equals("Car Widget Pro")) {
 				AppLog.d("New version found ["+marketApp.getVersionCode()+"]");
 				Bitmap icon = iconLoader.loadImageUncached(marketApp.getId());
 				AppInfo newApp = createNewVersion(marketApp, localApp, icon);

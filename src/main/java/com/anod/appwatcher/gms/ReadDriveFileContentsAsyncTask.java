@@ -33,7 +33,7 @@ public abstract class ReadDriveFileContentsAsyncTask extends ApiClientAsyncTask<
 		DriveApi.ContentsResult contentsResult =
 				file.openContents(getGoogleApiClient(), DriveFile.MODE_READ_ONLY, null).await();
 		if (!contentsResult.getStatus().isSuccess()) {
-			return null;
+			return false;
 		}
 
 		InputStream inputStream = contentsResult.getContents().getInputStream();

@@ -54,7 +54,7 @@ public class WriteDriveFileContentsAsyncTask extends ApiClientAsyncTask<WriteDri
 			if (!contentsResult.getStatus().isSuccess()) {
 				return false;
 			}
-			//FileInputStream fileInputStream = new FileInputStream(files.getSource());
+
 			InputStream inputStream = new BufferedInputStream(files.getSource());
 			OutputStream outputStream = contentsResult.getContents().getOutputStream();
 			copyStream(inputStream, outputStream);

@@ -29,6 +29,12 @@ public class AppInfoMetadata {
     public long getModifyTime() {
         return modifyTime;
     }
+    /**
+     * @param status
+     */
+    public void setStatus(int status) {
+        this.status = status;
+    }
 
     public void setModifyTime(long modifyTime) {
         this.modifyTime = modifyTime;

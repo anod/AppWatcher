@@ -43,13 +43,19 @@ public class AppListContentProvider extends ContentProvider {
 
 	@Override
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
-		if (sURIMatcher.match(uri) != ROW) { 
+        int matched = sURIMatcher.match(uri);
+		if (matched != ROW && matched != LIST) {
 			throw new IllegalArgumentException("Unknown URI " + uri); 
 		}
-		String rowId = uri.getLastPathSegment();
-		
+
         SQLiteDatabase db = mDatabaseOpenHelper.getWritableDatabase();
-        int count = db.delete(AppListTable.TABLE_NAME, AppListTable.Columns._ID+"=?", new String[] { rowId });
+        int count = 0;
+        if (matched == ROW) {
+            String rowId = uri.getLastPathSegment();
+            count = db.delete(AppListTable.TABLE_NAME, AppListTable.Columns._ID + "=?", new String[]{rowId});
+        } else {
+            count = db.delete(AppListTable.TABLE_NAME, selection, selectionArgs);
+        }
         if (count > 0) {
         	getContext().getContentResolver().notifyChange(CONTENT_URI, null);
         }

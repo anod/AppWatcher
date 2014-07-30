@@ -176,6 +176,11 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
 
     }
 
+    @Override
+    public void onGDriveSyncFinish() {
+
+    }
+
 
     @Override
     public void onGDriveError() {

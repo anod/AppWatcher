@@ -39,12 +39,11 @@
             android:paddingRight="@dimen/list_padding_side"
             android:paddingTop="@dimen/list_padding_vertical">
 
-            >
-
             <ListView
                 android:id="@android:id/list"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:scrollbars="none"
                 android:divider="@null"
                 android:dividerHeight="0dp"
                 android:drawSelectorOnTop="false" />

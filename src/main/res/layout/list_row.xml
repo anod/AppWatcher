@@ -14,8 +14,6 @@
         android:gravity="center_vertical"
         android:orientation="horizontal"
 		android:background="@color/white"
-		android:paddingTop="8dp"
-		android:paddingBottom="8dp"
 	>
 
         <FrameLayout
@@ -29,6 +27,8 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="8dip"
                 android:contentDescription="@string/application_icon"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
                 android:src="@drawable/ic_empty"
 			/>
 
@@ -47,7 +47,9 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical|clip_vertical"
             android:orientation="vertical"
-			android:paddingLeft="0dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:paddingLeft="0dp"
 			android:paddingRight="8dp">
 
             <TextView
