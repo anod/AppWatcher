@@ -22,6 +22,7 @@ import com.google.android.gms.drive.query.Query;
 import com.google.android.gms.drive.query.SearchableField;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -34,6 +35,11 @@ import java.util.Map;
  * Created by alex on 7/30/14.
  */
 public class SyncConnectedWorker {
+    /**
+     * Lock used when maintaining queue of requested updates.
+     */
+    public final static Object sLock = new Object();
+
     public static final String APPLIST_JSON = "applist.json";
     public static final String MIME_TYPE = "application/json";
 
@@ -49,16 +55,53 @@ public class SyncConnectedWorker {
         return mGoogleApiClient;
     }
     public void doSyncInBackground() throws Exception {
-        DriveId driveId = retrieveFileDriveId();
-
-        InputStreamReader driveFileReader = null;
-        if (driveId != null) {
-            driveFileReader = getFileInputStream(driveId);
+        synchronized (sLock) {
+            doSyncLocked();
         }
+    }
+
+    private void doSyncLocked() throws Exception {
+
+        Query query = new Query.Builder()
+                .build();
+        DriveApi.MetadataBufferResult metadataBufferResult = Drive.DriveApi
+                .getAppFolder(getGoogleApiClient())
+                .queryChildren(getGoogleApiClient(), query)
+                .await();
+
+        MetadataBuffer metadataList = metadataBufferResult.getMetadataBuffer();
+        if (metadataList.getCount() == 0) {
+            AppLog.d("No files found");
+        } else {
+            for (Metadata metadata: metadataList) {
+                AppLog.d("File: "+metadata.getTitle()+" Ext: "+metadata.getFileExtension()+" Mime: "+metadata.getMimeType());
+            }
+        }
+
+        DriveId driveId = retrieveFileDriveId();
 
         AppListContentProviderClient cr = new AppListContentProviderClient(mContext);
 
+        InputStreamReader driveFileReader = null;
+        DriveFile file = null;
+        DriveApi.ContentsResult contentsResult = null;
+        if (driveId != null) {
+            file = Drive.DriveApi.getFile(getGoogleApiClient(), driveId);
+            contentsResult = file.openContents(getGoogleApiClient(), DriveFile.MODE_READ_ONLY, null).await();
+            if (!contentsResult.getStatus().isSuccess()) {
+                throw new Exception("Error read file : "+contentsResult.getStatus().getStatusMessage());
+            }
+            driveFileReader = getFileInputStream(contentsResult);
+        }
+
         syncLists(driveFileReader, cr);
+
+        if (file != null) {
+            file.discardContents(getGoogleApiClient(), contentsResult.getContents()).await();
+        }
+        if (driveFileReader != null) {
+            driveFileReader.close();
+        }
 
         if (driveId == null) {
             driveId = createNewFile();
@@ -67,9 +110,13 @@ public class SyncConnectedWorker {
         writeToDrive(driveId, cr);
 
         cr.release();
+        Drive.DriveApi.requestSync(mGoogleApiClient).await();
+
     }
 
     private void writeToDrive(DriveId driveId, AppListContentProviderClient cr) throws Exception {
+
+        AppLog.d("[GDrive] Write full list to remote ");
 
         DriveFile target = Drive.DriveApi.getFile(getGoogleApiClient(), driveId);
 
@@ -82,7 +129,7 @@ public class SyncConnectedWorker {
         OutputStream outputStream = contentsResult.getContents().getOutputStream();
         AppListWriter writer = new AppListWriter();
         AppListCursor listCursor = cr.queryAllSorted();
-        OutputStreamWriter outWriter = new OutputStreamWriter(outputStream);
+        BufferedWriter outWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
         try {
             writer.writeJSON(outWriter, listCursor);
         } catch (IOException e) {
@@ -101,14 +148,7 @@ public class SyncConnectedWorker {
         }
     }
 
-    private InputStreamReader getFileInputStream(DriveId driveId) throws Exception {
-        DriveFile file = Drive.DriveApi.getFile(getGoogleApiClient(), driveId);
-        DriveApi.ContentsResult contentsResult =
-                file.openContents(getGoogleApiClient(), DriveFile.MODE_READ_ONLY, null).await();
-        if (!contentsResult.getStatus().isSuccess()) {
-            throw new Exception("Error read file : "+contentsResult.getStatus().getStatusMessage());
-        }
-
+    private InputStreamReader getFileInputStream(DriveApi.ContentsResult contentsResult) throws Exception {
         InputStream inputStream = contentsResult.getContents().getInputStream();
         if (inputStream == null) {
             throw new Exception("Empty input stream ");
@@ -123,20 +163,23 @@ public class SyncConnectedWorker {
 
     private void syncLists(InputStreamReader driveFileReader, AppListContentProviderClient cr) {
 
-
+        AppLog.d("[GDrive] Sync remote list " + APPLIST_JSON);
         // Add missing remote entries
         if (driveFileReader != null) {
             BufferedReader driveBufferedReader = new BufferedReader(driveFileReader);
             AppListReaderIterator driveAppsIterator = new AppListReaderIterator(driveBufferedReader);
             Map<String, Boolean> currentIds = cr.queryIdsMap();
+            AppLog.d("[GDrive] Read remote apps " + APPLIST_JSON);
             while (driveAppsIterator.hasNext()) {
                 AppInfo app = driveAppsIterator.next();
+                AppLog.d("[GDrive] Read app: " + app.getAppId());
                 if (app!=null && currentIds.get(app.getAppId()) == null) {
                     cr.insert(app);
                 }
             }
         }
 
+        AppLog.d("[GDrive] Clean locally deleted apps ");
         // Clean deleted
         cr.cleanDeleted();
 
@@ -145,28 +188,35 @@ public class SyncConnectedWorker {
     private DriveId retrieveFileDriveId() throws Exception {
 
         Query query = new Query.Builder()
-                .addFilter(Filters.eq(SearchableField.TITLE, APPLIST_JSON))
+                .addFilter(Filters.and(
+                    Filters.eq(SearchableField.MIME_TYPE, MIME_TYPE),
+                    Filters.eq(SearchableField.TITLE, APPLIST_JSON)
+                ))
                 .build();
+
         DriveApi.MetadataBufferResult metadataBufferResult = Drive.DriveApi
                 .getAppFolder(getGoogleApiClient())
                 .queryChildren(getGoogleApiClient(), query)
                 .await();
+
 
         if (!metadataBufferResult.getStatus().isSuccess()) {
             throw new Exception("Problem retrieving " + APPLIST_JSON + " : " + metadataBufferResult.getStatus().getStatusMessage());
         }
         MetadataBuffer metadataList = metadataBufferResult.getMetadataBuffer();
         if (metadataList.getCount() == 0) {
-            AppLog.d("File not found " + APPLIST_JSON);
+            AppLog.d("[GDrive] File NOT found " + APPLIST_JSON);
             return null;
         } else {
             Metadata metadata = metadataList.get(0);
+            AppLog.d("[GDrive] File found " + APPLIST_JSON);
             return metadata.getDriveId();
         }
     }
 
     private DriveId createNewFile() throws Exception {
         DriveApi.ContentsResult contentsResult = Drive.DriveApi.newContents(getGoogleApiClient()).await();
+        AppLog.d("[GDrive] Create new file ");
 
         if (!contentsResult.getStatus().isSuccess()) {
             throw new Exception("[Google Drive] File create request filed: "+contentsResult.getStatus().getStatusMessage());

@@ -39,7 +39,11 @@ abstract public class GooglePlayServices implements GoogleApiClient.ConnectionCa
     }
 
     public void connect() {
-        connectWithAction(ACTION_CONNECT);
+        if (!isConnected()) {
+            connectWithAction(ACTION_CONNECT);
+        } else {
+            onConnectAction(ACTION_CONNECT);
+        }
     }
 
     public void connectLocked() throws Exception {

@@ -125,13 +125,19 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
             onAboutAction();
         } if (action==ACTION_SYNC_ENABLE) {
             mSyncEnabledItem.checked=!mSyncEnabledItem.checked;
+            mSyncNowItem.enabled=false; // disable temporary sync now
             notifyDataSetChanged();
             if (mSyncEnabledItem.checked) {
                 setSupportProgressBarIndeterminateVisibility(true);
                 mGDriveSync.connect();
             }
+
         } if (action==ACTION_SYNC_NOW) {
-            mGDriveSync.sync();
+            if (mSyncNowItem.enabled) {
+                mSyncNowItem.enabled = false;
+                notifyDataSetChanged();
+                mGDriveSync.sync();
+            }
         }
     }
 
@@ -193,6 +199,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
         setSupportProgressBarIndeterminateVisibility(false);
         mPrefs.saveDriveSyncTime(System.currentTimeMillis());
         mSyncNowItem.summary = getString(R.string.pref_descr_drive_sync_now, getString(R.string.now));
+        mSyncNowItem.enabled=mSyncEnabledItem.checked;
         notifyDataSetChanged();
         Toast.makeText(this,"Google Drive finish",Toast.LENGTH_SHORT).show();
     }
@@ -201,6 +208,8 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     @Override
     public void onGDriveError() {
         setSupportProgressBarIndeterminateVisibility(false);
+        mSyncNowItem.enabled=mSyncEnabledItem.checked;
+        notifyDataSetChanged();
         Toast.makeText(this,"Google Drive error",Toast.LENGTH_SHORT).show();
     }
 }

@@ -47,6 +47,7 @@ public class AppListWriter {
      */
     public void writeApp(JsonWriter writer, AppInfo appInfo)
             throws IOException {
+        AppLog.d("Write app: "+appInfo.getAppId());
         writer.beginObject();
         writer.name("id").value(appInfo.getAppId());
         writer.name("packageName").value(appInfo.getPackageName());

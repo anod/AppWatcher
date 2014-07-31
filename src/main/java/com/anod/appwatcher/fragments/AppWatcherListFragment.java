@@ -268,7 +268,6 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 			
 			if (updateTime > 0) {
 				mTimestamp.setTime(updateTime);
-				AppLog.d("Update time [" + updateTime + "]:" + mTimestamp.toString());
 				holder.updateDate.setText(mDateFormat.format(mTimestamp));
 				holder.updateDate.setVisibility(View.VISIBLE);
 			} else {

@@ -26,7 +26,7 @@ import java.io.File;
 public class GDriveSync extends GooglePlayServices implements SyncTask.Listener {
 
 
-    private static final int ACTION_SYNC = 1;
+    private static final int ACTION_SYNC = 2;
 
     private Listener mListener;
 
