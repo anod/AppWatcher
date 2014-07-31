@@ -12,6 +12,8 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import java.util.concurrent.CountDownLatch;
+
 /**
  * Created by alex on 7/30/14.
  */
@@ -23,8 +25,8 @@ abstract public class GooglePlayServices implements GoogleApiClient.ConnectionCa
 
     private static final int ACTION_CONNECT = 1;
     protected final Context mContext;
-    private GoogleApiClient mGoogleApiClient;
-    private final Activity mActivity;
+    protected GoogleApiClient mGoogleApiClient;
+    private Activity mActivity;
     private int mOnConnectAction;
 
     public GooglePlayServices(Activity activity) {
@@ -32,8 +34,41 @@ abstract public class GooglePlayServices implements GoogleApiClient.ConnectionCa
         mActivity = activity;
     }
 
+    public GooglePlayServices(Context context) {
+        mContext = context.getApplicationContext();
+    }
+
     public void connect() {
         connectWithAction(ACTION_CONNECT);
+    }
+
+    public void connectLocked() throws Exception {
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = createGoogleApiClientBuilder().build();
+        }
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        mGoogleApiClient.registerConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+            @Override
+            public void onConnectionSuspended(int cause) {
+            }
+
+            @Override
+            public void onConnected(Bundle arg0) {
+                latch.countDown();
+            }
+        });
+        mGoogleApiClient.registerConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
+            @Override
+            public void onConnectionFailed(ConnectionResult arg0) {
+                latch.countDown();
+            }
+        });
+        mGoogleApiClient.connect();
+        latch.await();
+        if (!mGoogleApiClient.isConnected()) {
+            throw new Exception("Cannot connect to Google Play Services");
+        }
     }
 
     public void disconnect() {

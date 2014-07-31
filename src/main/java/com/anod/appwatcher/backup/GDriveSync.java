@@ -7,6 +7,7 @@ import android.content.IntentSender;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import com.anod.appwatcher.backup.gdrive.SyncConnectedWorker;
 import com.anod.appwatcher.backup.gdrive.SyncTask;
 import com.anod.appwatcher.utils.ActivityListener;
 import com.anod.appwatcher.utils.AppLog;
@@ -27,7 +28,9 @@ public class GDriveSync extends GooglePlayServices implements SyncTask.Listener 
 
     private static final int ACTION_SYNC = 1;
 
-    private final Listener mListener;
+    private Listener mListener;
+
+
 
     public interface Listener {
         void onGDriveConnect();
@@ -40,6 +43,10 @@ public class GDriveSync extends GooglePlayServices implements SyncTask.Listener 
     public GDriveSync(Activity activity, Listener listener) {
         super(activity);
         mListener = listener;
+    }
+
+    public GDriveSync(Context context) {
+        super(context);
     }
 
     @Override
@@ -62,6 +69,14 @@ public class GDriveSync extends GooglePlayServices implements SyncTask.Listener 
         } else {
             new SyncTask(mContext, this, createGoogleApiClientBuilder().build()).execute(true);
         }
+    }
+
+    public void syncLocked() throws Exception {
+        if (!isConnected()) {
+            connectLocked();
+        }
+        SyncConnectedWorker worker = new SyncConnectedWorker(mContext, mGoogleApiClient);
+        worker.doSyncInBackground();
     }
 
     protected GoogleApiClient.Builder createGoogleApiClientBuilder() {

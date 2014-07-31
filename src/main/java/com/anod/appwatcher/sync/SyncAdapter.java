@@ -20,11 +20,14 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
+import android.text.format.DateUtils;
 
 import com.anod.appwatcher.AppWatcherActivity;
 import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.accounts.AccountHelper;
+import com.anod.appwatcher.backup.GDriveSync;
+import com.anod.appwatcher.backup.gdrive.SyncConnectedWorker;
 import com.anod.appwatcher.market.AppIconLoader;
 import com.anod.appwatcher.market.AppLoader;
 import com.anod.appwatcher.market.DeviceIdHelper;
@@ -37,6 +40,8 @@ import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.BitmapUtils;
 import com.gc.android.market.api.MarketSession;
 import com.gc.android.market.api.model.Market.App;
+
+import org.acra.ACRA;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -101,7 +106,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 		finishIntent.putExtra(EXTRA_UPDATES_COUNT, size);
 		mContext.sendBroadcast(finishIntent);
 
-		pref.updateLastTime(System.currentTimeMillis());
+        long now = System.currentTimeMillis();
+		pref.updateLastTime(now);
 				
 		if (size > 0) {
 			showNotification(updatedTitles);
@@ -110,11 +116,34 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 			}
 		}
 
+        if (pref.isDriveSyncEnabled()) {
+            AppLog.d("DriveSyncEnabled = true");
+            performGDriveSync(pref, now);
+        } else {
+            AppLog.d("DriveSyncEnabled = false, skipping...");
+        }
+
 		AppLog.d("Finish::onPerformSync()");
 	
 	}
-	
-	/**
+
+    private void performGDriveSync(Preferences pref, long now) {
+        long driveSyncTime = pref.getLastDriveSyncTime();
+        if (driveSyncTime == -1 || now > (DateUtils.DAY_IN_MILLIS + driveSyncTime)) {
+            AppLog.d("DriveSync perform sync");
+            GDriveSync driveSync = new GDriveSync(mContext);
+            try {
+                driveSync.syncLocked();
+            } catch (Exception e) {
+                AppLog.ex(e);
+                ACRA.getErrorReporter().handleException(e);
+            }
+        } else {
+            AppLog.d("DriveSync backup is fresh");
+        }
+    }
+
+    /**
 	 * Check if device has wi-fi connection
 	 * @return
 	 */
