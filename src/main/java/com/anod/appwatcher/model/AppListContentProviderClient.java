@@ -86,7 +86,7 @@ public class AppListContentProviderClient {
 	 * 
 	 * @return map (AppId => TRUE)
 	 */
-	public Map<String,Boolean> queryIdsMap() {
+	public Map<String,Boolean> queryPackagesMap() {
 		AppListCursor cursor = queryAll();
 		HashMap<String, Boolean> result = new HashMap<String, Boolean>();
 		if (cursor == null) {
@@ -94,7 +94,7 @@ public class AppListContentProviderClient {
 		}
 		cursor.moveToPosition(-1);
 		while(cursor.moveToNext()) {
-			result.put(cursor.getAppInfo().getAppId(), true);
+			result.put(cursor.getAppInfo().getPackageName(), true);
 		}
 		cursor.close();
 		return result;
@@ -196,9 +196,9 @@ public class AppListContentProviderClient {
 	}
 
     public void insertList(List<AppInfo> appList) {
-        Map<String, Boolean> currentIds = queryIdsMap();
+        Map<String, Boolean> currentIds = queryPackagesMap();
         for(AppInfo app : appList) {
-            if (currentIds.get(app.getAppId()) == null) {
+            if (currentIds.get(app.getPackageName()) == null) {
                 insert(app);
             }
         }

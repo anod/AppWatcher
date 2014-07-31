@@ -61,23 +61,6 @@ public class SyncConnectedWorker {
     }
 
     private void doSyncLocked() throws Exception {
-
-        Query query = new Query.Builder()
-                .build();
-        DriveApi.MetadataBufferResult metadataBufferResult = Drive.DriveApi
-                .getAppFolder(getGoogleApiClient())
-                .queryChildren(getGoogleApiClient(), query)
-                .await();
-
-        MetadataBuffer metadataList = metadataBufferResult.getMetadataBuffer();
-        if (metadataList.getCount() == 0) {
-            AppLog.d("No files found");
-        } else {
-            for (Metadata metadata: metadataList) {
-                AppLog.d("File: "+metadata.getTitle()+" Ext: "+metadata.getFileExtension()+" Mime: "+metadata.getMimeType());
-            }
-        }
-
         DriveId driveId = retrieveFileDriveId();
 
         AppListContentProviderClient cr = new AppListContentProviderClient(mContext);
@@ -168,12 +151,12 @@ public class SyncConnectedWorker {
         if (driveFileReader != null) {
             BufferedReader driveBufferedReader = new BufferedReader(driveFileReader);
             AppListReaderIterator driveAppsIterator = new AppListReaderIterator(driveBufferedReader);
-            Map<String, Boolean> currentIds = cr.queryIdsMap();
+            Map<String, Boolean> currentIds = cr.queryPackagesMap();
             AppLog.d("[GDrive] Read remote apps " + APPLIST_JSON);
             while (driveAppsIterator.hasNext()) {
                 AppInfo app = driveAppsIterator.next();
-                AppLog.d("[GDrive] Read app: " + app.getAppId());
-                if (app!=null && currentIds.get(app.getAppId()) == null) {
+                AppLog.d("[GDrive] Read app: " + app.getPackageName());
+                if (app!=null && currentIds.get(app.getPackageName()) == null) {
                     cr.insert(app);
                 }
             }
