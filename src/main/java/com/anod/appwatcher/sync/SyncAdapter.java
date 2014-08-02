@@ -286,6 +286,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 	private void showNotification(ArrayList<String> updatedTitles) {
 		Intent notificationIntent = new Intent(mContext, AppWatcherActivity.class);
 		notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        notificationIntent.getBooleanExtra(AppWatcherActivity.EXTRA_FROM_NOTIFICATION, true);
 		PendingIntent contentIntent = PendingIntent.getActivity(mContext, 0, notificationIntent, 0);
 		
 		String title = renderNotificationTitle(updatedTitles);

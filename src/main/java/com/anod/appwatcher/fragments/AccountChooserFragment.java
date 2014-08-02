@@ -1,7 +1,6 @@
 package com.anod.appwatcher.fragments;
 
 import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -9,9 +8,8 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 
-import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.R;
-import com.anod.appwatcher.accounts.AccountHelper;
+import com.anod.appwatcher.accounts.AccountManager;
 
 /**
  * @author alex
@@ -33,20 +31,14 @@ public class AccountChooserFragment extends DialogFragment implements DialogInte
 	}
 
 	private int mSelectedItem;
-	private Account mCurrentAccount;
 	private OnAccountSelectionListener mListener;
 
 	private AccountManager mAccountManager;
-	private Account[] mAccounts;
-	private Preferences mPreferences;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		mAccountManager = AccountManager.get(getActivity());
-		mPreferences = new Preferences(getActivity());
-		mAccounts = mAccountManager.getAccountsByType(AccountHelper.ACCOUNT_TYPE);
-		mCurrentAccount = mPreferences.getAccount();
+        mAccountManager = new AccountManager(getActivity());
 	}
 
 
@@ -77,36 +69,47 @@ public class AccountChooserFragment extends DialogFragment implements DialogInte
 				})
 		;
 
-		if (mAccounts.length == 0) {
-			builder.setMessage("No registered google accounts");
+		if (mAccountManager.hasAccounts()) {
+            mSelectedItem = getSelectedItem();
+            builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    if (mAccountManager.getCurrentAccount() == null) {
+                        OnAccountSelectionListener listener = (OnAccountSelectionListener)getActivity();
+                        listener.onDialogAccountNotFound();
+                    }
+                }
+            });
+            builder.setSingleChoiceItems(getChoiceItems(), mSelectedItem, this);
 		} else {
-			mSelectedItem = getSelectedItem();
-			builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {
-					if (mCurrentAccount == null) {
-						OnAccountSelectionListener listener = (OnAccountSelectionListener)getActivity();
-						listener.onDialogAccountNotFound();
-					}
-				}
-			});
-			builder.setSingleChoiceItems(getChoiceItems(), mSelectedItem, this);
-
+            builder.setMessage(R.string.no_regestred_google_accounts);
 		}
+        AlertDialog dialog = builder.create();
+
+        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                if (mAccountManager.getCurrentAccount() == null) {
+                    OnAccountSelectionListener listener = (OnAccountSelectionListener)getActivity();
+                    listener.onDialogAccountNotFound();
+                }
+            }
+        });
 
 
 		// Create the AlertDialog object and return it
-		return builder.create();
+		return dialog;
 	}
 
 	private int getSelectedItem() {
 
-
-		if (mCurrentAccount == null) {
+        Account current = mAccountManager.getCurrentAccount();
+		if (mAccountManager.getCurrentAccount() == null) {
 			return 0;
 		}
 
-		for( int i = 0; i < mAccounts.length; i++) {
-			if (mAccounts[i].equals(mCurrentAccount)) {
+        Account[] accounts = mAccountManager.getAccounts();
+		for( int i = 0; i < accounts.length; i++) {
+			if (accounts[i].equals(current)) {
 				return i;
 			}
 		}
@@ -115,10 +118,11 @@ public class AccountChooserFragment extends DialogFragment implements DialogInte
 	}
 
 	private CharSequence[] getChoiceItems() {
-		CharSequence[] items = new CharSequence[mAccounts.length];
+        Account[] accounts = mAccountManager.getAccounts();
+		CharSequence[] items = new CharSequence[accounts.length];
 
-		for( int i = 0; i < mAccounts.length; i++) {
-			items[i] = mAccounts[i].name;
+		for( int i = 0; i < accounts.length; i++) {
+			items[i] = accounts[i].name;
 		}
 
 		return items;
@@ -132,9 +136,9 @@ public class AccountChooserFragment extends DialogFragment implements DialogInte
 
 	private void saveAccount() {
 		OnAccountSelectionListener listener = mListener;
-		if (mAccounts.length > 0) {
-			Account acc = mAccounts[mSelectedItem];
-			mPreferences.updateAccount(acc);
+		if (mAccountManager.hasAccounts()) {
+            Account acc = mAccountManager.getAccount(mSelectedItem);
+            mAccountManager.saveCurrentAccount(acc);
 			if (mListener != null) {
 				listener.onDialogAccountSelected(acc);
 			}

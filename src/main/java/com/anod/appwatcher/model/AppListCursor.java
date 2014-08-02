@@ -32,6 +32,11 @@ public class AppListCursor extends CursorWrapper implements CrossProcessCursor {
 		super(cursor);
 	}
 
+
+    public String getAppId() {
+        return getString(IDX_APPID);
+    }
+
 	public AppInfo getAppInfo() {
 		byte[] iconData = getBlob(IDX_ICON_CACHE);
 		Bitmap icon = BitmapUtils.unFlattenBitmap(iconData);
@@ -120,5 +125,6 @@ public class AppListCursor extends CursorWrapper implements CrossProcessCursor {
 	@Override
 	public boolean onMove(int oldPosition, int newPosition) {
 		return true;
-	}	
+	}
+
 }

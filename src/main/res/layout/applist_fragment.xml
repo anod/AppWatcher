@@ -50,11 +50,13 @@
         </android.support.v4.widget.SwipeRefreshLayout>
 
             <TextView
-                android:id="@+id/internalEmpty"
+                android:id="@id/android:empty"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center"
-                android:textAppearance="?android:attr/textAppearanceLarge" />
+                android:text="@string/search_for_app"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+
     </FrameLayout>
 
 </FrameLayout>

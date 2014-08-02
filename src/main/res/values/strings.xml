@@ -2,10 +2,9 @@
 <resources>
 
     <string name="app_name">App Watcher</string>
-    <string name="no_data">Click on \"Plus\" to add an app.</string>
     <string name="menu_add">Add</string>
     <string name="menu_refresh">Refresh</string>
-    <string name="failed_gain_access">Please allow access. The permission is required in order to communicate with Google Play Store.</string>
+    <string name="failed_gain_access">Please select account and allow access. This required in order to communicate with Google Play Store.</string>
     <string name="search_hint">Search an app</string>
     <string name="search_action">Search</string>
     <string name="search_for_app">Search for an application and click on it to add to the watch list.\n( Tip: you can add apps directly from Play Store using \"Share\" button )</string>
@@ -79,5 +78,6 @@
     <string name="gms_service_invalid">The version of the Google Play services installed on this device is not authentic.</string>
     <string name="never">never</string>
     <string name="now">now</string>
+    <string name="no_regestred_google_accounts">No registered google accounts</string>
 
 </resources>

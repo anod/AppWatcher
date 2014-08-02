@@ -26,8 +26,13 @@ public class AccountChooserHelper implements AccountChooserFragment.OnAccountSel
 	private static final int TWO_HOURS_IN_SEC = 7200;
 	private static final int SIX_HOURS_IN_SEC = 21600;
 
+    public void showAccountsDialog() {
+        AccountChooserFragment accountsDialog = AccountChooserFragment.newInstance();
+        accountsDialog.show(mActivity.getSupportFragmentManager(), "accountsDialog");
+    }
 
-	// Container Activity must implement this interface
+
+    // Container Activity must implement this interface
 	public interface OnAccountSelectionListener {
 		public void onHelperAccountSelected(final Account account, final String authSubToken);
 		public void onHelperAccountNotFound();
@@ -44,8 +49,14 @@ public class AccountChooserHelper implements AccountChooserFragment.OnAccountSel
 	public void init() {
 		mSyncAccount = mPreferences.getAccount();
 		if (mSyncAccount == null) {
-			AccountChooserFragment accountsDialog = AccountChooserFragment.newInstance();
-			accountsDialog.show(mActivity.getSupportFragmentManager(), "accountsDialog");
+            // Do not display dialog if only one account available
+            AccountManager accountManager = new AccountManager(mContext);
+            if (accountManager.hasJustOneAccount()) {
+                mSyncAccount = accountManager.getAccount(0);
+                accountManager.saveCurrentAccount(mSyncAccount);
+            } else {
+                showAccountsDialog();
+            }
 		} else {
 			ACRA.getErrorReporter().putCustomData("HasAccountSelected", mSyncAccount != null ? "true" : "false");
 			mAccountHelper.requestToken(mActivity, mSyncAccount, new AccountHelper.AuthenticateCallback() {

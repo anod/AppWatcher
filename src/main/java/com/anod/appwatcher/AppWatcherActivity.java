@@ -36,7 +36,11 @@ import org.acra.ACRA;
 
 public class AppWatcherActivity extends ActionBarActivity implements TextView.OnEditorActionListener, SearchView.OnQueryTextListener, AccountChooserHelper.OnAccountSelectionListener, AccountChooserFragment.OnAccountSelectionListener {
 
-	private boolean mSyncFinishedReceiverRegistered;
+    public static final String EXTRA_FROM_NOTIFICATION = "extra_noti";
+    private boolean mSyncFinishedReceiverRegistered;
+
+
+    private boolean mStartedFromNotification;
 
     public interface QueryChangeListener {
 
@@ -81,8 +85,16 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 
 		mAccountChooserHelper = new AccountChooserHelper(this, mPreferences, this);
 		mAccountChooserHelper.init();
+
+        Intent i = getIntent();
+        if (i != null) {
+            mStartedFromNotification=i.getBooleanExtra(EXTRA_FROM_NOTIFICATION, false);
+        }
 	}
 
+    public boolean isStartedFromNotification() {
+        return mStartedFromNotification;
+    }
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -260,8 +272,7 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 			mAccountChooserHelper.setSync(true);
 			return true;
         case R.id.menu_accounts:
-            AccountChooserFragment accountsDialog = AccountChooserFragment.newInstance();
-            accountsDialog.show(getSupportFragmentManager(), "accountsDialog");
+            mAccountChooserHelper.showAccountsDialog();
             return true;
         case R.id.menu_more:
             Intent gdriveSync = new Intent(this, SettingsActivity.class);
@@ -272,22 +283,24 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 		}
 	}
 
-	public void requestRefresh() {
+	public boolean requestRefresh() {
 		AppLog.d("Refresh pressed");
 
 		if (mAuthToken == null) {
 			Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
-			return;
+            mAccountChooserHelper.showAccountsDialog();
+			return false;
 		}
 
 		if (ContentResolver.isSyncPending(mSyncAccount, AppListContentProvider.AUTHORITY) || ContentResolver.isSyncActive(mSyncAccount, AppListContentProvider.AUTHORITY)) {
 			AppLog.d("Sync requested already. Skipping... ");
-			return;
+			return true;
 		}
 		startRefreshAnim();
 		Bundle params = new Bundle();
 		params.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
 		ContentResolver.requestSync(mSyncAccount, AppListContentProvider.AUTHORITY, params);
+        return true;
 	}
 
 	/**
@@ -342,7 +355,6 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 	@Override
 	public void onHelperAccountNotFound() {
 		Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
-		finish();
 	}
 
 	@Override

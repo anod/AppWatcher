@@ -133,6 +133,8 @@ public class ListExportFragment extends ListFragment {
 			Toast.makeText(mContext, getString(R.string.file_not_exist), Toast.LENGTH_SHORT).show();
 			break;
 		}
+
+        getActivity().getSupportFragmentManager().popBackStack();
 	}
 
 	private class ImportListAdapter extends ArrayAdapter<File> {

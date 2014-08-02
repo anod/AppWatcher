@@ -120,9 +120,7 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 							 Bundle savedInstanceState) {
-		int INTERNAL_EMPTY_ID = 0x00ff0001;
 		View root = inflater.inflate(R.layout.applist_fragment, container, false);
-		(root.findViewById(R.id.internalEmpty)).setId(INTERNAL_EMPTY_ID);
 		mList = (ListView) root.findViewById(android.R.id.list);
 		mListContainer =  root.findViewById(R.id.listContainer);
 		mProgressContainer = root.findViewById(R.id.progressContainer);
@@ -477,14 +475,19 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
         mAdapter.swapCursor(data);
 		mNewAppsCount = ((AppListCursorLoader)loader).getNewCount();
 		mTotalCount = data.getCount();
-		
+
         // The list should now be shown.
         if (isResumed()) {
             setListShown(true);
         } else {
             setListShownNoAnimation(true);
-        }        
-	}
+        }
+        if (mNewAppsCount == 1 && ((AppWatcherActivity)getActivity()).isStartedFromNotification()) {
+            String appId = ((AppListCursor)mAdapter.getItem(0)).getAppId();
+            onChangelogClick(appId);
+        }
+
+    }
 
 	@Override
 	public void onLoaderReset(Loader<Cursor> loader) {
@@ -510,6 +513,8 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 
     @Override
     public void onRefresh() {
-        ((AppWatcherActivity) getActivity()).requestRefresh();
+        if (!((AppWatcherActivity) getActivity()).requestRefresh()) {
+            mSwipeLayout.setRefreshing(false);
+        }
     }
 }
