@@ -16,6 +16,7 @@ import android.content.SyncResult;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.v4.app.NotificationCompat;
@@ -134,6 +135,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             GDriveSync driveSync = new GDriveSync(mContext);
             try {
                 driveSync.syncLocked();
+                pref.saveDriveSyncTime(System.currentTimeMillis());
             } catch (Exception e) {
                 AppLog.ex(e);
                 ACRA.getErrorReporter().handleException(e);
@@ -195,7 +197,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 				continue;
 			}
 
-			if (marketApp.getVersionCode() > localApp.getVersionCode()/* || localApp.getTitle().equals("Car Widget Pro")*/) {
+			if (marketApp.getVersionCode() > localApp.getVersionCode()/* || localApp.getTitle().equals("Car Widget Pro"*/) {
 				AppLog.d("New version found ["+marketApp.getVersionCode()+"]");
 				Bitmap icon = iconLoader.loadImageUncached(marketApp.getId());
 				AppInfo newApp = createNewVersion(marketApp, localApp, icon);
@@ -286,7 +288,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 	private void showNotification(ArrayList<String> updatedTitles) {
 		Intent notificationIntent = new Intent(mContext, AppWatcherActivity.class);
 		notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        notificationIntent.getBooleanExtra(AppWatcherActivity.EXTRA_FROM_NOTIFICATION, true);
+        Uri data = Uri.parse("com.anod.appwatcher://notification");
+        notificationIntent.setData(data);
+        notificationIntent.putExtra(AppWatcherActivity.EXTRA_FROM_NOTIFICATION, true);
 		PendingIntent contentIntent = PendingIntent.getActivity(mContext, 0, notificationIntent, 0);
 		
 		String title = renderNotificationTitle(updatedTitles);

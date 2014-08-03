@@ -150,7 +150,7 @@ abstract public class SettingsActionBarActivity extends ActionBarActivity implem
 
         init();
 
-        ArrayList<Preference> preferences = getPreferenceItems();
+        ArrayList<Preference> preferences = initPreferenceItems();
 
         mListView = (ListView) findViewById(android.R.id.list);
         mListView.setEmptyView(findViewById(android.R.id.empty));
@@ -159,7 +159,7 @@ abstract public class SettingsActionBarActivity extends ActionBarActivity implem
     }
 
     protected abstract void init();
-    protected abstract ArrayList<Preference> getPreferenceItems();
+    protected abstract ArrayList<Preference> initPreferenceItems();
     protected abstract void onPreferenceItemClick(int action, Item pref);
 
     @Override

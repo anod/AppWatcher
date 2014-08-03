@@ -64,7 +64,13 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     }
 
     @Override
-    protected ArrayList<SettingsActionBarActivity.Preference> getPreferenceItems() {
+    protected void onResume() {
+        super.onResume();
+        mSyncNowItem.summary = renderDriveSyncTime();
+    }
+
+    @Override
+    protected ArrayList<SettingsActionBarActivity.Preference> initPreferenceItems() {
         ArrayList<Preference> preferences = new ArrayList<Preference>();
 
         preferences.add(new Category(R.string.pref_header_drive_sync));
@@ -80,14 +86,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
         } else {
             mSyncEnabledItem.checked = mPrefs.isDriveSyncEnabled();
             mSyncNowItem.enabled = mSyncEnabledItem.checked;
-            long time = mPrefs.getLastDriveSyncTime();
-            if (time == -1) {
-                mSyncNowItem.summary = getString(R.string.pref_descr_drive_sync_now, getString(R.string.never));
-            } else {
-                mSyncNowItem.summary = getString(R.string.pref_descr_drive_sync_now,
-                        DateUtils.getRelativeDateTimeString(this, time, 0, DateUtils.WEEK_IN_MILLIS, DateUtils.FORMAT_ABBREV_ALL)
-                );
-            }
+            mSyncNowItem.summary = renderDriveSyncTime();
         }
         preferences.add(mSyncEnabledItem);
         preferences.add(mSyncNowItem);
@@ -105,6 +104,17 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
         preferences.add(new Item(R.string.pref_title_opensource, R.string.pref_descr_opensource, ACTION_LICENSES));
 
         return preferences;
+    }
+
+    private String renderDriveSyncTime() {
+        long time = mPrefs.getLastDriveSyncTime();
+        if (time == -1) {
+            return getString(R.string.pref_descr_drive_sync_now, getString(R.string.never));
+        } else {
+            return getString(R.string.pref_descr_drive_sync_now,
+                    DateUtils.getRelativeDateTimeString(this, time, 0, DateUtils.WEEK_IN_MILLIS, DateUtils.FORMAT_ABBREV_ALL)
+            );
+        }
     }
 
     @Override
