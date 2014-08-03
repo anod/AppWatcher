@@ -50,14 +50,14 @@ public class AccountChooserHelper implements AccountChooserFragment.OnAccountSel
 		mSyncAccount = mPreferences.getAccount();
 		if (mSyncAccount == null) {
             // Do not display dialog if only one account available
-            AccountManager accountManager = new AccountManager(mContext);
-            if (accountManager.hasJustOneAccount()) {
-                final Account account = accountManager.getAccount(0);
-                accountManager.saveCurrentAccount(account);
-                onDialogAccountSelected(account);
-            } else {
+            //AccountManager accountManager = new AccountManager(mContext);
+           // if (accountManager.hasJustOneAccount()) {
+            //    final Account account = accountManager.getAccount(0);
+            //    accountManager.saveCurrentAccount(account);
+            //    onDialogAccountSelected(account);
+            //} else {
                 showAccountsDialog();
-            }
+            //}
 		} else {
 			ACRA.getErrorReporter().putCustomData("HasAccountSelected", mSyncAccount != null ? "true" : "false");
 			mAccountHelper.requestToken(mActivity, mSyncAccount, new AccountHelper.AuthenticateCallback() {
