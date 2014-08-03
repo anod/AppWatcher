@@ -35,7 +35,7 @@ public class AccountManager {
     }
 
     public boolean hasJustOneAccount() {
-        return mAccounts.length == 0;
+        return mAccounts.length == 1;
     }
 
     public Account getAccount(int idx) {
