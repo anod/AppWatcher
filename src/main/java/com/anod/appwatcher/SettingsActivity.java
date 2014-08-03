@@ -190,7 +190,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
         notifyDataSetChanged();
         setSupportProgressBarIndeterminateVisibility(false);
 
-        Toast.makeText(this,"Google Drive connected",Toast.LENGTH_SHORT).show();
+        Toast.makeText(this,R.string.gdrive_connected,Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -201,7 +201,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     @Override
     public void onGDriveSyncStart() {
         setSupportProgressBarIndeterminateVisibility(true);
-        Toast.makeText(this,"Google Drive start",Toast.LENGTH_SHORT).show();
+        Toast.makeText(this,R.string.sync_start,Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -211,7 +211,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
         mSyncNowItem.summary = getString(R.string.pref_descr_drive_sync_now, getString(R.string.now));
         mSyncNowItem.enabled=mSyncEnabledItem.checked;
         notifyDataSetChanged();
-        Toast.makeText(this,"Google Drive finish",Toast.LENGTH_SHORT).show();
+        Toast.makeText(this,R.string.sync_finish,Toast.LENGTH_SHORT).show();
     }
 
 
@@ -220,6 +220,6 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
         setSupportProgressBarIndeterminateVisibility(false);
         mSyncNowItem.enabled=mSyncEnabledItem.checked;
         notifyDataSetChanged();
-        Toast.makeText(this,"Google Drive error",Toast.LENGTH_SHORT).show();
+        Toast.makeText(this,R.string.sync_error,Toast.LENGTH_SHORT).show();
     }
 }

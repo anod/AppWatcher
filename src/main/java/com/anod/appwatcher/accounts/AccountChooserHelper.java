@@ -52,8 +52,9 @@ public class AccountChooserHelper implements AccountChooserFragment.OnAccountSel
             // Do not display dialog if only one account available
             AccountManager accountManager = new AccountManager(mContext);
             if (accountManager.hasJustOneAccount()) {
-                mSyncAccount = accountManager.getAccount(0);
-                accountManager.saveCurrentAccount(mSyncAccount);
+                final Account account = accountManager.getAccount(0);
+                accountManager.saveCurrentAccount(account);
+                onDialogAccountSelected(account);
             } else {
                 showAccountsDialog();
             }

@@ -79,5 +79,9 @@
     <string name="never">never</string>
     <string name="now">now</string>
     <string name="no_regestred_google_accounts">No registered google accounts</string>
+    <string name="gdrive_connected">Google Drive connected</string>
+    <string name="sync_start">Sync start</string>
+    <string name="sync_finish">Sync finish</string>
+    <string name="sync_error">Sync error</string>
 
 </resources>
