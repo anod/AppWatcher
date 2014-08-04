@@ -1,24 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="vertical"
-	android:layout_width="match_parent"
-	android:layout_height="wrap_content"
-	android:paddingBottom="4dp"
-	android:baselineAligned="false">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:baselineAligned="false"
+    android:orientation="vertical"
+    android:paddingBottom="4dp">
 
-	<include layout="@layout/list_header" />
+    <include layout="@layout/list_header" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/white"
         android:gravity="center_vertical"
-        android:orientation="horizontal"
-		android:background="@color/white"
-	>
+        android:orientation="horizontal">
 
         <FrameLayout
             android:layout_width="@dimen/icon_wrapper"
-			android:layout_height="match_parent" >
+            android:layout_height="match_parent">
 
             <ImageView
                 android:id="@android:id/icon"
@@ -27,10 +26,9 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="8dip"
                 android:contentDescription="@string/application_icon"
-                android:paddingTop="8dp"
                 android:paddingBottom="8dp"
-                android:src="@drawable/ic_empty"
-			/>
+                android:paddingTop="8dp"
+                android:src="@drawable/ic_empty" />
 
             <LinearLayout
                 android:id="@+id/new_indicator"
@@ -38,8 +36,7 @@
                 android:layout_height="match_parent"
                 android:background="@color/blue_new"
                 android:gravity="left|center_vertical"
-                android:orientation="horizontal" >
-            </LinearLayout>
+                android:orientation="horizontal"></LinearLayout>
         </FrameLayout>
 
         <RelativeLayout
@@ -47,63 +44,62 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical|clip_vertical"
             android:orientation="vertical"
-            android:paddingTop="8dp"
             android:paddingBottom="8dp"
             android:paddingLeft="0dp"
-			android:paddingRight="8dp">
+            android:paddingRight="8dp"
+            android:paddingTop="8dp">
 
             <TextView
                 android:id="@android:id/title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
                 android:text="@string/app_name"
-				android:layout_alignParentTop="true"
-				android:layout_alignParentLeft="true"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-				android:textSize="@dimen/textSizeTitle"
-			/>
+                android:textSize="@dimen/textSizeTitle" />
 
             <TextView
                 android:id="@+id/details"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@android:id/title"
                 android:text="@string/app_name"
                 android:textAppearance="?android:attr/textAppearanceSmall"
-				android:layout_alignParentLeft="true"
-				android:layout_below="@android:id/title"
-				android:textSize="@dimen/textSize" />
+                android:textSize="@dimen/textSize" />
 
-			<TextView
-				android:id="@+id/version"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="@string/app_name"
-				android:layout_alignParentLeft="true"
-				android:layout_below="@+id/details"
-				android:textAppearance="?android:attr/textAppearanceSmall"
-				android:textSize="@dimen/textSize"/>
+            <TextView
+                android:id="@+id/version"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@+id/details"
+                android:text="@string/app_name"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textSize="@dimen/textSize" />
 
-			<TextView
-					android:id="@+id/update_date"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:text="@string/app_name"
-					android:layout_alignBaseline="@+id/details"
-					android:layout_alignRight="@+id/price"
-					android:textSize="@dimen/textSize"/>
+            <TextView
+                android:id="@+id/update_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/details"
+                android:layout_alignRight="@+id/price"
+                android:text="@string/app_name"
+                android:textSize="@dimen/textSize" />
 
-			<TextView
-					android:id="@+id/price"
-					android:layout_width="120dp"
-					android:layout_height="wrap_content"
-					android:textColor="@color/green"
-					android:textSize="@dimen/textSize"
-                    android:gravity="right"
-					android:text="INSTALLED 5.6.1609P.1258283"
-                    android:singleLine="true"
-                    android:ellipsize="end"
-					android:layout_alignParentBottom="true"
-					android:layout_alignParentRight="true"/>
+            <TextView
+                android:id="@+id/price"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:ellipsize="end"
+                android:gravity="right"
+                android:singleLine="true"
+                android:text="INSTALLED 5.6.1609P.1258283"
+                android:textColor="@color/green"
+                android:textSize="@dimen/textSize" />
 
         </RelativeLayout>
 
@@ -115,9 +111,8 @@
         android:layout_height="match_parent"
         android:gravity="center_horizontal|center_vertical"
         android:orientation="horizontal"
-		android:paddingTop="2dp"
-		android:paddingBottom="2dp"
-			>
+        android:paddingBottom="2dp"
+        android:paddingTop="2dp">
 
         <ImageButton
             android:id="@+id/share_btn"
@@ -125,11 +120,11 @@
             android:layout_height="match_parent"
             android:layout_marginLeft="0dp"
             android:layout_marginRight="1dp"
-			android:paddingLeft="10dp"
-			android:paddingRight="10dp"
             android:background="@drawable/app_act_button"
             android:contentDescription="@string/share"
             android:focusable="false"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
             android:src="@drawable/ic_action_share"
             android:text="@string/share" />
 
@@ -144,12 +139,12 @@
             android:background="@drawable/app_act_button"
             android:contentDescription="@string/whats_new"
             android:drawableLeft="@drawable/ic_action_info"
+            android:drawablePadding="0dp"
             android:focusable="false"
+            android:paddingLeft="4dp"
             android:text="@string/whats_new"
-			android:paddingLeft="4dp"
-			android:drawablePadding="0dp"
-			android:textSize="@dimen/textSize"
-            android:textColor="@color/text_dark" />
+            android:textColor="@color/text_dark"
+            android:textSize="@dimen/textSize" />
 
         <Button
             android:id="@+id/market_btn"
@@ -162,24 +157,24 @@
             android:background="@drawable/app_act_button"
             android:contentDescription="@string/play_store"
             android:drawableLeft="@drawable/ic_action_playback_play"
+            android:drawablePadding="0dp"
             android:focusable="false"
+            android:paddingLeft="4dp"
             android:text="@string/play_store"
-			android:paddingLeft="4dp"
-			android:drawablePadding="0dp"
-			android:textSize="@dimen/textSize"
-            android:textColor="@color/text_dark" />
+            android:textColor="@color/text_dark"
+            android:textSize="@dimen/textSize" />
 
         <ImageButton
             android:id="@+id/remove_btn"
             android:layout_width="wrap_content"
-			android:layout_height="match_parent"
+            android:layout_height="match_parent"
             android:layout_marginLeft="1dp"
             android:layout_marginRight="0dp"
-			android:paddingLeft="10dp"
-			android:paddingRight="10dp"
             android:background="@drawable/app_act_button"
             android:contentDescription="@string/remove"
             android:focusable="false"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
             android:src="@drawable/ic_action_cancel" />
     </LinearLayout>
 

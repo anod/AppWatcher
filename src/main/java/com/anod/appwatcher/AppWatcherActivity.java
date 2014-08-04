@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
@@ -21,6 +22,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,7 +36,10 @@ import com.anod.appwatcher.utils.AppLog;
 
 import org.acra.ACRA;
 
-public class AppWatcherActivity extends ActionBarActivity implements TextView.OnEditorActionListener, SearchView.OnQueryTextListener, AccountChooserHelper.OnAccountSelectionListener, AccountChooserFragment.OnAccountSelectionListener {
+public class AppWatcherActivity extends ActionBarActivity implements
+        TextView.OnEditorActionListener, SearchView.OnQueryTextListener,
+        AccountChooserHelper.OnAccountSelectionListener, AccountChooserFragment.OnAccountSelectionListener,
+        ActionBar.OnNavigationListener {
 
     public static final String EXTRA_FROM_NOTIFICATION = "extra_noti";
     private boolean mSyncFinishedReceiverRegistered;
@@ -74,6 +79,13 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.main);
+
+        ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(getSupportActionBar().getThemedContext(),
+                R.array.filter_list, android.R.layout.simple_spinner_dropdown_item);
+
+        getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+        getSupportActionBar().setListNavigationCallbacks(spinnerAdapter, this);
+        getSupportActionBar().setSelectedNavigationItem(0);
 
 		AppWatcherListFragment newFragment = new AppWatcherListFragment();
 		FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -375,6 +387,11 @@ public class AppWatcherActivity extends ActionBarActivity implements TextView.On
 		notifyQueryChange(s);
 		return true;
 	}
+
+    @Override
+    public boolean onNavigationItemSelected(int position, long itemId) {
+        return false;
+    }
 
 	public void notifyQueryChange(String s) {
 		if (mQueryChangeListener != null) {
