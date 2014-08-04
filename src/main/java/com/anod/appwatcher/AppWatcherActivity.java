@@ -44,11 +44,14 @@ public class AppWatcherActivity extends ActionBarActivity implements
     public static final String EXTRA_FROM_NOTIFICATION = "extra_noti";
     private boolean mSyncFinishedReceiverRegistered;
 
+    public static final int NAV_ALL = 0;
+    public static final int NAV_INSTALLED = 1;
+    public static final int NAV_NOTINSTALLED = 2;
 
     private boolean mStartedFromNotification;
 
     public interface QueryChangeListener {
-
+        void onNavigationChanged(int navId);
 		void onQueryTextChanged(String newQuery);
 	}
 	public interface RefreshListener {
@@ -390,6 +393,9 @@ public class AppWatcherActivity extends ActionBarActivity implements
 
     @Override
     public boolean onNavigationItemSelected(int position, long itemId) {
+        if (mQueryChangeListener != null) {
+            mQueryChangeListener.onNavigationChanged(position);
+        }
         return false;
     }
 

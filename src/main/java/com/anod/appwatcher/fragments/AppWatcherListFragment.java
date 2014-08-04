@@ -35,24 +35,30 @@ import com.anod.appwatcher.market.MarketInfo;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListCursor;
 import com.anod.appwatcher.model.AppListCursorLoader;
-import com.anod.appwatcher.utils.AppLog;
+import com.anod.appwatcher.model.InstalledFilter;
 import com.anod.appwatcher.utils.IntentUtils;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 
 import java.sql.Timestamp;
 
-public class AppWatcherListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>,AppWatcherActivity.QueryChangeListener,AppWatcherActivity.RefreshListener, SwipeRefreshLayout.OnRefreshListener {
+public class AppWatcherListFragment extends ListFragment implements
+        LoaderManager.LoaderCallbacks<Cursor>,
+        AppWatcherActivity.QueryChangeListener,
+        AppWatcherActivity.RefreshListener,
+        SwipeRefreshLayout.OnRefreshListener {
     
     private CursorAdapter mAdapter;
 	private int mNewAppsCount;
 	private int mTotalCount;
-	private String mCurFilter = "";
+	private String mTitleFilter = "";
 
 	public ListView mList;
 	private boolean mListShown;
 	private View mProgressContainer;
 	private View mListContainer;
     private SwipeRefreshLayout mSwipeLayout;
+    private InstalledFilter mInstalledFilter;
+
 
     class ViewHolder {
 		AppInfo app;
@@ -246,7 +252,7 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 					holder.price.setText(app.getPriceText());
 				}
 			}
-			if (mNewAppsCount > 0 && TextUtils.isEmpty(mCurFilter)) {
+			if (mNewAppsCount > 0 && TextUtils.isEmpty(mTitleFilter)) {
 				if (holder.position == 0) {
 					holder.sectionText.setText(context.getString(R.string.recently_updated));
 					holder.sectionCount.setText(String.valueOf(mNewAppsCount));
@@ -465,10 +471,10 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
 	
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new AppListCursorLoader(getActivity(), mCurFilter);
+        return new AppListCursorLoader(getActivity(), mTitleFilter, mInstalledFilter);
     }
 
-	@Override
+    	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         // Swap the new cursor in.  (The framework will take care of closing the
         // old cursor once we return.)
@@ -497,14 +503,28 @@ public class AppWatcherListFragment extends ListFragment implements LoaderManage
         mAdapter.swapCursor(null);
 	}
 
-	@Override
+    @Override
+    public void onNavigationChanged(int navId) {
+        if (navId == AppWatcherActivity.NAV_INSTALLED) {
+            mInstalledFilter = new InstalledFilter(true, mPMUtils);
+        } else if (navId == AppWatcherActivity.NAV_NOTINSTALLED) {
+            mInstalledFilter = new InstalledFilter(false, mPMUtils);
+        } else {
+            mInstalledFilter = null;
+        }
+        getLoaderManager().restartLoader(0, null, this);
+    }
+
+    @Override
 	public void onQueryTextChanged(String newQuery) {
 		String newFilter = !TextUtils.isEmpty(newQuery) ? newQuery : "";
-		if (!TextUtils.equals(newFilter,mCurFilter)) {
-			mCurFilter = newFilter;
+		if (!TextUtils.equals(newFilter, mTitleFilter)) {
+			mTitleFilter = newFilter;
 			getLoaderManager().restartLoader(0, null, this);
 		}
 	}
+
+
 
 	public void onRefreshFinish() {
         mSwipeLayout.setRefreshing(false);

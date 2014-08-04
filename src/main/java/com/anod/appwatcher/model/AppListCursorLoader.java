@@ -7,32 +7,34 @@ import android.support.v4.content.CursorLoader;
 import android.text.TextUtils;
 
 import com.anod.appwatcher.AppListContentProvider;
+import com.anod.appwatcher.utils.FilterCursorWrapper;
 
 /**
  * @author alex
  * @date 8/11/13
  */
 public class AppListCursorLoader extends CursorLoader {
-	private int mNewCount;
+    private static final Uri CONTENT_URI = AppListContentProvider.CONTENT_URI;
+    private static final String ORDER_DEFAULT = AppListTable.Columns.KEY_STATUS + " DESC, " +AppListTable.Columns.KEY_TITLE + " COLLATE LOCALIZED ASC";
+    private static final String SELECTION_TITLE = AppListTable.Columns.KEY_STATUS + " != ? AND " + AppListTable.Columns.KEY_TITLE + " LIKE ?";
+    private static final String SELECTION_DEFAULT = AppListTable.Columns.KEY_STATUS + " != ? ";
+    private final boolean mHasTitleFilter;
+    private final FilterCursorWrapper.CursorFilter mCursorFilter;
 
-	public AppListCursorLoader(Context context, String titleFilter) {
-		super(
-			context,
-			AppListContentProvider.CONTENT_URI,
-			AppListTable.APPLIST_PROJECTION, null, null,
-			AppListTable.Columns.KEY_STATUS + " DESC, " +AppListTable.Columns.KEY_TITLE + " COLLATE LOCALIZED ASC"
-		);
-		if (!TextUtils.isEmpty(titleFilter)) {
-			setSelection(
-                    AppListTable.Columns.KEY_STATUS + " != ? AND " +
-                    AppListTable.Columns.KEY_TITLE + " LIKE ?"
-            );
-			setSelectionArgs(new String[] {
-                    String.valueOf( AppInfoMetadata.STATUS_DELETED ),
-                    "%"+titleFilter+"%"
-            });
-		} else {
-            setSelection(AppListTable.Columns.KEY_STATUS + " != ? ");
+    private int mNewCount;
+
+    public AppListCursorLoader(Context context, String titleFilter,FilterCursorWrapper.CursorFilter cursorFilter) {
+		super(context, CONTENT_URI, AppListTable.APPLIST_PROJECTION, null, null,ORDER_DEFAULT);
+
+        mCursorFilter = cursorFilter;
+
+        if (!TextUtils.isEmpty(titleFilter)) {
+            mHasTitleFilter = true;
+            setSelection(SELECTION_TITLE);
+            setSelectionArgs(new String[] { String.valueOf( AppInfoMetadata.STATUS_DELETED ), "%"+titleFilter+"%" });
+        } else {
+            mHasTitleFilter = false;
+            setSelection(SELECTION_DEFAULT);
             setSelectionArgs(new String[] { String.valueOf( AppInfoMetadata.STATUS_DELETED ) });
         }
 	}
@@ -43,7 +45,11 @@ public class AppListCursorLoader extends CursorLoader {
 
 		loadNewCount();
 
-		return new AppListCursor(cr);
+        if (mCursorFilter == null || mHasTitleFilter) {
+            return new AppListCursor(cr);
+        } else {
+            return new AppListCursor(new FilterCursorWrapper(cr,mCursorFilter));
+        }
 	}
 
 	public int getNewCount() {

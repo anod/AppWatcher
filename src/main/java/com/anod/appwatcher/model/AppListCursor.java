@@ -15,8 +15,8 @@ import android.graphics.BitmapFactory;
  */
 public class AppListCursor extends CursorWrapper implements CrossProcessCursor {
     private static final int IDX_ROWID = 0;	
-    private static final int IDX_APPID = 1;	
-    private static final int IDX_PACKAGE = 2;
+    private static final int IDX_APPID = 1;
+    public static final int IDX_PACKAGE = 2;
     private static final int IDX_VERSION_NUMBER = 3;    
     private static final int IDX_VERSION_NAME = 4;
     private static final int IDX_TITLE = 5;    
