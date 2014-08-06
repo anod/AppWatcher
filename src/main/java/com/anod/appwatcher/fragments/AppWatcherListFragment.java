@@ -1,5 +1,6 @@
 package com.anod.appwatcher.fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -36,6 +37,7 @@ import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListCursor;
 import com.anod.appwatcher.model.AppListCursorLoader;
 import com.anod.appwatcher.model.InstalledFilter;
+import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.IntentUtils;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 
@@ -59,39 +61,61 @@ public class AppWatcherListFragment extends ListFragment implements
     private SwipeRefreshLayout mSwipeLayout;
     private InstalledFilter mInstalledFilter;
 
-
-    class ViewHolder {
-		AppInfo app;
-		int position;
-		View section;
-		TextView sectionText;
-		TextView sectionCount;
-		TextView title;
-		TextView details;
-		TextView version;
-		TextView price;
-		ImageView icon;
-		LinearLayout newIndicator;
-		LinearLayout options;
-		ImageButton removeBtn;
-		Button marketBtn;
-		Button changelogBtn;
-		ImageButton shareBtn;
-		TextView updateDate;
-	}
 	private ViewHolder mSelectedHolder = null;
 	private Animation mAnimSlideOut;
 	private boolean mIsBigScreen;
 	private PackageManagerUtils mPMUtils;
+    private boolean mOpenChangelog;
 
+    class ViewHolder {
+        AppInfo app;
+        int position;
+        View section;
+        TextView sectionText;
+        TextView sectionCount;
+        TextView title;
+        TextView details;
+        TextView version;
+        TextView price;
+        ImageView icon;
+        LinearLayout newIndicator;
+        LinearLayout options;
+        ImageButton removeBtn;
+        Button marketBtn;
+        Button changelogBtn;
+        ImageButton shareBtn;
+        TextView updateDate;
+    }
+
+    public static AppWatcherListFragment newInstance() {
+        AppWatcherListFragment frag = new AppWatcherListFragment();
+        Bundle args = new Bundle();
+        frag.setArguments(args);
+        return frag;
+    }
 
 	/** Called when the activity is first created. */
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        AppLog.d("Register listeners");
+        AppWatcherActivity act = (AppWatcherActivity)getActivity();
+
+        int navId = act.getSupportActionBar().getNavigationMode();
+        onNavigationChanged(navId);
+
+        act.setQueryChangeListener(this);
+        act.setRefreshListener(this);
     }
 
-	public void setListShown(boolean shown, boolean animate){
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        mOpenChangelog = ((AppWatcherActivity)getActivity()).isStartedFromNotification();
+    }
+
+    public void setListShown(boolean shown, boolean animate){
 		if (mListShown == shown) {
 			return;
 		}
@@ -162,11 +186,6 @@ public class AppWatcherListFragment extends ListFragment implements
 		mAnimSlideOut = AnimationUtils.loadAnimation(getActivity(), R.anim.slideout);
 
 		mPMUtils = new PackageManagerUtils(getActivity().getPackageManager());
-
-		AppWatcherActivity act = (AppWatcherActivity)getActivity();
-
-		act.setQueryChangeListener(this);
-		act.setRefreshListener(this);
 
 		// Prepare the loader.  Either re-connect with an existing one,
 		// or start a new one.
@@ -488,7 +507,7 @@ public class AppWatcherListFragment extends ListFragment implements
         } else {
             setListShownNoAnimation(true);
         }
-        if (mNewAppsCount == 1 && ((AppWatcherActivity)getActivity()).isStartedFromNotification()) {
+        if (mNewAppsCount == 1 && mOpenChangelog) {
             String appId = ((AppListCursor)mAdapter.getItem(0)).getAppId();
             onChangelogClick(appId);
         }

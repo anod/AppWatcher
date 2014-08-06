@@ -72,11 +72,17 @@ public class AppWatcherActivity extends ActionBarActivity implements
 
 	private AccountChooserHelper mAccountChooserHelper;
 
-	/*
-		 * (non-Javadoc)
-		 *
-		 * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
-		 */
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putInt("nav_id", getSupportActionBar().getSelectedNavigationIndex());
+        super.onSaveInstanceState(outState);
+    }
+
+    /*
+             * (non-Javadoc)
+             *
+             * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
+             */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -86,14 +92,22 @@ public class AppWatcherActivity extends ActionBarActivity implements
         ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(getSupportActionBar().getThemedContext(),
                 R.array.filter_list, android.R.layout.simple_spinner_dropdown_item);
 
+        int nav_id = NAV_ALL;
+        if (savedInstanceState != null) {
+            nav_id = savedInstanceState.getInt("nav_id",NAV_ALL);
+            AppLog.d("Restore nav id: "+nav_id);
+        }
+
         getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
         getSupportActionBar().setListNavigationCallbacks(spinnerAdapter, this);
-        getSupportActionBar().setSelectedNavigationItem(0);
+        getSupportActionBar().setSelectedNavigationItem(nav_id);
 
-		AppWatcherListFragment newFragment = new AppWatcherListFragment();
-		FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-		transaction.add(R.id.fragment_container, newFragment);
-		transaction.commit();
+        if (savedInstanceState == null) {
+            AppWatcherListFragment newFragment = AppWatcherListFragment.newInstance();
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.add(R.id.fragment_container, newFragment);
+            transaction.commit();
+        }
 
 		mContext = this;
 		mPreferences = new Preferences(this);
@@ -104,6 +118,7 @@ public class AppWatcherActivity extends ActionBarActivity implements
         Intent i = getIntent();
         if (i != null) {
             mStartedFromNotification=i.getBooleanExtra(EXTRA_FROM_NOTIFICATION, false);
+            i.removeExtra(EXTRA_FROM_NOTIFICATION);
         }
 	}
 
@@ -197,7 +212,7 @@ public class AppWatcherActivity extends ActionBarActivity implements
 		mSyncFinishedReceiverRegistered = true;
 		super.onResume();
 
-		AppLog.d("Mark updates as viewed.");
+		AppLog.d("Activity::onResume - Mark updates as viewed.");
 		mPreferences.markViewed(true);
 
 		notifyQueryChange("");
@@ -215,6 +230,9 @@ public class AppWatcherActivity extends ActionBarActivity implements
 			unregisterReceiver(mSyncFinishedReceiver);
 			mSyncFinishedReceiverRegistered = false;
 		}
+        mRefreshListener = null;
+        mQueryChangeListener = null;
+        AppLog.d("Activity::onPause");
 	}
 
 	/**
@@ -393,6 +411,7 @@ public class AppWatcherActivity extends ActionBarActivity implements
 
     @Override
     public boolean onNavigationItemSelected(int position, long itemId) {
+        AppLog.d("Navigation changed: "+position);
         if (mQueryChangeListener != null) {
             mQueryChangeListener.onNavigationChanged(position);
         }
