@@ -10,7 +10,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SearchView;
@@ -28,7 +27,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.anod.appwatcher.accounts.AccountChooserHelper;
-import com.anod.appwatcher.fragments.AboutDialogFragment;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
 import com.anod.appwatcher.fragments.AppWatcherListFragment;
 import com.anod.appwatcher.sync.SyncAdapter;
@@ -47,8 +45,6 @@ public class AppWatcherActivity extends ActionBarActivity implements
     public static final int NAV_ALL = 0;
     public static final int NAV_INSTALLED = 1;
     public static final int NAV_NOTINSTALLED = 2;
-
-    private boolean mStartedFromNotification;
 
     public interface QueryChangeListener {
         void onNavigationChanged(int navId);
@@ -71,6 +67,7 @@ public class AppWatcherActivity extends ActionBarActivity implements
 	private RefreshListener mRefreshListener;
 
 	private AccountChooserHelper mAccountChooserHelper;
+    private boolean mOpenChangelog;
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -79,10 +76,10 @@ public class AppWatcherActivity extends ActionBarActivity implements
     }
 
     /*
-             * (non-Javadoc)
-             *
-             * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
-             */
+     * (non-Javadoc)
+     *
+     * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
+     */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -92,8 +89,14 @@ public class AppWatcherActivity extends ActionBarActivity implements
         ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(getSupportActionBar().getThemedContext(),
                 R.array.filter_list, android.R.layout.simple_spinner_dropdown_item);
 
+        Intent i = getIntent();
+        if (i != null) {
+            mOpenChangelog =i.getBooleanExtra(EXTRA_FROM_NOTIFICATION, false);
+            i.removeExtra(EXTRA_FROM_NOTIFICATION);
+        }
+
         int nav_id = NAV_ALL;
-        if (savedInstanceState != null) {
+        if (savedInstanceState != null && !mOpenChangelog) {
             nav_id = savedInstanceState.getInt("nav_id",NAV_ALL);
             AppLog.d("Restore nav id: "+nav_id);
         }
@@ -115,15 +118,11 @@ public class AppWatcherActivity extends ActionBarActivity implements
 		mAccountChooserHelper = new AccountChooserHelper(this, mPreferences, this);
 		mAccountChooserHelper.init();
 
-        Intent i = getIntent();
-        if (i != null) {
-            mStartedFromNotification=i.getBooleanExtra(EXTRA_FROM_NOTIFICATION, false);
-            i.removeExtra(EXTRA_FROM_NOTIFICATION);
-        }
+
 	}
 
-    public boolean isStartedFromNotification() {
-        return mStartedFromNotification;
+    public boolean isOpenChangelog() {
+        return mOpenChangelog;
     }
 
 	@Override
@@ -230,8 +229,6 @@ public class AppWatcherActivity extends ActionBarActivity implements
 			unregisterReceiver(mSyncFinishedReceiver);
 			mSyncFinishedReceiverRegistered = false;
 		}
-        mRefreshListener = null;
-        mQueryChangeListener = null;
         AppLog.d("Activity::onPause");
 	}
 
@@ -239,9 +236,6 @@ public class AppWatcherActivity extends ActionBarActivity implements
 	 * stop refresh button animation
 	 */
 	private void stopRefreshAnim() {
-		//if (mSwipeLayout != null) {
-        //    mSwipeLayout.setRefreshing(false);
-		//}
 		if (mRefreshMenuItem == null) {
 			return;
 		}

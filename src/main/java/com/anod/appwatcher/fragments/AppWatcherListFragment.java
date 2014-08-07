@@ -1,6 +1,5 @@
 package com.anod.appwatcher.fragments;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -107,12 +106,8 @@ public class AppWatcherListFragment extends ListFragment implements
 
         act.setQueryChangeListener(this);
         act.setRefreshListener(this);
-    }
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        mOpenChangelog = ((AppWatcherActivity)getActivity()).isStartedFromNotification();
+        mOpenChangelog =act.isOpenChangelog();
     }
 
     public void setListShown(boolean shown, boolean animate){
@@ -498,7 +493,11 @@ public class AppWatcherListFragment extends ListFragment implements
         // Swap the new cursor in.  (The framework will take care of closing the
         // old cursor once we return.)
         mAdapter.swapCursor(data);
-		mNewAppsCount = ((AppListCursorLoader)loader).getNewCount();
+        if (mInstalledFilter == null) {
+            mNewAppsCount = ((AppListCursorLoader) loader).getNewCount();
+        } else {
+            mNewAppsCount = mInstalledFilter.getNewCount();
+        }
 		mTotalCount = data.getCount();
 
         // The list should now be shown.
@@ -507,11 +506,14 @@ public class AppWatcherListFragment extends ListFragment implements
         } else {
             setListShownNoAnimation(true);
         }
-        if (mNewAppsCount == 1 && mOpenChangelog) {
-            String appId = ((AppListCursor)mAdapter.getItem(0)).getAppId();
-            onChangelogClick(appId);
-        }
 
+        if (mOpenChangelog) {
+            if (mNewAppsCount == 1) {
+                String appId = ((AppListCursor)mAdapter.getItem(0)).getAppId();
+                onChangelogClick(appId);
+            }
+            mOpenChangelog=false;
+        }
     }
 
 	@Override

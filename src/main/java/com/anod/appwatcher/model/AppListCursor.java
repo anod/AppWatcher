@@ -22,7 +22,7 @@ public class AppListCursor extends CursorWrapper implements CrossProcessCursor {
     private static final int IDX_TITLE = 5;    
     private static final int IDX_CREATOR = 6;    
     private static final int IDX_ICON_CACHE = 7;
-    private static final int IDX_STATUS = 8;
+    public static final int IDX_STATUS = 8;
     private static final int IDX_UPDATE_DATE = 9;
 	private static final int IDX_PRICE_TEXT = 10;
 	private static final int IDX_PRICE_CURRENCY = 11;
