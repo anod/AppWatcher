@@ -100,6 +100,11 @@ public class AppsResponseLoader {
             }
         }
 
+        if (respWrapper.response == null) {
+            mNetworkError = true;
+            return null;
+        }
+
 		List<App> apps = respWrapper.response.getAppList();
 		int appCount = respWrapper.response.getEntriesCount();
 		
