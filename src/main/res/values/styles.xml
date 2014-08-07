@@ -20,7 +20,7 @@
 		<item name="android:background">@color/list_background</item>
     </style>
 
-    <style name="Widget"></style>
+    <style name="Widget"/>
     
     <style name="TextAppearance.Sherlock.Light.DialogWindowTitle" parent="Widget">
         <item name="android:textSize">22sp</item>

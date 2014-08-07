@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
 import android.view.KeyEvent;
@@ -31,10 +30,11 @@ import com.anod.appwatcher.fragments.AccountChooserFragment;
 import com.anod.appwatcher.fragments.AppWatcherListFragment;
 import com.anod.appwatcher.sync.SyncAdapter;
 import com.anod.appwatcher.utils.AppLog;
+import com.anod.appwatcher.utils.TranslucentActionBarActivity;
 
 import org.acra.ACRA;
 
-public class AppWatcherActivity extends ActionBarActivity implements
+public class AppWatcherActivity extends TranslucentActionBarActivity implements
         TextView.OnEditorActionListener, SearchView.OnQueryTextListener,
         AccountChooserHelper.OnAccountSelectionListener, AccountChooserFragment.OnAccountSelectionListener,
         ActionBar.OnNavigationListener {
@@ -85,6 +85,8 @@ public class AppWatcherActivity extends ActionBarActivity implements
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.main);
+
+        initSystemBar();
 
         ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(getSupportActionBar().getThemedContext(),
                 R.array.filter_list, android.R.layout.simple_spinner_dropdown_item);

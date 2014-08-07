@@ -39,6 +39,7 @@ import com.anod.appwatcher.model.InstalledFilter;
 import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.IntentUtils;
 import com.anod.appwatcher.utils.PackageManagerUtils;
+import com.anod.appwatcher.utils.TranslucentActionBarActivity;
 
 import java.sql.Timestamp;
 
@@ -147,6 +148,9 @@ public class AppWatcherListFragment extends ListFragment implements
 							 Bundle savedInstanceState) {
 		View root = inflater.inflate(R.layout.applist_fragment, container, false);
 		mList = (ListView) root.findViewById(android.R.id.list);
+
+        ((TranslucentActionBarActivity)getActivity()).adjustListView(mList);
+
 		mListContainer =  root.findViewById(R.id.listContainer);
 		mProgressContainer = root.findViewById(R.id.progressContainer);
 		mListShown = true;
