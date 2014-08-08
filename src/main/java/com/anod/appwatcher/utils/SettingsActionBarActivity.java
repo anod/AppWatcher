@@ -2,7 +2,6 @@ package com.anod.appwatcher.utils;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,7 +18,7 @@ import com.anod.appwatcher.R;
 import java.util.ArrayList;
 import java.util.List;
 
-abstract public class SettingsActionBarActivity extends ActionBarActivity implements AdapterView.OnItemClickListener {
+abstract public class SettingsActionBarActivity extends TranslucentActionBarActivity implements AdapterView.OnItemClickListener {
     protected ListView mListView;
 
     public static class Preference {
@@ -148,6 +147,7 @@ abstract public class SettingsActionBarActivity extends ActionBarActivity implem
         supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.preference_list_content);
 
+        initSystemBar();
         init();
 
         ArrayList<Preference> preferences = initPreferenceItems();
@@ -156,6 +156,7 @@ abstract public class SettingsActionBarActivity extends ActionBarActivity implem
         mListView.setEmptyView(findViewById(android.R.id.empty));
         mListView.setAdapter(new PreferenceAdapter(this, preferences));
         mListView.setOnItemClickListener(this);
+        adjustListView(mListView);
     }
 
     protected abstract void init();

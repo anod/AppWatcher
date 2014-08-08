@@ -1,5 +1,6 @@
 package com.anod.appwatcher.utils;
 
+import android.content.res.Resources;
 import android.os.Build;
 import android.support.v7.app.ActionBarActivity;
 import android.view.View;
@@ -23,7 +24,8 @@ abstract public class TranslucentActionBarActivity extends ActionBarActivity {
     protected void initSystemBar() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             SystemBarTintManager sysbars = new SystemBarTintManager(this);
-            sysbars.setStatusBarTintColor(getResources().getColor(R.color.abs__background_holo_dark));
+            Resources r = getResources();
+            sysbars.setStatusBarTintColor(r.getColor(R.color.abs__background_holo_dark));
             sysbars.setStatusBarAlpha(1);
             sysbars.setStatusBarTintEnabled(true);
 
@@ -33,6 +35,7 @@ abstract public class TranslucentActionBarActivity extends ActionBarActivity {
             mIsNavigationAtBottom = cfg.isNavigationAtBottom();
 
             FrameLayout frame = (FrameLayout) findViewById(R.id.activity_frame);
+            frame.setBackgroundColor(r.getColor(R.color.abs__background_holo_light));
             if (mIsNavigationAtBottom) {
                 mPixelInsetBottom = cfg.getPixelInsetBottom();
                 frame.setPadding(0,cfg.getPixelInsetTop(true),0,0);
