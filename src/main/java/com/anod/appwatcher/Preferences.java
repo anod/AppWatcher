@@ -1,8 +1,13 @@
 package com.anod.appwatcher;
 
 import android.accounts.Account;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class Preferences {
     private static final String VIEWED = "viewed";
@@ -120,4 +125,6 @@ public class Preferences {
         editor.putLong(key, value);
         editor.commit();
     }
+
+
 }

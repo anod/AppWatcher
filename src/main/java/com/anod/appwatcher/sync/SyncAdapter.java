@@ -17,6 +17,7 @@ import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.v4.app.NotificationCompat;
@@ -24,6 +25,8 @@ import android.support.v4.app.NotificationCompat.Builder;
 import android.text.format.DateUtils;
 
 import com.anod.appwatcher.AppWatcherActivity;
+import com.anod.appwatcher.AppWatcherApplication;
+import com.anod.appwatcher.BuildConfig;
 import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.accounts.AccountHelper;
@@ -46,6 +49,8 @@ import org.acra.ACRA;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private static final int ONE_SEC_IN_MILLIS = 1000;
@@ -181,6 +186,18 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 			return updatedTitles;
 		}
 		apps.moveToPosition(-1);
+
+
+        Set<String> debugPkgs = null;
+        if (BuildConfig.DEBUG) {
+            debugPkgs = new HashSet<String>();
+         //   debugPkgs.add("com.adobe.reader");
+         //   debugPkgs.add("com.aide.ui");
+         //   debugPkgs.add("com.anod.car.home.free");
+         //   debugPkgs.add("com.anod.car.home.pro");
+         //   debugPkgs.add("com.ibolt.carhome");
+        }
+
 		// TODO: implement multiple calls
 		while(apps.moveToNext()) {
 			App marketApp = null;
@@ -197,7 +214,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 				continue;
 			}
 
-			if (marketApp.getVersionCode() > localApp.getVersionCode()/* || localApp.getTitle().equals("Car Widget Pro")*/) {
+			if (marketApp.getVersionCode() > localApp.getVersionCode() || (debugPkgs!=null && debugPkgs.contains(localApp.getPackageName()))) {
 				AppLog.d("New version found ["+marketApp.getVersionCode()+"]");
 				Bitmap icon = iconLoader.loadImageUncached(marketApp.getId());
 				AppInfo newApp = createNewVersion(marketApp, localApp, icon);
@@ -240,6 +257,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 			}
 		}
 		apps.close();
+
 		return updatedTitles;
 	}
 

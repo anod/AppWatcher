@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
@@ -27,9 +28,13 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.anod.appwatcher.AppWatcherActivity;
+import com.anod.appwatcher.AppWatcherApplication;
+import com.anod.appwatcher.BuildConfig;
 import com.anod.appwatcher.ChangelogActivity;
+import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.market.MarketInfo;
 import com.anod.appwatcher.model.AppInfo;
@@ -42,6 +47,7 @@ import com.anod.appwatcher.utils.PackageManagerUtils;
 import com.anod.appwatcher.utils.TranslucentActionBarActivity;
 
 import java.sql.Timestamp;
+import java.util.Locale;
 
 public class AppWatcherListFragment extends ListFragment implements
         LoaderManager.LoaderCallbacks<Cursor>,
@@ -383,18 +389,22 @@ public class AppWatcherListFragment extends ListFragment implements
 				}
 
 			});
-            
+
+
             holder.icon.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					onIconClick(v);
 				}
 			});
+
+
             return holder;
 		}
     }
-    
-	public void onItemClick(View v) {
+
+
+    public void onItemClick(View v) {
 		ViewHolder holder = (ViewHolder)v.getTag();
 		switchItemOptions(holder);
 	}
@@ -464,7 +474,7 @@ public class AppWatcherListFragment extends ListFragment implements
 		builder.setType("text/plain");
 		builder.startChooser();
 	}
-	
+
 	private void onChangelogClick(final String appId) {
 		Intent intent = new Intent(getActivity(), ChangelogActivity.class);
 		intent.putExtra(ChangelogActivity.EXTRA_APP_ID, appId);
@@ -477,6 +487,7 @@ public class AppWatcherListFragment extends ListFragment implements
 	 */
 	private void onIconClick(View v) {
 		ViewHolder holder = (ViewHolder)v.getTag();
+        String pkgName = holder.app.getPackageName();
 		boolean isInstalled = mPMUtils.isAppInstalled(holder.app.getPackageName());
 		if (isInstalled) {
 			Intent appInfo = IntentUtils.createApplicationDetailsIntent(holder.app.getPackageName());
@@ -484,6 +495,10 @@ public class AppWatcherListFragment extends ListFragment implements
 		} else {
 			switchItemOptions(holder);
 		}
+        if (BuildConfig.DEBUG) {
+            AppLog.d(pkgName);
+            Toast.makeText(getActivity(),pkgName,Toast.LENGTH_SHORT).show();
+        }
 	}
 
 	

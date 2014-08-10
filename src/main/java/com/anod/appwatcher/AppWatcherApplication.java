@@ -6,6 +6,8 @@ import android.telephony.TelephonyManager;
 import android.view.ViewConfiguration;
 
 import java.lang.reflect.Field;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.newrelic.agent.android.NewRelic;
 
@@ -22,7 +24,7 @@ import org.acra.annotation.ReportsCrashes;
 )
 public class AppWatcherApplication extends Application {
 
-	 @Override
+    @Override
 	 public void onCreate() {
 		super.onCreate();
 
@@ -52,6 +54,7 @@ public class AppWatcherApplication extends Application {
 
 	 }
 
-
-
+    public static AppWatcherApplication get(Context context) {
+        return (AppWatcherApplication)context.getApplicationContext();
+    }
 }
