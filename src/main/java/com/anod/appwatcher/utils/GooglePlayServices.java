@@ -64,14 +64,15 @@ abstract public class GooglePlayServices implements GoogleApiClient.ConnectionCa
         });
         mGoogleApiClient.registerConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
             @Override
-            public void onConnectionFailed(ConnectionResult arg0) {
+            public void onConnectionFailed(ConnectionResult result) {
                 latch.countDown();
+                AppLog.e(result.toString());
             }
         });
         mGoogleApiClient.connect();
         latch.await();
         if (!mGoogleApiClient.isConnected()) {
-            throw new Exception("Cannot connect to Google Play Services");
+            throw new Exception("Cannot connect to Google Play Services. See log.");
         }
     }
 
