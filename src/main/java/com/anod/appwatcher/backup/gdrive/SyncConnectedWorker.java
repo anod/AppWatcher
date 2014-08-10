@@ -164,8 +164,8 @@ public class SyncConnectedWorker {
 
         AppLog.d("[GDrive] Clean locally deleted apps ");
         // Clean deleted
-        cr.cleanDeleted();
-
+        int numRows = cr.cleanDeleted();
+        AppLog.d("[GDrive] Cleaned "+numRows+" rows");
     }
 
     private DriveId retrieveFileDriveId() throws Exception {

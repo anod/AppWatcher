@@ -131,6 +131,18 @@ public class AppListContentProviderClient {
 		return 0;
 	}
 
+    public int markDeleted(int rowId) {
+        Uri updateUri = AppListContentProvider.CONTENT_URI.buildUpon().appendPath(String.valueOf(rowId)).build();
+        ContentValues values = new ContentValues();
+        values.put(AppListTable.Columns.KEY_STATUS, AppInfo.STATUS_DELETED );
+        try {
+            return mContentProviderClient.update(updateUri, values, null, null);
+        } catch (RemoteException e) {
+            AppLog.ex(e);
+        }
+        return 0;
+    }
+
     public int cleanDeleted() {
         int numRows = 0;
         try {

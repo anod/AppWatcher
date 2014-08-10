@@ -20,6 +20,7 @@ import java.util.List;
 
 abstract public class SettingsActionBarActivity extends TranslucentActionBarActivity implements AdapterView.OnItemClickListener {
     protected ListView mListView;
+    private PreferenceAdapter mPreferenceAdapter;
 
     public static class Preference {
         final int title;
@@ -152,9 +153,10 @@ abstract public class SettingsActionBarActivity extends TranslucentActionBarActi
 
         ArrayList<Preference> preferences = initPreferenceItems();
 
+        mPreferenceAdapter = new PreferenceAdapter(this, preferences);
         mListView = (ListView) findViewById(android.R.id.list);
         mListView.setEmptyView(findViewById(android.R.id.empty));
-        mListView.setAdapter(new PreferenceAdapter(this, preferences));
+        mListView.setAdapter(mPreferenceAdapter);
         mListView.setOnItemClickListener(this);
         adjustListView(mListView);
     }
@@ -173,8 +175,7 @@ abstract public class SettingsActionBarActivity extends TranslucentActionBarActi
     }
 
     protected void notifyDataSetChanged() {
-        PreferenceAdapter adapter = (PreferenceAdapter) mListView.getAdapter();
-        adapter.notifyDataSetChanged();
+        mPreferenceAdapter.notifyDataSetChanged();
     }
 
 }
