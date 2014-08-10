@@ -89,7 +89,7 @@ public class AppWatcherActivity extends TranslucentActionBarActivity implements
         initSystemBar();
 
         ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(getSupportActionBar().getThemedContext(),
-                R.array.filter_list, android.R.layout.simple_spinner_dropdown_item);
+                R.array.filter_list, R.layout.support_simple_spinner_dropdown_item);
 
         Intent i = getIntent();
         if (i != null) {
