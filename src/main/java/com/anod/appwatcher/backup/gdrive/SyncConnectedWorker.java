@@ -20,6 +20,8 @@ import com.google.android.gms.drive.MetadataChangeSet;
 import com.google.android.gms.drive.query.Filters;
 import com.google.android.gms.drive.query.Query;
 import com.google.android.gms.drive.query.SearchableField;
+import com.google.android.gms.drive.query.SortOrder;
+import com.google.android.gms.drive.query.SortableField;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -61,6 +63,8 @@ public class SyncConnectedWorker {
     }
 
     private void doSyncLocked() throws Exception {
+        Drive.DriveApi.requestSync(mGoogleApiClient).await();
+
         DriveId driveId = retrieveFileDriveId();
 
         AppListContentProviderClient cr = new AppListContentProviderClient(mContext);
@@ -86,11 +90,16 @@ public class SyncConnectedWorker {
             driveFileReader.close();
         }
 
+
         if (driveId == null) {
-            driveId = createNewFile();
+            if (cr.getCount() > 0) {
+                driveId = createNewFile();
+            }
         }
 
-        writeToDrive(driveId, cr);
+        if (driveId!=null) {
+            writeToDrive(driveId, cr);
+        }
 
         cr.release();
         Drive.DriveApi.requestSync(mGoogleApiClient).await();
@@ -170,11 +179,16 @@ public class SyncConnectedWorker {
 
     private DriveId retrieveFileDriveId() throws Exception {
 
+        SortOrder order = new SortOrder.Builder()
+                .addSortDescending(SortableField.QUOTA_USED)
+                .build();
+
         Query query = new Query.Builder()
                 .addFilter(Filters.and(
                     Filters.eq(SearchableField.MIME_TYPE, MIME_TYPE),
                     Filters.eq(SearchableField.TITLE, APPLIST_JSON)
                 ))
+                .setSortOrder(order)
                 .build();
 
         DriveApi.MetadataBufferResult metadataBufferResult = Drive.DriveApi
