@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     package="com.anod.appwatcher" >
 
-    <uses-sdk tools:node="replace" />
+    <uses-sdk />
     <!-- for google account token -->
     <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
@@ -64,6 +63,14 @@
             android:label="@string/import_export"
             android:theme="@style/AppThemeLight.Dialog" />
 
+        <activity
+            android:name=".NotificationActivity"
+            android:taskAffinity="com.anod.appwatcher.notification"
+            android:theme="@style/InvisibleTheme"
+            android:noHistory="true"
+            android:exported="true"
+            />
+
         <provider
             android:name=".AppListContentProvider"
             android:authorities="com.anod.appwatcher"
@@ -92,14 +99,12 @@
             android:value="@integer/google_play_services_version" />
 
         <activity
-            android:name=".GDriveSyncActivity"
-            android:label="@string/google_drive_sync"
-            android:theme="@style/AppThemeLight.Dialog" >
-        </activity>
-
-        <activity
             android:name=".SettingsActivity"
             android:label="Settings" >
+        </activity>
+        <activity
+            android:name="com.anod.uninstaller.UninstallActivity"
+            android:label="@string/title_activity_uninstall" >
         </activity>
     </application>
 

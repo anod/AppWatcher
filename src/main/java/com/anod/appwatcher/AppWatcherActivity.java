@@ -123,10 +123,6 @@ public class AppWatcherActivity extends TranslucentActionBarActivity implements
 
 	}
 
-    public boolean isOpenChangelog() {
-        return mOpenChangelog;
-    }
-
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu

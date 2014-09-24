@@ -25,8 +25,8 @@
     <string name="alert_dialog_cancel">Cancel</string>
     <string name="version">Version %s</string>
     <string name="update">Updated to %s</string>
-    <string name="notification_one_updated">%s update found</string>
-    <string name="notification_many_updates">%d updates found</string>
+    <string name="notification_one_updated">%s updated</string>
+    <string name="notification_many_updates">%d apps updated</string>
     <string name="notification_2_apps">%1$s, %2$s</string>
     <string name="notification_2_apps_more">%1$s, %2$s and more</string>
     <string name="notification_click">Click to see details</string>
@@ -71,7 +71,6 @@
     <string name="retry">Retry</string>
     <string name="title_activity_settings">SettingsActivity</string>
     <string name="google_drive_sync">Google Drive Sync</string>
-
     <string name="gms_service_missing">Google Play services is missing on this device.</string>
     <string name="gms_service_update_required">The installed version of Google Play services is out of date.</string>
     <string name="gms_service_disabled">The installed version of Google Play services has been disabled on this device.</string>
@@ -83,5 +82,10 @@
     <string name="sync_start">Sync start</string>
     <string name="sync_finish">Sync finish</string>
     <string name="sync_error">Sync error</string>
+    <string name="title_activity_uninstall">UninstallActivity</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="store">Store</string>
+    <string name="dismiss">Dismiss</string>
 
 </resources>

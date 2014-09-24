@@ -71,7 +71,6 @@ public class AppWatcherListFragment extends ListFragment implements
 	private Animation mAnimSlideOut;
 	private boolean mIsBigScreen;
 	private PackageManagerUtils mPMUtils;
-    private boolean mOpenChangelog;
 
     class ViewHolder {
         AppInfo app;
@@ -114,7 +113,6 @@ public class AppWatcherListFragment extends ListFragment implements
         act.setQueryChangeListener(this);
         act.setRefreshListener(this);
 
-        mOpenChangelog =act.isOpenChangelog();
     }
 
     public void setListShown(boolean shown, boolean animate){
@@ -526,13 +524,6 @@ public class AppWatcherListFragment extends ListFragment implements
             setListShownNoAnimation(true);
         }
 
-        if (mOpenChangelog) {
-            if (mNewAppsCount == 1) {
-                String appId = ((AppListCursor)mAdapter.getItem(0)).getAppId();
-                onChangelogClick(appId);
-            }
-            mOpenChangelog=false;
-        }
     }
 
 	@Override

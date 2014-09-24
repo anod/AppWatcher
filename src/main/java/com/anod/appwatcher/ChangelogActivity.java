@@ -46,8 +46,9 @@ public class ChangelogActivity extends FragmentActivity{
         MarketSessionHelper helper = new MarketSessionHelper(this);
         mMarketSession = helper.create(deviceId, null);
         
-        mLoader = new AppLoader(mMarketSession, true);
-		
+        mLoader = new AppLoader(mMarketSession);
+		mLoader.setExtended(true);
+
         mLoadingView = (ProgressBar)findViewById(R.id.progress_bar);
         mChangelog = (TextView)findViewById(R.id.changelog);
 		mRetryButton = (Button)findViewById(R.id.retry);
@@ -89,7 +90,7 @@ public class ChangelogActivity extends FragmentActivity{
 		protected App doInBackground(String... appsId) {
 			AppLog.d("App Id: "+appsId[0]);
 			try {
-				return mLoader.load(appsId[0]);
+				return mLoader.loadOne(appsId[0]);
 			} catch (Exception e) {
 				AppLog.e("Retrieve change log error", e);
 				return null;

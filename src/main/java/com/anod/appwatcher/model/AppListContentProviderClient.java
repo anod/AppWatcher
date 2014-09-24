@@ -51,7 +51,19 @@ public class AppListContentProviderClient {
 	public AppListCursor queryAll() {
 		return query(null, null, null);
 	}
-	
+
+    /**
+     *
+     * @return
+     */
+    public int getCount() {
+        Cursor cr = queryAll();
+        if (cr == null) {
+            return 0;
+        }
+        return cr.getCount();
+    }
+
 	public AppListCursor query(String sortOrder, String selection, String[] selectionArgs) {
 		Cursor cr = null;
 		try {

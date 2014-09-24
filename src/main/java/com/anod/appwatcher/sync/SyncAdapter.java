@@ -17,7 +17,6 @@ import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.v4.app.NotificationCompat;
@@ -25,13 +24,12 @@ import android.support.v4.app.NotificationCompat.Builder;
 import android.text.format.DateUtils;
 
 import com.anod.appwatcher.AppWatcherActivity;
-import com.anod.appwatcher.AppWatcherApplication;
 import com.anod.appwatcher.BuildConfig;
+import com.anod.appwatcher.NotificationActivity;
 import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.accounts.AccountHelper;
 import com.anod.appwatcher.backup.GDriveSync;
-import com.anod.appwatcher.backup.gdrive.SyncConnectedWorker;
 import com.anod.appwatcher.market.AppIconLoader;
 import com.anod.appwatcher.market.AppLoader;
 import com.anod.appwatcher.market.DeviceIdHelper;
@@ -42,6 +40,7 @@ import com.anod.appwatcher.model.AppListCursor;
 import com.anod.appwatcher.model.AppListTable;
 import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.BitmapUtils;
+import com.anod.appwatcher.utils.IntentUtils;
 import com.gc.android.market.api.MarketSession;
 import com.gc.android.market.api.model.Market.App;
 
@@ -56,14 +55,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private static final int ONE_SEC_IN_MILLIS = 1000;
 
 	private final Context mContext;
-    
-	private static final int NOTIFICATION_ID = 1;
-	
+
     public static final String SYNC_STOP = "com.anod.appwatcher.sync.start";
     public static final String SYNC_PROGRESS = "com.anod.appwatcher.sync.progress";
     public static final String EXTRA_UPDATES_COUNT = "extra_updates_count";
-    
-	public SyncAdapter(Context context, boolean autoInitialize) {
+    private MarketSession mMarketSession;
+    private AppLoader mLoader;
+
+    public SyncAdapter(Context context, boolean autoInitialize) {
 		super(context, autoInitialize);
         mContext = context;
 	}
@@ -95,19 +94,21 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 		//Broadcast progress intent
 		Intent startIntent = new Intent(SYNC_PROGRESS);
 		mContext.sendBroadcast(startIntent);
-		
-		
+
+        mMarketSession = createMarketSession(pref);
+        mLoader = new AppLoader(mMarketSession);
+
 		boolean lastUpdatesViewed = pref.isLastUpdatesViewed();
 		AppLog.d("Last update viewed: "+lastUpdatesViewed);
 		
-		ArrayList<String> updatedTitles = null;
+		ArrayList<UpdatedApp> updatedApps = null;
 		AppListContentProviderClient appListProvider = new AppListContentProviderClient(provider);
 		try {
-			updatedTitles = doSync(pref, appListProvider, lastUpdatesViewed);
+            updatedApps = doSync(pref, appListProvider, lastUpdatesViewed);
 		} catch (RemoteException e) {
-			
+
 		}
-		int size = (updatedTitles!=null) ? updatedTitles.size() : 0;
+		int size = (updatedApps!=null) ? updatedApps.size() : 0;
 		Intent finishIntent = new Intent(SYNC_STOP);
 		finishIntent.putExtra(EXTRA_UPDATES_COUNT, size);
 		mContext.sendBroadcast(finishIntent);
@@ -116,7 +117,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 		pref.updateLastTime(now);
 				
 		if (size > 0) {
-			showNotification(updatedTitles);
+            SyncNotification sn = new SyncNotification(mContext);
+            Notification notification = sn.create(updatedApps, mLoader);
+            sn.show(notification);
 			if (!manualSync && lastUpdatesViewed) {
 				pref.markViewed(false);
 			}
@@ -129,6 +132,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             AppLog.d("DriveSyncEnabled = false, skipping...");
         }
 
+        mLoader = null;
+        mMarketSession = null;
 		AppLog.d("Finish::onPerformSync()");
 	
 	}
@@ -164,23 +169,31 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 		return (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI);
 	}
 
+    protected static class UpdatedApp {
+        String appId;
+        String title;
+        String pkg;
+
+        private UpdatedApp(String appId, String title, String pkg) {
+            this.appId = appId;
+            this.title = title;
+            this.pkg = pkg;
+        }
+    }
 	/**
 	 * @param pref
 	 * @param client
 	 * @throws RemoteException
 	 * @return list of titles that were updated
 	 */
-	private ArrayList<String> doSync(Preferences pref, AppListContentProviderClient client, boolean lastUpdatesViewed) throws RemoteException {
-		ArrayList<String> updatedTitles = new ArrayList<String>();
+	private ArrayList<UpdatedApp> doSync(Preferences pref, AppListContentProviderClient client, boolean lastUpdatesViewed) throws RemoteException {
+		ArrayList<UpdatedApp> updatedTitles = new ArrayList<UpdatedApp>();
 
-		
-		MarketSession session = createAppInfoLoader(pref);
-		if (session == null) {
+		if (mMarketSession == null) {
 			return updatedTitles;
 		}
-		AppIconLoader iconLoader = new AppIconLoader(session);
-		AppLoader loader = new AppLoader(session, false);
-		
+        AppIconLoader iconLoader = new AppIconLoader(mMarketSession);
+
 		AppListCursor apps = client.queryAll();
 		if (apps==null || apps.moveToFirst() == false) {
 			return updatedTitles;
@@ -204,7 +217,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 			AppInfo localApp = apps.getAppInfo();
 			AppLog.d("Checking for updates '"+localApp.getTitle()+"' ...");
 			try {
-				marketApp = loader.load(localApp.getAppId());
+				marketApp = mLoader.loadOne(localApp.getAppId());
 			} catch (Exception e) {
 				AppLog.e("Cannot retrieve information for "+localApp.getTitle() + ", id:"+localApp.getAppId(), e);
 				continue;
@@ -219,7 +232,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 				Bitmap icon = iconLoader.loadImageUncached(marketApp.getId());
 				AppInfo newApp = createNewVersion(marketApp, localApp, icon);
 				client.update(newApp);
-				updatedTitles.add(marketApp.getTitle());
+				updatedTitles.add(new UpdatedApp(localApp.getAppId(),marketApp.getTitle(),marketApp.getPackageName()));
 				continue;
 			}
 			
@@ -261,12 +274,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 		return updatedTitles;
 	}
 
-	/**
-	 * @param marketApp
-	 * @param localApp
-	 * @param newIcon
-	 * @throws RemoteException
-	 */
 	private AppInfo createNewVersion(App marketApp, AppInfo localApp, Bitmap newIcon)  {
 
         // Gets the current system time in milliseconds
@@ -281,7 +288,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 	}
 
 
-	private MarketSession createAppInfoLoader(Preferences prefs) {
+	private MarketSession createMarketSession(Preferences prefs) {
 		AccountHelper tokenHelper = new AccountHelper(mContext);
 		String authToken = null;
 		try {
@@ -303,68 +310,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     	return session;
 	}
 	
-	private void showNotification(ArrayList<String> updatedTitles) {
-		Intent notificationIntent = new Intent(mContext, AppWatcherActivity.class);
-		notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        Uri data = Uri.parse("com.anod.appwatcher://notification");
-        notificationIntent.setData(data);
-        notificationIntent.putExtra(AppWatcherActivity.EXTRA_FROM_NOTIFICATION, true);
-		PendingIntent contentIntent = PendingIntent.getActivity(mContext, 0, notificationIntent, 0);
-		
-		String title = renderNotificationTitle(updatedTitles);
-		String text = renderNotificationText(updatedTitles);
-		
-		Builder builder = new NotificationCompat.Builder(mContext);	
-		Notification notification = builder
-			.setAutoCancel(true)
-			.setSmallIcon(R.drawable.ic_stat_update)
-			.setContentTitle(title)
-			.setContentText(text)
-			.setContentIntent(contentIntent)
-			.setTicker(title)
-			.build()
-		;
 
-		NotificationManager mNotificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-		mNotificationManager.notify(NOTIFICATION_ID, notification);
-	}
-
-	/**
-	 * @param updatedTitles
-	 * @return
-	 */
-	private String renderNotificationText(ArrayList<String> updatedTitles) {
-		int count = updatedTitles.size();
-		if (count == 1) {
-			return mContext.getString(R.string.notification_click);
-		}
-		if (count > 2) {
-			return mContext.getString(
-				R.string.notification_2_apps_more,
-				updatedTitles.get(0),
-				updatedTitles.get(1)						
-			);
-		} 
-		return mContext.getString(R.string.notification_2_apps,
-			updatedTitles.get(0),
-			updatedTitles.get(1)						
-		);				
-	}
-
-	/**
-	 * @param updatedTitles
-	 * @return
-	 */
-	private String renderNotificationTitle(ArrayList<String> updatedTitles) {
-		String title;
-		int count = updatedTitles.size();
-		if (count == 1) {
-			title = mContext.getString(R.string.notification_one_updated, updatedTitles.get(0));
-		} else {
-			title = mContext.getString(R.string.notification_many_updates, count);
-		}
-		return title;
-	}
-	
 
 }
