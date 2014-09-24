@@ -1,14 +1,22 @@
 package com.anod.appwatcher.backup;
 
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
+import com.anod.appwatcher.AppWatcherActivity;
+import com.anod.appwatcher.R;
 import com.anod.appwatcher.backup.gdrive.SyncConnectedWorker;
 import com.anod.appwatcher.backup.gdrive.SyncTask;
+import com.anod.appwatcher.sync.SyncAdapter;
 import com.anod.appwatcher.utils.ActivityListener;
 import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.GooglePlayServices;
@@ -27,9 +35,24 @@ public class GDriveSync extends GooglePlayServices implements SyncTask.Listener 
 
 
     private static final int ACTION_SYNC = 2;
+    private static final int NOTIFICATION_ID = 2;
 
     private Listener mListener;
 
+    public void showResolutionNotification(PendingIntent resolution) {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext);
+        builder
+                .setAutoCancel(true)
+                .setSmallIcon(R.drawable.ic_stat_update)
+                .setContentTitle("Google Drive sync failed.")
+                .setContentText("Required user action")
+                .setContentIntent(resolution)
+        ;
+
+        Notification notification = builder.build();
+        NotificationManager mNotificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotificationManager.notify(NOTIFICATION_ID, notification);
+    }
 
 
     public interface Listener {

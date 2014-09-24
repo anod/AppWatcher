@@ -1,6 +1,7 @@
 package com.anod.appwatcher.utils;
 
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -28,6 +29,20 @@ abstract public class GooglePlayServices implements GoogleApiClient.ConnectionCa
     protected GoogleApiClient mGoogleApiClient;
     private Activity mActivity;
     private int mOnConnectAction;
+    private PendingIntent mResolutionIntent;
+
+    public static class ResolutionException extends Exception {
+        private final PendingIntent mResolutionIntent;
+
+        ResolutionException(String message, PendingIntent resolutionIntent) {
+            super(message);
+            mResolutionIntent = resolutionIntent;
+        }
+
+        public PendingIntent getResolution() {
+             return mResolutionIntent;
+        }
+    }
 
     public GooglePlayServices(Activity activity) {
         mContext = activity.getApplicationContext();
@@ -50,7 +65,7 @@ abstract public class GooglePlayServices implements GoogleApiClient.ConnectionCa
         if (mGoogleApiClient == null) {
             mGoogleApiClient = createGoogleApiClientBuilder().build();
         }
-
+        mResolutionIntent = null;
         final CountDownLatch latch = new CountDownLatch(1);
         mGoogleApiClient.registerConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
             @Override
@@ -62,9 +77,11 @@ abstract public class GooglePlayServices implements GoogleApiClient.ConnectionCa
                 latch.countDown();
             }
         });
+
         mGoogleApiClient.registerConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
             @Override
             public void onConnectionFailed(ConnectionResult result) {
+                mResolutionIntent = result.getResolution();
                 latch.countDown();
                 AppLog.e(result.toString());
             }
@@ -72,7 +89,8 @@ abstract public class GooglePlayServices implements GoogleApiClient.ConnectionCa
         mGoogleApiClient.connect();
         latch.await();
         if (!mGoogleApiClient.isConnected()) {
-            throw new Exception("Cannot connect to Google Play Services. See log.");
+            String resolution = (mResolutionIntent == null) ? "none" : mResolutionIntent.toString();
+            throw new ResolutionException("Cannot connect to Google Play Services. See log. Resolution: "+resolution,mResolutionIntent);
         }
     }
 

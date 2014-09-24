@@ -40,6 +40,7 @@ import com.anod.appwatcher.model.AppListCursor;
 import com.anod.appwatcher.model.AppListTable;
 import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.BitmapUtils;
+import com.anod.appwatcher.utils.GooglePlayServices;
 import com.anod.appwatcher.utils.IntentUtils;
 import com.gc.android.market.api.MarketSession;
 import com.gc.android.market.api.model.Market.App;
@@ -106,7 +107,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 		try {
             updatedApps = doSync(pref, appListProvider, lastUpdatesViewed);
 		} catch (RemoteException e) {
-
+            AppLog.e("doSync exception", e);
+            ACRA.getErrorReporter().handleException(e);
 		}
 		int size = (updatedApps!=null) ? updatedApps.size() : 0;
 		Intent finishIntent = new Intent(SYNC_STOP);
@@ -125,13 +127,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 			}
 		}
 
-        if (pref.isDriveSyncEnabled()) {
-            AppLog.d("DriveSyncEnabled = true");
-            performGDriveSync(pref, now);
-        } else {
-            AppLog.d("DriveSyncEnabled = false, skipping...");
+        if (manualSync == false) {
+            if (pref.isDriveSyncEnabled()) {
+                AppLog.d("DriveSyncEnabled = true");
+                performGDriveSync(pref, now);
+            } else {
+                AppLog.d("DriveSyncEnabled = false, skipping...");
+            }
         }
-
         mLoader = null;
         mMarketSession = null;
 		AppLog.d("Finish::onPerformSync()");
@@ -146,6 +149,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             try {
                 driveSync.syncLocked();
                 pref.saveDriveSyncTime(System.currentTimeMillis());
+            } catch (GooglePlayServices.ResolutionException e) {
+                if (e.getResolution() != null){
+                    driveSync.showResolutionNotification(e.getResolution());
+                }
+                AppLog.ex(e);
+                ACRA.getErrorReporter().handleException(e);
             } catch (Exception e) {
                 AppLog.ex(e);
                 ACRA.getErrorReporter().handleException(e);
