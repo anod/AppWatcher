@@ -9,11 +9,8 @@ import android.widget.Toast;
 import com.anod.appwatcher.backup.ExportTask;
 import com.anod.appwatcher.backup.GDriveSync;
 import com.anod.appwatcher.backup.ListExportManager;
-import com.anod.appwatcher.utils.EmailReportSender;
+import com.anod.appwatcher.utils.ErrorReport;
 import com.anod.appwatcher.utils.SettingsActionBarActivity;
-
-import org.acra.ACRA;
-import org.acra.ErrorReporter;
 
 import java.util.ArrayList;
 
@@ -35,12 +32,12 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
 
     @Override
     public void onExportStart() {
-        setSupportProgressBarIndeterminateVisibility(true);
+        setProgressVisibility(true);
     }
 
     @Override
     public void onExportFinish(int code) {
-        setSupportProgressBarIndeterminateVisibility(false);
+        setProgressVisibility(false);
         Resources r = getResources();
         if (code == ListExportManager.RESULT_DONE) {
             Toast.makeText(this, r.getString(R.string.export_done), Toast.LENGTH_SHORT).show();
@@ -138,7 +135,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
             mSyncNowItem.enabled=false; // disable temporary sync now
             notifyDataSetChanged();
             if (mSyncEnabledItem.checked) {
-                setSupportProgressBarIndeterminateVisibility(true);
+                setProgressVisibility(true);
                 mGDriveSync.connect();
             }
 
@@ -154,13 +151,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
 
     private void onAboutAction() {
         if (mAboutCounter >= 4) {
-            ErrorReporter rs = ACRA.getErrorReporter();
-            rs.removeAllReportSenders();
-
-            EmailReportSender sender = new EmailReportSender(getApplicationContext());
-            rs.setReportSender(sender);
-            Throwable ex = new Throwable("Report a problem");
-            rs.handleException(ex);
+            ErrorReport.reportByEmail(this);
         } else {
             if (mAboutCounter ==3 ) {
                 Toast.makeText(this, "1 more tap to report a problem", Toast.LENGTH_SHORT).show();
@@ -188,7 +179,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
         mSyncNowItem.enabled=true;
         mPrefs.saveDriveSyncEnabled(true);
         notifyDataSetChanged();
-        setSupportProgressBarIndeterminateVisibility(false);
+        setProgressVisibility(false);
 
         Toast.makeText(this,R.string.gdrive_connected,Toast.LENGTH_SHORT).show();
     }
@@ -200,13 +191,13 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
 
     @Override
     public void onGDriveSyncStart() {
-        setSupportProgressBarIndeterminateVisibility(true);
+        setProgressVisibility(true);
         Toast.makeText(this,R.string.sync_start,Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onGDriveSyncFinish() {
-        setSupportProgressBarIndeterminateVisibility(false);
+        setProgressVisibility(false);
         mPrefs.saveDriveSyncTime(System.currentTimeMillis());
         mSyncNowItem.summary = getString(R.string.pref_descr_drive_sync_now, getString(R.string.now));
         mSyncNowItem.enabled=mSyncEnabledItem.checked;
@@ -217,7 +208,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
 
     @Override
     public void onGDriveError() {
-        setSupportProgressBarIndeterminateVisibility(false);
+        setProgressVisibility(false);
         mSyncNowItem.enabled=mSyncEnabledItem.checked;
         notifyDataSetChanged();
         Toast.makeText(this,R.string.sync_error,Toast.LENGTH_SHORT).show();

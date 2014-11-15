@@ -2,18 +2,14 @@ package com.anod.appwatcher;
 
 import android.app.Application;
 import android.content.Context;
-import android.telephony.TelephonyManager;
 import android.view.ViewConfiguration;
 
-import java.lang.reflect.Field;
-import java.util.HashSet;
-import java.util.Set;
-
+import com.anod.appwatcher.utils.ErrorReport;
 import com.newrelic.agent.android.NewRelic;
 
-import org.acra.ACRA;
-import org.acra.ErrorReporter;
 import org.acra.annotation.ReportsCrashes;
+
+import java.lang.reflect.Field;
 
 @ReportsCrashes(
 	formKey = "", // This is required for backward compatibility but not used
@@ -28,14 +24,7 @@ public class AppWatcherApplication extends Application {
 	 public void onCreate() {
 		super.onCreate();
 
-		ACRA.init(this);
-
-		 TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-		 ErrorReporter er = ACRA.getErrorReporter();
-		 er.putCustomData("NetworkOperatorName", tm.getNetworkOperatorName());
-		 er.putCustomData("SimOperatorName", tm.getSimOperatorName());
-		 er.putCustomData("NetworkOperator", tm.getNetworkOperator());
-		 er.putCustomData("SimOperator", tm.getSimOperator());
+        ErrorReport.init(this);
 
 		 NewRelic.withApplicationToken(
 			"AA47c4b684f2af988fdf3a13518738d7eaa8a4976f"

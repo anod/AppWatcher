@@ -4,6 +4,8 @@ import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -21,6 +23,7 @@ import java.util.List;
 abstract public class SettingsActionBarActivity extends TranslucentActionBarActivity implements AdapterView.OnItemClickListener {
     protected ListView mListView;
     private PreferenceAdapter mPreferenceAdapter;
+    private MenuItemAnimation mRefreshAnim;
 
     public static class Preference {
         final int title;
@@ -145,9 +148,10 @@ abstract public class SettingsActionBarActivity extends TranslucentActionBarActi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.preference_list_content);
 
+        mRefreshAnim = new MenuItemAnimation(this, R.anim.rotate);
+        mRefreshAnim.setInvisibleMode(true);
         initSystemBar();
         init();
 
@@ -164,6 +168,24 @@ abstract public class SettingsActionBarActivity extends TranslucentActionBarActi
     protected abstract void init();
     protected abstract ArrayList<Preference> initPreferenceItems();
     protected abstract void onPreferenceItemClick(int action, Item pref);
+
+    protected void setProgressVisibility(boolean visible) {
+        if (visible) {
+            mRefreshAnim.start();
+        } else {
+            mRefreshAnim.stop();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu
+        getMenuInflater().inflate(R.menu.settings, menu);
+        MenuItem refreshMenuItem = menu.findItem(R.id.menu_act_refresh);
+        mRefreshAnim.setMenuItem(refreshMenuItem);
+
+        return super.onCreateOptionsMenu(menu);
+    }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

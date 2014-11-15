@@ -4,8 +4,6 @@ import android.accounts.Account;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -16,18 +14,12 @@ import android.content.SyncResult;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationCompat.Builder;
 import android.text.format.DateUtils;
 
-import com.anod.appwatcher.AppWatcherActivity;
 import com.anod.appwatcher.BuildConfig;
-import com.anod.appwatcher.NotificationActivity;
 import com.anod.appwatcher.Preferences;
-import com.anod.appwatcher.R;
 import com.anod.appwatcher.accounts.AccountHelper;
 import com.anod.appwatcher.backup.GDriveSync;
 import com.anod.appwatcher.market.AppIconLoader;
@@ -38,14 +30,12 @@ import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.model.AppListCursor;
 import com.anod.appwatcher.model.AppListTable;
+import com.anod.appwatcher.utils.ErrorReport;
 import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.BitmapUtils;
 import com.anod.appwatcher.utils.GooglePlayServices;
-import com.anod.appwatcher.utils.IntentUtils;
 import com.gc.android.market.api.MarketSession;
 import com.gc.android.market.api.model.Market.App;
-
-import org.acra.ACRA;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -108,7 +98,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             updatedApps = doSync(pref, appListProvider, lastUpdatesViewed);
 		} catch (RemoteException e) {
             AppLog.e("doSync exception", e);
-            ACRA.getErrorReporter().handleException(e);
+            ErrorReport.handleException(e);
 		}
 		int size = (updatedApps!=null) ? updatedApps.size() : 0;
 		Intent finishIntent = new Intent(SYNC_STOP);
@@ -154,10 +144,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     driveSync.showResolutionNotification(e.getResolution());
                 }
                 AppLog.ex(e);
-                ACRA.getErrorReporter().handleException(e);
+                ErrorReport.handleException(e);
             } catch (Exception e) {
                 AppLog.ex(e);
-                ACRA.getErrorReporter().handleException(e);
+                ErrorReport.handleException(e);
             }
         } else {
             AppLog.d("DriveSync backup is fresh");

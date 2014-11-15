@@ -15,8 +15,7 @@
   -->
 
 <resources>
-    <style name="AppThemeLight.DarkActionBar" parent="@style/Theme.AppCompat.Light.DarkActionBar">
-        <item name="android:actionBarStyle">@style/ActionBar.Light.Inverse</item>
+    <style name="AppThemeLight.DarkActionBar" parent="AppThemeBase">
         <item name="android:windowContentOverlay">@drawable/actionbar_shadow</item>
         <item name="android:windowTranslucentNavigation">true</item>
         <item name="android:windowTranslucentStatus">true</item>

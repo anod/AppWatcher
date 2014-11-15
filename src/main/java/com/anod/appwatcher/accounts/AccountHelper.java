@@ -10,14 +10,10 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Looper;
-import android.widget.Toast;
 
 import com.anod.appwatcher.AppListContentProvider;
-import com.anod.appwatcher.Preferences;
+import com.anod.appwatcher.utils.ErrorReport;
 import com.anod.appwatcher.utils.AppLog;
-
-import org.acra.ACRA;
 
 import java.io.IOException;
 
@@ -100,7 +96,7 @@ public class AccountHelper {
 				AppLog.e("transient error encountered: " + e.getMessage(), e);
 				mCallback.onUnRecoverableException(e.getMessage());
 			}
-			ACRA.getErrorReporter().putCustomData("HasAccountToken", token != null ? "true" : "false");
+			ErrorReport.putCustomData("HasAccountToken", token != null ? "true" : "false");
 			return token;
 		}
 

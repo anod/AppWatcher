@@ -18,12 +18,8 @@ import android.widget.TextView;
 
 import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.R;
-import com.anod.appwatcher.utils.EmailReportSender;
+import com.anod.appwatcher.utils.ErrorReport;
 import com.anod.appwatcher.utils.IntentUtils;
-
-import org.acra.ACRA;
-import org.acra.ErrorReporter;
-import org.acra.sender.EmailIntentSender;
 
 import de.psdev.licensesdialog.LicensesDialog;
 
@@ -91,13 +87,7 @@ public class AboutDialogFragment extends DialogFragment {
 		reportBtn.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				ErrorReporter rs = ACRA.getErrorReporter();
-				rs.removeAllReportSenders();
-
-				EmailReportSender sender = new EmailReportSender(getActivity().getApplicationContext());
-				rs.setReportSender(sender);
-				Throwable ex = new Throwable("Report a problem");
-				rs.handleException(ex);
+            ErrorReport.reportByEmail(getActivity());
 			}
 		});
 

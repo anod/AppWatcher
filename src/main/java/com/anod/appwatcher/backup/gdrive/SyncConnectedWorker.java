@@ -34,7 +34,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 /**
- * Created by alex on 7/30/14.
+ * @author alex
+ * @date 2014-11-15
  */
 public class SyncConnectedWorker {
     /**

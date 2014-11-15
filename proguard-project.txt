@@ -21,8 +21,8 @@
 
 -keep class android.support.v4.app.** { *; }
 -keep interface android.support.v4.app.** { *; }
--keep class com.actionbarsherlock.** { *; }
--keep interface com.actionbarsherlock.** { *; }
+-keep class android.support.v7.** { *; }
+-keep interface android.support.v7.** { *; }
 
 -keepattributes *Annotation*
 
@@ -34,5 +34,28 @@
 -dontskipnonpubliclibraryclasses
 -dontwarn com.gc.android.**
 -dontnote com.gc.android.**
--dontwarn com.actionbarsherlock.**
--dontnote com.actionbarsherlock.**
+
+
+# NewRelic
+-keep class com.newrelic.** { *; }
+-dontwarn com.newrelic.**
+-keepattributes Exceptions, Signature, InnerClasses
+
+# Google Play Services
+-keep class * extends java.util.ListResourceBundle {
+    protected Object[][] getContents();
+}
+
+-keep public class com.google.android.gms.common.internal.safeparcel.SafeParcelable {
+    public static final *** NULL;
+}
+
+-keepnames @com.google.android.gms.common.annotation.KeepName class *
+-keepclassmembernames class * {
+    @com.google.android.gms.common.annotation.KeepName *;
+}
+
+-keepnames class * implements android.os.Parcelable {
+    public static final ** CREATOR;
+}
+

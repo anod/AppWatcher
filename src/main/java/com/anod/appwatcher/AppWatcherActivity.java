@@ -14,14 +14,9 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,9 +25,9 @@ import com.anod.appwatcher.fragments.AccountChooserFragment;
 import com.anod.appwatcher.fragments.AppWatcherListFragment;
 import com.anod.appwatcher.sync.SyncAdapter;
 import com.anod.appwatcher.utils.AppLog;
+import com.anod.appwatcher.utils.ErrorReport;
+import com.anod.appwatcher.utils.MenuItemAnimation;
 import com.anod.appwatcher.utils.TranslucentActionBarActivity;
-
-import org.acra.ACRA;
 
 public class AppWatcherActivity extends TranslucentActionBarActivity implements
         TextView.OnEditorActionListener, SearchView.OnQueryTextListener,
@@ -45,6 +40,7 @@ public class AppWatcherActivity extends TranslucentActionBarActivity implements
     public static final int NAV_ALL = 0;
     public static final int NAV_INSTALLED = 1;
     public static final int NAV_NOTINSTALLED = 2;
+    private MenuItemAnimation mRefreshAnim;
 
     public interface QueryChangeListener {
         void onNavigationChanged(int navId);
@@ -60,7 +56,6 @@ public class AppWatcherActivity extends TranslucentActionBarActivity implements
 	private Preferences mPreferences;
 	private MenuItem mWifiMenuItem;
 	private Account mSyncAccount;
-	private MenuItem mRefreshMenuItem;
 	private MenuItem mSearchMenuItem;
 	private QueryChangeListener mQueryChangeListener;
 
@@ -83,8 +78,11 @@ public class AppWatcherActivity extends TranslucentActionBarActivity implements
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
 		setContentView(R.layout.main);
+
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setIcon(R.drawable.ic_launcher);
 
         initSystemBar();
 
@@ -114,6 +112,8 @@ public class AppWatcherActivity extends TranslucentActionBarActivity implements
             transaction.commit();
         }
 
+        mRefreshAnim = new MenuItemAnimation(this, R.anim.rotate);
+
 		mContext = this;
 		mPreferences = new Preferences(this);
 
@@ -130,9 +130,10 @@ public class AppWatcherActivity extends TranslucentActionBarActivity implements
 
 		MenuItem autoSyncMenuItem = menu.findItem(R.id.menu_auto_update);
 		mWifiMenuItem = menu.findItem(R.id.menu_wifi_only);
-		mRefreshMenuItem = menu.findItem(R.id.menu_refresh);
+        MenuItem refreshMenuItem = menu.findItem(R.id.menu_act_refresh);
+        mRefreshAnim.setMenuItem(refreshMenuItem);
 
-		mSearchMenuItem = menu.findItem(R.id.menu_filter);
+		mSearchMenuItem = menu.findItem(R.id.menu_act_filter);
 		MenuItemCompat.setOnActionExpandListener(mSearchMenuItem, new MenuItemCompat.OnActionExpandListener() {
 			@Override
 			public boolean onMenuItemActionExpand(MenuItem menuItem) {
@@ -167,10 +168,10 @@ public class AppWatcherActivity extends TranslucentActionBarActivity implements
 	}
 
 	private void updateSyncStatus() {
-		if (!ContentResolver.isSyncActive(mSyncAccount, AppListContentProvider.AUTHORITY)) {
-			stopRefreshAnim();
+		if (mSyncAccount != null && ContentResolver.isSyncActive(mSyncAccount, AppListContentProvider.AUTHORITY)) {
+            mRefreshAnim.start();
 		} else {
-			startRefreshAnim();
+            mRefreshAnim.stop();
 		}
 	}
 
@@ -182,10 +183,10 @@ public class AppWatcherActivity extends TranslucentActionBarActivity implements
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (intent.getAction().equals(SyncAdapter.SYNC_PROGRESS)) {
-				startRefreshAnim();
+                mRefreshAnim.start();
 			} else if (intent.getAction().equals(SyncAdapter.SYNC_STOP)) {
 				int updatesCount = intent.getIntExtra(SyncAdapter.EXTRA_UPDATES_COUNT, 0);
-				stopRefreshAnim();
+                mRefreshAnim.stop();
 				if (updatesCount == 0) {
 					Toast.makeText(AppWatcherActivity.this, R.string.no_updates_found, Toast.LENGTH_SHORT).show();
 				}
@@ -200,7 +201,7 @@ public class AppWatcherActivity extends TranslucentActionBarActivity implements
 	@Override
 	protected void onResume() {
 
-		ACRA.getErrorReporter().setDefaultReportSenders();
+		ErrorReport.setDefaultReportSenders();
 
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(SyncAdapter.SYNC_PROGRESS);
@@ -228,43 +229,6 @@ public class AppWatcherActivity extends TranslucentActionBarActivity implements
 			mSyncFinishedReceiverRegistered = false;
 		}
         AppLog.d("Activity::onPause");
-	}
-
-	/**
-	 * stop refresh button animation
-	 */
-	private void stopRefreshAnim() {
-		if (mRefreshMenuItem == null) {
-			return;
-		}
-		View actionView = MenuItemCompat.getActionView(mRefreshMenuItem);
-		if (actionView != null) {
-			actionView.clearAnimation();
-			MenuItemCompat.setActionView(mRefreshMenuItem,null);
-		}
-	}
-
-	/**
-	 * Animate refresh button
-	 */
-	private void startRefreshAnim() {
-		if (mRefreshMenuItem == null) {
-			return;
-		}
-		View actionView = MenuItemCompat.getActionView(mRefreshMenuItem);
-		//already animating
-		if (actionView != null) {
-			return;
-		}
-		LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		ImageView iv = (ImageView) inflater.inflate(R.layout.refresh_action_view, null);
-
-		Animation rotation = AnimationUtils.loadAnimation(this, R.anim.rotate);
-		rotation.setRepeatCount(Animation.INFINITE);
-		iv.startAnimation(rotation);
-
-		MenuItemCompat.setActionView(mRefreshMenuItem, iv);
-
 	}
 
 	@Override
@@ -321,7 +285,7 @@ public class AppWatcherActivity extends TranslucentActionBarActivity implements
 			AppLog.d("Sync requested already. Skipping... ");
 			return true;
 		}
-		startRefreshAnim();
+        //mRefreshAnim.start();
 		Bundle params = new Bundle();
 		params.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
 		ContentResolver.requestSync(mSyncAccount, AppListContentProvider.AUTHORITY, params);

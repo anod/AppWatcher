@@ -8,8 +8,7 @@ import android.support.v7.app.ActionBarActivity;
 import com.anod.appwatcher.AppListContentProvider;
 import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
-
-import org.acra.ACRA;
+import com.anod.appwatcher.utils.ErrorReport;
 
 /**
  * @author alex
@@ -59,7 +58,7 @@ public class AccountChooserHelper implements AccountChooserFragment.OnAccountSel
                 showAccountsDialog();
             //}
 		} else {
-			ACRA.getErrorReporter().putCustomData("HasAccountSelected", mSyncAccount != null ? "true" : "false");
+			ErrorReport.putCustomData("HasAccountSelected", mSyncAccount != null ? "true" : "false");
 			mAccountHelper.requestToken(mActivity, mSyncAccount, new AccountHelper.AuthenticateCallback() {
 				@Override
 				public void onAuthTokenAvailable(String token) {
@@ -100,7 +99,7 @@ public class AccountChooserHelper implements AccountChooserFragment.OnAccountSel
 			@Override
 			public void onAuthTokenAvailable(String token) {
 				initAutoSync(account);
-				ACRA.getErrorReporter().putCustomData("HasAccountSelected", mSyncAccount != null ? "true" : "false");
+				ErrorReport.putCustomData("HasAccountSelected", mSyncAccount != null ? "true" : "false");
 				if (mListener != null) {
 					mListener.onHelperAccountSelected(account, token);
 				}

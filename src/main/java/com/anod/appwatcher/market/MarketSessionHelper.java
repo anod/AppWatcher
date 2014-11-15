@@ -6,9 +6,6 @@ import android.telephony.TelephonyManager;
 
 import com.gc.android.market.api.MarketSession;
 
-import org.acra.ACRA;
-import org.acra.ErrorReporter;
-
 public class MarketSessionHelper {
 	public static final String EXTRA_TOKEN = "extra_token";
 	private Context mContext;

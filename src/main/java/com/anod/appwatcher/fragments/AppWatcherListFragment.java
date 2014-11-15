@@ -6,7 +6,6 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
@@ -31,10 +30,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.anod.appwatcher.AppWatcherActivity;
-import com.anod.appwatcher.AppWatcherApplication;
 import com.anod.appwatcher.BuildConfig;
 import com.anod.appwatcher.ChangelogActivity;
-import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.market.MarketInfo;
 import com.anod.appwatcher.model.AppInfo;
@@ -47,7 +44,6 @@ import com.anod.appwatcher.utils.PackageManagerUtils;
 import com.anod.appwatcher.utils.TranslucentActionBarActivity;
 
 import java.sql.Timestamp;
-import java.util.Locale;
 
 public class AppWatcherListFragment extends ListFragment implements
         LoaderManager.LoaderCallbacks<Cursor>,

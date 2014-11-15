@@ -18,5 +18,7 @@
 	<color name="green">#FF03a9f4</color>
 	<color name="list_header_text">#ffB8B8B8</color>
 
+    <color name="color_primary">#ff000000</color>
+    <color name="color_primary_dark">#ff000000</color>
 </resources>
 

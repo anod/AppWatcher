@@ -2,11 +2,7 @@ package com.anod.appwatcher.utils;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
-import android.telephony.TelephonyManager;
 
-import org.acra.ACRA;
-import org.acra.ErrorReporter;
 import org.acra.ReportField;
 import org.acra.collector.CrashReportData;
 import org.acra.sender.ReportSender;
