@@ -234,7 +234,7 @@ public class AppWatcherActivity extends TranslucentActionBarActivity implements
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.menu_refresh:
+		case R.id.menu_act_refresh:
 			requestRefresh();
 			return true;
 		case R.id.menu_auto_update:

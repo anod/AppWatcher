@@ -4,6 +4,7 @@ import android.content.Context;
 import android.telephony.TelephonyManager;
 
 import com.anod.appwatcher.AppWatcherApplication;
+import com.anod.appwatcher.BuildConfig;
 
 import org.acra.ACRA;
 import org.acra.ErrorReporter;
@@ -14,7 +15,7 @@ import org.acra.ErrorReporter;
  */
 public class ErrorReport {
 
-    private static final boolean ENABLED = false;
+    private static final boolean ENABLED = BuildConfig.DEBUG;
     public static void putCustomData(String key, String value) {
        if (ENABLED) ACRA.getErrorReporter().putCustomData(key, value);
     }
