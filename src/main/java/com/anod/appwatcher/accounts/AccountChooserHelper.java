@@ -8,7 +8,7 @@ import android.support.v7.app.ActionBarActivity;
 import com.anod.appwatcher.AppListContentProvider;
 import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
-import com.anod.appwatcher.utils.ErrorReport;
+import com.crashlytics.android.Crashlytics;
 
 /**
  * @author alex
@@ -45,6 +45,10 @@ public class AccountChooserHelper implements AccountChooserFragment.OnAccountSel
 		mListener = listener;
 	}
 
+    public Account getAccount() {
+        return mSyncAccount;
+    }
+
 	public void init() {
 		mSyncAccount = mPreferences.getAccount();
 		if (mSyncAccount == null) {
@@ -58,7 +62,7 @@ public class AccountChooserHelper implements AccountChooserFragment.OnAccountSel
                 showAccountsDialog();
             //}
 		} else {
-			ErrorReport.putCustomData("HasAccountSelected", mSyncAccount != null ? "true" : "false");
+            Crashlytics.setBool("HasAccountSelected", mSyncAccount != null);
 			mAccountHelper.requestToken(mActivity, mSyncAccount, new AccountHelper.AuthenticateCallback() {
 				@Override
 				public void onAuthTokenAvailable(String token) {
@@ -99,7 +103,7 @@ public class AccountChooserHelper implements AccountChooserFragment.OnAccountSel
 			@Override
 			public void onAuthTokenAvailable(String token) {
 				initAutoSync(account);
-				ErrorReport.putCustomData("HasAccountSelected", mSyncAccount != null ? "true" : "false");
+                Crashlytics.setBool("HasAccountSelected", mSyncAccount != null );
 				if (mListener != null) {
 					mListener.onHelperAccountSelected(account, token);
 				}

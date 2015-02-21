@@ -9,7 +9,6 @@ import android.widget.Toast;
 import com.anod.appwatcher.backup.ExportTask;
 import com.anod.appwatcher.backup.GDriveSync;
 import com.anod.appwatcher.backup.ListExportManager;
-import com.anod.appwatcher.utils.ErrorReport;
 import com.anod.appwatcher.utils.SettingsActionBarActivity;
 
 import java.util.ArrayList;
@@ -151,7 +150,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
 
     private void onAboutAction() {
         if (mAboutCounter >= 4) {
-            ErrorReport.reportByEmail(this);
+            // TODO
         } else {
             if (mAboutCounter ==3 ) {
                 Toast.makeText(this, "1 more tap to report a problem", Toast.LENGTH_SHORT).show();

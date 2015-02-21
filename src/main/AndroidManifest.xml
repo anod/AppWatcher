@@ -107,6 +107,7 @@
             android:name="com.anod.uninstaller.UninstallActivity"
             android:label="@string/title_activity_uninstall" >
         </activity>
+        <meta-data android:name="com.crashlytics.ApiKey" android:value="37454d25f5bb26cdb68b79a6ca77eef421fa17c1"/>
     </application>
 
 </manifest>

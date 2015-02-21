@@ -1,5 +1,6 @@
 package com.gc.android.market.api;
 
+import android.os.Build;
 import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,7 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import com.anod.appwatcher.utils.AppLog;
 import com.gc.android.market.api.model.Market.AppsRequest;
 import com.gc.android.market.api.model.Market.AppsResponse;
 import com.gc.android.market.api.model.Market.CategoriesRequest;
@@ -96,8 +98,6 @@ public class MarketSession {
         context.setIsSecure(false);
         context.setVersion(2009011);
         setLocale(Locale.getDefault());
-        context.setDeviceAndSdkVersion("passion:9");
-        setOperatorTMobile();
 	}
 	
 	public void setLocale(Locale locale) {
@@ -108,26 +108,7 @@ public class MarketSession {
 	public void setOperator(String alpha, String numeric) {
 		setOperator(alpha, alpha, numeric, numeric);
 	}
-	
-	public void setOperatorTMobile() {
-		setOperator("T-Mobile", "310260");
-	}
-	
-	public void setOperatorSFR() {
-		setOperator("F SFR", "20810");
-	}
-	
-	public void setOperatorO2() {
-		setOperator("o2 - de", "26207");
-	}
-	
-	public void setOperatorSimyo() {
-		setOperator("E-Plus", "simyo", "26203", "26203");
-	}
-	
-	public void setOperatorSunrise() {
-		setOperator("sunrise", "22802");
-	}
+
 	
 	/**
 	 * http://www.2030.tk/wiki/Android_market_switch
@@ -152,60 +133,6 @@ public class MarketSession {
 		context.setAndroidId(androidId);
 	}
 	
-	
-	public void login(String email, String password, String androidId) {
-		this.login(email, password, androidId, ACCOUNT_TYPE_HOSTED_OR_GOOGLE);
-	}
-	
-	public void login(String email, String password, String androidId,
-			String accountType) {
-		//Android ID must an unique identifier associated to the account 
-		//used in in the login
-		setAndroidId(androidId);
-		Map<String,String> params = new LinkedHashMap<String,String>();
-		params.put("Email", email);
-		params.put("Passwd", password);
-		
-		params.put("service", SERVICE);
-	//	params.put("source", source);
-		params.put("accountType", accountType);
-
-		// Login at Google.com
-		try {
-			String data = Tools.postUrl(URL_LOGIN, params);
-			StringTokenizer st = new StringTokenizer(data, "\n\r=");
-			String authKey = null;
-			while (st.hasMoreTokens()) {
-				if (st.nextToken().equalsIgnoreCase("Auth")) {
-					authKey = st.nextToken();
-					break;
-				}
-			}
-			if(authKey == null)
-				throw new RuntimeException("authKey not found in "+ data);
-
-			setAuthSubToken(authKey);
-		} catch(Tools.HttpException httpEx) {
-			if(httpEx.getErrorCode() != 403)
-				throw httpEx;
-			
-			String data = httpEx.getErrorData();
-			StringTokenizer st = new StringTokenizer(data, "\n\r=");
-			String googleErrorCode = null;
-			while (st.hasMoreTokens()) {
-				if (st.nextToken().equalsIgnoreCase("Error")) {
-					googleErrorCode = st.nextToken();
-					break;
-				}
-			}
-			if(googleErrorCode == null)
-				throw httpEx;
-			
-			throw new LoginException(googleErrorCode);
-		} catch (IOException ex) {
-			throw new RuntimeException(ex);
-		}
-	}
 	
 	public List<Object> queryApp(AppsRequest requestGroup)
 	{
@@ -336,21 +263,24 @@ public class MarketSession {
 	
 	private byte[] executeRawHttpQuery(byte[] request) {
 		try {
-			
-			URL url = new URL("http://android.clients.google.com/market/api/ApiRequest");
+			String userAgent = "Android-Finsky/3.7.13 (api=3,versionCode=8013013,sdk="+Build.VERSION.SDK_INT+",device="+ Build.DEVICE +",hardware="+ Build.HARDWARE +",product="+Build.PRODUCT+")";
+
+            AppLog.d("User-Agent: "+userAgent);
+
+			URL url = new URL("https://android.clients.google.com/market/api/ApiRequest");
 			HttpURLConnection cnx = (HttpURLConnection)url.openConnection();
 			cnx.setDoOutput(true);
 			cnx.setRequestMethod("POST");
 			cnx.setRequestProperty("Cookie","ANDROID="+authSubToken);
-			cnx.setRequestProperty("User-Agent", "Android-Market/2 (sapphire PLAT-RC33); gzip");
+			cnx.setRequestProperty("User-Agent", userAgent);
 			cnx.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 			cnx.setRequestProperty("Accept-Charset","ISO-8859-1,utf-8;q=0.7,*;q=0.7");
 			
 			String request64 = Base64.encodeBytes(request,Base64.URL_SAFE);
 			
 			String requestData = "version="+PROTOCOL_VERSION+"&request="+request64;
-			
-			
+
+
 			cnx.setFixedLengthStreamingMode(requestData.getBytes("UTF-8").length);
 			OutputStream os = cnx.getOutputStream();
 			os.write(requestData.getBytes());

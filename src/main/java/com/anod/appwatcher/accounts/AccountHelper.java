@@ -12,14 +12,14 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 
 import com.anod.appwatcher.AppListContentProvider;
-import com.anod.appwatcher.utils.ErrorReport;
 import com.anod.appwatcher.utils.AppLog;
+import com.crashlytics.android.Crashlytics;
 
 import java.io.IOException;
 
 public class AccountHelper {
 
-	private static final String AUTH_TOKEN_TYPE = "android";
+	private static final String AUTH_TOKEN_TYPE = "androidmarket";
 	public static final String ACCOUNT_TYPE = "com.google";
 	private final AccountManager mAccountManager;
 
@@ -96,7 +96,7 @@ public class AccountHelper {
 				AppLog.e("transient error encountered: " + e.getMessage(), e);
 				mCallback.onUnRecoverableException(e.getMessage());
 			}
-			ErrorReport.putCustomData("HasAccountToken", token != null ? "true" : "false");
+            Crashlytics.setBool("HasAccountToken", token != null);
 			return token;
 		}
 

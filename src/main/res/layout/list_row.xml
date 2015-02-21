@@ -70,7 +70,7 @@
                 android:textSize="@dimen/textSize" />
 
             <TextView
-                android:id="@+id/version"
+                android:id="@+id/updated"
                 android:layout_width="120dp"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"

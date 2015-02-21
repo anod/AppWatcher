@@ -18,7 +18,6 @@ import android.widget.TextView;
 
 import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.R;
-import com.anod.appwatcher.utils.ErrorReport;
 import com.anod.appwatcher.utils.IntentUtils;
 
 import de.psdev.licensesdialog.LicensesDialog;
@@ -87,7 +86,7 @@ public class AboutDialogFragment extends DialogFragment {
 		reportBtn.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-            ErrorReport.reportByEmail(getActivity());
+                //TODO
 			}
 		});
 

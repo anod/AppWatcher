@@ -3,6 +3,9 @@ package com.anod.appwatcher.model;
 import android.graphics.Bitmap;
 
 import com.gc.android.market.api.model.Market.App;
+import com.google.android.finsky.api.model.Document;
+import com.google.android.finsky.protos.Common;
+import com.google.android.finsky.protos.DocDetails;
 
 
 public class AppInfo extends AppInfoMetadata{
@@ -19,19 +22,7 @@ public class AppInfo extends AppInfoMetadata{
 	private String priceCur;
 	private Integer priceMicros;
 
-	/**
-	 * 
-	 * @param rowId
-	 * @param appId
-	 * @param pname
-	 * @param versionNumber
-	 * @param versionName
-	 * @param title
-	 * @param creator
-	 * @param icon
-	 * @param status
-	 * @param updateTime
-	 */
+
 	public AppInfo(int rowId, String appId, String pname, int versionNumber, String versionName,
 			String title, String creator, Bitmap icon, int status, long updateTime, String priceText, String priceCur, Integer priceMicros) {
         super(appId,status);
@@ -69,8 +60,26 @@ public class AppInfo extends AppInfoMetadata{
 		this.priceText = app.getPrice();
 		this.priceCur = app.getPriceCurrency();
 	}
-	
-	/**
+
+    public AppInfo(Document doc, Bitmap icon) {
+        super(doc.getDocId(), STATUS_NORMAL);
+        this.rowId = 0;
+        this.appId = doc.getDocId();
+        DocDetails.AppDetails app = doc.getAppDetails();
+        this.packageName = app.packageName;
+        this.title = doc.getTitle();
+        this.versionNumber = app.versionCode;
+        this.versionName = app.versionString;
+        this.creator = doc.getCreator();
+        this.updateTime = 0;
+        this.icon = icon;
+        Common.Offer offer = doc.getOffer(0);
+        this.priceMicros = (int)offer.micros;
+        this.priceText = offer.formattedAmount;
+        this.priceCur = offer.currencyCode;
+    }
+
+    /**
 	 * 
 	 * @return
 	 */

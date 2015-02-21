@@ -11,6 +11,7 @@ import com.anod.appwatcher.utils.AppLog;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.drive.Drive;
 import com.google.android.gms.drive.DriveApi;
+import com.google.android.gms.drive.DriveContents;
 import com.google.android.gms.drive.DriveFile;
 import com.google.android.gms.drive.DriveFolder;
 import com.google.android.gms.drive.DriveId;
@@ -72,20 +73,22 @@ public class SyncConnectedWorker {
 
         InputStreamReader driveFileReader = null;
         DriveFile file = null;
-        DriveApi.ContentsResult contentsResult = null;
+        DriveContents contents = null;
+        DriveApi.DriveContentsResult contentsResult = null;
         if (driveId != null) {
             file = Drive.DriveApi.getFile(getGoogleApiClient(), driveId);
-            contentsResult = file.openContents(getGoogleApiClient(), DriveFile.MODE_READ_ONLY, null).await();
+            contentsResult = file.open(getGoogleApiClient(), DriveFile.MODE_READ_ONLY, null).await();
             if (!contentsResult.getStatus().isSuccess()) {
                 throw new Exception("Error read file : "+contentsResult.getStatus().getStatusMessage());
             }
-            driveFileReader = getFileInputStream(contentsResult);
+            contents = contentsResult.getDriveContents();
+            driveFileReader = getFileInputStream(contents);
         }
 
         syncLists(driveFileReader, cr);
 
-        if (file != null) {
-            file.discardContents(getGoogleApiClient(), contentsResult.getContents()).await();
+        if (contents != null) {
+            contents.discard(getGoogleApiClient());
         }
         if (driveFileReader != null) {
             driveFileReader.close();
@@ -113,13 +116,14 @@ public class SyncConnectedWorker {
 
         DriveFile target = Drive.DriveApi.getFile(getGoogleApiClient(), driveId);
 
-        DriveApi.ContentsResult contentsResult = target.openContents(
+        DriveApi.DriveContentsResult contentsResult = target.open(
                 getGoogleApiClient(), DriveFile.MODE_WRITE_ONLY, null).await();
         if (!contentsResult.getStatus().isSuccess()) {
             throw new Exception("Error open file for write : "+contentsResult.getStatus().getStatusMessage());
         }
 
-        OutputStream outputStream = contentsResult.getContents().getOutputStream();
+        DriveContents contents = contentsResult.getDriveContents();
+        OutputStream outputStream = contents.getOutputStream();
         AppListWriter writer = new AppListWriter();
         AppListCursor listCursor = cr.queryAllSorted();
         BufferedWriter outWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
@@ -134,15 +138,14 @@ public class SyncConnectedWorker {
             }
             outputStream.close();;
         }
-        com.google.android.gms.common.api.Status status = target.commitAndCloseContents(
-                getGoogleApiClient(), contentsResult.getContents()).await();
+        com.google.android.gms.common.api.Status status = contents.commit(getGoogleApiClient(), null).await();
         if (!status.getStatus().isSuccess()) {
             throw new Exception("Error commit changes to file : "+status.getStatusMessage());
         }
     }
 
-    private InputStreamReader getFileInputStream(DriveApi.ContentsResult contentsResult) throws Exception {
-        InputStream inputStream = contentsResult.getContents().getInputStream();
+    private InputStreamReader getFileInputStream(DriveContents contents) throws Exception {
+        InputStream inputStream = contents.getInputStream();
         if (inputStream == null) {
             throw new Exception("Empty input stream ");
         }
@@ -213,7 +216,7 @@ public class SyncConnectedWorker {
     }
 
     private DriveId createNewFile() throws Exception {
-        DriveApi.ContentsResult contentsResult = Drive.DriveApi.newContents(getGoogleApiClient()).await();
+        DriveApi.DriveContentsResult contentsResult = Drive.DriveApi.newDriveContents(getGoogleApiClient()).await();
         AppLog.d("[GDrive] Create new file ");
 
         if (!contentsResult.getStatus().isSuccess()) {
@@ -226,7 +229,7 @@ public class SyncConnectedWorker {
 
         DriveFolder.DriveFileResult driveFileResult = Drive.DriveApi
                 .getAppFolder(getGoogleApiClient())
-                .createFile(getGoogleApiClient(), changeSet, contentsResult.getContents()).await();
+                .createFile(getGoogleApiClient(), changeSet, contentsResult.getDriveContents()).await();
 
         if (!driveFileResult.getStatus().isSuccess()) {
             throw new Exception("[Google Drive] File create result filed: "+driveFileResult.getStatus().getStatusMessage());

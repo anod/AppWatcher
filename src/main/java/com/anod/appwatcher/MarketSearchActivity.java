@@ -1,21 +1,14 @@
 package com.anod.appwatcher;
 
-import java.util.HashMap;
-import java.util.List;
-
 import android.accounts.Account;
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -28,39 +21,38 @@ import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.VolleyError;
 import com.anod.appwatcher.accounts.AccountChooserHelper;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
-import com.anod.appwatcher.market.AppIconLoader;
-import com.anod.appwatcher.market.AppsResponseLoader;
 import com.anod.appwatcher.market.DeviceIdHelper;
-import com.anod.appwatcher.market.MarketSessionHelper;
+import com.anod.appwatcher.market.SearchApps;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 import com.anod.appwatcher.utils.TranslucentActionBarActivity;
-import com.commonsware.cwac.endless.EndlessAdapter;
-import com.gc.android.market.api.MarketSession;
-import com.gc.android.market.api.model.Market.App;
+import com.google.android.finsky.api.model.Document;
+import com.google.android.finsky.protos.Common;
+import com.google.android.finsky.protos.DocDetails;
+import com.squareup.picasso.Picasso;
 
-public class MarketSearchActivity extends TranslucentActionBarActivity implements AccountChooserHelper.OnAccountSelectionListener, AccountChooserFragment.OnAccountSelectionListener {
+import java.util.HashMap;
+import java.util.List;
+
+public class MarketSearchActivity extends TranslucentActionBarActivity implements AccountChooserHelper.OnAccountSelectionListener, AccountChooserFragment.OnAccountSelectionListener, SearchApps.Listener {
 	public static final String EXTRA_KEYWORD = "keyword";
 	public static final String EXTRA_EXACT = "exact";
 	public static final String EXTRA_SHARE = "share";
 
 	private AppsAdapter mAdapter;
-	private MarketSession mMarketSession;
-	private AppIconLoader mIconLoader;
-	private AppsResponseLoader mResponseLoader;
 	private Context mContext;
 	private LinearLayout mLoading;
 	private RelativeLayout mDeviceIdMessage = null;
@@ -75,12 +67,10 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
 	private AccountChooserHelper mAccChooserHelper;
     private LinearLayout mRetryView;
     private Button mRetryButton;
+    private SearchApps mSearchEngine;
 
 
-    /* (non-Javadoc)
-     * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
-     */
-	@Override
+    @Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
@@ -100,12 +90,10 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
 		
 		final Preferences prefs = new Preferences(this);
 		String deviceId = DeviceIdHelper.getDeviceId(this,prefs);
-		MarketSessionHelper helper = new MarketSessionHelper(mContext);
-		mMarketSession = helper.create(deviceId, null);
-        
-		mIconLoader = new AppIconLoader(mMarketSession);
-		mAdapter = new AppsAdapter(this,R.layout.market_app_row);
-		
+        mSearchEngine = new SearchApps(deviceId, this, this);
+
+		mAdapter = new AppsAdapter(this);
+
 		mListView = (ListView)findViewById(android.R.id.list);
 		mListView.setEmptyView(findViewById(android.R.id.empty));
 		mListView.setAdapter(mAdapter);
@@ -127,7 +115,6 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
         mLoading.setVisibility(View.VISIBLE);
         mRetryView.setVisibility(View.GONE);
 
-        mResponseLoader = new AppsResponseLoader(mMarketSession);
     }
 
     private void searchResults() {
@@ -138,15 +125,13 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
         imm.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
 
         mListView.setAdapter(mAdapter);
-		
-		mAdapter.clear();
-		mIconLoader.clearCache();
+
+        mSearchEngine.reset();
 
         showLoading();
 
 		if (query.length() > 0) {
-            mResponseLoader.setQuery(query);
-			new RetrieveResultsTask().execute();
+            mSearchEngine.setQuery(query).start();
 		} else {
 			showNoResults("");
 		}
@@ -194,7 +179,7 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
     }
 
     private void searchResultsDelayed() {
-        if (mMarketSession.getAuthSubToken() == null) {
+        if (mSearchEngine.getAuthSubToken() == null) {
             mInitiateSearch = true;
         } else {
             searchResults();
@@ -215,16 +200,16 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
     final OnItemClickListener itemClickListener  = new OnItemClickListener() {
 		@Override
 		public void onItemClick (AdapterView<?> parent, View view, int position, long id) {
-			App app = mAdapter.getItem(position);
-			String appId = app.getId();
-			if (mAddedApps.containsKey(app.getId())) {
+			Document doc = (Document) mAdapter.getItem(position);
+			String appId = doc.getDocId();
+			if (mAddedApps.containsKey(doc.getDocId())) {
 				return;
 			}
 			AppListContentProviderClient cr = new AppListContentProviderClient(MarketSearchActivity.this);
 
 			View bgView = view.findViewById(R.id.approw);
 
-			AppInfo existingApp = cr.queryAppId(app.getId());
+			AppInfo existingApp = cr.queryAppId(doc.getDocId());
 			if (existingApp != null) {
 				Toast.makeText(mContext, R.string.app_already_added, Toast.LENGTH_SHORT).show();
 				bgView.setBackgroundColor(mColorBgGray);
@@ -232,8 +217,8 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
 				return;
 			}
 
-			Bitmap icon = mIconLoader.getCachedImage(app.getId());
-			AppInfo info = new AppInfo(app, icon);
+			Bitmap icon = null;//mIconLoader.getCachedImage(app.getId());
+			AppInfo info = new AppInfo(doc, icon);
 
 			Uri uri = cr.insert(info);
 			cr.release();
@@ -241,7 +226,7 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
 			if (uri == null) {
 				Toast.makeText(mContext, R.string.error_insert_app, Toast.LENGTH_SHORT).show();
 			} else {
-				String msg = getString(R.string.app_stored, app.getTitle());
+				String msg = getString(R.string.app_stored, doc.getTitle());
 				Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
 				bgView.setBackgroundColor(mColorBgGray);
 				mAddedApps.put(appId, true);
@@ -259,7 +244,7 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
 			finish();
 			return;
 		}
-		mMarketSession.setAuthSubToken(authSubToken);
+        mSearchEngine.setAccount(account, authSubToken);
 		if (mInitiateSearch && !TextUtils.isEmpty(mSearchView.getQuery())) {
 			searchResults();
 		} else {
@@ -284,46 +269,6 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
 	@Override
 	public void onDialogAccountNotFound() {
 		mAccChooserHelper.onDialogAccountNotFound();
-	}
-
-	class RetrieveResultsTask extends AsyncTask<String, Void, RetrieveResultsTask.Result> {
-		class Result {
-			List<App> apps;
-			boolean networkError;
-		}
-		protected Result doInBackground(String... queries) {
-			List<App> apps = mResponseLoader.load();
-			if (apps != null) {
-				for (App app : apps) {
-					mIconLoader.precacheIcon(app.getId());
-				}
-			}
-			Result result = new Result();
-			result.apps = apps;
-			result.networkError = mResponseLoader.hasNetworkError();
-			return result;
-		}
-
-		@Override
-		protected void onPostExecute(Result result) {
-            mLoading.setVisibility(View.GONE);
-
-			if (result.networkError) {
-				showRetryButton();
-				return;
-			}
-			if (result.apps == null || result.apps.size() == 0) {
-				showNoResults(mResponseLoader.getQuery());
-				return;
-			}
-			adapterAddAll(mAdapter, result.apps);
-
-			if (mResponseLoader.hasNext()) {
-				mListView.setAdapter(new AppsEndlessAdapter(mContext, mAdapter, R.layout.pending));
-			}
-
-			showDeviceIdMessage();
-		}
 	}
 
 	private void showRetryButton() {
@@ -353,55 +298,33 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
         if (mAdapter.isEmpty()) {
             searchResultsDelayed();
         } else {
-            new RetrieveResultsTask().execute();
+            mSearchEngine.start();
         }
     }
 
-	@SuppressLint("NewApi")
-	private void adapterAddAll(ArrayAdapter<App> adapter, List<App> list) {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-			adapter.addAll(list);
-		} else {
-			for (App app : list) {
-				adapter.add(app);
-			}
-		}
-	}
+    @Override
+    public void onDataChanged() {
+        mLoading.setVisibility(View.GONE);
+        if (mSearchEngine.getData().getCount() == 0) {
+            showNoResults(mSearchEngine.getQuery());
+        } else {
+            mAdapter.notifyDataSetChanged();
+        }
+    }
 
-	class AppsEndlessAdapter extends EndlessAdapter {
+    @Override
+    public void onErrorResponse(VolleyError error) {
+        mLoading.setVisibility(View.GONE);
+        showRetryButton();
+    }
 
-		private List<App> mCache;
-
-        public AppsEndlessAdapter(Context context, ListAdapter wrapped, int pendingResource) {
-			super(context, wrapped, pendingResource);
-		}
-
-		@Override
-		protected boolean cacheInBackground() throws Exception {
-            mCache = null;
-			if (mResponseLoader.moveToNext()) {
-				mCache = mResponseLoader.load();
-				return (mCache == null || mCache.size() == 0) ? false : true;
-			}
-			return false;
-		}
-
-		@Override
-		protected void appendCachedData() {
-			if (mCache != null) {
-				AppsAdapter adapter = (AppsAdapter) getWrappedAdapter();
-				adapterAddAll(adapter, mCache);
-			}
-		}
-
-	}
-
-	class AppsAdapter extends ArrayAdapter<App> {
+    class AppsAdapter extends BaseAdapter {
 		private final PackageManagerUtils mPMUtils;
 		private Bitmap mDefaultIcon;
+        private int mIconSize;
 
-		public AppsAdapter(Context context, int textViewResourceId) {
-			super(context, textViewResourceId);
+        public AppsAdapter(Context context) {
+            mContext = context;
 			mPMUtils = new PackageManagerUtils(context.getPackageManager());
 		}
 
@@ -409,12 +332,28 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
 			View row;
 			TextView title;
 			TextView details;
-			TextView version;
+			TextView updated;
 			TextView price;
 			ImageView icon;
 		}
 
-		@Override
+        @Override
+        public int getCount() {
+            return mSearchEngine.getCount();
+        }
+
+
+        @Override
+        public Object getItem(int position) {
+            return mSearchEngine.getData().getItem(position, false);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			ViewHolder holder;
 			View v = convertView;
@@ -425,38 +364,51 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
 				holder.row = (View) v.findViewById(R.id.approw);
 				holder.title = (TextView) v.findViewById(android.R.id.title);
 				holder.details = (TextView) v.findViewById(R.id.details);
-				holder.version = (TextView) v.findViewById(R.id.version);
+				holder.updated = (TextView) v.findViewById(R.id.updated);
 				holder.price = (TextView) v.findViewById(R.id.price);
 				holder.icon = (ImageView) v.findViewById(android.R.id.icon);
 				v.setTag(holder);
 			} else {
 				holder = (ViewHolder) v.getTag();
 			}
-			App app = (App) getItem(position);
-			holder.title.setText(app.getTitle() + " " + app.getVersion());
-			holder.details.setText(app.getCreator());
-			holder.version.setText(app.getVersion());
+            Document doc = (Document) getItem(position);
 
-			if (mAddedApps.containsKey(app.getId())) {
+            DocDetails.AppDetails app = doc.getAppDetails();
+
+			holder.title.setText(doc.getTitle());
+			holder.details.setText(doc.getCreator());
+			holder.updated.setText(app.uploadDate);
+
+			if (mAddedApps.containsKey(doc.getBackendDocId())) {
 				holder.row.setBackgroundColor(mColorBgGray);
 			} else {
 				holder.row.setBackgroundColor(mColorBgWhite);
 			}
 
 			if (mDefaultIcon == null) {
-				mDefaultIcon = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_empty);
-			}
+				mDefaultIcon = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.ic_empty);
+                mIconSize = mContext.getResources().getDimensionPixelSize(R.dimen.icon_size);
+            }
 			holder.icon.setImageBitmap(mDefaultIcon);
-			mIconLoader.loadImage(app.getId(), holder.icon);
 
-			boolean isInstalled = mPMUtils.isAppInstalled(app.getPackageName());
+            List<Common.Image> images = doc.getImages(4);
+            if (images.size() > 0) {
+                Picasso.with(mContext)
+                    .load(images.get(0).imageUrl)
+                    .resize(mIconSize, mIconSize)
+                    .into(holder.icon);
+            }
+			//mIconLoader.loadImage(app.getId(), holder.icon);
+
+			boolean isInstalled = mPMUtils.isAppInstalled(app.packageName);
 			if (isInstalled) {
 				holder.price.setText(R.string.installed);
 			} else {
-				if (app.getPriceMicros() == 0 ) {
+                Common.Offer offer = doc.getOffer(1);
+				if (offer.micros == 0) {
 					holder.price.setText(R.string.free);
 				} else {
-					holder.price.setText(app.getPrice());
+					holder.price.setText(offer.currencyCode+" "+offer.formattedAmount);
 				}
 			}
 

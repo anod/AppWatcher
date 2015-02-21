@@ -25,7 +25,6 @@ import com.anod.appwatcher.fragments.AccountChooserFragment;
 import com.anod.appwatcher.fragments.AppWatcherListFragment;
 import com.anod.appwatcher.sync.SyncAdapter;
 import com.anod.appwatcher.utils.AppLog;
-import com.anod.appwatcher.utils.ErrorReport;
 import com.anod.appwatcher.utils.MenuItemAnimation;
 import com.anod.appwatcher.utils.TranslucentActionBarActivity;
 
@@ -200,9 +199,6 @@ public class AppWatcherActivity extends TranslucentActionBarActivity implements
 
 	@Override
 	protected void onResume() {
-
-		ErrorReport.setDefaultReportSenders();
-
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(SyncAdapter.SYNC_PROGRESS);
 		filter.addAction(SyncAdapter.SYNC_STOP);

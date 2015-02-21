@@ -4,27 +4,17 @@ import android.app.Application;
 import android.content.Context;
 import android.view.ViewConfiguration;
 
-import com.anod.appwatcher.utils.ErrorReport;
+import com.crashlytics.android.Crashlytics;
 import com.newrelic.agent.android.NewRelic;
-
-import org.acra.annotation.ReportsCrashes;
 
 import java.lang.reflect.Field;
 
-@ReportsCrashes(
-	formKey = "", // This is required for backward compatibility but not used
-	formUri = "https://anodsplace.info/acra/report/report.php",
-	httpMethod = org.acra.sender.HttpSender.Method.PUT,
-	reportType = org.acra.sender.HttpSender.Type.JSON,
-	logcatArguments = { "-t", "100", "-v", "tag", "AppWatcher:V", "*:S" }
-)
 public class AppWatcherApplication extends Application {
 
     @Override
 	 public void onCreate() {
 		super.onCreate();
-
-        ErrorReport.init(this);
+        Crashlytics.start(this);
 
 		 NewRelic.withApplicationToken(
 			"AA47c4b684f2af988fdf3a13518738d7eaa8a4976f"

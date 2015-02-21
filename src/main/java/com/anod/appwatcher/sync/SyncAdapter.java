@@ -30,10 +30,10 @@ import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.model.AppListCursor;
 import com.anod.appwatcher.model.AppListTable;
-import com.anod.appwatcher.utils.ErrorReport;
 import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.BitmapUtils;
 import com.anod.appwatcher.utils.GooglePlayServices;
+import com.crashlytics.android.Crashlytics;
 import com.gc.android.market.api.MarketSession;
 import com.gc.android.market.api.model.Market.App;
 
@@ -98,7 +98,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             updatedApps = doSync(pref, appListProvider, lastUpdatesViewed);
 		} catch (RemoteException e) {
             AppLog.e("doSync exception", e);
-            ErrorReport.handleException(e);
+            Crashlytics.logException(e);
 		}
 		int size = (updatedApps!=null) ? updatedApps.size() : 0;
 		Intent finishIntent = new Intent(SYNC_STOP);
@@ -144,10 +144,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     driveSync.showResolutionNotification(e.getResolution());
                 }
                 AppLog.ex(e);
-                ErrorReport.handleException(e);
+                Crashlytics.logException(e);
             } catch (Exception e) {
                 AppLog.ex(e);
-                ErrorReport.handleException(e);
+                Crashlytics.logException(e);
             }
         } else {
             AppLog.d("DriveSync backup is fresh");

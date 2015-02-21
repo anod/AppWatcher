@@ -322,7 +322,7 @@ public class AppWatcherListFragment extends ListFragment implements
             holder.title = (TextView)v.findViewById(android.R.id.title);
             holder.details = (TextView)v.findViewById(R.id.details);
             holder.icon = (ImageView)v.findViewById(android.R.id.icon);
-            holder.version = (TextView)v.findViewById(R.id.version);
+            holder.version = (TextView)v.findViewById(R.id.updated);
             holder.price = (TextView)v.findViewById(R.id.price);
             holder.options = (LinearLayout)v.findViewById(R.id.options);
             holder.newIndicator = (LinearLayout)v.findViewById(R.id.new_indicator);
