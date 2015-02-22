@@ -18,14 +18,14 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.text.format.DateUtils;
 
+import com.android.volley.VolleyError;
 import com.anod.appwatcher.BuildConfig;
 import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.accounts.AccountHelper;
 import com.anod.appwatcher.backup.GDriveSync;
-import com.anod.appwatcher.market.AppIconLoader;
-import com.anod.appwatcher.market.AppLoader;
+import com.anod.appwatcher.market.DetailsEndpoint;
 import com.anod.appwatcher.market.DeviceIdHelper;
-import com.anod.appwatcher.market.MarketSessionHelper;
+import com.anod.appwatcher.market.PlayStoreEndpoint;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.model.AppListCursor;
@@ -34,15 +34,16 @@ import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.BitmapUtils;
 import com.anod.appwatcher.utils.GooglePlayServices;
 import com.crashlytics.android.Crashlytics;
-import com.gc.android.market.api.MarketSession;
-import com.gc.android.market.api.model.Market.App;
+import com.google.android.finsky.api.model.Document;
+import com.google.android.finsky.protos.Common;
+import com.google.android.finsky.protos.DocDetails;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-public class SyncAdapter extends AbstractThreadedSyncAdapter {
+public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStoreEndpoint.Listener {
     private static final int ONE_SEC_IN_MILLIS = 1000;
 
 	private final Context mContext;
@@ -50,8 +51,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     public static final String SYNC_STOP = "com.anod.appwatcher.sync.start";
     public static final String SYNC_PROGRESS = "com.anod.appwatcher.sync.progress";
     public static final String EXTRA_UPDATES_COUNT = "extra_updates_count";
-    private MarketSession mMarketSession;
-    private AppLoader mLoader;
+    private DetailsEndpoint mEndpoint;
 
     public SyncAdapter(Context context, boolean autoInitialize) {
 		super(context, autoInitialize);
@@ -86,8 +86,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 		Intent startIntent = new Intent(SYNC_PROGRESS);
 		mContext.sendBroadcast(startIntent);
 
-        mMarketSession = createMarketSession(pref);
-        mLoader = new AppLoader(mMarketSession);
+        mEndpoint = createEndpoint(pref);
 
 		boolean lastUpdatesViewed = pref.isLastUpdatesViewed();
 		AppLog.d("Last update viewed: "+lastUpdatesViewed);
@@ -110,7 +109,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 				
 		if (size > 0) {
             SyncNotification sn = new SyncNotification(mContext);
-            Notification notification = sn.create(updatedApps, mLoader);
+            Notification notification = sn.create(updatedApps, mEndpoint);
             sn.show(notification);
 			if (!manualSync && lastUpdatesViewed) {
 				pref.markViewed(false);
@@ -125,8 +124,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 AppLog.d("DriveSyncEnabled = false, skipping...");
             }
         }
-        mLoader = null;
-        mMarketSession = null;
+        mEndpoint = null;
 		AppLog.d("Finish::onPerformSync()");
 	
 	}
@@ -168,6 +166,16 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 		return (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI);
 	}
 
+    @Override
+    public void onDataChanged() {
+
+    }
+
+    @Override
+    public void onErrorResponse(VolleyError error) {
+
+    }
+
     protected static class UpdatedApp {
         String appId;
         String title;
@@ -188,10 +196,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 	private ArrayList<UpdatedApp> doSync(Preferences pref, AppListContentProviderClient client, boolean lastUpdatesViewed) throws RemoteException {
 		ArrayList<UpdatedApp> updatedTitles = new ArrayList<UpdatedApp>();
 
-		if (mMarketSession == null) {
+		if (mEndpoint == null) {
 			return updatedTitles;
 		}
-        AppIconLoader iconLoader = new AppIconLoader(mMarketSession);
 
 		AppListCursor apps = client.queryAll();
 		if (apps==null || apps.moveToFirst() == false) {
@@ -212,11 +219,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
 		// TODO: implement multiple calls
 		while(apps.moveToNext()) {
-			App marketApp = null;
+			Document marketApp = null;
 			AppInfo localApp = apps.getAppInfo();
 			AppLog.d("Checking for updates '"+localApp.getTitle()+"' ...");
 			try {
-				marketApp = mLoader.loadOne(localApp.getAppId());
+				marketApp = mEndpoint.loadOne(localApp.getAppId());
 			} catch (Exception e) {
 				AppLog.e("Cannot retrieve information for "+localApp.getTitle() + ", id:"+localApp.getAppId(), e);
 				continue;
@@ -226,12 +233,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 				continue;
 			}
 
-			if (marketApp.getVersionCode() > localApp.getVersionCode() || (debugPkgs!=null && debugPkgs.contains(localApp.getPackageName()))) {
-				AppLog.d("New version found ["+marketApp.getVersionCode()+"]");
-				Bitmap icon = iconLoader.loadImageUncached(marketApp.getId());
+            DocDetails.AppDetails appDetails = marketApp.getAppDetails();
+			if (appDetails.versionCode > localApp.getVersionCode() || (debugPkgs!=null && debugPkgs.contains(localApp.getPackageName()))) {
+				AppLog.d("New version found ["+appDetails.versionCode+"]");
+				Bitmap icon = null;//iconLoader.loadImageUncached(marketApp.getId());
 				AppInfo newApp = createNewVersion(marketApp, localApp, icon);
 				client.update(newApp);
-				updatedTitles.add(new UpdatedApp(localApp.getAppId(),marketApp.getTitle(),marketApp.getPackageName()));
+				updatedTitles.add(new UpdatedApp(localApp.getAppId(),marketApp.getTitle(),appDetails.packageName));
 				continue;
 			}
 			
@@ -246,20 +254,22 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 			//Refresh app icon if it wasn't fetched previously
 			if (localApp.getIcon() == null) {
 				AppLog.d("Fetch missing icon");
-				Bitmap icon = iconLoader.loadImageUncached(localApp.getAppId());
+                Bitmap icon = null;//iconLoader.loadImageUncached(marketApp.getId());
 		   	    if (icon != null) {
 		   	    	byte[] iconData = BitmapUtils.flattenBitmap(icon);
 		   	   	    values.put(AppListTable.Columns.KEY_ICON_CACHE, iconData);
 		   	    }
 			}
-			if (!marketApp.getPriceCurrency().equals(localApp.getPriceCur())) {
-				values.put(AppListTable.Columns.KEY_PRICE_CURRENCY, marketApp.getPriceCurrency());
+            Common.Offer offer = marketApp.getOffer(1);
+
+			if (!offer.currencyCode.equals(localApp.getPriceCur())) {
+				values.put(AppListTable.Columns.KEY_PRICE_CURRENCY, offer.currencyCode);
 			}
-			if (!marketApp.getPrice().equals(localApp.getPriceText())) {
-				values.put(AppListTable.Columns.KEY_PRICE_TEXT, marketApp.getPrice());
+			if (!offer.formattedAmount.equals(localApp.getPriceText())) {
+				values.put(AppListTable.Columns.KEY_PRICE_TEXT, offer.formattedAmount);
 			}
-			if (localApp.getPriceMicros() != marketApp.getPriceMicros()) {
-				values.put(AppListTable.Columns.KEY_PRICE_MICROS, marketApp.getPriceMicros());
+			if (localApp.getPriceMicros() != offer.micros) {
+				values.put(AppListTable.Columns.KEY_PRICE_MICROS, offer.micros);
 			}
 
 			AppLog.d("ContentValues: "+values.toString());
@@ -273,25 +283,22 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 		return updatedTitles;
 	}
 
-	private AppInfo createNewVersion(App marketApp, AppInfo localApp, Bitmap newIcon)  {
-
-        // Gets the current system time in milliseconds
-        Long now = Long.valueOf(System.currentTimeMillis());
+	private AppInfo createNewVersion(Document marketApp, AppInfo localApp, Bitmap newIcon)  {
 
 		AppInfo newApp = new AppInfo(marketApp, newIcon);
 		newApp.setRowId(localApp.getRowId());
 		newApp.setStatus(AppInfo.STATUS_UPDATED);
-		newApp.setUpdateTime(now);
 
 		return newApp;
 	}
 
 
-	private MarketSession createMarketSession(Preferences prefs) {
+	private DetailsEndpoint createEndpoint(Preferences prefs) {
 		AccountHelper tokenHelper = new AccountHelper(mContext);
 		String authToken = null;
+        Account account = prefs.getAccount();
 		try {
-			authToken = tokenHelper.requestTokenBlocking(null, prefs.getAccount());
+			authToken = tokenHelper.requestTokenBlocking(null, account);
 		} catch (IOException e) {
 			AppLog.e("AuthToken IOException: " + e.getMessage(), e);
 		} catch (AuthenticatorException e) {
@@ -302,11 +309,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 		if (authToken == null) {
 			return null;
 		}
-		MarketSessionHelper helper = new MarketSessionHelper(mContext);
 		String deviceId = DeviceIdHelper.getDeviceId(mContext, prefs);
-		final MarketSession session = helper.create(deviceId, null);
-   		session.setAuthSubToken(authToken);
-    	return session;
+        DetailsEndpoint endpoint = new DetailsEndpoint(deviceId, this, mContext);
+        endpoint.setAccount(account,authToken);
+        return endpoint;
 	}
 	
 

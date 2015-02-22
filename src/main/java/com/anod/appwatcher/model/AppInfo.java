@@ -2,7 +2,6 @@ package com.anod.appwatcher.model;
 
 import android.graphics.Bitmap;
 
-import com.gc.android.market.api.model.Market.App;
 import com.google.android.finsky.api.model.Document;
 import com.google.android.finsky.protos.Common;
 import com.google.android.finsky.protos.DocDetails;
@@ -10,21 +9,22 @@ import com.google.android.finsky.protos.DocDetails;
 
 public class AppInfo extends AppInfoMetadata{
 
-	private int rowId;
+    private final String detailsUrl;
+    private int rowId;
 	private String packageName;
 	private int versionNumber;
 	private String versionName;
 	private String title;
 	private String creator;	
 	private Bitmap icon;
-	private long updateTime;
+	private String uploadDate;
 	private String priceText;
 	private String priceCur;
 	private Integer priceMicros;
 
 
 	public AppInfo(int rowId, String appId, String pname, int versionNumber, String versionName,
-			String title, String creator, Bitmap icon, int status, long updateTime, String priceText, String priceCur, Integer priceMicros) {
+			String title, String creator, Bitmap icon, int status, String uploadDate, String priceText, String priceCur, Integer priceMicros, String detailsUrl) {
         super(appId,status);
 		this.rowId = rowId;
 		this.packageName = pname;
@@ -33,47 +33,28 @@ public class AppInfo extends AppInfoMetadata{
 		this.title = title;
 		this.creator = creator;
 		this.icon = icon;
-		this.updateTime = updateTime;
+		this.uploadDate = uploadDate;
 
 		this.priceText = priceText;
 		this.priceCur = priceCur;
 		this.priceMicros = priceMicros;
-	}
-	
-	/**
-	 * Create loacl AppInfo from Market app object
-	 * @param app
-	 * @param icon
-	 */
-	public AppInfo(App app, Bitmap icon) {
-        super(app.getId(), STATUS_NORMAL);
-        this.rowId = 0;
-		this.appId = app.getId();
-		this.packageName = app.getPackageName();
-		this.title = app.getTitle();
-		this.versionNumber = app.getVersionCode();
-		this.versionName = app.getVersion();
-		this.creator = app.getCreator();
-		this.updateTime = 0;
-		this.icon = icon;
-		this.priceMicros = app.getPriceMicros();
-		this.priceText = app.getPrice();
-		this.priceCur = app.getPriceCurrency();
+        this.detailsUrl = detailsUrl;
 	}
 
     public AppInfo(Document doc, Bitmap icon) {
         super(doc.getDocId(), STATUS_NORMAL);
         this.rowId = 0;
         this.appId = doc.getDocId();
+        this.detailsUrl = doc.getDetailsUrl();
         DocDetails.AppDetails app = doc.getAppDetails();
         this.packageName = app.packageName;
         this.title = doc.getTitle();
         this.versionNumber = app.versionCode;
         this.versionName = app.versionString;
         this.creator = doc.getCreator();
-        this.updateTime = 0;
+        this.uploadDate = app.uploadDate;
         this.icon = icon;
-        Common.Offer offer = doc.getOffer(0);
+        Common.Offer offer = doc.getOffer(1);
         this.priceMicros = (int)offer.micros;
         this.priceText = offer.formattedAmount;
         this.priceCur = offer.currencyCode;
@@ -127,8 +108,8 @@ public class AppInfo extends AppInfoMetadata{
 	/**
 	 * @return the last update time
 	 */
-	public long getUpdateTime() {
-		return updateTime;
+	public String getUploadDate() {
+		return uploadDate;
 	}
 
 	/**
@@ -140,10 +121,10 @@ public class AppInfo extends AppInfoMetadata{
 	
 
 	/**
-	 * @param updateTime
+	 * @param uploadDate
 	 */
-	public void setUpdateTime(Long updateTime) {
-		this.updateTime = updateTime;
+	public void setUploadDate(String uploadDate) {
+		this.uploadDate = uploadDate;
 	}
 
 	public String getPriceText() {
@@ -157,4 +138,8 @@ public class AppInfo extends AppInfoMetadata{
 	public Integer getPriceMicros() {
 		return priceMicros;
 	}
+
+    public String getDetailsUrl() {
+        return detailsUrl;
+    }
 }

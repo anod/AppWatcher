@@ -252,13 +252,13 @@ public interface DocumentV2
                         codedInputByteBufferNano.readMessage(this.sectionMoreBy);
                         continue;
                     }
-                    case 26: {
+//                    case 26: {
 //                        if (this.plusOneData == null) {
 //                            this.plusOneData = new PlusOneData();
 //                        }
 //                        codedInputByteBufferNano.readMessage(this.plusOneData);
-                        continue;
-                    }
+//                        continue;
+//                    }
                     case 34: {
                         repeatedFieldArrayLength = WireFormatNano.getRepeatedFieldArrayLength(codedInputByteBufferNano, 34);
                         if (this.warning == null) {
@@ -294,13 +294,13 @@ public interface DocumentV2
                         codedInputByteBufferNano.readMessage(this.sectionCoreContent);
                         continue;
                     }
-                    case 58: {
-//                        if (this.template == null) {
-//                            this.template = new Template();
-//                        }
-//                        codedInputByteBufferNano.readMessage(this.template);
-                        continue;
-                    }
+//                    case 58: {
+////                        if (this.template == null) {
+////                            this.template = new Template();
+////                        }
+////                        codedInputByteBufferNano.readMessage(this.template);
+//                        continue;
+//                    }
                     case 66: {
                         repeatedFieldArrayLength2 = WireFormatNano.getRepeatedFieldArrayLength(codedInputByteBufferNano, 66);
                         if (this.badgeForCreator == null) {
@@ -411,25 +411,25 @@ public interface DocumentV2
                         this.subscription = subscription;
                         continue;
                     }
-                    case 138: {
-//                        if (this.oBSOLETEReason == null) {
-//                            this.oBSOLETEReason = new OBSOLETE_Reason();
-//                        }
-//                        codedInputByteBufferNano.readMessage(this.oBSOLETEReason);
-                        continue;
-                    }
+//                    case 138: {
+////                        if (this.oBSOLETEReason == null) {
+////                            this.oBSOLETEReason = new OBSOLETE_Reason();
+////                        }
+////                        codedInputByteBufferNano.readMessage(this.oBSOLETEReason);
+//                        continue;
+//                    }
                     case 146: {
                         this.privacyPolicyUrl = codedInputByteBufferNano.readString();
                         this.hasPrivacyPolicyUrl = true;
                         continue;
                     }
-                    case 154: {
-//                        if (this.suggestionReasons == null) {
-//                            this.suggestionReasons = new SuggestionReasons();
-//                        }
-//                        codedInputByteBufferNano.readMessage(this.suggestionReasons);
-                        continue;
-                    }
+//                    case 154: {
+////                        if (this.suggestionReasons == null) {
+////                            this.suggestionReasons = new SuggestionReasons();
+////                        }
+////                        codedInputByteBufferNano.readMessage(this.suggestionReasons);
+//                        continue;
+//                    }
                     case 162: {
                         if (this.optimalDeviceClassWarning == null) {
                             this.optimalDeviceClassWarning = new DocAnnotations.Warning();
@@ -479,27 +479,27 @@ public interface DocumentV2
                         codedInputByteBufferNano.readMessage(this.sectionPurchaseCrossSell);
                         continue;
                     }
-                    case 202: {
-//                        repeatedFieldArrayLength7 = WireFormatNano.getRepeatedFieldArrayLength(codedInputByteBufferNano, 202);
-//                        if (this.overflowLink == null) {
-//                            length3 = 0;
-//                        }
-//                        else {
-//                            length3 = this.overflowLink.length;
-//                        }
-//                        overflowLink = new OverflowLink[length3 + repeatedFieldArrayLength7];
-//                        if (length3 != 0) {
-//                            System.arraycopy(this.overflowLink, 0, overflowLink, 0, length3);
-//                        }
-//                        while (length3 < -1 + overflowLink.length) {
-//                            codedInputByteBufferNano.readMessage(overflowLink[length3] = new OverflowLink());
-//                            codedInputByteBufferNano.readTag();
-//                            ++length3;
-//                        }
-//                        codedInputByteBufferNano.readMessage(overflowLink[length3] = new OverflowLink());
-//                        this.overflowLink = overflowLink;
-                        continue;
-                    }
+//                    case 202: {
+////                        repeatedFieldArrayLength7 = WireFormatNano.getRepeatedFieldArrayLength(codedInputByteBufferNano, 202);
+////                        if (this.overflowLink == null) {
+////                            length3 = 0;
+////                        }
+////                        else {
+////                            length3 = this.overflowLink.length;
+////                        }
+////                        overflowLink = new OverflowLink[length3 + repeatedFieldArrayLength7];
+////                        if (length3 != 0) {
+////                            System.arraycopy(this.overflowLink, 0, overflowLink, 0, length3);
+////                        }
+////                        while (length3 < -1 + overflowLink.length) {
+////                            codedInputByteBufferNano.readMessage(overflowLink[length3] = new OverflowLink());
+////                            codedInputByteBufferNano.readTag();
+////                            ++length3;
+////                        }
+////                        codedInputByteBufferNano.readMessage(overflowLink[length3] = new OverflowLink());
+////                        this.overflowLink = overflowLink;
+//                        continue;
+//                    }
                     case 210: {
                         if (this.creatorDoc == null) {
                             this.creatorDoc = new DocV2();
@@ -1237,6 +1237,288 @@ public interface DocumentV2
             }
             if (this.hasPromotionalDescription || !this.promotionalDescription.equals("")) {
                 codedOutputByteBufferNano.writeString(27, this.promotionalDescription);
+            }
+            super.writeTo(codedOutputByteBufferNano);
+        }
+    }
+
+    public static final class Review extends MessageNano
+    {
+        private static volatile Review[] _emptyArray;
+        public DocV2 author;
+        public String authorName;
+        public String comment;
+        public String commentId;
+        public String deviceName;
+        public String documentVersion;
+        public boolean hasAuthorName;
+        public boolean hasComment;
+        public boolean hasCommentId;
+        public boolean hasDeviceName;
+        public boolean hasDocumentVersion;
+        public boolean hasReplyText;
+        public boolean hasReplyTimestampMsec;
+        public boolean hasSource;
+        public boolean hasStarRating;
+        public boolean hasTimestampMsec;
+        public boolean hasTitle;
+        public boolean hasUrl;
+        //public PlusData.OBSOLETE_PlusProfile oBSOLETEPlusProfile;
+        public String replyText;
+        public long replyTimestampMsec;
+        public Common.Image sentiment;
+        public String source;
+        public int starRating;
+        public long timestampMsec;
+        public String title;
+        public String url;
+
+        public Review() {
+            super();
+            this.clear();
+        }
+
+        public static Review[] emptyArray() {
+            if (_emptyArray == null) {
+                synchronized (InternalNano.LAZY_INIT_LOCK) {
+                    if (_emptyArray == null) {
+                        _emptyArray = new Review[0];
+                    }
+                }
+            }
+            return _emptyArray;
+        }
+
+        public Review clear() {
+            this.commentId = "";
+            this.hasCommentId = false;
+            this.author = null;
+            this.starRating = 0;
+            this.hasStarRating = false;
+            this.sentiment = null;
+            this.title = "";
+            this.hasTitle = false;
+            this.comment = "";
+            this.hasComment = false;
+            this.url = "";
+            this.hasUrl = false;
+            this.source = "";
+            this.hasSource = false;
+            this.documentVersion = "";
+            this.hasDocumentVersion = false;
+            this.timestampMsec = 0L;
+            this.hasTimestampMsec = false;
+            this.deviceName = "";
+            this.hasDeviceName = false;
+            this.replyText = "";
+            this.hasReplyText = false;
+            this.replyTimestampMsec = 0L;
+            this.hasReplyTimestampMsec = false;
+            //this.oBSOLETEPlusProfile = null;
+            this.authorName = "";
+            this.hasAuthorName = false;
+            this.cachedSize = -1;
+            return this;
+        }
+
+        @Override
+        protected int computeSerializedSize() {
+            int computeSerializedSize;
+            computeSerializedSize = super.computeSerializedSize();
+            if (this.hasAuthorName || !this.authorName.equals("")) {
+                computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(1, this.authorName);
+            }
+            if (this.hasUrl || !this.url.equals("")) {
+                computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(2, this.url);
+            }
+            if (this.hasSource || !this.source.equals("")) {
+                computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(3, this.source);
+            }
+            if (this.hasDocumentVersion || !this.documentVersion.equals("")) {
+                computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(4, this.documentVersion);
+            }
+            if (this.hasTimestampMsec || this.timestampMsec != 0L) {
+                computeSerializedSize += CodedOutputByteBufferNano.computeInt64Size(5, this.timestampMsec);
+            }
+            if (this.hasStarRating || this.starRating != 0) {
+                computeSerializedSize += CodedOutputByteBufferNano.computeInt32Size(6, this.starRating);
+            }
+            if (this.hasTitle || !this.title.equals("")) {
+                computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(7, this.title);
+            }
+            if (this.hasComment || !this.comment.equals("")) {
+                computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(8, this.comment);
+            }
+            if (this.hasCommentId || !this.commentId.equals("")) {
+                computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(9, this.commentId);
+            }
+            if (this.hasDeviceName || !this.deviceName.equals("")) {
+                computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(19, this.deviceName);
+            }
+            if (this.hasReplyText || !this.replyText.equals("")) {
+                computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(29, this.replyText);
+            }
+            if (this.hasReplyTimestampMsec || this.replyTimestampMsec != 0L) {
+                computeSerializedSize += CodedOutputByteBufferNano.computeInt64Size(30, this.replyTimestampMsec);
+            }
+//            if (this.oBSOLETEPlusProfile != null) {
+//                computeSerializedSize += CodedOutputByteBufferNano.computeMessageSize(31, this.oBSOLETEPlusProfile);
+//            }
+            if (this.author != null) {
+                computeSerializedSize += CodedOutputByteBufferNano.computeMessageSize(33, this.author);
+            }
+            if (this.sentiment != null) {
+                computeSerializedSize += CodedOutputByteBufferNano.computeMessageSize(34, this.sentiment);
+            }
+            return computeSerializedSize;
+        }
+
+        @Override
+        public Review mergeFrom(CodedInputByteBufferNano codedInputByteBufferNano) throws IOException {
+            int tag;
+            while (true) {
+                tag = codedInputByteBufferNano.readTag();
+                switch (tag) {
+                    default: {
+                        if (!WireFormatNano.parseUnknownField(codedInputByteBufferNano, tag)) {
+                            return this;
+                        }
+                        break;
+                    }
+                    case 0: {
+                        return this;
+                    }
+                    case 10: {
+                        this.authorName = codedInputByteBufferNano.readString();
+                        this.hasAuthorName = true;
+                        continue;
+                    }
+                    case 18: {
+                        this.url = codedInputByteBufferNano.readString();
+                        this.hasUrl = true;
+                        continue;
+                    }
+                    case 26: {
+                        this.source = codedInputByteBufferNano.readString();
+                        this.hasSource = true;
+                        continue;
+                    }
+                    case 34: {
+                        this.documentVersion = codedInputByteBufferNano.readString();
+                        this.hasDocumentVersion = true;
+                        continue;
+                    }
+                    case 40: {
+                        this.timestampMsec = codedInputByteBufferNano.readInt64();
+                        this.hasTimestampMsec = true;
+                        continue;
+                    }
+                    case 48: {
+                        this.starRating = codedInputByteBufferNano.readInt32();
+                        this.hasStarRating = true;
+                        continue;
+                    }
+                    case 58: {
+                        this.title = codedInputByteBufferNano.readString();
+                        this.hasTitle = true;
+                        continue;
+                    }
+                    case 66: {
+                        this.comment = codedInputByteBufferNano.readString();
+                        this.hasComment = true;
+                        continue;
+                    }
+                    case 74: {
+                        this.commentId = codedInputByteBufferNano.readString();
+                        this.hasCommentId = true;
+                        continue;
+                    }
+                    case 154: {
+                        this.deviceName = codedInputByteBufferNano.readString();
+                        this.hasDeviceName = true;
+                        continue;
+                    }
+                    case 234: {
+                        this.replyText = codedInputByteBufferNano.readString();
+                        this.hasReplyText = true;
+                        continue;
+                    }
+                    case 240: {
+                        this.replyTimestampMsec = codedInputByteBufferNano.readInt64();
+                        this.hasReplyTimestampMsec = true;
+                        continue;
+                    }
+                    case 250: {
+//                        if (this.oBSOLETEPlusProfile == null) {
+//                            this.oBSOLETEPlusProfile = new PlusData.OBSOLETE_PlusProfile();
+//                        }
+//                        codedInputByteBufferNano.readMessage(this.oBSOLETEPlusProfile);
+                        continue;
+                    }
+                    case 266: {
+                        if (this.author == null) {
+                            this.author = new DocV2();
+                        }
+                        codedInputByteBufferNano.readMessage(this.author);
+                        continue;
+                    }
+                    case 274: {
+                        if (this.sentiment == null) {
+                            this.sentiment = new Common.Image();
+                        }
+                        codedInputByteBufferNano.readMessage(this.sentiment);
+                        continue;
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void writeTo(CodedOutputByteBufferNano codedOutputByteBufferNano) throws IOException {
+            if (this.hasAuthorName || !this.authorName.equals("")) {
+                codedOutputByteBufferNano.writeString(1, this.authorName);
+            }
+            if (this.hasUrl || !this.url.equals("")) {
+                codedOutputByteBufferNano.writeString(2, this.url);
+            }
+            if (this.hasSource || !this.source.equals("")) {
+                codedOutputByteBufferNano.writeString(3, this.source);
+            }
+            if (this.hasDocumentVersion || !this.documentVersion.equals("")) {
+                codedOutputByteBufferNano.writeString(4, this.documentVersion);
+            }
+            if (this.hasTimestampMsec || this.timestampMsec != 0L) {
+                codedOutputByteBufferNano.writeInt64(5, this.timestampMsec);
+            }
+            if (this.hasStarRating || this.starRating != 0) {
+                codedOutputByteBufferNano.writeInt32(6, this.starRating);
+            }
+            if (this.hasTitle || !this.title.equals("")) {
+                codedOutputByteBufferNano.writeString(7, this.title);
+            }
+            if (this.hasComment || !this.comment.equals("")) {
+                codedOutputByteBufferNano.writeString(8, this.comment);
+            }
+            if (this.hasCommentId || !this.commentId.equals("")) {
+                codedOutputByteBufferNano.writeString(9, this.commentId);
+            }
+            if (this.hasDeviceName || !this.deviceName.equals("")) {
+                codedOutputByteBufferNano.writeString(19, this.deviceName);
+            }
+            if (this.hasReplyText || !this.replyText.equals("")) {
+                codedOutputByteBufferNano.writeString(29, this.replyText);
+            }
+            if (this.hasReplyTimestampMsec || this.replyTimestampMsec != 0L) {
+                codedOutputByteBufferNano.writeInt64(30, this.replyTimestampMsec);
+            }
+//            if (this.oBSOLETEPlusProfile != null) {
+//                codedOutputByteBufferNano.writeMessage(31, this.oBSOLETEPlusProfile);
+//            }
+            if (this.author != null) {
+                codedOutputByteBufferNano.writeMessage(33, this.author);
+            }
+            if (this.sentiment != null) {
+                codedOutputByteBufferNano.writeMessage(34, this.sentiment);
             }
             super.writeTo(codedOutputByteBufferNano);
         }

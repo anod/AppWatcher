@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DbOpenHelper extends SQLiteOpenHelper {
 	    
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 5;
     public static final String DATABASE_NAME = "app_watcher";
     private static final String TABLE_CREATE =
     	"CREATE TABLE " + AppListTable.TABLE_NAME + " (" +
@@ -19,11 +19,13 @@ public class DbOpenHelper extends SQLiteOpenHelper {
 			AppListTable.Columns.KEY_CREATOR + " TEXT," + 
 			AppListTable.Columns.KEY_ICON_CACHE + " BLOB," +
 			AppListTable.Columns.KEY_STATUS + " INTEGER," +
-			AppListTable.Columns.KEY_UPDATE_DATE + " INTEGER," +
+            AppListTable.Columns.KEY_UPDATE_DATE + " INTEGER," +
 			AppListTable.Columns.KEY_PRICE_TEXT + " TEXT," +
 			AppListTable.Columns.KEY_PRICE_CURRENCY + " TEXT," +
-			AppListTable.Columns.KEY_PRICE_MICROS + " INTEGER" +
-	") ";
+			AppListTable.Columns.KEY_PRICE_MICROS + " INTEGER," +
+            AppListTable.Columns.KEY_UPLOAD_DATE + " TEXT," +
+            AppListTable.Columns.KEY_DETAILS_URL + " TEXT" +
+    ") ";
 
     public DbOpenHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -40,12 +42,15 @@ public class DbOpenHelper extends SQLiteOpenHelper {
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		switch (oldVersion) {
 			case 1:
-				db.execSQL("ALTER TABLE "+AppListTable.TABLE_NAME + " ADD COLUMN " + AppListTable.Columns.KEY_UPDATE_DATE + " INTEGER");
+				db.execSQL("ALTER TABLE "+AppListTable.TABLE_NAME + " ADD COLUMN " + AppListTable.Columns.KEY_UPLOAD_DATE + " INTEGER");
 			case 2:
 			case 3:
 				db.execSQL("ALTER TABLE "+AppListTable.TABLE_NAME + " ADD COLUMN " + AppListTable.Columns.KEY_PRICE_TEXT + " TEXT");
 				db.execSQL("ALTER TABLE "+AppListTable.TABLE_NAME + " ADD COLUMN " + AppListTable.Columns.KEY_PRICE_CURRENCY + " TEXT");
 				db.execSQL("ALTER TABLE "+AppListTable.TABLE_NAME + " ADD COLUMN " + AppListTable.Columns.KEY_PRICE_MICROS + " INTEGER");
+            case 4:
+                db.execSQL("ALTER TABLE "+AppListTable.TABLE_NAME + " ADD COLUMN " + AppListTable.Columns.KEY_UPLOAD_DATE + " TEXT");
+                db.execSQL("ALTER TABLE "+AppListTable.TABLE_NAME + " ADD COLUMN " + AppListTable.Columns.KEY_DETAILS_URL + " TEXT");
 		}
 	}
 

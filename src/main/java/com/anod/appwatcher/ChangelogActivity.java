@@ -1,5 +1,6 @@
 package com.anod.appwatcher;
 
+import android.accounts.Account;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -10,21 +11,20 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.android.volley.VolleyError;
 import com.anod.appwatcher.accounts.AccountHelper;
-import com.anod.appwatcher.market.AppLoader;
+import com.anod.appwatcher.market.DetailsEndpoint;
 import com.anod.appwatcher.market.DeviceIdHelper;
-import com.anod.appwatcher.market.MarketSessionHelper;
+import com.anod.appwatcher.market.PlayStoreEndpoint;
 import com.anod.appwatcher.utils.AppLog;
-import com.gc.android.market.api.MarketSession;
-import com.gc.android.market.api.model.Market.App;
 
-public class ChangelogActivity extends ActionBarActivity {
+
+public class ChangelogActivity extends ActionBarActivity implements PlayStoreEndpoint.Listener {
 
 	public static final String EXTRA_APP_ID = "app_id";
-	private AppLoader mLoader;
+	private DetailsEndpoint mDetailsEndpoint;
 	private ProgressBar mLoadingView;
 	private TextView mChangelog;
-	private MarketSession mMarketSession;
 	private String mAppId;
 	private Button mRetryButton;
 
@@ -42,12 +42,8 @@ public class ChangelogActivity extends ActionBarActivity {
 
 		final Preferences prefs = new Preferences(this);
         String deviceId = DeviceIdHelper.getDeviceId(this, prefs);
-        
-        MarketSessionHelper helper = new MarketSessionHelper(this);
-        mMarketSession = helper.create(deviceId, null);
-        
-        mLoader = new AppLoader(mMarketSession);
-		mLoader.setExtended(true);
+
+        mDetailsEndpoint = new DetailsEndpoint(deviceId,this,this);
 
         mLoadingView = (ProgressBar)findViewById(R.id.progress_bar);
         mChangelog = (TextView)findViewById(R.id.changelog);
@@ -58,16 +54,18 @@ public class ChangelogActivity extends ActionBarActivity {
 		mRetryButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				new RetrieveResultsTask().execute(mAppId);
+                mDetailsEndpoint.start();
 			}
 		});
 
 		AccountHelper accHelper = new AccountHelper(this);
-		accHelper.requestToken(this, prefs.getAccount(), new AccountHelper.AuthenticateCallback() {
+        final Account account = prefs.getAccount();
+		accHelper.requestToken(this, account, new AccountHelper.AuthenticateCallback() {
 			@Override
 			public void onAuthTokenAvailable(String token) {
-				mMarketSession.setAuthSubToken(token);
-				new RetrieveResultsTask().execute(mAppId);
+                mDetailsEndpoint.setAccount(account, token);
+                mDetailsEndpoint.setAppId(mAppId);
+                mDetailsEndpoint.start();
 			}
 
 			@Override
@@ -77,47 +75,35 @@ public class ChangelogActivity extends ActionBarActivity {
 		});
 
 	}
-	
-    class RetrieveResultsTask extends AsyncTask<String, Void, App> {
 
-		@Override
-		protected void onPreExecute() {
-			mLoadingView.setVisibility(View.VISIBLE);
-			mRetryButton.setVisibility(View.GONE);
-			mChangelog.setVisibility(View.GONE);
-		}
+    @Override
+    public void onDataChanged() {
+        mLoadingView.setVisibility(View.GONE);
+        mChangelog.setVisibility(View.VISIBLE);
+        mChangelog.setAutoLinkMask(Linkify.ALL);
 
-		protected App doInBackground(String... appsId) {
-			AppLog.d("App Id: "+appsId[0]);
-			try {
-				return mLoader.loadOne(appsId[0]);
-			} catch (Exception e) {
-				AppLog.e("Retrieve change log error", e);
-				return null;
-			}
-        }
-        
-        @Override
-        protected void onPostExecute(App app) {
-        	mLoadingView.setVisibility(View.GONE);
-        	mChangelog.setVisibility(View.VISIBLE);
-        	mChangelog.setAutoLinkMask(Linkify.ALL);
-			if (app == null) {
-				mChangelog.setText(getString(R.string.error_fetchin_info));
-				mRetryButton.setVisibility(View.VISIBLE);
-				return;
-			}
-			mRetryButton.setVisibility(View.GONE);
-        	String changes = "";
-			if (app.getExtendedInfo() != null) {
-				changes = app.getExtendedInfo().getRecentChanges();
-			}
-        	if (changes.equals("")) {
-        		mChangelog.setText(R.string.no_recent_changes);
-        	} else {
-        		mChangelog.setText(app.getExtendedInfo().getRecentChanges());
-        	}
+        mRetryButton.setVisibility(View.GONE);
+        String changes = "";
+//        if (app.getExtendedInfo() != null) {
+//            changes = app.getExtendedInfo().getRecentChanges();
+//        }
+        if (changes.equals("")) {
+            mChangelog.setText(R.string.no_recent_changes);
+        } else {
+ //           mChangelog.setText(app.getExtendedInfo().getRecentChanges());
         }
     }
+
+    @Override
+    public void onErrorResponse(VolleyError error) {
+        mLoadingView.setVisibility(View.GONE);
+        mChangelog.setVisibility(View.VISIBLE);
+        mChangelog.setAutoLinkMask(Linkify.ALL);
+
+        mChangelog.setText(getString(R.string.error_fetchin_info));
+        mRetryButton.setVisibility(View.VISIBLE);
+    }
+
+
 
 }

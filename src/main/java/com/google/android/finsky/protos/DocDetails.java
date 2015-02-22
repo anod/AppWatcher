@@ -1394,18 +1394,17 @@ public interface DocDetails
         @Override
         public DocumentDetails mergeFrom(CodedInputByteBufferNano codedInputByteBufferNano) throws IOException {
             int tag;
-        Label_0136:
             while (true) {
                 tag = codedInputByteBufferNano.readTag();
                 switch (tag) {
                     default: {
                         if (!WireFormatNano.parseUnknownField(codedInputByteBufferNano, tag)) {
-                            break Label_0136;
+                            return this;
                         }
-                        continue;
+                        break;
                     }
                     case 0: {
-                        break Label_0136;
+                        return this;
                     }
                     case 10: {
                         if (this.appDetails == null) {
@@ -1500,7 +1499,6 @@ public interface DocDetails
                     }
                 }
             }
-            return this;
         }
         
         @Override

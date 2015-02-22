@@ -48,9 +48,8 @@ public class AppListReader {
      * @throws IOException
      */
     public AppInfo readAppInfo(JsonReader reader) throws IOException {
-        String appId = null, pname = null, versionName = "", title = "", creator = "";
+        String appId = null, pname = null, versionName = "", title = "", creator = "", uploadDate="", url="";
         int versionNumber = 0, status = 0;
-        long updateTime = 0;
         Bitmap icon = null;
 
         reader.beginObject();
@@ -64,14 +63,16 @@ public class AppListReader {
                 title = reader.nextString();
             } else if (name.equals("creator")) {
                 creator = reader.nextString();
-            } else if (name.equals("updateTime")) {
-                updateTime = reader.nextLong();
+            } else if (name.equals("uploadDate")) {
+                uploadDate = reader.nextString();
             } else if (name.equals("versionName")) {
                 versionName = reader.nextString();
             } else if (name.equals("versionCode")) {
                 versionNumber = reader.nextInt();
             } else if (name.equals("status")) {
                 status = reader.nextInt();
+            } else if (name.equals("detailsUrl")) {
+                url = reader.nextString();
             } else if (name.equals("icon")) {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 reader.beginArray();
@@ -87,7 +88,7 @@ public class AppListReader {
         reader.endObject();
         if (appId != null && pname != null) {
             return new AppInfo(0, appId, pname, versionNumber, versionName,
-                    title, creator, icon, status, updateTime, null, null, null);
+                    title, creator, icon, status, uploadDate, null, null, null, url);
         }
         return null;
     }

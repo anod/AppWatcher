@@ -11,7 +11,7 @@ import android.support.v4.app.NotificationCompat;
 import com.anod.appwatcher.AppWatcherActivity;
 import com.anod.appwatcher.NotificationActivity;
 import com.anod.appwatcher.R;
-import com.anod.appwatcher.market.AppLoader;
+import com.anod.appwatcher.market.DetailsEndpoint;
 
 import java.util.ArrayList;
 
@@ -38,7 +38,7 @@ public class SyncNotification {
         mNotificationManager.cancel(NOTIFICATION_ID);
     }
 
-    public Notification create(ArrayList<SyncAdapter.UpdatedApp> updatedApps, AppLoader loader) {
+    public Notification create(ArrayList<SyncAdapter.UpdatedApp> updatedApps, DetailsEndpoint detailsEndpoint) {
         Intent notificationIntent = new Intent(mContext, AppWatcherActivity.class);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         Uri data = Uri.parse("com.anod.appwatcher://notification");
@@ -60,16 +60,15 @@ public class SyncNotification {
         ;
         if (updatedApps.size() == 1) {
             SyncAdapter.UpdatedApp app = updatedApps.get(0);
-            addExtraInfo(app, builder, loader);
+            addExtraInfo(app, builder, detailsEndpoint);
         }
 
         return builder.build();
     }
 
 
-    private void addExtraInfo(SyncAdapter.UpdatedApp app, NotificationCompat.Builder builder,AppLoader loader) {
-        loader.setExtended(true);
-        String changes = loader.loadRecentChanges(app.appId);
+    private void addExtraInfo(SyncAdapter.UpdatedApp app, NotificationCompat.Builder builder,DetailsEndpoint detailsEndpoint) {
+        String changes = detailsEndpoint.loadRecentChanges(app.appId);
         if (changes != null) {
             if (changes.equals("")) {
                 changes = mContext.getString(R.string.no_recent_changes);

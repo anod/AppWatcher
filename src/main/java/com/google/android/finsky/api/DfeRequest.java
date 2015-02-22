@@ -150,9 +150,9 @@ public class DfeRequest<T extends MessageNano> extends Request<Response.Response
             return this.parseWrapperAndVerifyFromBytes(networkResponse, signatureResponse);
         }
         catch (InvalidProtocolBufferNanoException ex2) {
-            if (!b) {
-                return this.parseWrapperAndVerifySignature(networkResponse, true);
-            }
+//            if (!b) {
+//                return this.parseWrapperAndVerifySignature(networkResponse, true);
+//            }
             AppLog.d("Cannot parse response as ResponseWrapper proto.");
         }
         catch (IOException ex3) {

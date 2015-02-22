@@ -14,38 +14,32 @@ import com.anod.appwatcher.utils.AppLog;
 import com.google.android.finsky.api.DfeApi;
 import com.google.android.finsky.api.DfeApiContext;
 import com.google.android.finsky.api.DfeApiImpl;
-import com.google.android.finsky.api.DfeUtils;
-import com.google.android.finsky.api.model.DfeSearch;
+import com.google.android.finsky.api.model.DfeModel;
 import com.google.android.finsky.api.model.OnDataChangedListener;
 import com.google.android.finsky.config.ContentLevel;
 import com.google.android.volley.GoogleHttpClientStack;
 
 /**
  * @author alex
- * @date 2015-02-21
+ * @date 2015-02-22
  */
-public class SearchApps implements Response.ErrorListener, OnDataChangedListener {
-    private final Listener mListener;
-    private DfeSearch mSearchData;
-    private RequestQueue mRequestQueue;
-    private String mDeviceId;
-    private DfeApi mDfeApi;
-    private String mQuery;
-    private Context mContext;
-    private String mAuthSubToken;
-    private Account mAccount;
+public abstract class PlayStoreEndpoint implements Response.ErrorListener, OnDataChangedListener {
+    protected final Listener mListener;
+    protected final String mDeviceId;
+    protected final Context mContext;
 
-    public String getQuery() {
-        return mQuery;
-    }
-
+    protected DfeModel mDfeModel;
+    protected RequestQueue mRequestQueue;
+    protected DfeApi mDfeApi;
+    protected String mAuthSubToken;
+    protected Account mAccount;
 
     public interface Listener {
         void onDataChanged();
         void onErrorResponse(VolleyError error);
     }
 
-    public SearchApps(String deviceId, Listener listener, Context context) {
+    public PlayStoreEndpoint(String deviceId, Listener listener, Context context) {
         mDeviceId = deviceId;
         mContext = context;
         mListener = listener;
@@ -55,29 +49,10 @@ public class SearchApps implements Response.ErrorListener, OnDataChangedListener
         return mAuthSubToken;
     }
 
-    public SearchApps setAccount(Account account, String authSubToken) {
+    public PlayStoreEndpoint setAccount(Account account, String authSubToken) {
         mAccount = account;
         mAuthSubToken = authSubToken;
         return this;
-    }
-
-    public SearchApps setQuery(String query) {
-        mQuery = query;
-        return this;
-    }
-
-    public void reset() {
-        if (mSearchData != null) {
-            mSearchData.resetItems();
-            mSearchData = null;
-        }
-    }
-
-    public int getCount() {
-        if (mSearchData == null) {
-            return 0;
-        }
-        return mSearchData.getCount();
     }
 
     public void start() {
@@ -87,22 +62,32 @@ public class SearchApps implements Response.ErrorListener, OnDataChangedListener
             DfeApiContext dfeApiContext = DfeApiContext.create(mContext, mAccount, mAuthSubToken, mDeviceId, ContentLevel.create(mContext).getDfeValue());
             mDfeApi = new DfeApiImpl(mRequestQueue, dfeApiContext);
         }
-        if (mSearchData == null) {
-            String searchUrl = DfeUtils.formSearchUrl(mQuery, 0);
-            (mSearchData = new DfeSearch(mDfeApi, mQuery, searchUrl)).addDataChangedListener(this);
-            mSearchData.addErrorListener(this);
+        if (mDfeModel == null) {
+            mDfeModel = createDfeModel();
+            mDfeModel.addDataChangedListener(this);
+            mDfeModel.addErrorListener(this);
         }
-        mSearchData.startLoadItems();
+        execute();
     }
 
-    public DfeSearch getData() {
-        return mSearchData;
+    public void reset() {
+        if (mDfeModel != null) {
+            mDfeModel.unregisterAll();
+        }
+        mDfeModel = null;
+    }
+
+    protected abstract void execute();
+
+    protected abstract DfeModel createDfeModel();
+
+    public DfeModel getData() {
+        return mDfeModel;
     }
 
     @Override
     public void onDataChanged() {
-        if (mSearchData.isReady()) {
-            AppLog.d("Count: " + mSearchData.getCount());
+        if (mDfeModel.isReady()) {
             mListener.onDataChanged();
         }
     }
@@ -118,5 +103,4 @@ public class SearchApps implements Response.ErrorListener, OnDataChangedListener
     {
         return new BasicNetwork(new GoogleHttpClientStack(mContext.getApplicationContext(), false), new ByteArrayPool(1024 * 256));
     }
-
 }

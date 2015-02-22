@@ -53,10 +53,11 @@ public class AppListWriter {
         writer.name("packageName").value(appInfo.getPackageName());
         writer.name("title").value(appInfo.getTitle());
         writer.name("creator").value(appInfo.getCreator());
-        writer.name("updateTime").value(appInfo.getUpdateTime());
+        writer.name("uploadDate").value(appInfo.getUploadDate());
         writer.name("versionName").value(appInfo.getVersionName());
         writer.name("versionCode").value(appInfo.getVersionCode());
         writer.name("status").value(appInfo.getStatus());
+        writer.name("detailsUrl").value(appInfo.getDetailsUrl());
         Bitmap icon = appInfo.getIcon();
         if (icon != null) {
             byte[] iconData = BitmapUtils.flattenBitmap(icon);

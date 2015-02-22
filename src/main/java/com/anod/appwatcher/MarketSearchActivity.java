@@ -34,7 +34,7 @@ import com.android.volley.VolleyError;
 import com.anod.appwatcher.accounts.AccountChooserHelper;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
 import com.anod.appwatcher.market.DeviceIdHelper;
-import com.anod.appwatcher.market.SearchApps;
+import com.anod.appwatcher.market.SearchEndpoint;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.utils.PackageManagerUtils;
@@ -47,7 +47,7 @@ import com.squareup.picasso.Picasso;
 import java.util.HashMap;
 import java.util.List;
 
-public class MarketSearchActivity extends TranslucentActionBarActivity implements AccountChooserHelper.OnAccountSelectionListener, AccountChooserFragment.OnAccountSelectionListener, SearchApps.Listener {
+public class MarketSearchActivity extends TranslucentActionBarActivity implements AccountChooserHelper.OnAccountSelectionListener, AccountChooserFragment.OnAccountSelectionListener, SearchEndpoint.Listener {
 	public static final String EXTRA_KEYWORD = "keyword";
 	public static final String EXTRA_EXACT = "exact";
 	public static final String EXTRA_SHARE = "share";
@@ -67,7 +67,7 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
 	private AccountChooserHelper mAccChooserHelper;
     private LinearLayout mRetryView;
     private Button mRetryButton;
-    private SearchApps mSearchEngine;
+    private SearchEndpoint mSearchEngine;
 
 
     @Override
@@ -90,7 +90,7 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
 		
 		final Preferences prefs = new Preferences(this);
 		String deviceId = DeviceIdHelper.getDeviceId(this,prefs);
-        mSearchEngine = new SearchApps(deviceId, this, this);
+        mSearchEngine = new SearchEndpoint(deviceId, this, this);
 
 		mAdapter = new AppsAdapter(this);
 
@@ -319,7 +319,8 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
     }
 
     class AppsAdapter extends BaseAdapter {
-		private final PackageManagerUtils mPMUtils;
+        public static final int OFFER_TYPE = 1;
+        private final PackageManagerUtils mPMUtils;
 		private Bitmap mDefaultIcon;
         private int mIconSize;
 
@@ -398,17 +399,16 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
                     .resize(mIconSize, mIconSize)
                     .into(holder.icon);
             }
-			//mIconLoader.loadImage(app.getId(), holder.icon);
 
 			boolean isInstalled = mPMUtils.isAppInstalled(app.packageName);
 			if (isInstalled) {
 				holder.price.setText(R.string.installed);
 			} else {
-                Common.Offer offer = doc.getOffer(1);
+                Common.Offer offer = doc.getOffer(OFFER_TYPE);
 				if (offer.micros == 0) {
 					holder.price.setText(R.string.free);
 				} else {
-					holder.price.setText(offer.currencyCode+" "+offer.formattedAmount);
+					holder.price.setText(offer.formattedAmount);
 				}
 			}
 

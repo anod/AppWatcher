@@ -199,8 +199,6 @@ public class AppWatcherListFragment extends ListFragment implements
 		private String mUpdateText;
 		private int mDefColor;
 		private int mUpdateTextColor;
-		private java.text.DateFormat mDateFormat;
-		private Timestamp mTimestamp;
 
 		public ListCursorAdapter(Context context, Cursor c, int flags) {
 			super(context, c, flags);
@@ -210,9 +208,6 @@ public class AppWatcherListFragment extends ListFragment implements
 	        mUpdateText = r.getString(R.string.update);
             mInstalledText = r.getString(R.string.installed);
 	        mUpdateTextColor = r.getColor(R.color.blue_new);
-			mDateFormat = android.text.format.DateFormat
-					.getMediumDateFormat(context.getApplicationContext());
-            mTimestamp = new Timestamp(System.currentTimeMillis());
 
 		}
 
@@ -286,11 +281,10 @@ public class AppWatcherListFragment extends ListFragment implements
 				holder.section.setVisibility(View.GONE);
 			}
 			
-			long updateTime = app.getUpdateTime();
+			String uploadDate = app.getUploadDate();
 			
-			if (updateTime > 0) {
-				mTimestamp.setTime(updateTime);
-				holder.updateDate.setText(mDateFormat.format(mTimestamp));
+			if (!"".equals(uploadDate)) {
+				holder.updateDate.setText(uploadDate);
 				holder.updateDate.setVisibility(View.VISIBLE);
 			} else {
 				holder.updateDate.setVisibility(View.GONE);
