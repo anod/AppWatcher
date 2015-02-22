@@ -27,6 +27,10 @@ public class DetailsEndpoint extends PlayStoreEndpoint {
         return (DfeDetails)mDfeModel;
     }
 
+    public DocDetails.AppDetails getAppDetails() {
+        return getData().getDocument().getAppDetails();
+    }
+
     @Override
     protected void execute() {
         getData().start();

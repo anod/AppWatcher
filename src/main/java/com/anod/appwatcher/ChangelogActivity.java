@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.text.Html;
 import android.text.util.Linkify;
 import android.view.View;
 import android.widget.Button;
@@ -17,6 +18,8 @@ import com.anod.appwatcher.market.DetailsEndpoint;
 import com.anod.appwatcher.market.DeviceIdHelper;
 import com.anod.appwatcher.market.PlayStoreEndpoint;
 import com.anod.appwatcher.utils.AppLog;
+import com.google.android.finsky.api.model.DfeDetails;
+import com.google.android.finsky.protos.DocDetails;
 
 
 public class ChangelogActivity extends ActionBarActivity implements PlayStoreEndpoint.Listener {
@@ -84,13 +87,14 @@ public class ChangelogActivity extends ActionBarActivity implements PlayStoreEnd
 
         mRetryButton.setVisibility(View.GONE);
         String changes = "";
-//        if (app.getExtendedInfo() != null) {
-//            changes = app.getExtendedInfo().getRecentChanges();
-//        }
+        DocDetails.AppDetails details = mDetailsEndpoint.getAppDetails();
+        if (details != null) {
+            changes = details.recentChangesHtml;
+        }
         if (changes.equals("")) {
             mChangelog.setText(R.string.no_recent_changes);
         } else {
- //           mChangelog.setText(app.getExtendedInfo().getRecentChanges());
+            mChangelog.setText(Html.fromHtml(changes));
         }
     }
 
