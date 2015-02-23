@@ -10,6 +10,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.ByteArrayPool;
 import com.android.volley.toolbox.NoCache;
+import com.anod.appwatcher.AppWatcherApplication;
 import com.anod.appwatcher.utils.AppLog;
 import com.google.android.finsky.api.DfeApi;
 import com.google.android.finsky.api.DfeApiContext;
@@ -29,7 +30,6 @@ public abstract class PlayStoreEndpoint implements Response.ErrorListener, OnDat
     protected final Context mContext;
 
     protected DfeModel mDfeModel;
-    protected RequestQueue mRequestQueue;
     protected DfeApi mDfeApi;
     protected String mAuthSubToken;
     protected Account mAccount;
@@ -57,10 +57,9 @@ public abstract class PlayStoreEndpoint implements Response.ErrorListener, OnDat
 
     public void start() {
         if (mDfeApi == null) {
-            mRequestQueue = new RequestQueue(new NoCache(), createNetwork(), 2);
-            mRequestQueue.start();
+            RequestQueue queue = AppWatcherApplication.provide(mContext).requestQueue();
             DfeApiContext dfeApiContext = DfeApiContext.create(mContext, mAccount, mAuthSubToken, mDeviceId, ContentLevel.create(mContext).getDfeValue());
-            mDfeApi = new DfeApiImpl(mRequestQueue, dfeApiContext);
+            mDfeApi = new DfeApiImpl(queue, dfeApiContext);
         }
         if (mDfeModel == null) {
             mDfeModel = createDfeModel();
@@ -98,9 +97,4 @@ public abstract class PlayStoreEndpoint implements Response.ErrorListener, OnDat
         mListener.onErrorResponse(error);
     }
 
-
-    private Network createNetwork()
-    {
-        return new BasicNetwork(new GoogleHttpClientStack(mContext.getApplicationContext(), false), new ByteArrayPool(1024 * 256));
-    }
 }

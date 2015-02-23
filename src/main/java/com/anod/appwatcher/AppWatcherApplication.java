@@ -10,6 +10,7 @@ import com.newrelic.agent.android.NewRelic;
 import java.lang.reflect.Field;
 
 public class AppWatcherApplication extends Application {
+    private ObjectGraph mObjectGraph;
 
     @Override
 	 public void onCreate() {
@@ -31,9 +32,18 @@ public class AppWatcherApplication extends Application {
 			 // Ignore
 		 }
 
-	 }
+        mObjectGraph = new ObjectGraph(this);
+    }
+
+    public ObjectGraph getObjectGraph() {
+        return mObjectGraph;
+    }
 
     public static AppWatcherApplication get(Context context) {
         return (AppWatcherApplication)context.getApplicationContext();
+    }
+
+    public static ObjectGraph provide(Context context) {
+        return ((AppWatcherApplication) context.getApplicationContext()).getObjectGraph();
     }
 }

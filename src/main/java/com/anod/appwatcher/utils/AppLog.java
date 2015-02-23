@@ -2,7 +2,9 @@ package com.anod.appwatcher.utils;
 
 import android.util.Log;
 
+import com.android.volley.VolleyError;
 import com.anod.appwatcher.BuildConfig;
+import com.crashlytics.android.Crashlytics;
 
 import java.util.IllegalFormatException;
 import java.util.Locale;
@@ -23,15 +25,20 @@ public class AppLog {
 	}
 	
 	public static void e(String msg) {
-		Log.e(TAG, format(msg));
+        Log.e(TAG, format(msg));
 	}
 
 	public static void e(String msg, Throwable tr) {
-		Log.e(TAG, format(msg), tr);
+        Log.e(TAG, format(msg), tr);
+        Crashlytics.logException(tr);
 	}
 
     public static void e(String msg, final Object... params) {
         Log.e(TAG, format(msg, params));
+    }
+
+    public static void e(VolleyError error) {
+         e("Volley: "+error.getClass().getSimpleName()+": "+error.getMessage(),error.getCause());
     }
 
     public static void ex(Throwable e) { Log.e(TAG, e.getMessage(), e); }

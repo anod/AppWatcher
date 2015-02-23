@@ -85,19 +85,18 @@
     </content>
     <orderEntry type="jdk" jdkName="Android API 21 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" exported="" name="appcompat-v7-21.0.3" level="project" />
     <orderEntry type="library" exported="" name="crashlytics-1.1.13" level="project" />
     <orderEntry type="library" exported="" name="systembartint-1.0.3" level="project" />
-    <orderEntry type="library" exported="" name="picasso-2.5.0" level="project" />
     <orderEntry type="library" exported="" name="play-services-6.5.87" level="project" />
-    <orderEntry type="library" exported="" name="support-v4-21.0.3" level="project" />
-    <orderEntry type="library" exported="" name="keyczar-0.71g-090613" level="project" />
-    <orderEntry type="library" exported="" name="library-1.0.10" level="project" />
-    <orderEntry type="library" exported="" name="appcompat-v7-21.0.3" level="project" />
     <orderEntry type="library" exported="" name="support-annotations-21.0.3" level="project" />
     <orderEntry type="library" exported="" name="CWAC-AdapterWrapper" level="project" />
+    <orderEntry type="library" exported="" name="support-v4-21.0.3" level="project" />
+    <orderEntry type="library" exported="" name="keyczar-0.71g-090613" level="project" />
     <orderEntry type="library" exported="" name="protobuf-java-2.4.1" level="project" />
     <orderEntry type="library" exported="" name="android-agent-3.429.0" level="project" />
     <orderEntry type="library" exported="" name="androidmarketapi-0.6" level="project" />
+    <orderEntry type="library" exported="" name="library-1.0.10" level="project" />
   </component>
 </module>
 

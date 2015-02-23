@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
@@ -23,7 +22,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -31,21 +29,23 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.NetworkImageView;
 import com.anod.appwatcher.accounts.AccountChooserHelper;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
 import com.anod.appwatcher.market.DeviceIdHelper;
 import com.anod.appwatcher.market.SearchEndpoint;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListContentProviderClient;
+import com.anod.appwatcher.utils.AppLog;
+import com.anod.appwatcher.utils.DocUtils;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 import com.anod.appwatcher.utils.TranslucentActionBarActivity;
 import com.google.android.finsky.api.model.Document;
 import com.google.android.finsky.protos.Common;
 import com.google.android.finsky.protos.DocDetails;
-import com.squareup.picasso.Picasso;
 
 import java.util.HashMap;
-import java.util.List;
 
 public class MarketSearchActivity extends TranslucentActionBarActivity implements AccountChooserHelper.OnAccountSelectionListener, AccountChooserFragment.OnAccountSelectionListener, SearchEndpoint.Listener {
 	public static final String EXTRA_KEYWORD = "keyword";
@@ -68,6 +68,7 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
     private LinearLayout mRetryView;
     private Button mRetryButton;
     private SearchEndpoint mSearchEngine;
+    private int mIconSize = -1;
 
 
     @Override
@@ -195,7 +196,7 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
         default:
             return onOptionsItemSelected(item);
         }
-    }    
+    }
 
     final OnItemClickListener itemClickListener  = new OnItemClickListener() {
 		@Override
@@ -205,9 +206,9 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
 			if (mAddedApps.containsKey(doc.getDocId())) {
 				return;
 			}
-			AppListContentProviderClient cr = new AppListContentProviderClient(MarketSearchActivity.this);
+			final AppListContentProviderClient cr = new AppListContentProviderClient(MarketSearchActivity.this);
 
-			View bgView = view.findViewById(R.id.approw);
+			final View bgView = view.findViewById(R.id.approw);
 
 			AppInfo existingApp = cr.queryAppId(doc.getDocId());
 			if (existingApp != null) {
@@ -217,27 +218,50 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
 				return;
 			}
 
-			Bitmap icon = null;//mIconLoader.getCachedImage(app.getId());
-			AppInfo info = new AppInfo(doc, icon);
+            String imageUrl = DocUtils.getIconUrl(doc);
+            final AppInfo info = new AppInfo(doc, null);
+            if (imageUrl != null) {
+                if (mIconSize == -1) {
+                    mIconSize = mContext.getResources().getDimensionPixelSize(R.dimen.icon_size);
+                }
+                AppWatcherApplication.provide(mContext).imageLoader().get(imageUrl, new ImageLoader.ImageListener() {
+                    @Override
+                    public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
+                        info.setIcon(response.getBitmap());
+                        insertApp(info, bgView, cr);
+                    }
 
-			Uri uri = cr.insert(info);
-			cr.release();
-			
-			if (uri == null) {
-				Toast.makeText(mContext, R.string.error_insert_app, Toast.LENGTH_SHORT).show();
-			} else {
-				String msg = getString(R.string.app_stored, doc.getTitle());
-				Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
-				bgView.setBackgroundColor(mColorBgGray);
-				mAddedApps.put(appId, true);
-				if (mShareSource) {
-					finish();
-				}
-			}
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        AppLog.e(error);
+                        insertApp(info, bgView, cr);
+                    }
+                }, mIconSize, mIconSize);
+            } else {
+                insertApp(info, bgView, cr);
+            }
+
 		}
 	};
 
-	@Override
+    private void insertApp(final AppInfo info,View bgView, AppListContentProviderClient cr) {
+        Uri uri = cr.insert(info);
+        cr.release();
+
+        if (uri == null) {
+            Toast.makeText(mContext, R.string.error_insert_app, Toast.LENGTH_SHORT).show();
+        } else {
+            String msg = getString(R.string.app_stored, info.getTitle());
+            Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
+            bgView.setBackgroundColor(mColorBgGray);
+            mAddedApps.put(info.getAppId(), true);
+            if (mShareSource) {
+                finish();
+            }
+        }
+    }
+
+    @Override
 	public void onHelperAccountSelected(Account account, String authSubToken) {
 		if (authSubToken == null) {
 			Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
@@ -321,12 +345,12 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
     class AppsAdapter extends BaseAdapter {
         public static final int OFFER_TYPE = 1;
         private final PackageManagerUtils mPMUtils;
-		private Bitmap mDefaultIcon;
-        private int mIconSize;
+        private final ImageLoader mImageLoader;
 
         public AppsAdapter(Context context) {
             mContext = context;
 			mPMUtils = new PackageManagerUtils(context.getPackageManager());
+            mImageLoader = AppWatcherApplication.provide(context).imageLoader();
 		}
 
 		class ViewHolder {
@@ -335,7 +359,7 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
 			TextView details;
 			TextView updated;
 			TextView price;
-			ImageView icon;
+            NetworkImageView icon;
 		}
 
         @Override
@@ -367,7 +391,7 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
 				holder.details = (TextView) v.findViewById(R.id.details);
 				holder.updated = (TextView) v.findViewById(R.id.updated);
 				holder.price = (TextView) v.findViewById(R.id.price);
-				holder.icon = (ImageView) v.findViewById(android.R.id.icon);
+				holder.icon = (NetworkImageView) v.findViewById(android.R.id.icon);
 				v.setTag(holder);
 			} else {
 				holder = (ViewHolder) v.getTag();
@@ -386,18 +410,12 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
 				holder.row.setBackgroundColor(mColorBgWhite);
 			}
 
-			if (mDefaultIcon == null) {
-				mDefaultIcon = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.ic_empty);
-                mIconSize = mContext.getResources().getDimensionPixelSize(R.dimen.icon_size);
-            }
-			holder.icon.setImageBitmap(mDefaultIcon);
+            holder.icon.setDefaultImageResId(R.drawable.ic_empty);
+            holder.icon.setErrorImageResId(R.drawable.ic_empty);
+            String imageUrl = DocUtils.getIconUrl(doc);
 
-            List<Common.Image> images = doc.getImages(4);
-            if (images.size() > 0) {
-                Picasso.with(mContext)
-                    .load(images.get(0).imageUrl)
-                    .resize(mIconSize, mIconSize)
-                    .into(holder.icon);
+            if (imageUrl != null) {
+                holder.icon.setImageUrl(imageUrl, mImageLoader);
             }
 
 			boolean isInstalled = mPMUtils.isAppInstalled(app.packageName);

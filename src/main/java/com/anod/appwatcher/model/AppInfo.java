@@ -120,12 +120,7 @@ public class AppInfo extends AppInfoMetadata{
 	}
 	
 
-	/**
-	 * @param uploadDate
-	 */
-	public void setUploadDate(String uploadDate) {
-		this.uploadDate = uploadDate;
-	}
+	public void setIcon(Bitmap icon) { this.icon = icon; }
 
 	public String getPriceText() {
 		return priceText;
