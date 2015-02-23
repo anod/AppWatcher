@@ -14,8 +14,8 @@ public class SearchEndpoint extends PlayStoreEndpoint {
 
     private String mQuery;
 
-    public SearchEndpoint(String deviceId, Listener listener, Context context) {
-        super(deviceId, listener, context);
+    public SearchEndpoint(Listener listener, Context context) {
+        super(listener, context);
     }
 
     public String getQuery() {
@@ -48,8 +48,13 @@ public class SearchEndpoint extends PlayStoreEndpoint {
 
 
     @Override
-    protected void execute() {
+    protected void executeAsync() {
         getData().startLoadItems();
+    }
+
+    @Override
+    protected void executeSync() {
+        throw new UnsupportedOperationException("Not implemented");
     }
 
     @Override

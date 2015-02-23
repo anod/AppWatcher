@@ -54,7 +54,9 @@ public class DfeApiImpl implements DfeApi{
         bulkDetailsRequest.docid = list.toArray(new String[list.size()]);
         bulkDetailsRequest.includeDetails = includeDetails;
         bulkDetailsRequest.hasIncludeDetails = true;
-        final ProtoDfeRequest<Details.BulkDetailsResponse> protoDfeRequest = new ProtoDfeRequest<Details.BulkDetailsResponse>(DfeApiImpl.BULK_DETAILS_URI.toString(), bulkDetailsRequest, this.mApiContext, Details.BulkDetailsResponse.class, listener, errorListener) {
+        final ProtoDfeRequest<Details.BulkDetailsResponse> dfeRequest = new ProtoDfeRequest<Details.BulkDetailsResponse>(
+                DfeApiImpl.BULK_DETAILS_URI.toString(), bulkDetailsRequest, this.mApiContext, Details.BulkDetailsResponse.class, listener, errorListener)
+        {
             private String computeDocumentIdHash() {
                 long n = 0L;
                 for(String item: list) {
@@ -68,8 +70,8 @@ public class DfeApiImpl implements DfeApi{
                 return super.getCacheKey() + "/docidhash=" + this.computeDocumentIdHash();
             }
         };
-        protoDfeRequest.setShouldCache(true);
-        protoDfeRequest.setRetryPolicy(new DfeRetryPolicy(DfeApiImpl.BULK_DETAILS_TIMEOUT_MS, DfeApiImpl.BULK_DETAILS_MAX_RETRIES, DfeApiImpl.BULK_DETAILS_BACKOFF_MULT, this.mApiContext));
-        return this.mQueue.add((Request<?>)protoDfeRequest);
+        dfeRequest.setShouldCache(true);
+        dfeRequest.setRetryPolicy(new DfeRetryPolicy(DfeApiImpl.BULK_DETAILS_TIMEOUT_MS, DfeApiImpl.BULK_DETAILS_MAX_RETRIES, DfeApiImpl.BULK_DETAILS_BACKOFF_MULT, this.mApiContext));
+        return this.mQueue.add((Request<?>)dfeRequest);
     }
 }

@@ -1,4 +1,4 @@
-package com.anod.appwatcher.utils;
+package com.anod.appwatcher.volley;
 
 import android.content.Context;
 import android.graphics.Bitmap;

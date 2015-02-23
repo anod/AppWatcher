@@ -3,13 +3,9 @@ package com.anod.appwatcher.market;
 import android.accounts.Account;
 import android.content.Context;
 
-import com.android.volley.Network;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.BasicNetwork;
-import com.android.volley.toolbox.ByteArrayPool;
-import com.android.volley.toolbox.NoCache;
 import com.anod.appwatcher.AppWatcherApplication;
 import com.anod.appwatcher.utils.AppLog;
 import com.google.android.finsky.api.DfeApi;
@@ -18,7 +14,6 @@ import com.google.android.finsky.api.DfeApiImpl;
 import com.google.android.finsky.api.model.DfeModel;
 import com.google.android.finsky.api.model.OnDataChangedListener;
 import com.google.android.finsky.config.ContentLevel;
-import com.google.android.volley.GoogleHttpClientStack;
 
 /**
  * @author alex
@@ -26,7 +21,6 @@ import com.google.android.volley.GoogleHttpClientStack;
  */
 public abstract class PlayStoreEndpoint implements Response.ErrorListener, OnDataChangedListener {
     protected final Listener mListener;
-    protected final String mDeviceId;
     protected final Context mContext;
 
     protected DfeModel mDfeModel;
@@ -39,8 +33,7 @@ public abstract class PlayStoreEndpoint implements Response.ErrorListener, OnDat
         void onErrorResponse(VolleyError error);
     }
 
-    public PlayStoreEndpoint(String deviceId, Listener listener, Context context) {
-        mDeviceId = deviceId;
+    public PlayStoreEndpoint(Listener listener, Context context) {
         mContext = context;
         mListener = listener;
     }
@@ -55,10 +48,24 @@ public abstract class PlayStoreEndpoint implements Response.ErrorListener, OnDat
         return this;
     }
 
-    public void start() {
+    public void startAsync() {
+        init();
+        executeAsync();
+    }
+
+    public void startSync() {
+        init();
+        executeSync();
+    }
+
+    protected abstract void executeAsync();
+    protected abstract void executeSync();
+
+    private void init() {
         if (mDfeApi == null) {
             RequestQueue queue = AppWatcherApplication.provide(mContext).requestQueue();
-            DfeApiContext dfeApiContext = DfeApiContext.create(mContext, mAccount, mAuthSubToken, mDeviceId, ContentLevel.create(mContext).getDfeValue());
+            String deviceId = AppWatcherApplication.provide(mContext).deviceId();
+            DfeApiContext dfeApiContext = DfeApiContext.create(mContext, mAccount, mAuthSubToken, deviceId, ContentLevel.create(mContext).getDfeValue());
             mDfeApi = new DfeApiImpl(queue, dfeApiContext);
         }
         if (mDfeModel == null) {
@@ -66,7 +73,6 @@ public abstract class PlayStoreEndpoint implements Response.ErrorListener, OnDat
             mDfeModel.addDataChangedListener(this);
             mDfeModel.addErrorListener(this);
         }
-        execute();
     }
 
     public void reset() {
@@ -76,8 +82,6 @@ public abstract class PlayStoreEndpoint implements Response.ErrorListener, OnDat
         mDfeModel = null;
     }
 
-    protected abstract void execute();
-
     protected abstract DfeModel createDfeModel();
 
     public DfeModel getData() {
@@ -86,6 +90,9 @@ public abstract class PlayStoreEndpoint implements Response.ErrorListener, OnDat
 
     @Override
     public void onDataChanged() {
+        if (mListener == null) {
+            return;
+        }
         if (mDfeModel.isReady()) {
             mListener.onDataChanged();
         }
@@ -94,6 +101,9 @@ public abstract class PlayStoreEndpoint implements Response.ErrorListener, OnDat
     @Override
     public void onErrorResponse(VolleyError error) {
         AppLog.e("ErrorResponse: "+error.getMessage(), error);
+        if (mListener == null) {
+            return;
+        }
         mListener.onErrorResponse(error);
     }
 

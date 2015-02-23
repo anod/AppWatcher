@@ -2,6 +2,7 @@ package com.anod.appwatcher.model;
 
 import android.graphics.Bitmap;
 
+import com.anod.appwatcher.utils.DocUtils;
 import com.google.android.finsky.api.model.Document;
 import com.google.android.finsky.protos.Common;
 import com.google.android.finsky.protos.DocDetails;
@@ -54,7 +55,7 @@ public class AppInfo extends AppInfoMetadata{
         this.creator = doc.getCreator();
         this.uploadDate = app.uploadDate;
         this.icon = icon;
-        Common.Offer offer = doc.getOffer(1);
+        Common.Offer offer = DocUtils.getOffer(doc);
         this.priceMicros = (int)offer.micros;
         this.priceText = offer.formattedAmount;
         this.priceCur = offer.currencyCode;

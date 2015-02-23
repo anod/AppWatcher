@@ -19,11 +19,14 @@ import android.os.RemoteException;
 import android.text.format.DateUtils;
 
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader;
+import com.anod.appwatcher.AppWatcherApplication;
 import com.anod.appwatcher.BuildConfig;
 import com.anod.appwatcher.Preferences;
+import com.anod.appwatcher.R;
 import com.anod.appwatcher.accounts.AccountHelper;
 import com.anod.appwatcher.backup.GDriveSync;
-import com.anod.appwatcher.market.DetailsEndpoint;
+import com.anod.appwatcher.market.BulkDetailsEndpoint;
 import com.anod.appwatcher.market.DeviceIdHelper;
 import com.anod.appwatcher.market.PlayStoreEndpoint;
 import com.anod.appwatcher.model.AppInfo;
@@ -32,7 +35,9 @@ import com.anod.appwatcher.model.AppListCursor;
 import com.anod.appwatcher.model.AppListTable;
 import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.BitmapUtils;
+import com.anod.appwatcher.utils.DocUtils;
 import com.anod.appwatcher.utils.GooglePlayServices;
+import com.anod.appwatcher.volley.NoImageCache;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.finsky.api.model.Document;
 import com.google.android.finsky.protos.Common;
@@ -40,18 +45,24 @@ import com.google.android.finsky.protos.DocDetails;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStoreEndpoint.Listener {
     private static final int ONE_SEC_IN_MILLIS = 1000;
+    public static final int BULK_SIZE = 20;
 
-	private final Context mContext;
+    private final Context mContext;
 
     public static final String SYNC_STOP = "com.anod.appwatcher.sync.start";
     public static final String SYNC_PROGRESS = "com.anod.appwatcher.sync.progress";
     public static final String EXTRA_UPDATES_COUNT = "extra_updates_count";
-    private DetailsEndpoint mEndpoint;
+    private BulkDetailsEndpoint mEndpoint;
+    private ImageLoader mImageLoader;
+    private int mIconSize = -1;
 
     public SyncAdapter(Context context, boolean autoInitialize) {
 		super(context, autoInitialize);
@@ -109,7 +120,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
 				
 		if (size > 0) {
             SyncNotification sn = new SyncNotification(mContext);
-            Notification notification = sn.create(updatedApps, mEndpoint);
+            Notification notification = sn.create(updatedApps);
             sn.show(notification);
 			if (!manualSync && lastUpdatesViewed) {
 				pref.markViewed(false);
@@ -142,10 +153,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
                     driveSync.showResolutionNotification(e.getResolution());
                 }
                 AppLog.ex(e);
-                Crashlytics.logException(e);
             } catch (Exception e) {
                 AppLog.ex(e);
-                Crashlytics.logException(e);
             }
         } else {
             AppLog.d("DriveSync backup is fresh");
@@ -180,11 +189,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
         String appId;
         String title;
         String pkg;
+        String detailsUrl;
 
-        private UpdatedApp(String appId, String title, String pkg) {
+        private UpdatedApp(String appId, String title, String pkg, String detailsUrl) {
             this.appId = appId;
             this.title = title;
             this.pkg = pkg;
+            this.detailsUrl = detailsUrl;
         }
     }
 	/**
@@ -206,84 +217,157 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
 		}
 		apps.moveToPosition(-1);
 
+        int bulkSize = apps.getCount() > BULK_SIZE ? BULK_SIZE : apps.getCount();
 
-        Set<String> debugPkgs = null;
-        if (BuildConfig.DEBUG) {
-            debugPkgs = new HashSet<String>();
-         //   debugPkgs.add("com.adobe.reader");
-         //   debugPkgs.add("com.aide.ui");
-         //   debugPkgs.add("com.anod.car.home.free");
-         //   debugPkgs.add("com.anod.car.home.pro");
-         //   debugPkgs.add("com.ibolt.carhome");
-        }
-
-		// TODO: implement multiple calls
+        HashMap<String, AppInfo> localApps = new HashMap<>(bulkSize);
 		while(apps.moveToNext()) {
-			Document marketApp = null;
-			AppInfo localApp = apps.getAppInfo();
-			AppLog.d("Checking for updates '"+localApp.getTitle()+"' ...");
-			try {
-				marketApp = mEndpoint.loadOne(localApp.getAppId());
-			} catch (Exception e) {
-				AppLog.e("Cannot retrieve information for "+localApp.getTitle() + ", id:"+localApp.getAppId(), e);
-				continue;
-			}
-			if (marketApp == null) {
-				AppLog.e("Cannot retrieve information for "+localApp.getTitle() + ", id:"+localApp.getAppId());
-				continue;
-			}
 
-            DocDetails.AppDetails appDetails = marketApp.getAppDetails();
-			if (appDetails.versionCode > localApp.getVersionCode() || (debugPkgs!=null && debugPkgs.contains(localApp.getPackageName()))) {
-				AppLog.d("New version found ["+appDetails.versionCode+"]");
-				Bitmap icon = null;//iconLoader.loadImageUncached(marketApp.getId());
-				AppInfo newApp = createNewVersion(marketApp, localApp, icon);
-				client.update(newApp);
-				updatedTitles.add(new UpdatedApp(localApp.getAppId(),marketApp.getTitle(),appDetails.packageName));
-				continue;
-			}
-			
-			AppLog.d("No update found.");
-			ContentValues values = new ContentValues();
-			//Mark updated app as normal 
-			if (localApp.getStatus() == AppInfo.STATUS_UPDATED && lastUpdatesViewed) {
-				localApp.setStatus(AppInfo.STATUS_NORMAL);
-				AppLog.d("Mark application as old");
-				values.put(AppListTable.Columns.KEY_STATUS, AppInfo.STATUS_NORMAL );
-			}
-			//Refresh app icon if it wasn't fetched previously
-			if (localApp.getIcon() == null) {
-				AppLog.d("Fetch missing icon");
-                Bitmap icon = null;//iconLoader.loadImageUncached(marketApp.getId());
-		   	    if (icon != null) {
-		   	    	byte[] iconData = BitmapUtils.flattenBitmap(icon);
-		   	   	    values.put(AppListTable.Columns.KEY_ICON_CACHE, iconData);
-		   	    }
-			}
-            Common.Offer offer = marketApp.getOffer(1);
+            AppInfo localApp = apps.getAppInfo();
+            String docId = localApp.getAppId();
+            localApps.put(docId, localApp);
+            AppLog.d("Checking for updates '"+localApp.getTitle()+"' ...");
 
-			if (!offer.currencyCode.equals(localApp.getPriceCur())) {
-				values.put(AppListTable.Columns.KEY_PRICE_CURRENCY, offer.currencyCode);
-			}
-			if (!offer.formattedAmount.equals(localApp.getPriceText())) {
-				values.put(AppListTable.Columns.KEY_PRICE_TEXT, offer.formattedAmount);
-			}
-			if (localApp.getPriceMicros() != offer.micros) {
-				values.put(AppListTable.Columns.KEY_PRICE_MICROS, offer.micros);
-			}
+            if (localApps.size() == bulkSize) {
+                List<Document> documents = requestBulkDetails(localApps.keySet());
+                if (documents != null) {
+                    updateApps(documents, localApps, client, updatedTitles, lastUpdatesViewed);
+                } else {
+                    AppLog.e("No documents were received.");
+                }
+                localApps.clear();
+            }
 
-			AppLog.d("ContentValues: "+values.toString());
-
-			if (values.size() > 0) {
-				client.update(localApp.getRowId(), values);
-			}
 		}
+        if (localApps.size() > 0) {
+            List<Document> documents = requestBulkDetails(localApps.keySet());
+            if (documents != null) {
+                updateApps(documents, localApps, client, updatedTitles, lastUpdatesViewed);
+            } else {
+                AppLog.e("No documents were received.");
+            }
+            localApps.clear();
+        }
 		apps.close();
 
 		return updatedTitles;
 	}
 
-	private AppInfo createNewVersion(Document marketApp, AppInfo localApp, Bitmap newIcon)  {
+    private List<Document> requestBulkDetails(Set<String> docIds) {
+        List<String> listDocIds = new ArrayList<String>(docIds);
+        mEndpoint.setDocIds(listDocIds);
+
+        mEndpoint.startSync();
+        return mEndpoint.getDocuments();
+    }
+
+    private void updateApps(List<Document> documents, HashMap<String, AppInfo> localApps, AppListContentProviderClient client, ArrayList<UpdatedApp> updatedTitles, boolean lastUpdatesViewed) {
+        for(Document marketApp: documents) {
+            String docId = marketApp.getDocId();
+            AppInfo localApp = localApps.get(docId);
+            updateApp(marketApp, localApp, client, updatedTitles, lastUpdatesViewed);
+        }
+    }
+
+    private void updateApp(Document marketApp, AppInfo localApp, AppListContentProviderClient client, ArrayList<UpdatedApp> updatedTitles, boolean lastUpdatesViewed) {
+        Set<String> debugPkgs = null;
+        if (BuildConfig.DEBUG) {
+            debugPkgs = new HashSet<String>();
+            //   debugPkgs.add("com.adobe.reader");
+            //   debugPkgs.add("com.aide.ui");
+            //   debugPkgs.add("com.anod.car.home.free");
+            //   debugPkgs.add("com.anod.car.home.pro");
+            //   debugPkgs.add("com.ibolt.carhome");
+        }
+        DocDetails.AppDetails appDetails = marketApp.getAppDetails();
+        if (appDetails.versionCode > localApp.getVersionCode() || (debugPkgs!=null && debugPkgs.contains(localApp.getPackageName()))) {
+            AppLog.d("New version found ["+appDetails.versionCode+"]");
+            Bitmap icon = loadIcon(marketApp);
+            AppInfo newApp = createNewVersion(marketApp, localApp, icon);
+            client.update(newApp);
+            updatedTitles.add(new UpdatedApp(localApp.getAppId(),marketApp.getTitle(),appDetails.packageName, marketApp.getDetailsUrl()));
+            return;
+        }
+
+        AppLog.d("No update found for: "+localApp.getAppId());
+        ContentValues values = new ContentValues();
+        //Mark updated app as normal
+        if (localApp.getStatus() == AppInfo.STATUS_UPDATED && lastUpdatesViewed) {
+            localApp.setStatus(AppInfo.STATUS_NORMAL);
+            AppLog.d("Mark application as old");
+            values.put(AppListTable.Columns.KEY_STATUS, AppInfo.STATUS_NORMAL );
+        }
+        //Refresh app icon if it wasn't fetched previously
+        if (localApp.getIcon() == null) {
+            AppLog.d("Fetch missing icon");
+            Bitmap icon = loadIcon(marketApp);
+            if (icon != null) {
+                byte[] iconData = BitmapUtils.flattenBitmap(icon);
+                values.put(AppListTable.Columns.KEY_ICON_CACHE, iconData);
+            }
+        }
+        Common.Offer offer = DocUtils.getOffer(marketApp);
+
+        if (!offer.currencyCode.equals(localApp.getPriceCur())) {
+            values.put(AppListTable.Columns.KEY_PRICE_CURRENCY, offer.currencyCode);
+        }
+        if (!offer.formattedAmount.equals(localApp.getPriceText())) {
+            values.put(AppListTable.Columns.KEY_PRICE_TEXT, offer.formattedAmount);
+        }
+        if (localApp.getPriceMicros() != offer.micros) {
+            values.put(AppListTable.Columns.KEY_PRICE_MICROS, offer.micros);
+        }
+
+        AppLog.d("ContentValues: "+values.toString());
+
+        if (values.size() > 0) {
+            client.update(localApp.getRowId(), values);
+        }
+    }
+
+    private Bitmap loadIcon(Document marketApp) {
+        String imageUrl = DocUtils.getIconUrl(marketApp);
+        if (imageUrl == null) {
+            return null;
+        }
+        if (mIconSize == -1) {
+            mIconSize = mContext.getResources().getDimensionPixelSize(R.dimen.icon_size);
+        }
+        final Bitmap[] bitmaps = new Bitmap[1];
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        ImageLoader.ImageListener listener = new ImageLoader.ImageListener() {
+            @Override
+            public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
+                bitmaps[0] = response.getBitmap();
+                latch.countDown();
+            }
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                AppLog.e(error);
+                latch.countDown();
+            }
+        };
+
+        getImageLoader().get(imageUrl, listener, mIconSize, mIconSize);
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            AppLog.ex(e);
+        }
+        return bitmaps[0];
+    }
+
+    private ImageLoader getImageLoader() {
+        if (mImageLoader == null) {
+            // No cache implementation
+            mImageLoader = new ImageLoader(AppWatcherApplication.provide(mContext).requestQueue(), new NoImageCache());
+        }
+        return mImageLoader;
+    }
+
+    private AppInfo createNewVersion(Document marketApp, AppInfo localApp, Bitmap newIcon)  {
 
 		AppInfo newApp = new AppInfo(marketApp, newIcon);
 		newApp.setRowId(localApp.getRowId());
@@ -293,7 +377,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
 	}
 
 
-	private DetailsEndpoint createEndpoint(Preferences prefs) {
+	private BulkDetailsEndpoint createEndpoint(Preferences prefs) {
 		AccountHelper tokenHelper = new AccountHelper(mContext);
 		String authToken = null;
         Account account = prefs.getAccount();
@@ -310,7 +394,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
 			return null;
 		}
 		String deviceId = DeviceIdHelper.getDeviceId(mContext, prefs);
-        DetailsEndpoint endpoint = new DetailsEndpoint(deviceId, this, mContext);
+        BulkDetailsEndpoint endpoint = new BulkDetailsEndpoint(null, mContext);
         endpoint.setAccount(account,authToken);
         return endpoint;
 	}

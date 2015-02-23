@@ -4,7 +4,6 @@ import android.content.Context;
 
 import com.google.android.finsky.api.model.DfeDetails;
 import com.google.android.finsky.api.model.DfeModel;
-import com.google.android.finsky.api.model.Document;
 import com.google.android.finsky.protos.DocDetails;
 
 /**
@@ -13,14 +12,13 @@ import com.google.android.finsky.protos.DocDetails;
  */
 public class DetailsEndpoint extends PlayStoreEndpoint {
     private String mUrl;
-    private String mAppId;
 
-    public DetailsEndpoint(String deviceId, Listener listener, Context context) {
-        super(deviceId, listener, context);
+    public DetailsEndpoint(Listener listener, Context context) {
+        super(listener, context);
     }
 
-    public void setAppId(String appId) {
-        mAppId = appId;
+    public void setUrl(String url) {
+        mUrl = url;
     }
 
     public DfeDetails getData() {
@@ -31,40 +29,27 @@ public class DetailsEndpoint extends PlayStoreEndpoint {
         return getData().getDocument().getAppDetails();
     }
 
+    public String getRecentChanges() {
+        DocDetails.AppDetails details = getAppDetails();
+        if (details != null) {
+            return details.recentChangesHtml;
+        }
+        return null;
+    }
     @Override
-    protected void execute() {
-        getData().start();
+    protected void executeAsync() {
+        getData().startAsync();
+    }
+
+    @Override
+    protected void executeSync() {
+        getData().startSync();
     }
 
     @Override
     protected DfeModel createDfeModel() {
-        return new DfeDetails(this.mDfeApi, "details?doc="+mAppId);
-    }
-
-    /*
-    public App loadOne(String appId) {
-        List<App> apps = load(appId);
-        if (apps == null || apps.size() == 0) {
-            return null;
-        }
-        return apps.get(0);
-    }
-    public String loadRecentChanges(String appId) {
-        App app = loadOne(appId);
-        String changes = "";
-        if (app.getExtendedInfo() != null) {
-            changes = app.getExtendedInfo().getRecentChanges();
-        }
-        return changes;
-    }
-    */
-
-    public String loadRecentChanges(String appId) {
-        return null;
+        return new DfeDetails(this.mDfeApi, mUrl);
     }
 
 
-    public Document loadOne(String appId) {
-        return null;
-    }
 }

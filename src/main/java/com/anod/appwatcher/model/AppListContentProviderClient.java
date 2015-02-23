@@ -195,6 +195,8 @@ public class AppListContentProviderClient {
 		values.put(AppListTable.Columns.KEY_PRICE_CURRENCY, app.getPriceCur());
 		values.put(AppListTable.Columns.KEY_PRICE_MICROS, app.getPriceMicros() );
 
+        values.put(AppListTable.Columns.KEY_DETAILS_URL, app.getDetailsUrl() );
+
 		Bitmap icon = app.getIcon();
 		if (icon != null) {
 			byte[] iconData = BitmapUtils.flattenBitmap(icon);

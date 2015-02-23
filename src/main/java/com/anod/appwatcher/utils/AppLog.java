@@ -47,20 +47,9 @@ public class AppLog {
         Log.v(TAG, format(msg));
     }
 
-
     public static void v(String msg, final Object... params) {
         Log.v(TAG, format(msg, params));
     }
-
-    /*
-    public static String format(String msg) {
-    	long unixTime = System.currentTimeMillis();
-        Time time = new Time();
-        time.set(unixTime);
-
-        return String.format("[%s] %s ", time.format("%d-%m-%Y %H:%M:%S"), msg);
-    }
-*/
 
     private static String format(final String msg, final Object... array) {
         String formatted;

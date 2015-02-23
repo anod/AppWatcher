@@ -5,7 +5,7 @@ import com.google.android.finsky.api.DfeApi;
 import com.google.android.finsky.protos.Details;
 import com.google.android.finsky.protos.DocumentV2;
 
-public class DfeDetails extends DfeModel implements Response.Listener<Details.DetailsResponse>
+public class DfeDetails extends DfeBaseModel<Details.DetailsResponse>
 {
     private Details.DetailsResponse mDetailsResponse;
     private final String mDetailsUrl;
@@ -16,9 +16,10 @@ public class DfeDetails extends DfeModel implements Response.Listener<Details.De
         mDfeApi = dfeApi;
         mDetailsUrl = url;
     }
-    
-    public void start() {
-        mDfeApi.getDetails(mDetailsUrl, false, false, this, this);
+
+    @Override
+    protected void execute(Response.Listener<Details.DetailsResponse> responseListener, Response.ErrorListener errorListener) {
+        mDfeApi.getDetails(mDetailsUrl, false, false, responseListener, errorListener);
     }
 
     public Details.DiscoveryBadge[] getDiscoveryBadges() {
@@ -65,4 +66,5 @@ public class DfeDetails extends DfeModel implements Response.Listener<Details.De
         this.mDetailsResponse = mDetailsResponse;
         this.notifyDataSetChanged();
     }
+
 }

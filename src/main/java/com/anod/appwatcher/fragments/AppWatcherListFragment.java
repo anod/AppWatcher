@@ -226,7 +226,7 @@ public class AppWatcherListFragment extends ListFragment implements
             holder.details.setText(app.getCreator());
 			holder.removeBtn.setTag(app);
 			holder.marketBtn.setTag(app.getPackageName());
-			holder.changelogBtn.setTag(app.getAppId());
+			holder.changelogBtn.setTag(app.getAppId()+","+app.getDetailsUrl());
 			holder.shareBtn.setTag(app);
 			holder.icon.setTag(holder);
 			Bitmap icon = app.getIcon();
@@ -335,14 +335,12 @@ public class AppWatcherListFragment extends ListFragment implements
             	v.setOnClickListener(new OnClickListener() {
     				@Override
     				public void onClick(View v) {
-    					ViewHolder holder = (ViewHolder)v.getTag();
-    					final String appId = holder.app.getAppId();
-    					onChangelogClick(appId);
-    				}
-    			});
+                    ViewHolder holder = (ViewHolder)v.getTag();
+                    onChangelogClick(holder.app.getAppId(), holder.app.getDetailsUrl());
+                    }
+                });
             }
 
-            
             holder.removeBtn = (ImageButton)holder.options.findViewById(R.id.remove_btn);
             holder.removeBtn.setOnClickListener(new OnClickListener() {
 				@Override
@@ -364,8 +362,11 @@ public class AppWatcherListFragment extends ListFragment implements
             holder.changelogBtn.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					final String appId = (String)v.getTag();
-					onChangelogClick(appId);
+					final String tag = (String)v.getTag();
+                    String[] parts = tag.split(",");
+                    String appId = parts[0];
+                    String detailsUrl = parts[1];
+					onChangelogClick(appId, detailsUrl);
 				}
 			});
 
@@ -463,9 +464,10 @@ public class AppWatcherListFragment extends ListFragment implements
 		builder.startChooser();
 	}
 
-	private void onChangelogClick(final String appId) {
+	private void onChangelogClick(final String appId, final String detailsUrl) {
 		Intent intent = new Intent(getActivity(), ChangelogActivity.class);
 		intent.putExtra(ChangelogActivity.EXTRA_APP_ID, appId);
+        intent.putExtra(ChangelogActivity.EXTRA_DETAILS_URL, detailsUrl);
 		startActivity(intent);
 	}
 	

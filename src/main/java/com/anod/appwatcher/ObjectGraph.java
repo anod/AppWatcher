@@ -1,30 +1,23 @@
 package com.anod.appwatcher;
 
-import com.android.volley.Cache;
-import com.android.volley.Network;
 import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.BasicNetwork;
-import com.android.volley.toolbox.ByteArrayPool;
-import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NoCache;
-import com.anod.appwatcher.utils.LruBitmapCache;
-import com.google.android.volley.GoogleHttpClientStack;
-
-import java.io.File;
+import com.anod.appwatcher.market.DeviceIdHelper;
+import com.anod.appwatcher.volley.LruBitmapCache;
+import com.anod.appwatcher.volley.Network;
 
 /**
  * @author alex
  * @date 2015-02-22
  */
 public class ObjectGraph {
-    /** Default on-disk cache directory. */
-    private static final String DEFAULT_CACHE_DIR = "volley";
 
     private final AppWatcherApplication app;
     private RequestQueue mRequestQueue;
     private LruBitmapCache mCache;
     private ImageLoader mImageLoader;
+    private String mDeviceId;
 
     public ObjectGraph(AppWatcherApplication application)  {
         this.app = application;
@@ -37,17 +30,20 @@ public class ObjectGraph {
         return mCache;
     }
 
+    public String deviceId() {
+        if (mDeviceId == null) {
+            final Preferences prefs = new Preferences(this.app);
+            mDeviceId = DeviceIdHelper.getDeviceId(this.app, prefs);
+        }
+        return mDeviceId;
+    }
+
     public RequestQueue requestQueue() {
         if (mRequestQueue == null) {
-            mRequestQueue = new RequestQueue(new NoCache(), createNetwork(), 2);
+            mRequestQueue = new RequestQueue(new NoCache(), new Network(this.app), 2);
             mRequestQueue.start();
         }
         return mRequestQueue;
-    }
-
-    private Network createNetwork()
-    {
-        return new BasicNetwork(new GoogleHttpClientStack(this.app, false), new ByteArrayPool(1024 * 256));
     }
 
     public ImageLoader imageLoader() {
@@ -55,5 +51,13 @@ public class ObjectGraph {
             mImageLoader = new ImageLoader(requestQueue(), bitmapCache());
         }
         return mImageLoader;
+    }
+
+    public void reset() {
+        if (mCache != null) {
+            mCache.evictAll();
+        }
+        mCache = null;
+        mImageLoader = null;
     }
 }

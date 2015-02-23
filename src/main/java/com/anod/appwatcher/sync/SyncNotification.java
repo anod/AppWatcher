@@ -38,7 +38,7 @@ public class SyncNotification {
         mNotificationManager.cancel(NOTIFICATION_ID);
     }
 
-    public Notification create(ArrayList<SyncAdapter.UpdatedApp> updatedApps, DetailsEndpoint detailsEndpoint) {
+    public Notification create(ArrayList<SyncAdapter.UpdatedApp> updatedApps) {
         Intent notificationIntent = new Intent(mContext, AppWatcherActivity.class);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         Uri data = Uri.parse("com.anod.appwatcher://notification");
@@ -51,24 +51,27 @@ public class SyncNotification {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext);
         builder
-                .setAutoCancel(true)
-                .setSmallIcon(R.drawable.ic_stat_update)
-                .setContentTitle(title)
-                .setContentText(text)
-                .setContentIntent(contentIntent)
-                .setTicker(title)
+            .setAutoCancel(true)
+            .setSmallIcon(R.drawable.ic_stat_update)
+            .setContentTitle(title)
+            .setContentText(text)
+            .setContentIntent(contentIntent)
+            .setTicker(title)
         ;
         if (updatedApps.size() == 1) {
             SyncAdapter.UpdatedApp app = updatedApps.get(0);
-            addExtraInfo(app, builder, detailsEndpoint);
+            addExtraInfo(app, builder);
         }
 
         return builder.build();
     }
 
 
-    private void addExtraInfo(SyncAdapter.UpdatedApp app, NotificationCompat.Builder builder,DetailsEndpoint detailsEndpoint) {
-        String changes = detailsEndpoint.loadRecentChanges(app.appId);
+    private void addExtraInfo(SyncAdapter.UpdatedApp app, NotificationCompat.Builder builder) {
+        DetailsEndpoint detailsEndpoint = new DetailsEndpoint(null, mContext);
+        detailsEndpoint.setUrl(app.detailsUrl);
+        detailsEndpoint.startSync();
+        String changes = detailsEndpoint.getRecentChanges();
         if (changes != null) {
             if (changes.equals("")) {
                 changes = mContext.getString(R.string.no_recent_changes);

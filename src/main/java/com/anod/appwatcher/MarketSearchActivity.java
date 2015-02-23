@@ -4,7 +4,6 @@ import android.accounts.Account;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
@@ -89,9 +88,7 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
 		mLoading = (LinearLayout)findViewById(R.id.loading);
 		mLoading.setVisibility(View.GONE);
 		
-		final Preferences prefs = new Preferences(this);
-		String deviceId = DeviceIdHelper.getDeviceId(this,prefs);
-        mSearchEngine = new SearchEndpoint(deviceId, this, this);
+        mSearchEngine = new SearchEndpoint(this, this);
 
 		mAdapter = new AppsAdapter(this);
 
@@ -118,6 +115,12 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
 
     }
 
+    @Override
+    protected void onStop() {
+        AppWatcherApplication.get(this).getObjectGraph().reset();
+        super.onStop();
+    }
+
     private void searchResults() {
 		String query = mSearchView.getQuery().toString();
 
@@ -132,7 +135,7 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
         showLoading();
 
 		if (query.length() > 0) {
-            mSearchEngine.setQuery(query).start();
+            mSearchEngine.setQuery(query).startAsync();
 		} else {
 			showNoResults("");
 		}
@@ -322,7 +325,7 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
         if (mAdapter.isEmpty()) {
             searchResultsDelayed();
         } else {
-            mSearchEngine.start();
+            mSearchEngine.startAsync();
         }
     }
 
@@ -343,7 +346,6 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
     }
 
     class AppsAdapter extends BaseAdapter {
-        public static final int OFFER_TYPE = 1;
         private final PackageManagerUtils mPMUtils;
         private final ImageLoader mImageLoader;
 
@@ -422,7 +424,7 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
 			if (isInstalled) {
 				holder.price.setText(R.string.installed);
 			} else {
-                Common.Offer offer = doc.getOffer(OFFER_TYPE);
+                Common.Offer offer = DocUtils.getOffer(doc);
 				if (offer.micros == 0) {
 					holder.price.setText(R.string.free);
 				} else {
