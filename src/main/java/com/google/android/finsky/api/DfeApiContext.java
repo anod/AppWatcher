@@ -22,7 +22,7 @@ public class DfeApiContext
 {
     public static final String AUTH_TOKEN_TYPE = "androidmarket";
     public static final String PLAY_PACKAGE_NAME = "com.android.vending";
-    public static final String PLAY_VERSION_NAME = "5.0-1471336";
+    public static final String PLAY_VERSION_NAME = "5.0.31";
     public static final int PLAY_VERSION_CODE = 80300031;
     public static final String CLIENT_ID = "am-google";
     private final Context mContext;
@@ -33,7 +33,6 @@ public class DfeApiContext
 
 
     protected DfeApiContext(final Context context, final Account account, final String authToken, final String deviceId,
-                            final String s, final int api, final int versionCode,
                             final Locale locale, final String mccmnc,
                             final String clientId, final String loggingId, final int filterLevel) {
         super();
@@ -52,7 +51,7 @@ public class DfeApiContext
         if (!TextUtils.isEmpty((CharSequence)clientId)) {
             this.mHeaders.put("X-DFE-Logging-Id", loggingId);
         }
-        this.mHeaders.put("User-Agent", makeUserAgentString(s, api, versionCode));
+        this.mHeaders.put("User-Agent", makeUserAgentString(PLAY_VERSION_NAME, 3, PLAY_VERSION_CODE));
         this.mHeaders.put("X-DFE-Filter-Level", String.valueOf(filterLevel));
     }
 
@@ -62,15 +61,14 @@ public class DfeApiContext
 
         return new DfeApiContext(
                     context, account, authTokenStr,deviceId,
-                    PLAY_VERSION_NAME, 3, PLAY_VERSION_CODE,
                     Locale.getDefault(), tm.getSimOperator(), CLIENT_ID, "", filterLevel
         );
     }
 
 
-    private String makeUserAgentString(final String s, final int api, final int versionCode) {
+    private String makeUserAgentString(final String versionName, final int api, final int versionCode) {
         return String.format(Locale.US, "Android-Finsky/%s (api=%d,versionCode=%d,sdk=%d,device=%s,hardware=%s,product=%s)",
-                s,
+                versionName,
                 api, versionCode, Build.VERSION.SDK_INT, sanitizeHeaderValue(Build.DEVICE), sanitizeHeaderValue(Build.HARDWARE), sanitizeHeaderValue(Build.PRODUCT)
         );
     }

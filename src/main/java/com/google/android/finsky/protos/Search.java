@@ -349,6 +349,7 @@ public interface Search
                         newArray[i] = new DocumentV2.DocV2();
                         input.readMessage(newArray[i]);
                         this.doc = newArray;
+                        continue;
                     }
                     case 50: {
                         int arrayLength = WireFormatNano.getRepeatedFieldArrayLength(input, 50);
