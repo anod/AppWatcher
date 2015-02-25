@@ -856,24 +856,13 @@ public interface DocumentV2
         }
         
         @Override
-        public DocV2 mergeFrom(CodedInputByteBufferNano codedInputByteBufferNano) throws IOException {
+        public DocV2 mergeFrom(CodedInputByteBufferNano input) throws IOException {
             int tag;
-            int int32;
-            int int2;
-            int repeatedFieldArrayLength;
-            int i;
-            Common.Offer[] offer;
-            int repeatedFieldArrayLength2;
-            int j;
-            Common.Image[] image;
-            int repeatedFieldArrayLength3;
-            int k;
-            DocV2[] child;
             while (true) {
-                tag = codedInputByteBufferNano.readTag();
+                tag = input.readTag();
                 switch (tag) {
                     default: {
-                        if (!WireFormatNano.parseUnknownField(codedInputByteBufferNano, tag)) {
+                        if (!WireFormatNano.parseUnknownField(input, tag)) {
                             return this;
                         }
                         break;
@@ -882,17 +871,17 @@ public interface DocumentV2
                         return this;
                     }
                     case 10: {
-                        this.docid = codedInputByteBufferNano.readString();
+                        this.docid = input.readString();
                         this.hasDocid = true;
                         continue;
                     }
                     case 18: {
-                        this.backendDocid = codedInputByteBufferNano.readString();
+                        this.backendDocid = input.readString();
                         this.hasBackendDocid = true;
                         continue;
                     }
                     case 24: {
-                        int32 = codedInputByteBufferNano.readInt32();
+                        int int32 = input.readInt32();
                         switch (int32) {
                             default: {
                                 continue;
@@ -936,7 +925,7 @@ public interface DocumentV2
                         }
                     }
                     case 32: {
-                        int2 = codedInputByteBufferNano.readInt32();
+                        int int2 = input.readInt32();
                         switch (int2) {
                             default: {
                                 continue;
@@ -959,160 +948,151 @@ public interface DocumentV2
                         }
                     }
                     case 42: {
-                        this.title = codedInputByteBufferNano.readString();
+                        this.title = input.readString();
                         this.hasTitle = true;
                         continue;
                     }
                     case 50: {
-                        this.creator = codedInputByteBufferNano.readString();
+                        this.creator = input.readString();
                         this.hasCreator = true;
                         continue;
                     }
                     case 58: {
-                        this.descriptionHtml = codedInputByteBufferNano.readString();
+                        this.descriptionHtml = input.readString();
                         this.hasDescriptionHtml = true;
                         continue;
                     }
                     case 66: {
-                        repeatedFieldArrayLength = WireFormatNano.getRepeatedFieldArrayLength(codedInputByteBufferNano, 66);
-                        if (this.offer == null) {
-                            i = 0;
-                        }
-                        else {
-                            i = this.offer.length;
-                        }
-                        offer = new Common.Offer[i + repeatedFieldArrayLength];
+                        int arrayLength = WireFormatNano.getRepeatedFieldArrayLength(input, 66);
+                        int i = this.offer == null ? 0 : this.offer.length;
+                        Common.Offer[] newArray = new Common.Offer[i + arrayLength];
                         if (i != 0) {
-                            System.arraycopy(this.offer, 0, offer, 0, i);
+                            System.arraycopy(this.offer, 0, newArray, 0, i);
                         }
-                        while (i < -1 + offer.length) {
-                            codedInputByteBufferNano.readMessage(offer[i] = new Common.Offer());
-                            codedInputByteBufferNano.readTag();
-                            ++i;
+                        for (; i < newArray.length - 1; i++) {
+                            newArray[i] = new Common.Offer();
+                            input.readMessage(newArray[i]);
+                            input.readTag();
                         }
-                        codedInputByteBufferNano.readMessage(offer[i] = new Common.Offer());
-                        this.offer = offer;
+                        // Last one without readTag.
+                        newArray[i] = new Common.Offer();
+                        input.readMessage(newArray[i]);
+                        this.offer = newArray;
                         continue;
                     }
                     case 74: {
                         if (this.availability == null) {
                             this.availability = new FilterRules.Availability();
                         }
-                        codedInputByteBufferNano.readMessage(this.availability);
+                        input.readMessage(this.availability);
                         continue;
                     }
                     case 82: {
-                        repeatedFieldArrayLength2 = WireFormatNano.getRepeatedFieldArrayLength(codedInputByteBufferNano, 82);
-                        if (this.image == null) {
-                            j = 0;
+                        int arrayLength = WireFormatNano.getRepeatedFieldArrayLength(input, 82);
+                        int i = this.image == null ? 0 : this.image.length;
+                        Common.Image[] newArray = new Common.Image[i + arrayLength];
+                        if (i != 0) {
+                            System.arraycopy(this.image, 0, newArray, 0, i);
                         }
-                        else {
-                            j = this.image.length;
+                        for (; i < newArray.length - 1; i++) {
+                            newArray[i] = new Common.Image();
+                            input.readMessage(newArray[i]);
+                            input.readTag();
                         }
-                        image = new Common.Image[j + repeatedFieldArrayLength2];
-                        if (j != 0) {
-                            System.arraycopy(this.image, 0, image, 0, j);
-                        }
-                        while (j < -1 + image.length) {
-                            codedInputByteBufferNano.readMessage(image[j] = new Common.Image());
-                            codedInputByteBufferNano.readTag();
-                            ++j;
-                        }
-                        codedInputByteBufferNano.readMessage(image[j] = new Common.Image());
-                        this.image = image;
+                        // Last one without readTag.
+                        newArray[i] = new Common.Image();
+                        input.readMessage(newArray[i]);
+                        this.image = newArray;
                         continue;
                     }
                     case 90: {
-                        repeatedFieldArrayLength3 = WireFormatNano.getRepeatedFieldArrayLength(codedInputByteBufferNano, 90);
-                        if (this.child == null) {
-                            k = 0;
+                        int arrayLength = WireFormatNano.getRepeatedFieldArrayLength(input, 90);
+                        int i = this.child == null ? 0 : this.child.length;
+                        DocV2[] newArray = new DocV2[i + arrayLength];
+                        if (i != 0) {
+                            System.arraycopy(this.child, 0, newArray, 0, i);
                         }
-                        else {
-                            k = this.child.length;
+                        for (; i < newArray.length - 1; i++) {
+                            newArray[i] = new DocV2();
+                            input.readMessage(newArray[i]);
+                            input.readTag();
                         }
-                        child = new DocV2[k + repeatedFieldArrayLength3];
-                        if (k != 0) {
-                            System.arraycopy(this.child, 0, child, 0, k);
-                        }
-                        while (k < -1 + child.length) {
-                            codedInputByteBufferNano.readMessage(child[k] = new DocV2());
-                            codedInputByteBufferNano.readTag();
-                            ++k;
-                        }
-                        codedInputByteBufferNano.readMessage(child[k] = new DocV2());
-                        this.child = child;
+                        // Last one without readTag.
+                        newArray[i] = new DocV2();
+                        input.readMessage(newArray[i]);
+                        this.child = newArray;
                         continue;
                     }
                     case 98: {
                         if (this.containerMetadata == null) {
                             this.containerMetadata = new Containers.ContainerMetadata();
                         }
-                        codedInputByteBufferNano.readMessage(this.containerMetadata);
+                        input.readMessage(this.containerMetadata);
                         continue;
                     }
                     case 106: {
                         if (this.details == null) {
                             this.details = new DocDetails.DocumentDetails();
                         }
-                        codedInputByteBufferNano.readMessage(this.details);
+                        input.readMessage(this.details);
                         continue;
                     }
                     case 114: {
                         if (this.aggregateRating == null) {
                             this.aggregateRating = new Rating.AggregateRating();
                         }
-                        codedInputByteBufferNano.readMessage(this.aggregateRating);
+                        input.readMessage(this.aggregateRating);
                         continue;
                     }
                     case 122: {
                         if (this.annotations == null) {
                             this.annotations = new Annotations();
                         }
-                        codedInputByteBufferNano.readMessage(this.annotations);
+                        input.readMessage(this.annotations);
                         continue;
                     }
                     case 130: {
-                        this.detailsUrl = codedInputByteBufferNano.readString();
+                        this.detailsUrl = input.readString();
                         this.hasDetailsUrl = true;
                         continue;
                     }
                     case 138: {
-                        this.shareUrl = codedInputByteBufferNano.readString();
+                        this.shareUrl = input.readString();
                         this.hasShareUrl = true;
                         continue;
                     }
                     case 146: {
-                        this.reviewsUrl = codedInputByteBufferNano.readString();
+                        this.reviewsUrl = input.readString();
                         this.hasReviewsUrl = true;
                         continue;
                     }
                     case 154: {
-                        this.backendUrl = codedInputByteBufferNano.readString();
+                        this.backendUrl = input.readString();
                         this.hasBackendUrl = true;
                         continue;
                     }
                     case 162: {
-                        this.purchaseDetailsUrl = codedInputByteBufferNano.readString();
+                        this.purchaseDetailsUrl = input.readString();
                         this.hasPurchaseDetailsUrl = true;
                         continue;
                     }
                     case 168: {
-                        this.detailsReusable = codedInputByteBufferNano.readBool();
+                        this.detailsReusable = input.readBool();
                         this.hasDetailsReusable = true;
                         continue;
                     }
                     case 178: {
-                        this.subtitle = codedInputByteBufferNano.readString();
+                        this.subtitle = input.readString();
                         this.hasSubtitle = true;
                         continue;
                     }
                     case 186: {
-                        this.translatedDescriptionHtml = codedInputByteBufferNano.readString();
+                        this.translatedDescriptionHtml = input.readString();
                         this.hasTranslatedDescriptionHtml = true;
                         continue;
                     }
                     case 194: {
-                        this.serverLogsCookie = codedInputByteBufferNano.readBytes();
+                        this.serverLogsCookie = input.readBytes();
                         this.hasServerLogsCookie = true;
                         continue;
                     }
@@ -1120,16 +1100,16 @@ public interface DocumentV2
                         if (this.productDetails == null) {
                             this.productDetails = new DocDetails.ProductDetails();
                         }
-                        codedInputByteBufferNano.readMessage(this.productDetails);
+                        input.readMessage(this.productDetails);
                         continue;
                     }
                     case 208: {
-                        this.mature = codedInputByteBufferNano.readBool();
+                        this.mature = input.readBool();
                         this.hasMature = true;
                         continue;
                     }
                     case 218: {
-                        this.promotionalDescription = codedInputByteBufferNano.readString();
+                        this.promotionalDescription = input.readString();
                         this.hasPromotionalDescription = true;
                         continue;
                     }

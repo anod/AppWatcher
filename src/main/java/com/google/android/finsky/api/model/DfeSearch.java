@@ -143,8 +143,8 @@ public class DfeSearch extends ContainerList<Search.SearchResponse> implements P
         return this.mFullPageReplaced;
     }
     
-    protected Request<?> makeRequest(final String s) {
-        return this.mDfeApi.search(s, (Response.Listener<Search.SearchResponse>)this, this);
+    protected Request<?> makeRequest(final String url) {
+        return this.mDfeApi.search(url, this, this);
     }
     
     public void writeToParcel(final Parcel parcel, final int n) {

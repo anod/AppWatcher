@@ -265,13 +265,13 @@ public abstract interface Response {
         }
 
         @Override
-        public Payload mergeFrom(CodedInputByteBufferNano codedInputByteBufferNano) throws IOException {
+        public Payload mergeFrom(CodedInputByteBufferNano input) throws IOException {
             int tag;
             while (true) {
-                tag = codedInputByteBufferNano.readTag();
+                tag = input.readTag();
                 switch (tag) {
                     default: {
-                        if (!WireFormatNano.parseUnknownField(codedInputByteBufferNano, tag)) {
+                        if (!WireFormatNano.parseUnknownField(input, tag)) {
                             return this;
                         }
                         break;
@@ -283,329 +283,329 @@ public abstract interface Response {
                         if (this.listResponse == null) {
                             this.listResponse = new DocList.ListResponse();
                         }
-                        codedInputByteBufferNano.readMessage(this.listResponse);
+                        input.readMessage(this.listResponse);
                         continue;
                     }
                     case 18: {
                         if (this.detailsResponse == null) {
                             this.detailsResponse = new Details.DetailsResponse();
                         }
-                        codedInputByteBufferNano.readMessage(this.detailsResponse);
+                        input.readMessage(this.detailsResponse);
                         continue;
                     }
                     case 26: {
 //                        if (this.reviewResponse == null) {
 //                            this.reviewResponse = new Rev.ReviewResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.reviewResponse);
+//                        input.readMessage(this.reviewResponse);
                         continue;
                     }
                     case 34: {
 //                        if (this.buyResponse == null) {
 //                            this.buyResponse = new Buy.BuyResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.buyResponse);
+//                        input.readMessage(this.buyResponse);
                         continue;
                     }
                     case 42: {
                         if (this.searchResponse == null) {
                             this.searchResponse = new Search.SearchResponse();
                         }
-                        codedInputByteBufferNano.readMessage(this.searchResponse);
+                        input.readMessage(this.searchResponse);
                         continue;
                     }
                     case 50: {
 //                        if (this.tocResponse == null) {
 //                            this.tocResponse = new Toc.TocResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.tocResponse);
+//                        input.readMessage(this.tocResponse);
                         continue;
                     }
                     case 58: {
 //                        if (this.browseResponse == null) {
 //                            this.browseResponse = new Browse.BrowseResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.browseResponse);
+//                        input.readMessage(this.browseResponse);
                         continue;
                     }
                     case 66: {
 //                        if (this.purchaseStatusResponse == null) {
 //                            this.purchaseStatusResponse = new Buy.PurchaseStatusResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.purchaseStatusResponse);
+//                        input.readMessage(this.purchaseStatusResponse);
                         continue;
                     }
                     case 74: {
 //                        if (this.updateInstrumentResponse == null) {
 //                            this.updateInstrumentResponse = new BuyInstruments.UpdateInstrumentResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.updateInstrumentResponse);
+//                        input.readMessage(this.updateInstrumentResponse);
                         continue;
                     }
                     case 82: {
 //                        if (this.logResponse == null) {
 //                            this.logResponse = new Log.LogResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.logResponse);
+//                        input.readMessage(this.logResponse);
                         continue;
                     }
                     case 90: {
 //                        if (this.checkInstrumentResponse == null) {
 //                            this.checkInstrumentResponse = new BuyInstruments.CheckInstrumentResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.checkInstrumentResponse);
+//                        input.readMessage(this.checkInstrumentResponse);
                         continue;
                     }
                     case 98: {
 //                        if (this.plusOneResponse == null) {
 //                            this.plusOneResponse = new PlusOne.PlusOneResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.plusOneResponse);
+//                        input.readMessage(this.plusOneResponse);
                         continue;
                     }
                     case 106: {
 //                        if (this.flagContentResponse == null) {
 //                            this.flagContentResponse = new ContentFlagging.FlagContentResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.flagContentResponse);
+//                        input.readMessage(this.flagContentResponse);
                         continue;
                     }
                     case 114: {
 //                        if (this.ackNotificationResponse == null) {
 //                            this.ackNotificationResponse = new AckNotification.AckNotificationResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.ackNotificationResponse);
+//                        input.readMessage(this.ackNotificationResponse);
                         continue;
                     }
                     case 122: {
 //                        if (this.initiateAssociationResponse == null) {
 //                            this.initiateAssociationResponse = new CarrierBilling.InitiateAssociationResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.initiateAssociationResponse);
+//                        input.readMessage(this.initiateAssociationResponse);
                         continue;
                     }
                     case 130: {
 //                        if (this.verifyAssociationResponse == null) {
 //                            this.verifyAssociationResponse = new CarrierBilling.VerifyAssociationResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.verifyAssociationResponse);
+//                        input.readMessage(this.verifyAssociationResponse);
                         continue;
                     }
                     case 138: {
 //                        if (this.libraryReplicationResponse == null) {
 //                            this.libraryReplicationResponse = new LibraryReplication.LibraryReplicationResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.libraryReplicationResponse);
+//                        input.readMessage(this.libraryReplicationResponse);
                         continue;
                     }
                     case 146: {
 //                        if (this.revokeResponse == null) {
 //                            this.revokeResponse = new RevokeResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.revokeResponse);
+//                        input.readMessage(this.revokeResponse);
                         continue;
                     }
                     case 154: {
                         if (this.bulkDetailsResponse == null) {
                             this.bulkDetailsResponse = new Details.BulkDetailsResponse();
                         }
-                        codedInputByteBufferNano.readMessage(this.bulkDetailsResponse);
+                        input.readMessage(this.bulkDetailsResponse);
                         continue;
                     }
                     case 162: {
                         if (this.resolveLinkResponse == null) {
                             this.resolveLinkResponse = new ResolveLink.ResolvedLink();
                         }
-                        codedInputByteBufferNano.readMessage(this.resolveLinkResponse);
+                        input.readMessage(this.resolveLinkResponse);
                         continue;
                     }
                     case 170: {
 //                        if (this.deliveryResponse == null) {
 //                            this.deliveryResponse = new Delivery.DeliveryResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.deliveryResponse);
+//                        input.readMessage(this.deliveryResponse);
                         continue;
                     }
                     case 178: {
 //                        if (this.acceptTosResponse == null) {
 //                            this.acceptTosResponse = new Tos.AcceptTosResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.acceptTosResponse);
+//                        input.readMessage(this.acceptTosResponse);
                         continue;
                     }
                     case 186: {
 //                        if (this.rateSuggestedContentResponse == null) {
 //                            this.rateSuggestedContentResponse = new RateSuggestedContentResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.rateSuggestedContentResponse);
+//                        input.readMessage(this.rateSuggestedContentResponse);
                         continue;
                     }
                     case 194: {
 //                        if (this.checkPromoOfferResponse == null) {
 //                            this.checkPromoOfferResponse = new CheckPromoOffer.CheckPromoOfferResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.checkPromoOfferResponse);
+//                        input.readMessage(this.checkPromoOfferResponse);
                         continue;
                     }
                     case 202: {
 //                        if (this.instrumentSetupInfoResponse == null) {
 //                            this.instrumentSetupInfoResponse = new BuyInstruments.InstrumentSetupInfoResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.instrumentSetupInfoResponse);
+//                        input.readMessage(this.instrumentSetupInfoResponse);
                         continue;
                     }
                     case 210: {
 //                        if (this.redeemGiftCardResponse == null) {
 //                            this.redeemGiftCardResponse = new BuyInstruments.RedeemGiftCardResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.redeemGiftCardResponse);
+//                        input.readMessage(this.redeemGiftCardResponse);
                         continue;
                     }
                     case 218: {
 //                        if (this.modifyLibraryResponse == null) {
 //                            this.modifyLibraryResponse = new ModifyLibrary.ModifyLibraryResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.modifyLibraryResponse);
+//                        input.readMessage(this.modifyLibraryResponse);
                         continue;
                     }
                     case 226: {
 //                        if (this.uploadDeviceConfigResponse == null) {
 //                            this.uploadDeviceConfigResponse = new UploadDeviceConfig.UploadDeviceConfigResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.uploadDeviceConfigResponse);
+//                        input.readMessage(this.uploadDeviceConfigResponse);
                         continue;
                     }
                     case 234: {
 //                        if (this.plusProfileResponse == null) {
 //                            this.plusProfileResponse = new PlusProfile.PlusProfileResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.plusProfileResponse);
+//                        input.readMessage(this.plusProfileResponse);
                         continue;
                     }
                     case 242: {
 //                        if (this.consumePurchaseResponse == null) {
 //                            this.consumePurchaseResponse = new ConsumePurchaseResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.consumePurchaseResponse);
+//                        input.readMessage(this.consumePurchaseResponse);
                         continue;
                     }
                     case 250: {
 //                        if (this.billingProfileResponse == null) {
 //                            this.billingProfileResponse = new BuyInstruments.BillingProfileResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.billingProfileResponse);
+//                        input.readMessage(this.billingProfileResponse);
                         continue;
                     }
                     case 258: {
 //                        if (this.preparePurchaseResponse == null) {
 //                            this.preparePurchaseResponse = new Purchase.PreparePurchaseResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.preparePurchaseResponse);
+//                        input.readMessage(this.preparePurchaseResponse);
                         continue;
                     }
                     case 266: {
 //                        if (this.commitPurchaseResponse == null) {
 //                            this.commitPurchaseResponse = new Purchase.CommitPurchaseResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.commitPurchaseResponse);
+//                        input.readMessage(this.commitPurchaseResponse);
                         continue;
                     }
                     case 274: {
 //                        if (this.debugSettingsResponse == null) {
 //                            this.debugSettingsResponse = new DebugSettings.DebugSettingsResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.debugSettingsResponse);
+//                        input.readMessage(this.debugSettingsResponse);
                         continue;
                     }
                     case 282: {
 //                        if (this.checkIabPromoResponse == null) {
 //                            this.checkIabPromoResponse = new BuyInstruments.CheckIabPromoResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.checkIabPromoResponse);
+//                        input.readMessage(this.checkIabPromoResponse);
                         continue;
                     }
                     case 290: {
 //                        if (this.userActivitySettingsResponse == null) {
 //                            this.userActivitySettingsResponse = new UserActivity.UserActivitySettingsResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.userActivitySettingsResponse);
+//                        input.readMessage(this.userActivitySettingsResponse);
                         continue;
                     }
                     case 298: {
 //                        if (this.recordUserActivityResponse == null) {
 //                            this.recordUserActivityResponse = new UserActivity.RecordUserActivityResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.recordUserActivityResponse);
+//                        input.readMessage(this.recordUserActivityResponse);
                         continue;
                     }
                     case 306: {
 //                        if (this.redeemCodeResponse == null) {
 //                            this.redeemCodeResponse = new PromoCode.RedeemCodeResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.redeemCodeResponse);
+//                        input.readMessage(this.redeemCodeResponse);
                         continue;
                     }
                     case 314: {
 //                        if (this.selfUpdateResponse == null) {
 //                            this.selfUpdateResponse = new SelfUpdate.SelfUpdateResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.selfUpdateResponse);
+//                        input.readMessage(this.selfUpdateResponse);
                         continue;
                     }
                     case 322: {
 //                        if (this.searchSuggestResponse == null) {
 //                            this.searchSuggestResponse = new SearchSuggest.SearchSuggestResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.searchSuggestResponse);
+//                        input.readMessage(this.searchSuggestResponse);
                         continue;
                     }
                     case 330: {
 //                        if (this.getInitialInstrumentFlowStateResponse == null) {
 //                            this.getInitialInstrumentFlowStateResponse = new BuyInstruments.GetInitialInstrumentFlowStateResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.getInitialInstrumentFlowStateResponse);
+//                        input.readMessage(this.getInitialInstrumentFlowStateResponse);
                         continue;
                     }
                     case 338: {
 //                        if (this.createInstrumentResponse == null) {
 //                            this.createInstrumentResponse = new BuyInstruments.CreateInstrumentResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.createInstrumentResponse);
+//                        input.readMessage(this.createInstrumentResponse);
                         continue;
                     }
                     case 346: {
 //                        if (this.challengeResponse == null) {
 //                            this.challengeResponse = new ChallengeAction.ChallengeResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.challengeResponse);
+//                        input.readMessage(this.challengeResponse);
                         continue;
                     }
                     case 354: {
 //                        if (this.backupDeviceChoicesResponse == null) {
 //                            this.backupDeviceChoicesResponse = new Restore.GetBackupDeviceChoicesResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.backupDeviceChoicesResponse);
+//                        input.readMessage(this.backupDeviceChoicesResponse);
                         continue;
                     }
                     case 362: {
 //                        if (this.backupDocumentChoicesResponse == null) {
 //                            this.backupDocumentChoicesResponse = new Restore.GetBackupDocumentChoicesResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.backupDocumentChoicesResponse);
+//                        input.readMessage(this.backupDocumentChoicesResponse);
                         continue;
                     }
                     case 370: {
 //                        if (this.earlyUpdateResponse == null) {
 //                            this.earlyUpdateResponse = new EarlyUpdate.EarlyUpdateResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.earlyUpdateResponse);
+//                        input.readMessage(this.earlyUpdateResponse);
                         continue;
                     }
                     case 378: {
 //                        if (this.preloadsResponse == null) {
 //                            this.preloadsResponse = new Preloads.PreloadsResponse();
 //                        }
-//                        codedInputByteBufferNano.readMessage(this.preloadsResponse);
+//                        input.readMessage(this.preloadsResponse);
                         continue;
                     }
                 }

@@ -48,8 +48,8 @@ public class DfeRequest<T extends MessageNano> extends Request<Response.Response
         PROTO_DEBUG = Log.isLoggable("DfeProto", 2);
     }
     
-    public DfeRequest(final int n, final String s, final DfeApiContext mApiContext, final Class<T> mResponseClass, final com.android.volley.Response.Listener<T> mListener, final com.android.volley.Response.ErrorListener errorListener) {
-        super(n, Uri.withAppendedPath(DfeApi.BASE_URI, s).toString(), errorListener);
+    public DfeRequest(final int method, final String s, final DfeApiContext mApiContext, final Class<T> mResponseClass, final com.android.volley.Response.Listener<T> mListener, final com.android.volley.Response.ErrorListener errorListener) {
+        super(method, Uri.withAppendedPath(DfeApi.BASE_URI, s).toString(), errorListener);
         this.mAllowMultipleResponses = false;
         this.mServerLatencyMs = -1L;
         this.mAvoidBulkCancel = false;
@@ -63,8 +63,8 @@ public class DfeRequest<T extends MessageNano> extends Request<Response.Response
         this.mResponseClass = mResponseClass;
     }
     
-    public DfeRequest(final String s, final DfeApiContext dfeApiContext, final Class<T> clazz, final com.android.volley.Response.Listener<T> listener, final com.android.volley.Response.ErrorListener errorListener) {
-        this(0, s, dfeApiContext, clazz, listener, errorListener);
+    public DfeRequest(final String url, final DfeApiContext dfeApiContext, final Class<T> clazz, final com.android.volley.Response.Listener<T> listener, final com.android.volley.Response.ErrorListener errorListener) {
+        this(Method.GET, url, dfeApiContext, clazz, listener, errorListener);
     }
     
     private String getSignatureResponse(final NetworkResponse networkResponse) {

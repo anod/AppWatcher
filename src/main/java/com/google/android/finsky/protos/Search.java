@@ -74,15 +74,15 @@ public interface Search
         }
         
         @Override
-        public RelatedSearch mergeFrom(CodedInputByteBufferNano codedInputByteBufferNano) throws IOException {
+        public RelatedSearch mergeFrom(CodedInputByteBufferNano input) throws IOException {
             int tag;
             int int32;
             int int2;
             while (true) {
-                tag = codedInputByteBufferNano.readTag();
+                tag = input.readTag();
                 switch (tag) {
                     default: {
-                        if (!WireFormatNano.parseUnknownField(codedInputByteBufferNano, tag)) {
+                        if (!WireFormatNano.parseUnknownField(input, tag)) {
                             return this;
                         }
                         break;
@@ -91,17 +91,17 @@ public interface Search
                         return this;
                     }
                     case 10: {
-                        this.searchUrl = codedInputByteBufferNano.readString();
+                        this.searchUrl = input.readString();
                         this.hasSearchUrl = true;
                         continue;
                     }
                     case 18: {
-                        this.header = codedInputByteBufferNano.readString();
+                        this.header = input.readString();
                         this.hasHeader = true;
                         continue;
                     }
                     case 24: {
-                        int32 = codedInputByteBufferNano.readInt32();
+                        int32 = input.readInt32();
                         switch (int32) {
                             default: {
                                 continue;
@@ -124,7 +124,7 @@ public interface Search
                         }
                     }
                     case 32: {
-                        int2 = codedInputByteBufferNano.readInt32();
+                        int2 = input.readInt32();
                         switch (int2) {
                             default: {
                                 continue;
@@ -168,7 +168,7 @@ public interface Search
                         }
                     }
                     case 40: {
-                        this.current = codedInputByteBufferNano.readBool();
+                        this.current = input.readBool();
                         this.hasCurrent = true;
                         continue;
                     }
@@ -286,22 +286,13 @@ public interface Search
         }
         
         @Override
-        public SearchResponse mergeFrom(CodedInputByteBufferNano codedInputByteBufferNano) throws IOException {
+        public SearchResponse mergeFrom(CodedInputByteBufferNano input) throws IOException {
             int tag;
-            int repeatedFieldArrayLength;
-            int i;
-            DocList.Bucket[] bucket;
-            int repeatedFieldArrayLength2;
-            int j;
-            DocumentV2.DocV2[] doc;
-            int repeatedFieldArrayLength3;
-            int k;
-            RelatedSearch[] relatedSearch;
             while (true) {
-                tag = codedInputByteBufferNano.readTag();
+                tag = input.readTag();
                 switch (tag) {
                     default: {
-                        if (!WireFormatNano.parseUnknownField(codedInputByteBufferNano, tag)) {
+                        if (!WireFormatNano.parseUnknownField(input, tag)) {
                             return this;
                         }
                         break;
@@ -310,90 +301,80 @@ public interface Search
                         return this;
                     }
                     case 10: {
-                        this.originalQuery = codedInputByteBufferNano.readString();
+                        this.originalQuery = input.readString();
                         this.hasOriginalQuery = true;
                         continue;
                     }
                     case 18: {
-                        this.suggestedQuery = codedInputByteBufferNano.readString();
+                        this.suggestedQuery = input.readString();
                         this.hasSuggestedQuery = true;
                         continue;
                     }
                     case 24: {
-                        this.aggregateQuery = codedInputByteBufferNano.readBool();
+                        this.aggregateQuery = input.readBool();
                         this.hasAggregateQuery = true;
                         continue;
                     }
                     case 34: {
-                        repeatedFieldArrayLength = WireFormatNano.getRepeatedFieldArrayLength(codedInputByteBufferNano, 34);
-                        if (this.bucket == null) {
-                            i = 0;
-                        }
-                        else {
-                            i = this.bucket.length;
-                        }
-                        bucket = new DocList.Bucket[i + repeatedFieldArrayLength];
+                        int arrayLength = WireFormatNano.getRepeatedFieldArrayLength(input, 34);
+                        int i = this.bucket == null ? 0 : this.bucket.length;
+                        DocList.Bucket[] newArray = new DocList.Bucket[i + arrayLength];
                         if (i != 0) {
-                            System.arraycopy(this.bucket, 0, bucket, 0, i);
+                            System.arraycopy(this.bucket, 0, newArray, 0, i);
                         }
-                        while (i < -1 + bucket.length) {
-                            codedInputByteBufferNano.readMessage(bucket[i] = new DocList.Bucket());
-                            codedInputByteBufferNano.readTag();
-                            ++i;
+                        for (; i < newArray.length - 1; i++) {
+                            newArray[i] = new DocList.Bucket();
+                            input.readMessage(newArray[i]);
+                            input.readTag();
                         }
-                        codedInputByteBufferNano.readMessage(bucket[i] = new DocList.Bucket());
-                        this.bucket = bucket;
+                        // Last one without readTag.
+                        newArray[i] = new DocList.Bucket();
+                        input.readMessage(newArray[i]);
+                        this.bucket = newArray;
                         continue;
                     }
                     case 42: {
-                        repeatedFieldArrayLength2 = WireFormatNano.getRepeatedFieldArrayLength(codedInputByteBufferNano, 42);
-                        if (this.doc == null) {
-                            j = 0;
+                        int arrayLength = WireFormatNano.getRepeatedFieldArrayLength(input, 42);
+                        int i = this.doc == null ? 0 : this.doc.length;
+                        DocumentV2.DocV2[] newArray = new DocumentV2.DocV2[i + arrayLength];
+                        if (i != 0) {
+                            System.arraycopy(this.doc, 0, newArray, 0, i);
                         }
-                        else {
-                            j = this.doc.length;
+                        for (; i < newArray.length - 1; i++) {
+                            newArray[i] = new DocumentV2.DocV2();
+                            input.readMessage(newArray[i]);
+                            input.readTag();
                         }
-                        doc = new DocumentV2.DocV2[j + repeatedFieldArrayLength2];
-                        if (j != 0) {
-                            System.arraycopy(this.doc, 0, doc, 0, j);
-                        }
-                        while (j < -1 + doc.length) {
-                            codedInputByteBufferNano.readMessage(doc[j] = new DocumentV2.DocV2());
-                            codedInputByteBufferNano.readTag();
-                            ++j;
-                        }
-                        codedInputByteBufferNano.readMessage(doc[j] = new DocumentV2.DocV2());
-                        this.doc = doc;
-                        continue;
+                        // Last one without readTag.
+                        newArray[i] = new DocumentV2.DocV2();
+                        input.readMessage(newArray[i]);
+                        this.doc = newArray;
                     }
                     case 50: {
-                        repeatedFieldArrayLength3 = WireFormatNano.getRepeatedFieldArrayLength(codedInputByteBufferNano, 50);
-                        if (this.relatedSearch == null) {
-                            k = 0;
+                        int arrayLength = WireFormatNano.getRepeatedFieldArrayLength(input, 50);
+                        int i = this.relatedSearch == null ? 0 : this.relatedSearch.length;
+                        RelatedSearch[] newArray = new RelatedSearch[i + arrayLength];
+                        if (i != 0) {
+                            System.arraycopy(this.relatedSearch, 0, newArray, 0, i);
                         }
-                        else {
-                            k = this.relatedSearch.length;
+                        for (; i < newArray.length - 1; i++) {
+                            newArray[i] = new RelatedSearch();
+                            input.readMessage(newArray[i]);
+                            input.readTag();
                         }
-                        relatedSearch = new RelatedSearch[k + repeatedFieldArrayLength3];
-                        if (k != 0) {
-                            System.arraycopy(this.relatedSearch, 0, relatedSearch, 0, k);
-                        }
-                        while (k < -1 + relatedSearch.length) {
-                            codedInputByteBufferNano.readMessage(relatedSearch[k] = new RelatedSearch());
-                            codedInputByteBufferNano.readTag();
-                            ++k;
-                        }
-                        codedInputByteBufferNano.readMessage(relatedSearch[k] = new RelatedSearch());
-                        this.relatedSearch = relatedSearch;
+                        // Last one without readTag.
+                        newArray[i] = new RelatedSearch();
+                        input.readMessage(newArray[i]);
+                        this.relatedSearch = newArray;
                         continue;
                     }
                     case 58: {
-                        this.serverLogsCookie = codedInputByteBufferNano.readBytes();
+                        this.serverLogsCookie = input.readBytes();
                         this.hasServerLogsCookie = true;
                         continue;
                     }
                     case 64: {
-                        this.fullPageReplaced = codedInputByteBufferNano.readBool();
+                        this.fullPageReplaced = input.readBool();
                         this.hasFullPageReplaced = true;
                         continue;
                     }

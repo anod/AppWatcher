@@ -12,6 +12,7 @@ import com.google.android.finsky.api.model.DfeSearch;
  */
 public class SearchEndpoint extends PlayStoreEndpoint {
 
+    public static final int BACKEND_ID = 3;
     private String mQuery;
 
     public SearchEndpoint(Listener listener, Context context) {
@@ -59,7 +60,7 @@ public class SearchEndpoint extends PlayStoreEndpoint {
 
     @Override
     protected DfeModel createDfeModel() {
-        String searchUrl = DfeUtils.formSearchUrl(mQuery, 0);
+        String searchUrl = DfeUtils.formSearchUrl(mQuery, BACKEND_ID);
         return new DfeSearch(mDfeApi, mQuery, searchUrl);
     }
 }
