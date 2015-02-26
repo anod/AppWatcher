@@ -24,15 +24,13 @@
                 android:layout_width="@dimen/icon_size"
                 android:layout_height="@dimen/icon_size"
                 android:layout_gravity="center_vertical"
-                android:layout_marginLeft="8dip"
                 android:contentDescription="@string/application_icon"
-                android:paddingBottom="8dp"
-                android:paddingTop="8dp"
+                android:layout_marginLeft="8dip"
                 android:src="@drawable/ic_empty" />
 
             <LinearLayout
                 android:id="@+id/new_indicator"
-                android:layout_width="5dip"
+                android:layout_width="4dip"
                 android:layout_height="match_parent"
                 android:background="@color/blue_new"
                 android:gravity="left|center_vertical"
@@ -45,7 +43,7 @@
             android:gravity="center_vertical|clip_vertical"
             android:orientation="vertical"
             android:paddingBottom="8dp"
-            android:paddingLeft="0dp"
+            android:paddingLeft="8dp"
             android:paddingRight="8dp"
             android:paddingTop="8dp">
 

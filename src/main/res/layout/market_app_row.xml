@@ -31,8 +31,8 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical|clip_vertical"
             android:orientation="vertical"
-            android:paddingLeft="4dp"
-            android:paddingRight="4dp">
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="8dp">
 
             <TextView
                 android:id="@android:id/title"
