@@ -23,11 +23,13 @@ public class BulkDetailsEndpoint extends PlayStoreEndpoint {
 
     @Override
     protected void executeAsync() {
+        getData().setDocIds(mDocIds);
         getData().startAsync();
     }
 
     @Override
     protected void executeSync() {
+        getData().setDocIds(mDocIds);
         getData().startSync();
     }
 
@@ -45,7 +47,7 @@ public class BulkDetailsEndpoint extends PlayStoreEndpoint {
 
     @Override
     protected DfeModel createDfeModel() {
-        return new DfeBulkDetails(this.mDfeApi, mDocIds);
+        return new DfeBulkDetails(this.mDfeApi);
     }
 
 

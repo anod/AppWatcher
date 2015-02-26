@@ -1,7 +1,6 @@
 package com.google.android.finsky.api.model;
 
 import com.android.volley.Response;
-import com.android.volley.toolbox.RequestFuture;
 import com.anod.appwatcher.BuildConfig;
 import com.anod.appwatcher.utils.AppLog;
 import com.google.android.finsky.api.DfeApi;
@@ -10,24 +9,27 @@ import com.google.android.finsky.protos.DocumentV2;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 public class DfeBulkDetails extends DfeBaseModel<Details.BulkDetailsResponse>
 {
     private Details.BulkDetailsResponse mBulkDetailsResponse;
     private final DfeApi mDfeApi;
-    private final List<String> mDocIds;
+    private List<String> mDocIds;
     
-    public DfeBulkDetails(final DfeApi mDfeApi, final List<String> mDocIds) {
+    public DfeBulkDetails(final DfeApi mDfeApi) {
         super();
-        this.mDocIds = mDocIds;
         this.mDfeApi = mDfeApi;
 
     }
 
+
+    public void setDocIds(List<String> docIds) {
+        mDocIds = docIds;
+    }
+
     @Override
     protected void execute(Response.Listener<Details.BulkDetailsResponse> responseListener, Response.ErrorListener errorListener) {
-        mDfeApi.getDetails(mDocIds, false, responseListener, errorListener);
+        mDfeApi.getDetails(mDocIds, true, responseListener, errorListener);
     }
 
 
@@ -63,4 +65,5 @@ public class DfeBulkDetails extends DfeBaseModel<Details.BulkDetailsResponse>
         this.mBulkDetailsResponse = mBulkDetailsResponse;
         this.notifyDataSetChanged();
     }
+
 }

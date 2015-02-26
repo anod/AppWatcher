@@ -68,10 +68,7 @@ public class SyncNotification {
 
 
     private void addExtraInfo(SyncAdapter.UpdatedApp app, NotificationCompat.Builder builder) {
-        DetailsEndpoint detailsEndpoint = new DetailsEndpoint(null, mContext);
-        detailsEndpoint.setUrl(app.detailsUrl);
-        detailsEndpoint.startSync();
-        String changes = detailsEndpoint.getRecentChanges();
+        String changes = app.recentChanges;
         if (changes != null) {
             if (changes.equals("")) {
                 changes = mContext.getString(R.string.no_recent_changes);

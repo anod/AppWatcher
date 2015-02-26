@@ -16,6 +16,9 @@ public class DocUtils {
 
     public static String getIconUrl(Document doc) {
         List<Common.Image> images = doc.getImages(4);
+        if (images == null) {
+            return null;
+        }
         if (images.size() > 0) {
             return images.get(0).imageUrl;
         }

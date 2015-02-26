@@ -41,7 +41,10 @@ public class AppLog {
          e("Volley: "+error.getClass().getSimpleName()+": "+error.getMessage(),error.getCause());
     }
 
-    public static void ex(Throwable e) { Log.e(TAG, e.getMessage(), e); }
+    public static void ex(Throwable e) {
+        Log.e(TAG, e.getMessage(), e);
+        Crashlytics.logException(e);
+    }
 
     public static void w(String msg) {
         Log.v(TAG, format(msg));

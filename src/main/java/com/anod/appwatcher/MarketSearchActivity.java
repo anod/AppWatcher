@@ -68,6 +68,7 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
     private Button mRetryButton;
     private SearchEndpoint mSearchEngine;
     private int mIconSize = -1;
+    private AppListContentProviderClient mContentProviderClient;
 
 
     @Override
@@ -77,7 +78,7 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
 		setContentView(R.layout.market_search);
         initSystemBar();
 
-		mContext = (Context)this;
+		mContext = this;
 
 		Resources r = mContext.getResources();
 		mColorBgGray = r.getColor(R.color.row_grayout);
@@ -113,6 +114,20 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
         mLoading.setVisibility(View.VISIBLE);
         mRetryView.setVisibility(View.GONE);
 
+    }
+
+    @Override
+    protected void onPause() {
+        if (mContentProviderClient != null) {
+            mContentProviderClient.release();
+        }
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        mContentProviderClient = new AppListContentProviderClient(mContext);
+        super.onResume();
     }
 
     @Override
@@ -209,11 +224,10 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
 			if (mAddedApps.containsKey(doc.getDocId())) {
 				return;
 			}
-			final AppListContentProviderClient cr = new AppListContentProviderClient(MarketSearchActivity.this);
 
 			final View bgView = view.findViewById(R.id.approw);
 
-			AppInfo existingApp = cr.queryAppId(doc.getDocId());
+			AppInfo existingApp = mContentProviderClient.queryAppId(doc.getDocId());
 			if (existingApp != null) {
 				Toast.makeText(mContext, R.string.app_already_added, Toast.LENGTH_SHORT).show();
 				bgView.setBackgroundColor(mColorBgGray);
@@ -231,25 +245,24 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
                     @Override
                     public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
                         info.setIcon(response.getBitmap());
-                        insertApp(info, bgView, cr);
+                        insertApp(info, bgView);
                     }
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         AppLog.e(error);
-                        insertApp(info, bgView, cr);
+                        insertApp(info, bgView);
                     }
                 }, mIconSize, mIconSize);
             } else {
-                insertApp(info, bgView, cr);
+                insertApp(info, bgView);
             }
 
 		}
 	};
 
-    private void insertApp(final AppInfo info,View bgView, AppListContentProviderClient cr) {
-        Uri uri = cr.insert(info);
-        cr.release();
+    private void insertApp(final AppInfo info,View bgView) {
+        Uri uri = mContentProviderClient.insert(info);
 
         if (uri == null) {
             Toast.makeText(mContext, R.string.error_insert_app, Toast.LENGTH_SHORT).show();
@@ -302,8 +315,7 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
         mListView.setVisibility(View.GONE);
         mListView.getEmptyView().setVisibility(View.GONE);
         mRetryView.setVisibility(View.VISIBLE);
-	};
-
+	}
 
     private void showLoading() {
         mListView.setVisibility(View.GONE);
@@ -388,13 +400,16 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
 				LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 				v = vi.inflate(R.layout.market_app_row, null);
 				holder = new ViewHolder();
-				holder.row = (View) v.findViewById(R.id.approw);
+				holder.row = v.findViewById(R.id.approw);
 				holder.title = (TextView) v.findViewById(android.R.id.title);
 				holder.details = (TextView) v.findViewById(R.id.details);
 				holder.updated = (TextView) v.findViewById(R.id.updated);
 				holder.price = (TextView) v.findViewById(R.id.price);
 				holder.icon = (NetworkImageView) v.findViewById(android.R.id.icon);
-				v.setTag(holder);
+                holder.icon.setDefaultImageResId(R.drawable.ic_empty);
+                holder.icon.setErrorImageResId(R.drawable.ic_empty);
+
+                v.setTag(holder);
 			} else {
 				holder = (ViewHolder) v.getTag();
 			}
@@ -412,13 +427,8 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
 				holder.row.setBackgroundColor(mColorBgWhite);
 			}
 
-            holder.icon.setDefaultImageResId(R.drawable.ic_empty);
-            holder.icon.setErrorImageResId(R.drawable.ic_empty);
             String imageUrl = DocUtils.getIconUrl(doc);
-
-            if (imageUrl != null) {
-                holder.icon.setImageUrl(imageUrl, mImageLoader);
-            }
+            holder.icon.setImageUrl(imageUrl, mImageLoader);
 
 			boolean isInstalled = mPMUtils.isAppInstalled(app.packageName);
 			if (isInstalled) {

@@ -37,7 +37,7 @@ import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.BitmapUtils;
 import com.anod.appwatcher.utils.DocUtils;
 import com.anod.appwatcher.utils.GooglePlayServices;
-import com.anod.appwatcher.volley.NoImageCache;
+import com.anod.appwatcher.volley.SyncImageLoader;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.finsky.api.model.Document;
 import com.google.android.finsky.protos.Common;
@@ -49,7 +49,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStoreEndpoint.Listener {
     private static final int ONE_SEC_IN_MILLIS = 1000;
@@ -61,7 +60,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
     public static final String SYNC_PROGRESS = "com.anod.appwatcher.sync.progress";
     public static final String EXTRA_UPDATES_COUNT = "extra_updates_count";
     private BulkDetailsEndpoint mEndpoint;
-    private ImageLoader mImageLoader;
+    private SyncImageLoader mImageLoader;
     private int mIconSize = -1;
 
     public SyncAdapter(Context context, boolean autoInitialize) {
@@ -97,6 +96,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
 		Intent startIntent = new Intent(SYNC_PROGRESS);
 		mContext.sendBroadcast(startIntent);
 
+
         mEndpoint = createEndpoint(pref);
 
 		boolean lastUpdatesViewed = pref.isLastUpdatesViewed();
@@ -105,7 +105,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
 		ArrayList<UpdatedApp> updatedApps = null;
 		AppListContentProviderClient appListProvider = new AppListContentProviderClient(provider);
 		try {
-            updatedApps = doSync(pref, appListProvider, lastUpdatesViewed);
+            updatedApps = doSync(appListProvider, lastUpdatesViewed);
 		} catch (RemoteException e) {
             AppLog.e("doSync exception", e);
             Crashlytics.logException(e);
@@ -135,6 +135,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
                 AppLog.d("DriveSyncEnabled = false, skipping...");
             }
         }
+
         mEndpoint = null;
 		AppLog.d("Finish::onPerformSync()");
 	
@@ -189,22 +190,21 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
         String appId;
         String title;
         String pkg;
-        String detailsUrl;
+        String recentChanges;
 
-        private UpdatedApp(String appId, String title, String pkg, String detailsUrl) {
+        private UpdatedApp(String appId, String title, String pkg, String recentChanges) {
             this.appId = appId;
             this.title = title;
             this.pkg = pkg;
-            this.detailsUrl = detailsUrl;
+            this.recentChanges = recentChanges;
         }
     }
 	/**
-	 * @param pref
 	 * @param client
 	 * @throws RemoteException
 	 * @return list of titles that were updated
 	 */
-	private ArrayList<UpdatedApp> doSync(Preferences pref, AppListContentProviderClient client, boolean lastUpdatesViewed) throws RemoteException {
+	private ArrayList<UpdatedApp> doSync(AppListContentProviderClient client, boolean lastUpdatesViewed) throws RemoteException {
 		ArrayList<UpdatedApp> updatedTitles = new ArrayList<UpdatedApp>();
 
 		if (mEndpoint == null) {
@@ -220,6 +220,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
         int bulkSize = apps.getCount() > BULK_SIZE ? BULK_SIZE : apps.getCount();
 
         HashMap<String, AppInfo> localApps = new HashMap<>(bulkSize);
+
+        int i = 1;
 		while(apps.moveToNext()) {
 
             AppInfo localApp = apps.getAppInfo();
@@ -228,6 +230,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
             AppLog.d("Checking for updates '"+localApp.getTitle()+"' ...");
 
             if (localApps.size() == bulkSize) {
+                AppLog.d("Sending bulk #"+i+"...");
                 List<Document> documents = requestBulkDetails(localApps.keySet());
                 if (documents != null) {
                     updateApps(documents, localApps, client, updatedTitles, lastUpdatesViewed);
@@ -235,10 +238,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
                     AppLog.e("No documents were received.");
                 }
                 localApps.clear();
+                i++;
             }
 
 		}
         if (localApps.size() > 0) {
+            AppLog.d("Sending bulk #"+i+"...");
             List<Document> documents = requestBulkDetails(localApps.keySet());
             if (documents != null) {
                 updateApps(documents, localApps, client, updatedTitles, lastUpdatesViewed);
@@ -274,7 +279,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
             debugPkgs = new HashSet<String>();
             //   debugPkgs.add("com.adobe.reader");
             //   debugPkgs.add("com.aide.ui");
-            //   debugPkgs.add("com.anod.car.home.free");
+               debugPkgs.add("com.anod.car.home.free");
             //   debugPkgs.add("com.anod.car.home.pro");
             //   debugPkgs.add("com.ibolt.carhome");
         }
@@ -284,7 +289,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
             Bitmap icon = loadIcon(marketApp);
             AppInfo newApp = createNewVersion(marketApp, localApp, icon);
             client.update(newApp);
-            updatedTitles.add(new UpdatedApp(localApp.getAppId(),marketApp.getTitle(),appDetails.packageName, marketApp.getDetailsUrl()));
+            String recentChanges = (updatedTitles.size() == 0) ? appDetails.recentChangesHtml : null;
+            updatedTitles.add(new UpdatedApp(localApp.getAppId(),marketApp.getTitle(),appDetails.packageName, recentChanges));
             return;
         }
 
@@ -317,9 +323,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
             values.put(AppListTable.Columns.KEY_PRICE_MICROS, offer.micros);
         }
 
-        AppLog.d("ContentValues: "+values.toString());
-
         if (values.size() > 0) {
+            AppLog.d("ContentValues: "+values.toString());
             client.update(localApp.getRowId(), values);
         }
     }
@@ -332,37 +337,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
         if (mIconSize == -1) {
             mIconSize = mContext.getResources().getDimensionPixelSize(R.dimen.icon_size);
         }
-        final Bitmap[] bitmaps = new Bitmap[1];
-        final CountDownLatch latch = new CountDownLatch(1);
 
-        ImageLoader.ImageListener listener = new ImageLoader.ImageListener() {
-            @Override
-            public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
-                bitmaps[0] = response.getBitmap();
-                latch.countDown();
-            }
-
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                AppLog.e(error);
-                latch.countDown();
-            }
-        };
-
-        getImageLoader().get(imageUrl, listener, mIconSize, mIconSize);
-
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            AppLog.ex(e);
-        }
-        return bitmaps[0];
+        ImageLoader.ImageContainer container = getImageLoader().get(imageUrl, null, mIconSize, mIconSize);
+        return container.getBitmap();
     }
 
-    private ImageLoader getImageLoader() {
+    private SyncImageLoader getImageLoader() {
         if (mImageLoader == null) {
             // No cache implementation
-            mImageLoader = new ImageLoader(AppWatcherApplication.provide(mContext).requestQueue(), new NoImageCache());
+            mImageLoader = new SyncImageLoader(AppWatcherApplication.provide(mContext).requestQueue());
         }
         return mImageLoader;
     }

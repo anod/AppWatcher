@@ -27,7 +27,7 @@ public abstract class DfeBaseModel<DocType> extends DfeModel implements Response
             response = future.get();
         } catch (InterruptedException | ExecutionException e) {
             AppLog.ex(e);
-            onErrorResponse(new VolleyError("InterruptedException", e));
+            onErrorResponse(new VolleyError("Response exception: "+e.getMessage(), e));
         }
         onResponse(response);
     }
