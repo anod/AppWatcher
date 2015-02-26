@@ -8,13 +8,12 @@ import com.google.android.finsky.protos.DocumentV2;
 public class DfeDetails extends DfeBaseModel<Details.DetailsResponse>
 {
     private Details.DetailsResponse mDetailsResponse;
-    private final String mDetailsUrl;
+    private String mDetailsUrl;
     private DfeApi mDfeApi;
 
-    public DfeDetails(final DfeApi dfeApi, final String url) {
+    public DfeDetails(final DfeApi dfeApi) {
         super();
         mDfeApi = dfeApi;
-        mDetailsUrl = url;
     }
 
     @Override
@@ -67,4 +66,7 @@ public class DfeDetails extends DfeBaseModel<Details.DetailsResponse>
         this.notifyDataSetChanged();
     }
 
+    public void setDetailsUrl(String detailsUrl) {
+        mDetailsUrl = detailsUrl;
+    }
 }

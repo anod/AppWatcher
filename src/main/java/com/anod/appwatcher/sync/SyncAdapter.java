@@ -303,14 +303,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
             values.put(AppListTable.Columns.KEY_STATUS, AppInfo.STATUS_NORMAL );
         }
         //Refresh app icon if it wasn't fetched previously
-        if (localApp.getIcon() == null) {
-            AppLog.d("Fetch missing icon");
-            Bitmap icon = loadIcon(marketApp);
-            if (icon != null) {
-                byte[] iconData = BitmapUtils.flattenBitmap(icon);
-                values.put(AppListTable.Columns.KEY_ICON_CACHE, iconData);
-            }
-        }
+        fillMissingData(marketApp, localApp, values);
         Common.Offer offer = DocUtils.getOffer(marketApp);
 
         if (!offer.currencyCode.equals(localApp.getPriceCur())) {
@@ -326,6 +319,20 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
         if (values.size() > 0) {
             AppLog.d("ContentValues: "+values.toString());
             client.update(localApp.getRowId(), values);
+        }
+    }
+
+    private void fillMissingData(Document marketApp, AppInfo localApp, ContentValues values) {
+        if (localApp.getIcon() == null) {
+            AppLog.d("Fetch missing icon");
+            Bitmap icon = loadIcon(marketApp);
+            if (icon != null) {
+                byte[] iconData = BitmapUtils.flattenBitmap(icon);
+                values.put(AppListTable.Columns.KEY_ICON_CACHE, iconData);
+            }
+        }
+        if (localApp.getUploadDate()== null) {
+            values.put(AppListTable.Columns.KEY_UPDATE_DATE, marketApp.getAppDetails().uploadDate);
         }
     }
 

@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
+import android.text.Html;
 
 import com.anod.appwatcher.AppWatcherActivity;
 import com.anod.appwatcher.NotificationActivity;
@@ -73,10 +74,10 @@ public class SyncNotification {
             if (changes.equals("")) {
                 changes = mContext.getString(R.string.no_recent_changes);
             } else {
-                builder.setContentText(changes);
+                builder.setContentText(Html.fromHtml(changes));
             }
-            builder.setStyle(new NotificationCompat.BigTextStyle()
-                            .bigText(changes)
+            builder.setStyle(
+                new NotificationCompat.BigTextStyle().bigText(Html.fromHtml(changes))
             );
 
             Intent playIntent = new Intent(mContext, NotificationActivity.class);
