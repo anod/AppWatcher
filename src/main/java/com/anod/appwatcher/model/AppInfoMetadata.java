@@ -1,7 +1,8 @@
 package com.anod.appwatcher.model;
 
 /**
- * Created by alex on 7/13/14.
+ * @author alex
+ * @date 2015-02-27
  */
 public class AppInfoMetadata {
 
@@ -39,4 +40,9 @@ public class AppInfoMetadata {
     public void setModifyTime(long modifyTime) {
         this.modifyTime = modifyTime;
     }
+
+    public void setAppId(String appId) {
+        this.appId = appId;
+    }
+
 }

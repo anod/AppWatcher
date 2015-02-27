@@ -51,6 +51,8 @@ public class DbOpenHelper extends SQLiteOpenHelper {
             case 4:
                 db.execSQL("ALTER TABLE "+AppListTable.TABLE_NAME + " ADD COLUMN " + AppListTable.Columns.KEY_UPLOAD_DATE + " TEXT");
                 db.execSQL("ALTER TABLE "+AppListTable.TABLE_NAME + " ADD COLUMN " + AppListTable.Columns.KEY_DETAILS_URL + " TEXT");
+                db.execSQL("UPDATE "+AppListTable.TABLE_NAME + " SET " +  AppListTable.Columns.KEY_APPID + " = '" + AppListTable.Columns.KEY_PACKAGE + "'");
+                db.execSQL("UPDATE "+AppListTable.TABLE_NAME + " SET " +  AppListTable.Columns.KEY_DETAILS_URL + " = 'details.php?doc=' || " + AppListTable.Columns.KEY_PACKAGE);
 		}
 	}
 

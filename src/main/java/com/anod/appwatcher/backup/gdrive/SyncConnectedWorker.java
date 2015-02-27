@@ -164,12 +164,12 @@ public class SyncConnectedWorker {
         if (driveFileReader != null) {
             BufferedReader driveBufferedReader = new BufferedReader(driveFileReader);
             AppListReaderIterator driveAppsIterator = new AppListReaderIterator(driveBufferedReader);
-            Map<String, Boolean> currentIds = cr.queryPackagesMap();
+            Map<String, Integer> currentIds = cr.queryPackagesMap();
             AppLog.d("[GDrive] Read remote apps " + APPLIST_JSON);
             while (driveAppsIterator.hasNext()) {
                 AppInfo app = driveAppsIterator.next();
                 AppLog.d("[GDrive] Read app: " + app.getPackageName());
-                if (app!=null && currentIds.get(app.getPackageName()) == null) {
+                if (app != null && currentIds.get(app.getPackageName()) == null) {
                     cr.insert(app);
                 }
             }

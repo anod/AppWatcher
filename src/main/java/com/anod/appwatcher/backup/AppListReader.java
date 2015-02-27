@@ -1,6 +1,7 @@
 package com.anod.appwatcher.backup;
 
 import android.graphics.Bitmap;
+import android.text.TextUtils;
 
 import com.android.util.JsonReader;
 import com.android.util.JsonToken;
@@ -14,7 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by alex on 7/9/14.
+ * @author alex
+ * @date 2015-02-27
  */
 public class AppListReader {
 
@@ -23,7 +25,7 @@ public class AppListReader {
      * @return List of apps
      * @throws java.io.IOException
      */
-    public List<AppInfo> readFromJson(Reader reader) throws IOException {
+    public List<AppInfo> readJsonList(Reader reader) throws IOException {
         JsonReader jsonReader = new JsonReader(reader);
         List<AppInfo> apps = new ArrayList<AppInfo>();
         try {
@@ -48,7 +50,7 @@ public class AppListReader {
      * @throws IOException
      */
     public AppInfo readAppInfo(JsonReader reader) throws IOException {
-        String appId = null, pname = null, versionName = "", title = "", creator = "", uploadDate="", url="";
+        String appId = null, pname = null, versionName = "", title = "", creator = "", uploadDate="", detailsUrl=null;
         int versionNumber = 0, status = 0;
         Bitmap icon = null;
 
@@ -72,7 +74,7 @@ public class AppListReader {
             } else if (name.equals("status")) {
                 status = reader.nextInt();
             } else if (name.equals("detailsUrl")) {
-                url = reader.nextString();
+                detailsUrl = reader.nextString();
             } else if (name.equals("icon")) {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 reader.beginArray();
@@ -86,10 +88,21 @@ public class AppListReader {
             }
         }
         reader.endObject();
+        AppInfo info = null;
         if (appId != null && pname != null) {
-            return new AppInfo(0, appId, pname, versionNumber, versionName,
-                    title, creator, icon, status, uploadDate, null, null, null, url);
+            info = new AppInfo(0, appId, pname, versionNumber, versionName,
+                    title, creator, icon, status, uploadDate, null, null, null, detailsUrl);
         }
-        return null;
+        onUpgrade(info);
+        return info;
+    }
+
+
+    private void onUpgrade(AppInfo info) {
+        if (TextUtils.isEmpty(info.getDetailsUrl())) {
+            String packageName = info.getPackageName();
+            info.setAppId(packageName);
+            info.setDetailsUrl("details?doc="+packageName);
+        }
     }
 }

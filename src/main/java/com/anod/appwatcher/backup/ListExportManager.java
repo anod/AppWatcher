@@ -7,21 +7,16 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.Writer;
 import java.util.List;
-import java.util.Map;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.os.Environment;
 
-import com.android.util.JsonWriter;
 import com.android.util.MalformedJsonException;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.model.AppListCursor;
 import com.anod.appwatcher.utils.AppLog;
-import com.anod.appwatcher.utils.BitmapUtils;
 
 /**
  * Serialize and deserialize app info list into/from JSON file
@@ -162,7 +157,7 @@ public class ListExportManager {
         try {
 			synchronized (ListExportManager.sDataLock) {
 				BufferedReader buf = new BufferedReader(new FileReader(dataFile));
-				appList = reader.readFromJson(buf);
+				appList = reader.readJsonList(buf);
 			}
 		} catch (MalformedJsonException e) {
             AppLog.ex(e);
@@ -173,7 +168,7 @@ public class ListExportManager {
 		}
 		if (appList != null && appList.size() > 0) {
 			AppListContentProviderClient cr = new AppListContentProviderClient(mContext);
-            cr.insertList(appList);
+            cr.addList(appList);
 			cr.release();
 		}
 		return RESULT_DONE;

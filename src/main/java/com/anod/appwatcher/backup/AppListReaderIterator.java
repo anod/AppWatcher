@@ -9,7 +9,8 @@ import java.io.Reader;
 import java.util.Iterator;
 
 /**
- * Created by alex on 7/26/14.
+ * @author alex
+ * @date 2015-02-27
  */
 public class AppListReaderIterator implements Iterator<AppInfo> {
     private JsonReader mJsonReader;

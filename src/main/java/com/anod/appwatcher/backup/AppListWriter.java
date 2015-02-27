@@ -1,23 +1,19 @@
 package com.anod.appwatcher.backup;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 
 import com.android.util.JsonWriter;
 import com.anod.appwatcher.model.AppInfo;
-import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.model.AppListCursor;
 import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.BitmapUtils;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 
 /**
- * Created by alex on 7/9/14.
+ * @author alex
+ * @date 2015-02-27
  */
 public class AppListWriter {
 

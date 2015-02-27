@@ -10,21 +10,20 @@ import com.google.android.finsky.protos.DocDetails;
 
 public class AppInfo extends AppInfoMetadata{
 
-    private final String detailsUrl;
     private int rowId;
 	private String packageName;
 	private int versionNumber;
 	private String versionName;
 	private String title;
-	private String creator;	
+	private String creator;
 	private Bitmap icon;
 	private String uploadDate;
 	private String priceText;
 	private String priceCur;
 	private Integer priceMicros;
+    private String detailsUrl;
 
-
-	public AppInfo(int rowId, String appId, String pname, int versionNumber, String versionName,
+    public AppInfo(int rowId, String appId, String pname, int versionNumber, String versionName,
 			String title, String creator, Bitmap icon, int status, String uploadDate, String priceText, String priceCur, Integer priceMicros, String detailsUrl) {
         super(appId,status);
 		this.rowId = rowId;
@@ -137,5 +136,9 @@ public class AppInfo extends AppInfoMetadata{
 
     public String getDetailsUrl() {
         return detailsUrl;
+    }
+
+    public void setDetailsUrl(String detailsUrl) {
+        this.detailsUrl = detailsUrl;
     }
 }
