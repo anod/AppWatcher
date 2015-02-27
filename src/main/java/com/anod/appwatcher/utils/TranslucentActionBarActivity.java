@@ -1,8 +1,10 @@
 package com.anod.appwatcher.utils;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.os.Build;
 import android.support.v7.app.ActionBarActivity;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.FrameLayout;
@@ -37,12 +39,21 @@ abstract public class TranslucentActionBarActivity extends ActionBarActivity {
             FrameLayout frame = (FrameLayout) findViewById(R.id.activity_frame);
             frame.setBackgroundColor(r.getColor(R.color.abs__background_holo_light));
             if (mIsNavigationAtBottom) {
-                mPixelInsetBottom = cfg.getPixelInsetBottom();
+                mPixelInsetBottom = cfg.isNavigationAtBottom() ? getActionBarHeight(this) : 0;//cfg.getPixelInsetBottom();
                 frame.setPadding(0,cfg.getPixelInsetTop(true),0,0);
             } else {
                 frame.setPadding(0,cfg.getPixelInsetTop(true),cfg.getPixelInsetRight(),0);
             }
         }
+    }
+    private int getActionBarHeight(Context context) {
+        int result = 0;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            TypedValue tv = new TypedValue();
+            context.getTheme().resolveAttribute(android.support.v7.appcompat.R.attr.actionBarSize, tv, true);
+            result = TypedValue.complexToDimensionPixelSize(tv.data, context.getResources().getDisplayMetrics());
+        }
+        return result;
     }
 
     public void adjustListView(ListView lv) {
