@@ -1,6 +1,7 @@
 package com.anod.appwatcher.market;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.google.android.finsky.api.model.DfeDetails;
 import com.google.android.finsky.api.model.DfeModel;
@@ -38,18 +39,20 @@ public class DetailsEndpoint extends PlayStoreEndpoint {
     }
     @Override
     protected void executeAsync() {
+        getData().setDetailsUrl(mUrl);
         getData().startAsync();
     }
 
     @Override
     protected void executeSync() {
+
+        getData().setDetailsUrl(mUrl);
         getData().startSync();
     }
 
     @Override
     protected DfeModel createDfeModel() {
-        return new DfeDetails(this.mDfeApi, mUrl);
+        return new DfeDetails(this.mDfeApi);
     }
-
 
 }
