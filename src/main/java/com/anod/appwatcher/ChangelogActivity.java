@@ -14,15 +14,14 @@ import android.widget.TextView;
 import com.android.volley.VolleyError;
 import com.anod.appwatcher.accounts.AccountHelper;
 import com.anod.appwatcher.market.DetailsEndpoint;
-import com.anod.appwatcher.market.DeviceIdHelper;
 import com.anod.appwatcher.market.PlayStoreEndpoint;
-import com.google.android.finsky.protos.DocDetails;
 
 
 public class ChangelogActivity extends ActionBarActivity implements PlayStoreEndpoint.Listener {
 
 	public static final String EXTRA_APP_ID = "app_id";
     public static final String EXTRA_DETAILS_URL = "url";
+
     private DetailsEndpoint mDetailsEndpoint;
 	private ProgressBar mLoadingView;
 	private TextView mChangelog;

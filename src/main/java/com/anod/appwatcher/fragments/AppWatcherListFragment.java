@@ -363,7 +363,7 @@ public class AppWatcherListFragment extends ListFragment implements
 				@Override
 				public void onClick(View v) {
 					final String tag = (String)v.getTag();
-                    String[] parts = tag.split(",");
+                    String[] parts = tag.split(",", -2);
                     String appId = parts[0];
                     String detailsUrl = parts[1];
 					onChangelogClick(appId, detailsUrl);
