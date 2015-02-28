@@ -4,6 +4,8 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.anod.appwatcher.utils.AppLog;
+
 public class DbOpenHelper extends SQLiteOpenHelper {
 	    
     private static final int DATABASE_VERSION = 5;
@@ -19,7 +21,7 @@ public class DbOpenHelper extends SQLiteOpenHelper {
 			AppListTable.Columns.KEY_CREATOR + " TEXT," + 
 			AppListTable.Columns.KEY_ICON_CACHE + " BLOB," +
 			AppListTable.Columns.KEY_STATUS + " INTEGER," +
-            AppListTable.Columns.KEY_UPDATE_DATE + " INTEGER," +
+            AppListTable.Columns.KEY_NOTINUSE_TIMESTAMP + " INTEGER," +
 			AppListTable.Columns.KEY_PRICE_TEXT + " TEXT," +
 			AppListTable.Columns.KEY_PRICE_CURRENCY + " TEXT," +
 			AppListTable.Columns.KEY_PRICE_MICROS + " INTEGER," +
@@ -40,6 +42,7 @@ public class DbOpenHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        AppLog.v("Db upgrade from: "+oldVersion+" to "+newVersion);
 		switch (oldVersion) {
 			case 1:
 				db.execSQL("ALTER TABLE "+AppListTable.TABLE_NAME + " ADD COLUMN " + AppListTable.Columns.KEY_UPLOAD_DATE + " INTEGER");
@@ -51,8 +54,8 @@ public class DbOpenHelper extends SQLiteOpenHelper {
             case 4:
                 db.execSQL("ALTER TABLE "+AppListTable.TABLE_NAME + " ADD COLUMN " + AppListTable.Columns.KEY_UPLOAD_DATE + " TEXT");
                 db.execSQL("ALTER TABLE "+AppListTable.TABLE_NAME + " ADD COLUMN " + AppListTable.Columns.KEY_DETAILS_URL + " TEXT");
-                db.execSQL("UPDATE "+AppListTable.TABLE_NAME + " SET " +  AppListTable.Columns.KEY_APPID + " = '" + AppListTable.Columns.KEY_PACKAGE + "'");
-                db.execSQL("UPDATE "+AppListTable.TABLE_NAME + " SET " +  AppListTable.Columns.KEY_DETAILS_URL + " = 'details.php?doc=' || " + AppListTable.Columns.KEY_PACKAGE);
+                db.execSQL("UPDATE "+AppListTable.TABLE_NAME + " SET " +  AppListTable.Columns.KEY_APPID + " = " + AppListTable.Columns.KEY_PACKAGE + "");
+                db.execSQL("UPDATE "+AppListTable.TABLE_NAME + " SET " +  AppListTable.Columns.KEY_DETAILS_URL + " = 'details?doc=' || " + AppListTable.Columns.KEY_PACKAGE);
 		}
 	}
 

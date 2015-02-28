@@ -11,13 +11,19 @@ import java.util.Locale;
 
 public class AppLog {
 	private final static String TAG = "AppWatcher";
-	
+
+    public static final boolean DEBUG;
+
+    static {
+        DEBUG = Log.isLoggable("AppWatcher", BuildConfig.DEBUG ? Log.DEBUG : Log.WARN);
+    }
+
 	public static void d(String msg) {
-		if (BuildConfig.DEBUG) Log.d(TAG, format(msg));
+		if (DEBUG) Log.d(TAG, format(msg));
 	}
 
     public static void d(final String msg, final Object... params) {
-        if (BuildConfig.DEBUG) Log.d(TAG, format(msg, params));
+        if (DEBUG) Log.d(TAG, format(msg, params));
     }
 
 	public static void v(String msg) {

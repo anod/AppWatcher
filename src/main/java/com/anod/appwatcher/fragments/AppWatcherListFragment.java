@@ -241,12 +241,18 @@ public class AppWatcherListFragment extends ListFragment implements
 			}
 			holder.icon.setImageBitmap(icon);
 			if (app.getStatus() == AppInfo.STATUS_UPDATED) {
+                holder.version.setVisibility(View.VISIBLE);
 			    holder.version.setText(String.format(mUpdateText, app.getVersionName()));
 			    holder.version.setTextColor(mUpdateTextColor);
 				holder.newIndicator.setVisibility(View.VISIBLE);
 			} else {
-			    holder.version.setText(String.format(mVersionText, app.getVersionName()));
-			    holder.version.setTextColor(mDefColor);
+                if (TextUtils.isEmpty(app.getVersionName())) {
+                    holder.version.setVisibility(View.INVISIBLE);
+                } else {
+                    holder.version.setVisibility(View.VISIBLE);
+                    holder.version.setText(String.format(mVersionText, app.getVersionName()));
+                    holder.version.setTextColor(mDefColor);
+                }
 				holder.newIndicator.setVisibility(View.INVISIBLE);
 			}
 			

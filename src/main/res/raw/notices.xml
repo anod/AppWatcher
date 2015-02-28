@@ -16,18 +16,18 @@
   ~    limitations under the License.
   -->
 <notices>
-	<notice>
-		<name>Application Crash Reporting for Android (ACRA)</name>
-		<url>http://acra.ch/</url>
-		<copyright>Copyright 2010 Emmanuel Astier &amp; Kevin Gaudin</copyright>
-		<license>Apache Software License 2.0</license>
-	</notice>
-	<notice>
-		<name>CWAC AdapterWrapper</name>
-		<url>https://github.com/commonsguy/cwac-adapter</url>
-		<copyright>Copyright (c) 2008-2009 CommonsWare, LLC</copyright>
-		<license>Apache Software License 2.0</license>
-	</notice>
+    <notice>
+        <name>Android System Bar Tint</name>
+        <url>https://github.com/jgilfelt/SystemBarTint</url>
+        <copyright></copyright>
+        <license>Apache Software License 2.0</license>
+    </notice>
+    <notice>
+        <name>Volley. HTTP library.</name>
+        <url>https://android.googlesource.com/platform/frameworks/volley/</url>
+        <copyright></copyright>
+        <license>Apache Software License 2.0</license>
+    </notice>
 	<notice>
 		<name>An open-source API for the Android Market</name>
 		<url>https://code.google.com/p/android-market-api/</url>
@@ -36,8 +36,8 @@
 	</notice>
 	<notice>
 		<name>Protocol Buffers</name>
-		<url>https://code.google.com/p/protobuf/</url>
-		<copyright>Copyright 2010 Emmanuel Astier &amp; Kevin Gaudin</copyright>
-		<license>New BSD License</license>
+		<url>https://github.com/google/protobuf/</url>
+		<copyright>Copyright 2014, Google Inc.  All rights reserved.</copyright>
+		<license>Protobuf License</license>
 	</notice>
 </notices>

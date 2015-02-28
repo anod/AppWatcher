@@ -21,6 +21,7 @@ import de.psdev.licensesdialog.licenses.ISCLicense;
 import de.psdev.licensesdialog.licenses.MITLicense;
 import de.psdev.licensesdialog.licenses.License;
 import de.psdev.licensesdialog.licenses.NewBSDLicense;
+import de.psdev.licensesdialog.licenses.ProtobufLicense;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,6 +37,7 @@ public class LicenseResolver {
         registerLicense(new ISCLicense());
         registerLicense(new MITLicense());
 		registerLicense(new NewBSDLicense());
+        registerLicense(new ProtobufLicense());
     }
 
     /**

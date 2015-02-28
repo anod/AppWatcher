@@ -153,7 +153,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
             // TODO
         } else {
             if (mAboutCounter ==3 ) {
-                Toast.makeText(this, "1 more tap to report a problem", Toast.LENGTH_SHORT).show();
+           //     Toast.makeText(this, "1 more tap to report a problem", Toast.LENGTH_SHORT).show();
             }
             mAboutCounter++;
         }

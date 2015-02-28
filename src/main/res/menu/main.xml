@@ -36,7 +36,7 @@
     <item
         android:id="@+id/menu_more"
         appwatcher:showAsAction="never|withText"
-        android:title="More..." >
+        android:title="@string/more" >
     </item>
 <!--
     <item

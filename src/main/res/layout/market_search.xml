@@ -6,16 +6,19 @@
              android:paddingTop="0dp"
              android:id="@+id/activity_frame"
  >
-<RelativeLayout
-				android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
 
     <ListView
         android:id="@android:id/list"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-		android:paddingLeft="@dimen/list_padding_side"
-		android:paddingRight="@dimen/list_padding_side"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="@dimen/list_padding_vertical"
+        android:paddingLeft="@dimen/list_padding_side"
+        android:paddingRight="@dimen/list_padding_side"
+        android:paddingTop="@dimen/list_padding_side"
+        android:scrollbars="none"
+        android:divider="@null"
+        android:dividerHeight="0dp"
+        android:drawSelectorOnTop="false"
         android:visibility="gone"
 		tools:listitem="@layout/market_app_row"/>
 
@@ -23,19 +26,17 @@
         android:id="@android:id/empty"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
         android:layout_margin="25dip"
         android:gravity="center_horizontal"
+        android:layout_gravity="center"
         android:text="@string/search_for_app" />
 
     <LinearLayout
         android:id="@+id/loading"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
         android:gravity="center_vertical"
+        android:layout_gravity="center"
         android:orientation="horizontal" >
 
         <ProgressBar
@@ -52,9 +53,8 @@
         android:id="@+id/retry_box"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
         android:gravity="center"
+        android:layout_gravity="center"
         android:orientation="vertical" >
 
         <TextView
@@ -68,5 +68,5 @@
             android:id="@+id/retry"
         />
     </LinearLayout>
-</RelativeLayout>
+
     </FrameLayout>

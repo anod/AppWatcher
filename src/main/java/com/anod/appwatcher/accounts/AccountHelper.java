@@ -46,18 +46,16 @@ public class AccountHelper {
 	}
 
 	private String getAuthToken(Activity activity, Account acc) throws AuthenticatorException, OperationCanceledException, IOException {
-		String authToken = null;
 		if (acc == null) {
 			return null;
 		}
 		AccountManagerFuture<Bundle> future;
 
-
 		future = mAccountManager.getAuthToken(
 				acc, AUTH_TOKEN_TYPE, null, activity , null, null
 		);
 
-		authToken = future.getResult().getString(AccountManager.KEY_AUTHTOKEN);
+        String authToken = future.getResult().getString(AccountManager.KEY_AUTHTOKEN);
 		return authToken;
 	}
 

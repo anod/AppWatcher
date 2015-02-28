@@ -141,16 +141,16 @@ public class DfeRequest<T extends MessageNano> extends Request<Response.Response
         return from;
     }
     
-    private Response.ResponseWrapper parseWrapperAndVerifySignature(final NetworkResponse networkResponse, final boolean b) {
+    private Response.ResponseWrapper parseWrapperAndVerifySignature(final NetworkResponse networkResponse, final boolean gzip) {
         try {
             final String signatureResponse = this.getSignatureResponse(networkResponse);
-            if (b) {
+            if (gzip) {
                 return this.parseWrapperAndVerifySignatureFromIs(new GZIPInputStream(new ByteArrayInputStream(networkResponse.data)), signatureResponse);
             }
             return this.parseWrapperAndVerifyFromBytes(networkResponse, signatureResponse);
         }
         catch (InvalidProtocolBufferNanoException ex2) {
-//            if (!b) {
+//            if (!gzip) {
 //                return this.parseWrapperAndVerifySignature(networkResponse, true);
 //            }
             AppLog.d("Cannot parse response as ResponseWrapper proto.");
@@ -335,7 +335,7 @@ public class DfeRequest<T extends MessageNano> extends Request<Response.Response
     }
     
     public com.android.volley.Response<Response.ResponseWrapper> parseNetworkResponse(final NetworkResponse networkResponse) {
-        if (BuildConfig.DEBUG) {
+        if (AppLog.DEBUG) {
             final Map<String, String> headers = networkResponse.headers;
             int n = 0;
             if (headers != null) {

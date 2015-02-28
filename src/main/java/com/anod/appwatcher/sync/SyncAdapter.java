@@ -16,6 +16,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 
 import com.android.volley.VolleyError;
@@ -227,11 +228,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
             AppInfo localApp = apps.getAppInfo();
             String docId = localApp.getAppId();
             localApps.put(docId, localApp);
-            AppLog.d("Checking for updates '"+localApp.getTitle()+"' ...");
 
             if (localApps.size() == bulkSize) {
-                AppLog.d("Sending bulk #"+i+"...");
-                List<Document> documents = requestBulkDetails(localApps.keySet());
+                Set<String> docIds = localApps.keySet();
+                AppLog.d("Sending bulk #"+i+"... "+docIds);
+                List<Document> documents = requestBulkDetails(docIds);
                 if (documents != null) {
                     updateApps(documents, localApps, client, updatedTitles, lastUpdatesViewed);
                 } else {
@@ -243,8 +244,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
 
 		}
         if (localApps.size() > 0) {
-            AppLog.d("Sending bulk #"+i+"...");
-            List<Document> documents = requestBulkDetails(localApps.keySet());
+            Set<String> docIds = localApps.keySet();
+            AppLog.d("Sending bulk #"+i+"... "+docIds);
+            List<Document> documents = requestBulkDetails(docIds);
             if (documents != null) {
                 updateApps(documents, localApps, client, updatedTitles, lastUpdatesViewed);
             } else {
@@ -304,17 +306,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
         }
         //Refresh app icon if it wasn't fetched previously
         fillMissingData(marketApp, localApp, values);
-        Common.Offer offer = DocUtils.getOffer(marketApp);
-
-        if (!offer.currencyCode.equals(localApp.getPriceCur())) {
-            values.put(AppListTable.Columns.KEY_PRICE_CURRENCY, offer.currencyCode);
-        }
-        if (!offer.formattedAmount.equals(localApp.getPriceText())) {
-            values.put(AppListTable.Columns.KEY_PRICE_TEXT, offer.formattedAmount);
-        }
-        if (localApp.getPriceMicros() != offer.micros) {
-            values.put(AppListTable.Columns.KEY_PRICE_MICROS, offer.micros);
-        }
 
         if (values.size() > 0) {
             AppLog.d("ContentValues: "+values.toString());
@@ -331,8 +322,23 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
                 values.put(AppListTable.Columns.KEY_ICON_CACHE, iconData);
             }
         }
-        if (localApp.getUploadDate()== null) {
-            values.put(AppListTable.Columns.KEY_UPDATE_DATE, marketApp.getAppDetails().uploadDate);
+        if (TextUtils.isEmpty(localApp.getUploadDate())) {
+            values.put(AppListTable.Columns.KEY_UPLOAD_DATE, marketApp.getAppDetails().uploadDate);
+        }
+        if (TextUtils.isEmpty(localApp.getVersionName())) {
+            values.put(AppListTable.Columns.KEY_VERSION_NAME, marketApp.getAppDetails().versionString);
+        }
+
+        Common.Offer offer = DocUtils.getOffer(marketApp);
+
+        if (!offer.currencyCode.equals(localApp.getPriceCur())) {
+            values.put(AppListTable.Columns.KEY_PRICE_CURRENCY, offer.currencyCode);
+        }
+        if (!offer.formattedAmount.equals(localApp.getPriceText())) {
+            values.put(AppListTable.Columns.KEY_PRICE_TEXT, offer.formattedAmount);
+        }
+        if (localApp.getPriceMicros() != offer.micros) {
+            values.put(AppListTable.Columns.KEY_PRICE_MICROS, offer.micros);
         }
     }
 

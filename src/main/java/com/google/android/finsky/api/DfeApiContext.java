@@ -95,7 +95,7 @@ public class DfeApiContext
             final HashMap<String, String> hashMap = new HashMap<String, String>();
             hashMap.putAll(this.mHeaders);
             hashMap.put("Authorization", "GoogleLogin auth=" + this.mLastAuthToken);
-//            if (BuildConfig.DEBUG) {
+//            if (AppLog.DEBUG) {
 //                for(String key: hashMap.keySet()) {
 //                    AppLog.d("HTTP Header: "+key+" = "+hashMap.get(key));
 //                }
