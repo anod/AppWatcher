@@ -57,34 +57,44 @@ public class AppListReader {
         reader.beginObject();
         while (reader.hasNext()) {
             String name = reader.nextName();
+            final boolean isNull = reader.peek() == JsonToken.NULL;
+            boolean skipped = false;
             if (name.equals("id")) {
-                appId = reader.nextString();
+                appId = (isNull) ? null : reader.nextString();
             } else if (name.equals("packageName")) {
-                pname = reader.nextString();
+                pname = (isNull) ? null : reader.nextString();
             } else if (name.equals("title") && reader.peek() != JsonToken.NULL) {
-                title = reader.nextString();
+                title = (isNull) ? "" : reader.nextString();
             } else if (name.equals("creator")) {
-                creator = reader.nextString();
+                creator = (isNull) ? "" : reader.nextString();
             } else if (name.equals("uploadDate")) {
-                uploadDate = reader.nextString();
+                uploadDate = (isNull) ? "" : reader.nextString();
             } else if (name.equals("versionName")) {
-                versionName = reader.nextString();
+                versionName = (isNull) ? "" : reader.nextString();
             } else if (name.equals("versionCode")) {
-                versionNumber = reader.nextInt();
+                versionNumber = (isNull) ? 0 : reader.nextInt();
             } else if (name.equals("status")) {
-                status = reader.nextInt();
+                status = (isNull) ? 0 : reader.nextInt();
             } else if (name.equals("detailsUrl")) {
-                detailsUrl = reader.nextString();
+                detailsUrl = (isNull) ? "" : reader.nextString();
             } else if (name.equals("icon")) {
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                reader.beginArray();
-                while(reader.hasNext()) {
-                    baos.write(reader.nextInt());
+                if (isNull) {
+                    icon = null;
+                } else {
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    reader.beginArray();
+                    while (reader.hasNext()) {
+                        baos.write(reader.nextInt());
+                    }
+                    reader.endArray();
+                    icon = BitmapUtils.unFlattenBitmap(baos.toByteArray());
                 }
-                reader.endArray();
-                icon = BitmapUtils.unFlattenBitmap(baos.toByteArray());
             } else {
+                skipped = true;
                 reader.skipValue();
+            }
+            if (isNull && !skipped) {
+                reader.nextNull();
             }
         }
         reader.endObject();

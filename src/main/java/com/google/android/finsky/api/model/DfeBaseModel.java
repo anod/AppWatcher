@@ -25,7 +25,16 @@ public abstract class DfeBaseModel<DocType> extends DfeModel implements Response
         DocType response = null;
         try {
             response = future.get();
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause == null) {
+                AppLog.ex(e);
+                onErrorResponse(new VolleyError("Response exception: " + e.getMessage(), e));
+            } else {
+                AppLog.ex(cause);
+                onErrorResponse(new VolleyError("Response exception: " + cause.getMessage(), cause));
+            }
+        } catch (InterruptedException e) {
             AppLog.ex(e);
             onErrorResponse(new VolleyError("Response exception: "+e.getMessage(), e));
         }
