@@ -1,4 +1,4 @@
-package com.anod.appwatcher.model;
+package com.anod.appwatcher.model.schema;
 
 import android.provider.BaseColumns;
 
@@ -24,7 +24,7 @@ public class AppListTable {
 
     public static final String TABLE_NAME = "app_list";
 
-    public static final String[] APPLIST_PROJECTION = new String[]{
+    public static final String[] PROJECTION = new String[]{
             Columns._ID,
             Columns.KEY_APPID,
             Columns.KEY_PACKAGE,
@@ -42,4 +42,22 @@ public class AppListTable {
             Columns.KEY_DETAILS_URL
     };
 
+    public static final String TABLE_CREATE =
+            "CREATE TABLE " + TABLE_NAME + " (" +
+                    Columns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    Columns.KEY_APPID + " TEXT not null," +
+                    Columns.KEY_PACKAGE + " TEXT not null," +
+                    Columns.KEY_VERSION_NUMBER + " INTEGER," +
+                    Columns.KEY_VERSION_NAME + " TEXT," +
+                    Columns.KEY_TITLE + " TEXT not null," +
+                    Columns.KEY_CREATOR + " TEXT," +
+                    Columns.KEY_ICON_CACHE + " BLOB," +
+                    Columns.KEY_STATUS + " INTEGER," +
+                    Columns.KEY_NOTINUSE_TIMESTAMP + " INTEGER," +
+                    Columns.KEY_PRICE_TEXT + " TEXT," +
+                    Columns.KEY_PRICE_CURRENCY + " TEXT," +
+                    Columns.KEY_PRICE_MICROS + " INTEGER," +
+                    Columns.KEY_UPLOAD_DATE + " TEXT," +
+                    Columns.KEY_DETAILS_URL + " TEXT" +
+                    ") ";
 }

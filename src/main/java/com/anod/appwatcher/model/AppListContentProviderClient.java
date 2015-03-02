@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.RemoteException;
 
 import com.anod.appwatcher.AppListContentProvider;
+import com.anod.appwatcher.model.schema.AppListTable;
 import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.BitmapUtils;
 
@@ -67,8 +68,8 @@ public class AppListContentProviderClient {
 	public AppListCursor query(String sortOrder, String selection, String[] selectionArgs) {
 		Cursor cr = null;
 		try {
-			cr = mContentProviderClient.query(AppListContentProvider.CONTENT_URI,
-				AppListTable.APPLIST_PROJECTION, selection, selectionArgs, sortOrder
+			cr = mContentProviderClient.query(AppListContentProvider.APPS_CONTENT_URI,
+				AppListTable.PROJECTION, selection, selectionArgs, sortOrder
 			);
 		} catch (RemoteException e) {
 			AppLog.e(e.getMessage());
@@ -121,7 +122,7 @@ public class AppListContentProviderClient {
 	public Uri insert(AppInfo app) {
 		ContentValues values = createContentValues(app);
 		try {
-			return mContentProviderClient.insert(AppListContentProvider.CONTENT_URI, values);
+			return mContentProviderClient.insert(AppListContentProvider.APPS_CONTENT_URI, values);
 		} catch (RemoteException e) {
 			AppLog.e(e.getMessage());
 		}
@@ -135,7 +136,7 @@ public class AppListContentProviderClient {
 	}
 	
 	public int update(int rowId, ContentValues values) {
-		Uri updateUri = AppListContentProvider.CONTENT_URI.buildUpon().appendPath(String.valueOf(rowId)).build();
+		Uri updateUri = AppListContentProvider.APPS_CONTENT_URI.buildUpon().appendPath(String.valueOf(rowId)).build();
 		try {
 			return mContentProviderClient.update(updateUri, values, null, null);
 		} catch (RemoteException e) {
@@ -145,7 +146,7 @@ public class AppListContentProviderClient {
 	}
 
     public int markDeleted(int rowId) {
-        Uri updateUri = AppListContentProvider.CONTENT_URI.buildUpon().appendPath(String.valueOf(rowId)).build();
+        Uri updateUri = AppListContentProvider.APPS_CONTENT_URI.buildUpon().appendPath(String.valueOf(rowId)).build();
         ContentValues values = new ContentValues();
         values.put(AppListTable.Columns.KEY_STATUS, AppInfo.STATUS_DELETED );
         try {
@@ -160,7 +161,7 @@ public class AppListContentProviderClient {
         int numRows = 0;
         try {
             numRows=mContentProviderClient.delete(
-                AppListContentProvider.CONTENT_URI,
+                AppListContentProvider.APPS_CONTENT_URI,
                 AppListTable.Columns.KEY_STATUS + " = ?",
                 new String[]{ String.valueOf(AppInfoMetadata.STATUS_DELETED)}
             );

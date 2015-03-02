@@ -7,6 +7,7 @@ import android.support.v4.content.CursorLoader;
 import android.text.TextUtils;
 
 import com.anod.appwatcher.AppListContentProvider;
+import com.anod.appwatcher.model.schema.AppListTable;
 import com.anod.appwatcher.utils.FilterCursorWrapper;
 
 /**
@@ -14,8 +15,8 @@ import com.anod.appwatcher.utils.FilterCursorWrapper;
  * @date 8/11/13
  */
 public class AppListCursorLoader extends CursorLoader {
-    private static final Uri CONTENT_URI = AppListContentProvider.CONTENT_URI;
-    private static final String ORDER_DEFAULT = AppListTable.Columns.KEY_STATUS + " DESC, " +AppListTable.Columns.KEY_TITLE + " COLLATE LOCALIZED ASC";
+    private static final Uri CONTENT_URI = AppListContentProvider.APPS_CONTENT_URI;
+    private static final String ORDER_DEFAULT = AppListTable.Columns.KEY_STATUS + " DESC, " + AppListTable.Columns.KEY_TITLE + " COLLATE LOCALIZED ASC";
     private static final String SELECTION_TITLE = AppListTable.Columns.KEY_STATUS + " != ? AND " + AppListTable.Columns.KEY_TITLE + " LIKE ?";
     private static final String SELECTION_DEFAULT = AppListTable.Columns.KEY_STATUS + " != ? ";
     private final boolean mHasTitleFilter;
@@ -24,7 +25,7 @@ public class AppListCursorLoader extends CursorLoader {
     private int mNewCount;
 
     public AppListCursorLoader(Context context, String titleFilter,FilterCursorWrapper.CursorFilter cursorFilter) {
-		super(context, CONTENT_URI, AppListTable.APPLIST_PROJECTION, null, null,ORDER_DEFAULT);
+		super(context, CONTENT_URI, AppListTable.PROJECTION, null, null,ORDER_DEFAULT);
 
         mCursorFilter = cursorFilter;
 
