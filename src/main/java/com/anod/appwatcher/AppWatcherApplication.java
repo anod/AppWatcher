@@ -5,8 +5,10 @@ import android.content.Context;
 import android.view.ViewConfiguration;
 
 import com.crashlytics.android.Crashlytics;
+import com.mopub.common.MoPub;
 import com.newrelic.agent.android.NewRelic;
 
+import io.fabric.sdk.android.Fabric;
 import java.lang.reflect.Field;
 
 public class AppWatcherApplication extends Application {
@@ -15,7 +17,8 @@ public class AppWatcherApplication extends Application {
     @Override
 	 public void onCreate() {
 		super.onCreate();
-        Crashlytics.start(this);
+		Fabric.with(this, new Crashlytics(), new MoPub());
+
 
 		 NewRelic.withApplicationToken(
 			"AA47c4b684f2af988fdf3a13518738d7eaa8a4976f"

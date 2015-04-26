@@ -16,6 +16,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         class="com.anod.appwatcher.fragments.ListExportFragment"
-        tools:layout="@layout/restore_list" />
+        tools:layout="@layout/fragment_restore_list" />
 
 </LinearLayout>

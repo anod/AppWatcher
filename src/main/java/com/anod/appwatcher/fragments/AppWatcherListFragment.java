@@ -43,8 +43,6 @@ import com.anod.appwatcher.utils.IntentUtils;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 import com.anod.appwatcher.utils.TranslucentActionBarActivity;
 
-import java.sql.Timestamp;
-
 public class AppWatcherListFragment extends ListFragment implements
         LoaderManager.LoaderCallbacks<Cursor>,
         AppWatcherActivity.QueryChangeListener,
@@ -103,9 +101,6 @@ public class AppWatcherListFragment extends ListFragment implements
         AppLog.d("Register listeners");
         AppWatcherActivity act = (AppWatcherActivity)getActivity();
 
-        int navId = act.getSupportActionBar().getNavigationMode();
-        onNavigationChanged(navId);
-
         act.setQueryChangeListener(this);
         act.setRefreshListener(this);
 
@@ -146,7 +141,7 @@ public class AppWatcherListFragment extends ListFragment implements
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 							 Bundle savedInstanceState) {
-		View root = inflater.inflate(R.layout.applist_fragment, container, false);
+		View root = inflater.inflate(R.layout.fragment_applist, container, false);
 		mList = (ListView) root.findViewById(android.R.id.list);
 
         ((TranslucentActionBarActivity)getActivity()).adjustListView(mList);
@@ -299,7 +294,7 @@ public class AppWatcherListFragment extends ListFragment implements
 
 		@Override
 		public View newView(Context context, Cursor cursor, ViewGroup parent) {
-			View v = mInflater.inflate(R.layout.list_row, parent, false);
+			View v = mInflater.inflate(R.layout.list_item_app, parent, false);
 		    v.setClickable(true);
 		    v.setFocusable(true);
 
@@ -531,7 +526,7 @@ public class AppWatcherListFragment extends ListFragment implements
         // longer using it.
         mAdapter.swapCursor(null);
 	}
-
+/*
     @Override
     public void onNavigationChanged(int navId) {
         if (navId == AppWatcherActivity.NAV_INSTALLED) {
@@ -543,7 +538,7 @@ public class AppWatcherListFragment extends ListFragment implements
         }
         getLoaderManager().restartLoader(0, null, this);
     }
-
+*/
     @Override
 	public void onQueryTextChanged(String newQuery) {
 		String newFilter = !TextUtils.isEmpty(newQuery) ? newQuery : "";

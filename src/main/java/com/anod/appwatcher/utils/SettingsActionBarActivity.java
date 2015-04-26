@@ -8,7 +8,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
@@ -148,7 +147,7 @@ abstract public class SettingsActionBarActivity extends TranslucentActionBarActi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.preference_list_content);
+        setContentView(R.layout.activity_settings);
 
         mRefreshAnim = new MenuItemAnimation(this, R.anim.rotate);
         mRefreshAnim.setInvisibleMode(true);

@@ -12,7 +12,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.android.volley.VolleyError;
-import com.anod.appwatcher.accounts.AccountHelper;
+import com.anod.appwatcher.accounts.AuthTokenProvider;
 import com.anod.appwatcher.market.DetailsEndpoint;
 import com.anod.appwatcher.market.PlayStoreEndpoint;
 
@@ -35,7 +35,7 @@ public class ChangelogActivity extends ActionBarActivity implements PlayStoreEnd
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.app_changelog);
+		setContentView(R.layout.activity_app_changelog);
         
 		Intent data = getIntent();
 
@@ -59,10 +59,10 @@ public class ChangelogActivity extends ActionBarActivity implements PlayStoreEnd
 			}
 		});
 
-		AccountHelper accHelper = new AccountHelper(this);
+		AuthTokenProvider accHelper = new AuthTokenProvider(this);
         final Preferences prefs = new Preferences(this);
         final Account account = prefs.getAccount();
-		accHelper.requestToken(this, account, new AccountHelper.AuthenticateCallback() {
+		accHelper.requestToken(this, account, new AuthTokenProvider.AuthenticateCallback() {
 			@Override
 			public void onAuthTokenAvailable(String token) {
                 mDetailsEndpoint.setAccount(account, token);

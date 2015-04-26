@@ -1,23 +1,17 @@
 package com.anod.appwatcher.fragments;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Locale;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,7 +36,7 @@ public class ListExportFragment extends ListFragment {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.restore_list, null);
+		return inflater.inflate(R.layout.fragment_restore_list, null);
 	}
 
 	@Override
@@ -57,7 +51,7 @@ public class ListExportFragment extends ListFragment {
 		mBackupManager = ((ListExportActivity)getActivity()).getBackupManager();
 		mRestoreListener = new ImportClickListener();
 		mDeleteListener = new DeleteClickListener();
-		mAdapter = new ImportListAdapter(mContext, R.layout.restore_item, new ArrayList<File>());
+		mAdapter = new ImportListAdapter(mContext, R.layout.list_item_restore, new ArrayList<File>());
 	}
 
 	public void load() {

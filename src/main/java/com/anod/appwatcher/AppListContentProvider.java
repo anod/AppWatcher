@@ -18,7 +18,7 @@ import com.anod.appwatcher.model.schema.AppTagsTable;
 import com.anod.appwatcher.model.schema.TagsTable;
 
 public class AppListContentProvider extends ContentProvider {
-    public static final String AUTHORITY = "com.anod.appwatcher";
+    public static final String AUTHORITY = BuildConfig.APPLICATION_ID;
 
 	private DbOpenHelper mDatabaseOpenHelper;
 	

@@ -25,7 +25,7 @@ import com.anod.appwatcher.AppWatcherApplication;
 import com.anod.appwatcher.BuildConfig;
 import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.R;
-import com.anod.appwatcher.accounts.AccountHelper;
+import com.anod.appwatcher.accounts.AuthTokenProvider;
 import com.anod.appwatcher.backup.GDriveSync;
 import com.anod.appwatcher.market.BulkDetailsEndpoint;
 import com.anod.appwatcher.market.DeviceIdHelper;
@@ -281,7 +281,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
             debugPkgs = new HashSet<String>();
             //   debugPkgs.add("com.adobe.reader");
             //   debugPkgs.add("com.aide.ui");
-               debugPkgs.add("com.anod.car.home.free");
+            //   debugPkgs.add("com.anod.car.home.free");
             //   debugPkgs.add("com.anod.car.home.pro");
             //   debugPkgs.add("com.ibolt.carhome");
         }
@@ -374,7 +374,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
 
 
 	private BulkDetailsEndpoint createEndpoint(Preferences prefs) {
-		AccountHelper tokenHelper = new AccountHelper(mContext);
+		AuthTokenProvider tokenHelper = new AuthTokenProvider(mContext);
 		String authToken = null;
         Account account = prefs.getAccount();
 		try {

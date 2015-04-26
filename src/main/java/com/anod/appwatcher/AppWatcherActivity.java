@@ -11,18 +11,22 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.anod.appwatcher.accounts.AccountChooserHelper;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
 import com.anod.appwatcher.fragments.AppWatcherListFragment;
+import com.anod.appwatcher.navdrawer.Item;
+import com.anod.appwatcher.navdrawer.NavigationDrawer;
+import com.anod.appwatcher.navdrawer.list.Filters;
 import com.anod.appwatcher.sync.SyncAdapter;
 import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.MenuItemAnimation;
@@ -31,18 +35,15 @@ import com.anod.appwatcher.utils.TranslucentActionBarActivity;
 public class AppWatcherActivity extends TranslucentActionBarActivity implements
         TextView.OnEditorActionListener, SearchView.OnQueryTextListener,
         AccountChooserHelper.OnAccountSelectionListener, AccountChooserFragment.OnAccountSelectionListener,
-        ActionBar.OnNavigationListener {
+        NavigationDrawer.Listener {
 
     public static final String EXTRA_FROM_NOTIFICATION = "extra_noti";
     private boolean mSyncFinishedReceiverRegistered;
 
-    public static final int NAV_ALL = 0;
-    public static final int NAV_INSTALLED = 1;
-    public static final int NAV_NOTINSTALLED = 2;
     private MenuItemAnimation mRefreshAnim;
+    private NavigationDrawer mDrawer;
 
-    public interface QueryChangeListener {
-        void onNavigationChanged(int navId);
+	public interface QueryChangeListener {
 		void onQueryTextChanged(String newQuery);
 	}
 	public interface RefreshListener {
@@ -69,24 +70,19 @@ public class AppWatcherActivity extends TranslucentActionBarActivity implements
         super.onSaveInstanceState(outState);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
-     */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.main);
+		setContentView(R.layout.activity_main);
 
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setIcon(R.drawable.ic_launcher);
+		mContext = this;
 
-        initSystemBar();
+		setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+		setTitle(R.string.activity_main);
+		//initSystemBar();
 
-        ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(getSupportActionBar().getThemedContext(),
-                R.array.filter_list, R.layout.support_simple_spinner_dropdown_item);
+		mPreferences = new Preferences(this);
+        mDrawer = new NavigationDrawer(this, this);
 
         Intent i = getIntent();
         if (i != null) {
@@ -94,15 +90,11 @@ public class AppWatcherActivity extends TranslucentActionBarActivity implements
             i.removeExtra(EXTRA_FROM_NOTIFICATION);
         }
 
-        int nav_id = NAV_ALL;
+        int filter_id = Filters.NAVDRAWER_ITEM_ALL;
         if (savedInstanceState != null && !mOpenChangelog) {
-            nav_id = savedInstanceState.getInt("nav_id",NAV_ALL);
-            AppLog.d("Restore nav id: "+nav_id);
+            filter_id = savedInstanceState.getInt("nav_id", Filters.NAVDRAWER_ITEM_ALL);
+            AppLog.d("Restore filter id: "+filter_id);
         }
-
-        getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-        getSupportActionBar().setListNavigationCallbacks(spinnerAdapter, this);
-        getSupportActionBar().setSelectedNavigationItem(nav_id);
 
         if (savedInstanceState == null) {
             AppWatcherListFragment newFragment = AppWatcherListFragment.newInstance();
@@ -113,14 +105,23 @@ public class AppWatcherActivity extends TranslucentActionBarActivity implements
 
         mRefreshAnim = new MenuItemAnimation(this, R.anim.rotate);
 
-		mContext = this;
-		mPreferences = new Preferences(this);
-
 		mAccountChooserHelper = new AccountChooserHelper(this, mPreferences, this);
 		mAccountChooserHelper.init();
 
 
 	}
+
+	@Override
+	public void onDrawerItemClick(int listType, Item item) {
+		// TODO:
+	}
+
+	@Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        // Sync the toggle state after onRestoreInstanceState has occurred.
+        mDrawer.syncState();
+    }
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -181,18 +182,18 @@ public class AppWatcherActivity extends TranslucentActionBarActivity implements
 	private BroadcastReceiver mSyncFinishedReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			if (intent.getAction().equals(SyncAdapter.SYNC_PROGRESS)) {
-                mRefreshAnim.start();
-			} else if (intent.getAction().equals(SyncAdapter.SYNC_STOP)) {
-				int updatesCount = intent.getIntExtra(SyncAdapter.EXTRA_UPDATES_COUNT, 0);
-                mRefreshAnim.stop();
-				if (updatesCount == 0) {
-					Toast.makeText(AppWatcherActivity.this, R.string.no_updates_found, Toast.LENGTH_SHORT).show();
-				}
-				if (mRefreshListener != null) {
-					mRefreshListener.onRefreshFinish();
-				}
-			}
+        if (intent.getAction().equals(SyncAdapter.SYNC_PROGRESS)) {
+            mRefreshAnim.start();
+        } else if (intent.getAction().equals(SyncAdapter.SYNC_STOP)) {
+            int updatesCount = intent.getIntExtra(SyncAdapter.EXTRA_UPDATES_COUNT, 0);
+            mRefreshAnim.stop();
+            if (updatesCount == 0) {
+                Toast.makeText(AppWatcherActivity.this, R.string.no_updates_found, Toast.LENGTH_SHORT).show();
+            }
+            if (mRefreshListener != null) {
+                mRefreshListener.onRefreshFinish();
+            }
+        }
 		}
 
 	};
@@ -206,7 +207,9 @@ public class AppWatcherActivity extends TranslucentActionBarActivity implements
 		mSyncFinishedReceiverRegistered = true;
 		super.onResume();
 
-		AppLog.d("Activity::onResume - Mark updates as viewed.");
+        mDrawer.refresh();
+
+        AppLog.d("Activity::onResume - Mark updates as viewed.");
 		mPreferences.markViewed(true);
 
 		notifyQueryChange("");
@@ -229,6 +232,9 @@ public class AppWatcherActivity extends TranslucentActionBarActivity implements
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+        if (mDrawer.onOptionsItemSelected(item)) {
+            return true;
+        }
 		switch (item.getItemId()) {
 		case R.id.menu_act_refresh:
 			requestRefresh();
@@ -360,15 +366,15 @@ public class AppWatcherActivity extends TranslucentActionBarActivity implements
 		notifyQueryChange(s);
 		return true;
 	}
-
-    @Override
-    public boolean onNavigationItemSelected(int position, long itemId) {
-        AppLog.d("Navigation changed: "+position);
-        if (mQueryChangeListener != null) {
-            mQueryChangeListener.onNavigationChanged(position);
-        }
-        return false;
-    }
+//
+//    @Override
+//    public boolean onNavigationItemSelected(int position, long itemId) {
+//        AppLog.d("Navigation changed: "+position);
+//        if (mQueryChangeListener != null) {
+//            mQueryChangeListener.onNavigationChanged(position);
+//        }
+//        return false;
+//    }
 
 	public void notifyQueryChange(String s) {
 		if (mQueryChangeListener != null) {

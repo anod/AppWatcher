@@ -49,13 +49,45 @@
                 android:drawSelectorOnTop="false" />
         </android.support.v4.widget.SwipeRefreshLayout>
 
+        <LinearLayout
+            android:id="@id/android:empty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_gravity="center">
+
             <TextView
-                android:id="@id/android:empty"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="@string/search_for_app"
+                android:text="The watch list is empty"
                 android:textAppearance="?android:attr/textAppearanceSmall" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Search in Play Store"
+                android:drawableTop="@drawable/ic_action_search"
+                />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Import installed"
+                android:drawableTop="@drawable/ic_action_installed"
+                />
+
+            <TextView
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Add apps directly from Play Store using Share button"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+        </LinearLayout>
+
 
     </FrameLayout>
 

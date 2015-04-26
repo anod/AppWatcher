@@ -89,5 +89,20 @@
     <string name="dismiss">Dismiss</string>
     <string name="add_to_appwatcher">Add to App Watcher</string>
     <string name="more">More...</string>
+    <string name="drawer_open">Open</string>
+    <string name="drawer_close">Close</string>
 
+    <string name="navdrawer_showall">Show All</string>
+    <string name="navdrawer_installed">Installed</string>
+    <string name="navdrawer_not_installed">Not Installed</string>
+    <string name="navdrawer_item_add">Add</string>
+    <string name="navdrawer_item_filter">Filter</string>
+    <string name="navdrawer_item_tags">Tags</string>
+    <string name="navdrawer_item_settings">Settings</string>
+
+    <string name="navdrawer_item_filter_all">Show All</string>
+    <string name="navdrawer_item_filter_installed">Installed</string>
+    <string name="navdrawer_item_filter_notinstalled">Not Installed</string>
+    <string name="activity_market">Search</string>
+    <string name="activity_main">Watch List</string>
 </resources>

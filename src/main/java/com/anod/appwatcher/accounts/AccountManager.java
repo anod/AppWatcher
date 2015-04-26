@@ -6,7 +6,8 @@ import android.content.Context;
 import com.anod.appwatcher.Preferences;
 
 /**
- * Created by alex on 8/2/14.
+ * @author alex
+ * @date 2015-03-03
  */
 public class AccountManager {
 
@@ -18,7 +19,7 @@ public class AccountManager {
     public AccountManager(Context context) {
         mAccountManager = android.accounts.AccountManager.get(context);
         mPreferences = new Preferences(context);
-        mAccounts = mAccountManager.getAccountsByType(AccountHelper.ACCOUNT_TYPE);
+        mAccounts = mAccountManager.getAccountsByType(AuthTokenProvider.ACCOUNT_TYPE);
         mCurrentAccount = mPreferences.getAccount();
     }
 
@@ -45,5 +46,9 @@ public class AccountManager {
     public void saveCurrentAccount(Account acc) {
         mPreferences.updateAccount(acc);
         mCurrentAccount=acc;
+    }
+
+    public boolean hasActiveAccount() {
+        return mCurrentAccount != null;
     }
 }

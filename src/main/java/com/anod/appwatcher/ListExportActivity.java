@@ -16,7 +16,7 @@ public class ListExportActivity extends FragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		setContentView(R.layout.list_import);
+		setContentView(R.layout.activity_list_import);
 
 		mBackupManager = new ListExportManager(this);
 

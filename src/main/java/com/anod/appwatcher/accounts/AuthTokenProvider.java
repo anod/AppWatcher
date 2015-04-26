@@ -17,13 +17,13 @@ import com.crashlytics.android.Crashlytics;
 
 import java.io.IOException;
 
-public class AccountHelper {
+public class AuthTokenProvider {
 
 	private static final String AUTH_TOKEN_TYPE = "androidmarket";
 	public static final String ACCOUNT_TYPE = "com.google";
 	private final AccountManager mAccountManager;
 
-	public AccountHelper(Context context) {
+	public AuthTokenProvider(Context context) {
 		mAccountManager = AccountManager.get(context);
 	}
 
@@ -65,25 +65,25 @@ public class AccountHelper {
 	}
 
 	private static class GetTokenTask extends AsyncTask<Integer, Void, String> {
-		private final AccountHelper mAccountHelper;
+		private final AuthTokenProvider mAuthTokenProvider;
 		private Account mAccount;
 		private Activity mActivity;
 		private AuthenticateCallback mCallback;
 		private final AccountManager mAccountManager;
 
-		public GetTokenTask(Activity activity, Account acc, AccountManager accountManager, AccountHelper helper, AuthenticateCallback callback) {
+		public GetTokenTask(Activity activity, Account acc, AccountManager accountManager, AuthTokenProvider helper, AuthenticateCallback callback) {
 			mAccount = acc;
 			mActivity = activity;
 			mCallback = callback;
 			mAccountManager = accountManager;
-			mAccountHelper = helper;
+			mAuthTokenProvider = helper;
 		}
 
 		@Override
 		protected String doInBackground(Integer... params) {
 			String token = null;
 			try {
-				token = mAccountHelper.requestTokenBlocking(mActivity, mAccount);
+				token = mAuthTokenProvider.requestTokenBlocking(mActivity, mAccount);
 			} catch (IOException e) {
 				AppLog.e("transient error encountered: " + e.getMessage(), e);
 				mCallback.onUnRecoverableException(e.getMessage());

@@ -46,7 +46,7 @@ public class AboutDialogFragment extends DialogFragment {
 		long time = pref.getLastUpdateTime();
 
 		LayoutInflater inflater = getActivity().getLayoutInflater();
-		View aboutView = inflater.inflate(R.layout.about, null);
+		View aboutView = inflater.inflate(R.layout.fragment_about, null);
 
 		String text = getString(R.string.dialog_about_text);
 		TextView lastUpdateView = (TextView)aboutView.findViewById(R.id.last_update);

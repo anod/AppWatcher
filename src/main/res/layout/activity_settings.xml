@@ -1,69 +1,38 @@
-<?xml version="1.0" encoding="utf-8"?>
-
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:paddingTop="0dp"
+             android:id="@+id/activity_frame"
+    >
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:orientation="vertical"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:background="@android:color/transparent"
+ >
+    <!--
+     style="?android:attr/preferenceFragmentListStyle"
+     -->
 
-    <TextView
+    <ListView android:id="@android:id/list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="?android:attr/listSeparatorTextViewStyle"
-        android:paddingLeft="@dimen/preference_item_padding_side"
-        android:paddingRight="@dimen/preference_item_padding_side"
-        android:text="@string/pref_header_drive_sync"
-        />
+        android:layout_height="0px"
+        android:layout_weight="1"
+        android:paddingTop="0dip"
+        android:paddingBottom="0dip"
+        android:scrollbarStyle="outsideOverlay"
+        android:clipToPadding="false"
+        android:drawSelectorOnTop="false"
+        android:cacheColorHint="@android:color/transparent"
+        android:padding="@dimen/preference_item_padding_side"
+        android:scrollbarAlwaysDrawVerticalTrack="true" />
 
-    <CheckBox
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="New CheckBox"
-        android:id="@+id/checkBox" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="New Button"
-        android:id="@+id/button" />
-
-    <TextView
+    <TextView android:id="@android:id/empty"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="?android:attr/listSeparatorTextViewStyle"
-        android:paddingLeft="@dimen/preference_item_padding_side"
-        android:paddingRight="@dimen/preference_item_padding_side"
-        android:text="@string/pref_header_backup"
-        />
+        android:layout_height="match_parent"
+        android:padding="@dimen/preference_item_padding_side"
+        android:gravity="center"
+        android:visibility="gone" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="New Button"
-        android:id="@+id/button2" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="New Button"
-        android:id="@+id/button3" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="?android:attr/listSeparatorTextViewStyle"
-        android:paddingLeft="@dimen/preference_item_padding_side"
-        android:paddingRight="@dimen/preference_item_padding_side"
-        android:text="@string/pref_header_about"
-        />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="New Button"
-        android:id="@+id/button4" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="New Button"
-        android:id="@+id/button5" />
 </LinearLayout>
+    </FrameLayout>

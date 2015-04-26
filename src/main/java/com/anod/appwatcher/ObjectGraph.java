@@ -3,6 +3,7 @@ package com.anod.appwatcher;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NoCache;
+import com.anod.appwatcher.accounts.AccountManager;
 import com.anod.appwatcher.market.DeviceIdHelper;
 import com.anod.appwatcher.volley.LruBitmapCache;
 import com.anod.appwatcher.volley.Network;
@@ -18,6 +19,7 @@ public class ObjectGraph {
     private LruBitmapCache mCache;
     private ImageLoader mImageLoader;
     private String mDeviceId;
+    private AccountManager mAccountManager;
 
     public ObjectGraph(AppWatcherApplication application)  {
         this.app = application;
@@ -28,6 +30,13 @@ public class ObjectGraph {
             mCache = new LruBitmapCache(this.app);
         }
         return mCache;
+    }
+
+    public AccountManager accountManager() {
+        if (mAccountManager == null) {
+            mAccountManager = new AccountManager(this.app);
+        }
+        return mAccountManager;
     }
 
     public String deviceId() {

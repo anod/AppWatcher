@@ -32,7 +32,6 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.anod.appwatcher.accounts.AccountChooserHelper;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
-import com.anod.appwatcher.market.DeviceIdHelper;
 import com.anod.appwatcher.market.SearchEndpoint;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListContentProviderClient;
@@ -75,7 +74,7 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		setContentView(R.layout.market_search);
+		setContentView(R.layout.activity_market_search);
         initSystemBar();
 
 		mContext = this;
@@ -398,7 +397,7 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
 			View v = convertView;
 			if (v == null) {
 				LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				v = vi.inflate(R.layout.market_app_row, null);
+				v = vi.inflate(R.layout.list_item_market_app, null);
 				holder = new ViewHolder();
 				holder.row = v.findViewById(R.id.approw);
 				holder.title = (TextView) v.findViewById(android.R.id.title);

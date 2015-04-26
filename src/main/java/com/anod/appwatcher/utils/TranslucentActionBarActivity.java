@@ -4,8 +4,12 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.os.Build;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AbsListView;
 import android.widget.FrameLayout;
 import android.widget.ListView;
@@ -17,27 +21,31 @@ import com.readystatesoftware.systembartint.SystemBarTintManager;
  * @author alex
  * @date 2014-08-07
  */
-abstract public class TranslucentActionBarActivity extends ActionBarActivity {
+abstract public class TranslucentActionBarActivity extends AppCompatActivity {
 
 
     protected int mPixelInsetBottom;
     protected boolean mIsNavigationAtBottom;
 
     protected void initSystemBar() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        Resources r = getResources();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(r.getColor(R.color.colorPrimaryDark));
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             SystemBarTintManager sysbars = new SystemBarTintManager(this);
-            Resources r = getResources();
-            sysbars.setStatusBarTintColor(r.getColor(R.color.abs__background_holo_dark));
+            sysbars.setStatusBarTintColor(r.getColor(R.color.colorPrimaryDark));
             sysbars.setStatusBarAlpha(1);
             sysbars.setStatusBarTintEnabled(true);
 
             SystemBarTintManager.SystemBarConfig cfg = sysbars.getConfig();
 
-
             mIsNavigationAtBottom = cfg.isNavigationAtBottom();
 
-            FrameLayout frame = (FrameLayout) findViewById(R.id.activity_frame);
-            frame.setBackgroundColor(r.getColor(R.color.abs__background_holo_light));
+            ViewGroup frame = (ViewGroup) findViewById(R.id.activity_frame);
+            frame.setBackgroundColor(r.getColor(R.color.white));
             if (mIsNavigationAtBottom) {
                 mPixelInsetBottom = cfg.isNavigationAtBottom() ? getActionBarHeight(this) : 0;//cfg.getPixelInsetBottom();
                 frame.setPadding(0,cfg.getPixelInsetTop(true),0,0);
@@ -46,6 +54,7 @@ abstract public class TranslucentActionBarActivity extends ActionBarActivity {
             }
         }
     }
+
     private int getActionBarHeight(Context context) {
         int result = 0;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
