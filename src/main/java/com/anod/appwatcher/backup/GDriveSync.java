@@ -5,27 +5,15 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentSender;
-import android.net.Uri;
-import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
-import com.anod.appwatcher.AppWatcherActivity;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.backup.gdrive.SyncConnectedWorker;
 import com.anod.appwatcher.backup.gdrive.SyncTask;
-import com.anod.appwatcher.sync.SyncAdapter;
-import com.anod.appwatcher.utils.ActivityListener;
-import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.GooglePlayServices;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.drive.Drive;
-
-import java.io.File;
 
 /**
  * @author alex

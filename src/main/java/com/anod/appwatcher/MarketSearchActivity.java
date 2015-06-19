@@ -38,14 +38,14 @@ import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.DocUtils;
 import com.anod.appwatcher.utils.PackageManagerUtils;
-import com.anod.appwatcher.utils.TranslucentActionBarActivity;
+import com.anod.appwatcher.utils.DrawerActivity;
 import com.google.android.finsky.api.model.Document;
 import com.google.android.finsky.protos.Common;
 import com.google.android.finsky.protos.DocDetails;
 
 import java.util.HashMap;
 
-public class MarketSearchActivity extends TranslucentActionBarActivity implements AccountChooserHelper.OnAccountSelectionListener, AccountChooserFragment.OnAccountSelectionListener, SearchEndpoint.Listener {
+public class MarketSearchActivity extends DrawerActivity implements AccountChooserHelper.OnAccountSelectionListener, AccountChooserFragment.OnAccountSelectionListener, SearchEndpoint.Listener {
 	public static final String EXTRA_KEYWORD = "keyword";
 	public static final String EXTRA_EXACT = "exact";
 	public static final String EXTRA_SHARE = "share";
@@ -75,7 +75,6 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.activity_market_search);
-        initSystemBar();
 
 		mContext = this;
 
@@ -96,8 +95,6 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
 		mListView.setEmptyView(findViewById(android.R.id.empty));
 		mListView.setAdapter(mAdapter);
 		mListView.setOnItemClickListener(itemClickListener);
-
-        adjustListView(mListView);
 
         mRetryView = (LinearLayout)findViewById(R.id.retry_box);
         mRetryButton = (Button)findViewById(R.id.retry);

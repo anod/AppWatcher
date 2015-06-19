@@ -41,7 +41,6 @@ import com.anod.appwatcher.model.InstalledFilter;
 import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.IntentUtils;
 import com.anod.appwatcher.utils.PackageManagerUtils;
-import com.anod.appwatcher.utils.TranslucentActionBarActivity;
 
 public class AppWatcherListFragment extends ListFragment implements
         LoaderManager.LoaderCallbacks<Cursor>,
@@ -144,15 +143,13 @@ public class AppWatcherListFragment extends ListFragment implements
 		View root = inflater.inflate(R.layout.fragment_applist, container, false);
 		mList = (ListView) root.findViewById(android.R.id.list);
 
-        ((TranslucentActionBarActivity)getActivity()).adjustListView(mList);
-
 		mListContainer =  root.findViewById(R.id.listContainer);
 		mProgressContainer = root.findViewById(R.id.progressContainer);
 		mListShown = true;
 
         mSwipeLayout = (SwipeRefreshLayout) root.findViewById(R.id.swipe_container);
         mSwipeLayout.setOnRefreshListener(this);
-        mSwipeLayout.setColorScheme(android.R.color.holo_blue_bright,
+        mSwipeLayout.setColorSchemeResources(android.R.color.holo_blue_bright,
                 android.R.color.holo_green_light,
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);

@@ -11,7 +11,8 @@
     <color name="colorPrimary">@color/material_blue_gray_700</color>
     <color name="colorPrimaryDark">@color/material_blue_gray_900</color>
     <color name="textColorPrimary">@color/white</color>
-
+    <color name="colorAccent">#FF03a9f4</color>
+    
 	<color name="text_dark">#ff292929</color>
 	<color name="row_grayout">#ffcccccc</color>
 	<color name="list_background">#eeeeee</color>

@@ -3,7 +3,9 @@
     android:id="@+id/drawer_layout"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <LinearLayout
         android:id="@+id/activity_frame"
@@ -24,6 +26,13 @@
     </LinearLayout>
 
     <!-- Nav drawer -->
-    <include layout="@layout/navdrawer" />
+    <android.support.design.widget.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:headerLayout="@layout/nav_header"
+        app:menu="@menu/navigation_items"/>
     
 </android.support.v4.widget.DrawerLayout>

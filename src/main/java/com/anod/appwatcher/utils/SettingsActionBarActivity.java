@@ -2,6 +2,7 @@ package com.anod.appwatcher.utils;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -19,7 +20,7 @@ import com.anod.appwatcher.R;
 import java.util.ArrayList;
 import java.util.List;
 
-abstract public class SettingsActionBarActivity extends TranslucentActionBarActivity implements AdapterView.OnItemClickListener {
+abstract public class SettingsActionBarActivity extends DrawerActivity implements AdapterView.OnItemClickListener {
     protected ListView mListView;
     private PreferenceAdapter mPreferenceAdapter;
     private MenuItemAnimation mRefreshAnim;
@@ -148,10 +149,10 @@ abstract public class SettingsActionBarActivity extends TranslucentActionBarActi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
 
         mRefreshAnim = new MenuItemAnimation(this, R.anim.rotate);
         mRefreshAnim.setInvisibleMode(true);
-        initSystemBar();
         init();
 
         ArrayList<Preference> preferences = initPreferenceItems();
@@ -161,7 +162,6 @@ abstract public class SettingsActionBarActivity extends TranslucentActionBarActi
         mListView.setEmptyView(findViewById(android.R.id.empty));
         mListView.setAdapter(mPreferenceAdapter);
         mListView.setOnItemClickListener(this);
-        adjustListView(mListView);
     }
 
     protected abstract void init();

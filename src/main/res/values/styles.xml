@@ -28,6 +28,7 @@
         <!-- Set AppCompat’s color theming attrs -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
      </style>
 
     <style name="AppThemeBase" parent="@style/Theme.AppCompat.Light.NoActionBar">
