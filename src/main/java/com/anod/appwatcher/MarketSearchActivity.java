@@ -79,7 +79,7 @@ public class MarketSearchActivity extends DrawerActivity implements AccountChoos
 		mContext = this;
 
 		Resources r = mContext.getResources();
-		mColorBgGray = r.getColor(R.color.row_grayout);
+		mColorBgGray = r.getColor(R.color.row_inactive);
 		mColorBgWhite = r.getColor(R.color.white);
 
 		mAddedApps = new HashMap<String, Boolean>();

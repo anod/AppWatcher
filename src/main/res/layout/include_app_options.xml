@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/options"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_horizontal|center_vertical"
+    android:orientation="horizontal"
+    android:paddingBottom="2dp"
+    android:paddingTop="2dp"
+    tools:showIn="@layout/list_item_app">
+
+    <ImageButton
+        android:id="@+id/share_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="0dp"
+        android:layout_marginRight="1dp"
+        android:background="@drawable/app_act_button"
+        android:contentDescription="@string/share"
+        android:focusable="false"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:src="@drawable/ic_action_share"
+        android:text="@string/share"/>
+
+    <Button
+        android:id="@+id/changelog_btn"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="1dp"
+        android:layout_marginRight="1dp"
+        android:layout_weight="1"
+        android:background="@drawable/app_act_button"
+        android:contentDescription="@string/whats_new"
+        android:drawableLeft="@drawable/ic_action_info"
+        android:drawablePadding="0dp"
+        android:focusable="false"
+        android:paddingLeft="4dp"
+        android:text="@string/whats_new"
+        android:textColor="@color/text_dark"
+        android:textSize="@dimen/textSize"/>
+
+    <Button
+        android:id="@+id/market_btn"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="1dp"
+        android:layout_marginRight="1dp"
+        android:layout_weight="1"
+        android:background="@drawable/app_act_button"
+        android:contentDescription="@string/play_store"
+        android:drawableLeft="@drawable/ic_action_playback_play"
+        android:drawablePadding="0dp"
+        android:focusable="false"
+        android:paddingLeft="4dp"
+        android:text="@string/play_store"
+        android:textColor="@color/text_dark"
+        android:textSize="@dimen/textSize"/>
+
+    <ImageButton
+        android:id="@+id/remove_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="1dp"
+        android:layout_marginRight="0dp"
+        android:background="@drawable/app_act_button"
+        android:contentDescription="@string/remove"
+        android:focusable="false"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:src="@drawable/ic_action_cancel"/>
+</LinearLayout>

@@ -71,7 +71,7 @@
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentRight="true"
                 android:text="@string/installed"
-                android:textColor="@color/green"
+                android:textColor="@color/theme_accent"
                 android:textSize="@dimen/textSize" />
 
         </RelativeLayout>
