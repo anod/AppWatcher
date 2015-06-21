@@ -15,16 +15,18 @@ import com.anod.appwatcher.utils.PackageManagerUtils;
 public class ListCursorAdapterWrapper extends RecyclerView.Adapter<AppViewHolder> {
     private final ListCursorAdapter mCursorAdapter;
     private Context mContext;
+    private AppViewHolder.OnClickListener mListener;
 
-    public ListCursorAdapterWrapper(Context context, PackageManagerUtils pmutils) {
+    public ListCursorAdapterWrapper(Context context, PackageManagerUtils pmutils, AppViewHolder.OnClickListener listener) {
         mCursorAdapter = new ListCursorAdapter(context, pmutils);
         mContext = context;
+        mListener = listener;
     }
 
     @Override
     public AppViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = mCursorAdapter.newView(mContext, mCursorAdapter.getCursor(), parent);
-        AppViewHolder holder = new AppViewHolder(v);
+        AppViewHolder holder = new AppViewHolder(v, mListener);
         v.setTag(holder);
         return holder;
     }

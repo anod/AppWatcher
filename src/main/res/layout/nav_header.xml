@@ -17,7 +17,7 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
-              android:layout_height="192dp"
+              android:layout_height="96dp"
               android:background="?attr/colorPrimaryDark"
               android:padding="16dp"
               android:theme="@style/ThemeOverlay.AppCompat.Dark"
@@ -25,9 +25,13 @@
               android:gravity="bottom">
 
     <TextView
+        android:id="@+id/account_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Username"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
+        android:text="@string/choose_an_account"
+        android:drawableRight="@drawable/ic_drawer_accounts_expand"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:clickable="true"
+        android:background="?attr/selectableItemBackgroundBorderless"/>
 
 </LinearLayout>

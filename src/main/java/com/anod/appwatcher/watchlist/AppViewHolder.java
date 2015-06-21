@@ -24,9 +24,17 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
     public ImageView icon;
     public View newIndicator;
     public TextView updateDate;
+    private OnClickListener mListener;
 
-    public AppViewHolder(View itemView) {
+    interface OnClickListener {
+        void onIconClick(AppInfo app);
+        void onItemClick(AppInfo app);
+    }
+
+    public AppViewHolder(View itemView, OnClickListener listener) {
         super(itemView);
+
+        mListener = listener;
 
         this.app = null;
         this.position = 0;
@@ -41,33 +49,16 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
         this.newIndicator = itemView.findViewById(R.id.new_indicator);
         this.updateDate = (TextView) itemView.findViewById(R.id.update_date);
 
-        int mDefColor = this.version.getTextColors().getDefaultColor();
         itemView.setOnClickListener(this);
-
-                /*
-                                                        Viewthis this = (Viewthis)v.getTag();
-                                        onChangelogClick(this.app.getAppId(), this.app.getDetailsUrl());
-                 */
-
         this.icon.setOnClickListener(this);
 
     }
 
     @Override
     public void onClick(View v) {
-
+        if (v.getId() == android.R.id.icon) {
+            mListener.onIconClick(this.app);
+        }
+        mListener.onItemClick(this.app);
     }
-
-        /*
-        new OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                                final String tag = (String)v.getTag();
-                                String[] parts = tag.split(",", -2);
-                                String appId = parts[0];
-                                String detailsUrl = parts[1];
-                                onChangelogClick(appId, detailsUrl);
-                        }
-
-         */
 }

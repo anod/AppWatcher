@@ -6,8 +6,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.SearchView;
@@ -25,7 +25,7 @@ import com.anod.appwatcher.model.Filters;
 import com.anod.appwatcher.sync.SyncAdapter;
 import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.MenuItemAnimation;
-import com.anod.appwatcher.utils.DrawerActivity;
+import com.anod.appwatcher.ui.DrawerActivity;
 
 public class AppWatcherActivity extends DrawerActivity implements
         TextView.OnEditorActionListener, SearchView.OnQueryTextListener,
@@ -52,6 +52,7 @@ public class AppWatcherActivity extends DrawerActivity implements
     private MenuItem mWifiMenuItem;
     private Account mSyncAccount;
     private MenuItem mSearchMenuItem;
+    private FloatingActionButton mActionButton;
     private QueryChangeListener mQueryChangeListener;
 
     private RefreshListener mRefreshListener;
@@ -108,10 +109,10 @@ public class AppWatcherActivity extends DrawerActivity implements
         // Inflate the menu
         getMenuInflater().inflate(R.menu.main, menu);
 
-        MenuItem autoSyncMenuItem = menu.findItem(R.id.menu_auto_update);
-        mWifiMenuItem = menu.findItem(R.id.menu_wifi_only);
-        MenuItem refreshMenuItem = menu.findItem(R.id.menu_act_refresh);
-        mRefreshAnim.setMenuItem(refreshMenuItem);
+//        MenuItem autoSyncMenuItem = menu.findItem(R.id.menu_auto_update);
+//        mWifiMenuItem = menu.findItem(R.id.menu_wifi_only);
+//        MenuItem refreshMenuItem = menu.findItem(R.id.menu_act_refresh);
+//        mRefreshAnim.setMenuItem(refreshMenuItem);
 
         mSearchMenuItem = menu.findItem(R.id.menu_act_filter);
         MenuItemCompat.setOnActionExpandListener(mSearchMenuItem, new MenuItemCompat.OnActionExpandListener() {
@@ -130,17 +131,13 @@ public class AppWatcherActivity extends DrawerActivity implements
         final SearchView searchView = (SearchView) MenuItemCompat.getActionView(mSearchMenuItem);
         searchView.setOnQueryTextListener(this);
 
-        boolean useAutoSync = ContentResolver.getSyncAutomatically(mSyncAccount, AppListContentProvider.AUTHORITY);
-        autoSyncMenuItem.setChecked(useAutoSync);
-
-        mWifiMenuItem.setChecked(mPreferences.isWifiOnly());
-        if (useAutoSync == false) {
-            mWifiMenuItem.setEnabled(false);
-        }
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
-            menuTitleUpdateCompat(autoSyncMenuItem, R.string.menu_auto_update);
-            menuTitleUpdateCompat(mWifiMenuItem, R.string.menu_wifi_only);
-        }
+//        boolean useAutoSync = ContentResolver.getSyncAutomatically(mSyncAccount, AppListContentProvider.AUTHORITY);
+//        autoSyncMenuItem.setChecked(useAutoSync);
+//
+//        mWifiMenuItem.setChecked(mPreferences.isWifiOnly());
+//        if (useAutoSync == false) {
+//            mWifiMenuItem.setEnabled(false);
+//        }
 
         updateSyncStatus();
 
@@ -209,41 +206,37 @@ public class AppWatcherActivity extends DrawerActivity implements
     }
 
     @Override
+    protected void onAccountChooseClick() {
+        mAccountChooserHelper.showAccountsDialog();
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_act_refresh:
-                requestRefresh();
-                return true;
-            case R.id.menu_auto_update:
-                boolean useAutoSync = !item.isChecked();
-                item.setChecked(useAutoSync);
-                if (useAutoSync == false) {
-                    mWifiMenuItem.setEnabled(false);
-                } else {
-                    mWifiMenuItem.setEnabled(true);
-                }
-                // on old version there is no checkboxes
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
-                    menuTitleUpdateCompat(item, R.string.menu_auto_update);
-                }
-                mAccountChooserHelper.setSync(useAutoSync);
-                return true;
-            case R.id.menu_wifi_only:
-                boolean useWifiOnly = !item.isChecked();
-                item.setChecked(useWifiOnly);
-                mPreferences.saveWifiOnly(useWifiOnly);
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
-                    menuTitleUpdateCompat(item, R.string.menu_wifi_only);
-                }
-                mAccountChooserHelper.setSync(true);
-                return true;
-            case R.id.menu_accounts:
-                mAccountChooserHelper.showAccountsDialog();
-                return true;
-            case R.id.menu_more:
-                Intent gdriveSync = new Intent(this, SettingsActivity.class);
-                startActivity(gdriveSync);
-                return true;
+//            case R.id.menu_act_refresh:
+//                requestRefresh();
+//                return true;
+//            case R.id.menu_auto_update:
+//                boolean useAutoSync = !item.isChecked();
+//                item.setChecked(useAutoSync);
+//                if (useAutoSync == false) {
+//                    mWifiMenuItem.setEnabled(false);
+//                } else {
+//                    mWifiMenuItem.setEnabled(true);
+//                }
+//                // on old version there is no checkboxes
+//                mAccountChooserHelper.setSync(useAutoSync);
+//                return true;
+//            case R.id.menu_wifi_only:
+//                boolean useWifiOnly = !item.isChecked();
+//                item.setChecked(useWifiOnly);
+//                mPreferences.saveWifiOnly(useWifiOnly);
+//                mAccountChooserHelper.setSync(true);
+//                return true;
+//            case R.id.menu_more:
+//                Intent gdriveSync = new Intent(this, SettingsActivity.class);
+//                startActivity(gdriveSync);
+//                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -268,23 +261,6 @@ public class AppWatcherActivity extends DrawerActivity implements
         return true;
     }
 
-    /**
-     * For devices prior to honeycomb add enable/disable text
-     *
-     * @param item
-     * @param titleRes
-     */
-    private void menuTitleUpdateCompat(MenuItem item, int titleRes) {
-
-        String title = getString(titleRes);
-        String state = null;
-        if (item.isChecked()) {
-            state = getString(R.string.enabled);
-        } else {
-            state = getString(R.string.disabled);
-        }
-        item.setTitle(String.format("%s (%s)", title, state));
-    }
 
     @Override
     public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
@@ -300,12 +276,10 @@ public class AppWatcherActivity extends DrawerActivity implements
             Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
             return;
         }
-        if (mSyncAccount == null) {
-            mSyncAccount = account;
-        } else {
-            mSyncAccount = account;
-        }
+        mSyncAccount = account;
+        setDrawerAccount(account);
     }
+
 
     @Override
     public void onDialogAccountSelected(Account account) {

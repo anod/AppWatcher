@@ -132,7 +132,7 @@ public class ListCursorAdapter extends CursorAdapter {
 
     @Override
     public Cursor swapCursor(Cursor newCursor) {
-        mTotalCount = newCursor.getCount();
+        mTotalCount = (newCursor == null) ? 0 : newCursor.getCount();
         return super.swapCursor(newCursor);
     }
 

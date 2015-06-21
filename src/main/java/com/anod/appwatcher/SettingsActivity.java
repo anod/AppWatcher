@@ -9,7 +9,7 @@ import android.widget.Toast;
 import com.anod.appwatcher.backup.ExportTask;
 import com.anod.appwatcher.backup.GDriveSync;
 import com.anod.appwatcher.backup.ListExportManager;
-import com.anod.appwatcher.utils.SettingsActionBarActivity;
+import com.anod.appwatcher.ui.SettingsActionBarActivity;
 
 import java.util.ArrayList;
 

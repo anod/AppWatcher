@@ -1,4 +1,4 @@
-package com.anod.appwatcher.utils;
+package com.anod.appwatcher.ui;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -16,11 +16,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.anod.appwatcher.R;
+import com.anod.appwatcher.utils.MenuItemAnimation;
 
 import java.util.ArrayList;
 import java.util.List;
 
-abstract public class SettingsActionBarActivity extends DrawerActivity implements AdapterView.OnItemClickListener {
+abstract public class SettingsActionBarActivity extends ToolbarActivity implements AdapterView.OnItemClickListener {
     protected ListView mListView;
     private PreferenceAdapter mPreferenceAdapter;
     private MenuItemAnimation mRefreshAnim;
@@ -149,7 +150,7 @@ abstract public class SettingsActionBarActivity extends DrawerActivity implement
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        setupToolbar();
 
         mRefreshAnim = new MenuItemAnimation(this, R.anim.rotate);
         mRefreshAnim.setInvisibleMode(true);

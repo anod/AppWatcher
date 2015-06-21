@@ -37,7 +37,7 @@ public class AppWatcherListFragment extends Fragment implements
         LoaderManager.LoaderCallbacks<Cursor>,
         AppWatcherActivity.QueryChangeListener,
         AppWatcherActivity.RefreshListener,
-        SwipeRefreshLayout.OnRefreshListener {
+        SwipeRefreshLayout.OnRefreshListener, AppViewHolder.OnClickListener {
 
     private ListCursorAdapterWrapper mAdapter;
     private String mTitleFilter = "";
@@ -50,6 +50,7 @@ public class AppWatcherListFragment extends Fragment implements
     private InstalledFilter mInstalledFilter;
 
     private PackageManagerUtils mPMUtils;
+    private View mEmptyView;
 
     public static AppWatcherListFragment newInstance() {
         AppWatcherListFragment frag = new AppWatcherListFragment();
@@ -74,19 +75,27 @@ public class AppWatcherListFragment extends Fragment implements
     }
 
     public void setListShown(boolean shown, boolean animate) {
-        if (mListShown == shown) {
-            return;
-        }
         mListShown = shown;
         if (shown) {
             if (animate) {
                 mProgressContainer.startAnimation(AnimationUtils.loadAnimation(
                         getActivity(), android.R.anim.fade_out));
-                mListContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity(), android.R.anim.fade_in));
+                if (mAdapter.getItemCount() == 0){
+                    mEmptyView.startAnimation(AnimationUtils.loadAnimation(
+                            getActivity(), android.R.anim.fade_in));
+                } else {
+                    mListContainer.startAnimation(AnimationUtils.loadAnimation(
+                            getActivity(), android.R.anim.fade_in));
+                }
             }
             mProgressContainer.setVisibility(View.GONE);
-            mListContainer.setVisibility(View.VISIBLE);
+            if (mAdapter.getItemCount() == 0){
+                mEmptyView.setVisibility(View.VISIBLE);
+                mListContainer.setVisibility(View.INVISIBLE);
+            } else {
+                mEmptyView.setVisibility(View.GONE);
+                mListContainer.setVisibility(View.VISIBLE);
+            }
         } else {
             if (animate) {
                 mProgressContainer.startAnimation(AnimationUtils.loadAnimation(
@@ -96,6 +105,7 @@ public class AppWatcherListFragment extends Fragment implements
             }
             mProgressContainer.setVisibility(View.VISIBLE);
             mListContainer.setVisibility(View.INVISIBLE);
+            mEmptyView.setVisibility(View.GONE);
         }
     }
 
@@ -115,6 +125,9 @@ public class AppWatcherListFragment extends Fragment implements
 
         mListContainer = root.findViewById(R.id.list_container);
         mProgressContainer = root.findViewById(R.id.progress);
+        mEmptyView = root.findViewById(android.R.id.empty);
+
+        mEmptyView.setVisibility(View.GONE);
         mListShown = true;
 
         mSwipeLayout = (SwipeRefreshLayout) root.findViewById(R.id.swipe_container);
@@ -143,7 +156,7 @@ public class AppWatcherListFragment extends Fragment implements
         Resources r = getResources();
 
         // Create an empty adapter we will use to display the loaded data.
-        mAdapter = new ListCursorAdapterWrapper(getActivity(), mPMUtils);
+        mAdapter = new ListCursorAdapterWrapper(getActivity(), mPMUtils, this);
         mList.setAdapter(mAdapter);
 
         // Start out with a progress indicator.
@@ -180,31 +193,6 @@ public class AppWatcherListFragment extends Fragment implements
         builder.setType("text/plain");
         builder.startChooser();
     }
-
-    private void onChangelogClick(final String appId, final String detailsUrl) {
-        Intent intent = new Intent(getActivity(), ChangelogActivity.class);
-        intent.putExtra(ChangelogActivity.EXTRA_APP_ID, appId);
-        intent.putExtra(ChangelogActivity.EXTRA_DETAILS_URL, detailsUrl);
-        startActivity(intent);
-    }
-
-    /**
-     * @param v
-     */
-    private void onIconClick(View v) {
-        AppViewHolder holder = (AppViewHolder) v.getTag();
-        String pkgName = holder.app.getPackageName();
-        boolean isInstalled = mPMUtils.isAppInstalled(holder.app.getPackageName());
-        if (isInstalled) {
-            Intent appInfo = IntentUtils.createApplicationDetailsIntent(holder.app.getPackageName());
-            startActivity(appInfo);
-        }
-        if (BuildConfig.DEBUG) {
-            AppLog.d(pkgName);
-            Toast.makeText(getActivity(), pkgName, Toast.LENGTH_SHORT).show();
-        }
-    }
-
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -272,5 +260,27 @@ public class AppWatcherListFragment extends Fragment implements
         if (!((AppWatcherActivity) getActivity()).requestRefresh()) {
             mSwipeLayout.setRefreshing(false);
         }
+    }
+
+    @Override
+    public void onIconClick(AppInfo app) {
+        String pkgName = app.getPackageName();
+        boolean isInstalled = mPMUtils.isAppInstalled(app.getPackageName());
+        if (isInstalled) {
+            Intent appInfo = IntentUtils.createApplicationDetailsIntent(app.getPackageName());
+            startActivity(appInfo);
+        }
+        if (BuildConfig.DEBUG) {
+            AppLog.d(pkgName);
+            Toast.makeText(getActivity(), pkgName, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onItemClick(AppInfo app) {
+        Intent intent = new Intent(getActivity(), ChangelogActivity.class);
+        intent.putExtra(ChangelogActivity.EXTRA_APP_ID, app.getAppId());
+        intent.putExtra(ChangelogActivity.EXTRA_DETAILS_URL, app.getDetailsUrl());
+        startActivity(intent);
     }
 }

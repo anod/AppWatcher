@@ -8,7 +8,7 @@ import android.content.IntentSender;
 import android.os.Bundle;
 
 import com.anod.appwatcher.R;
-import com.anod.appwatcher.backup.gdrive.SyncTask;
+import com.anod.appwatcher.ui.ActivityListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
