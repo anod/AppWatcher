@@ -24,27 +24,15 @@ import com.anod.appwatcher.R;
 abstract public class DrawerActivity extends ToolbarActivity {
     DrawerLayout mDrawerLayout;
     private TextView mAccountNameView;
+    protected NavigationView mNavigationView;
 
     protected void setupDrawer() {
         setupToolbar();
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        if (navigationView != null) {
-            setupDrawerContent(navigationView);
-        }
+        mNavigationView = (NavigationView) findViewById(R.id.nav_view);
+        setupDrawerContent(mNavigationView);
 
-        Preferences pref = new Preferences(this);
-        long time = pref.getLastUpdateTime();
-
-        TextView lastUpdateView = (TextView)findViewById(R.id.last_update);
-        if (time > 0) {
-            String lastUpdate = getString(R.string.last_update, DateUtils.getRelativeDateTimeString(this, time, DateUtils.MINUTE_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, 0));
-            lastUpdateView.setText(lastUpdate);
-            lastUpdateView.setVisibility(View.VISIBLE);
-        } else {
-            lastUpdateView.setVisibility(View.GONE);
-        }
     }
 
     private void setupDrawerContent(NavigationView navigationView) {
@@ -58,12 +46,25 @@ abstract public class DrawerActivity extends ToolbarActivity {
             }
         });
 
+        Preferences pref = new Preferences(this);
+        long time = pref.getLastUpdateTime();
+
+        TextView lastUpdateView = (TextView)navigationView.findViewById(R.id.last_update);
+        if (time > 0) {
+            String lastUpdate = getString(R.string.last_update, DateUtils.getRelativeDateTimeString(this, time, DateUtils.MINUTE_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, 0));
+            lastUpdateView.setText(lastUpdate);
+            lastUpdateView.setVisibility(View.VISIBLE);
+        } else {
+            lastUpdateView.setVisibility(View.GONE);
+        }
+
         navigationView.setNavigationItemSelectedListener(
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(MenuItem menuItem) {
                         menuItem.setChecked(true);
-                        mDrawerLayout.closeDrawers();
+                        onOptionsItemSelected(menuItem);
+                        //mDrawerLayout.closeDrawers();
                         return true;
                     }
                 });

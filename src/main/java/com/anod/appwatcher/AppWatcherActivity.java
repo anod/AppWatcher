@@ -105,6 +105,8 @@ public class AppWatcherActivity extends DrawerActivity implements
         tabLayout.setupWithViewPager(mViewPager);
 
         mRefreshAnim = new MenuItemAnimation(this, R.anim.rotate);
+        mRefreshAnim.setMenuItem(mNavigationView.getMenu().findItem(R.id.menu_act_refresh));
+
 
         mAccountChooserHelper = new AccountChooserHelper(this, mPreferences, this);
         mAccountChooserHelper.init();
@@ -126,7 +128,6 @@ public class AppWatcherActivity extends DrawerActivity implements
 //        MenuItem autoSyncMenuItem = menu.findItem(R.id.menu_auto_update);
 //        mWifiMenuItem = menu.findItem(R.id.menu_wifi_only);
 //        MenuItem refreshMenuItem = menu.findItem(R.id.menu_act_refresh);
-//        mRefreshAnim.setMenuItem(refreshMenuItem);
 
         mSearchMenuItem = menu.findItem(R.id.menu_act_filter);
         MenuItemCompat.setOnActionExpandListener(mSearchMenuItem, new MenuItemCompat.OnActionExpandListener() {
@@ -227,9 +228,9 @@ public class AppWatcherActivity extends DrawerActivity implements
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-//            case R.id.menu_act_refresh:
-//                requestRefresh();
-//                return true;
+            case R.id.menu_act_refresh:
+                requestRefresh();
+            return true;
 //            case R.id.menu_auto_update:
 //                boolean useAutoSync = !item.isChecked();
 //                item.setChecked(useAutoSync);
@@ -247,10 +248,10 @@ public class AppWatcherActivity extends DrawerActivity implements
 //                mPreferences.saveWifiOnly(useWifiOnly);
 //                mAccountChooserHelper.setSync(true);
 //                return true;
-//            case R.id.menu_more:
-//                Intent gdriveSync = new Intent(this, SettingsActivity.class);
-//                startActivity(gdriveSync);
-//                return true;
+            case R.id.menu_settings:
+                Intent gdriveSync = new Intent(this, SettingsActivity.class);
+                startActivity(gdriveSync);
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -268,7 +269,7 @@ public class AppWatcherActivity extends DrawerActivity implements
             AppLog.d("Sync requested already. Skipping... ");
             return true;
         }
-        //mRefreshAnim.start();
+        mRefreshAnim.start();
         Bundle params = new Bundle();
         params.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
         ContentResolver.requestSync(mSyncAccount, AppListContentProvider.AUTHORITY, params);

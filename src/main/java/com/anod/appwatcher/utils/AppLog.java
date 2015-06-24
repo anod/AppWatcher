@@ -15,7 +15,7 @@ public class AppLog {
     public static final boolean DEBUG;
 
     static {
-        DEBUG = Log.isLoggable("AppWatcher", BuildConfig.DEBUG ? Log.DEBUG : Log.WARN);
+        DEBUG = BuildConfig.DEBUG || Log.isLoggable("AppWatcher", BuildConfig.DEBUG ? Log.DEBUG : Log.WARN);
     }
 
 	public static void d(String msg) {
