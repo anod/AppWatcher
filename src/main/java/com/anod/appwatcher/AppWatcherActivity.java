@@ -8,8 +8,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.FragmentTransaction;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
 import android.view.KeyEvent;
@@ -27,6 +31,9 @@ import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.MenuItemAnimation;
 import com.anod.appwatcher.ui.DrawerActivity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class AppWatcherActivity extends DrawerActivity implements
         TextView.OnEditorActionListener, SearchView.OnQueryTextListener,
         AccountChooserHelper.OnAccountSelectionListener, AccountChooserFragment.OnAccountSelectionListener {
@@ -35,6 +42,7 @@ public class AppWatcherActivity extends DrawerActivity implements
     private boolean mSyncFinishedReceiverRegistered;
 
     private MenuItemAnimation mRefreshAnim;
+    private ViewPager mViewPager;
 
     public interface QueryChangeListener {
         void onQueryTextChanged(String newQuery);
@@ -62,7 +70,7 @@ public class AppWatcherActivity extends DrawerActivity implements
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putInt("nav_id", getSupportActionBar().getSelectedNavigationIndex());
+        outState.putInt("tab_id", mViewPager.getCurrentItem());
         super.onSaveInstanceState(outState);
     }
 
@@ -83,25 +91,31 @@ public class AppWatcherActivity extends DrawerActivity implements
             i.removeExtra(EXTRA_FROM_NOTIFICATION);
         }
 
-        int filter_id = Filters.NAVDRAWER_ITEM_ALL;
+        int filterId = Filters.TAB_ALL;
         if (savedInstanceState != null && !mOpenChangelog) {
-            filter_id = savedInstanceState.getInt("nav_id", Filters.NAVDRAWER_ITEM_ALL);
-            AppLog.d("Restore filter id: " + filter_id);
+            filterId = savedInstanceState.getInt("tab_id", Filters.TAB_ALL);
+            AppLog.d("Restore tab: " + filterId);
         }
 
-        if (savedInstanceState == null) {
-            AppWatcherListFragment newFragment = AppWatcherListFragment.newInstance();
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.add(R.id.fragment_container, newFragment);
-            transaction.commit();
-        }
+        mViewPager = (ViewPager) findViewById(R.id.viewpager);
+        setupViewPager(mViewPager);
+        mViewPager.setCurrentItem(filterId);
+
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        tabLayout.setupWithViewPager(mViewPager);
 
         mRefreshAnim = new MenuItemAnimation(this, R.anim.rotate);
 
         mAccountChooserHelper = new AccountChooserHelper(this, mPreferences, this);
         mAccountChooserHelper.init();
+    }
 
-
+    private void setupViewPager(ViewPager viewPager) {
+        Adapter adapter = new Adapter(getSupportFragmentManager());
+        adapter.addFragment(AppWatcherListFragment.newInstance(Filters.TAB_ALL), getString(R.string.tab_showall));
+        adapter.addFragment(AppWatcherListFragment.newInstance(Filters.TAB_INSTALLED), getString(R.string.tab_installed));
+        adapter.addFragment(AppWatcherListFragment.newInstance(Filters.TAB_UNINSTALLED), getString(R.string.tab_not_installed));
+        viewPager.setAdapter(adapter);
     }
 
     @Override
@@ -336,5 +350,34 @@ public class AppWatcherActivity extends DrawerActivity implements
 
     public void setRefreshListener(RefreshListener listener) {
         mRefreshListener = listener;
+    }
+
+    static class Adapter extends FragmentPagerAdapter {
+        private final List<Fragment> mFragments = new ArrayList<>();
+        private final List<String> mFragmentTitles = new ArrayList<>();
+
+        public Adapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        public void addFragment(Fragment fragment, String title) {
+            mFragments.add(fragment);
+            mFragmentTitles.add(title);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            return mFragments.get(position);
+        }
+
+        @Override
+        public int getCount() {
+            return mFragments.size();
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return mFragmentTitles.get(position);
+        }
     }
 }

@@ -43,18 +43,17 @@ public class AppWatcherListFragment extends Fragment implements
     private String mTitleFilter = "";
 
     public RecyclerView mList;
-    private boolean mListShown;
     private View mProgressContainer;
     private View mListContainer;
-    private SwipeRefreshLayout mSwipeLayout;
     private InstalledFilter mInstalledFilter;
 
     private PackageManagerUtils mPMUtils;
     private View mEmptyView;
 
-    public static AppWatcherListFragment newInstance() {
+    public static AppWatcherListFragment newInstance(int filterId) {
         AppWatcherListFragment frag = new AppWatcherListFragment();
         Bundle args = new Bundle();
+        args.putInt("filter", filterId);
         frag.setArguments(args);
         return frag;
     }
@@ -75,7 +74,6 @@ public class AppWatcherListFragment extends Fragment implements
     }
 
     public void setListShown(boolean shown, boolean animate) {
-        mListShown = shown;
         if (shown) {
             if (animate) {
                 mProgressContainer.startAnimation(AnimationUtils.loadAnimation(
@@ -128,14 +126,6 @@ public class AppWatcherListFragment extends Fragment implements
         mEmptyView = root.findViewById(android.R.id.empty);
 
         mEmptyView.setVisibility(View.GONE);
-        mListShown = true;
-
-        mSwipeLayout = (SwipeRefreshLayout) root.findViewById(R.id.swipe_container);
-        mSwipeLayout.setOnRefreshListener(this);
-        mSwipeLayout.setColorSchemeResources(android.R.color.holo_blue_bright,
-                android.R.color.holo_green_light,
-                android.R.color.holo_orange_light,
-                android.R.color.holo_red_light);
 
         return root;
     }
@@ -162,6 +152,7 @@ public class AppWatcherListFragment extends Fragment implements
         // Start out with a progress indicator.
         setListShown(false);
 
+        setupFilter(getArguments().getInt("filter"));
         // Prepare the loader.  Either re-connect with an existing one,
         // or start a new one.
         getLoaderManager().initLoader(0, null, this);
@@ -229,15 +220,14 @@ public class AppWatcherListFragment extends Fragment implements
         mAdapter.swapCursor(null);
     }
 
-    public void onFilterChanged(int navId) {
-        if (navId == Filters.NAVDRAWER_ITEM_INSTALLED) {
+    private void setupFilter(int filterId) {
+        if (filterId == Filters.TAB_INSTALLED) {
             mInstalledFilter = new InstalledFilter(true, mPMUtils);
-        } else if (navId == Filters.NAVDRAWER_ITEM_UNINSTALLED) {
+        } else if (filterId == Filters.TAB_UNINSTALLED) {
             mInstalledFilter = new InstalledFilter(false, mPMUtils);
         } else {
             mInstalledFilter = null;
         }
-        getLoaderManager().restartLoader(0, null, this);
     }
 
     @Override
@@ -251,15 +241,12 @@ public class AppWatcherListFragment extends Fragment implements
 
 
     public void onRefreshFinish() {
-        mSwipeLayout.setRefreshing(false);
-    }
+            }
 
 
     @Override
     public void onRefresh() {
-        if (!((AppWatcherActivity) getActivity()).requestRefresh()) {
-            mSwipeLayout.setRefreshing(false);
-        }
+        ((AppWatcherActivity) getActivity()).requestRefresh();
     }
 
     @Override

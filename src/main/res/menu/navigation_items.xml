@@ -7,30 +7,22 @@
             android:icon="@drawable/ic_add_black_36dp"
             android:title="@string/navdrawer_item_add" />
 
-        <item android:id="@+id/nav_tags"
-              android:icon="@drawable/ic_action_tags"
-              android:title="@string/navdrawer_item_tags">
-        </item>
+        <item
+            android:id="@+id/nav_refresh"
+            android:icon="@drawable/ic_refresh_black_36dp"
+            android:title="@string/navdrawer_item_refresh" />
 
         <item
             android:id="@+id/nav_settings"
             android:icon="@drawable/ic_drawer_settings"
             android:title="@string/navdrawer_item_settings" />
 
-        <item android:id="@+id/nav_filter"
+        <item android:id="@+id/nav_tags"
               android:icon="@drawable/ic_filter_list_black_36dp"
-              android:title="@string/navdrawer_item_filter">
+              android:title="@string/navdrawer_item_tags">
             <group android:checkableBehavior="single">
                 <menu>
-                    <item
-                        android:id="@+id/nav_filter_all"
-                        android:title="@string/navdrawer_item_filter_all" />
-                    <item
-                        android:id="@+id/nav_filter_installed"
-                        android:title="@string/navdrawer_item_filter_installed" />
-                    <item
-                        android:id="@+id/nav_filter_uninstalled"
-                        android:title="@string/navdrawer_item_filter_notinstalled" />
+
                 </menu>
             </group>
         </item>

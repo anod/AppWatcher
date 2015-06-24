@@ -8,10 +8,13 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.format.DateUtils;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.R;
 
 /**
@@ -29,6 +32,18 @@ abstract public class DrawerActivity extends ToolbarActivity {
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         if (navigationView != null) {
             setupDrawerContent(navigationView);
+        }
+
+        Preferences pref = new Preferences(this);
+        long time = pref.getLastUpdateTime();
+
+        TextView lastUpdateView = (TextView)findViewById(R.id.last_update);
+        if (time > 0) {
+            String lastUpdate = getString(R.string.last_update, DateUtils.getRelativeDateTimeString(this, time, DateUtils.MINUTE_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, 0));
+            lastUpdateView.setText(lastUpdate);
+            lastUpdateView.setVisibility(View.VISIBLE);
+        } else {
+            lastUpdateView.setVisibility(View.GONE);
         }
     }
 

@@ -45,7 +45,7 @@
     <string name="no_recent_changes">No information about recent changes was provided.</string>
     <string name="google_account_not_found">Google account not found.</string>
     <string name="list_export">Export</string>
-    <string name="last_update">Last Update: %1$s</string>
+    <string name="last_update">Updated %1$s</string>
     <string name="list_import">Import</string>
     <string name="no_files_found">No files found</string>
     <string name="please_wait">Please, wait…</string>
@@ -92,17 +92,15 @@
     <string name="drawer_open">Open</string>
     <string name="drawer_close">Close</string>
 
-    <string name="navdrawer_showall">Show All</string>
-    <string name="navdrawer_installed">Installed</string>
-    <string name="navdrawer_not_installed">Not Installed</string>
+    <string name="tab_showall">All</string>
+    <string name="tab_installed">Installed</string>
+    <string name="tab_not_installed">Missing</string>
+
     <string name="navdrawer_item_add">Add</string>
-    <string name="navdrawer_item_filter">Filter</string>
     <string name="navdrawer_item_tags">Tags</string>
+    <string name="navdrawer_item_refresh">Update</string>
     <string name="navdrawer_item_settings">Settings</string>
 
-    <string name="navdrawer_item_filter_all">Show All</string>
-    <string name="navdrawer_item_filter_installed">Installed</string>
-    <string name="navdrawer_item_filter_notinstalled">Not Installed</string>
     <string name="activity_market">Search</string>
     <string name="activity_main">Watch List</string>
 </resources>

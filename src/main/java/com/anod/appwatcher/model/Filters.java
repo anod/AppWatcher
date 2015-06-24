@@ -5,7 +5,7 @@ package com.anod.appwatcher.model;
  * @date 2015-06-19
  */
 public class Filters {
-    public static final int NAVDRAWER_ITEM_ALL = 0;
-    public static final int NAVDRAWER_ITEM_INSTALLED = 1;
-    public static final int NAVDRAWER_ITEM_UNINSTALLED = 2;
+    public static final int TAB_ALL = 0;
+    public static final int TAB_INSTALLED = 1;
+    public static final int TAB_UNINSTALLED = 2;
 }
