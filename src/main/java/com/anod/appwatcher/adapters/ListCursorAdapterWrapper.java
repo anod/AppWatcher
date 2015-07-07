@@ -1,4 +1,4 @@
-package com.anod.appwatcher.watchlist;
+package com.anod.appwatcher.adapters;
 
 import android.content.Context;
 import android.database.Cursor;

@@ -1,4 +1,4 @@
-package com.anod.appwatcher.watchlist;
+package com.anod.appwatcher.adapters;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -51,10 +51,6 @@ public class ListCursorAdapter extends CursorAdapter {
         holder.app = app;
         holder.title.setText(app.getTitle());
         holder.details.setText(app.getCreator());
-//        holder.removeBtn.setTag(app);
-//        holder.marketBtn.setTag(app.getPackageName());
-//        holder.changelogBtn.setTag(app.getAppId() + "," + app.getDetailsUrl());
-//        holder.shareBtn.setTag(app);
         holder.icon.setTag(holder);
         Bitmap icon = app.getIcon();
         if (icon == null) {
@@ -96,18 +92,14 @@ public class ListCursorAdapter extends CursorAdapter {
                 holder.price.setText(app.getPriceText());
             }
         }
-        if (mNewAppsCount > 0 && TextUtils.isEmpty(mTitleFilter)) {
-            if (holder.position == 0) {
-                holder.sectionText.setText(context.getString(R.string.recently_updated));
-                holder.sectionCount.setText(String.valueOf(mNewAppsCount));
-                holder.section.setVisibility(View.VISIBLE);
-            } else if (holder.position == mNewAppsCount) {
-                holder.sectionText.setText(context.getString(R.string.watching));
-                holder.sectionCount.setText(String.valueOf(mTotalCount - mNewAppsCount));
-                holder.section.setVisibility(View.VISIBLE);
-            } else {
-                holder.section.setVisibility(View.GONE);
-            }
+        if (holder.position == mNewAppsCount) {
+            holder.sectionText.setText(R.string.watching);
+            holder.sectionCount.setText(String.valueOf(mTotalCount - mNewAppsCount));
+            holder.section.setVisibility(View.VISIBLE);
+        } else if (holder.position == 0 && mNewAppsCount > 0) {
+            holder.sectionText.setText(R.string.recently_updated);
+            holder.sectionCount.setText(String.valueOf(mNewAppsCount));
+            holder.section.setVisibility(View.VISIBLE);
         } else {
             holder.section.setVisibility(View.GONE);
         }

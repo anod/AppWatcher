@@ -1,11 +1,8 @@
-package com.anod.appwatcher.watchlist;
+package com.anod.appwatcher.adapters;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.anod.appwatcher.R;
@@ -26,7 +23,7 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
     public TextView updateDate;
     private OnClickListener mListener;
 
-    interface OnClickListener {
+    public interface OnClickListener {
         void onIconClick(AppInfo app);
         void onItemClick(AppInfo app);
     }

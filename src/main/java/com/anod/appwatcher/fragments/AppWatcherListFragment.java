@@ -1,4 +1,4 @@
-package com.anod.appwatcher.watchlist;
+package com.anod.appwatcher.fragments;
 
 import android.content.Intent;
 import android.content.res.Resources;
@@ -23,7 +23,6 @@ import com.anod.appwatcher.AppWatcherActivity;
 import com.anod.appwatcher.BuildConfig;
 import com.anod.appwatcher.ChangelogActivity;
 import com.anod.appwatcher.R;
-import com.anod.appwatcher.fragments.RemoveDialogFragment;
 import com.anod.appwatcher.market.MarketInfo;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListCursorLoader;
@@ -32,6 +31,8 @@ import com.anod.appwatcher.model.InstalledFilter;
 import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.IntentUtils;
 import com.anod.appwatcher.utils.PackageManagerUtils;
+import com.anod.appwatcher.adapters.AppViewHolder;
+import com.anod.appwatcher.adapters.ListCursorAdapterWrapper;
 
 public class AppWatcherListFragment extends Fragment implements
         LoaderManager.LoaderCallbacks<Cursor>,

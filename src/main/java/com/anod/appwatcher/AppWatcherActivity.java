@@ -24,7 +24,7 @@ import android.widget.Toast;
 
 import com.anod.appwatcher.accounts.AccountChooserHelper;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
-import com.anod.appwatcher.watchlist.AppWatcherListFragment;
+import com.anod.appwatcher.fragments.AppWatcherListFragment;
 import com.anod.appwatcher.model.Filters;
 import com.anod.appwatcher.sync.SyncAdapter;
 import com.anod.appwatcher.utils.AppLog;
@@ -80,6 +80,7 @@ public class AppWatcherActivity extends DrawerActivity implements
         setContentView(R.layout.activity_main);
         setTitle(R.string.activity_main);
         setupDrawer();
+        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
 
         mContext = this;
 
