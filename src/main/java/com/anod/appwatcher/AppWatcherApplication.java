@@ -7,6 +7,7 @@ import android.view.ViewConfiguration;
 import com.crashlytics.android.Crashlytics;
 import com.mopub.common.MoPub;
 import com.newrelic.agent.android.NewRelic;
+import com.squareup.leakcanary.LeakCanary;
 
 import io.fabric.sdk.android.Fabric;
 import java.lang.reflect.Field;
@@ -18,7 +19,7 @@ public class AppWatcherApplication extends Application {
 	 public void onCreate() {
 		super.onCreate();
 		Fabric.with(this, new Crashlytics(), new MoPub());
-
+		LeakCanary.install(this);
 
 		 NewRelic.withApplicationToken(
 			"AA47c4b684f2af988fdf3a13518738d7eaa8a4976f"
