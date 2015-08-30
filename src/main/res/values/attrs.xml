@@ -1,17 +1,8 @@
 <resources>
 
-<<<<<<< HEAD
-=======
-        <!-- This Drawable is overlaid over the foreground of the Window's content area, usually
-             to place a shadow below the title.  -->
-        <attr name="windowContentOverlay" format="reference" />
-
-    </declare-styleable>
->>>>>>> master
     <declare-styleable name="BezelImageView">
         <attr name="maskDrawable" format="reference" />
         <attr name="borderDrawable" format="reference" />
     </declare-styleable>
-
 
 </resources>

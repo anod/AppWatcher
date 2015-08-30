@@ -43,13 +43,13 @@ public class AppWatcherListFragment extends Fragment implements
     private ListCursorAdapterWrapper mAdapter;
     private String mTitleFilter = "";
 
-    public RecyclerView mList;
+    public RecyclerView mListView;
     private View mProgressContainer;
-    private View mListContainer;
+    private View mEmptyView;
+
     private InstalledFilter mInstalledFilter;
 
     private PackageManagerUtils mPMUtils;
-    private View mEmptyView;
 
     public static AppWatcherListFragment newInstance(int filterId) {
         AppWatcherListFragment frag = new AppWatcherListFragment();
@@ -74,8 +74,8 @@ public class AppWatcherListFragment extends Fragment implements
 
     }
 
-    public void setListShown(boolean shown, boolean animate) {
-        if (shown) {
+    public void setListVisible(boolean visible, boolean animate) {
+        if (visible) {
             if (animate) {
                 mProgressContainer.startAnimation(AnimationUtils.loadAnimation(
                         getActivity(), android.R.anim.fade_out));
@@ -83,49 +83,47 @@ public class AppWatcherListFragment extends Fragment implements
                     mEmptyView.startAnimation(AnimationUtils.loadAnimation(
                             getActivity(), android.R.anim.fade_in));
                 } else {
-                    mListContainer.startAnimation(AnimationUtils.loadAnimation(
+                    mListView.startAnimation(AnimationUtils.loadAnimation(
                             getActivity(), android.R.anim.fade_in));
                 }
             }
             mProgressContainer.setVisibility(View.GONE);
             if (mAdapter.getItemCount() == 0){
                 mEmptyView.setVisibility(View.VISIBLE);
-                mListContainer.setVisibility(View.INVISIBLE);
+                mListView.setVisibility(View.INVISIBLE);
             } else {
                 mEmptyView.setVisibility(View.GONE);
-                mListContainer.setVisibility(View.VISIBLE);
+                mListView.setVisibility(View.VISIBLE);
             }
         } else {
             if (animate) {
                 mProgressContainer.startAnimation(AnimationUtils.loadAnimation(
                         getActivity(), android.R.anim.fade_in));
-                mListContainer.startAnimation(AnimationUtils.loadAnimation(
+                mListView.startAnimation(AnimationUtils.loadAnimation(
                         getActivity(), android.R.anim.fade_out));
             }
             mProgressContainer.setVisibility(View.VISIBLE);
-            mListContainer.setVisibility(View.INVISIBLE);
+            mListView.setVisibility(View.INVISIBLE);
             mEmptyView.setVisibility(View.GONE);
         }
     }
 
-    public void setListShown(boolean shown) {
-        setListShown(shown, true);
+    public void setListVisible(boolean shown) {
+        setListVisible(shown, true);
     }
 
     public void setListShownNoAnimation(boolean shown) {
-        setListShown(shown, false);
+        setListVisible(shown, false);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_applist, container, false);
-        mList = (RecyclerView) root.findViewById(android.R.id.list);
 
-        mListContainer = root.findViewById(R.id.list_container);
+        mListView = (RecyclerView) root.findViewById(android.R.id.list);
         mProgressContainer = root.findViewById(R.id.progress);
         mEmptyView = root.findViewById(android.R.id.empty);
-
         mEmptyView.setVisibility(View.GONE);
 
         return root;
@@ -142,16 +140,16 @@ public class AppWatcherListFragment extends Fragment implements
         mPMUtils = new PackageManagerUtils(getActivity().getPackageManager());
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
-        mList.setLayoutManager(layoutManager);
+        mListView.setLayoutManager(layoutManager);
 
         Resources r = getResources();
 
         // Create an empty adapter we will use to display the loaded data.
         mAdapter = new ListCursorAdapterWrapper(getActivity(), mPMUtils, this);
-        mList.setAdapter(mAdapter);
+        mListView.setAdapter(mAdapter);
 
         // Start out with a progress indicator.
-        setListShown(false);
+        setListVisible(false);
 
         setupFilter(getArguments().getInt("filter"));
         // Prepare the loader.  Either re-connect with an existing one,
@@ -206,7 +204,7 @@ public class AppWatcherListFragment extends Fragment implements
 
         // The list should now be shown.
         if (isResumed()) {
-            setListShown(true);
+            setListVisible(true);
         } else {
             setListShownNoAnimation(true);
         }

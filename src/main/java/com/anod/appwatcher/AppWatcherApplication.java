@@ -5,12 +5,8 @@ import android.content.Context;
 import android.view.ViewConfiguration;
 
 import com.crashlytics.android.Crashlytics;
-<<<<<<< HEAD
 import com.mopub.common.MoPub;
-import com.newrelic.agent.android.NewRelic;
 import com.squareup.leakcanary.LeakCanary;
-=======
->>>>>>> master
 
 import io.fabric.sdk.android.Fabric;
 import java.lang.reflect.Field;
