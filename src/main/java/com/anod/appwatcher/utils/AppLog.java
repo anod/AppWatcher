@@ -62,7 +62,7 @@ public class AppLog {
 
     private static String format(final String msg, final Object... array) {
         String formatted;
-        if (array == null) {
+        if (array == null || array.length == 0) {
             formatted = msg;
         } else {
             try {
