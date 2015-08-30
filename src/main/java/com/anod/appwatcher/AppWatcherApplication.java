@@ -5,7 +5,6 @@ import android.content.Context;
 import android.view.ViewConfiguration;
 
 import com.crashlytics.android.Crashlytics;
-import com.newrelic.agent.android.NewRelic;
 
 import java.lang.reflect.Field;
 
@@ -17,9 +16,9 @@ public class AppWatcherApplication extends Application {
 		super.onCreate();
         Crashlytics.start(this);
 
-		 NewRelic.withApplicationToken(
-			"AA47c4b684f2af988fdf3a13518738d7eaa8a4976f"
-		 ).start(this);
+//		 NewRelic.withApplicationToken(
+//			"AA47c4b684f2af988fdf3a13518738d7eaa8a4976f"
+//		 ).start(this);
 
 		 try {
 			 ViewConfiguration config = ViewConfiguration.get(this);
