@@ -10,6 +10,7 @@ import android.support.v4.util.ArrayMap;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -43,7 +44,7 @@ public class PackageManagerUtils {
         return null;
     }
 
-    public List<PackageInfo> getInstalledApps() {
+    public List<PackageInfo> getDownloadedApps(Map<String, Integer> filter) {
         List<PackageInfo> packs = mPackageManager.getInstalledPackages(PackageManager.GET_ACTIVITIES);
         List<PackageInfo> downloaded = new ArrayList<>(packs.size());
         for (int i = 0; i < packs.size(); i++)
@@ -52,6 +53,10 @@ public class PackageManagerUtils {
             ApplicationInfo applicationInfo = packageInfo.applicationInfo;
             // Skips the system application (packages)
             if ( (applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 1)
+            {
+                continue;
+            }
+            if (filter != null && filter.containsKey(packageInfo.packageName))
             {
                 continue;
             }

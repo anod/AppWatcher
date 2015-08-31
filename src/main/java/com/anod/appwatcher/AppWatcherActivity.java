@@ -25,6 +25,8 @@ import android.widget.Toast;
 import com.anod.appwatcher.accounts.AccountChooserHelper;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
 import com.anod.appwatcher.fragments.AppWatcherListFragment;
+import com.anod.appwatcher.fragments.InstalledListFragment;
+import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.model.Filters;
 import com.anod.appwatcher.sync.SyncAdapter;
 import com.anod.appwatcher.utils.MenuItemAnimation;
@@ -32,6 +34,8 @@ import com.anod.appwatcher.ui.DrawerActivity;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import info.anodsplace.android.log.AppLog;
 
 public class AppWatcherActivity extends DrawerActivity implements
         TextView.OnEditorActionListener, SearchView.OnQueryTextListener,
@@ -47,10 +51,6 @@ public class AppWatcherActivity extends DrawerActivity implements
         void onQueryTextChanged(String newQuery);
     }
 
-    public interface RefreshListener {
-
-        void onRefreshFinish();
-    }
 
     protected String mAuthToken;
 
@@ -61,8 +61,6 @@ public class AppWatcherActivity extends DrawerActivity implements
     private MenuItem mSearchMenuItem;
     private FloatingActionButton mActionButton;
     private QueryChangeListener mQueryChangeListener;
-
-    private RefreshListener mRefreshListener;
 
     private AccountChooserHelper mAccountChooserHelper;
     private boolean mOpenChangelog;
@@ -115,7 +113,7 @@ public class AppWatcherActivity extends DrawerActivity implements
     private void setupViewPager(ViewPager viewPager) {
         Adapter adapter = new Adapter(getSupportFragmentManager());
         adapter.addFragment(AppWatcherListFragment.newInstance(Filters.TAB_ALL), getString(R.string.tab_showall));
-        adapter.addFragment(AppWatcherListFragment.newInstance(Filters.TAB_INSTALLED), getString(R.string.tab_installed));
+        adapter.addFragment(InstalledListFragment.newInstance(Filters.TAB_INSTALLED), getString(R.string.tab_installed));
         adapter.addFragment(AppWatcherListFragment.newInstance(Filters.TAB_UNINSTALLED), getString(R.string.tab_not_installed));
         viewPager.setAdapter(adapter);
     }
@@ -181,9 +179,6 @@ public class AppWatcherActivity extends DrawerActivity implements
                 mRefreshAnim.stop();
                 if (updatesCount == 0) {
                     Toast.makeText(AppWatcherActivity.this, R.string.no_updates_found, Toast.LENGTH_SHORT).show();
-                }
-                if (mRefreshListener != null) {
-                    mRefreshListener.onRefreshFinish();
                 }
             }
         }
@@ -349,9 +344,6 @@ public class AppWatcherActivity extends DrawerActivity implements
         mQueryChangeListener = listener;
     }
 
-    public void setRefreshListener(RefreshListener listener) {
-        mRefreshListener = listener;
-    }
 
     static class Adapter extends FragmentPagerAdapter {
         private final List<Fragment> mFragments = new ArrayList<>();

@@ -11,10 +11,13 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.RemoteException;
+import android.support.v4.util.ArrayMap;
 
 import com.anod.appwatcher.AppListContentProvider;
 import com.anod.appwatcher.model.schema.AppListTable;
 import com.anod.appwatcher.utils.BitmapUtils;
+
+import info.anodsplace.android.log.AppLog;
 
 /**
  * Wrapper above ContentResolver to simplify access to AppInfo
@@ -100,7 +103,7 @@ public class AppListContentProviderClient {
 	 */
 	public Map<String,Integer> queryPackagesMap() {
 		AppListCursor cursor = queryAll();
-		HashMap<String, Integer> result = new HashMap<String, Integer>();
+		ArrayMap<String, Integer> result = new ArrayMap<String, Integer>();
 		if (cursor == null) {
 			return result;
 		}
@@ -151,7 +154,7 @@ public class AppListContentProviderClient {
         try {
             return mContentProviderClient.update(updateUri, values, null, null);
         } catch (RemoteException e) {
-            AppLog.ex(e);
+            AppLog.e(e);
         }
         return 0;
     }
@@ -165,7 +168,7 @@ public class AppListContentProviderClient {
                 new String[]{ String.valueOf(AppInfoMetadata.STATUS_DELETED)}
             );
         } catch (RemoteException e) {
-            AppLog.ex(e);
+            AppLog.e(e);
         }
         return numRows;
     }

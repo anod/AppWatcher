@@ -44,6 +44,8 @@ import com.google.android.finsky.protos.DocDetails;
 
 import java.util.HashMap;
 
+import info.anodsplace.android.log.AppLog;
+
 public class MarketSearchActivity extends ToolbarActivity implements AccountChooserHelper.OnAccountSelectionListener, AccountChooserFragment.OnAccountSelectionListener, SearchEndpoint.Listener {
     public static final String EXTRA_KEYWORD = "keyword";
     public static final String EXTRA_EXACT = "exact";

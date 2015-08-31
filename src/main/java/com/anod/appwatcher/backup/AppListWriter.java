@@ -10,6 +10,8 @@ import com.anod.appwatcher.utils.BitmapUtils;
 import java.io.IOException;
 import java.io.Writer;
 
+import info.anodsplace.android.log.AppLog;
+
 /**
  * @author alex
  * @date 2015-02-27
@@ -42,7 +44,7 @@ public class AppListWriter {
      */
     public void writeApp(JsonWriter writer, AppInfo appInfo)
             throws IOException {
-        AppLog.d("Write app: "+appInfo.getAppId());
+        AppLog.d("Write app: " + appInfo.getAppId());
         writer.beginObject();
         writer.name("id").value(appInfo.getAppId());
         writer.name("packageName").value(appInfo.getPackageName());

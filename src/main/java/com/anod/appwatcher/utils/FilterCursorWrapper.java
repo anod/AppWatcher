@@ -3,6 +3,9 @@ package com.anod.appwatcher.utils;
 import android.database.AbstractCursor;
 import android.database.Cursor;
 import android.os.Bundle;
+
+import info.anodsplace.android.log.AppLog;
+
 /**
  * Cursor wrapper that filters MIME types not matching given list.
  */

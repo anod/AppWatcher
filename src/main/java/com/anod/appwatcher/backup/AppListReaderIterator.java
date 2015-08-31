@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.Iterator;
 
+import info.anodsplace.android.log.AppLog;
+
 /**
  * @author alex
  * @date 2015-02-27
@@ -40,7 +42,7 @@ public class AppListReaderIterator implements Iterator<AppInfo> {
                 mJsonReader.endArray();
             }
         } catch (IOException e) {
-            AppLog.ex(e);
+            AppLog.e(e);
         }
 
         return hasNext;
@@ -52,7 +54,7 @@ public class AppListReaderIterator implements Iterator<AppInfo> {
         try {
             info = mAppInfoReader.readAppInfo(mJsonReader);
         } catch (IOException e) {
-            AppLog.ex(e);
+            AppLog.e(e);
         }
 
         return info;

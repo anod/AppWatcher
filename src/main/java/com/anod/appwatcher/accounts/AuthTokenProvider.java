@@ -16,6 +16,8 @@ import com.crashlytics.android.Crashlytics;
 
 import java.io.IOException;
 
+import info.anodsplace.android.log.AppLog;
+
 public class AuthTokenProvider {
 
 	private static final String AUTH_TOKEN_TYPE = "androidmarket";

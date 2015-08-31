@@ -10,6 +10,8 @@ import com.android.volley.toolbox.RequestFuture;
 
 import java.util.concurrent.ExecutionException;
 
+import info.anodsplace.android.log.AppLog;
+
 /**
  * @author alex
  * @date 2015-02-26
@@ -39,7 +41,7 @@ public class SyncImageLoader extends ImageLoader {
         try {
             bitmap = future.get();
         } catch (InterruptedException | ExecutionException e) {
-            AppLog.ex(e);
+            AppLog.e(e);
         }
         ImageContainer imageContainer =  new ImageContainer(bitmap, requestUrl, null, null);
 

@@ -33,6 +33,8 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
+import info.anodsplace.android.log.AppLog;
+
 /**
  * @author alex
  * @date 2014-11-15
@@ -130,7 +132,7 @@ public class SyncConnectedWorker {
             writer.writeJSON(outWriter, listCursor);
         } catch (IOException e) {
             listCursor.close();
-            AppLog.ex(e);
+            AppLog.e(e);
         } finally {
             if (listCursor != null) {
                 listCursor.close();
@@ -151,7 +153,7 @@ public class SyncConnectedWorker {
         try {
             return new InputStreamReader(inputStream, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            AppLog.ex(e);
+            AppLog.e(e);
             return null;
         }
     }

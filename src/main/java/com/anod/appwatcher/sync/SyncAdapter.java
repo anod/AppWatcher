@@ -50,6 +50,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import info.anodsplace.android.log.AppLog;
+
 public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStoreEndpoint.Listener {
     private static final int ONE_SEC_IN_MILLIS = 1000;
     public static final int BULK_SIZE = 20;
@@ -153,9 +155,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
                 if (e.getResolution() != null){
                     driveSync.showResolutionNotification(e.getResolution());
                 }
-                AppLog.ex(e);
+                AppLog.e(e);
             } catch (Exception e) {
-                AppLog.ex(e);
+                AppLog.e(e);
             }
         } else {
             AppLog.d("DriveSync backup is fresh");

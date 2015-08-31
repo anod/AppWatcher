@@ -6,8 +6,6 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.app.ShareCompat;
-import android.support.v4.app.ShareCompat.IntentBuilder;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -23,24 +21,27 @@ import com.anod.appwatcher.AppWatcherActivity;
 import com.anod.appwatcher.BuildConfig;
 import com.anod.appwatcher.ChangelogActivity;
 import com.anod.appwatcher.R;
-import com.anod.appwatcher.market.MarketInfo;
+import com.anod.appwatcher.adapters.AppViewHolder;
+import com.anod.appwatcher.adapters.ListCursorAdapterWrapper;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListCursorLoader;
 import com.anod.appwatcher.model.Filters;
 import com.anod.appwatcher.model.InstalledFilter;
 import com.anod.appwatcher.utils.IntentUtils;
 import com.anod.appwatcher.utils.PackageManagerUtils;
-import com.anod.appwatcher.adapters.AppViewHolder;
-import com.anod.appwatcher.adapters.ListCursorAdapterWrapper;
+
+import info.anodsplace.android.log.AppLog;
+import info.anodsplace.android.widget.recyclerview.MergeRecyclerAdapter;
 
 public class AppWatcherListFragment extends Fragment implements
         LoaderManager.LoaderCallbacks<Cursor>,
         AppWatcherActivity.QueryChangeListener,
-        AppWatcherActivity.RefreshListener,
         SwipeRefreshLayout.OnRefreshListener, AppViewHolder.OnClickListener {
 
-    private ListCursorAdapterWrapper mAdapter;
+    private static final int ADAPTER_WATCHLIST = 0;
+    public static final String ARG_FILTER = "filter";
     private String mTitleFilter = "";
+
 
     public RecyclerView mListView;
     private View mProgressContainer;
@@ -48,12 +49,14 @@ public class AppWatcherListFragment extends Fragment implements
 
     private InstalledFilter mInstalledFilter;
 
-    private PackageManagerUtils mPMUtils;
+    protected PackageManagerUtils mPMUtils;
+
+    protected MergeRecyclerAdapter<RecyclerView.Adapter> mAdapter;
 
     public static AppWatcherListFragment newInstance(int filterId) {
         AppWatcherListFragment frag = new AppWatcherListFragment();
         Bundle args = new Bundle();
-        args.putInt("filter", filterId);
+        args.putInt(ARG_FILTER, filterId);
         frag.setArguments(args);
         return frag;
     }
@@ -69,7 +72,6 @@ public class AppWatcherListFragment extends Fragment implements
         AppWatcherActivity act = (AppWatcherActivity) getActivity();
 
         act.setQueryChangeListener(this);
-        act.setRefreshListener(this);
 
     }
 
@@ -144,44 +146,21 @@ public class AppWatcherListFragment extends Fragment implements
         Resources r = getResources();
 
         // Create an empty adapter we will use to display the loaded data.
-        mAdapter = new ListCursorAdapterWrapper(getActivity(), mPMUtils, this);
+
+        mAdapter = new MergeRecyclerAdapter<>();
+        mAdapter.addAdapter(ADAPTER_WATCHLIST, new ListCursorAdapterWrapper(getActivity(), mPMUtils, this));
+
         mListView.setAdapter(mAdapter);
 
         // Start out with a progress indicator.
         setListVisible(false);
 
-        setupFilter(getArguments().getInt("filter"));
+        setupFilter(getArguments().getInt(ARG_FILTER));
         // Prepare the loader.  Either re-connect with an existing one,
         // or start a new one.
         getLoaderManager().initLoader(0, null, this);
     }
 
-    private void onRemoveClick(View v) {
-        AppInfo app = (AppInfo) v.getTag();
-        RemoveDialogFragment removeDialog = RemoveDialogFragment.newInstance(
-                app.getTitle(), app.getRowId()
-        );
-        removeDialog.show(getFragmentManager(), "removeDialog");
-    }
-
-    private void onPlayStoreClick(View v) {
-        String pkg = (String) v.getTag();
-        Intent intent = IntentUtils.createPlayStoreIntent(pkg);
-        startActivity(intent);
-    }
-
-    private void onShareClick(View v) {
-        AppInfo app = (AppInfo) v.getTag();
-        IntentBuilder builder = ShareCompat.IntentBuilder.from(getActivity());
-        if (app.getStatus() == AppInfo.STATUS_UPDATED) {
-            builder.setSubject(getString(R.string.share_subject_updated, app.getTitle()));
-        } else {
-            builder.setSubject(getString(R.string.share_subject_normal, app.getTitle()));
-        }
-        builder.setText(String.format(MarketInfo.URL_WEB_PLAY_STORE, app.getPackageName()));
-        builder.setType("text/plain");
-        builder.startChooser();
-    }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -192,13 +171,14 @@ public class AppWatcherListFragment extends Fragment implements
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         // Swap the new cursor in.  (The framework will take care of closing the
         // old cursor once we return.)
-        mAdapter.swapCursor(data);
+        ListCursorAdapterWrapper watchlistAdapter = ((ListCursorAdapterWrapper) mAdapter.getAdapter(ADAPTER_WATCHLIST));
+        watchlistAdapter.swapData(data);
         if (mInstalledFilter == null) {
             int newCount = ((AppListCursorLoader) loader).getNewCount();
-            mAdapter.setNewAppsCount(newCount);
+            watchlistAdapter.setNewAppsCount(newCount);
         } else {
             int newCount = mInstalledFilter.getNewCount();
-            mAdapter.setNewAppsCount(newCount);
+            watchlistAdapter.setNewAppsCount(newCount);
         }
 
         // The list should now be shown.
@@ -215,7 +195,8 @@ public class AppWatcherListFragment extends Fragment implements
         // This is called when the last Cursor provided to onLoadFinished()
         // above is about to be closed.  We need to make sure we are no
         // longer using it.
-        mAdapter.swapCursor(null);
+        ListCursorAdapterWrapper watchlistAdapter = ((ListCursorAdapterWrapper) mAdapter.getAdapter(ADAPTER_WATCHLIST));
+        watchlistAdapter.swapData(null);
     }
 
     private void setupFilter(int filterId) {
@@ -237,9 +218,6 @@ public class AppWatcherListFragment extends Fragment implements
         }
     }
 
-
-    public void onRefreshFinish() {
-            }
 
 
     @Override

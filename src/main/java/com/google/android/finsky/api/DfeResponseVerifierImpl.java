@@ -13,6 +13,8 @@ import com.google.android.finsky.api.utils.AndroidKeyczarReader;
 import org.keyczar.*;
 import org.keyczar.exceptions.*;
 
+import info.anodsplace.android.log.AppLog;
+
 public class DfeResponseVerifierImpl implements DfeResponseVerifier
 {
     private static final String FALLBACK_KEYS_FILES_SUBDIR;

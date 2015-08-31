@@ -2,27 +2,39 @@ package com.anod.appwatcher;
 
 import android.accounts.Account;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ShareCompat;
+import android.support.v7.graphics.Palette;
 import android.text.Html;
 import android.text.util.Linkify;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.android.volley.VolleyError;
 import com.anod.appwatcher.accounts.AuthTokenProvider;
+import com.anod.appwatcher.fragments.RemoveDialogFragment;
 import com.anod.appwatcher.market.DetailsEndpoint;
+import com.anod.appwatcher.market.MarketInfo;
 import com.anod.appwatcher.market.PlayStoreEndpoint;
+import com.anod.appwatcher.model.AppInfo;
+import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.ui.ToolbarActivity;
+import com.anod.appwatcher.utils.IntentUtils;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
 
-public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpoint.Listener {
+public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpoint.Listener, Palette.PaletteAsyncListener, View.OnClickListener {
 
     public static final String EXTRA_APP_ID = "app_id";
     public static final String EXTRA_DETAILS_URL = "url";
@@ -33,11 +45,20 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
     TextView mChangelog;
     @InjectView(R.id.retry)
     Button mRetryButton;
+    @InjectView(android.R.id.icon)
+    ImageView mAppIcon;
+    @InjectView(android.R.id.title)
+    TextView mAppTitle;
+    @InjectView(R.id.background)
+    View mBackground;
+    @InjectView(R.id.market_btn)
+    FloatingActionButton mPlayStoreButton;
 
     private String mDetailsUrl;
     private String mAppId;
 
     private DetailsEndpoint mDetailsEndpoint;
+    private AppInfo mApp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,13 +101,65 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
             }
         });
 
+        AppListContentProviderClient cr = new AppListContentProviderClient(this);
+        mApp = cr.queryAppId(mAppId);
+        cr.release();
+
+        setupAppView(mApp);
+
     }
+
+    private void setupAppView(AppInfo app) {
+
+        Bitmap icon = app.getIcon();
+        if (icon == null) {
+            icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_empty);
+            mBackground.setVisibility(View.VISIBLE);
+            mBackground.setBackgroundColor(getResources().getColor(R.color.theme_primary, null));
+        } else {
+            Palette.from(icon).generate(this);
+        }
+        mAppIcon.setImageBitmap(icon);
+        mAppTitle.setText(app.getTitle());
+
+        mPlayStoreButton.setOnClickListener(this);
+    }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.changelog, menu);
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_remove:
+                RemoveDialogFragment removeDialog = RemoveDialogFragment.newInstance(
+                        mApp.getTitle(), mApp.getRowId()
+                );
+                removeDialog.show(getSupportFragmentManager(), "removeDialog");
+                return true;
+            case R.id.menu_share:
+                shareApp();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void shareApp() {
+        ShareCompat.IntentBuilder builder = ShareCompat.IntentBuilder.from(this);
+        if (mApp.getStatus() == AppInfo.STATUS_UPDATED) {
+            builder.setSubject(getString(R.string.share_subject_updated, mApp.getTitle()));
+        } else {
+            builder.setSubject(getString(R.string.share_subject_normal, mApp.getTitle()));
+        }
+        builder.setText(String.format(MarketInfo.URL_WEB_PLAY_STORE, mApp.getPackageName()));
+        builder.setType("text/plain");
+        builder.startChooser();
     }
 
     @Override
@@ -115,4 +188,30 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
     }
 
 
+    @Override
+    public void onGenerated(Palette palette) {
+        Palette.Swatch vibrant = palette.getDarkVibrantSwatch();
+        if (vibrant != null) {
+            mBackground.setBackgroundColor(vibrant.getRgb());
+            animateBackground();
+        } else {
+            // TODO:
+            mBackground.setVisibility(View.VISIBLE);
+            mBackground.setBackgroundColor(getResources().getColor(R.color.theme_primary, null));
+        }
+    }
+
+    private void animateBackground() {
+        // TODO
+        mBackground.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onClick(View v) {
+        int id = v.getId();
+        if (id == R.id.market_btn) {
+            Intent intent = IntentUtils.createPlayStoreIntent(mApp.getPackageName());
+            startActivity(intent);
+        }
+    }
 }

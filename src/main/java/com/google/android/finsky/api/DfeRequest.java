@@ -28,6 +28,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
+import info.anodsplace.android.log.AppLog;
+
 public class DfeRequest<T extends MessageNano> extends Request<Response.ResponseWrapper>
 {    private static final boolean SKIP_ALL_CACHES = false;
 

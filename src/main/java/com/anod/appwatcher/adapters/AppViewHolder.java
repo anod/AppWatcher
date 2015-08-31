@@ -13,7 +13,7 @@ import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 
 public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-    private final DataProvider mDataProvider;
+    protected final DataProvider mDataProvider;
 
     public AppInfo app;
     public int position;
@@ -29,7 +29,7 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
     public TextView updateDate;
     private OnClickListener mListener;
 
-    private Bitmap mDefaultIcon;
+    protected Bitmap mDefaultIcon;
 
     public interface OnClickListener {
         void onIconClick(AppInfo app);
@@ -123,6 +123,20 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
                 price.setText(app.getPriceText());
             }
         }
+
+        bindSectionView();
+
+        String uploadDate = app.getUploadDate();
+
+        if (!"".equals(uploadDate)) {
+            updateDate.setText(uploadDate);
+            updateDate.setVisibility(View.VISIBLE);
+        } else {
+            updateDate.setVisibility(View.GONE);
+        }
+    }
+
+    protected void bindSectionView() {
         if (position == mDataProvider.getNewAppsCount()) {
             sectionText.setText(R.string.watching);
             sectionCount.setText(String.valueOf(mDataProvider.getTotalAppsCount() - mDataProvider.getNewAppsCount()));
@@ -133,15 +147,6 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
             section.setVisibility(View.VISIBLE);
         } else {
             section.setVisibility(View.GONE);
-        }
-
-        String uploadDate = app.getUploadDate();
-
-        if (!"".equals(uploadDate)) {
-            updateDate.setText(uploadDate);
-            updateDate.setVisibility(View.VISIBLE);
-        } else {
-            updateDate.setVisibility(View.GONE);
         }
     }
 }

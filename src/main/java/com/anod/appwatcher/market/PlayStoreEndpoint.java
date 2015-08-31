@@ -14,6 +14,8 @@ import com.google.android.finsky.api.model.DfeModel;
 import com.google.android.finsky.api.model.OnDataChangedListener;
 import com.google.android.finsky.config.ContentLevel;
 
+import info.anodsplace.android.log.AppLog;
+
 /**
  * @author alex
  * @date 2015-02-22
@@ -99,7 +101,7 @@ public abstract class PlayStoreEndpoint implements Response.ErrorListener, OnDat
 
     @Override
     public void onErrorResponse(VolleyError error) {
-        AppLog.e("ErrorResponse: "+error.getMessage(), error);
+        AppLog.e("ErrorResponse: " + error.getMessage(), error);
         if (mListener == null) {
             return;
         }

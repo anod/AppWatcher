@@ -1,7 +1,6 @@
 package com.anod.appwatcher.adapters;
 
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +12,7 @@ import com.anod.appwatcher.model.AppInfoMetadata;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import info.anodsplace.android.widget.recyclerview.ArrayAdapter;
 
@@ -46,7 +46,7 @@ public class InstalledAppsAdapter extends ArrayAdapter<PackageInfo, AppViewHolde
         v.setClickable(true);
         v.setFocusable(true);
 
-        return new AppViewHolder(v, mDataProvider, mListener);
+        return new InstalledAppViewHolder(v, mDataProvider, mListener);
 
     }
 
@@ -80,5 +80,10 @@ public class InstalledAppsAdapter extends ArrayAdapter<PackageInfo, AppViewHolde
         holder.bindView(position, app);
     }
 
+    @Override
+    public void addAll(List<PackageInfo> objects) {
+        super.addAll(objects);
 
+        mDataProvider.setTotalCount(getItemCount());
+    }
 }

@@ -61,4 +61,7 @@ public class ListCursorAdapterWrapper extends RecyclerView.Adapter<AppViewHolder
         notifyDataSetChanged();
     }
 
+    public void setNewAppsCount(int newCount) {
+        mDataProvider.setNewAppsCount(newCount);
+    }
 }

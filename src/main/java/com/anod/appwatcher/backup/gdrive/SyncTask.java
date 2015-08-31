@@ -4,6 +4,8 @@ import android.content.Context;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import info.anodsplace.android.log.AppLog;
+
 /**
  * Created by alex on 7/29/14.
  */
@@ -36,7 +38,7 @@ public class SyncTask extends ApiClientAsyncTask<Boolean, Boolean, SyncTask.Resu
         try {
             worker.doSyncInBackground();
         } catch (Exception e) {
-            AppLog.ex(e);
+            AppLog.e(e);
             return new Result(false, e);
         }
 

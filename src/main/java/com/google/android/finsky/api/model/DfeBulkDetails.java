@@ -9,6 +9,8 @@ import com.google.android.finsky.protos.DocumentV2;
 import java.util.ArrayList;
 import java.util.List;
 
+import info.anodsplace.android.log.AppLog;
+
 public class DfeBulkDetails extends DfeBaseModel<Details.BulkDetailsResponse>
 {
     private Details.BulkDetailsResponse mBulkDetailsResponse;
