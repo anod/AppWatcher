@@ -7,7 +7,6 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.anod.appwatcher.AppWatcherApplication;
-import com.anod.appwatcher.utils.AppLog;
 import com.google.android.finsky.api.DfeApi;
 import com.google.android.finsky.api.DfeApiContext;
 import com.google.android.finsky.api.DfeApiImpl;

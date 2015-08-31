@@ -14,7 +14,6 @@ import android.os.RemoteException;
 
 import com.anod.appwatcher.AppListContentProvider;
 import com.anod.appwatcher.model.schema.AppListTable;
-import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.BitmapUtils;
 
 /**

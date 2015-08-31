@@ -28,7 +28,6 @@ import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListCursorLoader;
 import com.anod.appwatcher.model.Filters;
 import com.anod.appwatcher.model.InstalledFilter;
-import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.IntentUtils;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 import com.anod.appwatcher.adapters.AppViewHolder;

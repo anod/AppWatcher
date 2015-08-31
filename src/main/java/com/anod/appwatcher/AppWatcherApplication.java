@@ -8,10 +8,11 @@ import com.crashlytics.android.Crashlytics;
 import com.mopub.common.MoPub;
 import com.squareup.leakcanary.LeakCanary;
 
+import info.anodsplace.android.log.AppLog;
 import io.fabric.sdk.android.Fabric;
 import java.lang.reflect.Field;
 
-public class AppWatcherApplication extends Application {
+public class AppWatcherApplication extends Application implements AppLog.Listener {
     private ObjectGraph mObjectGraph;
 
     @Override
@@ -35,6 +36,9 @@ public class AppWatcherApplication extends Application {
 			 // Ignore
 		 }
 
+        AppLog.setDebug(BuildConfig.DEBUG, "AppWatcher");
+        AppLog.instance().setListener(this);
+
         mObjectGraph = new ObjectGraph(this);
     }
 
@@ -48,5 +52,10 @@ public class AppWatcherApplication extends Application {
 
     public static ObjectGraph provide(Context context) {
         return ((AppWatcherApplication) context.getApplicationContext()).getObjectGraph();
+    }
+
+    @Override
+    public void onLogException(Throwable tr) {
+        Crashlytics.logException(tr);
     }
 }

@@ -4,12 +4,9 @@ import android.graphics.Bitmap;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.RequestFuture;
-import com.anod.appwatcher.utils.AppLog;
 
 import java.util.concurrent.ExecutionException;
 

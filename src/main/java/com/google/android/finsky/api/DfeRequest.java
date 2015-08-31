@@ -13,8 +13,6 @@ import com.android.volley.RetryPolicy;
 import com.android.volley.ServerError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
-import com.anod.appwatcher.BuildConfig;
-import com.anod.appwatcher.utils.AppLog;
 import com.google.android.finsky.protos.Response;
 import com.google.android.finsky.protos.ResponseMessages;
 import com.google.android.finsky.utils.Utils;

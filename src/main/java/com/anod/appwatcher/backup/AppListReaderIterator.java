@@ -2,7 +2,6 @@ package com.anod.appwatcher.backup;
 
 import com.android.util.JsonReader;
 import com.anod.appwatcher.model.AppInfo;
-import com.anod.appwatcher.utils.AppLog;
 
 import java.io.IOException;
 import java.io.Reader;

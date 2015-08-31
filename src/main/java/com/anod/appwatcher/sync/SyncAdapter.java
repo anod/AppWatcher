@@ -34,7 +34,6 @@ import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.model.AppListCursor;
 import com.anod.appwatcher.model.schema.AppListTable;
-import com.anod.appwatcher.utils.AppLog;
 import com.anod.appwatcher.utils.BitmapUtils;
 import com.anod.appwatcher.utils.DocUtils;
 import com.anod.appwatcher.utils.GooglePlayServices;

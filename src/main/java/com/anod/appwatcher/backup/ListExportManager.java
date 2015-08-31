@@ -16,7 +16,6 @@ import com.android.util.MalformedJsonException;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.model.AppListCursor;
-import com.anod.appwatcher.utils.AppLog;
 
 /**
  * Serialize and deserialize app info list into/from JSON file

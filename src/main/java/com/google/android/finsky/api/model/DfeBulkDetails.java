@@ -2,7 +2,6 @@ package com.google.android.finsky.api.model;
 
 import com.android.volley.Response;
 import com.anod.appwatcher.BuildConfig;
-import com.anod.appwatcher.utils.AppLog;
 import com.google.android.finsky.api.DfeApi;
 import com.google.android.finsky.protos.Details;
 import com.google.android.finsky.protos.DocumentV2;

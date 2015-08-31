@@ -1,7 +1,6 @@
 package com.google.android.finsky.api;
 
 import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
@@ -9,10 +8,6 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 import com.android.volley.AuthFailureError;
-import com.android.volley.Cache;
-import com.android.volley.toolbox.AndroidAuthenticator;
-import com.anod.appwatcher.BuildConfig;
-import com.anod.appwatcher.utils.AppLog;
 
 import java.util.HashMap;
 import java.util.Locale;

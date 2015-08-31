@@ -8,7 +8,6 @@ import android.text.*;
 import android.util.*;
 
 import com.anod.appwatcher.BuildConfig;
-import com.anod.appwatcher.utils.AppLog;
 import com.google.android.finsky.api.utils.AndroidKeyczarReader;
 
 import org.keyczar.*;

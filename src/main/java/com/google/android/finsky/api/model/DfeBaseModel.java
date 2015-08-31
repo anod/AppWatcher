@@ -3,8 +3,6 @@ package com.google.android.finsky.api.model;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
-import com.anod.appwatcher.utils.AppLog;
-import com.google.android.finsky.protos.Details;
 
 import java.util.concurrent.ExecutionException;
 

@@ -12,7 +12,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 
 import com.anod.appwatcher.AppListContentProvider;
-import com.anod.appwatcher.utils.AppLog;
 import com.crashlytics.android.Crashlytics;
 
 import java.io.IOException;

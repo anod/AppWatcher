@@ -7,7 +7,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.anod.appwatcher.model.schema.AppListTable;
 import com.anod.appwatcher.model.schema.AppTagsTable;
 import com.anod.appwatcher.model.schema.TagsTable;
-import com.anod.appwatcher.utils.AppLog;
+
+import info.anodsplace.android.log.AppLog;
 
 public class DbOpenHelper extends SQLiteOpenHelper {
 	    
@@ -30,7 +31,7 @@ public class DbOpenHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        AppLog.v("Db upgrade from: "+oldVersion+" to "+newVersion);
+        AppLog.v("Db upgrade from: " + oldVersion + " to " + newVersion);
 		switch (oldVersion) {
 			case 1:
 				db.execSQL("ALTER TABLE "+AppListTable.TABLE_NAME + " ADD COLUMN " + AppListTable.Columns.KEY_UPLOAD_DATE + " INTEGER");
