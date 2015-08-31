@@ -2,6 +2,8 @@ package com.anod.appwatcher.ui;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.LayoutRes;
+import android.support.annotation.StringRes;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -29,13 +31,13 @@ abstract public class SettingsActionBarActivity extends ToolbarActivity implemen
     public static class Preference {
         final int title;
         final int layout;
-        public Preference(int title, int layout) {
+        public Preference(@StringRes int title,@LayoutRes int layout) {
             this.title = title;
             this.layout = layout;
         }
     }
     public static class Category extends Preference {
-        public Category(int title) {
+        public Category(@StringRes int title) {
             super(title, R.layout.preference_category);
         }
     }
@@ -47,7 +49,7 @@ abstract public class SettingsActionBarActivity extends ToolbarActivity implemen
         public int widget;
         public boolean enabled = true;
 
-        public Item(int title, int summaryRes, int action) {
+        public Item(@StringRes int title,@StringRes int summaryRes, int action) {
             super(title, R.layout.preference_holo);
             this.summaryRes = summaryRes;
             this.action = action;
@@ -57,9 +59,18 @@ abstract public class SettingsActionBarActivity extends ToolbarActivity implemen
     public static class CheckboxItem extends Item {
         public boolean checked = false;
 
-        public CheckboxItem(int title, int summaryRes, int action) {
+        public CheckboxItem(@StringRes int title,@StringRes  int summaryRes, int action) {
             super(title, summaryRes, action);
             this.widget = R.layout.preference_widget_checkbox;
+        }
+
+        public CheckboxItem(int title, int summaryRes, int action, boolean checked) {
+            this(title, summaryRes, action);
+            this.checked = checked;
+        }
+
+        public void switchState() {
+            this.checked = !this.checked;
         }
     }
 
@@ -192,6 +203,9 @@ abstract public class SettingsActionBarActivity extends ToolbarActivity implemen
         Preference pref = (Preference) mListView.getItemAtPosition(position);
         if (pref instanceof Item) {
             int action = ((Item) pref).action;
+            if (pref instanceof CheckboxItem) {
+                ((CheckboxItem) pref).switchState();
+            }
             onPreferenceItemClick(action, (Item) pref);
         }
     }

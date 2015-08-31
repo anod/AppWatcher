@@ -11,6 +11,8 @@ import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
 import com.crashlytics.android.Crashlytics;
 
+import info.anodsplace.android.log.AppLog;
+
 /**
  * @author alex
  * @date 9/17/13
@@ -52,6 +54,8 @@ public class AccountChooserHelper implements AccountChooserFragment.OnAccountSel
 
 	public void init() {
 		mSyncAccount = mPreferences.getAccount();
+		Crashlytics.setBool("HasAccountSelected", mSyncAccount != null);
+
 		if (mSyncAccount == null) {
             // Do not display dialog if only one account available
             //AccountManager accountManager = new AccountManager(mContext);
@@ -63,17 +67,18 @@ public class AccountChooserHelper implements AccountChooserFragment.OnAccountSel
                 showAccountsDialog();
             //}
 		} else {
-            Crashlytics.setBool("HasAccountSelected", mSyncAccount != null);
 			mAuthTokenProvider.requestToken(mActivity, mSyncAccount, new AuthTokenProvider.AuthenticateCallback() {
 				@Override
 				public void onAuthTokenAvailable(String token) {
 					initAutoSync(mSyncAccount);
-					mListener.onHelperAccountSelected(mSyncAccount, token);
+					if (mListener != null) {
+						mListener.onHelperAccountSelected(mSyncAccount, token);
+					}
 				}
 
 				@Override
 				public void onUnRecoverableException(String errorMessage) {
-
+					AppLog.e(errorMessage);
 				}
 			});
 
