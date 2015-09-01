@@ -31,8 +31,8 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@id/android:empty"
-        android:layout_width="wrap_content"
+        android:id="@android:id/empty"
+        android:layout_width="240dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:gravity="center"
@@ -40,31 +40,30 @@
 
         <TextView
 
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="The watch list is empty"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
+            android:text="Your watch list is empty"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <Button
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableTop="@drawable/ic_action_search"
-            android:text="Search in Play Store" />
+            android:drawableLeft="@drawable/ic_add_black_36dp"
+            android:text="Search for an app" />
 
         <Button
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableTop="@drawable/ic_action_installed"
-            android:text="Import installed" />
+            android:drawableLeft="@drawable/ic_action_installed"
+            android:text="Import downloaded" />
 
-        <TextView
-
-            android:layout_width="wrap_content"
+        <Button
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="Add apps directly from Play Store using Share button"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
+            android:drawableLeft="@drawable/ic_action_share"
+            android:text="Share from Play Store " />
+
     </LinearLayout>
 
 </FrameLayout>

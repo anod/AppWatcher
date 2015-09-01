@@ -50,12 +50,7 @@ public class InstalledListFragment extends AppWatcherListFragment {
 
 
     @Override
-    public void onIconClick(AppInfo app) {
-        super.onIconClick(app);
-    }
-
-    @Override
     public void onItemClick(AppInfo app) {
-        super.onItemClick(app);
+       // super.onItemClick(app);
     }
 }
