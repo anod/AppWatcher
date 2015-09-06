@@ -103,6 +103,6 @@
 
     <string name="activity_market">Search</string>
     <string name="activity_main">Watch List</string>
-    <string name="on_device">On device</string>
+    <string name="downloaded">Downloaded</string>
     <string name="category_updates">Updates</string>
 </resources>

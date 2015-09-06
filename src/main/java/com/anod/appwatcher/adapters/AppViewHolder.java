@@ -108,6 +108,21 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
             newIndicator.setVisibility(View.INVISIBLE);
         }
 
+        bindPriceView(app);
+
+        bindSectionView();
+
+        String uploadDate = app.getUploadDate();
+
+        if (!"".equals(uploadDate)) {
+            updateDate.setText(uploadDate);
+            updateDate.setVisibility(View.VISIBLE);
+        } else {
+            updateDate.setVisibility(View.GONE);
+        }
+    }
+
+    protected void bindPriceView(AppInfo app) {
         boolean isInstalled = mDataProvider.getPackageManagerUtils().isAppInstalled(app.getPackageName());
         if (isInstalled) {
             PackageManagerUtils.InstalledInfo installed = mDataProvider.getPackageManagerUtils().getInstalledInfo(app.getPackageName());
@@ -122,17 +137,6 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
             } else {
                 price.setText(app.getPriceText());
             }
-        }
-
-        bindSectionView();
-
-        String uploadDate = app.getUploadDate();
-
-        if (!"".equals(uploadDate)) {
-            updateDate.setText(uploadDate);
-            updateDate.setVisibility(View.VISIBLE);
-        } else {
-            updateDate.setVisibility(View.GONE);
         }
     }
 

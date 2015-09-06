@@ -51,7 +51,7 @@ public class AppWatcherListFragment extends Fragment implements
 
     protected PackageManagerUtils mPMUtils;
 
-    protected MergeRecyclerAdapter<RecyclerView.Adapter> mAdapter;
+    protected MergeRecyclerAdapter mAdapter;
 
     public static AppWatcherListFragment newInstance(int filterId) {
         AppWatcherListFragment frag = new AppWatcherListFragment();
@@ -147,7 +147,7 @@ public class AppWatcherListFragment extends Fragment implements
 
         // Create an empty adapter we will use to display the loaded data.
 
-        mAdapter = new MergeRecyclerAdapter<>();
+        mAdapter = new MergeRecyclerAdapter();
         mAdapter.addAdapter(ADAPTER_WATCHLIST, new ListCursorAdapterWrapper(getActivity(), mPMUtils, this));
 
         mListView.setAdapter(mAdapter);
