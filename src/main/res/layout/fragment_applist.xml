@@ -49,19 +49,19 @@
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/ic_add_black_36dp"
+            android:drawableLeft="@drawable/ic_search_black_24dp"
             android:text="Search for an app" />
 
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/ic_action_installed"
+            android:drawableLeft="@drawable/ic_check_black_24dp"
             android:text="Import downloaded" />
 
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/ic_action_share"
+            android:drawableLeft="@drawable/ic_share_black_24dp"
             android:text="Share from Play Store " />
 
     </LinearLayout>

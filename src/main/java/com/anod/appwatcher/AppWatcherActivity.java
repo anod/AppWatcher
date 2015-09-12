@@ -72,7 +72,7 @@ public class AppWatcherActivity extends DrawerActivity implements
         setContentView(R.layout.activity_main);
         setTitle(R.string.activity_main);
         setupDrawer();
-        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
+        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
 
         mContext = this;
 

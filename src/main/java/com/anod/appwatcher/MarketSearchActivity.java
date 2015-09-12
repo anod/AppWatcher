@@ -403,8 +403,8 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
                 holder.updated = (TextView) v.findViewById(R.id.updated);
                 holder.price = (TextView) v.findViewById(R.id.price);
                 holder.icon = (NetworkImageView) v.findViewById(android.R.id.icon);
-                holder.icon.setDefaultImageResId(R.drawable.ic_empty);
-                holder.icon.setErrorImageResId(R.drawable.ic_empty);
+                holder.icon.setDefaultImageResId(R.drawable.ic_android_black_24dp);
+                holder.icon.setErrorImageResId(R.drawable.ic_android_black_24dp);
 
                 v.setTag(holder);
             } else {

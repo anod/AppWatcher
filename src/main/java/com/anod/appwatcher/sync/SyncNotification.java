@@ -94,7 +94,7 @@ public class SyncNotification {
             readIntent.setData(Uri.parse("com.anod.appwatcher://dismiss/"));
             readIntent.putExtra(NotificationActivity.EXTRA_TYPE, NotificationActivity.TYPE_DISMISS);
 
-            builder.addAction(R.drawable.ic_action_cancel_white, mContext.getString(R.string.dismiss),
+            builder.addAction(R.drawable.ic_clear_white_24dp, mContext.getString(R.string.dismiss),
                     PendingIntent.getActivity(mContext, 0, readIntent, 0)
             );
 

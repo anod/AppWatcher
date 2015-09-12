@@ -30,7 +30,7 @@
         android:gravity="center"
         android:scaleType="center"
         android:background="@android:drawable/list_selector_background"
-        android:src="@drawable/ic_action_tick"
+        android:src="@drawable/ic_save_black_24dp"
         android:paddingLeft="14dip"
         android:paddingRight="14dip"
     /> 
@@ -49,7 +49,7 @@
         android:gravity="center"
         android:scaleType="center"
         android:background="@android:drawable/list_selector_background"
-        android:src="@drawable/ic_action_cancel"
+        android:src="@drawable/ic_delete_black_24dp"
         android:paddingLeft="14dip"
         android:paddingRight="14dip"
     />        
