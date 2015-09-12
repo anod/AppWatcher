@@ -14,8 +14,8 @@ import com.google.android.finsky.protos.DocDetails;
 public class DetailsEndpoint extends PlayStoreEndpoint {
     private String mUrl;
 
-    public DetailsEndpoint(Listener listener, Context context) {
-        super(listener, context);
+    public DetailsEndpoint(Context context) {
+        super(context);
     }
 
     public void setUrl(String url) {

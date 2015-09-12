@@ -8,8 +8,6 @@ import com.anod.appwatcher.backup.ListExportManager;
 import com.anod.appwatcher.fragments.WaitDialogFragment;
 
 public class ListExportActivity extends FragmentActivity {
-
-	private static final String WAIT_DIALOG = "wait_dialog";
 	private ListExportManager mBackupManager;
 
 	@Override
@@ -24,18 +22,6 @@ public class ListExportActivity extends FragmentActivity {
 
 	public ListExportManager getBackupManager() {
 		return mBackupManager;
-	}
-
-	public void showDialog() {
-		DialogFragment dialogFragment = WaitDialogFragment.newInstance();
-		dialogFragment.show(getSupportFragmentManager(), WAIT_DIALOG);
-	}
-	
-	public void dismissDialog() {
-		DialogFragment dialogFragment = (DialogFragment) getSupportFragmentManager().findFragmentByTag(WAIT_DIALOG);
-		if (dialogFragment != null) {
-			dialogFragment.dismiss();
-		}
 	}
 
 }

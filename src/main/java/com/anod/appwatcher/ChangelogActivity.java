@@ -32,6 +32,7 @@ import com.anod.appwatcher.utils.IntentUtils;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import info.anodsplace.android.log.AppLog;
 
 
 public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpoint.Listener, Palette.PaletteAsyncListener, View.OnClickListener {
@@ -72,7 +73,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
         mAppId = data.getStringExtra(EXTRA_APP_ID);
         mDetailsUrl = data.getStringExtra(EXTRA_DETAILS_URL);
 
-        mDetailsEndpoint = new DetailsEndpoint(this, this);
+        mDetailsEndpoint = new DetailsEndpoint(this);
         mDetailsEndpoint.setUrl(mDetailsUrl);
 
         mLoadingView.setVisibility(View.VISIBLE);
@@ -84,6 +85,19 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
                 mDetailsEndpoint.startAsync();
             }
         });
+
+        AppListContentProviderClient cr = new AppListContentProviderClient(this);
+        mApp = cr.queryAppId(mAppId);
+        cr.release();
+
+        setupAppView(mApp);
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mDetailsEndpoint.setListener(this);
 
         AuthTokenProvider accHelper = new AuthTokenProvider(this);
         final Preferences prefs = new Preferences(this);
@@ -101,12 +115,12 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
             }
         });
 
-        AppListContentProviderClient cr = new AppListContentProviderClient(this);
-        mApp = cr.queryAppId(mAppId);
-        cr.release();
+    }
 
-        setupAppView(mApp);
-
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mDetailsEndpoint.setListener(null);
     }
 
     private void setupAppView(AppInfo app) {
@@ -115,7 +129,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
         if (icon == null) {
             icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_android_black_24dp);
             mBackground.setVisibility(View.VISIBLE);
-            mBackground.setBackgroundColor(getResources().getColor(R.color.theme_primary, null));
+            mBackground.setBackgroundColor(getResources().getColor(R.color.theme_primary));
         } else {
             Palette.from(icon).generate(this);
         }
@@ -190,14 +204,23 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
 
     @Override
     public void onGenerated(Palette palette) {
+        for (Palette.Swatch swatch : palette.getSwatches()) {
+            AppLog.d("Palette: " + swatch.toString());
+        }
         Palette.Swatch vibrant = palette.getDarkVibrantSwatch();
         if (vibrant != null) {
             mBackground.setBackgroundColor(vibrant.getRgb());
             animateBackground();
         } else {
-            // TODO:
-            mBackground.setVisibility(View.VISIBLE);
-            mBackground.setBackgroundColor(getResources().getColor(R.color.theme_primary, null));
+            Palette.Swatch muted =  palette.getDarkMutedSwatch();
+            if (muted != null) {
+                mBackground.setBackgroundColor(muted.getRgb());
+                animateBackground();
+            } else {
+                // TODO:
+                mBackground.setVisibility(View.VISIBLE);
+                mBackground.setBackgroundColor(getResources().getColor(R.color.theme_primary));
+            }
         }
     }
 

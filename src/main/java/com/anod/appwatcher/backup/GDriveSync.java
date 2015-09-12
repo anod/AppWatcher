@@ -45,24 +45,33 @@ public class GDriveSync extends GooglePlayServices implements SyncTask.Listener 
 
     public interface Listener {
         void onGDriveConnect();
-        void onGDriveSyncProgress();
-        void onGDriveSyncStart();
-        void onGDriveSyncFinish();
-		void onGDriveError();
-	}
 
-    public GDriveSync(Activity activity, Listener listener) {
+        void onGDriveSyncProgress();
+
+        void onGDriveSyncStart();
+
+        void onGDriveSyncFinish();
+
+        void onGDriveError();
+    }
+
+    public GDriveSync(Activity activity) {
         super(activity);
-        mListener = listener;
     }
 
     public GDriveSync(Context context) {
         super(context);
     }
 
+    public void setListener(Listener listener) {
+        mListener = listener;
+    }
+
     @Override
     protected void onConnectAction(int action) {
-        mListener.onGDriveConnect();
+        if (mListener != null) {
+            mListener.onGDriveConnect();
+        }
         if (action == ACTION_SYNC) {
             new SyncTask(mContext, this, createGoogleApiClientBuilder().build()).execute(true);
         }
@@ -70,11 +79,15 @@ public class GDriveSync extends GooglePlayServices implements SyncTask.Listener 
 
     @Override
     protected void onConnectionError() {
-        mListener.onGDriveError();
+        if (mListener != null) {
+            mListener.onGDriveError();
+        }
     }
 
     public void sync() {
-        mListener.onGDriveSyncStart();
+        if (mListener != null) {
+            mListener.onGDriveSyncStart();
+        }
         if (!isConnected()) {
             connectWithAction(ACTION_SYNC);
         } else {
@@ -100,14 +113,20 @@ public class GDriveSync extends GooglePlayServices implements SyncTask.Listener 
     public void onResult(SyncTask.Result result) {
         if (result == null) {
             //Connection error
-            mListener.onGDriveError();
+            if (mListener != null) {
+                mListener.onGDriveError();
+            }
             return;
         }
         if (result.status) {
-            mListener.onGDriveSyncFinish();
+            if (mListener != null) {
+                mListener.onGDriveSyncFinish();
+            }
         } else {
             Toast.makeText(mContext, result.ex.getMessage(), Toast.LENGTH_SHORT).show();
-            mListener.onGDriveError();
+            if (mListener != null) {
+                mListener.onGDriveError();
+            }
         }
     }
 

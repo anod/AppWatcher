@@ -88,7 +88,7 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
         mLoading = (LinearLayout) findViewById(R.id.loading);
         mLoading.setVisibility(View.GONE);
 
-        mSearchEngine = new SearchEndpoint(this, this);
+        mSearchEngine = new SearchEndpoint(this);
 
         mAdapter = new AppsAdapter(this);
 
@@ -119,10 +119,12 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
             mContentProviderClient.release();
         }
         super.onPause();
+        mSearchEngine.setListener(null);
     }
 
     @Override
     protected void onResume() {
+        mSearchEngine.setListener(this);
         mContentProviderClient = new AppListContentProviderClient(mContext);
         super.onResume();
     }

@@ -3,6 +3,7 @@ package com.google.android.volley;
 import android.os.*;
 import org.apache.http.conn.*;
 import org.apache.http.conn.routing.*;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.protocol.*;
 import org.apache.http.client.methods.*;
 import android.content.*;
@@ -14,6 +15,7 @@ import org.apache.http.conn.params.*;
 import com.google.android.volley.elegant.*;
 import org.apache.http.impl.client.*;
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.net.*;
 import org.apache.http.client.*;
 import org.apache.http.*;
@@ -91,14 +93,14 @@ public final class AndroidHttpClient implements HttpClient
         }
         return true;
     }
-    
+
     public static AndroidHttpClient newInstance(final String s, final Context context) {
         final BasicHttpParams basicHttpParams = new BasicHttpParams();
         HttpConnectionParams.setStaleCheckingEnabled((HttpParams)basicHttpParams, false);
         HttpConnectionParams.setConnectionTimeout((HttpParams)basicHttpParams, 20000);
         HttpConnectionParams.setSoTimeout((HttpParams)basicHttpParams, 20000);
         HttpConnectionParams.setSocketBufferSize((HttpParams)basicHttpParams, 8192);
-        HttpClientParams.setRedirecting((HttpParams) basicHttpParams, false);
+        HttpClientParams.setRedirecting((HttpParams)basicHttpParams, false);
         SSLSessionCache sslSessionCache;
         if (context == null) {
             sslSessionCache = null;
@@ -106,14 +108,33 @@ public final class AndroidHttpClient implements HttpClient
         else {
             sslSessionCache = new SSLSessionCache(context);
         }
-        HttpProtocolParams.setUserAgent((HttpParams) basicHttpParams, s);
+        HttpProtocolParams.setUserAgent((HttpParams)basicHttpParams, s);
         final SchemeRegistry schemeRegistry = new SchemeRegistry();
         schemeRegistry.register(new Scheme("http", (SocketFactory)ElegantPlainSocketFactory.getSocketFactory(), 80));
-        schemeRegistry.register(new Scheme("https", (SocketFactory)SSLCertificateSocketFactory.getDefault(5000, sslSessionCache), 443));
+        schemeRegistry.register(new Scheme("https", (SocketFactory)getSocketFactory(sslSessionCache), 443));
         final ConnManagerParamBean connManagerParamBean = new ConnManagerParamBean((HttpParams)basicHttpParams);
         connManagerParamBean.setConnectionsPerRoute(new ConnPerRouteBean(4));
         connManagerParamBean.setMaxTotalConnections(8);
         return new AndroidHttpClient((ClientConnectionManager)new ElegantThreadSafeConnManager((HttpParams)basicHttpParams, schemeRegistry), (HttpParams)basicHttpParams);
+    }
+
+    private static SSLSocketFactory getSocketFactory(final SSLSessionCache sslSessionCache) {
+        final javax.net.ssl.SSLSocketFactory default1 = SSLCertificateSocketFactory.getDefault(5000, sslSessionCache);
+        try {
+            return SSLSocketFactory.class.getConstructor(javax.net.ssl.SSLSocketFactory.class).newInstance(default1);
+        }
+        catch (NoSuchMethodException ex) {
+            throw new IllegalStateException(ex);
+        }
+        catch (InstantiationException ex2) {
+            throw new IllegalStateException(ex2);
+        }
+        catch (IllegalAccessException ex3) {
+            throw new IllegalStateException(ex3);
+        }
+        catch (InvocationTargetException ex4) {
+            throw new IllegalStateException(ex4);
+        }
     }
     
     private static String toCurl(final HttpUriRequest httpUriRequest, final boolean b) throws IOException {

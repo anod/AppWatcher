@@ -15,8 +15,8 @@ public class SearchEndpoint extends PlayStoreEndpoint {
     public static final int BACKEND_ID = 3;
     private String mQuery;
 
-    public SearchEndpoint(Listener listener, Context context) {
-        super(listener, context);
+    public SearchEndpoint(Context context) {
+        super(context);
     }
 
     public String getQuery() {

@@ -2,6 +2,6 @@
 <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:src="@drawable/ic_refresh_black_36dp"
+    android:src="@drawable/ic_refresh_white_24dp"
     style="@style/ActionButton"
     android:contentDescription="@string/menu_refresh"/>

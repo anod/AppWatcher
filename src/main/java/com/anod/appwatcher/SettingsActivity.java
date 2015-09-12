@@ -61,7 +61,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
 
     @Override
     protected void init() {
-        mGDriveSync = new GDriveSync(this, this);
+        mGDriveSync = new GDriveSync(this);
         mPrefs = new Preferences(this);
         mAboutCounter = 0;
 
@@ -71,9 +71,16 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        mGDriveSync.setListener(null);
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         mSyncNowItem.summary = renderDriveSyncTime();
+        mGDriveSync.setListener(this);
     }
 
     @Override

@@ -21,7 +21,7 @@ import info.anodsplace.android.log.AppLog;
  * @date 2015-02-22
  */
 public abstract class PlayStoreEndpoint implements Response.ErrorListener, OnDataChangedListener {
-    protected final Listener mListener;
+    protected Listener mListener;
     protected final Context mContext;
 
     protected DfeModel mDfeModel;
@@ -34,8 +34,11 @@ public abstract class PlayStoreEndpoint implements Response.ErrorListener, OnDat
         void onErrorResponse(VolleyError error);
     }
 
-    public PlayStoreEndpoint(Listener listener, Context context) {
-        mContext = context;
+    public PlayStoreEndpoint(Context context) {
+        mContext = context.getApplicationContext();
+    }
+
+    public void setListener(Listener listener) {
         mListener = listener;
     }
 

@@ -35,7 +35,8 @@
                     style="@style/TextAppearance.AppCompat.Title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="16dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
                     android:text="@string/app_name"
                     android:textColor="@color/white" />
 
@@ -82,8 +83,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="right"
         android:layout_marginRight="8dp"
-        android:layout_marginTop="104dp"
-        android:src="@drawable/ic_play_arrow_white_48dp"
+        android:layout_marginTop="96dp"
+        android:src="@drawable/ic_play_arrow_black_48dp"
         app:backgroundTint="@color/white"
         app:elevation="2dp"
         app:fabSize="mini" />
