@@ -3,7 +3,7 @@
 
     <group android:checkableBehavior="none">
         <item
-            android:id="@+id/nav_add"
+            android:id="@+id/menu_add"
             android:icon="@drawable/ic_add_circle_outline_black_24dp"
             android:title="@string/navdrawer_item_add" />
 
@@ -14,7 +14,7 @@
 
         <item
             android:id="@+id/menu_settings"
-            android:icon="@drawable/ic_drawer_settings"
+            android:icon="@drawable/ic_settings_black_24dp"
             android:title="@string/navdrawer_item_settings" />
 
         <item android:id="@+id/nav_tags"
@@ -23,6 +23,7 @@
             <group android:checkableBehavior="single">
                 <menu>
                     <item
+                        android:icon="@drawable/ic_turned_in_black_36dp"
                         android:title="Tag 1" />
                 </menu>
             </group>

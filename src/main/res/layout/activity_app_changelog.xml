@@ -7,8 +7,7 @@
         android:id="@+id/background"
         android:layout_width="320dp"
         android:layout_height="120dp"
-        android:visibility="invisible"
-     />
+        android:visibility="invisible" />
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="320dp"
@@ -83,7 +82,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="right"
         android:layout_marginRight="8dp"
-        android:layout_marginTop="96dp"
+        android:layout_marginTop="86dp"
         android:src="@drawable/ic_play_arrow_black_48dp"
         app:backgroundTint="@color/white"
         app:elevation="2dp"

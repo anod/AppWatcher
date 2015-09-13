@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.util.ArrayMap;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
@@ -42,8 +43,6 @@ import com.google.android.finsky.api.model.Document;
 import com.google.android.finsky.protos.Common;
 import com.google.android.finsky.protos.DocDetails;
 
-import java.util.HashMap;
-
 import info.anodsplace.android.log.AppLog;
 
 public class MarketSearchActivity extends ToolbarActivity implements AccountChooserHelper.OnAccountSelectionListener, AccountChooserFragment.OnAccountSelectionListener, SearchEndpoint.Listener {
@@ -58,7 +57,7 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
     private ListView mListView;
     private boolean mInitiateSearch = false;
     private boolean mShareSource = false;
-    private HashMap<String, Boolean> mAddedApps;
+    private ArrayMap<String, Boolean> mAddedApps;
 
     private int mColorBgWhite;
     private int mColorBgGray;
@@ -69,21 +68,21 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
     private SearchEndpoint mSearchEngine;
     private int mIconSize = -1;
     private AppListContentProviderClient mContentProviderClient;
+    private String mSearchQuery;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_market_search);
-
+        setupToolbar();
         mContext = this;
 
         Resources r = mContext.getResources();
         mColorBgGray = r.getColor(R.color.row_inactive);
         mColorBgWhite = r.getColor(R.color.white);
 
-        mAddedApps = new HashMap<String, Boolean>();
+        mAddedApps = new ArrayMap<>();
 
         mLoading = (LinearLayout) findViewById(R.id.loading);
         mLoading.setVisibility(View.GONE);
@@ -111,6 +110,21 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
         mLoading.setVisibility(View.VISIBLE);
         mRetryView.setVisibility(View.GONE);
 
+        initFromIntent(getIntent());
+
+    }
+
+
+    private void initFromIntent(Intent i) {
+        if (i == null) {
+            return;
+        }
+        String keyword = i.getStringExtra(EXTRA_KEYWORD);
+        if (keyword != null) {
+            mSearchQuery = keyword;
+        }
+        mInitiateSearch = i.getBooleanExtra(EXTRA_EXACT, false);
+        mShareSource = i.getBooleanExtra(EXTRA_SHARE, false);
     }
 
     @Override
@@ -124,9 +138,14 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
 
     @Override
     protected void onResume() {
-        mSearchEngine.setListener(this);
         mContentProviderClient = new AppListContentProviderClient(mContext);
         super.onResume();
+
+        mSearchEngine.setListener(this);
+
+        mAccChooserHelper = new AccountChooserHelper(this, new Preferences(this), this);
+        mAccChooserHelper.init();
+
     }
 
     @Override
@@ -136,11 +155,6 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
     }
 
     private void searchResults() {
-        String query = mSearchView.getQuery().toString();
-
-        // hide virtual keyboard
-        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
 
         mListView.setAdapter(mAdapter);
 
@@ -148,8 +162,8 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
 
         showLoading();
 
-        if (query.length() > 0) {
-            mSearchEngine.setQuery(query).startAsync();
+        if (!TextUtils.isEmpty(mSearchQuery)) {
+            mSearchEngine.setQuery(mSearchQuery).startAsync();
         } else {
             showNoResults("");
         }
@@ -177,23 +191,28 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
 
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
-            public boolean onQueryTextSubmit(String s) {
+            public boolean onQueryTextSubmit(String query) {
+                mSearchQuery = query;
                 searchResultsDelayed();
+                hideKeyboard();
                 return false;
             }
 
             @Override
-            public boolean onQueryTextChange(String s) {
+            public boolean onQueryTextChange(String query) {
                 return false;
             }
         });
 
-        initFromIntent(getIntent());
-
-        mAccChooserHelper = new AccountChooserHelper(this, new Preferences(this), this);
-        mAccChooserHelper.init();
-
+        mSearchView.setQuery(mSearchQuery, true);
+        hideKeyboard();
         return true;
+    }
+
+    private void hideKeyboard() {
+        // hide virtual keyboard
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
     }
 
     private void searchResultsDelayed() {
@@ -211,7 +230,7 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
                 searchResultsDelayed();
                 return true;
             default:
-                return onOptionsItemSelected(item);
+                return super.onOptionsItemSelected(item);
         }
     }
 
@@ -284,12 +303,8 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
             return;
         }
         mSearchEngine.setAccount(account, authSubToken);
-        if (mInitiateSearch && !TextUtils.isEmpty(mSearchView.getQuery())) {
+        if (mInitiateSearch && !TextUtils.isEmpty(mSearchQuery)) {
             searchResults();
-        } else {
-            // hide virtual keyboard
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.showSoftInput(mSearchView, 0);
         }
     }
 
@@ -405,8 +420,8 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
                 holder.updated = (TextView) v.findViewById(R.id.updated);
                 holder.price = (TextView) v.findViewById(R.id.price);
                 holder.icon = (NetworkImageView) v.findViewById(android.R.id.icon);
-                holder.icon.setDefaultImageResId(R.drawable.ic_android_black_24dp);
-                holder.icon.setErrorImageResId(R.drawable.ic_android_black_24dp);
+                holder.icon.setDefaultImageResId(R.drawable.ic_blur_on_black_48dp);
+                holder.icon.setErrorImageResId(R.drawable.ic_android_black_48dp);
 
                 v.setTag(holder);
             } else {
@@ -447,15 +462,4 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
     }
 
 
-    private void initFromIntent(Intent i) {
-        if (i == null) {
-            return;
-        }
-        String keyword = i.getStringExtra(EXTRA_KEYWORD);
-        if (keyword != null) {
-            mSearchView.setQuery(keyword, true);
-        }
-        mInitiateSearch = i.getBooleanExtra(EXTRA_EXACT, false);
-        mShareSource = i.getBooleanExtra(EXTRA_SHARE, false);
-    }
 }

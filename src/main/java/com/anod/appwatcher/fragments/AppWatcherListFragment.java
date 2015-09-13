@@ -1,5 +1,6 @@
 package com.anod.appwatcher.fragments;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -61,18 +62,18 @@ public class AppWatcherListFragment extends Fragment implements
         return frag;
     }
 
-    /**
-     * Called when the activity is first created.
-     */
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        AppLog.d("Register listeners");
-        AppWatcherActivity act = (AppWatcherActivity) getActivity();
-
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        AppWatcherActivity act = (AppWatcherActivity) activity;
         act.setQueryChangeListener(this);
+    }
 
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        AppWatcherActivity act = (AppWatcherActivity) getActivity();
+        act.setQueryChangeListener(null);
     }
 
     public void setListVisible(boolean visible, boolean animate) {

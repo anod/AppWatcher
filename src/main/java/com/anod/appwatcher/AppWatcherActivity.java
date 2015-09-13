@@ -204,9 +204,13 @@ public class AppWatcherActivity extends DrawerActivity implements
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.menu_add:
+                Intent addActivity = new Intent(this, MarketSearchActivity.class);
+                startActivity(addActivity);
+                return true;
             case R.id.menu_act_refresh:
                 requestRefresh();
-            return true;
+                return true;
             case R.id.menu_settings:
                 Intent settingsActivity = new Intent(this, SettingsActivity.class);
                 startActivity(settingsActivity);

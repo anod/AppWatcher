@@ -87,7 +87,7 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
         Bitmap icon = app.getIcon();
         if (icon == null) {
             if (mDefaultIcon == null) {
-                mDefaultIcon = BitmapFactory.decodeResource(itemView.getContext().getResources(), R.drawable.ic_android_black_24dp);
+                mDefaultIcon = BitmapFactory.decodeResource(itemView.getContext().getResources(), R.drawable.ic_android_black_48dp);
             }
             icon = mDefaultIcon;
         }

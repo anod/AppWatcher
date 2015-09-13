@@ -127,7 +127,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
 
         Bitmap icon = app.getIcon();
         if (icon == null) {
-            icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_android_black_24dp);
+            icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_android_black_48dp);
             mBackground.setVisibility(View.VISIBLE);
             mBackground.setBackgroundColor(getResources().getColor(R.color.theme_primary));
         } else {

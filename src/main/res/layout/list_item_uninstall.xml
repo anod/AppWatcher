@@ -20,7 +20,7 @@
             android:contentDescription="@string/application_icon"
             android:paddingBottom="8dp"
             android:paddingTop="8dp"
-            android:src="@drawable/ic_android_black_24dp"/>
+            android:src="@drawable/ic_android_black_48dp"/>
 
     </FrameLayout>
 
