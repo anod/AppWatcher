@@ -41,7 +41,7 @@ public class FilterCursorWrapper extends AbstractCursor {
     private void initPositions(Cursor cursor, int count, CursorFilter filter) {
         cursor.moveToPosition(-1);
         while (cursor.moveToNext() && mCount < count) {
-            if (filter.filterRecord(cursor) == false) {
+            if (!filter.filterRecord(cursor)) {
                 mPosition[mCount++] = cursor.getPosition();
             }
         }

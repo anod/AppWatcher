@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -37,7 +36,7 @@ import info.anodsplace.android.widget.recyclerview.MergeRecyclerAdapter;
 public class AppWatcherListFragment extends Fragment implements
         LoaderManager.LoaderCallbacks<Cursor>,
         AppWatcherActivity.QueryChangeListener,
-        SwipeRefreshLayout.OnRefreshListener, AppViewHolder.OnClickListener {
+        AppViewHolder.OnClickListener {
 
     private static final int ADAPTER_WATCHLIST = 0;
     public static final String ARG_FILTER = "filter";
@@ -53,6 +52,7 @@ public class AppWatcherListFragment extends Fragment implements
     protected PackageManagerUtils mPMUtils;
 
     protected MergeRecyclerAdapter mAdapter;
+    private int mListenerIndex;
 
     public static AppWatcherListFragment newInstance(int filterId) {
         AppWatcherListFragment frag = new AppWatcherListFragment();
@@ -66,14 +66,15 @@ public class AppWatcherListFragment extends Fragment implements
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         AppWatcherActivity act = (AppWatcherActivity) activity;
-        act.setQueryChangeListener(this);
+        mListenerIndex = act.addQueryChangeListener(this);
+        AppLog.d("addQueryChangeListener with index: %d", mListenerIndex);
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         AppWatcherActivity act = (AppWatcherActivity) getActivity();
-        act.setQueryChangeListener(null);
+        act.removeQueryChangeListener(mListenerIndex);
     }
 
     public void setListVisible(boolean visible, boolean animate) {
@@ -217,13 +218,6 @@ public class AppWatcherListFragment extends Fragment implements
             mTitleFilter = newFilter;
             getLoaderManager().restartLoader(0, null, this);
         }
-    }
-
-
-
-    @Override
-    public void onRefresh() {
-        ((AppWatcherActivity) getActivity()).requestRefresh();
     }
 
     @Override

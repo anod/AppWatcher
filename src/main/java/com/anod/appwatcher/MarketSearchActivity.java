@@ -305,6 +305,8 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
         mSearchEngine.setAccount(account, authSubToken);
         if (mInitiateSearch && !TextUtils.isEmpty(mSearchQuery)) {
             searchResults();
+        } else {
+            showNoResults("");
         }
     }
 

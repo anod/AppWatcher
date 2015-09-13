@@ -11,10 +11,12 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.util.ArrayMap;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
+import android.util.SparseArray;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -55,7 +57,7 @@ public class AppWatcherActivity extends DrawerActivity implements
     private Preferences mPreferences;
     private Account mSyncAccount;
     private MenuItem mSearchMenuItem;
-    private QueryChangeListener mQueryChangeListener;
+    private ArrayList<QueryChangeListener> mQueryChangeListener = new ArrayList<>(3);
 
     private AccountChooserHelper mAccountChooserHelper;
     private boolean mOpenChangelog;
@@ -294,13 +296,19 @@ public class AppWatcherActivity extends DrawerActivity implements
     }
 
     public void notifyQueryChange(String s) {
-        if (mQueryChangeListener != null) {
-            mQueryChangeListener.onQueryTextChanged(s);
+        for (int idx = 0; idx < mQueryChangeListener.size(); idx++) {
+            AppLog.d("Notify query change: '%s', for listener: '%d'", s, idx);
+            mQueryChangeListener.get(idx).onQueryTextChanged(s);
         }
     }
 
-    public void setQueryChangeListener(QueryChangeListener listener) {
-        mQueryChangeListener = listener;
+    public int addQueryChangeListener(QueryChangeListener listener) {
+        mQueryChangeListener.add(listener);
+        return mQueryChangeListener.size()-1;
+    }
+
+    public void removeQueryChangeListener(int index) {
+        mQueryChangeListener.remove(index);
     }
 
 

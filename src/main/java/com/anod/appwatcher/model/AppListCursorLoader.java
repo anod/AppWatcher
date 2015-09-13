@@ -19,47 +19,45 @@ public class AppListCursorLoader extends CursorLoader {
     private static final String ORDER_DEFAULT = AppListTable.Columns.KEY_STATUS + " DESC, " + AppListTable.Columns.KEY_TITLE + " COLLATE LOCALIZED ASC";
     private static final String SELECTION_TITLE = AppListTable.Columns.KEY_STATUS + " != ? AND " + AppListTable.Columns.KEY_TITLE + " LIKE ?";
     private static final String SELECTION_DEFAULT = AppListTable.Columns.KEY_STATUS + " != ? ";
-    private final boolean mHasTitleFilter;
+
     private final FilterCursorWrapper.CursorFilter mCursorFilter;
 
     private int mNewCount;
 
-    public AppListCursorLoader(Context context, String titleFilter,FilterCursorWrapper.CursorFilter cursorFilter) {
-		super(context, CONTENT_URI, AppListTable.PROJECTION, null, null,ORDER_DEFAULT);
+    public AppListCursorLoader(Context context, String titleFilter, FilterCursorWrapper.CursorFilter cursorFilter) {
+        super(context, CONTENT_URI, AppListTable.PROJECTION, null, null, ORDER_DEFAULT);
 
         mCursorFilter = cursorFilter;
 
         if (!TextUtils.isEmpty(titleFilter)) {
-            mHasTitleFilter = true;
             setSelection(SELECTION_TITLE);
-            setSelectionArgs(new String[] { String.valueOf( AppInfoMetadata.STATUS_DELETED ), "%"+titleFilter+"%" });
+            setSelectionArgs(new String[]{String.valueOf(AppInfoMetadata.STATUS_DELETED), "%" + titleFilter + "%"});
         } else {
-            mHasTitleFilter = false;
             setSelection(SELECTION_DEFAULT);
-            setSelectionArgs(new String[] { String.valueOf( AppInfoMetadata.STATUS_DELETED ) });
+            setSelectionArgs(new String[]{String.valueOf(AppInfoMetadata.STATUS_DELETED)});
         }
-	}
+    }
 
-	@Override
-	public Cursor loadInBackground() {
-		Cursor cr = super.loadInBackground();
+    @Override
+    public Cursor loadInBackground() {
+        Cursor cr = super.loadInBackground();
 
-		loadNewCount();
+        loadNewCount();
 
-        if (mCursorFilter == null || mHasTitleFilter) {
+        if (mCursorFilter == null) {
             return new AppListCursor(cr);
         } else {
-            return new AppListCursor(new FilterCursorWrapper(cr,mCursorFilter));
+            return new AppListCursor(new FilterCursorWrapper(cr, mCursorFilter));
         }
-	}
+    }
 
-	public int getNewCount() {
-		return mNewCount;
-	}
+    public int getNewCount() {
+        return mNewCount;
+    }
 
-	private void loadNewCount() {
-		AppListContentProviderClient cl = new AppListContentProviderClient(getContext());
-		mNewCount = cl.queryUpdatesCount();
-		cl.release();
-	}
+    private void loadNewCount() {
+        AppListContentProviderClient cl = new AppListContentProviderClient(getContext());
+        mNewCount = cl.queryUpdatesCount();
+        cl.release();
+    }
 }
