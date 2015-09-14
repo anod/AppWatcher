@@ -30,7 +30,6 @@ public class RemoveDialogFragment extends DialogFragment {
         String message = getString(R.string.alert_dialog_remove_message, title); 
         
         return new AlertDialog.Builder(getActivity())
-             //   .setIcon(R.drawable.alert_dialog_icon)
                 .setTitle(R.string.alert_dialog_remove_title)
                 .setMessage(message)
                 .setPositiveButton(R.string.alert_dialog_remove, 
@@ -39,6 +38,7 @@ public class RemoveDialogFragment extends DialogFragment {
                         AppListContentProviderClient cl = new AppListContentProviderClient(getActivity());
                         cl.markDeleted(rowId);
                         cl.release();
+                        getActivity().finish();
                         }
                     }
                 )

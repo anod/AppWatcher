@@ -298,7 +298,6 @@ public class AppWatcherActivity extends DrawerActivity implements
 
     public void notifyQueryChange(String s) {
         for (int idx = 0; idx < mQueryChangeListener.size(); idx++) {
-            AppLog.d("Notify query change: '%s', for listener: '%d'", s, idx);
             mQueryChangeListener.get(idx).onQueryTextChanged(s);
         }
     }
