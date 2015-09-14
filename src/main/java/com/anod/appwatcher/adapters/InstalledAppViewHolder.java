@@ -1,11 +1,9 @@
 package com.anod.appwatcher.adapters;
 
-import android.text.TextUtils;
 import android.view.View;
 
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.model.AppInfo;
-import com.anod.appwatcher.utils.PackageManagerUtils;
 
 /**
  * @author alex

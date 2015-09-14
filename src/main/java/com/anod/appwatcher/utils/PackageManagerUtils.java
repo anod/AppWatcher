@@ -21,6 +21,7 @@ public class PackageManagerUtils {
     private PackageManager mPackageManager;
     private ArrayMap<String, InstalledInfo> mInstalledVersionsCache;
 
+
     public static class InstalledInfo {
         public int versionCode = 0;
         public String versionName = null;
@@ -33,6 +34,10 @@ public class PackageManagerUtils {
 
     public String getAppTitle(PackageInfo info) {
         return info.applicationInfo.loadLabel(mPackageManager).toString();
+    }
+
+    public PackageManager getPackageManager() {
+        return mPackageManager;
     }
 
     public Bitmap getAppIcon(PackageInfo info) {

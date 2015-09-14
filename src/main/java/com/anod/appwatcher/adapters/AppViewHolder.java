@@ -44,6 +44,7 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
         int getTotalAppsCount();
         int getNewAppsCount();
         PackageManagerUtils getPackageManagerUtils();
+        Bitmap getDefaultIcon();
     }
 
     public AppViewHolder(View itemView, DataProvider dataProvider, OnClickListener listener) {
@@ -83,16 +84,14 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
         this.app = app;
         title.setText(app.getTitle());
         details.setText(app.getCreator());
+
         icon.setTag(this);
         Bitmap icon = app.getIcon();
         if (icon == null) {
-            if (mDefaultIcon == null) {
-                mDefaultIcon = BitmapFactory.decodeResource(itemView.getContext().getResources(), R.drawable.ic_android_black_48dp);
-            }
-            icon = mDefaultIcon;
+            icon = mDataProvider.getDefaultIcon();
         }
-
         this.icon.setImageBitmap(icon);
+
         if (app.getStatus() == AppInfo.STATUS_UPDATED) {
             version.setVisibility(View.VISIBLE);
             version.setText(String.format(mDataProvider.getUpdateText(), app.getVersionName()));

@@ -135,6 +135,7 @@ public class AppWatcherActivity extends DrawerActivity implements
 
         final SearchView searchView = (SearchView) MenuItemCompat.getActionView(mSearchMenuItem);
         searchView.setOnQueryTextListener(this);
+        searchView.setSubmitButtonEnabled(true);
 
         updateSyncStatus();
 
@@ -308,7 +309,9 @@ public class AppWatcherActivity extends DrawerActivity implements
     }
 
     public void removeQueryChangeListener(int index) {
-        mQueryChangeListener.remove(index);
+        if (index < mQueryChangeListener.size()) {
+            mQueryChangeListener.remove(index);
+        }
     }
 
 

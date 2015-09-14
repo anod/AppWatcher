@@ -1,5 +1,6 @@
 package com.anod.appwatcher.adapters;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.view.LayoutInflater;
@@ -9,6 +10,7 @@ import android.view.ViewGroup;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppInfoMetadata;
+import com.anod.appwatcher.utils.AppIconLoader;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 
 import java.util.ArrayList;
@@ -26,6 +28,8 @@ public class InstalledAppsAdapter extends ArrayAdapter<PackageInfo, AppViewHolde
     private final AppViewHolderDataProvider mDataProvider;
     private final PackageManagerUtils mPMUtils;
 
+    private final AppIconLoader mIconLoader;
+
     public InstalledAppsAdapter(Context context, PackageManagerUtils pmutils, AppViewHolder.OnClickListener listener) {
         super(new ArrayList<PackageInfo>());
         mContext = context;
@@ -33,6 +37,8 @@ public class InstalledAppsAdapter extends ArrayAdapter<PackageInfo, AppViewHolde
         mDataProvider = new AppViewHolderDataProvider(context, pmutils);
 
         mPMUtils = pmutils;
+        mIconLoader = new AppIconLoader(context);
+
     }
 
     @Override
@@ -61,7 +67,7 @@ public class InstalledAppsAdapter extends ArrayAdapter<PackageInfo, AppViewHolde
                 localInfo.versionName,
                 mPMUtils.getAppTitle(localInfo),
                 null,
-                mPMUtils.getAppIcon(localInfo),
+                null,
                 AppInfoMetadata.STATUS_NORMAL,
                 null,
                 null,
@@ -76,8 +82,8 @@ public class InstalledAppsAdapter extends ArrayAdapter<PackageInfo, AppViewHolde
          String title, String creator, Bitmap icon, int status, String uploadDate, String priceText, String priceCur, Integer priceMicros, String detailsUrl) {
 
          */
-
         holder.bindView(position, app);
+        mIconLoader.loadImage(localInfo.applicationInfo, holder.icon);
     }
 
     @Override
