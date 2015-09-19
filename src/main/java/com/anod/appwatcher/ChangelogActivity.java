@@ -4,9 +4,13 @@ import android.accounts.Account;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.ColorInt;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ShareCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.graphics.Palette;
 import android.text.Html;
 import android.text.util.Linkify;
@@ -32,6 +36,7 @@ import com.anod.appwatcher.utils.IntentUtils;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import info.anodsplace.android.anim.RevealAnimatorCompat;
 import info.anodsplace.android.log.AppLog;
 
 
@@ -129,7 +134,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
         if (icon == null) {
             icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_android_black_48dp);
             mBackground.setVisibility(View.VISIBLE);
-            mBackground.setBackgroundColor(getResources().getColor(R.color.theme_primary));
+            applyColor(getResources().getColor(R.color.theme_primary));
         } else {
             Palette.from(icon).generate(this);
         }
@@ -209,24 +214,31 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
         }
         Palette.Swatch vibrant = palette.getDarkVibrantSwatch();
         if (vibrant != null) {
-            mBackground.setBackgroundColor(vibrant.getRgb());
+            applyColor(vibrant.getRgb());
             animateBackground();
         } else {
             Palette.Swatch muted =  palette.getDarkMutedSwatch();
             if (muted != null) {
-                mBackground.setBackgroundColor(muted.getRgb());
+                applyColor(muted.getRgb());
                 animateBackground();
             } else {
-                // TODO:
                 mBackground.setVisibility(View.VISIBLE);
-                mBackground.setBackgroundColor(getResources().getColor(R.color.theme_primary));
+                applyColor(getResources().getColor(R.color.theme_primary));
             }
         }
     }
 
+    private void applyColor(@ColorInt int color) {
+        Drawable drawable = DrawableCompat.wrap(mPlayStoreButton.getDrawable());
+        DrawableCompat.setTint(drawable, color);
+        mPlayStoreButton.setImageDrawable(drawable);
+        mBackground.setBackgroundColor(color);
+    }
+
     private void animateBackground() {
-        // TODO
-        mBackground.setVisibility(View.VISIBLE);
+        int[] location = new int[2];
+        mAppIcon.getLocationOnScreen(location);
+        RevealAnimatorCompat.show(mBackground, location[0], location[1], 0).start();
     }
 
     @Override
