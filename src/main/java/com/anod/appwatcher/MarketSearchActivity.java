@@ -4,9 +4,7 @@ import android.accounts.Account;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.util.ArrayMap;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
@@ -36,6 +34,7 @@ import com.anod.appwatcher.fragments.AccountChooserFragment;
 import com.anod.appwatcher.market.SearchEndpoint;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListContentProviderClient;
+import com.anod.appwatcher.model.NewWatchAppHandler;
 import com.anod.appwatcher.ui.ToolbarActivity;
 import com.anod.appwatcher.utils.DocUtils;
 import com.anod.appwatcher.utils.PackageManagerUtils;
@@ -43,9 +42,7 @@ import com.google.android.finsky.api.model.Document;
 import com.google.android.finsky.protos.Common;
 import com.google.android.finsky.protos.DocDetails;
 
-import info.anodsplace.android.log.AppLog;
-
-public class MarketSearchActivity extends ToolbarActivity implements AccountChooserHelper.OnAccountSelectionListener, AccountChooserFragment.OnAccountSelectionListener, SearchEndpoint.Listener {
+public class MarketSearchActivity extends ToolbarActivity implements AccountChooserHelper.OnAccountSelectionListener, AccountChooserFragment.OnAccountSelectionListener, SearchEndpoint.Listener, NewWatchAppHandler.Listener {
     public static final String EXTRA_KEYWORD = "keyword";
     public static final String EXTRA_EXACT = "exact";
     public static final String EXTRA_SHARE = "share";
@@ -57,7 +54,6 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
     private ListView mListView;
     private boolean mInitiateSearch = false;
     private boolean mShareSource = false;
-    private ArrayMap<String, Boolean> mAddedApps;
 
     private int mColorBgWhite;
     private int mColorBgGray;
@@ -66,9 +62,10 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
     private LinearLayout mRetryView;
     private Button mRetryButton;
     private SearchEndpoint mSearchEngine;
-    private int mIconSize = -1;
+
     private AppListContentProviderClient mContentProviderClient;
     private String mSearchQuery;
+    private NewWatchAppHandler mNewAppHandler;
 
 
     @Override
@@ -82,13 +79,13 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
         mColorBgGray = r.getColor(R.color.row_inactive);
         mColorBgWhite = r.getColor(R.color.white);
 
-        mAddedApps = new ArrayMap<>();
 
         mLoading = (LinearLayout) findViewById(R.id.loading);
         mLoading.setVisibility(View.GONE);
 
         mSearchEngine = new SearchEndpoint(this);
 
+        mNewAppHandler = new NewWatchAppHandler(this, this);
         mAdapter = new AppsAdapter(this);
 
         mListView = (ListView) findViewById(android.R.id.list);
@@ -133,6 +130,7 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
             mContentProviderClient.release();
         }
         super.onPause();
+        mNewAppHandler.setContentProvider(null);
         mSearchEngine.setListener(null);
     }
 
@@ -141,6 +139,7 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
         mContentProviderClient = new AppListContentProviderClient(mContext);
         super.onResume();
 
+        mNewAppHandler.setContentProvider(mContentProviderClient);
         mSearchEngine.setListener(this);
 
         mAccChooserHelper = new AccountChooserHelper(this, new Preferences(this), this);
@@ -238,62 +237,15 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             Document doc = (Document) mAdapter.getItem(position);
-            String appId = doc.getDocId();
-            if (mAddedApps.containsKey(doc.getDocId())) {
-                return;
-            }
-
-            final View bgView = view.findViewById(R.id.approw);
-
-            AppInfo existingApp = mContentProviderClient.queryAppId(doc.getDocId());
-            if (existingApp != null) {
-                Toast.makeText(mContext, R.string.app_already_added, Toast.LENGTH_SHORT).show();
-                bgView.setBackgroundColor(mColorBgGray);
-                mAddedApps.put(appId, true);
-                return;
-            }
 
             String imageUrl = DocUtils.getIconUrl(doc);
             final AppInfo info = new AppInfo(doc, null);
-            if (imageUrl != null) {
-                if (mIconSize == -1) {
-                    mIconSize = mContext.getResources().getDimensionPixelSize(R.dimen.icon_size);
-                }
-                AppWatcherApplication.provide(mContext).imageLoader().get(imageUrl, new ImageLoader.ImageListener() {
-                    @Override
-                    public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
-                        info.setIcon(response.getBitmap());
-                        insertApp(info, bgView);
-                    }
 
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        AppLog.e(error);
-                        insertApp(info, bgView);
-                    }
-                }, mIconSize, mIconSize);
-            } else {
-                insertApp(info, bgView);
-            }
-
+            mNewAppHandler.add(info, imageUrl);
         }
     };
 
-    private void insertApp(final AppInfo info, View bgView) {
-        Uri uri = mContentProviderClient.insert(info);
 
-        if (uri == null) {
-            Toast.makeText(mContext, R.string.error_insert_app, Toast.LENGTH_SHORT).show();
-        } else {
-            String msg = getString(R.string.app_stored, info.getTitle());
-            Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
-            bgView.setBackgroundColor(mColorBgGray);
-            mAddedApps.put(info.getAppId(), true);
-            if (mShareSource) {
-                finish();
-            }
-        }
-    }
 
     @Override
     public void onHelperAccountSelected(Account account, String authSubToken) {
@@ -373,6 +325,35 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
         showRetryButton();
     }
 
+    @Override
+    public void onAppAddSuccess(AppInfo info) {
+        String msg = mContext.getString(R.string.app_stored, info.getTitle());
+        Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
+        mAdapter.notifyDataSetChanged();
+        if (mShareSource) {
+            finish();
+        }
+    }
+
+    @Override
+    public void onAppAddError(int error) {
+        if (NewWatchAppHandler.ERROR_ALEREADY_ADDED == error) {
+            Toast.makeText(mContext, R.string.app_already_added, Toast.LENGTH_SHORT).show();
+            mAdapter.notifyDataSetChanged();
+        } else if (error == NewWatchAppHandler.ERROR_INSERT) {
+            Toast.makeText(mContext, R.string.error_insert_app, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    static class ViewHolder {
+        View row;
+        TextView title;
+        TextView details;
+        TextView updated;
+        TextView price;
+        NetworkImageView icon;
+    }
+
     class AppsAdapter extends BaseAdapter {
         private final PackageManagerUtils mPMUtils;
         private final ImageLoader mImageLoader;
@@ -383,14 +364,6 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
             mImageLoader = AppWatcherApplication.provide(context).imageLoader();
         }
 
-        class ViewHolder {
-            View row;
-            TextView title;
-            TextView details;
-            TextView updated;
-            TextView price;
-            NetworkImageView icon;
-        }
 
         @Override
         public int getCount() {
@@ -437,7 +410,7 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
             holder.details.setText(doc.getCreator());
             holder.updated.setText(app.uploadDate);
 
-            if (mAddedApps.containsKey(doc.getBackendDocId())) {
+            if (mNewAppHandler.isAdded(app.packageName)) {
                 holder.row.setBackgroundColor(mColorBgGray);
             } else {
                 holder.row.setBackgroundColor(mColorBgWhite);
