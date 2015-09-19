@@ -32,7 +32,6 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
     protected Bitmap mDefaultIcon;
 
     public interface OnClickListener {
-        void onIconClick(AppInfo app);
         void onItemClick(AppInfo app);
     }
 
@@ -66,16 +65,11 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
         this.newIndicator = itemView.findViewById(R.id.new_indicator);
         this.updateDate = (TextView) itemView.findViewById(R.id.update_date);
 
-        itemView.setOnClickListener(this);
-        this.icon.setOnClickListener(this);
-
+        itemView.findViewById(android.R.id.content).setOnClickListener(this);
     }
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == android.R.id.icon) {
-            mListener.onIconClick(this.app);
-        }
         mListener.onItemClick(this.app);
     }
 

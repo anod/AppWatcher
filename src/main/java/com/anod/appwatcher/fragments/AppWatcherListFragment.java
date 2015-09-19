@@ -221,24 +221,16 @@ public class AppWatcherListFragment extends Fragment implements
     }
 
     @Override
-    public void onIconClick(AppInfo app) {
-        String pkgName = app.getPackageName();
-        boolean isInstalled = mPMUtils.isAppInstalled(app.getPackageName());
-        if (isInstalled) {
-            Intent appInfo = IntentUtils.createApplicationDetailsIntent(app.getPackageName());
-            startActivity(appInfo);
-        }
-        if (BuildConfig.DEBUG) {
-            AppLog.d(pkgName);
-            Toast.makeText(getActivity(), pkgName, Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    @Override
     public void onItemClick(AppInfo app) {
         Intent intent = new Intent(getActivity(), ChangelogActivity.class);
         intent.putExtra(ChangelogActivity.EXTRA_APP_ID, app.getAppId());
         intent.putExtra(ChangelogActivity.EXTRA_DETAILS_URL, app.getDetailsUrl());
         startActivity(intent);
+
+        if (BuildConfig.DEBUG) {
+            AppLog.d(app.getPackageName());
+            Toast.makeText(getActivity(), app.getPackageName(), Toast.LENGTH_SHORT).show();
+        }
+
     }
 }

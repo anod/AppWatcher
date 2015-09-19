@@ -389,7 +389,7 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
                 LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 v = vi.inflate(R.layout.list_item_market_app, null);
                 holder = new ViewHolder();
-                holder.row = v.findViewById(R.id.approw);
+                holder.row = v.findViewById(android.R.id.content);
                 holder.title = (TextView) v.findViewById(android.R.id.title);
                 holder.details = (TextView) v.findViewById(R.id.details);
                 holder.updated = (TextView) v.findViewById(R.id.updated);

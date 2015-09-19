@@ -15,29 +15,39 @@
   ~ limitations under the License.
   -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="96dp"
               android:background="?attr/colorPrimaryDark"
-              android:padding="16dp"
               android:theme="@style/ThemeOverlay.AppCompat.Dark"
-              android:orientation="vertical"
-              android:gravity="bottom">
+              >
 
-    <TextView
-        android:id="@+id/account_name"
+    <LinearLayout
+        android:id="@+id/account_change"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/choose_an_account"
-        android:drawableRight="@drawable/ic_drawer_accounts_expand"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:orientation="vertical"
         android:clickable="true"
-        android:background="?attr/selectableItemBackgroundBorderless"/>
+        android:padding="16dp"
+        android:layout_gravity="bottom">
 
-    <TextView
-        android:id="@+id/last_update"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/last_update"
-        />
-</LinearLayout>
+        <TextView
+            android:id="@+id/account_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/choose_an_account"
+            android:drawableRight="@drawable/ic_drawer_accounts_expand"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:clickable="true"
+            />
+
+        <TextView
+            android:id="@+id/last_update"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/last_update"
+            />
+
+    </LinearLayout>
+</FrameLayout>

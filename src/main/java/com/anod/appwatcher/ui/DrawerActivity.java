@@ -12,6 +12,7 @@ import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.anod.appwatcher.Preferences;
@@ -39,7 +40,9 @@ abstract public class DrawerActivity extends ToolbarActivity {
 
         mAccountNameView = ((TextView)navigationView.findViewById(R.id.account_name));
 
-        mAccountNameView.setOnClickListener(new View.OnClickListener() {
+
+        LinearLayout changeAccount = (LinearLayout) navigationView.findViewById(R.id.account_change);
+        changeAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onAccountChooseClick();

@@ -17,12 +17,15 @@
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginBottom="4dp"
+        card_view:cardBackgroundColor="@color/white"
         >
 
         <LinearLayout
+            android:id="@android:id/content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/white"
+            android:background="?android:attr/selectableItemBackground"
+            android:clickable="true"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
