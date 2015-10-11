@@ -51,10 +51,10 @@ public class NewWatchAppHandler {
             return;
         }
 
+        mAddedApps.put(info.getPackageName(), true);
         AppInfo existingApp = mContentProvider.queryAppId(info.getPackageName());
         if (existingApp != null) {
             mListener.onAppAddError(ERROR_ALEREADY_ADDED);
-            mAddedApps.put(info.getPackageName(), true);
             return;
         }
 

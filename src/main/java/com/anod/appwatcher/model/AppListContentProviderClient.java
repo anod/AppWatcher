@@ -211,7 +211,8 @@ public class AppListContentProviderClient {
 
 
 	public AppInfo queryAppId(String id) {
-		AppListCursor cr = query(null, AppListTable.Columns.KEY_APPID + " = ?", new String[]{id});
+		AppListCursor cr = query(null,
+				AppListTable.Columns.KEY_APPID + " = ?", new String[]{id});
 		if (cr == null || cr.getCount() == 0) {
 			return null;
 		}

@@ -91,7 +91,6 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
         mListView = (ListView) findViewById(android.R.id.list);
         mListView.setEmptyView(findViewById(android.R.id.empty));
         mListView.setAdapter(mAdapter);
-        mListView.setOnItemClickListener(itemClickListener);
 
         mRetryView = (LinearLayout) findViewById(R.id.retry_box);
         mRetryButton = (Button) findViewById(R.id.retry);
@@ -233,9 +232,11 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
         }
     }
 
-    final OnItemClickListener itemClickListener = new OnItemClickListener() {
+    final View.OnClickListener itemClickListener = new View.OnClickListener() {
+
         @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        public void onClick(View v) {
+            int position = (int) v.getTag();
             Document doc = (Document) mAdapter.getItem(position);
 
             String imageUrl = DocUtils.getIconUrl(doc);
@@ -346,6 +347,7 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
     }
 
     static class ViewHolder {
+        int position;
         View row;
         TextView title;
         TextView details;
@@ -406,6 +408,7 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
 
             DocDetails.AppDetails app = doc.getAppDetails();
 
+            holder.position = position;
             holder.title.setText(doc.getTitle());
             holder.details.setText(doc.getCreator());
             holder.updated.setText(app.uploadDate);
@@ -418,6 +421,9 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
 
             String imageUrl = DocUtils.getIconUrl(doc);
             holder.icon.setImageUrl(imageUrl, mImageLoader);
+
+            holder.row.setTag(position);
+            holder.row.setOnClickListener(itemClickListener);
 
             boolean isInstalled = mPMUtils.isAppInstalled(app.packageName);
             if (isInstalled) {

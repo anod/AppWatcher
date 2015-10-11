@@ -107,11 +107,11 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
 
         String uploadDate = app.getUploadDate();
 
-        if (!"".equals(uploadDate)) {
+        if (TextUtils.isEmpty(uploadDate)) {
+            updateDate.setVisibility(View.GONE);
+        } else {
             updateDate.setText(uploadDate);
             updateDate.setVisibility(View.VISIBLE);
-        } else {
-            updateDate.setVisibility(View.GONE);
         }
     }
 
