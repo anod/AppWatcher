@@ -20,7 +20,6 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.ImageLoader;
 import com.anod.appwatcher.AppWatcherApplication;
 import com.anod.appwatcher.BuildConfig;
 import com.anod.appwatcher.Preferences;
@@ -37,7 +36,6 @@ import com.anod.appwatcher.model.schema.AppListTable;
 import com.anod.appwatcher.utils.BitmapUtils;
 import com.anod.appwatcher.utils.DocUtils;
 import com.anod.appwatcher.utils.GooglePlayServices;
-import com.anod.appwatcher.volley.SyncImageLoader;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.finsky.api.model.Document;
 import com.google.android.finsky.protos.Common;
@@ -63,7 +61,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
     public static final String SYNC_PROGRESS = "com.anod.appwatcher.sync.progress";
     public static final String EXTRA_UPDATES_COUNT = "extra_updates_count";
     private BulkDetailsEndpoint mEndpoint;
-    private SyncImageLoader mImageLoader;
     private int mIconSize = -1;
 
     public SyncAdapter(Context context, boolean autoInitialize) {
@@ -364,14 +361,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
             AppLog.e(e);
             return null;
         }
-    }
-
-    private SyncImageLoader getImageLoader() {
-        if (mImageLoader == null) {
-            // No cache implementation
-            mImageLoader = new SyncImageLoader(AppWatcherApplication.provide(mContext).requestQueue());
-        }
-        return mImageLoader;
     }
 
     private AppInfo createNewVersion(Document marketApp, AppInfo localApp, Bitmap newIcon)  {

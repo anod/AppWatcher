@@ -131,7 +131,6 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
 
     @Override
     protected void onStop() {
-        AppWatcherApplication.get(this).getObjectGraph().reset();
         super.onStop();
     }
 
