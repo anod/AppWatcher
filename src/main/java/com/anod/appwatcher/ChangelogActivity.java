@@ -10,7 +10,6 @@ import android.support.annotation.ColorInt;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ShareCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
-import android.support.v4.view.ViewCompat;
 import android.support.v7.graphics.Palette;
 import android.text.Html;
 import android.text.util.Linkify;
@@ -202,7 +201,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
         mChangelog.setVisibility(View.VISIBLE);
         mChangelog.setAutoLinkMask(Linkify.ALL);
 
-        mChangelog.setText(getString(R.string.error_fetchin_info));
+        mChangelog.setText(getString(R.string.error_fetching_info));
         mRetryButton.setVisibility(View.VISIBLE);
     }
 

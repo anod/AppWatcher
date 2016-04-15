@@ -17,10 +17,11 @@
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
-              android:layout_height="96dp"
+              android:layout_height="112dp"
               android:background="?attr/colorPrimaryDark"
               android:theme="@style/ThemeOverlay.AppCompat.Dark"
-              >
+             android:padding="16dp"
+    >
 
     <LinearLayout
         android:id="@+id/account_change"
@@ -29,7 +30,6 @@
         android:background="?attr/selectableItemBackgroundBorderless"
         android:orientation="vertical"
         android:clickable="true"
-        android:padding="16dp"
         android:layout_gravity="bottom">
 
         <TextView
@@ -37,6 +37,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/choose_an_account"
+            android:gravity="center_vertical"
             android:drawableRight="@drawable/ic_drawer_accounts_expand"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             android:clickable="true"

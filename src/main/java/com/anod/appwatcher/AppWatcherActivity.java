@@ -11,12 +11,10 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.util.ArrayMap;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
-import android.util.SparseArray;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -108,7 +106,7 @@ public class AppWatcherActivity extends DrawerActivity implements
 
     private void setupViewPager(ViewPager viewPager) {
         Adapter adapter = new Adapter(getSupportFragmentManager());
-        adapter.addFragment(AppWatcherListFragment.newInstance(Filters.TAB_ALL), getString(R.string.tab_showall));
+        adapter.addFragment(AppWatcherListFragment.newInstance(Filters.TAB_ALL), getString(R.string.tab_all));
         adapter.addFragment(InstalledListFragment.newInstance(Filters.TAB_INSTALLED), getString(R.string.tab_installed));
         adapter.addFragment(AppWatcherListFragment.newInstance(Filters.TAB_UNINSTALLED), getString(R.string.tab_not_installed));
         viewPager.setAdapter(adapter);

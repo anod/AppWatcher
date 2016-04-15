@@ -28,7 +28,6 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     private static final int ACTION_AUTO_UPDATE = 7;
     private static final int ACTION_WIFI_ONLY = 8;
 
-    private int mAboutCounter;
     private GDriveSync mGDriveSync;
     private CheckboxItem mSyncEnabledItem;
     private Item mSyncNowItem;
@@ -63,11 +62,9 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     protected void init() {
         mGDriveSync = new GDriveSync(this);
         mPrefs = new Preferences(this);
-        mAboutCounter = 0;
 
         mAccountChooserHelper = new AccountChooserHelper(this, mPrefs, null);
         mAccountChooserHelper.init();
-
     }
 
     @Override
@@ -160,8 +157,6 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
             startActivity(new Intent(this, ListExportActivity.class));
         } else if (action == ACTION_LICENSES) {
             new LicensesDialog(this, R.raw.notices, false, true).show();
-        } else if (action == ACTION_ABOUT) {
-            onAboutAction();
         } else if (action==ACTION_SYNC_ENABLE) {
             mSyncNowItem.enabled=false; // disable temporary sync now
             notifyDataSetChanged();
@@ -189,24 +184,11 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
         }
     }
 
-
-    private void onAboutAction() {
-        if (mAboutCounter >= 4) {
-            // TODO
-        } else {
-            if (mAboutCounter ==3 ) {
-           //     Toast.makeText(this, "1 more tap to report a problem", Toast.LENGTH_SHORT).show();
-            }
-            mAboutCounter++;
-        }
-    }
-
-
     private String getAppVersion() {
         String versionName = "";
         try {
             versionName = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
-        } catch (PackageManager.NameNotFoundException e) {
+        } catch (PackageManager.NameNotFoundException ignored) {
         }
 
         return versionName;

@@ -16,7 +16,7 @@
     <string name="remove">Удалить</string>
     <string name="whats_new">Что нового</string>
     <string name="whats_new_title">Что нового</string>
-    <string name="problem_occured">Проблема произошла во время получения информации.</string>
+    <string name="problem_occurred">Проблема произошла во время получения информации.</string>
     <string name="menu_auto_update">Автоматическое обновление</string>
     <string name="menu_wifi_only">Только по Wi-Fi</string>
     <string name="alert_dialog_remove_title">Удалить?</string>
@@ -71,7 +71,7 @@
     <string name="google_drive_sync">Синхронизация Google Drive</string>
     <string name="menu_filter">Фильтр</string>
     <string name="never">Никогда</string>
-    <string name="no_regestred_google_accounts">Нет зарегистрированных аккаунтов google</string>
+    <string name="no_registered_google_accounts">Нет зарегистрированных аккаунтов google</string>
     <string name="notices_close">Закрыть</string>
     <string name="now">сейчас</string>
     <string name="pref_descr_drive_sync_enabled">Синхронизировать список с Google Drive</string>

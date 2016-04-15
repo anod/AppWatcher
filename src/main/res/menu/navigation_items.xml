@@ -17,7 +17,7 @@
             android:icon="@drawable/ic_settings_black_24dp"
             android:title="@string/navdrawer_item_settings" />
 
-        <item android:id="@+id/nav_tags"
+<!--        <item android:id="@+id/nav_tags"
               android:icon="@drawable/ic_turned_in_black_36dp"
               android:title="@string/navdrawer_item_tags">
             <group android:checkableBehavior="single">
@@ -27,7 +27,7 @@
                         android:title="Tag 1" />
                 </menu>
             </group>
-        </item>
+        </item>-->
     </group>
 
 

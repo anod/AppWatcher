@@ -16,7 +16,7 @@
     <string name="remove">Verwijderen</string>
     <string name="whats_new">Nieuwe functies</string>
     <string name="whats_new_title">Nieuwe functies</string>
-    <string name="problem_occured">Er is een probleem opgetreden bij het opzoeken van de informatie.</string>
+    <string name="problem_occurred">Er is een probleem opgetreden bij het opzoeken van de informatie.</string>
     <string name="menu_auto_update">Automatisch bijwerken</string>
     <string name="menu_wifi_only">Enkel Wi-Fi</string>
     <string name="alert_dialog_remove_title">Verwijderen?</string>

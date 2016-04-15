@@ -82,7 +82,7 @@ public class AccountChooserFragment extends DialogFragment implements DialogInte
             });
             builder.setSingleChoiceItems(getChoiceItems(), mSelectedItem, this);
 		} else {
-            builder.setMessage(R.string.no_regestred_google_accounts);
+            builder.setMessage(R.string.no_registered_google_accounts);
 		}
         AlertDialog dialog = builder.create();
 

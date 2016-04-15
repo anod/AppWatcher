@@ -64,9 +64,8 @@ abstract public class DrawerActivity extends ToolbarActivity {
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(MenuItem menuItem) {
-                        menuItem.setChecked(true);
+                        mDrawerLayout.closeDrawers();
                         onOptionsItemSelected(menuItem);
-                        //mDrawerLayout.closeDrawers();
                         return true;
                     }
                 });
