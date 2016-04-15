@@ -1,5 +1,6 @@
 package com.anod.appwatcher.utils;
 
+import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -36,17 +37,9 @@ public class PackageManagerUtils {
         return info.applicationInfo.loadLabel(mPackageManager).toString();
     }
 
-    public PackageManager getPackageManager() {
-        return mPackageManager;
-    }
-
-    public Bitmap getAppIcon(PackageInfo info) {
-        Drawable drawable = info.applicationInfo.loadIcon(mPackageManager);
-        if (drawable instanceof BitmapDrawable) {
-            return ((BitmapDrawable) drawable).getBitmap();
-        }
-// TODO:
-        return null;
+    public ComponentName getLaunchComponent(PackageInfo info)
+    {
+        return mPackageManager.getLaunchIntentForPackage(info.packageName).getComponent();
     }
 
     public List<PackageInfo> getDownloadedApps(Map<String, Integer> filter) {

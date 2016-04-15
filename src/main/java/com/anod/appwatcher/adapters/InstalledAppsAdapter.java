@@ -3,6 +3,9 @@ package com.anod.appwatcher.adapters;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageInfo;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +32,7 @@ public class InstalledAppsAdapter extends ArrayAdapter<PackageInfo, AppViewHolde
     private final PackageManagerUtils mPMUtils;
 
     private final AppIconLoader mIconLoader;
+    private final Drawable mDefaultIconDrawable;
 
     public InstalledAppsAdapter(Context context, PackageManagerUtils pmutils, AppViewHolder.OnClickListener listener) {
         super(new ArrayList<PackageInfo>());
@@ -39,6 +43,7 @@ public class InstalledAppsAdapter extends ArrayAdapter<PackageInfo, AppViewHolde
         mPMUtils = pmutils;
         mIconLoader = new AppIconLoader(context);
 
+        mDefaultIconDrawable = ContextCompat.getDrawable(context, R.drawable.ic_android_black_48dp);
     }
 
     @Override
@@ -80,10 +85,13 @@ public class InstalledAppsAdapter extends ArrayAdapter<PackageInfo, AppViewHolde
          *
          * int rowId, String appId, String pname, int versionNumber, String versionName,
          String title, String creator, Bitmap icon, int status, String uploadDate, String priceText, String priceCur, Integer priceMicros, String detailsUrl) {
-
          */
         holder.bindView(position, app);
-        mIconLoader.loadImage(localInfo.applicationInfo, holder.icon);
+
+        mIconLoader.picasso()
+                .load(Uri.fromParts(AppIconLoader.SCHEME,mPMUtils.getLaunchComponent(localInfo).flattenToShortString(),null))
+                .placeholder(mDefaultIconDrawable)
+                .into(holder.icon);
     }
 
     @Override

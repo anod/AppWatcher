@@ -34,8 +34,8 @@ import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.ui.ToolbarActivity;
 import com.anod.appwatcher.utils.IntentUtils;
 
+import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 import info.anodsplace.android.anim.RevealAnimatorCompat;
 import info.anodsplace.android.log.AppLog;
 
@@ -45,19 +45,19 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
     public static final String EXTRA_APP_ID = "app_id";
     public static final String EXTRA_DETAILS_URL = "url";
 
-    @InjectView(R.id.progress_bar)
+    @Bind(R.id.progress_bar)
     ProgressBar mLoadingView;
-    @InjectView(R.id.changelog)
+    @Bind(R.id.changelog)
     TextView mChangelog;
-    @InjectView(R.id.retry)
+    @Bind(R.id.retry)
     Button mRetryButton;
-    @InjectView(android.R.id.icon)
+    @Bind(android.R.id.icon)
     ImageView mAppIcon;
-    @InjectView(android.R.id.title)
+    @Bind(android.R.id.title)
     TextView mAppTitle;
-    @InjectView(R.id.background)
+    @Bind(R.id.background)
     View mBackground;
-    @InjectView(R.id.market_btn)
+    @Bind(R.id.market_btn)
     FloatingActionButton mPlayStoreButton;
 
     private String mDetailsUrl;
@@ -70,7 +70,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_app_changelog);
-        ButterKnife.inject(this);
+        ButterKnife.bind(this);
         setupToolbar();
 
         Intent data = getIntent();

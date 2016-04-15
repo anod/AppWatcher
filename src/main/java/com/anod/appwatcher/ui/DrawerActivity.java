@@ -37,11 +37,10 @@ abstract public class DrawerActivity extends ToolbarActivity {
     }
 
     private void setupDrawerContent(NavigationView navigationView) {
+        View headerView = navigationView.getHeaderView(0);
 
-        mAccountNameView = ((TextView)navigationView.findViewById(R.id.account_name));
-
-
-        LinearLayout changeAccount = (LinearLayout) navigationView.findViewById(R.id.account_change);
+        mAccountNameView = ((TextView) headerView.findViewById(R.id.account_name));
+        LinearLayout changeAccount = (LinearLayout) headerView.findViewById(R.id.account_change);
         changeAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -52,13 +51,13 @@ abstract public class DrawerActivity extends ToolbarActivity {
         Preferences pref = new Preferences(this);
         long time = pref.getLastUpdateTime();
 
-        TextView lastUpdateView = (TextView)navigationView.findViewById(R.id.last_update);
+        TextView lastUpdateView = (TextView) headerView.findViewById(R.id.last_update);
         if (time > 0) {
             String lastUpdate = getString(R.string.last_update, DateUtils.getRelativeDateTimeString(this, time, DateUtils.MINUTE_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, 0));
             lastUpdateView.setText(lastUpdate);
             lastUpdateView.setVisibility(View.VISIBLE);
         } else {
-            lastUpdateView.setVisibility(View.GONE);
+            lastUpdateView.setVisibility(View.GONE);/**/
         }
 
         navigationView.setNavigationItemSelectedListener(
