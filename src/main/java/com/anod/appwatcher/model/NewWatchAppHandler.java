@@ -1,6 +1,8 @@
 package com.anod.appwatcher.model;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.v4.util.ArrayMap;
 import android.view.View;
@@ -11,6 +13,9 @@ import com.android.volley.toolbox.ImageLoader;
 import com.anod.appwatcher.AppWatcherApplication;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.utils.DocUtils;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import info.anodsplace.android.log.AppLog;
 
@@ -62,19 +67,21 @@ public class NewWatchAppHandler {
             if (mIconSize == -1) {
                 mIconSize = mContext.getResources().getDimensionPixelSize(R.dimen.icon_size);
             }
-            AppWatcherApplication.provide(mContext).imageLoader().get(imageUrl, new ImageLoader.ImageListener() {
+            Picasso.with(mContext).load(imageUrl).into(new Target() {
                 @Override
-                public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
-                    info.setIcon(response.getBitmap());
+                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                    info.setIcon(bitmap);
                     insertApp(info);
                 }
 
                 @Override
-                public void onErrorResponse(VolleyError error) {
-                    AppLog.e(error);
+                public void onBitmapFailed(Drawable errorDrawable) {
                     insertApp(info);
                 }
-            }, mIconSize, mIconSize);
+
+                @Override
+                public void onPrepareLoad(Drawable placeHolderDrawable) { }
+            });
         } else {
             insertApp(info);
         }

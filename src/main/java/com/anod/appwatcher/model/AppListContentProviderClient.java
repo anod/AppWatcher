@@ -1,9 +1,5 @@
 package com.anod.appwatcher.model;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import android.content.ContentProviderClient;
 import android.content.ContentValues;
 import android.content.Context;
@@ -16,6 +12,9 @@ import android.support.v4.util.ArrayMap;
 import com.anod.appwatcher.AppListContentProvider;
 import com.anod.appwatcher.model.schema.AppListTable;
 import com.anod.appwatcher.utils.BitmapUtils;
+
+import java.util.List;
+import java.util.Map;
 
 import info.anodsplace.android.log.AppLog;
 
@@ -45,7 +44,6 @@ public class AppListContentProviderClient {
 	
 	/**
 	 * Query all applications in db
-	 * @return
 	 */
 	public AppListCursor queryAllSorted() {
 		return query(DEFAULT_SORT_ORDER, null, null);
@@ -55,10 +53,6 @@ public class AppListContentProviderClient {
 		return query(null, null, null);
 	}
 
-    /**
-     *
-     * @return
-     */
     public int getCount() {
         Cursor cr = queryAll();
         if (cr == null) {
@@ -68,7 +62,7 @@ public class AppListContentProviderClient {
     }
 
 	public AppListCursor query(String sortOrder, String selection, String[] selectionArgs) {
-		Cursor cr = null;
+		Cursor cr;
 		try {
 			cr = mContentProviderClient.query(AppListContentProvider.APPS_CONTENT_URI,
 				AppListTable.PROJECTION, selection, selectionArgs, sortOrder
@@ -119,7 +113,6 @@ public class AppListContentProviderClient {
 	/**
 	 * Insert a new app into db
 	 * @param app
-	 * @return
 	 */
 	public Uri insert(AppInfo app) {
 		ContentValues values = createContentValues(app);
@@ -180,7 +173,6 @@ public class AppListContentProviderClient {
 	}
 	
 	/**
-	 * @param app
 	 * @return Content values for app
 	 */
 	private ContentValues createContentValues(AppInfo app) {

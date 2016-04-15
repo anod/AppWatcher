@@ -42,6 +42,7 @@ import com.crashlytics.android.Crashlytics;
 import com.google.android.finsky.api.model.Document;
 import com.google.android.finsky.protos.Common;
 import com.google.android.finsky.protos.DocDetails;
+import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -352,8 +353,17 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
             mIconSize = mContext.getResources().getDimensionPixelSize(R.dimen.icon_size);
         }
 
-        ImageLoader.ImageContainer container = getImageLoader().get(imageUrl, null, mIconSize, mIconSize);
-        return container.getBitmap();
+        try {
+            return Picasso.with(mContext).load(imageUrl)
+                    .resize(mIconSize,mIconSize)
+                    .centerInside()
+                    .onlyScaleDown()
+                    .get();
+
+        } catch (IOException e) {
+            AppLog.e(e);
+            return null;
+        }
     }
 
     private SyncImageLoader getImageLoader() {

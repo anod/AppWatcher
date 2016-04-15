@@ -35,10 +35,10 @@ public class RemoveDialogFragment extends DialogFragment {
                 .setPositiveButton(R.string.alert_dialog_remove, 
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
-                        AppListContentProviderClient cl = new AppListContentProviderClient(getActivity());
-                        cl.markDeleted(rowId);
-                        cl.release();
-                        getActivity().finish();
+                            AppListContentProviderClient cl = new AppListContentProviderClient(getActivity());
+                            cl.markDeleted(rowId);
+                            cl.release();
+                            getActivity().finish();
                         }
                     }
                 )

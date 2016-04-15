@@ -4,11 +4,13 @@ import android.accounts.Account;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.ColorInt;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ShareCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.graphics.Palette;
 import android.text.Html;
@@ -80,12 +82,17 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
         mDetailsEndpoint = new DetailsEndpoint(this);
         mDetailsEndpoint.setUrl(mDetailsUrl);
 
-        mLoadingView.setVisibility(View.VISIBLE);
+        mLoadingView.setVisibility(View.GONE);
         mRetryButton.setVisibility(View.GONE);
         mChangelog.setVisibility(View.GONE);
+        mBackground.setVisibility(View.INVISIBLE);
+
         mRetryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                mLoadingView.setVisibility(View.VISIBLE);
+                mRetryButton.setVisibility(View.GONE);
+                mChangelog.setVisibility(View.GONE);
                 mDetailsEndpoint.startAsync();
             }
         });
@@ -106,6 +113,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
         AuthTokenProvider accHelper = new AuthTokenProvider(this);
         final Preferences prefs = new Preferences(this);
         final Account account = prefs.getAccount();
+        mLoadingView.setVisibility(View.VISIBLE);
         accHelper.requestToken(this, account, new AuthTokenProvider.AuthenticateCallback() {
             @Override
             public void onAuthTokenAvailable(String token) {
@@ -133,7 +141,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
         if (icon == null) {
             icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_android_black_48dp);
             mBackground.setVisibility(View.VISIBLE);
-            applyColor(getResources().getColor(R.color.theme_primary));
+            applyColor(ContextCompat.getColor(this,R.color.theme_primary));
         } else {
             Palette.from(icon).generate(this);
         }
@@ -232,6 +240,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
         DrawableCompat.setTint(drawable, color);
         mPlayStoreButton.setImageDrawable(drawable);
         mBackground.setBackgroundColor(color);
+        mLoadingView.getIndeterminateDrawable().setColorFilter(color, PorterDuff.Mode.SRC_IN);
     }
 
     private void animateBackground() {

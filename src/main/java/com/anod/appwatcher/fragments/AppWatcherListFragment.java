@@ -1,6 +1,6 @@
 package com.anod.appwatcher.fragments;
 
-import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -27,7 +27,6 @@ import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListCursorLoader;
 import com.anod.appwatcher.model.Filters;
 import com.anod.appwatcher.model.InstalledFilter;
-import com.anod.appwatcher.utils.IntentUtils;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 
 import info.anodsplace.android.log.AppLog;
@@ -63,9 +62,9 @@ public class AppWatcherListFragment extends Fragment implements
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        AppWatcherActivity act = (AppWatcherActivity) activity;
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        AppWatcherActivity act = (AppWatcherActivity) context;
         mListenerIndex = act.addQueryChangeListener(this);
         AppLog.d("addQueryChangeListener with index: %d", mListenerIndex);
     }
@@ -144,8 +143,6 @@ public class AppWatcherListFragment extends Fragment implements
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         mListView.setLayoutManager(layoutManager);
-
-        Resources r = getResources();
 
         // Create an empty adapter we will use to display the loaded data.
 

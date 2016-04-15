@@ -7,7 +7,7 @@
         android:id="@+id/background"
         android:layout_width="320dp"
         android:layout_height="120dp"
-        android:visibility="invisible" />
+       android:background="@color/theme_primary"/>
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="320dp"
@@ -32,11 +32,11 @@
                 <TextView
                     android:id="@android:id/title"
                     style="@style/TextAppearance.AppCompat.Title"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
                     android:layout_marginRight="8dp"
-                    android:text="@string/app_name"
+                    android:text="@string/problem_occurred"
                     android:textColor="@color/white" />
 
             </LinearLayout>
@@ -82,7 +82,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="right"
         android:layout_marginRight="8dp"
-        android:layout_marginTop="86dp"
+        android:layout_marginTop="98dp"
         android:src="@drawable/ic_play_arrow_black_48dp"
         app:backgroundTint="@color/white"
         app:elevation="2dp"
