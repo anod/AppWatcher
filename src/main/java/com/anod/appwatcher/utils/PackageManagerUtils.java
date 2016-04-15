@@ -8,10 +8,16 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v4.util.ArrayMap;
+import android.util.DisplayMetrics;
+
+import com.anod.appwatcher.model.AppInfo;
+import com.anod.appwatcher.model.AppInfoMetadata;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import info.anodsplace.android.log.AppLog;
 
 
 /**
@@ -21,6 +27,63 @@ import java.util.Map;
 public class PackageManagerUtils {
     private PackageManager mPackageManager;
     private ArrayMap<String, InstalledInfo> mInstalledVersionsCache;
+
+    public AppInfo packageToApp(PackageInfo packageInfo) {
+        return new AppInfo(-1,
+                packageInfo.packageName,
+                packageInfo.packageName,
+                packageInfo.versionCode,
+                packageInfo.versionName,
+                this.getAppTitle(packageInfo),
+                null,
+                null,
+                AppInfoMetadata.STATUS_NORMAL,
+                null,
+                null,
+                null,
+                0,
+                "details?doc="+packageInfo.packageName
+        );
+    }
+
+    public PackageInfo getPackageInfo(String packageName) {
+        PackageInfo pkgInfo = null;
+        try {
+            pkgInfo = mPackageManager.getPackageInfo(packageName, 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            AppLog.e(e);
+        }
+        return pkgInfo;
+    }
+
+    public Bitmap loadIcon(ComponentName componentName, DisplayMetrics displayMetrics) {
+        Drawable d = null;
+        Bitmap icon;
+        try {
+            d = mPackageManager.getActivityIcon(componentName);
+        } catch (PackageManager.NameNotFoundException ignored) {
+        }
+
+        if (d == null) {
+            try {
+                d = mPackageManager.getApplicationIcon(componentName.getPackageName());
+            } catch (PackageManager.NameNotFoundException e1) {
+                AppLog.e(e1);
+                return null;
+            }
+        }
+
+        if (d instanceof BitmapDrawable) {
+            // Ensure the bitmap has a density.
+            BitmapDrawable bitmapDrawable = (BitmapDrawable) d;
+            icon = bitmapDrawable.getBitmap();
+            if (icon.getDensity() == Bitmap.DENSITY_NONE) {
+                bitmapDrawable.setTargetDensity(displayMetrics);
+            }
+            return icon;
+        }
+        return null;
+    }
 
 
     public static class InstalledInfo {

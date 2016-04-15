@@ -29,12 +29,12 @@ public class AppIconLoader {
 
 
     static class PackageIconRequestHandler extends RequestHandler {
-        private final PackageManager mPackageManager;
+        private final PackageManagerUtils mPackageManager;
         private final Context mContext;
 
         public PackageIconRequestHandler(Context context) {
             mContext = context;
-            mPackageManager = context.getPackageManager();
+            mPackageManager = new PackageManagerUtils(context.getPackageManager());
         }
 
         @Override
@@ -44,36 +44,16 @@ public class AppIconLoader {
 
         @Override
         public Result load(Request request, int networkPolicy) throws IOException {
-            Drawable d = null;
-            Bitmap icon;
 
             String part = request.uri.getSchemeSpecificPart();
             AppLog.d("Get Activity Info: " + part);
             ComponentName cmp = ComponentName.unflattenFromString(part);
-            try {
-                d = mPackageManager.getActivityIcon(cmp);
-            } catch (PackageManager.NameNotFoundException ignored) {
-            }
 
-            if (d == null) {
-                try {
-                    d = mPackageManager.getApplicationIcon(cmp.getPackageName());
-                } catch (PackageManager.NameNotFoundException e1) {
-                    AppLog.e(e1);
-                    return null;
-                }
+            Bitmap icon = mPackageManager.loadIcon(cmp, mContext.getResources().getDisplayMetrics());
+            if (icon == null){
+                return null;
             }
-
-            if (d instanceof BitmapDrawable) {
-                // Ensure the bitmap has a density.
-                BitmapDrawable bitmapDrawable = (BitmapDrawable) d;
-                icon = bitmapDrawable.getBitmap();
-                if (icon.getDensity() == Bitmap.DENSITY_NONE) {
-                    bitmapDrawable.setTargetDensity(mContext.getResources().getDisplayMetrics());
-                }
-                return new Result(icon, DISK);
-            }
-            return null;
+            return new Result(icon, DISK);
         }
 
     }

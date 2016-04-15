@@ -104,4 +104,5 @@
     <string name="activity_main">Watch List</string>
     <string name="downloaded">On device</string>
     <string name="category_updates">Updates</string>
+    <string name="cannot_load_app">Cannot load app details: \'%s\'</string>
 </resources>

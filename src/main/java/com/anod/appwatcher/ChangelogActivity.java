@@ -2,10 +2,13 @@ package com.anod.appwatcher;
 
 import android.accounts.Account;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.ColorInt;
 import android.support.design.widget.FloatingActionButton;
@@ -23,6 +26,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.VolleyError;
 import com.anod.appwatcher.accounts.AuthTokenProvider;
@@ -33,7 +37,11 @@ import com.anod.appwatcher.market.PlayStoreEndpoint;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.ui.ToolbarActivity;
+import com.anod.appwatcher.utils.AppIconLoader;
 import com.anod.appwatcher.utils.IntentUtils;
+import com.anod.appwatcher.utils.PackageManagerUtils;
+
+import java.io.IOException;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -45,6 +53,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
 
     public static final String EXTRA_APP_ID = "app_id";
     public static final String EXTRA_DETAILS_URL = "url";
+    public static final String EXTRA_ROW_ID = "row_id";
 
     @Bind(R.id.progress_bar)
     ProgressBar mLoadingView;
@@ -78,6 +87,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
 
         mAppId = data.getStringExtra(EXTRA_APP_ID);
         mDetailsUrl = data.getStringExtra(EXTRA_DETAILS_URL);
+        int rowId = data.getIntExtra(EXTRA_ROW_ID, -1);
 
         mDetailsEndpoint = new DetailsEndpoint(this);
         mDetailsEndpoint.setUrl(mDetailsUrl);
@@ -97,12 +107,38 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
             }
         });
 
-        AppListContentProviderClient cr = new AppListContentProviderClient(this);
-        mApp = cr.queryAppId(mAppId);
-        cr.release();
+        if (rowId == -1) {
+            mApp = loadInstalledApp();
+        } else {
+            AppListContentProviderClient cr = new AppListContentProviderClient(this);
+            mApp = cr.queryAppId(mAppId);
+            cr.release();
+        }
 
+        if (mApp == null)
+        {
+            Toast.makeText(this, getString(R.string.cannot_load_app, mAppId), Toast.LENGTH_LONG).show();
+            AppLog.e("Cannot load app details: '"+mAppId+"'");
+            finish();
+            return;
+        }
         setupAppView(mApp);
+    }
 
+    private AppInfo loadInstalledApp()
+    {
+        PackageManagerUtils utils = new PackageManagerUtils(getPackageManager());
+        PackageInfo pkgInfo = utils.getPackageInfo(mAppId);
+        if (pkgInfo == null)
+        {
+            return null;
+        }
+
+        AppInfo appInfo = utils.packageToApp(pkgInfo);
+
+        Bitmap icon = utils.loadIcon(utils.getLaunchComponent(pkgInfo), getResources().getDisplayMetrics());
+        appInfo.setIcon(icon);
+        return appInfo;
     }
 
     @Override

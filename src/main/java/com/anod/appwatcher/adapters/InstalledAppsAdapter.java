@@ -1,6 +1,5 @@
 package com.anod.appwatcher.adapters;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.graphics.drawable.Drawable;
@@ -63,24 +62,8 @@ public class InstalledAppsAdapter extends ArrayAdapter<PackageInfo, AppViewHolde
 
     @Override
     public void onBindViewHolder(AppViewHolder holder, int position) {
-        PackageInfo localInfo = getItem(position);
-
-        AppInfo app = new AppInfo(0,
-                localInfo.packageName,
-                localInfo.packageName,
-                localInfo.versionCode,
-                localInfo.versionName,
-                mPMUtils.getAppTitle(localInfo),
-                null,
-                null,
-                AppInfoMetadata.STATUS_NORMAL,
-                null,
-                null,
-                null,
-                0,
-                null
-        );
-
+        PackageInfo packageInfo = getItem(position);
+        AppInfo app = mPMUtils.packageToApp(packageInfo);
         /**
          *
          * int rowId, String appId, String pname, int versionNumber, String versionName,
@@ -89,7 +72,7 @@ public class InstalledAppsAdapter extends ArrayAdapter<PackageInfo, AppViewHolde
         holder.bindView(position, app);
 
         mIconLoader.picasso()
-                .load(Uri.fromParts(AppIconLoader.SCHEME,mPMUtils.getLaunchComponent(localInfo).flattenToShortString(),null))
+                .load(Uri.fromParts(AppIconLoader.SCHEME,mPMUtils.getLaunchComponent(packageInfo).flattenToShortString(),null))
                 .placeholder(mDefaultIconDrawable)
                 .into(holder.icon);
     }
@@ -97,7 +80,6 @@ public class InstalledAppsAdapter extends ArrayAdapter<PackageInfo, AppViewHolde
     @Override
     public void addAll(List<PackageInfo> objects) {
         super.addAll(objects);
-
         mDataProvider.setTotalCount(getItemCount());
     }
 }

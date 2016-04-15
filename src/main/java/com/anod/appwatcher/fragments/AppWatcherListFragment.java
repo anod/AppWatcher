@@ -1,5 +1,6 @@
 package com.anod.appwatcher.fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -27,6 +28,7 @@ import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListCursorLoader;
 import com.anod.appwatcher.model.Filters;
 import com.anod.appwatcher.model.InstalledFilter;
+import com.anod.appwatcher.utils.IntentUtils;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 
 import info.anodsplace.android.log.AppLog;
@@ -144,6 +146,8 @@ public class AppWatcherListFragment extends Fragment implements
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         mListView.setLayoutManager(layoutManager);
 
+        Resources r = getResources();
+
         // Create an empty adapter we will use to display the loaded data.
 
         mAdapter = new MergeRecyclerAdapter();
@@ -221,6 +225,7 @@ public class AppWatcherListFragment extends Fragment implements
     public void onItemClick(AppInfo app) {
         Intent intent = new Intent(getActivity(), ChangelogActivity.class);
         intent.putExtra(ChangelogActivity.EXTRA_APP_ID, app.getAppId());
+        intent.putExtra(ChangelogActivity.EXTRA_ROW_ID, app.getRowId());
         intent.putExtra(ChangelogActivity.EXTRA_DETAILS_URL, app.getDetailsUrl());
         startActivity(intent);
 

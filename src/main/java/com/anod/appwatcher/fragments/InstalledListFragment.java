@@ -48,14 +48,4 @@ public class InstalledListFragment extends AppWatcherListFragment {
 
     }
 
-
-    @Override
-    public void onItemClick(AppInfo app) {
-        if (app.getRowId() > 0) {
-            super.onItemClick(app);
-        } else {
-            // Add an app
-
-        }
-    }
 }
