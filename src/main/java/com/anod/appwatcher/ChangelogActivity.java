@@ -3,12 +3,10 @@ package com.anod.appwatcher;
 import android.accounts.Account;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.ColorInt;
 import android.support.design.widget.FloatingActionButton;
@@ -16,6 +14,7 @@ import android.support.v4.app.ShareCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.graphics.Palette;
+import android.support.v7.graphics.Target;
 import android.text.Html;
 import android.text.util.Linkify;
 import android.view.Menu;
@@ -37,11 +36,8 @@ import com.anod.appwatcher.market.PlayStoreEndpoint;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.ui.ToolbarActivity;
-import com.anod.appwatcher.utils.AppIconLoader;
 import com.anod.appwatcher.utils.IntentUtils;
 import com.anod.appwatcher.utils.PackageManagerUtils;
-
-import java.io.IOException;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -69,6 +65,13 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
     View mBackground;
     @Bind(R.id.market_btn)
     FloatingActionButton mPlayStoreButton;
+
+    private static Target[] sTargets = new Target[] {
+            Target.DARK_VIBRANT,
+            Target.DARK_MUTED,
+            Target.MUTED,
+            Target.VIBRANT,
+    };
 
     private String mDetailsUrl;
     private String mAppId;
@@ -252,23 +255,16 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
 
     @Override
     public void onGenerated(Palette palette) {
-        for (Palette.Swatch swatch : palette.getSwatches()) {
-            AppLog.d("Palette: " + swatch.toString());
-        }
-        Palette.Swatch vibrant = palette.getDarkVibrantSwatch();
-        if (vibrant != null) {
-            applyColor(vibrant.getRgb());
-            animateBackground();
-        } else {
-            Palette.Swatch muted =  palette.getDarkMutedSwatch();
-            if (muted != null) {
-                applyColor(muted.getRgb());
+        for(Target target : sTargets) {
+            Palette.Swatch swatch = palette.getSwatchForTarget(target);
+            if (swatch != null) {
+                applyColor(swatch.getRgb());
                 animateBackground();
-            } else {
-                mBackground.setVisibility(View.VISIBLE);
-                applyColor(getResources().getColor(R.color.theme_primary));
+                return;
             }
         }
+        mBackground.setVisibility(View.VISIBLE);
+        applyColor(ContextCompat.getColor(this, R.color.theme_primary));
     }
 
     private void applyColor(@ColorInt int color) {
