@@ -40,7 +40,6 @@
             android:gravity="center_vertical"
             android:drawableRight="@drawable/ic_drawer_accounts_expand"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-            android:clickable="true"
             />
 
         <TextView

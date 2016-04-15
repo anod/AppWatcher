@@ -1,37 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    >
+    android:orientation="vertical">
 
-    <include layout="@layout/toolbar"/>
+    <include layout="@layout/toolbar" />
 
-    <FrameLayout android:id="@+id/activity_frame"
-                 xmlns:android="http://schemas.android.com/apk/res/android"
-                 xmlns:tools="http://schemas.android.com/tools"
-                 android:layout_width="match_parent"
-                 android:layout_height="match_parent"
-                 android:paddingTop="0dp"
-        >
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/activity_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="8dp"
+        android:paddingBottom="4dp">
 
-
-        <ListView
+        <android.support.v7.widget.RecyclerView
             android:id="@android:id/list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:divider="@null"
-            android:dividerHeight="0dp"
-            android:drawSelectorOnTop="false"
-            android:paddingBottom="@dimen/list_padding_vertical"
-            android:paddingLeft="@dimen/list_padding_side"
-            android:paddingRight="@dimen/list_padding_side"
-            android:paddingTop="@dimen/list_padding_side"
-            android:scrollbars="none"
-            android:visibility="gone"
-            tools:listitem="@layout/market_app_row"/>
+            tools:listitem="@layout/list_item_market_app" />
 
         <TextView
             android:id="@android:id/empty"
@@ -40,7 +28,7 @@
             android:layout_gravity="center"
             android:layout_margin="25dip"
             android:gravity="center_horizontal"
-            android:text="@string/search_for_app"/>
+            android:text="@string/search_for_app" />
 
         <LinearLayout
             android:id="@+id/loading"
@@ -52,12 +40,12 @@
 
             <ProgressBar
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/loading"/>
+                android:text="@string/loading" />
         </LinearLayout>
 
         <LinearLayout
@@ -71,14 +59,13 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/problem_occurred"/>
+                android:text="@string/problem_occurred" />
 
             <Button
                 android:id="@+id/retry"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/retry"
-                />
+                android:text="@string/retry" />
         </LinearLayout>
 
     </FrameLayout>

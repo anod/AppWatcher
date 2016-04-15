@@ -3,9 +3,11 @@ package com.anod.appwatcher;
 import android.accounts.Account;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -13,22 +15,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.NetworkImageView;
 import com.anod.appwatcher.accounts.AccountChooserHelper;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
 import com.anod.appwatcher.market.SearchEndpoint;
@@ -41,6 +35,10 @@ import com.anod.appwatcher.utils.PackageManagerUtils;
 import com.google.android.finsky.api.model.Document;
 import com.google.android.finsky.protos.Common;
 import com.google.android.finsky.protos.DocDetails;
+import com.squareup.picasso.Picasso;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
 
 public class MarketSearchActivity extends ToolbarActivity implements AccountChooserHelper.OnAccountSelectionListener, AccountChooserFragment.OnAccountSelectionListener, SearchEndpoint.Listener, NewWatchAppHandler.Listener {
     public static final String EXTRA_KEYWORD = "keyword";
@@ -49,24 +47,27 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
 
     private AppsAdapter mAdapter;
     private Context mContext;
-    private LinearLayout mLoading;
-    private RelativeLayout mDeviceIdMessage = null;
-    private ListView mListView;
+
+    @Bind(R.id.loading)
+    LinearLayout mLoading;
+    @Bind(android.R.id.list)
+    RecyclerView mListView;
+    @Bind(android.R.id.empty)
+    TextView mEmptyView;
+    @Bind(R.id.retry_box)
+    LinearLayout mRetryView;
+    @Bind(R.id.retry)
+    Button mRetryButton;
+    SearchView mSearchView;
+
     private boolean mInitiateSearch = false;
     private boolean mShareSource = false;
 
-    private int mColorBgWhite;
-    private int mColorBgGray;
-    private SearchView mSearchView;
     private AccountChooserHelper mAccChooserHelper;
-    private LinearLayout mRetryView;
-    private Button mRetryButton;
     private SearchEndpoint mSearchEngine;
-
+    private NewWatchAppHandler mNewAppHandler;
     private AppListContentProviderClient mContentProviderClient;
     private String mSearchQuery;
-    private NewWatchAppHandler mNewAppHandler;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,25 +76,17 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
         setupToolbar();
         mContext = this;
 
-        Resources r = mContext.getResources();
-        mColorBgGray = r.getColor(R.color.row_inactive);
-        mColorBgWhite = r.getColor(R.color.white);
+        ButterKnife.bind(this);
 
-
-        mLoading = (LinearLayout) findViewById(R.id.loading);
         mLoading.setVisibility(View.GONE);
 
         mSearchEngine = new SearchEndpoint(this);
-
         mNewAppHandler = new NewWatchAppHandler(this, this);
-        mAdapter = new AppsAdapter(this);
+        mAdapter = new AppsAdapter(this, mSearchEngine, mNewAppHandler);
 
-        mListView = (ListView) findViewById(android.R.id.list);
-        mListView.setEmptyView(findViewById(android.R.id.empty));
+        mListView.setLayoutManager(new LinearLayoutManager(this));
         mListView.setAdapter(mAdapter);
 
-        mRetryView = (LinearLayout) findViewById(R.id.retry_box);
-        mRetryButton = (Button) findViewById(R.id.retry);
         mRetryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -102,12 +95,11 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
         });
 
         mListView.setVisibility(View.GONE);
-        mListView.getEmptyView().setVisibility(View.GONE);
+        mEmptyView.setVisibility(View.GONE);
         mLoading.setVisibility(View.VISIBLE);
         mRetryView.setVisibility(View.GONE);
 
         initFromIntent(getIntent());
-
     }
 
 
@@ -167,16 +159,6 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
         }
     }
 
-
-    private void showDeviceIdMessage() {
-        if (mDeviceIdMessage != null) {
-            Animation anim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.flyin);
-            mDeviceIdMessage.setAnimation(anim);
-            anim.start();
-            mDeviceIdMessage.setVisibility(View.VISIBLE);
-        }
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.searchbox, menu);
@@ -232,22 +214,6 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
         }
     }
 
-    final View.OnClickListener itemClickListener = new View.OnClickListener() {
-
-        @Override
-        public void onClick(View v) {
-            int position = (int) v.getTag();
-            Document doc = (Document) mAdapter.getItem(position);
-
-            String imageUrl = DocUtils.getIconUrl(doc);
-            final AppInfo info = new AppInfo(doc, null);
-
-            mNewAppHandler.add(info, imageUrl);
-        }
-    };
-
-
-
     @Override
     public void onHelperAccountSelected(Account account, String authSubToken) {
         if (authSubToken == null) {
@@ -282,24 +248,32 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
 
     private void showRetryButton() {
         mListView.setVisibility(View.GONE);
-        mListView.getEmptyView().setVisibility(View.GONE);
+        mEmptyView.setVisibility(View.GONE);
+        mLoading.setVisibility(View.GONE);
         mRetryView.setVisibility(View.VISIBLE);
     }
 
     private void showLoading() {
         mListView.setVisibility(View.GONE);
-        mListView.getEmptyView().setVisibility(View.GONE);
+        mEmptyView.setVisibility(View.GONE);
         mLoading.setVisibility(View.VISIBLE);
         mRetryView.setVisibility(View.GONE);
     }
 
     private void showNoResults(String query) {
         mLoading.setVisibility(View.GONE);
+        mListView.setVisibility(View.GONE);
+        mRetryView.setVisibility(View.GONE);
         String noResStr = (query.length() > 0) ? getString(R.string.no_result_found, query) : getString(R.string.search_for_app);
-        TextView tv = (TextView) mListView.getEmptyView();
-        tv.setText(noResStr);
-        tv.setVisibility(View.VISIBLE);
-        showDeviceIdMessage();
+        mEmptyView.setText(noResStr);
+        mEmptyView.setVisibility(View.VISIBLE);
+    }
+
+    private void showListView() {
+        mListView.setVisibility(View.VISIBLE);
+        mEmptyView.setVisibility(View.GONE);
+        mLoading.setVisibility(View.GONE);
+        mRetryView.setVisibility(View.GONE);
     }
 
     private void retrySearchResult() {
@@ -312,10 +286,10 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
 
     @Override
     public void onDataChanged() {
-        mLoading.setVisibility(View.GONE);
         if (mSearchEngine.getData().getCount() == 0) {
             showNoResults(mSearchEngine.getQuery());
         } else {
+            showListView();
             mAdapter.notifyDataSetChanged();
         }
     }
@@ -346,69 +320,69 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
         }
     }
 
-    static class ViewHolder {
-        int position;
+    static class MarketAppViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        private final NewWatchAppHandler mNewAppHandler;
+        Document doc;
+        @Bind(android.R.id.content)
         View row;
+        @Bind(android.R.id.title)
         TextView title;
+        @Bind(R.id.details)
         TextView details;
+        @Bind(R.id.updated)
         TextView updated;
+        @Bind(R.id.price)
         TextView price;
-        NetworkImageView icon;
+        @Bind(android.R.id.icon)
+        ImageView icon;
+
+        public MarketAppViewHolder(View itemView, NewWatchAppHandler newAppHandler) {
+            super(itemView);
+            ButterKnife.bind(this, itemView);
+            this.row.setOnClickListener(this);
+            mNewAppHandler = newAppHandler;
+        }
+
+        @Override
+        public void onClick(View v) {
+            String imageUrl = DocUtils.getIconUrl(doc);
+            final AppInfo info = new AppInfo(doc, null);
+            mNewAppHandler.add(info, imageUrl);
+        }
     }
 
-    class AppsAdapter extends BaseAdapter {
+    static class AppsAdapter extends RecyclerView.Adapter<MarketAppViewHolder> {
         private final PackageManagerUtils mPMUtils;
-        private final ImageLoader mImageLoader;
+        private final Context mContext;
+        private final SearchEndpoint mSearchEngine;
+        private final int mColorBgGray;
+        private final int mColorBgWhite;
+        private final NewWatchAppHandler mNewAppHandler;
 
-        public AppsAdapter(Context context) {
+        public AppsAdapter(Context context, SearchEndpoint searchEngine, NewWatchAppHandler newAppHandler) {
+            super();
             mContext = context;
             mPMUtils = new PackageManagerUtils(context.getPackageManager());
-            mImageLoader = AppWatcherApplication.provide(context).imageLoader();
-        }
+            mSearchEngine = searchEngine;
+            mNewAppHandler = newAppHandler;
 
-
-        @Override
-        public int getCount() {
-            return mSearchEngine.getCount();
-        }
-
-
-        @Override
-        public Object getItem(int position) {
-            return mSearchEngine.getData().getItem(position, false);
+            mColorBgGray = ContextCompat.getColor(context, R.color.row_inactive);
+            mColorBgWhite = ContextCompat.getColor(context, R.color.white);
         }
 
         @Override
-        public long getItemId(int position) {
-            return position;
+        public MarketAppViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(mContext).inflate(R.layout.list_item_market_app, parent, false);
+            return new MarketAppViewHolder(view, mNewAppHandler);
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            ViewHolder holder;
-            View v = convertView;
-            if (v == null) {
-                LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                v = vi.inflate(R.layout.list_item_market_app, null);
-                holder = new ViewHolder();
-                holder.row = v.findViewById(android.R.id.content);
-                holder.title = (TextView) v.findViewById(android.R.id.title);
-                holder.details = (TextView) v.findViewById(R.id.details);
-                holder.updated = (TextView) v.findViewById(R.id.updated);
-                holder.price = (TextView) v.findViewById(R.id.price);
-                holder.icon = (NetworkImageView) v.findViewById(android.R.id.icon);
-                holder.icon.setDefaultImageResId(R.drawable.ic_blur_on_black_48dp);
-                holder.icon.setErrorImageResId(R.drawable.ic_android_black_48dp);
-
-                v.setTag(holder);
-            } else {
-                holder = (ViewHolder) v.getTag();
-            }
-            Document doc = (Document) getItem(position);
+        public void onBindViewHolder(MarketAppViewHolder holder, int position) {
+            Document doc = mSearchEngine.getData().getItem(position, false);
 
             DocDetails.AppDetails app = doc.getAppDetails();
 
-            holder.position = position;
+            holder.doc = doc;
             holder.title.setText(doc.getTitle());
             holder.details.setText(doc.getCreator());
             holder.updated.setText(app.uploadDate);
@@ -420,10 +394,10 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
             }
 
             String imageUrl = DocUtils.getIconUrl(doc);
-            holder.icon.setImageUrl(imageUrl, mImageLoader);
 
-            holder.row.setTag(position);
-            holder.row.setOnClickListener(itemClickListener);
+            Picasso.with(mContext).load(imageUrl)
+                    .placeholder(R.drawable.ic_blur_on_black_48dp)
+                    .into(holder.icon);
 
             boolean isInstalled = mPMUtils.isAppInstalled(app.packageName);
             if (isInstalled) {
@@ -436,11 +410,16 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
                     holder.price.setText(offer.formattedAmount);
                 }
             }
-
-            return v;
         }
 
-    }
+        @Override
+        public int getItemCount() {
+            return mSearchEngine.getCount();
+        }
 
+        public boolean isEmpty() {
+            return mSearchEngine.getCount() == 0;
+        }
+    }
 
 }
