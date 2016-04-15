@@ -126,7 +126,6 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
 
         mAccChooserHelper = new AccountChooserHelper(this, new Preferences(this), this);
         mAccChooserHelper.init();
-
     }
 
     @Override
@@ -309,7 +308,5 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
             Toast.makeText(mContext, R.string.error_insert_app, Toast.LENGTH_SHORT).show();
         }
     }
-
-
 
 }

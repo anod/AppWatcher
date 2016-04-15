@@ -28,7 +28,6 @@ import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListCursorLoader;
 import com.anod.appwatcher.model.Filters;
 import com.anod.appwatcher.model.InstalledFilter;
-import com.anod.appwatcher.utils.IntentUtils;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 
 import info.anodsplace.android.log.AppLog;
@@ -41,6 +40,7 @@ public class AppWatcherListFragment extends Fragment implements
 
     private static final int ADAPTER_WATCHLIST = 0;
     public static final String ARG_FILTER = "filter";
+    private static final int REQUEST_APP_INFO = 1;
     private String mTitleFilter = "";
 
 
@@ -227,12 +227,23 @@ public class AppWatcherListFragment extends Fragment implements
         intent.putExtra(ChangelogActivity.EXTRA_APP_ID, app.getAppId());
         intent.putExtra(ChangelogActivity.EXTRA_ROW_ID, app.getRowId());
         intent.putExtra(ChangelogActivity.EXTRA_DETAILS_URL, app.getDetailsUrl());
-        startActivity(intent);
+        startActivityForResult(intent, REQUEST_APP_INFO);
 
         if (BuildConfig.DEBUG) {
             AppLog.d(app.getPackageName());
             Toast.makeText(getActivity(), app.getPackageName(), Toast.LENGTH_SHORT).show();
         }
 
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_APP_INFO && resultCode == Activity.RESULT_OK) {
+            String newPackage = data.getStringExtra(ChangelogActivity.EXTRA_ADD_APP_PACKAGE);
+            if (newPackage != null) {
+                getLoaderManager().restartLoader(0, null, this);
+            }
+        }
     }
 }

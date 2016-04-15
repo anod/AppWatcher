@@ -5,6 +5,7 @@ import android.text.TextUtils;
 
 import com.google.android.finsky.api.model.DfeDetails;
 import com.google.android.finsky.api.model.DfeModel;
+import com.google.android.finsky.api.model.Document;
 import com.google.android.finsky.protos.DocDetails;
 
 /**
@@ -30,6 +31,8 @@ public class DetailsEndpoint extends PlayStoreEndpoint {
         return getData().getDocument().getAppDetails();
     }
 
+    public Document getDocument() { return getData().getDocument(); }
+
     public String getRecentChanges() {
         DocDetails.AppDetails details = getAppDetails();
         if (details != null) {
@@ -45,7 +48,6 @@ public class DetailsEndpoint extends PlayStoreEndpoint {
 
     @Override
     protected void executeSync() {
-
         getData().setDetailsUrl(mUrl);
         getData().startSync();
     }

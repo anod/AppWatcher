@@ -1,6 +1,8 @@
 package com.anod.appwatcher.fragments;
 
+import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v4.content.Loader;
 import android.view.View;
 
 import com.anod.appwatcher.adapters.InstalledAppsAdapter;
@@ -27,25 +29,25 @@ public class InstalledListFragment extends AppWatcherListFragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
         mAdapter.addAdapter(ADAPTER_INSTALLED, new InstalledAppsAdapter(getActivity(), mPMUtils, this));
-
-        refreshInstalledList();
     }
 
 
     protected void refreshInstalledList() {
         // TODO: Background??
-
         AppListContentProviderClient cr = new AppListContentProviderClient(getActivity());
         Map<String, Integer> watchingPackages = cr.queryPackagesMap();
         cr.release();
 
         InstalledAppsAdapter downloadedAdapter = (InstalledAppsAdapter)mAdapter.getAdapter(ADAPTER_INSTALLED);
-
         downloadedAdapter.clear();
         downloadedAdapter.addAll(mPMUtils.getDownloadedApps(watchingPackages));
 
     }
 
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        super.onLoadFinished(loader, data);
+        refreshInstalledList();
+    }
 }

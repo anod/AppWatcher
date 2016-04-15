@@ -35,9 +35,12 @@ import com.anod.appwatcher.market.MarketInfo;
 import com.anod.appwatcher.market.PlayStoreEndpoint;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListContentProviderClient;
+import com.anod.appwatcher.model.NewWatchAppHandler;
 import com.anod.appwatcher.ui.ToolbarActivity;
+import com.anod.appwatcher.utils.DocUtils;
 import com.anod.appwatcher.utils.IntentUtils;
 import com.anod.appwatcher.utils.PackageManagerUtils;
+import com.google.android.finsky.api.model.Document;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -45,11 +48,13 @@ import info.anodsplace.android.anim.RevealAnimatorCompat;
 import info.anodsplace.android.log.AppLog;
 
 
-public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpoint.Listener, Palette.PaletteAsyncListener, View.OnClickListener {
+
+public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpoint.Listener, Palette.PaletteAsyncListener, View.OnClickListener, NewWatchAppHandler.Listener {
 
     public static final String EXTRA_APP_ID = "app_id";
     public static final String EXTRA_DETAILS_URL = "url";
     public static final String EXTRA_ROW_ID = "row_id";
+    public static final String EXTRA_ADD_APP_PACKAGE = "app_add_success";
 
     @Bind(R.id.progress_bar)
     ProgressBar mLoadingView;
@@ -78,6 +83,8 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
 
     private DetailsEndpoint mDetailsEndpoint;
     private AppInfo mApp;
+    private boolean mNewApp;
+    private MenuItem mAddMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,16 +113,23 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
                 mLoadingView.setVisibility(View.VISIBLE);
                 mRetryButton.setVisibility(View.GONE);
                 mChangelog.setVisibility(View.GONE);
-                mDetailsEndpoint.startAsync();
+                mRetryButton.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mDetailsEndpoint.startAsync();
+                    }
+                }, 500);
             }
         });
 
         if (rowId == -1) {
             mApp = loadInstalledApp();
+            mNewApp = true;
         } else {
             AppListContentProviderClient cr = new AppListContentProviderClient(this);
             mApp = cr.queryAppId(mAppId);
             cr.release();
+            mNewApp = false;
         }
 
         if (mApp == null)
@@ -175,12 +189,11 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
     }
 
     private void setupAppView(AppInfo app) {
-
         Bitmap icon = app.getIcon();
         if (icon == null) {
             icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_android_black_48dp);
             mBackground.setVisibility(View.VISIBLE);
-            applyColor(ContextCompat.getColor(this,R.color.theme_primary));
+            applyColor(ContextCompat.getColor(this, R.color.theme_primary));
         } else {
             Palette.from(icon).generate(this);
         }
@@ -190,12 +203,17 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
         mPlayStoreButton.setOnClickListener(this);
     }
 
-
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.changelog, menu);
+        mAddMenu = menu.findItem(R.id.menu_add);
+        mAddMenu.setEnabled(false);
+        if (mNewApp) {
+            menu.findItem(R.id.menu_remove).setVisible(false);
+        } else {
+            menu.findItem(R.id.menu_add).setVisible(false);
+        }
         return true;
     }
 
@@ -207,6 +225,18 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
                         mApp.getTitle(), mApp.getRowId()
                 );
                 removeDialog.show(getSupportFragmentManager(), "removeDialog");
+                return true;
+            case R.id.menu_add:
+                Document doc = mDetailsEndpoint.getDocument();
+                if (doc != null) {
+                    String imageUrl = DocUtils.getIconUrl(doc);
+                    final AppInfo info = new AppInfo(doc, null);
+                    AppListContentProviderClient client = new AppListContentProviderClient(this);
+                    NewWatchAppHandler appHandler = new NewWatchAppHandler(this, this);
+                    appHandler.setContentProvider(client);
+                    appHandler.add(info, imageUrl);
+                    client.release();
+                }
                 return true;
             case R.id.menu_share:
                 shareApp();
@@ -239,6 +269,9 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
             mChangelog.setText(R.string.no_recent_changes);
         } else {
             mChangelog.setText(Html.fromHtml(changes));
+        }
+        if (mDetailsEndpoint.getDocument() != null) {
+            mAddMenu.setEnabled(true);
         }
     }
 
@@ -287,6 +320,25 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
         if (id == R.id.market_btn) {
             Intent intent = IntentUtils.createPlayStoreIntent(mApp.getPackageName());
             startActivity(intent);
+        }
+    }
+
+    @Override
+    public void onAppAddSuccess(AppInfo info) {
+        String msg = getString(R.string.app_stored, info.getTitle());
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+        Intent data = new Intent();
+        data.putExtra(EXTRA_ADD_APP_PACKAGE, info.getPackageName());
+        setResult(RESULT_OK, data);
+        finish();
+    }
+
+    @Override
+    public void onAppAddError(int error) {
+        if (NewWatchAppHandler.ERROR_ALEREADY_ADDED == error) {
+            Toast.makeText(this, R.string.app_already_added, Toast.LENGTH_SHORT).show();
+        } else if (error == NewWatchAppHandler.ERROR_INSERT) {
+            Toast.makeText(this, R.string.error_insert_app, Toast.LENGTH_SHORT).show();
         }
     }
 }

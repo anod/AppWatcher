@@ -10,12 +10,12 @@ import com.anod.appwatcher.R;
 import com.anod.appwatcher.model.AppListContentProviderClient;
 
 public class RemoveDialogFragment extends DialogFragment {
-	
-    private static final String ARG_ROW_ID = "rowId";
-	private static final String ARG_TITLE = "title";
 
-	public static RemoveDialogFragment newInstance(String title, int rowId) {
-    	RemoveDialogFragment frag = new RemoveDialogFragment();
+    private static final String ARG_ROW_ID = "rowId";
+    private static final String ARG_TITLE = "title";
+
+    public static RemoveDialogFragment newInstance(String title, int rowId) {
+        RemoveDialogFragment frag = new RemoveDialogFragment();
         Bundle args = new Bundle();
         args.putString(ARG_TITLE, title);
         args.putInt(ARG_ROW_ID, rowId);
@@ -27,27 +27,27 @@ public class RemoveDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         String title = getArguments().getString(ARG_TITLE);
         final int rowId = getArguments().getInt(ARG_ROW_ID);
-        String message = getString(R.string.alert_dialog_remove_message, title); 
-        
+        String message = getString(R.string.alert_dialog_remove_message, title);
+
         return new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.alert_dialog_remove_title)
                 .setMessage(message)
-                .setPositiveButton(R.string.alert_dialog_remove, 
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                            AppListContentProviderClient cl = new AppListContentProviderClient(getActivity());
-                            cl.markDeleted(rowId);
-                            cl.release();
-                            getActivity().finish();
+                .setPositiveButton(R.string.alert_dialog_remove,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                AppListContentProviderClient cl = new AppListContentProviderClient(getActivity());
+                                cl.markDeleted(rowId);
+                                cl.release();
+                                getActivity().finish();
+                            }
                         }
-                    }
                 )
                 .setNegativeButton(R.string.alert_dialog_cancel,
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                            
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+
+                            }
                         }
-                    }
                 )
                 .create();
     }
