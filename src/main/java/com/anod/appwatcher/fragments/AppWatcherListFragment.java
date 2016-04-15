@@ -240,8 +240,7 @@ public class AppWatcherListFragment extends Fragment implements
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_APP_INFO && resultCode == Activity.RESULT_OK) {
-            String newPackage = data.getStringExtra(ChangelogActivity.EXTRA_ADD_APP_PACKAGE);
-            if (newPackage != null) {
+            if (data.getExtras() != null) {
                 getLoaderManager().restartLoader(0, null, this);
             }
         }

@@ -1,6 +1,7 @@
 package com.anod.appwatcher.utils;
 
 import android.content.ComponentName;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -102,7 +103,8 @@ public class PackageManagerUtils {
 
     public ComponentName getLaunchComponent(PackageInfo info)
     {
-        return mPackageManager.getLaunchIntentForPackage(info.packageName).getComponent();
+        Intent launchIntent = mPackageManager.getLaunchIntentForPackage(info.packageName);
+        return launchIntent == null ? null : launchIntent.getComponent();
     }
 
     public List<PackageInfo> getDownloadedApps(Map<String, Integer> filter) {

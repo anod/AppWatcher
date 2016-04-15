@@ -1,6 +1,7 @@
 package com.anod.appwatcher;
 
 import android.accounts.Account;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.graphics.Bitmap;
@@ -55,6 +56,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
     public static final String EXTRA_DETAILS_URL = "url";
     public static final String EXTRA_ROW_ID = "row_id";
     public static final String EXTRA_ADD_APP_PACKAGE = "app_add_success";
+    public static final String EXTRA_UNINSTALL_APP_PACKAGE = "app_uninstall";
 
     @Bind(R.id.progress_bar)
     ProgressBar mLoadingView;
@@ -85,6 +87,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
     private AppInfo mApp;
     private boolean mNewApp;
     private MenuItem mAddMenu;
+    private PackageManagerUtils mPMutils;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,6 +101,9 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
         mAppId = data.getStringExtra(EXTRA_APP_ID);
         mDetailsUrl = data.getStringExtra(EXTRA_DETAILS_URL);
         int rowId = data.getIntExtra(EXTRA_ROW_ID, -1);
+
+
+        mPMutils = new PackageManagerUtils(getPackageManager());
 
         mDetailsEndpoint = new DetailsEndpoint(this);
         mDetailsEndpoint.setUrl(mDetailsUrl);
@@ -144,17 +150,19 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
 
     private AppInfo loadInstalledApp()
     {
-        PackageManagerUtils utils = new PackageManagerUtils(getPackageManager());
-        PackageInfo pkgInfo = utils.getPackageInfo(mAppId);
+        PackageInfo pkgInfo = mPMutils.getPackageInfo(mAppId);
         if (pkgInfo == null)
         {
             return null;
         }
 
-        AppInfo appInfo = utils.packageToApp(pkgInfo);
+        AppInfo appInfo = mPMutils.packageToApp(pkgInfo);
 
-        Bitmap icon = utils.loadIcon(utils.getLaunchComponent(pkgInfo), getResources().getDisplayMetrics());
-        appInfo.setIcon(icon);
+        ComponentName launchComponent = mPMutils.getLaunchComponent(pkgInfo);
+        if (launchComponent != null) {
+            Bitmap icon = mPMutils.loadIcon(launchComponent, getResources().getDisplayMetrics());
+            appInfo.setIcon(icon);
+        }
         return appInfo;
     }
 
@@ -214,6 +222,10 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
         } else {
             menu.findItem(R.id.menu_add).setVisible(false);
         }
+        if (!mPMutils.isAppInstalled(mAppId)) {
+            menu.findItem(R.id.menu_uninstall).setVisible(false);
+        }
+
         return true;
     }
 
@@ -237,6 +249,13 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
                     appHandler.add(info, imageUrl);
                     client.release();
                 }
+                return true;
+            case R.id.menu_uninstall:
+                Intent data = new Intent();
+                data.putExtra(EXTRA_UNINSTALL_APP_PACKAGE, mAppId);
+                setResult(RESULT_OK, data);
+                Intent uninstallIntent = IntentUtils.createUninstallIntent(mAppId);
+                startActivity(uninstallIntent);
                 return true;
             case R.id.menu_share:
                 shareApp();
