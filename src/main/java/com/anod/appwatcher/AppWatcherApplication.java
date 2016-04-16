@@ -6,12 +6,9 @@ import android.view.ViewConfiguration;
 
 import com.squareup.leakcanary.LeakCanary;
 
-import net.hockeyapp.android.CrashManager;
-import net.hockeyapp.android.ExceptionHandler;
-import net.hockeyapp.android.utils.HockeyLog;
+import java.lang.reflect.Field;
 
 import info.anodsplace.android.log.AppLog;
-import java.lang.reflect.Field;
 
 public class AppWatcherApplication extends Application implements AppLog.Listener {
     private ObjectGraph mObjectGraph;
@@ -52,6 +49,6 @@ public class AppWatcherApplication extends Application implements AppLog.Listene
 
     @Override
     public void onLogException(Throwable tr) {
-        ExceptionHandler.saveException(tr, null, null);
+        // Ignore for now - ExceptionHandler.saveException(tr, null, null);
     }
 }

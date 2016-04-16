@@ -47,7 +47,7 @@ public class InstalledListFragment extends AppWatcherListFragment {
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        super.onLoadFinished(loader, data);
         refreshInstalledList();
+        super.onLoadFinished(loader, data);
     }
 }

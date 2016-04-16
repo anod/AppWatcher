@@ -1,11 +1,16 @@
 package com.anod.appwatcher.utils;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
+import android.widget.Toast;
 
+import com.anod.appwatcher.fragments.AppWatcherListFragment;
 import com.anod.appwatcher.market.MarketInfo;
+
+import info.anodsplace.android.log.AppLog;
 
 public class IntentUtils {
     private static final String SCHEME = "package";
@@ -40,4 +45,13 @@ public class IntentUtils {
         return new Intent(Intent.ACTION_UNINSTALL_PACKAGE, Uri.fromParts(SCHEME, packageName, null));
     }
 
+    public static void startActivitySafely(Context context, Intent intent) {
+        try {
+            context.startActivity(intent);
+        } catch (Exception e)
+        {
+            AppLog.e(e);
+            Toast.makeText(context, "Cannot start activity: "+intent.toString(), Toast.LENGTH_SHORT).show();
+        }
+    }
 }

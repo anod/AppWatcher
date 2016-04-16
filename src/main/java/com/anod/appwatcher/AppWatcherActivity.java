@@ -27,8 +27,8 @@ import com.anod.appwatcher.fragments.AppWatcherListFragment;
 import com.anod.appwatcher.fragments.InstalledListFragment;
 import com.anod.appwatcher.model.Filters;
 import com.anod.appwatcher.sync.SyncAdapter;
-import com.anod.appwatcher.utils.MenuItemAnimation;
 import com.anod.appwatcher.ui.DrawerActivity;
+import com.anod.appwatcher.utils.MenuItemAnimation;
 
 import net.hockeyapp.android.CrashManager;
 
@@ -72,7 +72,6 @@ public class AppWatcherActivity extends DrawerActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setTitle(R.string.activity_main);
         setupDrawer();
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
 
@@ -100,7 +99,6 @@ public class AppWatcherActivity extends DrawerActivity implements
         tabLayout.setupWithViewPager(mViewPager);
 
         mRefreshAnim = new MenuItemAnimation(this, R.anim.rotate);
-        mRefreshAnim.setMenuItem(mNavigationView.getMenu().findItem(R.id.menu_act_refresh));
 
         mAccountChooserHelper = new AccountChooserHelper(this, mPreferences, this);
         mAccountChooserHelper.init();
@@ -136,11 +134,24 @@ public class AppWatcherActivity extends DrawerActivity implements
         final SearchView searchView = (SearchView) MenuItemCompat.getActionView(mSearchMenuItem);
         searchView.setOnQueryTextListener(this);
         searchView.setSubmitButtonEnabled(true);
+        searchView.setQueryHint(getString(R.string.search));
+
+        mRefreshAnim.setMenuItem(menu.findItem(R.id.menu_act_refresh));
 
         updateSyncStatus();
 
         return super.onCreateOptionsMenu(menu);
     }
+
+
+    public void openSearch() {
+        MenuItemCompat.expandActionView(mSearchMenuItem);
+    }
+
+    public void switchTab(int tab) {
+        mViewPager.setCurrentItem(tab);
+    }
+
 
     private void updateSyncStatus() {
         if (mSyncAccount != null && ContentResolver.isSyncActive(mSyncAccount, AppListContentProvider.AUTHORITY)) {
@@ -305,7 +316,7 @@ public class AppWatcherActivity extends DrawerActivity implements
 
     public int addQueryChangeListener(QueryChangeListener listener) {
         mQueryChangeListener.add(listener);
-        return mQueryChangeListener.size()-1;
+        return mQueryChangeListener.size() - 1;
     }
 
     public void removeQueryChangeListener(int index) {

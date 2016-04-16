@@ -1,10 +1,11 @@
 package com.anod.appwatcher.fragments;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -28,8 +29,12 @@ import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListCursorLoader;
 import com.anod.appwatcher.model.Filters;
 import com.anod.appwatcher.model.InstalledFilter;
+import com.anod.appwatcher.utils.IntentUtils;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import info.anodsplace.android.log.AppLog;
 import info.anodsplace.android.widget.recyclerview.MergeRecyclerAdapter;
 
@@ -43,10 +48,13 @@ public class AppWatcherListFragment extends Fragment implements
     private static final int REQUEST_APP_INFO = 1;
     private String mTitleFilter = "";
 
+    @Bind(android.R.id.list)
+    RecyclerView mListView;
+    @Bind(R.id.progress)
+    View mProgressContainer;
+    @Bind(android.R.id.empty)
+    View mEmptyView;
 
-    public RecyclerView mListView;
-    private View mProgressContainer;
-    private View mEmptyView;
 
     private InstalledFilter mInstalledFilter;
 
@@ -112,27 +120,14 @@ public class AppWatcherListFragment extends Fragment implements
         }
     }
 
-    public void setListVisible(boolean shown) {
-        setListVisible(shown, true);
-    }
-
-    public void setListShownNoAnimation(boolean shown) {
-        setListVisible(shown, false);
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_applist, container, false);
-
-        mListView = (RecyclerView) root.findViewById(android.R.id.list);
-        mProgressContainer = root.findViewById(R.id.progress);
-        mEmptyView = root.findViewById(android.R.id.empty);
+        ButterKnife.bind(this, root);
         mEmptyView.setVisibility(View.GONE);
-
         return root;
     }
-
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -146,17 +141,13 @@ public class AppWatcherListFragment extends Fragment implements
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         mListView.setLayoutManager(layoutManager);
 
-        Resources r = getResources();
-
         // Create an empty adapter we will use to display the loaded data.
-
         mAdapter = new MergeRecyclerAdapter();
         mAdapter.addAdapter(ADAPTER_WATCHLIST, new ListCursorAdapterWrapper(getActivity(), mPMUtils, this));
-
         mListView.setAdapter(mAdapter);
 
         // Start out with a progress indicator.
-        setListVisible(false);
+        setListVisible(false, true);
 
         setupFilter(getArguments().getInt(ARG_FILTER));
         // Prepare the loader.  Either re-connect with an existing one,
@@ -172,8 +163,6 @@ public class AppWatcherListFragment extends Fragment implements
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        // Swap the new cursor in.  (The framework will take care of closing the
-        // old cursor once we return.)
         ListCursorAdapterWrapper watchlistAdapter = ((ListCursorAdapterWrapper) mAdapter.getAdapter(ADAPTER_WATCHLIST));
         watchlistAdapter.swapData(data);
         if (mInstalledFilter == null) {
@@ -186,11 +175,10 @@ public class AppWatcherListFragment extends Fragment implements
 
         // The list should now be shown.
         if (isResumed()) {
-            setListVisible(true);
+            setListVisible(true, true);
         } else {
-            setListShownNoAnimation(true);
+            setListVisible(true, false);
         }
-
     }
 
     @Override
@@ -244,5 +232,23 @@ public class AppWatcherListFragment extends Fragment implements
                 getLoaderManager().restartLoader(0, null, this);
             }
         }
+    }
+
+    @OnClick(android.R.id.button1)
+    public void onSearchButton() {
+        AppWatcherActivity activity = (AppWatcherActivity) getActivity();
+        activity.openSearch();
+    }
+
+    @OnClick(android.R.id.button2)
+    public void onImportButton() {
+        AppWatcherActivity activity = (AppWatcherActivity) getActivity();
+        activity.switchTab(Filters.TAB_INSTALLED);
+    }
+
+    @OnClick(android.R.id.button3)
+    public void onShareButton() {
+        Intent intent = Intent.makeMainActivity(new ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity"));
+        IntentUtils.startActivitySafely(getActivity(), intent);
     }
 }

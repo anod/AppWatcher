@@ -22,20 +22,18 @@
         <item name="colorPrimary">@color/theme_primary</item>
         <item name="colorPrimaryDark">@color/theme_primary_dark</item>
         <item name="colorAccent">@color/theme_accent</item>
+        <item name="android:buttonStyle">@style/BrandButtonStyle</item>
         <item name="android:windowBackground">@color/window_background</item>
+    </style>
+
+    <style name="BrandButtonStyle" parent="Widget.AppCompat.Button.Colored">
+        <item name="colorButtonNormal">@color/theme_primary</item>
+        <item name="android:textColor">@android:color/white</item>
     </style>
 
     <style name="AppThemeLight.DarkActionBar" parent="AppThemeBase" />
 
-    <style name="ActionButton">
-        <item name="android:background">@null</item>
-        <item name="android:minHeight">48dip</item>
-        <item name="android:minWidth">56dip</item>
-        <item name="android:gravity">center</item>
-        <item name="android:paddingLeft">12dip</item>
-        <item name="android:paddingRight">12dip</item>
-        <item name="android:scaleType">center</item>
-    </style>
+    <style name="ActionButton" parent="Widget.AppCompat.ActionButton" />
 
 	<style name="ListHeader">
 		<item name="android:layout_height">wrap_content</item>

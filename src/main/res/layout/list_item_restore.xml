@@ -30,7 +30,7 @@
         android:gravity="center"
         android:scaleType="center"
         android:background="@android:drawable/list_selector_background"
-        android:src="@drawable/ic_save_black_24dp"
+        android:src="@drawable/ic_check_black_24dp"
         android:paddingLeft="14dip"
         android:paddingRight="14dip"
     /> 

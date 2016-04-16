@@ -1,21 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">App Watcher</string>
-    <string name="no_data">Нажмите на \"Плюс\" чтобы добавить приложение.</string>
     <string name="menu_add">Добавитъ</string>
     <string name="menu_refresh">Обновить</string>
     <string name="failed_gain_access">Пожалуйста разрешите доступ. Разрешение требуется для того, чтобы связаться с Google Play Маркет.</string>
-    <string name="search_hint">Искать приложение</string>
     <string name="search_action">Поиск</string>
     <string name="search_for_app">Найдите приложение и нажмите на него.\n( Совет: Вы можете добавлять приложения непосредственно из Play Маркет с помощью кнопки \"Поделиться\" )</string>
     <string name="loading">Загрузка&#8230;</string>
     <string name="no_result_found">Нет результатов для \"%s\"</string>
     <string name="error_insert_app">Не удалось добавить приложение в список для наблюдения.</string>
     <string name="application_icon">Иконка приложения</string>
-    <string name="play_store">Play Маркет</string>
     <string name="remove">Удалить</string>
-    <string name="whats_new">Что нового</string>
-    <string name="whats_new_title">Что нового</string>
     <string name="problem_occurred">Проблема произошла во время получения информации.</string>
     <string name="menu_auto_update">Автоматическое обновление</string>
     <string name="menu_wifi_only">Только по Wi-Fi</string>
@@ -31,22 +26,16 @@
     <string name="notification_2_apps_more">%1$s, %2$s и еще</string>
     <string name="notification_click">Нажмите для деталей</string>
     <string name="no_updates_found">Обновления не найдены.</string>
-    <string name="about">О программе</string>
-    <string name="dialog_about_title">%1$s вер. %2$s</string>    
+    <string name="dialog_about_title">%1$s вер. %2$s</string>
     <string name="dialog_about_text">Автор: Alex Gavrishev&lt;br/&gt;&lt;a href=&quot;https://play.google.com/store/apps/developer?id=Alex+Gavrishev&quot;&gt;Google Play Store&lt;/a&gt;&lt;br/&gt;&lt;br/&gt;Project is licensed under a &lt;a href=&quot;http://creativecommons.org/licenses/by-sa/3.0/&quot;&gt;Creative Commons Attribution-ShareAlike 3.0 Unported License.&lt;/a&gt;&lt;br/&gt;&lt;br/&gt;Source Code available at &lt;a href=&quot;https://github.com/anod/AppWatcher&quot;&gt;github.com&lt;/a&gt;.</string>
     <string name="share">Поделиться</string>
     <string name="share_subject_normal">Взгляните на \"%s\"</string>
     <string name="share_subject_updated">Взгляните на новую версию \"%s\"</string>
-    <string name="disabled">Выключено</string>
-    <string name="enabled">Включено</string>
     <string name="app_stored">\"%s\" добавлен в список для наблюдения</string>
     <string name="rate_app">Оценить в маркете</string>
     <string name="installed">Установленно</string>
     <string name="no_recent_changes">Нет информации о последних изменениях.</string>
-    <string name="google_account_not_found">Google аккаунт не найден.</string>
-    <string name="list_export">Экспорт</string>
     <string name="last_update">Последнее обновление: %1$s</string>
-    <string name="list_import">Импорт</string>
     <string name="no_files_found">Файлы не найдены</string>
     <string name="please_wait">Подождите&#8230;</string>
     <string name="export_done">Завершено</string>
@@ -58,7 +47,6 @@
     <string name="file_not_exist">Файл не существует</string>
     <string name="failed_to_write_file">Не удалось записать файл</string>
     <string name="import_export">Импорт/Экспорт</string>
-    <string name="accounts">Аккаунты</string>
     <string name="action_settings">Настройки</string>
     <string name="add_to_appwatcher">Добавить в App Watcher</string>
     <string name="app_already_added">Аппликация уже в списке</string>
@@ -68,7 +56,6 @@
     <string name="gms_service_disabled">Google Play services отключены на этом устройстве</string>
     <string name="gms_service_missing">Google Play services отсутсвуют на этом устройстве.</string>
     <string name="gms_service_update_required">Версия Google Play services устарела.</string>
-    <string name="google_drive_sync">Синхронизация Google Drive</string>
     <string name="menu_filter">Фильтр</string>
     <string name="never">Никогда</string>
     <string name="no_registered_google_accounts">Нет зарегистрированных аккаунтов google</string>
@@ -92,5 +79,4 @@
     <string name="sync_finish">Синхронизация завершена</string>
     <string name="sync_start">Синхронизирую</string>
     <string name="watching">Под наблюдением</string>
-    <string name="more">Еще...</string>
 </resources>

@@ -34,35 +34,37 @@
         android:id="@android:id/empty"
         android:layout_width="240dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="96dp"
         android:orientation="vertical">
 
         <TextView
-
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Your watch list is empty"
+            android:text="@string/watch_list_is_empty"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <Button
+            android:id="@android:id/button1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/ic_search_black_24dp"
-            android:text="Search for an app" />
+            android:drawableLeft="@drawable/ic_search_white_24dp"
+            android:text="@string/search_for_an_app" />
 
         <Button
+            android:id="@android:id/button2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/ic_check_black_24dp"
-            android:text="Import downloaded" />
+            android:drawableLeft="@drawable/ic_system_update_alt_white_24dp"
+            android:text="@string/import_installed" />
 
         <Button
+            android:id="@android:id/button3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/ic_share_black_24dp"
-            android:text="Share from Play Store " />
+            android:drawableLeft="@drawable/ic_share_white_24dp"
+            android:text="@string/share_from_play_store" />
 
     </LinearLayout>
 

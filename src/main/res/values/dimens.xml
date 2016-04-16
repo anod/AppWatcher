@@ -3,29 +3,21 @@
 
     <dimen name="icon_size">40dip</dimen>
     <dimen name="icon_wrapper">56dip</dimen>
-    <dimen name="info_margin_right">4dp</dimen>
-    <dimen name="actionbar_compat_height">48dp</dimen>
-    <dimen name="actionbar_compat_button_width">48dp</dimen>
-    <dimen name="actionbar_compat_button_home_width">56dp</dimen>
 
     <!-- Dialog title height -->
-    <dimen name="abs__alert_dialog_title_height">64dip</dimen>
 
     <!--
          The platform's desired minimum size for a dialog's width when it
          is along the major axis (that is the screen is landscape).  This may
          be either a fraction or a dimension.
     -->
-    <item name="abs__dialog_min_width_major" type="dimen">65%</item>
     <!--
          The platform's desired minimum size for a dialog's width when it
          is along the minor axis (that is the screen is portrait).  This may
          be either a fraction or a dimension.
     -->
-    <item name="abs__dialog_min_width_minor" type="dimen">95%</item>
 
     <dimen name="list_padding_side">8dp</dimen>
-    <dimen name="row_margin_bottom">10dp</dimen>
     <dimen name="list_padding_vertical">4dp</dimen>
     <dimen name="textSize">10sp</dimen>
     <dimen name="textSizeTitle">14sp</dimen>
@@ -37,10 +29,4 @@
     <dimen name="preference_widget_width">48dp</dimen>
 
     <!-- Navdrawer -->
-    <dimen name="navdrawer_chosen_account_height">64dp</dimen>
-    <dimen name="navdrawer_width">280dp</dimen>
-    <dimen name="navdrawer_profile_image_size">40dp</dimen>
-    <dimen name="keyline_1">16dp</dimen>
-    <dimen name="text_size_medium">14sp</dimen>
-    <dimen name="text_size_large">18sp</dimen>
 </resources>

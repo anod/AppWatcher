@@ -11,4 +11,10 @@
 			appwatcher:actionViewClass="android.support.v7.widget.SearchView">
 	</item>
 
+	<item
+		android:id="@+id/menu_act_refresh"
+		android:icon="@drawable/ic_refresh_white_24dp"
+		appwatcher:showAsAction="always"
+		android:title="@string/menu_refresh">
+	</item>
 </menu>
