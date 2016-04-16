@@ -38,7 +38,7 @@ public class ObjectGraph {
 
     public RequestQueue requestQueue() {
         if (mRequestQueue == null) {
-            mRequestQueue = new RequestQueue(new NoCache(), new Network(this.app), 2);
+            mRequestQueue = new RequestQueue(new NoCache(), new Network(this.app, BuildConfig.DEBUG), 2);
             mRequestQueue.start();
         }
         return mRequestQueue;

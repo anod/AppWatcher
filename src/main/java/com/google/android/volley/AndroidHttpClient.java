@@ -182,14 +182,14 @@ public final class AndroidHttpClient implements HttpClient
         return sb.toString();
     }
     
-    public void enableCurlLogging(final String s, final int n) {
-        if (s == null) {
+    public void enableCurlLogging(final String tag, final int logLevel) {
+        if (tag == null) {
             throw new NullPointerException("name");
         }
-        if (n < 2 || n > 7) {
+        if (logLevel < 2 || logLevel > 7) {
             throw new IllegalArgumentException("Level is out of range [2..7]");
         }
-        this.curlConfiguration = new LoggingConfiguration(s, n);
+        this.curlConfiguration = new LoggingConfiguration(tag, logLevel);
     }
     
     public <T> T execute(final HttpHost httpHost, final HttpRequest httpRequest, final ResponseHandler<? extends T> responseHandler) throws IOException, ClientProtocolException {
@@ -244,9 +244,8 @@ public final class AndroidHttpClient implements HttpClient
     private class CurlLogger implements HttpRequestInterceptor
     {
         public void process(final HttpRequest httpRequest, final HttpContext httpContext) throws IOException {
-            final LoggingConfiguration access$300 = AndroidHttpClient.this.curlConfiguration;
-            if (access$300 != null && access$300.isLoggable() && httpRequest instanceof HttpUriRequest) {
-                access$300.println(toCurl((HttpUriRequest)httpRequest, true));
+            if (AndroidHttpClient.this.curlConfiguration != null && AndroidHttpClient.this.curlConfiguration.isLoggable() && httpRequest instanceof HttpUriRequest) {
+                AndroidHttpClient.this.curlConfiguration.println(toCurl((HttpUriRequest)httpRequest, true));
             }
         }
     }

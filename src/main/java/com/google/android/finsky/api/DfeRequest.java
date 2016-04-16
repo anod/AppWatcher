@@ -45,7 +45,7 @@ public class DfeRequest<T extends MessageNano> extends Request<Response.Response
     private long mServerLatencyMs;
     
     static {
-        PROTO_DEBUG = Log.isLoggable("AppWatcher.DfeProto", 2);
+        PROTO_DEBUG = Log.isLoggable("AppWatcher.DfeProto", Log.VERBOSE);
     }
     
     public DfeRequest(final int method, final String s, final DfeApiContext mApiContext, final Class<T> mResponseClass, final com.android.volley.Response.Listener<T> mListener, final com.android.volley.Response.ErrorListener errorListener) {

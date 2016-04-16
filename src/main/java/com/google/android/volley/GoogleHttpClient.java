@@ -99,8 +99,8 @@ public class GoogleHttpClient implements HttpClient
         }
     }
     
-    public void enableCurlLogging(final String s, final int n) {
-        this.mClient.enableCurlLogging(s, n);
+    public void enableCurlLogging(final String tag, final int logLevel) {
+        this.mClient.enableCurlLogging(tag, logLevel);
     }
     
     public <T> T execute(final HttpHost httpHost, final HttpRequest httpRequest, final ResponseHandler<? extends T> responseHandler) throws IOException, ClientProtocolException {

@@ -79,6 +79,9 @@
 -keep class org.apache.commons.logging.**
 -dontwarn org.apache.log4j.**
 
+-keep class org.apache.http.** { *; }
+-dontwarn org.apache.http.**
+
 ## Butterknife
 
 -keep class butterknife.** { *; }
@@ -92,3 +95,15 @@
 -keepclasseswithmembernames class * {
     @butterknife.* <methods>;
 }
+
+#
+-keep class android.support.v7.widget.SearchView { *; }
+
+-keep public class android.net.http.SslError
+-keep public class android.webkit.WebViewClient
+
+-dontwarn android.webkit.WebView
+-dontwarn android.net.http.SslError
+-dontwarn android.webkit.WebViewClient
+
+-dontwarn com.squareup.okhttp.**
