@@ -11,7 +11,7 @@ import com.google.android.volley.GoogleHttpClientStack;
  * @date 2015-02-23
  */
 public class Network extends BasicNetwork {
-    public Network(Context context) {
-        super(new GoogleHttpClientStack(context, false), new ByteArrayPool(1024 * 256));
+    public Network(Context context,boolean enableCurlLogging) {
+        super(new GoogleHttpClientStack(context, enableCurlLogging), new ByteArrayPool(1024 * 256));
     }
 }

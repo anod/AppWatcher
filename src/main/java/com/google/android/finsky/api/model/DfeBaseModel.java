@@ -3,10 +3,10 @@ package com.google.android.finsky.api.model;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
-import com.anod.appwatcher.utils.AppLog;
-import com.google.android.finsky.protos.Details;
 
 import java.util.concurrent.ExecutionException;
+
+import info.anodsplace.android.log.AppLog;
 
 /**
  * @author alex
@@ -28,14 +28,14 @@ public abstract class DfeBaseModel<DocType> extends DfeModel implements Response
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();
             if (cause == null) {
-                AppLog.ex(e);
+                AppLog.e(e);
                 onErrorResponse(new VolleyError("Response exception: " + e.getMessage(), e));
             } else {
-                AppLog.ex(cause);
+                AppLog.e(cause);
                 onErrorResponse(new VolleyError("Response exception: " + cause.getMessage(), cause));
             }
         } catch (InterruptedException e) {
-            AppLog.ex(e);
+            AppLog.e(e);
             onErrorResponse(new VolleyError("Response exception: "+e.getMessage(), e));
         }
         onResponse(response);

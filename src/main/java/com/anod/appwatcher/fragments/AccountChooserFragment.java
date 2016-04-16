@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 
+import com.anod.appwatcher.AppWatcherApplication;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.accounts.AccountManager;
 
@@ -38,7 +39,7 @@ public class AccountChooserFragment extends DialogFragment implements DialogInte
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-        mAccountManager = new AccountManager(getActivity());
+        mAccountManager = AppWatcherApplication.provide(getActivity()).accountManager();
 	}
 
 
@@ -81,7 +82,7 @@ public class AccountChooserFragment extends DialogFragment implements DialogInte
             });
             builder.setSingleChoiceItems(getChoiceItems(), mSelectedItem, this);
 		} else {
-            builder.setMessage(R.string.no_regestred_google_accounts);
+            builder.setMessage(R.string.no_registered_google_accounts);
 		}
         AlertDialog dialog = builder.create();
 

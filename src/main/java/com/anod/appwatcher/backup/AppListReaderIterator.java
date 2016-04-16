@@ -2,11 +2,12 @@ package com.anod.appwatcher.backup;
 
 import com.android.util.JsonReader;
 import com.anod.appwatcher.model.AppInfo;
-import com.anod.appwatcher.utils.AppLog;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Iterator;
+
+import info.anodsplace.android.log.AppLog;
 
 /**
  * @author alex
@@ -41,7 +42,7 @@ public class AppListReaderIterator implements Iterator<AppInfo> {
                 mJsonReader.endArray();
             }
         } catch (IOException e) {
-            AppLog.ex(e);
+            AppLog.e(e);
         }
 
         return hasNext;
@@ -53,7 +54,7 @@ public class AppListReaderIterator implements Iterator<AppInfo> {
         try {
             info = mAppInfoReader.readAppInfo(mJsonReader);
         } catch (IOException e) {
-            AppLog.ex(e);
+            AppLog.e(e);
         }
 
         return info;

@@ -5,54 +5,16 @@
 
 	<item
 			android:id="@+id/menu_act_filter"
-			android:icon="@drawable/ic_action_search"
+			android:icon="@drawable/ic_search_white_24dp"
 			appwatcher:showAsAction="ifRoom|collapseActionView"
 			android:title="@string/menu_filter"
 			appwatcher:actionViewClass="android.support.v7.widget.SearchView">
 	</item>
-    <item
-        android:id="@+id/menu_act_refresh"
-        android:icon="@drawable/ic_action_refresh"
-		appwatcher:showAsAction="ifRoom"
-        android:title="@string/menu_refresh">
-    </item>
-    <item
-        android:id="@+id/menu_auto_update"
-        android:checkable="true"
-		appwatcher:showAsAction="never|withText"
-        android:title="@string/menu_auto_update" android:icon="@drawable/ic_menu_autoupdate">
-    </item>
-    <item
-        android:id="@+id/menu_wifi_only"
-        android:checkable="true"
-		appwatcher:showAsAction="never|withText"
-        android:title="@string/menu_wifi_only" android:icon="@drawable/ic_menu_wifi">
-    </item>
-    <item
-        android:id="@+id/menu_accounts"
-        appwatcher:showAsAction="never|withText"
-        android:title="@string/accounts" >
-    </item>
-    <item
-        android:id="@+id/menu_more"
-        appwatcher:showAsAction="never|withText"
-        android:title="@string/more" >
-    </item>
-<!--
-    <item
-        android:id="@+id/menu_import_export"
-		appwatcher:showAsAction="never|withText"
-        android:title="@string/import_export" android:icon="@drawable/ic_menu_export">
-    </item>
-    <item
-        android:id="@+id/menu_gdrive_sync"
-        appwatcher:showAsAction="never|withText"
-        android:title="@string/gdrive_sync" android:icon="@drawable/ic_menu_gdrive" android:checkable="true">
-    </item>
-    <item
-        android:id="@+id/menu_about"
-		appwatcher:showAsAction="never|withText"
-        android:title="@string/about" android:icon="@drawable/ic_menu_about">
-    </item>
--->
+
+	<item
+		android:id="@+id/menu_act_refresh"
+		android:icon="@drawable/ic_refresh_white_24dp"
+		appwatcher:showAsAction="always"
+		android:title="@string/menu_refresh">
+	</item>
 </menu>

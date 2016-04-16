@@ -13,8 +13,6 @@ import com.android.volley.RetryPolicy;
 import com.android.volley.ServerError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
-import com.anod.appwatcher.BuildConfig;
-import com.anod.appwatcher.utils.AppLog;
 import com.google.android.finsky.protos.Response;
 import com.google.android.finsky.protos.ResponseMessages;
 import com.google.android.finsky.utils.Utils;
@@ -29,6 +27,8 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
+
+import info.anodsplace.android.log.AppLog;
 
 public class DfeRequest<T extends MessageNano> extends Request<Response.ResponseWrapper>
 {    private static final boolean SKIP_ALL_CACHES = false;
@@ -45,7 +45,7 @@ public class DfeRequest<T extends MessageNano> extends Request<Response.Response
     private long mServerLatencyMs;
     
     static {
-        PROTO_DEBUG = Log.isLoggable("AppWatcher.DfeProto", 2);
+        PROTO_DEBUG = Log.isLoggable("AppWatcher.DfeProto", Log.VERBOSE);
     }
     
     public DfeRequest(final int method, final String s, final DfeApiContext mApiContext, final Class<T> mResponseClass, final com.android.volley.Response.Listener<T> mListener, final com.android.volley.Response.ErrorListener errorListener) {

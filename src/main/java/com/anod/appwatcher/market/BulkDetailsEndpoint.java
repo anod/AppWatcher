@@ -17,8 +17,8 @@ import java.util.List;
 public class BulkDetailsEndpoint extends PlayStoreEndpoint {
     private List<String> mDocIds;
 
-    public BulkDetailsEndpoint(Listener listener, Context context) {
-        super(listener, context);
+    public BulkDetailsEndpoint(Context context) {
+        super(context);
     }
 
     @Override

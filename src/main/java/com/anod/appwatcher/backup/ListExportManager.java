@@ -16,7 +16,8 @@ import com.android.util.MalformedJsonException;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.model.AppListCursor;
-import com.anod.appwatcher.utils.AppLog;
+
+import info.anodsplace.android.log.AppLog;
 
 /**
  * Serialize and deserialize app info list into/from JSON file
@@ -120,7 +121,7 @@ public class ListExportManager {
                 writer.writeJSON(buf, listCursor);
             }
         } catch (IOException e) {
-            AppLog.ex(e);
+            AppLog.e(e);
             listCursor.close();
             cr.release();
             return false;
@@ -160,10 +161,10 @@ public class ListExportManager {
 				appList = reader.readJsonList(buf);
 			}
 		} catch (MalformedJsonException e) {
-            AppLog.ex(e);
+            AppLog.e(e);
 			return ERROR_DESERIALIZE;
 		} catch (IOException e) {
-            AppLog.ex(e);
+            AppLog.e(e);
 			return ERROR_FILE_READ;
 		}
 		if (appList != null && appList.size() > 0) {

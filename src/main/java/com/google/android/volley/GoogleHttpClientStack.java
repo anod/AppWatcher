@@ -1,6 +1,7 @@
 package com.google.android.volley;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.HttpClientStack;
@@ -14,17 +15,17 @@ public class GoogleHttpClientStack extends HttpClientStack
     this(paramContext, false);
   }
 
-  public GoogleHttpClientStack(Context paramContext, boolean paramBoolean)
+  public GoogleHttpClientStack(Context paramContext, boolean enableCurlLogging)
   {
-    this(new GoogleHttpClient(paramContext, "unused/0", true), paramBoolean);
+    this(new GoogleHttpClient(paramContext, "unused/0", true), enableCurlLogging);
   }
 
-  private GoogleHttpClientStack(GoogleHttpClient paramGoogleHttpClient, boolean paramBoolean)
+  private GoogleHttpClientStack(GoogleHttpClient paramGoogleHttpClient, boolean enableCurlLogging)
   {
     super(paramGoogleHttpClient);
     this.mGoogleHttpClient = paramGoogleHttpClient;
-    if (paramBoolean) {
-        paramGoogleHttpClient.enableCurlLogging(VolleyLog.TAG, 2);
+    if (enableCurlLogging) {
+        paramGoogleHttpClient.enableCurlLogging(VolleyLog.TAG, Log.VERBOSE);
     }
   }
 }

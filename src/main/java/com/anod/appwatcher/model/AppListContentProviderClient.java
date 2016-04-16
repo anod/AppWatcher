@@ -1,9 +1,5 @@
 package com.anod.appwatcher.model;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import android.content.ContentProviderClient;
 import android.content.ContentValues;
 import android.content.Context;
@@ -11,10 +7,16 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.RemoteException;
+import android.support.v4.util.ArrayMap;
 
 import com.anod.appwatcher.AppListContentProvider;
-import com.anod.appwatcher.utils.AppLog;
+import com.anod.appwatcher.model.schema.AppListTable;
 import com.anod.appwatcher.utils.BitmapUtils;
+
+import java.util.List;
+import java.util.Map;
+
+import info.anodsplace.android.log.AppLog;
 
 /**
  * Wrapper above ContentResolver to simplify access to AppInfo
@@ -42,7 +44,6 @@ public class AppListContentProviderClient {
 	
 	/**
 	 * Query all applications in db
-	 * @return
 	 */
 	public AppListCursor queryAllSorted() {
 		return query(DEFAULT_SORT_ORDER, null, null);
@@ -52,10 +53,6 @@ public class AppListContentProviderClient {
 		return query(null, null, null);
 	}
 
-    /**
-     *
-     * @return
-     */
     public int getCount() {
         Cursor cr = queryAll();
         if (cr == null) {
@@ -65,10 +62,10 @@ public class AppListContentProviderClient {
     }
 
 	public AppListCursor query(String sortOrder, String selection, String[] selectionArgs) {
-		Cursor cr = null;
+		Cursor cr;
 		try {
-			cr = mContentProviderClient.query(AppListContentProvider.CONTENT_URI,
-				AppListTable.APPLIST_PROJECTION, selection, selectionArgs, sortOrder
+			cr = mContentProviderClient.query(AppListContentProvider.APPS_CONTENT_URI,
+				AppListTable.PROJECTION, selection, selectionArgs, sortOrder
 			);
 		} catch (RemoteException e) {
 			AppLog.e(e.getMessage());
@@ -100,7 +97,7 @@ public class AppListContentProviderClient {
 	 */
 	public Map<String,Integer> queryPackagesMap() {
 		AppListCursor cursor = queryAll();
-		HashMap<String, Integer> result = new HashMap<String, Integer>();
+		ArrayMap<String, Integer> result = new ArrayMap<String, Integer>();
 		if (cursor == null) {
 			return result;
 		}
@@ -116,12 +113,11 @@ public class AppListContentProviderClient {
 	/**
 	 * Insert a new app into db
 	 * @param app
-	 * @return
 	 */
 	public Uri insert(AppInfo app) {
 		ContentValues values = createContentValues(app);
 		try {
-			return mContentProviderClient.insert(AppListContentProvider.CONTENT_URI, values);
+			return mContentProviderClient.insert(AppListContentProvider.APPS_CONTENT_URI, values);
 		} catch (RemoteException e) {
 			AppLog.e(e.getMessage());
 		}
@@ -135,7 +131,7 @@ public class AppListContentProviderClient {
 	}
 	
 	public int update(int rowId, ContentValues values) {
-		Uri updateUri = AppListContentProvider.CONTENT_URI.buildUpon().appendPath(String.valueOf(rowId)).build();
+		Uri updateUri = AppListContentProvider.APPS_CONTENT_URI.buildUpon().appendPath(String.valueOf(rowId)).build();
 		try {
 			return mContentProviderClient.update(updateUri, values, null, null);
 		} catch (RemoteException e) {
@@ -145,13 +141,13 @@ public class AppListContentProviderClient {
 	}
 
     public int markDeleted(int rowId) {
-        Uri updateUri = AppListContentProvider.CONTENT_URI.buildUpon().appendPath(String.valueOf(rowId)).build();
+        Uri updateUri = AppListContentProvider.APPS_CONTENT_URI.buildUpon().appendPath(String.valueOf(rowId)).build();
         ContentValues values = new ContentValues();
         values.put(AppListTable.Columns.KEY_STATUS, AppInfo.STATUS_DELETED );
         try {
             return mContentProviderClient.update(updateUri, values, null, null);
         } catch (RemoteException e) {
-            AppLog.ex(e);
+            AppLog.e(e);
         }
         return 0;
     }
@@ -160,12 +156,12 @@ public class AppListContentProviderClient {
         int numRows = 0;
         try {
             numRows=mContentProviderClient.delete(
-                AppListContentProvider.CONTENT_URI,
+                AppListContentProvider.APPS_CONTENT_URI,
                 AppListTable.Columns.KEY_STATUS + " = ?",
                 new String[]{ String.valueOf(AppInfoMetadata.STATUS_DELETED)}
             );
         } catch (RemoteException e) {
-            AppLog.ex(e);
+            AppLog.e(e);
         }
         return numRows;
     }
@@ -177,7 +173,6 @@ public class AppListContentProviderClient {
 	}
 	
 	/**
-	 * @param app
 	 * @return Content values for app
 	 */
 	private ContentValues createContentValues(AppInfo app) {
@@ -208,7 +203,8 @@ public class AppListContentProviderClient {
 
 
 	public AppInfo queryAppId(String id) {
-		AppListCursor cr = query(null, AppListTable.Columns.KEY_APPID + " = ?", new String[]{id});
+		AppListCursor cr = query(null,
+				AppListTable.Columns.KEY_APPID + " = ?", new String[]{id});
 		if (cr == null || cr.getCount() == 0) {
 			return null;
 		}

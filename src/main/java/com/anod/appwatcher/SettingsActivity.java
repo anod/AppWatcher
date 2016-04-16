@@ -1,15 +1,18 @@
 package com.anod.appwatcher;
 
+import android.accounts.Account;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.text.format.DateUtils;
 import android.widget.Toast;
 
+import com.anod.appwatcher.accounts.AccountChooserHelper;
 import com.anod.appwatcher.backup.ExportTask;
 import com.anod.appwatcher.backup.GDriveSync;
 import com.anod.appwatcher.backup.ListExportManager;
-import com.anod.appwatcher.utils.SettingsActionBarActivity;
+import com.anod.appwatcher.ui.SettingsActionBarActivity;
 
 import java.util.ArrayList;
 
@@ -22,12 +25,15 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     private static final int ACTION_ABOUT = 5;
     private static final int ACTION_SYNC_ENABLE = 1;
     private static final int ACTION_SYNC_NOW = 2;
+    private static final int ACTION_AUTO_UPDATE = 7;
+    private static final int ACTION_WIFI_ONLY = 8;
 
-    private int mAboutCounter;
     private GDriveSync mGDriveSync;
     private CheckboxItem mSyncEnabledItem;
     private Item mSyncNowItem;
     private Preferences mPrefs;
+    private AccountChooserHelper mAccountChooserHelper;
+    private CheckboxItem mWifiItem;
 
     @Override
     public void onExportStart() {
@@ -54,20 +60,44 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
 
     @Override
     protected void init() {
-        mGDriveSync = new GDriveSync(this, this);
+        mGDriveSync = new GDriveSync(this);
         mPrefs = new Preferences(this);
-        mAboutCounter = 0;
+
+        mAccountChooserHelper = new AccountChooserHelper(this, mPrefs, null);
+        mAccountChooserHelper.init();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mGDriveSync.setListener(null);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         mSyncNowItem.summary = renderDriveSyncTime();
+        mGDriveSync.setListener(this);
     }
 
     @Override
     protected ArrayList<SettingsActionBarActivity.Preference> initPreferenceItems() {
         ArrayList<Preference> preferences = new ArrayList<Preference>();
+
+
+        preferences.add(new Category(R.string.category_updates));
+
+        Account syncAccount = mAccountChooserHelper.getAccount();
+        boolean useAutoSync = false;
+        if (syncAccount!=null) {
+            useAutoSync = ContentResolver.getSyncAutomatically(syncAccount, AppListContentProvider.AUTHORITY);
+        }
+        preferences.add(new CheckboxItem(R.string.menu_auto_update, 0, ACTION_AUTO_UPDATE, useAutoSync));
+
+        mWifiItem = new CheckboxItem(R.string.menu_wifi_only, 0, ACTION_WIFI_ONLY, mPrefs.isWifiOnly());
+        preferences.add(mWifiItem);
+        mWifiItem.enabled = useAutoSync;
+
 
         preferences.add(new Category(R.string.pref_header_drive_sync));
 
@@ -127,10 +157,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
             startActivity(new Intent(this, ListExportActivity.class));
         } else if (action == ACTION_LICENSES) {
             new LicensesDialog(this, R.raw.notices, false, true).show();
-        } else if (action == ACTION_ABOUT) {
-            onAboutAction();
-        } if (action==ACTION_SYNC_ENABLE) {
-            mSyncEnabledItem.checked=!mSyncEnabledItem.checked;
+        } else if (action==ACTION_SYNC_ENABLE) {
             mSyncNowItem.enabled=false; // disable temporary sync now
             notifyDataSetChanged();
             if (mSyncEnabledItem.checked) {
@@ -138,33 +165,30 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
                 mGDriveSync.connect();
             }
 
-        } if (action==ACTION_SYNC_NOW) {
+        } else if (action==ACTION_SYNC_NOW) {
             if (mSyncNowItem.enabled) {
                 mSyncNowItem.enabled = false;
                 notifyDataSetChanged();
                 mGDriveSync.sync();
             }
+        } else if (action == ACTION_AUTO_UPDATE) {
+            boolean useAutoSync = ((CheckboxItem) pref).checked;
+            mAccountChooserHelper.setSync(useAutoSync);
+            mWifiItem.enabled = useAutoSync;
+            notifyDataSetChanged();
+        } else if (action == ACTION_WIFI_ONLY) {
+            boolean useWifiOnly = ((CheckboxItem) pref).checked;
+            mPrefs.saveWifiOnly(useWifiOnly);
+            mAccountChooserHelper.setSync(true);
+            notifyDataSetChanged();
         }
     }
-
-
-    private void onAboutAction() {
-        if (mAboutCounter >= 4) {
-            // TODO
-        } else {
-            if (mAboutCounter ==3 ) {
-           //     Toast.makeText(this, "1 more tap to report a problem", Toast.LENGTH_SHORT).show();
-            }
-            mAboutCounter++;
-        }
-    }
-
 
     private String getAppVersion() {
         String versionName = "";
         try {
             versionName = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
-        } catch (PackageManager.NameNotFoundException e) {
+        } catch (PackageManager.NameNotFoundException ignored) {
         }
 
         return versionName;

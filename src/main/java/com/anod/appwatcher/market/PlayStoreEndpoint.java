@@ -7,7 +7,6 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.anod.appwatcher.AppWatcherApplication;
-import com.anod.appwatcher.utils.AppLog;
 import com.google.android.finsky.api.DfeApi;
 import com.google.android.finsky.api.DfeApiContext;
 import com.google.android.finsky.api.DfeApiImpl;
@@ -15,12 +14,14 @@ import com.google.android.finsky.api.model.DfeModel;
 import com.google.android.finsky.api.model.OnDataChangedListener;
 import com.google.android.finsky.config.ContentLevel;
 
+import info.anodsplace.android.log.AppLog;
+
 /**
  * @author alex
  * @date 2015-02-22
  */
 public abstract class PlayStoreEndpoint implements Response.ErrorListener, OnDataChangedListener {
-    protected final Listener mListener;
+    protected Listener mListener;
     protected final Context mContext;
 
     protected DfeModel mDfeModel;
@@ -33,8 +34,11 @@ public abstract class PlayStoreEndpoint implements Response.ErrorListener, OnDat
         void onErrorResponse(VolleyError error);
     }
 
-    public PlayStoreEndpoint(Listener listener, Context context) {
-        mContext = context;
+    public PlayStoreEndpoint(Context context) {
+        mContext = context.getApplicationContext();
+    }
+
+    public void setListener(Listener listener) {
         mListener = listener;
     }
 
@@ -100,7 +104,7 @@ public abstract class PlayStoreEndpoint implements Response.ErrorListener, OnDat
 
     @Override
     public void onErrorResponse(VolleyError error) {
-        AppLog.e("ErrorResponse: "+error.getMessage(), error);
+        AppLog.e("ErrorResponse: " + error.getMessage(), error);
         if (mListener == null) {
             return;
         }

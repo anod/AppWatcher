@@ -5,6 +5,7 @@ import android.text.TextUtils;
 
 import com.google.android.finsky.api.model.DfeDetails;
 import com.google.android.finsky.api.model.DfeModel;
+import com.google.android.finsky.api.model.Document;
 import com.google.android.finsky.protos.DocDetails;
 
 /**
@@ -14,8 +15,8 @@ import com.google.android.finsky.protos.DocDetails;
 public class DetailsEndpoint extends PlayStoreEndpoint {
     private String mUrl;
 
-    public DetailsEndpoint(Listener listener, Context context) {
-        super(listener, context);
+    public DetailsEndpoint(Context context) {
+        super(context);
     }
 
     public void setUrl(String url) {
@@ -29,6 +30,8 @@ public class DetailsEndpoint extends PlayStoreEndpoint {
     public DocDetails.AppDetails getAppDetails() {
         return getData().getDocument().getAppDetails();
     }
+
+    public Document getDocument() { return getData().getDocument(); }
 
     public String getRecentChanges() {
         DocDetails.AppDetails details = getAppDetails();
@@ -45,7 +48,6 @@ public class DetailsEndpoint extends PlayStoreEndpoint {
 
     @Override
     protected void executeSync() {
-
         getData().setDetailsUrl(mUrl);
         getData().startSync();
     }

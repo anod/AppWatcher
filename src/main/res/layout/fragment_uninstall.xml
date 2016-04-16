@@ -11,7 +11,7 @@
              tools:context="com.anod.uninstaller.UninstallActivity$PlaceholderFragment">
 
     <LinearLayout
-        android:id="@+id/progressContainer"
+        android:id="@+id/progress"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
@@ -33,7 +33,7 @@
     </LinearLayout>
 
     <FrameLayout
-        android:id="@+id/listContainer"
+        android:id="@+id/list_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingBottom="@dimen/list_padding_vertical"

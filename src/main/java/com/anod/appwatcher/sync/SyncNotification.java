@@ -85,7 +85,7 @@ public class SyncNotification {
             playIntent.setData(Uri.parse("com.anod.appwatcher://play/" + app.pkg));
             playIntent.putExtra(NotificationActivity.EXTRA_TYPE, NotificationActivity.TYPE_PLAY);
             playIntent.putExtra(NotificationActivity.EXTRA_PKG, app.pkg);
-            builder.addAction(R.drawable.ic_action_playback_play_white, mContext.getString(R.string.store),
+            builder.addAction(R.drawable.ic_play_arrow_white_24dp, mContext.getString(R.string.store),
                     PendingIntent.getActivity(mContext, 0, playIntent, 0)
             );
 
@@ -94,7 +94,7 @@ public class SyncNotification {
             readIntent.setData(Uri.parse("com.anod.appwatcher://dismiss/"));
             readIntent.putExtra(NotificationActivity.EXTRA_TYPE, NotificationActivity.TYPE_DISMISS);
 
-            builder.addAction(R.drawable.ic_action_cancel_white, mContext.getString(R.string.dismiss),
+            builder.addAction(R.drawable.ic_clear_white_24dp, mContext.getString(R.string.dismiss),
                     PendingIntent.getActivity(mContext, 0, readIntent, 0)
             );
 

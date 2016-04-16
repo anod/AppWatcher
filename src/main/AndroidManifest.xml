@@ -21,8 +21,7 @@
 
     <application
         android:name=".AppWatcherApplication"
-        android:allowBackup="false"
-        android:backupAgent=".backup.BackupFileHelperAgent"
+        android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:logo="@drawable/ic_launcher"
@@ -33,29 +32,27 @@
             android:label="@string/add_to_appwatcher" >
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
-
                 <category android:name="android.intent.category.DEFAULT" />
-
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
         <activity
             android:name=".ChangelogActivity"
-            android:label="@string/whats_new_title"
+            android:label=""
             android:theme="@style/AppThemeLight.Dialog" >
         </activity>
         <activity
             android:name=".MarketSearchActivity"
-            android:label="@string/app_name"
+            android:label="@string/activity_market"
             android:theme="@style/AppThemeLight.DarkActionBar" >
         </activity>
         <activity
             android:name=".AppWatcherActivity"
             android:clearTaskOnLaunch="true"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -71,10 +68,13 @@
             android:noHistory="true"
             android:exported="true"
             />
+        <activity
+            android:name=".SettingsActivity"
+            android:label="Settings" />
 
         <provider
             android:name=".AppListContentProvider"
-            android:authorities="com.anod.appwatcher"
+            android:authorities="${applicationId}"
             android:label="@string/app_name"
             android:syncable="true" >
         </provider>
@@ -99,15 +99,7 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <activity
-            android:name=".SettingsActivity"
-            android:label="Settings" >
-        </activity>
-        <activity
-            android:name="com.anod.uninstaller.UninstallActivity"
-            android:label="@string/title_activity_uninstall" >
-        </activity>
-        <meta-data android:name="com.crashlytics.ApiKey" android:value="37454d25f5bb26cdb68b79a6ca77eef421fa17c1"/>
+        <meta-data android:name="net.hockeyapp.android.appIdentifier" android:value="${HOCKEYAPP_APP_ID}" />
     </application>
 
 </manifest>

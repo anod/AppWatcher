@@ -8,12 +8,14 @@ import android.content.IntentSender;
 import android.os.Bundle;
 
 import com.anod.appwatcher.R;
-import com.anod.appwatcher.backup.gdrive.SyncTask;
+import com.anod.appwatcher.ui.ActivityListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.util.concurrent.CountDownLatch;
+
+import info.anodsplace.android.log.AppLog;
 
 /**
  * Created by alex on 7/30/14.
@@ -128,7 +130,7 @@ abstract public class GooglePlayServices implements GoogleApiClient.ConnectionCa
         try {
             result.startResolutionForResult(mActivity, REQUEST_CODE_RESOLUTION);
         } catch (IntentSender.SendIntentException e) {
-            AppLog.ex(e);
+            AppLog.e(e);
             onConnectionError();
         }
     }

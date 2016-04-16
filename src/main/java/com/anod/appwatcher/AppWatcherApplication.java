@@ -4,21 +4,19 @@ import android.app.Application;
 import android.content.Context;
 import android.view.ViewConfiguration;
 
-import com.crashlytics.android.Crashlytics;
+import com.squareup.leakcanary.LeakCanary;
 
 import java.lang.reflect.Field;
 
-public class AppWatcherApplication extends Application {
+import info.anodsplace.android.log.AppLog;
+
+public class AppWatcherApplication extends Application implements AppLog.Listener {
     private ObjectGraph mObjectGraph;
 
     @Override
 	 public void onCreate() {
 		super.onCreate();
-        Crashlytics.start(this);
-
-//		 NewRelic.withApplicationToken(
-//			"AA47c4b684f2af988fdf3a13518738d7eaa8a4976f"
-//		 ).start(this);
+		LeakCanary.install(this);
 
 		 try {
 			 ViewConfiguration config = ViewConfiguration.get(this);
@@ -30,6 +28,9 @@ public class AppWatcherApplication extends Application {
 		 } catch (Exception ex) {
 			 // Ignore
 		 }
+
+        AppLog.setDebug(BuildConfig.DEBUG, "AppWatcher");
+        AppLog.instance().setListener(this);
 
         mObjectGraph = new ObjectGraph(this);
     }
@@ -44,5 +45,10 @@ public class AppWatcherApplication extends Application {
 
     public static ObjectGraph provide(Context context) {
         return ((AppWatcherApplication) context.getApplicationContext()).getObjectGraph();
+    }
+
+    @Override
+    public void onLogException(Throwable tr) {
+        // Ignore for now - ExceptionHandler.saveException(tr, null, null);
     }
 }

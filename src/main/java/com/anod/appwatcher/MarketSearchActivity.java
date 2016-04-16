@@ -3,105 +3,81 @@ package com.anod.appwatcher;
 import android.accounts.Account;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.NetworkImageView;
 import com.anod.appwatcher.accounts.AccountChooserHelper;
+import com.anod.appwatcher.adapters.MarketSearchAdapter;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
-import com.anod.appwatcher.market.DeviceIdHelper;
 import com.anod.appwatcher.market.SearchEndpoint;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListContentProviderClient;
-import com.anod.appwatcher.utils.AppLog;
-import com.anod.appwatcher.utils.DocUtils;
-import com.anod.appwatcher.utils.PackageManagerUtils;
-import com.anod.appwatcher.utils.TranslucentActionBarActivity;
-import com.google.android.finsky.api.model.Document;
-import com.google.android.finsky.protos.Common;
-import com.google.android.finsky.protos.DocDetails;
+import com.anod.appwatcher.model.NewWatchAppHandler;
+import com.anod.appwatcher.ui.ToolbarActivity;
 
-import java.util.HashMap;
+import butterknife.Bind;
+import butterknife.ButterKnife;
 
-public class MarketSearchActivity extends TranslucentActionBarActivity implements AccountChooserHelper.OnAccountSelectionListener, AccountChooserFragment.OnAccountSelectionListener, SearchEndpoint.Listener {
-	public static final String EXTRA_KEYWORD = "keyword";
-	public static final String EXTRA_EXACT = "exact";
-	public static final String EXTRA_SHARE = "share";
+public class MarketSearchActivity extends ToolbarActivity implements AccountChooserHelper.OnAccountSelectionListener, AccountChooserFragment.OnAccountSelectionListener, SearchEndpoint.Listener, NewWatchAppHandler.Listener {
+    public static final String EXTRA_KEYWORD = "keyword";
+    public static final String EXTRA_EXACT = "exact";
+    public static final String EXTRA_SHARE = "share";
 
-	private AppsAdapter mAdapter;
-	private Context mContext;
-	private LinearLayout mLoading;
-	private RelativeLayout mDeviceIdMessage = null;
-	private ListView mListView;
-	private boolean mInitiateSearch = false;
-	private boolean mShareSource = false;
-	private HashMap<String,Boolean> mAddedApps;
+    private MarketSearchAdapter mAdapter;
+    private Context mContext;
 
-	private int mColorBgWhite;
-	private int mColorBgGray;
-	private SearchView mSearchView;
-	private AccountChooserHelper mAccChooserHelper;
-    private LinearLayout mRetryView;
-    private Button mRetryButton;
+    @Bind(R.id.loading)
+    LinearLayout mLoading;
+    @Bind(android.R.id.list)
+    RecyclerView mListView;
+    @Bind(android.R.id.empty)
+    TextView mEmptyView;
+    @Bind(R.id.retry_box)
+    LinearLayout mRetryView;
+    @Bind(R.id.retry)
+    Button mRetryButton;
+    SearchView mSearchView;
+
+    private boolean mInitiateSearch = false;
+    private boolean mShareSource = false;
+
+    private AccountChooserHelper mAccChooserHelper;
     private SearchEndpoint mSearchEngine;
-    private int mIconSize = -1;
+    private NewWatchAppHandler mNewAppHandler;
     private AppListContentProviderClient mContentProviderClient;
-
+    private String mSearchQuery;
 
     @Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_market_search);
+        setupToolbar();
+        mContext = this;
 
-		setContentView(R.layout.market_search);
-        initSystemBar();
+        ButterKnife.bind(this);
 
-		mContext = this;
+        mLoading.setVisibility(View.GONE);
 
-		Resources r = mContext.getResources();
-		mColorBgGray = r.getColor(R.color.row_grayout);
-		mColorBgWhite = r.getColor(R.color.white);
+        mSearchEngine = new SearchEndpoint(this);
+        mNewAppHandler = new NewWatchAppHandler(this, this);
+        mAdapter = new MarketSearchAdapter(this, mSearchEngine, mNewAppHandler);
 
-		mAddedApps = new HashMap<String, Boolean>();
+        mListView.setLayoutManager(new LinearLayoutManager(this));
+        mListView.setAdapter(mAdapter);
 
-		mLoading = (LinearLayout)findViewById(R.id.loading);
-		mLoading.setVisibility(View.GONE);
-		
-        mSearchEngine = new SearchEndpoint(this, this);
-
-		mAdapter = new AppsAdapter(this);
-
-		mListView = (ListView)findViewById(android.R.id.list);
-		mListView.setEmptyView(findViewById(android.R.id.empty));
-		mListView.setAdapter(mAdapter);
-		mListView.setOnItemClickListener(itemClickListener);
-
-        adjustListView(mListView);
-
-        mRetryView = (LinearLayout)findViewById(R.id.retry_box);
-        mRetryButton = (Button)findViewById(R.id.retry);
         mRetryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -110,10 +86,24 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
         });
 
         mListView.setVisibility(View.GONE);
-        mListView.getEmptyView().setVisibility(View.GONE);
+        mEmptyView.setVisibility(View.GONE);
         mLoading.setVisibility(View.VISIBLE);
         mRetryView.setVisibility(View.GONE);
 
+        initFromIntent(getIntent());
+    }
+
+
+    private void initFromIntent(Intent i) {
+        if (i == null) {
+            return;
+        }
+        String keyword = i.getStringExtra(EXTRA_KEYWORD);
+        if (keyword != null) {
+            mSearchQuery = keyword;
+        }
+        mInitiateSearch = i.getBooleanExtra(EXTRA_EXACT, false);
+        mShareSource = i.getBooleanExtra(EXTRA_SHARE, false);
     }
 
     @Override
@@ -122,26 +112,28 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
             mContentProviderClient.release();
         }
         super.onPause();
+        mNewAppHandler.setContentProvider(null);
+        mSearchEngine.setListener(null);
     }
 
     @Override
     protected void onResume() {
         mContentProviderClient = new AppListContentProviderClient(mContext);
         super.onResume();
+
+        mNewAppHandler.setContentProvider(mContentProviderClient);
+        mSearchEngine.setListener(this);
+
+        mAccChooserHelper = new AccountChooserHelper(this, new Preferences(this), this);
+        mAccChooserHelper.init();
     }
 
     @Override
     protected void onStop() {
-        AppWatcherApplication.get(this).getObjectGraph().reset();
         super.onStop();
     }
 
     private void searchResults() {
-		String query = mSearchView.getQuery().toString();
-
-        // hide virtual keyboard
-        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
 
         mListView.setAdapter(mAdapter);
 
@@ -149,52 +141,47 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
 
         showLoading();
 
-		if (query.length() > 0) {
-            mSearchEngine.setQuery(query).startAsync();
-		} else {
-			showNoResults("");
-		}
-	}
+        if (!TextUtils.isEmpty(mSearchQuery)) {
+            mSearchEngine.setQuery(mSearchQuery).startAsync();
+        } else {
+            showNoResults("");
+        }
+    }
 
-	
-	private void showDeviceIdMessage() {
-		if (mDeviceIdMessage!=null) {
-			Animation anim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.flyin);
-			mDeviceIdMessage.setAnimation(anim);
-	        anim.start();
-	        mDeviceIdMessage.setVisibility(View.VISIBLE);
-		}
-	}
-	
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.searchbox, menu);
 
 
-		final MenuItem searchItem = menu.findItem(R.id.menu_search);
-		mSearchView = (SearchView) MenuItemCompat.getActionView(searchItem);
-		mSearchView.setIconifiedByDefault(false);
-		MenuItemCompat.expandActionView(searchItem);
+        final MenuItem searchItem = menu.findItem(R.id.menu_search);
+        mSearchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        mSearchView.setIconifiedByDefault(false);
+        MenuItemCompat.expandActionView(searchItem);
 
-		mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-			@Override
-			public boolean onQueryTextSubmit(String s) {
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                mSearchQuery = query;
                 searchResultsDelayed();
-				return false;
-			}
+                hideKeyboard();
+                return false;
+            }
 
-			@Override
-			public boolean onQueryTextChange(String s) {
-				return false;
-			}
-		});
+            @Override
+            public boolean onQueryTextChange(String query) {
+                return false;
+            }
+        });
 
-		initFromIntent(getIntent());
-
-		mAccChooserHelper = new AccountChooserHelper(this, new Preferences(this), this);
-		mAccChooserHelper.init();
-
+        mSearchView.setQuery(mSearchQuery, true);
+        hideKeyboard();
         return true;
+    }
+
+    private void hideKeyboard() {
+        // hide virtual keyboard
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
     }
 
     private void searchResultsDelayed() {
@@ -208,129 +195,74 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case R.id.menu_search:
-            searchResultsDelayed();
-        	return true;
-        default:
-            return onOptionsItemSelected(item);
-        }
-    }
-
-    final OnItemClickListener itemClickListener  = new OnItemClickListener() {
-		@Override
-		public void onItemClick (AdapterView<?> parent, View view, int position, long id) {
-			Document doc = (Document) mAdapter.getItem(position);
-			String appId = doc.getDocId();
-			if (mAddedApps.containsKey(doc.getDocId())) {
-				return;
-			}
-
-			final View bgView = view.findViewById(R.id.approw);
-
-			AppInfo existingApp = mContentProviderClient.queryAppId(doc.getDocId());
-			if (existingApp != null) {
-				Toast.makeText(mContext, R.string.app_already_added, Toast.LENGTH_SHORT).show();
-				bgView.setBackgroundColor(mColorBgGray);
-				mAddedApps.put(appId, true);
-				return;
-			}
-
-            String imageUrl = DocUtils.getIconUrl(doc);
-            final AppInfo info = new AppInfo(doc, null);
-            if (imageUrl != null) {
-                if (mIconSize == -1) {
-                    mIconSize = mContext.getResources().getDimensionPixelSize(R.dimen.icon_size);
-                }
-                AppWatcherApplication.provide(mContext).imageLoader().get(imageUrl, new ImageLoader.ImageListener() {
-                    @Override
-                    public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
-                        info.setIcon(response.getBitmap());
-                        insertApp(info, bgView);
-                    }
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        AppLog.e(error);
-                        insertApp(info, bgView);
-                    }
-                }, mIconSize, mIconSize);
-            } else {
-                insertApp(info, bgView);
-            }
-
-		}
-	};
-
-    private void insertApp(final AppInfo info,View bgView) {
-        Uri uri = mContentProviderClient.insert(info);
-
-        if (uri == null) {
-            Toast.makeText(mContext, R.string.error_insert_app, Toast.LENGTH_SHORT).show();
-        } else {
-            String msg = getString(R.string.app_stored, info.getTitle());
-            Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
-            bgView.setBackgroundColor(mColorBgGray);
-            mAddedApps.put(info.getAppId(), true);
-            if (mShareSource) {
-                finish();
-            }
+            case R.id.menu_search:
+                searchResultsDelayed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 
     @Override
-	public void onHelperAccountSelected(Account account, String authSubToken) {
-		if (authSubToken == null) {
-			Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
-			finish();
-			return;
-		}
+    public void onHelperAccountSelected(Account account, String authSubToken) {
+        if (authSubToken == null) {
+            Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
         mSearchEngine.setAccount(account, authSubToken);
-		if (mInitiateSearch && !TextUtils.isEmpty(mSearchView.getQuery())) {
-			searchResults();
-		} else {
-			// hide virtual keyboard
-			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-			imm.showSoftInput(mSearchView, 0);
-		}
-	}
+        if (mInitiateSearch && !TextUtils.isEmpty(mSearchQuery)) {
+            searchResults();
+        } else {
+            showNoResults("");
+        }
+    }
 
-	@Override
-	public void onHelperAccountNotFound() {
-		Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
-		finish();
+    @Override
+    public void onHelperAccountNotFound() {
+        Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
+        finish();
 
-	}
+    }
 
-	@Override
-	public void onDialogAccountSelected(Account account) {
-		mAccChooserHelper.onDialogAccountSelected(account);
-	}
+    @Override
+    public void onDialogAccountSelected(Account account) {
+        mAccChooserHelper.onDialogAccountSelected(account);
+    }
 
-	@Override
-	public void onDialogAccountNotFound() {
-		mAccChooserHelper.onDialogAccountNotFound();
-	}
+    @Override
+    public void onDialogAccountNotFound() {
+        mAccChooserHelper.onDialogAccountNotFound();
+    }
 
-	private void showRetryButton() {
+    private void showRetryButton() {
         mListView.setVisibility(View.GONE);
-        mListView.getEmptyView().setVisibility(View.GONE);
+        mEmptyView.setVisibility(View.GONE);
+        mLoading.setVisibility(View.GONE);
         mRetryView.setVisibility(View.VISIBLE);
-	}
+    }
 
     private void showLoading() {
         mListView.setVisibility(View.GONE);
-        mListView.getEmptyView().setVisibility(View.GONE);
+        mEmptyView.setVisibility(View.GONE);
         mLoading.setVisibility(View.VISIBLE);
         mRetryView.setVisibility(View.GONE);
     }
 
     private void showNoResults(String query) {
         mLoading.setVisibility(View.GONE);
+        mListView.setVisibility(View.GONE);
+        mRetryView.setVisibility(View.GONE);
         String noResStr = (query.length() > 0) ? getString(R.string.no_result_found, query) : getString(R.string.search_for_app);
-        TextView tv = (TextView)mListView.getEmptyView();
-        tv.setText(noResStr);
-        tv.setVisibility(View.VISIBLE);
-        showDeviceIdMessage();
+        mEmptyView.setText(noResStr);
+        mEmptyView.setVisibility(View.VISIBLE);
+    }
+
+    private void showListView() {
+        mListView.setVisibility(View.VISIBLE);
+        mEmptyView.setVisibility(View.GONE);
+        mLoading.setVisibility(View.GONE);
+        mRetryView.setVisibility(View.GONE);
     }
 
     private void retrySearchResult() {
@@ -343,10 +275,10 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
 
     @Override
     public void onDataChanged() {
-        mLoading.setVisibility(View.GONE);
         if (mSearchEngine.getData().getCount() == 0) {
             showNoResults(mSearchEngine.getQuery());
         } else {
+            showListView();
             mAdapter.notifyDataSetChanged();
         }
     }
@@ -357,106 +289,24 @@ public class MarketSearchActivity extends TranslucentActionBarActivity implement
         showRetryButton();
     }
 
-    class AppsAdapter extends BaseAdapter {
-        private final PackageManagerUtils mPMUtils;
-        private final ImageLoader mImageLoader;
-
-        public AppsAdapter(Context context) {
-            mContext = context;
-			mPMUtils = new PackageManagerUtils(context.getPackageManager());
-            mImageLoader = AppWatcherApplication.provide(context).imageLoader();
-		}
-
-		class ViewHolder {
-			View row;
-			TextView title;
-			TextView details;
-			TextView updated;
-			TextView price;
-            NetworkImageView icon;
-		}
-
-        @Override
-        public int getCount() {
-            return mSearchEngine.getCount();
+    @Override
+    public void onAppAddSuccess(AppInfo info) {
+        String msg = mContext.getString(R.string.app_stored, info.getTitle());
+        Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
+        mAdapter.notifyDataSetChanged();
+        if (mShareSource) {
+            finish();
         }
+    }
 
-
-        @Override
-        public Object getItem(int position) {
-            return mSearchEngine.getData().getItem(position, false);
+    @Override
+    public void onAppAddError(int error) {
+        if (NewWatchAppHandler.ERROR_ALEREADY_ADDED == error) {
+            Toast.makeText(mContext, R.string.app_already_added, Toast.LENGTH_SHORT).show();
+            mAdapter.notifyDataSetChanged();
+        } else if (error == NewWatchAppHandler.ERROR_INSERT) {
+            Toast.makeText(mContext, R.string.error_insert_app, Toast.LENGTH_SHORT).show();
         }
+    }
 
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			ViewHolder holder;
-			View v = convertView;
-			if (v == null) {
-				LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				v = vi.inflate(R.layout.market_app_row, null);
-				holder = new ViewHolder();
-				holder.row = v.findViewById(R.id.approw);
-				holder.title = (TextView) v.findViewById(android.R.id.title);
-				holder.details = (TextView) v.findViewById(R.id.details);
-				holder.updated = (TextView) v.findViewById(R.id.updated);
-				holder.price = (TextView) v.findViewById(R.id.price);
-				holder.icon = (NetworkImageView) v.findViewById(android.R.id.icon);
-                holder.icon.setDefaultImageResId(R.drawable.ic_empty);
-                holder.icon.setErrorImageResId(R.drawable.ic_empty);
-
-                v.setTag(holder);
-			} else {
-				holder = (ViewHolder) v.getTag();
-			}
-            Document doc = (Document) getItem(position);
-
-            DocDetails.AppDetails app = doc.getAppDetails();
-
-			holder.title.setText(doc.getTitle());
-			holder.details.setText(doc.getCreator());
-			holder.updated.setText(app.uploadDate);
-
-			if (mAddedApps.containsKey(doc.getBackendDocId())) {
-				holder.row.setBackgroundColor(mColorBgGray);
-			} else {
-				holder.row.setBackgroundColor(mColorBgWhite);
-			}
-
-            String imageUrl = DocUtils.getIconUrl(doc);
-            holder.icon.setImageUrl(imageUrl, mImageLoader);
-
-			boolean isInstalled = mPMUtils.isAppInstalled(app.packageName);
-			if (isInstalled) {
-				holder.price.setText(R.string.installed);
-			} else {
-                Common.Offer offer = DocUtils.getOffer(doc);
-				if (offer.micros == 0) {
-					holder.price.setText(R.string.free);
-				} else {
-					holder.price.setText(offer.formattedAmount);
-				}
-			}
-
-			return v;
-		}
-
-	}
-
-
-	private void initFromIntent(Intent i) {
-		if (i == null) {
-			return;
-		}
-		String keyword = i.getStringExtra(EXTRA_KEYWORD);
-		if (keyword != null) {
-			mSearchView.setQuery(keyword, true);
-		}
-		mInitiateSearch = i.getBooleanExtra(EXTRA_EXACT, false);
-		mShareSource = i.getBooleanExtra(EXTRA_SHARE, false);
-	}
 }

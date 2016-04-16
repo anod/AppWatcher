@@ -1,24 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="white">#FFFFFFFF</color>    
-    <color name="blue_focused">#b3e5fc</color>
-    <color name="blue_pressed">#81d4fa</color>
+    <color name="white">@android:color/white</color>
     <color name="blue_new">#FF03a9f4</color>
-    
-    <color name="abs__background_holo_dark">#ff000000</color>
-    <color name="abs__background_holo_light">#fff3f3f3</color>
-    <color name="abs__bright_foreground_holo_dark">@color/abs__background_holo_light</color>
-    <color name="abs__bright_foreground_holo_light">@color/abs__background_holo_dark</color>
-    <color name="abs__bright_foreground_disabled_holo_dark">#ff4c4c4c</color>
-    <color name="abs__bright_foreground_disabled_holo_light">#ffb2b2b2</color>
 
-	<color name="text_dark">#ff292929</color>
-	<color name="row_grayout">#ffcccccc</color>
-	<color name="list_background">#eeeeee</color>
-	<color name="green">#FF03a9f4</color>
-	<color name="list_header_text">#ffB8B8B8</color>
+    <color name="material_blue_500">#2196F3</color>
+    <color name="material_blue_800">#1565C0</color>
 
-    <color name="color_primary">#ff000000</color>
-    <color name="color_primary_dark">#ff000000</color>
+    <color name="theme_primary">@color/material_blue_500</color>
+    <color name="theme_primary_dark">@color/material_blue_800</color>
+    <color name="theme_accent">#FF03a9f4</color>
+
+    <color name="list_header_text">#ffB8B8B8</color>
+
+    <color name="window_background">#FFF5F5F5</color>
+    <color name="row_inactive">#ffcccccc</color>
+
 </resources>
 

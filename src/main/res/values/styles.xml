@@ -1,19 +1,3 @@
-<!--
-  Copyright 2011 The Android Open Source Project
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
--->
-
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <style name="InvisibleTheme" parent="android:Theme.Translucent">
@@ -26,26 +10,30 @@
 
     <style name="AppThemeLight.Dialog" parent="@style/Theme.AppCompat.Light.Dialog">
         <!-- Set AppCompat’s color theming attrs -->
-        <item name="colorPrimary">@android:color/transparent</item>
-        <item name="colorPrimaryDark">@color/color_primary_dark</item>
+        <item name="colorPrimary">@color/theme_primary</item>
+        <item name="colorPrimaryDark">@color/theme_primary_dark</item>
+        <item name="colorAccent">@color/theme_accent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="windowNoTitle">true</item>
      </style>
 
-    <style name="AppThemeBase" parent="@style/Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppThemeBase" parent="@style/Theme.AppCompat.Light.NoActionBar">
         <!-- Set AppCompat’s color theming attrs -->
-        <item name="colorPrimary">@color/color_primary</item>
-        <item name="colorPrimaryDark">@color/color_primary_dark</item>
+        <item name="colorPrimary">@color/theme_primary</item>
+        <item name="colorPrimaryDark">@color/theme_primary_dark</item>
+        <item name="colorAccent">@color/theme_accent</item>
+        <item name="android:buttonStyle">@style/BrandButtonStyle</item>
+        <item name="android:windowBackground">@color/window_background</item>
     </style>
+
+    <style name="BrandButtonStyle" parent="Widget.AppCompat.Button.Colored">
+        <item name="colorButtonNormal">@color/theme_primary</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
     <style name="AppThemeLight.DarkActionBar" parent="AppThemeBase" />
 
-    <style name="ActionButton">
-        <item name="android:background">@null</item>
-        <item name="android:minHeight">48dip</item>
-        <item name="android:minWidth">56dip</item>
-        <item name="android:gravity">center</item>
-        <item name="android:paddingLeft">12dip</item>
-        <item name="android:paddingRight">12dip</item>
-        <item name="android:scaleType">center</item>
-    </style>
+    <style name="ActionButton" parent="Widget.AppCompat.ActionButton" />
 
 	<style name="ListHeader">
 		<item name="android:layout_height">wrap_content</item>

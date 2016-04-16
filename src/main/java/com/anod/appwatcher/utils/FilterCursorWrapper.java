@@ -3,6 +3,9 @@ package com.anod.appwatcher.utils;
 import android.database.AbstractCursor;
 import android.database.Cursor;
 import android.os.Bundle;
+
+import info.anodsplace.android.log.AppLog;
+
 /**
  * Cursor wrapper that filters MIME types not matching given list.
  */
@@ -38,7 +41,7 @@ public class FilterCursorWrapper extends AbstractCursor {
     private void initPositions(Cursor cursor, int count, CursorFilter filter) {
         cursor.moveToPosition(-1);
         while (cursor.moveToNext() && mCount < count) {
-            if (filter.filterRecord(cursor) == false) {
+            if (!filter.filterRecord(cursor)) {
                 mPosition[mCount++] = cursor.getPosition();
             }
         }

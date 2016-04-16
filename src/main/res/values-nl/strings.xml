@@ -1,22 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">App Watcher</string>
-    <string name="no_data">Druk op \"Plus\" om een applicatie toe te voegen.</string>
     <string name="menu_add">Toevoegen</string>
     <string name="menu_refresh">Vernieuwen</string>
     <string name="failed_gain_access">Gelieve de toegang toe te staan. Deze machtiging is nodig om te communiceren met Google Play Store.</string>
-    <string name="search_hint">Applicatie zoeken</string>
     <string name="search_action">Zoeken</string>
     <string name="search_for_app">Zoek een applicatie en druk er op om het aan de volglijst toe te voegen.\n( Tip: u kunt ook altijd applicaties rechtstreeks toevoegen vanuit Play Store met \"Delen\" )</string>
     <string name="loading">Laden&#8230;</string>
     <string name="no_result_found">Geen resultaten voor \"%s\"</string>
     <string name="error_insert_app">Applicatie toevoegen aan de volglijst is mislukt.</string>
     <string name="application_icon">Applicatie icoon</string>
-    <string name="play_store">Play Store</string>
     <string name="remove">Verwijderen</string>
-    <string name="whats_new">Nieuwe functies</string>
-    <string name="whats_new_title">Nieuwe functies</string>
-    <string name="problem_occured">Er is een probleem opgetreden bij het opzoeken van de informatie.</string>
+    <string name="problem_occurred">Er is een probleem opgetreden bij het opzoeken van de informatie.</string>
     <string name="menu_auto_update">Automatisch bijwerken</string>
     <string name="menu_wifi_only">Enkel Wi-Fi</string>
     <string name="alert_dialog_remove_title">Verwijderen?</string>
@@ -31,14 +26,11 @@
     <string name="notification_2_apps_more">%1$s, %2$s en meer</string>    
     <string name="notification_click">Druk om details te zien</string>
     <string name="no_updates_found">Geen updates gevonden.</string>
-    <string name="about">Over</string>
-    <string name="dialog_about_title">%1$s ver. %2$s</string>    
+    <string name="dialog_about_title">%1$s ver. %2$s</string>
     <string name="dialog_about_text">Auteur: Alex Gavrishev&lt;br/&gt;&lt;a href=&quot;https://play.google.com/store/apps/developer?id=Alex+Gavrishev&quot;&gt;Google Play Store&lt;/a&gt;&lt;br/&gt;&lt;br/&gt;Dit project is onderhevig aan de volgende licentie: &lt;a href=&quot;http://creativecommons.org/licenses/by-sa/3.0/&quot;&gt;Creative Commons Attribution-ShareAlike 3.0 Unported License.&lt;/a&gt;&lt;br/&gt;&lt;br/&gt;De broncode is beschikbaar op &lt;a href=&quot;https://github.com/anod/AppWatcher&quot;&gt;github.com&lt;/a&gt;.</string>
    <string name="share">Delen</string>
     <string name="share_subject_normal"> Check \"%s\" out</string>
     <string name="share_subject_updated">Check de nieuwe versie van \"%s\" out.</string>
-    <string name="disabled">uitgeschakeld</string>
-    <string name="enabled">ingeschakeld</string>
     <string name="app_stored">\"%s\" is toegevoegd aan de volglijst</string>
     <string name="rate_app">App beoordelen</string>
     <string name="installed">Installed</string>
