@@ -68,6 +68,9 @@
             android:noHistory="true"
             android:exported="true"
             />
+        <activity
+            android:name=".SettingsActivity"
+            android:label="Settings" />
 
         <provider
             android:name=".AppListContentProvider"
@@ -96,27 +99,7 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <activity
-            android:name=".SettingsActivity"
-            android:label="Settings" >
-        </activity>
-        <activity
-            android:name="com.anod.uninstaller.UninstallActivity"
-            android:label="@string/title_activity_uninstall" >
-        </activity>
-        <meta-data android:name="com.crashlytics.ApiKey" android:value="37454d25f5bb26cdb68b79a6ca77eef421fa17c1"/>
-        <activity
-            android:name="com.mopub.mobileads.MoPubActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
-            android:name="com.mopub.mobileads.MraidActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
-            android:name="com.mopub.common.MoPubBrowser"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
-            android:name="com.mopub.mobileads.MraidVideoPlayerActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <meta-data android:name="net.hockeyapp.android.appIdentifier" android:value="${HOCKEYAPP_APP_ID}" />
     </application>
 
 </manifest>

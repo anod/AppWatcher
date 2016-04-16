@@ -7,7 +7,6 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.0.0'
-        classpath 'io.fabric.tools:gradle:1.+'
     }
 
 }
@@ -15,12 +14,10 @@ buildscript {
 repositories {
     mavenCentral()
     jcenter()
-    maven { url 'https://maven.fabric.io/public' }
     maven { url "https://jitpack.io" }
 }
 
 apply plugin: 'com.android.application'
-apply plugin: 'io.fabric'
 
 configurations.all {
     resolutionStrategy.cacheDynamicVersionsFor 10, 'minutes'
@@ -45,18 +42,13 @@ dependencies {
     compile 'com.android.volley:volley:1.0.0'
     compile 'com.jakewharton:butterknife:7.0.1'
     compile 'com.squareup.picasso:picasso:2.5.2'
-    compile('com.crashlytics.sdk.android:crashlytics:2.2.2@aar') {
-        transitive = true;
-    }
+
+    compile 'net.hockeyapp.android:HockeySDK:4.0.0-beta.1'
 
     // Find memory leaks tool
     debugCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
     testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
-
-    compile('com.mopub.sdk.android:mopub:3.4.0@aar') {
-        transitive = true;
-    }
 
 }
 
@@ -75,6 +67,7 @@ android {
         versionCode 24
         versionName '1.7.4'
 
+        manifestPlaceholders = [HOCKEYAPP_APP_ID: APPWATCHER_HOCKEYAPP_ID]
         resValue "string", "content_authority", "com.anod.appwatcher"
     }
 

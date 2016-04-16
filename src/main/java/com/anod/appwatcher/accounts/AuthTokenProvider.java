@@ -12,7 +12,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 
 import com.anod.appwatcher.AppListContentProvider;
-import com.crashlytics.android.Crashlytics;
 
 import java.io.IOException;
 
@@ -84,17 +83,10 @@ public class AuthTokenProvider {
             String token = null;
             try {
                 token = mAuthTokenProvider.requestTokenBlocking(mActivity, mAccount);
-            } catch (IOException e) {
-                AppLog.e("transient error encountered: " + e.getMessage(), e);
-                mCallback.onUnRecoverableException(e.getMessage());
-            } catch (AuthenticatorException e) {
-                AppLog.e("transient error encountered: " + e.getMessage(), e);
-                mCallback.onUnRecoverableException(e.getMessage());
-            } catch (OperationCanceledException e) {
+            } catch (IOException | OperationCanceledException | AuthenticatorException e) {
                 AppLog.e("transient error encountered: " + e.getMessage(), e);
                 mCallback.onUnRecoverableException(e.getMessage());
             }
-            Crashlytics.setBool("HasAccountToken", token != null);
             return token;
         }
 

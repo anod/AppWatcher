@@ -30,6 +30,8 @@ import com.anod.appwatcher.sync.SyncAdapter;
 import com.anod.appwatcher.utils.MenuItemAnimation;
 import com.anod.appwatcher.ui.DrawerActivity;
 
+import net.hockeyapp.android.CrashManager;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -186,6 +188,7 @@ public class AppWatcherActivity extends DrawerActivity implements
         }
 
         updateSyncStatus();
+        CrashManager.register(this);
     }
 
     @Override

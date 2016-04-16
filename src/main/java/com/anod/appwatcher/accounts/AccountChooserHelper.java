@@ -3,13 +3,13 @@ package com.anod.appwatcher.accounts;
 import android.accounts.Account;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
 
 import com.anod.appwatcher.AppListContentProvider;
 import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
-import com.crashlytics.android.Crashlytics;
+
+import net.hockeyapp.android.CrashManager;
 
 import info.anodsplace.android.log.AppLog;
 
@@ -54,7 +54,6 @@ public class AccountChooserHelper implements AccountChooserFragment.OnAccountSel
 
 	public void init() {
 		mSyncAccount = mPreferences.getAccount();
-		Crashlytics.setBool("HasAccountSelected", mSyncAccount != null);
 
 		if (mSyncAccount == null) {
             // Do not display dialog if only one account available
@@ -109,7 +108,6 @@ public class AccountChooserHelper implements AccountChooserFragment.OnAccountSel
 			@Override
 			public void onAuthTokenAvailable(String token) {
 				initAutoSync(account);
-                Crashlytics.setBool("HasAccountSelected", mSyncAccount != null );
 				if (mListener != null) {
 					mListener.onHelperAccountSelected(account, token);
 				}
