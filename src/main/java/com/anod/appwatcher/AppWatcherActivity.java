@@ -47,8 +47,10 @@ public class AppWatcherActivity extends DrawerActivity implements
     private MenuItemAnimation mRefreshAnim;
     private ViewPager mViewPager;
 
-    public interface QueryChangeListener {
+    public interface EventListener {
         void onQueryTextChanged(String newQuery);
+        void onSyncStart();
+        void onSyncFinish();
     }
 
     protected String mAuthToken;
@@ -57,7 +59,7 @@ public class AppWatcherActivity extends DrawerActivity implements
     private Preferences mPreferences;
     private Account mSyncAccount;
     private MenuItem mSearchMenuItem;
-    private ArrayList<QueryChangeListener> mQueryChangeListener = new ArrayList<>(3);
+    private ArrayList<EventListener> mEventListener = new ArrayList<>(3);
 
     private AccountChooserHelper mAccountChooserHelper;
     private boolean mOpenChangelog;
@@ -170,9 +172,11 @@ public class AppWatcherActivity extends DrawerActivity implements
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(SyncAdapter.SYNC_PROGRESS)) {
                 mRefreshAnim.start();
+                notifySyncStart();
             } else if (intent.getAction().equals(SyncAdapter.SYNC_STOP)) {
                 int updatesCount = intent.getIntExtra(SyncAdapter.EXTRA_UPDATES_COUNT, 0);
                 mRefreshAnim.stop();
+                notifySyncStop();
                 if (updatesCount == 0) {
                     Toast.makeText(AppWatcherActivity.this, R.string.no_updates_found, Toast.LENGTH_SHORT).show();
                 }
@@ -257,8 +261,6 @@ public class AppWatcherActivity extends DrawerActivity implements
 
     @Override
     public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
-        // TODO
-
         return false;
     }
 
@@ -309,22 +311,33 @@ public class AppWatcherActivity extends DrawerActivity implements
     }
 
     public void notifyQueryChange(String s) {
-        for (int idx = 0; idx < mQueryChangeListener.size(); idx++) {
-            mQueryChangeListener.get(idx).onQueryTextChanged(s);
+        for (int idx = 0; idx < mEventListener.size(); idx++) {
+            mEventListener.get(idx).onQueryTextChanged(s);
         }
     }
 
-    public int addQueryChangeListener(QueryChangeListener listener) {
-        mQueryChangeListener.add(listener);
-        return mQueryChangeListener.size() - 1;
+    public int addQueryChangeListener(EventListener listener) {
+        mEventListener.add(listener);
+        return mEventListener.size() - 1;
     }
 
     public void removeQueryChangeListener(int index) {
-        if (index < mQueryChangeListener.size()) {
-            mQueryChangeListener.remove(index);
+        if (index < mEventListener.size()) {
+            mEventListener.remove(index);
         }
     }
 
+    public void notifySyncStart() {
+        for (int idx = 0; idx < mEventListener.size(); idx++) {
+            mEventListener.get(idx).onSyncStart();
+        }
+    }
+
+    public void notifySyncStop() {
+        for (int idx = 0; idx < mEventListener.size(); idx++) {
+            mEventListener.get(idx).onSyncFinish();
+        }
+    }
 
     static class Adapter extends FragmentPagerAdapter {
         private final List<Fragment> mFragments = new ArrayList<>();

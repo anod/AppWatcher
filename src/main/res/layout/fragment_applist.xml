@@ -1,71 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/swipe_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@android:id/list"
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent">
 
-    <LinearLayout
-        android:id="@+id/progress"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical">
-
-        <ProgressBar
-            style="?android:attr/progressBarStyleLarge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingTop="4dip"
-            android:singleLine="true"
-            android:text=""
-            android:textAppearance="?android:attr/textAppearanceSmall" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@android:id/empty"
-        android:layout_width="240dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|center_horizontal"
-        android:layout_marginTop="96dp"
-        android:orientation="vertical">
-
-        <TextView
+        <android.support.v7.widget.RecyclerView
+            android:id="@android:id/list"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent" />
+
+        <LinearLayout
+            android:id="@+id/progress"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:gravity="center"
-            android:text="@string/watch_list_is_empty"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:orientation="vertical">
 
-        <Button
-            android:id="@android:id/button1"
-            android:layout_width="match_parent"
+            <ProgressBar
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="4dip"
+                android:singleLine="true"
+                android:text=""
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@android:id/empty"
+            android:layout_width="240dp"
             android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/ic_search_white_24dp"
-            android:text="@string/search_for_an_app" />
+            android:layout_gravity="top|center_horizontal"
+            android:layout_marginTop="96dp"
+            android:orientation="vertical">
 
-        <Button
-            android:id="@android:id/button2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/ic_system_update_alt_white_24dp"
-            android:text="@string/import_installed" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/watch_list_is_empty"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        <Button
-            android:id="@android:id/button3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/ic_share_white_24dp"
-            android:text="@string/share_from_play_store" />
+            <Button
+                android:id="@android:id/button1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/ic_search_white_24dp"
+                android:text="@string/search_for_an_app" />
 
-    </LinearLayout>
+            <Button
+                android:id="@android:id/button2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/ic_system_update_alt_white_24dp"
+                android:text="@string/import_installed" />
 
-</FrameLayout>
+            <Button
+                android:id="@android:id/button3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/ic_share_white_24dp"
+                android:text="@string/share_from_play_store" />
+
+        </LinearLayout>
+
+    </FrameLayout>
+</android.support.v4.widget.SwipeRefreshLayout>

@@ -5,11 +5,11 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -40,8 +40,8 @@ import info.anodsplace.android.widget.recyclerview.MergeRecyclerAdapter;
 
 public class AppWatcherListFragment extends Fragment implements
         LoaderManager.LoaderCallbacks<Cursor>,
-        AppWatcherActivity.QueryChangeListener,
-        AppViewHolder.OnClickListener {
+        AppWatcherActivity.EventListener,
+        AppViewHolder.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
 
     private static final int ADAPTER_WATCHLIST = 0;
     public static final String ARG_FILTER = "filter";
@@ -54,6 +54,8 @@ public class AppWatcherListFragment extends Fragment implements
     View mProgressContainer;
     @Bind(android.R.id.empty)
     View mEmptyView;
+    @Bind(R.id.swipe_layout)
+    SwipeRefreshLayout mSwipeLayout;
 
 
     private InstalledFilter mInstalledFilter;
@@ -126,6 +128,7 @@ public class AppWatcherListFragment extends Fragment implements
         View root = inflater.inflate(R.layout.fragment_applist, container, false);
         ButterKnife.bind(this, root);
         mEmptyView.setVisibility(View.GONE);
+        mSwipeLayout.setOnRefreshListener(this);
         return root;
     }
 
@@ -210,6 +213,16 @@ public class AppWatcherListFragment extends Fragment implements
     }
 
     @Override
+    public void onSyncStart() {
+        mSwipeLayout.setRefreshing(true);
+    }
+
+    @Override
+    public void onSyncFinish() {
+        mSwipeLayout.setRefreshing(false);
+    }
+
+    @Override
     public void onItemClick(AppInfo app) {
         Intent intent = new Intent(getActivity(), ChangelogActivity.class);
         intent.putExtra(ChangelogActivity.EXTRA_APP_ID, app.getAppId());
@@ -250,5 +263,10 @@ public class AppWatcherListFragment extends Fragment implements
     public void onShareButton() {
         Intent intent = Intent.makeMainActivity(new ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity"));
         IntentUtils.startActivitySafely(getActivity(), intent);
+    }
+
+    @Override
+    public void onRefresh() {
+        ((AppWatcherActivity)getActivity()).requestRefresh();
     }
 }
