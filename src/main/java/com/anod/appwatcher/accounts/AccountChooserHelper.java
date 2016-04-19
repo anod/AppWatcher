@@ -43,7 +43,7 @@ public class AccountChooserHelper implements AccountChooserFragment.OnAccountSel
 	public AccountChooserHelper(AppCompatActivity activity, Preferences preferences, OnAccountSelectionListener listener) {
 		mActivity = activity;
 		mPreferences = preferences;
-		mContext = (Context)mActivity;
+		mContext = mActivity;
 		mAuthTokenProvider = new AuthTokenProvider(mContext);
 		mListener = listener;
 	}

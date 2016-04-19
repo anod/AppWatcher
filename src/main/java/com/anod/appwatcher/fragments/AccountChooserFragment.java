@@ -27,8 +27,8 @@ public class AccountChooserFragment extends DialogFragment implements DialogInte
 
 	// Container Activity must implement this interface
 	public interface OnAccountSelectionListener {
-		public void onDialogAccountSelected(Account account);
-		public void onDialogAccountNotFound();
+		void onDialogAccountSelected(Account account);
+		void onDialogAccountNotFound();
 	}
 
 	private int mSelectedItem;

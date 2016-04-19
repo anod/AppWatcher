@@ -12,13 +12,14 @@ import com.anod.appwatcher.accounts.AccountChooserHelper;
 import com.anod.appwatcher.backup.ExportTask;
 import com.anod.appwatcher.backup.GDriveSync;
 import com.anod.appwatcher.backup.ListExportManager;
+import com.anod.appwatcher.fragments.AccountChooserFragment;
 import com.anod.appwatcher.ui.SettingsActionBarActivity;
 
 import java.util.ArrayList;
 
 import de.psdev.licensesdialog.LicensesDialog;
 
-public class SettingsActivity extends SettingsActionBarActivity implements ExportTask.Listener, GDriveSync.Listener {
+public class SettingsActivity extends SettingsActionBarActivity implements ExportTask.Listener, GDriveSync.Listener, AccountChooserFragment.OnAccountSelectionListener {
     private static final int ACTION_EXPORT = 3;
     private static final int ACTION_IMPORT = 4;
     private static final int ACTION_LICENSES = 6;
@@ -236,4 +237,15 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
         notifyDataSetChanged();
         Toast.makeText(this,R.string.sync_error,Toast.LENGTH_SHORT).show();
     }
+
+    @Override
+    public void onDialogAccountSelected(Account account) {
+        mAccountChooserHelper.onDialogAccountSelected(account);
+    }
+
+    @Override
+    public void onDialogAccountNotFound() {
+        mAccountChooserHelper.onDialogAccountNotFound();
+    }
+
 }
