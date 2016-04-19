@@ -26,13 +26,12 @@ import info.anodsplace.android.widget.recyclerview.ArrayAdapter;
  * @date 2015-08-30
  */
 public class InstalledAppsAdapter extends ArrayAdapter<PackageInfo, AppViewHolder>{
-    private final AppViewHolder.OnClickListener mListener;
-    private final Context mContext;
-    private final AppViewHolderDataProvider mDataProvider;
-    private final PackageManagerUtils mPMUtils;
+    protected final AppViewHolder.OnClickListener mListener;
+    protected final Context mContext;
+    protected final AppViewHolderDataProvider mDataProvider;
+    protected final PackageManagerUtils mPMUtils;
 
-    private final AppIconLoader mIconLoader;
-    private final Drawable mDefaultIconDrawable;
+    protected final AppIconLoader mIconLoader;
 
     public InstalledAppsAdapter(Context context, PackageManagerUtils pmutils, AppViewHolder.OnClickListener listener) {
         super(new ArrayList<PackageInfo>());
@@ -43,7 +42,6 @@ public class InstalledAppsAdapter extends ArrayAdapter<PackageInfo, AppViewHolde
         mPMUtils = pmutils;
         mIconLoader = new AppIconLoader(context);
 
-        mDefaultIconDrawable = ContextCompat.getDrawable(context, R.drawable.ic_android_black_48dp);
     }
 
     @Override
@@ -76,7 +74,7 @@ public class InstalledAppsAdapter extends ArrayAdapter<PackageInfo, AppViewHolde
         if (launchComponent != null) {
             mIconLoader.picasso()
                     .load(Uri.fromParts(AppIconLoader.SCHEME, launchComponent.flattenToShortString(), null))
-                    .placeholder(mDefaultIconDrawable)
+                    .placeholder(mDataProvider.getDefaultIconResource())
                     .into(holder.icon);
         }
     }

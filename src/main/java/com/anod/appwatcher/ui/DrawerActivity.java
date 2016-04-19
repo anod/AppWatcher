@@ -1,6 +1,7 @@
 package com.anod.appwatcher.ui;
 
 import android.accounts.Account;
+import android.content.Intent;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -15,6 +16,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.anod.appwatcher.ImportInstalledActivity;
 import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.R;
 

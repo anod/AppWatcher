@@ -234,6 +234,9 @@ public class AppWatcherActivity extends DrawerActivity implements
                 Intent settingsActivity = new Intent(this, SettingsActivity.class);
                 startActivity(settingsActivity);
                 return true;
+            case R.id.menu_act_import:
+                startActivity(new Intent(this, ImportInstalledActivity.class));
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }

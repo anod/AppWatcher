@@ -44,6 +44,7 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
         int getNewAppsCount();
         PackageManagerUtils getPackageManagerUtils();
         Bitmap getDefaultIcon();
+        int getDefaultIconResource();
     }
 
     public AppViewHolder(View itemView, DataProvider dataProvider, OnClickListener listener) {

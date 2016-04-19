@@ -18,6 +18,13 @@
             android:icon="@drawable/ic_settings_black_24dp"
             android:title="@string/navdrawer_item_settings" />
 
+
+        <item
+            android:id="@+id/menu_act_import"
+            android:icon="@drawable/ic_system_update_alt_white_24dp"
+            android:title="@string/import_installed">
+        </item>
+
 <!--        <item android:id="@+id/nav_tags"
               android:icon="@drawable/ic_turned_in_black_36dp"
               android:title="@string/navdrawer_item_tags">

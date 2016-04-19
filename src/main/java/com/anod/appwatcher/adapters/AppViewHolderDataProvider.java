@@ -77,9 +77,14 @@ public class AppViewHolderDataProvider implements AppViewHolder.DataProvider {
     @Override
     public Bitmap getDefaultIcon() {
         if (mDefaultIcon == null) {
-            mDefaultIcon = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.ic_android_black_48dp);
+            mDefaultIcon = BitmapFactory.decodeResource(mContext.getResources(), getDefaultIconResource());
         }
         return mDefaultIcon;
+    }
+
+    @Override
+    public int getDefaultIconResource() {
+        return R.drawable.ic_android_black_48dp;
     }
 
     public void setTotalCount(int totalCount) {

@@ -17,4 +17,5 @@
 		appwatcher:showAsAction="always"
 		android:title="@string/menu_refresh">
 	</item>
+
 </menu>

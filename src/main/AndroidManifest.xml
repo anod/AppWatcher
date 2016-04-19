@@ -70,7 +70,11 @@
             />
         <activity
             android:name=".SettingsActivity"
-            android:label="Settings" />
+            android:label="@string/settings" />
+
+        <activity android:name=".ImportInstalledActivity"
+            android:label="@string/import_installed"
+            android:theme="@style/AppThemeLight.DarkDialog" />
 
         <provider
             android:name=".AppListContentProvider"

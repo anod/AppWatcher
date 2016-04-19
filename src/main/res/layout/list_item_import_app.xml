@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@android:id/content"
+    android:background="?android:attr/selectableItemBackground"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="8dp">
+
+    <ImageView
+        android:id="@android:id/icon"
+        android:layout_width="@dimen/icon_size"
+        android:layout_height="@dimen/icon_size"
+        android:layout_gravity="center_vertical"
+        android:contentDescription="@string/application_icon"
+        android:src="@drawable/ic_android_black_48dp" />
+
+    <CheckedTextView
+        android:id="@android:id/title"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:checkMark="?android:attr/listChoiceIndicatorMultiple"
+        android:gravity="center_vertical"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textSize="@dimen/textSizeTitle"
+        tools:text="Car Widget Pro" />
+
+</LinearLayout>
