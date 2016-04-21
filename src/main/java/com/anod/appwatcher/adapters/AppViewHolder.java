@@ -13,7 +13,7 @@ import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 
 public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-    protected final DataProvider mDataProvider;
+    private final DataProvider mDataProvider;
 
     public AppInfo app;
     public int position;

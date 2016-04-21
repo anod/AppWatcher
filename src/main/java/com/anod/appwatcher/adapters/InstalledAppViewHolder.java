@@ -11,8 +11,11 @@ import com.anod.appwatcher.model.AppInfo;
  */
 public class InstalledAppViewHolder extends AppViewHolder {
 
+    private final DataProvider mDataProvider;
+
     public InstalledAppViewHolder(View itemView, DataProvider dataProvider, OnClickListener listener) {
         super(itemView, dataProvider, listener);
+        mDataProvider = dataProvider;
     }
 
     @Override

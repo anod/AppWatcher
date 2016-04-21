@@ -1,27 +1,28 @@
 package com.anod.appwatcher;
 
 import android.content.Context;
-import android.graphics.Bitmap;
+import android.content.pm.PackageInfo;
 import android.os.Bundle;
-import android.support.v4.util.ArrayMap;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.support.v4.util.SimpleArrayMap;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckedTextView;
 
 import com.anod.appwatcher.adapters.AppViewHolder;
-import com.anod.appwatcher.adapters.InstalledAppViewHolder;
+import com.anod.appwatcher.adapters.AppViewHolderDataProvider;
 import com.anod.appwatcher.adapters.InstalledAppsAdapter;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.ui.ToolbarActivity;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import butterknife.Bind;
@@ -33,14 +34,14 @@ import butterknife.OnClick;
  * @author algavris
  * @date 19/04/2016.
  */
-public class ImportInstalledActivity extends ToolbarActivity implements AppViewHolder.OnClickListener {
-
+public class ImportInstalledActivity extends ToolbarActivity implements LoaderManager.LoaderCallbacks<List<PackageInfo>> {
 
     @Bind(android.R.id.list)
     RecyclerView mList;
 
     private PackageManagerUtils mPMUtils;
     private boolean mAllSelected;
+    private ImportDataProvider mDataProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,19 +51,17 @@ public class ImportInstalledActivity extends ToolbarActivity implements AppViewH
         setupToolbar();
 
         mPMUtils = new PackageManagerUtils(getPackageManager());
+
+        mDataProvider = new ImportDataProvider(this, mPMUtils);
+
         mList.setLayoutManager(new LinearLayoutManager(this));
-        mList.setAdapter(new ImportAdapter(this, mPMUtils, this));
+        mList.setAdapter(new ImportAdapter(this, mPMUtils, mDataProvider));
+        getSupportLoaderManager().initLoader(0, null, this).forceLoad();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        refreshInstalledList();
-    }
-
-    @Override
-    public void onItemClick(AppInfo app) {
-
     }
 
     @OnClick(android.R.id.button3)
@@ -70,7 +69,7 @@ public class ImportInstalledActivity extends ToolbarActivity implements AppViewH
     {
         ImportAdapter importAdapter = (ImportAdapter)mList.getAdapter();
         mAllSelected = !mAllSelected;
-        importAdapter.selectAll(mAllSelected);
+        mDataProvider.selectAllPackages(mAllSelected);
         importAdapter.notifyDataSetChanged();
     }
 
@@ -87,24 +86,30 @@ public class ImportInstalledActivity extends ToolbarActivity implements AppViewH
     }
 
 
-    protected void refreshInstalledList() {
-        // TODO: Background?
-        AppListContentProviderClient cr = new AppListContentProviderClient(this);
-        Map<String, Integer> watchingPackages = cr.queryPackagesMap();
-        cr.release();
+    @Override
+    public Loader<List<PackageInfo>> onCreateLoader(int id, Bundle args) {
+        return new LocalPackageLoader(this, mPMUtils);
+    }
 
+    @Override
+    public void onLoadFinished(Loader<List<PackageInfo>> loader, List<PackageInfo> data) {
         ImportAdapter downloadedAdapter = (ImportAdapter)mList.getAdapter();
         downloadedAdapter.clear();
-        downloadedAdapter.addAll(mPMUtils.getDownloadedApps(watchingPackages));
+        downloadedAdapter.addAll(data);
+    }
 
+    @Override
+    public void onLoaderReset(Loader<List<PackageInfo>> loader) {
+        ImportAdapter downloadedAdapter = (ImportAdapter)mList.getAdapter();
+        downloadedAdapter.clear();
     }
 
     static class ImportAdapter extends InstalledAppsAdapter {
-        private SimpleArrayMap<String, Boolean> mSelectedPackages;
+        private final ImportDataProvider mDataProvider;
 
-        public ImportAdapter(Context context, PackageManagerUtils pmutils, AppViewHolder.OnClickListener listener) {
-            super(context, pmutils, listener);
-            mSelectedPackages = new SimpleArrayMap<>();
+        public ImportAdapter(Context context, PackageManagerUtils pmutils, ImportDataProvider dataProvider) {
+            super(context, pmutils, dataProvider, null);
+            mDataProvider = dataProvider;
         }
 
         @Override
@@ -113,24 +118,54 @@ public class ImportInstalledActivity extends ToolbarActivity implements AppViewH
             v.setClickable(true);
             v.setFocusable(true);
 
-            return new ImportAppViewHolder(v, mDataProvider, mListener);
-        }
-
-        public void selectAll(boolean select) {
-            // TDOD:
+            return new ImportAppViewHolder(v, mDataProvider);
         }
     }
 
+    static class ImportDataProvider extends AppViewHolderDataProvider
+    {
+        private SimpleArrayMap<String, Boolean> mSelectedPackages = new SimpleArrayMap<>();
+        private boolean mDefaultSelected;
+
+        public ImportDataProvider(Context context, PackageManagerUtils pmutils) {
+            super(context, pmutils);
+        }
+
+        public void selectAllPackages(boolean select) {
+            mSelectedPackages.clear();
+            mDefaultSelected = select;
+        }
+
+        public void selectPackage(String packageName, boolean select)
+        {
+            mSelectedPackages.put(packageName, select);
+        }
+
+        public boolean isPackageSelected(String packageName)
+        {
+            if (mSelectedPackages.containsKey(packageName)) {
+                return mSelectedPackages.get(packageName);
+            }
+            return mDefaultSelected;
+        }
+
+    }
 
     static class ImportAppViewHolder extends AppViewHolder
     {
-        public ImportAppViewHolder(View itemView, DataProvider dataProvider, OnClickListener listener) {
-            super(itemView, dataProvider, listener);
+        private final ImportDataProvider mDataProvider;
+
+        public ImportAppViewHolder(View itemView, ImportDataProvider dataProvider) {
+            super(itemView, dataProvider, null);
+            mDataProvider = dataProvider;
         }
 
         @Override
         public void bindView(int position, AppInfo app) {
+            this.app = app;
             title.setText(app.getTitle());
+            boolean checked = mDataProvider.isPackageSelected(app.getPackageName());
+            ((CheckedTextView)title).setChecked(checked);
         }
 
         @Override
@@ -141,11 +176,27 @@ public class ImportInstalledActivity extends ToolbarActivity implements AppViewH
 
         @Override
         public void onClick(View v) {
-            super.onClick(v);
             ((CheckedTextView)title).toggle();
+            mDataProvider.selectPackage(this.app.getPackageName(), ((CheckedTextView)title).isChecked());
         }
     }
 
+    private static class LocalPackageLoader extends AsyncTaskLoader<List<PackageInfo>> {
+        private final PackageManagerUtils mPMUtils;
+
+        public LocalPackageLoader(Context context, PackageManagerUtils pmUtils) {
+            super(context);
+            mPMUtils = pmUtils;
+        }
 
 
+        @Override
+        public List<PackageInfo> loadInBackground() {
+            AppListContentProviderClient cr = new AppListContentProviderClient(getContext());
+            Map<String, Integer> watchingPackages = cr.queryPackagesMap();
+            cr.release();
+
+            return mPMUtils.getDownloadedApps(watchingPackages);
+        }
+    }
 }

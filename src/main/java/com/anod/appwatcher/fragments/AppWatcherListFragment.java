@@ -46,7 +46,7 @@ public class AppWatcherListFragment extends Fragment implements
     private static final int ADAPTER_WATCHLIST = 0;
     public static final String ARG_FILTER = "filter";
     private static final int REQUEST_APP_INFO = 1;
-    private String mTitleFilter = "";
+    protected String mTitleFilter = "";
 
     @Bind(android.R.id.list)
     RecyclerView mListView;
@@ -58,7 +58,7 @@ public class AppWatcherListFragment extends Fragment implements
     SwipeRefreshLayout mSwipeLayout;
 
 
-    private InstalledFilter mInstalledFilter;
+    protected InstalledFilter mInstalledFilter;
 
     protected PackageManagerUtils mPMUtils;
 

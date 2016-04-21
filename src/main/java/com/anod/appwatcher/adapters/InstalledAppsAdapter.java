@@ -33,11 +33,11 @@ public class InstalledAppsAdapter extends ArrayAdapter<PackageInfo, AppViewHolde
 
     protected final AppIconLoader mIconLoader;
 
-    public InstalledAppsAdapter(Context context, PackageManagerUtils pmutils, AppViewHolder.OnClickListener listener) {
+    public InstalledAppsAdapter(Context context, PackageManagerUtils pmutils, AppViewHolderDataProvider dataProvider, AppViewHolder.OnClickListener listener) {
         super(new ArrayList<PackageInfo>());
         mContext = context;
         mListener = listener;
-        mDataProvider = new AppViewHolderDataProvider(context, pmutils);
+        mDataProvider = dataProvider;
 
         mPMUtils = pmutils;
         mIconLoader = new AppIconLoader(context);
