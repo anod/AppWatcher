@@ -5,25 +5,19 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.v4.util.ArrayMap;
-import android.view.View;
-import android.widget.Toast;
 
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.ImageLoader;
-import com.anod.appwatcher.AppWatcherApplication;
 import com.anod.appwatcher.R;
-import com.anod.appwatcher.utils.DocUtils;
-import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
-import info.anodsplace.android.log.AppLog;
+import java.io.IOException;
 
 /**
  * @author alex
  * @date 2015-09-19
  */
 public class NewWatchAppHandler {
+    public static final int RESULT_OK = 0;
     public static final int ERROR_INSERT = 1;
     public static final int ERROR_ALEREADY_ADDED = 2;
     private final Context mContext;
@@ -34,7 +28,7 @@ public class NewWatchAppHandler {
 
     public interface Listener {
         void onAppAddSuccess(AppInfo info);
-        void onAppAddError(int error);
+        void onAppAddError(AppInfo info, int error);
     }
 
     public NewWatchAppHandler(Context context, Listener listener) {
@@ -51,6 +45,37 @@ public class NewWatchAppHandler {
         return mAddedApps.containsKey(packageName);
     }
 
+
+    public int addSync(AppInfo info, String imageUrl) {
+        if (mAddedApps.containsKey(info.getPackageName())) {
+            return 0;
+        }
+
+        mAddedApps.put(info.getPackageName(), true);
+        AppInfo existingApp = mContentProvider.queryAppId(info.getPackageName());
+        if (existingApp != null) {
+            return ERROR_ALEREADY_ADDED;
+        }
+
+        if (imageUrl != null) {
+            if (mIconSize == -1) {
+                mIconSize = mContext.getResources().getDimensionPixelSize(R.dimen.icon_size);
+            }
+            Bitmap icon = null;
+            try {
+                icon = Picasso.with(mContext).load(imageUrl).get();
+            } catch (IOException ignored) { }
+            if (icon != null) {
+                info.setIcon(icon);
+            }
+        }
+        Uri uri = mContentProvider.insert(info);
+        if (uri == null) {
+            return ERROR_INSERT;
+        }
+        return RESULT_OK;
+    }
+
     public void add(final AppInfo info, String imageUrl) {
         if (mAddedApps.containsKey(info.getPackageName())) {
             return;
@@ -59,7 +84,7 @@ public class NewWatchAppHandler {
         mAddedApps.put(info.getPackageName(), true);
         AppInfo existingApp = mContentProvider.queryAppId(info.getPackageName());
         if (existingApp != null) {
-            mListener.onAppAddError(ERROR_ALEREADY_ADDED);
+            mListener.onAppAddError(info, ERROR_ALEREADY_ADDED);
             return;
         }
 
@@ -92,7 +117,7 @@ public class NewWatchAppHandler {
         Uri uri = mContentProvider.insert(info);
 
         if (uri == null) {
-            mListener.onAppAddError(ERROR_INSERT);
+            mListener.onAppAddError(info, ERROR_INSERT);
         } else {
             mAddedApps.put(info.getAppId(), true);
 

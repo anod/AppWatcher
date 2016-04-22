@@ -3,10 +3,8 @@ package com.anod.appwatcher.market;
 import android.content.Context;
 
 import com.google.android.finsky.api.model.DfeBulkDetails;
-import com.google.android.finsky.api.model.DfeDetails;
 import com.google.android.finsky.api.model.DfeModel;
 import com.google.android.finsky.api.model.Document;
-import com.google.android.finsky.protos.DocDetails;
 
 import java.util.List;
 

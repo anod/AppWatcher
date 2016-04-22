@@ -353,7 +353,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
     }
 
     @Override
-    public void onAppAddError(int error) {
+    public void onAppAddError(AppInfo info, int error) {
         if (NewWatchAppHandler.ERROR_ALEREADY_ADDED == error) {
             Toast.makeText(this, R.string.app_already_added, Toast.LENGTH_SHORT).show();
         } else if (error == NewWatchAppHandler.ERROR_INSERT) {

@@ -295,7 +295,7 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
     }
 
     @Override
-    public void onAppAddError(int error) {
+    public void onAppAddError(AppInfo info, int error) {
         if (NewWatchAppHandler.ERROR_ALEREADY_ADDED == error) {
             Toast.makeText(mContext, R.string.app_already_added, Toast.LENGTH_SHORT).show();
             mAdapter.notifyDataSetChanged();
