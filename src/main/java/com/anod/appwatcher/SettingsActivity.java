@@ -19,7 +19,8 @@ import java.util.ArrayList;
 
 import de.psdev.licensesdialog.LicensesDialog;
 
-public class SettingsActivity extends SettingsActionBarActivity implements ExportTask.Listener, GDriveSync.Listener, AccountChooserFragment.OnAccountSelectionListener {
+
+public class SettingsActivity extends SettingsActionBarActivity implements ExportTask.Listener, GDriveSync.Listener, AccountChooserHelper.OnAccountSelectionListener {
     private static final int ACTION_EXPORT = 3;
     private static final int ACTION_IMPORT = 4;
     private static final int ACTION_LICENSES = 6;
@@ -63,8 +64,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     protected void init() {
         mGDriveSync = new GDriveSync(this);
         mPrefs = new Preferences(this);
-
-        mAccountChooserHelper = new AccountChooserHelper(this, mPrefs, null);
+        mAccountChooserHelper = new AccountChooserHelper(this, mPrefs, this);
         mAccountChooserHelper.init();
     }
 
@@ -77,6 +77,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     @Override
     protected void onResume() {
         super.onResume();
+
         mSyncNowItem.summary = renderDriveSyncTime();
         mGDriveSync.setListener(this);
     }
@@ -90,7 +91,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
 
         Account syncAccount = mAccountChooserHelper.getAccount();
         boolean useAutoSync = false;
-        if (syncAccount!=null) {
+        if (syncAccount != null) {
             useAutoSync = ContentResolver.getSyncAutomatically(syncAccount, AppListContentProvider.AUTHORITY);
         }
         preferences.add(new CheckboxItem(R.string.menu_auto_update, 0, ACTION_AUTO_UPDATE, useAutoSync));
@@ -108,7 +109,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
             mSyncEnabledItem.checked = false;
             mSyncEnabledItem.enabled = false;
             mSyncNowItem.enabled = false;
-            mSyncEnabledItem.summaryRes=0;
+            mSyncEnabledItem.summaryRes = 0;
             mSyncEnabledItem.summary = mGDriveSync.getPlayServiceStatusText();
         } else {
             mSyncEnabledItem.checked = mPrefs.isDriveSyncEnabled();
@@ -152,21 +153,21 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
 
     @Override
     protected void onPreferenceItemClick(int action, SettingsActionBarActivity.Item pref) {
-        if (action== ACTION_EXPORT) {
+        if (action == ACTION_EXPORT) {
             new ExportTask(this, this).execute("");
-        } else if (action==ACTION_IMPORT) {
+        } else if (action == ACTION_IMPORT) {
             startActivity(new Intent(this, ListExportActivity.class));
         } else if (action == ACTION_LICENSES) {
             new LicensesDialog(this, R.raw.notices, false, true).show();
-        } else if (action==ACTION_SYNC_ENABLE) {
-            mSyncNowItem.enabled=false; // disable temporary sync now
+        } else if (action == ACTION_SYNC_ENABLE) {
+            mSyncNowItem.enabled = false; // disable temporary sync now
             notifyDataSetChanged();
             if (mSyncEnabledItem.checked) {
                 setProgressVisibility(true);
                 mGDriveSync.connect();
             }
 
-        } else if (action==ACTION_SYNC_NOW) {
+        } else if (action == ACTION_SYNC_NOW) {
             if (mSyncNowItem.enabled) {
                 mSyncNowItem.enabled = false;
                 notifyDataSetChanged();
@@ -198,14 +199,14 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
 
     @Override
     public void onGDriveConnect() {
-        mSyncEnabledItem.checked=true;
-        mSyncEnabledItem.enabled=true;
-        mSyncNowItem.enabled=true;
+        mSyncEnabledItem.checked = true;
+        mSyncEnabledItem.enabled = true;
+        mSyncNowItem.enabled = true;
         mPrefs.saveDriveSyncEnabled(true);
         notifyDataSetChanged();
         setProgressVisibility(false);
 
-        Toast.makeText(this,R.string.gdrive_connected,Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.gdrive_connected, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -216,7 +217,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     @Override
     public void onGDriveSyncStart() {
         setProgressVisibility(true);
-        Toast.makeText(this,R.string.sync_start,Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.sync_start, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -224,28 +225,36 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
         setProgressVisibility(false);
         mPrefs.saveDriveSyncTime(System.currentTimeMillis());
         mSyncNowItem.summary = getString(R.string.pref_descr_drive_sync_now, getString(R.string.now));
-        mSyncNowItem.enabled=mSyncEnabledItem.checked;
+        mSyncNowItem.enabled = mSyncEnabledItem.checked;
         notifyDataSetChanged();
-        Toast.makeText(this,R.string.sync_finish,Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.sync_finish, Toast.LENGTH_SHORT).show();
     }
 
 
     @Override
     public void onGDriveError() {
         setProgressVisibility(false);
-        mSyncNowItem.enabled=mSyncEnabledItem.checked;
+        mSyncNowItem.enabled = mSyncEnabledItem.checked;
         notifyDataSetChanged();
-        Toast.makeText(this,R.string.sync_error,Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.sync_error, Toast.LENGTH_SHORT).show();
     }
 
     @Override
-    public void onDialogAccountSelected(Account account) {
-        mAccountChooserHelper.onDialogAccountSelected(account);
+    public void onHelperAccountSelected(Account account, String authSubToken) {
+        if (authSubToken == null) {
+            Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
+            finish();
+        }
     }
 
     @Override
-    public void onDialogAccountNotFound() {
-        mAccountChooserHelper.onDialogAccountNotFound();
+    public void onHelperAccountNotFound() {
+        Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
+        finish();
     }
 
+    @Override
+    public AccountChooserFragment.OnAccountSelectionListener getAccountSelectionListener() {
+        return mAccountChooserHelper;
+    }
 }

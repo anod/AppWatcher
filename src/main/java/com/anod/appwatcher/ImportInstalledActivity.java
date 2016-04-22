@@ -1,5 +1,6 @@
 package com.anod.appwatcher;
 
+import android.accounts.Account;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.os.Bundle;
@@ -13,10 +14,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckedTextView;
+import android.widget.Toast;
 
+import com.android.volley.VolleyError;
+import com.anod.appwatcher.accounts.AccountChooserHelper;
 import com.anod.appwatcher.adapters.AppViewHolder;
 import com.anod.appwatcher.adapters.AppViewHolderDataProvider;
 import com.anod.appwatcher.adapters.InstalledAppsAdapter;
+import com.anod.appwatcher.fragments.AccountChooserFragment;
+import com.anod.appwatcher.market.BulkDetailsEndpoint;
+import com.anod.appwatcher.market.PlayStoreEndpoint;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.ui.ToolbarActivity;
@@ -34,7 +41,7 @@ import butterknife.OnClick;
  * @author algavris
  * @date 19/04/2016.
  */
-public class ImportInstalledActivity extends ToolbarActivity implements LoaderManager.LoaderCallbacks<List<PackageInfo>> {
+public class ImportInstalledActivity extends ToolbarActivity implements LoaderManager.LoaderCallbacks<List<PackageInfo>>, AccountChooserHelper.OnAccountSelectionListener, PlayStoreEndpoint.Listener {
 
     @Bind(android.R.id.list)
     RecyclerView mList;
@@ -42,6 +49,8 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
     private PackageManagerUtils mPMUtils;
     private boolean mAllSelected;
     private ImportDataProvider mDataProvider;
+    private BulkDetailsEndpoint mEndpoint;
+    private AccountChooserHelper mAccountChooserHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +62,7 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
         mPMUtils = new PackageManagerUtils(getPackageManager());
 
         mDataProvider = new ImportDataProvider(this, mPMUtils);
+        mEndpoint = new BulkDetailsEndpoint(this);
 
         mList.setLayoutManager(new LinearLayoutManager(this));
         mList.setAdapter(new ImportAdapter(this, mPMUtils, mDataProvider));
@@ -62,6 +72,10 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
     @Override
     protected void onResume() {
         super.onResume();
+
+        mEndpoint.setListener(this);
+        mAccountChooserHelper = new AccountChooserHelper(this, new Preferences(this), this);
+        mAccountChooserHelper.init();
     }
 
     @OnClick(android.R.id.button3)
@@ -82,7 +96,9 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
     @OnClick(android.R.id.button1)
     public void onImportButtonClick()
     {
-        finish();
+        ButterKnife.findById(this, android.R.id.button3).setVisibility(View.GONE);
+        ButterKnife.findById(this, android.R.id.button1).setVisibility(View.GONE);
+        mDataProvider.getSelectedPackages();
     }
 
 
@@ -102,6 +118,37 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
     public void onLoaderReset(Loader<List<PackageInfo>> loader) {
         ImportAdapter downloadedAdapter = (ImportAdapter)mList.getAdapter();
         downloadedAdapter.clear();
+    }
+
+    @Override
+    public void onHelperAccountSelected(Account account, String authSubToken) {
+        if (authSubToken == null) {
+            Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
+        mEndpoint.setAccount(account, authSubToken);
+    }
+
+    @Override
+    public void onHelperAccountNotFound() {
+        Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
+        finish();
+    }
+
+    @Override
+    public AccountChooserFragment.OnAccountSelectionListener getAccountSelectionListener() {
+        return mAccountChooserHelper;
+    }
+
+    @Override
+    public void onDataChanged() {
+
+    }
+
+    @Override
+    public void onErrorResponse(VolleyError error) {
+
     }
 
     static class ImportAdapter extends InstalledAppsAdapter {
@@ -149,6 +196,9 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
             return mDefaultSelected;
         }
 
+        public SimpleArrayMap<String, Boolean> getSelectedPackages() {
+            return mSelectedPackages;
+        }
     }
 
     static class ImportAppViewHolder extends AppViewHolder
@@ -199,4 +249,5 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
             return mPMUtils.getDownloadedApps(watchingPackages);
         }
     }
+
 }

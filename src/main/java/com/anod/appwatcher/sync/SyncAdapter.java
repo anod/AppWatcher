@@ -385,7 +385,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
         if (authToken == null) {
             return null;
         }
-        String deviceId = DeviceIdHelper.getDeviceId(mContext, prefs);
         BulkDetailsEndpoint endpoint = new BulkDetailsEndpoint(mContext);
         endpoint.setAccount(account, authToken);
         return endpoint;

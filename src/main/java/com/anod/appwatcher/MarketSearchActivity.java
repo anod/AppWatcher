@@ -31,7 +31,7 @@ import com.anod.appwatcher.ui.ToolbarActivity;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class MarketSearchActivity extends ToolbarActivity implements AccountChooserHelper.OnAccountSelectionListener, AccountChooserFragment.OnAccountSelectionListener, SearchEndpoint.Listener, NewWatchAppHandler.Listener {
+public class MarketSearchActivity extends ToolbarActivity implements AccountChooserHelper.OnAccountSelectionListener, SearchEndpoint.Listener, NewWatchAppHandler.Listener {
     public static final String EXTRA_KEYWORD = "keyword";
     public static final String EXTRA_EXACT = "exact";
     public static final String EXTRA_SHARE = "share";
@@ -226,13 +226,8 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
     }
 
     @Override
-    public void onDialogAccountSelected(Account account) {
-        mAccChooserHelper.onDialogAccountSelected(account);
-    }
-
-    @Override
-    public void onDialogAccountNotFound() {
-        mAccChooserHelper.onDialogAccountNotFound();
+    public AccountChooserFragment.OnAccountSelectionListener getAccountSelectionListener() {
+        return mAccChooserHelper;
     }
 
     private void showRetryButton() {

@@ -1,17 +1,12 @@
 package com.anod.appwatcher;
 
 import android.accounts.Account;
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Build;
-
-import java.util.HashSet;
-import java.util.Set;
 
 public class Preferences {
     private static final String VIEWED = "viewed";
-    private static final String FIRT_LAUNCH = "firt_launch";
+    private static final String FIRST_LAUNCH = "firt_launch";
     private static final String LAST_UPDATE_TIME = "last_update_time";
     private static final String WIFI_ONLY = "wifi_only";
     private static final String DEVICE_ID = "device_id";
@@ -32,20 +27,17 @@ public class Preferences {
 
     public Account getAccount() {
         String name = mSettings.getString(ACCOUNT_NAME, null);
-
         if (name == null) {
             return null;
         }
-
         String type = mSettings.getString(ACCOUNT_TYPE, null);
-
         return new Account(name, type);
     }
 
     public boolean checkFirstLaunch() {
-        boolean value = mSettings.getBoolean(FIRT_LAUNCH, true);
+        boolean value = mSettings.getBoolean(FIRST_LAUNCH, true);
         if (value) {
-            saveBoolean(FIRT_LAUNCH, false);
+            saveBoolean(FIRST_LAUNCH, false);
         }
         return value;
     }
@@ -70,7 +62,7 @@ public class Preferences {
         } else {
             editor.putString(DEVICE_ID, deviceId);
         }
-        editor.commit();
+        editor.apply();
     }
 
     public void saveWifiOnly(boolean useWifiOnly) {
@@ -90,7 +82,7 @@ public class Preferences {
         SharedPreferences.Editor editor = mSettings.edit();
         editor.putString(ACCOUNT_NAME, account.name);
         editor.putString(ACCOUNT_TYPE, account.type);
-        editor.commit();
+        editor.apply();
     }
 
     public boolean isLastUpdatesViewed() {
@@ -111,19 +103,18 @@ public class Preferences {
 
     public void saveDriveSyncTime(long time) {
         saveLong(DRIVE_SYNC_TIME, time);
-
     }
 
     private void saveBoolean(String key, boolean value) {
         SharedPreferences.Editor editor = mSettings.edit();
         editor.putBoolean(key, value);
-        editor.commit();
+        editor.apply();
     }
 
     private void saveLong(String key, long value) {
         SharedPreferences.Editor editor = mSettings.edit();
         editor.putLong(key, value);
-        editor.commit();
+        editor.apply();
     }
 
 

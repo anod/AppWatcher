@@ -39,7 +39,7 @@ import info.anodsplace.android.log.AppLog;
 
 public class AppWatcherActivity extends DrawerActivity implements
         TextView.OnEditorActionListener, SearchView.OnQueryTextListener,
-        AccountChooserHelper.OnAccountSelectionListener, AccountChooserFragment.OnAccountSelectionListener {
+        AccountChooserHelper.OnAccountSelectionListener {
 
     public static final String EXTRA_FROM_NOTIFICATION = "extra_noti";
     private boolean mSyncFinishedReceiverRegistered;
@@ -278,15 +278,9 @@ public class AppWatcherActivity extends DrawerActivity implements
         setDrawerAccount(account);
     }
 
-
     @Override
-    public void onDialogAccountSelected(Account account) {
-        mAccountChooserHelper.onDialogAccountSelected(account);
-    }
-
-    @Override
-    public void onDialogAccountNotFound() {
-        mAccountChooserHelper.onDialogAccountNotFound();
+    public AccountChooserFragment.OnAccountSelectionListener getAccountSelectionListener() {
+        return mAccountChooserHelper;
     }
 
     @Override
