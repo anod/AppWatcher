@@ -1,18 +1,17 @@
-package com.anod.appwatcher.adapters;
+package com.anod.appwatcher.installed;
 
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageInfo;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.anod.appwatcher.R;
+import com.anod.appwatcher.adapters.AppViewHolder;
+import com.anod.appwatcher.adapters.AppViewHolderDataProvider;
 import com.anod.appwatcher.model.AppInfo;
-import com.anod.appwatcher.model.AppInfoMetadata;
 import com.anod.appwatcher.utils.AppIconLoader;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 

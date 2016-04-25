@@ -115,7 +115,7 @@ public class PackageManagerUtils {
             PackageInfo packageInfo = packs.get(i);
             ApplicationInfo applicationInfo = packageInfo.applicationInfo;
             // Skips the system application (packages)
-            if ( (applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 1)
+            if ( (applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 1 && (applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) == 0)
             {
                 continue;
             }

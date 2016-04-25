@@ -11,15 +11,16 @@ import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
 import java.io.IOException;
+import java.util.Random;
 
 /**
  * @author alex
  * @date 2015-09-19
  */
-public class NewWatchAppHandler {
+public class AddWatchAppHandler {
     public static final int RESULT_OK = 0;
     public static final int ERROR_INSERT = 1;
-    public static final int ERROR_ALEREADY_ADDED = 2;
+    public static final int ERROR_ALREADY_ADDED = 2;
     private final Context mContext;
     private final Listener mListener;
     private ArrayMap<String, Boolean> mAddedApps;
@@ -31,7 +32,7 @@ public class NewWatchAppHandler {
         void onAppAddError(AppInfo info, int error);
     }
 
-    public NewWatchAppHandler(Context context, Listener listener) {
+    public AddWatchAppHandler(Context context, Listener listener) {
         mContext = context;
         mAddedApps = new ArrayMap<>();
         mListener = listener;
@@ -54,7 +55,7 @@ public class NewWatchAppHandler {
         mAddedApps.put(info.getPackageName(), true);
         AppInfo existingApp = mContentProvider.queryAppId(info.getPackageName());
         if (existingApp != null) {
-            return ERROR_ALEREADY_ADDED;
+            return ERROR_ALREADY_ADDED;
         }
 
         if (imageUrl != null) {
@@ -69,10 +70,15 @@ public class NewWatchAppHandler {
                 info.setIcon(icon);
             }
         }
-        Uri uri = mContentProvider.insert(info);
-        if (uri == null) {
+
+        if ((new Random()).nextInt(32)  > 16)
+        {
             return ERROR_INSERT;
         }
+//        Uri uri = mContentProvider.insert(info);
+//        if (uri == null) {
+//            return ERROR_INSERT;
+//        }
         return RESULT_OK;
     }
 
@@ -84,7 +90,7 @@ public class NewWatchAppHandler {
         mAddedApps.put(info.getPackageName(), true);
         AppInfo existingApp = mContentProvider.queryAppId(info.getPackageName());
         if (existingApp != null) {
-            mListener.onAppAddError(info, ERROR_ALEREADY_ADDED);
+            mListener.onAppAddError(info, ERROR_ALREADY_ADDED);
             return;
         }
 

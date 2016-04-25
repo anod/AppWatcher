@@ -72,7 +72,7 @@
             android:name=".SettingsActivity"
             android:label="@string/settings" />
 
-        <activity android:name=".ImportInstalledActivity"
+        <activity android:name=".installed.ImportInstalledActivity"
             android:label="@string/import_installed"
             android:theme="@style/AppThemeLight.DarkDialog" />
 

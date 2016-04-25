@@ -36,7 +36,7 @@ import com.anod.appwatcher.market.MarketInfo;
 import com.anod.appwatcher.market.PlayStoreEndpoint;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListContentProviderClient;
-import com.anod.appwatcher.model.NewWatchAppHandler;
+import com.anod.appwatcher.model.AddWatchAppHandler;
 import com.anod.appwatcher.ui.ToolbarActivity;
 import com.anod.appwatcher.utils.DocUtils;
 import com.anod.appwatcher.utils.IntentUtils;
@@ -50,7 +50,7 @@ import info.anodsplace.android.log.AppLog;
 
 
 
-public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpoint.Listener, Palette.PaletteAsyncListener, View.OnClickListener, NewWatchAppHandler.Listener {
+public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpoint.Listener, Palette.PaletteAsyncListener, View.OnClickListener, AddWatchAppHandler.Listener {
 
     public static final String EXTRA_APP_ID = "app_id";
     public static final String EXTRA_DETAILS_URL = "url";
@@ -244,7 +244,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
                     String imageUrl = DocUtils.getIconUrl(doc);
                     final AppInfo info = new AppInfo(doc, null);
                     AppListContentProviderClient client = new AppListContentProviderClient(this);
-                    NewWatchAppHandler appHandler = new NewWatchAppHandler(this, this);
+                    AddWatchAppHandler appHandler = new AddWatchAppHandler(this, this);
                     appHandler.setContentProvider(client);
                     appHandler.add(info, imageUrl);
                     client.release();
@@ -354,9 +354,9 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
 
     @Override
     public void onAppAddError(AppInfo info, int error) {
-        if (NewWatchAppHandler.ERROR_ALEREADY_ADDED == error) {
+        if (AddWatchAppHandler.ERROR_ALREADY_ADDED == error) {
             Toast.makeText(this, R.string.app_already_added, Toast.LENGTH_SHORT).show();
-        } else if (error == NewWatchAppHandler.ERROR_INSERT) {
+        } else if (error == AddWatchAppHandler.ERROR_INSERT) {
             Toast.makeText(this, R.string.error_insert_app, Toast.LENGTH_SHORT).show();
         }
     }

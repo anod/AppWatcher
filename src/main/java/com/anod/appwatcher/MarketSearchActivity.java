@@ -25,13 +25,13 @@ import com.anod.appwatcher.fragments.AccountChooserFragment;
 import com.anod.appwatcher.market.SearchEndpoint;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListContentProviderClient;
-import com.anod.appwatcher.model.NewWatchAppHandler;
+import com.anod.appwatcher.model.AddWatchAppHandler;
 import com.anod.appwatcher.ui.ToolbarActivity;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class MarketSearchActivity extends ToolbarActivity implements AccountChooserHelper.OnAccountSelectionListener, SearchEndpoint.Listener, NewWatchAppHandler.Listener {
+public class MarketSearchActivity extends ToolbarActivity implements AccountChooserHelper.OnAccountSelectionListener, SearchEndpoint.Listener, AddWatchAppHandler.Listener {
     public static final String EXTRA_KEYWORD = "keyword";
     public static final String EXTRA_EXACT = "exact";
     public static final String EXTRA_SHARE = "share";
@@ -56,7 +56,7 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
 
     private AccountChooserHelper mAccChooserHelper;
     private SearchEndpoint mSearchEngine;
-    private NewWatchAppHandler mNewAppHandler;
+    private AddWatchAppHandler mNewAppHandler;
     private AppListContentProviderClient mContentProviderClient;
     private String mSearchQuery;
 
@@ -72,7 +72,7 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
         mLoading.setVisibility(View.GONE);
 
         mSearchEngine = new SearchEndpoint(this);
-        mNewAppHandler = new NewWatchAppHandler(this, this);
+        mNewAppHandler = new AddWatchAppHandler(this, this);
         mAdapter = new MarketSearchAdapter(this, mSearchEngine, mNewAppHandler);
 
         mListView.setLayoutManager(new LinearLayoutManager(this));
@@ -296,10 +296,10 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
 
     @Override
     public void onAppAddError(AppInfo info, int error) {
-        if (NewWatchAppHandler.ERROR_ALEREADY_ADDED == error) {
+        if (AddWatchAppHandler.ERROR_ALREADY_ADDED == error) {
             Toast.makeText(mContext, R.string.app_already_added, Toast.LENGTH_SHORT).show();
             mAdapter.notifyDataSetChanged();
-        } else if (error == NewWatchAppHandler.ERROR_INSERT) {
+        } else if (error == AddWatchAppHandler.ERROR_INSERT) {
             Toast.makeText(mContext, R.string.error_insert_app, Toast.LENGTH_SHORT).show();
         }
     }

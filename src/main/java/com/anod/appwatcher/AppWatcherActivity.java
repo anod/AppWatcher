@@ -25,6 +25,7 @@ import com.anod.appwatcher.accounts.AccountChooserHelper;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
 import com.anod.appwatcher.fragments.AppWatcherListFragment;
 import com.anod.appwatcher.fragments.InstalledListFragment;
+import com.anod.appwatcher.installed.ImportInstalledActivity;
 import com.anod.appwatcher.model.Filters;
 import com.anod.appwatcher.sync.SyncAdapter;
 import com.anod.appwatcher.ui.DrawerActivity;

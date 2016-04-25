@@ -1,4 +1,4 @@
-package com.anod.appwatcher;
+package com.anod.appwatcher.installed;
 
 import android.accounts.Account;
 import android.content.Context;
@@ -10,20 +10,16 @@ import android.support.v4.content.Loader;
 import android.support.v4.util.SimpleArrayMap;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.CheckedTextView;
+import android.widget.Button;
 import android.widget.Toast;
 
+import com.anod.appwatcher.Preferences;
+import com.anod.appwatcher.R;
 import com.anod.appwatcher.accounts.AccountChooserHelper;
-import com.anod.appwatcher.adapters.AppViewHolder;
-import com.anod.appwatcher.adapters.AppViewHolderDataProvider;
-import com.anod.appwatcher.adapters.InstalledAppsAdapter;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
-import com.anod.appwatcher.model.AppInfo;
+import com.anod.appwatcher.model.AddWatchAppHandler;
 import com.anod.appwatcher.model.AppListContentProviderClient;
-import com.anod.appwatcher.model.BulkImportManager;
 import com.anod.appwatcher.ui.ToolbarActivity;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 
@@ -39,7 +35,7 @@ import butterknife.OnClick;
  * @author algavris
  * @date 19/04/2016.
  */
-public class ImportInstalledActivity extends ToolbarActivity implements LoaderManager.LoaderCallbacks<List<PackageInfo>>, AccountChooserHelper.OnAccountSelectionListener {
+public class ImportInstalledActivity extends ToolbarActivity implements LoaderManager.LoaderCallbacks<List<PackageInfo>>, AccountChooserHelper.OnAccountSelectionListener, ImportBulkManager.Listener {
     @Bind(android.R.id.list)
     RecyclerView mList;
 
@@ -47,7 +43,7 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
     private boolean mAllSelected;
     private ImportDataProvider mDataProvider;
     private AccountChooserHelper mAccountChooserHelper;
-    private BulkImportManager mImportManager;
+    private ImportBulkManager mImportManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,11 +54,12 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
 
         mPMUtils = new PackageManagerUtils(getPackageManager());
 
-        mImportManager = new BulkImportManager(this, listener);
+        mImportManager = new ImportBulkManager(this, this);
         mDataProvider = new ImportDataProvider(this, mPMUtils);
 
         mList.setLayoutManager(new LinearLayoutManager(this));
         mList.setAdapter(new ImportAdapter(this, mPMUtils, mDataProvider));
+        mList.setItemAnimator(new ImportItemAnimator(this));
         getSupportLoaderManager().initLoader(0, null, this).forceLoad();
     }
 
@@ -84,6 +81,9 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
 
     @OnClick(android.R.id.button2)
     public void onCancelButtonClick() {
+        if (mDataProvider.isImportStarted()) {
+            mImportManager.stop();
+        }
         finish();
     }
 
@@ -94,10 +94,12 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
         ImportAdapter adapter = (ImportAdapter) mList.getAdapter();
 
         mImportManager.init();
-        for (int i = 0; i < adapter.getItemCount(); i++) {
-            PackageInfo packageInfo = adapter.getItem(i);
+        adapter.clearPackageIndex();
+        for (int idx = 0; idx < adapter.getItemCount(); idx++) {
+            PackageInfo packageInfo = adapter.getItem(idx);
             if (mDataProvider.isPackageSelected(packageInfo.packageName)) {
                 mImportManager.addPackage(packageInfo.packageName);
+                adapter.storePackageIndex(packageInfo.packageName, idx);
             }
         }
         if (mImportManager.isEmpty()) {
@@ -146,94 +148,37 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
         return mAccountChooserHelper;
     }
 
-    static class ImportAdapter extends InstalledAppsAdapter {
-        private final ImportDataProvider mDataProvider;
-
-        public ImportAdapter(Context context, PackageManagerUtils pmutils, ImportDataProvider dataProvider) {
-            super(context, pmutils, dataProvider, null);
-            mDataProvider = dataProvider;
-        }
-
-        @Override
-        public AppViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View v = LayoutInflater.from(mContext).inflate(R.layout.list_item_import_app, parent, false);
-            v.setClickable(true);
-            v.setFocusable(true);
-
-            return new ImportAppViewHolder(v, mDataProvider);
-        }
-
-    }
-
-    static class ImportDataProvider extends AppViewHolderDataProvider {
-        private static final int STATUS_DEFAULT = 0;
-        private static final int STATUS_PROCESSING = 1;
-        private static final int STATUS_SUCCESS = 2;
-        private static final int STATUS_ERROR = 3;
-
-        private SimpleArrayMap<String, Boolean> mSelectedPackages = new SimpleArrayMap<>();
-        private boolean mDefaultSelected;
-        private SimpleArrayMap<String, Integer> mProcessingPackages = new SimpleArrayMap<>();
-
-        public ImportDataProvider(Context context, PackageManagerUtils pmutils) {
-            super(context, pmutils);
-        }
-
-        public void selectAllPackages(boolean select) {
-            mSelectedPackages.clear();
-            mDefaultSelected = select;
-        }
-
-        public void selectPackage(String packageName, boolean select) {
-            mSelectedPackages.put(packageName, select);
-        }
-
-        public boolean isPackageSelected(String packageName) {
-            if (mSelectedPackages.containsKey(packageName)) {
-                return mSelectedPackages.get(packageName);
+    @Override
+    public void onImportProgress(List<String> docIds, SimpleArrayMap<String, Integer> result) {
+        ImportAdapter adapter = (ImportAdapter) mList.getAdapter();
+        for (String packageName : docIds) {
+            Integer resultCode = result.get(packageName);
+            int status;
+            if (resultCode == null) {
+                status = ImportDataProvider.STATUS_ERROR;
+            } else {
+                status = resultCode == AddWatchAppHandler.RESULT_OK ? ImportDataProvider.STATUS_DONE : ImportDataProvider.STATUS_ERROR;
             }
-            return mDefaultSelected;
-        }
-
-        public int getPackageStatus(String packageName) {
-            if (mProcessingPackages.containsKey(packageName)) {
-                return mProcessingPackages.get(packageName);
-            }
-            return STATUS_DEFAULT;
-        }
-
-    }
-
-    static class ImportAppViewHolder extends AppViewHolder {
-        private final ImportDataProvider mDataProvider;
-
-        public ImportAppViewHolder(View itemView, ImportDataProvider dataProvider) {
-            super(itemView, dataProvider, null);
-            mDataProvider = dataProvider;
-        }
-
-        @Override
-        public void bindView(int position, AppInfo app) {
-            this.app = app;
-            title.setText(app.getTitle());
-            boolean checked = mDataProvider.isPackageSelected(app.getPackageName());
-            ((CheckedTextView) title).setChecked(checked);
-        }
-
-        @Override
-        protected void bindPriceView(AppInfo app) {
-        }
-
-        @Override
-        protected void bindSectionView() {
-        }
-
-        @Override
-        public void onClick(View v) {
-            ((CheckedTextView) title).toggle();
-            mDataProvider.selectPackage(this.app.getPackageName(), ((CheckedTextView) title).isChecked());
+            mDataProvider.setPackageStatus(packageName, status);
+            adapter.notifyPackageStatusChanged(packageName);
         }
     }
+
+    @Override
+    public void onImportFinish() {
+        ((Button)ButterKnife.findById(this, android.R.id.button2)).setText(android.R.string.ok);
+    }
+
+    @Override
+    public void onImportStart(List<String> docIds) {
+        ImportAdapter adapter = (ImportAdapter) mList.getAdapter();
+        mDataProvider.setImportStarted(true);
+        for (String packageName : docIds) {
+            mDataProvider.setPackageStatus(packageName, ImportDataProvider.STATUS_IMPORTING);
+            adapter.notifyPackageStatusChanged(packageName);
+        }
+    }
+
 
     private static class LocalPackageLoader extends AsyncTaskLoader<List<PackageInfo>> {
         private final PackageManagerUtils mPMUtils;
@@ -252,6 +197,5 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
             return mPMUtils.getDownloadedApps(watchingPackages);
         }
     }
-
 
 }

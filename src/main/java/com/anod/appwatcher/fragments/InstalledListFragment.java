@@ -8,8 +8,7 @@ import android.support.v4.content.Loader;
 import android.view.View;
 
 import com.anod.appwatcher.adapters.AppViewHolderDataProvider;
-import com.anod.appwatcher.adapters.InstalledAppsAdapter;
-import com.anod.appwatcher.model.AppInfo;
+import com.anod.appwatcher.installed.InstalledAppsAdapter;
 import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.model.AppListCursorLoader;
 import com.anod.appwatcher.utils.FilterCursorWrapper;

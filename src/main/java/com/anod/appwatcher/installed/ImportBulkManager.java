@@ -1,4 +1,4 @@
-package com.anod.appwatcher.model;
+package com.anod.appwatcher.installed;
 
 import android.accounts.Account;
 import android.content.Context;
@@ -8,33 +8,36 @@ import android.support.v4.util.SimpleArrayMap;
 import com.android.volley.VolleyError;
 import com.anod.appwatcher.market.BulkDetailsEndpoint;
 import com.anod.appwatcher.market.PlayStoreEndpoint;
-
-import com.anod.appwatcher.utils.DocUtils;
+import com.anod.appwatcher.model.AddWatchAppAsyncTask;
+import com.anod.appwatcher.model.AddWatchAppHandler;
 import com.google.android.finsky.api.model.Document;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class BulkImportManager implements PlayStoreEndpoint.Listener, AddAppAsyncTask.Listener {
+public class ImportBulkManager implements PlayStoreEndpoint.Listener, AddWatchAppAsyncTask.Listener {
     private static final int BULK_SIZE = 20;
 
     private final BulkDetailsEndpoint mEndpoint;
-    private final NewWatchAppHandler mNewAppHandler;
+    private final AddWatchAppHandler mNewAppHandler;
+    private final Context mContext;
     private List<List<String>> listsDocIds;
     private int currentBulk;
-    private BulkImportManager.Listener mListener;
+    private ImportBulkManager.Listener mListener;
+    private AsyncTask<Document, Void, SimpleArrayMap<String, Integer>> mTask;
 
-    interface Listener
+    public interface Listener
     {
         void onImportProgress(List<String> docIds, SimpleArrayMap<String, Integer> result);
         void onImportFinish();
         void onImportStart(List<String> docIds);
     }
 
-    public BulkImportManager(Context context, Listener listener) {
+    public ImportBulkManager(Context context, Listener listener) {
         mEndpoint = new BulkDetailsEndpoint(context);
         mEndpoint.setListener(this);
-        mNewAppHandler = new NewWatchAppHandler(context, null);
+        mNewAppHandler = new AddWatchAppHandler(context, null);
+        mContext = context;
         mListener = listener;
     }
 
@@ -43,8 +46,20 @@ public class BulkImportManager implements PlayStoreEndpoint.Listener, AddAppAsyn
         currentBulk = 0;
     }
 
+
+    public void stop() {
+        mEndpoint.reset();
+        if (mTask != null && !mTask.isCancelled()){
+            mTask.cancel(true);
+            mTask = null;
+        }
+    }
+
     public void addPackage(String packageName) {
-        List<String> currentList = listsDocIds.get(currentBulk);
+        List<String> currentList = null;
+        if (listsDocIds.size() > currentBulk) {
+            currentList = listsDocIds.get(currentBulk);
+        }
         if (currentList == null) {
             currentList = new ArrayList<>();
             listsDocIds.add(currentList);
@@ -74,12 +89,21 @@ public class BulkImportManager implements PlayStoreEndpoint.Listener, AddAppAsyn
     @Override
     public void onDataChanged() {
         List<Document> docs = mEndpoint.getDocuments();
-        new AddAppAsyncTask(mNewAppHandler, this).execute(docs.toArray(new Document[docs.size()]));
+        mTask = new AddWatchAppAsyncTask(mNewAppHandler, mContext, this).execute(docs.toArray(new Document[docs.size()]));
     }
 
     @Override
     public void onErrorResponse(VolleyError error) {
-
+        List<String> docIds = listsDocIds.get(currentBulk);
+        mListener.onImportProgress(docIds, new SimpleArrayMap<String, Integer>());
+        currentBulk++;
+        if (currentBulk == listsDocIds.size()) {
+            mListener.onImportFinish();
+        }
+        else
+        {
+            nextBulk();
+        }
     }
 
     public void setAccount(Account account, String authSubToken) {

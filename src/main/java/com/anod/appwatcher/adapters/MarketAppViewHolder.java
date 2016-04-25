@@ -7,7 +7,7 @@ import android.widget.TextView;
 
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.model.AppInfo;
-import com.anod.appwatcher.model.NewWatchAppHandler;
+import com.anod.appwatcher.model.AddWatchAppHandler;
 import com.anod.appwatcher.utils.DocUtils;
 import com.google.android.finsky.api.model.Document;
 
@@ -15,7 +15,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 
 class MarketAppViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-    private final NewWatchAppHandler mNewAppHandler;
+    private final AddWatchAppHandler mNewAppHandler;
     Document doc;
     @Bind(android.R.id.content)
     View row;
@@ -30,7 +30,7 @@ class MarketAppViewHolder extends RecyclerView.ViewHolder implements View.OnClic
     @Bind(android.R.id.icon)
     ImageView icon;
 
-    public MarketAppViewHolder(View itemView, NewWatchAppHandler newAppHandler) {
+    public MarketAppViewHolder(View itemView, AddWatchAppHandler newAppHandler) {
         super(itemView);
         ButterKnife.bind(this, itemView);
         this.row.setOnClickListener(this);

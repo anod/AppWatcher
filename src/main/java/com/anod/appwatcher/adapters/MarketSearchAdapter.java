@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.market.SearchEndpoint;
-import com.anod.appwatcher.model.NewWatchAppHandler;
+import com.anod.appwatcher.model.AddWatchAppHandler;
 import com.anod.appwatcher.utils.DocUtils;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 import com.google.android.finsky.api.model.Document;
@@ -23,9 +23,9 @@ public class MarketSearchAdapter extends RecyclerView.Adapter<MarketAppViewHolde
     private final SearchEndpoint mSearchEngine;
     private final int mColorBgGray;
     private final int mColorBgWhite;
-    private final NewWatchAppHandler mNewAppHandler;
+    private final AddWatchAppHandler mNewAppHandler;
 
-    public MarketSearchAdapter(Context context, SearchEndpoint searchEngine, NewWatchAppHandler newAppHandler) {
+    public MarketSearchAdapter(Context context, SearchEndpoint searchEngine, AddWatchAppHandler newAppHandler) {
         super();
         mContext = context;
         mPMUtils = new PackageManagerUtils(context.getPackageManager());
