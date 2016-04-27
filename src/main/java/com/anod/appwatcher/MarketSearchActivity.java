@@ -35,6 +35,7 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
     public static final String EXTRA_KEYWORD = "keyword";
     public static final String EXTRA_EXACT = "exact";
     public static final String EXTRA_SHARE = "share";
+    public static final String EXTRA_FOCUS = "focus";
 
     private MarketSearchAdapter mAdapter;
     private Context mContext;
@@ -59,6 +60,7 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
     private AddWatchAppHandler mNewAppHandler;
     private AppListContentProviderClient mContentProviderClient;
     private String mSearchQuery;
+    private boolean mFocus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,6 +106,7 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
         }
         mInitiateSearch = i.getBooleanExtra(EXTRA_EXACT, false);
         mShareSource = i.getBooleanExtra(EXTRA_SHARE, false);
+        mFocus = i.getBooleanExtra(EXTRA_FOCUS, false);
     }
 
     @Override
@@ -174,7 +177,16 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
         });
 
         mSearchView.setQuery(mSearchQuery, true);
-        hideKeyboard();
+        if (mFocus) {
+            mSearchView.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSearchView.requestFocus();
+                }
+            });
+        } else {
+            hideKeyboard();
+        }
         return true;
     }
 

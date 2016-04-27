@@ -59,6 +59,7 @@ public class SyncConnectedWorker {
     public GoogleApiClient getGoogleApiClient() {
         return mGoogleApiClient;
     }
+
     public void doSyncInBackground() throws Exception {
         synchronized (sLock) {
             doSyncLocked();
@@ -80,7 +81,7 @@ public class SyncConnectedWorker {
             file = Drive.DriveApi.getFile(getGoogleApiClient(), driveId);
             contentsResult = file.open(getGoogleApiClient(), DriveFile.MODE_READ_ONLY, null).await();
             if (!contentsResult.getStatus().isSuccess()) {
-                throw new Exception("Error read file : "+contentsResult.getStatus().getStatusMessage());
+                throw new Exception("Error read file : " + contentsResult.getStatus().getStatusMessage());
             }
             contents = contentsResult.getDriveContents();
             driveFileReader = getFileInputStream(contents);
@@ -97,12 +98,12 @@ public class SyncConnectedWorker {
 
 
         if (driveId == null) {
-            if (cr.getCount() > 0) {
+            if (cr.getCount(false) > 0) {
                 driveId = createNewFile();
             }
         }
 
-        if (driveId!=null) {
+        if (driveId != null) {
             writeToDrive(driveId, cr);
         }
 
@@ -120,7 +121,7 @@ public class SyncConnectedWorker {
         DriveApi.DriveContentsResult contentsResult = target.open(
                 getGoogleApiClient(), DriveFile.MODE_WRITE_ONLY, null).await();
         if (!contentsResult.getStatus().isSuccess()) {
-            throw new Exception("Error open file for write : "+contentsResult.getStatus().getStatusMessage());
+            throw new Exception("Error open file for write : " + contentsResult.getStatus().getStatusMessage());
         }
 
         DriveContents contents = contentsResult.getDriveContents();
@@ -137,11 +138,12 @@ public class SyncConnectedWorker {
             if (listCursor != null) {
                 listCursor.close();
             }
-            outputStream.close();;
+            outputStream.close();
+            ;
         }
         com.google.android.gms.common.api.Status status = contents.commit(getGoogleApiClient(), null).await();
         if (!status.getStatus().isSuccess()) {
-            throw new Exception("Error commit changes to file : "+status.getStatusMessage());
+            throw new Exception("Error commit changes to file : " + status.getStatusMessage());
         }
     }
 
@@ -165,7 +167,7 @@ public class SyncConnectedWorker {
         if (driveFileReader != null) {
             BufferedReader driveBufferedReader = new BufferedReader(driveFileReader);
             AppListReaderIterator driveAppsIterator = new AppListReaderIterator(driveBufferedReader);
-            Map<String, Integer> currentIds = cr.queryPackagesMap();
+            Map<String, Integer> currentIds = cr.queryPackagesMap(true);
             AppLog.d("[GDrive] Read remote apps " + APPLIST_JSON);
             while (driveAppsIterator.hasNext()) {
                 AppInfo app = driveAppsIterator.next();
@@ -179,7 +181,7 @@ public class SyncConnectedWorker {
         AppLog.d("[GDrive] Clean locally deleted apps ");
         // Clean deleted
         int numRows = cr.cleanDeleted();
-        AppLog.d("[GDrive] Cleaned "+numRows+" rows");
+        AppLog.d("[GDrive] Cleaned " + numRows + " rows");
     }
 
     private DriveId retrieveFileDriveId() throws Exception {
@@ -190,8 +192,8 @@ public class SyncConnectedWorker {
 
         Query query = new Query.Builder()
                 .addFilter(Filters.and(
-                    Filters.eq(SearchableField.MIME_TYPE, MIME_TYPE),
-                    Filters.eq(SearchableField.TITLE, APPLIST_JSON)
+                        Filters.eq(SearchableField.MIME_TYPE, MIME_TYPE),
+                        Filters.eq(SearchableField.TITLE, APPLIST_JSON)
                 ))
                 .setSortOrder(order)
                 .build();
@@ -221,7 +223,7 @@ public class SyncConnectedWorker {
         AppLog.d("[GDrive] Create new file ");
 
         if (!contentsResult.getStatus().isSuccess()) {
-            throw new Exception("[Google Drive] File create request filed: "+contentsResult.getStatus().getStatusMessage());
+            throw new Exception("[Google Drive] File create request filed: " + contentsResult.getStatus().getStatusMessage());
         }
         MetadataChangeSet changeSet = new MetadataChangeSet.Builder()
                 .setTitle(APPLIST_JSON)
@@ -233,7 +235,7 @@ public class SyncConnectedWorker {
                 .createFile(getGoogleApiClient(), changeSet, contentsResult.getDriveContents()).await();
 
         if (!driveFileResult.getStatus().isSuccess()) {
-            throw new Exception("[Google Drive] File create result filed: "+driveFileResult.getStatus().getStatusMessage());
+            throw new Exception("[Google Drive] File create result filed: " + driveFileResult.getStatus().getStatusMessage());
         }
         return driveFileResult.getDriveFile().getDriveId();
     }

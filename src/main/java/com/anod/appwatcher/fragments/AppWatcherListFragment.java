@@ -22,6 +22,7 @@ import android.widget.Toast;
 import com.anod.appwatcher.AppWatcherActivity;
 import com.anod.appwatcher.BuildConfig;
 import com.anod.appwatcher.ChangelogActivity;
+import com.anod.appwatcher.MarketSearchActivity;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.adapters.AppViewHolder;
 import com.anod.appwatcher.adapters.ListCursorAdapterWrapper;
@@ -250,8 +251,10 @@ public class AppWatcherListFragment extends Fragment implements
 
     @OnClick(android.R.id.button1)
     public void onSearchButton() {
-        AppWatcherActivity activity = (AppWatcherActivity) getActivity();
-        activity.openSearch();
+        Intent searchIntent = new Intent(getActivity(), MarketSearchActivity.class);
+        searchIntent.putExtra(MarketSearchActivity.EXTRA_KEYWORD, "");
+        searchIntent.putExtra(MarketSearchActivity.EXTRA_FOCUS, true);
+        startActivity(searchIntent);
     }
 
     @OnClick(android.R.id.button2)

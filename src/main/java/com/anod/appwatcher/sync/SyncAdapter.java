@@ -26,7 +26,6 @@ import com.anod.appwatcher.R;
 import com.anod.appwatcher.accounts.AuthTokenProvider;
 import com.anod.appwatcher.backup.GDriveSync;
 import com.anod.appwatcher.market.BulkDetailsEndpoint;
-import com.anod.appwatcher.market.DeviceIdHelper;
 import com.anod.appwatcher.market.PlayStoreEndpoint;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListContentProviderClient;
@@ -207,7 +206,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
             return updatedTitles;
         }
 
-        AppListCursor apps = client.queryAll();
+        AppListCursor apps = client.queryAll(false);
         if (apps == null || !apps.moveToFirst()) {
             return updatedTitles;
         }

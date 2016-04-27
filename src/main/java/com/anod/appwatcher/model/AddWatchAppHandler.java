@@ -55,6 +55,14 @@ public class AddWatchAppHandler {
         mAddedApps.put(info.getPackageName(), true);
         AppInfo existingApp = mContentProvider.queryAppId(info.getPackageName());
         if (existingApp != null) {
+            if (existingApp.getStatus() == AppInfoMetadata.STATUS_DELETED) {
+                int success = mContentProvider.updateStatus(existingApp.getRowId(), AppInfoMetadata.STATUS_NORMAL);
+                if (success > 0) {
+                    return RESULT_OK;
+                } else {
+                    return ERROR_INSERT;
+                }
+            }
             return ERROR_ALREADY_ADDED;
         }
 
@@ -90,6 +98,15 @@ public class AddWatchAppHandler {
         mAddedApps.put(info.getPackageName(), true);
         AppInfo existingApp = mContentProvider.queryAppId(info.getPackageName());
         if (existingApp != null) {
+            if (existingApp.getStatus() == AppInfoMetadata.STATUS_DELETED) {
+                int success = mContentProvider.updateStatus(existingApp.getRowId(), AppInfoMetadata.STATUS_NORMAL);
+                if (success > 0) {
+                    mListener.onAppAddSuccess(info);
+                } else {
+                    mListener.onAppAddError(info, ERROR_INSERT);
+                }
+                return;
+            }
             mListener.onAppAddError(info, ERROR_ALREADY_ADDED);
             return;
         }

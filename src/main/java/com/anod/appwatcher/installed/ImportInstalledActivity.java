@@ -195,7 +195,7 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
         @Override
         public List<PackageInfo> loadInBackground() {
             AppListContentProviderClient cr = new AppListContentProviderClient(getContext());
-            Map<String, Integer> watchingPackages = cr.queryPackagesMap();
+            Map<String, Integer> watchingPackages = cr.queryPackagesMap(false);
             cr.release();
 
             return mPMUtils.getDownloadedApps(watchingPackages);

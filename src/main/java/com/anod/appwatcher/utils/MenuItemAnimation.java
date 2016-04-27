@@ -64,6 +64,7 @@ public class MenuItemAnimation {
         if (mInvisibleMode) {
             mMenuItem.setVisible(true);
         }
+
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         ImageView iv = (ImageView) inflater.inflate(R.layout.widget_refresh_action, null);
 
