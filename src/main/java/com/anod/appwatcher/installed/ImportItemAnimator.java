@@ -35,6 +35,8 @@ public class ImportItemAnimator extends DefaultItemAnimator {
     @Override
     public boolean animateChange(RecyclerView.ViewHolder oldHolder, RecyclerView.ViewHolder newHolder, int fromX, int fromY, int toX, int toY) {
         cancelCurrentAnimationIfExists(oldHolder);
+        oldHolder.itemView.clearAnimation();
+        newHolder.itemView.clearAnimation();
 
         if (newHolder instanceof ImportAppViewHolder) {
             ImportAppViewHolder holder = (ImportAppViewHolder) newHolder;
@@ -62,10 +64,6 @@ public class ImportItemAnimator extends DefaultItemAnimator {
         );
         animator.setDuration(300);
         animator.start();
-    }
-
-    private void cancelCurrentAnimationIfExists(RecyclerView.ViewHolder oldHolder) {
-        oldHolder.itemView.clearAnimation();
     }
 
     @Override
