@@ -328,9 +328,14 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
     }
 
     private void animateBackground() {
-        int[] location = new int[2];
-        mAppIcon.getLocationOnScreen(location);
-        RevealAnimatorCompat.show(mBackground, location[0], location[1], 0).start();
+        mBackground.post(new Runnable() {
+            @Override
+            public void run() {
+                int[] location = new int[2];
+                mAppIcon.getLocationOnScreen(location);
+                RevealAnimatorCompat.show(mBackground, location[0], location[1], 0).start();
+            }
+        });
     }
 
     @Override

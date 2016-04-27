@@ -75,10 +75,10 @@ public class AddWatchAppHandler {
         {
             return ERROR_INSERT;
         }
-//        Uri uri = mContentProvider.insert(info);
-//        if (uri == null) {
-//            return ERROR_INSERT;
-//        }
+        Uri uri = mContentProvider.insert(info);
+        if (uri == null) {
+            return ERROR_INSERT;
+        }
         return RESULT_OK;
     }
 

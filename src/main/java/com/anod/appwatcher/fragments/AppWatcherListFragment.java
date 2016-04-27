@@ -25,6 +25,7 @@ import com.anod.appwatcher.ChangelogActivity;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.adapters.AppViewHolder;
 import com.anod.appwatcher.adapters.ListCursorAdapterWrapper;
+import com.anod.appwatcher.installed.ImportInstalledActivity;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListCursorLoader;
 import com.anod.appwatcher.model.Filters;
@@ -255,8 +256,7 @@ public class AppWatcherListFragment extends Fragment implements
 
     @OnClick(android.R.id.button2)
     public void onImportButton() {
-        AppWatcherActivity activity = (AppWatcherActivity) getActivity();
-        activity.switchTab(Filters.TAB_INSTALLED);
+        startActivity(new Intent(getActivity(), ImportInstalledActivity.class));
     }
 
     @OnClick(android.R.id.button3)

@@ -6,6 +6,11 @@
 
     <include layout="@layout/toolbar_transparent" />
 
+    <ProgressBar
+        android:id="@android:id/progress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
     <android.support.v7.widget.RecyclerView
         android:id="@android:id/list"
         android:layout_width="match_parent"

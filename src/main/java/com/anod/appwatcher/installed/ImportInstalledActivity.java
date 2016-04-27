@@ -12,6 +12,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.anod.appwatcher.Preferences;
@@ -38,6 +39,8 @@ import butterknife.OnClick;
 public class ImportInstalledActivity extends ToolbarActivity implements LoaderManager.LoaderCallbacks<List<PackageInfo>>, AccountChooserHelper.OnAccountSelectionListener, ImportBulkManager.Listener {
     @Bind(android.R.id.list)
     RecyclerView mList;
+    @Bind(android.R.id.progress)
+    ProgressBar mProgress;
 
     private PackageManagerUtils mPMUtils;
     private boolean mAllSelected;
@@ -116,6 +119,7 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
 
     @Override
     public void onLoadFinished(Loader<List<PackageInfo>> loader, List<PackageInfo> data) {
+        mProgress.setVisibility(View.GONE);
         ImportAdapter downloadedAdapter = (ImportAdapter) mList.getAdapter();
         downloadedAdapter.clear();
         downloadedAdapter.addAll(data);

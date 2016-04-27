@@ -55,6 +55,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:drawableLeft="@drawable/ic_search_white_24dp"
+                style="@style/BrandButtonStyle"
                 android:text="@string/search_for_an_app" />
 
             <Button
@@ -62,6 +63,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:drawableLeft="@drawable/ic_system_update_alt_white_24dp"
+                style="@style/BrandButtonStyle"
                 android:text="@string/import_installed" />
 
             <Button
@@ -69,6 +71,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:drawableLeft="@drawable/ic_share_white_24dp"
+                style="@style/BrandButtonStyle"
                 android:text="@string/share_from_play_store" />
 
         </LinearLayout>

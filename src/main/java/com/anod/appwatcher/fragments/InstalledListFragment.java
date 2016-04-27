@@ -48,11 +48,11 @@ public class InstalledListFragment extends AppWatcherListFragment {
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        super.onLoadFinished(loader, data);
-
         InstalledAppsAdapter downloadedAdapter = (InstalledAppsAdapter)mAdapter.getAdapter(ADAPTER_INSTALLED);
         downloadedAdapter.clear();
         downloadedAdapter.addAll(((InstalledLoader)loader).getInstalledApps());
+
+        super.onLoadFinished(loader, data);
     }
 
     static class InstalledLoader extends AppListCursorLoader
