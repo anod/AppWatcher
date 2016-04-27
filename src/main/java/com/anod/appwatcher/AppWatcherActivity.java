@@ -159,8 +159,10 @@ public class AppWatcherActivity extends DrawerActivity implements
     private void updateSyncStatus() {
         if (mSyncAccount != null && ContentResolver.isSyncActive(mSyncAccount, AppListContentProvider.AUTHORITY)) {
             mRefreshAnim.start();
+            notifySyncStart();
         } else {
             mRefreshAnim.stop();
+            notifySyncStop();
         }
     }
 

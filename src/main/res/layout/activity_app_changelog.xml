@@ -70,6 +70,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/changelog"
                 android:layout_centerHorizontal="true"
+                style="@style/BrandButtonStyle"
                 android:text="@string/retry" />
 
         </RelativeLayout>
@@ -82,7 +83,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="right"
         android:layout_marginRight="8dp"
-        android:layout_marginTop="98dp"
+        android:layout_marginTop="@dimen/playstore_button_margin_top"
         android:src="@drawable/ic_play_arrow_black_48dp"
         app:backgroundTint="@color/white"
         app:elevation="2dp"
