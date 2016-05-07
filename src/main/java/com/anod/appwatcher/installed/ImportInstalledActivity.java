@@ -4,6 +4,7 @@ import android.accounts.Account;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
@@ -72,6 +73,11 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
 
         mAccountChooserHelper = new AccountChooserHelper(this, new Preferences(this), this);
         mAccountChooserHelper.init();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        mAccountChooserHelper.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @OnClick(android.R.id.button3)

@@ -4,6 +4,7 @@ import android.accounts.Account;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -149,6 +150,11 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
         } else {
             showNoResults("");
         }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        mAccChooserHelper.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override

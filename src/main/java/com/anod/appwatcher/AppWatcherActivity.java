@@ -1,16 +1,21 @@
 package com.anod.appwatcher;
 
+import android.Manifest;
 import android.accounts.Account;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.SearchView;
@@ -220,7 +225,12 @@ public class AppWatcherActivity extends DrawerActivity implements
 
     @Override
     protected void onAccountChooseClick() {
-        mAccountChooserHelper.showAccountsDialog();
+        mAccountChooserHelper.showAccountsDialogWithCheck();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        mAccountChooserHelper.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override
@@ -249,7 +259,7 @@ public class AppWatcherActivity extends DrawerActivity implements
 
         if (mAuthToken == null) {
             Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
-            mAccountChooserHelper.showAccountsDialog();
+            mAccountChooserHelper.showAccountsDialogWithCheck();
             return false;
         }
 

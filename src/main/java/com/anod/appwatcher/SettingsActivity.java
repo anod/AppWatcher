@@ -5,6 +5,7 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.support.annotation.NonNull;
 import android.text.format.DateUtils;
 import android.widget.Toast;
 
@@ -69,6 +70,11 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
         mPrefs = new Preferences(this);
         mAccountChooserHelper = new AccountChooserHelper(this, mPrefs, this);
         mAccountChooserHelper.init();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        mAccountChooserHelper.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override

@@ -1,13 +1,19 @@
 package com.anod.appwatcher.accounts;
 
+import android.Manifest;
 import android.accounts.Account;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
 import com.anod.appwatcher.AppListContentProvider;
 import com.anod.appwatcher.Preferences;
+import com.anod.appwatcher.R;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
 
 import info.anodsplace.android.log.AppLog;
@@ -27,9 +33,40 @@ public class AccountChooserHelper implements AccountChooserFragment.OnAccountSel
     private static final int TWO_HOURS_IN_SEC = 7200;
     private static final int SIX_HOURS_IN_SEC = 21600;
 
-    public void showAccountsDialog() {
+    private static final int PERMISSION_REQUEST_GET_ACCOUNTS = 123;
+
+    private void showAccountsDialog() {
         AccountChooserFragment accountsDialog = AccountChooserFragment.newInstance();
         accountsDialog.show(mActivity.getSupportFragmentManager(), "accountsDialog");
+    }
+
+    public void showAccountsDialogWithCheck() {
+        if (ContextCompat.checkSelfPermission(mActivity, Manifest.permission.GET_ACCOUNTS) == PackageManager.PERMISSION_GRANTED) {
+            showAccountsDialog();
+        } else {
+            ActivityCompat.requestPermissions(mActivity,new String[] { Manifest.permission.GET_ACCOUNTS }, PERMISSION_REQUEST_GET_ACCOUNTS);
+        }
+
+    }
+
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == PERMISSION_REQUEST_GET_ACCOUNTS)
+        {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+            {
+                // http://stackoverflow.com/questions/33264031/calling-dialogfragments-show-from-within-onrequestpermissionsresult-causes
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        showAccountsDialog();
+                    }
+                }, 200);
+            }
+            else
+            {
+                Toast.makeText(mActivity, R.string.failed_gain_access, Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     // Container Activity must implement this interface
@@ -58,15 +95,7 @@ public class AccountChooserHelper implements AccountChooserFragment.OnAccountSel
         mSyncAccount = mPreferences.getAccount();
 
         if (mSyncAccount == null) {
-            // Do not display dialog if only one account available
-            //AccountManager accountManager = new AccountManager(mContext);
-            // if (accountManager.hasJustOneAccount()) {
-            //    final Account account = accountManager.getAccount(0);
-            //    accountManager.saveCurrentAccount(account);
-            //    onDialogAccountSelected(account);
-            //} else {
-            showAccountsDialog();
-            //}
+            showAccountsDialogWithCheck();
         } else {
             mAuthTokenProvider.requestToken(mActivity, mSyncAccount, new AuthTokenProvider.AuthenticateCallback() {
                 @Override
