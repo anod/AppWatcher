@@ -115,7 +115,7 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
     }
 
     protected void bindIcon(AppInfo app) {
-        if (app.iconUrl == null) {
+        if (TextUtils.isEmpty(app.iconUrl)) {
             if (app.getRowId() > 0) {
                 Uri dbImageUri = AppListContentProvider.ICONS_CONTENT_URI.buildUpon().appendPath(String.valueOf(app.getRowId())).build();
                 mIconLoader.retrieve(dbImageUri)

@@ -328,7 +328,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
         String iconUrl = DocUtils.getIconUrl(marketApp);
         if (!TextUtils.isEmpty(iconUrl))
         {
-            values.put(AppListTable.Columns.KEY_ICON_URL, offer.micros);
+            values.put(AppListTable.Columns.KEY_ICON_URL, DocUtils.getIconUrl(marketApp));
         }
     }
 

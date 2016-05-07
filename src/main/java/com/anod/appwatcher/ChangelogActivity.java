@@ -17,6 +17,7 @@ import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.graphics.Palette;
 import android.support.v7.graphics.Target;
 import android.text.Html;
+import android.text.TextUtils;
 import android.text.util.Linkify;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -196,7 +197,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
         mAppTitle.setText(app.title);
         mPlayStoreButton.setOnClickListener(this);
 
-        if (app.iconUrl == null) {
+        if (TextUtils.isEmpty(app.iconUrl)) {
             if (app.getRowId() > 0)
             {
                 Uri dbImageUri = AppListContentProvider.ICONS_CONTENT_URI.buildUpon().appendPath(String.valueOf(app.getRowId())).build();
