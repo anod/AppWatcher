@@ -1,11 +1,15 @@
 package com.anod.appwatcher;
 
+import android.Manifest;
 import android.accounts.Account;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.format.DateUtils;
 import android.widget.Toast;
 
@@ -31,6 +35,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     private static final int ACTION_SYNC_NOW = 2;
     private static final int ACTION_AUTO_UPDATE = 7;
     private static final int ACTION_WIFI_ONLY = 8;
+    private static final int PERMISSION_REQUEST_STORAGE = 300;
 
     private GDriveSync mGDriveSync;
     private CheckboxItem mSyncEnabledItem;
@@ -74,7 +79,18 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        mAccountChooserHelper.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSION_REQUEST_STORAGE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+            {
+                this.runExport();
+            }
+            else
+            {
+                Toast.makeText(this, "Cannot start export without permissions", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            mAccountChooserHelper.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
     }
 
     @Override
@@ -160,10 +176,21 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    private void runExport()
+    {
+        new ExportTask(this, this).execute("");
+    }
+
     @Override
     protected void onPreferenceItemClick(int action, SettingsActionBarActivity.Item pref) {
         if (action == ACTION_EXPORT) {
-            new ExportTask(this, this).execute("");
+
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+               this.runExport();
+            } else {
+                ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_REQUEST_STORAGE);
+            }
+
         } else if (action == ACTION_IMPORT) {
             startActivity(new Intent(this, ListExportActivity.class));
         } else if (action == ACTION_LICENSES) {
