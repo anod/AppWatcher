@@ -31,10 +31,9 @@ public class AddWatchAppAsyncTask extends AsyncTask<Document, Void, SimpleArrayM
             if (isCancelled()) {
                 return result;
             }
-            final String imageUrl = DocUtils.getIconUrl(doc);
-            final AppInfo info = new AppInfo(doc, null);
-            int status = mNewAppHandler.addSync(info, imageUrl);
-            result.put(info.getPackageName(), status);
+            final AppInfo info = new AppInfo(doc);
+            int status = mNewAppHandler.addSync(info);
+            result.put(info.packageName, status);
         }
         client.release();
         mNewAppHandler.setContentProvider(null);

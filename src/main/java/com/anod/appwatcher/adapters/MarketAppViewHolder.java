@@ -39,8 +39,7 @@ class MarketAppViewHolder extends RecyclerView.ViewHolder implements View.OnClic
 
     @Override
     public void onClick(View v) {
-        String imageUrl = DocUtils.getIconUrl(doc);
-        final AppInfo info = new AppInfo(doc, null);
-        mNewAppHandler.add(info, imageUrl);
+        final AppInfo info = new AppInfo(doc);
+        mNewAppHandler.add(info);
     }
 }

@@ -8,6 +8,7 @@ import android.widget.CheckedTextView;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.adapters.AppViewHolder;
 import com.anod.appwatcher.model.AppInfo;
+import com.anod.appwatcher.utils.AppIconLoader;
 
 /**
  * @author alex
@@ -16,23 +17,25 @@ import com.anod.appwatcher.model.AppInfo;
 class ImportAppViewHolder extends AppViewHolder {
     private final ImportDataProvider mDataProvider;
 
-    public ImportAppViewHolder(View itemView, ImportDataProvider dataProvider) {
-        super(itemView, dataProvider, null);
+    public ImportAppViewHolder(View itemView, ImportDataProvider dataProvider, AppIconLoader iconLoader) {
+        super(itemView, dataProvider, iconLoader, null);
         mDataProvider = dataProvider;
     }
 
     @Override
     public void bindView(int position, AppInfo app) {
         this.app = app;
-        title.setText(app.getTitle());
-        boolean checked = mDataProvider.isPackageSelected(app.getPackageName());
+        title.setText(app.title);
+        boolean checked = mDataProvider.isPackageSelected(app.packageName);
         ((CheckedTextView) title).setChecked(checked);
         title.setEnabled(!mDataProvider.isImportStarted());
+
+        this.bindIcon(app);
     }
 
     public int status()
     {
-       return mDataProvider.getPackageStatus(app.getPackageName());
+       return mDataProvider.getPackageStatus(app.packageName);
     }
 
     @Override
@@ -46,6 +49,6 @@ class ImportAppViewHolder extends AppViewHolder {
     @Override
     public void onClick(View v) {
         ((CheckedTextView) title).toggle();
-        mDataProvider.selectPackage(this.app.getPackageName(), ((CheckedTextView) title).isChecked());
+        mDataProvider.selectPackage(this.app.packageName, ((CheckedTextView) title).isChecked());
     }
 }

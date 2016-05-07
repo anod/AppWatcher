@@ -280,10 +280,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
             //   debugPkgs.add("com.ibolt.carhome");
         }
         DocDetails.AppDetails appDetails = marketApp.getAppDetails();
-        if (appDetails.versionCode > localApp.getVersionCode() || (debugPkgs != null && debugPkgs.contains(localApp.getPackageName()))) {
+        if (appDetails.versionCode > localApp.versionNumber || (debugPkgs != null && debugPkgs.contains(localApp.packageName))) {
             AppLog.d("New version found [" + appDetails.versionCode + "]");
-            Bitmap icon = loadIcon(marketApp);
-            AppInfo newApp = createNewVersion(marketApp, localApp, icon);
+            AppInfo newApp = createNewVersion(marketApp, localApp);
             client.update(newApp);
             String recentChanges = (updatedTitles.size() == 0) ? appDetails.recentChangesHtml : null;
             updatedTitles.add(new UpdatedApp(localApp.getAppId(), marketApp.getTitle(), appDetails.packageName, recentChanges));
@@ -308,59 +307,35 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
     }
 
     private void fillMissingData(Document marketApp, AppInfo localApp, ContentValues values) {
-        if (localApp.getIcon() == null) {
-            AppLog.d("Fetch missing icon");
-            Bitmap icon = loadIcon(marketApp);
-            if (icon != null) {
-                byte[] iconData = BitmapUtils.flattenBitmap(icon);
-                values.put(AppListTable.Columns.KEY_ICON_CACHE, iconData);
-            }
-        }
-        if (TextUtils.isEmpty(localApp.getUploadDate())) {
+        if (TextUtils.isEmpty(localApp.uploadDate)) {
             values.put(AppListTable.Columns.KEY_UPLOAD_DATE, marketApp.getAppDetails().uploadDate);
         }
-        if (TextUtils.isEmpty(localApp.getVersionName())) {
+        if (TextUtils.isEmpty(localApp.versionName)) {
             values.put(AppListTable.Columns.KEY_VERSION_NAME, marketApp.getAppDetails().versionString);
         }
 
         Common.Offer offer = DocUtils.getOffer(marketApp);
 
-        if (!offer.currencyCode.equals(localApp.getPriceCur())) {
+        if (!offer.currencyCode.equals(localApp.priceCur)) {
             values.put(AppListTable.Columns.KEY_PRICE_CURRENCY, offer.currencyCode);
         }
-        if (!offer.formattedAmount.equals(localApp.getPriceText())) {
+        if (!offer.formattedAmount.equals(localApp.priceText)) {
             values.put(AppListTable.Columns.KEY_PRICE_TEXT, offer.formattedAmount);
         }
-        if (localApp.getPriceMicros() != offer.micros) {
+        if (localApp.priceMicros != offer.micros) {
             values.put(AppListTable.Columns.KEY_PRICE_MICROS, offer.micros);
         }
-    }
-
-    private Bitmap loadIcon(Document marketApp) {
-        String imageUrl = DocUtils.getIconUrl(marketApp);
-        if (imageUrl == null) {
-            return null;
-        }
-        if (mIconSize == -1) {
-            mIconSize = mContext.getResources().getDimensionPixelSize(R.dimen.icon_size);
-        }
-
-        try {
-            return Picasso.with(mContext).load(imageUrl)
-                    .resize(mIconSize, mIconSize)
-                    .centerInside()
-                    .onlyScaleDown()
-                    .get();
-
-        } catch (IOException e) {
-            AppLog.e(e);
-            return null;
+        String iconUrl = DocUtils.getIconUrl(marketApp);
+        if (!TextUtils.isEmpty(iconUrl))
+        {
+            values.put(AppListTable.Columns.KEY_ICON_URL, offer.micros);
         }
     }
 
-    private AppInfo createNewVersion(Document marketApp, AppInfo localApp, Bitmap newIcon) {
 
-        AppInfo newApp = new AppInfo(marketApp, newIcon);
+    private AppInfo createNewVersion(Document marketApp, AppInfo localApp) {
+
+        AppInfo newApp = new AppInfo(marketApp);
         newApp.setRowId(localApp.getRowId());
         newApp.setStatus(AppInfo.STATUS_UPDATED);
 

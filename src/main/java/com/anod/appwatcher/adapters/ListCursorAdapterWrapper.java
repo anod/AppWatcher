@@ -7,7 +7,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.anod.appwatcher.App;
 import com.anod.appwatcher.R;
+import com.anod.appwatcher.utils.AppIconLoader;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 
 /**
@@ -17,6 +19,7 @@ import com.anod.appwatcher.utils.PackageManagerUtils;
 public class ListCursorAdapterWrapper extends RecyclerView.Adapter<AppViewHolder> {
     private final ListCursorAdapter mCursorAdapter;
     private final AppViewHolderDataProvider mDataProvider;
+    private final AppIconLoader mIconLoader;
     private Context mContext;
     private AppViewHolder.OnClickListener mListener;
 
@@ -26,12 +29,13 @@ public class ListCursorAdapterWrapper extends RecyclerView.Adapter<AppViewHolder
         mListener = listener;
 
         mDataProvider = new AppViewHolderDataProvider(context, pmutils);
+        mIconLoader = App.provide(context).iconLoader();
     }
 
     @Override
     public AppViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = mCursorAdapter.newView(mContext, mCursorAdapter.getCursor(), parent);
-        AppViewHolder holder = new AppViewHolder(v, mDataProvider, mListener);
+        AppViewHolder holder = new AppViewHolder(v, mDataProvider, mIconLoader, mListener);
         v.setTag(holder);
         return holder;
     }

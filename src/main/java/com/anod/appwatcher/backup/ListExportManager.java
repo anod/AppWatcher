@@ -112,6 +112,7 @@ public class ListExportManager {
 	}
 
     public boolean writeList(File dataFile) {
+		AppLog.d("Write into: "+dataFile.toString());
         AppListWriter writer = new AppListWriter();
         AppListContentProviderClient cr = new AppListContentProviderClient(mContext);
         AppListCursor listCursor = cr.queryAllSorted();

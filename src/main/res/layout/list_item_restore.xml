@@ -2,65 +2,66 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:minHeight="?android:attr/listPreferredItemHeight"
     android:gravity="center_vertical"
-    android:paddingRight="?android:attr/scrollbarSize"
-    >
-   
-     <RelativeLayout
-       	android:layout_width="0dp"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:minHeight="?android:attr/listPreferredItemHeight">
+
+    <RelativeLayout
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="6dip"
-        android:layout_weight="1"
         android:layout_marginLeft="6dip"
-     >
-        <TextView android:id="@android:id/title"
+        android:layout_weight="1">
+
+        <TextView
+            android:id="@android:id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:textAppearance="?android:attr/textAppearanceLarge"
             android:ellipsize="marquee"
-            android:fadingEdge="horizontal" />
+            android:fadingEdge="horizontal"
+            android:singleLine="true"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            tools:text="20999999_9999"/>
     </RelativeLayout>
 
-    <ImageView 
-    	android:id="@+id/apply_icon"
+    <ImageView
+        android:id="@+id/apply_icon"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:gravity="center"
-        android:scaleType="center"
         android:background="@android:drawable/list_selector_background"
-        android:src="@drawable/ic_check_black_24dp"
+        android:gravity="center"
         android:paddingLeft="14dip"
         android:paddingRight="14dip"
-    /> 
-    
-    <View android:id="@+id/divider"
+        android:scaleType="center"
+        android:src="@drawable/ic_check_black_24dp" />
+
+    <View
+        android:id="@+id/divider"
         android:layout_width="1dp"
         android:layout_height="match_parent"
-        android:layout_marginTop="5dip"
         android:layout_marginBottom="5dip"
-	    android:background="@drawable/divider_vertical_dark" 
-    />
+        android:layout_marginTop="5dip"
+        android:background="@drawable/divider_vertical_dark" />
 
-    <ImageView android:id="@+id/delete_action_button"
+    <ImageView
+        android:id="@+id/delete_action_button"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:gravity="center"
-        android:scaleType="center"
         android:background="@android:drawable/list_selector_background"
-        android:src="@drawable/ic_delete_black_24dp"
+        android:gravity="center"
         android:paddingLeft="14dip"
         android:paddingRight="14dip"
-    />        
+        android:scaleType="center"
+        android:src="@drawable/ic_delete_black_24dp" />
 
     <!-- Preference should place its actual preference widget here. -->
-    <LinearLayout android:id="@android:id/widget_frame"
+    <LinearLayout
+        android:id="@android:id/widget_frame"
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
         android:gravity="center_vertical"
-        android:orientation="vertical" >
-        
-     </LinearLayout>
+        android:orientation="vertical">
+
+    </LinearLayout>
 
 </LinearLayout>

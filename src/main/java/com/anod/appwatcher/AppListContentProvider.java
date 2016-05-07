@@ -26,9 +26,11 @@ public class AppListContentProvider extends ContentProvider {
     private static final int APP_ROW = 20;
     private static final int TAG_LIST = 30;
     private static final int TAG_APPS = 40;
+    private static final int ICON_ROW = 50;
 
     public static final Uri APPS_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/apps");
     public static final Uri TAGS_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/tags");
+    public static final Uri ICONS_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/icons");
 
 
     private static final UriMatcher sURIMatcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -40,6 +42,12 @@ public class AppListContentProvider extends ContentProvider {
         sURIMatcher.addURI(AUTHORITY, "tags", TAG_LIST);
         sURIMatcher.addURI(AUTHORITY, "tag/#/apps", TAG_APPS);
 
+        sURIMatcher.addURI(AUTHORITY, "icons/#", ICON_ROW);
+    }
+
+    public static boolean matchIconUri(Uri uri)
+    {
+        return sURIMatcher.match(uri) == ICON_ROW;
     }
 
     private Query matchQuery(Uri uri) {
@@ -49,10 +57,11 @@ public class AppListContentProvider extends ContentProvider {
         }
         Query query = new Query();
         query.type = matched;
+        String rowId;
         switch (matched) {
             case APP_ROW:
                 query.table = AppListTable.TABLE_NAME;
-                String rowId = uri.getLastPathSegment();
+                rowId = uri.getLastPathSegment();
                 query.selection = AppListTable.Columns._ID + "=?";
                 query.selectionArgs = new String[]{rowId};
                 query.notifyUri = APPS_CONTENT_URI;
@@ -68,6 +77,13 @@ public class AppListContentProvider extends ContentProvider {
             case TAG_APPS:
                 query.table = AppTagsTable.TABLE_NAME;
                 query.notifyUri = TAGS_CONTENT_URI;
+                return query;
+            case ICON_ROW:
+                query.table = AppListTable.TABLE_NAME;
+                rowId = uri.getLastPathSegment();
+                query.selection = AppListTable.Columns._ID + "=?";
+                query.selectionArgs = new String[]{rowId};
+                query.notifyUri = ICONS_CONTENT_URI;
                 return query;
         }
         return null;
@@ -142,6 +158,11 @@ public class AppListContentProvider extends ContentProvider {
         // Using SQLiteQueryBuilder instead of query() method
         SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
         queryBuilder.setTables(query.table);
+
+        if (selection == null) {
+            selection = query.selection;
+            selectionArgs = query.selectionArgs;
+        }
 
         SQLiteDatabase db = mDatabaseOpenHelper.getWritableDatabase();
         Cursor cursor = queryBuilder.query(db, projection, selection, selectionArgs, null, null, sortOrder);

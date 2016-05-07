@@ -84,8 +84,7 @@ public class AuthTokenProvider {
             try {
                 token = mAuthTokenProvider.requestTokenBlocking(mActivity, mAccount);
             } catch (IOException | OperationCanceledException | AuthenticatorException e) {
-                AppLog.e("transient error encountered: " + e.getMessage(), e);
-                mCallback.onUnRecoverableException(e.getMessage());
+                AppLog.e(e.getMessage(), e);
             }
             return token;
         }
@@ -95,7 +94,7 @@ public class AuthTokenProvider {
         protected void onPostExecute(String token) {
             super.onPostExecute(token);
             if (token == null) {
-                mCallback.onUnRecoverableException("Token is null");
+                mCallback.onUnRecoverableException("Cannot retrieve authorization token");
             } else {
                 mCallback.onAuthTokenAvailable(token);
             }

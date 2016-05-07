@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.support.v4.util.ArrayMap;
 import android.util.DisplayMetrics;
 
@@ -30,6 +31,12 @@ public class PackageManagerUtils {
     private ArrayMap<String, InstalledInfo> mInstalledVersionsCache;
 
     public AppInfo packageToApp(PackageInfo packageInfo) {
+        ComponentName launchComponent = this.getLaunchComponent(packageInfo);
+        String iconUrl = null;
+        if (launchComponent != null) {
+            iconUrl = Uri.fromParts(AppIconLoader.SCHEME, launchComponent.flattenToShortString(), null).toString();
+        }
+
         return new AppInfo(-1,
                 packageInfo.packageName,
                 packageInfo.packageName,
@@ -37,7 +44,7 @@ public class PackageManagerUtils {
                 packageInfo.versionName,
                 this.getAppTitle(packageInfo),
                 null,
-                null,
+                iconUrl,
                 AppInfoMetadata.STATUS_NORMAL,
                 null,
                 null,
@@ -108,7 +115,7 @@ public class PackageManagerUtils {
     }
 
     public List<PackageInfo> getDownloadedApps(Map<String, Integer> filter) {
-        List<PackageInfo> packs = mPackageManager.getInstalledPackages(PackageManager.GET_ACTIVITIES);
+        List<PackageInfo> packs = mPackageManager.getInstalledPackages(0);
         List<PackageInfo> downloaded = new ArrayList<>(packs.size());
         for (int i = 0; i < packs.size(); i++)
         {

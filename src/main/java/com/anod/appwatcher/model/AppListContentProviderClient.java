@@ -108,7 +108,7 @@ public class AppListContentProviderClient {
         cursor.moveToPosition(-1);
         while (cursor.moveToNext()) {
             AppInfo info = cursor.getAppInfo();
-            result.put(info.getPackageName(), info.getRowId());
+            result.put(info.packageName, info.getRowId());
         }
         cursor.close();
         return result;
@@ -188,25 +188,21 @@ public class AppListContentProviderClient {
         ContentValues values = new ContentValues();
 
         values.put(AppListTable.Columns.KEY_APPID, app.getAppId());
-        values.put(AppListTable.Columns.KEY_PACKAGE, app.getPackageName());
-        values.put(AppListTable.Columns.KEY_TITLE, app.getTitle());
-        values.put(AppListTable.Columns.KEY_VERSION_NUMBER, app.getVersionCode());
-        values.put(AppListTable.Columns.KEY_VERSION_NAME, app.getVersionName());
-        values.put(AppListTable.Columns.KEY_CREATOR, app.getCreator());
+        values.put(AppListTable.Columns.KEY_PACKAGE, app.packageName);
+        values.put(AppListTable.Columns.KEY_TITLE, app.title);
+        values.put(AppListTable.Columns.KEY_VERSION_NUMBER, app.versionNumber);
+        values.put(AppListTable.Columns.KEY_VERSION_NAME, app.versionName);
+        values.put(AppListTable.Columns.KEY_CREATOR, app.creator);
         values.put(AppListTable.Columns.KEY_STATUS, app.getStatus());
-        values.put(AppListTable.Columns.KEY_UPLOAD_DATE, app.getUploadDate());
+        values.put(AppListTable.Columns.KEY_UPLOAD_DATE, app.uploadDate);
 
-        values.put(AppListTable.Columns.KEY_PRICE_TEXT, app.getPriceText());
-        values.put(AppListTable.Columns.KEY_PRICE_CURRENCY, app.getPriceCur());
-        values.put(AppListTable.Columns.KEY_PRICE_MICROS, app.getPriceMicros());
+        values.put(AppListTable.Columns.KEY_PRICE_TEXT, app.priceText);
+        values.put(AppListTable.Columns.KEY_PRICE_CURRENCY, app.priceCur);
+        values.put(AppListTable.Columns.KEY_PRICE_MICROS, app.priceMicros);
 
         values.put(AppListTable.Columns.KEY_DETAILS_URL, app.getDetailsUrl());
 
-        Bitmap icon = app.getIcon();
-        if (icon != null) {
-            byte[] iconData = BitmapUtils.flattenBitmap(icon);
-            values.put(AppListTable.Columns.KEY_ICON_CACHE, iconData);
-        }
+        values.put(AppListTable.Columns.KEY_ICON_URL, app.iconUrl);
         return values;
     }
 
@@ -227,10 +223,36 @@ public class AppListContentProviderClient {
         return info;
     }
 
+    public Bitmap queryAppIcon(Uri uri) {
+        Cursor cr;
+        try {
+            cr = mContentProviderClient.query(uri,
+                    new String[]{ AppListTable.Columns._ID, AppListTable.Columns.KEY_ICON_CACHE },
+                    null, null, null
+            );
+        } catch (RemoteException e) {
+            AppLog.e(e);
+            return null;
+        }
+        if (cr == null) {
+            return null;
+        }
+        cr.moveToPosition(-1);
+        Bitmap icon = null;
+        if (cr.moveToNext()) {
+            byte[] iconData = cr.getBlob(1);
+            icon = BitmapUtils.unFlattenBitmap(iconData);
+        }
+        cr.close();
+
+        return icon;
+    }
+
+
     public void addList(List<AppInfo> appList) {
         Map<String, Integer> currentIds = queryPackagesMap(true);
         for (AppInfo app : appList) {
-            Integer rowId = currentIds.get(app.getPackageName());
+            Integer rowId = currentIds.get(app.packageName);
             if (rowId == null) {
                 insert(app);
             } else {

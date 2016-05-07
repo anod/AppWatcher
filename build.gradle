@@ -4,9 +4,12 @@ buildscript {
     repositories {
         mavenCentral()
         maven { url 'https://maven.fabric.io/public' }
+        maven {
+            url 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.0.0'
+        classpath 'com.android.tools.build:gradle:2.1.0'
     }
 
 }
@@ -15,6 +18,9 @@ repositories {
     mavenCentral()
     jcenter()
     maven { url "https://jitpack.io" }
+    maven {
+        url 'https://oss.sonatype.org/content/repositories/snapshots/'
+    }
 }
 
 apply plugin: 'com.android.application'
@@ -41,7 +47,7 @@ dependencies {
 
     compile 'com.android.volley:volley:1.0.0'
     compile 'com.jakewharton:butterknife:7.0.1'
-    compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'com.squareup.picasso:picasso:2.6.0-SNAPSHOT'
 
     compile 'net.hockeyapp.android:HockeySDK:4.0.0-beta.1'
 

@@ -233,8 +233,8 @@ public class AppWatcherListFragment extends Fragment implements
         startActivityForResult(intent, REQUEST_APP_INFO);
 
         if (BuildConfig.DEBUG) {
-            AppLog.d(app.getPackageName());
-            Toast.makeText(getActivity(), app.getPackageName(), Toast.LENGTH_SHORT).show();
+            AppLog.d(app.packageName);
+            Toast.makeText(getActivity(), app.packageName, Toast.LENGTH_SHORT).show();
         }
 
     }

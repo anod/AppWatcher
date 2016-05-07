@@ -4,6 +4,7 @@ import android.accounts.Account;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.Toast;
 
 import com.anod.appwatcher.AppListContentProvider;
 import com.anod.appwatcher.Preferences;
@@ -78,7 +79,9 @@ public class AccountChooserHelper implements AccountChooserFragment.OnAccountSel
 
                 @Override
                 public void onUnRecoverableException(String errorMessage) {
-                    AppLog.e(errorMessage);
+                    if (mListener != null) {
+                        mListener.onHelperAccountSelected(mSyncAccount, null);
+                    }
                 }
             });
 
@@ -116,7 +119,9 @@ public class AccountChooserHelper implements AccountChooserFragment.OnAccountSel
 
             @Override
             public void onUnRecoverableException(String errorMessage) {
-
+                if (mListener != null) {
+                    mListener.onHelperAccountSelected(mSyncAccount, null);
+                }
             }
         });
 

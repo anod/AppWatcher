@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.anod.appwatcher.App;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.adapters.AppViewHolder;
 import com.anod.appwatcher.adapters.AppViewHolderDataProvider;
@@ -39,7 +40,7 @@ public class InstalledAppsAdapter extends ArrayAdapter<PackageInfo, AppViewHolde
         mDataProvider = dataProvider;
 
         mPMUtils = pmutils;
-        mIconLoader = new AppIconLoader(context);
+        mIconLoader = App.provide(context).iconLoader();
 
     }
 
@@ -54,7 +55,7 @@ public class InstalledAppsAdapter extends ArrayAdapter<PackageInfo, AppViewHolde
         v.setClickable(true);
         v.setFocusable(true);
 
-        return new InstalledAppViewHolder(v, mDataProvider, mListener);
+        return new InstalledAppViewHolder(v, mDataProvider, mIconLoader, mListener);
 
     }
 
@@ -68,14 +69,6 @@ public class InstalledAppsAdapter extends ArrayAdapter<PackageInfo, AppViewHolde
          String title, String creator, Bitmap icon, int status, String uploadDate, String priceText, String priceCur, Integer priceMicros, String detailsUrl) {
          */
         holder.bindView(position, app);
-
-        ComponentName launchComponent = mPMUtils.getLaunchComponent(packageInfo);
-        if (launchComponent != null) {
-            mIconLoader.picasso()
-                    .load(Uri.fromParts(AppIconLoader.SCHEME, launchComponent.flattenToShortString(), null))
-                    .placeholder(mDataProvider.getDefaultIconResource())
-                    .into(holder.icon);
-        }
     }
 
     @Override

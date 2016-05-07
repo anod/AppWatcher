@@ -1,13 +1,13 @@
 package com.anod.appwatcher;
 
 import android.accounts.Account;
-import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.ColorInt;
 import android.support.design.widget.FloatingActionButton;
@@ -38,10 +38,11 @@ import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.model.AddWatchAppHandler;
 import com.anod.appwatcher.ui.ToolbarActivity;
-import com.anod.appwatcher.utils.DocUtils;
+import com.anod.appwatcher.utils.AppIconLoader;
 import com.anod.appwatcher.utils.IntentUtils;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 import com.google.android.finsky.api.model.Document;
+import com.squareup.picasso.Picasso;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -55,6 +56,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
     public static final String EXTRA_APP_ID = "app_id";
     public static final String EXTRA_DETAILS_URL = "url";
     public static final String EXTRA_ROW_ID = "row_id";
+    public static final String EXTRA_ICON = "app_icon";
     public static final String EXTRA_ADD_APP_PACKAGE = "app_add_success";
     public static final String EXTRA_UNINSTALL_APP_PACKAGE = "app_uninstall";
 
@@ -88,6 +90,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
     private boolean mNewApp;
     private MenuItem mAddMenu;
     private PackageManagerUtils mPMutils;
+    private AppIconLoader mIconLoader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,6 +101,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
 
         Intent data = getIntent();
 
+        mIconLoader = App.provide(this).iconLoader();
         mAppId = data.getStringExtra(EXTRA_APP_ID);
         mDetailsUrl = data.getStringExtra(EXTRA_DETAILS_URL);
         int rowId = data.getIntExtra(EXTRA_ROW_ID, -1);
@@ -155,15 +159,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
         {
             return null;
         }
-
-        AppInfo appInfo = mPMutils.packageToApp(pkgInfo);
-
-        ComponentName launchComponent = mPMutils.getLaunchComponent(pkgInfo);
-        if (launchComponent != null) {
-            Bitmap icon = mPMutils.loadIcon(launchComponent, getResources().getDisplayMetrics());
-            appInfo.setIcon(icon);
-        }
-        return appInfo;
+        return  mPMutils.packageToApp(pkgInfo);
     }
 
     @Override
@@ -197,18 +193,46 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
     }
 
     private void setupAppView(AppInfo app) {
-        Bitmap icon = app.getIcon();
-        if (icon == null) {
-            icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_android_black_48dp);
-            mBackground.setVisibility(View.VISIBLE);
-            applyColor(ContextCompat.getColor(this, R.color.theme_primary));
-        } else {
-            Palette.from(icon).generate(this);
-        }
-        mAppIcon.setImageBitmap(icon);
-        mAppTitle.setText(app.getTitle());
-
+        mAppTitle.setText(app.title);
         mPlayStoreButton.setOnClickListener(this);
+
+        if (app.iconUrl == null) {
+            if (app.getRowId() > 0)
+            {
+                Uri dbImageUri = AppListContentProvider.ICONS_CONTENT_URI.buildUpon().appendPath(String.valueOf(app.getRowId())).build();
+                mIconLoader.retrieve(dbImageUri).into(mIconLoadTarget);
+            } else {
+                setDefaultIcon();
+            }
+        } else {
+            mIconLoader.retrieve(app.iconUrl).into(mIconLoadTarget);
+        }
+    }
+
+    private com.squareup.picasso.Target mIconLoadTarget = new com.squareup.picasso.Target() {
+        @Override
+        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+            Palette.from(bitmap).generate(ChangelogActivity.this);
+            mAppIcon.setImageBitmap(bitmap);
+        }
+
+        @Override
+        public void onBitmapFailed(Drawable errorDrawable) {
+            setDefaultIcon();
+        }
+
+        @Override
+        public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+        }
+    };
+
+    private void setDefaultIcon()
+    {
+        Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_android_black_48dp);
+        mBackground.setVisibility(View.VISIBLE);
+        applyColor(ContextCompat.getColor(this, R.color.theme_primary));
+        mAppIcon.setImageBitmap(icon);
     }
 
     @Override
@@ -234,19 +258,18 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
         switch (item.getItemId()) {
             case R.id.menu_remove:
                 RemoveDialogFragment removeDialog = RemoveDialogFragment.newInstance(
-                        mApp.getTitle(), mApp.getRowId()
+                        mApp.title, mApp.getRowId()
                 );
                 removeDialog.show(getSupportFragmentManager(), "removeDialog");
                 return true;
             case R.id.menu_add:
                 Document doc = mDetailsEndpoint.getDocument();
                 if (doc != null) {
-                    String imageUrl = DocUtils.getIconUrl(doc);
-                    final AppInfo info = new AppInfo(doc, null);
+                    final AppInfo info = new AppInfo(doc);
                     AppListContentProviderClient client = new AppListContentProviderClient(this);
                     AddWatchAppHandler appHandler = new AddWatchAppHandler(this, this);
                     appHandler.setContentProvider(client);
-                    appHandler.add(info, imageUrl);
+                    appHandler.add(info);
                     client.release();
                 }
                 return true;
@@ -267,11 +290,11 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
     private void shareApp() {
         ShareCompat.IntentBuilder builder = ShareCompat.IntentBuilder.from(this);
         if (mApp.getStatus() == AppInfo.STATUS_UPDATED) {
-            builder.setSubject(getString(R.string.share_subject_updated, mApp.getTitle()));
+            builder.setSubject(getString(R.string.share_subject_updated, mApp.title));
         } else {
-            builder.setSubject(getString(R.string.share_subject_normal, mApp.getTitle()));
+            builder.setSubject(getString(R.string.share_subject_normal, mApp.title));
         }
-        builder.setText(String.format(MarketInfo.URL_WEB_PLAY_STORE, mApp.getPackageName()));
+        builder.setText(String.format(MarketInfo.URL_WEB_PLAY_STORE, mApp.packageName));
         builder.setType("text/plain");
         builder.startChooser();
     }
@@ -342,17 +365,17 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
     public void onClick(View v) {
         int id = v.getId();
         if (id == R.id.market_btn) {
-            Intent intent = IntentUtils.createPlayStoreIntent(mApp.getPackageName());
+            Intent intent = IntentUtils.createPlayStoreIntent(mApp.packageName);
             startActivity(intent);
         }
     }
 
     @Override
     public void onAppAddSuccess(AppInfo info) {
-        String msg = getString(R.string.app_stored, info.getTitle());
+        String msg = getString(R.string.app_stored, info.title);
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
         Intent data = new Intent();
-        data.putExtra(EXTRA_ADD_APP_PACKAGE, info.getPackageName());
+        data.putExtra(EXTRA_ADD_APP_PACKAGE, info.packageName);
         setResult(RESULT_OK, data);
         finish();
     }

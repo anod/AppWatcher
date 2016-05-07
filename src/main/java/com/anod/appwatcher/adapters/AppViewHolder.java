@@ -2,18 +2,22 @@ package com.anod.appwatcher.adapters;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.anod.appwatcher.AppListContentProvider;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.model.AppInfo;
+import com.anod.appwatcher.utils.AppIconLoader;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 
 public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
     private final DataProvider mDataProvider;
+    private final AppIconLoader mIconLoader;
 
     public AppInfo app;
     public int position;
@@ -28,8 +32,6 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
     public View newIndicator;
     public TextView updateDate;
     private OnClickListener mListener;
-
-    protected Bitmap mDefaultIcon;
 
     public interface OnClickListener {
         void onItemClick(AppInfo app);
@@ -47,11 +49,12 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
         int getDefaultIconResource();
     }
 
-    public AppViewHolder(View itemView, DataProvider dataProvider, OnClickListener listener) {
+    public AppViewHolder(View itemView, DataProvider dataProvider, AppIconLoader iconLoader, OnClickListener listener) {
         super(itemView);
 
         mListener = listener;
         mDataProvider = dataProvider;
+        mIconLoader = iconLoader;
 
         this.app = null;
         this.position = 0;
@@ -77,27 +80,22 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
     public void bindView(int position, AppInfo app) {
         this.position = position;
         this.app = app;
-        title.setText(app.getTitle());
-        details.setText(app.getCreator());
+        title.setText(app.title);
+        details.setText(app.creator);
 
-        icon.setTag(this);
-        Bitmap icon = app.getIcon();
-        if (icon == null) {
-            icon = mDataProvider.getDefaultIcon();
-        }
-        this.icon.setImageBitmap(icon);
+        bindIcon(app);
 
         if (app.getStatus() == AppInfo.STATUS_UPDATED) {
             version.setVisibility(View.VISIBLE);
-            version.setText(String.format(mDataProvider.getUpdateText(), app.getVersionName()));
+            version.setText(String.format(mDataProvider.getUpdateText(), app.versionName));
             version.setTextColor(mDataProvider.getUpdateTextColor());
             newIndicator.setVisibility(View.VISIBLE);
         } else {
-            if (TextUtils.isEmpty(app.getVersionName())) {
+            if (TextUtils.isEmpty(app.versionName)) {
                 version.setVisibility(View.INVISIBLE);
             } else {
                 version.setVisibility(View.VISIBLE);
-                version.setText(String.format(mDataProvider.getVersionText(), app.getVersionName()));
+                version.setText(String.format(mDataProvider.getVersionText(), app.versionName));
             }
             newIndicator.setVisibility(View.INVISIBLE);
         }
@@ -106,7 +104,7 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
 
         bindSectionView();
 
-        String uploadDate = app.getUploadDate();
+        String uploadDate = app.uploadDate;
 
         if (TextUtils.isEmpty(uploadDate)) {
             updateDate.setVisibility(View.GONE);
@@ -116,20 +114,37 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
         }
     }
 
+    protected void bindIcon(AppInfo app) {
+        if (app.iconUrl == null) {
+            if (app.getRowId() > 0) {
+                Uri dbImageUri = AppListContentProvider.ICONS_CONTENT_URI.buildUpon().appendPath(String.valueOf(app.getRowId())).build();
+                mIconLoader.retrieve(dbImageUri)
+                        .placeholder(mDataProvider.getDefaultIconResource())
+                        .into(this.icon);
+            } else {
+                this.icon.setImageBitmap(mDataProvider.getDefaultIcon());
+            }
+        } else {
+            mIconLoader.retrieve(app.iconUrl)
+                    .placeholder(mDataProvider.getDefaultIconResource())
+                    .into(this.icon);
+        }
+    }
+
     protected void bindPriceView(AppInfo app) {
-        boolean isInstalled = mDataProvider.getPackageManagerUtils().isAppInstalled(app.getPackageName());
+        boolean isInstalled = mDataProvider.getPackageManagerUtils().isAppInstalled(app.packageName);
         if (isInstalled) {
-            PackageManagerUtils.InstalledInfo installed = mDataProvider.getPackageManagerUtils().getInstalledInfo(app.getPackageName());
+            PackageManagerUtils.InstalledInfo installed = mDataProvider.getPackageManagerUtils().getInstalledInfo(app.packageName);
             if (TextUtils.isEmpty(installed.versionName)) {
                 price.setText(mDataProvider.getInstalledText());
             } else {
                 price.setText(mDataProvider.getInstalledText() + " " + installed.versionName);
             }
         } else {
-            if (app.getPriceMicros() == 0) {
+            if (app.priceMicros == 0) {
                 price.setText(R.string.free);
             } else {
-                price.setText(app.getPriceText());
+                price.setText(app.priceText);
             }
         }
     }

@@ -171,8 +171,8 @@ public class SyncConnectedWorker {
             AppLog.d("[GDrive] Read remote apps " + APPLIST_JSON);
             while (driveAppsIterator.hasNext()) {
                 AppInfo app = driveAppsIterator.next();
-                AppLog.d("[GDrive] Read app: " + app.getPackageName());
-                if (app != null && currentIds.get(app.getPackageName()) == null) {
+                AppLog.d("[GDrive] Read app: " + app.packageName);
+                if (currentIds.get(app.packageName) == null) {
                     cr.insert(app);
                 }
             }

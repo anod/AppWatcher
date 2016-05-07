@@ -234,7 +234,6 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
     public void onHelperAccountNotFound() {
         Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
         finish();
-
     }
 
     @Override
@@ -298,7 +297,7 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
 
     @Override
     public void onAppAddSuccess(AppInfo info) {
-        String msg = mContext.getString(R.string.app_stored, info.getTitle());
+        String msg = mContext.getString(R.string.app_stored, info.title);
         Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
         mAdapter.notifyDataSetChanged();
         if (mShareSource) {

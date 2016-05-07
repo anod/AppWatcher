@@ -10,9 +10,9 @@ public class AppInfoMetadata {
     public static final int STATUS_UPDATED = 1;
     public static final int STATUS_DELETED = 2;
 
+    protected String appId;
     protected int status;
     protected long modifyTime; // when the item was inserted or deleted
-    protected String appId;
 
     public AppInfoMetadata(String appId, int status) {
         this.appId = appId;

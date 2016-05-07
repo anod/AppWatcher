@@ -50,7 +50,7 @@ public class AppListReader {
      * @throws IOException
      */
     public AppInfo readAppInfo(JsonReader reader) throws IOException {
-        String appId = null, pname = null, versionName = "", title = "", creator = "", uploadDate="", detailsUrl=null;
+        String appId = null, pname = null, versionName = "", title = "", creator = "", uploadDate="", detailsUrl=null, iconUrl=null;
         int versionNumber = 0, status = 0;
         Bitmap icon = null;
 
@@ -77,18 +77,8 @@ public class AppListReader {
                 status = (isNull) ? 0 : reader.nextInt();
             } else if (name.equals("detailsUrl")) {
                 detailsUrl = (isNull) ? "" : reader.nextString();
-            } else if (name.equals("icon")) {
-                if (isNull) {
-                    icon = null;
-                } else {
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    reader.beginArray();
-                    while (reader.hasNext()) {
-                        baos.write(reader.nextInt());
-                    }
-                    reader.endArray();
-                    icon = BitmapUtils.unFlattenBitmap(baos.toByteArray());
-                }
+            } else if (name.equals("iconUrl")) {
+                iconUrl = (isNull) ? "" : reader.nextString();
             } else {
                 skipped = true;
                 reader.skipValue();
@@ -101,7 +91,7 @@ public class AppListReader {
         AppInfo info = null;
         if (appId != null && pname != null) {
             info = new AppInfo(0, appId, pname, versionNumber, versionName,
-                    title, creator, icon, status, uploadDate, null, null, null, detailsUrl);
+                    title, creator, iconUrl, status, uploadDate, null, null, null, detailsUrl);
         }
         onUpgrade(info);
         return info;
@@ -110,7 +100,7 @@ public class AppListReader {
 
     private void onUpgrade(AppInfo info) {
         if (TextUtils.isEmpty(info.getDetailsUrl())) {
-            String packageName = info.getPackageName();
+            String packageName = info.packageName;
             info.setAppId(packageName);
             info.setDetailsUrl("details?doc="+packageName);
         }

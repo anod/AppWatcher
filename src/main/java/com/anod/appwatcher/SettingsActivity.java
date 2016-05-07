@@ -18,6 +18,7 @@ import com.anod.appwatcher.ui.SettingsActionBarActivity;
 import java.util.ArrayList;
 
 import de.psdev.licensesdialog.LicensesDialog;
+import info.anodsplace.android.log.AppLog;
 
 
 public class SettingsActivity extends SettingsActionBarActivity implements ExportTask.Listener, GDriveSync.Listener, AccountChooserHelper.OnAccountSelectionListener {
@@ -39,11 +40,13 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
 
     @Override
     public void onExportStart() {
+        AppLog.d("Exporting...");
         setProgressVisibility(true);
     }
 
     @Override
     public void onExportFinish(int code) {
+        AppLog.d("Code: "+code);
         setProgressVisibility(false);
         Resources r = getResources();
         if (code == ListExportManager.RESULT_DONE) {
@@ -243,14 +246,12 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     public void onHelperAccountSelected(Account account, String authSubToken) {
         if (authSubToken == null) {
             Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
-            finish();
         }
     }
 
     @Override
     public void onHelperAccountNotFound() {
         Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
-        finish();
     }
 
     @Override

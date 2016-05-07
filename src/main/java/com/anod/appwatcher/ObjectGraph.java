@@ -4,6 +4,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.NoCache;
 import com.anod.appwatcher.accounts.AccountManager;
 import com.anod.appwatcher.market.DeviceIdHelper;
+import com.anod.appwatcher.utils.AppIconLoader;
 import com.anod.appwatcher.volley.Network;
 
 /**
@@ -16,6 +17,7 @@ public class ObjectGraph {
     private RequestQueue mRequestQueue;
     private String mDeviceId;
     private AccountManager mAccountManager;
+    private AppIconLoader mIconLoader;
 
     public ObjectGraph(AppWatcherApplication application)  {
         this.app = application;
@@ -42,6 +44,15 @@ public class ObjectGraph {
             mRequestQueue.start();
         }
         return mRequestQueue;
+    }
+
+    public AppIconLoader iconLoader()
+    {
+        if (mIconLoader == null)
+        {
+            mIconLoader = new AppIconLoader(this.app);
+        }
+        return mIconLoader;
     }
 
 }

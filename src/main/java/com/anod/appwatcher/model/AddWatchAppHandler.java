@@ -47,13 +47,13 @@ public class AddWatchAppHandler {
     }
 
 
-    public int addSync(AppInfo info, String imageUrl) {
-        if (mAddedApps.containsKey(info.getPackageName())) {
+    public int addSync(AppInfo info) {
+        if (mAddedApps.containsKey(info.packageName)) {
             return 0;
         }
 
-        mAddedApps.put(info.getPackageName(), true);
-        AppInfo existingApp = mContentProvider.queryAppId(info.getPackageName());
+        mAddedApps.put(info.packageName, true);
+        AppInfo existingApp = mContentProvider.queryAppId(info.packageName);
         if (existingApp != null) {
             if (existingApp.getStatus() == AppInfoMetadata.STATUS_DELETED) {
                 int success = mContentProvider.updateStatus(existingApp.getRowId(), AppInfoMetadata.STATUS_NORMAL);
@@ -64,19 +64,6 @@ public class AddWatchAppHandler {
                 }
             }
             return ERROR_ALREADY_ADDED;
-        }
-
-        if (imageUrl != null) {
-            if (mIconSize == -1) {
-                mIconSize = mContext.getResources().getDimensionPixelSize(R.dimen.icon_size);
-            }
-            Bitmap icon = null;
-            try {
-                icon = Picasso.with(mContext).load(imageUrl).get();
-            } catch (IOException ignored) { }
-            if (icon != null) {
-                info.setIcon(icon);
-            }
         }
 
         if ((new Random()).nextInt(32)  > 16)
@@ -90,13 +77,13 @@ public class AddWatchAppHandler {
         return RESULT_OK;
     }
 
-    public void add(final AppInfo info, String imageUrl) {
-        if (mAddedApps.containsKey(info.getPackageName())) {
+    public void add(final AppInfo info) {
+        if (mAddedApps.containsKey(info.packageName)) {
             return;
         }
 
-        mAddedApps.put(info.getPackageName(), true);
-        AppInfo existingApp = mContentProvider.queryAppId(info.getPackageName());
+        mAddedApps.put(info.packageName, true);
+        AppInfo existingApp = mContentProvider.queryAppId(info.packageName);
         if (existingApp != null) {
             if (existingApp.getStatus() == AppInfoMetadata.STATUS_DELETED) {
                 int success = mContentProvider.updateStatus(existingApp.getRowId(), AppInfoMetadata.STATUS_NORMAL);
@@ -111,29 +98,7 @@ public class AddWatchAppHandler {
             return;
         }
 
-        if (imageUrl != null) {
-            if (mIconSize == -1) {
-                mIconSize = mContext.getResources().getDimensionPixelSize(R.dimen.icon_size);
-            }
-            Picasso.with(mContext).load(imageUrl).into(new Target() {
-                @Override
-                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                    info.setIcon(bitmap);
-                    insertApp(info);
-                }
-
-                @Override
-                public void onBitmapFailed(Drawable errorDrawable) {
-                    insertApp(info);
-                }
-
-                @Override
-                public void onPrepareLoad(Drawable placeHolderDrawable) { }
-            });
-        } else {
-            insertApp(info);
-        }
-
+        insertApp(info);
     }
 
     private void insertApp(final AppInfo info) {

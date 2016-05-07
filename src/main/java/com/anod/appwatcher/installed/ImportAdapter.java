@@ -14,8 +14,8 @@ class ImportAdapter extends InstalledAppsAdapter {
     private final ImportDataProvider mDataProvider;
     private SimpleArrayMap<String, Integer> mPackageIndex;
 
-    public ImportAdapter(Context context, PackageManagerUtils pmutils, ImportDataProvider dataProvider) {
-        super(context, pmutils, dataProvider, null);
+    public ImportAdapter(Context context, PackageManagerUtils pmUtils, ImportDataProvider dataProvider) {
+        super(context, pmUtils, dataProvider, null);
         mDataProvider = dataProvider;
     }
 
@@ -25,7 +25,7 @@ class ImportAdapter extends InstalledAppsAdapter {
         v.setClickable(true);
         v.setFocusable(true);
 
-        return new ImportAppViewHolder(v, mDataProvider);
+        return new ImportAppViewHolder(v, mDataProvider, mIconLoader);
     }
 
     public void clearPackageIndex() {

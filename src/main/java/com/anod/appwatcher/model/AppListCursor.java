@@ -20,13 +20,13 @@ public class AppListCursor extends CursorWrapper implements CrossProcessCursor {
     private static final int IDX_VERSION_NAME = 4;
     private static final int IDX_TITLE = 5;
     private static final int IDX_CREATOR = 6;
-    private static final int IDX_ICON_CACHE = 7;
-    public static final int IDX_STATUS = 8;
-    private static final int IDX_PRICE_TEXT = 10;
-    private static final int IDX_PRICE_CURRENCY = 11;
-    private static final int IDX_PRICE_MICROS = 12;
-    private static final int IDX_UPLOAD_DATE = 13;
-    private static final int IDX_DETAILS_URL = 14;
+    public static final int IDX_STATUS = 7;
+    private static final int IDX_PRICE_TEXT = 9;
+    private static final int IDX_PRICE_CURRENCY = 10;
+    private static final int IDX_PRICE_MICROS = 11;
+    private static final int IDX_UPLOAD_DATE = 12;
+    private static final int IDX_DETAILS_URL = 13;
+    private static final int IDX_ICON_URL = 14;
 
     public AppListCursor(Cursor cursor) {
         super(cursor);
@@ -38,8 +38,6 @@ public class AppListCursor extends CursorWrapper implements CrossProcessCursor {
     }
 
     public AppInfo getAppInfo() {
-        byte[] iconData = getBlob(IDX_ICON_CACHE);
-        Bitmap icon = BitmapUtils.unFlattenBitmap(iconData);
 
         return new AppInfo(
                 getInt(IDX_ROWID),
@@ -49,7 +47,7 @@ public class AppListCursor extends CursorWrapper implements CrossProcessCursor {
                 getString(IDX_VERSION_NAME),
                 getString(IDX_TITLE),
                 getString(IDX_CREATOR),
-                icon,
+                getString(IDX_ICON_URL),
                 getInt(IDX_STATUS),
                 getString(IDX_UPLOAD_DATE),
                 getString(IDX_PRICE_TEXT),
@@ -85,16 +83,16 @@ public class AppListCursor extends CursorWrapper implements CrossProcessCursor {
                 for (int i = 0; i < columnNum; i++) {
                     boolean putNull = true;
                     ;
-                    if (IDX_ICON_CACHE == i) {
-                        byte[] iconData = getBlob(IDX_ICON_CACHE);
-                        if (iconData != null && iconData.length > 0) {
-                            putNull = false;
-                            if (!window.putBlob(iconData, getPosition(), i)) {
-                                window.freeLastRow();
-                                break;
-                            }
-                        }
-                    } else {
+//                    if (IDX_ICON_CACHE == i) {
+//                        byte[] iconData = getBlob(IDX_ICON_CACHE);
+//                        if (iconData != null && iconData.length > 0) {
+//                            putNull = false;
+//                            if (!window.putBlob(iconData, getPosition(), i)) {
+//                                window.freeLastRow();
+//                                break;
+//                            }
+//                        }
+//                    } else {
                         String field = getString(i);
                         if (field != null) {
                             putNull = false;
@@ -103,7 +101,7 @@ public class AppListCursor extends CursorWrapper implements CrossProcessCursor {
                                 break;
                             }
                         }
-                    }
+//                    }
                     if (putNull) {
                         if (!window.putNull(getPosition(), i)) {
                             window.freeLastRow();
