@@ -88,8 +88,6 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
             {
                 Toast.makeText(this, "Cannot start export without permissions", Toast.LENGTH_SHORT).show();
             }
-        } else {
-            mAccountChooserHelper.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 

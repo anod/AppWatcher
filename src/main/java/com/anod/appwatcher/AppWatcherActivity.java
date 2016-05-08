@@ -229,11 +229,6 @@ public class AppWatcherActivity extends DrawerActivity implements
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        mAccountChooserHelper.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_add:
@@ -294,6 +289,11 @@ public class AppWatcherActivity extends DrawerActivity implements
     @Override
     public AccountChooserFragment.OnAccountSelectionListener getAccountSelectionListener() {
         return mAccountChooserHelper;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override

@@ -75,11 +75,6 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
         mAccountChooserHelper.init();
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        mAccountChooserHelper.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    }
-
     @OnClick(android.R.id.button3)
     public void onAllButtonClick() {
         ImportAdapter importAdapter = (ImportAdapter) mList.getAdapter();

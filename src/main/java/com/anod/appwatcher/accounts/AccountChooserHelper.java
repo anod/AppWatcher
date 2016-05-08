@@ -33,40 +33,13 @@ public class AccountChooserHelper implements AccountChooserFragment.OnAccountSel
     private static final int TWO_HOURS_IN_SEC = 7200;
     private static final int SIX_HOURS_IN_SEC = 21600;
 
-    private static final int PERMISSION_REQUEST_GET_ACCOUNTS = 123;
-
     private void showAccountsDialog() {
         AccountChooserFragment accountsDialog = AccountChooserFragment.newInstance();
         accountsDialog.show(mActivity.getSupportFragmentManager(), "accountsDialog");
     }
 
     public void showAccountsDialogWithCheck() {
-        if (ContextCompat.checkSelfPermission(mActivity, Manifest.permission.GET_ACCOUNTS) == PackageManager.PERMISSION_GRANTED) {
-            showAccountsDialog();
-        } else {
-            ActivityCompat.requestPermissions(mActivity,new String[] { Manifest.permission.GET_ACCOUNTS }, PERMISSION_REQUEST_GET_ACCOUNTS);
-        }
-
-    }
-
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == PERMISSION_REQUEST_GET_ACCOUNTS)
-        {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-            {
-                // http://stackoverflow.com/questions/33264031/calling-dialogfragments-show-from-within-onrequestpermissionsresult-causes
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        showAccountsDialog();
-                    }
-                }, 200);
-            }
-            else
-            {
-                Toast.makeText(mActivity, R.string.failed_gain_access, Toast.LENGTH_SHORT).show();
-            }
-        }
+        showAccountsDialog();
     }
 
     // Container Activity must implement this interface

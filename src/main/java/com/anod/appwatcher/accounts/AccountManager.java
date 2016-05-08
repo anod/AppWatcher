@@ -13,7 +13,7 @@ public class AccountManager {
 
     private final android.accounts.AccountManager mAccountManager;
     private final Preferences mPreferences;
-    private final Account[] mAccounts;
+    private Account[] mAccounts;
     private Account mCurrentAccount;
 
     public AccountManager(Context context) {
@@ -35,8 +35,10 @@ public class AccountManager {
         return mAccounts.length > 0;
     }
 
-    public boolean hasJustOneAccount() {
-        return mAccounts.length == 1;
+    public void reload()
+    {
+        mAccounts = mAccountManager.getAccountsByType(AuthTokenProvider.ACCOUNT_TYPE);
+        mCurrentAccount = mPreferences.getAccount();
     }
 
     public Account getAccount(int idx) {
@@ -46,9 +48,5 @@ public class AccountManager {
     public void saveCurrentAccount(Account acc) {
         mPreferences.updateAccount(acc);
         mCurrentAccount=acc;
-    }
-
-    public boolean hasActiveAccount() {
-        return mCurrentAccount != null;
     }
 }
