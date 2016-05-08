@@ -56,7 +56,7 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
     private boolean mInitiateSearch = false;
     private boolean mShareSource = false;
 
-    private AccountChooserHelper mAccChooserHelper;
+    private AccountChooserHelper mAccountChooserHelper;
     private SearchEndpoint mSearchEngine;
     private AddWatchAppHandler mNewAppHandler;
     private AppListContentProviderClient mContentProviderClient;
@@ -128,8 +128,8 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
         mNewAppHandler.setContentProvider(mContentProviderClient);
         mSearchEngine.setListener(this);
 
-        mAccChooserHelper = new AccountChooserHelper(this, new Preferences(this), this);
-        mAccChooserHelper.init();
+        mAccountChooserHelper = new AccountChooserHelper(this, new Preferences(this), this);
+        mAccountChooserHelper.init();
     }
 
     @Override
@@ -238,8 +238,14 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        mAccountChooserHelper.onRequestPermissionResult(requestCode, permissions, grantResults);
+    }
+
+    @Override
     public AccountChooserFragment.OnAccountSelectionListener getAccountSelectionListener() {
-        return mAccChooserHelper;
+        return mAccountChooserHelper;
     }
 
     private void showRetryButton() {

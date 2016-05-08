@@ -24,7 +24,7 @@ import com.anod.appwatcher.accounts.AccountManager;
  */
 public class AccountChooserFragment extends DialogFragment implements DialogInterface.OnClickListener {
 
-    private static final int PERMISSION_REQUEST_GET_ACCOUNTS = 123;
+    public static final int PERMISSION_REQUEST_GET_ACCOUNTS = 123;
 
     public static AccountChooserFragment newInstance() {
         AccountChooserFragment frag = new AccountChooserFragment();
@@ -33,7 +33,7 @@ public class AccountChooserFragment extends DialogFragment implements DialogInte
         return frag;
     }
 
-    public interface AccountSelectionProvider {
+    public interface AccountSelectionProvider extends ActivityCompat.OnRequestPermissionsResultCallback {
         OnAccountSelectionListener getAccountSelectionListener();
     }
 
@@ -55,29 +55,6 @@ public class AccountChooserFragment extends DialogFragment implements DialogInte
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == PERMISSION_REQUEST_GET_ACCOUNTS)
-        {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-            {
-                mAccountManager.reload();
-                // http://stackoverflow.com/questions/33264031/calling-dialogfragments-show-from-within-onrequestpermissionsresult-causes
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                       // TODO
-
-                    }
-                }, 200);
-            }
-            else
-            {
-                Toast.makeText(getActivity(), "Failed to gain access to Google accounts", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
 
@@ -93,9 +70,9 @@ public class AccountChooserFragment extends DialogFragment implements DialogInte
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-
         builder.setTitle(R.string.choose_an_account);
 
 
@@ -104,7 +81,11 @@ public class AccountChooserFragment extends DialogFragment implements DialogInte
             builder.setMessage("Allow access to list of you Google accounts");
             builder.setPositiveButton("Allow", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
-                    requestPermissions(new String[] { Manifest.permission.GET_ACCOUNTS }, PERMISSION_REQUEST_GET_ACCOUNTS);
+                    ActivityCompat.requestPermissions(
+                            getActivity(),
+                            new String[] { Manifest.permission.GET_ACCOUNTS },
+                            PERMISSION_REQUEST_GET_ACCOUNTS
+                    );
                 }
             });
         }
@@ -116,30 +97,33 @@ public class AccountChooserFragment extends DialogFragment implements DialogInte
                 }
             });
 
+            mAccountManager.reload();
             if (mAccountManager.hasAccounts()) {
                 mSelectedItem = getSelectedItem();
-                builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        if (mAccountManager.getCurrentAccount() == null) {
-                            OnAccountSelectionListener listener = (OnAccountSelectionListener) getActivity();
-                            listener.onDialogAccountNotFound();
-                        }
-                    }
-                });
                 builder.setSingleChoiceItems(getChoiceItems(), mSelectedItem, this);
             } else {
                 builder.setMessage(R.string.no_registered_google_accounts);
             }
         }
 
+        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                if (mAccountManager.getCurrentAccount() == null) {
+                    if (mListener != null) {
+                        mListener.onDialogAccountNotFound();
+                    }
+                }
+            }
+        });
 
         AlertDialog dialog = builder.create();
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {
                 if (mAccountManager.getCurrentAccount() == null) {
-                    OnAccountSelectionListener listener = (OnAccountSelectionListener) getActivity();
-                    listener.onDialogAccountNotFound();
+                    if (mListener != null) {
+                        mListener.onDialogAccountNotFound();
+                    }
                 }
             }
         });

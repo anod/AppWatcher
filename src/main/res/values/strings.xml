@@ -94,4 +94,6 @@
     <string name="settings">Settings</string>
     <string name="all">All</string>
     <string name="import_action">Import</string>
+    <string name="import_permission_denied">Cannot start import without permissions</string>
+    <string name="export_permission_denied">Cannot start export without permissions</string>
 </resources>

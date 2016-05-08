@@ -19,6 +19,7 @@ import com.anod.appwatcher.backup.GDriveSync;
 import com.anod.appwatcher.backup.ListExportManager;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
 import com.anod.appwatcher.ui.SettingsActionBarActivity;
+import com.anod.appwatcher.utils.AppPermissions;
 
 import java.util.ArrayList;
 
@@ -35,7 +36,6 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     private static final int ACTION_SYNC_NOW = 2;
     private static final int ACTION_AUTO_UPDATE = 7;
     private static final int ACTION_WIFI_ONLY = 8;
-    private static final int PERMISSION_REQUEST_STORAGE = 300;
 
     private GDriveSync mGDriveSync;
     private CheckboxItem mSyncEnabledItem;
@@ -79,17 +79,37 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == PERMISSION_REQUEST_STORAGE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-            {
-                this.runExport();
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        mAccountChooserHelper.onRequestPermissionResult(requestCode, permissions, grantResults);
+
+        AppPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, AppPermissions.REQUEST_STORAGE_READ, new AppPermissions.PermissionResult() {
+            @Override
+            public void granted() {
+                startActivity(new Intent(SettingsActivity.this, ListExportActivity.class));
             }
-            else
-            {
-                Toast.makeText(this, "Cannot start export without permissions", Toast.LENGTH_SHORT).show();
+
+            @Override
+            public void denied() {
+                Toast.makeText(SettingsActivity.this, R.string.import_permission_denied, Toast.LENGTH_SHORT).show();
             }
-        }
+        });
+
+
+        AppPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, AppPermissions.REQUEST_STORAGE_WRITE, new AppPermissions.PermissionResult() {
+            @Override
+            public void granted() {
+                SettingsActivity.this.runExport();
+            }
+
+            @Override
+            public void denied() {
+                Toast.makeText(SettingsActivity.this, R.string.export_permission_denied, Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
+
 
     @Override
     protected void onPause() {
@@ -183,14 +203,26 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     protected void onPreferenceItemClick(int action, SettingsActionBarActivity.Item pref) {
         if (action == ACTION_EXPORT) {
 
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-               this.runExport();
-            } else {
-                ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_REQUEST_STORAGE);
+            if (AppPermissions.isGranted(this, Manifest.permission.WRITE_EXTERNAL_STORAGE))
+            {
+                this.runExport();
+            }
+            else
+            {
+                AppPermissions.request(this, new String[] { Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, AppPermissions.REQUEST_STORAGE_WRITE);
             }
 
         } else if (action == ACTION_IMPORT) {
-            startActivity(new Intent(this, ListExportActivity.class));
+
+            if (AppPermissions.isGranted(this, Manifest.permission.READ_EXTERNAL_STORAGE))
+            {
+                startActivity(new Intent(this, ListExportActivity.class));
+            }
+            else
+            {
+                AppPermissions.request(this, new String[] { Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, AppPermissions.REQUEST_STORAGE_READ);
+            }
+
         } else if (action == ACTION_LICENSES) {
             new LicensesDialog(this, R.raw.notices, false, true).show();
         } else if (action == ACTION_SYNC_ENABLE) {

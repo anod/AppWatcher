@@ -154,6 +154,12 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        mAccountChooserHelper.onRequestPermissionResult(requestCode, permissions, grantResults);
+    }
+
+    @Override
     public void onImportProgress(List<String> docIds, SimpleArrayMap<String, Integer> result) {
         ImportAdapter adapter = (ImportAdapter) mList.getAdapter();
         for (String packageName : docIds) {

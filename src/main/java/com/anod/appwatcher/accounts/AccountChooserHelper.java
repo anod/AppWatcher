@@ -42,6 +42,26 @@ public class AccountChooserHelper implements AccountChooserFragment.OnAccountSel
         showAccountsDialog();
     }
 
+    public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == AccountChooserFragment.PERMISSION_REQUEST_GET_ACCOUNTS)
+        {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+            {
+                // http://stackoverflow.com/questions/33264031/calling-dialogfragments-show-from-within-onrequestpermissionsresult-causes
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        showAccountsDialog();
+                    }
+                }, 200);
+            }
+            else
+            {
+                Toast.makeText(mActivity, "Failed to gain access to Google accounts", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
     // Container Activity must implement this interface
     public interface OnAccountSelectionListener extends AccountChooserFragment.AccountSelectionProvider {
         void onHelperAccountSelected(final Account account, final String authSubToken);

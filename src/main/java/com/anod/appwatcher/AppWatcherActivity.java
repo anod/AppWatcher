@@ -294,6 +294,7 @@ public class AppWatcherActivity extends DrawerActivity implements
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        mAccountChooserHelper.onRequestPermissionResult(requestCode, permissions, grantResults);
     }
 
     @Override
