@@ -26,6 +26,12 @@ public class InstalledAppViewHolder extends AppViewHolder {
     }
 
     @Override
+    protected void bindVersionText(AppInfo app) {
+        version.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stat_communication_stay_primary_portrait, 0,0,0);
+        version.setText(app.versionName);
+    }
+
+    @Override
     protected void bindSectionView() {
         if (position == 0) {
             sectionText.setText(R.string.downloaded);

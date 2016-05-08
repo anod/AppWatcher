@@ -2,6 +2,7 @@ package com.anod.appwatcher.adapters;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -38,8 +39,6 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
     }
 
     public interface DataProvider {
-        String getVersionText();
-        String getUpdateText();
         String getInstalledText();
         int getUpdateTextColor();
         int getTotalAppsCount();
@@ -83,22 +82,15 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
         title.setText(app.title);
         details.setText(app.creator);
 
-        bindIcon(app);
-
         if (app.getStatus() == AppInfo.STATUS_UPDATED) {
-            version.setVisibility(View.VISIBLE);
-            version.setText(String.format(mDataProvider.getUpdateText(), app.versionName));
-            version.setTextColor(mDataProvider.getUpdateTextColor());
             newIndicator.setVisibility(View.VISIBLE);
         } else {
-            if (TextUtils.isEmpty(app.versionName)) {
-                version.setVisibility(View.INVISIBLE);
-            } else {
-                version.setVisibility(View.VISIBLE);
-                version.setText(String.format(mDataProvider.getVersionText(), app.versionName));
-            }
             newIndicator.setVisibility(View.INVISIBLE);
         }
+
+        bindIcon(app);
+
+        bindVersionText(app);
 
         bindPriceView(app);
 
@@ -111,6 +103,21 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
         } else {
             updateDate.setText(uploadDate);
             updateDate.setVisibility(View.VISIBLE);
+        }
+    }
+
+    protected void bindVersionText(AppInfo app) {
+        if (app.getStatus() == AppInfo.STATUS_UPDATED) {
+            version.setVisibility(View.VISIBLE);
+            version.setText(app.versionName);
+            version.setTextColor(mDataProvider.getUpdateTextColor());
+        } else {
+            if (TextUtils.isEmpty(app.versionName)) {
+                version.setVisibility(View.INVISIBLE);
+            } else {
+                version.setVisibility(View.VISIBLE);
+                version.setText(app.versionName);
+            }
         }
     }
 
@@ -135,12 +142,14 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
         boolean isInstalled = mDataProvider.getPackageManagerUtils().isAppInstalled(app.packageName);
         if (isInstalled) {
             PackageManagerUtils.InstalledInfo installed = mDataProvider.getPackageManagerUtils().getInstalledInfo(app.packageName);
+            price.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stat_communication_stay_primary_portrait, 0,0,0);
             if (TextUtils.isEmpty(installed.versionName)) {
                 price.setText(mDataProvider.getInstalledText());
             } else {
-                price.setText(mDataProvider.getInstalledText() + " " + installed.versionName);
+                price.setText(installed.versionName);
             }
         } else {
+            price.setCompoundDrawables(null, null, null, null);
             if (app.priceMicros == 0) {
                 price.setText(R.string.free);
             } else {

@@ -19,7 +19,7 @@
     <string name="alert_dialog_remove_message">Do you want to stop watching after \"%s\" updates?</string>
     <string name="alert_dialog_remove">Remove</string>
     <string name="alert_dialog_cancel">Cancel</string>
-    <string name="version">Ver. %s</string>
+    <string name="version">%s</string>
     <string name="update">Updated to %s</string>
     <string name="notification_one_updated">%s updated</string>
     <string name="notification_many_updates">%d apps updated</string>

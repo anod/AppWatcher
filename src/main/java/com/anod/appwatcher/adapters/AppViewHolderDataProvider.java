@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
 
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.utils.PackageManagerUtils;
@@ -13,8 +15,6 @@ import com.anod.appwatcher.utils.PackageManagerUtils;
  * @date 2015-08-30
  */
 public class AppViewHolderDataProvider implements AppViewHolder.DataProvider {
-    private final String mVersionText;
-    private final String mUpdateText;
     private final String mInstalledText;
     private final int mUpdateTextColor;
     private final PackageManagerUtils mPMUtils;
@@ -26,8 +26,6 @@ public class AppViewHolderDataProvider implements AppViewHolder.DataProvider {
     public AppViewHolderDataProvider(Context context, PackageManagerUtils pmutils) {
         Resources r = context.getResources();
         mContext = context;
-        mVersionText = r.getString(R.string.version);
-        mUpdateText = r.getString(R.string.update);
         mInstalledText = r.getString(R.string.installed);
         mUpdateTextColor = r.getColor(R.color.blue_new);
 
@@ -39,15 +37,6 @@ public class AppViewHolderDataProvider implements AppViewHolder.DataProvider {
         mNewAppsCount = newAppsCount;
     }
 
-    @Override
-    public String getVersionText() {
-        return mVersionText;
-    }
-
-    @Override
-    public String getUpdateText() {
-        return mUpdateText;
-    }
 
     @Override
     public String getInstalledText() {
