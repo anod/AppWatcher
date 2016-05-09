@@ -107,3 +107,4 @@
 -dontwarn android.webkit.WebViewClient
 
 -dontwarn com.squareup.okhttp.**
+-dontwarn okhttp3.**

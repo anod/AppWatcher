@@ -216,12 +216,16 @@ public class AppWatcherListFragment extends Fragment implements
 
     @Override
     public void onSyncStart() {
-        mSwipeLayout.setRefreshing(true);
+        if (mSwipeLayout!= null){
+            mSwipeLayout.setRefreshing(true);
+        }
     }
 
     @Override
     public void onSyncFinish() {
-        mSwipeLayout.setRefreshing(false);
+        if (mSwipeLayout!=null) {
+            mSwipeLayout.setRefreshing(false);
+        }
     }
 
     @Override
