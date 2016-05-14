@@ -96,4 +96,5 @@
     <string name="import_action">Import</string>
     <string name="import_permission_denied">Cannot start import without permissions</string>
     <string name="export_permission_denied">Cannot start export without permissions</string>
+    <string name="version_text">%1$s (%2$d)</string>
 </resources>

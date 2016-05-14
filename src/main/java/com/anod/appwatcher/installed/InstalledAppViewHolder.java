@@ -18,17 +18,7 @@ public class InstalledAppViewHolder extends AppViewHolder {
     public InstalledAppViewHolder(View itemView, DataProvider dataProvider, AppIconLoader iconLoader, OnClickListener listener) {
         super(itemView, dataProvider, iconLoader, listener);
         mDataProvider = dataProvider;
-    }
-
-    @Override
-    protected void bindPriceView(AppInfo app) {
-        price.setVisibility(View.GONE);
-    }
-
-    @Override
-    protected void bindVersionText(AppInfo app) {
-        version.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stat_communication_stay_primary_portrait, 0,0,0);
-        version.setText(app.versionName);
+        mIsLocalApp = true;
     }
 
     @Override

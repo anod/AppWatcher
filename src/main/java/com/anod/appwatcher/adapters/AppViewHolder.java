@@ -1,8 +1,6 @@
 package com.anod.appwatcher.adapters;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -26,13 +24,12 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
     public TextView sectionText;
     public TextView sectionCount;
     public TextView title;
-    public TextView details;
-    public TextView version;
-    public TextView price;
     public ImageView icon;
     public View newIndicator;
-    public TextView updateDate;
     private OnClickListener mListener;
+
+    public AppDetailsView detailsView;
+    protected boolean mIsLocalApp = false;
 
     public interface OnClickListener {
         void onItemClick(AppInfo app);
@@ -46,6 +43,7 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
         PackageManagerUtils getPackageManagerUtils();
         Bitmap getDefaultIcon();
         int getDefaultIconResource();
+        String formatVersionText(String versionName, int versionNumber);
     }
 
     public AppViewHolder(View itemView, DataProvider dataProvider, AppIconLoader iconLoader, OnClickListener listener) {
@@ -60,13 +58,10 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
         this.section = itemView.findViewById(R.id.sec_header);
         this.sectionText = (TextView) itemView.findViewById(R.id.sec_header_title);
         this.sectionCount = (TextView) itemView.findViewById(R.id.sec_header_count);
-        this.title = (TextView) itemView.findViewById(android.R.id.title);
-        this.details = (TextView) itemView.findViewById(R.id.details);
         this.icon = (ImageView) itemView.findViewById(android.R.id.icon);
-        this.version = (TextView) itemView.findViewById(R.id.updated);
-        this.price = (TextView) itemView.findViewById(R.id.price);
         this.newIndicator = itemView.findViewById(R.id.new_indicator);
-        this.updateDate = (TextView) itemView.findViewById(R.id.update_date);
+
+        this.detailsView = new AppDetailsView(itemView, dataProvider);
 
         itemView.findViewById(android.R.id.content).setOnClickListener(this);
     }
@@ -79,8 +74,8 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
     public void bindView(int position, AppInfo app) {
         this.position = position;
         this.app = app;
-        title.setText(app.title);
-        details.setText(app.creator);
+
+        this.detailsView.fillDetails(app, mIsLocalApp);
 
         if (app.getStatus() == AppInfo.STATUS_UPDATED) {
             newIndicator.setVisibility(View.VISIBLE);
@@ -90,35 +85,8 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
 
         bindIcon(app);
 
-        bindVersionText(app);
-
-        bindPriceView(app);
-
         bindSectionView();
 
-        String uploadDate = app.uploadDate;
-
-        if (TextUtils.isEmpty(uploadDate)) {
-            updateDate.setVisibility(View.GONE);
-        } else {
-            updateDate.setText(uploadDate);
-            updateDate.setVisibility(View.VISIBLE);
-        }
-    }
-
-    protected void bindVersionText(AppInfo app) {
-        if (app.getStatus() == AppInfo.STATUS_UPDATED) {
-            version.setVisibility(View.VISIBLE);
-            version.setText(app.versionName);
-            version.setTextColor(mDataProvider.getUpdateTextColor());
-        } else {
-            if (TextUtils.isEmpty(app.versionName)) {
-                version.setVisibility(View.INVISIBLE);
-            } else {
-                version.setVisibility(View.VISIBLE);
-                version.setText(app.versionName);
-            }
-        }
     }
 
     protected void bindIcon(AppInfo app) {
@@ -135,26 +103,6 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
             mIconLoader.retrieve(app.iconUrl)
                     .placeholder(mDataProvider.getDefaultIconResource())
                     .into(this.icon);
-        }
-    }
-
-    protected void bindPriceView(AppInfo app) {
-        boolean isInstalled = mDataProvider.getPackageManagerUtils().isAppInstalled(app.packageName);
-        if (isInstalled) {
-            PackageManagerUtils.InstalledInfo installed = mDataProvider.getPackageManagerUtils().getInstalledInfo(app.packageName);
-            price.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stat_communication_stay_primary_portrait, 0,0,0);
-            if (TextUtils.isEmpty(installed.versionName)) {
-                price.setText(mDataProvider.getInstalledText());
-            } else {
-                price.setText(installed.versionName);
-            }
-        } else {
-            price.setCompoundDrawables(null, null, null, null);
-            if (app.priceMicros == 0) {
-                price.setText(R.string.free);
-            } else {
-                price.setText(app.priceText);
-            }
         }
     }
 

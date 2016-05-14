@@ -31,6 +31,8 @@ import android.widget.Toast;
 
 import com.android.volley.VolleyError;
 import com.anod.appwatcher.accounts.AuthTokenProvider;
+import com.anod.appwatcher.adapters.AppDetailsView;
+import com.anod.appwatcher.adapters.AppViewHolderDataProvider;
 import com.anod.appwatcher.fragments.RemoveDialogFragment;
 import com.anod.appwatcher.market.DetailsEndpoint;
 import com.anod.appwatcher.market.MarketInfo;
@@ -57,7 +59,6 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
     public static final String EXTRA_APP_ID = "app_id";
     public static final String EXTRA_DETAILS_URL = "url";
     public static final String EXTRA_ROW_ID = "row_id";
-    public static final String EXTRA_ICON = "app_icon";
     public static final String EXTRA_ADD_APP_PACKAGE = "app_add_success";
     public static final String EXTRA_UNINSTALL_APP_PACKAGE = "app_uninstall";
 
@@ -69,12 +70,12 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
     Button mRetryButton;
     @Bind(android.R.id.icon)
     ImageView mAppIcon;
-    @Bind(android.R.id.title)
-    TextView mAppTitle;
     @Bind(R.id.background)
     View mBackground;
     @Bind(R.id.market_btn)
     FloatingActionButton mPlayStoreButton;
+    @Bind(R.id.content)
+    View mContent;
 
     private static Target[] sTargets = new Target[] {
             Target.DARK_VIBRANT,
@@ -92,6 +93,8 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
     private MenuItem mAddMenu;
     private PackageManagerUtils mPMutils;
     private AppIconLoader mIconLoader;
+    private AppViewHolderDataProvider mDataProvider;
+    private AppDetailsView mAppDetailsView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,10 +112,13 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
 
 
         mPMutils = new PackageManagerUtils(getPackageManager());
+        mDataProvider = new AppViewHolderDataProvider(this, mPMutils);
+        mAppDetailsView = new AppDetailsView(findViewById(R.id.container), mDataProvider);
 
         mDetailsEndpoint = new DetailsEndpoint(this);
         mDetailsEndpoint.setUrl(mDetailsUrl);
 
+        mContent.setVisibility(View.INVISIBLE);
         mLoadingView.setVisibility(View.GONE);
         mRetryButton.setVisibility(View.GONE);
         mChangelog.setVisibility(View.GONE);
@@ -138,7 +144,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
             mNewApp = true;
         } else {
             AppListContentProviderClient cr = new AppListContentProviderClient(this);
-            mApp = cr.queryAppId(mAppId);
+            mApp = cr.queryAppRow(rowId);
             cr.release();
             mNewApp = false;
         }
@@ -194,8 +200,9 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
     }
 
     private void setupAppView(AppInfo app) {
-        mAppTitle.setText(app.title);
         mPlayStoreButton.setOnClickListener(this);
+
+        mAppDetailsView.fillDetails(app, mApp.getRowId() == -1);
 
         if (TextUtils.isEmpty(app.iconUrl)) {
             if (app.getRowId() > 0)
@@ -303,6 +310,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
     @Override
     public void onDataChanged() {
         mLoadingView.setVisibility(View.GONE);
+        mContent.setVisibility(View.VISIBLE);
         mChangelog.setVisibility(View.VISIBLE);
         mChangelog.setAutoLinkMask(Linkify.ALL);
 
@@ -320,6 +328,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
 
     @Override
     public void onErrorResponse(VolleyError error) {
+        mContent.setVisibility(View.VISIBLE);
         mLoadingView.setVisibility(View.GONE);
         mChangelog.setVisibility(View.VISIBLE);
         mChangelog.setAutoLinkMask(Linkify.ALL);
@@ -349,6 +358,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
         mPlayStoreButton.setImageDrawable(drawable);
         mBackground.setBackgroundColor(color);
         mLoadingView.getIndeterminateDrawable().setColorFilter(color, PorterDuff.Mode.SRC_IN);
+        mAppDetailsView.updateAccentColor(color, mApp);
     }
 
     private void animateBackground() {

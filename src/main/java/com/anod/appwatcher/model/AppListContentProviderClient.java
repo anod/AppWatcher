@@ -223,6 +223,22 @@ public class AppListContentProviderClient {
         return info;
     }
 
+    public AppInfo queryAppRow(int rowId) {
+        AppListCursor cr = query(null,
+                AppListTable.Columns._ID + " = ?", new String[]{ String.valueOf(rowId) });
+        if (cr == null || cr.getCount() == 0) {
+            return null;
+        }
+        cr.moveToPosition(-1);
+        AppInfo info = null;
+        if (cr.moveToNext()) {
+            info = cr.getAppInfo();
+        }
+        cr.close();
+
+        return info;
+    }
+
     public Bitmap queryAppIcon(Uri uri) {
         Cursor cr;
         try {

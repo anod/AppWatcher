@@ -39,14 +39,6 @@ class ImportAppViewHolder extends AppViewHolder {
     }
 
     @Override
-    protected void bindPriceView(AppInfo app) {
-    }
-
-    @Override
-    protected void bindSectionView() {
-    }
-
-    @Override
     public void onClick(View v) {
         ((CheckedTextView) title).toggle();
         mDataProvider.selectPackage(this.app.packageName, ((CheckedTextView) title).isChecked());

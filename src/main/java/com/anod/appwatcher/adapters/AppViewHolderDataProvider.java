@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.res.ResourcesCompat;
 
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.utils.PackageManagerUtils;
@@ -27,10 +28,8 @@ public class AppViewHolderDataProvider implements AppViewHolder.DataProvider {
         Resources r = context.getResources();
         mContext = context;
         mInstalledText = r.getString(R.string.installed);
-        mUpdateTextColor = r.getColor(R.color.blue_new);
-
+        mUpdateTextColor = ContextCompat.getColor(context, R.color.blue_new);
         mPMUtils = pmutils;
-
     }
 
     public void setNewAppsCount(int newAppsCount) {
@@ -42,6 +41,7 @@ public class AppViewHolderDataProvider implements AppViewHolder.DataProvider {
     public String getInstalledText() {
         return mInstalledText;
     }
+
 
     @Override
     public int getUpdateTextColor() {
@@ -74,6 +74,11 @@ public class AppViewHolderDataProvider implements AppViewHolder.DataProvider {
     @Override
     public int getDefaultIconResource() {
         return R.drawable.ic_android_black_48dp;
+    }
+
+    @Override
+    public String formatVersionText(String versionName, int versionNumber) {
+        return mContext.getString(R.string.version_text, versionName, versionNumber);
     }
 
     public void setTotalCount(int totalCount) {
