@@ -59,11 +59,11 @@ public class InstalledListFragment extends AppWatcherListFragment {
     {
         private final PackageManagerUtils mPMUtils;
 
-        public List<PackageInfo> getInstalledApps() {
+        public List<String> getInstalledApps() {
             return mInstalledApps;
         }
 
-        private List<PackageInfo> mInstalledApps = new ArrayList<>();
+        private List<String> mInstalledApps = new ArrayList<>();
 
         public InstalledLoader(Context context, String titleFilter, FilterCursorWrapper.CursorFilter cursorFilter, PackageManagerUtils pmUtils) {
             super(context, titleFilter, cursorFilter);

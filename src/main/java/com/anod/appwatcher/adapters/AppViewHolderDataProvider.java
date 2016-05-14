@@ -23,12 +23,14 @@ public class AppViewHolderDataProvider implements AppViewHolder.DataProvider {
     private int mNewAppsCount;
     private Bitmap mDefaultIcon;
     private Context mContext;
+    private int mOutdatedColorText;
 
     public AppViewHolderDataProvider(Context context, PackageManagerUtils pmutils) {
         Resources r = context.getResources();
         mContext = context;
         mInstalledText = r.getString(R.string.installed);
         mUpdateTextColor = ContextCompat.getColor(context, R.color.blue_new);
+        mOutdatedColorText = ContextCompat.getColor(context, R.color.material_amber_800);
         mPMUtils = pmutils;
     }
 
@@ -79,6 +81,11 @@ public class AppViewHolderDataProvider implements AppViewHolder.DataProvider {
     @Override
     public String formatVersionText(String versionName, int versionNumber) {
         return mContext.getString(R.string.version_text, versionName, versionNumber);
+    }
+
+    @Override
+    public int getOutdatedColorText() {
+        return mOutdatedColorText;
     }
 
     public void setTotalCount(int totalCount) {

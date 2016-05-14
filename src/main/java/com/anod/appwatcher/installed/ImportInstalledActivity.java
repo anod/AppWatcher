@@ -37,7 +37,7 @@ import butterknife.OnClick;
  * @author algavris
  * @date 19/04/2016.
  */
-public class ImportInstalledActivity extends ToolbarActivity implements LoaderManager.LoaderCallbacks<List<PackageInfo>>, AccountChooserHelper.OnAccountSelectionListener, ImportBulkManager.Listener {
+public class ImportInstalledActivity extends ToolbarActivity implements LoaderManager.LoaderCallbacks<List<String>>, AccountChooserHelper.OnAccountSelectionListener, ImportBulkManager.Listener {
     @Bind(android.R.id.list)
     RecyclerView mList;
     @Bind(android.R.id.progress)
@@ -100,10 +100,10 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
         mImportManager.init();
         adapter.clearPackageIndex();
         for (int idx = 0; idx < adapter.getItemCount(); idx++) {
-            PackageInfo packageInfo = adapter.getItem(idx);
-            if (mDataProvider.isPackageSelected(packageInfo.packageName)) {
-                mImportManager.addPackage(packageInfo.packageName);
-                adapter.storePackageIndex(packageInfo.packageName, idx);
+            String packageName = adapter.getItem(idx);
+            if (mDataProvider.isPackageSelected(packageName)) {
+                mImportManager.addPackage(packageName);
+                adapter.storePackageIndex(packageName, idx);
             }
         }
         if (mImportManager.isEmpty()) {
@@ -114,12 +114,12 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
     }
 
     @Override
-    public Loader<List<PackageInfo>> onCreateLoader(int id, Bundle args) {
+    public Loader<List<String>> onCreateLoader(int id, Bundle args) {
         return new LocalPackageLoader(this, mPMUtils);
     }
 
     @Override
-    public void onLoadFinished(Loader<List<PackageInfo>> loader, List<PackageInfo> data) {
+    public void onLoadFinished(Loader<List<String>> loader, List<String> data) {
         mProgress.setVisibility(View.GONE);
         ImportAdapter downloadedAdapter = (ImportAdapter) mList.getAdapter();
         downloadedAdapter.clear();
@@ -127,7 +127,7 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
     }
 
     @Override
-    public void onLoaderReset(Loader<List<PackageInfo>> loader) {
+    public void onLoaderReset(Loader<List<String>> loader) {
         ImportAdapter downloadedAdapter = (ImportAdapter) mList.getAdapter();
         downloadedAdapter.clear();
     }
@@ -191,7 +191,7 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
     }
 
 
-    private static class LocalPackageLoader extends AsyncTaskLoader<List<PackageInfo>> {
+    private static class LocalPackageLoader extends AsyncTaskLoader<List<String>> {
         private final PackageManagerUtils mPMUtils;
 
         public LocalPackageLoader(Context context, PackageManagerUtils pmUtils) {
@@ -200,7 +200,7 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
         }
 
         @Override
-        public List<PackageInfo> loadInBackground() {
+        public List<String> loadInBackground() {
             AppListContentProviderClient cr = new AppListContentProviderClient(getContext());
             Map<String, Integer> watchingPackages = cr.queryPackagesMap(false);
             cr.release();

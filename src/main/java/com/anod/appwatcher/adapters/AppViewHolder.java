@@ -44,6 +44,7 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
         Bitmap getDefaultIcon();
         int getDefaultIconResource();
         String formatVersionText(String versionName, int versionNumber);
+        int getOutdatedColorText();
     }
 
     public AppViewHolder(View itemView, DataProvider dataProvider, AppIconLoader iconLoader, OnClickListener listener) {

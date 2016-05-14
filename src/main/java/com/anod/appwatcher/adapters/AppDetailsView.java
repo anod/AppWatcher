@@ -66,12 +66,12 @@ public class AppDetailsView {
 
 
     private void fillWatchAppView(AppInfo app) {
+        boolean isInstalled = mDataProvider.getPackageManagerUtils().isAppInstalled(app.packageName);
         version.setText(mDataProvider.formatVersionText(app.versionName, app.versionNumber));
         if (app.getStatus() == AppInfo.STATUS_UPDATED) {
             version.setTextColor(mAccentColor);
         }
 
-        boolean isInstalled = mDataProvider.getPackageManagerUtils().isAppInstalled(app.packageName);
         price.setTextColor(mAccentColor);
         if (isInstalled) {
             PackageManagerUtils.InstalledInfo installed = mDataProvider.getPackageManagerUtils().getInstalledInfo(app.packageName);
@@ -80,6 +80,10 @@ public class AppDetailsView {
                 price.setText(mDataProvider.getInstalledText());
             } else {
                 price.setText(mDataProvider.formatVersionText(installed.versionName, installed.versionCode));
+            }
+            if (app.versionNumber > installed.versionCode)
+            {
+                version.setTextColor(mDataProvider.getOutdatedColorText());
             }
         } else {
             price.setCompoundDrawables(null, null, null, null);

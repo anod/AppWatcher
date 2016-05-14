@@ -161,12 +161,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
 
     private AppInfo loadInstalledApp()
     {
-        PackageInfo pkgInfo = mPMutils.getPackageInfo(mAppId);
-        if (pkgInfo == null)
-        {
-            return null;
-        }
-        return  mPMutils.packageToApp(pkgInfo);
+        return mPMutils.packageToApp(mAppId);
     }
 
     @Override

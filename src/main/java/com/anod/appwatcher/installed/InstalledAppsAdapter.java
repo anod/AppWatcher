@@ -25,7 +25,7 @@ import info.anodsplace.android.widget.recyclerview.ArrayAdapter;
  * @author alex
  * @date 2015-08-30
  */
-public class InstalledAppsAdapter extends ArrayAdapter<PackageInfo, AppViewHolder>{
+public class InstalledAppsAdapter extends ArrayAdapter<String, AppViewHolder>{
     protected final AppViewHolder.OnClickListener mListener;
     protected final Context mContext;
     protected final AppViewHolderDataProvider mDataProvider;
@@ -34,7 +34,7 @@ public class InstalledAppsAdapter extends ArrayAdapter<PackageInfo, AppViewHolde
     protected final AppIconLoader mIconLoader;
 
     public InstalledAppsAdapter(Context context, PackageManagerUtils pmutils, AppViewHolderDataProvider dataProvider, AppViewHolder.OnClickListener listener) {
-        super(new ArrayList<PackageInfo>());
+        super(new ArrayList<String>());
         mContext = context;
         mListener = listener;
         mDataProvider = dataProvider;
@@ -61,8 +61,8 @@ public class InstalledAppsAdapter extends ArrayAdapter<PackageInfo, AppViewHolde
 
     @Override
     public void onBindViewHolder(AppViewHolder holder, int position) {
-        PackageInfo packageInfo = getItem(position);
-        AppInfo app = mPMUtils.packageToApp(packageInfo);
+        String packageName = getItem(position);
+        AppInfo app = mPMUtils.packageToApp(packageName);
         /**
          *
          * int rowId, String appId, String pname, int versionNumber, String versionName,
@@ -72,7 +72,7 @@ public class InstalledAppsAdapter extends ArrayAdapter<PackageInfo, AppViewHolde
     }
 
     @Override
-    public void addAll(List<PackageInfo> objects) {
+    public void addAll(List<String> objects) {
         super.addAll(objects);
         mDataProvider.setTotalCount(getItemCount());
     }

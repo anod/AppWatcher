@@ -15,6 +15,9 @@ import android.util.DisplayMetrics;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppInfoMetadata;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +33,8 @@ public class PackageManagerUtils {
     private PackageManager mPackageManager;
     private ArrayMap<String, InstalledInfo> mInstalledVersionsCache;
 
-    public AppInfo packageToApp(PackageInfo packageInfo) {
+    public AppInfo packageToApp(String packageName) {
+        PackageInfo packageInfo = getPackageInfo(packageName);
         ComponentName launchComponent = this.getLaunchComponent(packageInfo);
         String iconUrl = null;
         if (launchComponent != null) {
@@ -50,7 +54,7 @@ public class PackageManagerUtils {
                 null,
                 null,
                 0,
-                "details?doc="+packageInfo.packageName
+                "details?doc=" + packageInfo.packageName
         );
     }
 
@@ -108,29 +112,60 @@ public class PackageManagerUtils {
         return info.applicationInfo.loadLabel(mPackageManager).toString();
     }
 
-    public ComponentName getLaunchComponent(PackageInfo info)
-    {
+    public ComponentName getLaunchComponent(PackageInfo info) {
         Intent launchIntent = mPackageManager.getLaunchIntentForPackage(info.packageName);
         return launchIntent == null ? null : launchIntent.getComponent();
     }
 
-    public List<PackageInfo> getDownloadedApps(Map<String, Integer> filter) {
-        List<PackageInfo> packs = mPackageManager.getInstalledPackages(0);
-        List<PackageInfo> downloaded = new ArrayList<>(packs.size());
-        for (int i = 0; i < packs.size(); i++)
-        {
+    public List<String> getDownloadedApps(Map<String, Integer> filter) {
+        List<PackageInfo> packs;
+        try {
+            packs = mPackageManager.getInstalledPackages(0);
+        } catch (Exception e) {
+            AppLog.e(e);
+            return this.getDownloadedPackagesFallback(filter);
+        }
+        List<String> downloaded = new ArrayList<>(packs.size());
+        for (int i = 0; i < packs.size(); i++) {
             PackageInfo packageInfo = packs.get(i);
             ApplicationInfo applicationInfo = packageInfo.applicationInfo;
             // Skips the system application (packages)
-            if ( (applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 1 && (applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) == 0)
-            {
+            if ((applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 1 && (applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) == 0) {
                 continue;
             }
-            if (filter != null && filter.containsKey(packageInfo.packageName))
-            {
+            if (filter != null && filter.containsKey(packageInfo.packageName)) {
                 continue;
             }
-            downloaded.add(packageInfo);
+            downloaded.add(packageInfo.packageName);
+        }
+        return downloaded;
+    }
+
+    private List<String> getDownloadedPackagesFallback(Map<String, Integer> filter) {
+        List<String> downloaded = new ArrayList<>();
+        BufferedReader bufferedReader = null;
+        try {
+            Process process = Runtime.getRuntime().exec("pm list packages");
+            bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                final String packageName = line.substring(line.indexOf(':') + 1);
+                if (filter != null && filter.containsKey(packageName)) {
+                    continue;
+                }
+                downloaded.add(packageName);
+            }
+            process.waitFor();
+        } catch (Exception e) {
+            AppLog.e(e);
+        } finally {
+            if (bufferedReader != null) {
+                try {
+                    bufferedReader.close();
+                } catch (IOException e) {
+                    AppLog.e(e);
+                }
+            }
         }
         return downloaded;
     }
