@@ -18,5 +18,6 @@
     <color name="window_background">#FFF5F5F5</color>
     <color name="row_inactive">#ffcccccc</color>
 
+    <color name="primary_text">#de000000</color>
 </resources>
 

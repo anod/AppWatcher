@@ -2,6 +2,8 @@ package com.anod.appwatcher.adapters;
 
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.support.annotation.ColorInt;
+import android.support.annotation.ColorRes;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.View;
@@ -37,14 +39,13 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
 
     public interface DataProvider {
         String getInstalledText();
-        int getUpdateTextColor();
         int getTotalAppsCount();
         int getNewAppsCount();
         PackageManagerUtils getPackageManagerUtils();
         Bitmap getDefaultIcon();
         int getDefaultIconResource();
         String formatVersionText(String versionName, int versionNumber);
-        int getOutdatedColorText();
+        @ColorInt int getColor(@ColorRes int colorRes);
     }
 
     public AppViewHolder(View itemView, DataProvider dataProvider, AppIconLoader iconLoader, OnClickListener listener) {

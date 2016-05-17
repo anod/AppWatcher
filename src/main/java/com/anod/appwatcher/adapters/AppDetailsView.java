@@ -19,8 +19,8 @@ import butterknife.ButterKnife;
 public class AppDetailsView {
 
     private final AppViewHolder.DataProvider mDataProvider;
-    private
-    @ColorInt int mAccentColor;
+    private final int mTextColor;
+    private @ColorInt int mAccentColor;
 
     @Bind(android.R.id.title)
     public TextView title;
@@ -37,9 +37,9 @@ public class AppDetailsView {
     {
         mDataProvider = dataProvider;
         ButterKnife.bind(this, view);
-        mAccentColor = mDataProvider.getUpdateTextColor();
+        mAccentColor = mDataProvider.getColor(R.color.blue_new);
+        mTextColor = mDataProvider.getColor(R.color.primary_text);
     }
-
 
     public void fillDetails(AppInfo app, boolean isLocalApp)
     {
@@ -70,6 +70,8 @@ public class AppDetailsView {
         version.setText(mDataProvider.formatVersionText(app.versionName, app.versionNumber));
         if (app.getStatus() == AppInfo.STATUS_UPDATED) {
             version.setTextColor(mAccentColor);
+        } else {
+            version.setTextColor(mTextColor);
         }
 
         price.setTextColor(mAccentColor);
@@ -83,7 +85,9 @@ public class AppDetailsView {
             }
             if (app.versionNumber > installed.versionCode)
             {
-                version.setTextColor(mDataProvider.getOutdatedColorText());
+                version.setTextColor(mDataProvider.getColor(R.color.material_amber_800));
+            } else {
+                version.setTextColor(mTextColor);
             }
         } else {
             price.setCompoundDrawables(null, null, null, null);
