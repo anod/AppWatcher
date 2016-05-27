@@ -16,8 +16,9 @@ public class Preferences {
 
 
     private static final String PREFS_NAME = "WatcherPrefs";
-    public static final String DRIVE_SYNC = "drive_sync";
-    public static final String DRIVE_SYNC_TIME = "drive_sync_time";
+    private static final String DRIVE_SYNC = "drive_sync";
+    private static final String DRIVE_SYNC_TIME = "drive_sync_time";
+    private static final String AUTOSYNC = "autosync";
 
     private SharedPreferences mSettings;
 
@@ -118,4 +119,11 @@ public class Preferences {
     }
 
 
+    public boolean useAutoSync() {
+        return mSettings.getBoolean(AUTOSYNC, true);
+    }
+
+    public void setUseAutoSync(boolean useAutoSync) {
+        mSettings.edit().putBoolean(AUTOSYNC, useAutoSync).apply();
+    }
 }

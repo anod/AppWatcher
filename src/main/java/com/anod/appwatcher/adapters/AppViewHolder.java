@@ -16,18 +16,14 @@ import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.utils.AppIconLoader;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 
-public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-    private final DataProvider mDataProvider;
-    private final AppIconLoader mIconLoader;
-
+public class AppViewHolder extends AppViewHolderBase implements View.OnClickListener {
     public AppInfo app;
     public int position;
-    public View section;
-    public TextView sectionText;
-    public TextView sectionCount;
-    public TextView title;
+    protected View section;
+    protected TextView sectionText;
+    protected TextView sectionCount;
     public ImageView icon;
-    public View newIndicator;
+    private View newIndicator;
     private OnClickListener mListener;
 
     public AppDetailsView detailsView;
@@ -37,23 +33,10 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
         void onItemClick(AppInfo app);
     }
 
-    public interface DataProvider {
-        String getInstalledText();
-        int getTotalAppsCount();
-        int getNewAppsCount();
-        PackageManagerUtils getPackageManagerUtils();
-        Bitmap getDefaultIcon();
-        int getDefaultIconResource();
-        String formatVersionText(String versionName, int versionNumber);
-        @ColorInt int getColor(@ColorRes int colorRes);
-    }
-
     public AppViewHolder(View itemView, DataProvider dataProvider, AppIconLoader iconLoader, OnClickListener listener) {
-        super(itemView);
+        super(itemView, dataProvider, iconLoader);
 
         mListener = listener;
-        mDataProvider = dataProvider;
-        mIconLoader = iconLoader;
 
         this.app = null;
         this.position = 0;
@@ -85,27 +68,8 @@ public class AppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
             newIndicator.setVisibility(View.INVISIBLE);
         }
 
-        bindIcon(app);
-
+        bindIcon(app, this.icon);
         bindSectionView();
-
-    }
-
-    protected void bindIcon(AppInfo app) {
-        if (TextUtils.isEmpty(app.iconUrl)) {
-            if (app.getRowId() > 0) {
-                Uri dbImageUri = AppListContentProvider.ICONS_CONTENT_URI.buildUpon().appendPath(String.valueOf(app.getRowId())).build();
-                mIconLoader.retrieve(dbImageUri)
-                        .placeholder(mDataProvider.getDefaultIconResource())
-                        .into(this.icon);
-            } else {
-                this.icon.setImageBitmap(mDataProvider.getDefaultIcon());
-            }
-        } else {
-            mIconLoader.retrieve(app.iconUrl)
-                    .placeholder(mDataProvider.getDefaultIconResource())
-                    .into(this.icon);
-        }
     }
 
     protected void bindSectionView() {

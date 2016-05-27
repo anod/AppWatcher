@@ -1,11 +1,23 @@
 package com.google.android.finsky.api;
 
-import com.google.android.volley.DisplayMessageError;
+import com.android.volley.VolleyError;
 
-public class DfeServerError extends DisplayMessageError
-{
-  public DfeServerError(String paramString)
-  {
-    super(paramString);
-  }
+class DfeServerError extends VolleyError {
+
+    String mDisplayErrorHtml;
+
+    DfeServerError(String displayErrorHtml) {
+        super();
+
+        mDisplayErrorHtml = displayErrorHtml;
+    }
+
+    public String getDisplayErrorHtml() {
+        return this.mDisplayErrorHtml;
+    }
+
+    @Override
+    public String toString() {
+        return "DisplayErrorMessage[" + this.mDisplayErrorHtml + "]";
+    }
 }

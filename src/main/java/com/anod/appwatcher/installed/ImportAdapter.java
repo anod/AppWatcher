@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.adapters.AppViewHolder;
+import com.anod.appwatcher.adapters.AppViewHolderBase;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 
 class ImportAdapter extends InstalledAppsAdapter {
@@ -20,7 +21,7 @@ class ImportAdapter extends InstalledAppsAdapter {
     }
 
     @Override
-    public AppViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public AppViewHolderBase onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(mContext).inflate(R.layout.list_item_import_app, parent, false);
         v.setClickable(true);
         v.setFocusable(true);

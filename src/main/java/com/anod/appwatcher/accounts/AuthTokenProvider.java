@@ -101,35 +101,4 @@ public class AuthTokenProvider {
         }
     }
 
-
-    public void setAccountSyncable(Account account) {
-
-        Account[] accounts = mAccountManager.getAccountsByType(ACCOUNT_TYPE);
-        for (int i = 0; i < accounts.length; i++) {
-            int syncable = 0;
-            if (accounts[i].equals(account)) {
-                syncable = 1;
-            }
-            AppLog.d("Set " + accounts[i].name + " syncable = " + syncable);
-            ContentResolver.setIsSyncable(accounts[i], AppListContentProvider.AUTHORITY, syncable);
-        }
-
-    }
-
-    /**
-     * setup sync according to current settings
-     */
-    public void setSync(Account account, boolean autoSync, long pollFrequency) {
-        Bundle params = new Bundle();
-
-        AppLog.d("Set sync for " + account.name + ", autoSync" + autoSync);
-        if (autoSync) {
-            ContentResolver.setSyncAutomatically(account, AppListContentProvider.AUTHORITY, true);
-            ContentResolver.addPeriodicSync(account, AppListContentProvider.AUTHORITY, params, pollFrequency);
-        } else {
-            ContentResolver.removePeriodicSync(account, AppListContentProvider.AUTHORITY, params);
-            ContentResolver.setSyncAutomatically(account, AppListContentProvider.AUTHORITY, false);
-        }
-
-    }
 }

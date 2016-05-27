@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.view.ViewConfiguration;
 
+import com.android.volley.VolleyLog;
 import com.squareup.leakcanary.LeakCanary;
 
 import java.lang.reflect.Field;
@@ -31,6 +32,7 @@ public class AppWatcherApplication extends Application implements AppLog.Listene
 
         AppLog.setDebug(BuildConfig.DEBUG, "AppWatcher");
         AppLog.instance().setListener(this);
+        VolleyLog.setTag("AppWatcher");
 
         mObjectGraph = new ObjectGraph(this);
     }

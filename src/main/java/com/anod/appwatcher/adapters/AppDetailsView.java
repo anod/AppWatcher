@@ -1,6 +1,7 @@
 package com.anod.appwatcher.adapters;
 
 import android.support.annotation.ColorInt;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
@@ -24,13 +25,13 @@ public class AppDetailsView {
 
     @Bind(android.R.id.title)
     public TextView title;
-    @Bind(R.id.details)
+    @Nullable @Bind(R.id.details)
     public TextView details;
-    @Bind(R.id.updated)
+    @Nullable @Bind(R.id.updated)
     public TextView version;
-    @Bind(R.id.price)
+    @Nullable  @Bind(R.id.price)
     public TextView price;
-    @Bind(R.id.update_date)
+    @Nullable @Bind(R.id.update_date)
     public TextView updateDate;
 
     public AppDetailsView(View view, AppViewHolder.DataProvider dataProvider)
@@ -45,7 +46,6 @@ public class AppDetailsView {
     {
         title.setText(app.title);
         details.setText(app.creator);
-
         String uploadDate = app.uploadDate;
 
         if (TextUtils.isEmpty(uploadDate)) {

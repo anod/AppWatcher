@@ -45,10 +45,15 @@ public class AppWatcherListFragment extends Fragment implements
         AppWatcherActivity.EventListener,
         AppViewHolder.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
 
+    static final String ARG_FILTER = "filter";
     private static final int ADAPTER_WATCHLIST = 0;
-    public static final String ARG_FILTER = "filter";
     private static final int REQUEST_APP_INFO = 1;
+
     protected String mTitleFilter = "";
+    protected InstalledFilter mInstalledFilter;
+    protected PackageManagerUtils mPMUtils;
+    protected MergeRecyclerAdapter mAdapter;
+    private int mListenerIndex;
 
     @Bind(android.R.id.list)
     RecyclerView mListView;
@@ -58,14 +63,6 @@ public class AppWatcherListFragment extends Fragment implements
     View mEmptyView;
     @Bind(R.id.swipe_layout)
     SwipeRefreshLayout mSwipeLayout;
-
-
-    protected InstalledFilter mInstalledFilter;
-
-    protected PackageManagerUtils mPMUtils;
-
-    protected MergeRecyclerAdapter mAdapter;
-    private int mListenerIndex;
 
     public static AppWatcherListFragment newInstance(int filterId) {
         AppWatcherListFragment frag = new AppWatcherListFragment();

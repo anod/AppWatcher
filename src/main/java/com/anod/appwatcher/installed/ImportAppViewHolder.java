@@ -1,46 +1,54 @@
 package com.anod.appwatcher.installed;
 
 import android.view.View;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
 import android.widget.CheckedTextView;
+import android.widget.ImageView;
 
-import com.anod.appwatcher.R;
-import com.anod.appwatcher.adapters.AppViewHolder;
+import com.anod.appwatcher.adapters.AppViewHolderBase;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.utils.AppIconLoader;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
 
 /**
  * @author alex
  * @date 2015-08-31
  */
-class ImportAppViewHolder extends AppViewHolder {
+class ImportAppViewHolder extends AppViewHolderBase implements View.OnClickListener {
     private final ImportDataProvider mDataProvider;
 
-    public ImportAppViewHolder(View itemView, ImportDataProvider dataProvider, AppIconLoader iconLoader) {
-        super(itemView, dataProvider, iconLoader, null);
+    public AppInfo app;
+    @Bind(android.R.id.title)
+    public CheckedTextView title;
+    @Bind(android.R.id.icon)
+    public ImageView icon;
+
+    ImportAppViewHolder(View itemView, ImportDataProvider dataProvider, AppIconLoader iconLoader) {
+        super(itemView, dataProvider, iconLoader);
         mDataProvider = dataProvider;
+        ButterKnife.bind(this, itemView);
     }
 
-    @Override
     public void bindView(int position, AppInfo app) {
         this.app = app;
-        title.setText(app.title);
+        this.title.setText(app.title);
         boolean checked = mDataProvider.isPackageSelected(app.packageName);
-        ((CheckedTextView) title).setChecked(checked);
+        this.title.setChecked(checked);
         title.setEnabled(!mDataProvider.isImportStarted());
 
-        this.bindIcon(app);
+        itemView.findViewById(android.R.id.content).setOnClickListener(this);
+
+        this.bindIcon(app, this.icon);
     }
 
-    public int status()
-    {
-       return mDataProvider.getPackageStatus(app.packageName);
+    public int status() {
+        return mDataProvider.getPackageStatus(app.packageName);
     }
 
     @Override
     public void onClick(View v) {
-        ((CheckedTextView) title).toggle();
-        mDataProvider.selectPackage(this.app.packageName, ((CheckedTextView) title).isChecked());
+        this.title.toggle();
+        mDataProvider.selectPackage(this.app.packageName, title.isChecked());
     }
 }

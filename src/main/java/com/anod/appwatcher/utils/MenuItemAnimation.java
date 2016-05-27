@@ -31,7 +31,7 @@ public class MenuItemAnimation {
     public void setMenuItem(MenuItem menuItem) {
         mMenuItem = menuItem;
     }
-//R.anim.rotate
+
     /**
      * stop refresh button animation
      */

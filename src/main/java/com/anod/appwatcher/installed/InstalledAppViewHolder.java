@@ -11,13 +11,10 @@ import com.anod.appwatcher.utils.AppIconLoader;
  * @author alex
  * @date 2015-08-31
  */
-public class InstalledAppViewHolder extends AppViewHolder {
+class InstalledAppViewHolder extends AppViewHolder {
 
-    private final DataProvider mDataProvider;
-
-    public InstalledAppViewHolder(View itemView, DataProvider dataProvider, AppIconLoader iconLoader, OnClickListener listener) {
+    InstalledAppViewHolder(View itemView, DataProvider dataProvider, AppIconLoader iconLoader, OnClickListener listener) {
         super(itemView, dataProvider, iconLoader, listener);
-        mDataProvider = dataProvider;
         mIsLocalApp = true;
     }
 

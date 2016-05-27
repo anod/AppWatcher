@@ -2,10 +2,12 @@ package com.anod.appwatcher;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.NoCache;
+import com.android.volley.toolbox.Volley;
 import com.anod.appwatcher.accounts.AccountManager;
 import com.anod.appwatcher.market.DeviceIdHelper;
 import com.anod.appwatcher.utils.AppIconLoader;
-import com.anod.appwatcher.volley.Network;
+import com.anod.appwatcher.market.Network;
+import com.google.android.gms.gcm.GcmNetworkManager;
 
 /**
  * @author alex
@@ -40,7 +42,7 @@ public class ObjectGraph {
 
     public RequestQueue requestQueue() {
         if (mRequestQueue == null) {
-            mRequestQueue = new RequestQueue(new NoCache(), new Network(this.app, BuildConfig.DEBUG), 2);
+            mRequestQueue = new RequestQueue(new NoCache(), new Network(), 2);
             mRequestQueue.start();
         }
         return mRequestQueue;
@@ -53,6 +55,10 @@ public class ObjectGraph {
             mIconLoader = new AppIconLoader(this.app);
         }
         return mIconLoader;
+    }
+
+    public GcmNetworkManager gcmNetworkManager() {
+        return GcmNetworkManager.getInstance(this.app);
     }
 
 }

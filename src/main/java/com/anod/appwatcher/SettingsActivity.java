@@ -18,6 +18,7 @@ import com.anod.appwatcher.backup.ExportTask;
 import com.anod.appwatcher.backup.GDriveSync;
 import com.anod.appwatcher.backup.ListExportManager;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
+import com.anod.appwatcher.sync.SyncScheduler;
 import com.anod.appwatcher.ui.SettingsActionBarActivity;
 import com.anod.appwatcher.utils.AppPermissions;
 
@@ -132,11 +133,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
 
         preferences.add(new Category(R.string.category_updates));
 
-        Account syncAccount = mAccountChooserHelper.getAccount();
-        boolean useAutoSync = false;
-        if (syncAccount != null) {
-            useAutoSync = ContentResolver.getSyncAutomatically(syncAccount, AppListContentProvider.AUTHORITY);
-        }
+        boolean useAutoSync = mPrefs.useAutoSync();
         preferences.add(new CheckboxItem(R.string.menu_auto_update, 0, ACTION_AUTO_UPDATE, useAutoSync));
 
         mWifiItem = new CheckboxItem(R.string.menu_wifi_only, 0, ACTION_WIFI_ONLY, mPrefs.isWifiOnly());
@@ -241,13 +238,17 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
             }
         } else if (action == ACTION_AUTO_UPDATE) {
             boolean useAutoSync = ((CheckboxItem) pref).checked;
-            mAccountChooserHelper.setSync(useAutoSync);
+            if (useAutoSync) {
+                SyncScheduler.schedule(this);
+            } else {
+                SyncScheduler.cancel(this);
+            }
+            mPrefs.setUseAutoSync(useAutoSync);
             mWifiItem.enabled = useAutoSync;
             notifyDataSetChanged();
         } else if (action == ACTION_WIFI_ONLY) {
             boolean useWifiOnly = ((CheckboxItem) pref).checked;
             mPrefs.saveWifiOnly(useWifiOnly);
-            mAccountChooserHelper.setSync(true);
             notifyDataSetChanged();
         }
     }

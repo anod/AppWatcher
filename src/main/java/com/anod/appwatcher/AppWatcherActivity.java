@@ -1,21 +1,17 @@
 package com.anod.appwatcher;
 
-import android.Manifest;
 import android.accounts.Account;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.SearchView;
@@ -33,8 +29,10 @@ import com.anod.appwatcher.fragments.InstalledListFragment;
 import com.anod.appwatcher.installed.ImportInstalledActivity;
 import com.anod.appwatcher.model.Filters;
 import com.anod.appwatcher.sync.SyncAdapter;
+import com.anod.appwatcher.sync.SyncScheduler;
 import com.anod.appwatcher.ui.DrawerActivity;
 import com.anod.appwatcher.utils.MenuItemAnimation;
+import com.google.android.gms.gcm.GcmTaskService;
 
 import net.hockeyapp.android.CrashManager;
 
@@ -86,6 +84,11 @@ public class AppWatcherActivity extends DrawerActivity implements
         mContext = this;
 
         mPreferences = new Preferences(this);
+
+        if (mPreferences.useAutoSync())
+        {
+            SyncScheduler.schedule(this);
+        }
 
         Intent i = getIntent();
         if (i != null) {
@@ -145,32 +148,8 @@ public class AppWatcherActivity extends DrawerActivity implements
         searchView.setQueryHint(getString(R.string.search));
 
         mRefreshAnim.setMenuItem(menu.findItem(R.id.menu_act_refresh));
-
-        updateSyncStatus();
-
         return super.onCreateOptionsMenu(menu);
     }
-
-
-    public void openSearch() {
-        MenuItemCompat.expandActionView(mSearchMenuItem);
-    }
-
-    public void switchTab(int tab) {
-        mViewPager.setCurrentItem(tab);
-    }
-
-
-    private void updateSyncStatus() {
-        if (mSyncAccount != null && ContentResolver.isSyncActive(mSyncAccount, AppListContentProvider.AUTHORITY)) {
-            mRefreshAnim.start();
-            notifySyncStart();
-        } else {
-            mRefreshAnim.stop();
-            notifySyncStop();
-        }
-    }
-
 
     /**
      * Receive notifications from SyncAdapter
@@ -178,10 +157,11 @@ public class AppWatcherActivity extends DrawerActivity implements
     private BroadcastReceiver mSyncFinishedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(SyncAdapter.SYNC_PROGRESS)) {
+            String action = intent.getAction();
+            if (GcmTaskService.SERVICE_ACTION_EXECUTE_TASK.equals(action) || SyncAdapter.SYNC_PROGRESS.equals(action)) {
                 mRefreshAnim.start();
                 notifySyncStart();
-            } else if (intent.getAction().equals(SyncAdapter.SYNC_STOP)) {
+            } else if (SyncAdapter.SYNC_STOP.equals(action)) {
                 int updatesCount = intent.getIntExtra(SyncAdapter.EXTRA_UPDATES_COUNT, 0);
                 mRefreshAnim.stop();
                 notifySyncStop();
@@ -198,6 +178,7 @@ public class AppWatcherActivity extends DrawerActivity implements
         IntentFilter filter = new IntentFilter();
         filter.addAction(SyncAdapter.SYNC_PROGRESS);
         filter.addAction(SyncAdapter.SYNC_STOP);
+        filter.addAction(GcmTaskService.SERVICE_ACTION_EXECUTE_TASK);
         registerReceiver(mSyncFinishedReceiver, filter);
         mSyncFinishedReceiverRegistered = true;
         super.onResume();
@@ -209,8 +190,7 @@ public class AppWatcherActivity extends DrawerActivity implements
         if (mSearchMenuItem != null) {
             MenuItemCompat.collapseActionView(mSearchMenuItem);
         }
-
-        updateSyncStatus();
+        notifySyncStop();
         CrashManager.register(this);
     }
 
@@ -258,15 +238,9 @@ public class AppWatcherActivity extends DrawerActivity implements
             return false;
         }
 
-        if (ContentResolver.isSyncPending(mSyncAccount, AppListContentProvider.AUTHORITY) || ContentResolver.isSyncActive(mSyncAccount, AppListContentProvider.AUTHORITY)) {
-            AppLog.d("Sync requested already. Skipping... ");
-            return true;
-        }
-        mRefreshAnim.start();
-        Bundle params = new Bundle();
-        params.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-        ContentResolver.requestSync(mSyncAccount, AppListContentProvider.AUTHORITY, params);
-        return true;
+        Toast.makeText(this, "Refresh scheduled", Toast.LENGTH_SHORT).show();
+        SyncScheduler.execute(this);
+        return false;
     }
 
 

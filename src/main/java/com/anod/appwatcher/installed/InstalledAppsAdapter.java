@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import com.anod.appwatcher.App;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.adapters.AppViewHolder;
+import com.anod.appwatcher.adapters.AppViewHolderBase;
 import com.anod.appwatcher.adapters.AppViewHolderDataProvider;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.utils.AppIconLoader;
@@ -25,13 +26,13 @@ import info.anodsplace.android.widget.recyclerview.ArrayAdapter;
  * @author alex
  * @date 2015-08-30
  */
-public class InstalledAppsAdapter extends ArrayAdapter<String, AppViewHolder>{
+public class InstalledAppsAdapter extends ArrayAdapter<String, AppViewHolderBase> {
     protected final AppViewHolder.OnClickListener mListener;
     protected final Context mContext;
-    protected final AppViewHolderDataProvider mDataProvider;
-    protected final PackageManagerUtils mPMUtils;
+    private final AppViewHolderDataProvider mDataProvider;
+    private final PackageManagerUtils mPMUtils;
 
-    protected final AppIconLoader mIconLoader;
+    final AppIconLoader mIconLoader;
 
     public InstalledAppsAdapter(Context context, PackageManagerUtils pmutils, AppViewHolderDataProvider dataProvider, AppViewHolder.OnClickListener listener) {
         super(new ArrayList<String>());
@@ -50,7 +51,7 @@ public class InstalledAppsAdapter extends ArrayAdapter<String, AppViewHolder>{
     }
 
     @Override
-    public AppViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public AppViewHolderBase onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(mContext).inflate(R.layout.list_item_app, parent, false);
         v.setClickable(true);
         v.setFocusable(true);
@@ -60,7 +61,7 @@ public class InstalledAppsAdapter extends ArrayAdapter<String, AppViewHolder>{
     }
 
     @Override
-    public void onBindViewHolder(AppViewHolder holder, int position) {
+    public void onBindViewHolder(AppViewHolderBase holder, int position) {
         String packageName = getItem(position);
         AppInfo app = mPMUtils.packageToApp(packageName);
         /**

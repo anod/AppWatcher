@@ -48,45 +48,43 @@ import java.util.Set;
 
 import info.anodsplace.android.log.AppLog;
 
-public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStoreEndpoint.Listener {
+public class SyncAdapter implements PlayStoreEndpoint.Listener {
     private static final int ONE_SEC_IN_MILLIS = 1000;
-    public static final int BULK_SIZE = 20;
+    static final int BULK_SIZE = 20;
+    static final String SYNC_EXTRAS_MANUAL = "manual";
 
     private final Context mContext;
 
     public static final String SYNC_STOP = "com.anod.appwatcher.sync.start";
     public static final String SYNC_PROGRESS = "com.anod.appwatcher.sync.progress";
     public static final String EXTRA_UPDATES_COUNT = "extra_updates_count";
-    private BulkDetailsEndpoint mEndpoint;
-    private int mIconSize = -1;
 
-    public SyncAdapter(Context context, boolean autoInitialize) {
-        super(context, autoInitialize);
+    public SyncAdapter(Context context) {
         mContext = context;
     }
 
-    @Override
-    public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
+    int onPerformSync(Bundle extras, ContentProviderClient provider) {
 
         Preferences pref = new Preferences(mContext);
 
-        boolean manualSync = extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, false);
+        boolean manualSync = extras.getBoolean(SYNC_EXTRAS_MANUAL, false);
         // Skip any check if sync requested from application
-        if (manualSync == false) {
+        if (!manualSync) {
             if (pref.isWifiOnly() && !isWifiEnabled()) {
                 AppLog.d("Wifi not enabled, skipping update check....");
-                return;
+                return -1;
             }
             long updateTime = pref.getLastUpdateTime();
             if (updateTime != -1 && (System.currentTimeMillis() - updateTime < ONE_SEC_IN_MILLIS)) {
                 AppLog.d("Last update less than second, skipping...");
-                return;
+                return -1;
             }
         }
         if (pref.getAccount() == null) {
             AppLog.d("No active account, skipping sync...");
-            return;
+            return -1;
         }
+
         AppLog.v("Perform synchronization");
 
         //Broadcast progress intent
@@ -94,7 +92,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
         mContext.sendBroadcast(startIntent);
 
 
-        mEndpoint = createEndpoint(pref);
+        BulkDetailsEndpoint endpoint = createEndpoint(pref);
 
         boolean lastUpdatesViewed = pref.isLastUpdatesViewed();
         AppLog.d("Last update viewed: " + lastUpdatesViewed);
@@ -102,15 +100,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
         ArrayList<UpdatedApp> updatedApps = null;
         AppListContentProviderClient appListProvider = new AppListContentProviderClient(provider);
         try {
-            updatedApps = doSync(appListProvider, lastUpdatesViewed);
+            updatedApps = doSync(appListProvider, lastUpdatesViewed, endpoint);
         } catch (RemoteException e) {
-            AppLog.e("doSync exception", e);
+            AppLog.e(e);
         }
         int size = (updatedApps != null) ? updatedApps.size() : 0;
-        Intent finishIntent = new Intent(SYNC_STOP);
-        finishIntent.putExtra(EXTRA_UPDATES_COUNT, size);
-        mContext.sendBroadcast(finishIntent);
-
         long now = System.currentTimeMillis();
         pref.updateLastTime(now);
 
@@ -123,7 +117,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
             }
         }
 
-        if (manualSync == false) {
+        if (!manualSync) {
             if (pref.isDriveSyncEnabled()) {
                 AppLog.d("DriveSyncEnabled = true");
                 performGDriveSync(pref, now);
@@ -132,9 +126,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
             }
         }
 
-        mEndpoint = null;
         AppLog.d("Finish::onPerformSync()");
-
+        return size;
     }
 
     private void performGDriveSync(Preferences pref, long now) {
@@ -199,10 +192,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
      * @return list of titles that were updated
      * @throws RemoteException
      */
-    private ArrayList<UpdatedApp> doSync(AppListContentProviderClient client, boolean lastUpdatesViewed) throws RemoteException {
+    private ArrayList<UpdatedApp> doSync(AppListContentProviderClient client, boolean lastUpdatesViewed, BulkDetailsEndpoint endpoint) throws RemoteException {
         ArrayList<UpdatedApp> updatedTitles = new ArrayList<UpdatedApp>();
 
-        if (mEndpoint == null) {
+        if (endpoint == null) {
             return updatedTitles;
         }
 
@@ -226,7 +219,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
             if (localApps.size() == bulkSize) {
                 Set<String> docIds = localApps.keySet();
                 AppLog.d("Sending bulk #" + i + "... " + docIds);
-                List<Document> documents = requestBulkDetails(docIds);
+                List<Document> documents = requestBulkDetails(docIds, endpoint);
                 if (documents != null) {
                     updateApps(documents, localApps, client, updatedTitles, lastUpdatesViewed);
                 } else {
@@ -240,7 +233,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
         if (localApps.size() > 0) {
             Set<String> docIds = localApps.keySet();
             AppLog.d("Sending bulk #" + i + "... " + docIds);
-            List<Document> documents = requestBulkDetails(docIds);
+            List<Document> documents = requestBulkDetails(docIds, endpoint);
             if (documents != null) {
                 updateApps(documents, localApps, client, updatedTitles, lastUpdatesViewed);
             } else {
@@ -253,12 +246,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter implements PlayStor
         return updatedTitles;
     }
 
-    private List<Document> requestBulkDetails(Set<String> docIds) {
+    private List<Document> requestBulkDetails(Set<String> docIds, BulkDetailsEndpoint endpoint) {
         List<String> listDocIds = new ArrayList<String>(docIds);
-        mEndpoint.setDocIds(listDocIds);
-
-        mEndpoint.startSync();
-        return mEndpoint.getDocuments();
+        endpoint.setDocIds(listDocIds);
+        endpoint.startSync();
+        return endpoint.getDocuments();
     }
 
     private void updateApps(List<Document> documents, HashMap<String, AppInfo> localApps, AppListContentProviderClient client, ArrayList<UpdatedApp> updatedTitles, boolean lastUpdatesViewed) {
