@@ -203,6 +203,7 @@ public class AppListContentProviderClient {
         values.put(AppListTable.Columns.KEY_DETAILS_URL, app.getDetailsUrl());
 
         values.put(AppListTable.Columns.KEY_ICON_URL, app.iconUrl);
+        values.put(AppListTable.Columns.KEY_REFRESH_TIMESTAMP, app.refreshTime);
         return values;
     }
 

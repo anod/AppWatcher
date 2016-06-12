@@ -19,6 +19,7 @@ public class Preferences {
     private static final String DRIVE_SYNC = "drive_sync";
     private static final String DRIVE_SYNC_TIME = "drive_sync_time";
     private static final String AUTOSYNC = "autosync";
+    private static final String REQUIRES_CHARGING = "requires-charging";
 
     private SharedPreferences mSettings;
 
@@ -125,5 +126,13 @@ public class Preferences {
 
     public void setUseAutoSync(boolean useAutoSync) {
         mSettings.edit().putBoolean(AUTOSYNC, useAutoSync).apply();
+    }
+
+    public void setRequiresCharging(boolean requiresCharging) {
+        mSettings.edit().putBoolean(REQUIRES_CHARGING, requiresCharging).apply();
+    }
+
+    public boolean isRequiresCharging() {
+        return mSettings.getBoolean(REQUIRES_CHARGING, false);
     }
 }

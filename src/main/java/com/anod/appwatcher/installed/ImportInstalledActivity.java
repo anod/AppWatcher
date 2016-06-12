@@ -25,6 +25,8 @@ import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.ui.ToolbarActivity;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -194,7 +196,7 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
     private static class LocalPackageLoader extends AsyncTaskLoader<List<String>> {
         private final PackageManagerUtils mPMUtils;
 
-        public LocalPackageLoader(Context context, PackageManagerUtils pmUtils) {
+        LocalPackageLoader(Context context, PackageManagerUtils pmUtils) {
             super(context);
             mPMUtils = pmUtils;
         }
@@ -205,7 +207,15 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
             Map<String, Integer> watchingPackages = cr.queryPackagesMap(false);
             cr.release();
 
-            return mPMUtils.getDownloadedApps(watchingPackages);
+            List<String> list =  mPMUtils.getDownloadedApps(watchingPackages);
+            Collections.sort(list, new Comparator<String>() {
+                @Override
+                public int compare(String lPackageName, String rPackageName) {
+                    return mPMUtils.getAppTitle(lPackageName).compareTo(mPMUtils.getAppTitle(rPackageName));
+                }
+            });
+
+            return list;
         }
     }
 

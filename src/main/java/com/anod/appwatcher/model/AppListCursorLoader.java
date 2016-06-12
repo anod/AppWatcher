@@ -21,6 +21,7 @@ public class AppListCursorLoader extends CursorLoader {
     private static final String SELECTION_DEFAULT = AppListTable.Columns.KEY_STATUS + " != ? ";
 
     private final FilterCursorWrapper.CursorFilter mCursorFilter;
+    protected final String mTitleFilter;
 
     private int mNewCount;
 
@@ -28,6 +29,7 @@ public class AppListCursorLoader extends CursorLoader {
         super(context, CONTENT_URI, AppListTable.PROJECTION, null, null, ORDER_DEFAULT);
 
         mCursorFilter = cursorFilter;
+        mTitleFilter = titleFilter;
 
         if (!TextUtils.isEmpty(titleFilter)) {
             setSelection(SELECTION_TITLE);

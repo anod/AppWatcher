@@ -54,7 +54,8 @@ public class PackageManagerUtils {
                 null,
                 null,
                 0,
-                "details?doc=" + packageInfo.packageName
+                "details?doc=" + packageInfo.packageName,
+                0
         );
     }
 
@@ -106,6 +107,10 @@ public class PackageManagerUtils {
     public PackageManagerUtils(PackageManager pm) {
         mPackageManager = pm;
         mInstalledVersionsCache = new ArrayMap<>();
+    }
+
+    public String getAppTitle(String packageName) {
+        return getAppTitle(getPackageInfo(packageName));
     }
 
     public String getAppTitle(PackageInfo info) {

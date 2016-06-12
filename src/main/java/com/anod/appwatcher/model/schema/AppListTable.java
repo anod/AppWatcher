@@ -14,7 +14,7 @@ public class AppListTable {
         public static final String KEY_ICON_CACHE = "icon";
         public static final String KEY_ICON_URL = "iconUrl";
         public static final String KEY_STATUS = "status";
-        public static final String KEY_NOTINUSE_TIMESTAMP = "update_date";
+        public static final String KEY_REFRESH_TIMESTAMP = "update_date";
         public static final String KEY_PRICE_TEXT = "price_text";
         public static final String KEY_PRICE_CURRENCY = "price_currency";
         public static final String KEY_PRICE_MICROS = "price_micros";
@@ -34,7 +34,7 @@ public class AppListTable {
             Columns.KEY_TITLE,
             Columns.KEY_CREATOR,
             Columns.KEY_STATUS,
-            Columns.KEY_NOTINUSE_TIMESTAMP,
+            Columns.KEY_REFRESH_TIMESTAMP,
             Columns.KEY_PRICE_TEXT,
             Columns.KEY_PRICE_CURRENCY,
             Columns.KEY_PRICE_MICROS,
@@ -54,7 +54,7 @@ public class AppListTable {
                     Columns.KEY_CREATOR + " TEXT," +
                     Columns.KEY_ICON_CACHE + " BLOB," +
                     Columns.KEY_STATUS + " INTEGER," +
-                    Columns.KEY_NOTINUSE_TIMESTAMP + " INTEGER," +
+                    Columns.KEY_REFRESH_TIMESTAMP + " INTEGER," +
                     Columns.KEY_PRICE_TEXT + " TEXT," +
                     Columns.KEY_PRICE_CURRENCY + " TEXT," +
                     Columns.KEY_PRICE_MICROS + " INTEGER," +

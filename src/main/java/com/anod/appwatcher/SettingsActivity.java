@@ -2,14 +2,10 @@ package com.anod.appwatcher;
 
 import android.Manifest;
 import android.accounts.Account;
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.text.format.DateUtils;
 import android.widget.Toast;
 
@@ -37,6 +33,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     private static final int ACTION_SYNC_NOW = 2;
     private static final int ACTION_AUTO_UPDATE = 7;
     private static final int ACTION_WIFI_ONLY = 8;
+    private static final int ACTION_REQUIRES_CHARGING = 9;
 
     private GDriveSync mGDriveSync;
     private CheckboxItem mSyncEnabledItem;
@@ -44,6 +41,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     private Preferences mPrefs;
     private AccountChooserHelper mAccountChooserHelper;
     private CheckboxItem mWifiItem;
+    private CheckboxItem mChargingItem;
 
     @Override
     public void onExportStart() {
@@ -140,6 +138,9 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
         preferences.add(mWifiItem);
         mWifiItem.enabled = useAutoSync;
 
+        mChargingItem = new CheckboxItem(R.string.menu_requires_charging, 0, ACTION_REQUIRES_CHARGING, mPrefs.isRequiresCharging());
+        preferences.add(mChargingItem);
+        mChargingItem.enabled = useAutoSync;
 
         preferences.add(new Category(R.string.pref_header_drive_sync));
 
@@ -239,16 +240,22 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
         } else if (action == ACTION_AUTO_UPDATE) {
             boolean useAutoSync = ((CheckboxItem) pref).checked;
             if (useAutoSync) {
-                SyncScheduler.schedule(this);
+                SyncScheduler.schedule(this, mPrefs.isRequiresCharging());
             } else {
                 SyncScheduler.cancel(this);
             }
             mPrefs.setUseAutoSync(useAutoSync);
             mWifiItem.enabled = useAutoSync;
+            mChargingItem.enabled = useAutoSync;
             notifyDataSetChanged();
         } else if (action == ACTION_WIFI_ONLY) {
             boolean useWifiOnly = ((CheckboxItem) pref).checked;
             mPrefs.saveWifiOnly(useWifiOnly);
+            notifyDataSetChanged();
+        } else if (action == ACTION_REQUIRES_CHARGING) {
+            boolean requiresCharging = ((CheckboxItem) pref).checked;
+            mPrefs.setRequiresCharging(requiresCharging);
+            SyncScheduler.schedule(this, requiresCharging);
             notifyDataSetChanged();
         }
     }

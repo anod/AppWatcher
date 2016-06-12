@@ -41,6 +41,7 @@ public class AppListWriter {
         writer.name("status").value(appInfo.getStatus());
         writer.name("detailsUrl").value(appInfo.getDetailsUrl());
         writer.name("iconUrl").value(appInfo.iconUrl);
+        writer.name("refreshTime").value(appInfo.refreshTime);
         writer.endObject();
     }
 }

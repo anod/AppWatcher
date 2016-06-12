@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.anod.appwatcher" >
+    package="com.anod.appwatcher">
 
     <uses-sdk />
     <!-- for google account token -->
@@ -24,34 +24,34 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:logo="@drawable/ic_launcher"
-        android:theme="@style/AppThemeLight.DarkActionBar" >
+        android:theme="@style/AppThemeLight.DarkActionBar">
         <activity
             android:name=".ShareRecieverActivity"
             android:icon="@drawable/ic_launcher"
-            android:label="@string/add_to_appwatcher" >
+            android:label="@string/add_to_appwatcher">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
         <activity
             android:name=".ChangelogActivity"
             android:label=""
-            android:theme="@style/AppThemeLight.Dialog" >
-        </activity>
+            android:theme="@style/AppThemeLight.Dialog"></activity>
         <activity
             android:name=".MarketSearchActivity"
             android:label="@string/activity_market"
-            android:theme="@style/AppThemeLight.DarkActionBar" >
-        </activity>
+            android:theme="@style/AppThemeLight.DarkActionBar"></activity>
         <activity
             android:name=".AppWatcherActivity"
             android:clearTaskOnLaunch="true"
-            android:label="@string/app_name"
-            >
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -59,19 +59,17 @@
             android:name=".ListExportActivity"
             android:label="@string/import_export"
             android:theme="@style/AppThemeLight.Dialog" />
-
         <activity
             android:name=".NotificationActivity"
-            android:taskAffinity="com.anod.appwatcher.notification"
-            android:theme="@style/InvisibleTheme"
-            android:noHistory="true"
             android:exported="true"
-            />
+            android:noHistory="true"
+            android:taskAffinity="com.anod.appwatcher.notification"
+            android:theme="@style/InvisibleTheme" />
         <activity
             android:name=".SettingsActivity"
             android:label="@string/settings" />
-
-        <activity android:name=".installed.ImportInstalledActivity"
+        <activity
+            android:name=".installed.ImportInstalledActivity"
             android:label="@string/import_installed"
             android:theme="@style/AppThemeLight.DarkDialog" />
 
@@ -79,8 +77,7 @@
             android:name=".AppListContentProvider"
             android:authorities="${applicationId}"
             android:label="@string/app_name"
-            android:syncable="true" >
-        </provider>
+            android:syncable="true"></provider>
 
         <service
             android:name=".sync.SyncTaskService"
@@ -97,8 +94,13 @@
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
+        <meta-data
+            android:name="net.hockeyapp.android.appIdentifier"
+            android:value="${HOCKEYAPP_APP_ID}" />
 
-        <meta-data android:name="net.hockeyapp.android.appIdentifier" android:value="${HOCKEYAPP_APP_ID}" />
+        <service
+            android:name=".sync.ManualSyncService"
+            android:exported="false"></service>
     </application>
 
 </manifest>

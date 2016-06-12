@@ -1,9 +1,6 @@
 package com.anod.appwatcher.installed;
 
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;

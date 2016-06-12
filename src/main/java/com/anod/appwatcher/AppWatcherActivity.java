@@ -2,7 +2,6 @@ package com.anod.appwatcher;
 
 import android.accounts.Account;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -28,6 +27,7 @@ import com.anod.appwatcher.fragments.AppWatcherListFragment;
 import com.anod.appwatcher.fragments.InstalledListFragment;
 import com.anod.appwatcher.installed.ImportInstalledActivity;
 import com.anod.appwatcher.model.Filters;
+import com.anod.appwatcher.sync.ManualSyncService;
 import com.anod.appwatcher.sync.SyncAdapter;
 import com.anod.appwatcher.sync.SyncScheduler;
 import com.anod.appwatcher.ui.DrawerActivity;
@@ -87,7 +87,7 @@ public class AppWatcherActivity extends DrawerActivity implements
 
         if (mPreferences.useAutoSync())
         {
-            SyncScheduler.schedule(this);
+            SyncScheduler.schedule(this, mPreferences.isRequiresCharging());
         }
 
         Intent i = getIntent();
@@ -239,7 +239,7 @@ public class AppWatcherActivity extends DrawerActivity implements
         }
 
         Toast.makeText(this, "Refresh scheduled", Toast.LENGTH_SHORT).show();
-        SyncScheduler.execute(this);
+        ManualSyncService.startActionSync(this);
         return false;
     }
 

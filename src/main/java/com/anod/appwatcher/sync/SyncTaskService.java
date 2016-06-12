@@ -4,6 +4,7 @@ import android.content.ContentProviderClient;
 import android.content.Intent;
 
 import com.anod.appwatcher.AppListContentProvider;
+import com.anod.appwatcher.Preferences;
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.GcmTaskService;
 import com.google.android.gms.gcm.TaskParams;
@@ -15,7 +16,10 @@ public class SyncTaskService extends GcmTaskService {
     @Override
     public void onInitializeTasks() {
         super.onInitializeTasks();
-        SyncScheduler.schedule(getApplicationContext());
+        Preferences prefs = new Preferences(getApplicationContext());
+        if (prefs.useAutoSync()) {
+            SyncScheduler.schedule(getApplicationContext(), prefs.isRequiresCharging());
+        }
     }
 
     @Override

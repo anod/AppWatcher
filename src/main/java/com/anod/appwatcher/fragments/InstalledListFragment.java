@@ -5,6 +5,9 @@ import android.content.pm.PackageInfo;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
+import android.support.v4.util.ArrayMap;
+import android.support.v4.util.SimpleArrayMap;
+import android.text.TextUtils;
 import android.view.View;
 
 import com.anod.appwatcher.adapters.AppViewHolderDataProvider;
@@ -15,6 +18,9 @@ import com.anod.appwatcher.utils.FilterCursorWrapper;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -58,14 +64,15 @@ public class InstalledListFragment extends AppWatcherListFragment {
     static class InstalledLoader extends AppListCursorLoader
     {
         private final PackageManagerUtils mPMUtils;
+        private final SimpleArrayMap<String, String> mTitleCache = new SimpleArrayMap<>();
 
-        public List<String> getInstalledApps() {
+        List<String> getInstalledApps() {
             return mInstalledApps;
         }
 
         private List<String> mInstalledApps = new ArrayList<>();
 
-        public InstalledLoader(Context context, String titleFilter, FilterCursorWrapper.CursorFilter cursorFilter, PackageManagerUtils pmUtils) {
+        InstalledLoader(Context context, String titleFilter, FilterCursorWrapper.CursorFilter cursorFilter, PackageManagerUtils pmUtils) {
             super(context, titleFilter, cursorFilter);
             mPMUtils = pmUtils;
         }
@@ -78,8 +85,42 @@ public class InstalledListFragment extends AppWatcherListFragment {
             Map<String, Integer> watchingPackages = cr.queryPackagesMap(false);
             cr.release();
 
-            mInstalledApps = mPMUtils.getDownloadedApps(watchingPackages);
+            List<String> list = mPMUtils.getDownloadedApps(watchingPackages);
+
+            Collections.sort(list, new Comparator<String>() {
+                @Override
+                public int compare(String lPackageName, String rPackageName) {
+                    return getPackageTitle(lPackageName).compareTo(getPackageTitle(rPackageName));
+                }
+            });
+
+
+            if (!TextUtils.isEmpty(mTitleFilter)) {
+                List<String> filtered = new ArrayList<>(list.size());
+                String lcFilter = mTitleFilter.toLowerCase();
+                for(String packageName : list) {
+                    String title = getPackageTitle(packageName);
+                    if (title.toLowerCase().contains(lcFilter)) {
+                        filtered.add(packageName);
+                    }
+                }
+                mInstalledApps = filtered;
+            } else {
+                mInstalledApps = list;
+            }
+            mTitleCache.clear();
             return cursor;
+        }
+
+        private String getPackageTitle(String packageName)
+        {
+            if (mTitleCache.containsKey(packageName)) {
+                return mTitleCache.get(packageName);
+            } else {
+                String title = mPMUtils.getAppTitle(packageName);
+                mTitleCache.put(packageName, title);
+                return title;
+            }
         }
     }
 }

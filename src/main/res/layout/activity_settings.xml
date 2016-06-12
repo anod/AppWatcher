@@ -1,17 +1,15 @@
-<FrameLayout android:id="@+id/activity_frame"
-             xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             android:fitsSystemWindows="true"
-    >
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/activity_frame"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                  android:layout_width="match_parent"
-                  android:layout_height="match_parent"
-                  android:orientation="vertical"
-        >
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <include layout="@layout/toolbar"/>
+        <include layout="@layout/toolbar" />
 
         <ListView
             android:id="@android:id/list"
@@ -25,7 +23,7 @@
             android:paddingBottom="0dip"
             android:paddingTop="0dip"
             android:scrollbarAlwaysDrawVerticalTrack="true"
-            android:scrollbarStyle="outsideOverlay"/>
+            android:scrollbarStyle="outsideOverlay" />
 
         <TextView
             android:id="@android:id/empty"
@@ -33,7 +31,7 @@
             android:layout_height="match_parent"
             android:gravity="center"
             android:padding="@dimen/preference_item_padding_side"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
     </LinearLayout>
 </FrameLayout>

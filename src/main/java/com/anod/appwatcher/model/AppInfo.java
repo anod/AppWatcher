@@ -21,9 +21,10 @@ public class AppInfo extends AppInfoMetadata {
     public final String priceCur;
     public final Integer priceMicros;
     public final String iconUrl;
+    public final long refreshTime;
 
     public AppInfo(int rowId, String appId, String pname, int versionNumber, String versionName,
-                   String title, String creator, String iconUrl, int status, String uploadDate, String priceText, String priceCur, Integer priceMicros, String detailsUrl) {
+                   String title, String creator, String iconUrl, int status, String uploadDate, String priceText, String priceCur, Integer priceMicros, String detailsUrl, long refreshTime) {
         super(appId, status);
         this.rowId = rowId;
         this.packageName = pname;
@@ -39,6 +40,7 @@ public class AppInfo extends AppInfoMetadata {
         this.detailsUrl = detailsUrl;
 
         this.iconUrl = iconUrl;
+        this.refreshTime = refreshTime;
     }
 
     public AppInfo(Document doc) {
@@ -59,6 +61,7 @@ public class AppInfo extends AppInfoMetadata {
         this.priceCur = offer.currencyCode;
 
         this.iconUrl = DocUtils.getIconUrl(doc);
+        this.refreshTime = System.currentTimeMillis();
     }
 
     public int getRowId() {
@@ -76,4 +79,5 @@ public class AppInfo extends AppInfoMetadata {
     public String getDetailsUrl() {
         return this.detailsUrl;
     }
+
 }

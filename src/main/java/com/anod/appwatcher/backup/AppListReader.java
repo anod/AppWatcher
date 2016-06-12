@@ -53,6 +53,7 @@ public class AppListReader {
         String appId = null, pname = null, versionName = "", title = "", creator = "", uploadDate="", detailsUrl=null, iconUrl=null;
         int versionNumber = 0, status = 0;
         Bitmap icon = null;
+        long refreshTime = 0;
 
         reader.beginObject();
         while (reader.hasNext()) {
@@ -79,6 +80,8 @@ public class AppListReader {
                 detailsUrl = (isNull) ? "" : reader.nextString();
             } else if (name.equals("iconUrl")) {
                 iconUrl = (isNull) ? "" : reader.nextString();
+            } else if (name.equals("refreshTime")) {
+                refreshTime = reader.nextLong();
             } else {
                 skipped = true;
                 reader.skipValue();
@@ -91,7 +94,7 @@ public class AppListReader {
         AppInfo info = null;
         if (appId != null && pname != null) {
             info = new AppInfo(0, appId, pname, versionNumber, versionName,
-                    title, creator, iconUrl, status, uploadDate, null, null, null, detailsUrl);
+                    title, creator, iconUrl, status, uploadDate, null, null, null, detailsUrl, refreshTime);
         }
         onUpgrade(info);
         return info;
