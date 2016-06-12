@@ -88,15 +88,18 @@ abstract public class SettingsActionBarActivity extends ToolbarActivity implemen
         @Override
         public int getItemViewType(int position) {
             Preference pref = getItem(position);
-            if (pref instanceof Category) {
+            if (pref instanceof CheckboxItem) {
                 return 0;
             }
-            return 1;
+            if (pref instanceof Category) {
+                return 1;
+            }
+            return 2;
         }
 
         @Override
         public int getViewTypeCount() {
-            return 2;
+            return 3;
         }
 
         @Override
@@ -116,7 +119,9 @@ abstract public class SettingsActionBarActivity extends ToolbarActivity implemen
             if (pref instanceof Item) {
                 Item item = (Item) pref;
                 View icon = view.findViewById(android.R.id.icon);
-                icon.setVisibility(View.GONE);
+                if (icon != null) {
+                    icon.setVisibility(View.GONE);
+                }
 
                 TextView summary = (TextView) view.findViewById(android.R.id.summary);
                 if (item.summaryRes > 0) {

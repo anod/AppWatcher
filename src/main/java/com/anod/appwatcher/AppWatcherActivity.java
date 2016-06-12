@@ -186,10 +186,6 @@ public class AppWatcherActivity extends DrawerActivity implements
         AppLog.d("Mark updates as viewed.");
         mPreferences.markViewed(true);
 
-        notifyQueryChange("");
-        if (mSearchMenuItem != null) {
-            MenuItemCompat.collapseActionView(mSearchMenuItem);
-        }
         notifySyncStop();
         CrashManager.register(this);
     }
@@ -277,27 +273,31 @@ public class AppWatcherActivity extends DrawerActivity implements
     }
 
     @Override
-    public boolean onQueryTextSubmit(String s) {
-        if (TextUtils.isEmpty(s)) {
+    public boolean onQueryTextSubmit(String query) {
+        if (TextUtils.isEmpty(query)) {
             MenuItemCompat.collapseActionView(mSearchMenuItem);
         } else {
             Intent searchIntent = new Intent(mContext, MarketSearchActivity.class);
-            searchIntent.putExtra(MarketSearchActivity.EXTRA_KEYWORD, s);
+            searchIntent.putExtra(MarketSearchActivity.EXTRA_KEYWORD, query);
             searchIntent.putExtra(MarketSearchActivity.EXTRA_EXACT, true);
             startActivity(searchIntent);
+            notifyQueryChange("");
+            if (mSearchMenuItem != null) {
+                MenuItemCompat.collapseActionView(mSearchMenuItem);
+            }
         }
         return true;
     }
 
     @Override
-    public boolean onQueryTextChange(String s) {
-        notifyQueryChange(s);
+    public boolean onQueryTextChange(String newText) {
+        notifyQueryChange(newText);
         return true;
     }
 
-    public void notifyQueryChange(String s) {
+    private void notifyQueryChange(String newTexr) {
         for (int idx = 0; idx < mEventListener.size(); idx++) {
-            mEventListener.get(idx).onQueryTextChanged(s);
+            mEventListener.get(idx).onQueryTextChanged(newTexr);
         }
     }
 
@@ -312,19 +312,19 @@ public class AppWatcherActivity extends DrawerActivity implements
         }
     }
 
-    public void notifySyncStart() {
+    private void notifySyncStart() {
         for (int idx = 0; idx < mEventListener.size(); idx++) {
             mEventListener.get(idx).onSyncStart();
         }
     }
 
-    public void notifySyncStop() {
+    private void notifySyncStop() {
         for (int idx = 0; idx < mEventListener.size(); idx++) {
             mEventListener.get(idx).onSyncFinish();
         }
     }
 
-    static class Adapter extends FragmentPagerAdapter {
+    private static class Adapter extends FragmentPagerAdapter {
         private final List<Fragment> mFragments = new ArrayList<>();
         private final List<String> mFragmentTitles = new ArrayList<>();
 

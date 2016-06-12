@@ -16,13 +16,13 @@ public class NotificationActivity extends Activity {
     /* (non-Javadoc)
      * @see android.app.Activity#onCreate(android.os.Bundle)
      */
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		Intent intent = getIntent();
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Intent intent = getIntent();
         SyncNotification sn = new SyncNotification(this);
         sn.cancel();
-		int type = intent.getIntExtra(EXTRA_TYPE,0);
+        int type = intent.getIntExtra(EXTRA_TYPE, 0);
         if (type == TYPE_PLAY) {
             String pkg = intent.getStringExtra(EXTRA_PKG);
             startActivity(IntentUtils.createPlayStoreIntent(pkg));
@@ -30,8 +30,8 @@ public class NotificationActivity extends Activity {
             // Nothing
         }
 
-		finish();
-	}
+        finish();
+    }
 
 
 }

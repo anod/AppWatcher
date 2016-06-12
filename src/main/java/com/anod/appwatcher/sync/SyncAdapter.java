@@ -108,8 +108,10 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
         long now = System.currentTimeMillis();
         pref.updateLastTime(now);
 
-        if (size > 0) {
-            SyncNotification sn = new SyncNotification(mContext);
+        SyncNotification sn = new SyncNotification(mContext);
+        if (manualSync) {
+            sn.cancel();
+        } else if (size > 0) {
             Notification notification = sn.create(updatedApps);
             sn.show(notification);
             if (!manualSync && lastUpdatesViewed) {
