@@ -47,11 +47,12 @@ public class MarketSearchAdapter extends RecyclerView.Adapter<MarketAppViewHolde
         Document doc = mSearchEngine.getData().getItem(position, false);
 
         DocDetails.AppDetails app = doc.getAppDetails();
+        String uploadDate = app == null ? "" : app.uploadDate;
 
         holder.doc = doc;
         holder.title.setText(doc.getTitle());
         holder.details.setText(doc.getCreator());
-        holder.updated.setText(app.uploadDate);
+        holder.updated.setText(uploadDate);
 
         if (mNewAppHandler.isAdded(app.packageName)) {
             holder.row.setBackgroundColor(mColorBgGray);
@@ -70,7 +71,10 @@ public class MarketSearchAdapter extends RecyclerView.Adapter<MarketAppViewHolde
             holder.price.setText(R.string.installed);
         } else {
             Common.Offer offer = DocUtils.getOffer(doc);
-            if (offer.micros == 0) {
+            if (offer == null)
+            {
+                holder.price.setText("");
+            } else if (offer.micros == 0) {
                 holder.price.setText(R.string.free);
             } else {
                 holder.price.setText(offer.formattedAmount);

@@ -14,6 +14,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ShareCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.graphics.Palette;
 import android.support.v7.graphics.Target;
 import android.text.Html;
@@ -362,7 +363,9 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
             public void run() {
                 int[] location = new int[2];
                 mAppIcon.getLocationOnScreen(location);
-                RevealAnimatorCompat.show(mBackground, location[0], location[1], 0).start();
+                if (ViewCompat.isAttachedToWindow(mBackground)) {
+                    RevealAnimatorCompat.show(mBackground, location[0], location[1], 0).start();
+                }
             }
         });
     }

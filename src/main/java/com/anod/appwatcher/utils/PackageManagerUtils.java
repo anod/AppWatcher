@@ -35,27 +35,21 @@ public class PackageManagerUtils {
 
     public AppInfo packageToApp(String packageName) {
         PackageInfo packageInfo = getPackageInfo(packageName);
+        if (packageInfo == null) {
+            return new AppInfo(
+                    packageName, 0, "",
+                    packageName, null, AppInfoMetadata.STATUS_DELETED
+            );
+        }
         ComponentName launchComponent = this.getLaunchComponent(packageInfo);
         String iconUrl = null;
         if (launchComponent != null) {
             iconUrl = Uri.fromParts(AppIconLoader.SCHEME, launchComponent.flattenToShortString(), null).toString();
         }
 
-        return new AppInfo(-1,
-                packageInfo.packageName,
-                packageInfo.packageName,
-                packageInfo.versionCode,
-                packageInfo.versionName,
-                this.getAppTitle(packageInfo),
-                null,
-                iconUrl,
-                AppInfoMetadata.STATUS_NORMAL,
-                null,
-                null,
-                null,
-                0,
-                "details?doc=" + packageInfo.packageName,
-                0
+        return new AppInfo(
+                packageInfo.packageName, packageInfo.versionCode, packageInfo.versionName,
+                this.getAppTitle(packageInfo), iconUrl, AppInfoMetadata.STATUS_NORMAL
         );
     }
 
