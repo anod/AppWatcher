@@ -32,15 +32,15 @@ dependencies {
 
     compile 'com.github.anod:android-utils-lib:1.0.1'
 
-    compile 'com.android.support:appcompat-v7:24.0.0'
-    compile 'com.android.support:recyclerview-v7:24.0.0'
-    compile 'com.android.support:design:24.0.0'
-    compile 'com.android.support:cardview-v7:24.0.0'
-    compile 'com.android.support:palette-v7:24.0.0'
+    compile 'com.android.support:appcompat-v7:24.1.1'
+    compile 'com.android.support:recyclerview-v7:24.1.1'
+    compile 'com.android.support:design:24.1.1'
+    compile 'com.android.support:cardview-v7:24.1.1'
+    compile 'com.android.support:palette-v7:24.1.1'
 
-    compile 'com.google.android.gms:play-services-identity:9.2.0'
-    compile 'com.google.android.gms:play-services-drive:9.2.0'
-    compile 'com.google.android.gms:play-services-gcm:9.2.0'
+    compile 'com.google.android.gms:play-services-identity:9.2.1'
+    compile 'com.google.android.gms:play-services-drive:9.2.1'
+    compile 'com.google.android.gms:play-services-gcm:9.2.1'
 
     compile 'com.android.volley:volley:1.0.0'
     compile 'com.jakewharton:butterknife:7.0.1'
@@ -73,6 +73,7 @@ android {
         manifestPlaceholders = [HOCKEYAPP_APP_ID: APPWATCHER_HOCKEYAPP_ID]
         resValue "string", "content_authority", "com.anod.appwatcher"
 
+        vectorDrawables.useSupportLibrary = true
     }
 
     signingConfigs {

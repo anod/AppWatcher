@@ -5,7 +5,7 @@
 
         <item
             android:id="@+id/menu_act_refresh"
-            android:icon="@drawable/ic_refresh_black_36dp"
+            android:icon="@drawable/ic_refresh_black_24dp"
             android:title="@string/navdrawer_item_refresh" />
 
         <item

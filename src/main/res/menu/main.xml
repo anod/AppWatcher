@@ -12,6 +12,15 @@
 	</item>
 
 	<item
+		android:id="@+id/menu_act_sort"
+		android:icon="@drawable/ic_search_white_24dp"
+		appwatcher:showAsAction="ifRoom|collapseActionView"
+		android:title="@string/sort"
+		appwatcher:actionViewClass="android.support.v7.widget.SearchView">
+	</item>
+
+
+	<item
 		android:id="@+id/menu_act_refresh"
 		android:icon="@drawable/ic_refresh_white_24dp"
 		appwatcher:showAsAction="always"

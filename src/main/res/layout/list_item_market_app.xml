@@ -29,7 +29,7 @@
             android:layout_gravity="center_vertical"
             android:layout_marginLeft="8dip"
             android:contentDescription="@string/application_icon"
-            android:src="@drawable/ic_android_black_48dp" />
+            android:src="@drawable/ic_android_black_24dp" />
 
         <RelativeLayout
             android:layout_width="match_parent"

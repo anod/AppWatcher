@@ -73,7 +73,7 @@ public class AppViewHolderDataProvider implements AppViewHolder.DataProvider {
 
     @Override
     public int getDefaultIconResource() {
-        return R.drawable.ic_android_black_48dp;
+        return R.drawable.ic_android_black_24dp;
     }
 
     @Override
