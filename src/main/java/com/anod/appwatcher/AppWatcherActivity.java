@@ -3,6 +3,7 @@ package com.anod.appwatcher;
 import android.accounts.Account;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
 import android.view.KeyEvent;
@@ -57,11 +59,10 @@ public class AppWatcherActivity extends DrawerActivity implements
         void onSyncFinish();
     }
 
-    protected String mAuthToken;
+    private String mAuthToken;
 
     private AppWatcherActivity mContext;
     private Preferences mPreferences;
-    private Account mSyncAccount;
     private MenuItem mSearchMenuItem;
     private ArrayList<EventListener> mEventListener = new ArrayList<>(3);
 
@@ -132,7 +133,9 @@ public class AppWatcherActivity extends DrawerActivity implements
         MenuItemCompat.setOnActionExpandListener(mSearchMenuItem, new MenuItemCompat.OnActionExpandListener() {
             @Override
             public boolean onMenuItemActionExpand(MenuItem menuItem) {
+
                 return true;
+
             }
 
             @Override
@@ -221,8 +224,25 @@ public class AppWatcherActivity extends DrawerActivity implements
             case R.id.menu_act_import:
                 startActivity(new Intent(this, ImportInstalledActivity.class));
                 return true;
+            case R.id.menu_act_sort:
+                showSortOptions();
+                return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showSortOptions() {
+
+        final int selected = mPreferences.getSortIndex();
+        new AlertDialog.Builder(this)
+            .setSingleChoiceItems(R.array.sort_titles, selected, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int index) {
+                    mPreferences.setSortIndex(index);
+                }
+            })
+            .create()
+            .show();
     }
 
     public boolean requestRefresh() {
@@ -252,7 +272,6 @@ public class AppWatcherActivity extends DrawerActivity implements
             Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
             return;
         }
-        mSyncAccount = account;
         setDrawerAccount(account);
     }
 
@@ -328,11 +347,11 @@ public class AppWatcherActivity extends DrawerActivity implements
         private final List<Fragment> mFragments = new ArrayList<>();
         private final List<String> mFragmentTitles = new ArrayList<>();
 
-        public Adapter(FragmentManager fm) {
+        Adapter(FragmentManager fm) {
             super(fm);
         }
 
-        public void addFragment(Fragment fragment, String title) {
+        void addFragment(Fragment fragment, String title) {
             mFragments.add(fragment);
             mFragmentTitles.add(title);
         }

@@ -99,4 +99,11 @@
     <string name="version_text">%1$s (%2$d)</string>
     <string name="menu_requires_charging">Requires charging</string>
     <string name="sort">Sort</string>
+
+    <string-array name="sort_titles">
+        <item>By name &#x2193;</item>
+        <item>By name &#x2191;</item>
+        <item>By date &#x2193;</item>
+        <item>By date &#x2191;</item>
+    </string-array>
 </resources>

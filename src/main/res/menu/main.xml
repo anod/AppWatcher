@@ -13,12 +13,9 @@
 
 	<item
 		android:id="@+id/menu_act_sort"
-		android:icon="@drawable/ic_search_white_24dp"
-		appwatcher:showAsAction="ifRoom|collapseActionView"
-		android:title="@string/sort"
-		appwatcher:actionViewClass="android.support.v7.widget.SearchView">
-	</item>
-
+		android:icon="@drawable/ic_sort_white_24dp"
+		appwatcher:showAsAction="ifRoom"
+		android:title="@string/sort"/>
 
 	<item
 		android:id="@+id/menu_act_refresh"

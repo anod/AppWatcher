@@ -40,11 +40,11 @@
         <activity
             android:name=".ChangelogActivity"
             android:label=""
-            android:theme="@style/AppThemeLight.Dialog"></activity>
+            android:theme="@style/AppThemeLight.Dialog" />
         <activity
             android:name=".MarketSearchActivity"
             android:label="@string/activity_market"
-            android:theme="@style/AppThemeLight.DarkActionBar"></activity>
+            android:theme="@style/AppThemeLight.DarkActionBar" />
         <activity
             android:name=".AppWatcherActivity"
             android:clearTaskOnLaunch="true"
@@ -77,7 +77,7 @@
             android:name=".AppListContentProvider"
             android:authorities="${applicationId}"
             android:label="@string/app_name"
-            android:syncable="true"></provider>
+            android:syncable="true" />
 
         <service
             android:name=".sync.SyncTaskService"
@@ -100,7 +100,7 @@
 
         <service
             android:name=".sync.ManualSyncService"
-            android:exported="false"></service>
+            android:exported="false" />
     </application>
 
 </manifest>

@@ -13,6 +13,7 @@ public class Preferences {
     private static final String DEVICE_ID_MESSAGE = "device_id_message";
     private static final String ACCOUNT_NAME = "account_name";
     private static final String ACCOUNT_TYPE = "account_type";
+    private static final String SORT_INDEX = "sort_index";
 
 
     private static final String PREFS_NAME = "WatcherPrefs";
@@ -134,5 +135,13 @@ public class Preferences {
 
     public boolean isRequiresCharging() {
         return mSettings.getBoolean(REQUIRES_CHARGING, false);
+    }
+
+    public int getSortIndex() {
+        return mSettings.getInt(SORT_INDEX, 0);
+    }
+
+    public void setSortIndex(int index) {
+        mSettings.edit().putInt(SORT_INDEX, index).apply();
     }
 }
