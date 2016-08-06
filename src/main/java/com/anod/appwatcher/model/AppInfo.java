@@ -23,9 +23,9 @@ public class AppInfo extends AppInfoMetadata {
     public final String iconUrl;
     public final long refreshTime;
 
-    public AppInfo(String packageName, int versionCode, String versionName, String title, String iconUrl, int status) {
+    public AppInfo(String packageName, int versionCode, String versionName, String title, String iconUrl, int status, String uploadDate) {
         this(-1, packageName, packageName, versionCode, versionName, title, null, iconUrl,
-                status, null, null, null, 0, "details?doc=" + packageName, 0);
+                status, uploadDate, null, null, 0, "details?doc=" + packageName, 0);
     }
 
     public AppInfo(int rowId, String appId, String pname, int versionNumber, String versionName,

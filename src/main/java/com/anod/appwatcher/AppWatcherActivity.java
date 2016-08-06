@@ -85,7 +85,6 @@ public class AppWatcherActivity extends DrawerActivity implements
         mContext = this;
 
         mPreferences = new Preferences(this);
-
         if (mPreferences.useAutoSync())
         {
             SyncScheduler.schedule(this, mPreferences.isRequiresCharging());
@@ -118,9 +117,9 @@ public class AppWatcherActivity extends DrawerActivity implements
 
     private void setupViewPager(ViewPager viewPager) {
         Adapter adapter = new Adapter(getSupportFragmentManager());
-        adapter.addFragment(AppWatcherListFragment.newInstance(Filters.TAB_ALL), getString(R.string.tab_all));
-        adapter.addFragment(InstalledListFragment.newInstance(Filters.TAB_INSTALLED), getString(R.string.tab_installed));
-        adapter.addFragment(AppWatcherListFragment.newInstance(Filters.TAB_UNINSTALLED), getString(R.string.tab_not_installed));
+        adapter.addFragment(AppWatcherListFragment.newInstance(Filters.TAB_ALL, mPreferences.getSortIndex()), getString(R.string.tab_all));
+        adapter.addFragment(InstalledListFragment.newInstance(Filters.TAB_INSTALLED, mPreferences.getSortIndex()), getString(R.string.tab_installed));
+        adapter.addFragment(AppWatcherListFragment.newInstance(Filters.TAB_UNINSTALLED, mPreferences.getSortIndex()), getString(R.string.tab_not_installed));
         viewPager.setAdapter(adapter);
     }
 
@@ -133,9 +132,7 @@ public class AppWatcherActivity extends DrawerActivity implements
         MenuItemCompat.setOnActionExpandListener(mSearchMenuItem, new MenuItemCompat.OnActionExpandListener() {
             @Override
             public boolean onMenuItemActionExpand(MenuItem menuItem) {
-
                 return true;
-
             }
 
             @Override
@@ -173,7 +170,6 @@ public class AppWatcherActivity extends DrawerActivity implements
                 }
             }
         }
-
     };
 
     @Override
@@ -232,13 +228,14 @@ public class AppWatcherActivity extends DrawerActivity implements
     }
 
     private void showSortOptions() {
-
         final int selected = mPreferences.getSortIndex();
         new AlertDialog.Builder(this)
             .setSingleChoiceItems(R.array.sort_titles, selected, new DialogInterface.OnClickListener() {
                 @Override
-                public void onClick(DialogInterface dialogInterface, int index) {
+                public void onClick(DialogInterface dialog, int index) {
                     mPreferences.setSortIndex(index);
+                    setupViewPager(mViewPager);
+                    dialog.dismiss();
                 }
             })
             .create()
@@ -247,7 +244,6 @@ public class AppWatcherActivity extends DrawerActivity implements
 
     public boolean requestRefresh() {
         AppLog.d("Refresh pressed");
-
         if (mAuthToken == null) {
             Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
             mAccountChooserHelper.showAccountsDialogWithCheck();

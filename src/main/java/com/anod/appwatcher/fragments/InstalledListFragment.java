@@ -10,6 +10,7 @@ import android.support.v4.util.SimpleArrayMap;
 import android.text.TextUtils;
 import android.view.View;
 
+import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.adapters.AppViewHolderDataProvider;
 import com.anod.appwatcher.installed.InstalledAppsAdapter;
 import com.anod.appwatcher.model.AppListContentProviderClient;
@@ -30,11 +31,13 @@ import java.util.Map;
  */
 public class InstalledListFragment extends AppWatcherListFragment {
     private static final int ADAPTER_INSTALLED = 1;
+    private int mSortId;
 
-    public static InstalledListFragment newInstance(int filterId) {
+    public static InstalledListFragment newInstance(int filterId, int sortId) {
         InstalledListFragment frag = new InstalledListFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_FILTER, filterId);
+        args.putInt(ARG_SORT, sortId);
         frag.setArguments(args);
         return frag;
     }
@@ -42,15 +45,17 @@ public class InstalledListFragment extends AppWatcherListFragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        mSortId = getArguments().getInt(ARG_SORT);
+
         AppViewHolderDataProvider dataProvider = new AppViewHolderDataProvider(getActivity(), mPMUtils);
         mAdapter.addAdapter(ADAPTER_INSTALLED, new InstalledAppsAdapter(getActivity(), mPMUtils, dataProvider, this));
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new InstalledLoader(getActivity(), mTitleFilter, mInstalledFilter, mPMUtils);
+        return new InstalledLoader(getActivity(), mTitleFilter, mSortId, mInstalledFilter, mPMUtils);
     }
-
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
@@ -65,6 +70,8 @@ public class InstalledListFragment extends AppWatcherListFragment {
     {
         private final PackageManagerUtils mPMUtils;
         private final SimpleArrayMap<String, String> mTitleCache = new SimpleArrayMap<>();
+        private final SimpleArrayMap<String, Long> mUpdateTimeCache = new SimpleArrayMap<>();
+        private final int mSortId;
 
         List<String> getInstalledApps() {
             return mInstalledApps;
@@ -72,9 +79,10 @@ public class InstalledListFragment extends AppWatcherListFragment {
 
         private List<String> mInstalledApps = new ArrayList<>();
 
-        InstalledLoader(Context context, String titleFilter, FilterCursorWrapper.CursorFilter cursorFilter, PackageManagerUtils pmUtils) {
-            super(context, titleFilter, cursorFilter);
+        InstalledLoader(Context context, String titleFilter, int sortId, FilterCursorWrapper.CursorFilter cursorFilter, PackageManagerUtils pmUtils) {
+            super(context, titleFilter, sortId, cursorFilter);
             mPMUtils = pmUtils;
+            mSortId = sortId;
         }
 
         @Override
@@ -87,13 +95,15 @@ public class InstalledListFragment extends AppWatcherListFragment {
 
             List<String> list = mPMUtils.getDownloadedApps(watchingPackages);
 
-            Collections.sort(list, new Comparator<String>() {
-                @Override
-                public int compare(String lPackageName, String rPackageName) {
-                    return getPackageTitle(lPackageName).compareTo(getPackageTitle(rPackageName));
-                }
-            });
-
+            if (mSortId == Preferences.SORT_NAME_DESC) {
+                Collections.sort(list, new AppTitleComparator(-1, this));
+            } else if (mSortId == Preferences.SORT_DATE_ASC) {
+                Collections.sort(list, new AppUpdateTimeComparator(1, this));
+            } else if (mSortId == Preferences.SORT_DATE_DESC) {
+                Collections.sort(list, new AppUpdateTimeComparator(-1, this));
+            } else{
+                Collections.sort(list, new AppTitleComparator(1, this));
+            }
 
             if (!TextUtils.isEmpty(mTitleFilter)) {
                 List<String> filtered = new ArrayList<>(list.size());
@@ -122,5 +132,51 @@ public class InstalledListFragment extends AppWatcherListFragment {
                 return title;
             }
         }
+
+        private long getPackageUpdateTime(String packageName)
+        {
+            if (mUpdateTimeCache.containsKey(packageName)) {
+                return mUpdateTimeCache.get(packageName);
+            } else {
+                long updateTime = mPMUtils.getAppUpdateTime(packageName);
+                mUpdateTimeCache.put(packageName, updateTime);
+                return updateTime;
+            }
+        }
+
+        private final static class AppTitleComparator implements Comparator<String> {
+            private final int mOrder;
+            private final InstalledLoader mLoader;
+
+            private AppTitleComparator(int order, InstalledLoader loader) {
+                mLoader = loader;
+                mOrder = order;
+            }
+
+            @Override
+            public int compare(String lPackageName, String rPackageName) {
+                return mOrder * (mLoader.getPackageTitle(lPackageName).compareTo(mLoader.getPackageTitle(rPackageName)));
+            }
+        }
+
+        private final static class AppUpdateTimeComparator implements Comparator<String> {
+            private final int mOrder;
+            private final InstalledLoader mLoader;
+
+            private AppUpdateTimeComparator(int order, InstalledLoader loader) {
+                mLoader = loader;
+                mOrder = order;
+            }
+
+            @Override
+            public int compare(String lPackageName, String rPackageName) {
+                if (mLoader.getPackageUpdateTime(lPackageName) > mLoader.getPackageUpdateTime(rPackageName)) {
+                    return mOrder;
+                } else {
+                    return mOrder * -1;
+                }
+            }
+        }
     }
+
 }

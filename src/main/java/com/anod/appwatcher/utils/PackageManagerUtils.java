@@ -18,7 +18,9 @@ import com.anod.appwatcher.model.AppInfoMetadata;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -32,13 +34,12 @@ import info.anodsplace.android.log.AppLog;
 public class PackageManagerUtils {
     private PackageManager mPackageManager;
     private ArrayMap<String, InstalledInfo> mInstalledVersionsCache;
-
     public AppInfo packageToApp(String packageName) {
         PackageInfo packageInfo = getPackageInfo(packageName);
         if (packageInfo == null) {
             return new AppInfo(
                     packageName, 0, "",
-                    packageName, null, AppInfoMetadata.STATUS_DELETED
+                    packageName, null, AppInfoMetadata.STATUS_DELETED, ""
             );
         }
         ComponentName launchComponent = this.getLaunchComponent(packageInfo);
@@ -47,23 +48,27 @@ public class PackageManagerUtils {
             iconUrl = Uri.fromParts(AppIconLoader.SCHEME, launchComponent.flattenToShortString(), null).toString();
         }
 
+        DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
+        String lastUpdate = dateFormat.format(new Date(packageInfo.lastUpdateTime));
+
         return new AppInfo(
                 packageInfo.packageName, packageInfo.versionCode, packageInfo.versionName,
-                this.getAppTitle(packageInfo), iconUrl, AppInfoMetadata.STATUS_NORMAL
+                this.getAppTitle(packageInfo), iconUrl, AppInfoMetadata.STATUS_NORMAL, lastUpdate
         );
     }
 
-    public PackageInfo getPackageInfo(String packageName) {
+    PackageInfo getPackageInfo(String packageName) {
         PackageInfo pkgInfo = null;
         try {
             pkgInfo = mPackageManager.getPackageInfo(packageName, 0);
         } catch (PackageManager.NameNotFoundException e) {
             AppLog.e(e);
         }
+
         return pkgInfo;
     }
 
-    public Bitmap loadIcon(ComponentName componentName, DisplayMetrics displayMetrics) {
+    Bitmap loadIcon(ComponentName componentName, DisplayMetrics displayMetrics) {
         Drawable d = null;
         Bitmap icon;
         try {
@@ -107,11 +112,15 @@ public class PackageManagerUtils {
         return getAppTitle(getPackageInfo(packageName));
     }
 
-    public String getAppTitle(PackageInfo info) {
+    String getAppTitle(PackageInfo info) {
         return info.applicationInfo.loadLabel(mPackageManager).toString();
     }
 
-    public ComponentName getLaunchComponent(PackageInfo info) {
+    public long getAppUpdateTime(String packageName) {
+        return getPackageInfo(packageName).lastUpdateTime;
+    }
+
+    ComponentName getLaunchComponent(PackageInfo info) {
         Intent launchIntent = mPackageManager.getLaunchIntentForPackage(info.packageName);
         return launchIntent == null ? null : launchIntent.getComponent();
     }

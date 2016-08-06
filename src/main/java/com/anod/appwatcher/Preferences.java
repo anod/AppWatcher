@@ -15,6 +15,10 @@ public class Preferences {
     private static final String ACCOUNT_TYPE = "account_type";
     private static final String SORT_INDEX = "sort_index";
 
+    static final int SORT_NAME_ASC = 0;
+    public static final int SORT_NAME_DESC = 1;
+    public static final int SORT_DATE_ASC = 2;
+    public static final int SORT_DATE_DESC = 3;
 
     private static final String PREFS_NAME = "WatcherPrefs";
     private static final String DRIVE_SYNC = "drive_sync";
@@ -49,7 +53,6 @@ public class Preferences {
         return mSettings.getLong(LAST_UPDATE_TIME, -1);
     }
 
-
     public String getDeviceId() {
         return mSettings.getString(DEVICE_ID, null);
     }
@@ -68,10 +71,9 @@ public class Preferences {
         editor.apply();
     }
 
-    public void saveWifiOnly(boolean useWifiOnly) {
+    void saveWifiOnly(boolean useWifiOnly) {
         saveBoolean(WIFI_ONLY, useWifiOnly);
     }
-
 
     public void updateLastTime(long time) {
         saveLong(LAST_UPDATE_TIME, time);
@@ -96,7 +98,7 @@ public class Preferences {
         return mSettings.getBoolean(DRIVE_SYNC, false);
     }
 
-    public void saveDriveSyncEnabled(boolean enabled) {
+    void saveDriveSyncEnabled(boolean enabled) {
         saveBoolean(DRIVE_SYNC, enabled);
     }
 
@@ -125,11 +127,11 @@ public class Preferences {
         return mSettings.getBoolean(AUTOSYNC, true);
     }
 
-    public void setUseAutoSync(boolean useAutoSync) {
+    void setUseAutoSync(boolean useAutoSync) {
         mSettings.edit().putBoolean(AUTOSYNC, useAutoSync).apply();
     }
 
-    public void setRequiresCharging(boolean requiresCharging) {
+    void setRequiresCharging(boolean requiresCharging) {
         mSettings.edit().putBoolean(REQUIRES_CHARGING, requiresCharging).apply();
     }
 
@@ -137,11 +139,11 @@ public class Preferences {
         return mSettings.getBoolean(REQUIRES_CHARGING, false);
     }
 
-    public int getSortIndex() {
+    int getSortIndex() {
         return mSettings.getInt(SORT_INDEX, 0);
     }
 
-    public void setSortIndex(int index) {
+    void setSortIndex(int index) {
         mSettings.edit().putInt(SORT_INDEX, index).apply();
     }
 }

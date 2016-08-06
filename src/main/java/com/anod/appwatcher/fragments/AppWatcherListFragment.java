@@ -46,6 +46,8 @@ public class AppWatcherListFragment extends Fragment implements
         AppViewHolder.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
 
     static final String ARG_FILTER = "filter";
+    static final String ARG_SORT = "sort";
+
     private static final int ADAPTER_WATCHLIST = 0;
     private static final int REQUEST_APP_INFO = 1;
 
@@ -54,6 +56,7 @@ public class AppWatcherListFragment extends Fragment implements
     protected PackageManagerUtils mPMUtils;
     protected MergeRecyclerAdapter mAdapter;
     private int mListenerIndex;
+    private int mSortId;
 
     @Bind(android.R.id.list)
     RecyclerView mListView;
@@ -64,10 +67,11 @@ public class AppWatcherListFragment extends Fragment implements
     @Bind(R.id.swipe_layout)
     SwipeRefreshLayout mSwipeLayout;
 
-    public static AppWatcherListFragment newInstance(int filterId) {
+    public static AppWatcherListFragment newInstance(int filterId, int sortId) {
         AppWatcherListFragment frag = new AppWatcherListFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_FILTER, filterId);
+        args.putInt(ARG_SORT, sortId);
         frag.setArguments(args);
         return frag;
     }
@@ -151,6 +155,7 @@ public class AppWatcherListFragment extends Fragment implements
         // Start out with a progress indicator.
         setListVisible(false, true);
 
+        mSortId = getArguments().getInt(ARG_SORT);
         setupFilter(getArguments().getInt(ARG_FILTER));
         // Prepare the loader.  Either re-connect with an existing one,
         // or start a new one.
@@ -160,7 +165,7 @@ public class AppWatcherListFragment extends Fragment implements
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new AppListCursorLoader(getActivity(), mTitleFilter, mInstalledFilter);
+        return new AppListCursorLoader(getActivity(), mTitleFilter, mSortId, mInstalledFilter);
     }
 
     @Override
