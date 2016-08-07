@@ -31,7 +31,6 @@ import java.util.Map;
  */
 public class InstalledListFragment extends AppWatcherListFragment {
     private static final int ADAPTER_INSTALLED = 1;
-    private int mSortId;
 
     public static InstalledListFragment newInstance(int filterId, int sortId) {
         InstalledListFragment frag = new InstalledListFragment();

@@ -55,8 +55,9 @@ public class AppWatcherListFragment extends Fragment implements
     protected InstalledFilter mInstalledFilter;
     protected PackageManagerUtils mPMUtils;
     protected MergeRecyclerAdapter mAdapter;
+    protected int mSortId;
+
     private int mListenerIndex;
-    private int mSortId;
 
     @Bind(android.R.id.list)
     RecyclerView mListView;
@@ -205,6 +206,13 @@ public class AppWatcherListFragment extends Fragment implements
         } else {
             mInstalledFilter = null;
         }
+    }
+
+    @Override
+    public void onSortChanged(int sortIndex)
+    {
+        mSortId = sortIndex;
+        getLoaderManager().restartLoader(0, null, this);
     }
 
     @Override

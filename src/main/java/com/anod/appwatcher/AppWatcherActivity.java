@@ -54,6 +54,7 @@ public class AppWatcherActivity extends DrawerActivity implements
     private ViewPager mViewPager;
 
     public interface EventListener {
+        void onSortChanged(int sortIndex);
         void onQueryTextChanged(String newQuery);
         void onSyncStart();
         void onSyncFinish();
@@ -234,7 +235,7 @@ public class AppWatcherActivity extends DrawerActivity implements
                 @Override
                 public void onClick(DialogInterface dialog, int index) {
                     mPreferences.setSortIndex(index);
-                    setupViewPager(mViewPager);
+                    notifySortChange(index);
                     dialog.dismiss();
                 }
             })
@@ -308,6 +309,12 @@ public class AppWatcherActivity extends DrawerActivity implements
     public boolean onQueryTextChange(String newText) {
         notifyQueryChange(newText);
         return true;
+    }
+
+    private void notifySortChange(int sortIndex) {
+        for (int idx = 0; idx < mEventListener.size(); idx++) {
+            mEventListener.get(idx).onSortChanged(sortIndex);
+        }
     }
 
     private void notifyQueryChange(String newTexr) {
