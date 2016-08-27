@@ -1,7 +1,6 @@
 package com.anod.appwatcher.market;
 
 import android.content.Context;
-import android.text.TextUtils;
 
 import com.google.android.finsky.api.model.DfeDetails;
 import com.google.android.finsky.api.model.DfeModel;
@@ -12,7 +11,7 @@ import com.google.android.finsky.protos.DocDetails;
  * @author alex
  * @date 2015-02-22
  */
-public class DetailsEndpoint extends PlayStoreEndpoint {
+public class DetailsEndpoint extends PlayStoreEndpointBase {
     private String mUrl;
 
     public DetailsEndpoint(Context context) {

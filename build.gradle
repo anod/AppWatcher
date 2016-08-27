@@ -7,7 +7,7 @@ buildscript {
         maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.1.0'
+        classpath 'com.android.tools.build:gradle:2.1.3'
     }
 }
 
@@ -61,7 +61,7 @@ def buildTime() {
 }
 android {
     compileSdkVersion 24
-    buildToolsVersion '24.0.0'
+    buildToolsVersion '24.0.2'
 
     defaultConfig {
         applicationId 'com.anod.appwatcher'

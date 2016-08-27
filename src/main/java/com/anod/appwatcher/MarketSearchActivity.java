@@ -13,7 +13,6 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -21,24 +20,35 @@ import android.widget.Toast;
 
 import com.android.volley.VolleyError;
 import com.anod.appwatcher.accounts.AccountChooserHelper;
-import com.anod.appwatcher.adapters.MarketSearchAdapter;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
+import com.anod.appwatcher.market.CompositeStateEndpoint;
+import com.anod.appwatcher.market.DetailsEndpoint;
+import com.anod.appwatcher.market.PlayStoreEndpointBase;
 import com.anod.appwatcher.market.SearchEndpoint;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.model.AddWatchAppHandler;
+import com.anod.appwatcher.search.ResultsAdapter;
+import com.anod.appwatcher.search.ResultsAdapterDetails;
+import com.anod.appwatcher.search.ResultsAdapterSearch;
 import com.anod.appwatcher.ui.ToolbarActivity;
+import com.anod.appwatcher.utils.DocUtils;
+import com.anod.appwatcher.utils.Keyboard;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class MarketSearchActivity extends ToolbarActivity implements AccountChooserHelper.OnAccountSelectionListener, SearchEndpoint.Listener, AddWatchAppHandler.Listener {
+public class MarketSearchActivity extends ToolbarActivity implements AccountChooserHelper.OnAccountSelectionListener, AddWatchAppHandler.Listener, CompositeStateEndpoint.Listener {
     public static final String EXTRA_KEYWORD = "keyword";
     public static final String EXTRA_EXACT = "exact";
     public static final String EXTRA_SHARE = "share";
     public static final String EXTRA_FOCUS = "focus";
+    public static final String EXTRA_PACKAGE = "package";
 
-    private MarketSearchAdapter mAdapter;
+    private static final int DETAILS_ENDPOINT_ID = 0;
+    private static final int SEARCH_ENDPOINT_ID = 1;
+
+    private ResultsAdapter mAdapter;
     private Context mContext;
 
     @Bind(R.id.loading)
@@ -57,11 +67,12 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
     private boolean mShareSource = false;
 
     private AccountChooserHelper mAccountChooserHelper;
-    private SearchEndpoint mSearchEngine;
     private AddWatchAppHandler mNewAppHandler;
     private AppListContentProviderClient mContentProviderClient;
     private String mSearchQuery;
     private boolean mFocus;
+    private boolean mPackageSearch;
+    private CompositeStateEndpoint mEndpoints;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,12 +85,13 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
 
         mLoading.setVisibility(View.GONE);
 
-        mSearchEngine = new SearchEndpoint(this);
+        mEndpoints = new CompositeStateEndpoint(this);
+        mEndpoints.add(SEARCH_ENDPOINT_ID, new SearchEndpoint(this));
+        mEndpoints.add(DETAILS_ENDPOINT_ID, new DetailsEndpoint(this));
+
         mNewAppHandler = new AddWatchAppHandler(this, this);
-        mAdapter = new MarketSearchAdapter(this, mSearchEngine, mNewAppHandler);
 
         mListView.setLayoutManager(new LinearLayoutManager(this));
-        mListView.setAdapter(mAdapter);
 
         mRetryButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -96,7 +108,6 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
         initFromIntent(getIntent());
     }
 
-
     private void initFromIntent(Intent i) {
         if (i == null) {
             return;
@@ -105,9 +116,19 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
         if (keyword != null) {
             mSearchQuery = keyword;
         }
+        mPackageSearch = i.getBooleanExtra(EXTRA_PACKAGE, false);
         mInitiateSearch = i.getBooleanExtra(EXTRA_EXACT, false);
         mShareSource = i.getBooleanExtra(EXTRA_SHARE, false);
         mFocus = i.getBooleanExtra(EXTRA_FOCUS, false);
+
+
+        if (mPackageSearch) {
+            mEndpoints.setActive(DETAILS_ENDPOINT_ID);
+            mAdapter = new ResultsAdapterDetails(this, (DetailsEndpoint) mEndpoints.get(DETAILS_ENDPOINT_ID), mNewAppHandler);
+        } else {
+            mEndpoints.setActive(SEARCH_ENDPOINT_ID);
+            mAdapter = new ResultsAdapterSearch(this, (SearchEndpoint) mEndpoints.get(SEARCH_ENDPOINT_ID), mNewAppHandler);
+        }
     }
 
     @Override
@@ -117,7 +138,7 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
         }
         super.onPause();
         mNewAppHandler.setContentProvider(null);
-        mSearchEngine.setListener(null);
+        mEndpoints.setListener(null);
     }
 
     @Override
@@ -126,27 +147,24 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
         super.onResume();
 
         mNewAppHandler.setContentProvider(mContentProviderClient);
-        mSearchEngine.setListener(this);
 
         mAccountChooserHelper = new AccountChooserHelper(this, new Preferences(this), this);
         mAccountChooserHelper.init();
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-    }
-
     private void searchResults() {
-
         mListView.setAdapter(mAdapter);
-
-        mSearchEngine.reset();
-
+        mEndpoints.reset();
         showLoading();
 
         if (!TextUtils.isEmpty(mSearchQuery)) {
-            mSearchEngine.setQuery(mSearchQuery).startAsync();
+            if (mPackageSearch)
+            {
+                String url = DocUtils.getUrl(mSearchQuery);
+                ((DetailsEndpoint) mEndpoints.get(DETAILS_ENDPOINT_ID)).setUrl(url);
+            }
+            ((SearchEndpoint) mEndpoints.get(SEARCH_ENDPOINT_ID)).setQuery(mSearchQuery);
+            mEndpoints.active().startAsync();
         } else {
             showNoResults("");
         }
@@ -155,7 +173,6 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.searchbox, menu);
-
 
         final MenuItem searchItem = menu.findItem(R.id.menu_search);
         mSearchView = (SearchView) MenuItemCompat.getActionView(searchItem);
@@ -167,7 +184,7 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
             public boolean onQueryTextSubmit(String query) {
                 mSearchQuery = query;
                 searchResultsDelayed();
-                hideKeyboard();
+                Keyboard.hide(mSearchView, MarketSearchActivity.this);
                 return false;
             }
 
@@ -186,19 +203,13 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
                 }
             });
         } else {
-            hideKeyboard();
+            Keyboard.hide(mSearchView, this);
         }
         return true;
     }
 
-    private void hideKeyboard() {
-        // hide virtual keyboard
-        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
-    }
-
     private void searchResultsDelayed() {
-        if (mSearchEngine.getAuthSubToken() == null) {
+        if (mEndpoints.getAuthSubToken() == null) {
             mInitiateSearch = true;
         } else {
             searchResults();
@@ -223,7 +234,7 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
             finish();
             return;
         }
-        mSearchEngine.setAccount(account, authSubToken);
+        mEndpoints.setAccount(account, authSubToken);
         if (mInitiateSearch && !TextUtils.isEmpty(mSearchQuery)) {
             searchResults();
         } else {
@@ -282,24 +293,8 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
         if (mAdapter.isEmpty()) {
             searchResultsDelayed();
         } else {
-            mSearchEngine.startAsync();
+            mEndpoints.active().startAsync();
         }
-    }
-
-    @Override
-    public void onDataChanged() {
-        if (mSearchEngine.getData().getCount() == 0) {
-            showNoResults(mSearchEngine.getQuery());
-        } else {
-            showListView();
-            mAdapter.notifyDataSetChanged();
-        }
-    }
-
-    @Override
-    public void onErrorResponse(VolleyError error) {
-        mLoading.setVisibility(View.GONE);
-        showRetryButton();
     }
 
     @Override
@@ -322,4 +317,40 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
         }
     }
 
+    @Override
+    public void onDataChanged(int id, PlayStoreEndpointBase endpoint) {
+        if (id == DETAILS_ENDPOINT_ID)
+        {
+            if (((DetailsEndpoint)endpoint).getDocument() != null)
+            {
+                showListView();
+                mAdapter.notifyDataSetChanged();
+            } else {
+                mAdapter = new ResultsAdapterSearch(this, (SearchEndpoint) mEndpoints.get(SEARCH_ENDPOINT_ID), mNewAppHandler);
+                mListView.setAdapter(mAdapter);
+                mEndpoints.setActive(SEARCH_ENDPOINT_ID).startAsync();
+            }
+        } else {
+            SearchEndpoint searchEndpoint = (SearchEndpoint)endpoint;
+            if (searchEndpoint.getData().getCount() == 0) {
+                showNoResults(searchEndpoint.getQuery());
+            } else {
+                showListView();
+                mAdapter.notifyDataSetChanged();
+            }
+        }
+    }
+
+    @Override
+    public void onErrorResponse(int id, PlayStoreEndpointBase endpoint, VolleyError error) {
+        if (id == DETAILS_ENDPOINT_ID)
+        {
+            mAdapter = new ResultsAdapterSearch(this, (SearchEndpoint) mEndpoints.get(SEARCH_ENDPOINT_ID), mNewAppHandler);
+            mListView.setAdapter(mAdapter);
+            mEndpoints.setActive(SEARCH_ENDPOINT_ID).startAsync();
+        } else {
+            mLoading.setVisibility(View.GONE);
+            showRetryButton();
+        }
+    }
 }

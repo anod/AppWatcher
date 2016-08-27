@@ -12,7 +12,7 @@ import java.util.List;
  * @author alex
  * @date 2015-02-22
  */
-public class BulkDetailsEndpoint extends PlayStoreEndpoint {
+public class BulkDetailsEndpoint extends PlayStoreEndpointBase {
     private List<String> mDocIds;
 
     public BulkDetailsEndpoint(Context context) {

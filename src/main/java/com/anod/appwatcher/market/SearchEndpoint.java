@@ -10,9 +10,9 @@ import com.google.android.finsky.api.model.DfeSearch;
  * @author alex
  * @date 2015-02-21
  */
-public class SearchEndpoint extends PlayStoreEndpoint {
+public class SearchEndpoint extends PlayStoreEndpointBase {
 
-    public static final int BACKEND_ID = 3;
+    private static final int BACKEND_ID = 3;
     private String mQuery;
 
     public SearchEndpoint(Context context) {

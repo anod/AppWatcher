@@ -4,14 +4,10 @@ import android.accounts.Account;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.app.Notification;
-import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SyncResult;
-import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -22,7 +18,6 @@ import android.text.format.DateUtils;
 import com.android.volley.VolleyError;
 import com.anod.appwatcher.BuildConfig;
 import com.anod.appwatcher.Preferences;
-import com.anod.appwatcher.R;
 import com.anod.appwatcher.accounts.AuthTokenProvider;
 import com.anod.appwatcher.backup.GDriveSync;
 import com.anod.appwatcher.market.BulkDetailsEndpoint;
@@ -31,13 +26,11 @@ import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.model.AppListCursor;
 import com.anod.appwatcher.model.schema.AppListTable;
-import com.anod.appwatcher.utils.BitmapUtils;
 import com.anod.appwatcher.utils.DocUtils;
 import com.anod.appwatcher.utils.GooglePlayServices;
 import com.google.android.finsky.api.model.Document;
 import com.google.android.finsky.protos.Common;
 import com.google.android.finsky.protos.DocDetails;
-import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -50,7 +43,7 @@ import info.anodsplace.android.log.AppLog;
 
 public class SyncAdapter implements PlayStoreEndpoint.Listener {
     private static final int ONE_SEC_IN_MILLIS = 1000;
-    static final int BULK_SIZE = 20;
+    private static final int BULK_SIZE = 20;
     static final String SYNC_EXTRAS_MANUAL = "manual";
 
     private final Context mContext;
@@ -176,7 +169,7 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
 
     }
 
-    protected static class UpdatedApp {
+    static class UpdatedApp {
         String appId;
         String title;
         String pkg;

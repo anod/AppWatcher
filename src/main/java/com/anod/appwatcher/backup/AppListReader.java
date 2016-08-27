@@ -7,6 +7,7 @@ import com.android.util.JsonReader;
 import com.android.util.JsonToken;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.utils.BitmapUtils;
+import com.anod.appwatcher.utils.DocUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -105,7 +106,7 @@ public class AppListReader {
         if (TextUtils.isEmpty(info.getDetailsUrl())) {
             String packageName = info.packageName;
             info.setAppId(packageName);
-            info.setDetailsUrl("details?doc="+packageName);
+            info.setDetailsUrl(DocUtils.getUrl(packageName));
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.anod.appwatcher.adapters;
+package com.anod.appwatcher.search;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -14,7 +14,7 @@ import com.google.android.finsky.api.model.Document;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-class MarketAppViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+class ResultsAppViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
     private final AddWatchAppHandler mNewAppHandler;
     Document doc;
     @Bind(android.R.id.content)
@@ -30,7 +30,7 @@ class MarketAppViewHolder extends RecyclerView.ViewHolder implements View.OnClic
     @Bind(android.R.id.icon)
     ImageView icon;
 
-    public MarketAppViewHolder(View itemView, AddWatchAppHandler newAppHandler) {
+    public ResultsAppViewHolder(View itemView, AddWatchAppHandler newAppHandler) {
         super(itemView);
         ButterKnife.bind(this, itemView);
         this.row.setOnClickListener(this);

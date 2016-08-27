@@ -1,9 +1,7 @@
 package com.anod.appwatcher.utils;
 
-import com.anod.appwatcher.R;
 import com.google.android.finsky.api.model.Document;
 import com.google.android.finsky.protos.Common;
-import com.google.android.finsky.protos.DocDetails;
 
 import java.util.List;
 
@@ -29,4 +27,8 @@ public class DocUtils {
         return doc.getOffer(OFFER_TYPE); // Type 1 ?
     }
 
+    public static String getUrl(String packageName)
+    {
+        return "details?doc="+packageName;
+    }
 }

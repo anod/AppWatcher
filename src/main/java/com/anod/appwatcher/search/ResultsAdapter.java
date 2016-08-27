@@ -1,4 +1,4 @@
-package com.anod.appwatcher.adapters;
+package com.anod.appwatcher.search;
 
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.anod.appwatcher.R;
-import com.anod.appwatcher.market.SearchEndpoint;
 import com.anod.appwatcher.model.AddWatchAppHandler;
 import com.anod.appwatcher.utils.DocUtils;
 import com.anod.appwatcher.utils.PackageManagerUtils;
@@ -17,19 +16,17 @@ import com.google.android.finsky.protos.Common;
 import com.google.android.finsky.protos.DocDetails;
 import com.squareup.picasso.Picasso;
 
-public class MarketSearchAdapter extends RecyclerView.Adapter<MarketAppViewHolder> {
+public abstract class ResultsAdapter extends RecyclerView.Adapter<ResultsAppViewHolder> {
     private final PackageManagerUtils mPMUtils;
     private final Context mContext;
-    private final SearchEndpoint mSearchEngine;
     private final int mColorBgGray;
     private final int mColorBgWhite;
     private final AddWatchAppHandler mNewAppHandler;
 
-    public MarketSearchAdapter(Context context, SearchEndpoint searchEngine, AddWatchAppHandler newAppHandler) {
+    ResultsAdapter(Context context, AddWatchAppHandler newAppHandler) {
         super();
         mContext = context;
         mPMUtils = new PackageManagerUtils(context.getPackageManager());
-        mSearchEngine = searchEngine;
         mNewAppHandler = newAppHandler;
 
         mColorBgGray = ContextCompat.getColor(context, R.color.row_inactive);
@@ -37,14 +34,16 @@ public class MarketSearchAdapter extends RecyclerView.Adapter<MarketAppViewHolde
     }
 
     @Override
-    public MarketAppViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ResultsAppViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(mContext).inflate(R.layout.list_item_market_app, parent, false);
-        return new MarketAppViewHolder(view, mNewAppHandler);
+        return new ResultsAppViewHolder(view, mNewAppHandler);
     }
 
+    abstract Document getDocument(int position);
+
     @Override
-    public void onBindViewHolder(MarketAppViewHolder holder, int position) {
-        Document doc = mSearchEngine.getData().getItem(position, false);
+    public void onBindViewHolder(ResultsAppViewHolder holder, int position) {
+        Document doc = getDocument(position);
 
         DocDetails.AppDetails app = doc.getAppDetails();
         String uploadDate = app == null ? "" : app.uploadDate;
@@ -82,12 +81,7 @@ public class MarketSearchAdapter extends RecyclerView.Adapter<MarketAppViewHolde
         }
     }
 
-    @Override
-    public int getItemCount() {
-        return mSearchEngine.getCount();
-    }
-
     public boolean isEmpty() {
-        return mSearchEngine.getCount() == 0;
+        return getItemCount() == 0;
     }
 }
