@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v4.util.ArrayMap;
 import android.util.DisplayMetrics;
 
@@ -57,7 +58,7 @@ public class PackageManagerUtils {
         );
     }
 
-    PackageInfo getPackageInfo(String packageName) {
+    private PackageInfo getPackageInfo(String packageName) {
         PackageInfo pkgInfo = null;
         try {
             pkgInfo = mPackageManager.getPackageInfo(packageName, 0);
@@ -97,7 +98,6 @@ public class PackageManagerUtils {
         return null;
     }
 
-
     public static class InstalledInfo {
         public int versionCode = 0;
         public String versionName = null;
@@ -109,18 +109,26 @@ public class PackageManagerUtils {
     }
 
     public String getAppTitle(String packageName) {
+        PackageInfo info = getPackageInfo(packageName);
+        if (info == null) {
+            return packageName;
+        }
         return getAppTitle(getPackageInfo(packageName));
     }
 
-    String getAppTitle(PackageInfo info) {
+    private String getAppTitle(@NonNull PackageInfo info) {
         return info.applicationInfo.loadLabel(mPackageManager).toString();
     }
 
     public long getAppUpdateTime(String packageName) {
+        PackageInfo info = getPackageInfo(packageName);
+        if (info == null) {
+            return 0;
+        }
         return getPackageInfo(packageName).lastUpdateTime;
     }
 
-    ComponentName getLaunchComponent(PackageInfo info) {
+    private ComponentName getLaunchComponent(PackageInfo info) {
         Intent launchIntent = mPackageManager.getLaunchIntentForPackage(info.packageName);
         return launchIntent == null ? null : launchIntent.getComponent();
     }
@@ -198,16 +206,6 @@ public class PackageManagerUtils {
 
         mInstalledVersionsCache.put(packageName, info);
         return info;
-    }
-
-    public String getAppVersionName(String packageName) {
-        InstalledInfo info = getInstalledInfo(packageName);
-        return info.versionName;
-    }
-
-    public int getAppVersionCode(String packageName) {
-        InstalledInfo info = getInstalledInfo(packageName);
-        return info.versionCode;
     }
 
     public boolean isAppInstalled(String packageName) {

@@ -10,7 +10,7 @@ import com.anod.appwatcher.R;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -23,15 +23,15 @@ public class AppDetailsView {
     private final int mTextColor;
     private @ColorInt int mAccentColor;
 
-    @Bind(android.R.id.title)
+    @BindView(android.R.id.title)
     public TextView title;
-    @Nullable @Bind(R.id.details)
+    @Nullable @BindView(R.id.details)
     public TextView details;
-    @Nullable @Bind(R.id.updated)
+    @Nullable @BindView(R.id.updated)
     public TextView version;
-    @Nullable  @Bind(R.id.price)
+    @Nullable  @BindView(R.id.price)
     public TextView price;
-    @Nullable @Bind(R.id.update_date)
+    @Nullable @BindView(R.id.update_date)
     public TextView updateDate;
 
     public AppDetailsView(View view, AppViewHolder.DataProvider dataProvider)

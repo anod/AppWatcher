@@ -8,7 +8,7 @@ import com.anod.appwatcher.adapters.AppViewHolderBase;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.utils.AppIconLoader;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -19,9 +19,9 @@ class ImportAppViewHolder extends AppViewHolderBase implements View.OnClickListe
     private final ImportDataProvider mDataProvider;
 
     public AppInfo app;
-    @Bind(android.R.id.title)
+    @BindView(android.R.id.title)
     public CheckedTextView title;
-    @Bind(android.R.id.icon)
+    @BindView(android.R.id.icon)
     public ImageView icon;
 
     ImportAppViewHolder(View itemView, ImportDataProvider dataProvider, AppIconLoader iconLoader) {

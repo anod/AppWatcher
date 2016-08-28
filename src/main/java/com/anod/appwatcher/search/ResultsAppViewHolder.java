@@ -8,26 +8,25 @@ import android.widget.TextView;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AddWatchAppHandler;
-import com.anod.appwatcher.utils.DocUtils;
 import com.google.android.finsky.api.model.Document;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 class ResultsAppViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
     private final AddWatchAppHandler mNewAppHandler;
     Document doc;
-    @Bind(android.R.id.content)
+    @BindView(android.R.id.content)
     View row;
-    @Bind(android.R.id.title)
+    @BindView(android.R.id.title)
     TextView title;
-    @Bind(R.id.details)
+    @BindView(R.id.details)
     TextView details;
-    @Bind(R.id.updated)
+    @BindView(R.id.updated)
     TextView updated;
-    @Bind(R.id.price)
+    @BindView(R.id.price)
     TextView price;
-    @Bind(android.R.id.icon)
+    @BindView(android.R.id.icon)
     ImageView icon;
 
     public ResultsAppViewHolder(View itemView, AddWatchAppHandler newAppHandler) {

@@ -47,7 +47,7 @@ import com.anod.appwatcher.utils.PackageManagerUtils;
 import com.google.android.finsky.api.model.Document;
 import com.squareup.picasso.Picasso;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import info.anodsplace.android.anim.RevealAnimatorCompat;
 import info.anodsplace.android.log.AppLog;
@@ -62,19 +62,19 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
     public static final String EXTRA_ADD_APP_PACKAGE = "app_add_success";
     public static final String EXTRA_UNINSTALL_APP_PACKAGE = "app_uninstall";
 
-    @Bind(R.id.progress_bar)
+    @BindView(R.id.progress_bar)
     ProgressBar mLoadingView;
-    @Bind(R.id.changelog)
+    @BindView(R.id.changelog)
     TextView mChangelog;
-    @Bind(R.id.retry)
+    @BindView(R.id.retry)
     Button mRetryButton;
-    @Bind(android.R.id.icon)
+    @BindView(android.R.id.icon)
     ImageView mAppIcon;
-    @Bind(R.id.background)
+    @BindView(R.id.background)
     View mBackground;
-    @Bind(R.id.market_btn)
+    @BindView(R.id.market_btn)
     FloatingActionButton mPlayStoreButton;
-    @Bind(R.id.content)
+    @BindView(R.id.content)
     View mContent;
 
     private static Target[] sTargets = new Target[] {

@@ -8,6 +8,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.1.3'
+        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
     }
 }
 
@@ -21,6 +22,7 @@ repositories {
 }
 
 apply plugin: 'com.android.application'
+apply plugin: 'android-apt'
 
 configurations.all {
     resolutionStrategy.cacheDynamicVersionsFor 10, 'minutes'
@@ -32,20 +34,22 @@ dependencies {
 
     compile 'com.github.anod:android-utils-lib:1.0.1'
 
-    compile 'com.android.support:appcompat-v7:24.1.1'
-    compile 'com.android.support:recyclerview-v7:24.1.1'
-    compile 'com.android.support:design:24.1.1'
-    compile 'com.android.support:cardview-v7:24.1.1'
-    compile 'com.android.support:palette-v7:24.1.1'
+    compile 'com.android.support:appcompat-v7:24.2.0'
+    compile 'com.android.support:recyclerview-v7:24.2.0'
+    compile 'com.android.support:design:24.2.0'
+    compile 'com.android.support:cardview-v7:24.2.0'
+    compile 'com.android.support:palette-v7:24.2.0'
 
-    compile 'com.google.android.gms:play-services-identity:9.2.1'
-    compile 'com.google.android.gms:play-services-drive:9.2.1'
-    compile 'com.google.android.gms:play-services-gcm:9.2.1'
+    compile 'com.google.android.gms:play-services-identity:9.4.0'
+    compile 'com.google.android.gms:play-services-drive:9.4.0'
+    compile 'com.google.android.gms:play-services-gcm:9.4.0'
 
     compile 'com.android.volley:volley:1.0.0'
-    compile 'com.jakewharton:butterknife:7.0.1'
-    compile 'com.squareup.okhttp3:okhttp:3.3.1'
+    compile 'com.squareup.okhttp3:okhttp:3.4.1'
     compile 'com.squareup.picasso:picasso:2.6.0-SNAPSHOT'
+
+    compile 'com.jakewharton:butterknife:8.4.0'
+    apt 'com.jakewharton:butterknife-compiler:8.4.0'
 
     compile 'net.hockeyapp.android:HockeySDK:4.1.0-beta.2'
 
@@ -67,8 +71,8 @@ android {
         applicationId 'com.anod.appwatcher'
         minSdkVersion 15
         targetSdkVersion 24
-        versionCode 32
-        versionName '1.8.3'
+        versionCode 33
+        versionName '1.8.4'
 
         manifestPlaceholders = [HOCKEYAPP_APP_ID: APPWATCHER_HOCKEYAPP_ID]
         resValue "string", "content_authority", "com.anod.appwatcher"

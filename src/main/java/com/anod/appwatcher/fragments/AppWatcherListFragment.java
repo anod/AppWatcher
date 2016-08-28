@@ -34,7 +34,7 @@ import com.anod.appwatcher.model.InstalledFilter;
 import com.anod.appwatcher.utils.IntentUtils;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import info.anodsplace.android.log.AppLog;
@@ -59,13 +59,13 @@ public class AppWatcherListFragment extends Fragment implements
 
     private int mListenerIndex;
 
-    @Bind(android.R.id.list)
+    @BindView(android.R.id.list)
     RecyclerView mListView;
-    @Bind(R.id.progress)
+    @BindView(R.id.progress)
     View mProgressContainer;
-    @Bind(android.R.id.empty)
+    @BindView(android.R.id.empty)
     View mEmptyView;
-    @Bind(R.id.swipe_layout)
+    @BindView(R.id.swipe_layout)
     SwipeRefreshLayout mSwipeLayout;
 
     public static AppWatcherListFragment newInstance(int filterId, int sortId) {

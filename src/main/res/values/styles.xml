@@ -15,7 +15,7 @@
         <item name="colorAccent">@color/theme_accent</item>
         <item name="android:windowNoTitle">true</item>
         <item name="windowNoTitle">true</item>
-     </style>
+    </style>
 
     <style name="AppThemeLight.DarkDialog" parent="@style/Theme.AppCompat.Dialog">
         <item name="colorPrimary">@color/theme_primary</item>
@@ -43,11 +43,17 @@
 
     <style name="ActionButton" parent="Widget.AppCompat.ActionButton" />
 
-	<style name="ListHeader">
-		<item name="android:layout_height">wrap_content</item>
-		<item name="android:textSize">16sp</item>
-		<item name="android:typeface">normal</item>
-		<item name="android:textStyle">normal</item>
-	</style>
+    <style name="ListHeader">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:typeface">normal</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
+    <style name="AlertDialog" parent="@style/Theme.AppCompat.Light.Dialog.Alert">
+        <item name="colorPrimaryDark">@color/theme_primary_dark</item>
+        <item name="colorAccent">@color/theme_accent</item>
+        <item name="android:textColor">@color/blue_new</item>
+    </style>
 
 </resources>

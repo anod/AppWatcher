@@ -2,17 +2,16 @@ package com.anod.appwatcher.fragments;
 
 import android.Manifest;
 import android.accounts.Account;
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
-import android.widget.Toast;
+import android.support.v7.app.AlertDialog;
 
 import com.anod.appwatcher.AppWatcherApplication;
 import com.anod.appwatcher.R;
@@ -55,31 +54,30 @@ public class AccountChooserFragment extends DialogFragment implements DialogInte
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(Context context) {
+        super.onAttach(context);
 
         // This makes sure that the container activity has implemented
         // the callback interface. If not, it throws an exception
         try {
-            mListener = ((AccountSelectionProvider) activity).getAccountSelectionListener();
+            mListener = ((AccountSelectionProvider) context).getAccountSelectionListener();
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
+            throw new ClassCastException(context.toString()
                     + " must implement OnAccountSelectionListener");
         }
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-
         // Use the Builder class for convenient dialog construction
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AlertDialog);
         builder.setTitle(R.string.choose_an_account);
-
 
         if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.GET_ACCOUNTS) != PackageManager.PERMISSION_GRANTED)
         {
-            builder.setMessage("Allow access to list of you Google accounts");
-            builder.setPositiveButton("Allow", new DialogInterface.OnClickListener() {
+            builder.setMessage(R.string.allow_access_to_accounts);
+            builder.setPositiveButton(R.string.allow, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     ActivityCompat.requestPermissions(
                             getActivity(),

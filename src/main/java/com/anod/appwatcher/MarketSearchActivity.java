@@ -35,7 +35,7 @@ import com.anod.appwatcher.ui.ToolbarActivity;
 import com.anod.appwatcher.utils.DocUtils;
 import com.anod.appwatcher.utils.Keyboard;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MarketSearchActivity extends ToolbarActivity implements AccountChooserHelper.OnAccountSelectionListener, AddWatchAppHandler.Listener, CompositeStateEndpoint.Listener {
@@ -51,15 +51,15 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
     private ResultsAdapter mAdapter;
     private Context mContext;
 
-    @Bind(R.id.loading)
+    @BindView(R.id.loading)
     LinearLayout mLoading;
-    @Bind(android.R.id.list)
+    @BindView(android.R.id.list)
     RecyclerView mListView;
-    @Bind(android.R.id.empty)
+    @BindView(android.R.id.empty)
     TextView mEmptyView;
-    @Bind(R.id.retry_box)
+    @BindView(R.id.retry_box)
     LinearLayout mRetryView;
-    @Bind(R.id.retry)
+    @BindView(R.id.retry)
     Button mRetryButton;
     SearchView mSearchView;
 

@@ -30,7 +30,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -40,9 +40,9 @@ import butterknife.OnClick;
  * @date 19/04/2016.
  */
 public class ImportInstalledActivity extends ToolbarActivity implements LoaderManager.LoaderCallbacks<List<String>>, AccountChooserHelper.OnAccountSelectionListener, ImportBulkManager.Listener {
-    @Bind(android.R.id.list)
+    @BindView(android.R.id.list)
     RecyclerView mList;
-    @Bind(android.R.id.progress)
+    @BindView(android.R.id.progress)
     ProgressBar mProgress;
 
     private PackageManagerUtils mPMUtils;
