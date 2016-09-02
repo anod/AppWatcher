@@ -21,7 +21,8 @@ public class ResultsAdapterSearch extends ResultsAdapter {
 
     @Override
     Document getDocument(int position) {
-        return mSearchEngine.getData().getItem(position, false);
+        boolean isLastPosition = mSearchEngine.getCount() - 1 == position;
+        return mSearchEngine.getData().getItem(position, isLastPosition);
     }
 
     @Override

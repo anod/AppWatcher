@@ -7,16 +7,16 @@ public abstract class ContainerList<T> extends PaginatedList<T, Document>
 {
     private Document mContainerDocument;
     
-    protected ContainerList(final String s) {
-        super(s);
+    protected ContainerList(final String url) {
+        super(url);
     }
     
-    protected ContainerList(final String s, final boolean b) {
-        super(s, b);
+    ContainerList(final String url, final boolean autoLoadNextPage) {
+        super(url, autoLoadNextPage);
     }
     
-    protected ContainerList(final List<UrlOffsetPair> list, final int n, final boolean b) {
-        super(list, n, b);
+    ContainerList(final List<UrlOffsetPair> list, final int count, final boolean autoLoadNextPage) {
+        super(list, count, autoLoadNextPage);
     }
     
     public int getBackendId() {

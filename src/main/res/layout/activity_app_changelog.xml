@@ -125,13 +125,16 @@
                         tools:text="Details" />
                 </LinearLayout>
 
+                <ScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
                 <TextView
                     android:id="@+id/changelog"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="left"
+                    android:layout_height="match_parent"
                     android:paddingTop="16dp"
                     android:text="@string/problem_occurred" />
+                </ScrollView>
 
                 <Button
                     android:id="@+id/retry"

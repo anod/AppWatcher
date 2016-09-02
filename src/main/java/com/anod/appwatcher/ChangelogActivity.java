@@ -185,7 +185,6 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
 
             }
         });
-
     }
 
     @Override
@@ -331,7 +330,6 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
         mChangelog.setText(getString(R.string.error_fetching_info));
         mRetryButton.setVisibility(View.VISIBLE);
     }
-
 
     @Override
     public void onGenerated(Palette palette) {

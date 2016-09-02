@@ -86,7 +86,7 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
         mLoading.setVisibility(View.GONE);
 
         mEndpoints = new CompositeStateEndpoint(this);
-        mEndpoints.add(SEARCH_ENDPOINT_ID, new SearchEndpoint(this));
+        mEndpoints.add(SEARCH_ENDPOINT_ID, new SearchEndpoint(this, true));
         mEndpoints.add(DETAILS_ENDPOINT_ID, new DetailsEndpoint(this));
 
         mNewAppHandler = new AddWatchAppHandler(this, this);

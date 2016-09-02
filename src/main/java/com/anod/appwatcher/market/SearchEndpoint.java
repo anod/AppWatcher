@@ -14,9 +14,11 @@ public class SearchEndpoint extends PlayStoreEndpointBase {
 
     private static final int BACKEND_ID = 3;
     private String mQuery;
+    private boolean mAutoLoadNextPage;
 
-    public SearchEndpoint(Context context) {
+    public SearchEndpoint(Context context, boolean autoLoadNextPage) {
         super(context);
+        mAutoLoadNextPage = autoLoadNextPage;
     }
 
     public String getQuery() {
@@ -61,6 +63,6 @@ public class SearchEndpoint extends PlayStoreEndpointBase {
     @Override
     protected DfeModel createDfeModel() {
         String searchUrl = DfeUtils.formSearchUrl(mQuery, BACKEND_ID);
-        return new DfeSearch(mDfeApi, mQuery, searchUrl);
+        return new DfeSearch(mDfeApi, mQuery, searchUrl, mAutoLoadNextPage);
     }
 }

@@ -6,36 +6,36 @@ import android.text.*;
 
 public abstract class PaginatedList<T, D> extends DfeModel implements Response.Listener<T>
 {
-    protected final boolean mAutoLoadNextPage;
+    private final boolean mAutoLoadNextPage;
     private int mCurrentOffset;
     private Request<?> mCurrentRequest;
     private final List<D> mItems;
     private boolean mItemsRemoved;
     private int mItemsUntilEndCount;
     private int mLastPositionRequested;
-    protected T mLastResponse;
+    T mLastResponse;
     private boolean mMoreAvailable;
-    protected List<UrlOffsetPair> mUrlOffsetList;
+    List<UrlOffsetPair> mUrlOffsetList;
     private int mWindowDistance;
     
-    protected PaginatedList(final String s) {
-        this(s, true);
+    PaginatedList(final String url) {
+        this(url, true);
     }
     
-    protected PaginatedList(final String s, final boolean mAutoLoadNextPage) {
+    PaginatedList(final String url, final boolean autoLoadNextPage) {
         super();
-        this.mWindowDistance = 12;
-        this.mItems = new ArrayList<D>();
-        this.mItemsUntilEndCount = 4;
-        (this.mUrlOffsetList = new ArrayList<UrlOffsetPair>()).add(new UrlOffsetPair(0, s));
-        this.mMoreAvailable = true;
-        this.mAutoLoadNextPage = mAutoLoadNextPage;
+        mWindowDistance = 12;
+        mItems = new ArrayList<D>();
+        mItemsUntilEndCount = 4;
+        (mUrlOffsetList = new ArrayList<>()).add(new UrlOffsetPair(0, url));
+        mMoreAvailable = true;
+        mAutoLoadNextPage = autoLoadNextPage;
     }
     
-    protected PaginatedList(final List<UrlOffsetPair> mUrlOffsetList, final int n, final boolean b) {
-        this(null, b);
-        this.mUrlOffsetList = mUrlOffsetList;
-        for (int i = 0; i < n; ++i) {
+    PaginatedList(final List<UrlOffsetPair> urlOffsetList, final int count, final boolean autoLoadNextPage) {
+        this(null, autoLoadNextPage);
+        mUrlOffsetList = urlOffsetList;
+        for (int i = 0; i < count; ++i) {
             this.mItems.add(null);
         }
     }
@@ -91,8 +91,8 @@ public abstract class PaginatedList<T, D> extends DfeModel implements Response.L
         return this.getItem(n, true);
     }
     
-    public final D getItem(final int pos, final boolean b) {
-        if (b) {
+    public final D getItem(final int pos, final boolean isLastPosition) {
+        if (isLastPosition) {
             this.mLastPositionRequested = pos;
         }
         if (pos < 0) {
@@ -110,7 +110,7 @@ public abstract class PaginatedList<T, D> extends DfeModel implements Response.L
                                 this.mUrlOffsetList.remove(-1 + this.mUrlOffsetList.size());
                             }
                             final UrlOffsetPair urlOffsetPair = this.mUrlOffsetList.get(-1 + this.mUrlOffsetList.size());
-                            if (b) {
+                            if (isLastPosition) {
                                 this.requestMoreItemsIfNoRequestExists(urlOffsetPair);
                             }
                         }
@@ -118,7 +118,7 @@ public abstract class PaginatedList<T, D> extends DfeModel implements Response.L
                 }
                 else {
                     final UrlOffsetPair urlOffsetPair2 = this.mUrlOffsetList.get(-1 + this.mUrlOffsetList.size());
-                    if (b) {
+                    if (isLastPosition) {
                         this.requestMoreItemsIfNoRequestExists(urlOffsetPair2);
                     }
                 }
@@ -183,23 +183,18 @@ public abstract class PaginatedList<T, D> extends DfeModel implements Response.L
             }
         }
         final String nextPageUrl = this.getNextPageUrl(mLastResponse);
-        if (!TextUtils.isEmpty((CharSequence)nextPageUrl) && (this.mCurrentOffset == size || this.mItemsRemoved)) {
+        if (!TextUtils.isEmpty(nextPageUrl) && (this.mCurrentOffset == size || this.mItemsRemoved)) {
             this.mUrlOffsetList.add(new UrlOffsetPair(this.mItems.size(), nextPageUrl));
         }
         if (this.mItemsRemoved) {
             this.mItemsRemoved = false;
         }
-        final int size2 = this.mItems.size();
         final int offset = this.mUrlOffsetList.get(-1 + this.mUrlOffsetList.size()).offset;
-        boolean b = false;
-        if (size2 == offset) {
-            final int length = itemsFromResponse.length;
-            b = false;
-            if (length > 0) {
-                b = true;
-            }
+        boolean moreAvailable = false;
+        if (mItems.size() == offset) {
+            moreAvailable = (itemsFromResponse.length > 0);
         }
-        this.mMoreAvailable = (b && this.mAutoLoadNextPage);
+        mMoreAvailable = (moreAvailable && mAutoLoadNextPage);
         this.clearTransientState();
         this.notifyDataSetChanged();
     }

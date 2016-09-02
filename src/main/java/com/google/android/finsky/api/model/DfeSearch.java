@@ -45,21 +45,21 @@ public class DfeSearch extends ContainerList<Search.SearchResponse> implements P
         };
     }
     
-    public DfeSearch(final DfeApi mDfeApi, final String mQuery, final String mInitialUrl) {
-        super(mInitialUrl,false);
-        this.mFullPageReplaced = false;
-        this.mAggregatedQuery = null;
-        this.mInitialUrl = mInitialUrl;
-        this.mDfeApi = mDfeApi;
-        this.mQuery = mQuery;
+    public DfeSearch(final DfeApi dfeApi, final String query, final String initialUrl, boolean autoLoadNextPage) {
+        super(initialUrl,autoLoadNextPage);
+        mFullPageReplaced = false;
+        mAggregatedQuery = null;
+        mInitialUrl = initialUrl;
+        mDfeApi = dfeApi;
+        mQuery = query;
     }
     
-    private DfeSearch(final List<UrlOffsetPair> list, final int n, final String mQuery, final Boolean mAggregatedQuery) {
-        super(list, n, true);
+    private DfeSearch(final List<UrlOffsetPair> list, final int count, final String query, final Boolean aggregatedQuery) {
+        super(list, count, true);
         this.mFullPageReplaced = false;
         this.mAggregatedQuery = null;
-        this.mQuery = mQuery;
-        this.mAggregatedQuery = mAggregatedQuery;
+        this.mQuery = query;
+        this.mAggregatedQuery = aggregatedQuery;
         final int size = list.size();
         String url = null;
         if (size > 0) {
