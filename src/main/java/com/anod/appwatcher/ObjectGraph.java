@@ -5,6 +5,7 @@ import com.android.volley.toolbox.NoCache;
 import com.android.volley.toolbox.Volley;
 import com.anod.appwatcher.accounts.AccountManager;
 import com.anod.appwatcher.market.DeviceIdHelper;
+import com.anod.appwatcher.utils.AppCrashListener;
 import com.anod.appwatcher.utils.AppIconLoader;
 import com.anod.appwatcher.market.Network;
 import com.google.android.gms.gcm.GcmNetworkManager;
@@ -20,8 +21,9 @@ public class ObjectGraph {
     private String mDeviceId;
     private AccountManager mAccountManager;
     private AppIconLoader mIconLoader;
+    private AppCrashListener mAppCrashListener;
 
-    public ObjectGraph(AppWatcherApplication application)  {
+    ObjectGraph(AppWatcherApplication application)  {
         this.app = application;
     }
 
@@ -55,6 +57,15 @@ public class ObjectGraph {
             mIconLoader = new AppIconLoader(this.app);
         }
         return mIconLoader;
+    }
+
+    public AppCrashListener crashListener()
+    {
+        if (mAppCrashListener  == null)
+        {
+            mAppCrashListener = new AppCrashListener();
+        }
+        return mAppCrashListener;
     }
 
     public GcmNetworkManager gcmNetworkManager() {

@@ -34,6 +34,7 @@ import com.anod.appwatcher.search.ResultsAdapterSearch;
 import com.anod.appwatcher.ui.ToolbarActivity;
 import com.anod.appwatcher.utils.DocUtils;
 import com.anod.appwatcher.utils.Keyboard;
+import com.anod.appwatcher.utils.MetricsManagerEvent;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -156,6 +157,10 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
         mListView.setAdapter(mAdapter);
         mEndpoints.reset();
         showLoading();
+
+        App.provide(this).crashListener().put("SEARCH_QUERY", mSearchQuery);
+        App.provide(this).crashListener().put("SEARCH_PACKAGE", String.valueOf(mPackageSearch));
+        MetricsManagerEvent.track("PERFORM_SEARCH", "SEARCH_QUERY", mSearchQuery, "SEARCH_PACKAGE", String.valueOf(mPackageSearch), "FROM_SHARE", String.valueOf(mShareSource));
 
         if (!TextUtils.isEmpty(mSearchQuery)) {
             if (mPackageSearch)

@@ -51,7 +51,7 @@ dependencies {
     compile 'com.jakewharton:butterknife:8.4.0'
     apt 'com.jakewharton:butterknife-compiler:8.4.0'
 
-    compile 'net.hockeyapp.android:HockeySDK:4.1.0-beta.2'
+    compile 'net.hockeyapp.android:HockeySDK:4.1.1'
 
     // Find memory leaks tool
     debugCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
@@ -71,7 +71,7 @@ android {
         applicationId 'com.anod.appwatcher'
         minSdkVersion 15
         targetSdkVersion 24
-        versionCode 33
+        versionCode 34
         versionName '1.8.4'
 
         manifestPlaceholders = [HOCKEYAPP_APP_ID: APPWATCHER_HOCKEYAPP_ID]
@@ -98,7 +98,7 @@ android {
             minifyEnabled false
             shrinkResources false
             applicationIdSuffix ".debug"
-            versionNameSuffix "-" + buildTime()
+            versionNameSuffix "-" + buildTime() + "-debug"
             proguardFile 'proguard-project.txt'
             proguardFile getDefaultProguardFile('proguard-android.txt')
 

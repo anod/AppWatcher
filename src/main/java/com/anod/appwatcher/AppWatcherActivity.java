@@ -33,10 +33,13 @@ import com.anod.appwatcher.sync.ManualSyncService;
 import com.anod.appwatcher.sync.SyncAdapter;
 import com.anod.appwatcher.sync.SyncScheduler;
 import com.anod.appwatcher.ui.DrawerActivity;
+import com.anod.appwatcher.utils.AppCrashListener;
 import com.anod.appwatcher.utils.MenuItemAnimation;
 import com.google.android.gms.gcm.GcmTaskService;
 
 import net.hockeyapp.android.CrashManager;
+import net.hockeyapp.android.metrics.MetricsManager;
+import net.hockeyapp.android.utils.Util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,6 +85,7 @@ public class AppWatcherActivity extends DrawerActivity implements
         setContentView(R.layout.activity_main);
         setupDrawer();
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
+        MetricsManager.register(getApplication());
 
         mContext = this;
 
@@ -187,7 +191,7 @@ public class AppWatcherActivity extends DrawerActivity implements
         mPreferences.markViewed(true);
 
         notifySyncStop();
-        CrashManager.register(this);
+        CrashManager.register(this, Util.getAppIdentifier(this), App.provide(this).crashListener());
     }
 
     @Override

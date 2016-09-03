@@ -47,13 +47,15 @@ public abstract class ResultsAdapter extends RecyclerView.Adapter<ResultsAppView
 
         DocDetails.AppDetails app = doc.getAppDetails();
         String uploadDate = app == null ? "" : app.uploadDate;
+        String packageName =  app == null ? "" : app.packageName;
 
         holder.doc = doc;
         holder.title.setText(doc.getTitle());
         holder.details.setText(doc.getCreator());
         holder.updated.setText(uploadDate);
 
-        if (mNewAppHandler.isAdded(app.packageName)) {
+
+        if (mNewAppHandler.isAdded(packageName)) {
             holder.row.setBackgroundColor(mColorBgGray);
         } else {
             holder.row.setBackgroundColor(mColorBgWhite);
@@ -65,7 +67,7 @@ public abstract class ResultsAdapter extends RecyclerView.Adapter<ResultsAppView
                 .placeholder(R.drawable.ic_blur_on_black_48dp)
                 .into(holder.icon);
 
-        boolean isInstalled = mPMUtils.isAppInstalled(app.packageName);
+        boolean isInstalled = mPMUtils.isAppInstalled(packageName);
         if (isInstalled) {
             holder.price.setText(R.string.installed);
         } else {
