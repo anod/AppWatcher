@@ -107,7 +107,7 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
         } else if (size > 0) {
             Notification notification = sn.create(updatedApps);
             sn.show(notification);
-            if (!manualSync && lastUpdatesViewed) {
+            if (lastUpdatesViewed) {
                 pref.markViewed(false);
             }
         }
@@ -257,17 +257,9 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
     }
 
     private void updateApp(Document marketApp, AppInfo localApp, AppListContentProviderClient client, ArrayList<UpdatedApp> updatedTitles, boolean lastUpdatesViewed) {
-        Set<String> debugPkgs = null;
-        if (BuildConfig.DEBUG) {
-            debugPkgs = new HashSet<String>();
-            //   debugPkgs.add("com.adobe.reader");
-            //   debugPkgs.add("com.aide.ui");
-            //   debugPkgs.add("com.anod.car.home.free");
-            //   debugPkgs.add("com.anod.car.home.pro");
-            //   debugPkgs.add("com.ibolt.carhome");
-        }
         DocDetails.AppDetails appDetails = marketApp.getAppDetails();
-        if (appDetails.versionCode > localApp.versionNumber || (debugPkgs != null && debugPkgs.contains(localApp.packageName))) {
+
+        if (appDetails.versionCode > localApp.versionNumber) {
             AppLog.d("New version found [" + appDetails.versionCode + "]");
             AppInfo newApp = createNewVersion(marketApp, localApp);
             client.update(newApp);
@@ -294,9 +286,9 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
     }
 
     private void fillMissingData(Document marketApp, AppInfo localApp, ContentValues values) {
-        if (TextUtils.isEmpty(localApp.uploadDate)) {
-            values.put(AppListTable.Columns.KEY_UPLOAD_DATE, marketApp.getAppDetails().uploadDate);
-        }
+        long refreshTime = DocUtils.extractDate(marketApp);
+        values.put(AppListTable.Columns.KEY_REFRESH_TIMESTAMP, refreshTime);
+        values.put(AppListTable.Columns.KEY_UPLOAD_DATE, marketApp.getAppDetails().uploadDate);
         if (TextUtils.isEmpty(localApp.versionName)) {
             values.put(AppListTable.Columns.KEY_VERSION_NAME, marketApp.getAppDetails().versionString);
         }
@@ -321,11 +313,9 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
 
 
     private AppInfo createNewVersion(Document marketApp, AppInfo localApp) {
-
         AppInfo newApp = new AppInfo(marketApp);
         newApp.setRowId(localApp.getRowId());
         newApp.setStatus(AppInfo.STATUS_UPDATED);
-
         return newApp;
     }
 

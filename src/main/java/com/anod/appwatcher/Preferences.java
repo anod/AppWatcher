@@ -3,6 +3,14 @@ package com.anod.appwatcher;
 import android.accounts.Account;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.support.v4.util.ArrayMap;
+import android.util.ArraySet;
+
+import com.anod.appwatcher.utils.LocaleCompat;
+
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
 
 public class Preferences {
     private static final String VIEWED = "viewed";
@@ -14,6 +22,7 @@ public class Preferences {
     private static final String ACCOUNT_NAME = "account_name";
     private static final String ACCOUNT_TYPE = "account_type";
     private static final String SORT_INDEX = "sort_index";
+    private static final String EXTRACT_DATE_LOCALES = "date_locales";
 
     static final int SORT_NAME_ASC = 0;
     public static final int SORT_NAME_DESC = 1;

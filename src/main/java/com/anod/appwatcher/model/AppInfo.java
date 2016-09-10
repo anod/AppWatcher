@@ -1,5 +1,7 @@
 package com.anod.appwatcher.model;
 
+import android.content.Context;
+
 import com.anod.appwatcher.utils.DocUtils;
 import com.google.android.finsky.api.model.Document;
 import com.google.android.finsky.protos.Common;
@@ -66,7 +68,7 @@ public class AppInfo extends AppInfoMetadata {
         this.priceCur = offer.currencyCode;
 
         this.iconUrl = DocUtils.getIconUrl(doc);
-        this.refreshTime = System.currentTimeMillis();
+        this.refreshTime = DocUtils.extractDate(doc);
     }
 
     public int getRowId() {

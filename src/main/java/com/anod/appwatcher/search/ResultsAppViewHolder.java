@@ -29,7 +29,7 @@ class ResultsAppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
     @BindView(android.R.id.icon)
     ImageView icon;
 
-    public ResultsAppViewHolder(View itemView, AddWatchAppHandler newAppHandler) {
+    ResultsAppViewHolder(View itemView, AddWatchAppHandler newAppHandler) {
         super(itemView);
         ButterKnife.bind(this, itemView);
         this.row.setOnClickListener(this);
