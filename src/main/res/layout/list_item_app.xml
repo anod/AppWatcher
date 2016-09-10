@@ -82,6 +82,7 @@
                         android:singleLine="true"
                         android:textAppearance="?android:attr/textAppearanceSmall"
                         android:textSize="@dimen/textSize"
+                        android:gravity="left"
                         tools:text="5.6.1609P.1258283" />
 
                     <TextView
@@ -90,6 +91,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="right"
                         android:textSize="@dimen/textSize"
+                        android:gravity="right"
                         tools:text="Date" />
 
                 </LinearLayout>
@@ -112,6 +114,7 @@
                         android:singleLine="true"
                         android:textColor="@color/theme_accent"
                         android:textSize="@dimen/textSize"
+                        android:gravity="left"
                         tools:text="5.6.1609P.1258283" />
 
                     <TextView
@@ -121,6 +124,7 @@
                         android:layout_gravity="right"
                         android:textAppearance="?android:attr/textAppearanceSmall"
                         android:textSize="10sp"
+                        android:gravity="right"
                         tools:text="Details" />
                 </LinearLayout>
 

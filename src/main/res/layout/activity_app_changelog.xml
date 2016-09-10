@@ -38,6 +38,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
                     android:layout_marginRight="8dp"
+                    android:gravity="left"
                     android:text="@string/problem_occurred"
                     android:textColor="@color/white" />
 
@@ -83,6 +84,7 @@
                         android:singleLine="true"
                         android:textAppearance="?android:attr/textAppearanceSmall"
                         android:textSize="@dimen/textSize"
+                        android:gravity="left"
                         tools:text="5.6.1609P.1258283" />
 
                     <TextView
@@ -113,6 +115,7 @@
                         android:singleLine="true"
                         android:textColor="@color/theme_accent"
                         android:textSize="@dimen/textSize"
+                        android:gravity="left"
                         tools:text="5.6.1609P.1258283" />
 
                     <TextView
