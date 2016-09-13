@@ -1,20 +1,17 @@
 package com.anod.appwatcher.utils;
 
-import android.content.Context;
-import android.support.v4.util.SimpleArrayMap;
-
-import com.anod.appwatcher.Preferences;
+import com.anod.appwatcher.utils.date.CustomParserFactory;
 import com.google.android.finsky.api.model.Document;
 import com.google.android.finsky.protos.Common;
 
-import net.hockeyapp.android.metrics.MetricsManager;
-
 import java.text.DateFormat;
+import java.text.DateFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 import info.anodsplace.android.log.AppLog;
 
@@ -24,8 +21,6 @@ import info.anodsplace.android.log.AppLog;
  */
 public class DocUtils {
     private static final int OFFER_TYPE = 1;
-    private static final String UPLOAD_FORMAT = "MMMM d, yyyy";
-    private static Object sLock = new Object();
 
     public static String getIconUrl(Document doc) {
         List<Common.Image> images = doc.getImages(4);
@@ -54,8 +49,20 @@ public class DocUtils {
     }
 
     private static long extractDate(String uploadDate, Locale locale) {
-        DateFormat df = DateFormat.getDateInstance(DateFormat.MEDIUM, locale);
+        DateFormat df = CustomParserFactory.create(locale);
+        if (df != null) {
+            long time = extractDate(uploadDate, df, locale, true);
+            if (time > 0) {
+                return time;
+            }
+        }
 
+        df = DateFormat.getDateInstance(DateFormat.MEDIUM, locale);
+        return extractDate(uploadDate, df, locale, false);
+    }
+
+    private static long extractDate(String uploadDate, DateFormat df, Locale locale, boolean isCustom)
+    {
         AppLog.d("Parsing: '%s' - '%s'", uploadDate, locale.toString());
         try {
             Date date = df.parse(uploadDate);
@@ -67,14 +74,18 @@ public class DocUtils {
             {
                 format = ((SimpleDateFormat) df).toPattern();
             }
+            String expected = df.format(new Date());
             MetricsManagerEvent.track("ERROR_EXTRACT_DATE",
-                "LOCALE", locale.toString(),
-                "DEFAULT_LOCALE", Locale.getDefault().toString(),
-                "FORMAT", format,
-                "DATE", uploadDate);
+                    "LOCALE", locale.toString(),
+                    "DEFAULT_LOCALE", Locale.getDefault().toString(),
+                    "FORMAT", format,
+                    "DATE", uploadDate,
+                    "EXPECTED", expected,
+                    "CUSTOM", isCustom ? "YES" : "NO");
         }
 
         return 0;
+
     }
 
 }

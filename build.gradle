@@ -59,10 +59,6 @@ dependencies {
     testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
 }
 
-def buildTime() {
-    def df = new SimpleDateFormat("yyyyMMddHm")
-    return df.format(new Date())
-}
 android {
     compileSdkVersion 24
     buildToolsVersion '24.0.2'
@@ -98,7 +94,7 @@ android {
             minifyEnabled false
             shrinkResources false
             applicationIdSuffix ".debug"
-            versionNameSuffix "-" + buildTime() + "-debug"
+            versionNameSuffix "-debug"
             proguardFile 'proguard-project.txt'
             proguardFile getDefaultProguardFile('proguard-android.txt')
 
