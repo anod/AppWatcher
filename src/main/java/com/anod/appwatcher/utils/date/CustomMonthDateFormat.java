@@ -12,13 +12,17 @@ import java.util.Date;
  * @date 12/09/2016.
  */
 
-class RussianDateFormat extends DateFormat {
-    private static final String[] RU_SHORT_MONTHS = new String[] {
-            "янв", "февр", "мар", "апр", "мая", "июн", "июл", "авг", "сент", "окт", "нояб", "дек"
-    };
+class CustomMonthDateFormat extends DateFormat {
+
     private static final int STATE_DAY = 0;
     private static final int STATE_MONTH = 1;
     private static final int STATE_YEAR = 2;
+    private final String[] mMonthNames;
+
+    CustomMonthDateFormat(String[] monthNames)
+    {
+        mMonthNames = monthNames;
+    }
 
     @Override
     public StringBuffer format(Date date, StringBuffer toAppendTo, FieldPosition fieldPosition) {
@@ -61,7 +65,7 @@ class RussianDateFormat extends DateFormat {
                 }
                 if (ch == ' ') {
                     String monthName = sb.toString();
-                    month = Arrays.asList(RU_SHORT_MONTHS).indexOf(monthName);
+                    month = Arrays.asList(mMonthNames).indexOf(monthName);
                     if (month == -1)
                     {
                         pos.setIndex(0);
@@ -86,6 +90,11 @@ class RussianDateFormat extends DateFormat {
                 }
             }
             sb.append(ch);
+        }
+
+        if (year == -1 && sb.length() == 4)
+        {
+            year = toInt(sb.toString());
         }
 
         if (day > 0 && month >=0 && year > 2000)
