@@ -92,19 +92,8 @@ public class AppWatcherListFragment extends Fragment implements
         act.removeQueryChangeListener(mListenerIndex);
     }
 
-    public void setListVisible(boolean visible, boolean animate) {
+    public void setListVisible(boolean visible) {
         if (visible) {
-            if (animate) {
-                mProgressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity(), android.R.anim.fade_out));
-                if (mAdapter.getItemCount() == 0){
-                    mEmptyView.startAnimation(AnimationUtils.loadAnimation(
-                            getActivity(), android.R.anim.fade_in));
-                } else {
-                    mListView.startAnimation(AnimationUtils.loadAnimation(
-                            getActivity(), android.R.anim.fade_in));
-                }
-            }
             mProgressContainer.setVisibility(View.GONE);
             if (mAdapter.getItemCount() == 0){
                 mEmptyView.setVisibility(View.VISIBLE);
@@ -114,12 +103,6 @@ public class AppWatcherListFragment extends Fragment implements
                 mListView.setVisibility(View.VISIBLE);
             }
         } else {
-            if (animate) {
-                mProgressContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity(), android.R.anim.fade_in));
-                mListView.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity(), android.R.anim.fade_out));
-            }
             mProgressContainer.setVisibility(View.VISIBLE);
             mListView.setVisibility(View.INVISIBLE);
             mEmptyView.setVisibility(View.GONE);
@@ -154,7 +137,7 @@ public class AppWatcherListFragment extends Fragment implements
         mListView.setAdapter(mAdapter);
 
         // Start out with a progress indicator.
-        setListVisible(false, true);
+        setListVisible(false);
 
         mSortId = getArguments().getInt(ARG_SORT);
         setupFilter(getArguments().getInt(ARG_FILTER));
@@ -181,12 +164,7 @@ public class AppWatcherListFragment extends Fragment implements
             watchlistAdapter.setNewAppsCount(newCount);
         }
 
-        // The list should now be shown.
-        if (isResumed()) {
-            setListVisible(true, true);
-        } else {
-            setListVisible(true, false);
-        }
+        setListVisible(true);
     }
 
     @Override
