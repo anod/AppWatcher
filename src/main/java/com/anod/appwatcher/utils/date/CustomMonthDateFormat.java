@@ -85,24 +85,26 @@ class CustomMonthDateFormat extends DateFormat {
                         pos.setErrorIndex(index);
                         break;
                     }
-                    pos.setIndex(index);
                     break;
                 }
             }
+            pos.setIndex(index);
             sb.append(ch);
         }
 
-        if (year == -1 && sb.length() == 4)
+        if (day > 0 && month >=0)
         {
-            year = toInt(sb.toString());
+            if (year == 0 && sb.length() == 4) {
+                year = toInt(sb.toString());
+            }
+            if (year > 2000)
+            {
+                Calendar c = Calendar.getInstance();
+                c.set(year, month, day);
+                return c.getTime();
+            }
         }
 
-        if (day > 0 && month >=0 && year > 2000)
-        {
-            Calendar c = Calendar.getInstance();
-            c.set(year, month, day);
-            return c.getTime();
-        }
         pos.setIndex(0);
         return null;
     }
