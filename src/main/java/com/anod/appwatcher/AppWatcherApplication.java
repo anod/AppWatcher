@@ -5,6 +5,7 @@ import android.content.Context;
 import android.view.ViewConfiguration;
 
 import com.android.volley.VolleyLog;
+import com.anod.appwatcher.utils.MetricsManagerEvent;
 import com.squareup.leakcanary.LeakCanary;
 
 import java.lang.reflect.Field;
@@ -51,6 +52,18 @@ public class AppWatcherApplication extends Application implements AppLog.Listene
 
     @Override
     public void onLogException(Throwable tr) {
+
+        String method = "<unknown>";
+        StackTraceElement[] stackTrace = tr.getStackTrace();
+        for (int i = 2; i < stackTrace.length; ++i) {
+            final String className = stackTrace[i].getClassName();
+            if (!className.equals(AppLog.class.getName())) {
+                final String substring = className.substring(1 + className.lastIndexOf(46));
+                method = substring.substring(1 + substring.lastIndexOf(36)) + "." + stackTrace[i].getMethodName();
+                break;
+            }
+        }
+        MetricsManagerEvent.track("EXCEPTION", "CLASS", tr.getClass().getSimpleName(), "METHOD", method, "MESSAGE", tr.getMessage());
         // Ignore for now - ExceptionHandler.saveException(tr, null, null);
     }
 }
