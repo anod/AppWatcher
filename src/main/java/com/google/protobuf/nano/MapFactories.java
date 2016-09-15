@@ -30,59 +30,38 @@
 
 package com.google.protobuf.nano;
 
-import java.io.IOException;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Stores unknown fields. These might be extensions or fields that the generated
- * API doesn't know about yet.
- *
- * @author bduff@google.com (Brian Duff)
+ * Utility class for maps support.
  */
-final class UnknownFieldData {
+public final class MapFactories {
+  public static interface MapFactory {
+    <K, V> Map<K, V> forMap(Map<K, V> oldMap);
+  }
 
-    final int tag;
-    /**
-     * Important: this should be treated as immutable, even though it's possible
-     * to change the array values.
-     */
-    final byte[] bytes;
+  // NOTE(liujisi): The factory setter is temporarily marked as package private.
+  // The way to provide customized implementations of maps for different
+  // platforms are still under discussion.  Mark it as private to avoid exposing
+  // the API in proto3 alpha release.
+  /* public */ static void setMapFactory(MapFactory newMapFactory) {
+    mapFactory = newMapFactory;
+  }
 
-    UnknownFieldData(int tag, byte[] bytes) {
-        this.tag = tag;
-        this.bytes = bytes;
+  public static MapFactory getMapFactory() {
+    return mapFactory;
+  }
+
+  private static class DefaultMapFactory implements MapFactory {
+    public <K, V> Map<K, V> forMap(Map<K, V> oldMap) {
+      if (oldMap == null) {
+        return new HashMap<K, V>();
+      }
+      return oldMap;
     }
+  }
+  private static volatile MapFactory mapFactory = new DefaultMapFactory();
 
-    int computeSerializedSize() {
-        int size = 0;
-        size += CodedOutputByteBufferNano.computeRawVarint32Size(tag);
-        size += bytes.length;
-        return size;
-    }
-
-    void writeTo(CodedOutputByteBufferNano output) throws IOException {
-        output.writeRawVarint32(tag);
-        output.writeRawBytes(bytes);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        }
-        if (!(o instanceof UnknownFieldData)) {
-            return false;
-        }
-
-        UnknownFieldData other = (UnknownFieldData) o;
-        return tag == other.tag && Arrays.equals(bytes, other.bytes);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = 17;
-        result = 31 * result + tag;
-        result = 31 * result + Arrays.hashCode(bytes);
-        return result;
-    }
+  private MapFactories() {}
 }

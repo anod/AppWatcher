@@ -1,6 +1,6 @@
 // Protocol Buffers - Google's data interchange format
 // Copyright 2013 Google Inc.  All rights reserved.
-// http://code.google.com/p/protobuf/
+// https://developers.google.com/protocol-buffers/
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -35,6 +35,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Map;
 
 /**
  * Static helper methods for printing nano protos.
@@ -43,8 +44,7 @@ import java.lang.reflect.Modifier;
  */
 public final class MessageNanoPrinter {
     // Do not allow instantiation
-    private MessageNanoPrinter() {
-    }
+    private MessageNanoPrinter() {}
 
     private static final String INDENT = "  ";
     private static final int MAX_STRING_LEN = 200;
@@ -54,7 +54,7 @@ public final class MessageNanoPrinter {
      * is mostly compatible with Protocol Buffer's TextFormat (as provided by non-nano protocol
      * buffers) -- groups (which are deprecated) are output with an underscore name (e.g. foo_bar
      * instead of FooBar) and will thus not parse.
-     * <p/>
+     *
      * <p>Employs Java reflection on the given object and recursively prints primitive fields,
      * groups, and messages.</p>
      */
@@ -79,14 +79,14 @@ public final class MessageNanoPrinter {
      * Meant to be called recursively.
      *
      * @param identifier the identifier to use, or {@code null} if this is the root message to
-     *                   print.
-     * @param object     the value to print. May in fact be a primitive value or byte array and not a
-     *                   message.
-     * @param indentBuf  the indentation each line should begin with.
-     * @param buf        the output buffer.
+     *        print.
+     * @param object the value to print. May in fact be a primitive value or byte array and not a
+     *        message.
+     * @param indentBuf the indentation each line should begin with.
+     * @param buf the output buffer.
      */
     private static void print(String identifier, Object object,
-                              StringBuffer indentBuf, StringBuffer buf) throws IllegalAccessException,
+            StringBuffer indentBuf, StringBuffer buf) throws IllegalAccessException,
             InvocationTargetException {
         if (object == null) {
             // This can happen if...
@@ -97,7 +97,7 @@ public final class MessageNanoPrinter {
         } else if (object instanceof MessageNano) {  // Nano proto message
             int origIndentBufLength = indentBuf.length();
             if (identifier != null) {
-                buf.append(indentBuf).append(deCamelCaseify(identifier)).append(": {\n");
+                buf.append(indentBuf).append(deCamelCaseify(identifier)).append(" <\n");
                 indentBuf.append(INDENT);
             }
             Class<?> clazz = object.getClass();
@@ -156,7 +156,7 @@ public final class MessageNanoPrinter {
                     } catch (NoSuchMethodException e) {
                         continue;
                     }
-                    // If hazzer does't exist or returns false, no need to continue
+                    // If hazzer doesn't exist or returns false, no need to continue
                     if (!(Boolean) hazzer.invoke(object)) {
                         continue;
                     }
@@ -173,8 +173,21 @@ public final class MessageNanoPrinter {
             }
             if (identifier != null) {
                 indentBuf.setLength(origIndentBufLength);
-                buf.append(indentBuf).append("},\n");
+                buf.append(indentBuf).append(">\n");
             }
+        } else if (object instanceof Map) {
+          Map<?,?> map = (Map<?,?>) object;
+          identifier = deCamelCaseify(identifier);
+
+          for (Map.Entry<?,?> entry : map.entrySet()) {
+            buf.append(indentBuf).append(identifier).append(" <\n");
+            int origIndentBufLength = indentBuf.length();
+            indentBuf.append(INDENT);
+            print("key", entry.getKey(), indentBuf, buf);
+            print("value", entry.getValue(), indentBuf, buf);
+            indentBuf.setLength(origIndentBufLength);
+            buf.append(indentBuf).append(">\n");
+          }
         } else {
             // Non-null primitive value
             identifier = deCamelCaseify(identifier);
@@ -187,7 +200,7 @@ public final class MessageNanoPrinter {
             } else {
                 buf.append(object);
             }
-            buf.append(",\n");
+            buf.append("\n");
         }
     }
 

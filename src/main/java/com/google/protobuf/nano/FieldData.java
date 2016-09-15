@@ -1,6 +1,6 @@
 // Protocol Buffers - Google's data interchange format
 // Copyright 2014 Google Inc.  All rights reserved.
-// http://code.google.com/p/protobuf/
+// https://developers.google.com/protocol-buffers/
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -42,9 +42,7 @@ import java.util.List;
 class FieldData implements Cloneable {
     private Extension<?, ?> cachedExtension;
     private Object value;
-    /**
-     * The serialised values for this object. Will be cleared if getValue is called
-     */
+    /** The serialised values for this object. Will be cleared if getValue is called */
     private List<UnknownFieldData> unknownFieldData;
 
     <T> FieldData(Extension<?, T> extension, T newValue) {
@@ -78,7 +76,7 @@ class FieldData implements Cloneable {
     }
 
     <T> T getValue(Extension<?, T> extension) {
-        if (value != null) {
+        if (value != null){
             if (cachedExtension != extension) {  // Extension objects are singletons.
                 throw new IllegalStateException(
                         "Tried to getExtension with a differernt Extension.");

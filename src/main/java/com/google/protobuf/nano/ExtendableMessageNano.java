@@ -1,6 +1,6 @@
 // Protocol Buffers - Google's data interchange format
 // Copyright 2013 Google Inc.  All rights reserved.
-// http://code.google.com/p/protobuf/
+// https://developers.google.com/protocol-buffers/
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -117,21 +117,22 @@ public abstract class ExtendableMessageNano<M extends ExtendableMessageNano<M>>
         }
 
         @SuppressWarnings("unchecked") // Generated code should guarantee type safety
-                M typedThis = (M) this;
+        M typedThis = (M) this;
         return typedThis;
     }
 
     /**
      * Stores the binary data of an unknown field.
-     * <p/>
+     *
      * <p>Generated messages will call this for unknown fields if the store_unknown_fields
      * option is on.
-     * <p/>
+     *
      * <p>Note that the tag might be a end-group tag (rather than the start of an unknown field) in
      * which case we do not want to add an unknown field entry.
      *
      * @param input the input buffer.
-     * @param tag   the tag of the field.
+     * @param tag the tag of the field.
+
      * @return {@literal true} unless the tag is an end-group tag.
      */
     protected final boolean storeUnknownField(CodedInputByteBufferNano input, int tag)
@@ -157,31 +158,6 @@ public abstract class ExtendableMessageNano<M extends ExtendableMessageNano<M>>
         }
         field.addUnknownField(unknownField);
         return true;
-    }
-
-    /**
-     * Returns whether the stored unknown field data in this message is equivalent to that in the
-     * other message.
-     *
-     * @param other the other message.
-     * @return whether the two sets of unknown field data are equal.
-     */
-    protected final boolean unknownFieldDataEquals(M other) {
-        if (unknownFieldData == null || unknownFieldData.isEmpty()) {
-            return other.unknownFieldData == null || other.unknownFieldData.isEmpty();
-        } else {
-            return unknownFieldData.equals(other.unknownFieldData);
-        }
-    }
-
-    /**
-     * Computes the hashcode representing the unknown field data stored in this message.
-     *
-     * @return the hashcode for the unknown field data.
-     */
-    protected final int unknownFieldDataHashCode() {
-        return (unknownFieldData == null || unknownFieldData.isEmpty()
-                ? 0 : unknownFieldData.hashCode());
     }
 
     @Override

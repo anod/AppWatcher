@@ -1,6 +1,6 @@
 // Protocol Buffers - Google's data interchange format
 // Copyright 2013 Google Inc.  All rights reserved.
-// http://code.google.com/p/protobuf/
+// https://developers.google.com/protocol-buffers/
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -72,8 +72,8 @@ public abstract class MessageNano {
      * cached size.
      */
     protected int computeSerializedSize() {
-        // This is overridden if the generated message has serialized fields.
-        return 0;
+      // This is overridden if the generated message has serialized fields.
+      return 0;
     }
 
     /**
@@ -94,7 +94,6 @@ public abstract class MessageNano {
 
     /**
      * Serialize to a byte array.
-     *
      * @return byte array with the serialized data.
      */
     public static final byte[] toByteArray(MessageNano msg) {
@@ -114,7 +113,7 @@ public abstract class MessageNano {
     public static final void toByteArray(MessageNano msg, byte[] data, int offset, int length) {
         try {
             final CodedOutputByteBufferNano output =
-                    CodedOutputByteBufferNano.newInstance(data, offset, length);
+                CodedOutputByteBufferNano.newInstance(data, offset, length);
             msg.writeTo(output);
             output.checkNoSpaceLeft();
         } catch (IOException e) {
@@ -128,7 +127,7 @@ public abstract class MessageNano {
      * message being built.
      */
     public static final <T extends MessageNano> T mergeFrom(T msg, final byte[] data)
-            throws InvalidProtocolBufferNanoException {
+        throws InvalidProtocolBufferNanoException {
         return mergeFrom(msg, data, 0, data.length);
     }
 
@@ -137,10 +136,10 @@ public abstract class MessageNano {
      * message being built.
      */
     public static final <T extends MessageNano> T mergeFrom(T msg, final byte[] data,
-                                                            final int off, final int len) throws InvalidProtocolBufferNanoException {
+            final int off, final int len) throws InvalidProtocolBufferNanoException {
         try {
             final CodedInputByteBufferNano input =
-                    CodedInputByteBufferNano.newInstance(data, off, len);
+                CodedInputByteBufferNano.newInstance(data, off, len);
             msg.mergeFrom(input);
             input.checkLastTagWas(0);
             return msg;
@@ -164,7 +163,7 @@ public abstract class MessageNano {
             return false;
         }
         if (a.getClass() != b.getClass()) {
-            return false;
+          return false;
         }
         final int serializedSize = a.getSerializedSize();
         if (b.getSerializedSize() != serializedSize) {
@@ -180,7 +179,7 @@ public abstract class MessageNano {
     /**
      * Returns a string that is (mostly) compatible with ProtoBuffer's TextFormat. Note that groups
      * (which are deprecated) are not serialized with the correct field name.
-     * <p/>
+     *
      * <p>This is implemented using reflection, so it is not especially fast nor is it guaranteed
      * to find all fields if you have method removal turned on for proguard.
      */

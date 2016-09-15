@@ -1,6 +1,6 @@
 // Protocol Buffers - Google's data interchange format
 // Copyright 2013 Google Inc.  All rights reserved.
-// http://code.google.com/p/protobuf/
+// https://developers.google.com/protocol-buffers/
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -37,95 +37,88 @@ import java.io.IOException;
  * message implementations.  It is public only because those generated messages
  * do not reside in the {@code protobuf} package.  Others should not use this
  * class directly.
- * <p/>
+ *
  * This class contains constants and helper functions useful for dealing with
  * the Protocol Buffer wire format.
  *
  * @author kenton@google.com Kenton Varda
  */
 public final class WireFormatNano {
-    // Do not allow instantiation.
-    private WireFormatNano() {
+  // Do not allow instantiation.
+  private WireFormatNano() {}
+
+  static final int WIRETYPE_VARINT           = 0;
+  static final int WIRETYPE_FIXED64          = 1;
+  static final int WIRETYPE_LENGTH_DELIMITED = 2;
+  static final int WIRETYPE_START_GROUP      = 3;
+  static final int WIRETYPE_END_GROUP        = 4;
+  static final int WIRETYPE_FIXED32          = 5;
+
+  static final int TAG_TYPE_BITS = 3;
+  static final int TAG_TYPE_MASK = (1 << TAG_TYPE_BITS) - 1;
+
+  /** Given a tag value, determines the wire type (the lower 3 bits). */
+  static int getTagWireType(final int tag) {
+    return tag & TAG_TYPE_MASK;
+  }
+
+  /** Given a tag value, determines the field number (the upper 29 bits). */
+  public static int getTagFieldNumber(final int tag) {
+    return tag >>> TAG_TYPE_BITS;
+  }
+
+  /** Makes a tag value given a field number and wire type. */
+  static int makeTag(final int fieldNumber, final int wireType) {
+    return (fieldNumber << TAG_TYPE_BITS) | wireType;
+  }
+
+  public static final int EMPTY_INT_ARRAY[] = {};
+  public static final long EMPTY_LONG_ARRAY[] = {};
+  public static final float EMPTY_FLOAT_ARRAY[] = {};
+  public static final double EMPTY_DOUBLE_ARRAY[] = {};
+  public static final boolean EMPTY_BOOLEAN_ARRAY[] = {};
+  public static final String EMPTY_STRING_ARRAY[] = {};
+  public static final byte[] EMPTY_BYTES_ARRAY[] = {};
+  public static final byte[] EMPTY_BYTES = {};
+
+  /**
+   * Parses an unknown field. This implementation skips the field.
+   *
+   * <p>Generated messages will call this for unknown fields if the store_unknown_fields
+   * option is off.
+   *
+   * @return {@literal true} unless the tag is an end-group tag.
+   */
+  public static boolean parseUnknownField(
+      final CodedInputByteBufferNano input,
+      final int tag) throws IOException {
+    return input.skipField(tag);
+  }
+
+  /**
+   * Computes the array length of a repeated field. We assume that in the common case repeated
+   * fields are contiguously serialized but we still correctly handle interspersed values of a
+   * repeated field (but with extra allocations).
+   *
+   * Rewinds to current input position before returning.
+   *
+   * @param input stream input, pointing to the byte after the first tag
+   * @param tag repeated field tag just read
+   * @return length of array
+   * @throws IOException
+   */
+  public static final int getRepeatedFieldArrayLength(
+      final CodedInputByteBufferNano input,
+      final int tag) throws IOException {
+    int arrayLength = 1;
+    int startPos = input.getPosition();
+    input.skipField(tag);
+    while (input.readTag() == tag) {
+      input.skipField(tag);
+      arrayLength++;
     }
-
-    static final int WIRETYPE_VARINT = 0;
-    static final int WIRETYPE_FIXED64 = 1;
-    static final int WIRETYPE_LENGTH_DELIMITED = 2;
-    static final int WIRETYPE_START_GROUP = 3;
-    static final int WIRETYPE_END_GROUP = 4;
-    static final int WIRETYPE_FIXED32 = 5;
-
-    static final int TAG_TYPE_BITS = 3;
-    static final int TAG_TYPE_MASK = (1 << TAG_TYPE_BITS) - 1;
-
-    /**
-     * Given a tag value, determines the wire type (the lower 3 bits).
-     */
-    static int getTagWireType(final int tag) {
-        return tag & TAG_TYPE_MASK;
-    }
-
-    /**
-     * Given a tag value, determines the field number (the upper 29 bits).
-     */
-    public static int getTagFieldNumber(final int tag) {
-        return tag >>> TAG_TYPE_BITS;
-    }
-
-    /**
-     * Makes a tag value given a field number and wire type.
-     */
-    static int makeTag(final int fieldNumber, final int wireType) {
-        return (fieldNumber << TAG_TYPE_BITS) | wireType;
-    }
-
-    public static final int EMPTY_INT_ARRAY[] = {};
-    public static final long EMPTY_LONG_ARRAY[] = {};
-    public static final float EMPTY_FLOAT_ARRAY[] = {};
-    public static final double EMPTY_DOUBLE_ARRAY[] = {};
-    public static final boolean EMPTY_BOOLEAN_ARRAY[] = {};
-    public static final String EMPTY_STRING_ARRAY[] = {};
-    public static final byte[] EMPTY_BYTES_ARRAY[] = {};
-    public static final byte[] EMPTY_BYTES = {};
-
-    /**
-     * Parses an unknown field. This implementation skips the field.
-     * <p/>
-     * <p>Generated messages will call this for unknown fields if the store_unknown_fields
-     * option is off.
-     *
-     * @return {@literal true} unless the tag is an end-group tag.
-     */
-    public static boolean parseUnknownField(
-            final CodedInputByteBufferNano input,
-            final int tag) throws IOException {
-        return input.skipField(tag);
-    }
-
-    /**
-     * Computes the array length of a repeated field. We assume that in the common case repeated
-     * fields are contiguously serialized but we still correctly handle interspersed values of a
-     * repeated field (but with extra allocations).
-     * <p/>
-     * Rewinds to current input position before returning.
-     *
-     * @param input stream input, pointing to the byte after the first tag
-     * @param tag   repeated field tag just read
-     * @return length of array
-     * @throws IOException
-     */
-    public static final int getRepeatedFieldArrayLength(
-            final CodedInputByteBufferNano input,
-            final int tag) throws IOException {
-        int arrayLength = 1;
-        int startPos = input.getPosition();
-        input.skipField(tag);
-        while (input.readTag() == tag) {
-            input.skipField(tag);
-            arrayLength++;
-        }
-        input.rewindToPosition(startPos);
-        return arrayLength;
-    }
+    input.rewindToPosition(startPos);
+    return arrayLength;
+  }
 
 }
