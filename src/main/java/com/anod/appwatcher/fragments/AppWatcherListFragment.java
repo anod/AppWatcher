@@ -52,10 +52,10 @@ public class AppWatcherListFragment extends Fragment implements
     private static final int REQUEST_APP_INFO = 1;
 
     protected String mTitleFilter = "";
-    protected InstalledFilter mInstalledFilter;
     protected PackageManagerUtils mPMUtils;
     protected MergeRecyclerAdapter mAdapter;
     protected int mSortId;
+    protected int mFilterId;
 
     private int mListenerIndex;
 
@@ -140,7 +140,7 @@ public class AppWatcherListFragment extends Fragment implements
         setListVisible(false);
 
         mSortId = getArguments().getInt(ARG_SORT);
-        setupFilter(getArguments().getInt(ARG_FILTER));
+        mFilterId = getArguments().getInt(ARG_FILTER);
         // Prepare the loader.  Either re-connect with an existing one,
         // or start a new one.
         getLoaderManager().initLoader(0, null, this);
@@ -149,20 +149,16 @@ public class AppWatcherListFragment extends Fragment implements
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new AppListCursorLoader(getActivity(), mTitleFilter, mSortId, mInstalledFilter);
+        return new AppListCursorLoader(getActivity(), mTitleFilter, mSortId, createFilter(mFilterId));
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         ListCursorAdapterWrapper watchlistAdapter = ((ListCursorAdapterWrapper) mAdapter.getAdapter(ADAPTER_WATCHLIST));
         watchlistAdapter.swapData(data);
-        if (mInstalledFilter == null) {
-            int newCount = ((AppListCursorLoader) loader).getNewCount();
-            watchlistAdapter.setNewAppsCount(newCount);
-        } else {
-            int newCount = mInstalledFilter.getNewCount();
-            watchlistAdapter.setNewAppsCount(newCount);
-        }
+
+        int newCount = ((AppListCursorLoader) loader).getNewCountFiltered();
+        watchlistAdapter.setNewAppsCount(newCount);
 
         setListVisible(true);
     }
@@ -176,21 +172,20 @@ public class AppWatcherListFragment extends Fragment implements
         watchlistAdapter.swapData(null);
     }
 
-    private void setupFilter(int filterId) {
+    protected InstalledFilter createFilter(int filterId) {
         if (filterId == Filters.TAB_INSTALLED) {
-            mInstalledFilter = new InstalledFilter(true, mPMUtils);
+            return new InstalledFilter(true, mPMUtils);
         } else if (filterId == Filters.TAB_UNINSTALLED) {
-            mInstalledFilter = new InstalledFilter(false, mPMUtils);
-        } else {
-            mInstalledFilter = null;
+            return new InstalledFilter(false, mPMUtils);
         }
+        return null;
     }
 
     @Override
     public void onSortChanged(int sortIndex)
     {
         mSortId = sortIndex;
-        getLoaderManager().restartLoader(0, null, this);
+        restartLoader();
     }
 
     @Override
@@ -198,7 +193,7 @@ public class AppWatcherListFragment extends Fragment implements
         String newFilter = !TextUtils.isEmpty(newQuery) ? newQuery : "";
         if (!TextUtils.equals(newFilter, mTitleFilter)) {
             mTitleFilter = newFilter;
-            getLoaderManager().restartLoader(0, null, this);
+            restartLoader();
         }
     }
 
@@ -236,7 +231,7 @@ public class AppWatcherListFragment extends Fragment implements
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_APP_INFO && resultCode == Activity.RESULT_OK) {
             if (data.getExtras() != null) {
-                getLoaderManager().restartLoader(0, null, this);
+                restartLoader();
             }
         }
     }
@@ -264,4 +259,9 @@ public class AppWatcherListFragment extends Fragment implements
     public void onRefresh() {
         ((AppWatcherActivity)getActivity()).requestRefresh();
     }
+
+    private void restartLoader() {
+        getLoaderManager().restartLoader(0, null, this);
+    }
+
 }

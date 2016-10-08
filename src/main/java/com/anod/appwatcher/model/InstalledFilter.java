@@ -6,7 +6,8 @@ import com.anod.appwatcher.utils.FilterCursorWrapper;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 
 /**
- * Created by alex on 8/4/14.
+ * @author alex
+ * @date 8/4/14.
  */
 public class InstalledFilter implements FilterCursorWrapper.CursorFilter {
     private final boolean mCheckInstalled;
@@ -36,7 +37,11 @@ public class InstalledFilter implements FilterCursorWrapper.CursorFilter {
         return false;
     }
 
-    public int getNewCount() {
+    int getNewCount() {
         return mNewCount;
+    }
+
+    void resetNewCount() {
+        mNewCount = 0;
     }
 }

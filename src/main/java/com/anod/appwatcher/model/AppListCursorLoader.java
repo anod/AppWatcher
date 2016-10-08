@@ -69,16 +69,24 @@ public class AppListCursorLoader extends CursorLoader {
     public Cursor loadInBackground() {
         Cursor cr = super.loadInBackground();
 
-        loadNewCount();
-
         if (mCursorFilter == null) {
+            loadNewCount();
             return new AppListCursor(cr);
         } else {
+            if (mCursorFilter instanceof InstalledFilter)
+            {
+                ((InstalledFilter)mCursorFilter).resetNewCount();
+            }
             return new AppListCursor(new FilterCursorWrapper(cr, mCursorFilter));
         }
     }
 
-    public int getNewCount() {
+    public int getNewCountFiltered()
+    {
+        if (mCursorFilter instanceof InstalledFilter)
+        {
+            return ((InstalledFilter)mCursorFilter).getNewCount();
+        }
         return mNewCount;
     }
 

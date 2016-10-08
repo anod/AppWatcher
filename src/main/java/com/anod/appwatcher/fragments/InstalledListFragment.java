@@ -53,7 +53,7 @@ public class InstalledListFragment extends AppWatcherListFragment {
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new InstalledLoader(getActivity(), mTitleFilter, mSortId, mInstalledFilter, mPMUtils);
+        return new InstalledLoader(getActivity(), mTitleFilter, mSortId, createFilter(mFilterId), mPMUtils);
     }
 
     @Override
