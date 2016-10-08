@@ -34,7 +34,13 @@ public class DocUtils {
     }
 
     public static Common.Offer getOffer(Document doc) {
-        return doc.getOffer(OFFER_TYPE); // Type 1 ?
+        Common.Offer offer =  doc.getOffer(OFFER_TYPE); // Type 1 ?
+        if (offer == null)
+        {
+            offer = new Common.Offer();
+            offer.clear();
+        }
+        return offer;
     }
 
     public static String getUrl(String packageName)
