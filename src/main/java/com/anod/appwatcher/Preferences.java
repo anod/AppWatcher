@@ -3,14 +3,6 @@ package com.anod.appwatcher;
 import android.accounts.Account;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.support.v4.util.ArrayMap;
-import android.util.ArraySet;
-
-import com.anod.appwatcher.utils.LocaleCompat;
-
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Set;
 
 public class Preferences {
     private static final String VIEWED = "viewed";
@@ -34,6 +26,8 @@ public class Preferences {
     private static final String DRIVE_SYNC_TIME = "drive_sync_time";
     private static final String AUTOSYNC = "autosync";
     private static final String REQUIRES_CHARGING = "requires-charging";
+    public static final String VERSION_CODE = "version_code";
+    public static final String NOTIFY_INSTALLED_UPTODATE = "notify_installed_uptodate";
 
     private SharedPreferences mSettings;
 
@@ -154,5 +148,23 @@ public class Preferences {
 
     void setSortIndex(int index) {
         mSettings.edit().putInt(SORT_INDEX, index).apply();
+    }
+
+    public int getVersionCode() {
+        return mSettings.getInt(VERSION_CODE, 0);
+    }
+
+    public void saveVersionCode(int code)
+    {
+        mSettings.edit().putInt(VERSION_CODE, code).apply();
+    }
+
+    public boolean isNotifyInstalledUpToDate() {
+        return mSettings.getBoolean(NOTIFY_INSTALLED_UPTODATE, true);
+    }
+
+    public void setNotifyInstalledUpToDate(boolean notify)
+    {
+        mSettings.edit().putBoolean(NOTIFY_INSTALLED_UPTODATE, notify).apply();
     }
 }

@@ -16,7 +16,6 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 
 import com.android.volley.VolleyError;
-import com.anod.appwatcher.BuildConfig;
 import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.accounts.AuthTokenProvider;
 import com.anod.appwatcher.backup.GDriveSync;
@@ -26,16 +25,19 @@ import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.model.AppListCursor;
 import com.anod.appwatcher.model.schema.AppListTable;
+import com.anod.appwatcher.utils.CollectionsUtils;
 import com.anod.appwatcher.utils.DocUtils;
 import com.anod.appwatcher.utils.GooglePlayServices;
+import com.anod.appwatcher.utils.PackageManagerUtils;
 import com.google.android.finsky.api.model.Document;
 import com.google.android.finsky.protos.Common;
 import com.google.android.finsky.protos.DocDetails;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -47,6 +49,8 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
     static final String SYNC_EXTRAS_MANUAL = "manual";
 
     private final Context mContext;
+    private final PackageManagerUtils mPMUtils;
+    private final Preferences mPreferences;
 
     public static final String SYNC_STOP = "com.anod.appwatcher.sync.start";
     public static final String SYNC_PROGRESS = "com.anod.appwatcher.sync.progress";
@@ -54,26 +58,26 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
 
     public SyncAdapter(Context context) {
         mContext = context;
+        mPMUtils = new PackageManagerUtils(context.getPackageManager());
+        mPreferences = new Preferences(mContext);
     }
 
     int onPerformSync(Bundle extras, ContentProviderClient provider) {
 
-        Preferences pref = new Preferences(mContext);
-
         boolean manualSync = extras.getBoolean(SYNC_EXTRAS_MANUAL, false);
         // Skip any check if sync requested from application
         if (!manualSync) {
-            if (pref.isWifiOnly() && !isWifiEnabled()) {
+            if (mPreferences.isWifiOnly() && !isWifiEnabled()) {
                 AppLog.d("Wifi not enabled, skipping update check....");
                 return -1;
             }
-            long updateTime = pref.getLastUpdateTime();
+            long updateTime = mPreferences.getLastUpdateTime();
             if (updateTime != -1 && (System.currentTimeMillis() - updateTime < ONE_SEC_IN_MILLIS)) {
                 AppLog.d("Last update less than second, skipping...");
                 return -1;
             }
         }
-        if (pref.getAccount() == null) {
+        if (mPreferences.getAccount() == null) {
             AppLog.d("No active account, skipping sync...");
             return -1;
         }
@@ -85,9 +89,9 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
         mContext.sendBroadcast(startIntent);
 
 
-        BulkDetailsEndpoint endpoint = createEndpoint(pref);
+        BulkDetailsEndpoint endpoint = createEndpoint(mPreferences);
 
-        boolean lastUpdatesViewed = pref.isLastUpdatesViewed();
+        boolean lastUpdatesViewed = mPreferences.isLastUpdatesViewed();
         AppLog.d("Last update viewed: " + lastUpdatesViewed);
 
         ArrayList<UpdatedApp> updatedApps = null;
@@ -99,23 +103,18 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
         }
         int size = (updatedApps != null) ? updatedApps.size() : 0;
         long now = System.currentTimeMillis();
-        pref.updateLastTime(now);
+        mPreferences.updateLastTime(now);
 
-        SyncNotification sn = new SyncNotification(mContext);
-        if (manualSync) {
-            sn.cancel();
-        } else if (size > 0) {
-            Notification notification = sn.create(updatedApps);
-            sn.show(notification);
-            if (lastUpdatesViewed) {
-                pref.markViewed(false);
-            }
+        if (!manualSync && size > 0 && lastUpdatesViewed) {
+            mPreferences.markViewed(false);
         }
 
+        notifyIfNeeded(manualSync, size, updatedApps);
+
         if (!manualSync) {
-            if (pref.isDriveSyncEnabled()) {
+            if (mPreferences.isDriveSyncEnabled()) {
                 AppLog.d("DriveSyncEnabled = true");
-                performGDriveSync(pref, now);
+                performGDriveSync(mPreferences, now);
             } else {
                 AppLog.d("DriveSyncEnabled = false, skipping...");
             }
@@ -123,6 +122,28 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
 
         AppLog.d("Finish::onPerformSync()");
         return size;
+    }
+
+    private void notifyIfNeeded(boolean manualSync, int size, List<UpdatedApp> updatedApps) {
+        SyncNotification sn = new SyncNotification(mContext);
+        if (manualSync) {
+            sn.cancel();
+        } else if (size > 0) {
+            if (!mPreferences.isNotifyInstalledUpToDate())
+            {
+                updatedApps = CollectionsUtils.filter(updatedApps, new CollectionsUtils.Predicate<UpdatedApp>() {
+                    @Override
+                    public boolean test(UpdatedApp updatedApp) {
+                        return updatedApp.isInstalledUpToDate;
+                    }
+                });
+            }
+            size = updatedApps.size();
+            if (size > 0) {
+                Notification notification = sn.create(updatedApps);
+                sn.show(notification);
+            }
+        }
     }
 
     private void performGDriveSync(Preferences pref, long now) {
@@ -170,16 +191,18 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
     }
 
     static class UpdatedApp {
-        String appId;
-        String title;
-        String pkg;
-        String recentChanges;
+        final String appId;
+        final String title;
+        final String pkg;
+        final String recentChanges;
+        final boolean isInstalledUpToDate;
 
-        private UpdatedApp(String appId, String title, String pkg, String recentChanges) {
+        private UpdatedApp(String appId, String title, String pkg, String recentChanges, boolean isInstalledUpToDate) {
             this.appId = appId;
             this.title = title;
             this.pkg = pkg;
             this.recentChanges = recentChanges;
+            this.isInstalledUpToDate = isInstalledUpToDate;
         }
     }
 
@@ -203,6 +226,8 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
         int bulkSize = apps.getCount() > BULK_SIZE ? BULK_SIZE : apps.getCount();
 
         HashMap<String, AppInfo> localApps = new HashMap<>(bulkSize);
+
+
 
         int i = 1;
         while (apps.moveToNext()) {
@@ -264,7 +289,15 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
             AppInfo newApp = createNewVersion(marketApp, localApp);
             client.update(newApp);
             String recentChanges = (updatedTitles.size() == 0) ? appDetails.recentChangesHtml : null;
-            updatedTitles.add(new UpdatedApp(localApp.getAppId(), marketApp.getTitle(), appDetails.packageName, recentChanges));
+
+            boolean isInstalledUpToDate = false;
+            PackageManagerUtils.InstalledInfo installedInfo = mPMUtils.getInstalledInfo(appDetails.packageName);
+            if (installedInfo != null)
+            {
+                isInstalledUpToDate = appDetails.versionCode == installedInfo.versionCode;
+            }
+
+            updatedTitles.add(new UpdatedApp(localApp.getAppId(), marketApp.getTitle(), appDetails.packageName, recentChanges, isInstalledUpToDate));
             return;
         }
 

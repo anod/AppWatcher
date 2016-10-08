@@ -34,6 +34,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     private static final int ACTION_AUTO_UPDATE = 7;
     private static final int ACTION_WIFI_ONLY = 8;
     private static final int ACTION_REQUIRES_CHARGING = 9;
+    private static final int ACTION_NOTIFY_UPTODATE = 10;
 
     private GDriveSync mGDriveSync;
     private CheckboxItem mSyncEnabledItem;
@@ -142,6 +143,10 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
         preferences.add(mChargingItem);
         mChargingItem.enabled = useAutoSync;
 
+        preferences.add(new Category(R.string.settings_notifications));
+        preferences.add(new CheckboxItem(R.string.uptodate_title, R.string.uptodate_summary, ACTION_NOTIFY_UPTODATE, mPrefs.isNotifyInstalledUpToDate()));
+
+
         preferences.add(new Category(R.string.pref_header_drive_sync));
 
         mSyncEnabledItem = new CheckboxItem(R.string.pref_title_drive_sync_enabled, R.string.pref_descr_drive_sync_enabled, ACTION_SYNC_ENABLE);
@@ -225,7 +230,6 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
             new LicensesDialog(this, R.raw.notices, false, true).show();
         } else if (action == ACTION_SYNC_ENABLE) {
             mSyncNowItem.enabled = false; // disable temporary sync now
-            notifyDataSetChanged();
             if (mSyncEnabledItem.checked) {
                 setProgressVisibility(true);
                 mGDriveSync.connect();
@@ -234,7 +238,6 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
         } else if (action == ACTION_SYNC_NOW) {
             if (mSyncNowItem.enabled) {
                 mSyncNowItem.enabled = false;
-                notifyDataSetChanged();
                 mGDriveSync.sync();
             }
         } else if (action == ACTION_AUTO_UPDATE) {
@@ -247,17 +250,18 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
             mPrefs.setUseAutoSync(useAutoSync);
             mWifiItem.enabled = useAutoSync;
             mChargingItem.enabled = useAutoSync;
-            notifyDataSetChanged();
         } else if (action == ACTION_WIFI_ONLY) {
             boolean useWifiOnly = ((CheckboxItem) pref).checked;
             mPrefs.saveWifiOnly(useWifiOnly);
-            notifyDataSetChanged();
         } else if (action == ACTION_REQUIRES_CHARGING) {
             boolean requiresCharging = ((CheckboxItem) pref).checked;
             mPrefs.setRequiresCharging(requiresCharging);
             SyncScheduler.schedule(this, requiresCharging);
-            notifyDataSetChanged();
+        } else if (action == ACTION_NOTIFY_UPTODATE) {
+            boolean notify = ((CheckboxItem) pref).checked;
+            mPrefs.setNotifyInstalledUpToDate(notify);
         }
+        notifyDataSetChanged();
     }
 
     private String getAppVersion() {

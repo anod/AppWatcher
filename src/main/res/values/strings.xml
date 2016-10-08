@@ -101,6 +101,9 @@
     <string name="sort">Sort</string>
     <string name="allow_access_to_accounts">Allow access to list of you Google accounts</string>
     <string name="allow">Allow</string>
+    <string name="settings_notifications">Notifications</string>
+    <string name="uptodate_summary">Show notification if the app is installed and already updated.</string>
+    <string name="uptodate_title">Up to date notifications</string>
 
     <string-array name="sort_titles">
         <item>By name &#x2193;</item>

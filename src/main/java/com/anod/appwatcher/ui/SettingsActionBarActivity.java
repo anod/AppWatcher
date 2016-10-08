@@ -59,7 +59,7 @@ abstract public class SettingsActionBarActivity extends ToolbarActivity implemen
     public static class CheckboxItem extends Item {
         public boolean checked = false;
 
-        public CheckboxItem(@StringRes int title,@StringRes  int summaryRes, int action) {
+        public CheckboxItem(@StringRes int title,@StringRes int summaryRes, int action) {
             super(title, summaryRes, action);
             this.widget = R.layout.preference_widget_checkbox;
         }
