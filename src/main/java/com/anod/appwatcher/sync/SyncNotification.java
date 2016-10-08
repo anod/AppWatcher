@@ -15,6 +15,7 @@ import com.anod.appwatcher.R;
 import com.anod.appwatcher.market.DetailsEndpoint;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author alex
@@ -22,7 +23,7 @@ import java.util.ArrayList;
  */
 public class SyncNotification {
 
-    public static final int NOTIFICATION_ID = 1;
+    static final int NOTIFICATION_ID = 1;
 
     private final Context mContext;
 
@@ -39,7 +40,7 @@ public class SyncNotification {
         mNotificationManager.cancel(NOTIFICATION_ID);
     }
 
-    public Notification create(ArrayList<SyncAdapter.UpdatedApp> updatedApps) {
+    public Notification create(List<SyncAdapter.UpdatedApp> updatedApps) {
         Intent notificationIntent = new Intent(mContext, AppWatcherActivity.class);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         Uri data = Uri.parse("com.anod.appwatcher://notification");
@@ -64,6 +65,27 @@ public class SyncNotification {
             addExtraInfo(app, builder);
         }
 
+        Intent playIntent = new Intent(mContext, NotificationActivity.class);
+        playIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        playIntent.setData(Uri.parse("com.anod.appwatcher://play/myapps"));
+        playIntent.putExtra(NotificationActivity.EXTRA_TYPE, NotificationActivity.TYPE_MYAPPS);
+        builder.addAction(R.drawable.ic_play_arrow_white_24dp, mContext.getString(R.string.store),
+                PendingIntent.getActivity(mContext, 0, playIntent, 0)
+        );
+
+        Intent readIntent = new Intent(mContext, NotificationActivity.class);
+        readIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        readIntent.setData(Uri.parse("com.anod.appwatcher://dismiss/"));
+        readIntent.putExtra(NotificationActivity.EXTRA_TYPE, NotificationActivity.TYPE_DISMISS);
+
+        builder.addAction(R.drawable.ic_clear_white_24dp, mContext.getString(R.string.dismiss),
+                PendingIntent.getActivity(mContext, 0, readIntent, 0)
+        );
+
+        builder.addAction(R.drawable.ic_clear_white_24dp, mContext.getString(R.string.dismiss),
+                PendingIntent.getActivity(mContext, 0, readIntent, 0)
+        );
+
         return builder.build();
     }
 
@@ -79,7 +101,7 @@ public class SyncNotification {
             builder.setStyle(
                 new NotificationCompat.BigTextStyle().bigText(Html.fromHtml(changes))
             );
-
+/*
             Intent playIntent = new Intent(mContext, NotificationActivity.class);
             playIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             playIntent.setData(Uri.parse("com.anod.appwatcher://play/" + app.pkg));
@@ -88,20 +110,12 @@ public class SyncNotification {
             builder.addAction(R.drawable.ic_play_arrow_white_24dp, mContext.getString(R.string.store),
                     PendingIntent.getActivity(mContext, 0, playIntent, 0)
             );
-
-            Intent readIntent = new Intent(mContext, NotificationActivity.class);
-            readIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            readIntent.setData(Uri.parse("com.anod.appwatcher://dismiss/"));
-            readIntent.putExtra(NotificationActivity.EXTRA_TYPE, NotificationActivity.TYPE_DISMISS);
-
-            builder.addAction(R.drawable.ic_clear_white_24dp, mContext.getString(R.string.dismiss),
-                    PendingIntent.getActivity(mContext, 0, readIntent, 0)
-            );
+*/
 
         }
     }
 
-    private String renderNotificationText(ArrayList<SyncAdapter.UpdatedApp> apps) {
+    private String renderNotificationText(List<SyncAdapter.UpdatedApp> apps) {
         int count = apps.size();
         if (count == 1) {
             return mContext.getString(R.string.notification_click);
@@ -119,7 +133,7 @@ public class SyncNotification {
         );
     }
 
-    private String renderNotificationTitle(ArrayList<SyncAdapter.UpdatedApp> apps) {
+    private String renderNotificationTitle(List<SyncAdapter.UpdatedApp> apps) {
         String title;
         int count = apps.size();
         if (count == 1) {

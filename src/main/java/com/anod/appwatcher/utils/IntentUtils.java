@@ -1,5 +1,6 @@
 package com.anod.appwatcher.utils;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -39,6 +40,15 @@ public class IntentUtils {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
         return intent;
+    }
+
+    public static Intent createMyAppsIntent()
+    {
+        Intent marketIntent = new Intent(Intent.ACTION_VIEW)
+                .setComponent(new ComponentName("com.android.vending",
+                        "com.google.android.finsky.activities.MainActivity"))
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        return marketIntent;
     }
 
     public static Intent createUninstallIntent(String packageName) {
