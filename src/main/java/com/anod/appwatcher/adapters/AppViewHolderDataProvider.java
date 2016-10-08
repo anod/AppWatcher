@@ -32,7 +32,7 @@ public class AppViewHolderDataProvider implements AppViewHolder.DataProvider {
         mPMUtils = pmutils;
     }
 
-    public void setNewAppsCount(int newAppsCount) {
+    void setNewAppsCount(int newAppsCount) {
         mNewAppsCount = newAppsCount;
     }
 

@@ -35,6 +35,7 @@ import com.anod.appwatcher.sync.SyncScheduler;
 import com.anod.appwatcher.ui.DrawerActivity;
 import com.anod.appwatcher.utils.AppCrashListener;
 import com.anod.appwatcher.utils.MenuItemAnimation;
+import com.anod.appwatcher.utils.UpgradeCheck;
 import com.google.android.gms.gcm.GcmTaskService;
 
 import net.hockeyapp.android.CrashManager;
@@ -273,7 +274,12 @@ public class AppWatcherActivity extends DrawerActivity implements
             Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
             return;
         }
+
         setDrawerAccount(account);
+        if (UpgradeCheck.isNewVersion(mPreferences))
+        {
+            requestRefresh();
+        }
     }
 
     @Override
