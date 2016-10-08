@@ -12,10 +12,16 @@ public class UpgradeCheck {
 
     public static boolean isNewVersion(Preferences preferences)
     {
-        if (preferences.getVersionCode() > BuildConfig.VERSION_CODE)
+        int code = preferences.getVersionCode();
+        if (code > BuildConfig.VERSION_CODE)
         {
             preferences.saveVersionCode(BuildConfig.VERSION_CODE);
             return true;
+        }
+
+        if (code == 0)
+        {
+            preferences.saveVersionCode(BuildConfig.VERSION_CODE);
         }
         return false;
     }

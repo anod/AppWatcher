@@ -7,6 +7,7 @@ import android.content.Context;
 import android.os.Bundle;
 
 import com.anod.appwatcher.AppListContentProvider;
+import com.anod.appwatcher.BuildConfig;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -39,7 +40,9 @@ public class ManualSyncService extends IntentService {
             ContentProviderClient contentProviderClient = getContentResolver().acquireContentProviderClient(AppListContentProvider.AUTHORITY);
 
             Bundle bundle = new Bundle();
-            bundle.putBoolean(SyncAdapter.SYNC_EXTRAS_MANUAL, true);
+            if (!BuildConfig.DEBUG) {
+                bundle.putBoolean(SyncAdapter.SYNC_EXTRAS_MANUAL, true);
+            }
 
             int updatesCount = syncAdapter.onPerformSync(bundle, contentProviderClient);
 

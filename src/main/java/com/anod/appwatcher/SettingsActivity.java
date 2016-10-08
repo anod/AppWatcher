@@ -19,6 +19,7 @@ import com.anod.appwatcher.ui.SettingsActionBarActivity;
 import com.anod.appwatcher.utils.AppPermissions;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import de.psdev.licensesdialog.LicensesDialog;
 import info.anodsplace.android.log.AppLog;
@@ -265,13 +266,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     }
 
     private String getAppVersion() {
-        String versionName = "";
-        try {
-            versionName = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
-        } catch (PackageManager.NameNotFoundException ignored) {
-        }
-
-        return versionName;
+        return String.format(Locale.US, "%s (%d)", BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE);
     }
 
 

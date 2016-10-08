@@ -16,6 +16,7 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 
 import com.android.volley.VolleyError;
+import com.anod.appwatcher.BuildConfig;
 import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.accounts.AuthTokenProvider;
 import com.anod.appwatcher.backup.GDriveSync;
