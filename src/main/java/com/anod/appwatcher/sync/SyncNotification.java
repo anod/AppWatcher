@@ -69,6 +69,7 @@ public class SyncNotification {
         playIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         playIntent.setData(Uri.parse("com.anod.appwatcher://play/myapps"));
         playIntent.putExtra(NotificationActivity.EXTRA_TYPE, NotificationActivity.TYPE_MYAPPS);
+
         builder.addAction(R.drawable.ic_play_arrow_white_24dp, mContext.getString(R.string.store),
                 PendingIntent.getActivity(mContext, 0, playIntent, 0)
         );
@@ -77,10 +78,6 @@ public class SyncNotification {
         readIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         readIntent.setData(Uri.parse("com.anod.appwatcher://dismiss/"));
         readIntent.putExtra(NotificationActivity.EXTRA_TYPE, NotificationActivity.TYPE_DISMISS);
-
-        builder.addAction(R.drawable.ic_clear_white_24dp, mContext.getString(R.string.dismiss),
-                PendingIntent.getActivity(mContext, 0, readIntent, 0)
-        );
 
         builder.addAction(R.drawable.ic_clear_white_24dp, mContext.getString(R.string.dismiss),
                 PendingIntent.getActivity(mContext, 0, readIntent, 0)

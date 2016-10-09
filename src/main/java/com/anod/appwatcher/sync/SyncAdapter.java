@@ -285,7 +285,7 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
     private void updateApp(Document marketApp, AppInfo localApp, AppListContentProviderClient client, ArrayList<UpdatedApp> updatedTitles, boolean lastUpdatesViewed) {
         DocDetails.AppDetails appDetails = marketApp.getAppDetails();
 
-        if (appDetails.versionCode > localApp.versionNumber) {
+        if (appDetails.versionCode > localApp.versionNumber || (BuildConfig.DEBUG && appDetails.packageName.startsWith("com.anod.appwatcher"))) {
             AppLog.d("New version found [" + appDetails.versionCode + "]");
             AppInfo newApp = createNewVersion(marketApp, localApp);
             client.update(newApp);

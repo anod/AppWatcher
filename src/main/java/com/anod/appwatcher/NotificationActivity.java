@@ -24,9 +24,9 @@ public class NotificationActivity extends Activity {
         int type = intent.getIntExtra(EXTRA_TYPE, 0);
         if (type == TYPE_PLAY) {
             String pkg = intent.getStringExtra(EXTRA_PKG);
-            startActivity(IntentUtils.createPlayStoreIntent(pkg));
+            IntentUtils.startActivitySafely(this, IntentUtils.createPlayStoreIntent(pkg));
         } else if (type == TYPE_MYAPPS) {
-            startActivity(IntentUtils.createMyAppsIntent());
+            IntentUtils.startActivitySafely(this, IntentUtils.createMyAppsIntent());
         } /* if (type == TYPE_DISMISS) {
             // Nothing
         } */

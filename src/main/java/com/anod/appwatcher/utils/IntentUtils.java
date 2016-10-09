@@ -44,7 +44,7 @@ public class IntentUtils {
 
     public static Intent createMyAppsIntent()
     {
-        Intent marketIntent = new Intent(Intent.ACTION_VIEW)
+        Intent marketIntent = new Intent("com.google.android.finsky.VIEW_MY_DOWNLOADS")
                 .setComponent(new ComponentName("com.android.vending",
                         "com.google.android.finsky.activities.MainActivity"))
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
