@@ -12,9 +12,7 @@ import android.text.Html;
 import com.anod.appwatcher.AppWatcherActivity;
 import com.anod.appwatcher.NotificationActivity;
 import com.anod.appwatcher.R;
-import com.anod.appwatcher.market.DetailsEndpoint;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -60,32 +58,42 @@ public class SyncNotification {
             .setContentIntent(contentIntent)
             .setTicker(title)
         ;
+
         if (updatedApps.size() == 1) {
             SyncAdapter.UpdatedApp app = updatedApps.get(0);
             addExtraInfo(app, builder);
+        } else {
+            addMultipleExtraInfo(updatedApps, builder);
         }
-
-        Intent playIntent = new Intent(mContext, NotificationActivity.class);
-        playIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        playIntent.setData(Uri.parse("com.anod.appwatcher://play/myapps"));
-        playIntent.putExtra(NotificationActivity.EXTRA_TYPE, NotificationActivity.TYPE_MYAPPS);
-
-        builder.addAction(R.drawable.ic_play_arrow_white_24dp, mContext.getString(R.string.store),
-                PendingIntent.getActivity(mContext, 0, playIntent, 0)
-        );
-
-        Intent readIntent = new Intent(mContext, NotificationActivity.class);
-        readIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        readIntent.setData(Uri.parse("com.anod.appwatcher://dismiss/"));
-        readIntent.putExtra(NotificationActivity.EXTRA_TYPE, NotificationActivity.TYPE_DISMISS);
-
-        builder.addAction(R.drawable.ic_clear_white_24dp, mContext.getString(R.string.dismiss),
-                PendingIntent.getActivity(mContext, 0, readIntent, 0)
-        );
 
         return builder.build();
     }
 
+    private void addMultipleExtraInfo(List<SyncAdapter.UpdatedApp> updatedApps, NotificationCompat.Builder builder) {
+        boolean isUpdatable = false;
+        for (SyncAdapter.UpdatedApp app: updatedApps) {
+            if (app.installedVersionCode > 0 && app.versionCode != app.installedVersionCode)
+            {
+                isUpdatable = true;
+                break;
+            }
+        }
+        if (!isUpdatable)
+        {
+            return;
+        }
+
+        Intent updateIntent = createActionIntent(Uri.parse("com.anod.appwatcher://play/myapps/1"), NotificationActivity.TYPE_MYAPPS_UPDATE);
+        builder.addAction(R.drawable.ic_system_update_alt_white_24dp, mContext.getString(R.string.noti_action_update),
+                PendingIntent.getActivity(mContext, 0, updateIntent, 0)
+        );
+
+        Intent readIntent = createActionIntent(Uri.parse("com.anod.appwatcher://dismiss/"), NotificationActivity.TYPE_DISMISS);
+        builder.addAction(R.drawable.ic_clear_white_24dp, mContext.getString(R.string.dismiss),
+                PendingIntent.getActivity(mContext, 0, readIntent, 0)
+        );
+
+    }
 
     private void addExtraInfo(SyncAdapter.UpdatedApp app, NotificationCompat.Builder builder) {
         String changes = app.recentChanges;
@@ -98,18 +106,35 @@ public class SyncNotification {
             builder.setStyle(
                 new NotificationCompat.BigTextStyle().bigText(Html.fromHtml(changes))
             );
-/*
-            Intent playIntent = new Intent(mContext, NotificationActivity.class);
-            playIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            playIntent.setData(Uri.parse("com.anod.appwatcher://play/" + app.pkg));
-            playIntent.putExtra(NotificationActivity.EXTRA_TYPE, NotificationActivity.TYPE_PLAY);
+
+            Intent playIntent = createActionIntent(Uri.parse("com.anod.appwatcher://play/" + app.pkg), NotificationActivity.TYPE_PLAY);
             playIntent.putExtra(NotificationActivity.EXTRA_PKG, app.pkg);
+
             builder.addAction(R.drawable.ic_play_arrow_white_24dp, mContext.getString(R.string.store),
                     PendingIntent.getActivity(mContext, 0, playIntent, 0)
             );
-*/
 
+            if (app.installedVersionCode > 0) {
+                Intent updateIntent = createActionIntent(Uri.parse("com.anod.appwatcher://play/myapps/1"), NotificationActivity.TYPE_MYAPPS_UPDATE);
+                builder.addAction(R.drawable.ic_system_update_alt_white_24dp, mContext.getString(R.string.noti_action_update),
+                        PendingIntent.getActivity(mContext, 0, updateIntent, 0)
+                );
+            }
+
+            Intent readIntent = createActionIntent(Uri.parse("com.anod.appwatcher://dismiss/"), NotificationActivity.TYPE_DISMISS);
+            builder.addAction(R.drawable.ic_clear_white_24dp, mContext.getString(R.string.dismiss),
+                    PendingIntent.getActivity(mContext, 0, readIntent, 0)
+            );
         }
+    }
+
+    private Intent createActionIntent(Uri uri,int type)
+    {
+        Intent intent = new Intent(mContext, NotificationActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setData(uri);
+        intent.putExtra(NotificationActivity.EXTRA_TYPE, type);
+        return intent;
     }
 
     private String renderNotificationText(List<SyncAdapter.UpdatedApp> apps) {

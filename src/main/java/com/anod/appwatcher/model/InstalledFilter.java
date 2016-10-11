@@ -13,6 +13,7 @@ public class InstalledFilter implements FilterCursorWrapper.CursorFilter {
     private final boolean mCheckInstalled;
     private final PackageManagerUtils mPMUtils;
     private int mNewCount;
+    private int mInstalledNewCount;
 
     public InstalledFilter(boolean checkInstalled, PackageManagerUtils pmutils) {
         mCheckInstalled = checkInstalled;
@@ -23,8 +24,10 @@ public class InstalledFilter implements FilterCursorWrapper.CursorFilter {
     public boolean filterRecord(Cursor cursor) {
         String packageName = cursor.getString(AppListCursor.IDX_PACKAGE);
         int status = cursor.getInt(AppListCursor.IDX_STATUS);
+        int versionCode = cursor.getInt(AppListCursor.IDX_VERSION_NUMBER);
 
-        boolean installed = mPMUtils.isAppInstalled(packageName);
+        PackageManagerUtils.InstalledInfo installedInfo = mPMUtils.getInstalledInfo(packageName);
+        boolean installed = installedInfo != null && installedInfo.versionCode > 0;
 
         boolean filterRecord = (mCheckInstalled) ? !installed : installed;
 
@@ -33,6 +36,9 @@ public class InstalledFilter implements FilterCursorWrapper.CursorFilter {
         }
         if (status == AppInfo.STATUS_UPDATED) {
             mNewCount++;
+            if (installed && installedInfo.versionCode != versionCode) {
+                mInstalledNewCount++;
+            }
         }
         return false;
     }
@@ -41,7 +47,12 @@ public class InstalledFilter implements FilterCursorWrapper.CursorFilter {
         return mNewCount;
     }
 
+    int getUpdatableNewCount() {
+        return mInstalledNewCount;
+    }
+
     void resetNewCount() {
         mNewCount = 0;
+        mInstalledNewCount = 0;
     }
 }

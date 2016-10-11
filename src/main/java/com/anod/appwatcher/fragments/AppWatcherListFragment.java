@@ -16,7 +16,6 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
 import android.widget.Toast;
 
 import com.anod.appwatcher.AppWatcherActivity;
@@ -158,7 +157,9 @@ public class AppWatcherListFragment extends Fragment implements
         watchlistAdapter.swapData(data);
 
         int newCount = ((AppListCursorLoader) loader).getNewCountFiltered();
-        watchlistAdapter.setNewAppsCount(newCount);
+        int updatableCount = ((AppListCursorLoader) loader).getUpdatableCountFiltered();
+
+        watchlistAdapter.setNewAppsCount(newCount, updatableCount);
 
         setListVisible(true);
     }
@@ -224,6 +225,11 @@ public class AppWatcherListFragment extends Fragment implements
             Toast.makeText(getActivity(), app.packageName, Toast.LENGTH_SHORT).show();
         }
 
+    }
+
+    @Override
+    public void onActionButton() {
+        IntentUtils.startActivitySafely(getContext(), IntentUtils.createMyAppsIntent(true));
     }
 
     @Override

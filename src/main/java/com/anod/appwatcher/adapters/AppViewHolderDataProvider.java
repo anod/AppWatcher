@@ -4,11 +4,9 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.res.ResourcesCompat;
 
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.utils.PackageManagerUtils;
@@ -24,6 +22,7 @@ public class AppViewHolderDataProvider implements AppViewHolder.DataProvider {
     private int mNewAppsCount;
     private Bitmap mDefaultIcon;
     private Context mContext;
+    private int mUpdatableAppsCount;
 
     public AppViewHolderDataProvider(Context context, PackageManagerUtils pmutils) {
         Resources r = context.getResources();
@@ -32,10 +31,10 @@ public class AppViewHolderDataProvider implements AppViewHolder.DataProvider {
         mPMUtils = pmutils;
     }
 
-    void setNewAppsCount(int newAppsCount) {
+    void setNewAppsCount(int newAppsCount, int updatableAppsCount) {
         mNewAppsCount = newAppsCount;
+        mUpdatableAppsCount = updatableAppsCount;
     }
-
 
     @Override
     public String getInstalledText() {
@@ -56,6 +55,11 @@ public class AppViewHolderDataProvider implements AppViewHolder.DataProvider {
     @Override
     public int getNewAppsCount() {
         return mNewAppsCount;
+    }
+
+    @Override
+    public int getUpdatableAppsCount() {
+        return mUpdatableAppsCount;
     }
 
     @Override

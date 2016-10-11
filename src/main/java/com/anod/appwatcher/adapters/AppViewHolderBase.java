@@ -33,6 +33,8 @@ public abstract class AppViewHolderBase extends RecyclerView.ViewHolder {
         String formatVersionText(String versionName, int versionNumber);
         @ColorInt
         int getColor(@ColorRes int colorRes);
+
+        int getUpdatableAppsCount();
     }
 
     public AppViewHolderBase(View itemView, DataProvider dataProvider, AppIconLoader iconLoader) {

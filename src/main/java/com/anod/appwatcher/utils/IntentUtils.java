@@ -42,12 +42,15 @@ public class IntentUtils {
         return intent;
     }
 
-    public static Intent createMyAppsIntent()
+    public static Intent createMyAppsIntent(boolean update)
     {
         Intent marketIntent = new Intent("com.google.android.finsky.VIEW_MY_DOWNLOADS")
                 .setComponent(new ComponentName("com.android.vending",
                         "com.google.android.finsky.activities.MainActivity"))
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        if (update) {
+            marketIntent.putExtra("trigger_update_all", true);
+        }
         return marketIntent;
     }
 

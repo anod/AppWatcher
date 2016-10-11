@@ -1,13 +1,9 @@
 package com.anod.appwatcher.model;
 
-import com.anod.appwatcher.utils.BitmapUtils;
-
 import android.database.CrossProcessCursor;
 import android.database.Cursor;
 import android.database.CursorWindow;
 import android.database.CursorWrapper;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 
 /**
  * @author alex
@@ -15,13 +11,13 @@ import android.graphics.BitmapFactory;
 public class AppListCursor extends CursorWrapper implements CrossProcessCursor {
     private static final int IDX_ROWID = 0;
     private static final int IDX_APPID = 1;
-    public static final int IDX_PACKAGE = 2;
-    private static final int IDX_VERSION_NUMBER = 3;
+    static final int IDX_PACKAGE = 2;
+    static final int IDX_VERSION_NUMBER = 3;
     private static final int IDX_VERSION_NAME = 4;
     private static final int IDX_TITLE = 5;
     private static final int IDX_CREATOR = 6;
-    public static final int IDX_STATUS = 7;
-    public static final int IDX_REFRESH_TIME= 8;
+    static final int IDX_STATUS = 7;
+    static final int IDX_REFRESH_TIME= 8;
     private static final int IDX_PRICE_TEXT = 9;
     private static final int IDX_PRICE_CURRENCY = 10;
     private static final int IDX_PRICE_MICROS = 11;

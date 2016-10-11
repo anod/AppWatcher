@@ -58,6 +58,12 @@ public class AppListContentProviderClient {
         return query(null, selection, selectionArgs);
     }
 
+    AppListCursor queryUpdated() {
+        String selection = AppListTable.Columns.KEY_STATUS + " = ?";
+        String[] selectionArgs = new String[]{String.valueOf(AppInfo.STATUS_UPDATED)};
+        return query(null, selection, selectionArgs);
+    }
+
     public int getCount(boolean includeDeleted) {
         Cursor cr = queryAll(includeDeleted);
         if (cr == null) {
@@ -80,20 +86,6 @@ public class AppListContentProviderClient {
             return null;
         }
         return new AppListCursor(cr);
-    }
-
-
-    public int queryUpdatesCount() {
-        String selection = AppListTable.Columns.KEY_STATUS + " = ?";
-        String[] selectionArgs = new String[]{String.valueOf(AppInfo.STATUS_UPDATED)};
-        AppListCursor cr = query(null, selection, selectionArgs);
-
-        if (cr == null) {
-            return 0;
-        }
-        int count = cr.getCount();
-        cr.close();
-        return count;
     }
 
     /**
@@ -278,4 +270,5 @@ public class AppListContentProviderClient {
             }
         }
     }
+
 }

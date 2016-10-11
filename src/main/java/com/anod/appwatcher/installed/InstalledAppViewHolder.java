@@ -24,6 +24,7 @@ class InstalledAppViewHolder extends AppViewHolder {
             sectionText.setText(R.string.downloaded);
             sectionCount.setText(String.valueOf(mDataProvider.getTotalAppsCount()));
             section.setVisibility(View.VISIBLE);
+            actionButton.setVisibility(View.GONE);
         } else {
             section.setVisibility(View.GONE);
         }

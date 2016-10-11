@@ -20,9 +20,16 @@
         android:layout_weight="1"
         android:ellipsize="end"
         android:focusable="false"
-        android:singleLine="true"
         android:textColor="@color/list_header_text"
-        tools:text="Recently updated"/>
+        tools:text="Recently updated"
+        android:maxLines="1"/>
+
+    <Button
+        android:id="@+id/sec_action_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/update_all"
+        android:gravity="center_vertical|right" />
 
     <TextView
         android:id="@+id/sec_header_count"

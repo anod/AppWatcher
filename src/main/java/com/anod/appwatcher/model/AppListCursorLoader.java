@@ -3,7 +3,6 @@ package com.anod.appwatcher.model;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.CursorLoader;
 import android.text.TextUtils;
 
@@ -11,9 +10,9 @@ import com.anod.appwatcher.AppListContentProvider;
 import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.model.schema.AppListTable;
 import com.anod.appwatcher.utils.FilterCursorWrapper;
+import com.anod.appwatcher.utils.PackageManagerUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import info.anodsplace.android.log.AppLog;
 
@@ -32,6 +31,7 @@ public class AppListCursorLoader extends CursorLoader {
     protected final String mTitleFilter;
 
     private int mNewCount;
+    private int mUpdatableNewCount;
 
     public AppListCursorLoader(Context context, String titleFilter, int sortId, FilterCursorWrapper.CursorFilter cursorFilter) {
         super(context, CONTENT_URI, AppListTable.PROJECTION, null, null, ORDER_DEFAULT);
@@ -92,7 +92,39 @@ public class AppListCursorLoader extends CursorLoader {
 
     private void loadNewCount() {
         AppListContentProviderClient cl = new AppListContentProviderClient(getContext());
-        mNewCount = cl.queryUpdatesCount();
+        AppListCursor apps = cl.queryUpdated();
+
+        mNewCount = 0;
+        mUpdatableNewCount = 0;
+
+        if (apps == null) {
+            return;
+        }
+
+        mNewCount = apps.getCount();
+        if (mNewCount > 0) {
+            PackageManagerUtils pm = new PackageManagerUtils(getContext().getPackageManager());
+            apps.moveToPosition(-1);
+            while (apps.moveToNext()) {
+                AppInfo info = apps.getAppInfo();
+                PackageManagerUtils.InstalledInfo installed = pm.getInstalledInfo(info.packageName);
+
+                if (installed != null && installed.versionCode != info.versionNumber)
+                {
+                    mUpdatableNewCount++;
+                }
+            }
+        }
+
+        apps.close();
         cl.release();
+    }
+
+    public int getUpdatableCountFiltered() {
+        if (mCursorFilter instanceof InstalledFilter)
+        {
+            return ((InstalledFilter)mCursorFilter).getUpdatableNewCount();
+        }
+        return mUpdatableNewCount;
     }
 }

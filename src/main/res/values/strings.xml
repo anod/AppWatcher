@@ -104,6 +104,8 @@
     <string name="settings_notifications">Notifications</string>
     <string name="uptodate_summary">Show notification if the app is installed and already updated.</string>
     <string name="uptodate_title">Up to date notifications</string>
+    <string name="noti_action_update">Update</string>
+    <string name="update_all">Update All</string>
 
     <string-array name="sort_titles">
         <item>By name &#x2193;</item>

@@ -135,7 +135,7 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
                 updatedApps = CollectionsUtils.filter(updatedApps, new CollectionsUtils.Predicate<UpdatedApp>() {
                     @Override
                     public boolean test(UpdatedApp updatedApp) {
-                        return updatedApp.isInstalledUpToDate;
+                        return updatedApp.installedVersionCode > 0 && updatedApp.versionCode == updatedApp.installedVersionCode;
                     }
                 });
             }
@@ -196,14 +196,16 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
         final String title;
         final String pkg;
         final String recentChanges;
-        final boolean isInstalledUpToDate;
+        final int versionCode;
+        final int installedVersionCode;
 
-        private UpdatedApp(String appId, String title, String pkg, String recentChanges, boolean isInstalledUpToDate) {
+        private UpdatedApp(String appId, String title, String pkg, String recentChanges, int versionCode, int installedVersionCode) {
             this.appId = appId;
             this.title = title;
             this.pkg = pkg;
             this.recentChanges = recentChanges;
-            this.isInstalledUpToDate = isInstalledUpToDate;
+            this.versionCode = versionCode;
+            this.installedVersionCode = installedVersionCode;
         }
     }
 
@@ -227,9 +229,6 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
         int bulkSize = apps.getCount() > BULK_SIZE ? BULK_SIZE : apps.getCount();
 
         HashMap<String, AppInfo> localApps = new HashMap<>(bulkSize);
-
-
-
         int i = 1;
         while (apps.moveToNext()) {
 
@@ -291,14 +290,11 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
             client.update(newApp);
             String recentChanges = (updatedTitles.size() == 0) ? appDetails.recentChangesHtml : null;
 
-            boolean isInstalledUpToDate = false;
+            int installedVersionCode = 0;
             PackageManagerUtils.InstalledInfo installedInfo = mPMUtils.getInstalledInfo(appDetails.packageName);
-            if (installedInfo != null)
-            {
-                isInstalledUpToDate = appDetails.versionCode == installedInfo.versionCode;
-            }
+            installedVersionCode = (installedInfo != null) ? installedInfo.versionCode : 0;
 
-            updatedTitles.add(new UpdatedApp(localApp.getAppId(), marketApp.getTitle(), appDetails.packageName, recentChanges, isInstalledUpToDate));
+            updatedTitles.add(new UpdatedApp(localApp.getAppId(), marketApp.getTitle(), appDetails.packageName, recentChanges, appDetails.versionCode, installedVersionCode));
             return;
         }
 

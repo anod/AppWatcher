@@ -14,6 +14,7 @@ public class NotificationActivity extends Activity {
     public static final int TYPE_PLAY = 1;
     public static final int TYPE_DISMISS = 2;
     public static final int TYPE_MYAPPS = 3;
+    public static final int TYPE_MYAPPS_UPDATE = 4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,8 +27,10 @@ public class NotificationActivity extends Activity {
             String pkg = intent.getStringExtra(EXTRA_PKG);
             IntentUtils.startActivitySafely(this, IntentUtils.createPlayStoreIntent(pkg));
         } else if (type == TYPE_MYAPPS) {
-            IntentUtils.startActivitySafely(this, IntentUtils.createMyAppsIntent());
-        } /* if (type == TYPE_DISMISS) {
+            IntentUtils.startActivitySafely(this, IntentUtils.createMyAppsIntent(false));
+        } else if (type == TYPE_MYAPPS_UPDATE) {
+            IntentUtils.startActivitySafely(this, IntentUtils.createMyAppsIntent(true));
+        }/* if (type == TYPE_DISMISS) {
             // Nothing
         } */
 
