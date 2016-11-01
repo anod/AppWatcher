@@ -1,7 +1,5 @@
 package com.anod.appwatcher.model;
 
-import android.content.Context;
-
 import com.anod.appwatcher.utils.DocUtils;
 import com.google.android.finsky.api.model.Document;
 import com.google.android.finsky.protos.Common;

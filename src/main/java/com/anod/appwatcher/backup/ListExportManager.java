@@ -112,11 +112,11 @@ public class ListExportManager {
         return RESULT_DONE;
     }
 
-    public boolean writeList(File dataFile) {
+    boolean writeList(File dataFile) {
         AppLog.d("Write into: " + dataFile.toString());
         AppListWriter writer = new AppListWriter();
         AppListContentProviderClient cr = new AppListContentProviderClient(mContext);
-        AppListCursor listCursor = cr.queryAllSorted();
+        AppListCursor listCursor = cr.queryAllSorted(true);
         try {
             synchronized (ListExportManager.sDataLock) {
                 BufferedWriter buf = new BufferedWriter(new FileWriter(dataFile));

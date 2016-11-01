@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 
 import com.anod.appwatcher.R;
+import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListContentProviderClient;
 
 public class RemoveDialogFragment extends DialogFragment {
@@ -36,7 +37,7 @@ public class RemoveDialogFragment extends DialogFragment {
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 AppListContentProviderClient cl = new AppListContentProviderClient(getActivity());
-                                cl.markDeleted(rowId);
+                                cl.updateStatus(rowId, AppInfo.STATUS_DELETED);
                                 cl.release();
                                 getActivity().finish();
                             }

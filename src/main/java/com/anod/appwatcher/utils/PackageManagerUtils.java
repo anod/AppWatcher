@@ -11,6 +11,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v4.util.ArrayMap;
+import android.support.v4.util.SimpleArrayMap;
 import android.util.DisplayMetrics;
 
 import com.anod.appwatcher.model.AppInfo;
@@ -133,7 +134,7 @@ public class PackageManagerUtils {
         return launchIntent == null ? null : launchIntent.getComponent();
     }
 
-    public List<String> getDownloadedApps(Map<String, Integer> filter) {
+    public List<String> getDownloadedApps(SimpleArrayMap<String, Integer> filter) {
         List<PackageInfo> packs;
         try {
             packs = mPackageManager.getInstalledPackages(0);
@@ -157,7 +158,7 @@ public class PackageManagerUtils {
         return downloaded;
     }
 
-    private List<String> getDownloadedPackagesFallback(Map<String, Integer> filter) {
+    private List<String> getDownloadedPackagesFallback(SimpleArrayMap<String, Integer> filter) {
         List<String> downloaded = new ArrayList<>();
         BufferedReader bufferedReader = null;
         try {

@@ -47,7 +47,7 @@ public class AddWatchAppHandler {
     }
 
 
-    public int addSync(AppInfo info) {
+    int addSync(AppInfo info) {
         if (mAddedApps.containsKey(info.packageName)) {
             return 0;
         }
@@ -66,10 +66,6 @@ public class AddWatchAppHandler {
             return ERROR_ALREADY_ADDED;
         }
 
-        if ((new Random()).nextInt(32)  > 16)
-        {
-            return ERROR_INSERT;
-        }
         Uri uri = mContentProvider.insert(info);
         if (uri == null) {
             return ERROR_INSERT;

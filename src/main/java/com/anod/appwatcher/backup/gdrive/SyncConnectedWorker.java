@@ -1,6 +1,7 @@
 package com.anod.appwatcher.backup.gdrive;
 
 import android.content.Context;
+import android.support.v4.util.SimpleArrayMap;
 
 import com.anod.appwatcher.backup.AppListReaderIterator;
 import com.anod.appwatcher.backup.AppListWriter;
@@ -30,8 +31,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.util.Map;
 
 import info.anodsplace.android.log.AppLog;
 
@@ -43,10 +42,10 @@ public class SyncConnectedWorker {
     /**
      * Lock used when maintaining queue of requested updates.
      */
-    public final static Object sLock = new Object();
+    private final static Object sLock = new Object();
 
-    public static final String APPLIST_JSON = "applist.json";
-    public static final String MIME_TYPE = "application/json";
+    private static final String APPLIST_JSON = "applist.json";
+    private static final String MIME_TYPE = "application/json";
 
     private final Context mContext;
     private final GoogleApiClient mGoogleApiClient;
@@ -56,46 +55,27 @@ public class SyncConnectedWorker {
         mGoogleApiClient = client;
     }
 
-    public GoogleApiClient getGoogleApiClient() {
-        return mGoogleApiClient;
-    }
-
     public void doSyncInBackground() throws Exception {
         synchronized (sLock) {
-            doSyncLocked();
+            AppListContentProviderClient cr = new AppListContentProviderClient(mContext);
+            try {
+                doSyncLocked(cr);
+            } catch (Exception e) {
+                throw new Exception(e);
+            } finally {
+                cr.release();
+            }
         }
     }
 
-    private void doSyncLocked() throws Exception {
+    private void doSyncLocked(AppListContentProviderClient cr) throws Exception {
         Drive.DriveApi.requestSync(mGoogleApiClient).await();
 
         DriveId driveId = retrieveFileDriveId();
-
-        AppListContentProviderClient cr = new AppListContentProviderClient(mContext);
-
-        InputStreamReader driveFileReader = null;
-        DriveFile file = null;
-        DriveContents contents = null;
-        DriveApi.DriveContentsResult contentsResult = null;
+        // There is as file exist, create driveFileReader
         if (driveId != null) {
-            file = Drive.DriveApi.getFile(getGoogleApiClient(), driveId);
-            contentsResult = file.open(getGoogleApiClient(), DriveFile.MODE_READ_ONLY, null).await();
-            if (!contentsResult.getStatus().isSuccess()) {
-                throw new Exception("Error read file : " + contentsResult.getStatus().getStatusMessage());
-            }
-            contents = contentsResult.getDriveContents();
-            driveFileReader = getFileInputStream(contents);
+            insertRemoteItems(driveId, cr);
         }
-
-        syncLists(driveFileReader, cr);
-
-        if (contents != null) {
-            contents.discard(getGoogleApiClient());
-        }
-        if (driveFileReader != null) {
-            driveFileReader.close();
-        }
-
 
         if (driveId == null) {
             if (cr.getCount(false) > 0) {
@@ -107,19 +87,21 @@ public class SyncConnectedWorker {
             writeToDrive(driveId, cr);
         }
 
-        cr.release();
-        Drive.DriveApi.requestSync(mGoogleApiClient).await();
+        AppLog.d("[GDrive] Clean locally deleted apps ");
+        // Clean deleted
+        int numRows = cr.cleanDeleted();
+        AppLog.d("[GDrive] Cleaned " + numRows + " rows");
 
+        Drive.DriveApi.requestSync(mGoogleApiClient).await();
     }
 
     private void writeToDrive(DriveId driveId, AppListContentProviderClient cr) throws Exception {
 
         AppLog.d("[GDrive] Write full list to remote ");
 
-        DriveFile target = Drive.DriveApi.getFile(getGoogleApiClient(), driveId);
+        DriveFile target = driveId.asDriveFile();
 
-        DriveApi.DriveContentsResult contentsResult = target.open(
-                getGoogleApiClient(), DriveFile.MODE_WRITE_ONLY, null).await();
+        DriveApi.DriveContentsResult contentsResult = target.open(mGoogleApiClient, DriveFile.MODE_WRITE_ONLY, null).await();
         if (!contentsResult.getStatus().isSuccess()) {
             throw new Exception("Error open file for write : " + contentsResult.getStatus().getStatusMessage());
         }
@@ -127,7 +109,7 @@ public class SyncConnectedWorker {
         DriveContents contents = contentsResult.getDriveContents();
         OutputStream outputStream = contents.getOutputStream();
         AppListWriter writer = new AppListWriter();
-        AppListCursor listCursor = cr.queryAllSorted();
+        AppListCursor listCursor = cr.queryAllSorted(false);
         BufferedWriter outWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
         try {
             writer.writeJSON(outWriter, listCursor);
@@ -138,10 +120,13 @@ public class SyncConnectedWorker {
             if (listCursor != null) {
                 listCursor.close();
             }
-            outputStream.close();
-            ;
+            try {
+                outputStream.close();
+            } catch (IOException e) {
+                AppLog.e(e);
+            }
         }
-        com.google.android.gms.common.api.Status status = contents.commit(getGoogleApiClient(), null).await();
+        com.google.android.gms.common.api.Status status = contents.commit(mGoogleApiClient, null).await();
         if (!status.getStatus().isSuccess()) {
             throw new Exception("Error commit changes to file : " + status.getStatusMessage());
         }
@@ -152,36 +137,35 @@ public class SyncConnectedWorker {
         if (inputStream == null) {
             throw new Exception("Empty input stream ");
         }
-        try {
-            return new InputStreamReader(inputStream, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            AppLog.e(e);
-            return null;
-        }
+        return new InputStreamReader(inputStream, "UTF-8");
     }
 
-    private void syncLists(InputStreamReader driveFileReader, AppListContentProviderClient cr) {
+    private void insertRemoteItems(DriveId driveId, AppListContentProviderClient cr) throws Exception {
+        DriveFile file = driveId.asDriveFile();
+        DriveApi.DriveContentsResult contentsResult = file.open(mGoogleApiClient, DriveFile.MODE_READ_ONLY, null).await();
+        if (!contentsResult.getStatus().isSuccess()) {
+            throw new Exception("Error read file : " + contentsResult.getStatus().getStatusMessage());
+        }
+        DriveContents contents = contentsResult.getDriveContents();
+        InputStreamReader driveFileReader = getFileInputStream(contents);
 
         AppLog.d("[GDrive] Sync remote list " + APPLIST_JSON);
+
         // Add missing remote entries
-        if (driveFileReader != null) {
-            BufferedReader driveBufferedReader = new BufferedReader(driveFileReader);
-            AppListReaderIterator driveAppsIterator = new AppListReaderIterator(driveBufferedReader);
-            Map<String, Integer> currentIds = cr.queryPackagesMap(true);
-            AppLog.d("[GDrive] Read remote apps " + APPLIST_JSON);
-            while (driveAppsIterator.hasNext()) {
-                AppInfo app = driveAppsIterator.next();
-                AppLog.d("[GDrive] Read app: " + app.packageName);
-                if (currentIds.get(app.packageName) == null) {
-                    cr.insert(app);
-                }
+        BufferedReader driveBufferedReader = new BufferedReader(driveFileReader);
+        AppListReaderIterator driveAppsIterator = new AppListReaderIterator(driveBufferedReader);
+        SimpleArrayMap<String, Integer> currentIds = cr.queryPackagesMap(true);
+        AppLog.d("[GDrive] Read remote apps " + APPLIST_JSON);
+        while (driveAppsIterator.hasNext()) {
+            AppInfo app = driveAppsIterator.next();
+            AppLog.d("[GDrive] Read app: " + app.packageName);
+            if (!currentIds.containsKey(app.packageName)) {
+                cr.insert(app);
             }
         }
 
-        AppLog.d("[GDrive] Clean locally deleted apps ");
-        // Clean deleted
-        int numRows = cr.cleanDeleted();
-        AppLog.d("[GDrive] Cleaned " + numRows + " rows");
+        driveFileReader.close();
+        contents.discard(mGoogleApiClient);
     }
 
     private DriveId retrieveFileDriveId() throws Exception {
@@ -199,8 +183,8 @@ public class SyncConnectedWorker {
                 .build();
 
         DriveApi.MetadataBufferResult metadataBufferResult = Drive.DriveApi
-                .getAppFolder(getGoogleApiClient())
-                .queryChildren(getGoogleApiClient(), query)
+                .getAppFolder(mGoogleApiClient)
+                .queryChildren(mGoogleApiClient, query)
                 .await();
 
 
@@ -219,7 +203,7 @@ public class SyncConnectedWorker {
     }
 
     private DriveId createNewFile() throws Exception {
-        DriveApi.DriveContentsResult contentsResult = Drive.DriveApi.newDriveContents(getGoogleApiClient()).await();
+        DriveApi.DriveContentsResult contentsResult = Drive.DriveApi.newDriveContents(mGoogleApiClient).await();
         AppLog.d("[GDrive] Create new file ");
 
         if (!contentsResult.getStatus().isSuccess()) {
@@ -231,8 +215,8 @@ public class SyncConnectedWorker {
                 .build();
 
         DriveFolder.DriveFileResult driveFileResult = Drive.DriveApi
-                .getAppFolder(getGoogleApiClient())
-                .createFile(getGoogleApiClient(), changeSet, contentsResult.getDriveContents()).await();
+                .getAppFolder(mGoogleApiClient)
+                .createFile(mGoogleApiClient, changeSet, contentsResult.getDriveContents()).await();
 
         if (!driveFileResult.getStatus().isSuccess()) {
             throw new Exception("[Google Drive] File create result filed: " + driveFileResult.getStatus().getStatusMessage());

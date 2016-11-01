@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.support.v4.util.ArrayMap;
+import android.support.v4.util.SimpleArrayMap;
 
 import com.anod.appwatcher.AppListContentProvider;
 import com.anod.appwatcher.model.schema.AppListTable;
@@ -44,18 +45,22 @@ public class AppListContentProviderClient {
     /**
      * Query all applications in db
      */
-    public AppListCursor queryAllSorted() {
-        return query(DEFAULT_SORT_ORDER, null, null);
+    public AppListCursor queryAllSorted(boolean includeDeleted) {
+        return queryAll(includeDeleted, DEFAULT_SORT_ORDER);
     }
 
     public AppListCursor queryAll(boolean includeDeleted) {
+        return queryAll(includeDeleted, null);
+    }
+
+    private AppListCursor queryAll(boolean includeDeleted, String sortOrder) {
         if (includeDeleted) {
-            return query(null, null, null);
+            return query(sortOrder, null, null);
         }
         String selection = AppListTable.Columns.KEY_STATUS + " != ?";
         String[] selectionArgs = new String[]{String.valueOf(AppInfo.STATUS_DELETED)};
 
-        return query(null, selection, selectionArgs);
+        return query(sortOrder, selection, selectionArgs);
     }
 
     AppListCursor queryUpdated() {
@@ -91,12 +96,12 @@ public class AppListContentProviderClient {
     /**
      * @return map (AppId => RowId)
      */
-    public Map<String, Integer> queryPackagesMap(boolean includeDeleted) {
+    public SimpleArrayMap<String, Integer> queryPackagesMap(boolean includeDeleted) {
         AppListCursor cursor = queryAll(includeDeleted);
-        ArrayMap<String, Integer> result = new ArrayMap<String, Integer>();
         if (cursor == null) {
-            return result;
+            return new SimpleArrayMap<>();
         }
+        SimpleArrayMap<String, Integer> result = new SimpleArrayMap<>(cursor.getCount());
         cursor.moveToPosition(-1);
         while (cursor.moveToNext()) {
             AppInfo info = cursor.getAppInfo();
@@ -106,11 +111,6 @@ public class AppListContentProviderClient {
         return result;
     }
 
-    /**
-     * Insert a new app into db
-     *
-     * @param app
-     */
     public Uri insert(AppInfo app) {
         ContentValues values = createContentValues(app);
         try {
@@ -135,10 +135,6 @@ public class AppListContentProviderClient {
             AppLog.e(e.getMessage());
         }
         return 0;
-    }
-
-    public int markDeleted(int rowId) {
-        return updateStatus(rowId, AppInfo.STATUS_DELETED);
     }
 
     public int updateStatus(int rowId, int status) {
@@ -259,7 +255,7 @@ public class AppListContentProviderClient {
 
 
     public void addList(List<AppInfo> appList) {
-        Map<String, Integer> currentIds = queryPackagesMap(true);
+        SimpleArrayMap<String, Integer> currentIds = queryPackagesMap(true);
         for (AppInfo app : appList) {
             Integer rowId = currentIds.get(app.packageName);
             if (rowId == null) {

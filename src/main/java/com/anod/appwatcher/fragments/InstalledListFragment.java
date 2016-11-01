@@ -89,7 +89,7 @@ public class InstalledListFragment extends AppWatcherListFragment {
             Cursor cursor = super.loadInBackground();
 
             AppListContentProviderClient cr = new AppListContentProviderClient(getContext());
-            Map<String, Integer> watchingPackages = cr.queryPackagesMap(false);
+            SimpleArrayMap<String, Integer> watchingPackages = cr.queryPackagesMap(false);
             cr.release();
 
             List<String> list = mPMUtils.getDownloadedApps(watchingPackages);
