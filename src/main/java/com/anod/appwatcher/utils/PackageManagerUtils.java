@@ -10,6 +10,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.util.ArrayMap;
 import android.support.v4.util.SimpleArrayMap;
 import android.util.DisplayMetrics;
@@ -187,7 +188,7 @@ public class PackageManagerUtils {
         return downloaded;
     }
 
-    public InstalledInfo getInstalledInfo(String packageName) {
+    public @NonNull InstalledInfo getInstalledInfo(String packageName) {
         if (mInstalledVersionsCache.containsKey(packageName)) {
             return mInstalledVersionsCache.get(packageName);
         }
@@ -207,6 +208,11 @@ public class PackageManagerUtils {
 
         mInstalledVersionsCache.put(packageName, info);
         return info;
+    }
+
+    public boolean isUpdatable(String packageName, int versionNumber) {
+        InstalledInfo info = getInstalledInfo(packageName);
+        return info.versionCode > 0 && info.versionCode != versionNumber;
     }
 
     public boolean isAppInstalled(String packageName) {

@@ -290,11 +290,8 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
             client.update(newApp);
             String recentChanges = (updatedTitles.size() == 0) ? appDetails.recentChangesHtml : null;
 
-            int installedVersionCode = 0;
             PackageManagerUtils.InstalledInfo installedInfo = mPMUtils.getInstalledInfo(appDetails.packageName);
-            installedVersionCode = (installedInfo != null) ? installedInfo.versionCode : 0;
-
-            updatedTitles.add(new UpdatedApp(localApp.getAppId(), marketApp.getTitle(), appDetails.packageName, recentChanges, appDetails.versionCode, installedVersionCode));
+            updatedTitles.add(new UpdatedApp(localApp.getAppId(), marketApp.getTitle(), appDetails.packageName, recentChanges, appDetails.versionCode, installedInfo.versionCode));
             return;
         }
 

@@ -107,9 +107,7 @@ public class AppListCursorLoader extends CursorLoader {
             apps.moveToPosition(-1);
             while (apps.moveToNext()) {
                 AppInfo info = apps.getAppInfo();
-                PackageManagerUtils.InstalledInfo installed = pm.getInstalledInfo(info.packageName);
-
-                if (installed != null && installed.versionCode != info.versionNumber)
+                if (pm.isUpdatable(info.packageName, info.versionNumber))
                 {
                     mUpdatableNewCount++;
                 }

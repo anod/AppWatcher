@@ -71,17 +71,22 @@ public class SyncNotification {
 
     private void addMultipleExtraInfo(List<SyncAdapter.UpdatedApp> updatedApps, NotificationCompat.Builder builder) {
         boolean isUpdatable = false;
+
+        StringBuilder sb = new StringBuilder();
         for (SyncAdapter.UpdatedApp app: updatedApps) {
             if (app.installedVersionCode > 0 && app.versionCode != app.installedVersionCode)
             {
                 isUpdatable = true;
-                break;
             }
+            sb.append(app.title).append("\n");
         }
+
         if (!isUpdatable)
         {
             return;
         }
+
+        builder.setStyle(new NotificationCompat.BigTextStyle().bigText(sb.toString()));
 
         Intent updateIntent = createActionIntent(Uri.parse("com.anod.appwatcher://play/myapps/1"), NotificationActivity.TYPE_MYAPPS_UPDATE);
         builder.addAction(R.drawable.ic_system_update_alt_white_24dp, mContext.getString(R.string.noti_action_update),
