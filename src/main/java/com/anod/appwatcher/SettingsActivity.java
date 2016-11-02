@@ -17,6 +17,7 @@ import com.anod.appwatcher.fragments.AccountChooserFragment;
 import com.anod.appwatcher.sync.SyncScheduler;
 import com.anod.appwatcher.ui.SettingsActionBarActivity;
 import com.anod.appwatcher.utils.AppPermissions;
+import com.google.android.finsky.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -36,6 +37,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     private static final int ACTION_WIFI_ONLY = 8;
     private static final int ACTION_REQUIRES_CHARGING = 9;
     private static final int ACTION_NOTIFY_UPTODATE = 10;
+    private static final int ACTION_EXPORT_LOCATION = 11;
 
     private GDriveSync mGDriveSync;
     private CheckboxItem mSyncEnabledItem;
@@ -170,6 +172,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
         preferences.add(new Category(R.string.pref_header_backup));
         preferences.add(new Item(R.string.pref_title_export, R.string.pref_descr_export, ACTION_EXPORT));
         preferences.add(new Item(R.string.pref_title_import, R.string.pref_descr_import, ACTION_IMPORT));
+        preferences.add(new Item(R.string.pref_title_location, R.string.export_path, ACTION_EXPORT_LOCATION));
 
         preferences.add(new Category(R.string.pref_header_about));
 
@@ -261,6 +264,13 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
         } else if (action == ACTION_NOTIFY_UPTODATE) {
             boolean notify = ((CheckboxItem) pref).checked;
             mPrefs.setNotifyInstalledUpToDate(notify);
+        } else if (action == ACTION_EXPORT_LOCATION) {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("application/json");
+                startActivity(intent);
+            }
         }
         notifyDataSetChanged();
     }
