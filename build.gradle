@@ -67,8 +67,8 @@ android {
         applicationId 'com.anod.appwatcher'
         minSdkVersion 15
         targetSdkVersion 24
-        versionCode 43
-        versionName '1.8.5'
+        versionCode 44
+        versionName '1.8.6'
 
         manifestPlaceholders = [HOCKEYAPP_APP_ID: APPWATCHER_HOCKEYAPP_ID]
         resValue "string", "content_authority", "com.anod.appwatcher"
