@@ -135,7 +135,7 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
                 updatedApps = CollectionsUtils.filter(updatedApps, new CollectionsUtils.Predicate<UpdatedApp>() {
                     @Override
                     public boolean test(UpdatedApp updatedApp) {
-                        return updatedApp.installedVersionCode > 0 && updatedApp.versionCode == updatedApp.installedVersionCode;
+                        return updatedApp.installedVersionCode > 0 && updatedApp.versionCode <= updatedApp.installedVersionCode;
                     }
                 });
             }
