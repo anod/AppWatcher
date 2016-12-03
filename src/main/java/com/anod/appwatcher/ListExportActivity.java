@@ -1,14 +1,12 @@
 package com.anod.appwatcher;
 
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 
-import com.anod.appwatcher.backup.ListExportManager;
-import com.anod.appwatcher.fragments.WaitDialogFragment;
+import com.anod.appwatcher.backup.ListBackupManager;
 
 public class ListExportActivity extends FragmentActivity {
-	private ListExportManager mBackupManager;
+	private ListBackupManager mBackupManager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -16,11 +14,11 @@ public class ListExportActivity extends FragmentActivity {
 		
 		setContentView(R.layout.activity_list_import);
 
-		mBackupManager = new ListExportManager(this);
+		mBackupManager = new ListBackupManager(this);
 
 	}
 
-	public ListExportManager getBackupManager() {
+	public ListBackupManager getBackupManager() {
 		return mBackupManager;
 	}
 

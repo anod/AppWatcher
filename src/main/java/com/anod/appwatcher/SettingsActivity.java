@@ -1,10 +1,12 @@
 package com.anod.appwatcher;
 
-import android.Manifest;
 import android.accounts.Account;
+import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.net.Uri;
+import android.os.Build;
+import android.provider.DocumentsContract;
 import android.support.annotation.NonNull;
 import android.text.format.DateUtils;
 import android.widget.Toast;
@@ -12,13 +14,13 @@ import android.widget.Toast;
 import com.anod.appwatcher.accounts.AccountChooserHelper;
 import com.anod.appwatcher.backup.ExportTask;
 import com.anod.appwatcher.backup.GDriveSync;
-import com.anod.appwatcher.backup.ListExportManager;
+import com.anod.appwatcher.backup.ImportTask;
+import com.anod.appwatcher.backup.ListBackupManager;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
 import com.anod.appwatcher.sync.SyncScheduler;
 import com.anod.appwatcher.ui.SettingsActionBarActivity;
-import com.anod.appwatcher.utils.AppPermissions;
-import com.google.android.finsky.utils.Utils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -26,7 +28,7 @@ import de.psdev.licensesdialog.LicensesDialog;
 import info.anodsplace.android.log.AppLog;
 
 
-public class SettingsActivity extends SettingsActionBarActivity implements ExportTask.Listener, GDriveSync.Listener, AccountChooserHelper.OnAccountSelectionListener {
+public class SettingsActivity extends SettingsActionBarActivity implements ExportTask.Listener, GDriveSync.Listener, AccountChooserHelper.OnAccountSelectionListener, ImportTask.Listener {
     private static final int ACTION_EXPORT = 3;
     private static final int ACTION_IMPORT = 4;
     private static final int ACTION_LICENSES = 6;
@@ -37,7 +39,10 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     private static final int ACTION_WIFI_ONLY = 8;
     private static final int ACTION_REQUIRES_CHARGING = 9;
     private static final int ACTION_NOTIFY_UPTODATE = 10;
-    private static final int ACTION_EXPORT_LOCATION = 11;
+
+    private static final int REQUEST_BACKUP_DEST = 1;
+    private static final int REQUEST_BACKUP_FILE = 2;
+
 
     private GDriveSync mGDriveSync;
     private CheckboxItem mSyncEnabledItem;
@@ -58,15 +63,15 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
         AppLog.d("Code: "+code);
         setProgressVisibility(false);
         Resources r = getResources();
-        if (code == ListExportManager.RESULT_DONE) {
+        if (code == ListBackupManager.RESULT_OK) {
             Toast.makeText(this, r.getString(R.string.export_done), Toast.LENGTH_SHORT).show();
             return;
         }
         switch (code) {
-            case ListExportManager.ERROR_STORAGE_NOT_AVAILABLE:
+            case ListBackupManager.ERROR_STORAGE_NOT_AVAILABLE:
                 Toast.makeText(this, r.getString(R.string.external_storage_not_available), Toast.LENGTH_SHORT).show();
                 break;
-            case ListExportManager.ERROR_FILE_WRITE:
+            case ListBackupManager.ERROR_FILE_WRITE:
                 Toast.makeText(this, r.getString(R.string.failed_to_write_file), Toast.LENGTH_SHORT).show();
                 break;
         }
@@ -83,36 +88,8 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
         mAccountChooserHelper.onRequestPermissionResult(requestCode, permissions, grantResults);
-
-        AppPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, AppPermissions.REQUEST_STORAGE_READ, new AppPermissions.PermissionResult() {
-            @Override
-            public void granted() {
-                startActivity(new Intent(SettingsActivity.this, ListExportActivity.class));
-            }
-
-            @Override
-            public void denied() {
-                Toast.makeText(SettingsActivity.this, R.string.import_permission_denied, Toast.LENGTH_SHORT).show();
-            }
-        });
-
-
-        AppPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, AppPermissions.REQUEST_STORAGE_WRITE, new AppPermissions.PermissionResult() {
-            @Override
-            public void granted() {
-                SettingsActivity.this.runExport();
-            }
-
-            @Override
-            public void denied() {
-                Toast.makeText(SettingsActivity.this, R.string.export_permission_denied, Toast.LENGTH_SHORT).show();
-            }
-        });
-
     }
-
 
     @Override
     protected void onPause() {
@@ -172,7 +149,6 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
         preferences.add(new Category(R.string.pref_header_backup));
         preferences.add(new Item(R.string.pref_title_export, R.string.pref_descr_export, ACTION_EXPORT));
         preferences.add(new Item(R.string.pref_title_import, R.string.pref_descr_import, ACTION_IMPORT));
-        preferences.add(new Item(R.string.pref_title_location, R.string.export_path, ACTION_EXPORT_LOCATION));
 
         preferences.add(new Category(R.string.pref_header_about));
 
@@ -197,39 +173,46 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        mGDriveSync.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_BACKUP_FILE) {
+            if (resultCode == Activity.RESULT_OK) {
+                new ImportTask(this, this).execute(data.getData());
+            }
+        } else if (requestCode == REQUEST_BACKUP_DEST) {
+            if (resultCode == Activity.RESULT_OK) {
+                new ExportTask(this, this).execute(data.getData());
+            }
+        } else {
+            mGDriveSync.onActivityResult(requestCode, resultCode, data);
+        }
         super.onActivityResult(requestCode, resultCode, data);
-    }
-
-    private void runExport()
-    {
-        new ExportTask(this, this).execute("");
     }
 
     @Override
     protected void onPreferenceItemClick(int action, SettingsActionBarActivity.Item pref) {
         if (action == ACTION_EXPORT) {
 
-            if (AppPermissions.isGranted(this, Manifest.permission.WRITE_EXTERNAL_STORAGE))
-            {
-                this.runExport();
-            }
-            else
-            {
-                AppPermissions.request(this, new String[] { Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, AppPermissions.REQUEST_STORAGE_WRITE);
+            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+                Uri uri = Uri.parse(ListBackupManager.getDefaultBackupDir().getAbsolutePath());
+                intent.setDataAndType(uri, "application/json");
+                intent.putExtra(Intent.EXTRA_TITLE, "appwatcher-" + ListBackupManager.generateFileName());
+                startActivityForResult(intent, REQUEST_BACKUP_DEST);
+            } else {
+                File backupFile = ListBackupManager.generateBackupFile();
+                new ExportTask(this, this).execute(Uri.fromFile(backupFile));
             }
 
         } else if (action == ACTION_IMPORT) {
-
-            if (AppPermissions.isGranted(this, Manifest.permission.READ_EXTERNAL_STORAGE))
-            {
+            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("*/*");
+                String[] mimeTypes = {"application/json", "text/plain", "*/*"};
+                intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
+                startActivityForResult(intent, REQUEST_BACKUP_FILE);
+            } else {
                 startActivity(new Intent(this, ListExportActivity.class));
             }
-            else
-            {
-                AppPermissions.request(this, new String[] { Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, AppPermissions.REQUEST_STORAGE_READ);
-            }
-
         } else if (action == ACTION_LICENSES) {
             new LicensesDialog(this, R.raw.notices, false, true).show();
         } else if (action == ACTION_SYNC_ENABLE) {
@@ -264,13 +247,6 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
         } else if (action == ACTION_NOTIFY_UPTODATE) {
             boolean notify = ((CheckboxItem) pref).checked;
             mPrefs.setNotifyInstalledUpToDate(notify);
-        } else if (action == ACTION_EXPORT_LOCATION) {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-                intent.addCategory(Intent.CATEGORY_OPENABLE);
-                intent.setType("application/json");
-                startActivity(intent);
-            }
         }
         notifyDataSetChanged();
     }
@@ -278,7 +254,6 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     private String getAppVersion() {
         return String.format(Locale.US, "%s (%d)", BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE);
     }
-
 
     @Override
     public void onGDriveConnect() {
@@ -337,5 +312,10 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     @Override
     public AccountChooserFragment.OnAccountSelectionListener getAccountSelectionListener() {
         return mAccountChooserHelper;
+    }
+
+    @Override
+    public void onImportFinish(int code) {
+        ImportTask.showImportFinishToast(this, code);
     }
 }

@@ -1,6 +1,7 @@
 package com.anod.appwatcher.backup;
 
 import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.android.util.JsonReader;
@@ -19,14 +20,9 @@ import java.util.List;
  * @author alex
  * @date 2015-02-27
  */
-public class AppListReader {
+class AppListReader {
 
-    /**
-     * @param reader
-     * @return List of apps
-     * @throws java.io.IOException
-     */
-    public List<AppInfo> readJsonList(Reader reader) throws IOException {
+    List<AppInfo> readJsonList(@NonNull Reader reader) throws IOException {
         JsonReader jsonReader = new JsonReader(reader);
         List<AppInfo> apps = new ArrayList<AppInfo>();
         try {
@@ -44,13 +40,7 @@ public class AppListReader {
         return apps;
     }
 
-    /**
-     * Reads one app from json
-     * @param reader
-     * @return app info
-     * @throws IOException
-     */
-    public AppInfo readAppInfo(JsonReader reader) throws IOException {
+    AppInfo readAppInfo(@NonNull JsonReader reader) throws IOException {
         String appId = null, pname = null, versionName = "", title = "", creator = "", uploadDate="", detailsUrl=null, iconUrl=null;
         int versionNumber = 0, status = 0;
         Bitmap icon = null;

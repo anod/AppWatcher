@@ -3,10 +3,11 @@ package com.anod.appwatcher.fragments;
 import java.io.File;
 import java.util.ArrayList;
 
-import android.app.Activity;
 import android.content.Context;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,20 +19,21 @@ import android.widget.Toast;
 
 import com.anod.appwatcher.ListExportActivity;
 import com.anod.appwatcher.R;
-import com.anod.appwatcher.backup.ListExportManager;
+import com.anod.appwatcher.backup.ImportTask;
+import com.anod.appwatcher.backup.ListBackupManager;
 
-public class ListExportFragment extends ListFragment {
+public class ListExportFragment extends ListFragment implements ImportTask.Listener {
 	private ImportListAdapter mAdapter;
 	private ImportClickListener mRestoreListener;
 	private DeleteClickListener mDeleteListener;
 
-	private ListExportManager mBackupManager;
-	private Activity mContext;
+	private ListBackupManager mBackupManager;
+	private Context mContext;
 
 	@Override
-	public void onAttach(Activity activity) {
-		super.onAttach(activity);
-		mContext = activity;
+	public void onAttach(Context context) {
+		super.onAttach(context);
+		mContext = context;
 	}
 
 	@Override
@@ -44,7 +46,7 @@ public class ListExportFragment extends ListFragment {
 		super.onActivityCreated(savedInstanceState);
 		init();
 		setListAdapter(getAdapter());
-		load();
+		reload();
 	}
 
 	public void init() {
@@ -54,12 +56,12 @@ public class ListExportFragment extends ListFragment {
 		mAdapter = new ImportListAdapter(mContext, R.layout.list_item_restore, new ArrayList<File>());
 	}
 
-	public void load() {
-		new FileListTask().execute(0);
-	}
-
 	public ImportListAdapter getAdapter() {
 		return mAdapter;
+	}
+
+	public void reload() {
+		new FileListTask().execute(0);
 	}
 
 	private class FileListTask extends AsyncTask<Integer, Void, File[]> {
@@ -78,55 +80,22 @@ public class ListExportFragment extends ListFragment {
 			}
             mAdapter.clear();
 			if (result != null) {
-				for (int i = 0; i < result.length; i++) {
-					mAdapter.add(result[i]);
+				for (File aResult : result) {
+					mAdapter.add(aResult);
 				}
 			}
             mAdapter.notifyDataSetChanged();
 		}
 	}
-	private class ImportTask extends AsyncTask<String, Void, Integer> {
 
-		@Override
-		protected void onPreExecute() {
-
-		}
-
-		protected Integer doInBackground(String... filenames) {
-			String filename = filenames[0];
-			return mBackupManager.doImport(filename);
-		}
-
-		protected void onPostExecute(Integer result) {
-			onImportFinish(result);
-		}
-	}
-
-	private void onImportFinish(int code) {
+	@Override
+	public void onImportFinish(int code) {
 		//Avoid crash when fragment not attached to activity
 		if (!isAdded()) {
 			return;
 		}
 
-
-		if (code == ListExportManager.RESULT_DONE) {
-			Toast.makeText(mContext, getString(R.string.import_done), Toast.LENGTH_SHORT).show();
-			return;
-		}
-		switch (code) {
-		case ListExportManager.ERROR_STORAGE_NOT_AVAILABLE:
-			Toast.makeText(mContext, getString(R.string.external_storage_not_available), Toast.LENGTH_SHORT).show();
-			break;
-		case ListExportManager.ERROR_DESERIALIZE:
-			Toast.makeText(mContext, getString(R.string.restore_deserialize_failed), Toast.LENGTH_SHORT).show();
-			break;
-		case ListExportManager.ERROR_FILE_READ:
-			Toast.makeText(mContext, getString(R.string.failed_to_read_file), Toast.LENGTH_SHORT).show();
-			break;
-		case ListExportManager.ERROR_FILE_NOT_EXIST:
-			Toast.makeText(mContext, getString(R.string.file_not_exist), Toast.LENGTH_SHORT).show();
-			break;
-		}
+		ImportTask.showImportFinishToast(mContext, code);
 
         getActivity().getSupportFragmentManager().popBackStack();
 	}
@@ -134,13 +103,14 @@ public class ListExportFragment extends ListFragment {
 	private class ImportListAdapter extends ArrayAdapter<File> {
 		private int resource;
 
-		public ImportListAdapter(Context _context, int _resource, ArrayList<File> _items) {
+		ImportListAdapter(Context _context, int _resource, ArrayList<File> _items) {
 			super(_context, _resource, _items);
 			resource = _resource;
 		}
 
+		@NonNull
 		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
+		public View getView(int position, View convertView, @NonNull ViewGroup parent) {
 			View v = convertView;
 			if (v == null) {
 				LayoutInflater vi = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -150,7 +120,7 @@ public class ListExportFragment extends ListFragment {
 
 			TextView titleView = (TextView) v.findViewById(android.R.id.title);
 			String name = entry.getName();
-			name = name.substring(0, name.lastIndexOf(ListExportManager.FILE_EXT_DAT));
+			name = name.substring(0, name.lastIndexOf(ListBackupManager.FILE_EXT_DAT));
 			titleView.setTag(name);
 			titleView.setText(name);
 
@@ -171,7 +141,9 @@ public class ListExportFragment extends ListFragment {
 	private class ImportClickListener implements View.OnClickListener {
 		@Override
 		public void onClick(View v) {
-			new ImportTask().execute((String) v.getTag());
+			File file = ListBackupManager.getBackupFile((String) v.getTag());
+			Uri uri = Uri.fromFile(file);
+			new ImportTask(getContext(), ListExportFragment.this).execute(uri);
 		}
 	}
 

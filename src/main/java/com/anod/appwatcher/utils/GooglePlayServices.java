@@ -18,13 +18,14 @@ import java.util.concurrent.CountDownLatch;
 import info.anodsplace.android.log.AppLog;
 
 /**
- * Created by alex on 7/30/14.
+ * @author alex
+ * @date 7/30/14.
  */
 abstract public class GooglePlayServices implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         ActivityListener.ResultListener {
 
-    public static final int REQUEST_CODE_RESOLUTION = 123;
+    static final int REQUEST_CODE_RESOLUTION = 123;
 
     private static final int ACTION_CONNECT = 1;
     protected final Context mContext;

@@ -1,7 +1,9 @@
 package com.anod.appwatcher.backup;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 
 import com.android.util.MalformedJsonException;
 import com.anod.appwatcher.model.AppInfo;
@@ -11,11 +13,17 @@ import com.anod.appwatcher.model.AppListCursor;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import info.anodsplace.android.log.AppLog;
 
@@ -24,10 +32,11 @@ import info.anodsplace.android.log.AppLog;
  *
  * @author alex
  */
-public class ListExportManager {
+public class ListBackupManager {
     private static final String DIR_BACKUP = "/data/com.anod.appwatcher/backup";
+
     public static final String FILE_EXT_DAT = ".json";
-    public static final int RESULT_DONE = 0;
+    public static final int RESULT_OK = 0;
     public static final int ERROR_STORAGE_NOT_AVAILABLE = 1;
     public static final int ERROR_FILE_NOT_EXIST = 2;
     public static final int ERROR_FILE_READ = 3;
@@ -45,27 +54,20 @@ public class ListExportManager {
      * merely allocating an Object, and can still be synchronized on.
      */
     static final Object[] sDataLock = new Object[0];
-    public static final String DATE_FORMAT_FILENAME = "yyyyMMdd_HHmmss.SSS";
+    static final String DATE_FORMAT_FILENAME = "yyyyMMdd_HHmmss";
 
     private Context mContext;
 
-    public ListExportManager(Context context) {
+    public ListBackupManager(Context context) {
         mContext = context;
     }
 
     /**
-     * @return last modified time
+     * @return Full path to Backup dir
      */
-    public long getUpdateTime() {
-        File saveDir = getBackupDir();
-        if (!saveDir.isDirectory()) {
-            return 0;
-        }
-        String[] files = saveDir.list();
-        if (files.length == 0) {
-            return 0;
-        }
-        return saveDir.lastModified();
+    public static File getDefaultBackupDir() {
+        File externalPath = Environment.getExternalStorageDirectory();
+        return new File(externalPath.getAbsolutePath() + DIR_BACKUP);
     }
 
     /**
@@ -74,7 +76,7 @@ public class ListExportManager {
      * @return
      */
     public File[] getFileList() {
-        File saveDir = getBackupDir();
+        File saveDir = getDefaultBackupDir();
         if (!saveDir.isDirectory()) {
             return null;
         }
@@ -87,39 +89,28 @@ public class ListExportManager {
         return saveDir.listFiles(filter);
     }
 
-    /**
-     * write app list into filename
-     *
-     * @param filename
-     * @return status
-     */
-    public int doExport(String filename) {
-        if (!checkMediaWritable()) {
-            return ERROR_STORAGE_NOT_AVAILABLE;
-        }
-
-        File saveDir = getBackupDir();
-        if (!saveDir.exists()) {
-            saveDir.mkdirs();
-        }
-
-        File dataFile = new File(saveDir, filename + FILE_EXT_DAT);
-
-        if (!writeList(dataFile)) {
+    int doExport(Uri destUri) {
+        OutputStream outputStream;
+        try {
+            outputStream = mContext.getContentResolver().openOutputStream(destUri);
+        } catch (FileNotFoundException e) {
             return ERROR_FILE_WRITE;
         }
-        saveDir.setLastModified(System.currentTimeMillis());
-        return RESULT_DONE;
+
+        if (!writeList(outputStream)) {
+            return ERROR_FILE_WRITE;
+        }
+        return RESULT_OK;
     }
 
-    boolean writeList(File dataFile) {
-        AppLog.d("Write into: " + dataFile.toString());
+    boolean writeList(@NonNull  OutputStream outputStream) {
+        AppLog.d("Write into: " + outputStream.toString());
         AppListWriter writer = new AppListWriter();
         AppListContentProviderClient cr = new AppListContentProviderClient(mContext);
         AppListCursor listCursor = cr.queryAllSorted(true);
         try {
-            synchronized (ListExportManager.sDataLock) {
-                BufferedWriter buf = new BufferedWriter(new FileWriter(dataFile));
+            synchronized (ListBackupManager.sDataLock) {
+                BufferedWriter buf = new BufferedWriter(new OutputStreamWriter(outputStream));
                 writer.writeJSON(buf, listCursor);
             }
         } catch (IOException e) {
@@ -136,31 +127,21 @@ public class ListExportManager {
         return true;
     }
 
-    /**
-     * Import list from backup
-     *
-     * @param filename
-     * @return
-     */
-    public int doImport(String filename) {
-        if (!checkMediaReadable()) {
-            return ERROR_STORAGE_NOT_AVAILABLE;
-        }
-
-        File saveDir = getBackupDir();
-        File dataFile = new File(saveDir, filename + FILE_EXT_DAT);
-        if (!dataFile.exists()) {
-            return ERROR_FILE_NOT_EXIST;
-        }
-        if (!dataFile.canRead()) {
+    int doImport(Uri uri) {
+        InputStream inputStream;
+        try {
+            inputStream = mContext.getContentResolver().openInputStream(uri);
+        } catch (FileNotFoundException e) {
             return ERROR_FILE_READ;
         }
-
+        if (inputStream == null) {
+            return ERROR_FILE_READ;
+        }
         AppListReader reader = new AppListReader();
-        List<AppInfo> appList = null;
+        List<AppInfo> appList;
         try {
-            synchronized (ListExportManager.sDataLock) {
-                BufferedReader buf = new BufferedReader(new FileReader(dataFile));
+            synchronized (ListBackupManager.sDataLock) {
+                BufferedReader buf = new BufferedReader(new InputStreamReader(inputStream));
                 appList = reader.readJsonList(buf);
             }
         } catch (MalformedJsonException e) {
@@ -175,44 +156,19 @@ public class ListExportManager {
             cr.addList(appList);
             cr.release();
         }
-        return RESULT_DONE;
+        return RESULT_OK;
     }
 
-
-    /**
-     * @return Full path to Backup dir
-     */
-    public File getBackupDir() {
-        File externalPath = Environment.getExternalStorageDirectory();
-        return new File(externalPath.getAbsolutePath() + DIR_BACKUP);
+    public static String generateFileName() {
+        SimpleDateFormat sdf = new SimpleDateFormat(ListBackupManager.DATE_FORMAT_FILENAME, Locale.US);
+        return sdf.format(new Date(System.currentTimeMillis())) + FILE_EXT_DAT;
     }
 
-    /**
-     * Checks if it possible to write to the backup directory
-     *
-     * @return true/false
-     */
-    private boolean checkMediaWritable() {
-        String state = Environment.getExternalStorageState();
-        if (!Environment.MEDIA_MOUNTED.equals(state)) {
-            // We can read and write the media
-            return false;
-        }
-        return true;
+    public static File generateBackupFile() {
+        return new File(getDefaultBackupDir(), generateFileName());
     }
 
-    /**
-     * Checks if it possible to read from the backup directory
-     *
-     * @return true/false
-     */
-    private boolean checkMediaReadable() {
-        String state = Environment.getExternalStorageState();
-        if (!Environment.MEDIA_MOUNTED.equals(state)
-                && !Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-            return false;
-        }
-        return true;
+    public static File getBackupFile(String filename) {
+        return new File(getDefaultBackupDir(), filename + FILE_EXT_DAT);
     }
-
 }
