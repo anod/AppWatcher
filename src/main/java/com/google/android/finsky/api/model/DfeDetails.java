@@ -2,8 +2,7 @@ package com.google.android.finsky.api.model;
 
 import com.android.volley.Response;
 import com.google.android.finsky.api.DfeApi;
-import com.google.android.finsky.protos.Details;
-import com.google.android.finsky.protos.DocumentV2;
+import com.google.android.finsky.protos.nano.Messages.Details;
 
 public class DfeDetails extends DfeBaseModel<Details.DetailsResponse>
 {
@@ -21,41 +20,13 @@ public class DfeDetails extends DfeBaseModel<Details.DetailsResponse>
         mDfeApi.getDetails(mDetailsUrl, false, false, responseListener, errorListener);
     }
 
-    public Details.DiscoveryBadge[] getDiscoveryBadges() {
-        if (this.mDetailsResponse == null) {
-            return null;
-        }
-        return this.mDetailsResponse.discoveryBadge;
-    }
-    
     public Document getDocument() {
         if (this.mDetailsResponse == null || this.mDetailsResponse.docV2 == null) {
             return null;
         }
         return new Document(this.mDetailsResponse.docV2);
     }
-    
-    public String getFooterHtml() {
-        if (this.mDetailsResponse == null || this.mDetailsResponse.footerHtml.length() == 0) {
-            return null;
-        }
-        return this.mDetailsResponse.footerHtml;
-    }
-    
-    public byte[] getServerLogsCookie() {
-        if (this.mDetailsResponse == null || this.mDetailsResponse.serverLogsCookie.length == 0) {
-            return null;
-        }
-        return this.mDetailsResponse.serverLogsCookie;
-    }
-    
-    public DocumentV2.Review getUserReview() {
-        if (this.mDetailsResponse == null || this.mDetailsResponse.userReview == null) {
-            return null;
-        }
-        return this.mDetailsResponse.userReview;
-    }
-    
+
     @Override
     public boolean isReady() {
         return this.mDetailsResponse != null;

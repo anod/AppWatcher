@@ -1,0 +1,143 @@
+syntax = "proto2";
+
+package com.google.android.finsky.protos;
+
+message Common
+{
+    message Image
+    {
+        optional int32 imageType = 1;
+        optional string imageUrl = 5;
+    }
+
+    message Offer
+    {
+        enum TYPE
+        {
+            TYPE_1 = 1;
+        }
+        optional int64 micros = 1;
+        optional string currencyCode = 2;
+        optional string formattedAmount = 3;
+        optional TYPE offerType = 8;
+    }
+}
+
+message Containers
+{
+    message ContainerMetadata
+    {
+        optional string nextPageUrl = 2;
+    }
+}
+message DocDetails
+{
+    message AppDetails
+    {
+        optional int32 versionCode = 3;
+        optional string versionString = 4;
+        optional string packageName = 14;
+        optional string recentChangesHtml = 15;
+        optional string uploadDate = 16;
+        optional string appType = 18;
+    }
+
+    message DocumentDetails
+    {
+        optional AppDetails appDetails = 1;
+    }
+}
+
+message DocumentV2
+{
+    message DocV2
+    {
+        optional string docid = 1;
+        optional int32 backendId = 4;
+        optional string title = 5;
+        optional string creator = 6;
+        repeated Common.Offer offer = 8;
+        repeated Common.Image image = 10;
+        repeated DocV2 child = 11;
+        optional Containers.ContainerMetadata containerMetadata = 12;
+        optional DocDetails.DocumentDetails details = 13;
+        optional string detailsUrl = 16;
+
+    }
+}
+
+message Details
+{
+    message DetailsResponse
+    {
+        optional DocumentV2.DocV2 docV2 = 4;
+    }
+
+    message BulkDetailsEntry
+    {
+        optional DocumentV2.DocV2 doc = 1;
+    }
+
+    message BulkDetailsResponse
+    {
+        repeated BulkDetailsEntry entry = 1;
+    }
+
+    message BulkDetailsRequest
+    {
+        repeated string docid = 1;
+        required bool includeDetails = 3;
+    }
+}
+
+message Search
+{
+    message SearchResponse
+    {
+        optional string originalQuery = 1;
+        optional string suggestedQuery = 2;
+        optional bool aggregateQuery = 3;
+        repeated DocumentV2.DocV2 doc = 5;
+        optional bool fullPageReplaced = 8;
+    }
+}
+
+message LibraryReplication
+{
+    message LibraryReplicationResponse
+    {
+
+    }
+}
+
+message ResponseMessages
+{
+    message ServerCommands
+    {
+        optional bool clearCache = 1;
+        optional string displayErrorMessage = 2;
+        optional string logErrorStacktrace = 3;
+    }
+
+    message ServerMetadata
+    {
+        optional int64 latencyMillis = 1;
+    }
+}
+
+message Response
+{
+    message Payload
+    {
+        optional Details.DetailsResponse detailsResponse = 2;
+        optional Search.SearchResponse searchResponse = 5;
+        optional LibraryReplication.LibraryReplicationResponse libraryReplicationResponse = 17;
+        optional Details.BulkDetailsResponse bulkDetailsResponse = 19;
+    }
+    message ResponseWrapper
+    {
+        optional Payload payload = 1;
+        optional ResponseMessages.ServerCommands commands = 2;
+        optional ResponseMessages.ServerMetadata serverMetadata = 5;
+    }
+}

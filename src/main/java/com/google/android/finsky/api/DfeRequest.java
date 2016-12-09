@@ -13,9 +13,9 @@ import com.android.volley.RetryPolicy;
 import com.android.volley.ServerError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
-import com.google.android.finsky.protos.Response;
-import com.google.android.finsky.protos.ResponseMessages;
 import com.google.android.finsky.utils.Utils;
+import com.google.android.finsky.protos.nano.Messages.Response;
+import com.google.android.finsky.protos.nano.Messages.ResponseMessages;
 import com.google.android.play.dfe.utils.NanoProtoHelper;
 import com.google.protobuf.nano.InvalidProtocolBufferNanoException;
 import com.google.protobuf.nano.MessageNano;
@@ -74,13 +74,13 @@ public class DfeRequest<T extends MessageNano> extends Request<Response.Response
     private com.android.volley.Response<Response.ResponseWrapper> handleServerCommands(final Response.ResponseWrapper responseWrapper) {
         if (responseWrapper.commands != null) {
             final ResponseMessages.ServerCommands commands = responseWrapper.commands;
-            if (commands.hasLogErrorStacktrace) {
+            if (!TextUtils.isEmpty(commands.logErrorStacktrace)) {
                 AppLog.d("%s", commands.logErrorStacktrace);
             }
             if (commands.clearCache) {
               //  this.mApiContext.getCache().clear();
             }
-            if (commands.hasDisplayErrorMessage) {
+            if (!TextUtils.isEmpty(commands.displayErrorMessage)) {
                 return com.android.volley.Response.error(new DfeServerError(commands.displayErrorMessage));
             }
         }
@@ -360,7 +360,7 @@ public class DfeRequest<T extends MessageNano> extends Request<Response.Response
             if (response == null) {
                 if (wrapperAndVerifySignature.serverMetadata != null) {
                     final ResponseMessages.ServerMetadata serverMetadata = wrapperAndVerifySignature.serverMetadata;
-                    if (serverMetadata.hasLatencyMillis) {
+                    if (serverMetadata.latencyMillis > 0) {
                         this.mServerLatencyMs = serverMetadata.latencyMillis;
                     }
                 }

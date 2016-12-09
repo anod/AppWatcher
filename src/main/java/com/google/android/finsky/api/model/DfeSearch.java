@@ -1,9 +1,8 @@
 package com.google.android.finsky.api.model;
 
-import com.android.volley.Response;
 import com.google.android.finsky.api.*;
 import android.os.*;
-import com.google.android.finsky.protos.*;
+import com.google.android.finsky.protos.nano.Messages.*;
 import com.android.volley.*;
 import java.util.*;
 
@@ -116,31 +115,9 @@ public class DfeSearch extends ContainerList<Search.SearchResponse> implements P
         return this.mQuery;
     }
     
-    public Search.RelatedSearch[] getRelatedSearches() {
-        return ((Search.SearchResponse)this.mLastResponse).relatedSearch;
-    }
-    
-    public byte[] getServerLogsCookie() {
-        if (this.mLastResponse == null || ((Search.SearchResponse)this.mLastResponse).serverLogsCookie.length == 0) {
-            return null;
-        }
-        return ((Search.SearchResponse)this.mLastResponse).serverLogsCookie;
-    }
-    
-    public String getSuggestedQuery() {
-        return this.mSuggestedQuery;
-    }
-    
-    public boolean hasBackendId() {
-        return this.mAggregatedQuery != null;
-    }
-    
+
     public boolean isAggregateResult() {
         return this.mAggregatedQuery;
-    }
-    
-    public boolean isFullPageReplaced() {
-        return this.mFullPageReplaced;
     }
     
     protected Request<?> makeRequest(final String url) {

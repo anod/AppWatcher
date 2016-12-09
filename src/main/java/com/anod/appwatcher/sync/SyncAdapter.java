@@ -31,13 +31,11 @@ import com.anod.appwatcher.utils.DocUtils;
 import com.anod.appwatcher.utils.GooglePlayServices;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 import com.google.android.finsky.api.model.Document;
-import com.google.android.finsky.protos.Common;
-import com.google.android.finsky.protos.DocDetails;
+import com.google.android.finsky.protos.nano.Messages.Common;
+import com.google.android.finsky.protos.nano.Messages.DocDetails;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -320,7 +318,7 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
             values.put(AppListTable.Columns.KEY_VERSION_NAME, marketApp.getAppDetails().versionString);
         }
 
-        Common.Offer offer = DocUtils.getOffer(marketApp);
+        Common.Offer offer = marketApp.getOffer();
 
         if (!offer.currencyCode.equals(localApp.priceCur)) {
             values.put(AppListTable.Columns.KEY_PRICE_CURRENCY, offer.currencyCode);
@@ -331,10 +329,10 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
         if (localApp.priceMicros != offer.micros) {
             values.put(AppListTable.Columns.KEY_PRICE_MICROS, offer.micros);
         }
-        String iconUrl = DocUtils.getIconUrl(marketApp);
+        String iconUrl = marketApp.getIconUrl();
         if (!TextUtils.isEmpty(iconUrl))
         {
-            values.put(AppListTable.Columns.KEY_ICON_URL, DocUtils.getIconUrl(marketApp));
+            values.put(AppListTable.Columns.KEY_ICON_URL, marketApp.getIconUrl());
         }
     }
 

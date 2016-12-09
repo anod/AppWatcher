@@ -3,8 +3,8 @@ package com.google.android.finsky.api.model;
 import com.android.volley.Response;
 import com.anod.appwatcher.BuildConfig;
 import com.google.android.finsky.api.DfeApi;
-import com.google.android.finsky.protos.Details;
-import com.google.android.finsky.protos.DocumentV2;
+import com.google.android.finsky.protos.nano.Messages.Details;
+import com.google.android.finsky.protos.nano.Messages.DocumentV2;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +40,7 @@ public class DfeBulkDetails extends DfeBaseModel<Details.BulkDetailsResponse>
             list = null;
         }
         else {
-            list = new ArrayList<Document>();
+            list = new ArrayList<>();
             for (int i = 0; i < this.mBulkDetailsResponse.entry.length; ++i) {
                 final DocumentV2.DocV2 doc = this.mBulkDetailsResponse.entry[i].doc;
                 if (doc == null) {

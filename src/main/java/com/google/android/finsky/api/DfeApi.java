@@ -4,16 +4,16 @@ import android.net.Uri;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
-import com.google.android.finsky.protos.Details;
-import com.google.android.finsky.protos.Search;
+import com.google.android.finsky.protos.nano.Messages.Details;
+import com.google.android.finsky.protos.nano.Messages.Search;
 
 import java.util.Collection;
 
 public interface DfeApi
 {
-    public static final Uri BASE_URI = Uri.parse("https://android.clients.google.com/fdfe/");
-    public static final Uri SEARCH_CHANNEL_URI = Uri.parse("search");
-    public static final Uri BULK_DETAILS_URI = Uri.parse("bulkDetails");
+    Uri BASE_URI = Uri.parse("https://android.clients.google.com/fdfe/");
+    Uri SEARCH_CHANNEL_URI = Uri.parse("search");
+    Uri BULK_DETAILS_URI = Uri.parse("bulkDetails");
 
     Request<?> search(String url, Response.Listener<Search.SearchResponse> responseListener, Response.ErrorListener errorListener);
 

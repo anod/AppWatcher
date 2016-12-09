@@ -12,8 +12,8 @@ import com.anod.appwatcher.model.AddWatchAppHandler;
 import com.anod.appwatcher.utils.DocUtils;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 import com.google.android.finsky.api.model.Document;
-import com.google.android.finsky.protos.Common;
-import com.google.android.finsky.protos.DocDetails;
+import com.google.android.finsky.protos.nano.Messages.Common;
+import com.google.android.finsky.protos.nano.Messages.DocDetails;
 import com.squareup.picasso.Picasso;
 
 public abstract class ResultsAdapter extends RecyclerView.Adapter<ResultsAppViewHolder> {
@@ -61,7 +61,7 @@ public abstract class ResultsAdapter extends RecyclerView.Adapter<ResultsAppView
             holder.row.setBackgroundColor(mColorBgWhite);
         }
 
-        String imageUrl = DocUtils.getIconUrl(doc);
+        String imageUrl = doc.getIconUrl();
 
         Picasso.with(mContext).load(imageUrl)
                 .placeholder(R.drawable.ic_blur_on_black_48dp)
@@ -71,7 +71,7 @@ public abstract class ResultsAdapter extends RecyclerView.Adapter<ResultsAppView
         if (isInstalled) {
             holder.price.setText(R.string.installed);
         } else {
-            Common.Offer offer = DocUtils.getOffer(doc);
+            Common.Offer offer = doc.getOffer(Common.Offer.TYPE_1);
             if (offer == null)
             {
                 holder.price.setText("");

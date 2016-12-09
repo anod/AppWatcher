@@ -5,7 +5,7 @@ import android.content.Context;
 import com.google.android.finsky.api.model.DfeDetails;
 import com.google.android.finsky.api.model.DfeModel;
 import com.google.android.finsky.api.model.Document;
-import com.google.android.finsky.protos.DocDetails;
+import com.google.android.finsky.protos.nano.Messages.DocDetails;
 
 /**
  * @author alex

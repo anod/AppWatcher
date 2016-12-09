@@ -3,13 +3,12 @@ package com.google.android.finsky.api;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.google.android.finsky.protos.Details;
-import com.google.android.finsky.protos.Search;
+import com.google.android.finsky.protos.nano.Messages.Details;
+import com.google.android.finsky.protos.nano.Messages.Search;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 
 /**
  * @author alex
@@ -53,7 +52,6 @@ public class DfeApiImpl implements DfeApi{
         Collections.sort(list);
         bulkDetailsRequest.docid = list.toArray(new String[list.size()]);
         bulkDetailsRequest.includeDetails = includeDetails;
-        bulkDetailsRequest.hasIncludeDetails = true;
         final ProtoDfeRequest<Details.BulkDetailsResponse> dfeRequest = new ProtoDfeRequest<Details.BulkDetailsResponse>(
                 DfeApiImpl.BULK_DETAILS_URI.toString(), bulkDetailsRequest, this.mApiContext, Details.BulkDetailsResponse.class, listener, errorListener)
         {
