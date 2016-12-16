@@ -26,8 +26,9 @@ import com.anod.appwatcher.market.DetailsEndpoint;
 import com.anod.appwatcher.market.PlayStoreEndpointBase;
 import com.anod.appwatcher.market.SearchEndpoint;
 import com.anod.appwatcher.model.AppInfo;
+import com.anod.appwatcher.model.AppInfoMetadata;
 import com.anod.appwatcher.model.AppListContentProviderClient;
-import com.anod.appwatcher.model.AddWatchAppHandler;
+import com.anod.appwatcher.model.WatchAppList;
 import com.anod.appwatcher.search.ResultsAdapter;
 import com.anod.appwatcher.search.ResultsAdapterDetails;
 import com.anod.appwatcher.search.ResultsAdapterSearch;
@@ -39,7 +40,7 @@ import com.anod.appwatcher.utils.MetricsManagerEvent;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MarketSearchActivity extends ToolbarActivity implements AccountChooserHelper.OnAccountSelectionListener, AddWatchAppHandler.Listener, CompositeStateEndpoint.Listener {
+public class MarketSearchActivity extends ToolbarActivity implements AccountChooserHelper.OnAccountSelectionListener, WatchAppList.Listener, CompositeStateEndpoint.Listener {
     public static final String EXTRA_KEYWORD = "keyword";
     public static final String EXTRA_EXACT = "exact";
     public static final String EXTRA_SHARE = "share";
@@ -68,7 +69,7 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
     private boolean mShareSource = false;
 
     private AccountChooserHelper mAccountChooserHelper;
-    private AddWatchAppHandler mNewAppHandler;
+    private WatchAppList mWatchAppList;
     private AppListContentProviderClient mContentProviderClient;
     private String mSearchQuery;
     private boolean mFocus;
@@ -90,7 +91,7 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
         mEndpoints.add(SEARCH_ENDPOINT_ID, new SearchEndpoint(this, true));
         mEndpoints.add(DETAILS_ENDPOINT_ID, new DetailsEndpoint(this));
 
-        mNewAppHandler = new AddWatchAppHandler(this, this);
+        mWatchAppList = new WatchAppList(this);
 
         mListView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -125,10 +126,10 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
 
         if (mPackageSearch) {
             mEndpoints.setActive(DETAILS_ENDPOINT_ID);
-            mAdapter = new ResultsAdapterDetails(this, (DetailsEndpoint) mEndpoints.get(DETAILS_ENDPOINT_ID), mNewAppHandler);
+            mAdapter = new ResultsAdapterDetails(this, (DetailsEndpoint) mEndpoints.get(DETAILS_ENDPOINT_ID), mWatchAppList);
         } else {
             mEndpoints.setActive(SEARCH_ENDPOINT_ID);
-            mAdapter = new ResultsAdapterSearch(this, (SearchEndpoint) mEndpoints.get(SEARCH_ENDPOINT_ID), mNewAppHandler);
+            mAdapter = new ResultsAdapterSearch(this, (SearchEndpoint) mEndpoints.get(SEARCH_ENDPOINT_ID), mWatchAppList);
         }
     }
 
@@ -138,7 +139,7 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
             mContentProviderClient.release();
         }
         super.onPause();
-        mNewAppHandler.setContentProvider(null);
+        mWatchAppList.initContentProvider(null);
         mEndpoints.setListener(null);
     }
 
@@ -147,7 +148,7 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
         mContentProviderClient = new AppListContentProviderClient(mContext);
         super.onResume();
 
-        mNewAppHandler.setContentProvider(mContentProviderClient);
+        mWatchAppList.initContentProvider(mContentProviderClient);
 
         mAccountChooserHelper = new AccountChooserHelper(this, new Preferences(this), this);
         mAccountChooserHelper.init();
@@ -303,21 +304,23 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
     }
 
     @Override
-    public void onAppAddSuccess(AppInfo info) {
-        String msg = mContext.getString(R.string.app_stored, info.title);
-        Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
+    public void onWatchListChangeSuccess(AppInfo info, int newStatus) {
         mAdapter.notifyDataSetChanged();
-        if (mShareSource) {
-            finish();
+        if (newStatus == AppInfoMetadata.STATUS_NORMAL) {
+            String msg = mContext.getString(R.string.app_stored, info.title);
+            Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
+            if (mShareSource) {
+                finish();
+            }
         }
     }
 
     @Override
-    public void onAppAddError(AppInfo info, int error) {
-        if (AddWatchAppHandler.ERROR_ALREADY_ADDED == error) {
+    public void onWatchListChangeError(AppInfo info, int error) {
+        if (WatchAppList.ERROR_ALREADY_ADDED == error) {
             Toast.makeText(mContext, R.string.app_already_added, Toast.LENGTH_SHORT).show();
             mAdapter.notifyDataSetChanged();
-        } else if (error == AddWatchAppHandler.ERROR_INSERT) {
+        } else if (error == WatchAppList.ERROR_INSERT) {
             Toast.makeText(mContext, R.string.error_insert_app, Toast.LENGTH_SHORT).show();
         }
     }
@@ -331,7 +334,7 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
                 showListView();
                 mAdapter.notifyDataSetChanged();
             } else {
-                mAdapter = new ResultsAdapterSearch(this, (SearchEndpoint) mEndpoints.get(SEARCH_ENDPOINT_ID), mNewAppHandler);
+                mAdapter = new ResultsAdapterSearch(this, (SearchEndpoint) mEndpoints.get(SEARCH_ENDPOINT_ID), mWatchAppList);
                 mListView.setAdapter(mAdapter);
                 mEndpoints.setActive(SEARCH_ENDPOINT_ID).startAsync();
             }
@@ -350,7 +353,7 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
     public void onErrorResponse(int id, PlayStoreEndpointBase endpoint, VolleyError error) {
         if (id == DETAILS_ENDPOINT_ID)
         {
-            mAdapter = new ResultsAdapterSearch(this, (SearchEndpoint) mEndpoints.get(SEARCH_ENDPOINT_ID), mNewAppHandler);
+            mAdapter = new ResultsAdapterSearch(this, (SearchEndpoint) mEndpoints.get(SEARCH_ENDPOINT_ID), mWatchAppList);
             mListView.setAdapter(mAdapter);
             mEndpoints.setActive(SEARCH_ENDPOINT_ID).startAsync();
         } else {

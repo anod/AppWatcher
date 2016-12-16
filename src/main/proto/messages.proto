@@ -48,34 +48,31 @@ message DocDetails
     }
 }
 
-message DocumentV2
+message DocV2
 {
-    message DocV2
-    {
-        optional string docid = 1;
-        optional int32 backendId = 4;
-        optional string title = 5;
-        optional string creator = 6;
-        repeated Common.Offer offer = 8;
-        repeated Common.Image image = 10;
-        repeated DocV2 child = 11;
-        optional Containers.ContainerMetadata containerMetadata = 12;
-        optional DocDetails.DocumentDetails details = 13;
-        optional string detailsUrl = 16;
+    optional string docid = 1;
+    optional int32 backendId = 4;
+    optional string title = 5;
+    optional string creator = 6;
+    repeated Common.Offer offer = 8;
+    repeated Common.Image image = 10;
+    repeated DocV2 child = 11;
+    optional Containers.ContainerMetadata containerMetadata = 12;
+    optional DocDetails.DocumentDetails details = 13;
+    optional string detailsUrl = 16;
 
-    }
 }
 
 message Details
 {
     message DetailsResponse
     {
-        optional DocumentV2.DocV2 docV2 = 4;
+        optional DocV2 docV2 = 4;
     }
 
     message BulkDetailsEntry
     {
-        optional DocumentV2.DocV2 doc = 1;
+        optional DocV2 doc = 1;
     }
 
     message BulkDetailsResponse
@@ -97,17 +94,57 @@ message Search
         optional string originalQuery = 1;
         optional string suggestedQuery = 2;
         optional bool aggregateQuery = 3;
-        repeated DocumentV2.DocV2 doc = 5;
+        repeated DocV2 doc = 5;
         optional bool fullPageReplaced = 8;
     }
 }
 
-message LibraryReplication
+message LibraryUpdateProto
 {
-    message LibraryReplicationResponse
+    message ClientLibraryState
+    {
+        required int32 corpus = 1;
+        optional bytes serverToken = 2;
+        required int64 hashCodeSum = 3;
+        required int32 librarySize = 4;
+        required string libraryId = 5;
+    }
+
+    message LibraryAppDetails
     {
 
     }
+
+    message LibraryMutation
+    {
+
+    }
+
+    message LibraryUpdate
+    {
+        enum Status
+        {
+            LIBRARY_UPDATE_STATUS_1 = 1;
+        }
+        optional Status status = 1;
+        optional int32 corpus = 2;
+        optional bytes serverToken = 3;
+        repeated LibraryUpdateProto.LibraryMutation mutation = 4;
+        optional bool hasMore = 5;
+        optional string libraryId = 6;
+    }
+}
+
+message LibraryReplicationRequest
+{
+    repeated LibraryUpdateProto.ClientLibraryState libraryState = 1;
+    optional int32 libraryMutationVersion = 2;
+}
+
+message LibraryReplicationResponse
+{
+    repeated LibraryUpdateProto.LibraryUpdate update = 1;
+    repeated string autoAcquireFreeAppIfHigherVersionAvailableTag = 2;
 }
 
 message ResponseMessages
@@ -125,13 +162,24 @@ message ResponseMessages
     }
 }
 
+message Bucket
+{
+
+}
+
+message ListResponse
+{
+    repeated Bucket bucket = 1;
+    repeated DocV2 doc =2;
+}
+
 message Response
 {
     message Payload
     {
+        optional ListResponse listResponse = 1;
         optional Details.DetailsResponse detailsResponse = 2;
         optional Search.SearchResponse searchResponse = 5;
-        optional LibraryReplication.LibraryReplicationResponse libraryReplicationResponse = 17;
         optional Details.BulkDetailsResponse bulkDetailsResponse = 19;
     }
     message ResponseWrapper
@@ -141,3 +189,4 @@ message Response
         optional ResponseMessages.ServerMetadata serverMetadata = 5;
     }
 }
+

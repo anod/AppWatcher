@@ -101,7 +101,7 @@ public class DfeSearch extends ContainerList<Search.SearchResponse> implements P
         final int length = searchResponse.doc.length;
         String nextPageUrl = null;
         if (length == 1) {
-            final DocumentV2.DocV2 docV2 = searchResponse.doc[0];
+            final DocV2 docV2 = searchResponse.doc[0];
             final Containers.ContainerMetadata containerMetadata = docV2.containerMetadata;
             nextPageUrl = null;
             if (containerMetadata != null) {

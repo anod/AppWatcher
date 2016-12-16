@@ -3,20 +3,19 @@ package com.google.android.finsky.api.model;
 import android.support.annotation.NonNull;
 import android.util.SparseArray;
 
-import com.google.android.finsky.protos.nano.Messages.DocumentV2;
+import com.google.android.finsky.protos.nano.Messages.DocV2;
 import com.google.android.finsky.protos.nano.Messages.DocDetails;
 import com.google.android.finsky.protos.nano.Messages.Common;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class Document {
 
-    private final DocumentV2.DocV2 doc;
+    private final DocV2 doc;
     private SparseArray<List<Common.Image>> mImageTypeMap;
 
-    public Document(@NonNull DocumentV2.DocV2 docV2) {
+    public Document(@NonNull DocV2 docV2) {
         this.doc = docV2;
     }
 

@@ -48,8 +48,7 @@ import java.util.List;
 import info.anodsplace.android.log.AppLog;
 
 public class AppWatcherActivity extends DrawerActivity implements
-        TextView.OnEditorActionListener, SearchView.OnQueryTextListener,
-        AccountChooserHelper.OnAccountSelectionListener {
+        TextView.OnEditorActionListener, SearchView.OnQueryTextListener {
 
     public static final String EXTRA_FROM_NOTIFICATION = "extra_noti";
     private boolean mSyncFinishedReceiverRegistered;
@@ -64,14 +63,10 @@ public class AppWatcherActivity extends DrawerActivity implements
         void onSyncFinish();
     }
 
-    private String mAuthToken;
-
     private AppWatcherActivity mContext;
-    private Preferences mPreferences;
     private MenuItem mSearchMenuItem;
     private ArrayList<EventListener> mEventListener = new ArrayList<>(3);
 
-    private AccountChooserHelper mAccountChooserHelper;
     private boolean mOpenChangelog;
 
     @Override
@@ -90,7 +85,6 @@ public class AppWatcherActivity extends DrawerActivity implements
 
         mContext = this;
 
-        mPreferences = new Preferences(this);
         if (mPreferences.useAutoSync())
         {
             SyncScheduler.schedule(this, mPreferences.isRequiresCharging());
@@ -116,9 +110,6 @@ public class AppWatcherActivity extends DrawerActivity implements
         tabLayout.setupWithViewPager(mViewPager);
 
         mRefreshAnim = new MenuItemAnimation(this, R.anim.rotate);
-
-        mAccountChooserHelper = new AccountChooserHelper(this, mPreferences, this);
-        mAccountChooserHelper.init();
     }
 
     private void setupViewPager(ViewPager viewPager) {
@@ -205,11 +196,6 @@ public class AppWatcherActivity extends DrawerActivity implements
     }
 
     @Override
-    protected void onAccountChooseClick() {
-        mAccountChooserHelper.showAccountsDialogWithCheck();
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_add:
@@ -250,9 +236,8 @@ public class AppWatcherActivity extends DrawerActivity implements
 
     public boolean requestRefresh() {
         AppLog.d("Refresh pressed");
-        if (mAuthToken == null) {
-            Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
-            mAccountChooserHelper.showAccountsDialogWithCheck();
+        if (!isAuthenticated()) {
+            showAccountsDialogWithCheck();
             return false;
         }
 
@@ -261,7 +246,6 @@ public class AppWatcherActivity extends DrawerActivity implements
         return false;
     }
 
-
     @Override
     public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
         return false;
@@ -269,33 +253,11 @@ public class AppWatcherActivity extends DrawerActivity implements
 
     @Override
     public void onHelperAccountSelected(Account account, String authToken) {
-        mAuthToken = authToken;
-        if (authToken == null) {
-            Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        setDrawerAccount(account);
+        super.onHelperAccountSelected(account, authToken);
         if (UpgradeCheck.isNewVersion(mPreferences))
         {
             requestRefresh();
         }
-    }
-
-    @Override
-    public AccountChooserFragment.OnAccountSelectionListener getAccountSelectionListener() {
-        return mAccountChooserHelper;
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        mAccountChooserHelper.onRequestPermissionResult(requestCode, permissions, grantResults);
-    }
-
-    @Override
-    public void onHelperAccountNotFound() {
-        Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
     }
 
     @Override

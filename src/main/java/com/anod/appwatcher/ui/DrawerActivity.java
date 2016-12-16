@@ -1,6 +1,10 @@
 package com.anod.appwatcher.ui;
 
 import android.accounts.Account;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -9,18 +13,36 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.anod.appwatcher.MarketSearchActivity;
 import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.R;
+import com.anod.appwatcher.SettingsActivity;
+import com.anod.appwatcher.accounts.AccountChooserHelper;
+import com.anod.appwatcher.fragments.AccountChooserFragment;
+import com.anod.appwatcher.wishlist.WishlistFragment;
+import com.anod.appwatcher.installed.ImportInstalledActivity;
 
 /**
  * @author alex
  * @date 2014-08-07
  */
-abstract public class DrawerActivity extends ToolbarActivity {
+abstract public class DrawerActivity extends ToolbarActivity implements AccountChooserHelper.OnAccountSelectionListener {
     DrawerLayout mDrawerLayout;
     private TextView mAccountNameView;
     protected NavigationView mNavigationView;
+    private AccountChooserHelper mAccountChooserHelper;
+    protected Preferences mPreferences;
+    private String mAuthToken;
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mPreferences = new Preferences(this);
+        mAccountChooserHelper = new AccountChooserHelper(this, mPreferences, this);
+        mAccountChooserHelper.init();
+    }
 
     protected void setupDrawer() {
         setupToolbar();
@@ -28,7 +50,6 @@ abstract public class DrawerActivity extends ToolbarActivity {
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mNavigationView = (NavigationView) findViewById(R.id.nav_view);
         setupDrawerContent(mNavigationView);
-
     }
 
     private void setupDrawerContent(NavigationView navigationView) {
@@ -66,7 +87,37 @@ abstract public class DrawerActivity extends ToolbarActivity {
                 });
     }
 
-    protected abstract void onAccountChooseClick();
+
+    @Override
+    public AccountChooserFragment.OnAccountSelectionListener getAccountSelectionListener() {
+        return mAccountChooserHelper;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        mAccountChooserHelper.onRequestPermissionResult(requestCode, permissions, grantResults);
+    }
+
+    protected void onAccountChooseClick() {
+        mAccountChooserHelper.showAccountsDialogWithCheck();
+    }
+
+    @Override
+    public void onHelperAccountSelected(Account account, String authToken) {
+        mAuthToken = authToken;
+        if (authToken == null) {
+            Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        setDrawerAccount(account);
+    }
+
+    @Override
+    public void onHelperAccountNotFound() {
+        Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -74,10 +125,23 @@ abstract public class DrawerActivity extends ToolbarActivity {
             case android.R.id.home:
                 mDrawerLayout.openDrawer(GravityCompat.START);
                 return true;
+            case R.id.menu_add:
+                Intent addActivity = new Intent(this, MarketSearchActivity.class);
+                startActivity(addActivity);
+                return true;
+            case R.id.menu_settings:
+                Intent settingsActivity = new Intent(this, SettingsActivity.class);
+                startActivity(settingsActivity);
+                return true;
+            case R.id.menu_act_import:
+                startActivity(new Intent(this, ImportInstalledActivity.class));
+                return true;
+            case R.id.menu_wishlist:
+                startActivity(FragmentActivity.intent(WishlistFragment.TAG, this));
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
-
 
     protected void setDrawerAccount(Account account) {
         if (account == null) {
@@ -85,5 +149,23 @@ abstract public class DrawerActivity extends ToolbarActivity {
         } else {
             mAccountNameView.setText(account.name);
         }
+    }
+
+
+    public boolean isAuthenticated() {
+        return mAuthToken != null;
+    }
+
+    public void showAccountsDialogWithCheck() {
+        Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
+        mAccountChooserHelper.showAccountsDialogWithCheck();
+    }
+
+    public Account getAccount() {
+        return mAccountChooserHelper.getAccount();
+    }
+
+    public String getAuthToken() {
+        return mAuthToken;
     }
 }

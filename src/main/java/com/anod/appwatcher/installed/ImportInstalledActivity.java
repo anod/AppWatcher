@@ -2,7 +2,6 @@ package com.anod.appwatcher.installed;
 
 import android.accounts.Account;
 import android.content.Context;
-import android.content.pm.PackageInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
@@ -20,7 +19,7 @@ import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.accounts.AccountChooserHelper;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
-import com.anod.appwatcher.model.AddWatchAppHandler;
+import com.anod.appwatcher.model.WatchAppList;
 import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.ui.ToolbarActivity;
 import com.anod.appwatcher.utils.PackageManagerUtils;
@@ -28,7 +27,6 @@ import com.anod.appwatcher.utils.PackageManagerUtils;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -170,7 +168,7 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
             if (resultCode == null) {
                 status = ImportDataProvider.STATUS_ERROR;
             } else {
-                status = resultCode == AddWatchAppHandler.RESULT_OK ? ImportDataProvider.STATUS_DONE : ImportDataProvider.STATUS_ERROR;
+                status = resultCode == WatchAppList.RESULT_OK ? ImportDataProvider.STATUS_DONE : ImportDataProvider.STATUS_ERROR;
             }
             mDataProvider.setPackageStatus(packageName, status);
             adapter.notifyPackageStatusChanged(packageName);

@@ -3,6 +3,8 @@ package com.google.android.finsky.api;
 import android.net.Uri;
 import android.net.Uri.Builder;
 import android.text.TextUtils;
+import android.util.Base64;
+
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkError;
 import com.android.volley.ParseError;
@@ -58,9 +60,8 @@ public class DfeUtils
       return false;
     return TextUtils.equals(Uri.parse(paramString1).getQueryParameter("doc"), Uri.parse(paramString2).getQueryParameter("doc"));
   }
-}
 
-/* Location:           /Users/alex/Documents/android-tools/com.android.vending-5.0.31-80300031-minAPI9-dex2jar.jar
- * Qualified Name:     com.google.android.finsky.api.DfeUtils
- * JD-Core Version:    0.6.2
- */
+  public static String base64Encode(byte[] input) {
+    return Base64.encodeToString(input, Base64.NO_WRAP | Base64.URL_SAFE);
+  }
+}

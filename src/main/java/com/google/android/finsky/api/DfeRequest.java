@@ -30,7 +30,7 @@ import java.util.zip.GZIPInputStream;
 
 import info.anodsplace.android.log.AppLog;
 
-public class DfeRequest<T extends MessageNano> extends Request<Response.ResponseWrapper>
+class DfeRequest<T extends MessageNano> extends Request<Response.ResponseWrapper>
 {    private static final boolean SKIP_ALL_CACHES = false;
 
     private static final boolean PROTO_DEBUG;
@@ -48,7 +48,7 @@ public class DfeRequest<T extends MessageNano> extends Request<Response.Response
         PROTO_DEBUG = Log.isLoggable("AppWatcher.DfeProto", Log.VERBOSE);
     }
     
-    public DfeRequest(final int method, final String s, final DfeApiContext mApiContext, final Class<T> mResponseClass, final com.android.volley.Response.Listener<T> mListener, final com.android.volley.Response.ErrorListener errorListener) {
+     DfeRequest(final int method, final String s, final DfeApiContext mApiContext, final Class<T> mResponseClass, final com.android.volley.Response.Listener<T> mListener, final com.android.volley.Response.ErrorListener errorListener) {
         super(method, Uri.withAppendedPath(DfeApi.BASE_URI, s).toString(), errorListener);
         this.mAllowMultipleResponses = false;
         this.mServerLatencyMs = -1L;
@@ -63,7 +63,7 @@ public class DfeRequest<T extends MessageNano> extends Request<Response.Response
         this.mResponseClass = mResponseClass;
     }
     
-    public DfeRequest(final String url, final DfeApiContext dfeApiContext, final Class<T> clazz, final com.android.volley.Response.Listener<T> listener, final com.android.volley.Response.ErrorListener errorListener) {
+    DfeRequest(final String url, final DfeApiContext dfeApiContext, final Class<T> clazz, final com.android.volley.Response.Listener<T> listener, final com.android.volley.Response.ErrorListener errorListener) {
         this(Method.GET, url, dfeApiContext, clazz, listener, errorListener);
     }
     

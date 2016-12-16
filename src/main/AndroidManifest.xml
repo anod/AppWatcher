@@ -69,6 +69,9 @@
             android:name=".SettingsActivity"
             android:label="@string/settings" />
         <activity
+            android:name=".ui.FragmentActivity"
+            />
+        <activity
             android:name=".installed.ImportInstalledActivity"
             android:label="@string/import_installed"
             android:theme="@style/AppThemeLight.DarkDialog" />

@@ -1,45 +1,36 @@
 package com.anod.appwatcher.model;
 
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.support.v4.util.ArrayMap;
+import android.support.v4.util.SimpleArrayMap;
 
-import com.anod.appwatcher.R;
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
-
-import java.io.IOException;
-import java.util.Random;
 
 /**
  * @author alex
  * @date 2015-09-19
  */
-public class AddWatchAppHandler {
+public class WatchAppList {
     public static final int RESULT_OK = 0;
     public static final int ERROR_INSERT = 1;
     public static final int ERROR_ALREADY_ADDED = 2;
-    private final Context mContext;
+    public static final int ERROR_DELETE = 3;
+
     private final Listener mListener;
-    private ArrayMap<String, Boolean> mAddedApps;
+    private SimpleArrayMap<String, Integer> mAddedApps;
     private AppListContentProviderClient mContentProvider;
-    private int mIconSize = -1;
 
     public interface Listener {
-        void onAppAddSuccess(AppInfo info);
-        void onAppAddError(AppInfo info, int error);
+        void onWatchListChangeSuccess(AppInfo info, int newStatus);
+        void onWatchListChangeError(AppInfo info, int error);
     }
 
-    public AddWatchAppHandler(Context context, Listener listener) {
-        mContext = context;
-        mAddedApps = new ArrayMap<>();
+    public WatchAppList(Listener listener) {
+        mAddedApps = new SimpleArrayMap<>();
         mListener = listener;
     }
 
-    public void setContentProvider(AppListContentProviderClient contentProvider) {
+    public void initContentProvider(AppListContentProviderClient contentProvider) {
         mContentProvider = contentProvider;
+        mAddedApps = mContentProvider.queryPackagesMap(false);
     }
 
     public boolean isAdded(String packageName) {
@@ -52,7 +43,7 @@ public class AddWatchAppHandler {
             return 0;
         }
 
-        mAddedApps.put(info.packageName, true);
+        mAddedApps.put(info.packageName, -1);
         AppInfo existingApp = mContentProvider.queryAppId(info.packageName);
         if (existingApp != null) {
             if (existingApp.getStatus() == AppInfoMetadata.STATUS_DELETED) {
@@ -78,34 +69,52 @@ public class AddWatchAppHandler {
             return;
         }
 
-        mAddedApps.put(info.packageName, true);
+        mAddedApps.put(info.packageName, -1);
         AppInfo existingApp = mContentProvider.queryAppId(info.packageName);
         if (existingApp != null) {
             if (existingApp.getStatus() == AppInfoMetadata.STATUS_DELETED) {
                 int success = mContentProvider.updateStatus(existingApp.getRowId(), AppInfoMetadata.STATUS_NORMAL);
                 if (success > 0) {
-                    mListener.onAppAddSuccess(info);
+                    mListener.onWatchListChangeSuccess(info, AppInfoMetadata.STATUS_NORMAL);
                 } else {
-                    mListener.onAppAddError(info, ERROR_INSERT);
+                    mListener.onWatchListChangeError(info, ERROR_INSERT);
                 }
                 return;
             }
-            mListener.onAppAddError(info, ERROR_ALREADY_ADDED);
+            mListener.onWatchListChangeError(info, ERROR_ALREADY_ADDED);
             return;
         }
 
         insertApp(info);
     }
 
+    public void delete(AppInfo info)
+    {
+        if (!mAddedApps.containsKey(info.packageName)) {
+            return;
+        }
+
+        AppInfo existingApp = mContentProvider.queryAppId(info.packageName);
+        if (existingApp != null) {
+            int success = mContentProvider.updateStatus(existingApp.getRowId(), AppInfoMetadata.STATUS_DELETED);
+            if (success > 0) {
+                mAddedApps.remove(info.packageName);
+                mListener.onWatchListChangeSuccess(info, AppInfoMetadata.STATUS_DELETED);
+            } else {
+                mListener.onWatchListChangeError(info, ERROR_DELETE);
+            }
+        }
+    }
+
     private void insertApp(final AppInfo info) {
         Uri uri = mContentProvider.insert(info);
 
         if (uri == null) {
-            mListener.onAppAddError(info, ERROR_INSERT);
+            mListener.onWatchListChangeError(info, ERROR_INSERT);
         } else {
-            mAddedApps.put(info.getAppId(), true);
-
-            mListener.onAppAddSuccess(info);
+            mAddedApps.put(info.getAppId(), -1);
+            mListener.onWatchListChangeSuccess(info, AppInfoMetadata.STATUS_NORMAL);
         }
     }
+
 }

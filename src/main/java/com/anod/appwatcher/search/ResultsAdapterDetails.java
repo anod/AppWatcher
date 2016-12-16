@@ -3,7 +3,7 @@ package com.anod.appwatcher.search;
 import android.content.Context;
 
 import com.anod.appwatcher.market.DetailsEndpoint;
-import com.anod.appwatcher.model.AddWatchAppHandler;
+import com.anod.appwatcher.model.WatchAppList;
 import com.google.android.finsky.api.model.Document;
 
 /**
@@ -14,13 +14,13 @@ import com.google.android.finsky.api.model.Document;
 public class ResultsAdapterDetails extends ResultsAdapter {
     private final DetailsEndpoint mDetailsEndpoint;
 
-    public ResultsAdapterDetails(Context context, DetailsEndpoint detailsEndpoint, AddWatchAppHandler newAppHandler) {
+    public ResultsAdapterDetails(Context context, DetailsEndpoint detailsEndpoint, WatchAppList newAppHandler) {
         super(context, newAppHandler);
         mDetailsEndpoint = detailsEndpoint;
     }
 
     @Override
-    Document getDocument(int position) {
+    public Document getDocument(int position) {
         return mDetailsEndpoint.getDocument();
     }
 

@@ -8,8 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.anod.appwatcher.R;
-import com.anod.appwatcher.model.AddWatchAppHandler;
-import com.anod.appwatcher.utils.DocUtils;
+import com.anod.appwatcher.model.WatchAppList;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 import com.google.android.finsky.api.model.Document;
 import com.google.android.finsky.protos.nano.Messages.Common;
@@ -21,9 +20,9 @@ public abstract class ResultsAdapter extends RecyclerView.Adapter<ResultsAppView
     private final Context mContext;
     private final int mColorBgGray;
     private final int mColorBgWhite;
-    private final AddWatchAppHandler mNewAppHandler;
+    private final WatchAppList mNewAppHandler;
 
-    ResultsAdapter(Context context, AddWatchAppHandler newAppHandler) {
+    protected ResultsAdapter(Context context, WatchAppList newAppHandler) {
         super();
         mContext = context;
         mPMUtils = new PackageManagerUtils(context.getPackageManager());
@@ -39,7 +38,7 @@ public abstract class ResultsAdapter extends RecyclerView.Adapter<ResultsAppView
         return new ResultsAppViewHolder(view, mNewAppHandler);
     }
 
-    abstract Document getDocument(int position);
+    public abstract Document getDocument(int position);
 
     @Override
     public void onBindViewHolder(ResultsAppViewHolder holder, int position) {

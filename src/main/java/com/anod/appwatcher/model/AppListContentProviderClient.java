@@ -196,9 +196,9 @@ public class AppListContentProviderClient {
     }
 
 
-    public AppInfo queryAppId(String id) {
+    public AppInfo queryAppId(String packageName) {
         AppListCursor cr = query(null,
-                AppListTable.Columns.KEY_APPID + " = ?", new String[]{id});
+                AppListTable.Columns.KEY_PACKAGE + " = ? AND " + AppListTable.Columns.KEY_STATUS + " != ?", new String[]{packageName, String.valueOf(AppInfo.STATUS_DELETED) });
         if (cr == null || cr.getCount() == 0) {
             return null;
         }

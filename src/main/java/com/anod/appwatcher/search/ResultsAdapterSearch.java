@@ -3,7 +3,7 @@ package com.anod.appwatcher.search;
 import android.content.Context;
 
 import com.anod.appwatcher.market.SearchEndpoint;
-import com.anod.appwatcher.model.AddWatchAppHandler;
+import com.anod.appwatcher.model.WatchAppList;
 import com.google.android.finsky.api.model.Document;
 
 /**
@@ -14,13 +14,13 @@ import com.google.android.finsky.api.model.Document;
 public class ResultsAdapterSearch extends ResultsAdapter {
     private final SearchEndpoint mSearchEngine;
 
-    public ResultsAdapterSearch(Context context, SearchEndpoint searchEngine, AddWatchAppHandler newAppHandler) {
+    public ResultsAdapterSearch(Context context, SearchEndpoint searchEngine, WatchAppList newAppHandler) {
         super(context, newAppHandler);
         mSearchEngine = searchEngine;
     }
 
     @Override
-    Document getDocument(int position) {
+    public Document getDocument(int position) {
         boolean isLastPosition = mSearchEngine.getCount() - 1 == position;
         return mSearchEngine.getData().getItem(position, isLastPosition);
     }

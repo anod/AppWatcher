@@ -7,14 +7,14 @@ import android.widget.TextView;
 
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.model.AppInfo;
-import com.anod.appwatcher.model.AddWatchAppHandler;
+import com.anod.appwatcher.model.WatchAppList;
 import com.google.android.finsky.api.model.Document;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 class ResultsAppViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-    private final AddWatchAppHandler mNewAppHandler;
+    private final WatchAppList mNewAppHandler;
     Document doc;
     @BindView(android.R.id.content)
     View row;
@@ -29,7 +29,7 @@ class ResultsAppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
     @BindView(android.R.id.icon)
     ImageView icon;
 
-    ResultsAppViewHolder(View itemView, AddWatchAppHandler newAppHandler) {
+    ResultsAppViewHolder(View itemView, WatchAppList newAppHandler) {
         super(itemView);
         ButterKnife.bind(this, itemView);
         this.row.setOnClickListener(this);
@@ -39,6 +39,11 @@ class ResultsAppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
     @Override
     public void onClick(View v) {
         final AppInfo info = new AppInfo(doc);
-        mNewAppHandler.add(info);
+        if (mNewAppHandler.isAdded(info.packageName))
+        {
+            mNewAppHandler.add(info);
+        } else {
+            mNewAppHandler.delete(info);
+        }
     }
 }

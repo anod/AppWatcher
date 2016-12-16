@@ -4,7 +4,7 @@ import com.android.volley.Response;
 import com.anod.appwatcher.BuildConfig;
 import com.google.android.finsky.api.DfeApi;
 import com.google.android.finsky.protos.nano.Messages.Details;
-import com.google.android.finsky.protos.nano.Messages.DocumentV2;
+import com.google.android.finsky.protos.nano.Messages.DocV2;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +42,7 @@ public class DfeBulkDetails extends DfeBaseModel<Details.BulkDetailsResponse>
         else {
             list = new ArrayList<>();
             for (int i = 0; i < this.mBulkDetailsResponse.entry.length; ++i) {
-                final DocumentV2.DocV2 doc = this.mBulkDetailsResponse.entry[i].doc;
+                final DocV2 doc = this.mBulkDetailsResponse.entry[i].doc;
                 if (doc == null) {
                     if (BuildConfig.DEBUG) {
                         AppLog.d("Null document for requested docId: %s ", this.mDocIds.get(i));

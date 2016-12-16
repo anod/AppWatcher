@@ -14,6 +14,11 @@
             android:title="@string/navdrawer_item_add" />
 
         <item
+            android:id="@+id/menu_wishlist"
+            android:icon="@drawable/ic_bookmark_black_24dp"
+            android:title="@string/navdrawer_item_wishlist" />
+
+        <item
             android:id="@+id/menu_settings"
             android:icon="@drawable/ic_settings_black_24dp"
             android:title="@string/navdrawer_item_settings" />

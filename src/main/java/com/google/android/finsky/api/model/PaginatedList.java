@@ -137,7 +137,7 @@ public abstract class PaginatedList<T, D> extends DfeModel implements Response.L
         return value;
     }
     
-    protected abstract D[] getItemsFromResponse(final T p0);
+    protected abstract D[] getItemsFromResponse(final T listResponse);
     
     public List<String> getListPageUrls() {
         final ArrayList<String> list = new ArrayList<String>(this.mUrlOffsetList.size());
@@ -148,7 +148,7 @@ public abstract class PaginatedList<T, D> extends DfeModel implements Response.L
         return list;
     }
     
-    protected abstract String getNextPageUrl(final T p0);
+    protected abstract String getNextPageUrl(final T listResponse);
     
     public boolean isMoreAvailable() {
         return this.mMoreAvailable;
@@ -159,7 +159,7 @@ public abstract class PaginatedList<T, D> extends DfeModel implements Response.L
         return this.mLastResponse != null || this.mItems.size() > 0;
     }
     
-    protected abstract Request<?> makeRequest(final String p0);
+    protected abstract Request<?> makeRequest(final String url);
     
     @Override
     public void onErrorResponse(final VolleyError volleyError) {

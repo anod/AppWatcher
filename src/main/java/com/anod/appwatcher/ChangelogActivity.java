@@ -39,7 +39,7 @@ import com.anod.appwatcher.market.MarketInfo;
 import com.anod.appwatcher.market.PlayStoreEndpoint;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListContentProviderClient;
-import com.anod.appwatcher.model.AddWatchAppHandler;
+import com.anod.appwatcher.model.WatchAppList;
 import com.anod.appwatcher.ui.ToolbarActivity;
 import com.anod.appwatcher.utils.AppIconLoader;
 import com.anod.appwatcher.utils.IntentUtils;
@@ -55,7 +55,7 @@ import info.anodsplace.android.log.AppLog;
 
 
 
-public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpoint.Listener, Palette.PaletteAsyncListener, View.OnClickListener, AddWatchAppHandler.Listener {
+public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpoint.Listener, Palette.PaletteAsyncListener, View.OnClickListener, WatchAppList.Listener {
 
     public static final String EXTRA_APP_ID = "app_id";
     public static final String EXTRA_DETAILS_URL = "url";
@@ -272,9 +272,9 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
                 if (doc != null) {
                     final AppInfo info = new AppInfo(doc);
                     AppListContentProviderClient client = new AppListContentProviderClient(this);
-                    AddWatchAppHandler appHandler = new AddWatchAppHandler(this, this);
-                    appHandler.setContentProvider(client);
-                    appHandler.add(info);
+                    WatchAppList appList = new WatchAppList(this);
+                    appList.initContentProvider(client);
+                    appList.add(info);
                     client.release();
                 }
                 return true;
@@ -380,7 +380,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
     }
 
     @Override
-    public void onAppAddSuccess(AppInfo info) {
+    public void onWatchListChangeSuccess(AppInfo info, int newStatus) {
         String msg = getString(R.string.app_stored, info.title);
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
         Intent data = new Intent();
@@ -390,10 +390,10 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
     }
 
     @Override
-    public void onAppAddError(AppInfo info, int error) {
-        if (AddWatchAppHandler.ERROR_ALREADY_ADDED == error) {
+    public void onWatchListChangeError(AppInfo info, int error) {
+        if (WatchAppList.ERROR_ALREADY_ADDED == error) {
             Toast.makeText(this, R.string.app_already_added, Toast.LENGTH_SHORT).show();
-        } else if (error == AddWatchAppHandler.ERROR_INSERT) {
+        } else if (error == WatchAppList.ERROR_INSERT) {
             Toast.makeText(this, R.string.error_insert_app, Toast.LENGTH_SHORT).show();
         }
     }

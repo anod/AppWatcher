@@ -9,7 +9,7 @@ import com.android.volley.VolleyError;
 import com.anod.appwatcher.market.BulkDetailsEndpoint;
 import com.anod.appwatcher.market.PlayStoreEndpoint;
 import com.anod.appwatcher.model.AddWatchAppAsyncTask;
-import com.anod.appwatcher.model.AddWatchAppHandler;
+import com.anod.appwatcher.model.WatchAppList;
 import com.google.android.finsky.api.model.Document;
 
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ public class ImportBulkManager implements PlayStoreEndpoint.Listener, AddWatchAp
     private static final int BULK_SIZE = 20;
 
     private final BulkDetailsEndpoint mEndpoint;
-    private final AddWatchAppHandler mNewAppHandler;
+    private final WatchAppList mWatchAppList;
     private final Context mContext;
     private List<List<String>> listsDocIds;
     private int currentBulk;
@@ -36,7 +36,7 @@ public class ImportBulkManager implements PlayStoreEndpoint.Listener, AddWatchAp
     public ImportBulkManager(Context context, Listener listener) {
         mEndpoint = new BulkDetailsEndpoint(context);
         mEndpoint.setListener(this);
-        mNewAppHandler = new AddWatchAppHandler(context, null);
+        mWatchAppList = new WatchAppList(null);
         mContext = context;
         mListener = listener;
     }
@@ -89,7 +89,7 @@ public class ImportBulkManager implements PlayStoreEndpoint.Listener, AddWatchAp
     @Override
     public void onDataChanged() {
         List<Document> docs = mEndpoint.getDocuments();
-        mTask = new AddWatchAppAsyncTask(mNewAppHandler, mContext, this).execute(docs.toArray(new Document[docs.size()]));
+        mTask = new AddWatchAppAsyncTask(mWatchAppList, mContext, this).execute(docs.toArray(new Document[docs.size()]));
     }
 
     @Override

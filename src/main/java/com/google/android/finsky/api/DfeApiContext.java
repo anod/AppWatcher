@@ -20,7 +20,7 @@ public class DfeApiContext
     public static final String PLAY_VERSION_NAME = "5.0.31";
     public static final int PLAY_VERSION_CODE = 80300031;
     public static final String CLIENT_ID = "am-google";
-    private final Context mContext;
+    final Context mContext;
     private final Account mAccount;
     private boolean mHasPerformedInitialTokenInvalidation;
     private final Map<String, String> mHeaders;
@@ -32,7 +32,7 @@ public class DfeApiContext
                             final String clientId, final String loggingId, final int filterLevel) {
         super();
         this.mHeaders = new HashMap<String, String>();
-        this.mContext = context;
+        mContext = context;
         mAccount = account;
         mLastAuthToken = authToken;
         this.mHeaders.put("X-DFE-Device-Id", deviceId);//Long.toHexString(PlayG.androidId.get()));

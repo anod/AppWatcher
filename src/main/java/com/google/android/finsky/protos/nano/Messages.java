@@ -742,337 +742,186 @@ public interface Messages {
     }
   }
 
-  public static final class DocumentV2 extends
+  public static final class DocV2 extends
       com.google.protobuf.nano.MessageNano {
 
-    public static final class DocV2 extends
-        com.google.protobuf.nano.MessageNano {
-
-      private static volatile DocV2[] _emptyArray;
-      public static DocV2[] emptyArray() {
-        // Lazily initializes the empty array
-        if (_emptyArray == null) {
-          synchronized (
-              com.google.protobuf.nano.InternalNano.LAZY_INIT_LOCK) {
-            if (_emptyArray == null) {
-              _emptyArray = new DocV2[0];
-            }
-          }
-        }
-        return _emptyArray;
-      }
-
-      // optional string docid = 1;
-      public java.lang.String docid;
-
-      // optional int32 backendId = 4;
-      public int backendId;
-
-      // optional string title = 5;
-      public java.lang.String title;
-
-      // optional string creator = 6;
-      public java.lang.String creator;
-
-      // repeated .com.google.android.finsky.protos.Common.Offer offer = 8;
-      public com.google.android.finsky.protos.nano.Messages.Common.Offer[] offer;
-
-      // repeated .com.google.android.finsky.protos.Common.Image image = 10;
-      public com.google.android.finsky.protos.nano.Messages.Common.Image[] image;
-
-      // repeated .com.google.android.finsky.protos.DocumentV2.DocV2 child = 11;
-      public com.google.android.finsky.protos.nano.Messages.DocumentV2.DocV2[] child;
-
-      // optional .com.google.android.finsky.protos.Containers.ContainerMetadata containerMetadata = 12;
-      public com.google.android.finsky.protos.nano.Messages.Containers.ContainerMetadata containerMetadata;
-
-      // optional .com.google.android.finsky.protos.DocDetails.DocumentDetails details = 13;
-      public com.google.android.finsky.protos.nano.Messages.DocDetails.DocumentDetails details;
-
-      // optional string detailsUrl = 16;
-      public java.lang.String detailsUrl;
-
-      public DocV2() {
-        clear();
-      }
-
-      public DocV2 clear() {
-        docid = "";
-        backendId = 0;
-        title = "";
-        creator = "";
-        offer = com.google.android.finsky.protos.nano.Messages.Common.Offer.emptyArray();
-        image = com.google.android.finsky.protos.nano.Messages.Common.Image.emptyArray();
-        child = com.google.android.finsky.protos.nano.Messages.DocumentV2.DocV2.emptyArray();
-        containerMetadata = null;
-        details = null;
-        detailsUrl = "";
-        cachedSize = -1;
-        return this;
-      }
-
-      @Override
-      public void writeTo(com.google.protobuf.nano.CodedOutputByteBufferNano output)
-          throws java.io.IOException {
-        if (!this.docid.equals("")) {
-          output.writeString(1, this.docid);
-        }
-        if (this.backendId != 0) {
-          output.writeInt32(4, this.backendId);
-        }
-        if (!this.title.equals("")) {
-          output.writeString(5, this.title);
-        }
-        if (!this.creator.equals("")) {
-          output.writeString(6, this.creator);
-        }
-        if (this.offer != null && this.offer.length > 0) {
-          for (int i = 0; i < this.offer.length; i++) {
-            com.google.android.finsky.protos.nano.Messages.Common.Offer element = this.offer[i];
-            if (element != null) {
-              output.writeMessage(8, element);
-            }
-          }
-        }
-        if (this.image != null && this.image.length > 0) {
-          for (int i = 0; i < this.image.length; i++) {
-            com.google.android.finsky.protos.nano.Messages.Common.Image element = this.image[i];
-            if (element != null) {
-              output.writeMessage(10, element);
-            }
-          }
-        }
-        if (this.child != null && this.child.length > 0) {
-          for (int i = 0; i < this.child.length; i++) {
-            com.google.android.finsky.protos.nano.Messages.DocumentV2.DocV2 element = this.child[i];
-            if (element != null) {
-              output.writeMessage(11, element);
-            }
-          }
-        }
-        if (this.containerMetadata != null) {
-          output.writeMessage(12, this.containerMetadata);
-        }
-        if (this.details != null) {
-          output.writeMessage(13, this.details);
-        }
-        if (!this.detailsUrl.equals("")) {
-          output.writeString(16, this.detailsUrl);
-        }
-        super.writeTo(output);
-      }
-
-      @Override
-      protected int computeSerializedSize() {
-        int size = super.computeSerializedSize();
-        if (!this.docid.equals("")) {
-          size += com.google.protobuf.nano.CodedOutputByteBufferNano
-              .computeStringSize(1, this.docid);
-        }
-        if (this.backendId != 0) {
-          size += com.google.protobuf.nano.CodedOutputByteBufferNano
-              .computeInt32Size(4, this.backendId);
-        }
-        if (!this.title.equals("")) {
-          size += com.google.protobuf.nano.CodedOutputByteBufferNano
-              .computeStringSize(5, this.title);
-        }
-        if (!this.creator.equals("")) {
-          size += com.google.protobuf.nano.CodedOutputByteBufferNano
-              .computeStringSize(6, this.creator);
-        }
-        if (this.offer != null && this.offer.length > 0) {
-          for (int i = 0; i < this.offer.length; i++) {
-            com.google.android.finsky.protos.nano.Messages.Common.Offer element = this.offer[i];
-            if (element != null) {
-              size += com.google.protobuf.nano.CodedOutputByteBufferNano
-                .computeMessageSize(8, element);
-            }
-          }
-        }
-        if (this.image != null && this.image.length > 0) {
-          for (int i = 0; i < this.image.length; i++) {
-            com.google.android.finsky.protos.nano.Messages.Common.Image element = this.image[i];
-            if (element != null) {
-              size += com.google.protobuf.nano.CodedOutputByteBufferNano
-                .computeMessageSize(10, element);
-            }
-          }
-        }
-        if (this.child != null && this.child.length > 0) {
-          for (int i = 0; i < this.child.length; i++) {
-            com.google.android.finsky.protos.nano.Messages.DocumentV2.DocV2 element = this.child[i];
-            if (element != null) {
-              size += com.google.protobuf.nano.CodedOutputByteBufferNano
-                .computeMessageSize(11, element);
-            }
-          }
-        }
-        if (this.containerMetadata != null) {
-          size += com.google.protobuf.nano.CodedOutputByteBufferNano
-            .computeMessageSize(12, this.containerMetadata);
-        }
-        if (this.details != null) {
-          size += com.google.protobuf.nano.CodedOutputByteBufferNano
-            .computeMessageSize(13, this.details);
-        }
-        if (!this.detailsUrl.equals("")) {
-          size += com.google.protobuf.nano.CodedOutputByteBufferNano
-              .computeStringSize(16, this.detailsUrl);
-        }
-        return size;
-      }
-
-      @Override
-      public DocV2 mergeFrom(
-              com.google.protobuf.nano.CodedInputByteBufferNano input)
-          throws java.io.IOException {
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              return this;
-            default: {
-              if (!com.google.protobuf.nano.WireFormatNano.parseUnknownField(input, tag)) {
-                return this;
-              }
-              break;
-            }
-            case 10: {
-              this.docid = input.readString();
-              break;
-            }
-            case 32: {
-              this.backendId = input.readInt32();
-              break;
-            }
-            case 42: {
-              this.title = input.readString();
-              break;
-            }
-            case 50: {
-              this.creator = input.readString();
-              break;
-            }
-            case 66: {
-              int arrayLength = com.google.protobuf.nano.WireFormatNano
-                  .getRepeatedFieldArrayLength(input, 66);
-              int i = this.offer == null ? 0 : this.offer.length;
-              com.google.android.finsky.protos.nano.Messages.Common.Offer[] newArray =
-                  new com.google.android.finsky.protos.nano.Messages.Common.Offer[i + arrayLength];
-              if (i != 0) {
-                java.lang.System.arraycopy(this.offer, 0, newArray, 0, i);
-              }
-              for (; i < newArray.length - 1; i++) {
-                newArray[i] = new com.google.android.finsky.protos.nano.Messages.Common.Offer();
-                input.readMessage(newArray[i]);
-                input.readTag();
-              }
-              // Last one without readTag.
-              newArray[i] = new com.google.android.finsky.protos.nano.Messages.Common.Offer();
-              input.readMessage(newArray[i]);
-              this.offer = newArray;
-              break;
-            }
-            case 82: {
-              int arrayLength = com.google.protobuf.nano.WireFormatNano
-                  .getRepeatedFieldArrayLength(input, 82);
-              int i = this.image == null ? 0 : this.image.length;
-              com.google.android.finsky.protos.nano.Messages.Common.Image[] newArray =
-                  new com.google.android.finsky.protos.nano.Messages.Common.Image[i + arrayLength];
-              if (i != 0) {
-                java.lang.System.arraycopy(this.image, 0, newArray, 0, i);
-              }
-              for (; i < newArray.length - 1; i++) {
-                newArray[i] = new com.google.android.finsky.protos.nano.Messages.Common.Image();
-                input.readMessage(newArray[i]);
-                input.readTag();
-              }
-              // Last one without readTag.
-              newArray[i] = new com.google.android.finsky.protos.nano.Messages.Common.Image();
-              input.readMessage(newArray[i]);
-              this.image = newArray;
-              break;
-            }
-            case 90: {
-              int arrayLength = com.google.protobuf.nano.WireFormatNano
-                  .getRepeatedFieldArrayLength(input, 90);
-              int i = this.child == null ? 0 : this.child.length;
-              com.google.android.finsky.protos.nano.Messages.DocumentV2.DocV2[] newArray =
-                  new com.google.android.finsky.protos.nano.Messages.DocumentV2.DocV2[i + arrayLength];
-              if (i != 0) {
-                java.lang.System.arraycopy(this.child, 0, newArray, 0, i);
-              }
-              for (; i < newArray.length - 1; i++) {
-                newArray[i] = new com.google.android.finsky.protos.nano.Messages.DocumentV2.DocV2();
-                input.readMessage(newArray[i]);
-                input.readTag();
-              }
-              // Last one without readTag.
-              newArray[i] = new com.google.android.finsky.protos.nano.Messages.DocumentV2.DocV2();
-              input.readMessage(newArray[i]);
-              this.child = newArray;
-              break;
-            }
-            case 98: {
-              if (this.containerMetadata == null) {
-                this.containerMetadata = new com.google.android.finsky.protos.nano.Messages.Containers.ContainerMetadata();
-              }
-              input.readMessage(this.containerMetadata);
-              break;
-            }
-            case 106: {
-              if (this.details == null) {
-                this.details = new com.google.android.finsky.protos.nano.Messages.DocDetails.DocumentDetails();
-              }
-              input.readMessage(this.details);
-              break;
-            }
-            case 130: {
-              this.detailsUrl = input.readString();
-              break;
-            }
-          }
-        }
-      }
-
-      public static DocV2 parseFrom(byte[] data)
-          throws com.google.protobuf.nano.InvalidProtocolBufferNanoException {
-        return com.google.protobuf.nano.MessageNano.mergeFrom(new DocV2(), data);
-      }
-
-      public static DocV2 parseFrom(
-              com.google.protobuf.nano.CodedInputByteBufferNano input)
-          throws java.io.IOException {
-        return new DocV2().mergeFrom(input);
-      }
-    }
-
-    private static volatile DocumentV2[] _emptyArray;
-    public static DocumentV2[] emptyArray() {
+    private static volatile DocV2[] _emptyArray;
+    public static DocV2[] emptyArray() {
       // Lazily initializes the empty array
       if (_emptyArray == null) {
         synchronized (
             com.google.protobuf.nano.InternalNano.LAZY_INIT_LOCK) {
           if (_emptyArray == null) {
-            _emptyArray = new DocumentV2[0];
+            _emptyArray = new DocV2[0];
           }
         }
       }
       return _emptyArray;
     }
 
-    public DocumentV2() {
+    // optional string docid = 1;
+    public java.lang.String docid;
+
+    // optional int32 backendId = 4;
+    public int backendId;
+
+    // optional string title = 5;
+    public java.lang.String title;
+
+    // optional string creator = 6;
+    public java.lang.String creator;
+
+    // repeated .com.google.android.finsky.protos.Common.Offer offer = 8;
+    public com.google.android.finsky.protos.nano.Messages.Common.Offer[] offer;
+
+    // repeated .com.google.android.finsky.protos.Common.Image image = 10;
+    public com.google.android.finsky.protos.nano.Messages.Common.Image[] image;
+
+    // repeated .com.google.android.finsky.protos.DocV2 child = 11;
+    public com.google.android.finsky.protos.nano.Messages.DocV2[] child;
+
+    // optional .com.google.android.finsky.protos.Containers.ContainerMetadata containerMetadata = 12;
+    public com.google.android.finsky.protos.nano.Messages.Containers.ContainerMetadata containerMetadata;
+
+    // optional .com.google.android.finsky.protos.DocDetails.DocumentDetails details = 13;
+    public com.google.android.finsky.protos.nano.Messages.DocDetails.DocumentDetails details;
+
+    // optional string detailsUrl = 16;
+    public java.lang.String detailsUrl;
+
+    public DocV2() {
       clear();
     }
 
-    public DocumentV2 clear() {
+    public DocV2 clear() {
+      docid = "";
+      backendId = 0;
+      title = "";
+      creator = "";
+      offer = com.google.android.finsky.protos.nano.Messages.Common.Offer.emptyArray();
+      image = com.google.android.finsky.protos.nano.Messages.Common.Image.emptyArray();
+      child = com.google.android.finsky.protos.nano.Messages.DocV2.emptyArray();
+      containerMetadata = null;
+      details = null;
+      detailsUrl = "";
       cachedSize = -1;
       return this;
     }
 
     @Override
-    public DocumentV2 mergeFrom(
+    public void writeTo(com.google.protobuf.nano.CodedOutputByteBufferNano output)
+        throws java.io.IOException {
+      if (!this.docid.equals("")) {
+        output.writeString(1, this.docid);
+      }
+      if (this.backendId != 0) {
+        output.writeInt32(4, this.backendId);
+      }
+      if (!this.title.equals("")) {
+        output.writeString(5, this.title);
+      }
+      if (!this.creator.equals("")) {
+        output.writeString(6, this.creator);
+      }
+      if (this.offer != null && this.offer.length > 0) {
+        for (int i = 0; i < this.offer.length; i++) {
+          com.google.android.finsky.protos.nano.Messages.Common.Offer element = this.offer[i];
+          if (element != null) {
+            output.writeMessage(8, element);
+          }
+        }
+      }
+      if (this.image != null && this.image.length > 0) {
+        for (int i = 0; i < this.image.length; i++) {
+          com.google.android.finsky.protos.nano.Messages.Common.Image element = this.image[i];
+          if (element != null) {
+            output.writeMessage(10, element);
+          }
+        }
+      }
+      if (this.child != null && this.child.length > 0) {
+        for (int i = 0; i < this.child.length; i++) {
+          com.google.android.finsky.protos.nano.Messages.DocV2 element = this.child[i];
+          if (element != null) {
+            output.writeMessage(11, element);
+          }
+        }
+      }
+      if (this.containerMetadata != null) {
+        output.writeMessage(12, this.containerMetadata);
+      }
+      if (this.details != null) {
+        output.writeMessage(13, this.details);
+      }
+      if (!this.detailsUrl.equals("")) {
+        output.writeString(16, this.detailsUrl);
+      }
+      super.writeTo(output);
+    }
+
+    @Override
+    protected int computeSerializedSize() {
+      int size = super.computeSerializedSize();
+      if (!this.docid.equals("")) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeStringSize(1, this.docid);
+      }
+      if (this.backendId != 0) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeInt32Size(4, this.backendId);
+      }
+      if (!this.title.equals("")) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeStringSize(5, this.title);
+      }
+      if (!this.creator.equals("")) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeStringSize(6, this.creator);
+      }
+      if (this.offer != null && this.offer.length > 0) {
+        for (int i = 0; i < this.offer.length; i++) {
+          com.google.android.finsky.protos.nano.Messages.Common.Offer element = this.offer[i];
+          if (element != null) {
+            size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeMessageSize(8, element);
+          }
+        }
+      }
+      if (this.image != null && this.image.length > 0) {
+        for (int i = 0; i < this.image.length; i++) {
+          com.google.android.finsky.protos.nano.Messages.Common.Image element = this.image[i];
+          if (element != null) {
+            size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeMessageSize(10, element);
+          }
+        }
+      }
+      if (this.child != null && this.child.length > 0) {
+        for (int i = 0; i < this.child.length; i++) {
+          com.google.android.finsky.protos.nano.Messages.DocV2 element = this.child[i];
+          if (element != null) {
+            size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeMessageSize(11, element);
+          }
+        }
+      }
+      if (this.containerMetadata != null) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+          .computeMessageSize(12, this.containerMetadata);
+      }
+      if (this.details != null) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+          .computeMessageSize(13, this.details);
+      }
+      if (!this.detailsUrl.equals("")) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeStringSize(16, this.detailsUrl);
+      }
+      return size;
+    }
+
+    @Override
+    public DocV2 mergeFrom(
             com.google.protobuf.nano.CodedInputByteBufferNano input)
         throws java.io.IOException {
       while (true) {
@@ -1086,19 +935,113 @@ public interface Messages {
             }
             break;
           }
+          case 10: {
+            this.docid = input.readString();
+            break;
+          }
+          case 32: {
+            this.backendId = input.readInt32();
+            break;
+          }
+          case 42: {
+            this.title = input.readString();
+            break;
+          }
+          case 50: {
+            this.creator = input.readString();
+            break;
+          }
+          case 66: {
+            int arrayLength = com.google.protobuf.nano.WireFormatNano
+                .getRepeatedFieldArrayLength(input, 66);
+            int i = this.offer == null ? 0 : this.offer.length;
+            com.google.android.finsky.protos.nano.Messages.Common.Offer[] newArray =
+                new com.google.android.finsky.protos.nano.Messages.Common.Offer[i + arrayLength];
+            if (i != 0) {
+              java.lang.System.arraycopy(this.offer, 0, newArray, 0, i);
+            }
+            for (; i < newArray.length - 1; i++) {
+              newArray[i] = new com.google.android.finsky.protos.nano.Messages.Common.Offer();
+              input.readMessage(newArray[i]);
+              input.readTag();
+            }
+            // Last one without readTag.
+            newArray[i] = new com.google.android.finsky.protos.nano.Messages.Common.Offer();
+            input.readMessage(newArray[i]);
+            this.offer = newArray;
+            break;
+          }
+          case 82: {
+            int arrayLength = com.google.protobuf.nano.WireFormatNano
+                .getRepeatedFieldArrayLength(input, 82);
+            int i = this.image == null ? 0 : this.image.length;
+            com.google.android.finsky.protos.nano.Messages.Common.Image[] newArray =
+                new com.google.android.finsky.protos.nano.Messages.Common.Image[i + arrayLength];
+            if (i != 0) {
+              java.lang.System.arraycopy(this.image, 0, newArray, 0, i);
+            }
+            for (; i < newArray.length - 1; i++) {
+              newArray[i] = new com.google.android.finsky.protos.nano.Messages.Common.Image();
+              input.readMessage(newArray[i]);
+              input.readTag();
+            }
+            // Last one without readTag.
+            newArray[i] = new com.google.android.finsky.protos.nano.Messages.Common.Image();
+            input.readMessage(newArray[i]);
+            this.image = newArray;
+            break;
+          }
+          case 90: {
+            int arrayLength = com.google.protobuf.nano.WireFormatNano
+                .getRepeatedFieldArrayLength(input, 90);
+            int i = this.child == null ? 0 : this.child.length;
+            com.google.android.finsky.protos.nano.Messages.DocV2[] newArray =
+                new com.google.android.finsky.protos.nano.Messages.DocV2[i + arrayLength];
+            if (i != 0) {
+              java.lang.System.arraycopy(this.child, 0, newArray, 0, i);
+            }
+            for (; i < newArray.length - 1; i++) {
+              newArray[i] = new com.google.android.finsky.protos.nano.Messages.DocV2();
+              input.readMessage(newArray[i]);
+              input.readTag();
+            }
+            // Last one without readTag.
+            newArray[i] = new com.google.android.finsky.protos.nano.Messages.DocV2();
+            input.readMessage(newArray[i]);
+            this.child = newArray;
+            break;
+          }
+          case 98: {
+            if (this.containerMetadata == null) {
+              this.containerMetadata = new com.google.android.finsky.protos.nano.Messages.Containers.ContainerMetadata();
+            }
+            input.readMessage(this.containerMetadata);
+            break;
+          }
+          case 106: {
+            if (this.details == null) {
+              this.details = new com.google.android.finsky.protos.nano.Messages.DocDetails.DocumentDetails();
+            }
+            input.readMessage(this.details);
+            break;
+          }
+          case 130: {
+            this.detailsUrl = input.readString();
+            break;
+          }
         }
       }
     }
 
-    public static DocumentV2 parseFrom(byte[] data)
+    public static DocV2 parseFrom(byte[] data)
         throws com.google.protobuf.nano.InvalidProtocolBufferNanoException {
-      return com.google.protobuf.nano.MessageNano.mergeFrom(new DocumentV2(), data);
+      return com.google.protobuf.nano.MessageNano.mergeFrom(new DocV2(), data);
     }
 
-    public static DocumentV2 parseFrom(
+    public static DocV2 parseFrom(
             com.google.protobuf.nano.CodedInputByteBufferNano input)
         throws java.io.IOException {
-      return new DocumentV2().mergeFrom(input);
+      return new DocV2().mergeFrom(input);
     }
   }
 
@@ -1122,8 +1065,8 @@ public interface Messages {
         return _emptyArray;
       }
 
-      // optional .com.google.android.finsky.protos.DocumentV2.DocV2 docV2 = 4;
-      public com.google.android.finsky.protos.nano.Messages.DocumentV2.DocV2 docV2;
+      // optional .com.google.android.finsky.protos.DocV2 docV2 = 4;
+      public com.google.android.finsky.protos.nano.Messages.DocV2 docV2;
 
       public DetailsResponse() {
         clear();
@@ -1171,7 +1114,7 @@ public interface Messages {
             }
             case 34: {
               if (this.docV2 == null) {
-                this.docV2 = new com.google.android.finsky.protos.nano.Messages.DocumentV2.DocV2();
+                this.docV2 = new com.google.android.finsky.protos.nano.Messages.DocV2();
               }
               input.readMessage(this.docV2);
               break;
@@ -1209,8 +1152,8 @@ public interface Messages {
         return _emptyArray;
       }
 
-      // optional .com.google.android.finsky.protos.DocumentV2.DocV2 doc = 1;
-      public com.google.android.finsky.protos.nano.Messages.DocumentV2.DocV2 doc;
+      // optional .com.google.android.finsky.protos.DocV2 doc = 1;
+      public com.google.android.finsky.protos.nano.Messages.DocV2 doc;
 
       public BulkDetailsEntry() {
         clear();
@@ -1258,7 +1201,7 @@ public interface Messages {
             }
             case 10: {
               if (this.doc == null) {
-                this.doc = new com.google.android.finsky.protos.nano.Messages.DocumentV2.DocV2();
+                this.doc = new com.google.android.finsky.protos.nano.Messages.DocV2();
               }
               input.readMessage(this.doc);
               break;
@@ -1595,8 +1538,8 @@ public interface Messages {
       // optional bool aggregateQuery = 3;
       public boolean aggregateQuery;
 
-      // repeated .com.google.android.finsky.protos.DocumentV2.DocV2 doc = 5;
-      public com.google.android.finsky.protos.nano.Messages.DocumentV2.DocV2[] doc;
+      // repeated .com.google.android.finsky.protos.DocV2 doc = 5;
+      public com.google.android.finsky.protos.nano.Messages.DocV2[] doc;
 
       // optional bool fullPageReplaced = 8;
       public boolean fullPageReplaced;
@@ -1609,7 +1552,7 @@ public interface Messages {
         originalQuery = "";
         suggestedQuery = "";
         aggregateQuery = false;
-        doc = com.google.android.finsky.protos.nano.Messages.DocumentV2.DocV2.emptyArray();
+        doc = com.google.android.finsky.protos.nano.Messages.DocV2.emptyArray();
         fullPageReplaced = false;
         cachedSize = -1;
         return this;
@@ -1629,7 +1572,7 @@ public interface Messages {
         }
         if (this.doc != null && this.doc.length > 0) {
           for (int i = 0; i < this.doc.length; i++) {
-            com.google.android.finsky.protos.nano.Messages.DocumentV2.DocV2 element = this.doc[i];
+            com.google.android.finsky.protos.nano.Messages.DocV2 element = this.doc[i];
             if (element != null) {
               output.writeMessage(5, element);
             }
@@ -1658,7 +1601,7 @@ public interface Messages {
         }
         if (this.doc != null && this.doc.length > 0) {
           for (int i = 0; i < this.doc.length; i++) {
-            com.google.android.finsky.protos.nano.Messages.DocumentV2.DocV2 element = this.doc[i];
+            com.google.android.finsky.protos.nano.Messages.DocV2 element = this.doc[i];
             if (element != null) {
               size += com.google.protobuf.nano.CodedOutputByteBufferNano
                 .computeMessageSize(5, element);
@@ -1703,18 +1646,18 @@ public interface Messages {
               int arrayLength = com.google.protobuf.nano.WireFormatNano
                   .getRepeatedFieldArrayLength(input, 42);
               int i = this.doc == null ? 0 : this.doc.length;
-              com.google.android.finsky.protos.nano.Messages.DocumentV2.DocV2[] newArray =
-                  new com.google.android.finsky.protos.nano.Messages.DocumentV2.DocV2[i + arrayLength];
+              com.google.android.finsky.protos.nano.Messages.DocV2[] newArray =
+                  new com.google.android.finsky.protos.nano.Messages.DocV2[i + arrayLength];
               if (i != 0) {
                 java.lang.System.arraycopy(this.doc, 0, newArray, 0, i);
               }
               for (; i < newArray.length - 1; i++) {
-                newArray[i] = new com.google.android.finsky.protos.nano.Messages.DocumentV2.DocV2();
+                newArray[i] = new com.google.android.finsky.protos.nano.Messages.DocV2();
                 input.readMessage(newArray[i]);
                 input.readTag();
               }
               // Last one without readTag.
-              newArray[i] = new com.google.android.finsky.protos.nano.Messages.DocumentV2.DocV2();
+              newArray[i] = new com.google.android.finsky.protos.nano.Messages.DocV2();
               input.readMessage(newArray[i]);
               this.doc = newArray;
               break;
@@ -1793,37 +1736,165 @@ public interface Messages {
     }
   }
 
-  public static final class LibraryReplication extends
+  public static final class LibraryUpdateProto extends
       com.google.protobuf.nano.MessageNano {
 
-    public static final class LibraryReplicationResponse extends
+    public static final class ClientLibraryState extends
         com.google.protobuf.nano.MessageNano {
 
-      private static volatile LibraryReplicationResponse[] _emptyArray;
-      public static LibraryReplicationResponse[] emptyArray() {
+      private static volatile ClientLibraryState[] _emptyArray;
+      public static ClientLibraryState[] emptyArray() {
         // Lazily initializes the empty array
         if (_emptyArray == null) {
           synchronized (
               com.google.protobuf.nano.InternalNano.LAZY_INIT_LOCK) {
             if (_emptyArray == null) {
-              _emptyArray = new LibraryReplicationResponse[0];
+              _emptyArray = new ClientLibraryState[0];
             }
           }
         }
         return _emptyArray;
       }
 
-      public LibraryReplicationResponse() {
+      // required int32 corpus = 1;
+      public int corpus;
+
+      // optional bytes serverToken = 2;
+      public byte[] serverToken;
+
+      // required int64 hashCodeSum = 3;
+      public long hashCodeSum;
+
+      // required int32 librarySize = 4;
+      public int librarySize;
+
+      // required string libraryId = 5;
+      public java.lang.String libraryId;
+
+      public ClientLibraryState() {
         clear();
       }
 
-      public LibraryReplicationResponse clear() {
+      public ClientLibraryState clear() {
+        corpus = 0;
+        serverToken = com.google.protobuf.nano.WireFormatNano.EMPTY_BYTES;
+        hashCodeSum = 0L;
+        librarySize = 0;
+        libraryId = "";
         cachedSize = -1;
         return this;
       }
 
       @Override
-      public LibraryReplicationResponse mergeFrom(
+      public void writeTo(com.google.protobuf.nano.CodedOutputByteBufferNano output)
+          throws java.io.IOException {
+        output.writeInt32(1, this.corpus);
+        if (!java.util.Arrays.equals(this.serverToken, com.google.protobuf.nano.WireFormatNano.EMPTY_BYTES)) {
+          output.writeBytes(2, this.serverToken);
+        }
+        output.writeInt64(3, this.hashCodeSum);
+        output.writeInt32(4, this.librarySize);
+        output.writeString(5, this.libraryId);
+        super.writeTo(output);
+      }
+
+      @Override
+      protected int computeSerializedSize() {
+        int size = super.computeSerializedSize();
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeInt32Size(1, this.corpus);
+        if (!java.util.Arrays.equals(this.serverToken, com.google.protobuf.nano.WireFormatNano.EMPTY_BYTES)) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeBytesSize(2, this.serverToken);
+        }
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeInt64Size(3, this.hashCodeSum);
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeInt32Size(4, this.librarySize);
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeStringSize(5, this.libraryId);
+        return size;
+      }
+
+      @Override
+      public ClientLibraryState mergeFrom(
+              com.google.protobuf.nano.CodedInputByteBufferNano input)
+          throws java.io.IOException {
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              return this;
+            default: {
+              if (!com.google.protobuf.nano.WireFormatNano.parseUnknownField(input, tag)) {
+                return this;
+              }
+              break;
+            }
+            case 8: {
+              this.corpus = input.readInt32();
+              break;
+            }
+            case 18: {
+              this.serverToken = input.readBytes();
+              break;
+            }
+            case 24: {
+              this.hashCodeSum = input.readInt64();
+              break;
+            }
+            case 32: {
+              this.librarySize = input.readInt32();
+              break;
+            }
+            case 42: {
+              this.libraryId = input.readString();
+              break;
+            }
+          }
+        }
+      }
+
+      public static ClientLibraryState parseFrom(byte[] data)
+          throws com.google.protobuf.nano.InvalidProtocolBufferNanoException {
+        return com.google.protobuf.nano.MessageNano.mergeFrom(new ClientLibraryState(), data);
+      }
+
+      public static ClientLibraryState parseFrom(
+              com.google.protobuf.nano.CodedInputByteBufferNano input)
+          throws java.io.IOException {
+        return new ClientLibraryState().mergeFrom(input);
+      }
+    }
+
+    public static final class LibraryAppDetails extends
+        com.google.protobuf.nano.MessageNano {
+
+      private static volatile LibraryAppDetails[] _emptyArray;
+      public static LibraryAppDetails[] emptyArray() {
+        // Lazily initializes the empty array
+        if (_emptyArray == null) {
+          synchronized (
+              com.google.protobuf.nano.InternalNano.LAZY_INIT_LOCK) {
+            if (_emptyArray == null) {
+              _emptyArray = new LibraryAppDetails[0];
+            }
+          }
+        }
+        return _emptyArray;
+      }
+
+      public LibraryAppDetails() {
+        clear();
+      }
+
+      public LibraryAppDetails clear() {
+        cachedSize = -1;
+        return this;
+      }
+
+      @Override
+      public LibraryAppDetails mergeFrom(
               com.google.protobuf.nano.CodedInputByteBufferNano input)
           throws java.io.IOException {
         while (true) {
@@ -1841,43 +1912,293 @@ public interface Messages {
         }
       }
 
-      public static LibraryReplicationResponse parseFrom(byte[] data)
+      public static LibraryAppDetails parseFrom(byte[] data)
           throws com.google.protobuf.nano.InvalidProtocolBufferNanoException {
-        return com.google.protobuf.nano.MessageNano.mergeFrom(new LibraryReplicationResponse(), data);
+        return com.google.protobuf.nano.MessageNano.mergeFrom(new LibraryAppDetails(), data);
       }
 
-      public static LibraryReplicationResponse parseFrom(
+      public static LibraryAppDetails parseFrom(
               com.google.protobuf.nano.CodedInputByteBufferNano input)
           throws java.io.IOException {
-        return new LibraryReplicationResponse().mergeFrom(input);
+        return new LibraryAppDetails().mergeFrom(input);
       }
     }
 
-    private static volatile LibraryReplication[] _emptyArray;
-    public static LibraryReplication[] emptyArray() {
+    public static final class LibraryMutation extends
+        com.google.protobuf.nano.MessageNano {
+
+      private static volatile LibraryMutation[] _emptyArray;
+      public static LibraryMutation[] emptyArray() {
+        // Lazily initializes the empty array
+        if (_emptyArray == null) {
+          synchronized (
+              com.google.protobuf.nano.InternalNano.LAZY_INIT_LOCK) {
+            if (_emptyArray == null) {
+              _emptyArray = new LibraryMutation[0];
+            }
+          }
+        }
+        return _emptyArray;
+      }
+
+      public LibraryMutation() {
+        clear();
+      }
+
+      public LibraryMutation clear() {
+        cachedSize = -1;
+        return this;
+      }
+
+      @Override
+      public LibraryMutation mergeFrom(
+              com.google.protobuf.nano.CodedInputByteBufferNano input)
+          throws java.io.IOException {
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              return this;
+            default: {
+              if (!com.google.protobuf.nano.WireFormatNano.parseUnknownField(input, tag)) {
+                return this;
+              }
+              break;
+            }
+          }
+        }
+      }
+
+      public static LibraryMutation parseFrom(byte[] data)
+          throws com.google.protobuf.nano.InvalidProtocolBufferNanoException {
+        return com.google.protobuf.nano.MessageNano.mergeFrom(new LibraryMutation(), data);
+      }
+
+      public static LibraryMutation parseFrom(
+              com.google.protobuf.nano.CodedInputByteBufferNano input)
+          throws java.io.IOException {
+        return new LibraryMutation().mergeFrom(input);
+      }
+    }
+
+    public static final class LibraryUpdate extends
+        com.google.protobuf.nano.MessageNano {
+
+      // enum Status
+      public static final int LIBRARY_UPDATE_STATUS_1 = 1;
+
+      private static volatile LibraryUpdate[] _emptyArray;
+      public static LibraryUpdate[] emptyArray() {
+        // Lazily initializes the empty array
+        if (_emptyArray == null) {
+          synchronized (
+              com.google.protobuf.nano.InternalNano.LAZY_INIT_LOCK) {
+            if (_emptyArray == null) {
+              _emptyArray = new LibraryUpdate[0];
+            }
+          }
+        }
+        return _emptyArray;
+      }
+
+      // optional .com.google.android.finsky.protos.LibraryUpdateProto.LibraryUpdate.Status status = 1;
+      public int status;
+
+      // optional int32 corpus = 2;
+      public int corpus;
+
+      // optional bytes serverToken = 3;
+      public byte[] serverToken;
+
+      // repeated .com.google.android.finsky.protos.LibraryUpdateProto.LibraryMutation mutation = 4;
+      public com.google.android.finsky.protos.nano.Messages.LibraryUpdateProto.LibraryMutation[] mutation;
+
+      // optional bool hasMore = 5;
+      public boolean hasMore;
+
+      // optional string libraryId = 6;
+      public java.lang.String libraryId;
+
+      public LibraryUpdate() {
+        clear();
+      }
+
+      public LibraryUpdate clear() {
+        status = com.google.android.finsky.protos.nano.Messages.LibraryUpdateProto.LibraryUpdate.LIBRARY_UPDATE_STATUS_1;
+        corpus = 0;
+        serverToken = com.google.protobuf.nano.WireFormatNano.EMPTY_BYTES;
+        mutation = com.google.android.finsky.protos.nano.Messages.LibraryUpdateProto.LibraryMutation.emptyArray();
+        hasMore = false;
+        libraryId = "";
+        cachedSize = -1;
+        return this;
+      }
+
+      @Override
+      public void writeTo(com.google.protobuf.nano.CodedOutputByteBufferNano output)
+          throws java.io.IOException {
+        if (this.status != com.google.android.finsky.protos.nano.Messages.LibraryUpdateProto.LibraryUpdate.LIBRARY_UPDATE_STATUS_1) {
+          output.writeInt32(1, this.status);
+        }
+        if (this.corpus != 0) {
+          output.writeInt32(2, this.corpus);
+        }
+        if (!java.util.Arrays.equals(this.serverToken, com.google.protobuf.nano.WireFormatNano.EMPTY_BYTES)) {
+          output.writeBytes(3, this.serverToken);
+        }
+        if (this.mutation != null && this.mutation.length > 0) {
+          for (int i = 0; i < this.mutation.length; i++) {
+            com.google.android.finsky.protos.nano.Messages.LibraryUpdateProto.LibraryMutation element = this.mutation[i];
+            if (element != null) {
+              output.writeMessage(4, element);
+            }
+          }
+        }
+        if (this.hasMore != false) {
+          output.writeBool(5, this.hasMore);
+        }
+        if (!this.libraryId.equals("")) {
+          output.writeString(6, this.libraryId);
+        }
+        super.writeTo(output);
+      }
+
+      @Override
+      protected int computeSerializedSize() {
+        int size = super.computeSerializedSize();
+        if (this.status != com.google.android.finsky.protos.nano.Messages.LibraryUpdateProto.LibraryUpdate.LIBRARY_UPDATE_STATUS_1) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeInt32Size(1, this.status);
+        }
+        if (this.corpus != 0) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeInt32Size(2, this.corpus);
+        }
+        if (!java.util.Arrays.equals(this.serverToken, com.google.protobuf.nano.WireFormatNano.EMPTY_BYTES)) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeBytesSize(3, this.serverToken);
+        }
+        if (this.mutation != null && this.mutation.length > 0) {
+          for (int i = 0; i < this.mutation.length; i++) {
+            com.google.android.finsky.protos.nano.Messages.LibraryUpdateProto.LibraryMutation element = this.mutation[i];
+            if (element != null) {
+              size += com.google.protobuf.nano.CodedOutputByteBufferNano
+                .computeMessageSize(4, element);
+            }
+          }
+        }
+        if (this.hasMore != false) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeBoolSize(5, this.hasMore);
+        }
+        if (!this.libraryId.equals("")) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeStringSize(6, this.libraryId);
+        }
+        return size;
+      }
+
+      @Override
+      public LibraryUpdate mergeFrom(
+              com.google.protobuf.nano.CodedInputByteBufferNano input)
+          throws java.io.IOException {
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              return this;
+            default: {
+              if (!com.google.protobuf.nano.WireFormatNano.parseUnknownField(input, tag)) {
+                return this;
+              }
+              break;
+            }
+            case 8: {
+              int value = input.readInt32();
+              switch (value) {
+                case com.google.android.finsky.protos.nano.Messages.LibraryUpdateProto.LibraryUpdate.LIBRARY_UPDATE_STATUS_1:
+                  this.status = value;
+                  break;
+              }
+              break;
+            }
+            case 16: {
+              this.corpus = input.readInt32();
+              break;
+            }
+            case 26: {
+              this.serverToken = input.readBytes();
+              break;
+            }
+            case 34: {
+              int arrayLength = com.google.protobuf.nano.WireFormatNano
+                  .getRepeatedFieldArrayLength(input, 34);
+              int i = this.mutation == null ? 0 : this.mutation.length;
+              com.google.android.finsky.protos.nano.Messages.LibraryUpdateProto.LibraryMutation[] newArray =
+                  new com.google.android.finsky.protos.nano.Messages.LibraryUpdateProto.LibraryMutation[i + arrayLength];
+              if (i != 0) {
+                java.lang.System.arraycopy(this.mutation, 0, newArray, 0, i);
+              }
+              for (; i < newArray.length - 1; i++) {
+                newArray[i] = new com.google.android.finsky.protos.nano.Messages.LibraryUpdateProto.LibraryMutation();
+                input.readMessage(newArray[i]);
+                input.readTag();
+              }
+              // Last one without readTag.
+              newArray[i] = new com.google.android.finsky.protos.nano.Messages.LibraryUpdateProto.LibraryMutation();
+              input.readMessage(newArray[i]);
+              this.mutation = newArray;
+              break;
+            }
+            case 40: {
+              this.hasMore = input.readBool();
+              break;
+            }
+            case 50: {
+              this.libraryId = input.readString();
+              break;
+            }
+          }
+        }
+      }
+
+      public static LibraryUpdate parseFrom(byte[] data)
+          throws com.google.protobuf.nano.InvalidProtocolBufferNanoException {
+        return com.google.protobuf.nano.MessageNano.mergeFrom(new LibraryUpdate(), data);
+      }
+
+      public static LibraryUpdate parseFrom(
+              com.google.protobuf.nano.CodedInputByteBufferNano input)
+          throws java.io.IOException {
+        return new LibraryUpdate().mergeFrom(input);
+      }
+    }
+
+    private static volatile LibraryUpdateProto[] _emptyArray;
+    public static LibraryUpdateProto[] emptyArray() {
       // Lazily initializes the empty array
       if (_emptyArray == null) {
         synchronized (
             com.google.protobuf.nano.InternalNano.LAZY_INIT_LOCK) {
           if (_emptyArray == null) {
-            _emptyArray = new LibraryReplication[0];
+            _emptyArray = new LibraryUpdateProto[0];
           }
         }
       }
       return _emptyArray;
     }
 
-    public LibraryReplication() {
+    public LibraryUpdateProto() {
       clear();
     }
 
-    public LibraryReplication clear() {
+    public LibraryUpdateProto clear() {
       cachedSize = -1;
       return this;
     }
 
     @Override
-    public LibraryReplication mergeFrom(
+    public LibraryUpdateProto mergeFrom(
             com.google.protobuf.nano.CodedInputByteBufferNano input)
         throws java.io.IOException {
       while (true) {
@@ -1895,15 +2216,293 @@ public interface Messages {
       }
     }
 
-    public static LibraryReplication parseFrom(byte[] data)
+    public static LibraryUpdateProto parseFrom(byte[] data)
         throws com.google.protobuf.nano.InvalidProtocolBufferNanoException {
-      return com.google.protobuf.nano.MessageNano.mergeFrom(new LibraryReplication(), data);
+      return com.google.protobuf.nano.MessageNano.mergeFrom(new LibraryUpdateProto(), data);
     }
 
-    public static LibraryReplication parseFrom(
+    public static LibraryUpdateProto parseFrom(
             com.google.protobuf.nano.CodedInputByteBufferNano input)
         throws java.io.IOException {
-      return new LibraryReplication().mergeFrom(input);
+      return new LibraryUpdateProto().mergeFrom(input);
+    }
+  }
+
+  public static final class LibraryReplicationRequest extends
+      com.google.protobuf.nano.MessageNano {
+
+    private static volatile LibraryReplicationRequest[] _emptyArray;
+    public static LibraryReplicationRequest[] emptyArray() {
+      // Lazily initializes the empty array
+      if (_emptyArray == null) {
+        synchronized (
+            com.google.protobuf.nano.InternalNano.LAZY_INIT_LOCK) {
+          if (_emptyArray == null) {
+            _emptyArray = new LibraryReplicationRequest[0];
+          }
+        }
+      }
+      return _emptyArray;
+    }
+
+    // repeated .com.google.android.finsky.protos.LibraryUpdateProto.ClientLibraryState libraryState = 1;
+    public com.google.android.finsky.protos.nano.Messages.LibraryUpdateProto.ClientLibraryState[] libraryState;
+
+    // optional int32 libraryMutationVersion = 2;
+    public int libraryMutationVersion;
+
+    public LibraryReplicationRequest() {
+      clear();
+    }
+
+    public LibraryReplicationRequest clear() {
+      libraryState = com.google.android.finsky.protos.nano.Messages.LibraryUpdateProto.ClientLibraryState.emptyArray();
+      libraryMutationVersion = 0;
+      cachedSize = -1;
+      return this;
+    }
+
+    @Override
+    public void writeTo(com.google.protobuf.nano.CodedOutputByteBufferNano output)
+        throws java.io.IOException {
+      if (this.libraryState != null && this.libraryState.length > 0) {
+        for (int i = 0; i < this.libraryState.length; i++) {
+          com.google.android.finsky.protos.nano.Messages.LibraryUpdateProto.ClientLibraryState element = this.libraryState[i];
+          if (element != null) {
+            output.writeMessage(1, element);
+          }
+        }
+      }
+      if (this.libraryMutationVersion != 0) {
+        output.writeInt32(2, this.libraryMutationVersion);
+      }
+      super.writeTo(output);
+    }
+
+    @Override
+    protected int computeSerializedSize() {
+      int size = super.computeSerializedSize();
+      if (this.libraryState != null && this.libraryState.length > 0) {
+        for (int i = 0; i < this.libraryState.length; i++) {
+          com.google.android.finsky.protos.nano.Messages.LibraryUpdateProto.ClientLibraryState element = this.libraryState[i];
+          if (element != null) {
+            size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeMessageSize(1, element);
+          }
+        }
+      }
+      if (this.libraryMutationVersion != 0) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeInt32Size(2, this.libraryMutationVersion);
+      }
+      return size;
+    }
+
+    @Override
+    public LibraryReplicationRequest mergeFrom(
+            com.google.protobuf.nano.CodedInputByteBufferNano input)
+        throws java.io.IOException {
+      while (true) {
+        int tag = input.readTag();
+        switch (tag) {
+          case 0:
+            return this;
+          default: {
+            if (!com.google.protobuf.nano.WireFormatNano.parseUnknownField(input, tag)) {
+              return this;
+            }
+            break;
+          }
+          case 10: {
+            int arrayLength = com.google.protobuf.nano.WireFormatNano
+                .getRepeatedFieldArrayLength(input, 10);
+            int i = this.libraryState == null ? 0 : this.libraryState.length;
+            com.google.android.finsky.protos.nano.Messages.LibraryUpdateProto.ClientLibraryState[] newArray =
+                new com.google.android.finsky.protos.nano.Messages.LibraryUpdateProto.ClientLibraryState[i + arrayLength];
+            if (i != 0) {
+              java.lang.System.arraycopy(this.libraryState, 0, newArray, 0, i);
+            }
+            for (; i < newArray.length - 1; i++) {
+              newArray[i] = new com.google.android.finsky.protos.nano.Messages.LibraryUpdateProto.ClientLibraryState();
+              input.readMessage(newArray[i]);
+              input.readTag();
+            }
+            // Last one without readTag.
+            newArray[i] = new com.google.android.finsky.protos.nano.Messages.LibraryUpdateProto.ClientLibraryState();
+            input.readMessage(newArray[i]);
+            this.libraryState = newArray;
+            break;
+          }
+          case 16: {
+            this.libraryMutationVersion = input.readInt32();
+            break;
+          }
+        }
+      }
+    }
+
+    public static LibraryReplicationRequest parseFrom(byte[] data)
+        throws com.google.protobuf.nano.InvalidProtocolBufferNanoException {
+      return com.google.protobuf.nano.MessageNano.mergeFrom(new LibraryReplicationRequest(), data);
+    }
+
+    public static LibraryReplicationRequest parseFrom(
+            com.google.protobuf.nano.CodedInputByteBufferNano input)
+        throws java.io.IOException {
+      return new LibraryReplicationRequest().mergeFrom(input);
+    }
+  }
+
+  public static final class LibraryReplicationResponse extends
+      com.google.protobuf.nano.MessageNano {
+
+    private static volatile LibraryReplicationResponse[] _emptyArray;
+    public static LibraryReplicationResponse[] emptyArray() {
+      // Lazily initializes the empty array
+      if (_emptyArray == null) {
+        synchronized (
+            com.google.protobuf.nano.InternalNano.LAZY_INIT_LOCK) {
+          if (_emptyArray == null) {
+            _emptyArray = new LibraryReplicationResponse[0];
+          }
+        }
+      }
+      return _emptyArray;
+    }
+
+    // repeated .com.google.android.finsky.protos.LibraryUpdateProto.LibraryUpdate update = 1;
+    public com.google.android.finsky.protos.nano.Messages.LibraryUpdateProto.LibraryUpdate[] update;
+
+    // repeated string autoAcquireFreeAppIfHigherVersionAvailableTag = 2;
+    public java.lang.String[] autoAcquireFreeAppIfHigherVersionAvailableTag;
+
+    public LibraryReplicationResponse() {
+      clear();
+    }
+
+    public LibraryReplicationResponse clear() {
+      update = com.google.android.finsky.protos.nano.Messages.LibraryUpdateProto.LibraryUpdate.emptyArray();
+      autoAcquireFreeAppIfHigherVersionAvailableTag = com.google.protobuf.nano.WireFormatNano.EMPTY_STRING_ARRAY;
+      cachedSize = -1;
+      return this;
+    }
+
+    @Override
+    public void writeTo(com.google.protobuf.nano.CodedOutputByteBufferNano output)
+        throws java.io.IOException {
+      if (this.update != null && this.update.length > 0) {
+        for (int i = 0; i < this.update.length; i++) {
+          com.google.android.finsky.protos.nano.Messages.LibraryUpdateProto.LibraryUpdate element = this.update[i];
+          if (element != null) {
+            output.writeMessage(1, element);
+          }
+        }
+      }
+      if (this.autoAcquireFreeAppIfHigherVersionAvailableTag != null && this.autoAcquireFreeAppIfHigherVersionAvailableTag.length > 0) {
+        for (int i = 0; i < this.autoAcquireFreeAppIfHigherVersionAvailableTag.length; i++) {
+          java.lang.String element = this.autoAcquireFreeAppIfHigherVersionAvailableTag[i];
+          if (element != null) {
+            output.writeString(2, element);
+          }
+        }
+      }
+      super.writeTo(output);
+    }
+
+    @Override
+    protected int computeSerializedSize() {
+      int size = super.computeSerializedSize();
+      if (this.update != null && this.update.length > 0) {
+        for (int i = 0; i < this.update.length; i++) {
+          com.google.android.finsky.protos.nano.Messages.LibraryUpdateProto.LibraryUpdate element = this.update[i];
+          if (element != null) {
+            size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeMessageSize(1, element);
+          }
+        }
+      }
+      if (this.autoAcquireFreeAppIfHigherVersionAvailableTag != null && this.autoAcquireFreeAppIfHigherVersionAvailableTag.length > 0) {
+        int dataCount = 0;
+        int dataSize = 0;
+        for (int i = 0; i < this.autoAcquireFreeAppIfHigherVersionAvailableTag.length; i++) {
+          java.lang.String element = this.autoAcquireFreeAppIfHigherVersionAvailableTag[i];
+          if (element != null) {
+            dataCount++;
+            dataSize += com.google.protobuf.nano.CodedOutputByteBufferNano
+                .computeStringSizeNoTag(element);
+          }
+        }
+        size += dataSize;
+        size += 1 * dataCount;
+      }
+      return size;
+    }
+
+    @Override
+    public LibraryReplicationResponse mergeFrom(
+            com.google.protobuf.nano.CodedInputByteBufferNano input)
+        throws java.io.IOException {
+      while (true) {
+        int tag = input.readTag();
+        switch (tag) {
+          case 0:
+            return this;
+          default: {
+            if (!com.google.protobuf.nano.WireFormatNano.parseUnknownField(input, tag)) {
+              return this;
+            }
+            break;
+          }
+          case 10: {
+            int arrayLength = com.google.protobuf.nano.WireFormatNano
+                .getRepeatedFieldArrayLength(input, 10);
+            int i = this.update == null ? 0 : this.update.length;
+            com.google.android.finsky.protos.nano.Messages.LibraryUpdateProto.LibraryUpdate[] newArray =
+                new com.google.android.finsky.protos.nano.Messages.LibraryUpdateProto.LibraryUpdate[i + arrayLength];
+            if (i != 0) {
+              java.lang.System.arraycopy(this.update, 0, newArray, 0, i);
+            }
+            for (; i < newArray.length - 1; i++) {
+              newArray[i] = new com.google.android.finsky.protos.nano.Messages.LibraryUpdateProto.LibraryUpdate();
+              input.readMessage(newArray[i]);
+              input.readTag();
+            }
+            // Last one without readTag.
+            newArray[i] = new com.google.android.finsky.protos.nano.Messages.LibraryUpdateProto.LibraryUpdate();
+            input.readMessage(newArray[i]);
+            this.update = newArray;
+            break;
+          }
+          case 18: {
+            int arrayLength = com.google.protobuf.nano.WireFormatNano
+                .getRepeatedFieldArrayLength(input, 18);
+            int i = this.autoAcquireFreeAppIfHigherVersionAvailableTag == null ? 0 : this.autoAcquireFreeAppIfHigherVersionAvailableTag.length;
+            java.lang.String[] newArray = new java.lang.String[i + arrayLength];
+            if (i != 0) {
+              java.lang.System.arraycopy(this.autoAcquireFreeAppIfHigherVersionAvailableTag, 0, newArray, 0, i);
+            }
+            for (; i < newArray.length - 1; i++) {
+              newArray[i] = input.readString();
+              input.readTag();
+            }
+            // Last one without readTag.
+            newArray[i] = input.readString();
+            this.autoAcquireFreeAppIfHigherVersionAvailableTag = newArray;
+            break;
+          }
+        }
+      }
+    }
+
+    public static LibraryReplicationResponse parseFrom(byte[] data)
+        throws com.google.protobuf.nano.InvalidProtocolBufferNanoException {
+      return com.google.protobuf.nano.MessageNano.mergeFrom(new LibraryReplicationResponse(), data);
+    }
+
+    public static LibraryReplicationResponse parseFrom(
+            com.google.protobuf.nano.CodedInputByteBufferNano input)
+        throws java.io.IOException {
+      return new LibraryReplicationResponse().mergeFrom(input);
     }
   }
 
@@ -2162,6 +2761,214 @@ public interface Messages {
     }
   }
 
+  public static final class Bucket extends
+      com.google.protobuf.nano.MessageNano {
+
+    private static volatile Bucket[] _emptyArray;
+    public static Bucket[] emptyArray() {
+      // Lazily initializes the empty array
+      if (_emptyArray == null) {
+        synchronized (
+            com.google.protobuf.nano.InternalNano.LAZY_INIT_LOCK) {
+          if (_emptyArray == null) {
+            _emptyArray = new Bucket[0];
+          }
+        }
+      }
+      return _emptyArray;
+    }
+
+    public Bucket() {
+      clear();
+    }
+
+    public Bucket clear() {
+      cachedSize = -1;
+      return this;
+    }
+
+    @Override
+    public Bucket mergeFrom(
+            com.google.protobuf.nano.CodedInputByteBufferNano input)
+        throws java.io.IOException {
+      while (true) {
+        int tag = input.readTag();
+        switch (tag) {
+          case 0:
+            return this;
+          default: {
+            if (!com.google.protobuf.nano.WireFormatNano.parseUnknownField(input, tag)) {
+              return this;
+            }
+            break;
+          }
+        }
+      }
+    }
+
+    public static Bucket parseFrom(byte[] data)
+        throws com.google.protobuf.nano.InvalidProtocolBufferNanoException {
+      return com.google.protobuf.nano.MessageNano.mergeFrom(new Bucket(), data);
+    }
+
+    public static Bucket parseFrom(
+            com.google.protobuf.nano.CodedInputByteBufferNano input)
+        throws java.io.IOException {
+      return new Bucket().mergeFrom(input);
+    }
+  }
+
+  public static final class ListResponse extends
+      com.google.protobuf.nano.MessageNano {
+
+    private static volatile ListResponse[] _emptyArray;
+    public static ListResponse[] emptyArray() {
+      // Lazily initializes the empty array
+      if (_emptyArray == null) {
+        synchronized (
+            com.google.protobuf.nano.InternalNano.LAZY_INIT_LOCK) {
+          if (_emptyArray == null) {
+            _emptyArray = new ListResponse[0];
+          }
+        }
+      }
+      return _emptyArray;
+    }
+
+    // repeated .com.google.android.finsky.protos.Bucket bucket = 1;
+    public com.google.android.finsky.protos.nano.Messages.Bucket[] bucket;
+
+    // repeated .com.google.android.finsky.protos.DocV2 doc = 2;
+    public com.google.android.finsky.protos.nano.Messages.DocV2[] doc;
+
+    public ListResponse() {
+      clear();
+    }
+
+    public ListResponse clear() {
+      bucket = com.google.android.finsky.protos.nano.Messages.Bucket.emptyArray();
+      doc = com.google.android.finsky.protos.nano.Messages.DocV2.emptyArray();
+      cachedSize = -1;
+      return this;
+    }
+
+    @Override
+    public void writeTo(com.google.protobuf.nano.CodedOutputByteBufferNano output)
+        throws java.io.IOException {
+      if (this.bucket != null && this.bucket.length > 0) {
+        for (int i = 0; i < this.bucket.length; i++) {
+          com.google.android.finsky.protos.nano.Messages.Bucket element = this.bucket[i];
+          if (element != null) {
+            output.writeMessage(1, element);
+          }
+        }
+      }
+      if (this.doc != null && this.doc.length > 0) {
+        for (int i = 0; i < this.doc.length; i++) {
+          com.google.android.finsky.protos.nano.Messages.DocV2 element = this.doc[i];
+          if (element != null) {
+            output.writeMessage(2, element);
+          }
+        }
+      }
+      super.writeTo(output);
+    }
+
+    @Override
+    protected int computeSerializedSize() {
+      int size = super.computeSerializedSize();
+      if (this.bucket != null && this.bucket.length > 0) {
+        for (int i = 0; i < this.bucket.length; i++) {
+          com.google.android.finsky.protos.nano.Messages.Bucket element = this.bucket[i];
+          if (element != null) {
+            size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeMessageSize(1, element);
+          }
+        }
+      }
+      if (this.doc != null && this.doc.length > 0) {
+        for (int i = 0; i < this.doc.length; i++) {
+          com.google.android.finsky.protos.nano.Messages.DocV2 element = this.doc[i];
+          if (element != null) {
+            size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeMessageSize(2, element);
+          }
+        }
+      }
+      return size;
+    }
+
+    @Override
+    public ListResponse mergeFrom(
+            com.google.protobuf.nano.CodedInputByteBufferNano input)
+        throws java.io.IOException {
+      while (true) {
+        int tag = input.readTag();
+        switch (tag) {
+          case 0:
+            return this;
+          default: {
+            if (!com.google.protobuf.nano.WireFormatNano.parseUnknownField(input, tag)) {
+              return this;
+            }
+            break;
+          }
+          case 10: {
+            int arrayLength = com.google.protobuf.nano.WireFormatNano
+                .getRepeatedFieldArrayLength(input, 10);
+            int i = this.bucket == null ? 0 : this.bucket.length;
+            com.google.android.finsky.protos.nano.Messages.Bucket[] newArray =
+                new com.google.android.finsky.protos.nano.Messages.Bucket[i + arrayLength];
+            if (i != 0) {
+              java.lang.System.arraycopy(this.bucket, 0, newArray, 0, i);
+            }
+            for (; i < newArray.length - 1; i++) {
+              newArray[i] = new com.google.android.finsky.protos.nano.Messages.Bucket();
+              input.readMessage(newArray[i]);
+              input.readTag();
+            }
+            // Last one without readTag.
+            newArray[i] = new com.google.android.finsky.protos.nano.Messages.Bucket();
+            input.readMessage(newArray[i]);
+            this.bucket = newArray;
+            break;
+          }
+          case 18: {
+            int arrayLength = com.google.protobuf.nano.WireFormatNano
+                .getRepeatedFieldArrayLength(input, 18);
+            int i = this.doc == null ? 0 : this.doc.length;
+            com.google.android.finsky.protos.nano.Messages.DocV2[] newArray =
+                new com.google.android.finsky.protos.nano.Messages.DocV2[i + arrayLength];
+            if (i != 0) {
+              java.lang.System.arraycopy(this.doc, 0, newArray, 0, i);
+            }
+            for (; i < newArray.length - 1; i++) {
+              newArray[i] = new com.google.android.finsky.protos.nano.Messages.DocV2();
+              input.readMessage(newArray[i]);
+              input.readTag();
+            }
+            // Last one without readTag.
+            newArray[i] = new com.google.android.finsky.protos.nano.Messages.DocV2();
+            input.readMessage(newArray[i]);
+            this.doc = newArray;
+            break;
+          }
+        }
+      }
+    }
+
+    public static ListResponse parseFrom(byte[] data)
+        throws com.google.protobuf.nano.InvalidProtocolBufferNanoException {
+      return com.google.protobuf.nano.MessageNano.mergeFrom(new ListResponse(), data);
+    }
+
+    public static ListResponse parseFrom(
+            com.google.protobuf.nano.CodedInputByteBufferNano input)
+        throws java.io.IOException {
+      return new ListResponse().mergeFrom(input);
+    }
+  }
+
   public static final class Response extends
       com.google.protobuf.nano.MessageNano {
 
@@ -2182,14 +2989,14 @@ public interface Messages {
         return _emptyArray;
       }
 
+      // optional .com.google.android.finsky.protos.ListResponse listResponse = 1;
+      public com.google.android.finsky.protos.nano.Messages.ListResponse listResponse;
+
       // optional .com.google.android.finsky.protos.Details.DetailsResponse detailsResponse = 2;
       public com.google.android.finsky.protos.nano.Messages.Details.DetailsResponse detailsResponse;
 
       // optional .com.google.android.finsky.protos.Search.SearchResponse searchResponse = 5;
       public com.google.android.finsky.protos.nano.Messages.Search.SearchResponse searchResponse;
-
-      // optional .com.google.android.finsky.protos.LibraryReplication.LibraryReplicationResponse libraryReplicationResponse = 17;
-      public com.google.android.finsky.protos.nano.Messages.LibraryReplication.LibraryReplicationResponse libraryReplicationResponse;
 
       // optional .com.google.android.finsky.protos.Details.BulkDetailsResponse bulkDetailsResponse = 19;
       public com.google.android.finsky.protos.nano.Messages.Details.BulkDetailsResponse bulkDetailsResponse;
@@ -2199,9 +3006,9 @@ public interface Messages {
       }
 
       public Payload clear() {
+        listResponse = null;
         detailsResponse = null;
         searchResponse = null;
-        libraryReplicationResponse = null;
         bulkDetailsResponse = null;
         cachedSize = -1;
         return this;
@@ -2210,14 +3017,14 @@ public interface Messages {
       @Override
       public void writeTo(com.google.protobuf.nano.CodedOutputByteBufferNano output)
           throws java.io.IOException {
+        if (this.listResponse != null) {
+          output.writeMessage(1, this.listResponse);
+        }
         if (this.detailsResponse != null) {
           output.writeMessage(2, this.detailsResponse);
         }
         if (this.searchResponse != null) {
           output.writeMessage(5, this.searchResponse);
-        }
-        if (this.libraryReplicationResponse != null) {
-          output.writeMessage(17, this.libraryReplicationResponse);
         }
         if (this.bulkDetailsResponse != null) {
           output.writeMessage(19, this.bulkDetailsResponse);
@@ -2228,6 +3035,10 @@ public interface Messages {
       @Override
       protected int computeSerializedSize() {
         int size = super.computeSerializedSize();
+        if (this.listResponse != null) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeMessageSize(1, this.listResponse);
+        }
         if (this.detailsResponse != null) {
           size += com.google.protobuf.nano.CodedOutputByteBufferNano
             .computeMessageSize(2, this.detailsResponse);
@@ -2235,10 +3046,6 @@ public interface Messages {
         if (this.searchResponse != null) {
           size += com.google.protobuf.nano.CodedOutputByteBufferNano
             .computeMessageSize(5, this.searchResponse);
-        }
-        if (this.libraryReplicationResponse != null) {
-          size += com.google.protobuf.nano.CodedOutputByteBufferNano
-            .computeMessageSize(17, this.libraryReplicationResponse);
         }
         if (this.bulkDetailsResponse != null) {
           size += com.google.protobuf.nano.CodedOutputByteBufferNano
@@ -2262,6 +3069,13 @@ public interface Messages {
               }
               break;
             }
+            case 10: {
+              if (this.listResponse == null) {
+                this.listResponse = new com.google.android.finsky.protos.nano.Messages.ListResponse();
+              }
+              input.readMessage(this.listResponse);
+              break;
+            }
             case 18: {
               if (this.detailsResponse == null) {
                 this.detailsResponse = new com.google.android.finsky.protos.nano.Messages.Details.DetailsResponse();
@@ -2274,13 +3088,6 @@ public interface Messages {
                 this.searchResponse = new com.google.android.finsky.protos.nano.Messages.Search.SearchResponse();
               }
               input.readMessage(this.searchResponse);
-              break;
-            }
-            case 138: {
-              if (this.libraryReplicationResponse == null) {
-                this.libraryReplicationResponse = new com.google.android.finsky.protos.nano.Messages.LibraryReplication.LibraryReplicationResponse();
-              }
-              input.readMessage(this.libraryReplicationResponse);
               break;
             }
             case 154: {

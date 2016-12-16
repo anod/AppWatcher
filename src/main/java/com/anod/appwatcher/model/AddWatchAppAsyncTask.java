@@ -4,11 +4,10 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.support.v4.util.SimpleArrayMap;
 
-import com.anod.appwatcher.utils.DocUtils;
 import com.google.android.finsky.api.model.Document;
 
 public class AddWatchAppAsyncTask extends AsyncTask<Document, Void, SimpleArrayMap<String, Integer>> {
-    private final AddWatchAppHandler mNewAppHandler;
+    private final WatchAppList mNewAppHandler;
     private final Listener mListener;
     private Context mContext;
 
@@ -16,7 +15,7 @@ public class AddWatchAppAsyncTask extends AsyncTask<Document, Void, SimpleArrayM
         void onAddAppTaskFinish(SimpleArrayMap<String, Integer> result);
     }
 
-    public AddWatchAppAsyncTask(AddWatchAppHandler newAppHandler, Context context, Listener listener) {
+    public AddWatchAppAsyncTask(WatchAppList newAppHandler, Context context, Listener listener) {
         mNewAppHandler = newAppHandler;
         mListener = listener;
         mContext = context;
@@ -25,7 +24,7 @@ public class AddWatchAppAsyncTask extends AsyncTask<Document, Void, SimpleArrayM
     @Override
     protected SimpleArrayMap<String, Integer> doInBackground(Document... documents) {
         AppListContentProviderClient client = new AppListContentProviderClient(mContext);
-        mNewAppHandler.setContentProvider(client);
+        mNewAppHandler.initContentProvider(client);
         SimpleArrayMap<String, Integer> result = new SimpleArrayMap<>();
         for (Document doc : documents) {
             if (isCancelled()) {
@@ -36,7 +35,7 @@ public class AddWatchAppAsyncTask extends AsyncTask<Document, Void, SimpleArrayM
             result.put(info.packageName, status);
         }
         client.release();
-        mNewAppHandler.setContentProvider(null);
+        mNewAppHandler.initContentProvider(null);
         return result;
     }
 

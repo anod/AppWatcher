@@ -34,7 +34,7 @@ public abstract class ContainerList<T> extends PaginatedList<T, Document>
         return this.mContainerDocument;
     }
     
-    protected Document[] updateContainerAndGetItems(final DocumentV2.DocV2 docV2) {
+    protected Document[] updateContainerAndGetItems(final DocV2 docV2) {
         Document[] array;
         if (docV2 != null) {
             this.mContainerDocument = new Document(docV2);

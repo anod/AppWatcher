@@ -9,6 +9,7 @@
     <string name="search_for_app">Search for an application and click on it to add to the watch list.\n( Tip: you can add apps directly from Play Store using \"Share\" button )</string>
     <string name="loading">Loading…</string>
     <string name="no_result_found">No results for \"%s\"</string>
+    <string name="no_result_wishlist">No wishlist items. You can add them in Play Store</string>
     <string name="error_insert_app">Failed to add application to the watch list.</string>
     <string name="application_icon">Application icon</string>
     <string name="remove">Remove</string>
@@ -106,6 +107,8 @@
     <string name="uptodate_title">Installed notifications</string>
     <string name="noti_action_update">Update</string>
     <string name="update_all">Update All</string>
+    <string name="navdrawer_item_wishlist">Wishlist</string>
+    <string name="wishlist">Wishlist</string>
 
     <string-array name="sort_titles">
         <item>By name &#x2193;</item>
