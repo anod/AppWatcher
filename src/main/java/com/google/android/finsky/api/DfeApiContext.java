@@ -15,22 +15,18 @@ import java.util.Map;
 
 public class DfeApiContext
 {
-    public static final String AUTH_TOKEN_TYPE = "androidmarket";
-    public static final String PLAY_PACKAGE_NAME = "com.android.vending";
-    public static final String PLAY_VERSION_NAME = "5.0.31";
-    public static final int PLAY_VERSION_CODE = 80300031;
-    public static final String CLIENT_ID = "am-google";
+    private static final String PLAY_VERSION_NAME = "5.12.10";
+    private static final int PLAY_VERSION_CODE = 80421000;
+    private static final String CLIENT_ID = "am-google";
     final Context mContext;
     private final Account mAccount;
-    private boolean mHasPerformedInitialTokenInvalidation;
     private final Map<String, String> mHeaders;
     private String mLastAuthToken;
 
 
-    protected DfeApiContext(final Context context, final Account account, final String authToken, final String deviceId,
+    private DfeApiContext(final Context context, final Account account, final String authToken, final String deviceId,
                             final Locale locale, final String mccmnc,
                             final String clientId, final String loggingId, final int filterLevel) {
-        super();
         this.mHeaders = new HashMap<String, String>();
         mContext = context;
         mAccount = account;
@@ -51,6 +47,7 @@ public class DfeApiContext
     }
 
 
+
     public static DfeApiContext create(final Context context, final Account account,final String authTokenStr, final String deviceId, final int filterLevel) {
         final TelephonyManager tm = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
 
@@ -67,25 +64,26 @@ public class DfeApiContext
                 api, versionCode, Build.VERSION.SDK_INT, sanitizeHeaderValue(Build.DEVICE), sanitizeHeaderValue(Build.HARDWARE), sanitizeHeaderValue(Build.PRODUCT)
         );
     }
-    
-    static String sanitizeHeaderValue(final String s) {
+
+
+    private static String sanitizeHeaderValue(final String s) {
         return Uri.encode(s).replace("(", "").replace(")", "");
     }
     
     public Account getAccount() {
         return this.mAccount;
     }
-    
-    public String getAccountName() {
+
+    String getAccountName() {
         final Account account = this.getAccount();
         if (account == null) {
             return null;
         }
         return account.name;
     }
-    
 
-    public Map<String, String> getHeaders() throws AuthFailureError {
+
+    Map<String, String> getHeaders() throws AuthFailureError {
         synchronized (this) {
             final HashMap<String, String> hashMap = new HashMap<String, String>();
             hashMap.putAll(this.mHeaders);

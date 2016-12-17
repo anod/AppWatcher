@@ -40,24 +40,11 @@ public class PackageManagerUtils {
     public AppInfo packageToApp(String packageName) {
         PackageInfo packageInfo = getPackageInfo(packageName);
         if (packageInfo == null) {
-            return new AppInfo(
-                    packageName, 0, "",
-                    packageName, null, AppInfoMetadata.STATUS_DELETED, ""
-            );
+            return AppInfo.fromLocalPackage(null, packageName, "", null);
         }
-        ComponentName launchComponent = this.getLaunchComponent(packageInfo);
-        String iconUrl = null;
-        if (launchComponent != null) {
-            iconUrl = Uri.fromParts(AppIconLoader.SCHEME, launchComponent.flattenToShortString(), null).toString();
-        }
-
-        DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
-        String lastUpdate = dateFormat.format(new Date(packageInfo.lastUpdateTime));
-
-        return new AppInfo(
-                packageInfo.packageName, packageInfo.versionCode, packageInfo.versionName,
-                this.getAppTitle(packageInfo), iconUrl, AppInfoMetadata.STATUS_NORMAL, lastUpdate
-        );
+        ComponentName launchComponent = getLaunchComponent(packageInfo);
+        String appTitle = getAppTitle(packageInfo);
+        return AppInfo.fromLocalPackage(packageInfo, packageName, appTitle, launchComponent);
     }
 
     private PackageInfo getPackageInfo(String packageName) {

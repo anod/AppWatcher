@@ -33,6 +33,8 @@ public class AppDetailsView {
     public TextView price;
     @Nullable @BindView(R.id.update_date)
     public TextView updateDate;
+    @Nullable @BindView(R.id.app_type)
+    public TextView appType;
 
     public AppDetailsView(View view, AppViewHolder.DataProvider dataProvider)
     {
@@ -44,6 +46,11 @@ public class AppDetailsView {
 
     public void fillDetails(AppInfo app, boolean isLocalApp)
     {
+        assert details != null;
+        assert updateDate != null;
+        assert price != null;
+        assert version != null;
+
         title.setText(app.title);
         details.setText(app.creator);
         String uploadDate = app.uploadDate;
@@ -53,6 +60,17 @@ public class AppDetailsView {
         } else {
             updateDate.setText(uploadDate);
             updateDate.setVisibility(View.VISIBLE);
+        }
+
+        if (appType != null) {
+            appType.setVisibility(View.GONE);
+
+//            if (TextUtils.isEmpty(app.appType)) {
+//                appType.setVisibility(View.GONE);
+//            } else {
+//                appType.setText(app.appType);
+//                appType.setVisibility(View.VISIBLE);
+//            }
         }
 
         if (isLocalApp) {
@@ -66,6 +84,9 @@ public class AppDetailsView {
 
 
     private void fillWatchAppView(AppInfo app) {
+        assert price != null;
+        assert version != null;
+
         boolean isInstalled = mDataProvider.getPackageManagerUtils().isAppInstalled(app.packageName);
         version.setText(mDataProvider.formatVersionText(app.versionName, app.versionNumber));
         if (app.getStatus() == AppInfo.STATUS_UPDATED) {
@@ -100,6 +121,9 @@ public class AppDetailsView {
     }
 
     public void updateAccentColor(@ColorInt int color, AppInfo app) {
+        assert price != null;
+        assert version != null;
+
         mAccentColor = color;
         price.setTextColor(mAccentColor);
         if (app.getStatus() == AppInfo.STATUS_UPDATED) {

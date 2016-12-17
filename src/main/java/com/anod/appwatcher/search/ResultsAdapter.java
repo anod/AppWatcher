@@ -12,7 +12,7 @@ import com.anod.appwatcher.model.WatchAppList;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 import com.google.android.finsky.api.model.Document;
 import com.google.android.finsky.protos.nano.Messages.Common;
-import com.google.android.finsky.protos.nano.Messages.DocDetails;
+import com.google.android.finsky.protos.nano.Messages.AppDetails;
 import com.squareup.picasso.Picasso;
 
 public abstract class ResultsAdapter extends RecyclerView.Adapter<ResultsAppViewHolder> {
@@ -44,7 +44,7 @@ public abstract class ResultsAdapter extends RecyclerView.Adapter<ResultsAppView
     public void onBindViewHolder(ResultsAppViewHolder holder, int position) {
         Document doc = getDocument(position);
 
-        DocDetails.AppDetails app = doc.getAppDetails();
+        AppDetails app = doc.getAppDetails();
         String uploadDate = app == null ? "" : app.uploadDate;
         String packageName =  app == null ? "" : app.packageName;
 

@@ -32,7 +32,7 @@ import com.anod.appwatcher.utils.GooglePlayServices;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 import com.google.android.finsky.api.model.Document;
 import com.google.android.finsky.protos.nano.Messages.Common;
-import com.google.android.finsky.protos.nano.Messages.DocDetails;
+import com.google.android.finsky.protos.nano.Messages.AppDetails;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -280,7 +280,7 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
     }
 
     private void updateApp(Document marketApp, AppInfo localApp, AppListContentProviderClient client, ArrayList<UpdatedApp> updatedTitles, boolean lastUpdatesViewed) {
-        DocDetails.AppDetails appDetails = marketApp.getAppDetails();
+        AppDetails appDetails = marketApp.getAppDetails();
 
         if (appDetails.versionCode > localApp.versionNumber || (BuildConfig.DEBUG && appDetails.packageName.startsWith("com.anod.appwatcher"))) {
             AppLog.d("New version found [" + appDetails.versionCode + "]");
@@ -318,8 +318,11 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
             values.put(AppListTable.Columns.KEY_VERSION_NAME, marketApp.getAppDetails().versionString);
         }
 
-        Common.Offer offer = marketApp.getOffer();
+        if (!marketApp.getAppDetails().appType.equals(localApp.appType)) {
+            values.put(AppListTable.Columns.KEY_APP_TYPE, marketApp.getAppDetails().appType);
+        }
 
+        Common.Offer offer = marketApp.getOffer();
         if (!offer.currencyCode.equals(localApp.priceCur)) {
             values.put(AppListTable.Columns.KEY_PRICE_CURRENCY, offer.currencyCode);
         }
@@ -329,6 +332,7 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
         if (localApp.priceMicros != offer.micros) {
             values.put(AppListTable.Columns.KEY_PRICE_MICROS, offer.micros);
         }
+
         String iconUrl = marketApp.getIconUrl();
         if (!TextUtils.isEmpty(iconUrl))
         {

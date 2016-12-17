@@ -12,7 +12,7 @@ import info.anodsplace.android.log.AppLog;
 
 public class DbOpenHelper extends SQLiteOpenHelper {
 
-    private static final int DATABASE_VERSION = 8;
+    private static final int DATABASE_VERSION = 9;
     public static final String DATABASE_NAME = "app_watcher";
 
 
@@ -51,6 +51,9 @@ public class DbOpenHelper extends SQLiteOpenHelper {
             case 6:
             case 7:
                 db.execSQL("ALTER TABLE " + AppListTable.TABLE_NAME + " ADD COLUMN " + AppListTable.Columns.KEY_ICON_URL + " TEXT");
+            case 8:
+                db.execSQL("ALTER TABLE " + AppListTable.TABLE_NAME + " ADD COLUMN " + AppListTable.Columns.KEY_APP_TYPE + " TEXT");
+                db.execSQL("ALTER TABLE " + AppListTable.TABLE_NAME + " ADD COLUMN " + AppListTable.Columns.KEY_SYNC_VERSION + " INTEGER");
         }
     }
 

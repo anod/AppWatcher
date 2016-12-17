@@ -24,6 +24,8 @@ public class AppListCursor extends CursorWrapper implements CrossProcessCursor {
     private static final int IDX_UPLOAD_DATE = 12;
     private static final int IDX_DETAILS_URL = 13;
     private static final int IDX_ICON_URL = 14;
+    private static final int IDX_APP_TYPE = 15;
+    private static final int IDX_SYNC_VERSION = 16;
 
     public AppListCursor(Cursor cursor) {
         super(cursor);
@@ -51,7 +53,9 @@ public class AppListCursor extends CursorWrapper implements CrossProcessCursor {
                 getString(IDX_PRICE_CURRENCY),
                 getInt(IDX_PRICE_MICROS),
                 getString(IDX_DETAILS_URL),
-                getLong(IDX_REFRESH_TIME)
+                getLong(IDX_REFRESH_TIME),
+                getString(IDX_APP_TYPE),
+                getInt(IDX_SYNC_VERSION)
         );
     }
 

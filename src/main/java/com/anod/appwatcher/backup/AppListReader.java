@@ -41,10 +41,11 @@ class AppListReader {
     }
 
     AppInfo readAppInfo(@NonNull JsonReader reader) throws IOException {
-        String appId = null, pname = null, versionName = "", title = "", creator = "", uploadDate="", detailsUrl=null, iconUrl=null;
-        int versionNumber = 0, status = 0;
+        String appId = null, pname = null, versionName = "", title = "", creator = "", uploadDate="", detailsUrl=null, iconUrl=null, appType = "";
+        int versionNumber = 0, status = 0, syncVersion = 0;
         Bitmap icon = null;
         long refreshTime = 0;
+
 
         reader.beginObject();
         while (reader.hasNext()) {
@@ -73,6 +74,10 @@ class AppListReader {
                 iconUrl = (isNull) ? "" : reader.nextString();
             } else if (name.equals("refreshTime")) {
                 refreshTime = reader.nextLong();
+            } else if (name.equals("appType")) {
+                appType = (isNull) ? "" : reader.nextString();
+            } else if (name.equals("syncVersion")) {
+                syncVersion = (isNull) ? 0 : reader.nextInt();
             } else {
                 skipped = true;
                 reader.skipValue();
@@ -85,7 +90,7 @@ class AppListReader {
         AppInfo info = null;
         if (appId != null && pname != null) {
             info = new AppInfo(0, appId, pname, versionNumber, versionName,
-                    title, creator, iconUrl, status, uploadDate, null, null, null, detailsUrl, refreshTime);
+                    title, creator, iconUrl, status, uploadDate, null, null, null, detailsUrl, refreshTime, appType, syncVersion);
         }
         onUpgrade(info);
         return info;

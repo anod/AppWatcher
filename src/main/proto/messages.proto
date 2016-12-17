@@ -30,38 +30,46 @@ message Containers
         optional string nextPageUrl = 2;
     }
 }
+
+
+message AppDetails
+{
+    optional string developerName = 1;
+    optional int32 majorVersionNumber = 2;
+    optional int32 versionCode = 3;
+    optional string versionString = 4;
+    optional string title = 5;
+    repeated string appCategory = 7;
+    optional string numDownloads = 13;
+    optional string packageName = 14;
+    optional string recentChangesHtml = 15;
+    optional string uploadDate = 16;
+    optional string appType = 18;
+}
+
 message DocDetails
 {
-    message AppDetails
-    {
-        optional int32 versionCode = 3;
-        optional string versionString = 4;
-        optional string packageName = 14;
-        optional string recentChangesHtml = 15;
-        optional string uploadDate = 16;
-        optional string appType = 18;
-    }
-
-    message DocumentDetails
-    {
-        optional AppDetails appDetails = 1;
-    }
+    optional AppDetails appDetails = 1;
 }
 
 message DocV2
 {
     optional string docid = 1;
+    optional string backendDocid = 2;
+    optional int32 docType = 3;
     optional int32 backendId = 4;
     optional string title = 5;
     optional string creator = 6;
+    optional string descriptionHtml = 7;
     repeated Common.Offer offer = 8;
     repeated Common.Image image = 10;
     repeated DocV2 child = 11;
     optional Containers.ContainerMetadata containerMetadata = 12;
-    optional DocDetails.DocumentDetails details = 13;
+    optional DocDetails details = 13;
     optional string detailsUrl = 16;
 
 }
+
 
 message Details
 {

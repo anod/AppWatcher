@@ -20,7 +20,8 @@ public class AppListTable {
         public static final String KEY_PRICE_MICROS = "price_micros";
         public static final String KEY_UPLOAD_DATE = "upload_date";
         public static final String KEY_DETAILS_URL = "details_url";
-
+        public static final String KEY_APP_TYPE = "app_type";
+        public static final String KEY_SYNC_VERSION = "sync_version";
     }
 
     public static final String TABLE_NAME = "app_list";
@@ -41,6 +42,8 @@ public class AppListTable {
             Columns.KEY_UPLOAD_DATE,
             Columns.KEY_DETAILS_URL,
             Columns.KEY_ICON_URL,
+            Columns.KEY_APP_TYPE,
+            Columns.KEY_SYNC_VERSION
     };
 
     public static final String TABLE_CREATE =
@@ -60,6 +63,8 @@ public class AppListTable {
                     Columns.KEY_PRICE_MICROS + " INTEGER," +
                     Columns.KEY_UPLOAD_DATE + " TEXT," +
                     Columns.KEY_DETAILS_URL + " TEXT," +
-                    Columns.KEY_ICON_URL + " TEXT" +
+                    Columns.KEY_ICON_URL + " TEXT," +
+                    Columns.KEY_APP_TYPE + " TEXT," +
+                    Columns.KEY_SYNC_VERSION + " INTEGER" +
                     ") ";
 }

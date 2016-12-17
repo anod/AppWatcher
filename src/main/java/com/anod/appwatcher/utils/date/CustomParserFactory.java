@@ -35,6 +35,11 @@ public class CustomParserFactory {
             return new SimpleDateFormat("dd.M.yyyy", locale);
         }
 
+        if (lang.equals(new Locale("hu","").getLanguage()))
+        {
+            return new SimpleDateFormat("yyyy. MMM. d.", locale);
+        }
+
         if (locale == new Locale("en", "IN"))
         {
             return new SimpleDateFormat("dd-MMM-yyyy", locale);

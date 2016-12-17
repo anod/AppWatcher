@@ -5,7 +5,7 @@ import android.content.Context;
 import com.google.android.finsky.api.model.DfeDetails;
 import com.google.android.finsky.api.model.DfeModel;
 import com.google.android.finsky.api.model.Document;
-import com.google.android.finsky.protos.nano.Messages.DocDetails;
+import com.google.android.finsky.protos.nano.Messages.AppDetails;
 
 /**
  * @author alex
@@ -26,14 +26,14 @@ public class DetailsEndpoint extends PlayStoreEndpointBase {
         return (DfeDetails)mDfeModel;
     }
 
-    public DocDetails.AppDetails getAppDetails() {
+    public AppDetails getAppDetails() {
         return getData().getDocument().getAppDetails();
     }
 
     public Document getDocument() { return getData().getDocument(); }
 
     public String getRecentChanges() {
-        DocDetails.AppDetails details = getAppDetails();
+        AppDetails details = getAppDetails();
         if (details != null) {
             return details.recentChangesHtml;
         }

@@ -192,11 +192,14 @@ public class AppListContentProviderClient {
 
         values.put(AppListTable.Columns.KEY_ICON_URL, app.iconUrl);
         values.put(AppListTable.Columns.KEY_REFRESH_TIMESTAMP, app.refreshTime);
+
+        values.put(AppListTable.Columns.KEY_APP_TYPE, app.appType);
+        values.put(AppListTable.Columns.KEY_SYNC_VERSION, app.syncVersion);
         return values;
     }
 
 
-    public AppInfo queryAppId(String packageName) {
+    AppInfo queryAppId(String packageName) {
         AppListCursor cr = query(null,
                 AppListTable.Columns.KEY_PACKAGE + " = ? AND " + AppListTable.Columns.KEY_STATUS + " != ?", new String[]{packageName, String.valueOf(AppInfo.STATUS_DELETED) });
         if (cr == null || cr.getCount() == 0) {

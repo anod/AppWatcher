@@ -439,254 +439,270 @@ public interface Messages {
     }
   }
 
-  public static final class DocDetails extends
+  public static final class AppDetails extends
       com.google.protobuf.nano.MessageNano {
 
-    public static final class AppDetails extends
-        com.google.protobuf.nano.MessageNano {
-
-      private static volatile AppDetails[] _emptyArray;
-      public static AppDetails[] emptyArray() {
-        // Lazily initializes the empty array
-        if (_emptyArray == null) {
-          synchronized (
-              com.google.protobuf.nano.InternalNano.LAZY_INIT_LOCK) {
-            if (_emptyArray == null) {
-              _emptyArray = new AppDetails[0];
-            }
+    private static volatile AppDetails[] _emptyArray;
+    public static AppDetails[] emptyArray() {
+      // Lazily initializes the empty array
+      if (_emptyArray == null) {
+        synchronized (
+            com.google.protobuf.nano.InternalNano.LAZY_INIT_LOCK) {
+          if (_emptyArray == null) {
+            _emptyArray = new AppDetails[0];
           }
         }
-        return _emptyArray;
       }
+      return _emptyArray;
+    }
 
-      // optional int32 versionCode = 3;
-      public int versionCode;
+    // optional string developerName = 1;
+    public java.lang.String developerName;
 
-      // optional string versionString = 4;
-      public java.lang.String versionString;
+    // optional int32 majorVersionNumber = 2;
+    public int majorVersionNumber;
 
-      // optional string packageName = 14;
-      public java.lang.String packageName;
+    // optional int32 versionCode = 3;
+    public int versionCode;
 
-      // optional string recentChangesHtml = 15;
-      public java.lang.String recentChangesHtml;
+    // optional string versionString = 4;
+    public java.lang.String versionString;
 
-      // optional string uploadDate = 16;
-      public java.lang.String uploadDate;
+    // optional string title = 5;
+    public java.lang.String title;
 
-      // optional string appType = 18;
-      public java.lang.String appType;
+    // repeated string appCategory = 7;
+    public java.lang.String[] appCategory;
 
-      public AppDetails() {
-        clear();
+    // optional string numDownloads = 13;
+    public java.lang.String numDownloads;
+
+    // optional string packageName = 14;
+    public java.lang.String packageName;
+
+    // optional string recentChangesHtml = 15;
+    public java.lang.String recentChangesHtml;
+
+    // optional string uploadDate = 16;
+    public java.lang.String uploadDate;
+
+    // optional string appType = 18;
+    public java.lang.String appType;
+
+    public AppDetails() {
+      clear();
+    }
+
+    public AppDetails clear() {
+      developerName = "";
+      majorVersionNumber = 0;
+      versionCode = 0;
+      versionString = "";
+      title = "";
+      appCategory = com.google.protobuf.nano.WireFormatNano.EMPTY_STRING_ARRAY;
+      numDownloads = "";
+      packageName = "";
+      recentChangesHtml = "";
+      uploadDate = "";
+      appType = "";
+      cachedSize = -1;
+      return this;
+    }
+
+    @Override
+    public void writeTo(com.google.protobuf.nano.CodedOutputByteBufferNano output)
+        throws java.io.IOException {
+      if (!this.developerName.equals("")) {
+        output.writeString(1, this.developerName);
       }
-
-      public AppDetails clear() {
-        versionCode = 0;
-        versionString = "";
-        packageName = "";
-        recentChangesHtml = "";
-        uploadDate = "";
-        appType = "";
-        cachedSize = -1;
-        return this;
+      if (this.majorVersionNumber != 0) {
+        output.writeInt32(2, this.majorVersionNumber);
       }
-
-      @Override
-      public void writeTo(com.google.protobuf.nano.CodedOutputByteBufferNano output)
-          throws java.io.IOException {
-        if (this.versionCode != 0) {
-          output.writeInt32(3, this.versionCode);
-        }
-        if (!this.versionString.equals("")) {
-          output.writeString(4, this.versionString);
-        }
-        if (!this.packageName.equals("")) {
-          output.writeString(14, this.packageName);
-        }
-        if (!this.recentChangesHtml.equals("")) {
-          output.writeString(15, this.recentChangesHtml);
-        }
-        if (!this.uploadDate.equals("")) {
-          output.writeString(16, this.uploadDate);
-        }
-        if (!this.appType.equals("")) {
-          output.writeString(18, this.appType);
-        }
-        super.writeTo(output);
+      if (this.versionCode != 0) {
+        output.writeInt32(3, this.versionCode);
       }
-
-      @Override
-      protected int computeSerializedSize() {
-        int size = super.computeSerializedSize();
-        if (this.versionCode != 0) {
-          size += com.google.protobuf.nano.CodedOutputByteBufferNano
-              .computeInt32Size(3, this.versionCode);
-        }
-        if (!this.versionString.equals("")) {
-          size += com.google.protobuf.nano.CodedOutputByteBufferNano
-              .computeStringSize(4, this.versionString);
-        }
-        if (!this.packageName.equals("")) {
-          size += com.google.protobuf.nano.CodedOutputByteBufferNano
-              .computeStringSize(14, this.packageName);
-        }
-        if (!this.recentChangesHtml.equals("")) {
-          size += com.google.protobuf.nano.CodedOutputByteBufferNano
-              .computeStringSize(15, this.recentChangesHtml);
-        }
-        if (!this.uploadDate.equals("")) {
-          size += com.google.protobuf.nano.CodedOutputByteBufferNano
-              .computeStringSize(16, this.uploadDate);
-        }
-        if (!this.appType.equals("")) {
-          size += com.google.protobuf.nano.CodedOutputByteBufferNano
-              .computeStringSize(18, this.appType);
-        }
-        return size;
+      if (!this.versionString.equals("")) {
+        output.writeString(4, this.versionString);
       }
+      if (!this.title.equals("")) {
+        output.writeString(5, this.title);
+      }
+      if (this.appCategory != null && this.appCategory.length > 0) {
+        for (int i = 0; i < this.appCategory.length; i++) {
+          java.lang.String element = this.appCategory[i];
+          if (element != null) {
+            output.writeString(7, element);
+          }
+        }
+      }
+      if (!this.numDownloads.equals("")) {
+        output.writeString(13, this.numDownloads);
+      }
+      if (!this.packageName.equals("")) {
+        output.writeString(14, this.packageName);
+      }
+      if (!this.recentChangesHtml.equals("")) {
+        output.writeString(15, this.recentChangesHtml);
+      }
+      if (!this.uploadDate.equals("")) {
+        output.writeString(16, this.uploadDate);
+      }
+      if (!this.appType.equals("")) {
+        output.writeString(18, this.appType);
+      }
+      super.writeTo(output);
+    }
 
-      @Override
-      public AppDetails mergeFrom(
-              com.google.protobuf.nano.CodedInputByteBufferNano input)
-          throws java.io.IOException {
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
+    @Override
+    protected int computeSerializedSize() {
+      int size = super.computeSerializedSize();
+      if (!this.developerName.equals("")) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeStringSize(1, this.developerName);
+      }
+      if (this.majorVersionNumber != 0) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeInt32Size(2, this.majorVersionNumber);
+      }
+      if (this.versionCode != 0) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeInt32Size(3, this.versionCode);
+      }
+      if (!this.versionString.equals("")) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeStringSize(4, this.versionString);
+      }
+      if (!this.title.equals("")) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeStringSize(5, this.title);
+      }
+      if (this.appCategory != null && this.appCategory.length > 0) {
+        int dataCount = 0;
+        int dataSize = 0;
+        for (int i = 0; i < this.appCategory.length; i++) {
+          java.lang.String element = this.appCategory[i];
+          if (element != null) {
+            dataCount++;
+            dataSize += com.google.protobuf.nano.CodedOutputByteBufferNano
+                .computeStringSizeNoTag(element);
+          }
+        }
+        size += dataSize;
+        size += 1 * dataCount;
+      }
+      if (!this.numDownloads.equals("")) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeStringSize(13, this.numDownloads);
+      }
+      if (!this.packageName.equals("")) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeStringSize(14, this.packageName);
+      }
+      if (!this.recentChangesHtml.equals("")) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeStringSize(15, this.recentChangesHtml);
+      }
+      if (!this.uploadDate.equals("")) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeStringSize(16, this.uploadDate);
+      }
+      if (!this.appType.equals("")) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeStringSize(18, this.appType);
+      }
+      return size;
+    }
+
+    @Override
+    public AppDetails mergeFrom(
+            com.google.protobuf.nano.CodedInputByteBufferNano input)
+        throws java.io.IOException {
+      while (true) {
+        int tag = input.readTag();
+        switch (tag) {
+          case 0:
+            return this;
+          default: {
+            if (!com.google.protobuf.nano.WireFormatNano.parseUnknownField(input, tag)) {
               return this;
-            default: {
-              if (!com.google.protobuf.nano.WireFormatNano.parseUnknownField(input, tag)) {
-                return this;
-              }
-              break;
             }
-            case 24: {
-              this.versionCode = input.readInt32();
-              break;
+            break;
+          }
+          case 10: {
+            this.developerName = input.readString();
+            break;
+          }
+          case 16: {
+            this.majorVersionNumber = input.readInt32();
+            break;
+          }
+          case 24: {
+            this.versionCode = input.readInt32();
+            break;
+          }
+          case 34: {
+            this.versionString = input.readString();
+            break;
+          }
+          case 42: {
+            this.title = input.readString();
+            break;
+          }
+          case 58: {
+            int arrayLength = com.google.protobuf.nano.WireFormatNano
+                .getRepeatedFieldArrayLength(input, 58);
+            int i = this.appCategory == null ? 0 : this.appCategory.length;
+            java.lang.String[] newArray = new java.lang.String[i + arrayLength];
+            if (i != 0) {
+              java.lang.System.arraycopy(this.appCategory, 0, newArray, 0, i);
             }
-            case 34: {
-              this.versionString = input.readString();
-              break;
+            for (; i < newArray.length - 1; i++) {
+              newArray[i] = input.readString();
+              input.readTag();
             }
-            case 114: {
-              this.packageName = input.readString();
-              break;
-            }
-            case 122: {
-              this.recentChangesHtml = input.readString();
-              break;
-            }
-            case 130: {
-              this.uploadDate = input.readString();
-              break;
-            }
-            case 146: {
-              this.appType = input.readString();
-              break;
-            }
+            // Last one without readTag.
+            newArray[i] = input.readString();
+            this.appCategory = newArray;
+            break;
+          }
+          case 106: {
+            this.numDownloads = input.readString();
+            break;
+          }
+          case 114: {
+            this.packageName = input.readString();
+            break;
+          }
+          case 122: {
+            this.recentChangesHtml = input.readString();
+            break;
+          }
+          case 130: {
+            this.uploadDate = input.readString();
+            break;
+          }
+          case 146: {
+            this.appType = input.readString();
+            break;
           }
         }
-      }
-
-      public static AppDetails parseFrom(byte[] data)
-          throws com.google.protobuf.nano.InvalidProtocolBufferNanoException {
-        return com.google.protobuf.nano.MessageNano.mergeFrom(new AppDetails(), data);
-      }
-
-      public static AppDetails parseFrom(
-              com.google.protobuf.nano.CodedInputByteBufferNano input)
-          throws java.io.IOException {
-        return new AppDetails().mergeFrom(input);
       }
     }
 
-    public static final class DocumentDetails extends
-        com.google.protobuf.nano.MessageNano {
-
-      private static volatile DocumentDetails[] _emptyArray;
-      public static DocumentDetails[] emptyArray() {
-        // Lazily initializes the empty array
-        if (_emptyArray == null) {
-          synchronized (
-              com.google.protobuf.nano.InternalNano.LAZY_INIT_LOCK) {
-            if (_emptyArray == null) {
-              _emptyArray = new DocumentDetails[0];
-            }
-          }
-        }
-        return _emptyArray;
-      }
-
-      // optional .com.google.android.finsky.protos.DocDetails.AppDetails appDetails = 1;
-      public com.google.android.finsky.protos.nano.Messages.DocDetails.AppDetails appDetails;
-
-      public DocumentDetails() {
-        clear();
-      }
-
-      public DocumentDetails clear() {
-        appDetails = null;
-        cachedSize = -1;
-        return this;
-      }
-
-      @Override
-      public void writeTo(com.google.protobuf.nano.CodedOutputByteBufferNano output)
-          throws java.io.IOException {
-        if (this.appDetails != null) {
-          output.writeMessage(1, this.appDetails);
-        }
-        super.writeTo(output);
-      }
-
-      @Override
-      protected int computeSerializedSize() {
-        int size = super.computeSerializedSize();
-        if (this.appDetails != null) {
-          size += com.google.protobuf.nano.CodedOutputByteBufferNano
-            .computeMessageSize(1, this.appDetails);
-        }
-        return size;
-      }
-
-      @Override
-      public DocumentDetails mergeFrom(
-              com.google.protobuf.nano.CodedInputByteBufferNano input)
-          throws java.io.IOException {
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              return this;
-            default: {
-              if (!com.google.protobuf.nano.WireFormatNano.parseUnknownField(input, tag)) {
-                return this;
-              }
-              break;
-            }
-            case 10: {
-              if (this.appDetails == null) {
-                this.appDetails = new com.google.android.finsky.protos.nano.Messages.DocDetails.AppDetails();
-              }
-              input.readMessage(this.appDetails);
-              break;
-            }
-          }
-        }
-      }
-
-      public static DocumentDetails parseFrom(byte[] data)
-          throws com.google.protobuf.nano.InvalidProtocolBufferNanoException {
-        return com.google.protobuf.nano.MessageNano.mergeFrom(new DocumentDetails(), data);
-      }
-
-      public static DocumentDetails parseFrom(
-              com.google.protobuf.nano.CodedInputByteBufferNano input)
-          throws java.io.IOException {
-        return new DocumentDetails().mergeFrom(input);
-      }
+    public static AppDetails parseFrom(byte[] data)
+        throws com.google.protobuf.nano.InvalidProtocolBufferNanoException {
+      return com.google.protobuf.nano.MessageNano.mergeFrom(new AppDetails(), data);
     }
+
+    public static AppDetails parseFrom(
+            com.google.protobuf.nano.CodedInputByteBufferNano input)
+        throws java.io.IOException {
+      return new AppDetails().mergeFrom(input);
+    }
+  }
+
+  public static final class DocDetails extends
+      com.google.protobuf.nano.MessageNano {
 
     private static volatile DocDetails[] _emptyArray;
     public static DocDetails[] emptyArray() {
@@ -702,13 +718,36 @@ public interface Messages {
       return _emptyArray;
     }
 
+    // optional .com.google.android.finsky.protos.AppDetails appDetails = 1;
+    public com.google.android.finsky.protos.nano.Messages.AppDetails appDetails;
+
     public DocDetails() {
       clear();
     }
 
     public DocDetails clear() {
+      appDetails = null;
       cachedSize = -1;
       return this;
+    }
+
+    @Override
+    public void writeTo(com.google.protobuf.nano.CodedOutputByteBufferNano output)
+        throws java.io.IOException {
+      if (this.appDetails != null) {
+        output.writeMessage(1, this.appDetails);
+      }
+      super.writeTo(output);
+    }
+
+    @Override
+    protected int computeSerializedSize() {
+      int size = super.computeSerializedSize();
+      if (this.appDetails != null) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+          .computeMessageSize(1, this.appDetails);
+      }
+      return size;
     }
 
     @Override
@@ -724,6 +763,13 @@ public interface Messages {
             if (!com.google.protobuf.nano.WireFormatNano.parseUnknownField(input, tag)) {
               return this;
             }
+            break;
+          }
+          case 10: {
+            if (this.appDetails == null) {
+              this.appDetails = new com.google.android.finsky.protos.nano.Messages.AppDetails();
+            }
+            input.readMessage(this.appDetails);
             break;
           }
         }
@@ -762,6 +808,12 @@ public interface Messages {
     // optional string docid = 1;
     public java.lang.String docid;
 
+    // optional string backendDocid = 2;
+    public java.lang.String backendDocid;
+
+    // optional int32 docType = 3;
+    public int docType;
+
     // optional int32 backendId = 4;
     public int backendId;
 
@@ -770,6 +822,9 @@ public interface Messages {
 
     // optional string creator = 6;
     public java.lang.String creator;
+
+    // optional string descriptionHtml = 7;
+    public java.lang.String descriptionHtml;
 
     // repeated .com.google.android.finsky.protos.Common.Offer offer = 8;
     public com.google.android.finsky.protos.nano.Messages.Common.Offer[] offer;
@@ -783,8 +838,8 @@ public interface Messages {
     // optional .com.google.android.finsky.protos.Containers.ContainerMetadata containerMetadata = 12;
     public com.google.android.finsky.protos.nano.Messages.Containers.ContainerMetadata containerMetadata;
 
-    // optional .com.google.android.finsky.protos.DocDetails.DocumentDetails details = 13;
-    public com.google.android.finsky.protos.nano.Messages.DocDetails.DocumentDetails details;
+    // optional .com.google.android.finsky.protos.DocDetails details = 13;
+    public com.google.android.finsky.protos.nano.Messages.DocDetails details;
 
     // optional string detailsUrl = 16;
     public java.lang.String detailsUrl;
@@ -795,9 +850,12 @@ public interface Messages {
 
     public DocV2 clear() {
       docid = "";
+      backendDocid = "";
+      docType = 0;
       backendId = 0;
       title = "";
       creator = "";
+      descriptionHtml = "";
       offer = com.google.android.finsky.protos.nano.Messages.Common.Offer.emptyArray();
       image = com.google.android.finsky.protos.nano.Messages.Common.Image.emptyArray();
       child = com.google.android.finsky.protos.nano.Messages.DocV2.emptyArray();
@@ -814,6 +872,12 @@ public interface Messages {
       if (!this.docid.equals("")) {
         output.writeString(1, this.docid);
       }
+      if (!this.backendDocid.equals("")) {
+        output.writeString(2, this.backendDocid);
+      }
+      if (this.docType != 0) {
+        output.writeInt32(3, this.docType);
+      }
       if (this.backendId != 0) {
         output.writeInt32(4, this.backendId);
       }
@@ -822,6 +886,9 @@ public interface Messages {
       }
       if (!this.creator.equals("")) {
         output.writeString(6, this.creator);
+      }
+      if (!this.descriptionHtml.equals("")) {
+        output.writeString(7, this.descriptionHtml);
       }
       if (this.offer != null && this.offer.length > 0) {
         for (int i = 0; i < this.offer.length; i++) {
@@ -866,6 +933,14 @@ public interface Messages {
         size += com.google.protobuf.nano.CodedOutputByteBufferNano
             .computeStringSize(1, this.docid);
       }
+      if (!this.backendDocid.equals("")) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeStringSize(2, this.backendDocid);
+      }
+      if (this.docType != 0) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeInt32Size(3, this.docType);
+      }
       if (this.backendId != 0) {
         size += com.google.protobuf.nano.CodedOutputByteBufferNano
             .computeInt32Size(4, this.backendId);
@@ -877,6 +952,10 @@ public interface Messages {
       if (!this.creator.equals("")) {
         size += com.google.protobuf.nano.CodedOutputByteBufferNano
             .computeStringSize(6, this.creator);
+      }
+      if (!this.descriptionHtml.equals("")) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeStringSize(7, this.descriptionHtml);
       }
       if (this.offer != null && this.offer.length > 0) {
         for (int i = 0; i < this.offer.length; i++) {
@@ -939,6 +1018,14 @@ public interface Messages {
             this.docid = input.readString();
             break;
           }
+          case 18: {
+            this.backendDocid = input.readString();
+            break;
+          }
+          case 24: {
+            this.docType = input.readInt32();
+            break;
+          }
           case 32: {
             this.backendId = input.readInt32();
             break;
@@ -949,6 +1036,10 @@ public interface Messages {
           }
           case 50: {
             this.creator = input.readString();
+            break;
+          }
+          case 58: {
+            this.descriptionHtml = input.readString();
             break;
           }
           case 66: {
@@ -1020,7 +1111,7 @@ public interface Messages {
           }
           case 106: {
             if (this.details == null) {
-              this.details = new com.google.android.finsky.protos.nano.Messages.DocDetails.DocumentDetails();
+              this.details = new com.google.android.finsky.protos.nano.Messages.DocDetails();
             }
             input.readMessage(this.details);
             break;

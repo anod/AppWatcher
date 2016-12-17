@@ -50,7 +50,7 @@ dependencies {
     compile 'com.jakewharton:butterknife:8.4.0'
     apt 'com.jakewharton:butterknife-compiler:8.4.0'
 
-    compile 'net.hockeyapp.android:HockeySDK:4.1.1'
+    compile 'net.hockeyapp.android:HockeySDK:4.1.2'
 
     compile group: 'com.google.protobuf.nano', name: 'protobuf-javanano', version: '3.1.0'
 

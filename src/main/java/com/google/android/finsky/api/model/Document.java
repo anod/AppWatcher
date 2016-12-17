@@ -4,7 +4,7 @@ import android.support.annotation.NonNull;
 import android.util.SparseArray;
 
 import com.google.android.finsky.protos.nano.Messages.DocV2;
-import com.google.android.finsky.protos.nano.Messages.DocDetails;
+import com.google.android.finsky.protos.nano.Messages.AppDetails;
 import com.google.android.finsky.protos.nano.Messages.Common;
 
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ public class Document {
         this.doc = docV2;
     }
 
-    public DocDetails.AppDetails getAppDetails() {
+    public AppDetails getAppDetails() {
         if (this.doc.details != null)
         {
             return this.doc.details.appDetails;
