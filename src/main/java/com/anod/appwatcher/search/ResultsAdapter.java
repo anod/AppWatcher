@@ -54,7 +54,7 @@ public abstract class ResultsAdapter extends RecyclerView.Adapter<ResultsAppView
         holder.updated.setText(uploadDate);
 
 
-        if (mNewAppHandler.isAdded(packageName)) {
+        if (mNewAppHandler.contains(packageName)) {
             holder.row.setBackgroundColor(mColorBgGray);
         } else {
             holder.row.setBackgroundColor(mColorBgWhite);

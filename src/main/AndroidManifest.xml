@@ -69,7 +69,7 @@
             android:name=".SettingsActivity"
             android:label="@string/settings" />
         <activity
-            android:name=".ui.FragmentActivity"
+            android:name=".ui.FragmentToolbarActivity"
             />
         <activity
             android:name=".installed.ImportInstalledActivity"

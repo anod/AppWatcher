@@ -33,7 +33,7 @@ public class WatchAppList {
         mAddedApps = mContentProvider.queryPackagesMap(false);
     }
 
-    public boolean isAdded(String packageName) {
+    public boolean contains(String packageName) {
         return mAddedApps.containsKey(packageName);
     }
 

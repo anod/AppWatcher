@@ -13,8 +13,8 @@ public final class DfeList extends ContainerList<ListResponse>
     private DfeApi mDfeApi;
 
 
-    public DfeList(final DfeApi dfeApi, final String mInitialListUrl, final boolean b) {
-        super(mInitialListUrl, b);
+    public DfeList(final DfeApi dfeApi, final String mInitialListUrl, final boolean autoLoadNextPage) {
+        super(mInitialListUrl, autoLoadNextPage);
         mDfeApi = dfeApi;
         this.mFilteredDocId = null;
         this.mInitialListUrl = mInitialListUrl;

@@ -2,7 +2,6 @@ package com.anod.appwatcher.market;
 
 import android.content.Context;
 
-import com.google.android.finsky.api.DfeApi;
 import com.google.android.finsky.api.model.DfeList;
 import com.google.android.finsky.api.model.DfeModel;
 
@@ -14,9 +13,11 @@ import com.google.android.finsky.api.model.DfeModel;
 public class WishlistEndpoint extends PlayStoreEndpointBase {
     private static String LIBRARY_ID = "u-wl";
     private static int BACKEND_ID = 0;
+    private final boolean mAutoloadNext;
 
-    public WishlistEndpoint(Context context) {
+    public WishlistEndpoint(Context context, boolean autoLoadNextPage) {
         super(context);
+        mAutoloadNext = autoLoadNextPage;
     }
 
     public DfeList getData() {
@@ -52,6 +53,6 @@ public class WishlistEndpoint extends PlayStoreEndpointBase {
 
     @Override
     protected DfeModel createDfeModel() {
-        return new DfeList(mDfeApi, mDfeApi.getLibraryUrl(BACKEND_ID, LIBRARY_ID, 7, null), true);
+        return new DfeList(mDfeApi, mDfeApi.getLibraryUrl(BACKEND_ID, LIBRARY_ID, 7, null), mAutoloadNext);
     }
 }

@@ -3,10 +3,12 @@ package com.anod.appwatcher.wishlist;
 import android.accounts.Account;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,15 +19,12 @@ import android.widget.Toast;
 
 import com.android.volley.VolleyError;
 import com.anod.appwatcher.R;
-import com.anod.appwatcher.accounts.AccountChooserHelper;
-import com.anod.appwatcher.fragments.AccountChooserFragment;
 import com.anod.appwatcher.market.PlayStoreEndpoint;
 import com.anod.appwatcher.market.WishlistEndpoint;
 import com.anod.appwatcher.model.AppInfoMetadata;
 import com.anod.appwatcher.model.WatchAppList;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListContentProviderClient;
-import com.anod.appwatcher.ui.DrawerActivity;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -35,8 +34,10 @@ import butterknife.ButterKnife;
  * @date 16/12/2016.
  */
 
-public class WishlistFragment extends Fragment implements WatchAppList.Listener, AccountChooserHelper.OnAccountSelectionListener, PlayStoreEndpoint.Listener {
+public class WishlistFragment extends Fragment implements WatchAppList.Listener, PlayStoreEndpoint.Listener {
     public static final String TAG = "wishlist";
+    public static final String EXTRA_ACCOUNT = "extra_account";
+    public static final String EXTRA_AUTH_TOKEN = "extra_auth_token";
 
     @BindView(R.id.loading)
     LinearLayout mLoading;
@@ -54,27 +55,11 @@ public class WishlistFragment extends Fragment implements WatchAppList.Listener,
     private AppListContentProviderClient mContentProviderClient;
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        Context context = getContext();
-
-        // TODO: Pass as extras
-        if (context instanceof DrawerActivity) {
-            Account account = ((DrawerActivity) context).getAccount();
-            String authToken = ((DrawerActivity) context).getAuthToken();
-            if (account != null && authToken != null) {
-                onHelperAccountSelected(account, authToken);
-            }
-        }
-    }
-
-    @Override
     public void onAttach(Context context) {
         super.onAttach(context);
 
         if (mEndpoint == null) {
-            mEndpoint = new WishlistEndpoint(context);
+            mEndpoint = new WishlistEndpoint(context, true);
         }
 
         if (mWatchAppList == null)
@@ -124,6 +109,21 @@ public class WishlistFragment extends Fragment implements WatchAppList.Listener,
     }
 
     @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        Account account = getArguments().getParcelable(EXTRA_ACCOUNT);
+        String authToken = getArguments().getString(EXTRA_AUTH_TOKEN);
+
+        if (account == null || TextUtils.isEmpty(authToken)) {
+            Toast.makeText(getContext(), R.string.choose_an_account, Toast.LENGTH_SHORT).show();
+            getActivity().finish();
+        } else {
+            startLoadingList(account, authToken);
+        }
+    }
+
+    @Override
     public void onWatchListChangeSuccess(AppInfo info, int newStatus) {
         if (newStatus == AppInfoMetadata.STATUS_NORMAL) {
             String msg = getString(R.string.app_stored, info.title);
@@ -143,8 +143,7 @@ public class WishlistFragment extends Fragment implements WatchAppList.Listener,
     }
 
 
-    @Override
-    public void onHelperAccountSelected(Account account, String authSubToken) {
+    private void startLoadingList(@NonNull Account account,@NonNull String authSubToken) {
         mEndpoint.setAccount(account, authSubToken);
 
         Context context = getContext();
@@ -155,16 +154,6 @@ public class WishlistFragment extends Fragment implements WatchAppList.Listener,
         mEndpoint.startAsync();
     }
 
-    @Override
-    public void onHelperAccountNotFound() {
-        // NOT IN USE
-    }
-
-    @Override
-    public AccountChooserFragment.OnAccountSelectionListener getAccountSelectionListener() {
-        // NOT IN USE
-        return null;
-    }
 
     private void showRetryButton() {
         mListView.setVisibility(View.GONE);

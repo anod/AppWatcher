@@ -14,7 +14,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 class ResultsAppViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-    private final WatchAppList mNewAppHandler;
+    private final WatchAppList watchAppList;
     Document doc;
     @BindView(android.R.id.content)
     View row;
@@ -29,21 +29,21 @@ class ResultsAppViewHolder extends RecyclerView.ViewHolder implements View.OnCli
     @BindView(android.R.id.icon)
     ImageView icon;
 
-    ResultsAppViewHolder(View itemView, WatchAppList newAppHandler) {
+    ResultsAppViewHolder(View itemView, WatchAppList watchAppList) {
         super(itemView);
         ButterKnife.bind(this, itemView);
         this.row.setOnClickListener(this);
-        mNewAppHandler = newAppHandler;
+        this.watchAppList = watchAppList;
     }
 
     @Override
     public void onClick(View v) {
         final AppInfo info = new AppInfo(doc);
-        if (mNewAppHandler.isAdded(info.packageName))
+        if (watchAppList.contains(info.packageName))
         {
-            mNewAppHandler.add(info);
+            watchAppList.delete(info);
         } else {
-            mNewAppHandler.delete(info);
+            watchAppList.add(info);
         }
     }
 }

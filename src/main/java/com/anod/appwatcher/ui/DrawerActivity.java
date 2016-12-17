@@ -137,7 +137,10 @@ abstract public class DrawerActivity extends ToolbarActivity implements AccountC
                 startActivity(new Intent(this, ImportInstalledActivity.class));
                 return true;
             case R.id.menu_wishlist:
-                startActivity(FragmentActivity.intent(WishlistFragment.TAG, this));
+                Bundle args = new Bundle();
+                args.putParcelable(WishlistFragment.EXTRA_ACCOUNT, mAccountChooserHelper.getAccount());
+                args.putString(WishlistFragment.EXTRA_AUTH_TOKEN, mAuthToken);
+                startActivity(FragmentToolbarActivity.intent(WishlistFragment.TAG, args, this));
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -159,13 +162,5 @@ abstract public class DrawerActivity extends ToolbarActivity implements AccountC
     public void showAccountsDialogWithCheck() {
         Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
         mAccountChooserHelper.showAccountsDialogWithCheck();
-    }
-
-    public Account getAccount() {
-        return mAccountChooserHelper.getAccount();
-    }
-
-    public String getAuthToken() {
-        return mAuthToken;
     }
 }
