@@ -58,9 +58,9 @@ public class DocUtils {
             MetricsManagerEvent.track("ERROR_EXTRACT_DATE",
                     "LOCALE", locale.toString(),
                     "DEFAULT_LOCALE", Locale.getDefault().toString(),
-                    "FORMAT", format,
-                    "DATE", uploadDate,
+                    "ACTUAL", uploadDate,
                     "EXPECTED", expected,
+                    "EXPECTED_FORMAT", format,
                     "CUSTOM", isCustom ? "YES" : "NO");
         }
 

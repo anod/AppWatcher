@@ -37,7 +37,17 @@ public class CustomParserFactory {
 
         if (lang.equals(new Locale("hu","").getLanguage()))
         {
-            return new SimpleDateFormat("yyyy. MMM. d.", locale);
+            return new SimpleDateFormat("yyyy. MMM d.", locale);
+        }
+
+        if (lang.equals(new Locale("pl","").getLanguage()))
+        {
+            return new SimpleDateFormat("d MMM yyyy", locale);
+        }
+
+        if (lang.equals(new Locale("it","").getLanguage()))
+        {
+            return new SimpleDateFormat("d MMM yyyy", locale);
         }
 
         if (locale == new Locale("en", "IN"))
@@ -45,7 +55,11 @@ public class CustomParserFactory {
             return new SimpleDateFormat("dd-MMM-yyyy", locale);
         }
 
-        if (locale == new Locale("en", "GB"))
+        if (locale == new Locale("en", "GB")
+                || locale == new Locale("en", "SE")
+                || locale == new Locale("en", "PH")
+                || locale == new Locale("en", "AU")
+                )
         {
             return new SimpleDateFormat("d MMM yyyy", locale);
         }
