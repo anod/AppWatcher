@@ -135,21 +135,15 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
 
     @Override
     protected void onPause() {
-        if (mContentProviderClient != null) {
-            mContentProviderClient.release();
-        }
+        mWatchAppList.detach();
         super.onPause();
-        mWatchAppList.initContentProvider(null);
         mEndpoints.setListener(null);
     }
 
     @Override
     protected void onResume() {
-        mContentProviderClient = new AppListContentProviderClient(mContext);
+        mWatchAppList.attach(mContext);
         super.onResume();
-
-        mWatchAppList.initContentProvider(mContentProviderClient);
-
         mAccountChooserHelper = new AccountChooserHelper(this, new Preferences(this), this);
         mAccountChooserHelper.init();
     }

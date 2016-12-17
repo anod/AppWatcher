@@ -52,7 +52,6 @@ public class WishlistFragment extends Fragment implements WatchAppList.Listener,
 
     private WishlistEndpoint mEndpoint;
     private WatchAppList mWatchAppList;
-    private AppListContentProviderClient mContentProviderClient;
 
     @Override
     public void onAttach(Context context) {
@@ -67,20 +66,15 @@ public class WishlistFragment extends Fragment implements WatchAppList.Listener,
             mWatchAppList = new WatchAppList(this);
         }
 
-        mContentProviderClient = new AppListContentProviderClient(context);
-        mWatchAppList.initContentProvider(mContentProviderClient);
-
+        mWatchAppList.attach(context);
         mEndpoint.setListener(this);
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        if (mContentProviderClient != null) {
-            mContentProviderClient.release();
-        }
         mEndpoint.setListener(null);
-        mWatchAppList.initContentProvider(null);
+        mWatchAppList.detach();
     }
 
     @Override

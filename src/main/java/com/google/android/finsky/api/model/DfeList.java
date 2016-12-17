@@ -8,8 +8,8 @@ import com.google.android.finsky.protos.nano.Messages.ListResponse;
 
 public final class DfeList extends ContainerList<ListResponse>
 {
-    public String mFilteredDocId;
-    public String mInitialListUrl;
+    private String mFilteredDocId;
+    private String mInitialListUrl;
     private DfeApi mDfeApi;
 
 

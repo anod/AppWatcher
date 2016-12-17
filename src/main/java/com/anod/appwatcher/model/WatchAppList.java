@@ -1,6 +1,8 @@
 package com.anod.appwatcher.model;
 
+import android.content.Context;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v4.util.SimpleArrayMap;
 
 
@@ -28,9 +30,21 @@ public class WatchAppList {
         mListener = listener;
     }
 
-    public void initContentProvider(AppListContentProviderClient contentProvider) {
+    public void attach(Context context) {
+        attach(new AppListContentProviderClient(context));
+    }
+
+    private void attach(@NonNull AppListContentProviderClient contentProvider) {
         mContentProvider = contentProvider;
         mAddedApps = mContentProvider.queryPackagesMap(false);
+    }
+
+    public void detach()
+    {
+        if (mContentProvider != null){
+            mContentProvider.release();
+        }
+        mContentProvider = null;
     }
 
     public boolean contains(String packageName) {

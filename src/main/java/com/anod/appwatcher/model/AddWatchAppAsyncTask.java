@@ -23,8 +23,7 @@ public class AddWatchAppAsyncTask extends AsyncTask<Document, Void, SimpleArrayM
 
     @Override
     protected SimpleArrayMap<String, Integer> doInBackground(Document... documents) {
-        AppListContentProviderClient client = new AppListContentProviderClient(mContext);
-        mNewAppHandler.initContentProvider(client);
+        mNewAppHandler.attach(mContext);
         SimpleArrayMap<String, Integer> result = new SimpleArrayMap<>();
         for (Document doc : documents) {
             if (isCancelled()) {
@@ -34,8 +33,7 @@ public class AddWatchAppAsyncTask extends AsyncTask<Document, Void, SimpleArrayM
             int status = mNewAppHandler.addSync(info);
             result.put(info.packageName, status);
         }
-        client.release();
-        mNewAppHandler.initContentProvider(null);
+        mNewAppHandler.detach();
         return result;
     }
 

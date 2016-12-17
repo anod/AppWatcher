@@ -271,11 +271,10 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
                 Document doc = mDetailsEndpoint.getDocument();
                 if (doc != null) {
                     final AppInfo info = new AppInfo(doc);
-                    AppListContentProviderClient client = new AppListContentProviderClient(this);
                     WatchAppList appList = new WatchAppList(this);
-                    appList.initContentProvider(client);
+                    appList.attach(this);
                     appList.add(info);
-                    client.release();
+                    appList.detach();
                 }
                 return true;
             case R.id.menu_uninstall:
