@@ -1,29 +1,32 @@
 package com.google.android.finsky.api.model;
 
 import com.android.volley.Request;
+import com.anod.appwatcher.utils.CollectionsUtils;
 import com.google.android.finsky.api.DfeApi;
 import com.google.android.finsky.protos.nano.Messages;
 import com.google.android.finsky.protos.nano.Messages.ListResponse;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 
 public final class DfeList extends ContainerList<ListResponse>
 {
-    private String mFilteredDocId;
-    private String mInitialListUrl;
     private DfeApi mDfeApi;
+    private CollectionsUtils.Predicate<Document> mResponseFiler;
 
-
-    public DfeList(final DfeApi dfeApi, final String mInitialListUrl, final boolean autoLoadNextPage) {
+    public DfeList(final DfeApi dfeApi, final String mInitialListUrl, final boolean autoLoadNextPage, CollectionsUtils.Predicate<Document> responseFilter) {
         super(mInitialListUrl, autoLoadNextPage);
         mDfeApi = dfeApi;
-        this.mFilteredDocId = null;
-        this.mInitialListUrl = mInitialListUrl;
+        mResponseFiler = responseFilter;
     }
 
     
     @Override
-    public final void clearDataAndReplaceInitialUrl(final String mInitialListUrl) {
-        super.clearDataAndReplaceInitialUrl(this.mInitialListUrl = mInitialListUrl);
+    public final void clearDataAndReplaceInitialUrl(final String initialListUrl) {
+        super.clearDataAndReplaceInitialUrl(initialListUrl);
     }
     
     @Override
@@ -33,11 +36,16 @@ public final class DfeList extends ContainerList<ListResponse>
 
     @Override
     protected Document[] getItemsFromResponse(ListResponse listResponse) {
-        if (listResponse.doc == null || listResponse.doc.length == 0) {
+        if (listResponse.doc == null || listResponse.doc.length == 0 || listResponse.doc[0] == null) {
             return new Document[0];
         }
-        return this.updateContainerAndGetItems(listResponse.doc[0]);
-
+        Document[] docs = this.updateContainerAndGetItems(listResponse.doc[0]);
+        if (mResponseFiler == null)
+        {
+            return docs;
+        }
+        List<Document> list = CollectionsUtils.filter(Arrays.asList(docs), mResponseFiler);
+        return list.toArray(new Document[0]);
     }
 
     @Override

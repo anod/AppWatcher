@@ -50,16 +50,19 @@ public class CustomParserFactory {
             return new SimpleDateFormat("d MMM yyyy", locale);
         }
 
-        if (locale == new Locale("en", "IN"))
+        if (locale.equals(new Locale("en", "IN")))
         {
             return new SimpleDateFormat("dd-MMM-yyyy", locale);
         }
 
-        if (locale == new Locale("en", "GB")
-                || locale == new Locale("en", "SE")
-                || locale == new Locale("en", "PH")
-                || locale == new Locale("en", "AU")
-                )
+        if (locale.equals(new Locale("en", "SE"))
+                || locale.equals(new Locale("en", "PH"))
+                || locale.equals(new Locale("en", "AU")))
+        {
+            return new SimpleDateFormat("d MMM. yyyy", locale);
+        }
+
+        if (locale.equals(new Locale("en", "GB")))
         {
             return new SimpleDateFormat("d MMM yyyy", locale);
         }
