@@ -18,8 +18,8 @@ import com.squareup.picasso.Picasso;
 public abstract class ResultsAdapter extends RecyclerView.Adapter<ResultsAppViewHolder> {
     private final PackageManagerUtils mPMUtils;
     private final Context mContext;
-    private final int mColorBgGray;
-    private final int mColorBgWhite;
+    private final int mColorBgDisabled;
+    private final int mColorBgNormal;
     private final WatchAppList mNewAppHandler;
 
     protected ResultsAdapter(Context context, WatchAppList newAppHandler) {
@@ -28,8 +28,8 @@ public abstract class ResultsAdapter extends RecyclerView.Adapter<ResultsAppView
         mPMUtils = new PackageManagerUtils(context.getPackageManager());
         mNewAppHandler = newAppHandler;
 
-        mColorBgGray = ContextCompat.getColor(context, R.color.row_inactive);
-        mColorBgWhite = ContextCompat.getColor(context, R.color.white);
+        mColorBgDisabled = ContextCompat.getColor(context, R.color.row_inactive);
+        mColorBgNormal = ContextCompat.getColor(context, R.color.item_background);
     }
 
     @Override
@@ -55,9 +55,9 @@ public abstract class ResultsAdapter extends RecyclerView.Adapter<ResultsAppView
 
 
         if (mNewAppHandler.contains(packageName)) {
-            holder.row.setBackgroundColor(mColorBgGray);
+            holder.row.setBackgroundColor(mColorBgDisabled);
         } else {
-            holder.row.setBackgroundColor(mColorBgWhite);
+            holder.row.setBackgroundColor(mColorBgNormal);
         }
 
         String imageUrl = doc.getIconUrl();

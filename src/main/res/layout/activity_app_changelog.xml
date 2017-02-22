@@ -40,7 +40,7 @@
                     android:layout_marginRight="8dp"
                     android:gravity="left"
                     android:text="@string/problem_occurred"
-                    android:textColor="@color/white" />
+                    android:textColor="@color/primary_text_dark" />
 
             </LinearLayout>
 
@@ -170,7 +170,7 @@
         android:layout_marginRight="8dp"
         android:layout_marginTop="@dimen/playstore_button_margin_top"
         android:src="@drawable/ic_play_arrow_black_48dp"
-        app:backgroundTint="@color/white"
+        app:backgroundTint="@color/fab_tint"
         app:elevation="2dp"
         app:fabSize="mini" />
 

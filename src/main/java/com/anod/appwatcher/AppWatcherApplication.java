@@ -2,6 +2,7 @@ package com.anod.appwatcher;
 
 import android.app.Application;
 import android.content.Context;
+import android.support.v7.app.AppCompatDelegate;
 import android.view.ViewConfiguration;
 
 import com.android.volley.VolleyLog;
@@ -14,6 +15,11 @@ import info.anodsplace.android.log.AppLog;
 
 public class AppWatcherApplication extends Application implements AppLog.Listener {
     private ObjectGraph mObjectGraph;
+
+    static {
+        AppCompatDelegate.setDefaultNightMode(
+                AppCompatDelegate.MODE_NIGHT_NO);
+    }
 
     @Override
 	 public void onCreate() {

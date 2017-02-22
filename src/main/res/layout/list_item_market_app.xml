@@ -7,7 +7,7 @@
     android:layout_marginBottom="4dp"
 
     android:clickable="true"
-    card_view:cardBackgroundColor="@color/white"
+    card_view:cardBackgroundColor="@color/item_background"
     card_view:cardCornerRadius="4dp">
 
     <LinearLayout
