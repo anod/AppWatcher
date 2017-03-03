@@ -99,7 +99,7 @@
     <string name="navdrawer_item_settings">Настройки</string>
     <string name="pref_descr_opensource">Сведения о лицензиях на программное обеспечение с открытым исходным кодом</string>
     <string name="pref_title_opensource">Лицензии с открытым исходным кодом</string>
-    <string name="search">Поиск...</string>
+    <string name="search">Поиск…</string>
     <string name="search_for_an_app">Поиск аппликации</string>
     <string name="settings">Настройки</string>
     <string name="share_from_play_store">Поделиться из Play Store</string>
@@ -109,4 +109,28 @@
     <string name="tab_not_installed">Не установленные</string>
     <string name="uninstall">Удалить</string>
     <string name="watch_list_is_empty">Список наблюдений пуст</string>
+    <string name="navdrawer_item_wishlist">Список желаний</string>
+    <string name="no_result_wishlist">Список пуст. Вы можете добавить аппликации в Play Маркете</string>
+    <string name="noti_action_update">Обновить</string>
+    <string name="pref_descr_theme">Выбрать между темной и светлой темой</string>
+    <string name="pref_header_interface">Интерфейс</string>
+    <string name="pref_title_location">Место</string>
+    <string name="pref_title_theme">Тема</string>
+    <string name="settings_notifications">Уведомления</string>
+    <string name="update_all">Обновить все</string>
+    <string name="uptodate_summary">Показывать уведомления об уже обновленных аппликациях</string>
+    <string name="uptodate_title">Уведомлять об установленных</string>
+    <string name="wishlist">Список желаний</string>
+    <string-array name="sort_titles">
+        <item>Название &#x2193;</item>
+        <item>Название &#x2191;</item>
+        <item>Дата &#x2193;</item>
+        <item>Дата &#x2191;</item>
+    </string-array>
+
+    <string-array name="themes">
+        <item>Авто (Темная с 22 до 6)</item> <!-- MODE_NIGHT_AUTO = 0; -->
+        <item>Светлая</item> <!-- MODE_NIGHT_NO = 1; -->
+        <item>Темная</item> <!-- MODE_NIGHT_YES = 2; -->
+    </string-array>
 </resources>
