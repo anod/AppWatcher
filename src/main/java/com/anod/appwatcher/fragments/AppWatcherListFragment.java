@@ -200,6 +200,10 @@ public class AppWatcherListFragment extends Fragment implements
 
     @Override
     public void onSyncStart() {
+        if (mInstalledApps instanceof InstalledAppsProvider.MemoryCache)
+        {
+            ((InstalledAppsProvider.MemoryCache)mInstalledApps).reset();
+        }
         if (mSwipeLayout!= null){
             mSwipeLayout.setRefreshing(true);
         }

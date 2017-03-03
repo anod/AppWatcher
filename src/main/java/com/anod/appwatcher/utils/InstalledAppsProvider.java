@@ -60,7 +60,7 @@ public interface InstalledAppsProvider {
 
     class MemoryCache implements InstalledAppsProvider
     {
-        private final ArrayMap<String, InstalledAppsProvider.Info> mInstalledVersionsCache = new ArrayMap<>();
+        private final ArrayMap<String, InstalledAppsProvider.Info> mCache = new ArrayMap<>();
         private final InstalledAppsProvider mInstalledAppsProvider;
 
         public MemoryCache(InstalledAppsProvider installedAppsProvider) {
@@ -68,14 +68,20 @@ public interface InstalledAppsProvider {
         }
 
         public @NonNull InstalledAppsProvider.Info getInfo(String packageName) {
-            if (mInstalledVersionsCache.containsKey(packageName)) {
-                return mInstalledVersionsCache.get(packageName);
+            if (mCache.containsKey(packageName)) {
+                return mCache.get(packageName);
             }
 
             Info info = mInstalledAppsProvider.getInfo(packageName);
-            mInstalledVersionsCache.put(packageName, info);
+            mCache.put(packageName, info);
             return info;
         }
+
+        public void reset()
+        {
+            mCache.clear();
+        }
+
     }
 
 }
