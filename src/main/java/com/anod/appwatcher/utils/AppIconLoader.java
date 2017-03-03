@@ -1,28 +1,21 @@
 package com.anod.appwatcher.utils;
 
 import android.content.ComponentName;
-import android.content.ContentProviderClient;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.RemoteException;
 
 import com.anod.appwatcher.AppListContentProvider;
 import com.anod.appwatcher.BuildConfig;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.model.AppListContentProviderClient;
-import com.anod.appwatcher.model.schema.AppListTable;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Request;
 import com.squareup.picasso.RequestCreator;
 import com.squareup.picasso.RequestHandler;
 
 import java.io.IOException;
-import java.util.Map;
 
 import info.anodsplace.android.log.AppLog;
 
@@ -40,12 +33,12 @@ public class AppIconLoader {
     }
 
     static class PackageIconRequestHandler extends RequestHandler {
-        private final PackageManagerUtils mPackageManager;
+        private final PackageManager mPackageManager;
         private final Context mContext;
 
-        public PackageIconRequestHandler(Context context) {
+        PackageIconRequestHandler(Context context) {
             mContext = context;
-            mPackageManager = new PackageManagerUtils(context.getPackageManager());
+            mPackageManager = context.getPackageManager();
         }
 
         @Override
@@ -60,7 +53,7 @@ public class AppIconLoader {
             AppLog.d("Get Activity Info: " + part);
             ComponentName cmp = ComponentName.unflattenFromString(part);
 
-            Bitmap icon = mPackageManager.loadIcon(cmp, mContext.getResources().getDisplayMetrics());
+            Bitmap icon = PackageManagerUtils.loadIcon(cmp, mContext.getResources().getDisplayMetrics(), mPackageManager);
             if (icon == null){
                 return null;
             }
@@ -73,7 +66,7 @@ public class AppIconLoader {
 
         private final Context mContext;
 
-        public IconDbRequestHandler(Context context) {
+        IconDbRequestHandler(Context context) {
             mContext = context;
         }
 

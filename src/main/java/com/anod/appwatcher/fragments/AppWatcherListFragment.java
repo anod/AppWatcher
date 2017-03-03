@@ -30,8 +30,8 @@ import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListCursorLoader;
 import com.anod.appwatcher.model.Filters;
 import com.anod.appwatcher.model.InstalledFilter;
+import com.anod.appwatcher.utils.InstalledAppsProvider;
 import com.anod.appwatcher.utils.IntentUtils;
-import com.anod.appwatcher.utils.PackageManagerUtils;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -51,7 +51,7 @@ public class AppWatcherListFragment extends Fragment implements
     private static final int REQUEST_APP_INFO = 1;
 
     protected String mTitleFilter = "";
-    protected PackageManagerUtils mPMUtils;
+    protected InstalledAppsProvider mInstalledApps;
     protected MergeRecyclerAdapter mAdapter;
     protected int mSortId;
     protected int mFilterId;
@@ -125,14 +125,14 @@ public class AppWatcherListFragment extends Fragment implements
         // We have a menu item to show in action bar.
         setHasOptionsMenu(true);
 
-        mPMUtils = new PackageManagerUtils(getActivity().getPackageManager());
+        mInstalledApps = new InstalledAppsProvider.MemoryCache(new InstalledAppsProvider.PackageManager(getActivity().getPackageManager()));
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         mListView.setLayoutManager(layoutManager);
 
         // Create an empty adapter we will use to display the loaded data.
         mAdapter = new MergeRecyclerAdapter();
-        mAdapter.addAdapter(ADAPTER_WATCHLIST, new ListCursorAdapterWrapper(getActivity(), mPMUtils, this));
+        mAdapter.addAdapter(ADAPTER_WATCHLIST, new ListCursorAdapterWrapper(getActivity(), mInstalledApps, this));
         mListView.setAdapter(mAdapter);
 
         // Start out with a progress indicator.
@@ -175,9 +175,9 @@ public class AppWatcherListFragment extends Fragment implements
 
     protected InstalledFilter createFilter(int filterId) {
         if (filterId == Filters.TAB_INSTALLED) {
-            return new InstalledFilter(true, mPMUtils);
+            return new InstalledFilter(true, mInstalledApps);
         } else if (filterId == Filters.TAB_UNINSTALLED) {
-            return new InstalledFilter(false, mPMUtils);
+            return new InstalledFilter(false, mInstalledApps);
         }
         return null;
     }

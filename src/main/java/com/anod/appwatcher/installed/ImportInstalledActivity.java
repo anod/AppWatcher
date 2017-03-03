@@ -2,6 +2,7 @@ package com.anod.appwatcher.installed;
 
 import android.accounts.Account;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
@@ -22,6 +23,7 @@ import com.anod.appwatcher.fragments.AccountChooserFragment;
 import com.anod.appwatcher.model.WatchAppList;
 import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.ui.ToolbarActivity;
+import com.anod.appwatcher.utils.InstalledAppsProvider;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 
 import java.util.Collections;
@@ -43,7 +45,6 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
     @BindView(android.R.id.progress)
     ProgressBar mProgress;
 
-    private PackageManagerUtils mPMUtils;
     private boolean mAllSelected;
     private ImportDataProvider mDataProvider;
     private AccountChooserHelper mAccountChooserHelper;
@@ -56,13 +57,11 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
         ButterKnife.bind(this);
         setupToolbar();
 
-        mPMUtils = new PackageManagerUtils(getPackageManager());
-
         mImportManager = new ImportBulkManager(this, this);
-        mDataProvider = new ImportDataProvider(this, mPMUtils);
+        mDataProvider = new ImportDataProvider(this, new InstalledAppsProvider.MemoryCache(new InstalledAppsProvider.PackageManager(getPackageManager())));
 
         mList.setLayoutManager(new LinearLayoutManager(this));
-        mList.setAdapter(new ImportAdapter(this, mPMUtils, mDataProvider));
+        mList.setAdapter(new ImportAdapter(this, getPackageManager(), mDataProvider));
         mList.setItemAnimator(new ImportItemAnimator(this));
         getSupportLoaderManager().initLoader(0, null, this).forceLoad();
     }
@@ -115,7 +114,7 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
 
     @Override
     public Loader<List<String>> onCreateLoader(int id, Bundle args) {
-        return new LocalPackageLoader(this, mPMUtils);
+        return new LocalPackageLoader(this);
     }
 
     @Override
@@ -192,11 +191,9 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
 
 
     private static class LocalPackageLoader extends AsyncTaskLoader<List<String>> {
-        private final PackageManagerUtils mPMUtils;
 
-        LocalPackageLoader(Context context, PackageManagerUtils pmUtils) {
+        LocalPackageLoader(Context context) {
             super(context);
-            mPMUtils = pmUtils;
         }
 
         @Override
@@ -205,11 +202,12 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
             SimpleArrayMap<String, Integer> watchingPackages = cr.queryPackagesMap(false);
             cr.release();
 
-            List<String> list =  mPMUtils.getDownloadedApps(watchingPackages);
+            final PackageManager pm = getContext().getPackageManager();
+            List<String> list =  PackageManagerUtils.getDownloadedApps(watchingPackages, pm);
             Collections.sort(list, new Comparator<String>() {
                 @Override
                 public int compare(String lPackageName, String rPackageName) {
-                    return mPMUtils.getAppTitle(lPackageName).compareTo(mPMUtils.getAppTitle(rPackageName));
+                    return PackageManagerUtils.getAppTitle(lPackageName, pm).compareTo(PackageManagerUtils.getAppTitle(rPackageName, pm));
                 }
             });
 

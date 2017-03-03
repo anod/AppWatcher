@@ -15,7 +15,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.graphics.Palette;
-import android.support.v7.graphics.Target;
 import android.text.Html;
 import android.text.TextUtils;
 import android.text.util.Linkify;
@@ -42,6 +41,7 @@ import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.model.WatchAppList;
 import com.anod.appwatcher.ui.ToolbarActivity;
 import com.anod.appwatcher.utils.AppIconLoader;
+import com.anod.appwatcher.utils.InstalledAppsProvider;
 import com.anod.appwatcher.utils.IntentUtils;
 import com.anod.appwatcher.utils.MetricsManagerEvent;
 import com.anod.appwatcher.utils.PackageManagerUtils;
@@ -86,7 +86,6 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
     private AppInfo mApp;
     private boolean mNewApp;
     private MenuItem mAddMenu;
-    private PackageManagerUtils mPMutils;
     private AppIconLoader mIconLoader;
     private AppViewHolderDataProvider mDataProvider;
     private AppDetailsView mAppDetailsView;
@@ -108,8 +107,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
         App.provide(this).crashListener().put("DETAILS_ROW_ID", String.valueOf(rowId));
         MetricsManagerEvent.track("OPEN_CHANGELOG", "DETAILS_APP_ID", mAppId, "DETAILS_ROW_ID", String.valueOf(rowId));
 
-        mPMutils = new PackageManagerUtils(getPackageManager());
-        mDataProvider = new AppViewHolderDataProvider(this, mPMutils);
+        mDataProvider = new AppViewHolderDataProvider(this, new InstalledAppsProvider.MemoryCache(new InstalledAppsProvider.PackageManager(getPackageManager())));
         mAppDetailsView = new AppDetailsView(findViewById(R.id.container), mDataProvider);
 
         mDetailsEndpoint = new DetailsEndpoint(this);
@@ -158,7 +156,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
 
     private AppInfo loadInstalledApp()
     {
-        return mPMutils.packageToApp(mAppId);
+        return PackageManagerUtils.packageToApp(mAppId, getPackageManager());
     }
 
     @Override
@@ -246,7 +244,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
         } else {
             menu.findItem(R.id.menu_add).setVisible(false);
         }
-        if (!mPMutils.isAppInstalled(mAppId)) {
+        if (!mDataProvider.getInstalledAppsProvider().getInfo(mAppId).isInstalled()) {
             menu.findItem(R.id.menu_uninstall).setVisible(false);
         }
 

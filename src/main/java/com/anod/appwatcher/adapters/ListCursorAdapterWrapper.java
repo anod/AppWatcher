@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import com.anod.appwatcher.App;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.utils.AppIconLoader;
+import com.anod.appwatcher.utils.InstalledAppsProvider;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 
 /**
@@ -23,12 +24,12 @@ public class ListCursorAdapterWrapper extends RecyclerView.Adapter<AppViewHolder
     private Context mContext;
     private AppViewHolder.OnClickListener mListener;
 
-    public ListCursorAdapterWrapper(Context context, PackageManagerUtils pmutils, AppViewHolder.OnClickListener listener) {
+    public ListCursorAdapterWrapper(Context context, InstalledAppsProvider iap, AppViewHolder.OnClickListener listener) {
         mCursorAdapter = new ListCursorAdapter(context);
         mContext = context;
         mListener = listener;
 
-        mDataProvider = new AppViewHolderDataProvider(context, pmutils);
+        mDataProvider = new AppViewHolderDataProvider(context, iap);
         mIconLoader = App.provide(context).iconLoader();
     }
 

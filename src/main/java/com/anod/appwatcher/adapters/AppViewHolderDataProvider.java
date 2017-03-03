@@ -9,6 +9,7 @@ import android.support.annotation.ColorRes;
 import android.support.v4.content.ContextCompat;
 
 import com.anod.appwatcher.R;
+import com.anod.appwatcher.utils.InstalledAppsProvider;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 
 /**
@@ -17,18 +18,18 @@ import com.anod.appwatcher.utils.PackageManagerUtils;
  */
 public class AppViewHolderDataProvider implements AppViewHolder.DataProvider {
     private final String mInstalledText;
-    private final PackageManagerUtils mPMUtils;
+    private final InstalledAppsProvider mInstalledAppsProvider;
     private int mTotalCount;
     private int mNewAppsCount;
     private Bitmap mDefaultIcon;
     private Context mContext;
     private int mUpdatableAppsCount;
 
-    public AppViewHolderDataProvider(Context context, PackageManagerUtils pmutils) {
+    public AppViewHolderDataProvider(Context context, InstalledAppsProvider installedAppsProvider) {
         Resources r = context.getResources();
         mContext = context;
         mInstalledText = r.getString(R.string.installed);
-        mPMUtils = pmutils;
+        mInstalledAppsProvider = installedAppsProvider;
     }
 
     void setNewAppsCount(int newAppsCount, int updatableAppsCount) {
@@ -63,8 +64,8 @@ public class AppViewHolderDataProvider implements AppViewHolder.DataProvider {
     }
 
     @Override
-    public PackageManagerUtils getPackageManagerUtils() {
-        return mPMUtils;
+    public InstalledAppsProvider getInstalledAppsProvider() {
+        return mInstalledAppsProvider;
     }
 
     @Override

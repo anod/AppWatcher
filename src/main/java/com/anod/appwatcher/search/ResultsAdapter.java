@@ -9,27 +9,28 @@ import android.view.ViewGroup;
 
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.model.WatchAppList;
-import com.anod.appwatcher.utils.PackageManagerUtils;
+import com.anod.appwatcher.utils.InstalledAppsProvider;
 import com.google.android.finsky.api.model.Document;
 import com.google.android.finsky.protos.nano.Messages.Common;
 import com.google.android.finsky.protos.nano.Messages.AppDetails;
 import com.squareup.picasso.Picasso;
 
 public abstract class ResultsAdapter extends RecyclerView.Adapter<ResultsAppViewHolder> {
-    private final PackageManagerUtils mPMUtils;
     private final Context mContext;
     private final int mColorBgDisabled;
     private final int mColorBgNormal;
     private final WatchAppList mNewAppHandler;
+    private final InstalledAppsProvider mInstalledAppsProvider;
 
     protected ResultsAdapter(Context context, WatchAppList newAppHandler) {
         super();
         mContext = context;
-        mPMUtils = new PackageManagerUtils(context.getPackageManager());
         mNewAppHandler = newAppHandler;
 
         mColorBgDisabled = ContextCompat.getColor(context, R.color.row_inactive);
         mColorBgNormal = ContextCompat.getColor(context, R.color.item_background);
+
+        mInstalledAppsProvider = new InstalledAppsProvider.MemoryCache(new InstalledAppsProvider.PackageManager(context.getPackageManager()));
     }
 
     @Override
@@ -66,7 +67,7 @@ public abstract class ResultsAdapter extends RecyclerView.Adapter<ResultsAppView
                 .placeholder(R.drawable.ic_blur_on_black_48dp)
                 .into(holder.icon);
 
-        boolean isInstalled = mPMUtils.isAppInstalled(packageName);
+        boolean isInstalled = mInstalledAppsProvider.getInfo(packageName).isInstalled();
         if (isInstalled) {
             holder.price.setText(R.string.installed);
         } else {

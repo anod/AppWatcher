@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import com.anod.appwatcher.AppListContentProvider;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.utils.AppIconLoader;
+import com.anod.appwatcher.utils.InstalledAppsProvider;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 
 /**
@@ -27,7 +28,7 @@ public abstract class AppViewHolderBase extends RecyclerView.ViewHolder {
         String getInstalledText();
         int getTotalAppsCount();
         int getNewAppsCount();
-        PackageManagerUtils getPackageManagerUtils();
+        InstalledAppsProvider getInstalledAppsProvider();
         Bitmap getDefaultIcon();
         int getDefaultIconResource();
         String formatVersionText(String versionName, int versionNumber);

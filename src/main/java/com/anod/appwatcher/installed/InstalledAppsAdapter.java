@@ -1,6 +1,7 @@
 package com.anod.appwatcher.installed;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,17 +28,17 @@ public class InstalledAppsAdapter extends ArrayAdapter<String, AppViewHolderBase
     protected final AppViewHolder.OnClickListener mListener;
     protected final Context mContext;
     private final AppViewHolderDataProvider mDataProvider;
-    private final PackageManagerUtils mPMUtils;
+    private final PackageManager mPackageManager;
 
     final AppIconLoader mIconLoader;
 
-    public InstalledAppsAdapter(Context context, PackageManagerUtils pmutils, AppViewHolderDataProvider dataProvider, AppViewHolder.OnClickListener listener) {
+    public InstalledAppsAdapter(Context context, PackageManager pm, AppViewHolderDataProvider dataProvider, AppViewHolder.OnClickListener listener) {
         super(new ArrayList<String>());
         mContext = context;
         mListener = listener;
         mDataProvider = dataProvider;
 
-        mPMUtils = pmutils;
+        mPackageManager = pm;
         mIconLoader = App.provide(context).iconLoader();
 
     }
@@ -60,7 +61,7 @@ public class InstalledAppsAdapter extends ArrayAdapter<String, AppViewHolderBase
     @Override
     public void onBindViewHolder(AppViewHolderBase holder, int position) {
         String packageName = getItem(position);
-        AppInfo app = mPMUtils.packageToApp(packageName);
+        AppInfo app = PackageManagerUtils.packageToApp(packageName, mPackageManager);
         /**
          *
          * int rowId, String appId, String pname, int versionNumber, String versionName,

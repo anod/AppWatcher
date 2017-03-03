@@ -3,7 +3,7 @@ package com.anod.appwatcher.model;
 import android.database.Cursor;
 
 import com.anod.appwatcher.utils.FilterCursorWrapper;
-import com.anod.appwatcher.utils.PackageManagerUtils;
+import com.anod.appwatcher.utils.InstalledAppsProvider;
 
 /**
  * @author alex
@@ -11,13 +11,13 @@ import com.anod.appwatcher.utils.PackageManagerUtils;
  */
 public class InstalledFilter implements FilterCursorWrapper.CursorFilter {
     private final boolean mIncludeInstalled;
-    private final PackageManagerUtils mPMUtils;
+    private final InstalledAppsProvider mInstalledAppsProvider;
     private int mNewCount;
     private int mInstalledNewCount;
 
-    public InstalledFilter(boolean includeInstalled, PackageManagerUtils pmutils) {
+    public InstalledFilter(boolean includeInstalled, InstalledAppsProvider iap) {
         mIncludeInstalled = includeInstalled;
-        mPMUtils = pmutils;
+        mInstalledAppsProvider = iap;
     }
 
     @Override
@@ -26,8 +26,8 @@ public class InstalledFilter implements FilterCursorWrapper.CursorFilter {
         int status = cursor.getInt(AppListCursor.IDX_STATUS);
         int versionCode = cursor.getInt(AppListCursor.IDX_VERSION_NUMBER);
 
-        PackageManagerUtils.InstalledInfo installedInfo = mPMUtils.getInstalledInfo(packageName);
-        boolean installed = installedInfo.versionCode > 0;
+        InstalledAppsProvider.Info installedInfo = mInstalledAppsProvider.getInfo(packageName);
+        boolean installed = installedInfo.isInstalled();
 
         if (mIncludeInstalled && !installed) {
             return true;
@@ -39,7 +39,7 @@ public class InstalledFilter implements FilterCursorWrapper.CursorFilter {
 
         if (status == AppInfo.STATUS_UPDATED) {
             mNewCount++;
-            if (mPMUtils.isUpdatable(packageName, versionCode)) {
+            if (installedInfo.isUpdatable(versionCode)) {
                 mInstalledNewCount++;
             }
         }

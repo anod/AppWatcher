@@ -35,40 +35,28 @@ import info.anodsplace.android.log.AppLog;
  * @date 9/18/13
  */
 public class PackageManagerUtils {
-    private PackageManager mPackageManager;
-    private ArrayMap<String, InstalledInfo> mInstalledVersionsCache;
-    public AppInfo packageToApp(String packageName) {
-        PackageInfo packageInfo = getPackageInfo(packageName);
+
+    public static AppInfo packageToApp(String packageName, PackageManager pm) {
+        PackageInfo packageInfo = getPackageInfo(packageName, pm);
         if (packageInfo == null) {
             return AppInfo.fromLocalPackage(null, packageName, "", null);
         }
-        ComponentName launchComponent = getLaunchComponent(packageInfo);
-        String appTitle = getAppTitle(packageInfo);
+        ComponentName launchComponent = getLaunchComponent(packageInfo, pm);
+        String appTitle = getAppTitle(packageInfo, pm);
         return AppInfo.fromLocalPackage(packageInfo, packageName, appTitle, launchComponent);
     }
 
-    private PackageInfo getPackageInfo(String packageName) {
-        PackageInfo pkgInfo = null;
-        try {
-            pkgInfo = mPackageManager.getPackageInfo(packageName, 0);
-        } catch (PackageManager.NameNotFoundException e) {
-            AppLog.e(e);
-        }
-
-        return pkgInfo;
-    }
-
-    Bitmap loadIcon(ComponentName componentName, DisplayMetrics displayMetrics) {
+    static Bitmap loadIcon(ComponentName componentName, DisplayMetrics displayMetrics, PackageManager pm) {
         Drawable d = null;
         Bitmap icon;
         try {
-            d = mPackageManager.getActivityIcon(componentName);
+            d = pm.getActivityIcon(componentName);
         } catch (PackageManager.NameNotFoundException ignored) {
         }
 
         if (d == null) {
             try {
-                d = mPackageManager.getApplicationIcon(componentName.getPackageName());
+                d = pm.getApplicationIcon(componentName.getPackageName());
             } catch (PackageManager.NameNotFoundException e1) {
                 AppLog.e(e1);
                 return null;
@@ -87,48 +75,29 @@ public class PackageManagerUtils {
         return null;
     }
 
-    public static class InstalledInfo {
-        public int versionCode = 0;
-        public String versionName = null;
-    }
-
-    public PackageManagerUtils(PackageManager pm) {
-        mPackageManager = pm;
-        mInstalledVersionsCache = new ArrayMap<>();
-    }
-
-    public String getAppTitle(String packageName) {
-        PackageInfo info = getPackageInfo(packageName);
+    public static String getAppTitle(String packageName, PackageManager pm) {
+        PackageInfo info = getPackageInfo(packageName, pm);
         if (info == null) {
             return packageName;
         }
-        return getAppTitle(getPackageInfo(packageName));
+        return getAppTitle(info, pm);
     }
 
-    private String getAppTitle(@NonNull PackageInfo info) {
-        return info.applicationInfo.loadLabel(mPackageManager).toString();
-    }
-
-    public long getAppUpdateTime(String packageName) {
-        PackageInfo info = getPackageInfo(packageName);
+    public static long getAppUpdateTime(String packageName, PackageManager pm) {
+        PackageInfo info = getPackageInfo(packageName, pm);
         if (info == null) {
             return 0;
         }
-        return getPackageInfo(packageName).lastUpdateTime;
+        return getPackageInfo(packageName, pm).lastUpdateTime;
     }
 
-    private ComponentName getLaunchComponent(PackageInfo info) {
-        Intent launchIntent = mPackageManager.getLaunchIntentForPackage(info.packageName);
-        return launchIntent == null ? null : launchIntent.getComponent();
-    }
-
-    public List<String> getDownloadedApps(SimpleArrayMap<String, Integer> filter) {
+    public static List<String> getDownloadedApps(SimpleArrayMap<String, Integer> filter, PackageManager pm) {
         List<PackageInfo> packs;
         try {
-            packs = mPackageManager.getInstalledPackages(0);
+            packs = pm.getInstalledPackages(0);
         } catch (Exception e) {
             AppLog.e(e);
-            return this.getDownloadedPackagesFallback(filter);
+            return getDownloadedPackagesFallback(filter);
         }
         List<String> downloaded = new ArrayList<>(packs.size());
         for (int i = 0; i < packs.size(); i++) {
@@ -146,7 +115,7 @@ public class PackageManagerUtils {
         return downloaded;
     }
 
-    private List<String> getDownloadedPackagesFallback(SimpleArrayMap<String, Integer> filter) {
+    private static List<String> getDownloadedPackagesFallback(SimpleArrayMap<String, Integer> filter) {
         List<String> downloaded = new ArrayList<>();
         BufferedReader bufferedReader = null;
         try {
@@ -175,35 +144,23 @@ public class PackageManagerUtils {
         return downloaded;
     }
 
-    public @NonNull InstalledInfo getInstalledInfo(String packageName) {
-        if (mInstalledVersionsCache.containsKey(packageName)) {
-            return mInstalledVersionsCache.get(packageName);
-        }
+    private static String getAppTitle(@NonNull PackageInfo info, PackageManager pm) {
+        return info.applicationInfo.loadLabel(pm).toString();
+    }
 
+    private static PackageInfo getPackageInfo(String packageName, PackageManager pm) {
         PackageInfo pkgInfo = null;
         try {
-            pkgInfo = mPackageManager.getPackageInfo(packageName, 0);
+            pkgInfo = pm.getPackageInfo(packageName, 0);
         } catch (PackageManager.NameNotFoundException e) {
-            // skip
+            AppLog.e(e);
         }
 
-        InstalledInfo info = new InstalledInfo();
-        if (pkgInfo != null) {
-            info.versionCode = pkgInfo.versionCode;
-            info.versionName = pkgInfo.versionName;
-        }
-
-        mInstalledVersionsCache.put(packageName, info);
-        return info;
+        return pkgInfo;
     }
 
-    public boolean isUpdatable(String packageName, int versionNumber) {
-        InstalledInfo info = getInstalledInfo(packageName);
-        return info.versionCode > 0 && info.versionCode != versionNumber;
-    }
-
-    public boolean isAppInstalled(String packageName) {
-        InstalledInfo info = getInstalledInfo(packageName);
-        return info.versionCode > 0;
+    private static ComponentName getLaunchComponent(PackageInfo info, PackageManager pm) {
+        Intent launchIntent = pm.getLaunchIntentForPackage(info.packageName);
+        return launchIntent == null ? null : launchIntent.getComponent();
     }
 }

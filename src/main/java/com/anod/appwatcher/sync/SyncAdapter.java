@@ -16,7 +16,6 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 
 import com.android.volley.VolleyError;
-import com.anod.appwatcher.BuildConfig;
 import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.accounts.AuthTokenProvider;
 import com.anod.appwatcher.backup.GDriveSync;
@@ -29,7 +28,7 @@ import com.anod.appwatcher.model.schema.AppListTable;
 import com.anod.appwatcher.utils.CollectionsUtils;
 import com.anod.appwatcher.utils.AppDetailsUploadDate;
 import com.anod.appwatcher.utils.GooglePlayServices;
-import com.anod.appwatcher.utils.PackageManagerUtils;
+import com.anod.appwatcher.utils.InstalledAppsProvider;
 import com.google.android.finsky.api.model.Document;
 import com.google.android.finsky.protos.nano.Messages.Common;
 
@@ -47,8 +46,8 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
     static final String SYNC_EXTRAS_MANUAL = "manual";
 
     private final Context mContext;
-    private final PackageManagerUtils mPMUtils;
     private final Preferences mPreferences;
+    private final InstalledAppsProvider mInstalledAppsProvider;
 
     public static final String SYNC_STOP = "com.anod.appwatcher.sync.start";
     public static final String SYNC_PROGRESS = "com.anod.appwatcher.sync.progress";
@@ -56,8 +55,8 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
 
     public SyncAdapter(Context context) {
         mContext = context;
-        mPMUtils = new PackageManagerUtils(context.getPackageManager());
         mPreferences = new Preferences(mContext);
+        mInstalledAppsProvider = new InstalledAppsProvider.PackageManager(mContext.getPackageManager());
     }
 
     int onPerformSync(Bundle extras, ContentProviderClient provider) {
@@ -287,7 +286,7 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
             client.update(newApp);
             String recentChanges = (updatedTitles.size() == 0) ? appDetails.recentChangesHtml : null;
 
-            PackageManagerUtils.InstalledInfo installedInfo = mPMUtils.getInstalledInfo(appDetails.packageName);
+            InstalledAppsProvider.Info installedInfo = mInstalledAppsProvider.getInfo(appDetails.packageName);
             updatedTitles.add(new UpdatedApp(localApp.getAppId(), marketApp.getTitle(), appDetails.packageName, recentChanges, appDetails.versionCode, installedInfo.versionCode));
             return;
         }

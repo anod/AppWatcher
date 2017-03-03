@@ -10,7 +10,7 @@ import com.anod.appwatcher.AppListContentProvider;
 import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.model.schema.AppListTable;
 import com.anod.appwatcher.utils.FilterCursorWrapper;
-import com.anod.appwatcher.utils.PackageManagerUtils;
+import com.anod.appwatcher.utils.InstalledAppsProvider;
 
 import java.util.ArrayList;
 
@@ -103,11 +103,11 @@ public class AppListCursorLoader extends CursorLoader {
 
         mNewCount = apps.getCount();
         if (mNewCount > 0) {
-            PackageManagerUtils pm = new PackageManagerUtils(getContext().getPackageManager());
+            InstalledAppsProvider iap = new InstalledAppsProvider.PackageManager(getContext().getPackageManager());
             apps.moveToPosition(-1);
             while (apps.moveToNext()) {
                 AppInfo info = apps.getAppInfo();
-                if (pm.isUpdatable(info.packageName, info.versionNumber))
+                if (iap.getInfo(info.packageName).isUpdatable(info.versionNumber))
                 {
                     mUpdatableNewCount++;
                 }

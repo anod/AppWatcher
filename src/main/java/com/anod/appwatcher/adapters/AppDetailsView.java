@@ -8,7 +8,7 @@ import android.widget.TextView;
 
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.model.AppInfo;
-import com.anod.appwatcher.utils.PackageManagerUtils;
+import com.anod.appwatcher.utils.InstalledAppsProvider;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -87,7 +87,7 @@ public class AppDetailsView {
         assert price != null;
         assert version != null;
 
-        boolean isInstalled = mDataProvider.getPackageManagerUtils().isAppInstalled(app.packageName);
+        boolean isInstalled = mDataProvider.getInstalledAppsProvider().getInfo(app.packageName).isInstalled();
         version.setText(mDataProvider.formatVersionText(app.versionName, app.versionNumber));
         if (app.getStatus() == AppInfo.STATUS_UPDATED) {
             version.setTextColor(mAccentColor);
@@ -97,7 +97,7 @@ public class AppDetailsView {
 
         price.setTextColor(mAccentColor);
         if (isInstalled) {
-            PackageManagerUtils.InstalledInfo installed = mDataProvider.getPackageManagerUtils().getInstalledInfo(app.packageName);
+            InstalledAppsProvider.Info installed = mDataProvider.getInstalledAppsProvider().getInfo(app.packageName);
             price.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stat_communication_stay_primary_portrait, 0,0,0);
             if (TextUtils.isEmpty(installed.versionName)) {
                 price.setText(mDataProvider.getInstalledText());
