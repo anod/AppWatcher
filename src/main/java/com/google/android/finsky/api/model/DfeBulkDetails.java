@@ -2,6 +2,7 @@ package com.google.android.finsky.api.model;
 
 import com.android.volley.Response;
 import com.anod.appwatcher.BuildConfig;
+import com.anod.appwatcher.utils.CollectionsUtils;
 import com.google.android.finsky.api.DfeApi;
 import com.google.android.finsky.protos.nano.Messages.Details;
 import com.google.android.finsky.protos.nano.Messages.DocV2;
@@ -16,11 +17,13 @@ public class DfeBulkDetails extends DfeBaseModel<Details.BulkDetailsResponse>
     private Details.BulkDetailsResponse mBulkDetailsResponse;
     private final DfeApi mDfeApi;
     private List<String> mDocIds;
-    
-    public DfeBulkDetails(final DfeApi mDfeApi) {
-        super();
-        this.mDfeApi = mDfeApi;
 
+    private final CollectionsUtils.Predicate<? super Document> mResponseFiler;
+
+    public DfeBulkDetails(final DfeApi dfeApi, CollectionsUtils.Predicate<Document> responseFilter) {
+        super();
+        mDfeApi = dfeApi;
+        mResponseFiler = responseFilter;
     }
 
 
@@ -33,9 +36,8 @@ public class DfeBulkDetails extends DfeBaseModel<Details.BulkDetailsResponse>
         mDfeApi.getDetails(mDocIds, true, responseListener, errorListener);
     }
 
-
     public List<Document> getDocuments() {
-        List<Document> list;
+        ArrayList<Document> list;
         if (this.mBulkDetailsResponse == null) {
             list = null;
         }
@@ -53,9 +55,12 @@ public class DfeBulkDetails extends DfeBaseModel<Details.BulkDetailsResponse>
                 }
             }
         }
-        return list;
+        if (mResponseFiler == null || list == null) {
+            return list;
+        }
+        return CollectionsUtils.filter(list, mResponseFiler);
     }
-    
+
     @Override
     public boolean isReady() {
         return this.mBulkDetailsResponse != null;

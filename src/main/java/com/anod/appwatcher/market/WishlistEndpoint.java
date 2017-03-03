@@ -55,11 +55,6 @@ public class WishlistEndpoint extends PlayStoreEndpointBase {
 
     @Override
     protected DfeModel createDfeModel() {
-        return new DfeList(mDfeApi, mDfeApi.getLibraryUrl(BACKEND_ID, LIBRARY_ID, 7, null), mAutoloadNext, new CollectionsUtils.Predicate<Document>() {
-            @Override
-            public boolean test(Document document) {
-                return document.getAppDetails() == null;
-            }
-        });
+        return new DfeList(mDfeApi, mDfeApi.getLibraryUrl(BACKEND_ID, LIBRARY_ID, 7, null), mAutoloadNext, AppDetailsFilter.createPredicate());
     }
 }

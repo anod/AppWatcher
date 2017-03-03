@@ -63,6 +63,6 @@ public class SearchEndpoint extends PlayStoreEndpointBase {
     @Override
     protected DfeModel createDfeModel() {
         String searchUrl = DfeUtils.formSearchUrl(mQuery, BACKEND_ID);
-        return new DfeSearch(mDfeApi, mQuery, searchUrl, mAutoLoadNextPage);
+        return new DfeSearch(mDfeApi, mQuery, searchUrl, mAutoLoadNextPage, AppDetailsFilter.createPredicate());
     }
 }

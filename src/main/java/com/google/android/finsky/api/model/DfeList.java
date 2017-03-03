@@ -14,8 +14,8 @@ import java.util.List;
 
 public final class DfeList extends ContainerList<ListResponse>
 {
-    private DfeApi mDfeApi;
-    private CollectionsUtils.Predicate<Document> mResponseFiler;
+    private final DfeApi mDfeApi;
+    private final CollectionsUtils.Predicate<Document> mResponseFiler;
 
     public DfeList(final DfeApi dfeApi, final String mInitialListUrl, final boolean autoLoadNextPage, CollectionsUtils.Predicate<Document> responseFilter) {
         super(mInitialListUrl, autoLoadNextPage);

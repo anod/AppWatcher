@@ -1,5 +1,6 @@
 package com.google.android.finsky.api.model;
 
+import com.anod.appwatcher.utils.CollectionsUtils;
 import com.google.android.finsky.api.*;
 import android.os.*;
 import com.google.android.finsky.protos.nano.Messages.*;
@@ -17,7 +18,7 @@ public class DfeSearch extends ContainerList<Search.SearchResponse> implements P
     private String mSuggestedQuery;
     
     static {
-        DfeSearch.CREATOR = (Parcelable.Creator<DfeSearch>)new Parcelable.Creator<DfeSearch>() {
+        DfeSearch.CREATOR = new Parcelable.Creator<DfeSearch>() {
             public DfeSearch createFromParcel(final Parcel parcel) {
                 boolean aggregatedQuery = true;
                 final int int1 = parcel.readInt();
@@ -25,17 +26,15 @@ public class DfeSearch extends ContainerList<Search.SearchResponse> implements P
                 for (int i = 0; i < int1; ++i) {
                     list.add(new UrlOffsetPair(parcel.readInt(), parcel.readString()));
                 }
-                final int int2 = parcel.readInt();
-                final String string = parcel.readString();
+                final int count = parcel.readInt();
+                final String query = parcel.readString();
                 final int int3 = parcel.readInt();
-                Boolean value = null;
                 if (int3 >= 0) {
                     if (int3 != 1) {
                         aggregatedQuery = false;
                     }
-                    value = aggregatedQuery;
                 }
-                return new DfeSearch(list, int2, string, value);
+                return new DfeSearch(list, count, query, aggregatedQuery, null);
             }
             
             public DfeSearch[] newArray(final int n) {
@@ -43,17 +42,20 @@ public class DfeSearch extends ContainerList<Search.SearchResponse> implements P
             }
         };
     }
-    
-    public DfeSearch(final DfeApi dfeApi, final String query, final String initialUrl, boolean autoLoadNextPage) {
+
+    private final CollectionsUtils.Predicate<Document> mResponseFiler;
+
+    public DfeSearch(final DfeApi dfeApi, final String query, final String initialUrl, boolean autoLoadNextPage, CollectionsUtils.Predicate<Document> responseFilter) {
         super(initialUrl,autoLoadNextPage);
         mFullPageReplaced = false;
         mAggregatedQuery = null;
         mInitialUrl = initialUrl;
         mDfeApi = dfeApi;
         mQuery = query;
+        mResponseFiler = responseFilter;
     }
     
-    private DfeSearch(final List<UrlOffsetPair> list, final int count, final String query, final Boolean aggregatedQuery) {
+    private DfeSearch(final List<UrlOffsetPair> list, final int count, final String query, final Boolean aggregatedQuery, CollectionsUtils.Predicate<Document> responseFilter) {
         super(list, count, true);
         this.mFullPageReplaced = false;
         this.mAggregatedQuery = null;
@@ -65,6 +67,7 @@ public class DfeSearch extends ContainerList<Search.SearchResponse> implements P
             url = list.get(0).url;
         }
         this.mInitialUrl = url;
+        mResponseFiler = responseFilter;
     }
     
     protected void clearDiskCache() {
@@ -94,9 +97,16 @@ public class DfeSearch extends ContainerList<Search.SearchResponse> implements P
         if (searchResponse.doc == null || searchResponse.doc.length == 0) {
             return new Document[0];
         }
-        return this.updateContainerAndGetItems(searchResponse.doc[0]);
+        Document[] docs = this.updateContainerAndGetItems(searchResponse.doc[0]);
+        if (mResponseFiler == null)
+        {
+            return docs;
+        }
+        List<Document> list = CollectionsUtils.filter(Arrays.asList(docs), mResponseFiler);
+        return list.toArray(new Document[0]);
     }
-    
+
+
     protected String getNextPageUrl(final Search.SearchResponse searchResponse) {
         final int length = searchResponse.doc.length;
         String nextPageUrl = null;

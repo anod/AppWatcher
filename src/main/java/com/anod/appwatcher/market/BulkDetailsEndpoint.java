@@ -45,7 +45,7 @@ public class BulkDetailsEndpoint extends PlayStoreEndpointBase {
 
     @Override
     protected DfeModel createDfeModel() {
-        return new DfeBulkDetails(this.mDfeApi);
+        return new DfeBulkDetails(this.mDfeApi, AppDetailsFilter.createPredicate());
     }
 
 
