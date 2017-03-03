@@ -2,6 +2,7 @@ package com.anod.appwatcher;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.support.v7.app.AppCompatDelegate;
 import android.view.ViewConfiguration;
 
@@ -18,7 +19,7 @@ public class AppWatcherApplication extends Application implements AppLog.Listene
 
     static {
         AppCompatDelegate.setDefaultNightMode(
-                AppCompatDelegate.MODE_NIGHT_NO);
+                AppCompatDelegate.MODE_NIGHT_YES);
     }
 
     @Override
@@ -54,6 +55,18 @@ public class AppWatcherApplication extends Application implements AppLog.Listene
 
     public static ObjectGraph provide(Context context) {
         return ((AppWatcherApplication) context.getApplicationContext()).getObjectGraph();
+    }
+
+    public boolean isNightTheme() {
+        int currentNightMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        switch (currentNightMode) {
+            case Configuration.UI_MODE_NIGHT_YES:
+                return true;
+            case Configuration.UI_MODE_NIGHT_NO:
+            case Configuration.UI_MODE_NIGHT_UNDEFINED:
+                return false;
+        }
+        return false;
     }
 
     @Override

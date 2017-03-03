@@ -43,7 +43,7 @@
                     android:id="@+id/new_indicator"
                     android:layout_width="4dip"
                     android:layout_height="match_parent"
-                    android:background="@color/blue_new"
+                    android:background="@color/theme_accent"
                     android:gravity="left|center_vertical"
                     android:orientation="horizontal" />
             </FrameLayout>

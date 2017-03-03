@@ -47,7 +47,7 @@
     <style name="AlertDialog" parent="@style/Theme.AppCompat.DayNight.Dialog.Alert">
         <item name="colorPrimaryDark">@color/theme_primary_dark</item>
         <item name="colorAccent">@color/theme_accent</item>
-        <item name="android:textColor">@color/blue_new</item>
+        <item name="android:textColor">@color/theme_accent</item>
     </style>
 
 </resources>

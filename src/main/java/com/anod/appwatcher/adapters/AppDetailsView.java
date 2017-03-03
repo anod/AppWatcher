@@ -40,7 +40,7 @@ public class AppDetailsView {
     {
         mDataProvider = dataProvider;
         ButterKnife.bind(this, view);
-        mAccentColor = mDataProvider.getColor(R.color.blue_new);
+        mAccentColor = mDataProvider.getColor(R.color.theme_accent);
         mTextColor = mDataProvider.getColor(R.color.primary_text);
     }
 

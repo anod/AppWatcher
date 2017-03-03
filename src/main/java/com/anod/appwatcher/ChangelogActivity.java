@@ -45,6 +45,7 @@ import com.anod.appwatcher.utils.AppIconLoader;
 import com.anod.appwatcher.utils.IntentUtils;
 import com.anod.appwatcher.utils.MetricsManagerEvent;
 import com.anod.appwatcher.utils.PackageManagerUtils;
+import com.anod.appwatcher.utils.PaletteSwatch;
 import com.google.android.finsky.api.model.Document;
 import com.squareup.picasso.Picasso;
 
@@ -77,13 +78,6 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
     FloatingActionButton mPlayStoreButton;
     @BindView(R.id.content)
     View mContent;
-
-    private static Target[] sTargets = new Target[] {
-            Target.DARK_VIBRANT,
-            Target.DARK_MUTED,
-            Target.MUTED,
-            Target.VIBRANT,
-    };
 
     private String mDetailsUrl;
     private String mAppId;
@@ -222,7 +216,8 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
         }
 
         @Override
-        public void onBitmapFailed(Drawable errorDrawable) {
+        public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+            AppLog.e("mIconLoadTarget::onBitmapFailed", e);
             setDefaultIcon();
         }
 
@@ -335,17 +330,22 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
 
     @Override
     public void onGenerated(Palette palette) {
-        for(Target target : sTargets) {
-            Palette.Swatch swatch = palette.getSwatchForTarget(target);
-            if (swatch != null) {
-                applyColor(swatch.getRgb());
-                animateBackground();
-                return;
-            }
+        if (App.with(this).isNightTheme())
+        {
+            Palette.Swatch lightSwatch = PaletteSwatch.getLight(palette, ContextCompat.getColor(this, R.color.primary_text_dark));
+            mAppDetailsView.updateAccentColor(lightSwatch.getRgb(), mApp);
+
+            Palette.Swatch darkSwatch = PaletteSwatch.getDark(palette, ContextCompat.getColor(this, R.color.theme_primary));
+            applyColor(darkSwatch.getRgb());
+            animateBackground();
+        } else {
+            Palette.Swatch darkSwatch = PaletteSwatch.getDark(palette, ContextCompat.getColor(this, R.color.theme_primary));
+            applyColor(darkSwatch.getRgb());
+            mAppDetailsView.updateAccentColor(darkSwatch.getRgb(), mApp);
+            animateBackground();
         }
-        mBackground.setVisibility(View.VISIBLE);
-        applyColor(ContextCompat.getColor(this, R.color.theme_primary));
     }
+
 
     private void applyColor(@ColorInt int color) {
         Drawable drawable = DrawableCompat.wrap(mPlayStoreButton.getDrawable());
@@ -353,7 +353,6 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
         mPlayStoreButton.setImageDrawable(drawable);
         mBackground.setBackgroundColor(color);
         mLoadingView.getIndeterminateDrawable().setColorFilter(color, PorterDuff.Mode.SRC_IN);
-        mAppDetailsView.updateAccentColor(color, mApp);
     }
 
     private void animateBackground() {

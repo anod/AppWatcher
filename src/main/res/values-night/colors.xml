@@ -2,4 +2,10 @@
 <resources>
     <color name="primary_text">@color/primary_text_default_material_dark</color>
     <color name="item_background">@color/material_grey_800</color>
+
+    <color name="theme_primary">@color/material_blue_800</color>
+    <color name="theme_primary_dark">@color/material_blue_900</color>
+
+    <color name="row_inactive">@color/material_grey_700</color>
+
 </resources>
