@@ -7,10 +7,8 @@ import android.text.TextUtils;
 import com.android.util.JsonReader;
 import com.android.util.JsonToken;
 import com.anod.appwatcher.model.AppInfo;
-import com.anod.appwatcher.utils.BitmapUtils;
-import com.anod.appwatcher.utils.DocUtils;
+import com.anod.appwatcher.utils.AppDetailsUploadDate;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
@@ -101,7 +99,7 @@ class AppListReader {
         if (TextUtils.isEmpty(info.getDetailsUrl())) {
             String packageName = info.packageName;
             info.setAppId(packageName);
-            info.setDetailsUrl(DocUtils.getUrl(packageName));
+            info.setDetailsUrl(AppInfo.createDetailsUrl(packageName));
         }
     }
 }

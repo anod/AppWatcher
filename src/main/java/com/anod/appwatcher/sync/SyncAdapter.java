@@ -27,12 +27,11 @@ import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.model.AppListCursor;
 import com.anod.appwatcher.model.schema.AppListTable;
 import com.anod.appwatcher.utils.CollectionsUtils;
-import com.anod.appwatcher.utils.DocUtils;
+import com.anod.appwatcher.utils.AppDetailsUploadDate;
 import com.anod.appwatcher.utils.GooglePlayServices;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 import com.google.android.finsky.api.model.Document;
 import com.google.android.finsky.protos.nano.Messages.Common;
-import com.google.android.finsky.protos.nano.Messages.AppDetails;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -280,7 +279,7 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
     }
 
     private void updateApp(Document marketApp, AppInfo localApp, AppListContentProviderClient client, ArrayList<UpdatedApp> updatedTitles, boolean lastUpdatesViewed) {
-        AppDetails appDetails = marketApp.getAppDetails();
+        com.google.android.finsky.protos.nano.Messages.AppDetails appDetails = marketApp.getAppDetails();
 
         if (appDetails.versionCode > localApp.versionNumber || (BuildConfig.DEBUG && appDetails.packageName.startsWith("com.anod.appwatcher"))) {
             AppLog.d("New version found [" + appDetails.versionCode + "]");
@@ -311,7 +310,7 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
     }
 
     private void fillMissingData(Document marketApp, AppInfo localApp, ContentValues values) {
-        long refreshTime = DocUtils.extractDate(marketApp);
+        long refreshTime = AppDetailsUploadDate.extract(marketApp);
         values.put(AppListTable.Columns.KEY_REFRESH_TIMESTAMP, refreshTime);
         values.put(AppListTable.Columns.KEY_UPLOAD_DATE, marketApp.getAppDetails().uploadDate);
         if (TextUtils.isEmpty(localApp.versionName)) {

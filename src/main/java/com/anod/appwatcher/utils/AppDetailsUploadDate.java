@@ -1,11 +1,14 @@
 package com.anod.appwatcher.utils;
 
+import android.text.TextUtils;
+
 import com.anod.appwatcher.utils.date.CustomParserFactory;
 import com.google.android.finsky.api.model.Document;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
@@ -15,38 +18,42 @@ import info.anodsplace.android.log.AppLog;
  * @author alex
  * @date 2015-02-23
  */
-public class DocUtils {
+public class AppDetailsUploadDate {
 
-    public static String getUrl(String packageName)
-    {
-        return "details?doc="+packageName;
-    }
-
-    public static long extractDate(Document doc) {
+    public static long extract(Document doc) {
         Locale defaultLocale = Locale.getDefault();
         String uploadDate = doc.getAppDetails().uploadDate;
-        return extractDate(uploadDate, defaultLocale);
+        Date date = extract(uploadDate, defaultLocale);
+        if (date == null)
+        {
+            return 0;
+        }
+        return date.getTime();
     }
 
-    private static long extractDate(String uploadDate, Locale locale) {
+    static Date extract(String uploadDate, Locale locale) {
+        if ("".equals(uploadDate))
+        {
+            return null;
+        }
         DateFormat df = CustomParserFactory.create(locale);
         if (df != null) {
-            long time = extractDate(uploadDate, df, locale, true);
-            if (time > 0) {
-                return time;
+            Date date = extract(uploadDate, df, locale, true);
+            if (date != null)
+            {
+                return date;
             }
         }
 
         df = DateFormat.getDateInstance(DateFormat.MEDIUM, locale);
-        return extractDate(uploadDate, df, locale, false);
+        return extract(uploadDate, df, locale, false);
     }
 
-    private static long extractDate(String uploadDate, DateFormat df, Locale locale, boolean isCustom)
+    private static Date extract(String uploadDate, DateFormat df, Locale locale, boolean isCustom)
     {
         AppLog.d("Parsing: '%s' - '%s'", uploadDate, locale.toString());
         try {
-            Date date = df.parse(uploadDate);
-            return date.getTime();
+            return df.parse(uploadDate);
         } catch (ParseException e) {
             AppLog.e(e);
             String format = "<UNKNOWN>";
@@ -64,7 +71,7 @@ public class DocUtils {
                     "CUSTOM", isCustom ? "YES" : "NO");
         }
 
-        return 0;
+        return null;
 
     }
 

@@ -7,16 +7,20 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.anod.appwatcher.utils.AppIconLoader;
-import com.anod.appwatcher.utils.DocUtils;
+import com.anod.appwatcher.utils.AppDetailsUploadDate;
 import com.google.android.finsky.api.model.Document;
 import com.google.android.finsky.protos.nano.Messages.Common;
-import com.google.android.finsky.protos.nano.Messages.AppDetails;
 
 import java.text.DateFormat;
 import java.util.Date;
 
 
 public class AppInfo extends AppInfoMetadata {
+
+    public static String createDetailsUrl(String packageName)
+    {
+        return "details?doc="+packageName;
+    }
 
     private int rowId;
     private String detailsUrl;
@@ -91,7 +95,7 @@ public class AppInfo extends AppInfoMetadata {
         this.rowId = 0;
         this.appId = doc.getDocId();
         this.detailsUrl = doc.getDetailsUrl();
-        AppDetails app = doc.getAppDetails();
+        com.google.android.finsky.protos.nano.Messages.AppDetails app = doc.getAppDetails();
         this.packageName = app.packageName;
         this.title = doc.getTitle();
         this.versionNumber = app.versionCode;
@@ -106,7 +110,7 @@ public class AppInfo extends AppInfoMetadata {
         this.priceCur = offer.currencyCode;
 
         this.iconUrl = doc.getIconUrl();
-        this.refreshTime = DocUtils.extractDate(doc);
+        this.refreshTime = AppDetailsUploadDate.extract(doc);
         this.syncVersion = 0;
     }
 

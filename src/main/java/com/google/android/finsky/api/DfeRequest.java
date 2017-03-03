@@ -335,7 +335,7 @@ class DfeRequest<T extends MessageNano> extends Request<Response.ResponseWrapper
     }
     
     public com.android.volley.Response<Response.ResponseWrapper> parseNetworkResponse(final NetworkResponse networkResponse) {
-        if (AppLog.DEBUG) {
+        if (AppLog.LOG_DEBUG) {
             final Map<String, String> headers = networkResponse.headers;
             int n = 0;
             if (headers != null) {

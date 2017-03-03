@@ -33,7 +33,7 @@ import com.anod.appwatcher.search.ResultsAdapter;
 import com.anod.appwatcher.search.ResultsAdapterDetails;
 import com.anod.appwatcher.search.ResultsAdapterSearch;
 import com.anod.appwatcher.ui.ToolbarActivity;
-import com.anod.appwatcher.utils.DocUtils;
+import com.anod.appwatcher.utils.AppDetailsUploadDate;
 import com.anod.appwatcher.utils.Keyboard;
 import com.anod.appwatcher.utils.MetricsManagerEvent;
 
@@ -160,7 +160,7 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
         if (!TextUtils.isEmpty(mSearchQuery)) {
             if (mPackageSearch)
             {
-                String url = DocUtils.getUrl(mSearchQuery);
+                String url = AppInfo.createDetailsUrl(mSearchQuery);
                 ((DetailsEndpoint) mEndpoints.get(DETAILS_ENDPOINT_ID)).setUrl(url);
             }
             ((SearchEndpoint) mEndpoints.get(SEARCH_ENDPOINT_ID)).setQuery(mSearchQuery);
