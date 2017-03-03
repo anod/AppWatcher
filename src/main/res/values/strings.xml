@@ -116,4 +116,11 @@
         <item>By date &#x2193;</item>
         <item>By date &#x2191;</item>
     </string-array>
+
+    <string-array name="themes">
+        <item>Auto (Dark from 10pm till 6am)</item> <!-- MODE_NIGHT_AUTO = 0; -->
+        <item>Light</item> <!-- MODE_NIGHT_NO = 1; -->
+        <item>Dark</item> <!-- MODE_NIGHT_YES = 2; -->
+    </string-array>
+
 </resources>

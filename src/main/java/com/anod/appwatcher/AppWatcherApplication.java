@@ -17,32 +17,29 @@ import info.anodsplace.android.log.AppLog;
 public class AppWatcherApplication extends Application implements AppLog.Listener {
     private ObjectGraph mObjectGraph;
 
-    static {
-        AppCompatDelegate.setDefaultNightMode(
-                AppCompatDelegate.MODE_NIGHT_YES);
-    }
-
     @Override
-	 public void onCreate() {
-		super.onCreate();
-		LeakCanary.install(this);
+    public void onCreate() {
+        super.onCreate();
+        LeakCanary.install(this);
 
-		 try {
-			 ViewConfiguration config = ViewConfiguration.get(this);
-			 Field menuKeyField = ViewConfiguration.class.getDeclaredField("sHasPermanentMenuKey");
-			 if(menuKeyField != null) {
-				 menuKeyField.setAccessible(true);
-				 menuKeyField.setBoolean(config, false);
-			 }
-		 } catch (Exception ex) {
-			 // Ignore
-		 }
+        try {
+            ViewConfiguration config = ViewConfiguration.get(this);
+            Field menuKeyField = ViewConfiguration.class.getDeclaredField("sHasPermanentMenuKey");
+            if (menuKeyField != null) {
+                menuKeyField.setAccessible(true);
+                menuKeyField.setBoolean(config, false);
+            }
+        } catch (Exception ex) {
+            // Ignore
+        }
 
         AppLog.setDebug(BuildConfig.DEBUG, "AppWatcher");
         AppLog.instance().setListener(this);
         VolleyLog.setTag("AppWatcher");
 
         mObjectGraph = new ObjectGraph(this);
+        Preferences prefs = new Preferences(this);
+        AppCompatDelegate.setDefaultNightMode(prefs.getNightMode());
     }
 
     public ObjectGraph getObjectGraph() {
@@ -50,7 +47,7 @@ public class AppWatcherApplication extends Application implements AppLog.Listene
     }
 
     public static AppWatcherApplication get(Context context) {
-        return (AppWatcherApplication)context.getApplicationContext();
+        return (AppWatcherApplication) context.getApplicationContext();
     }
 
     public static ObjectGraph provide(Context context) {

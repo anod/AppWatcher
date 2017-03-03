@@ -3,6 +3,7 @@ package com.anod.appwatcher;
 import android.accounts.Account;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.support.v7.app.AppCompatDelegate;
 
 public class Preferences {
     private static final String VIEWED = "viewed";
@@ -28,6 +29,7 @@ public class Preferences {
     private static final String REQUIRES_CHARGING = "requires-charging";
     public static final String VERSION_CODE = "version_code";
     public static final String NOTIFY_INSTALLED_UPTODATE = "notify_installed_uptodate";
+    public static final String NIGHT_MODE = "night-mode";
 
     private SharedPreferences mSettings;
 
@@ -166,5 +168,14 @@ public class Preferences {
     public void setNotifyInstalledUpToDate(boolean notify)
     {
         mSettings.edit().putBoolean(NOTIFY_INSTALLED_UPTODATE, notify).apply();
+    }
+
+    public int getNightMode() {
+        return mSettings.getInt(NIGHT_MODE, AppCompatDelegate.MODE_NIGHT_NO);
+    }
+
+    public void setNightMode(int nightMode)
+    {
+        mSettings.edit().putInt(NIGHT_MODE, nightMode).apply();
     }
 }

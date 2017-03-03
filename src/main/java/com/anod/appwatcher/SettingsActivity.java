@@ -2,12 +2,15 @@ package com.anod.appwatcher;
 
 import android.accounts.Account;
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.DocumentsContract;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatDelegate;
 import android.text.format.DateUtils;
 import android.widget.Toast;
 
@@ -39,6 +42,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     private static final int ACTION_WIFI_ONLY = 8;
     private static final int ACTION_REQUIRES_CHARGING = 9;
     private static final int ACTION_NOTIFY_UPTODATE = 10;
+    private static final int ACTION_THEME = 11;
 
     private static final int REQUEST_BACKUP_DEST = 1;
     private static final int REQUEST_BACKUP_FILE = 2;
@@ -145,10 +149,12 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
         preferences.add(mSyncEnabledItem);
         preferences.add(mSyncNowItem);
 
-
         preferences.add(new Category(R.string.pref_header_backup));
         preferences.add(new Item(R.string.pref_title_export, R.string.pref_descr_export, ACTION_EXPORT));
         preferences.add(new Item(R.string.pref_title_import, R.string.pref_descr_import, ACTION_IMPORT));
+
+        preferences.add(new Category(R.string.pref_header_interface));
+        preferences.add(new Item(R.string.pref_title_theme, R.string.pref_descr_theme, ACTION_THEME));
 
         preferences.add(new Category(R.string.pref_header_about));
 
@@ -247,6 +253,24 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
         } else if (action == ACTION_NOTIFY_UPTODATE) {
             boolean notify = ((CheckboxItem) pref).checked;
             mPrefs.setNotifyInstalledUpToDate(notify);
+        } else if (action == ACTION_THEME)
+        {
+            AlertDialog dialog = new AlertDialog.Builder(this)
+                    .setTitle(R.string.pref_title_theme)
+                    .setItems(R.array.themes, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            if (mPrefs.getNightMode() != which) {
+                                mPrefs.setNightMode(which);
+                                AppCompatDelegate.setDefaultNightMode(which);
+                                SettingsActivity.this.recreate();
+                                Intent i = new Intent(SettingsActivity.this, AppWatcherActivity.class);
+                                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                startActivity(i);
+                            }
+                        }
+                    }).create();
+            dialog.show();
         }
         notifyDataSetChanged();
     }
