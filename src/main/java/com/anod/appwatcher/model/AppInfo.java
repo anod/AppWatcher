@@ -47,9 +47,11 @@ public class AppInfo extends AppInfoMetadata {
                     packageName, null, AppInfoMetadata.STATUS_DELETED, ""
             );
         }
-        String iconUrl = null;
+        String iconUrl;
         if (launchComponent != null) {
             iconUrl = Uri.fromParts(AppIconLoader.SCHEME, launchComponent.flattenToShortString(), null).toString();
+        } else {
+            iconUrl = Uri.fromParts(AppIconLoader.SCHEME, new ComponentName(packageName, packageName).flattenToShortString() , null).toString();
         }
 
         DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
