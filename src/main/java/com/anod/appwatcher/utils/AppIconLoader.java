@@ -93,7 +93,7 @@ public class AppIconLoader {
             mPicasso = new Picasso.Builder(mContext)
                     .addRequestHandler(new PackageIconRequestHandler(mContext))
                     .addRequestHandler(new IconDbRequestHandler(mContext))
-                    .indicatorsEnabled(BuildConfig.DEBUG)
+//                    .indicatorsEnabled(BuildConfig.DEBUG)
                     .build();
         }
         return mPicasso;

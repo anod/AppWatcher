@@ -82,7 +82,7 @@
                         android:drawablePadding="4dp"
                         android:ellipsize="end"
                         android:gravity="left"
-                        android:singleLine="true"
+                        android:maxLines="1"
                         android:textAppearance="?android:attr/textAppearanceSmall"
                         android:textSize="@dimen/textSize"
                         tools:text="5.6.1609P.1258283"/>
@@ -112,7 +112,7 @@
                         android:drawableLeft="@drawable/ic_stat_communication_stay_primary_portrait"
                         android:drawablePadding="4dp"
                         android:ellipsize="end"
-                        android:singleLine="true"
+                        android:maxLines="1"
                         android:textColor="@color/theme_accent"
                         android:textSize="@dimen/textSize"
                         android:gravity="left"
