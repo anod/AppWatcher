@@ -256,6 +256,14 @@ public class AppListContentProviderClient {
         return icon;
     }
 
+    public void discardAll()
+    {
+        try {
+            mContentProviderClient.delete(AppListContentProvider.APPS_CONTENT_URI, null, null);
+        } catch (RemoteException e) {
+            AppLog.e(e);
+        }
+    }
 
     public void addList(List<AppInfo> appList) {
         SimpleArrayMap<String, Integer> currentIds = queryPackagesMap(true);

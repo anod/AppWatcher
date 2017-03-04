@@ -125,7 +125,7 @@ public class AppWatcherListFragment extends Fragment implements
         // We have a menu item to show in action bar.
         setHasOptionsMenu(true);
 
-        mInstalledApps = new InstalledAppsProvider.MemoryCache(new InstalledAppsProvider.PackageManager(getActivity().getPackageManager()));
+        mInstalledApps = new InstalledAppsProvider.PackageManager(getActivity().getPackageManager());
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         mListView.setLayoutManager(layoutManager);
@@ -200,10 +200,6 @@ public class AppWatcherListFragment extends Fragment implements
 
     @Override
     public void onSyncStart() {
-        if (mInstalledApps instanceof InstalledAppsProvider.MemoryCache)
-        {
-            ((InstalledAppsProvider.MemoryCache)mInstalledApps).reset();
-        }
         if (mSwipeLayout!= null){
             mSwipeLayout.setRefreshing(true);
         }

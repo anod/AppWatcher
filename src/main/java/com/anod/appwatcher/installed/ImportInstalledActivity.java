@@ -33,6 +33,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import info.anodsplace.android.log.AppLog;
 
 
 /**
@@ -62,7 +63,7 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
 
         mList.setLayoutManager(new LinearLayoutManager(this));
         mList.setAdapter(new ImportAdapter(this, getPackageManager(), mDataProvider));
-        mList.setItemAnimator(new ImportItemAnimator(this));
+        mList.setItemAnimator(new ImportItemAnimator());
         getSupportLoaderManager().initLoader(0, null, this).forceLoad();
     }
 
@@ -184,6 +185,7 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
         ImportAdapter adapter = (ImportAdapter) mList.getAdapter();
         mDataProvider.setImportStarted(true);
         for (String packageName : docIds) {
+            AppLog.d(packageName);
             mDataProvider.setPackageStatus(packageName, ImportDataProvider.STATUS_IMPORTING);
             adapter.notifyPackageStatusChanged(packageName);
         }

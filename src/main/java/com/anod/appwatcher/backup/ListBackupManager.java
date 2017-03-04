@@ -153,6 +153,7 @@ public class ListBackupManager {
         }
         if (appList != null && appList.size() > 0) {
             AppListContentProviderClient cr = new AppListContentProviderClient(mContext);
+            cr.discardAll();
             cr.addList(appList);
             cr.release();
         }

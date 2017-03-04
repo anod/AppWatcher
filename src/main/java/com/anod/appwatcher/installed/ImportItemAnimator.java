@@ -2,19 +2,14 @@ package com.anod.appwatcher.installed;
 
 import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
-import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
-import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-
-import com.anod.appwatcher.R;
 
 import java.util.List;
 
@@ -22,15 +17,7 @@ import java.util.List;
  * @author algavris
  * @date 24/04/2016.
  */
-public class ImportItemAnimator extends DefaultItemAnimator {
-    private int mThemePrimaryDark;
-    private int mMaterialRed;
-
-    public ImportItemAnimator(Context context) {
-        Resources res = context.getResources();
-        mThemePrimaryDark = ResourcesCompat.getColor(res, R.color.theme_primary_dark, null);
-        mMaterialRed = ResourcesCompat.getColor(res, R.color.material_red_800, null);
-    }
+class ImportItemAnimator extends DefaultItemAnimator {
 
     @Override
     public boolean animateChange(RecyclerView.ViewHolder oldHolder, RecyclerView.ViewHolder newHolder, int fromX, int fromY, int toX, int toY) {
@@ -47,9 +34,9 @@ public class ImportItemAnimator extends DefaultItemAnimator {
                 anim.setRepeatCount(Animation.INFINITE);
                 holder.itemView.startAnimation(anim);
             } else if (status == ImportDataProvider.STATUS_DONE) {
-                animateColor(holder.itemView, Color.TRANSPARENT, mThemePrimaryDark);
+                animateColor(holder.itemView, Color.TRANSPARENT, holder.themeAccent);
             } else if (status == ImportDataProvider.STATUS_ERROR) {
-                animateColor(holder.itemView, Color.TRANSPARENT, mMaterialRed);
+                animateColor(holder.itemView, Color.TRANSPARENT, holder.materialRed);
             }
         }
 

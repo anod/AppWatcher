@@ -1,13 +1,16 @@
 package com.anod.appwatcher.installed;
 
+import android.graphics.Color;
 import android.view.View;
 import android.widget.CheckedTextView;
 import android.widget.ImageView;
 
+import com.anod.appwatcher.R;
 import com.anod.appwatcher.adapters.AppViewHolderBase;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.utils.AppIconLoader;
 
+import butterknife.BindColor;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -23,6 +26,11 @@ class ImportAppViewHolder extends AppViewHolderBase implements View.OnClickListe
     public CheckedTextView title;
     @BindView(android.R.id.icon)
     public ImageView icon;
+
+    @BindColor(R.color.theme_accent)
+    int themeAccent;
+    @BindColor(R.color.material_red_800)
+    int materialRed;
 
     ImportAppViewHolder(View itemView, ImportDataProvider dataProvider, AppIconLoader iconLoader) {
         super(itemView, dataProvider, iconLoader);
@@ -40,6 +48,14 @@ class ImportAppViewHolder extends AppViewHolderBase implements View.OnClickListe
         itemView.findViewById(android.R.id.content).setOnClickListener(this);
 
         this.bindIcon(app, this.icon);
+
+        if (status() == ImportDataProvider.STATUS_DONE) {
+            itemView.setBackgroundColor(themeAccent);
+        } else if (status() == ImportDataProvider.STATUS_ERROR) {
+            itemView.setBackgroundColor(materialRed);
+        } else {
+            itemView.setBackgroundColor(Color.TRANSPARENT);
+        }
     }
 
     public int status() {

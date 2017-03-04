@@ -15,7 +15,7 @@ import com.google.android.finsky.api.model.Document;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ImportBulkManager implements PlayStoreEndpoint.Listener, AddWatchAppAsyncTask.Listener {
+class ImportBulkManager implements PlayStoreEndpoint.Listener, AddWatchAppAsyncTask.Listener {
     private static final int BULK_SIZE = 20;
 
     private final BulkDetailsEndpoint mEndpoint;
@@ -33,7 +33,7 @@ public class ImportBulkManager implements PlayStoreEndpoint.Listener, AddWatchAp
         void onImportStart(List<String> docIds);
     }
 
-    public ImportBulkManager(Context context, Listener listener) {
+    ImportBulkManager(Context context, Listener listener) {
         mEndpoint = new BulkDetailsEndpoint(context);
         mEndpoint.setListener(this);
         mWatchAppList = new WatchAppList(null);
@@ -47,7 +47,7 @@ public class ImportBulkManager implements PlayStoreEndpoint.Listener, AddWatchAp
     }
 
 
-    public void stop() {
+    void stop() {
         mEndpoint.reset();
         if (mTask != null && !mTask.isCancelled()){
             mTask.cancel(true);
@@ -55,7 +55,7 @@ public class ImportBulkManager implements PlayStoreEndpoint.Listener, AddWatchAp
         }
     }
 
-    public void addPackage(String packageName) {
+    void addPackage(String packageName) {
         List<String> currentList = null;
         if (listsDocIds.size() > currentBulk) {
             currentList = listsDocIds.get(currentBulk);
@@ -76,6 +76,7 @@ public class ImportBulkManager implements PlayStoreEndpoint.Listener, AddWatchAp
     }
 
     public void start() {
+        currentBulk = 0;
         nextBulk();
     }
 
@@ -106,7 +107,7 @@ public class ImportBulkManager implements PlayStoreEndpoint.Listener, AddWatchAp
         }
     }
 
-    public void setAccount(Account account, String authSubToken) {
+    void setAccount(Account account, String authSubToken) {
         mEndpoint.setAccount(account, authSubToken);
     }
 
@@ -123,6 +124,4 @@ public class ImportBulkManager implements PlayStoreEndpoint.Listener, AddWatchAp
             nextBulk();
         }
     }
-
-
 }
