@@ -81,11 +81,11 @@
                         android:drawableLeft="@drawable/ic_stat_av_play_shopping_bag"
                         android:drawablePadding="4dp"
                         android:ellipsize="end"
+                        android:gravity="left"
                         android:singleLine="true"
                         android:textAppearance="?android:attr/textAppearanceSmall"
                         android:textSize="@dimen/textSize"
-                        android:gravity="left"
-                        tools:text="5.6.1609P.1258283" />
+                        tools:text="5.6.1609P.1258283"/>
 
                     <TextView
                         android:id="@+id/update_date"

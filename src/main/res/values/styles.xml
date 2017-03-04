@@ -22,6 +22,8 @@
         <item name="colorPrimary">@color/theme_primary</item>
         <item name="colorPrimaryDark">@color/theme_primary_dark</item>
         <item name="colorAccent">@color/theme_accent</item>
+        <!-- Override color for Material.Small -->
+        <item name="android:textColorTertiary">@color/primary_text</item>
         <item name="android:buttonStyle">@style/BrandButtonStyle</item>
         <!--
         <item name="android:windowBackground">@color/window_background</item>

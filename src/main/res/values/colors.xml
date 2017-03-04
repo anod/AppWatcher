@@ -25,6 +25,8 @@
 
     <color name="primary_text">@color/primary_text_default_material_light</color>
     <color name="primary_text_dark">@color/primary_text_default_material_dark</color>
+
+    <color name="thri">@color/secondary_text_default_material_dark</color>
     <color name="fab_tint">@android:color/white</color>
 
 </resources>

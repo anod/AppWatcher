@@ -328,19 +328,15 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
 
     @Override
     public void onGenerated(Palette palette) {
+        Palette.Swatch darkSwatch = PaletteSwatch.getDark(palette, ContextCompat.getColor(this, R.color.theme_primary));
+        applyColor(darkSwatch.getRgb());
+        animateBackground();
+
         if (App.with(this).isNightTheme())
         {
-            Palette.Swatch lightSwatch = PaletteSwatch.getLight(palette, ContextCompat.getColor(this, R.color.primary_text_dark));
-            mAppDetailsView.updateAccentColor(lightSwatch.getRgb(), mApp);
-
-            Palette.Swatch darkSwatch = PaletteSwatch.getDark(palette, ContextCompat.getColor(this, R.color.theme_primary));
-            applyColor(darkSwatch.getRgb());
-            animateBackground();
+            mAppDetailsView.updateAccentColor(ContextCompat.getColor(this, R.color.primary_text_dark), mApp);
         } else {
-            Palette.Swatch darkSwatch = PaletteSwatch.getDark(palette, ContextCompat.getColor(this, R.color.theme_primary));
-            applyColor(darkSwatch.getRgb());
             mAppDetailsView.updateAccentColor(darkSwatch.getRgb(), mApp);
-            animateBackground();
         }
     }
 
