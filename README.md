@@ -1,14 +1,22 @@
 App Watcher for Android
 =======================
 
-App Watcher helps you to receive notifications about updates for application from Play Store even the app is not installed currently on your device
+App Watcher notifies you about updates of applications from Play Store even the app is not installed currently on your device and provides quick access to the "What's new" section.
+
+With App Watcher you can follow changes of apps you love, know about new features, bug fixes and new levels update for games.
+
+App Watcher checks daily the list for updates in Play Store and will notify you when there is a new version available.
 
 Features:
 
-* Search and add app from Play Market to watch list
-* Manual and automatic updates
-* Quick shortcut to see what's new in app
-* Share application
+ * Add an app from Play Market to watch list (Use Share)
+ * Manual and automatic updates
+ * Quick shortcut to see what's new/changelog in app 
+ * Share application
+ * Update notification
+ * Google Drive backup
+ * Filter list by: Installed/Not installed
+ * Import from PLay Store watchlist
 
 [Google Play Store][1]
 
@@ -24,15 +32,9 @@ Features:
 * ActionBar
 * NotificationCompat
 * ShareCompat
+* GoogleDrive integration
+* Protocol Buffers
 
-## Dependencies
- * SherlockActionBar library 
-
-## 3rd party components
- * [SherlockActionBar library] [4]
- * [Adroid Market Api][2]
- * [CommonsWare EndlessAdapter][3]
- 
 ## Author
 
 Alex Gavrishev, 2012
@@ -43,7 +45,4 @@ Alex Gavrishev, 2012
 	http://creativecommons.org/licenses/by-sa/3.0/
  
 
- [1]: https://play.google.com/store/apps/developer?id=Alex+Gavrishev
- [2]: http://code.google.com/p/android-market-api/
- [3]: https://github.com/commonsguy/cwac-endless
- [4]: http://actionbarsherlock.com/
+ [1]: https://play.google.com/store/apps/details?id=com.anod.appwatcher
