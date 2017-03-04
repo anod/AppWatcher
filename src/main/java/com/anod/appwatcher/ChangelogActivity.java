@@ -107,7 +107,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
         App.provide(this).crashListener().put("DETAILS_ROW_ID", String.valueOf(rowId));
         MetricsManagerEvent.track("OPEN_CHANGELOG", "DETAILS_APP_ID", mAppId, "DETAILS_ROW_ID", String.valueOf(rowId));
 
-        mDataProvider = new AppViewHolderDataProvider(this, new InstalledAppsProvider.MemoryCache(new InstalledAppsProvider.PackageManager(getPackageManager())));
+        mDataProvider = new AppViewHolderDataProvider(this, new InstalledAppsProvider.PackageManager(getPackageManager()));
         mAppDetailsView = new AppDetailsView(findViewById(R.id.container), mDataProvider);
 
         mDetailsEndpoint = new DetailsEndpoint(this);
