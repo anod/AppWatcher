@@ -21,10 +21,9 @@ import com.android.volley.VolleyError;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.market.PlayStoreEndpoint;
 import com.anod.appwatcher.market.WishlistEndpoint;
+import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppInfoMetadata;
 import com.anod.appwatcher.model.WatchAppList;
-import com.anod.appwatcher.model.AppInfo;
-import com.anod.appwatcher.model.AppListContentProviderClient;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

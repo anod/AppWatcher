@@ -6,9 +6,7 @@ import com.google.android.finsky.api.DfeApi;
 import com.google.android.finsky.protos.nano.Messages;
 import com.google.android.finsky.protos.nano.Messages.ListResponse;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 

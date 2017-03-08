@@ -7,7 +7,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.RemoteException;
-import android.support.v4.util.ArrayMap;
 import android.support.v4.util.SimpleArrayMap;
 
 import com.anod.appwatcher.AppListContentProvider;
@@ -15,7 +14,6 @@ import com.anod.appwatcher.model.schema.AppListTable;
 import com.anod.appwatcher.utils.BitmapUtils;
 
 import java.util.List;
-import java.util.Map;
 
 import info.anodsplace.android.log.AppLog;
 

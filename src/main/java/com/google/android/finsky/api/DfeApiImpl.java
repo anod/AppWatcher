@@ -5,8 +5,8 @@ import android.net.Uri;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.google.android.finsky.protos.nano.Messages.ListResponse;
 import com.google.android.finsky.protos.nano.Messages.Details;
+import com.google.android.finsky.protos.nano.Messages.ListResponse;
 import com.google.android.finsky.protos.nano.Messages.Search;
 import com.google.android.finsky.utils.NetworkType;
 

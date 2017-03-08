@@ -2,12 +2,11 @@ package com.anod.appwatcher;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.NoCache;
-import com.android.volley.toolbox.Volley;
 import com.anod.appwatcher.accounts.AccountManager;
 import com.anod.appwatcher.market.DeviceIdHelper;
+import com.anod.appwatcher.market.Network;
 import com.anod.appwatcher.utils.AppCrashListener;
 import com.anod.appwatcher.utils.AppIconLoader;
-import com.anod.appwatcher.market.Network;
 import com.google.android.gms.gcm.GcmNetworkManager;
 
 /**

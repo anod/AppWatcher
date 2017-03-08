@@ -1,9 +1,6 @@
 package com.google.android.finsky.config;
 
-import android.content.*;
-import com.google.android.finsky.api.*;
-import com.google.android.finsky.utils.*;
-import android.accounts.*;
+import android.content.Context;
 
 public class ContentLevel
 {

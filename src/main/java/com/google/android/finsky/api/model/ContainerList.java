@@ -1,7 +1,8 @@
 package com.google.android.finsky.api.model;
 
-import java.util.*;
-import com.google.android.finsky.protos.nano.Messages.*;
+import com.google.android.finsky.protos.nano.Messages.DocV2;
+
+import java.util.List;
 
 public abstract class ContainerList<T> extends PaginatedList<T, Document>
 {

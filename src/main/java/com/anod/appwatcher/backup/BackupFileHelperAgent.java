@@ -1,8 +1,5 @@
 package com.anod.appwatcher.backup;
 
-import java.io.File;
-import java.io.IOException;
-
 import android.app.backup.BackupAgentHelper;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
@@ -10,6 +7,9 @@ import android.app.backup.FileBackupHelper;
 import android.os.ParcelFileDescriptor;
 
 import com.anod.appwatcher.model.DbOpenHelper;
+
+import java.io.File;
+import java.io.IOException;
 
 public class BackupFileHelperAgent extends BackupAgentHelper {
 	// A key to uniquely identify the set of backup data

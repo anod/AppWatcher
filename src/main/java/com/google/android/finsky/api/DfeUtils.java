@@ -1,7 +1,6 @@
 package com.google.android.finsky.api;
 
 import android.net.Uri;
-import android.net.Uri.Builder;
 import android.text.TextUtils;
 import android.util.Base64;
 

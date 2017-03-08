@@ -6,8 +6,8 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.anod.appwatcher.utils.AppIconLoader;
 import com.anod.appwatcher.utils.AppDetailsUploadDate;
+import com.anod.appwatcher.utils.AppIconLoader;
 import com.google.android.finsky.api.model.Document;
 import com.google.android.finsky.protos.nano.Messages.Common;
 

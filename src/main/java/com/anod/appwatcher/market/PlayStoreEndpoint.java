@@ -2,10 +2,7 @@ package com.anod.appwatcher.market;
 
 import android.accounts.Account;
 
-import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.google.android.finsky.api.model.DfeModel;
-import com.google.android.finsky.api.model.OnDataChangedListener;
 
 /**
  * @author algavris

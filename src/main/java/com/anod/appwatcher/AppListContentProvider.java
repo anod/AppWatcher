@@ -1,7 +1,6 @@
 package com.anod.appwatcher;
 
 import android.content.ContentProvider;
-import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
@@ -12,8 +11,8 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 
 import com.anod.appwatcher.model.AppListCursor;
-import com.anod.appwatcher.model.schema.AppListTable;
 import com.anod.appwatcher.model.DbOpenHelper;
+import com.anod.appwatcher.model.schema.AppListTable;
 import com.anod.appwatcher.model.schema.AppTagsTable;
 import com.anod.appwatcher.model.schema.TagsTable;
 

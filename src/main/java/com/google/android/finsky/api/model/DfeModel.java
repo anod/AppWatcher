@@ -1,7 +1,9 @@
 package com.google.android.finsky.api.model;
 
-import java.util.*;
-import com.android.volley.*;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+
+import java.util.HashSet;
 
 public abstract class DfeModel implements Response.ErrorListener
 {

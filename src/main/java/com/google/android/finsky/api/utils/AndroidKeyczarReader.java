@@ -1,10 +1,15 @@
 package com.google.android.finsky.api.utils;
 
-import org.keyczar.interfaces.*;
-import java.nio.charset.*;
-import android.content.res.*;
-import org.keyczar.exceptions.*;
-import java.io.*;
+import android.content.res.AssetManager;
+import android.content.res.Resources;
+
+import org.keyczar.exceptions.KeyczarException;
+import org.keyczar.interfaces.KeyczarReader;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 
 public class AndroidKeyczarReader implements KeyczarReader
 {

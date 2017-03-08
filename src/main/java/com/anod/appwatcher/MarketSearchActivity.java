@@ -33,7 +33,6 @@ import com.anod.appwatcher.search.ResultsAdapter;
 import com.anod.appwatcher.search.ResultsAdapterDetails;
 import com.anod.appwatcher.search.ResultsAdapterSearch;
 import com.anod.appwatcher.ui.ToolbarActivity;
-import com.anod.appwatcher.utils.AppDetailsUploadDate;
 import com.anod.appwatcher.utils.Keyboard;
 import com.anod.appwatcher.utils.MetricsManagerEvent;
 

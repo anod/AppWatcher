@@ -1,22 +1,14 @@
 package com.anod.appwatcher.accounts;
 
-import android.Manifest;
 import android.accounts.Account;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Handler;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
-import com.anod.appwatcher.AppListContentProvider;
 import com.anod.appwatcher.Preferences;
-import com.anod.appwatcher.R;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
-
-import info.anodsplace.android.log.AppLog;
 
 /**
  * @author alex

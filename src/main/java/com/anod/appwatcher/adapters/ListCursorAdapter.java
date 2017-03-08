@@ -1,12 +1,8 @@
 package com.anod.appwatcher.adapters;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.support.v4.widget.CursorAdapter;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +10,6 @@ import android.view.ViewGroup;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListCursor;
-import com.anod.appwatcher.utils.PackageManagerUtils;
 
 public class ListCursorAdapter extends CursorAdapter {
     private LayoutInflater mInflater;

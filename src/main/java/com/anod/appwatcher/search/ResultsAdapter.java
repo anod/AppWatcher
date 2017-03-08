@@ -11,8 +11,8 @@ import com.anod.appwatcher.R;
 import com.anod.appwatcher.model.WatchAppList;
 import com.anod.appwatcher.utils.InstalledAppsProvider;
 import com.google.android.finsky.api.model.Document;
-import com.google.android.finsky.protos.nano.Messages.Common;
 import com.google.android.finsky.protos.nano.Messages.AppDetails;
+import com.google.android.finsky.protos.nano.Messages.Common;
 import com.squareup.picasso.Picasso;
 
 public abstract class ResultsAdapter extends RecyclerView.Adapter<ResultsAppViewHolder> {

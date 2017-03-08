@@ -4,7 +4,6 @@ import android.view.View;
 
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.adapters.AppViewHolder;
-import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.utils.AppIconLoader;
 
 /**

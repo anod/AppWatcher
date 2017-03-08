@@ -1,8 +1,14 @@
 package com.google.android.finsky.api.model;
 
-import java.util.*;
-import com.android.volley.*;
-import android.text.*;
+import android.text.TextUtils;
+
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public abstract class PaginatedList<T, D> extends DfeModel implements Response.Listener<T>
 {

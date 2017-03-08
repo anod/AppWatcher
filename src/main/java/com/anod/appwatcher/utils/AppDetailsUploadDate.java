@@ -1,14 +1,11 @@
 package com.anod.appwatcher.utils;
 
-import android.text.TextUtils;
-
 import com.anod.appwatcher.utils.date.CustomParserFactory;
 import com.google.android.finsky.api.model.Document;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 

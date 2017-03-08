@@ -2,15 +2,12 @@ package com.anod.appwatcher.adapters;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
 import android.support.v4.content.ContextCompat;
 
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.utils.InstalledAppsProvider;
-import com.anod.appwatcher.utils.PackageManagerUtils;
 
 /**
  * @author alex
@@ -21,7 +18,6 @@ public class AppViewHolderDataProvider implements AppViewHolder.DataProvider {
     private final InstalledAppsProvider mInstalledAppsProvider;
     private int mTotalCount;
     private int mNewAppsCount;
-    private Bitmap mDefaultIcon;
     private Context mContext;
     private int mUpdatableAppsCount;
 
@@ -41,7 +37,6 @@ public class AppViewHolderDataProvider implements AppViewHolder.DataProvider {
     public String getInstalledText() {
         return mInstalledText;
     }
-
 
     @Override
     public @ColorInt int getColor(@ColorRes int colorRes) {
@@ -66,14 +61,6 @@ public class AppViewHolderDataProvider implements AppViewHolder.DataProvider {
     @Override
     public InstalledAppsProvider getInstalledAppsProvider() {
         return mInstalledAppsProvider;
-    }
-
-    @Override
-    public Bitmap getDefaultIcon() {
-        if (mDefaultIcon == null) {
-            mDefaultIcon = BitmapFactory.decodeResource(mContext.getResources(), getDefaultIconResource());
-        }
-        return mDefaultIcon;
     }
 
     @Override

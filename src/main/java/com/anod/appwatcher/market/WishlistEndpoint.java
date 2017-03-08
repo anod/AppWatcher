@@ -2,10 +2,8 @@ package com.anod.appwatcher.market;
 
 import android.content.Context;
 
-import com.anod.appwatcher.utils.CollectionsUtils;
 import com.google.android.finsky.api.model.DfeList;
 import com.google.android.finsky.api.model.DfeModel;
-import com.google.android.finsky.api.model.Document;
 
 /**
  * @author algavris

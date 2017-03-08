@@ -1,17 +1,14 @@
 package com.anod.appwatcher.adapters;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.anod.appwatcher.App;
-import com.anod.appwatcher.R;
 import com.anod.appwatcher.utils.AppIconLoader;
 import com.anod.appwatcher.utils.InstalledAppsProvider;
-import com.anod.appwatcher.utils.PackageManagerUtils;
 
 /**
  * @author alex

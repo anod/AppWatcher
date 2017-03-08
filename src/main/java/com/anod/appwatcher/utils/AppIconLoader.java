@@ -7,7 +7,6 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 
 import com.anod.appwatcher.AppListContentProvider;
-import com.anod.appwatcher.BuildConfig;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.squareup.picasso.Picasso;

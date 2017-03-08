@@ -13,7 +13,6 @@ import com.anod.appwatcher.AppListContentProvider;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.utils.AppIconLoader;
 import com.anod.appwatcher.utils.InstalledAppsProvider;
-import com.anod.appwatcher.utils.PackageManagerUtils;
 
 /**
  * @author algavris
@@ -29,7 +28,6 @@ public abstract class AppViewHolderBase extends RecyclerView.ViewHolder {
         int getTotalAppsCount();
         int getNewAppsCount();
         InstalledAppsProvider getInstalledAppsProvider();
-        Bitmap getDefaultIcon();
         int getDefaultIconResource();
         String formatVersionText(String versionName, int versionNumber);
         @ColorInt
@@ -54,7 +52,7 @@ public abstract class AppViewHolderBase extends RecyclerView.ViewHolder {
                         .placeholder(mDataProvider.getDefaultIconResource())
                         .into(iconView);
             } else {
-                iconView.setImageBitmap(mDataProvider.getDefaultIcon());
+                iconView.setImageResource(mDataProvider.getDefaultIconResource());
             }
         } else {
             mIconLoader.retrieve(app.iconUrl)

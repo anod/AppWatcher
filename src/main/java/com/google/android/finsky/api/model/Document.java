@@ -3,9 +3,9 @@ package com.google.android.finsky.api.model;
 import android.support.annotation.NonNull;
 import android.util.SparseArray;
 
-import com.google.android.finsky.protos.nano.Messages.DocV2;
 import com.google.android.finsky.protos.nano.Messages.AppDetails;
 import com.google.android.finsky.protos.nano.Messages.Common;
+import com.google.android.finsky.protos.nano.Messages.DocV2;
 
 import java.util.ArrayList;
 import java.util.List;

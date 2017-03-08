@@ -1,11 +1,18 @@
 package com.google.android.finsky.api.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.android.volley.Request;
 import com.anod.appwatcher.utils.CollectionsUtils;
-import com.google.android.finsky.api.*;
-import android.os.*;
-import com.google.android.finsky.protos.nano.Messages.*;
-import com.android.volley.*;
-import java.util.*;
+import com.google.android.finsky.api.DfeApi;
+import com.google.android.finsky.protos.nano.Messages.Containers;
+import com.google.android.finsky.protos.nano.Messages.DocV2;
+import com.google.android.finsky.protos.nano.Messages.Search;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class DfeSearch extends ContainerList<Search.SearchResponse> implements Parcelable
 {

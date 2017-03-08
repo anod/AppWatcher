@@ -2,8 +2,8 @@ package com.anod.appwatcher.sync;
 
 import android.app.IntentService;
 import android.content.ContentProviderClient;
-import android.content.Intent;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.anod.appwatcher.AppListContentProvider;

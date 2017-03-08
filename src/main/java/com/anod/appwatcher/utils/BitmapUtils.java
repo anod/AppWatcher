@@ -1,11 +1,11 @@
 package com.anod.appwatcher.utils;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 public class BitmapUtils {
     public static byte[] flattenBitmap(Bitmap bitmap) {

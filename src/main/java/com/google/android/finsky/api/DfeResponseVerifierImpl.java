@@ -1,17 +1,20 @@
 package com.google.android.finsky.api;
 
-import org.keyczar.interfaces.*;
-import android.content.*;
-import java.io.*;
-import java.security.*;
-import android.text.*;
-import android.util.*;
+import android.content.Context;
+import android.text.TextUtils;
+import android.util.Base64;
 
 import com.anod.appwatcher.BuildConfig;
 import com.google.android.finsky.api.utils.AndroidKeyczarReader;
 
-import org.keyczar.*;
-import org.keyczar.exceptions.*;
+import org.keyczar.KeyczarFileReader;
+import org.keyczar.Verifier;
+import org.keyczar.exceptions.KeyczarException;
+import org.keyczar.interfaces.KeyczarReader;
+
+import java.io.File;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 
 import info.anodsplace.android.log.AppLog;
 
