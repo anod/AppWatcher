@@ -23,8 +23,8 @@ import com.anod.appwatcher.BuildConfig;
 import com.anod.appwatcher.ChangelogActivity;
 import com.anod.appwatcher.MarketSearchActivity;
 import com.anod.appwatcher.R;
+import com.anod.appwatcher.adapters.AppListCursorAdapterWrapper;
 import com.anod.appwatcher.adapters.AppViewHolder;
-import com.anod.appwatcher.adapters.ListCursorAdapterWrapper;
 import com.anod.appwatcher.installed.ImportInstalledActivity;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListCursorLoader;
@@ -132,7 +132,7 @@ public class AppWatcherListFragment extends Fragment implements
 
         // Create an empty adapter we will use to display the loaded data.
         mAdapter = new MergeRecyclerAdapter();
-        mAdapter.addAdapter(ADAPTER_WATCHLIST, new ListCursorAdapterWrapper(getActivity(), mInstalledApps, this));
+        mAdapter.addAdapter(ADAPTER_WATCHLIST, new AppListCursorAdapterWrapper(getActivity(), mInstalledApps, this));
         mListView.setAdapter(mAdapter);
 
         // Start out with a progress indicator.
@@ -152,7 +152,7 @@ public class AppWatcherListFragment extends Fragment implements
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        ListCursorAdapterWrapper watchlistAdapter = ((ListCursorAdapterWrapper) mAdapter.getAdapter(ADAPTER_WATCHLIST));
+        AppListCursorAdapterWrapper watchlistAdapter = ((AppListCursorAdapterWrapper) mAdapter.getAdapter(ADAPTER_WATCHLIST));
         watchlistAdapter.swapData(data);
 
         int newCount = ((AppListCursorLoader) loader).getNewCountFiltered();
@@ -168,7 +168,7 @@ public class AppWatcherListFragment extends Fragment implements
         // This is called when the last Cursor provided to onLoadFinished()
         // above is about to be closed.  We need to make sure we are no
         // longer using it.
-        ListCursorAdapterWrapper watchlistAdapter = ((ListCursorAdapterWrapper) mAdapter.getAdapter(ADAPTER_WATCHLIST));
+        AppListCursorAdapterWrapper watchlistAdapter = ((AppListCursorAdapterWrapper) mAdapter.getAdapter(ADAPTER_WATCHLIST));
         watchlistAdapter.swapData(null);
     }
 

@@ -6,8 +6,8 @@ import android.support.v4.util.SimpleArrayMap;
 import com.anod.appwatcher.backup.AppListReaderIterator;
 import com.anod.appwatcher.backup.AppListWriter;
 import com.anod.appwatcher.model.AppInfo;
-import com.anod.appwatcher.model.AppListContentProviderClient;
-import com.anod.appwatcher.model.AppListCursor;
+import com.anod.appwatcher.content.AppListContentProviderClient;
+import com.anod.appwatcher.content.AppListCursor;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.drive.Drive;
 import com.google.android.gms.drive.DriveApi;
@@ -63,7 +63,7 @@ public class SyncConnectedWorker {
             } catch (Exception e) {
                 throw new Exception(e);
             } finally {
-                cr.release();
+                cr.close();
             }
         }
     }

@@ -7,8 +7,8 @@ import android.support.annotation.NonNull;
 
 import com.android.util.MalformedJsonException;
 import com.anod.appwatcher.model.AppInfo;
-import com.anod.appwatcher.model.AppListContentProviderClient;
-import com.anod.appwatcher.model.AppListCursor;
+import com.anod.appwatcher.content.AppListContentProviderClient;
+import com.anod.appwatcher.content.AppListCursor;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -116,13 +116,13 @@ public class ListBackupManager {
         } catch (IOException e) {
             AppLog.e(e);
             listCursor.close();
-            cr.release();
+            cr.close();
             return false;
         } finally {
             if (listCursor != null && !listCursor.isClosed()) {
                 listCursor.close();
             }
-            cr.release();
+            cr.close();
         }
         return true;
     }
@@ -155,7 +155,7 @@ public class ListBackupManager {
             AppListContentProviderClient cr = new AppListContentProviderClient(mContext);
             cr.discardAll();
             cr.addList(appList);
-            cr.release();
+            cr.close();
         }
         return RESULT_OK;
     }

@@ -20,7 +20,7 @@ import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.accounts.AccountChooser;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
-import com.anod.appwatcher.model.AppListContentProviderClient;
+import com.anod.appwatcher.content.AppListContentProviderClient;
 import com.anod.appwatcher.model.WatchAppList;
 import com.anod.appwatcher.ui.ToolbarActivity;
 import com.anod.appwatcher.utils.InstalledAppsProvider;
@@ -202,7 +202,7 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
         public List<String> loadInBackground() {
             AppListContentProviderClient cr = new AppListContentProviderClient(getContext());
             SimpleArrayMap<String, Integer> watchingPackages = cr.queryPackagesMap(false);
-            cr.release();
+            cr.close();
 
             final PackageManager pm = getContext().getPackageManager();
             List<String> list =  PackageManagerUtils.getDownloadedApps(watchingPackages, pm);

@@ -27,7 +27,7 @@ import com.anod.appwatcher.market.PlayStoreEndpointBase;
 import com.anod.appwatcher.market.SearchEndpoint;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppInfoMetadata;
-import com.anod.appwatcher.model.AppListContentProviderClient;
+import com.anod.appwatcher.content.AppListContentProviderClient;
 import com.anod.appwatcher.model.WatchAppList;
 import com.anod.appwatcher.search.ResultsAdapter;
 import com.anod.appwatcher.search.ResultsAdapterDetails;
@@ -69,7 +69,6 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
 
     private AccountChooser mAccountChooser;
     private WatchAppList mWatchAppList;
-    private AppListContentProviderClient mContentProviderClient;
     private String mSearchQuery;
     private boolean mFocus;
     private boolean mPackageSearch;

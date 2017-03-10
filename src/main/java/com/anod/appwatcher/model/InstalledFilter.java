@@ -2,6 +2,8 @@ package com.anod.appwatcher.model;
 
 import android.database.Cursor;
 
+import com.anod.appwatcher.content.AppListCursor;
+import com.anod.appwatcher.model.schema.AppListTable;
 import com.anod.appwatcher.utils.FilterCursorWrapper;
 import com.anod.appwatcher.utils.InstalledAppsProvider;
 
@@ -22,9 +24,9 @@ public class InstalledFilter implements FilterCursorWrapper.CursorFilter {
 
     @Override
     public boolean filterRecord(Cursor cursor) {
-        String packageName = cursor.getString(AppListCursor.IDX_PACKAGE);
-        int status = cursor.getInt(AppListCursor.IDX_STATUS);
-        int versionCode = cursor.getInt(AppListCursor.IDX_VERSION_NUMBER);
+        String packageName = cursor.getString(AppListTable.Projection.PACKAGE);
+        int status = cursor.getInt(AppListTable.Projection.STATUS);
+        int versionCode = cursor.getInt(AppListTable.Projection.VERSION_NUMBER);
 
         InstalledAppsProvider.Info installedInfo = mInstalledAppsProvider.getInfo(packageName);
         boolean installed = installedInfo.isInstalled();

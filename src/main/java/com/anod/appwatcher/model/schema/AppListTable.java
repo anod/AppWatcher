@@ -4,7 +4,7 @@ import android.provider.BaseColumns;
 
 public class AppListTable {
 
-    public class Columns implements BaseColumns {
+    public static class Columns implements BaseColumns {
         public static final String KEY_APPID = "app_id";
         public static final String KEY_PACKAGE = "package";
         public static final String KEY_VERSION_NUMBER = "ver_num";
@@ -45,6 +45,26 @@ public class AppListTable {
             Columns.KEY_APP_TYPE,
             Columns.KEY_SYNC_VERSION
     };
+
+    public static class Projection {
+        public static final int _ID = 0;
+        public static final int APPID = 1;
+        public static final int PACKAGE = 2;
+        public static final int VERSION_NUMBER = 3;
+        public static final int VERSION_NAME = 4;
+        public static final int TITLE = 5;
+        public static final int CREATOR = 6;
+        public static final int STATUS = 7;
+        public static final int REFRESH_TIME= 8;
+        public static final int PRICE_TEXT = 9;
+        public static final int PRICE_CURRENCY = 10;
+        public static final int PRICE_MICROS = 11;
+        public static final int UPLOAD_DATE = 12;
+        public static final int DETAILS_URL = 13;
+        public static final int ICON_URL = 14;
+        public static final int APP_TYPE = 15;
+        public static final int SYNC_VERSION = 16;
+    }
 
     public static final String TABLE_CREATE =
             "CREATE TABLE " + TABLE_NAME + " (" +

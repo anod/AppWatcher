@@ -9,6 +9,7 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.text.format.DateUtils;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -20,9 +21,15 @@ import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.SettingsActivity;
 import com.anod.appwatcher.accounts.AccountChooser;
+import com.anod.appwatcher.content.TagsContentProviderClient;
+import com.anod.appwatcher.content.TagsCursor;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
 import com.anod.appwatcher.installed.ImportInstalledActivity;
+import com.anod.appwatcher.model.AppInfo;
+import com.anod.appwatcher.model.Tag;
 import com.anod.appwatcher.wishlist.WishlistFragment;
+
+import java.util.HashMap;
 
 /**
  * @author alex
@@ -50,6 +57,7 @@ abstract public class DrawerActivity extends ToolbarActivity implements AccountC
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mNavigationView = (NavigationView) findViewById(R.id.nav_view);
         setupDrawerContent(mNavigationView);
+        updateTags();
     }
 
     private void setupDrawerContent(NavigationView navigationView) {
@@ -85,6 +93,26 @@ abstract public class DrawerActivity extends ToolbarActivity implements AccountC
                         return true;
                     }
                 });
+
+    }
+
+    public void updateTags()
+    {
+        Menu menu = mNavigationView.getMenu();
+        menu.removeGroup(1);
+
+        TagsContentProviderClient tags = new TagsContentProviderClient(this);
+        TagsCursor cr = tags.queryAll();
+        if (cr == null || !cr.moveToFirst()) {
+            return;
+        }
+        cr.moveToPosition(-1);
+
+        while (cr.moveToNext()) {
+            Tag tag = cr.getTag();
+            menu.add(1, tag.id, tag.id, tag.name);
+        }
+        cr.close();
     }
 
 
@@ -153,7 +181,6 @@ abstract public class DrawerActivity extends ToolbarActivity implements AccountC
             mAccountNameView.setText(account.name);
         }
     }
-
 
     public boolean isAuthenticated() {
         return mAuthToken != null;

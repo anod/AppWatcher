@@ -26,7 +26,6 @@ public class DbOpenHelper extends SQLiteOpenHelper {
         db.execSQL(AppListTable.TABLE_CREATE);
         db.execSQL(TagsTable.TABLE_CREATE);
         db.execSQL(AppTagsTable.TABLE_CREATE);
-
     }
 
     @Override

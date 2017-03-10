@@ -15,11 +15,17 @@ public class TagsTable {
 
     public static final String TABLE_NAME = "tags";
 
-    public static final String[] PROJECTION = new String[]{
+    public static final String[] PROJECTION = new String[] {
             Columns._ID,
             Columns.KEY_NAME,
             Columns.KEY_COLOR
     };
+
+    public static class Projection {
+        public static final int _ID = 0;
+        public static final int NAME = 1;
+        public static final int COLOR = 2;
+    }
 
     public static final String TABLE_CREATE =
             "CREATE TABLE " + TABLE_NAME + " (" +

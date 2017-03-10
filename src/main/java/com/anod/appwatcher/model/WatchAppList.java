@@ -5,6 +5,8 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v4.util.SimpleArrayMap;
 
+import com.anod.appwatcher.content.AppListContentProviderClient;
+
 
 /**
  * @author alex
@@ -42,7 +44,7 @@ public class WatchAppList {
     public void detach()
     {
         if (mContentProvider != null){
-            mContentProvider.release();
+            mContentProvider.close();
         }
         mContentProvider = null;
     }

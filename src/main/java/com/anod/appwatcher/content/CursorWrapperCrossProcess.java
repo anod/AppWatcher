@@ -1,4 +1,4 @@
-package com.anod.appwatcher.model;
+package com.anod.appwatcher.content;
 
 import android.database.CrossProcessCursor;
 import android.database.Cursor;
@@ -6,57 +6,19 @@ import android.database.CursorWindow;
 import android.database.CursorWrapper;
 
 /**
- * @author alex
+ * @author algavris
+ * @date 10/03/2017.
  */
-public class AppListCursor extends CursorWrapper implements CrossProcessCursor {
-    private static final int IDX_ROWID = 0;
-    private static final int IDX_APPID = 1;
-    static final int IDX_PACKAGE = 2;
-    static final int IDX_VERSION_NUMBER = 3;
-    private static final int IDX_VERSION_NAME = 4;
-    private static final int IDX_TITLE = 5;
-    private static final int IDX_CREATOR = 6;
-    static final int IDX_STATUS = 7;
-    static final int IDX_REFRESH_TIME= 8;
-    private static final int IDX_PRICE_TEXT = 9;
-    private static final int IDX_PRICE_CURRENCY = 10;
-    private static final int IDX_PRICE_MICROS = 11;
-    private static final int IDX_UPLOAD_DATE = 12;
-    private static final int IDX_DETAILS_URL = 13;
-    private static final int IDX_ICON_URL = 14;
-    private static final int IDX_APP_TYPE = 15;
-    private static final int IDX_SYNC_VERSION = 16;
 
-    public AppListCursor(Cursor cursor) {
+class CursorWrapperCrossProcess extends CursorWrapper implements CrossProcessCursor {
+
+    /**
+     * Creates a cursor wrapper.
+     *
+     * @param cursor The underlying cursor to wrap.
+     */
+    CursorWrapperCrossProcess(Cursor cursor) {
         super(cursor);
-    }
-
-
-    public String getAppId() {
-        return getString(IDX_APPID);
-    }
-
-    public AppInfo getAppInfo() {
-
-        return new AppInfo(
-                getInt(IDX_ROWID),
-                getString(IDX_APPID),
-                getString(IDX_PACKAGE),
-                getInt(IDX_VERSION_NUMBER),
-                getString(IDX_VERSION_NAME),
-                getString(IDX_TITLE),
-                getString(IDX_CREATOR),
-                getString(IDX_ICON_URL),
-                getInt(IDX_STATUS),
-                getString(IDX_UPLOAD_DATE),
-                getString(IDX_PRICE_TEXT),
-                getString(IDX_PRICE_CURRENCY),
-                getInt(IDX_PRICE_MICROS),
-                getString(IDX_DETAILS_URL),
-                getLong(IDX_REFRESH_TIME),
-                getString(IDX_APP_TYPE),
-                getInt(IDX_SYNC_VERSION)
-        );
     }
 
     protected void finalize() throws Throwable {
@@ -95,14 +57,14 @@ public class AppListCursor extends CursorWrapper implements CrossProcessCursor {
 //                            }
 //                        }
 //                    } else {
-                        String field = getString(i);
-                        if (field != null) {
-                            putNull = false;
-                            if (!window.putString(field, getPosition(), i)) {
-                                window.freeLastRow();
-                                break;
-                            }
+                    String field = getString(i);
+                    if (field != null) {
+                        putNull = false;
+                        if (!window.putString(field, getPosition(), i)) {
+                            window.freeLastRow();
+                            break;
                         }
+                    }
 //                    }
                     if (putNull) {
                         if (!window.putNull(getPosition(), i)) {
@@ -128,5 +90,4 @@ public class AppListCursor extends CursorWrapper implements CrossProcessCursor {
     public boolean onMove(int oldPosition, int newPosition) {
         return true;
     }
-
 }

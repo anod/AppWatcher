@@ -8,6 +8,8 @@ import android.text.TextUtils;
 
 import com.anod.appwatcher.AppListContentProvider;
 import com.anod.appwatcher.Preferences;
+import com.anod.appwatcher.content.AppListContentProviderClient;
+import com.anod.appwatcher.content.AppListCursor;
 import com.anod.appwatcher.model.schema.AppListTable;
 import com.anod.appwatcher.utils.FilterCursorWrapper;
 import com.anod.appwatcher.utils.InstalledAppsProvider;
@@ -115,7 +117,7 @@ public class AppListCursorLoader extends CursorLoader {
         }
 
         apps.close();
-        cl.release();
+        cl.close();
     }
 
     public int getUpdatableCountFiltered() {

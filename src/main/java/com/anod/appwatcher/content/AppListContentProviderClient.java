@@ -1,4 +1,4 @@
-package com.anod.appwatcher.model;
+package com.anod.appwatcher.content;
 
 import android.content.ContentProviderClient;
 import android.content.ContentValues;
@@ -10,6 +10,8 @@ import android.os.RemoteException;
 import android.support.v4.util.SimpleArrayMap;
 
 import com.anod.appwatcher.AppListContentProvider;
+import com.anod.appwatcher.model.AppInfo;
+import com.anod.appwatcher.model.AppInfoMetadata;
 import com.anod.appwatcher.model.schema.AppListTable;
 import com.anod.appwatcher.utils.BitmapUtils;
 
@@ -61,7 +63,7 @@ public class AppListContentProviderClient {
         return query(sortOrder, selection, selectionArgs);
     }
 
-    AppListCursor queryUpdated() {
+    public AppListCursor queryUpdated() {
         String selection = AppListTable.Columns.KEY_STATUS + " = ?";
         String[] selectionArgs = new String[]{String.valueOf(AppInfo.STATUS_UPDATED)};
         return query(null, selection, selectionArgs);
@@ -161,7 +163,7 @@ public class AppListContentProviderClient {
         return numRows;
     }
 
-    public void release() {
+    public void close() {
         if (mContentProviderClient != null) {
             mContentProviderClient.release();
         }
@@ -196,8 +198,7 @@ public class AppListContentProviderClient {
         return values;
     }
 
-
-    AppInfo queryAppId(String packageName) {
+    public AppInfo queryAppId(String packageName) {
         AppListCursor cr = query(null,
                 AppListTable.Columns.KEY_PACKAGE + " = ? AND " + AppListTable.Columns.KEY_STATUS + " != ?", new String[]{packageName, String.valueOf(AppInfo.STATUS_DELETED) });
         if (cr == null || cr.getCount() == 0) {

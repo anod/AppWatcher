@@ -2,7 +2,7 @@ package com.anod.appwatcher.backup;
 
 import com.android.util.JsonWriter;
 import com.anod.appwatcher.model.AppInfo;
-import com.anod.appwatcher.model.AppListCursor;
+import com.anod.appwatcher.content.AppListCursor;
 
 import java.io.IOException;
 import java.io.Writer;
