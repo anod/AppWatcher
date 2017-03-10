@@ -19,7 +19,7 @@ import com.anod.appwatcher.MarketSearchActivity;
 import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.SettingsActivity;
-import com.anod.appwatcher.accounts.AccountChooserHelper;
+import com.anod.appwatcher.accounts.AccountChooser;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
 import com.anod.appwatcher.installed.ImportInstalledActivity;
 import com.anod.appwatcher.wishlist.WishlistFragment;
@@ -28,11 +28,11 @@ import com.anod.appwatcher.wishlist.WishlistFragment;
  * @author alex
  * @date 2014-08-07
  */
-abstract public class DrawerActivity extends ToolbarActivity implements AccountChooserHelper.OnAccountSelectionListener {
+abstract public class DrawerActivity extends ToolbarActivity implements AccountChooser.OnAccountSelectionListener {
     DrawerLayout mDrawerLayout;
     private TextView mAccountNameView;
     protected NavigationView mNavigationView;
-    private AccountChooserHelper mAccountChooserHelper;
+    private AccountChooser mAccountChooser;
     protected Preferences mPreferences;
     private String mAuthToken;
 
@@ -40,8 +40,8 @@ abstract public class DrawerActivity extends ToolbarActivity implements AccountC
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPreferences = new Preferences(this);
-        mAccountChooserHelper = new AccountChooserHelper(this, mPreferences, this);
-        mAccountChooserHelper.init();
+        mAccountChooser = new AccountChooser(this, mPreferences, this);
+        mAccountChooser.init();
     }
 
     protected void setupDrawer() {
@@ -90,21 +90,21 @@ abstract public class DrawerActivity extends ToolbarActivity implements AccountC
 
     @Override
     public AccountChooserFragment.OnAccountSelectionListener getAccountSelectionListener() {
-        return mAccountChooserHelper;
+        return mAccountChooser;
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        mAccountChooserHelper.onRequestPermissionResult(requestCode, permissions, grantResults);
+        mAccountChooser.onRequestPermissionResult(requestCode, permissions, grantResults);
     }
 
     protected void onAccountChooseClick() {
-        mAccountChooserHelper.showAccountsDialogWithCheck();
+        mAccountChooser.showAccountsDialogWithCheck();
     }
 
     @Override
-    public void onHelperAccountSelected(Account account, String authToken) {
+    public void onAccountSelected(Account account, String authToken) {
         mAuthToken = authToken;
         if (authToken == null) {
             Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
@@ -115,7 +115,7 @@ abstract public class DrawerActivity extends ToolbarActivity implements AccountC
     }
 
     @Override
-    public void onHelperAccountNotFound() {
+    public void onAccountNotFound() {
         Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
     }
 
@@ -138,7 +138,7 @@ abstract public class DrawerActivity extends ToolbarActivity implements AccountC
                 return true;
             case R.id.menu_wishlist:
                 Bundle args = new Bundle();
-                args.putParcelable(WishlistFragment.EXTRA_ACCOUNT, mAccountChooserHelper.getAccount());
+                args.putParcelable(WishlistFragment.EXTRA_ACCOUNT, mAccountChooser.getAccount());
                 args.putString(WishlistFragment.EXTRA_AUTH_TOKEN, mAuthToken);
                 startActivity(FragmentToolbarActivity.intent(WishlistFragment.TAG, args, this));
                 return true;
@@ -161,6 +161,6 @@ abstract public class DrawerActivity extends ToolbarActivity implements AccountC
 
     public void showAccountsDialogWithCheck() {
         Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
-        mAccountChooserHelper.showAccountsDialogWithCheck();
+        mAccountChooser.showAccountsDialogWithCheck();
     }
 }

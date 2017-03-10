@@ -18,7 +18,7 @@ import android.widget.Toast;
 
 import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.R;
-import com.anod.appwatcher.accounts.AccountChooserHelper;
+import com.anod.appwatcher.accounts.AccountChooser;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
 import com.anod.appwatcher.model.AppListContentProviderClient;
 import com.anod.appwatcher.model.WatchAppList;
@@ -40,7 +40,7 @@ import info.anodsplace.android.log.AppLog;
  * @author algavris
  * @date 19/04/2016.
  */
-public class ImportInstalledActivity extends ToolbarActivity implements LoaderManager.LoaderCallbacks<List<String>>, AccountChooserHelper.OnAccountSelectionListener, ImportBulkManager.Listener {
+public class ImportInstalledActivity extends ToolbarActivity implements LoaderManager.LoaderCallbacks<List<String>>, AccountChooser.OnAccountSelectionListener, ImportBulkManager.Listener {
     @BindView(android.R.id.list)
     RecyclerView mList;
     @BindView(android.R.id.progress)
@@ -48,7 +48,7 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
 
     private boolean mAllSelected;
     private ImportDataProvider mDataProvider;
-    private AccountChooserHelper mAccountChooserHelper;
+    private AccountChooser mAccountChooser;
     private ImportBulkManager mImportManager;
 
     @Override
@@ -71,8 +71,8 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
     protected void onResume() {
         super.onResume();
 
-        mAccountChooserHelper = new AccountChooserHelper(this, new Preferences(this), this);
-        mAccountChooserHelper.init();
+        mAccountChooser = new AccountChooser(this, new Preferences(this), this);
+        mAccountChooser.init();
     }
 
     @OnClick(android.R.id.button3)
@@ -133,7 +133,7 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
     }
 
     @Override
-    public void onHelperAccountSelected(Account account, String authSubToken) {
+    public void onAccountSelected(Account account, String authSubToken) {
         if (authSubToken == null) {
             Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
             finish();
@@ -143,20 +143,20 @@ public class ImportInstalledActivity extends ToolbarActivity implements LoaderMa
     }
 
     @Override
-    public void onHelperAccountNotFound() {
+    public void onAccountNotFound() {
         Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
         finish();
     }
 
     @Override
     public AccountChooserFragment.OnAccountSelectionListener getAccountSelectionListener() {
-        return mAccountChooserHelper;
+        return mAccountChooser;
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        mAccountChooserHelper.onRequestPermissionResult(requestCode, permissions, grantResults);
+        mAccountChooser.onRequestPermissionResult(requestCode, permissions, grantResults);
     }
 
     @Override

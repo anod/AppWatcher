@@ -145,7 +145,6 @@ public class AppWatcherListFragment extends Fragment implements
         getLoaderManager().initLoader(0, null, this);
     }
 
-
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new AppListCursorLoader(getActivity(), mTitleFilter, mSortId, createFilter(mFilterId));

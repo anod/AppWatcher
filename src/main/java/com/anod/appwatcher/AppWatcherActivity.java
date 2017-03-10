@@ -51,6 +51,7 @@ public class AppWatcherActivity extends DrawerActivity implements
 
     private MenuItemAnimation mRefreshAnim;
     private ViewPager mViewPager;
+    private String mFilterQuery = "";
 
     public interface EventListener {
         void onSortChanged(int sortIndex);
@@ -63,11 +64,10 @@ public class AppWatcherActivity extends DrawerActivity implements
     private MenuItem mSearchMenuItem;
     private ArrayList<EventListener> mEventListener = new ArrayList<>(3);
 
-    private boolean mOpenChangelog;
-
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putInt("tab_id", mViewPager.getCurrentItem());
+        outState.putString("filter", mFilterQuery);
         super.onSaveInstanceState(outState);
     }
 
@@ -86,15 +86,10 @@ public class AppWatcherActivity extends DrawerActivity implements
             SyncScheduler.schedule(this, mPreferences.isRequiresCharging());
         }
 
-        Intent i = getIntent();
-        if (i != null) {
-            mOpenChangelog = i.getBooleanExtra(EXTRA_FROM_NOTIFICATION, false);
-            i.removeExtra(EXTRA_FROM_NOTIFICATION);
-        }
-
         int filterId = Filters.TAB_ALL;
-        if (savedInstanceState != null && !mOpenChangelog) {
+        if (savedInstanceState != null) {
             filterId = savedInstanceState.getInt("tab_id", Filters.TAB_ALL);
+            mFilterQuery = savedInstanceState.getString("filter");
             AppLog.d("Restore tab: " + filterId);
         }
 
@@ -139,6 +134,11 @@ public class AppWatcherActivity extends DrawerActivity implements
         searchView.setOnQueryTextListener(this);
         searchView.setSubmitButtonEnabled(true);
         searchView.setQueryHint(getString(R.string.search));
+
+        if (!TextUtils.isEmpty(mFilterQuery)) {
+            MenuItemCompat.expandActionView(mSearchMenuItem);
+            searchView.setQuery(mFilterQuery, false);
+        }
 
         mRefreshAnim.setMenuItem(menu.findItem(R.id.menu_act_refresh));
         return super.onCreateOptionsMenu(menu);
@@ -248,8 +248,8 @@ public class AppWatcherActivity extends DrawerActivity implements
     }
 
     @Override
-    public void onHelperAccountSelected(Account account, String authToken) {
-        super.onHelperAccountSelected(account, authToken);
+    public void onAccountSelected(Account account, String authToken) {
+        super.onAccountSelected(account, authToken);
         if (UpgradeCheck.isNewVersion(mPreferences))
         {
             requestRefresh();
@@ -258,6 +258,7 @@ public class AppWatcherActivity extends DrawerActivity implements
 
     @Override
     public boolean onQueryTextSubmit(String query) {
+        mFilterQuery = "";
         if (TextUtils.isEmpty(query)) {
             MenuItemCompat.collapseActionView(mSearchMenuItem);
         } else {
@@ -275,6 +276,7 @@ public class AppWatcherActivity extends DrawerActivity implements
 
     @Override
     public boolean onQueryTextChange(String newText) {
+        mFilterQuery = newText;
         notifyQueryChange(newText);
         return true;
     }
@@ -293,6 +295,12 @@ public class AppWatcherActivity extends DrawerActivity implements
 
     public int addQueryChangeListener(EventListener listener) {
         mEventListener.add(listener);
+
+        if (!TextUtils.isEmpty(mFilterQuery))
+        {
+            notifyQueryChange(mFilterQuery);
+        }
+
         return mEventListener.size() - 1;
     }
 

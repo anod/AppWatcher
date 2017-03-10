@@ -14,16 +14,13 @@ import com.anod.appwatcher.fragments.AccountChooserFragment;
  * @author alex
  * @date 9/17/13
  */
-public class AccountChooserHelper implements AccountChooserFragment.OnAccountSelectionListener {
+public class AccountChooser implements AccountChooserFragment.OnAccountSelectionListener {
     private final AuthTokenProvider mAuthTokenProvider;
     private final Context mContext;
     private final OnAccountSelectionListener mListener;
     private AppCompatActivity mActivity;
     private Preferences mPreferences;
     private Account mSyncAccount;
-
-    private static final int TWO_HOURS_IN_SEC = 7200;
-    private static final int SIX_HOURS_IN_SEC = 21600;
 
     private void showAccountsDialog() {
         AccountChooserFragment accountsDialog = AccountChooserFragment.newInstance();
@@ -56,11 +53,11 @@ public class AccountChooserHelper implements AccountChooserFragment.OnAccountSel
 
     // Container Activity must implement this interface
     public interface OnAccountSelectionListener extends AccountChooserFragment.AccountSelectionProvider {
-        void onHelperAccountSelected(final Account account, final String authSubToken);
-        void onHelperAccountNotFound();
+        void onAccountSelected(final Account account, final String authSubToken);
+        void onAccountNotFound();
     }
 
-    public AccountChooserHelper(AppCompatActivity activity, Preferences preferences, OnAccountSelectionListener listener) {
+    public AccountChooser(AppCompatActivity activity, Preferences preferences, OnAccountSelectionListener listener) {
         mActivity = activity;
         if (!(mActivity instanceof AccountChooserFragment.AccountSelectionProvider)) {
             throw new ClassCastException(activity.toString()
@@ -86,14 +83,14 @@ public class AccountChooserHelper implements AccountChooserFragment.OnAccountSel
                 @Override
                 public void onAuthTokenAvailable(String token) {
                     if (mListener != null) {
-                        mListener.onHelperAccountSelected(mSyncAccount, token);
+                        mListener.onAccountSelected(mSyncAccount, token);
                     }
                 }
 
                 @Override
                 public void onUnRecoverableException(String errorMessage) {
                     if (mListener != null) {
-                        mListener.onHelperAccountSelected(mSyncAccount, null);
+                        mListener.onAccountSelected(mSyncAccount, null);
                     }
                 }
             });
@@ -109,14 +106,14 @@ public class AccountChooserHelper implements AccountChooserFragment.OnAccountSel
             @Override
             public void onAuthTokenAvailable(String token) {
                 if (mListener != null) {
-                    mListener.onHelperAccountSelected(account, token);
+                    mListener.onAccountSelected(account, token);
                 }
             }
 
             @Override
             public void onUnRecoverableException(String errorMessage) {
                 if (mListener != null) {
-                    mListener.onHelperAccountSelected(mSyncAccount, null);
+                    mListener.onAccountSelected(mSyncAccount, null);
                 }
             }
         });
@@ -126,7 +123,7 @@ public class AccountChooserHelper implements AccountChooserFragment.OnAccountSel
     @Override
     public void onDialogAccountNotFound() {
         if (mListener != null) {
-            mListener.onHelperAccountNotFound();
+            mListener.onAccountNotFound();
         }
     }
 }

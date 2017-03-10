@@ -13,7 +13,7 @@ import android.support.v7.app.AppCompatDelegate;
 import android.text.format.DateUtils;
 import android.widget.Toast;
 
-import com.anod.appwatcher.accounts.AccountChooserHelper;
+import com.anod.appwatcher.accounts.AccountChooser;
 import com.anod.appwatcher.backup.ExportTask;
 import com.anod.appwatcher.backup.GDriveSync;
 import com.anod.appwatcher.backup.ImportTask;
@@ -30,7 +30,7 @@ import de.psdev.licensesdialog.LicensesDialog;
 import info.anodsplace.android.log.AppLog;
 
 
-public class SettingsActivity extends SettingsActionBarActivity implements ExportTask.Listener, GDriveSync.Listener, AccountChooserHelper.OnAccountSelectionListener, ImportTask.Listener {
+public class SettingsActivity extends SettingsActionBarActivity implements ExportTask.Listener, GDriveSync.Listener, AccountChooser.OnAccountSelectionListener, ImportTask.Listener {
     private static final int ACTION_EXPORT = 3;
     private static final int ACTION_IMPORT = 4;
     private static final int ACTION_LICENSES = 6;
@@ -51,7 +51,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     private CheckboxItem mSyncEnabledItem;
     private Item mSyncNowItem;
     private Preferences mPrefs;
-    private AccountChooserHelper mAccountChooserHelper;
+    private AccountChooser mAccountChooser;
     private CheckboxItem mWifiItem;
     private CheckboxItem mChargingItem;
 
@@ -84,14 +84,14 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     protected void init() {
         mGDriveSync = new GDriveSync(this);
         mPrefs = new Preferences(this);
-        mAccountChooserHelper = new AccountChooserHelper(this, mPrefs, this);
-        mAccountChooserHelper.init();
+        mAccountChooser = new AccountChooser(this, mPrefs, this);
+        mAccountChooser.init();
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        mAccountChooserHelper.onRequestPermissionResult(requestCode, permissions, grantResults);
+        mAccountChooser.onRequestPermissionResult(requestCode, permissions, grantResults);
     }
 
     @Override
@@ -321,20 +321,20 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     }
 
     @Override
-    public void onHelperAccountSelected(Account account, String authSubToken) {
+    public void onAccountSelected(Account account, String authSubToken) {
         if (authSubToken == null) {
             Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
         }
     }
 
     @Override
-    public void onHelperAccountNotFound() {
+    public void onAccountNotFound() {
         Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
     }
 
     @Override
     public AccountChooserFragment.OnAccountSelectionListener getAccountSelectionListener() {
-        return mAccountChooserHelper;
+        return mAccountChooser;
     }
 
     @Override
