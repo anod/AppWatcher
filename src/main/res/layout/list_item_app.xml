@@ -11,11 +11,12 @@
         xmlns:card_view="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="4dp"
+        android:layout_marginBottom="1dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         card_view:cardBackgroundColor="@color/item_background"
-        card_view:cardCornerRadius="4dp">
+        card_view:cardCornerRadius="1dp"
+        card_view:cardElevation="1dp">
 
         <LinearLayout
             android:id="@android:id/content"
