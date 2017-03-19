@@ -5,7 +5,7 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v4.util.SimpleArrayMap;
 
-import com.anod.appwatcher.content.AppListContentProviderClient;
+import com.anod.appwatcher.content.DbContentProviderClient;
 
 
 /**
@@ -20,7 +20,7 @@ public class WatchAppList {
 
     private final Listener mListener;
     private SimpleArrayMap<String, Integer> mAddedApps;
-    private AppListContentProviderClient mContentProvider;
+    private DbContentProviderClient mContentProvider;
 
     public interface Listener {
         void onWatchListChangeSuccess(AppInfo info, int newStatus);
@@ -33,10 +33,10 @@ public class WatchAppList {
     }
 
     public void attach(Context context) {
-        attach(new AppListContentProviderClient(context));
+        attach(new DbContentProviderClient(context));
     }
 
-    private void attach(@NonNull AppListContentProviderClient contentProvider) {
+    private void attach(@NonNull DbContentProviderClient contentProvider) {
         mContentProvider = contentProvider;
         mAddedApps = mContentProvider.queryPackagesMap(false);
     }

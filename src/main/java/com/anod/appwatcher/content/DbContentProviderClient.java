@@ -12,7 +12,9 @@ import android.support.v4.util.SimpleArrayMap;
 import com.anod.appwatcher.AppListContentProvider;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppInfoMetadata;
+import com.anod.appwatcher.model.Tag;
 import com.anod.appwatcher.model.schema.AppListTable;
+import com.anod.appwatcher.model.schema.TagsTable;
 import com.anod.appwatcher.utils.BitmapUtils;
 
 import java.util.List;
@@ -24,20 +26,20 @@ import info.anodsplace.android.log.AppLog;
  *
  * @author alex
  */
-public class AppListContentProviderClient {
+public class DbContentProviderClient {
     private static final String DEFAULT_SORT_ORDER =
             AppListTable.Columns.KEY_STATUS + " DESC, "
                     + AppListTable.Columns.KEY_TITLE
                     + " COLLATE LOCALIZED ASC";
 
-    private ContentProviderClient mContentProviderClient;
+    private final ContentProviderClient mContentProviderClient;
 
 
-    public AppListContentProviderClient(Context context) {
+    public DbContentProviderClient(Context context) {
         mContentProviderClient = context.getContentResolver().acquireContentProviderClient(AppListContentProvider.AUTHORITY);
     }
 
-    public AppListContentProviderClient(ContentProviderClient provider) {
+    public DbContentProviderClient(ContentProviderClient provider) {
         mContentProviderClient = provider;
     }
 
@@ -55,18 +57,18 @@ public class AppListContentProviderClient {
 
     private AppListCursor queryAll(boolean includeDeleted, String sortOrder) {
         if (includeDeleted) {
-            return query(sortOrder, null, null);
+            return queryApps(sortOrder, null, null);
         }
         String selection = AppListTable.Columns.KEY_STATUS + " != ?";
         String[] selectionArgs = new String[]{String.valueOf(AppInfo.STATUS_DELETED)};
 
-        return query(sortOrder, selection, selectionArgs);
+        return queryApps(sortOrder, selection, selectionArgs);
     }
 
     public AppListCursor queryUpdated() {
         String selection = AppListTable.Columns.KEY_STATUS + " = ?";
         String[] selectionArgs = new String[]{String.valueOf(AppInfo.STATUS_UPDATED)};
-        return query(null, selection, selectionArgs);
+        return queryApps(null, selection, selectionArgs);
     }
 
     public int getCount(boolean includeDeleted) {
@@ -77,10 +79,10 @@ public class AppListContentProviderClient {
         return cr.getCount();
     }
 
-    public AppListCursor query(String sortOrder, String selection, String[] selectionArgs) {
+    public AppListCursor queryApps(String sortOrder, String selection, String[] selectionArgs) {
         Cursor cr;
         try {
-            cr = mContentProviderClient.query(AppListContentProvider.APPS_CONTENT_URI,
+            cr = mContentProviderClient.query(DbContentProvider.APPS_CONTENT_URI,
                     AppListTable.PROJECTION, selection, selectionArgs, sortOrder
             );
         } catch (RemoteException e) {
@@ -112,9 +114,9 @@ public class AppListContentProviderClient {
     }
 
     public Uri insert(AppInfo app) {
-        ContentValues values = createContentValues(app);
+        ContentValues values = AppListTable.createContentValues(app);
         try {
-            return mContentProviderClient.insert(AppListContentProvider.APPS_CONTENT_URI, values);
+            return mContentProviderClient.insert(DbContentProvider.APPS_CONTENT_URI, values);
         } catch (RemoteException e) {
             AppLog.e(e.getMessage());
         }
@@ -123,12 +125,12 @@ public class AppListContentProviderClient {
 
     public int update(AppInfo app) {
         int rowId = app.getRowId();
-        ContentValues values = createContentValues(app);
+        ContentValues values = AppListTable.createContentValues(app);
         return update(rowId, values);
     }
 
     public int update(int rowId, ContentValues values) {
-        Uri updateUri = AppListContentProvider.APPS_CONTENT_URI.buildUpon().appendPath(String.valueOf(rowId)).build();
+        Uri updateUri = DbContentProvider.APPS_CONTENT_URI.buildUpon().appendPath(String.valueOf(rowId)).build();
         try {
             return mContentProviderClient.update(updateUri, values, null, null);
         } catch (RemoteException e) {
@@ -138,7 +140,7 @@ public class AppListContentProviderClient {
     }
 
     public int updateStatus(int rowId, int status) {
-        Uri updateUri = AppListContentProvider.APPS_CONTENT_URI.buildUpon().appendPath(String.valueOf(rowId)).build();
+        Uri updateUri = DbContentProvider.APPS_CONTENT_URI.buildUpon().appendPath(String.valueOf(rowId)).build();
         ContentValues values = new ContentValues();
         values.put(AppListTable.Columns.KEY_STATUS, status);
         try {
@@ -153,7 +155,7 @@ public class AppListContentProviderClient {
         int numRows = 0;
         try {
             numRows = mContentProviderClient.delete(
-                    AppListContentProvider.APPS_CONTENT_URI,
+                    DbContentProvider.APPS_CONTENT_URI,
                     AppListTable.Columns.KEY_STATUS + " = ?",
                     new String[]{String.valueOf(AppInfoMetadata.STATUS_DELETED)}
             );
@@ -169,37 +171,8 @@ public class AppListContentProviderClient {
         }
     }
 
-    /**
-     * @return Content values for app
-     */
-    private ContentValues createContentValues(AppInfo app) {
-        ContentValues values = new ContentValues();
-
-        values.put(AppListTable.Columns.KEY_APPID, app.getAppId());
-        values.put(AppListTable.Columns.KEY_PACKAGE, app.packageName);
-        values.put(AppListTable.Columns.KEY_TITLE, app.title);
-        values.put(AppListTable.Columns.KEY_VERSION_NUMBER, app.versionNumber);
-        values.put(AppListTable.Columns.KEY_VERSION_NAME, app.versionName);
-        values.put(AppListTable.Columns.KEY_CREATOR, app.creator);
-        values.put(AppListTable.Columns.KEY_STATUS, app.getStatus());
-        values.put(AppListTable.Columns.KEY_UPLOAD_DATE, app.uploadDate);
-
-        values.put(AppListTable.Columns.KEY_PRICE_TEXT, app.priceText);
-        values.put(AppListTable.Columns.KEY_PRICE_CURRENCY, app.priceCur);
-        values.put(AppListTable.Columns.KEY_PRICE_MICROS, app.priceMicros);
-
-        values.put(AppListTable.Columns.KEY_DETAILS_URL, app.getDetailsUrl());
-
-        values.put(AppListTable.Columns.KEY_ICON_URL, app.iconUrl);
-        values.put(AppListTable.Columns.KEY_REFRESH_TIMESTAMP, app.refreshTime);
-
-        values.put(AppListTable.Columns.KEY_APP_TYPE, app.appType);
-        values.put(AppListTable.Columns.KEY_SYNC_VERSION, app.syncVersion);
-        return values;
-    }
-
     public AppInfo queryAppId(String packageName) {
-        AppListCursor cr = query(null,
+        AppListCursor cr = queryApps(null,
                 AppListTable.Columns.KEY_PACKAGE + " = ? AND " + AppListTable.Columns.KEY_STATUS + " != ?", new String[]{packageName, String.valueOf(AppInfo.STATUS_DELETED) });
         if (cr == null || cr.getCount() == 0) {
             return null;
@@ -215,7 +188,7 @@ public class AppListContentProviderClient {
     }
 
     public AppInfo queryAppRow(int rowId) {
-        AppListCursor cr = query(null,
+        AppListCursor cr = queryApps(null,
                 AppListTable.Columns._ID + " = ?", new String[]{ String.valueOf(rowId) });
         if (cr == null || cr.getCount() == 0) {
             return null;
@@ -277,4 +250,37 @@ public class AppListContentProviderClient {
         }
     }
 
+    public Tag queryTagByName(String tagName) {
+        try {
+            Cursor cr = mContentProviderClient.query(
+                    DbContentProvider.TAGS_CONTENT_URI,
+                    TagsTable.PROJECTION,
+                    TagsTable.Columns.NAME + " = ?", new String[]{String.valueOf(tagName)},
+                    null
+            );
+            if (cr == null || cr.getCount() == 0) {
+                return null;
+            }
+            cr.moveToPosition(-1);
+            Tag tag = null;
+            if (cr.moveToNext()) {
+                tag = (new TagsCursor(cr)).getTag();
+            }
+            cr.close();
+            return tag;
+        } catch (RemoteException e) {
+            AppLog.e(e);
+        }
+        return null;
+    }
+
+    public Uri createTag(Tag tag) {
+        ContentValues values = TagsTable.createContentValues(tag);
+        try {
+            return mContentProviderClient.insert(DbContentProvider.TAGS_CONTENT_URI, values);
+        } catch (RemoteException e) {
+            AppLog.e(e.getMessage());
+        }
+        return null;
+    }
 }

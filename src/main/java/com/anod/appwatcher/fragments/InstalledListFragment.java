@@ -12,7 +12,7 @@ import android.view.View;
 import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.adapters.AppViewHolderDataProvider;
 import com.anod.appwatcher.installed.InstalledAppsAdapter;
-import com.anod.appwatcher.content.AppListContentProviderClient;
+import com.anod.appwatcher.content.DbContentProviderClient;
 import com.anod.appwatcher.model.AppListCursorLoader;
 import com.anod.appwatcher.utils.FilterCursorWrapper;
 import com.anod.appwatcher.utils.PackageManagerUtils;
@@ -84,7 +84,7 @@ public class InstalledListFragment extends AppWatcherListFragment {
         public Cursor loadInBackground() {
             Cursor cursor = super.loadInBackground();
 
-            AppListContentProviderClient cr = new AppListContentProviderClient(getContext());
+            DbContentProviderClient cr = new DbContentProviderClient(getContext());
             SimpleArrayMap<String, Integer> watchingPackages = cr.queryPackagesMap(false);
             cr.close();
 

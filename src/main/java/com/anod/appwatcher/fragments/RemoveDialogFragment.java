@@ -8,7 +8,7 @@ import android.support.v4.app.DialogFragment;
 
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.model.AppInfo;
-import com.anod.appwatcher.content.AppListContentProviderClient;
+import com.anod.appwatcher.content.DbContentProviderClient;
 
 public class RemoveDialogFragment extends DialogFragment {
 
@@ -36,7 +36,7 @@ public class RemoveDialogFragment extends DialogFragment {
                 .setPositiveButton(R.string.alert_dialog_remove,
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
-                                AppListContentProviderClient cl = new AppListContentProviderClient(getActivity());
+                                DbContentProviderClient cl = new DbContentProviderClient(getActivity());
                                 cl.updateStatus(rowId, AppInfo.STATUS_DELETED);
                                 cl.close();
                                 getActivity().finish();

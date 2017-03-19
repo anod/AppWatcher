@@ -8,7 +8,7 @@ import android.text.TextUtils;
 
 import com.anod.appwatcher.AppListContentProvider;
 import com.anod.appwatcher.Preferences;
-import com.anod.appwatcher.content.AppListContentProviderClient;
+import com.anod.appwatcher.content.DbContentProviderClient;
 import com.anod.appwatcher.content.AppListCursor;
 import com.anod.appwatcher.model.schema.AppListTable;
 import com.anod.appwatcher.utils.FilterCursorWrapper;
@@ -93,7 +93,7 @@ public class AppListCursorLoader extends CursorLoader {
     }
 
     private void loadNewCount() {
-        AppListContentProviderClient cl = new AppListContentProviderClient(getContext());
+        DbContentProviderClient cl = new DbContentProviderClient(getContext());
         AppListCursor apps = cl.queryUpdated();
 
         mNewCount = 0;

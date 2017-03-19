@@ -25,6 +25,7 @@ import com.anod.appwatcher.MarketSearchActivity;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.adapters.AppListCursorAdapterWrapper;
 import com.anod.appwatcher.adapters.AppViewHolder;
+import com.anod.appwatcher.content.AppListCursor;
 import com.anod.appwatcher.installed.ImportInstalledActivity;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListCursorLoader;
@@ -153,7 +154,7 @@ public class AppWatcherListFragment extends Fragment implements
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         AppListCursorAdapterWrapper watchlistAdapter = ((AppListCursorAdapterWrapper) mAdapter.getAdapter(ADAPTER_WATCHLIST));
-        watchlistAdapter.swapData(data);
+        watchlistAdapter.swapData((AppListCursor) data);
 
         int newCount = ((AppListCursorLoader) loader).getNewCountFiltered();
         int updatableCount = ((AppListCursorLoader) loader).getUpdatableCountFiltered();

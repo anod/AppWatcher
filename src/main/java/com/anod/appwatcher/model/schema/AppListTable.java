@@ -1,6 +1,9 @@
 package com.anod.appwatcher.model.schema;
 
+import android.content.ContentValues;
 import android.provider.BaseColumns;
+
+import com.anod.appwatcher.model.AppInfo;
 
 public class AppListTable {
 
@@ -87,4 +90,33 @@ public class AppListTable {
                     Columns.KEY_APP_TYPE + " TEXT," +
                     Columns.KEY_SYNC_VERSION + " INTEGER" +
                     ") ";
+
+    /**
+     * @return Content values for app
+     */
+    public static ContentValues createContentValues(AppInfo app) {
+        ContentValues values = new ContentValues();
+
+        values.put(AppListTable.Columns.KEY_APPID, app.getAppId());
+        values.put(AppListTable.Columns.KEY_PACKAGE, app.packageName);
+        values.put(AppListTable.Columns.KEY_TITLE, app.title);
+        values.put(AppListTable.Columns.KEY_VERSION_NUMBER, app.versionNumber);
+        values.put(AppListTable.Columns.KEY_VERSION_NAME, app.versionName);
+        values.put(AppListTable.Columns.KEY_CREATOR, app.creator);
+        values.put(AppListTable.Columns.KEY_STATUS, app.getStatus());
+        values.put(AppListTable.Columns.KEY_UPLOAD_DATE, app.uploadDate);
+
+        values.put(AppListTable.Columns.KEY_PRICE_TEXT, app.priceText);
+        values.put(AppListTable.Columns.KEY_PRICE_CURRENCY, app.priceCur);
+        values.put(AppListTable.Columns.KEY_PRICE_MICROS, app.priceMicros);
+
+        values.put(AppListTable.Columns.KEY_DETAILS_URL, app.getDetailsUrl());
+
+        values.put(AppListTable.Columns.KEY_ICON_URL, app.iconUrl);
+        values.put(AppListTable.Columns.KEY_REFRESH_TIMESTAMP, app.refreshTime);
+
+        values.put(AppListTable.Columns.KEY_APP_TYPE, app.appType);
+        values.put(AppListTable.Columns.KEY_SYNC_VERSION, app.syncVersion);
+        return values;
+    }
 }

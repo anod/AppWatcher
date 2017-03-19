@@ -22,7 +22,7 @@ import com.anod.appwatcher.backup.GDriveSync;
 import com.anod.appwatcher.market.BulkDetailsEndpoint;
 import com.anod.appwatcher.market.PlayStoreEndpoint;
 import com.anod.appwatcher.model.AppInfo;
-import com.anod.appwatcher.content.AppListContentProviderClient;
+import com.anod.appwatcher.content.DbContentProviderClient;
 import com.anod.appwatcher.content.AppListCursor;
 import com.anod.appwatcher.model.schema.AppListTable;
 import com.anod.appwatcher.utils.AppDetailsUploadDate;
@@ -92,7 +92,7 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
         AppLog.d("Last update viewed: " + lastUpdatesViewed);
 
         ArrayList<UpdatedApp> updatedApps = null;
-        AppListContentProviderClient appListProvider = new AppListContentProviderClient(provider);
+        DbContentProviderClient appListProvider = new DbContentProviderClient(provider);
         try {
             updatedApps = doSync(appListProvider, lastUpdatesViewed, endpoint);
         } catch (RemoteException e) {
@@ -209,7 +209,7 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
      * @return list of titles that were updated
      * @throws RemoteException
      */
-    private ArrayList<UpdatedApp> doSync(AppListContentProviderClient client, boolean lastUpdatesViewed, BulkDetailsEndpoint endpoint) throws RemoteException {
+    private ArrayList<UpdatedApp> doSync(DbContentProviderClient client, boolean lastUpdatesViewed, BulkDetailsEndpoint endpoint) throws RemoteException {
         ArrayList<UpdatedApp> updatedTitles = new ArrayList<UpdatedApp>();
 
         if (endpoint == null) {
@@ -269,7 +269,7 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
         return endpoint.getDocuments();
     }
 
-    private void updateApps(List<Document> documents, HashMap<String, AppInfo> localApps, AppListContentProviderClient client, ArrayList<UpdatedApp> updatedTitles, boolean lastUpdatesViewed) {
+    private void updateApps(List<Document> documents, HashMap<String, AppInfo> localApps, DbContentProviderClient client, ArrayList<UpdatedApp> updatedTitles, boolean lastUpdatesViewed) {
         for (Document marketApp : documents) {
             String docId = marketApp.getDocId();
             AppInfo localApp = localApps.get(docId);
@@ -277,7 +277,7 @@ public class SyncAdapter implements PlayStoreEndpoint.Listener {
         }
     }
 
-    private void updateApp(Document marketApp, AppInfo localApp, AppListContentProviderClient client, ArrayList<UpdatedApp> updatedTitles, boolean lastUpdatesViewed) {
+    private void updateApp(Document marketApp, AppInfo localApp, DbContentProviderClient client, ArrayList<UpdatedApp> updatedTitles, boolean lastUpdatesViewed) {
         com.google.android.finsky.protos.nano.Messages.AppDetails appDetails = marketApp.getAppDetails();
 
         if (appDetails.versionCode > localApp.versionNumber) {

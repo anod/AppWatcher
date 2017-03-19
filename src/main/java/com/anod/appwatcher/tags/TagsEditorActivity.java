@@ -5,20 +5,24 @@ import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.anod.appwatcher.AppListContentProvider;
 import com.anod.appwatcher.R;
+import com.anod.appwatcher.content.DbContentProviderClient;
 import com.anod.appwatcher.content.TagsContentProviderClient;
 import com.anod.appwatcher.content.TagsCursor;
 import com.anod.appwatcher.model.Tag;
-import com.anod.appwatcher.model.schema.AppListTable;
 import com.anod.appwatcher.model.schema.TagsTable;
 import com.anod.appwatcher.recyclerview.RecyclerViewCursorAdapter;
 import com.anod.appwatcher.ui.ToolbarActivity;
@@ -31,7 +35,7 @@ import butterknife.ButterKnife;
  * @date 10/03/2017.
  */
 
-public class TagsEditorActivity extends ToolbarActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class TagsEditorActivity extends ToolbarActivity implements LoaderManager.LoaderCallbacks<Cursor>, TextView.OnEditorActionListener {
 
     @BindView(android.R.id.list)
     RecyclerView mListView;
@@ -50,6 +54,9 @@ public class TagsEditorActivity extends ToolbarActivity implements LoaderManager
         mAdapter = new TagAdapter(this);
         mListView.setLayoutManager(new LinearLayoutManager(this));
         mListView.setAdapter(mAdapter);
+
+        mAddTag.setOnEditorActionListener(this);
+
         getSupportLoaderManager().initLoader(0, null, this).forceLoad();
     }
 
@@ -60,7 +67,7 @@ public class TagsEditorActivity extends ToolbarActivity implements LoaderManager
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mAdapter.swapData(data);
+        mAdapter.swapData(new TagsCursor(data));
     }
 
     @Override
@@ -68,16 +75,38 @@ public class TagsEditorActivity extends ToolbarActivity implements LoaderManager
         mAdapter.swapData(null);
     }
 
+    @Override
+    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+        String tag = v.getText().toString().trim();
+        if (TextUtils.isEmpty(tag))
+        {
+            return true;
+        }
+
+        addNewTag(tag);
+
+        return true;
+    }
+
+    private void addNewTag(@NonNull String tag) {
+        DbContentProviderClient cr = new DbContentProviderClient(this);
+        if (cr.queryTagByName(tag) == null)
+        {
+            cr.createTag(new Tag(tag));
+        }
+        cr.close();
+    }
+
     static class TagsCursorLoader extends CursorLoader {
-        private static final Uri CONTENT_URI = AppListContentProvider.APPS_CONTENT_URI;
+        private static final Uri CONTENT_URI = AppListContentProvider.TAGS_CONTENT_URI;
         private static final String ORDER_DEFAULT = TagsContentProviderClient.DEFAULT_SORT_ORDER;
 
-        public TagsCursorLoader(Context context) {
+        TagsCursorLoader(Context context) {
             super(context, CONTENT_URI, TagsTable.PROJECTION, null, null, ORDER_DEFAULT);
         }
     }
 
-    static class TagAdapter extends RecyclerViewCursorAdapter<TagHolder> {
+    static class TagAdapter extends RecyclerViewCursorAdapter<TagHolder, TagsCursor> {
         TagAdapter(Context context) {
             super(context, R.layout.list_item_tag);
         }
@@ -88,8 +117,8 @@ public class TagsEditorActivity extends ToolbarActivity implements LoaderManager
         }
 
         @Override
-        protected void onBindViewHolder(TagHolder holder, int position, Cursor cursor) {
-            holder.bindView(position, ((TagsCursor)cursor).getTag());
+        protected void onBindViewHolder(TagHolder holder, int position, TagsCursor cursor) {
+            holder.bindView(position, cursor.getTag());
         }
     }
 

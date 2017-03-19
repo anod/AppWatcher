@@ -8,7 +8,7 @@ import android.net.Uri;
 
 import com.anod.appwatcher.AppListContentProvider;
 import com.anod.appwatcher.R;
-import com.anod.appwatcher.content.AppListContentProviderClient;
+import com.anod.appwatcher.content.DbContentProviderClient;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Request;
 import com.squareup.picasso.RequestCreator;
@@ -76,7 +76,7 @@ public class AppIconLoader {
 
         @Override
         public Result load(Request request, int networkPolicy) throws IOException {
-            AppListContentProviderClient client = new AppListContentProviderClient(mContext);
+            DbContentProviderClient client = new DbContentProviderClient(mContext);
             Bitmap icon = client.queryAppIcon(request.uri);
             client.close();
             if (icon == null)

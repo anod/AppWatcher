@@ -7,7 +7,7 @@ import android.support.annotation.NonNull;
 
 import com.android.util.MalformedJsonException;
 import com.anod.appwatcher.model.AppInfo;
-import com.anod.appwatcher.content.AppListContentProviderClient;
+import com.anod.appwatcher.content.DbContentProviderClient;
 import com.anod.appwatcher.content.AppListCursor;
 
 import java.io.BufferedReader;
@@ -106,7 +106,7 @@ public class ListBackupManager {
     boolean writeList(@NonNull  OutputStream outputStream) {
         AppLog.d("Write into: " + outputStream.toString());
         AppListWriter writer = new AppListWriter();
-        AppListContentProviderClient cr = new AppListContentProviderClient(mContext);
+        DbContentProviderClient cr = new DbContentProviderClient(mContext);
         AppListCursor listCursor = cr.queryAllSorted(true);
         try {
             synchronized (ListBackupManager.sDataLock) {
@@ -152,7 +152,7 @@ public class ListBackupManager {
             return ERROR_FILE_READ;
         }
         if (appList != null && appList.size() > 0) {
-            AppListContentProviderClient cr = new AppListContentProviderClient(mContext);
+            DbContentProviderClient cr = new DbContentProviderClient(mContext);
             cr.discardAll();
             cr.addList(appList);
             cr.close();

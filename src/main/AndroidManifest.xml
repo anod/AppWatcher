@@ -76,6 +76,11 @@
             android:label="@string/import_installed"
             android:theme="@style/AppTheme.Dialog" />
 
+        <activity
+            android:name=".tags.TagsEditorActivity"
+            android:label="@string/tags"
+            android:theme="@style/AppTheme.Main" />
+
         <provider
             android:name=".AppListContentProvider"
             android:authorities="${applicationId}"

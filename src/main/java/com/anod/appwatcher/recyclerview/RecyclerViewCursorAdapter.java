@@ -2,6 +2,7 @@ package com.anod.appwatcher.recyclerview;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.database.CursorWrapper;
 import android.support.annotation.LayoutRes;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -12,11 +13,11 @@ import android.view.ViewGroup;
  * @author alex
  * @date 2015-06-20
  */
-public abstract class RecyclerViewCursorAdapter<VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> {
+public abstract class RecyclerViewCursorAdapter<VH extends RecyclerView.ViewHolder, CR extends CursorWrapper> extends RecyclerView.Adapter<VH> {
     private boolean mDataValid;
     private final Context mContext;
     private final int mResource;
-    private Cursor mCursor;
+    private CR mCursor;
 
     public RecyclerViewCursorAdapter(Context context, @LayoutRes int itemResource) {
         mContext = context;
@@ -24,7 +25,7 @@ public abstract class RecyclerViewCursorAdapter<VH extends RecyclerView.ViewHold
     }
 
     protected abstract VH onCreateViewHolder(View itemView);
-    protected abstract void onBindViewHolder(VH holder, int position, Cursor cursor);
+    protected abstract void onBindViewHolder(VH holder, int position, CR cursor);
 
     @Override
     public VH onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -60,7 +61,7 @@ public abstract class RecyclerViewCursorAdapter<VH extends RecyclerView.ViewHold
         return v;
     }
 
-    public void swapData(Cursor newCursor) {
+    public void swapData(CR newCursor) {
         if (newCursor == mCursor) {
             return;
         }

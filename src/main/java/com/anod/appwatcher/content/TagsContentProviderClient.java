@@ -16,7 +16,7 @@ import info.anodsplace.android.log.AppLog;
  */
 
 public class TagsContentProviderClient {
-    public static final String DEFAULT_SORT_ORDER = TagsTable.Columns.KEY_NAME + " COLLATE LOCALIZED ASC";
+    public static final String DEFAULT_SORT_ORDER = TagsTable.Columns.NAME + " COLLATE LOCALIZED ASC";
 
     private ContentProviderClient mContentProviderClient;
 

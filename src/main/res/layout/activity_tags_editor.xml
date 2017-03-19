@@ -13,7 +13,7 @@
         android:background="?attr/colorPrimary"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        app:layout_scrollFlags="scroll|enterAlways"
+        app:contentInsetRight="24dp"
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto">
 
@@ -23,10 +23,12 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:hint="@string/add_new_tag"
-            android:inputType="textShortMessage"
+            android:inputType="textCapWords"
             android:background="?attr/colorPrimaryDark"
             android:textAppearance="@style/TextAppearance.AppCompat.Body2"
             android:padding="8dp"
+            android:imeActionLabel="Add"
+            android:imeOptions="actionDone"
             android:theme="@style/ThemeOverlay.AppCompat.Dark"/>
 
     </android.support.v7.widget.Toolbar>

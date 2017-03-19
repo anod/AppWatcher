@@ -27,7 +27,6 @@ import com.anod.appwatcher.market.PlayStoreEndpointBase;
 import com.anod.appwatcher.market.SearchEndpoint;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppInfoMetadata;
-import com.anod.appwatcher.content.AppListContentProviderClient;
 import com.anod.appwatcher.model.WatchAppList;
 import com.anod.appwatcher.search.ResultsAdapter;
 import com.anod.appwatcher.search.ResultsAdapterDetails;

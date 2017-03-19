@@ -16,7 +16,7 @@ import com.anod.appwatcher.utils.InstalledAppsProvider;
  * @author alex
  * @date 2015-06-20
  */
-public class AppListCursorAdapterWrapper extends RecyclerViewCursorAdapter<AppViewHolder> {
+public class AppListCursorAdapterWrapper extends RecyclerViewCursorAdapter<AppViewHolder, AppListCursor> {
     private final AppViewHolderDataProvider mDataProvider;
     private final AppIconLoader mIconLoader;
     private final AppViewHolder.OnClickListener mListener;
@@ -34,9 +34,8 @@ public class AppListCursorAdapterWrapper extends RecyclerViewCursorAdapter<AppVi
     }
 
     @Override
-    protected void onBindViewHolder(AppViewHolder holder, int position, Cursor cursor) {
-        AppListCursor wrapper = (AppListCursor) cursor;
-        AppInfo app = wrapper.getAppInfo();
+    protected void onBindViewHolder(AppViewHolder holder, int position, AppListCursor cursor) {
+        AppInfo app = cursor.getAppInfo();
         holder.bindView(cursor.getPosition(), app);
     }
 
@@ -45,7 +44,7 @@ public class AppListCursorAdapterWrapper extends RecyclerViewCursorAdapter<AppVi
         return 1;
     }
 
-    public void swapData(Cursor data) {
+    public void swapData(AppListCursor data) {
         int totalCount = (data == null) ? 0 : data.getCount();
         mDataProvider.setTotalCount(totalCount);
         super.swapData(data);

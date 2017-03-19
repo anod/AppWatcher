@@ -30,6 +30,11 @@
             android:title="@string/import_installed">
         </item>
 
+        <item
+            android:id="@+id/menu_act_tags"
+            android:icon="@drawable/ic_label_black_24px"
+            android:title="@string/tags">
+        </item>
 <!--        <item android:id="@+id/nav_tags"
               android:icon="@drawable/ic_turned_in_black_36dp"
               android:title="@string/navdrawer_item_tags">

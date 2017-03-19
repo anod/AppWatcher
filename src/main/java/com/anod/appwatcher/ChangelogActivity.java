@@ -37,7 +37,7 @@ import com.anod.appwatcher.market.DetailsEndpoint;
 import com.anod.appwatcher.market.MarketInfo;
 import com.anod.appwatcher.market.PlayStoreEndpoint;
 import com.anod.appwatcher.model.AppInfo;
-import com.anod.appwatcher.content.AppListContentProviderClient;
+import com.anod.appwatcher.content.DbContentProviderClient;
 import com.anod.appwatcher.model.WatchAppList;
 import com.anod.appwatcher.ui.ToolbarActivity;
 import com.anod.appwatcher.utils.AppIconLoader;
@@ -138,7 +138,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
             mApp = loadInstalledApp();
             mNewApp = true;
         } else {
-            AppListContentProviderClient cr = new AppListContentProviderClient(this);
+            DbContentProviderClient cr = new DbContentProviderClient(this);
             mApp = cr.queryAppRow(rowId);
             cr.close();
             mNewApp = false;

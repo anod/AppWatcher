@@ -6,7 +6,7 @@ import android.support.v4.util.SimpleArrayMap;
 import com.anod.appwatcher.backup.AppListReaderIterator;
 import com.anod.appwatcher.backup.AppListWriter;
 import com.anod.appwatcher.model.AppInfo;
-import com.anod.appwatcher.content.AppListContentProviderClient;
+import com.anod.appwatcher.content.DbContentProviderClient;
 import com.anod.appwatcher.content.AppListCursor;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.drive.Drive;
@@ -57,7 +57,7 @@ public class SyncConnectedWorker {
 
     public void doSyncInBackground() throws Exception {
         synchronized (sLock) {
-            AppListContentProviderClient cr = new AppListContentProviderClient(mContext);
+            DbContentProviderClient cr = new DbContentProviderClient(mContext);
             try {
                 doSyncLocked(cr);
             } catch (Exception e) {
@@ -68,7 +68,7 @@ public class SyncConnectedWorker {
         }
     }
 
-    private void doSyncLocked(AppListContentProviderClient cr) throws Exception {
+    private void doSyncLocked(DbContentProviderClient cr) throws Exception {
         Drive.DriveApi.requestSync(mGoogleApiClient).await();
 
         DriveId driveId = retrieveFileDriveId();
@@ -95,7 +95,7 @@ public class SyncConnectedWorker {
         Drive.DriveApi.requestSync(mGoogleApiClient).await();
     }
 
-    private void writeToDrive(DriveId driveId, AppListContentProviderClient cr) throws Exception {
+    private void writeToDrive(DriveId driveId, DbContentProviderClient cr) throws Exception {
 
         AppLog.d("[GDrive] Write full list to remote ");
 
@@ -140,7 +140,7 @@ public class SyncConnectedWorker {
         return new InputStreamReader(inputStream, "UTF-8");
     }
 
-    private void insertRemoteItems(DriveId driveId, AppListContentProviderClient cr) throws Exception {
+    private void insertRemoteItems(DriveId driveId, DbContentProviderClient cr) throws Exception {
         DriveFile file = driveId.asDriveFile();
         DriveApi.DriveContentsResult contentsResult = file.open(mGoogleApiClient, DriveFile.MODE_READ_ONLY, null).await();
         if (!contentsResult.getStatus().isSuccess()) {

@@ -154,7 +154,7 @@ public class DbContentProvider extends ContentProvider {
         if (query == null) {
             throw new IllegalArgumentException("Unknown URI " + uri);
         }
-        // Using SQLiteQueryBuilder instead of query() method
+        // Using SQLiteQueryBuilder instead of queryApps() method
         SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
         queryBuilder.setTables(query.table);
 

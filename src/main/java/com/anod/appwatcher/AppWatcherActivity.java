@@ -29,6 +29,7 @@ import com.anod.appwatcher.model.Filters;
 import com.anod.appwatcher.sync.ManualSyncService;
 import com.anod.appwatcher.sync.SyncAdapter;
 import com.anod.appwatcher.sync.SyncScheduler;
+import com.anod.appwatcher.tags.TagsEditorActivity;
 import com.anod.appwatcher.ui.DrawerActivity;
 import com.anod.appwatcher.utils.MenuItemAnimation;
 import com.anod.appwatcher.utils.UpgradeCheck;
@@ -207,6 +208,9 @@ public class AppWatcherActivity extends DrawerActivity implements
                 return true;
             case R.id.menu_act_import:
                 startActivity(new Intent(this, ImportInstalledActivity.class));
+                return true;
+            case R.id.menu_act_tags:
+                startActivity(new Intent(this, TagsEditorActivity.class));
                 return true;
             case R.id.menu_act_sort:
                 showSortOptions();
