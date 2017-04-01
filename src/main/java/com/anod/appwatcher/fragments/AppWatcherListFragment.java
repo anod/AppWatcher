@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -18,7 +20,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.anod.appwatcher.AppWatcherActivity;
 import com.anod.appwatcher.BuildConfig;
 import com.anod.appwatcher.ChangelogActivity;
 import com.anod.appwatcher.MarketSearchActivity;
@@ -31,6 +32,8 @@ import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppListCursorLoader;
 import com.anod.appwatcher.model.Filters;
 import com.anod.appwatcher.model.InstalledFilter;
+import com.anod.appwatcher.model.Tag;
+import com.anod.appwatcher.ui.AppWatcherBaseActivity;
 import com.anod.appwatcher.utils.InstalledAppsProvider;
 import com.anod.appwatcher.utils.IntentUtils;
 
@@ -42,13 +45,14 @@ import info.anodsplace.android.widget.recyclerview.MergeRecyclerAdapter;
 
 public class AppWatcherListFragment extends Fragment implements
         LoaderManager.LoaderCallbacks<Cursor>,
-        AppWatcherActivity.EventListener,
+        AppWatcherBaseActivity.EventListener,
         AppViewHolder.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
 
     static final String ARG_FILTER = "filter";
     static final String ARG_SORT = "sort";
+    static final String ARG_TAG = "tag";
+    static final String ARG_SECTION_PROVIDER = "section";
 
-    private static final int ADAPTER_WATCHLIST = 0;
     private static final int REQUEST_APP_INFO = 1;
 
     protected String mTitleFilter = "";
@@ -56,6 +60,7 @@ public class AppWatcherListFragment extends Fragment implements
     protected MergeRecyclerAdapter mAdapter;
     protected int mSortId;
     protected int mFilterId;
+    protected Tag mTag;
 
     private int mListenerIndex;
 
@@ -68,19 +73,73 @@ public class AppWatcherListFragment extends Fragment implements
     @BindView(R.id.swipe_layout)
     SwipeRefreshLayout mSwipeLayout;
 
-    public static AppWatcherListFragment newInstance(int filterId, int sortId) {
+    private SectionProvider mSection;
+
+    public static AppWatcherListFragment newInstance(int filterId, int sortId, SectionProvider sectionProvider, @Nullable Tag tag) {
         AppWatcherListFragment frag = new AppWatcherListFragment();
+        frag.setArguments(createArguments(filterId, sortId, sectionProvider, tag));
+        return frag;
+    }
+
+    interface SectionProvider {
+        void fillAdapters(MergeRecyclerAdapter adapter, Context context, InstalledAppsProvider installedApps, AppViewHolder.OnClickListener clickListener);
+        Loader<Cursor> createLoader(Context context, String titleFilter, int sortId, InstalledFilter filter, Tag tag);
+        void loadFinished(MergeRecyclerAdapter adapter, Loader<Cursor> loader, Cursor data);
+        void loaderReset(MergeRecyclerAdapter adapter);
+    }
+
+    public static class DefaultSection implements SectionProvider {
+        private static final int ADAPTER_WATCHLIST = 0;
+
+        @Override
+        public void fillAdapters(MergeRecyclerAdapter adapter, Context context, InstalledAppsProvider installedApps, AppViewHolder.OnClickListener clickListener) {
+            adapter.addAdapter(ADAPTER_WATCHLIST, new AppListCursorAdapterWrapper(context, installedApps, clickListener));
+
+        }
+
+        @Override
+        public Loader<Cursor> createLoader(Context context, String titleFilter, int sortId, InstalledFilter filter, Tag tag) {
+            return new AppListCursorLoader(context, titleFilter, sortId, filter, tag);
+        }
+
+        @Override
+        public void loadFinished(MergeRecyclerAdapter adapter, Loader<Cursor> loader, Cursor data) {
+            AppListCursorAdapterWrapper watchlistAdapter = ((AppListCursorAdapterWrapper) adapter.getAdapter(ADAPTER_WATCHLIST));
+            watchlistAdapter.swapData((AppListCursor) data);
+
+            int newCount = ((AppListCursorLoader) loader).getNewCountFiltered();
+            int updatableCount = ((AppListCursorLoader) loader).getUpdatableCountFiltered();
+
+            watchlistAdapter.setNewAppsCount(newCount, updatableCount);
+        }
+
+        @Override
+        public void loaderReset(MergeRecyclerAdapter adapter) {
+            // This is called when the last Cursor provided to onLoadFinished()
+            // above is about to be closed.  We need to make sure we are no
+            // longer using it.
+            AppListCursorAdapterWrapper watchlistAdapter = ((AppListCursorAdapterWrapper) adapter.getAdapter(ADAPTER_WATCHLIST));
+            watchlistAdapter.swapData(null);
+        }
+    }
+
+    protected static Bundle createArguments(int filterId, int sortId,@NonNull SectionProvider sectionProvider, @Nullable Tag tag)
+    {
         Bundle args = new Bundle();
         args.putInt(ARG_FILTER, filterId);
         args.putInt(ARG_SORT, sortId);
-        frag.setArguments(args);
-        return frag;
+        args.putString(ARG_SECTION_PROVIDER, sectionProvider.getClass().getName());
+        if (tag != null)
+        {
+            args.putParcelable(ARG_TAG, tag);
+        }
+        return args;
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        AppWatcherActivity act = (AppWatcherActivity) context;
+        AppWatcherBaseActivity act = (AppWatcherBaseActivity) context;
         mListenerIndex = act.addQueryChangeListener(this);
         AppLog.d("addQueryChangeListener with index: %d", mListenerIndex);
     }
@@ -88,7 +147,7 @@ public class AppWatcherListFragment extends Fragment implements
     @Override
     public void onDetach() {
         super.onDetach();
-        AppWatcherActivity act = (AppWatcherActivity) getActivity();
+        AppWatcherBaseActivity act = (AppWatcherBaseActivity) getActivity();
         act.removeQueryChangeListener(mListenerIndex);
     }
 
@@ -110,13 +169,23 @@ public class AppWatcherListFragment extends Fragment implements
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_applist, container, false);
         ButterKnife.bind(this, root);
         mEmptyView.setVisibility(View.GONE);
         mSwipeLayout.setOnRefreshListener(this);
         return root;
+    }
+
+    public SectionProvider sectionForClassName(String sectionClassName)
+    {
+        try {
+            Class<SectionProvider> sectionClass = (Class<SectionProvider>) Class.forName(sectionClassName);
+            return sectionClass.newInstance();
+        } catch (Exception e) {
+            AppLog.e(e);
+        }
+        return null;
     }
 
     @Override
@@ -131,9 +200,11 @@ public class AppWatcherListFragment extends Fragment implements
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         mListView.setLayoutManager(layoutManager);
 
+        mSection = sectionForClassName(getArguments().getString(ARG_SECTION_PROVIDER));
+
         // Create an empty adapter we will use to display the loaded data.
         mAdapter = new MergeRecyclerAdapter();
-        mAdapter.addAdapter(ADAPTER_WATCHLIST, new AppListCursorAdapterWrapper(getActivity(), mInstalledApps, this));
+        mSection.fillAdapters(mAdapter, getActivity(), mInstalledApps, this);
         mListView.setAdapter(mAdapter);
 
         // Start out with a progress indicator.
@@ -141,6 +212,7 @@ public class AppWatcherListFragment extends Fragment implements
 
         mSortId = getArguments().getInt(ARG_SORT);
         mFilterId = getArguments().getInt(ARG_FILTER);
+        mTag = getArguments().getParcelable(ARG_TAG);
         // Prepare the loader.  Either re-connect with an existing one,
         // or start a new one.
         getLoaderManager().initLoader(0, null, this);
@@ -148,29 +220,18 @@ public class AppWatcherListFragment extends Fragment implements
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new AppListCursorLoader(getActivity(), mTitleFilter, mSortId, createFilter(mFilterId));
+        return mSection.createLoader(getActivity(), mTitleFilter, mSortId, createFilter(mFilterId), mTag);
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        AppListCursorAdapterWrapper watchlistAdapter = ((AppListCursorAdapterWrapper) mAdapter.getAdapter(ADAPTER_WATCHLIST));
-        watchlistAdapter.swapData((AppListCursor) data);
-
-        int newCount = ((AppListCursorLoader) loader).getNewCountFiltered();
-        int updatableCount = ((AppListCursorLoader) loader).getUpdatableCountFiltered();
-
-        watchlistAdapter.setNewAppsCount(newCount, updatableCount);
-
+        mSection.loadFinished(mAdapter, loader, data);
         setListVisible(true);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        // This is called when the last Cursor provided to onLoadFinished()
-        // above is about to be closed.  We need to make sure we are no
-        // longer using it.
-        AppListCursorAdapterWrapper watchlistAdapter = ((AppListCursorAdapterWrapper) mAdapter.getAdapter(ADAPTER_WATCHLIST));
-        watchlistAdapter.swapData(null);
+        mSection.loaderReset(mAdapter);
     }
 
     protected InstalledFilter createFilter(int filterId) {
@@ -263,11 +324,10 @@ public class AppWatcherListFragment extends Fragment implements
 
     @Override
     public void onRefresh() {
-        ((AppWatcherActivity)getActivity()).requestRefresh();
+        ((AppWatcherBaseActivity)getActivity()).requestRefresh();
     }
 
     private void restartLoader() {
         getLoaderManager().restartLoader(0, null, this);
     }
-
 }

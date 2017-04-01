@@ -8,7 +8,7 @@ import com.anod.appwatcher.model.AppInfo;
 public class AppListTable {
 
     public static class Columns implements BaseColumns {
-        public static final String KEY_APPID = "app_id";
+        public static final String APPID = "app_id";
         public static final String KEY_PACKAGE = "package";
         public static final String KEY_VERSION_NUMBER = "ver_num";
         public static final String KEY_VERSION_NAME = "ver_name";
@@ -27,11 +27,16 @@ public class AppListTable {
         public static final String KEY_SYNC_VERSION = "sync_version";
     }
 
+    public class TableColumns {
+        public static final String _ID = AppListTable.TABLE_NAME + "." + AppListTable.Columns._ID;
+        public static final String APPID = AppListTable.TABLE_NAME + ".app_id";
+    }
+
     public static final String TABLE_NAME = "app_list";
 
     public static final String[] PROJECTION = new String[]{
-            Columns._ID,
-            Columns.KEY_APPID,
+            TableColumns._ID,
+            TableColumns.APPID,
             Columns.KEY_PACKAGE,
             Columns.KEY_VERSION_NUMBER,
             Columns.KEY_VERSION_NAME,
@@ -72,7 +77,7 @@ public class AppListTable {
     public static final String TABLE_CREATE =
             "CREATE TABLE " + TABLE_NAME + " (" +
                     Columns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                    Columns.KEY_APPID + " TEXT not null," +
+                    Columns.APPID + " TEXT not null," +
                     Columns.KEY_PACKAGE + " TEXT not null," +
                     Columns.KEY_VERSION_NUMBER + " INTEGER," +
                     Columns.KEY_VERSION_NAME + " TEXT," +
@@ -97,7 +102,7 @@ public class AppListTable {
     public static ContentValues createContentValues(AppInfo app) {
         ContentValues values = new ContentValues();
 
-        values.put(AppListTable.Columns.KEY_APPID, app.getAppId());
+        values.put(AppListTable.Columns.APPID, app.getAppId());
         values.put(AppListTable.Columns.KEY_PACKAGE, app.packageName);
         values.put(AppListTable.Columns.KEY_TITLE, app.title);
         values.put(AppListTable.Columns.KEY_VERSION_NUMBER, app.versionNumber);

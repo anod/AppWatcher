@@ -56,6 +56,9 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".tags.AppsTagActivity"
+            android:theme="@style/AppTheme.Main" />
+        <activity
             android:name=".ListExportActivity"
             android:label="@string/import_export"
             android:theme="@style/AppTheme.Dialog" />

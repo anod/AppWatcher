@@ -39,7 +39,7 @@ public class DbContentProvider extends ContentProvider {
         sURIMatcher.addURI(AUTHORITY, "apps/#", APP_ROW);
 
         sURIMatcher.addURI(AUTHORITY, "tags", TAG_LIST);
-        sURIMatcher.addURI(AUTHORITY, "tag/#/apps", TAG_APPS);
+        sURIMatcher.addURI(AUTHORITY, "tags/#/apps", TAG_APPS);
 
         sURIMatcher.addURI(AUTHORITY, "icons/#", ICON_ROW);
     }
@@ -74,8 +74,8 @@ public class DbContentProvider extends ContentProvider {
                 query.notifyUri = TAGS_CONTENT_URI;
                 return query;
             case TAG_APPS:
-                query.table = AppTagsTable.TABLE_NAME;
-                query.notifyUri = TAGS_CONTENT_URI;
+                query.table = AppTagsTable.TABLE_NAME + ", " + AppListTable.TABLE_NAME;
+                query.notifyUri = APPS_CONTENT_URI;
                 return query;
             case ICON_ROW:
                 query.table = AppListTable.TABLE_NAME;

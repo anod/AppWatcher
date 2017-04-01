@@ -1,19 +1,16 @@
-package com.anod.appwatcher.fragments;
+package com.anod.appwatcher.installed;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.os.Bundle;
-import android.support.v4.content.Loader;
+import android.support.annotation.Nullable;
 import android.support.v4.util.SimpleArrayMap;
 import android.text.TextUtils;
-import android.view.View;
 
 import com.anod.appwatcher.Preferences;
-import com.anod.appwatcher.adapters.AppViewHolderDataProvider;
-import com.anod.appwatcher.installed.InstalledAppsAdapter;
 import com.anod.appwatcher.content.DbContentProviderClient;
 import com.anod.appwatcher.model.AppListCursorLoader;
+import com.anod.appwatcher.model.Tag;
 import com.anod.appwatcher.utils.FilterCursorWrapper;
 import com.anod.appwatcher.utils.PackageManagerUtils;
 
@@ -22,60 +19,20 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-/**
- * @author alex
- * @date 2015-08-31
- */
-public class InstalledListFragment extends AppWatcherListFragment {
-    private static final int ADAPTER_INSTALLED = 1;
-
-    public static InstalledListFragment newInstance(int filterId, int sortId) {
-        InstalledListFragment frag = new InstalledListFragment();
-        Bundle args = new Bundle();
-        args.putInt(ARG_FILTER, filterId);
-        args.putInt(ARG_SORT, sortId);
-        frag.setArguments(args);
-        return frag;
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        mSortId = getArguments().getInt(ARG_SORT);
-
-        AppViewHolderDataProvider dataProvider = new AppViewHolderDataProvider(getActivity(), mInstalledApps);
-        mAdapter.addAdapter(ADAPTER_INSTALLED, new InstalledAppsAdapter(getActivity(), getActivity().getPackageManager(), dataProvider, this));
-    }
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new InstalledLoader(getActivity(), mTitleFilter, mSortId, createFilter(mFilterId), getActivity().getPackageManager());
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        InstalledAppsAdapter downloadedAdapter = (InstalledAppsAdapter) mAdapter.getAdapter(ADAPTER_INSTALLED);
-        downloadedAdapter.clear();
-        downloadedAdapter.addAll(((InstalledLoader) loader).getInstalledApps());
-
-        super.onLoadFinished(loader, data);
-    }
-
-    static class InstalledLoader extends AppListCursorLoader {
+public class InstalledLoader extends AppListCursorLoader {
         private final PackageManager mPackageManager;
         private final SimpleArrayMap<String, String> mTitleCache = new SimpleArrayMap<>();
         private final SimpleArrayMap<String, Long> mUpdateTimeCache = new SimpleArrayMap<>();
         private final int mSortId;
 
-        List<String> getInstalledApps() {
+        public List<String> getInstalledApps() {
             return mInstalledApps;
         }
 
         private List<String> mInstalledApps = new ArrayList<>();
 
-        InstalledLoader(Context context, String titleFilter, int sortId, FilterCursorWrapper.CursorFilter cursorFilter, PackageManager pm) {
-            super(context, titleFilter, sortId, cursorFilter);
+        public InstalledLoader(Context context, String titleFilter, int sortId, FilterCursorWrapper.CursorFilter cursorFilter, @Nullable Tag tag, PackageManager pm) {
+            super(context, titleFilter, sortId, cursorFilter, tag);
             mPackageManager = pm;
             mSortId = sortId;
         }
@@ -171,5 +128,3 @@ public class InstalledListFragment extends AppWatcherListFragment {
             }
         }
     }
-
-}

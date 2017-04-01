@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -54,6 +55,7 @@ public class TagsEditorActivity extends ToolbarActivity implements LoaderManager
         mAdapter = new TagAdapter(this);
         mListView.setLayoutManager(new LinearLayoutManager(this));
         mListView.setAdapter(mAdapter);
+        mListView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.HORIZONTAL));
 
         mAddTag.setOnEditorActionListener(this);
 
@@ -83,18 +85,26 @@ public class TagsEditorActivity extends ToolbarActivity implements LoaderManager
             return true;
         }
 
-        addNewTag(tag);
+        if (addNewTag(tag))
+        {
+            v.setText("");
+            v.requestFocus();
+        }
 
         return true;
     }
 
-    private void addNewTag(@NonNull String tag) {
+    private boolean addNewTag(@NonNull String tag) {
         DbContentProviderClient cr = new DbContentProviderClient(this);
         if (cr.queryTagByName(tag) == null)
         {
-            cr.createTag(new Tag(tag));
+            if (cr.createTag(new Tag(tag)) != null)
+            {
+                return true;
+            }
         }
         cr.close();
+        return false;
     }
 
     static class TagsCursorLoader extends CursorLoader {
@@ -123,11 +133,11 @@ public class TagsEditorActivity extends ToolbarActivity implements LoaderManager
     }
 
     static class TagHolder extends RecyclerView.ViewHolder {
-        EditText mTagName;
+        @BindView(android.R.id.text1) TextView mTagName;
 
         TagHolder(View itemView) {
             super(itemView);
-            mTagName = (EditText)itemView;
+            ButterKnife.bind(this, itemView);
         }
 
         void bindView(int position, Tag tag) {

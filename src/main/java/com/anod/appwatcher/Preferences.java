@@ -144,11 +144,11 @@ public class Preferences {
         return mSettings.getBoolean(REQUIRES_CHARGING, false);
     }
 
-    int getSortIndex() {
+    public int getSortIndex() {
         return mSettings.getInt(SORT_INDEX, 0);
     }
 
-    void setSortIndex(int index) {
+    public void setSortIndex(int index) {
         mSettings.edit().putInt(SORT_INDEX, index).apply();
     }
 

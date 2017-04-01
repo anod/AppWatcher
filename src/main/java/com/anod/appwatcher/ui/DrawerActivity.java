@@ -1,21 +1,28 @@
 package com.anod.appwatcher.ui;
 
 import android.accounts.Account;
+import android.app.ActionBar;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
+import android.support.v4.content.res.ResourcesCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.text.format.DateUtils;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.anod.appwatcher.AppWatcherActivity;
 import com.anod.appwatcher.MarketSearchActivity;
 import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.R;
@@ -27,6 +34,7 @@ import com.anod.appwatcher.fragments.AccountChooserFragment;
 import com.anod.appwatcher.installed.ImportInstalledActivity;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.Tag;
+import com.anod.appwatcher.tags.AppsTagActivity;
 import com.anod.appwatcher.wishlist.WishlistFragment;
 
 import java.util.HashMap;
@@ -54,10 +62,12 @@ abstract public class DrawerActivity extends ToolbarActivity implements AccountC
     protected void setupDrawer() {
         setupToolbar();
 
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mNavigationView = (NavigationView) findViewById(R.id.nav_view);
-        setupDrawerContent(mNavigationView);
-        updateTags();
+        if (isDrawerEnabled()) {
+            mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+            mNavigationView = (NavigationView) findViewById(R.id.nav_view);
+            setupDrawerContent(mNavigationView);
+            updateTags();
+        }
     }
 
     private void setupDrawerContent(NavigationView navigationView) {
@@ -110,7 +120,11 @@ abstract public class DrawerActivity extends ToolbarActivity implements AccountC
 
         while (cr.moveToNext()) {
             Tag tag = cr.getTag();
-            menu.add(1, tag.id, tag.id, tag.name);
+            MenuItem item = menu.add(1, tag.id, tag.id, tag.name);
+            Drawable icon = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_label_black_24px, null);
+            DrawableCompat.setTint(icon, Color.RED);
+            item.setIcon(icon);
+            item.setIntent(AppsTagActivity.createTagIntent(tag, this));
         }
         cr.close();
     }
@@ -139,7 +153,9 @@ abstract public class DrawerActivity extends ToolbarActivity implements AccountC
             return;
         }
 
-        setDrawerAccount(account);
+        if (isDrawerEnabled()) {
+            setDrawerAccount(account);
+        }
     }
 
     @Override
@@ -151,8 +167,11 @@ abstract public class DrawerActivity extends ToolbarActivity implements AccountC
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                mDrawerLayout.openDrawer(GravityCompat.START);
-                return true;
+                if (isDrawerEnabled()) {
+                    mDrawerLayout.openDrawer(GravityCompat.START);
+                    return true;
+                }
+                return super.onOptionsItemSelected(item);
             case R.id.menu_add:
                 Intent addActivity = new Intent(this, MarketSearchActivity.class);
                 startActivity(addActivity);
@@ -171,7 +190,17 @@ abstract public class DrawerActivity extends ToolbarActivity implements AccountC
                 startActivity(FragmentToolbarActivity.intent(WishlistFragment.TAG, args, this));
                 return true;
         }
+        Intent intent = item.getIntent();
+        if (intent != null)
+        {
+            startActivity(intent);
+            return true;
+        }
         return super.onOptionsItemSelected(item);
+    }
+
+    protected boolean isDrawerEnabled() {
+        return true;
     }
 
     protected void setDrawerAccount(Account account) {

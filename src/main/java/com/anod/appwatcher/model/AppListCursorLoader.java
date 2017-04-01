@@ -11,23 +11,19 @@ import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.content.DbContentProviderClient;
 import com.anod.appwatcher.content.AppListCursor;
 import com.anod.appwatcher.model.schema.AppListTable;
+import com.anod.appwatcher.model.schema.AppTagsTable;
 import com.anod.appwatcher.utils.FilterCursorWrapper;
 import com.anod.appwatcher.utils.InstalledAppsProvider;
 
 import java.util.ArrayList;
-
-import info.anodsplace.android.log.AppLog;
 
 /**
  * @author alex
  * @date 8/11/13
  */
 public class AppListCursorLoader extends CursorLoader {
-    private static final Uri CONTENT_URI = AppListContentProvider.APPS_CONTENT_URI;
     private static final String ORDER_DEFAULT = AppListTable.Columns.KEY_STATUS + " DESC, "
             + AppListTable.Columns.KEY_TITLE + " COLLATE LOCALIZED ASC";
-    private static final String SELECTION_TITLE = AppListTable.Columns.KEY_STATUS + " != ? AND " + AppListTable.Columns.KEY_TITLE + " LIKE ?";
-    private static final String SELECTION_DEFAULT = AppListTable.Columns.KEY_STATUS + " != ? ";
 
     private final FilterCursorWrapper.CursorFilter mCursorFilter;
     protected final String mTitleFilter;
@@ -35,20 +31,46 @@ public class AppListCursorLoader extends CursorLoader {
     private int mNewCount;
     private int mUpdatableNewCount;
 
-    public AppListCursorLoader(Context context, String titleFilter, int sortId, FilterCursorWrapper.CursorFilter cursorFilter) {
-        super(context, CONTENT_URI, AppListTable.PROJECTION, null, null, ORDER_DEFAULT);
+    public AppListCursorLoader(Context context, String titleFilter, int sortId, FilterCursorWrapper.CursorFilter cursorFilter, Tag tag) {
+        super(context, getContentUri(tag), AppListTable.PROJECTION, null, null, ORDER_DEFAULT);
 
         mCursorFilter = cursorFilter;
         mTitleFilter = titleFilter;
 
-        if (!TextUtils.isEmpty(titleFilter)) {
-            setSelection(SELECTION_TITLE);
-            setSelectionArgs(new String[]{String.valueOf(AppInfoMetadata.STATUS_DELETED), "%" + titleFilter + "%"});
-        } else {
-            setSelection(SELECTION_DEFAULT);
-            setSelectionArgs(new String[]{String.valueOf(AppInfoMetadata.STATUS_DELETED)});
+        ArrayList<String> selc = new ArrayList<>(3);
+        ArrayList<String> args = new ArrayList<>(3);
+
+        selc.add(AppListTable.Columns.KEY_STATUS + " != ?");
+        args.add(String.valueOf(AppInfoMetadata.STATUS_DELETED));
+
+        if (tag != null)
+        {
+            selc.add(AppTagsTable.TableColumns.TAGID + " = ?");
+            args.add(String.valueOf(tag.id));
+            selc.add(AppTagsTable.TableColumns.APPID + " = " + AppListTable.TableColumns.APPID);
         }
+
+        if (!TextUtils.isEmpty(titleFilter)) {
+            selc.add(AppListTable.Columns.KEY_TITLE + " LIKE ?");
+            args.add("%" + titleFilter + "%");
+        }
+
+        String selection = TextUtils.join(" AND ", selc);
+        String[] selectionArgs = args.toArray(new String[0]);
+
+        setSelection(selection);
+        setSelectionArgs(selectionArgs);
+
         setSortOrder(createSortOrder(sortId));
+    }
+
+    private static Uri getContentUri(Tag tag) {
+        return tag == null ?
+                AppListContentProvider.APPS_CONTENT_URI :
+                AppListContentProvider.TAGS_CONTENT_URI
+                     .buildUpon()
+                     .appendPath(String.valueOf(tag.id))
+                     .appendPath("apps").build();
     }
 
     private String createSortOrder(int sortId) {
@@ -63,7 +85,6 @@ public class AppListCursorLoader extends CursorLoader {
         } else {
             filter.add(AppListTable.Columns.KEY_TITLE + " COLLATE LOCALIZED ASC");
         }
-        AppLog.d(TextUtils.join(", ", filter));
         return TextUtils.join(", ", filter);
     }
 

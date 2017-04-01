@@ -47,4 +47,13 @@ public class ToolbarActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    protected Bundle getIntentExtras()
+    {
+        if (getIntent() == null || getIntent().getExtras() == null)
+        {
+            return new Bundle();
+        }
+        return getIntent().getExtras();
+    }
 }
