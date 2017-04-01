@@ -111,6 +111,8 @@
     <string name="wishlist">Wishlist</string>
     <string name="add_new_tag">Add a tag...</string>
     <string name="tags">Tags</string>
+    <string name="no_apps_with_this_tag">No apps with this tag</string>
+    <string name="add_apps">Add apps</string>
 
     <string-array name="sort_titles">
         <item>By name &#x2193;</item>

@@ -43,20 +43,20 @@ public class AppsTagActivity extends AppWatcherBaseActivity {
 
     protected AppWatcherBaseActivity.Adapter createViewPagerAdapter() {
         AppWatcherBaseActivity.Adapter adapter = new AppWatcherBaseActivity.Adapter(getSupportFragmentManager());
-        adapter.addFragment(AppWatcherListFragment.newInstance(
+        adapter.addFragment(AppsTagListFragment.newInstance(
                 Filters.TAB_ALL,
                 mPreferences.getSortIndex(),
-                new AppWatcherListFragment.DefaultSection(),
+                new AppsTagListFragment.DefaultSection(),
                 mTag), getString(R.string.tab_all));
-        adapter.addFragment(AppWatcherListFragment.newInstance(
+        adapter.addFragment(AppsTagListFragment.newInstance(
                 Filters.TAB_INSTALLED,
                 mPreferences.getSortIndex(),
-                new AppWatcherListFragment.DefaultSection(),
+                new AppsTagListFragment.DefaultSection(),
                 mTag), getString(R.string.tab_installed));
-        adapter.addFragment(AppWatcherListFragment.newInstance(
+        adapter.addFragment(AppsTagListFragment.newInstance(
                 Filters.TAB_UNINSTALLED,
                 mPreferences.getSortIndex(),
-                new AppWatcherListFragment.DefaultSection(),
+                new AppsTagListFragment.DefaultSection(),
                 mTag), getString(R.string.tab_not_installed));
         return adapter;
     }

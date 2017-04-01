@@ -40,6 +40,7 @@ import com.anod.appwatcher.utils.IntentUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.Optional;
 import info.anodsplace.android.log.AppLog;
 import info.anodsplace.android.widget.recyclerview.MergeRecyclerAdapter;
 
@@ -81,7 +82,7 @@ public class AppWatcherListFragment extends Fragment implements
         return frag;
     }
 
-    interface SectionProvider {
+    public interface SectionProvider {
         void fillAdapters(MergeRecyclerAdapter adapter, Context context, InstalledAppsProvider installedApps, AppViewHolder.OnClickListener clickListener);
         Loader<Cursor> createLoader(Context context, String titleFilter, int sortId, InstalledFilter filter, Tag tag);
         void loadFinished(MergeRecyclerAdapter adapter, Loader<Cursor> loader, Cursor data);
@@ -94,7 +95,6 @@ public class AppWatcherListFragment extends Fragment implements
         @Override
         public void fillAdapters(MergeRecyclerAdapter adapter, Context context, InstalledAppsProvider installedApps, AppViewHolder.OnClickListener clickListener) {
             adapter.addAdapter(ADAPTER_WATCHLIST, new AppListCursorAdapterWrapper(context, installedApps, clickListener));
-
         }
 
         @Override
@@ -170,11 +170,15 @@ public class AppWatcherListFragment extends Fragment implements
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_applist, container, false);
+        View root = inflateView(inflater, container, savedInstanceState);
         ButterKnife.bind(this, root);
         mEmptyView.setVisibility(View.GONE);
         mSwipeLayout.setOnRefreshListener(this);
         return root;
+    }
+
+    protected View inflateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_applist, container, false);
     }
 
     public SectionProvider sectionForClassName(String sectionClassName)
@@ -304,6 +308,7 @@ public class AppWatcherListFragment extends Fragment implements
     }
 
     @OnClick(android.R.id.button1)
+    @Optional
     public void onSearchButton() {
         Intent searchIntent = new Intent(getActivity(), MarketSearchActivity.class);
         searchIntent.putExtra(MarketSearchActivity.EXTRA_KEYWORD, "");
@@ -312,11 +317,13 @@ public class AppWatcherListFragment extends Fragment implements
     }
 
     @OnClick(android.R.id.button2)
+    @Optional
     public void onImportButton() {
         startActivity(new Intent(getActivity(), ImportInstalledActivity.class));
     }
 
     @OnClick(android.R.id.button3)
+    @Optional
     public void onShareButton() {
         Intent intent = Intent.makeMainActivity(new ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity"));
         IntentUtils.startActivitySafely(getActivity(), intent);
