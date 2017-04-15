@@ -71,7 +71,7 @@ public class AppViewHolder extends AppViewHolderBase implements View.OnClickList
             newIndicator.setVisibility(View.INVISIBLE);
         }
 
-        bindIcon(app, this.icon);
+        mIconLoader.loadAppIntoImageView(app, this.icon, R.drawable.ic_android_black_24dp);
         bindSectionView();
     }
 

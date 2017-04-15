@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.LayoutRes;
+import android.support.annotation.MenuRes;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -98,12 +99,13 @@ public abstract class AppWatcherBaseActivity extends DrawerActivity implements
     }
 
     protected abstract @LayoutRes int getContentLayout();
+    protected abstract @MenuRes int getMenuResource();
     protected abstract AppWatcherBaseActivity.Adapter createViewPagerAdapter();
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu
-        getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(getMenuResource(), menu);
 
         mSearchMenuItem = menu.findItem(R.id.menu_act_filter);
         MenuItemCompat.setOnActionExpandListener(mSearchMenuItem, new MenuItemCompat.OnActionExpandListener() {

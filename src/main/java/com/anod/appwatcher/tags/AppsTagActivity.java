@@ -3,10 +3,9 @@ package com.anod.appwatcher.tags;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MenuItem;
 
 import com.anod.appwatcher.R;
-import com.anod.appwatcher.fragments.AppWatcherListFragment;
-import com.anod.appwatcher.installed.InstalledSectionProvider;
 import com.anod.appwatcher.model.Filters;
 import com.anod.appwatcher.model.Tag;
 import com.anod.appwatcher.ui.AppWatcherBaseActivity;
@@ -39,6 +38,21 @@ public class AppsTagActivity extends AppWatcherBaseActivity {
     @Override
     protected int getContentLayout() {
         return R.layout.activity_main;
+    }
+
+    @Override
+    protected int getMenuResource() {
+        return R.menu.main_tag;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.menu_act_addtag)
+        {
+            startActivity(AppsTagSelectActivity.createIntent(mTag, this));
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     protected AppWatcherBaseActivity.Adapter createViewPagerAdapter() {

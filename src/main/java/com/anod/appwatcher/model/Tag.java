@@ -16,7 +16,7 @@ public class Tag implements Parcelable {
     public final @ColorInt int color;
 
     public Tag(String name) {
-        this(-1, name, Color.GRAY);
+        this(-1, name, 0xFF9E9E9E);
     }
 
     public Tag(int id, String name, @ColorInt int color) {

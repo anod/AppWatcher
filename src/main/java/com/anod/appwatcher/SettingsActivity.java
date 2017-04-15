@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatDelegate;
@@ -19,10 +20,16 @@ import com.anod.appwatcher.backup.GDriveSync;
 import com.anod.appwatcher.backup.ImportTask;
 import com.anod.appwatcher.backup.ListBackupManager;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
+import com.anod.appwatcher.model.DbOpenHelper;
 import com.anod.appwatcher.sync.SyncScheduler;
 import com.anod.appwatcher.ui.SettingsActionBarActivity;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -42,10 +49,10 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
     private static final int ACTION_REQUIRES_CHARGING = 9;
     private static final int ACTION_NOTIFY_UPTODATE = 10;
     private static final int ACTION_THEME = 11;
+    private static final int ACTION_EXPORT_DB = 12;
 
     private static final int REQUEST_BACKUP_DEST = 1;
     private static final int REQUEST_BACKUP_FILE = 2;
-
 
     private GDriveSync mGDriveSync;
     private CheckboxItem mSyncEnabledItem;
@@ -162,6 +169,9 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
         preferences.add(aboutItem);
         preferences.add(new Item(R.string.pref_title_opensource, R.string.pref_descr_opensource, ACTION_LICENSES));
 
+        if (BuildConfig.DEBUG) {
+            preferences.add(new Item(R.string.pref_export_db, 0, ACTION_EXPORT_DB));
+        }
         return preferences;
     }
 
@@ -252,8 +262,7 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
         } else if (action == ACTION_NOTIFY_UPTODATE) {
             boolean notify = ((CheckboxItem) pref).checked;
             mPrefs.setNotifyInstalledUpToDate(notify);
-        } else if (action == ACTION_THEME)
-        {
+        } else if (action == ACTION_THEME) {
             AlertDialog dialog = new AlertDialog.Builder(this)
                     .setTitle(R.string.pref_title_theme)
                     .setItems(R.array.themes, new DialogInterface.OnClickListener() {
@@ -270,8 +279,37 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
                         }
                     }).create();
             dialog.show();
+        } else if (action == ACTION_EXPORT_DB) {
+            try {
+                exportDb();
+            } catch (IOException e) {
+                AppLog.e(e);
+            }
         }
         notifyDataSetChanged();
+    }
+
+    private void exportDb() throws IOException {
+        File sd = Environment.getExternalStorageDirectory();
+        String dbPath;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            dbPath = getFilesDir().getAbsolutePath().replace("files", "databases") + File.separator;
+        }
+        else {
+            dbPath = getFilesDir().getPath() + getPackageName() + "/databases/";
+        }
+        String currentDBPath = DbOpenHelper.DATABASE_NAME;
+        String backupDBPath = "appwatcher.db";
+        File currentDB = new File(dbPath, currentDBPath);
+        File backupDB = new File(sd, backupDBPath);
+
+        if (currentDB.exists()) {
+            FileChannel src = new FileInputStream(currentDB).getChannel();
+            FileChannel dst = new FileOutputStream(backupDB).getChannel();
+            dst.transferFrom(src, 0, src.size());
+            src.close();
+            dst.close();
+        }
     }
 
     private String getAppVersion() {

@@ -45,6 +45,11 @@ public class AppWatcherActivity extends AppWatcherBaseActivity implements
         return R.layout.activity_main;
     }
 
+    @Override
+    protected int getMenuResource() {
+        return R.menu.main;
+    }
+
     protected AppWatcherBaseActivity.Adapter createViewPagerAdapter() {
         AppWatcherBaseActivity.Adapter adapter = new AppWatcherBaseActivity.Adapter(getSupportFragmentManager());
         adapter.addFragment(AppWatcherListFragment.newInstance(

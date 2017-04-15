@@ -1,14 +1,19 @@
 package com.anod.appwatcher.tags;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.anod.appwatcher.MarketSearchActivity;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.fragments.AppWatcherListFragment;
 import com.anod.appwatcher.model.Tag;
+
+import butterknife.OnClick;
+import butterknife.Optional;
 
 /**
  * @author algavris
@@ -27,4 +32,9 @@ public class AppsTagListFragment extends AppWatcherListFragment {
         return inflater.inflate(R.layout.fragment_appstag_list, container, false);
     }
 
+    @OnClick(android.R.id.button1)
+    @Optional
+    public void onSearchButton() {
+        startActivity(AppsTagSelectActivity.createIntent(mTag, getActivity()));
+    }
 }

@@ -64,11 +64,6 @@ public class AppViewHolderDataProvider implements AppViewHolder.DataProvider {
     }
 
     @Override
-    public int getDefaultIconResource() {
-        return R.drawable.ic_android_black_24dp;
-    }
-
-    @Override
     public String formatVersionText(String versionName, int versionNumber) {
         return mContext.getString(R.string.version_text, versionName, versionNumber);
     }

@@ -25,9 +25,6 @@
         <!-- Override color for Material.Small -->
         <item name="android:textColorTertiary">@color/primary_text</item>
         <item name="android:buttonStyle">@style/BrandButtonStyle</item>
-        <!--
-        <item name="android:windowBackground">@color/window_background</item>
-        -->
     </style>
 
     <style name="BrandButtonStyle" parent="Widget.AppCompat.Button.Colored">

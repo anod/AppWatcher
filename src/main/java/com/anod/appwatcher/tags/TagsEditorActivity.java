@@ -1,21 +1,23 @@
 package com.anod.appwatcher.tags;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
-import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.anod.appwatcher.AppListContentProvider;
@@ -36,12 +38,10 @@ import butterknife.ButterKnife;
  * @date 10/03/2017.
  */
 
-public class TagsEditorActivity extends ToolbarActivity implements LoaderManager.LoaderCallbacks<Cursor>, TextView.OnEditorActionListener {
+public class TagsEditorActivity extends ToolbarActivity implements LoaderManager.LoaderCallbacks<Cursor>, View.OnClickListener {
 
     @BindView(android.R.id.list)
     RecyclerView mListView;
-    @BindView(android.R.id.edit)
-    EditText mAddTag;
 
     private TagAdapter mAdapter;
 
@@ -52,14 +52,29 @@ public class TagsEditorActivity extends ToolbarActivity implements LoaderManager
         ButterKnife.bind(this);
         setupToolbar();
 
-        mAdapter = new TagAdapter(this);
+        mAdapter = new TagAdapter(this, this);
         mListView.setLayoutManager(new LinearLayoutManager(this));
         mListView.setAdapter(mAdapter);
         mListView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.HORIZONTAL));
 
-        mAddTag.setOnEditorActionListener(this);
-
         getSupportLoaderManager().initLoader(0, null, this).forceLoad();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.tags_editor, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.add_tag)
+        {
+            EditTagDialog dialog = EditTagDialog.newInstance(null);
+            dialog.show(getSupportFragmentManager(), "edit-tag-dialog");
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -77,37 +92,30 @@ public class TagsEditorActivity extends ToolbarActivity implements LoaderManager
         mAdapter.swapData(null);
     }
 
-    @Override
-    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-        String tag = v.getText().toString().trim();
-        if (TextUtils.isEmpty(tag))
-        {
-            return true;
-        }
-
-        if (addNewTag(tag))
-        {
-            v.setText("");
-            v.requestFocus();
-        }
-
-        return true;
-    }
-
-    private boolean addNewTag(@NonNull String tag) {
+    public void saveTag(Tag tag) {
         DbContentProviderClient cr = new DbContentProviderClient(this);
-        if (cr.queryTagByName(tag) == null)
-        {
-            if (cr.createTag(new Tag(tag)) != null)
-            {
-                return true;
-            }
+        if (tag.id == -1) {
+            cr.createTag(tag);
+        } else {
+            cr.saveTag(tag);
         }
         cr.close();
-        return false;
     }
 
-    static class TagsCursorLoader extends CursorLoader {
+    public void deleteTag(Tag tag) {
+        DbContentProviderClient cr = new DbContentProviderClient(this);
+        cr.deleteTag(tag);
+        cr.close();
+    }
+
+    @Override
+    public void onClick(View v) {
+        Tag tag = (Tag)v.getTag();
+        EditTagDialog dialog = EditTagDialog.newInstance(tag);
+        dialog.show(getSupportFragmentManager(), "edit-tag-dialog");
+    }
+
+    private static class TagsCursorLoader extends CursorLoader {
         private static final Uri CONTENT_URI = AppListContentProvider.TAGS_CONTENT_URI;
         private static final String ORDER_DEFAULT = TagsContentProviderClient.DEFAULT_SORT_ORDER;
 
@@ -116,14 +124,17 @@ public class TagsEditorActivity extends ToolbarActivity implements LoaderManager
         }
     }
 
-    static class TagAdapter extends RecyclerViewCursorAdapter<TagHolder, TagsCursor> {
-        TagAdapter(Context context) {
+    private static class TagAdapter extends RecyclerViewCursorAdapter<TagHolder, TagsCursor> {
+        private final View.OnClickListener mListener;
+
+        TagAdapter(Context context, View.OnClickListener listener) {
             super(context, R.layout.list_item_tag);
+            mListener = listener;
         }
 
         @Override
         protected TagHolder onCreateViewHolder(View itemView) {
-            return new TagHolder(itemView);
+            return new TagHolder(itemView, mListener);
         }
 
         @Override
@@ -133,17 +144,24 @@ public class TagsEditorActivity extends ToolbarActivity implements LoaderManager
     }
 
     static class TagHolder extends RecyclerView.ViewHolder {
+        private final View.OnClickListener listener;
         @BindView(android.R.id.text1) TextView mTagName;
+        @BindView(android.R.id.icon) ImageView mTagColor;
 
-        TagHolder(View itemView) {
+
+        TagHolder(View itemView, View.OnClickListener listener) {
             super(itemView);
+            this.listener = listener;
             ButterKnife.bind(this, itemView);
         }
 
         void bindView(int position, Tag tag) {
-            mTagName.setTag(tag.id);
             mTagName.setText(tag.name);
-            mTagName.setCompoundDrawables(new ColorDrawable(tag.color), null, new ColorDrawable(tag.color), null);
+            mTagName.setTag(tag);
+            Drawable d = mTagColor.getDrawable().mutate();
+            DrawableCompat.setTint(d, tag.color);
+            mTagColor.setImageDrawable(d);
+            mTagName.setOnClickListener(this.listener);
         }
-    }
+   }
 }

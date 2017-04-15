@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.GravityCompat;
@@ -121,8 +122,9 @@ abstract public class DrawerActivity extends ToolbarActivity implements AccountC
         while (cr.moveToNext()) {
             Tag tag = cr.getTag();
             MenuItem item = menu.add(1, tag.id, tag.id, tag.name);
-            Drawable icon = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_label_black_24px, null);
-            DrawableCompat.setTint(icon, Color.RED);
+            Drawable icon = ContextCompat.getDrawable(this, R.drawable.ic_label_black_24px).mutate();
+            DrawableCompat.setTint(icon, tag.color);
+
             item.setIcon(icon);
             item.setIntent(AppsTagActivity.createTagIntent(tag, this));
         }

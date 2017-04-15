@@ -3,6 +3,7 @@ package com.anod.appwatcher.model;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v4.content.CursorLoader;
 import android.text.TextUtils;
 
@@ -31,8 +32,12 @@ public class AppListCursorLoader extends CursorLoader {
     private int mNewCount;
     private int mUpdatableNewCount;
 
-    public AppListCursorLoader(Context context, String titleFilter, int sortId, FilterCursorWrapper.CursorFilter cursorFilter, Tag tag) {
-        super(context, getContentUri(tag), AppListTable.PROJECTION, null, null, ORDER_DEFAULT);
+    public AppListCursorLoader(Context context, @NonNull String titleFilter,int sortId, FilterCursorWrapper.CursorFilter cursorFilter, Tag tag) {
+        this(context, titleFilter, createSortOrder(sortId), cursorFilter, tag);
+    }
+
+    public AppListCursorLoader(Context context, @NonNull String titleFilter,@NonNull String sortOrder, FilterCursorWrapper.CursorFilter cursorFilter, Tag tag) {
+        super(context, getContentUri(tag), AppListTable.PROJECTION, null, null, sortOrder);
 
         mCursorFilter = cursorFilter;
         mTitleFilter = titleFilter;
@@ -60,20 +65,15 @@ public class AppListCursorLoader extends CursorLoader {
 
         setSelection(selection);
         setSelectionArgs(selectionArgs);
-
-        setSortOrder(createSortOrder(sortId));
     }
 
     private static Uri getContentUri(Tag tag) {
         return tag == null ?
                 AppListContentProvider.APPS_CONTENT_URI :
-                AppListContentProvider.TAGS_CONTENT_URI
-                     .buildUpon()
-                     .appendPath(String.valueOf(tag.id))
-                     .appendPath("apps").build();
+                AppListContentProvider.APPS_TAG_CONTENT_URI.buildUpon().appendPath(String.valueOf(tag.id)).build();
     }
 
-    private String createSortOrder(int sortId) {
+    private static String createSortOrder(int sortId) {
         ArrayList<String> filter = new ArrayList<>();
         filter.add(AppListTable.Columns.KEY_STATUS + " DESC");
         if (sortId == Preferences.SORT_NAME_DESC) {

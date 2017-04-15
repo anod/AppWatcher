@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import android.util.Log;
 
 import com.android.volley.VolleyError;
 import com.anod.appwatcher.Preferences;

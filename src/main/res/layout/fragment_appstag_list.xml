@@ -59,7 +59,7 @@
                 style="@style/BrandButtonStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:drawableLeft="@drawable/ic_add_circle_outline_black_24dp"
+                android:drawableLeft="@drawable/ic_library_add_black_24px"
                 android:text="@string/add_apps"/>
 
         </LinearLayout>

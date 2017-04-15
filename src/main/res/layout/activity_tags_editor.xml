@@ -15,23 +15,7 @@
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         app:contentInsetRight="48dp"
         xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto">
-
-        <EditText
-            android:id="@android:id/edit"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:hint="@string/add_new_tag"
-            android:inputType="textCapWords"
-            android:background="?attr/colorPrimaryDark"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-            android:padding="8dp"
-            android:imeActionLabel="Add"
-            android:imeOptions="actionDone"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark"/>
-
-    </android.support.v7.widget.Toolbar>
+        xmlns:app="http://schemas.android.com/apk/res-auto" />
 
     <android.support.v7.widget.RecyclerView
         android:layout_marginTop="8dp"

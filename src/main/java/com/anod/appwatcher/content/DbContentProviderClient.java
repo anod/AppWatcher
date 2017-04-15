@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.RemoteException;
+import android.support.annotation.NonNull;
 import android.support.v4.util.SimpleArrayMap;
 
 import com.anod.appwatcher.AppListContentProvider;
@@ -14,6 +15,7 @@ import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppInfoMetadata;
 import com.anod.appwatcher.model.Tag;
 import com.anod.appwatcher.model.schema.AppListTable;
+import com.anod.appwatcher.model.schema.AppTagsTable;
 import com.anod.appwatcher.model.schema.TagsTable;
 import com.anod.appwatcher.utils.BitmapUtils;
 
@@ -274,7 +276,7 @@ public class DbContentProviderClient {
         return null;
     }
 
-    public Uri createTag(Tag tag) {
+    public Uri createTag(@NonNull Tag tag) {
         ContentValues values = TagsTable.createContentValues(tag);
         try {
             return mContentProviderClient.insert(DbContentProvider.TAGS_CONTENT_URI, values);
@@ -282,5 +284,43 @@ public class DbContentProviderClient {
             AppLog.e(e.getMessage());
         }
         return null;
+    }
+
+    public int saveTag(@NonNull Tag tag) {
+        Uri updateUri = DbContentProvider.TAGS_CONTENT_URI.buildUpon().appendPath(String.valueOf(tag.id)).build();
+        ContentValues values = TagsTable.createContentValues(tag);
+        try {
+            return mContentProviderClient.update(updateUri, values, null, null);
+        } catch (RemoteException e) {
+            AppLog.e(e.getMessage());
+        }
+        return 0;
+    }
+
+    public void deleteTag(@NonNull Tag tag) {
+        Uri tagDeleteUri = DbContentProvider.TAGS_CONTENT_URI.buildUpon().appendPath(String.valueOf(tag.id)).build();
+        Uri appsTagDeleteUri = DbContentProvider.TAGS_CONTENT_URI.buildUpon().appendPath(String.valueOf(tag.id)).appendPath("apps").build();
+        try {
+            mContentProviderClient.delete(tagDeleteUri, null, null);
+            mContentProviderClient.delete(appsTagDeleteUri, null, null);
+        } catch (RemoteException e) {
+            AppLog.e(e);
+        }
+    }
+
+    public boolean addAppsToTag(@NonNull List<String> appIds,@NonNull Tag tag)
+    {
+        try {
+            Uri appsTagUri = DbContentProvider.TAGS_CONTENT_URI.buildUpon().appendPath(String.valueOf(tag.id)).appendPath("apps").build();
+            mContentProviderClient.delete(appsTagUri, null, null);
+            for (String appId: appIds) {
+                ContentValues values = AppTagsTable.createContentValues(appId, tag);
+                mContentProviderClient.insert(appsTagUri, values);
+            }
+            return true;
+        } catch (RemoteException e) {
+            AppLog.e(e);
+        }
+        return false;
     }
 }

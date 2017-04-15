@@ -51,13 +51,15 @@
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".tags.AppsTagActivity"
             android:theme="@style/AppTheme.Main" />
+        <activity
+            android:name=".tags.AppsTagSelectActivity"
+            android:theme="@style/AppTheme.Dialog" />
         <activity
             android:name=".ListExportActivity"
             android:label="@string/import_export"

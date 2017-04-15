@@ -25,10 +25,13 @@ public class DbContentProvider extends ContentProvider {
     private static final int APP_LIST = 10;
     private static final int APP_ROW = 20;
     private static final int TAG_LIST = 30;
-    private static final int TAG_APPS = 40;
-    private static final int ICON_ROW = 50;
+    private static final int TAG_ROW = 40;
+    private static final int TAG_APPS = 50;
+    private static final int APP_TAG_LIST = 60;
+    private static final int ICON_ROW = 70;
 
     public static final Uri APPS_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/apps");
+    public static final Uri APPS_TAG_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/apps/tag");
     public static final Uri TAGS_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/tags");
     public static final Uri ICONS_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/icons");
 
@@ -37,8 +40,10 @@ public class DbContentProvider extends ContentProvider {
     static {
         sURIMatcher.addURI(AUTHORITY, "apps", APP_LIST);
         sURIMatcher.addURI(AUTHORITY, "apps/#", APP_ROW);
+        sURIMatcher.addURI(AUTHORITY, "apps/tag/#", APP_TAG_LIST);
 
         sURIMatcher.addURI(AUTHORITY, "tags", TAG_LIST);
+        sURIMatcher.addURI(AUTHORITY, "tags/#", TAG_ROW);
         sURIMatcher.addURI(AUTHORITY, "tags/#/apps", TAG_APPS);
 
         sURIMatcher.addURI(AUTHORITY, "icons/#", ICON_ROW);
@@ -69,13 +74,27 @@ public class DbContentProvider extends ContentProvider {
                 query.table = AppListTable.TABLE_NAME;
                 query.notifyUri = APPS_CONTENT_URI;
                 return query;
+            case APP_TAG_LIST:
+                query.table = AppTagsTable.TABLE_NAME + ", " + AppListTable.TABLE_NAME;
+                query.notifyUri = APPS_CONTENT_URI;
+                return query;
             case TAG_LIST:
                 query.table = TagsTable.TABLE_NAME;
                 query.notifyUri = TAGS_CONTENT_URI;
                 return query;
+            case TAG_ROW:
+                query.table = TagsTable.TABLE_NAME;
+                rowId = uri.getLastPathSegment();
+                query.selection = TagsTable.Columns._ID + "=?";
+                query.selectionArgs = new String[]{rowId};
+                query.notifyUri = TAGS_CONTENT_URI;
+                return query;
             case TAG_APPS:
-                query.table = AppTagsTable.TABLE_NAME + ", " + AppListTable.TABLE_NAME;
-                query.notifyUri = APPS_CONTENT_URI;
+                query.table = AppTagsTable.TABLE_NAME;
+                String tagId = uri.getPathSegments().get(uri.getPathSegments().size() - 2);
+                query.selection = AppTagsTable.Columns.TAGID + "=?";
+                query.selectionArgs = new String[]{tagId};
+                query.notifyUri = APPS_TAG_CONTENT_URI;
                 return query;
             case ICON_ROW:
                 query.table = AppListTable.TABLE_NAME;

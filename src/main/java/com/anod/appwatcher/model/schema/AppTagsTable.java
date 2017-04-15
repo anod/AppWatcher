@@ -1,6 +1,9 @@
 package com.anod.appwatcher.model.schema;
 
+import android.content.ContentValues;
 import android.provider.BaseColumns;
+
+import com.anod.appwatcher.model.Tag;
 
 /**
  * @author alex
@@ -8,7 +11,7 @@ import android.provider.BaseColumns;
  */
 public class AppTagsTable {
 
-    private class Columns implements BaseColumns {
+    public class Columns implements BaseColumns {
         public static final String APPID = "app_id";
         public static final String TAGID = "tags_id";
     }
@@ -20,6 +23,12 @@ public class AppTagsTable {
     }
 
     public static final String TABLE_NAME = "app_tags";
+
+    public static class Projection {
+        public static final int _ID = 0;
+        public static final int APPID = 1;
+        public static final int TAGID = 2;
+    }
 
     public static final String[] PROJECTION = new String[]{
             TableColumns._ID,
@@ -34,4 +43,10 @@ public class AppTagsTable {
                     Columns.TAGID + " INTEGER" +
                     ") ";
 
+    public static ContentValues createContentValues(String appId, Tag tag) {
+        ContentValues values = new ContentValues();
+        values.put(Columns.APPID, appId);
+        values.put(Columns.TAGID, tag.id);
+        return values;
+    }
 }

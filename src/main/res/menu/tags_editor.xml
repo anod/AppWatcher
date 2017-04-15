@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/add_tag"
+        android:icon="@drawable/ic_library_add_black_24px"
+        android:title="Add a tag"
+        app:showAsAction="always"/>
+</menu>

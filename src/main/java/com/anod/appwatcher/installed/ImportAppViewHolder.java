@@ -47,7 +47,7 @@ class ImportAppViewHolder extends AppViewHolderBase implements View.OnClickListe
 
         itemView.findViewById(android.R.id.content).setOnClickListener(this);
 
-        this.bindIcon(app, this.icon);
+        mIconLoader.loadAppIntoImageView(app, this.icon, R.drawable.ic_android_black_24dp);
 
         if (status() == ImportDataProvider.STATUS_DONE) {
             itemView.setBackgroundColor(themeAccent);

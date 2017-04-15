@@ -5,10 +5,15 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.support.annotation.DrawableRes;
+import android.support.annotation.NonNull;
+import android.text.TextUtils;
+import android.widget.ImageView;
 
 import com.anod.appwatcher.AppListContentProvider;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.content.DbContentProviderClient;
+import com.anod.appwatcher.model.AppInfo;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Request;
 import com.squareup.picasso.RequestCreator;
@@ -53,7 +58,7 @@ public class AppIconLoader {
             ComponentName cmp = ComponentName.unflattenFromString(part);
 
             Bitmap icon = PackageManagerUtils.loadIcon(cmp, mContext.getResources().getDisplayMetrics(), mPackageManager);
-            if (icon == null){
+            if (icon == null) {
                 return null;
             }
             return new Result(icon, DISK);
@@ -79,8 +84,7 @@ public class AppIconLoader {
             DbContentProviderClient client = new DbContentProviderClient(mContext);
             Bitmap icon = client.queryAppIcon(request.uri);
             client.close();
-            if (icon == null)
-            {
+            if (icon == null) {
                 return null;
             }
             return new Result(icon, DISK);
@@ -117,6 +121,23 @@ public class AppIconLoader {
                 .resize(mIconSize, mIconSize)
                 .centerInside()
                 .onlyScaleDown();
+    }
+
+    public void loadAppIntoImageView(@NonNull AppInfo app, @NonNull ImageView iconView, @DrawableRes int defaultRes) {
+        if (TextUtils.isEmpty(app.iconUrl)) {
+            if (app.getRowId() > 0) {
+                Uri dbImageUri = AppListContentProvider.ICONS_CONTENT_URI.buildUpon().appendPath(String.valueOf(app.getRowId())).build();
+                this.retrieve(dbImageUri)
+                        .placeholder(defaultRes)
+                        .into(iconView);
+            } else {
+                iconView.setImageResource(defaultRes);
+            }
+        } else {
+            this.retrieve(app.iconUrl)
+                    .placeholder(defaultRes)
+                    .into(iconView);
+        }
     }
 
 

@@ -5,14 +5,17 @@
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_margin="8dp"
+    android:paddingLeft="12dp"
+    android:paddingRight="12dp"
+    android:paddingTop="8dp"
     >
 
     <ImageView
+        android:id="@android:id/icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_label_black_24px"
-        />
+    />
 
     <TextView
         android:id="@android:id/text1"

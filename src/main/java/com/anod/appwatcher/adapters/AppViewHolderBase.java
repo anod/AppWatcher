@@ -28,7 +28,6 @@ public abstract class AppViewHolderBase extends RecyclerView.ViewHolder {
         int getTotalAppsCount();
         int getNewAppsCount();
         InstalledAppsProvider getInstalledAppsProvider();
-        int getDefaultIconResource();
         String formatVersionText(String versionName, int versionNumber);
         @ColorInt
         int getColor(@ColorRes int colorRes);
@@ -43,21 +42,4 @@ public abstract class AppViewHolderBase extends RecyclerView.ViewHolder {
     }
 
     public abstract void bindView(int position, AppInfo app);
-
-    protected void bindIcon(AppInfo app, ImageView iconView) {
-        if (TextUtils.isEmpty(app.iconUrl)) {
-            if (app.getRowId() > 0) {
-                Uri dbImageUri = AppListContentProvider.ICONS_CONTENT_URI.buildUpon().appendPath(String.valueOf(app.getRowId())).build();
-                mIconLoader.retrieve(dbImageUri)
-                        .placeholder(mDataProvider.getDefaultIconResource())
-                        .into(iconView);
-            } else {
-                iconView.setImageResource(mDataProvider.getDefaultIconResource());
-            }
-        } else {
-            mIconLoader.retrieve(app.iconUrl)
-                    .placeholder(mDataProvider.getDefaultIconResource())
-                    .into(iconView);
-        }
-    }
 }
