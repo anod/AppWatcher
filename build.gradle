@@ -2,11 +2,11 @@
 buildscript {
     repositories {
         mavenCentral()
-        maven { url 'https://maven.fabric.io/public' }
         maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.4.0-alpha6'
+        classpath 'com.android.tools.build:gradle:2.3.1'
+        classpath 'com.google.gms:google-services:3.0.0'
     }
 }
 
@@ -40,14 +40,15 @@ dependencies {
     compile 'com.google.android.gms:play-services-drive:10.2.1'
     compile 'com.google.android.gms:play-services-gcm:10.2.1'
 
+    compile 'com.google.firebase:firebase-core:10.2.1'
+    compile 'com.google.firebase:firebase-crash:10.2.1'
+
     compile 'com.android.volley:volley:1.0.0'
     compile 'com.squareup.okhttp3:okhttp:3.6.0'
     compile 'com.squareup.picasso:picasso:3.0.0-SNAPSHOT'
 
     compile 'com.jakewharton:butterknife:8.5.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
-
-    compile 'net.hockeyapp.android:HockeySDK:4.1.2'
 
     compile group: 'com.google.protobuf.nano', name: 'protobuf-javanano', version: '3.1.0'
 
@@ -70,8 +71,6 @@ android {
         targetSdkVersion 24
         versionCode 50
         versionName '1.8.7'
-
-        manifestPlaceholders = [HOCKEYAPP_APP_ID: APPWATCHER_HOCKEYAPP_ID]
         resValue "string", "content_authority", "com.anod.appwatcher"
 
         vectorDrawables.generatedDensities = ['xhdpi','xxxhdpi']
@@ -118,4 +117,14 @@ android {
         // but continue the build even when errors are found:
         abortOnError false
     }
+
+//    task genSource(type: Exec) {
+//        println "Executing " + АPPWATCHER_BOOTSTRAP_FILE
+//        commandLine АPPWATCHER_BOOTSTRAP_FILE
+//    }
+//
+//    preBuild.dependsOn genSource
 }
+
+// ADD THIS AT THE BOTTOM
+apply plugin: 'com.google.gms.google-services'

@@ -5,9 +5,9 @@ import com.android.volley.toolbox.NoCache;
 import com.anod.appwatcher.accounts.AccountManager;
 import com.anod.appwatcher.market.DeviceIdHelper;
 import com.anod.appwatcher.market.Network;
-import com.anod.appwatcher.utils.AppCrashListener;
 import com.anod.appwatcher.utils.AppIconLoader;
 import com.google.android.gms.gcm.GcmNetworkManager;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 /**
  * @author alex
@@ -20,7 +20,7 @@ public class ObjectGraph {
     private String mDeviceId;
     private AccountManager mAccountManager;
     private AppIconLoader mIconLoader;
-    private AppCrashListener mAppCrashListener;
+    private FirebaseAnalytics mFirebaseAnalytics;
 
     ObjectGraph(AppWatcherApplication application)  {
         this.app = application;
@@ -58,17 +58,14 @@ public class ObjectGraph {
         return mIconLoader;
     }
 
-    public AppCrashListener crashListener()
-    {
-        if (mAppCrashListener  == null)
-        {
-            mAppCrashListener = new AppCrashListener();
-        }
-        return mAppCrashListener;
-    }
-
     public GcmNetworkManager gcmNetworkManager() {
         return GcmNetworkManager.getInstance(this.app);
     }
 
+    public FirebaseAnalytics firebase() {
+        if (mFirebaseAnalytics == null) {
+            mFirebaseAnalytics = FirebaseAnalytics.getInstance(this.app);
+        }
+        return mFirebaseAnalytics;
+    }
 }

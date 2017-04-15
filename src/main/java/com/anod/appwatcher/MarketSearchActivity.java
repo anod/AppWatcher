@@ -150,9 +150,7 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
         mEndpoints.reset();
         showLoading();
 
-        App.provide(this).crashListener().put("SEARCH_QUERY", mSearchQuery);
-        App.provide(this).crashListener().put("SEARCH_PACKAGE", String.valueOf(mPackageSearch));
-        MetricsManagerEvent.track("PERFORM_SEARCH", "SEARCH_QUERY", mSearchQuery, "SEARCH_PACKAGE", String.valueOf(mPackageSearch), "FROM_SHARE", String.valueOf(mShareSource));
+        MetricsManagerEvent.track(this, "perform_search", "SEARCH_QUERY", mSearchQuery, "SEARCH_PACKAGE", String.valueOf(mPackageSearch), "FROM_SHARE", String.valueOf(mShareSource));
 
         if (!TextUtils.isEmpty(mSearchQuery)) {
             if (mPackageSearch)

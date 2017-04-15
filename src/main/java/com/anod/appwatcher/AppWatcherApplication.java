@@ -7,10 +7,14 @@ import android.support.v7.app.AppCompatDelegate;
 import android.view.ViewConfiguration;
 
 import com.android.volley.VolleyLog;
+import com.anod.appwatcher.utils.AppDetailsUploadDate;
 import com.anod.appwatcher.utils.MetricsManagerEvent;
+import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.crash.FirebaseCrash;
 import com.squareup.leakcanary.LeakCanary;
 
 import java.lang.reflect.Field;
+import java.util.Locale;
 
 import info.anodsplace.android.log.AppLog;
 
@@ -33,6 +37,7 @@ public class AppWatcherApplication extends Application implements AppLog.Listene
             // Ignore
         }
 
+        AppLog.LOGGER = new FirebaseLogger();
         AppLog.setDebug(BuildConfig.DEBUG, "AppWatcher");
         AppLog.instance().setListener(this);
         VolleyLog.setTag("AppWatcher");
@@ -68,18 +73,24 @@ public class AppWatcherApplication extends Application implements AppLog.Listene
 
     @Override
     public void onLogException(Throwable tr) {
-
-        String method = "<unknown>";
-        StackTraceElement[] stackTrace = tr.getStackTrace();
-        for (int i = 2; i < stackTrace.length; ++i) {
-            final String className = stackTrace[i].getClassName();
-            if (!className.equals(AppLog.class.getName())) {
-                final String substring = className.substring(1 + className.lastIndexOf(46));
-                method = substring.substring(1 + substring.lastIndexOf(36)) + "." + stackTrace[i].getMethodName();
-                break;
-            }
+        FirebaseCrash.report(tr);
+        if (tr instanceof AppDetailsUploadDate.ExtractDateError) {
+            AppDetailsUploadDate.ExtractDateError error = (AppDetailsUploadDate.ExtractDateError) tr;
+            MetricsManagerEvent.track(this, "error_extract_date",
+                    "LOCALE", error.locale,
+                    "DEFAULT_LOCALE", error.defaultlocale,
+                    "ACTUAL", error.actual,
+                    "EXPECTED", error.expected,
+                    "EXPECTED_FORMAT", error.expectedFormat,
+                    "CUSTOM", error.isCustomParser? "YES" : "NO");
         }
-        MetricsManagerEvent.track("EXCEPTION", "CLASS", tr.getClass().getSimpleName(), "METHOD", method, "MESSAGE", tr.getMessage());
-        // Ignore for now - ExceptionHandler.saveException(tr, null, null);
+    }
+
+    private class FirebaseLogger extends AppLog.Logger.Android {
+        @Override
+        public void println(int priority, String tag, String msg) {
+            super.println(priority, tag, msg);
+            FirebaseCrash.logcat(priority, tag, msg);
+        }
     }
 }

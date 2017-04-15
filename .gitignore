@@ -29,3 +29,5 @@ build
 .DS_Store
 .iml
 /captures
+
+/google-services.json

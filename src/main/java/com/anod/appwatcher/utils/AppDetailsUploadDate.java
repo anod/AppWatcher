@@ -52,24 +52,44 @@ public class AppDetailsUploadDate {
         try {
             return df.parse(uploadDate);
         } catch (ParseException e) {
-            AppLog.e(e);
             String format = "<UNKNOWN>";
             if (df instanceof SimpleDateFormat)
             {
                 format = ((SimpleDateFormat) df).toPattern();
             }
             String expected = df.format(new Date());
-            MetricsManagerEvent.track("ERROR_EXTRACT_DATE",
-                    "LOCALE", locale.toString(),
-                    "DEFAULT_LOCALE", Locale.getDefault().toString(),
-                    "ACTUAL", uploadDate,
-                    "EXPECTED", expected,
-                    "EXPECTED_FORMAT", format,
-                    "CUSTOM", isCustom ? "YES" : "NO");
+
+            AppLog.e(new ExtractDateError(
+                    locale.toString(),
+                    Locale.getDefault().toString(),
+                    uploadDate,
+                    expected,
+                    format,
+                    isCustom,
+                    e
+            ));
         }
 
         return null;
-
     }
 
+    public static class ExtractDateError extends Exception
+    {
+        public final String locale;
+        public final String defaultlocale;
+        public final String actual;
+        public final String expected;
+        public final String expectedFormat;
+        public final boolean isCustomParser;
+
+        ExtractDateError(String locale, String defaultlocale, String actual, String expected, String expectedFormat, boolean isCustomParser, ParseException cause) {
+            super(cause);
+            this.locale = locale;
+            this.defaultlocale = defaultlocale;
+            this.actual = actual;
+            this.expected = expected;
+            this.expectedFormat = expectedFormat;
+            this.isCustomParser = isCustomParser;
+        }
+    }
 }

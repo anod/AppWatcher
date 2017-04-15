@@ -11,20 +11,15 @@ import com.anod.appwatcher.model.Filters;
 import com.anod.appwatcher.sync.SyncScheduler;
 import com.anod.appwatcher.ui.AppWatcherBaseActivity;
 
-import net.hockeyapp.android.CrashManager;
-import net.hockeyapp.android.metrics.MetricsManager;
-import net.hockeyapp.android.utils.Util;
-
 import info.anodsplace.android.log.AppLog;
 
-public class AppWatcherActivity extends AppWatcherBaseActivity implements
-        TextView.OnEditorActionListener, SearchView.OnQueryTextListener {
+public class AppWatcherActivity extends AppWatcherBaseActivity implements TextView.OnEditorActionListener, SearchView.OnQueryTextListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
-        MetricsManager.register(getApplication());
+        App.provide(this).firebase();
 
         if (mPreferences.useAutoSync())
         {
@@ -38,7 +33,6 @@ public class AppWatcherActivity extends AppWatcherBaseActivity implements
 
         AppLog.d("Mark updates as viewed.");
         mPreferences.markViewed(true);
-        CrashManager.register(this, Util.getAppIdentifier(this), App.provide(this).crashListener());
     }
 
     protected @LayoutRes int getContentLayout() {
