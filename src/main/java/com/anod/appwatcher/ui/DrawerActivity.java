@@ -3,9 +3,11 @@ package com.anod.appwatcher.ui;
 import android.accounts.Account;
 import android.app.ActionBar;
 import android.content.Intent;
+import android.database.ContentObserver;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
@@ -29,6 +31,7 @@ import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.SettingsActivity;
 import com.anod.appwatcher.accounts.AccountChooser;
+import com.anod.appwatcher.content.DbContentProvider;
 import com.anod.appwatcher.content.TagsContentProviderClient;
 import com.anod.appwatcher.content.TagsCursor;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
@@ -68,6 +71,7 @@ abstract public class DrawerActivity extends ToolbarActivity implements AccountC
             mNavigationView = (NavigationView) findViewById(R.id.nav_view);
             setupDrawerContent(mNavigationView);
             updateTags();
+            getContentResolver().registerContentObserver(DbContentProvider.TAGS_CONTENT_URI, true, new TagsUpdateObserver(this));
         }
     }
 
@@ -129,6 +133,7 @@ abstract public class DrawerActivity extends ToolbarActivity implements AccountC
             item.setIntent(AppsTagActivity.createTagIntent(tag, this));
         }
         cr.close();
+
     }
 
 
@@ -220,5 +225,19 @@ abstract public class DrawerActivity extends ToolbarActivity implements AccountC
     public void showAccountsDialogWithCheck() {
         Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show();
         mAccountChooser.showAccountsDialogWithCheck();
+    }
+
+    static class TagsUpdateObserver extends ContentObserver {
+        private final DrawerActivity mDrawerActivity;
+
+        TagsUpdateObserver(DrawerActivity drawerActivity) {
+            super(new Handler());
+            mDrawerActivity = drawerActivity;
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            mDrawerActivity.updateTags();
+        }
     }
 }
