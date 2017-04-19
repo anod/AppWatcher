@@ -126,9 +126,10 @@ public abstract class AppWatcherBaseActivity extends DrawerActivity implements
         searchView.setSubmitButtonEnabled(true);
         searchView.setQueryHint(getString(R.string.search));
 
-        if (!TextUtils.isEmpty(mFilterQuery)) {
+        String filterQuery = mFilterQuery;
+        if (!TextUtils.isEmpty(filterQuery)) {
             MenuItemCompat.expandActionView(mSearchMenuItem);
-            searchView.setQuery(mFilterQuery, false);
+            searchView.setQuery(filterQuery, false);
         }
 
         mRefreshAnim.setMenuItem(menu.findItem(R.id.menu_act_refresh));

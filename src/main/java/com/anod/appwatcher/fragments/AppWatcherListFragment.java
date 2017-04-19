@@ -196,9 +196,6 @@ public class AppWatcherListFragment extends Fragment implements
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // We have a menu item to show in action bar.
-        setHasOptionsMenu(true);
-
         mInstalledApps = new InstalledAppsProvider.PackageManager(getActivity().getPackageManager());
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
@@ -335,6 +332,8 @@ public class AppWatcherListFragment extends Fragment implements
     }
 
     private void restartLoader() {
-        getLoaderManager().restartLoader(0, null, this);
+        if (isResumed()) {
+            getLoaderManager().restartLoader(0, null, this);
+        }
     }
 }
