@@ -1,17 +1,14 @@
 package com.anod.appwatcher.ui;
 
 import android.accounts.Account;
-import android.app.ActionBar;
 import android.content.Intent;
 import android.database.ContentObserver;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.GravityCompat;
@@ -19,13 +16,12 @@ import android.support.v4.widget.DrawerLayout;
 import android.text.format.DateUtils;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.SubMenu;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.anod.appwatcher.AppWatcherActivity;
 import com.anod.appwatcher.MarketSearchActivity;
 import com.anod.appwatcher.Preferences;
 import com.anod.appwatcher.R;
@@ -36,12 +32,9 @@ import com.anod.appwatcher.content.TagsContentProviderClient;
 import com.anod.appwatcher.content.TagsCursor;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
 import com.anod.appwatcher.installed.ImportInstalledActivity;
-import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.Tag;
 import com.anod.appwatcher.tags.AppsTagActivity;
 import com.anod.appwatcher.wishlist.WishlistFragment;
-
-import java.util.HashMap;
 
 /**
  * @author alex
@@ -111,8 +104,7 @@ abstract public class DrawerActivity extends ToolbarActivity implements AccountC
 
     }
 
-    public void updateTags()
-    {
+    public void updateTags() {
         Menu menu = mNavigationView.getMenu();
         menu.removeGroup(1);
 
@@ -126,16 +118,15 @@ abstract public class DrawerActivity extends ToolbarActivity implements AccountC
         while (cr.moveToNext()) {
             Tag tag = cr.getTag();
             MenuItem item = menu.add(1, tag.id, tag.id, tag.name);
-            Drawable icon = ContextCompat.getDrawable(this, R.drawable.ic_label_black_24px).mutate();
-            DrawableCompat.setTint(icon, tag.color);
-
-            item.setIcon(icon);
+            item.setActionView(R.layout.drawer_tag_indicator);
+            ImageView iv = (ImageView) item.getActionView();
+            Drawable d = ResourcesCompat.getDrawable(getResources(), R.drawable.circular_color, null);
+            DrawableCompat.setTint(d, tag.color);
+            iv.setImageDrawable(d);
             item.setIntent(AppsTagActivity.createTagIntent(tag, this));
         }
         cr.close();
-
     }
-
 
     @Override
     public AccountChooserFragment.OnAccountSelectionListener getAccountSelectionListener() {
@@ -198,8 +189,7 @@ abstract public class DrawerActivity extends ToolbarActivity implements AccountC
                 return true;
         }
         Intent intent = item.getIntent();
-        if (intent != null)
-        {
+        if (intent != null) {
             startActivity(intent);
             return true;
         }
