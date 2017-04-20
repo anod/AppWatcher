@@ -16,6 +16,12 @@ public class CustomParserFactory {
     private static final String[] SV_SHORT_MONTHS = new String[] {
             "jan", "feb", "mars", "apr", "maj", "juni", "juli", "aug", "sep", "okt", "nov", "dec"
     };
+    private static final String[] ES_SHORT_MONTHS = new String[] {
+            "ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sept", "oct", "nov", "dic"
+    };
+    private static final String[] ES_US_SHORT_MONTHS = new String[] {
+            "ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"
+    };
 
     public static DateFormat create(Locale locale)
     {
@@ -28,6 +34,16 @@ public class CustomParserFactory {
         if (lang.equals(new Locale("sv","").getLanguage()))
         {
             return new CustomMonthDateFormat(SV_SHORT_MONTHS);
+        }
+
+        if (locale.equals(new Locale("es","ES")))
+        {
+            return new CustomMonthDateFormat(ES_SHORT_MONTHS);
+        }
+
+        if (locale.equals(new Locale("es","US")))
+        {
+            return new CustomMonthDateFormat(ES_US_SHORT_MONTHS);
         }
 
         if (lang.equals(new Locale("de","").getLanguage()))
