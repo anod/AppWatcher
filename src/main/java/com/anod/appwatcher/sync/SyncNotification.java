@@ -74,7 +74,7 @@ public class SyncNotification {
 
         StringBuilder sb = new StringBuilder();
         for (SyncAdapter.UpdatedApp app: updatedApps) {
-            if (app.installedVersionCode > 0 && app.versionCode != app.installedVersionCode)
+            if (app.installedVersionCode > 0 && app.versionCode > app.installedVersionCode)
             {
                 isUpdatable = true;
             }
