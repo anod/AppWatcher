@@ -38,9 +38,9 @@ public class AppWatcherApplication extends Application implements AppLog.Listene
         }
 
         AppLog.LOGGER = new FirebaseLogger();
-        AppLog.setDebug(BuildConfig.DEBUG, "AppWatcher");
+        AppLog.setDebug(true, "AppWatcher");
         AppLog.instance().setListener(this);
-        VolleyLog.setTag("AppWatcher");
+        //VolleyLog.setTag("AppWatcher");
 
         mObjectGraph = new ObjectGraph(this);
         Preferences prefs = new Preferences(this);

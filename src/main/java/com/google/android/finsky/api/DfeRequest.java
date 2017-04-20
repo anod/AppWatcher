@@ -249,71 +249,7 @@ class DfeRequest<T extends MessageNano> extends Request<Response.ResponseWrapper
         }
         return headers;
     }
-    
-    public long getServerLatencyMs() {
-        return this.mServerLatencyMs;
-    }
-    
-    @Override
-    public String getUrl() {
-        char c = '&';
-        String s = super.getUrl();
-//        final String s2 = DfeApiConfig.ipCountryOverride.get();
-//        if (!TextUtils.isEmpty((CharSequence)s2)) {
-//            final StringBuilder append = new StringBuilder().append(s);
-//            char c2;
-//            if (s.indexOf(63) != -1) {
-//                c2 = c;
-//            }
-//            else {
-//                c2 = '?';
-//            }
-//            s = append.append(c2).toString() + "ipCountryOverride=" + s2;
-//        }
-//        final String s3 = DfeApiConfig.mccMncOverride.get();
-//        if (!TextUtils.isEmpty((CharSequence)s3)) {
-//            final StringBuilder append2 = new StringBuilder().append(s);
-//            char c3;
-//            if (s.indexOf(63) != -1) {
-//                c3 = c;
-//            }
-//            else {
-//                c3 = '?';
-//            }
-//            s = append2.append(c3).toString() + "mccmncOverride=" + s3;
-//        }
-        if (SKIP_ALL_CACHES) {
-            final StringBuilder append3 = new StringBuilder().append(s);
-            char c4;
-            if (s.indexOf(63) != -1) {
-                c4 = c;
-            }
-            else {
-                c4 = '?';
-            }
-            s = append3.append(c4).toString() + "skipCache=true";
-        }
-//        if (DfeApiConfig.showStagingData.get()) {
-//            final StringBuilder append4 = new StringBuilder().append(s);
-//            char c5;
-//            if (s.indexOf(63) != -1) {
-//                c5 = c;
-//            }
-//            else {
-//                c5 = '?';
-//            }
-//            s = append4.append(c5).toString() + "showStagingData=true";
-//        }
-//        if (DfeApiConfig.prexDisabled.get()) {
-//            final StringBuilder append5 = new StringBuilder().append(s);
-//            if (s.indexOf(63) == -1) {
-//                c = '?';
-//            }
-//            s = append5.append(c).toString() + "p13n=false";
-//        }
-        return s;
-    }
-    
+
     public void handleNotifications(final Response.ResponseWrapper responseWrapper) {
 //        if (this.mApiContext.getNotificationManager() != null && responseWrapper.notification.length != 0) {
 //            final Notifications.Notification[] notification = responseWrapper.notification;
