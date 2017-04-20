@@ -1,12 +1,14 @@
 
 buildscript {
     repositories {
+        jcenter()
         mavenCentral()
         maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.3.1'
         classpath 'com.google.gms:google-services:3.0.0'
+        classpath 'com.google.firebase:firebase-plugins:1.0.5'
     }
 }
 
@@ -20,6 +22,7 @@ repositories {
 }
 
 apply plugin: 'com.android.application'
+apply plugin: 'com.google.firebase.firebase-crash'
 
 configurations.all {
     resolutionStrategy.cacheDynamicVersionsFor 10, 'minutes'
@@ -69,8 +72,8 @@ android {
         applicationId 'com.anod.appwatcher'
         minSdkVersion 15
         targetSdkVersion 24
-        versionCode 50
-        versionName '1.8.7'
+        versionCode 53
+        versionName '1.8.9'
         resValue "string", "content_authority", "com.anod.appwatcher"
 
         vectorDrawables.generatedDensities = ['xhdpi','xxxhdpi']
