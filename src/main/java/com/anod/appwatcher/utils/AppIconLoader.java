@@ -54,7 +54,6 @@ public class AppIconLoader {
         public Result load(Request request, int networkPolicy) throws IOException {
 
             String part = request.uri.getSchemeSpecificPart();
-            AppLog.d("Get Activity Info: " + part);
             ComponentName cmp = ComponentName.unflattenFromString(part);
 
             Bitmap icon = PackageManagerUtils.loadIcon(cmp, mContext.getResources().getDisplayMetrics(), mPackageManager);

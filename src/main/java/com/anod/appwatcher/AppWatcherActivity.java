@@ -31,7 +31,7 @@ public class AppWatcherActivity extends AppWatcherBaseActivity implements TextVi
     protected void onResume() {
         super.onResume();
 
-        AppLog.d("Mark updates as viewed.");
+        AppLog.d("mark updates as viewed.");
         mPreferences.markViewed(true);
     }
 

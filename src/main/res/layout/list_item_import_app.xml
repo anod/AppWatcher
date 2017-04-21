@@ -18,7 +18,8 @@
 
     <CheckedTextView
         android:id="@android:id/title"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
+        android:layout_weight="1"
         android:layout_height="match_parent"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"

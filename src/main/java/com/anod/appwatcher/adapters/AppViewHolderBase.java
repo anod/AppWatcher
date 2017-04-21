@@ -1,15 +1,10 @@
 package com.anod.appwatcher.adapters;
 
-import android.graphics.Bitmap;
-import android.net.Uri;
 import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.view.View;
-import android.widget.ImageView;
 
-import com.anod.appwatcher.AppListContentProvider;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.utils.AppIconLoader;
 import com.anod.appwatcher.utils.InstalledAppsProvider;

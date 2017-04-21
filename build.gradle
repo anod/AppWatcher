@@ -72,7 +72,7 @@ android {
         applicationId 'com.anod.appwatcher'
         minSdkVersion 15
         targetSdkVersion 24
-        versionCode 53
+        versionCode 54
         versionName '1.8.9'
         resValue "string", "content_authority", "com.anod.appwatcher"
 
