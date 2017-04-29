@@ -25,7 +25,7 @@ public class SyncScheduler {
                 .setService(SyncTaskService.class)
                 .setTag(TASK_TAG)
                 .setFlex(TEN_MINUTES_IN_SEC)
-                .setPeriod(3 * ONE_HOUR_IN_SEC)
+                .setPeriod(2 * ONE_HOUR_IN_SEC)
                 .setRequiresCharging(requiresCharging)
                 .setPersisted(true)
                 .setRequiredNetwork(Task.NETWORK_STATE_CONNECTED)

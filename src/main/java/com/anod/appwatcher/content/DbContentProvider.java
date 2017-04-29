@@ -30,6 +30,7 @@ public class DbContentProvider extends ContentProvider {
     private static final int TAG_ROW = 40;
     private static final int TAG_APPS = 50;
     private static final int TAGS_APPS = 80;
+    private static final int TAGS_APPS_COUNT = 90;
 
     private static final int ICON_ROW = 70;
 
@@ -37,6 +38,7 @@ public class DbContentProvider extends ContentProvider {
     public static final Uri APPS_TAG_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/apps/tag");
     public static final Uri TAGS_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/tags");
     public static final Uri TAGS_APPS_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/tags/apps");
+    public static final Uri TAGS_APPS_COUNT_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/tags/apps/count");
     public static final Uri ICONS_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/icons");
 
     private static final UriMatcher sURIMatcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -50,6 +52,7 @@ public class DbContentProvider extends ContentProvider {
         sURIMatcher.addURI(AUTHORITY, "tags/#", TAG_ROW);
         sURIMatcher.addURI(AUTHORITY, "tags/#/apps", TAG_APPS);
         sURIMatcher.addURI(AUTHORITY, "tags/apps", TAGS_APPS);
+        sURIMatcher.addURI(AUTHORITY, "tags/apps/count", TAGS_APPS_COUNT);
 
         sURIMatcher.addURI(AUTHORITY, "icons/#", ICON_ROW);
     }
@@ -105,6 +108,12 @@ public class DbContentProvider extends ContentProvider {
                 query.table = AppTagsTable.TABLE_NAME;
                 query.notifyUri = APPS_TAG_CONTENT_URI;
                 return query;
+            case TAGS_APPS_COUNT:
+                query.table = AppTagsTable.TABLE_NAME;
+                query.notifyUri = APPS_TAG_CONTENT_URI;
+                query.projection = new String[] { AppTagsTable.Columns.TAGID, "count() as count" };
+                query.groupBy = AppTagsTable.Columns.TAGID;
+                return query;
             case ICON_ROW:
                 query.table = AppListTable.TABLE_NAME;
                 rowId = uri.getLastPathSegment();
@@ -118,10 +127,12 @@ public class DbContentProvider extends ContentProvider {
 
     private static class Query {
         int type;
-        String table;
-        String selection;
-        String[] selectionArgs;
-        Uri notifyUri;
+        String table = null;
+        String selection = null;
+        String[] selectionArgs = null;
+        Uri notifyUri = null;
+        String groupBy = null;
+        String[] projection = null;
     }
 
     @Override
@@ -190,9 +201,13 @@ public class DbContentProvider extends ContentProvider {
             selection = query.selection;
             selectionArgs = query.selectionArgs;
         }
+        if (projection == null) {
+            projection = query.projection;
+        }
 
         SQLiteDatabase db = mDatabaseOpenHelper.getWritableDatabase();
-        Cursor cursor = queryBuilder.query(db, projection, selection, selectionArgs, null, null, sortOrder);
+        Cursor cursor = queryBuilder.query(db, projection, selection, selectionArgs, query.groupBy, null, sortOrder, null);
+
         if (cursor == null) {
             return null;
         }

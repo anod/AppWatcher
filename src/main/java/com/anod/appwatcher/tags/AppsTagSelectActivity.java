@@ -54,7 +54,7 @@ public class AppsTagSelectActivity extends ToolbarActivity implements LoaderMana
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_import_installed);
+        setContentView(R.layout.activity_tag_select);
         ButterKnife.bind(this);
         setupToolbar();
 

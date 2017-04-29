@@ -11,13 +11,14 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v4.util.SimpleArrayMap;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.text.format.DateUtils;
+import android.util.SparseIntArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -109,20 +110,20 @@ abstract public class DrawerActivity extends ToolbarActivity implements AccountC
         menu.removeGroup(1);
 
         TagsContentProviderClient tags = new TagsContentProviderClient(this);
-        TagsCursor cr = tags.queryAll();
-        if (cr == null || !cr.moveToFirst()) {
-            return;
-        }
-        cr.moveToPosition(-1);
+        SparseIntArray counts = tags.queryTagsAppsCounts();
 
+        TagsCursor cr = tags.queryAll();
+        cr.moveToPosition(-1);
         while (cr.moveToNext()) {
             Tag tag = cr.getTag();
+            int count = counts.get(tag.id);
             MenuItem item = menu.add(1, tag.id, tag.id, tag.name);
             item.setActionView(R.layout.drawer_tag_indicator);
-            ImageView iv = (ImageView) item.getActionView();
+            TextView tagIndicator = (TextView) item.getActionView().findViewById(android.R.id.text1);
             Drawable d = ResourcesCompat.getDrawable(getResources(), R.drawable.circular_color, null);
             DrawableCompat.setTint(d, tag.color);
-            iv.setImageDrawable(d);
+            tagIndicator.setBackgroundDrawable(d);
+            tagIndicator.setText(count > 100 ? "99+" : "" + count);
             item.setIntent(AppsTagActivity.createTagIntent(tag, this));
         }
         cr.close();

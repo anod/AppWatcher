@@ -4,6 +4,8 @@ import android.content.ContentProviderClient;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.RemoteException;
+import android.support.v4.util.SimpleArrayMap;
+import android.util.SparseIntArray;
 
 import com.anod.appwatcher.AppListContentProvider;
 import com.anod.appwatcher.model.schema.TagsTable;
@@ -32,18 +34,31 @@ public class TagsContentProviderClient {
         return query(DEFAULT_SORT_ORDER, null, null);
     }
 
+    public SparseIntArray queryTagsAppsCounts()
+    {
+        SparseIntArray counts = new SparseIntArray();
+        try {
+            Cursor cr = mContentProviderClient.query(AppListContentProvider.TAGS_APPS_COUNT_CONTENT_URI, null, null, null, null);
+            cr = cr == null ? new NullCursor() : cr;
+            cr.moveToPosition(-1);
+            while (cr.moveToNext()) {
+                counts.put(cr.getInt(0), cr.getInt(1));
+            }
+            cr.close();
+        } catch (RemoteException e) {
+            AppLog.e(e);
+        }
+        return counts;
+    }
+
     public TagsCursor query(String sortOrder, String selection, String[] selectionArgs) {
-        Cursor cr;
+        Cursor cr = null;
         try {
             cr = mContentProviderClient.query(AppListContentProvider.TAGS_CONTENT_URI,
                     TagsTable.PROJECTION, selection, selectionArgs, sortOrder
             );
         } catch (RemoteException e) {
             AppLog.e(e.getMessage());
-            return null;
-        }
-        if (cr == null) {
-            return null;
         }
         return new TagsCursor(cr);
     }
