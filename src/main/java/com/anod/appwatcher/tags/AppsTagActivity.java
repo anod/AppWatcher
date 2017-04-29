@@ -2,13 +2,19 @@ package com.anod.appwatcher.tags;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.TabLayout;
+import android.support.v7.graphics.Palette;
 import android.view.MenuItem;
 
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.model.Filters;
 import com.anod.appwatcher.model.Tag;
 import com.anod.appwatcher.ui.AppWatcherBaseActivity;
+
+import java.util.ArrayList;
 
 /**
  * @author algavris
@@ -31,6 +37,16 @@ public class AppsTagActivity extends AppWatcherBaseActivity {
         mTag = getIntentExtras().getParcelable(EXTRA_TAG);
         assert mTag != null;
         super.onCreate(savedInstanceState);
+
+        AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.appbar);
+        appBarLayout.setBackgroundColor(mTag.color);
+
+        float[] hsv = new float[3];
+        Color.colorToHSV(mTag.color, hsv);
+        hsv[2] *= 0.6f;
+        int dark = Color.HSVToColor(hsv);
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        tabLayout.setSelectedTabIndicatorColor(dark);
 
         setTitle(mTag.name);
     }
