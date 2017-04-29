@@ -23,19 +23,19 @@ public class ImportTask extends AsyncTask<Uri, Void, Integer> {
 
     public static void showImportFinishToast(Context context, int code) {
         switch (code) {
-            case ListBackupManager.RESULT_OK:
+            case DbBackupManager.RESULT_OK:
                 Toast.makeText(context, context.getString(R.string.import_done), Toast.LENGTH_SHORT).show();
                 break;
-            case ListBackupManager.ERROR_STORAGE_NOT_AVAILABLE:
+            case DbBackupManager.ERROR_STORAGE_NOT_AVAILABLE:
                 Toast.makeText(context, context.getString(R.string.external_storage_not_available), Toast.LENGTH_SHORT).show();
                 break;
-            case ListBackupManager.ERROR_DESERIALIZE:
+            case DbBackupManager.ERROR_DESERIALIZE:
                 Toast.makeText(context, context.getString(R.string.restore_deserialize_failed), Toast.LENGTH_SHORT).show();
                 break;
-            case ListBackupManager.ERROR_FILE_READ:
+            case DbBackupManager.ERROR_FILE_READ:
                 Toast.makeText(context, context.getString(R.string.failed_to_read_file), Toast.LENGTH_SHORT).show();
                 break;
-            case ListBackupManager.ERROR_FILE_NOT_EXIST:
+            case DbBackupManager.ERROR_FILE_NOT_EXIST:
                 Toast.makeText(context, context.getString(R.string.file_not_exist), Toast.LENGTH_SHORT).show();
                 break;
         }
@@ -47,11 +47,11 @@ public class ImportTask extends AsyncTask<Uri, Void, Integer> {
 
     protected Integer doInBackground(Uri... sources) {
         Uri srcUri = sources[0];
-        ListBackupManager mBackupManager = new ListBackupManager(mContext);
+        DbBackupManager mBackupManager = new DbBackupManager(mContext);
         if (srcUri.getScheme().equals(ContentResolver.SCHEME_FILE))
         {
             int res = validateFileDestination(srcUri);
-            if (res != ListBackupManager.RESULT_OK) {
+            if (res != DbBackupManager.RESULT_OK) {
                 return res;
             }
         }
@@ -60,17 +60,17 @@ public class ImportTask extends AsyncTask<Uri, Void, Integer> {
 
     private int validateFileDestination(Uri destUri) {
         if (!checkMediaReadable()) {
-            return ListBackupManager.ERROR_STORAGE_NOT_AVAILABLE;
+            return DbBackupManager.ERROR_STORAGE_NOT_AVAILABLE;
         }
 
         File dataFile = new File(destUri.getPath());
         if (!dataFile.exists()) {
-            return ListBackupManager.ERROR_FILE_NOT_EXIST;
+            return DbBackupManager.ERROR_FILE_NOT_EXIST;
         }
         if (!dataFile.canRead()) {
-            return ListBackupManager.ERROR_FILE_READ;
+            return DbBackupManager.ERROR_FILE_READ;
         }
-        return ListBackupManager.RESULT_OK;
+        return DbBackupManager.RESULT_OK;
     }
 
     /**

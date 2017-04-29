@@ -3,11 +3,12 @@ package com.anod.appwatcher.backup.gdrive;
 import android.content.Context;
 import android.support.v4.util.SimpleArrayMap;
 
-import com.anod.appwatcher.backup.AppListReaderIterator;
-import com.anod.appwatcher.backup.AppListWriter;
+import com.anod.appwatcher.backup.DbJsonReader;
+import com.anod.appwatcher.backup.DbJsonWriter;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.content.DbContentProviderClient;
-import com.anod.appwatcher.content.AppListCursor;
+import com.anod.appwatcher.model.AppTag;
+import com.anod.appwatcher.model.Tag;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.drive.Drive;
 import com.google.android.gms.drive.DriveApi;
@@ -108,18 +109,13 @@ public class SyncConnectedWorker {
 
         DriveContents contents = contentsResult.getDriveContents();
         OutputStream outputStream = contents.getOutputStream();
-        AppListWriter writer = new AppListWriter();
-        AppListCursor listCursor = cr.queryAllSorted(false);
+        DbJsonWriter writer = new DbJsonWriter();
         BufferedWriter outWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
         try {
-            writer.writeJSON(outWriter, listCursor);
+            writer.write(outWriter, cr);
         } catch (IOException e) {
-            listCursor.close();
             AppLog.e(e);
         } finally {
-            if (listCursor != null) {
-                listCursor.close();
-            }
             try {
                 outputStream.close();
             } catch (IOException e) {
@@ -140,32 +136,47 @@ public class SyncConnectedWorker {
         return new InputStreamReader(inputStream, "UTF-8");
     }
 
-    private void insertRemoteItems(DriveId driveId, DbContentProviderClient cr) throws Exception {
+    private void insertRemoteItems(DriveId driveId, final DbContentProviderClient cr) throws Exception {
         DriveFile file = driveId.asDriveFile();
         DriveApi.DriveContentsResult contentsResult = file.open(mGoogleApiClient, DriveFile.MODE_READ_ONLY, null).await();
         if (!contentsResult.getStatus().isSuccess()) {
             throw new Exception("Error read file : " + contentsResult.getStatus().getStatusMessage());
         }
-        DriveContents contents = contentsResult.getDriveContents();
-        InputStreamReader driveFileReader = getFileInputStream(contents);
+        final DriveContents contents = contentsResult.getDriveContents();
+        final InputStreamReader driveFileReader = getFileInputStream(contents);
 
         AppLog.d("[GDrive] Sync remote list " + APPLIST_JSON);
 
         // Add missing remote entries
         BufferedReader driveBufferedReader = new BufferedReader(driveFileReader);
-        AppListReaderIterator driveAppsIterator = new AppListReaderIterator(driveBufferedReader);
-        SimpleArrayMap<String, Integer> currentIds = cr.queryPackagesMap(true);
-        AppLog.d("[GDrive] Read remote apps " + APPLIST_JSON);
-        while (driveAppsIterator.hasNext()) {
-            AppInfo app = driveAppsIterator.next();
-            AppLog.d("[GDrive] Read app: " + app.packageName);
-            if (!currentIds.containsKey(app.packageName)) {
-                cr.insert(app);
-            }
-        }
+        DbJsonReader jsonReader = new DbJsonReader();
 
-        driveFileReader.close();
-        contents.discard(mGoogleApiClient);
+        final SimpleArrayMap<String, Integer> currentIds = cr.queryPackagesMap(true);
+        jsonReader.read(driveBufferedReader, new DbJsonReader.OnReadListener() {
+            @Override
+            public void onAppRead(AppInfo app) {
+                AppLog.d("[GDrive] Read app: " + app.packageName);
+                if (!currentIds.containsKey(app.packageName)) {
+                    cr.insert(app);
+                }
+            }
+
+            @Override
+            public void onTagRead(Tag tag) {
+
+            }
+
+            @Override
+            public void onAppTagRead(AppTag appTag) {
+
+            }
+
+            @Override
+            public void onFinish() throws IOException {
+                driveFileReader.close();
+                contents.discard(mGoogleApiClient);
+            }
+        });
     }
 
     private DriveId retrieveFileDriveId() throws Exception {
@@ -186,7 +197,6 @@ public class SyncConnectedWorker {
                 .getAppFolder(mGoogleApiClient)
                 .queryChildren(mGoogleApiClient, query)
                 .await();
-
 
         if (!metadataBufferResult.getStatus().isSuccess()) {
             throw new Exception("Problem retrieving " + APPLIST_JSON + " : " + metadataBufferResult.getStatus().getStatusMessage());
@@ -223,6 +233,5 @@ public class SyncConnectedWorker {
         }
         return driveFileResult.getDriveFile().getDriveId();
     }
-
 
 }

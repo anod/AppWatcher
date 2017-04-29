@@ -43,10 +43,10 @@ public class AppTagsTable {
                     Columns.TAGID + " INTEGER" +
                     ") ";
 
-    public static ContentValues createContentValues(String appId, Tag tag) {
+    public static ContentValues createContentValues(String appId, int tagId) {
         ContentValues values = new ContentValues();
         values.put(Columns.APPID, appId);
-        values.put(Columns.TAGID, tag.id);
+        values.put(Columns.TAGID, tagId);
         return values;
     }
 }

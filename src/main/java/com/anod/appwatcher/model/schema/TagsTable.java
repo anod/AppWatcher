@@ -39,6 +39,9 @@ public class TagsTable {
 
     public static ContentValues createContentValues(Tag tag) {
         ContentValues values = new ContentValues();
+        if (tag.id > 0) {
+            values.put(Columns._ID, tag.id);
+        }
         values.put(Columns.NAME, tag.name);
         values.put(Columns.COLOR, tag.color);
         return values;

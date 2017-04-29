@@ -61,7 +61,7 @@ class TagAppsManager {
         }
 
         DbContentProviderClient cr = new DbContentProviderClient(mContext);
-        boolean result = cr.addAppsToTag(appIds, mTag);
+        boolean result = cr.addAppsToTag(appIds, mTag.id);
         cr.close();
 
         mContext.getContentResolver().notifyChange(DbContentProvider.APPS_TAG_CONTENT_URI, null);

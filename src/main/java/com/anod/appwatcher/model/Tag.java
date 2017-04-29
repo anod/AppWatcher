@@ -11,12 +11,13 @@ import android.support.annotation.ColorInt;
  */
 
 public class Tag implements Parcelable {
+    public static final int DEFAULT_COLOR = 0xFF9E9E9E;
     public final int id;
     public final String name;
     public final @ColorInt int color;
 
     public Tag(String name) {
-        this(-1, name, 0xFF9E9E9E);
+        this(-1, name, DEFAULT_COLOR);
     }
 
     public Tag(int id, String name, @ColorInt int color) {

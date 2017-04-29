@@ -13,12 +13,14 @@ import android.support.v4.util.SimpleArrayMap;
 import com.anod.appwatcher.AppListContentProvider;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppInfoMetadata;
+import com.anod.appwatcher.model.AppTag;
 import com.anod.appwatcher.model.Tag;
 import com.anod.appwatcher.model.schema.AppListTable;
 import com.anod.appwatcher.model.schema.AppTagsTable;
 import com.anod.appwatcher.model.schema.TagsTable;
 import com.anod.appwatcher.utils.BitmapUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import info.anodsplace.android.log.AppLog;
@@ -35,7 +37,6 @@ public class DbContentProviderClient {
                     + " COLLATE LOCALIZED ASC";
 
     private final ContentProviderClient mContentProviderClient;
-
 
     public DbContentProviderClient(Context context) {
         mContentProviderClient = context.getContentResolver().acquireContentProviderClient(AppListContentProvider.AUTHORITY);
@@ -81,18 +82,14 @@ public class DbContentProviderClient {
         return cr.getCount();
     }
 
-    public AppListCursor queryApps(String sortOrder, String selection, String[] selectionArgs) {
-        Cursor cr;
+    private AppListCursor queryApps(String sortOrder, String selection, String[] selectionArgs) {
+        Cursor cr = null;
         try {
             cr = mContentProviderClient.query(DbContentProvider.APPS_CONTENT_URI,
                     AppListTable.PROJECTION, selection, selectionArgs, sortOrder
             );
         } catch (RemoteException e) {
             AppLog.e(e.getMessage());
-            return null;
-        }
-        if (cr == null) {
-            return null;
         }
         return new AppListCursor(cr);
     }
@@ -230,16 +227,17 @@ public class DbContentProviderClient {
         return icon;
     }
 
-    public void discardAll()
-    {
+    public void discardAll() {
         try {
             mContentProviderClient.delete(AppListContentProvider.APPS_CONTENT_URI, null, null);
+            mContentProviderClient.delete(AppListContentProvider.TAGS_CONTENT_URI, null, null);
+            mContentProviderClient.delete(AppListContentProvider.TAGS_APPS_CONTENT_URI, null, null);
         } catch (RemoteException e) {
             AppLog.e(e);
         }
     }
 
-    public void addList(List<AppInfo> appList) {
+    public void addApps(List<AppInfo> appList) {
         SimpleArrayMap<String, Integer> currentIds = queryPackagesMap(true);
         for (AppInfo app : appList) {
             Integer rowId = currentIds.get(app.packageName);
@@ -252,28 +250,23 @@ public class DbContentProviderClient {
         }
     }
 
-    public Tag queryTagByName(String tagName) {
+    public TagsCursor queryTags() {
         try {
             Cursor cr = mContentProviderClient.query(
                     DbContentProvider.TAGS_CONTENT_URI,
-                    TagsTable.PROJECTION,
-                    TagsTable.Columns.NAME + " = ?", new String[]{String.valueOf(tagName)},
-                    null
+                    TagsTable.PROJECTION, null, null, null
             );
-            if (cr == null || cr.getCount() == 0) {
-                return null;
-            }
-            cr.moveToPosition(-1);
-            Tag tag = null;
-            if (cr.moveToNext()) {
-                tag = (new TagsCursor(cr)).getTag();
-            }
-            cr.close();
-            return tag;
+            return new TagsCursor(cr);
         } catch (RemoteException e) {
             AppLog.e(e);
         }
         return null;
+    }
+
+    public void addTags(List<Tag> tags) {
+        for (Tag tag: tags) {
+            createTag(tag);
+        }
     }
 
     public Uri createTag(@NonNull Tag tag) {
@@ -308,13 +301,26 @@ public class DbContentProviderClient {
         }
     }
 
-    public boolean addAppsToTag(@NonNull List<String> appIds,@NonNull Tag tag)
+    public Cursor queryAppTags() {
+        try {
+            Cursor cr = mContentProviderClient.query(
+                    DbContentProvider.TAGS_APPS_CONTENT_URI,
+                    AppTagsTable.PROJECTION, null, null, null
+            );
+            return cr == null ? new NullCursor() : cr;
+        } catch (RemoteException e) {
+            AppLog.e(e);
+        }
+        return null;
+    }
+
+    public boolean addAppsToTag(@NonNull List<String> appIds,int tagId)
     {
         try {
-            Uri appsTagUri = DbContentProvider.TAGS_CONTENT_URI.buildUpon().appendPath(String.valueOf(tag.id)).appendPath("apps").build();
+            Uri appsTagUri = DbContentProvider.TAGS_CONTENT_URI.buildUpon().appendPath(String.valueOf(tagId)).appendPath("apps").build();
             mContentProviderClient.delete(appsTagUri, null, null);
             for (String appId: appIds) {
-                ContentValues values = AppTagsTable.createContentValues(appId, tag);
+                ContentValues values = AppTagsTable.createContentValues(appId, tagId);
                 mContentProviderClient.insert(appsTagUri, values);
             }
             return true;
@@ -322,5 +328,24 @@ public class DbContentProviderClient {
             AppLog.e(e);
         }
         return false;
+    }
+
+    public void addAppTags(List<AppTag> appTags) {
+        SimpleArrayMap<Integer, List<String>> tagApps = new SimpleArrayMap<>();
+        for (AppTag appTag: appTags) {
+            List<String> list = tagApps.get(appTag.tagId);
+            if (list == null)
+            {
+                list = new ArrayList<String>();
+                tagApps.put(appTag.tagId, list);
+            }
+            list.add(appTag.appId);
+        }
+
+        for (int i = 0; i < tagApps.size(); i++) {
+            int tagId = tagApps.keyAt(i);
+            List<String> list = tagApps.valueAt(i);
+            addAppsToTag(list, tagId);
+        }
     }
 }

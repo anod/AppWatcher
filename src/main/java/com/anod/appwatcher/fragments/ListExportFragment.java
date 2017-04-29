@@ -17,7 +17,7 @@ import android.widget.Toast;
 import com.anod.appwatcher.ListExportActivity;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.backup.ImportTask;
-import com.anod.appwatcher.backup.ListBackupManager;
+import com.anod.appwatcher.backup.DbBackupManager;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ public class ListExportFragment extends ListFragment implements ImportTask.Liste
 	private ImportClickListener mRestoreListener;
 	private DeleteClickListener mDeleteListener;
 
-	private ListBackupManager mBackupManager;
+	private DbBackupManager mBackupManager;
 	private Context mContext;
 
 	@Override
@@ -120,7 +120,7 @@ public class ListExportFragment extends ListFragment implements ImportTask.Liste
 
 			TextView titleView = (TextView) v.findViewById(android.R.id.title);
 			String name = entry.getName();
-			name = name.substring(0, name.lastIndexOf(ListBackupManager.FILE_EXT_DAT));
+			name = name.substring(0, name.lastIndexOf(DbBackupManager.FILE_EXT_DAT));
 			titleView.setTag(name);
 			titleView.setText(name);
 
@@ -141,7 +141,7 @@ public class ListExportFragment extends ListFragment implements ImportTask.Liste
 	private class ImportClickListener implements View.OnClickListener {
 		@Override
 		public void onClick(View v) {
-			File file = ListBackupManager.getBackupFile((String) v.getTag());
+			File file = DbBackupManager.getBackupFile((String) v.getTag());
 			Uri uri = Uri.fromFile(file);
 			new ImportTask(getContext(), ListExportFragment.this).execute(uri);
 		}

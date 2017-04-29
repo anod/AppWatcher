@@ -18,7 +18,7 @@ class CursorWrapperCrossProcess extends CursorWrapper implements CrossProcessCur
      * @param cursor The underlying cursor to wrap.
      */
     CursorWrapperCrossProcess(Cursor cursor) {
-        super(cursor);
+        super(cursor == null ? new NullCursor() : cursor);
     }
 
     protected void finalize() throws Throwable {

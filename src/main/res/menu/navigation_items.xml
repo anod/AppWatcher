@@ -21,7 +21,6 @@
         <item
             android:id="@+id/menu_act_tags"
             android:icon="@drawable/ic_label_black_24px"
-            android:visible="false"
             android:title="@string/tags">
         </item>
 

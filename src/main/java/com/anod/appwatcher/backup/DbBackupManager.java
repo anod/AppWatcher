@@ -6,9 +6,7 @@ import android.os.Environment;
 import android.support.annotation.NonNull;
 
 import com.android.util.MalformedJsonException;
-import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.content.DbContentProviderClient;
-import com.anod.appwatcher.content.AppListCursor;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -22,7 +20,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 import info.anodsplace.android.log.AppLog;
@@ -32,7 +29,7 @@ import info.anodsplace.android.log.AppLog;
  *
  * @author alex
  */
-public class ListBackupManager {
+public class DbBackupManager {
     private static final String DIR_BACKUP = "/data/com.anod.appwatcher/backup";
 
     public static final String FILE_EXT_DAT = ".json";
@@ -58,7 +55,7 @@ public class ListBackupManager {
 
     private Context mContext;
 
-    public ListBackupManager(Context context) {
+    public DbBackupManager(Context context) {
         mContext = context;
     }
 
@@ -72,8 +69,6 @@ public class ListBackupManager {
 
     /**
      * List of files in the backup directory
-     *
-     * @return
      */
     public File[] getFileList() {
         File saveDir = getDefaultBackupDir();
@@ -97,32 +92,26 @@ public class ListBackupManager {
             return ERROR_FILE_WRITE;
         }
 
-        if (!writeList(outputStream)) {
+        if (!writeDb(outputStream)) {
             return ERROR_FILE_WRITE;
         }
         return RESULT_OK;
     }
 
-    boolean writeList(@NonNull  OutputStream outputStream) {
+    boolean writeDb(@NonNull  OutputStream outputStream) {
         AppLog.d("Write into: " + outputStream.toString());
-        AppListWriter writer = new AppListWriter();
-        DbContentProviderClient cr = new DbContentProviderClient(mContext);
-        AppListCursor listCursor = cr.queryAllSorted(true);
+        DbJsonWriter writer = new DbJsonWriter();
+        DbContentProviderClient client = new DbContentProviderClient(mContext);
         try {
-            synchronized (ListBackupManager.sDataLock) {
+            synchronized (DbBackupManager.sDataLock) {
                 BufferedWriter buf = new BufferedWriter(new OutputStreamWriter(outputStream));
-                writer.writeJSON(buf, listCursor);
+                writer.write(buf, client);
             }
         } catch (IOException e) {
             AppLog.e(e);
-            listCursor.close();
-            cr.close();
             return false;
         } finally {
-            if (listCursor != null && !listCursor.isClosed()) {
-                listCursor.close();
-            }
-            cr.close();
+            client.close();
         }
         return true;
     }
@@ -137,12 +126,12 @@ public class ListBackupManager {
         if (inputStream == null) {
             return ERROR_FILE_READ;
         }
-        AppListReader reader = new AppListReader();
-        List<AppInfo> appList;
+        DbJsonReader reader = new DbJsonReader();
+        DbJsonReader.Container container;
         try {
-            synchronized (ListBackupManager.sDataLock) {
+            synchronized (DbBackupManager.sDataLock) {
                 BufferedReader buf = new BufferedReader(new InputStreamReader(inputStream));
-                appList = reader.readJsonList(buf);
+                container = reader.read(buf);
             }
         } catch (MalformedJsonException e) {
             AppLog.e(e);
@@ -151,17 +140,22 @@ public class ListBackupManager {
             AppLog.e(e);
             return ERROR_FILE_READ;
         }
-        if (appList != null && appList.size() > 0) {
+        if (container != null) {
             DbContentProviderClient cr = new DbContentProviderClient(mContext);
-            cr.discardAll();
-            cr.addList(appList);
+            if (container.apps.size() > 0) {
+                cr.discardAll();
+                cr.addApps(container.apps);
+                cr.addTags(container.tags);
+                cr.addAppTags(container.appTags);
+            }
+
             cr.close();
         }
         return RESULT_OK;
     }
 
     public static String generateFileName() {
-        SimpleDateFormat sdf = new SimpleDateFormat(ListBackupManager.DATE_FORMAT_FILENAME, Locale.US);
+        SimpleDateFormat sdf = new SimpleDateFormat(DbBackupManager.DATE_FORMAT_FILENAME, Locale.US);
         return sdf.format(new Date(System.currentTimeMillis())) + FILE_EXT_DAT;
     }
 

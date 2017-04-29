@@ -30,11 +30,11 @@ public class ExportTask extends AsyncTask<Uri, Void, Integer> {
 
     protected Integer doInBackground(Uri... dest) {
         Uri destUri = dest[0];
-        ListBackupManager mBackupManager = new ListBackupManager(mContext);
+        DbBackupManager mBackupManager = new DbBackupManager(mContext);
         if (destUri.getScheme().equals(ContentResolver.SCHEME_FILE))
         {
             int res = validateFileDestination(destUri);
-            if (res != ListBackupManager.RESULT_OK) {
+            if (res != DbBackupManager.RESULT_OK) {
                 return res;
             }
         }
@@ -43,7 +43,7 @@ public class ExportTask extends AsyncTask<Uri, Void, Integer> {
 
     private int validateFileDestination(Uri destUri) {
         if (!checkMediaWritable()) {
-            return ListBackupManager.ERROR_STORAGE_NOT_AVAILABLE;
+            return DbBackupManager.ERROR_STORAGE_NOT_AVAILABLE;
         }
 
         File destFile = new File(destUri.getPath());
@@ -51,7 +51,7 @@ public class ExportTask extends AsyncTask<Uri, Void, Integer> {
             destFile.getParentFile().mkdirs();
         }
 
-        return ListBackupManager.RESULT_OK;
+        return DbBackupManager.RESULT_OK;
     }
 
     /**

@@ -24,15 +24,19 @@ public class DbContentProvider extends ContentProvider {
 
     private static final int APP_LIST = 10;
     private static final int APP_ROW = 20;
+    private static final int APP_TAG_LIST = 60;
+
     private static final int TAG_LIST = 30;
     private static final int TAG_ROW = 40;
     private static final int TAG_APPS = 50;
-    private static final int APP_TAG_LIST = 60;
+    private static final int TAGS_APPS = 80;
+
     private static final int ICON_ROW = 70;
 
     public static final Uri APPS_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/apps");
     public static final Uri APPS_TAG_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/apps/tag");
     public static final Uri TAGS_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/tags");
+    public static final Uri TAGS_APPS_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/tags/apps");
     public static final Uri ICONS_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/icons");
 
     private static final UriMatcher sURIMatcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -45,6 +49,7 @@ public class DbContentProvider extends ContentProvider {
         sURIMatcher.addURI(AUTHORITY, "tags", TAG_LIST);
         sURIMatcher.addURI(AUTHORITY, "tags/#", TAG_ROW);
         sURIMatcher.addURI(AUTHORITY, "tags/#/apps", TAG_APPS);
+        sURIMatcher.addURI(AUTHORITY, "tags/apps", TAGS_APPS);
 
         sURIMatcher.addURI(AUTHORITY, "icons/#", ICON_ROW);
     }
@@ -94,6 +99,10 @@ public class DbContentProvider extends ContentProvider {
                 String tagId = uri.getPathSegments().get(uri.getPathSegments().size() - 2);
                 query.selection = AppTagsTable.Columns.TAGID + "=?";
                 query.selectionArgs = new String[]{tagId};
+                query.notifyUri = APPS_TAG_CONTENT_URI;
+                return query;
+            case TAGS_APPS:
+                query.table = AppTagsTable.TABLE_NAME;
                 query.notifyUri = APPS_TAG_CONTENT_URI;
                 return query;
             case ICON_ROW:

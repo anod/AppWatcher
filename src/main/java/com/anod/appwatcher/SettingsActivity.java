@@ -18,7 +18,7 @@ import com.anod.appwatcher.accounts.AccountChooser;
 import com.anod.appwatcher.backup.ExportTask;
 import com.anod.appwatcher.backup.GDriveSync;
 import com.anod.appwatcher.backup.ImportTask;
-import com.anod.appwatcher.backup.ListBackupManager;
+import com.anod.appwatcher.backup.DbBackupManager;
 import com.anod.appwatcher.fragments.AccountChooserFragment;
 import com.anod.appwatcher.model.DbOpenHelper;
 import com.anod.appwatcher.sync.SyncScheduler;
@@ -26,7 +26,6 @@ import com.anod.appwatcher.ui.SettingsActionBarActivity;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
@@ -73,15 +72,15 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
         AppLog.d("Code: "+code);
         setProgressVisibility(false);
         Resources r = getResources();
-        if (code == ListBackupManager.RESULT_OK) {
+        if (code == DbBackupManager.RESULT_OK) {
             Toast.makeText(this, r.getString(R.string.export_done), Toast.LENGTH_SHORT).show();
             return;
         }
         switch (code) {
-            case ListBackupManager.ERROR_STORAGE_NOT_AVAILABLE:
+            case DbBackupManager.ERROR_STORAGE_NOT_AVAILABLE:
                 Toast.makeText(this, r.getString(R.string.external_storage_not_available), Toast.LENGTH_SHORT).show();
                 break;
-            case ListBackupManager.ERROR_FILE_WRITE:
+            case DbBackupManager.ERROR_FILE_WRITE:
                 Toast.makeText(this, r.getString(R.string.failed_to_write_file), Toast.LENGTH_SHORT).show();
                 break;
         }
@@ -208,12 +207,12 @@ public class SettingsActivity extends SettingsActionBarActivity implements Expor
 
             if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-                Uri uri = Uri.parse(ListBackupManager.getDefaultBackupDir().getAbsolutePath());
+                Uri uri = Uri.parse(DbBackupManager.getDefaultBackupDir().getAbsolutePath());
                 intent.setDataAndType(uri, "application/json");
-                intent.putExtra(Intent.EXTRA_TITLE, "appwatcher-" + ListBackupManager.generateFileName());
+                intent.putExtra(Intent.EXTRA_TITLE, "appwatcher-" + DbBackupManager.generateFileName());
                 startActivityForResult(intent, REQUEST_BACKUP_DEST);
             } else {
-                File backupFile = ListBackupManager.generateBackupFile();
+                File backupFile = DbBackupManager.generateBackupFile();
                 new ExportTask(this, this).execute(Uri.fromFile(backupFile));
             }
 
