@@ -82,7 +82,7 @@ public class AppWatcherListFragment extends Fragment implements
         return frag;
     }
 
-    public interface SectionProvider {
+    protected interface SectionProvider {
         void fillAdapters(MergeRecyclerAdapter adapter, Context context, InstalledAppsProvider installedApps, AppViewHolder.OnClickListener clickListener);
         Loader<Cursor> createLoader(Context context, String titleFilter, int sortId, InstalledFilter filter, Tag tag);
         void loadFinished(MergeRecyclerAdapter adapter, Loader<Cursor> loader, Cursor data);

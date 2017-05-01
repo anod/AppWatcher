@@ -225,7 +225,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
 
     private void setDefaultIcon()
     {
-        Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_android_black_24dp);
+        Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_notifications_black_24dp);
         mBackground.setVisibility(View.VISIBLE);
         applyColor(ContextCompat.getColor(this, R.color.theme_primary));
         mAppIcon.setImageBitmap(icon);

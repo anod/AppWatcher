@@ -34,6 +34,12 @@
 
     <style name="AppTheme.Main" parent="AppTheme.Base" />
 
+    <style name="AppTheme.Neutral" parent="AppTheme.Base">
+        <item name="colorPrimary">@color/neutral_theme_primary</item>
+        <item name="colorPrimaryDark">@color/neutral_theme_primary_dark</item>
+        <item name="colorAccent">@color/neutral_theme_accent</item>
+    </style>
+
     <style name="ActionButton" parent="Widget.AppCompat.ActionButton" />
 
     <style name="ListHeader">

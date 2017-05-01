@@ -1,13 +1,11 @@
 package com.anod.appwatcher.tags;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.anod.appwatcher.MarketSearchActivity;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.fragments.AppWatcherListFragment;
 import com.anod.appwatcher.model.Tag;

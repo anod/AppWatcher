@@ -3,11 +3,13 @@ package com.anod.appwatcher.tags;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v7.graphics.Palette;
 import android.view.MenuItem;
+import android.view.Window;
 
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.model.Filters;
@@ -47,6 +49,9 @@ public class AppsTagActivity extends AppWatcherBaseActivity {
         int dark = Color.HSVToColor(hsv);
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setSelectedTabIndicatorColor(dark);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().setStatusBarColor(dark);
+        }
 
         setTitle(mTag.name);
     }

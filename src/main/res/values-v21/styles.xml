@@ -21,4 +21,21 @@
         <item name="android:statusBarColor">@color/theme_primary_dark</item>
     </style>
 
+    <style name="AppTheme.Neutral" parent="AppTheme.Base">
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@color/neutral_theme_primary_dark</item>
+
+        <item name="colorPrimary">@color/neutral_theme_primary</item>
+        <item name="colorPrimaryDark">@color/neutral_theme_primary_dark</item>
+        <item name="colorAccent">@color/neutral_theme_accent</item>
+    </style>
+
+    <style name="AppTheme.Dialog" parent="@style/Theme.AppCompat.DayNight.Dialog">
+        <!-- Set AppCompat’s color theming attrs -->
+        <item name="colorPrimary">@color/theme_primary</item>
+        <item name="colorPrimaryDark">@color/theme_primary_dark</item>
+        <item name="colorAccent">@color/theme_accent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="windowNoTitle">true</item>
+    </style>
 </resources>

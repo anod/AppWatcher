@@ -3,7 +3,7 @@
     <string name="app_name">App Watcher</string>
     <string name="menu_add">Add</string>
     <string name="menu_refresh">Refresh</string>
-    <string name="failed_gain_access">Please select account and allow access. This required in order to communicate with Google Play Store.</string>
+    <string name="failed_gain_access">Please allow access and select an account. This required in order to communicate with Google Play Store.</string>
     <string name="search_action">Search</string>
     <string name="search_for_app">Search for an application and click on it to add to the watch list.\n( Tip: you can add apps directly from Play Store using \"Share\" button )</string>
     <string name="loading">Loading…</string>
@@ -99,7 +99,6 @@
     <string name="version_text">%1$s (%2$d)</string>
     <string name="menu_requires_charging">Requires charging</string>
     <string name="sort">Sort</string>
-    <string name="allow_access_to_accounts">Allow access to list of you Google accounts</string>
     <string name="allow">Allow</string>
     <string name="settings_notifications">Notifications</string>
     <string name="uptodate_summary">Show notification if the app is installed and already updated.</string>

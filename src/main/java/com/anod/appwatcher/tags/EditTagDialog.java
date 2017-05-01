@@ -48,7 +48,7 @@ public class EditTagDialog extends DialogFragment implements ColorPickerSwatch.O
         }
         frag.setArguments(args);
 
-        frag.setStyle(STYLE_NO_TITLE, 0);
+        frag.setStyle(STYLE_NO_TITLE, R.style.AppTheme_Dialog);
         return frag;
     }
 

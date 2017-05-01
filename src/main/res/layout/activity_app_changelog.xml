@@ -29,7 +29,7 @@
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:layout_marginLeft="16dp"
-                    android:src="@drawable/ic_android_black_24dp" />
+                    android:src="@drawable/ic_notifications_black_24dp" />
 
                 <TextView
                     android:id="@android:id/title"

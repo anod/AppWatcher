@@ -76,7 +76,7 @@ public class AccountChooserFragment extends DialogFragment implements DialogInte
 
         if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.GET_ACCOUNTS) != PackageManager.PERMISSION_GRANTED)
         {
-            builder.setMessage(R.string.allow_access_to_accounts);
+            builder.setMessage(R.string.failed_gain_access);
             builder.setPositiveButton(R.string.allow, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     ActivityCompat.requestPermissions(

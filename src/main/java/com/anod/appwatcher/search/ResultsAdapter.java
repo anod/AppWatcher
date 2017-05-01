@@ -64,7 +64,7 @@ public abstract class ResultsAdapter extends RecyclerView.Adapter<ResultsAppView
         String imageUrl = doc.getIconUrl();
 
         Picasso.with(mContext).load(imageUrl)
-                .placeholder(R.drawable.ic_android_black_24dp)
+                .placeholder(R.drawable.ic_notifications_black_24dp)
                 .into(holder.icon);
 
         boolean isInstalled = mInstalledAppsProvider.getInfo(packageName).isInstalled();

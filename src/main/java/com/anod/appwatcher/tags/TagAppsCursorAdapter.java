@@ -43,7 +43,7 @@ class TagAppsCursorAdapter extends RecyclerViewCursorAdapter<TagAppsCursorAdapte
             this.title.setText(app.title);
             this.title.setChecked(mManager.isSelected(app.getAppId()));
             this.itemView.findViewById(android.R.id.content).setOnClickListener(this);
-            mIconLoader.loadAppIntoImageView(app, this.icon, R.drawable.ic_android_black_24dp);
+            mIconLoader.loadAppIntoImageView(app, this.icon, R.drawable.ic_notifications_black_24dp);
         }
 
         @Override
