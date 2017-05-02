@@ -56,7 +56,7 @@
     <string name="gms_service_disabled">Google Play services отключены на этом устройстве</string>
     <string name="gms_service_missing">Google Play services отсутсвуют на этом устройстве.</string>
     <string name="gms_service_update_required">Версия Google Play services устарела.</string>
-    <string name="menu_filter">Фильтр</string>
+    <string name="menu_filter">Поиск</string>
     <string name="never">Никогда</string>
     <string name="no_registered_google_accounts">Нет зарегистрированных аккаунтов google</string>
     <string name="notices_close">Закрыть</string>
@@ -133,4 +133,13 @@
         <item>Светлая</item> <!-- MODE_NIGHT_NO = 1; -->
         <item>Темная</item> <!-- MODE_NIGHT_YES = 2; -->
     </string-array>
+    <string name="add_apps">Добавить аппликации</string>
+    <string name="add_new_tag">Создать новый тэг</string>
+    <string name="delete">Удалить</string>
+    <string name="no_apps_with_this_tag">Нет аппликаций с этим тэгом</string>
+    <string name="save">Сохранить</string>
+    <string name="store">Маркет</string>
+    <string name="tag">Тэг</string>
+    <string name="tag_name">Название</string>
+    <string name="tags">Тэги</string>
 </resources>

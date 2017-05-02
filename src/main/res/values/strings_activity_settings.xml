@@ -28,6 +28,6 @@
     <string name="pref_title_theme">Theme</string>
     <string name="pref_descr_theme">Choose between dark or default theme</string>
 
-    <string name="pref_export_db">Export DB to SD-Card</string>
+    <string name="pref_export_db" translatable="false">Export DB to SD-Card</string>
 
 </resources>

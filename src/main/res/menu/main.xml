@@ -6,7 +6,7 @@
 	<item
 			android:id="@+id/menu_act_filter"
 			android:icon="@drawable/ic_search_white_24dp"
-			appwatcher:showAsAction="ifRoom|collapseActionView"
+			appwatcher:showAsAction="always|collapseActionView"
 			android:title="@string/menu_filter"
 			appwatcher:actionViewClass="android.support.v7.widget.SearchView">
 	</item>
@@ -20,7 +20,7 @@
 	<item
 		android:id="@+id/menu_act_refresh"
 		android:icon="@drawable/ic_refresh_white_24dp"
-		appwatcher:showAsAction="always"
+		appwatcher:showAsAction="ifRoom"
 		android:title="@string/menu_refresh">
 	</item>
 

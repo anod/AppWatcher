@@ -121,7 +121,7 @@ abstract public class DrawerActivity extends ToolbarActivity implements AccountC
             item.setActionView(R.layout.drawer_tag_indicator);
             TextView tagIndicator = (TextView) item.getActionView().findViewById(android.R.id.text1);
             Drawable d = ResourcesCompat.getDrawable(getResources(), R.drawable.circular_color, null);
-            DrawableCompat.setTint(d, tag.color);
+            DrawableCompat.setTint(DrawableCompat.wrap(d), tag.color);
             tagIndicator.setBackgroundDrawable(d);
             tagIndicator.setText(count > 100 ? "99+" : "" + count);
             item.setIntent(AppsTagActivity.createTagIntent(tag, this));

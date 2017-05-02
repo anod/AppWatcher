@@ -159,7 +159,7 @@ public class TagsEditorActivity extends ToolbarActivity implements LoaderManager
             mTagName.setText(tag.name);
             mTagName.setTag(tag);
             Drawable d = mTagColor.getDrawable().mutate();
-            DrawableCompat.setTint(d, tag.color);
+            DrawableCompat.setTint(DrawableCompat.wrap(d), tag.color);
             mTagColor.setImageDrawable(d);
             mTagName.setOnClickListener(this.listener);
         }
