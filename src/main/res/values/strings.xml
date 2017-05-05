@@ -32,7 +32,7 @@
     <string name="share">Share</string>
     <string name="share_subject_normal">Check out \"%s\"</string>
     <string name="share_subject_updated">Check out new version of \"%s\"</string>
-    <string name="app_stored">\"%s\" added to the watch list</string>
+    <string name="app_stored">\"%s\" was added</string>
     <string name="rate_app">Rate this app</string>
     <string name="installed">INSTALLED</string>
     <string name="no_recent_changes">No information about recent changes was provided.</string>
@@ -115,6 +115,8 @@
     <string name="save">Save</string>
     <string name="delete">Delete</string>
     <string name="tag">Tag</string>
+    <string name="action_tag">%s Tag</string>
+    <string name="tag_app">Tag %1s</string>
 
     <string-array name="sort_titles">
         <item>By name &#x2193;</item>

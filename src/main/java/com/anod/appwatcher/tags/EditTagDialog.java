@@ -98,7 +98,7 @@ public class EditTagDialog extends DialogFragment implements ColorPickerSwatch.O
     void onSaveClick()
     {
         mTag = new Tag(mTag.id, mEditText.getText().toString().trim(), mTag.color);
-        ((TagsEditorActivity)getActivity()).saveTag(mTag);
+        ((TagsListActivity)getActivity()).saveTag(mTag);
         dismiss();
     }
 
@@ -111,7 +111,7 @@ public class EditTagDialog extends DialogFragment implements ColorPickerSwatch.O
     @OnClick(android.R.id.button3)
     void onDeleteClick()
     {
-        ((TagsEditorActivity)getActivity()).deleteTag(mTag);
+        ((TagsListActivity)getActivity()).deleteTag(mTag);
         dismiss();
     }
 

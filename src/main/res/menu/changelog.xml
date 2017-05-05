@@ -21,6 +21,12 @@
     </item>
 
     <item
+        android:id="@+id/menu_tag_app"
+        app:showAsAction="ifRoom"
+        android:title="@string/tag" android:icon="@drawable/ic_label_black_24px">
+    </item>
+
+    <item
         android:id="@+id/menu_share"
         app:showAsAction="ifRoom"
         android:title="@string/share" android:icon="@drawable/ic_share_white_24dp">

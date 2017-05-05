@@ -8,7 +8,6 @@ import com.anod.appwatcher.content.DbContentProvider;
 import com.anod.appwatcher.content.DbContentProviderClient;
 import com.anod.appwatcher.model.Tag;
 import com.anod.appwatcher.model.schema.AppTagsTable;
-import com.anod.appwatcher.utils.CollectionsUtils;
 
 import java.util.ArrayList;
 
@@ -61,7 +60,7 @@ class TagAppsManager {
         }
 
         DbContentProviderClient cr = new DbContentProviderClient(mContext);
-        boolean result = cr.addAppsToTag(appIds, mTag.id);
+        boolean result = cr.setAppsToTag(appIds, mTag.id);
         cr.close();
 
         mContext.getContentResolver().notifyChange(DbContentProvider.APPS_TAG_CONTENT_URI, null);

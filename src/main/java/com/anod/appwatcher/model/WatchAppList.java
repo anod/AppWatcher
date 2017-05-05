@@ -114,6 +114,7 @@ public class WatchAppList {
         if (existingApp != null) {
             int success = mContentProvider.updateStatus(existingApp.getRowId(), AppInfoMetadata.STATUS_DELETED);
             if (success > 0) {
+                mContentProvider.deleteAppTags(existingApp.getAppId());
                 mAddedApps.remove(info.packageName);
                 mListener.onWatchListChangeSuccess(info, AppInfoMetadata.STATUS_DELETED);
             } else {
@@ -128,6 +129,8 @@ public class WatchAppList {
         if (uri == null) {
             mListener.onWatchListChangeError(info, ERROR_INSERT);
         } else {
+            int rowId = Integer.parseInt(uri.getLastPathSegment());
+            info.setRowId(rowId);
             mAddedApps.put(info.getAppId(), -1);
             mListener.onWatchListChangeSuccess(info, AppInfoMetadata.STATUS_NORMAL);
         }

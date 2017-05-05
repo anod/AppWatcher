@@ -65,7 +65,9 @@ abstract public class DrawerActivity extends ToolbarActivity implements AccountC
             mNavigationView = (NavigationView) findViewById(R.id.nav_view);
             setupDrawerContent(mNavigationView);
             updateTags();
-            getContentResolver().registerContentObserver(DbContentProvider.TAGS_CONTENT_URI, true, new TagsUpdateObserver(this));
+            TagsUpdateObserver observer = new TagsUpdateObserver(this);
+            getContentResolver().registerContentObserver(DbContentProvider.TAGS_CONTENT_URI, true, observer);
+            getContentResolver().registerContentObserver(DbContentProvider.APPS_TAG_CONTENT_URI, true, observer);
         }
     }
 

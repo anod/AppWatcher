@@ -24,7 +24,9 @@ public class DbContentProvider extends ContentProvider {
 
     private static final int APP_LIST = 10;
     private static final int APP_ROW = 20;
-    private static final int APP_TAG_LIST = 60;
+    private static final int APP_TAGS = 100;
+    private static final int APPS_TAG = 60;
+    private static final int APPS_TAGS_CLEAN = 110;
 
     private static final int TAG_LIST = 30;
     private static final int TAG_ROW = 40;
@@ -35,7 +37,8 @@ public class DbContentProvider extends ContentProvider {
     private static final int ICON_ROW = 70;
 
     public static final Uri APPS_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/apps");
-    public static final Uri APPS_TAG_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/apps/tag");
+    public static final Uri APPS_TAG_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/apps/tags");
+    public static final Uri APPS_TAG_CLEAN_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/apps/tags/clean");
     public static final Uri TAGS_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/tags");
     public static final Uri TAGS_APPS_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/tags/apps");
     public static final Uri TAGS_APPS_COUNT_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/tags/apps/count");
@@ -46,7 +49,9 @@ public class DbContentProvider extends ContentProvider {
     static {
         sURIMatcher.addURI(AUTHORITY, "apps", APP_LIST);
         sURIMatcher.addURI(AUTHORITY, "apps/#", APP_ROW);
-        sURIMatcher.addURI(AUTHORITY, "apps/tag/#", APP_TAG_LIST);
+        sURIMatcher.addURI(AUTHORITY, "apps/tags/#", APPS_TAG);
+        sURIMatcher.addURI(AUTHORITY, "apps/tags/clean", APPS_TAGS_CLEAN);
+        sURIMatcher.addURI(AUTHORITY, "apps/#/tags", APP_TAGS);
 
         sURIMatcher.addURI(AUTHORITY, "tags", TAG_LIST);
         sURIMatcher.addURI(AUTHORITY, "tags/#", TAG_ROW);
@@ -82,9 +87,21 @@ public class DbContentProvider extends ContentProvider {
                 query.table = AppListTable.TABLE_NAME;
                 query.notifyUri = APPS_CONTENT_URI;
                 return query;
-            case APP_TAG_LIST:
+            case APPS_TAG:
                 query.table = AppTagsTable.TABLE_NAME + ", " + AppListTable.TABLE_NAME;
                 query.notifyUri = APPS_CONTENT_URI;
+                return query;
+            case APP_TAGS:
+                query.table = AppTagsTable.TABLE_NAME + ", " + AppListTable.TABLE_NAME;
+                rowId = uri.getPathSegments().get(uri.getPathSegments().size() - 2);
+                query.selection = AppListTable.TableColumns._ID + "=? AND " + AppListTable.TableColumns.APPID + "=" + AppTagsTable.TableColumns.APPID;
+                query.selectionArgs = new String[]{ rowId };
+                query.notifyUri = APPS_TAG_CONTENT_URI;
+                return query;
+            case APPS_TAGS_CLEAN:
+                query.table = AppTagsTable.TABLE_NAME + " LEFT OUTER JOIN " + AppListTable.TABLE_NAME;
+                query.selection = AppListTable.TableColumns._ID + " IS NULL";
+                query.notifyUri = APPS_TAG_CONTENT_URI;
                 return query;
             case TAG_LIST:
                 query.table = TagsTable.TABLE_NAME;

@@ -32,7 +32,7 @@ import com.anod.appwatcher.installed.ImportInstalledActivity;
 import com.anod.appwatcher.model.Filters;
 import com.anod.appwatcher.sync.ManualSyncService;
 import com.anod.appwatcher.sync.SyncAdapter;
-import com.anod.appwatcher.tags.TagsEditorActivity;
+import com.anod.appwatcher.tags.TagsListActivity;
 import com.anod.appwatcher.utils.MenuItemAnimation;
 import com.anod.appwatcher.utils.UpgradeCheck;
 import com.google.android.gms.gcm.GcmTaskService;
@@ -197,7 +197,7 @@ public abstract class AppWatcherBaseActivity extends DrawerActivity implements
                 startActivity(new Intent(this, ImportInstalledActivity.class));
                 return true;
             case R.id.menu_act_tags:
-                startActivity(new Intent(this, TagsEditorActivity.class));
+                startActivity(new Intent(this, TagsListActivity.class));
                 return true;
             case R.id.menu_act_sort:
                 showSortOptions();

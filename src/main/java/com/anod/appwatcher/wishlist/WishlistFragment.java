@@ -24,6 +24,7 @@ import com.anod.appwatcher.market.WishlistEndpoint;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.AppInfoMetadata;
 import com.anod.appwatcher.model.WatchAppList;
+import com.anod.appwatcher.tags.TagSnackbar;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -119,8 +120,7 @@ public class WishlistFragment extends Fragment implements WatchAppList.Listener,
     @Override
     public void onWatchListChangeSuccess(AppInfo info, int newStatus) {
         if (newStatus == AppInfoMetadata.STATUS_NORMAL) {
-            String msg = getString(R.string.app_stored, info.title);
-            Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
+            TagSnackbar.make(getActivity(), info, false).show();
         }
         mListView.getAdapter().notifyDataSetChanged();
     }

@@ -158,6 +158,13 @@ public class DbContentProviderClient {
                     AppListTable.Columns.KEY_STATUS + " = ?",
                     new String[]{String.valueOf(AppInfoMetadata.STATUS_DELETED)}
             );
+
+            int tagsCleaned = mContentProviderClient.delete(
+                    DbContentProvider.APPS_TAG_CLEAN_CONTENT_URI,
+                    null,
+                    null
+            );
+            AppLog.d("Deleted " + numRows + " rows, tags " + tagsCleaned + " cleaned");
         } catch (RemoteException e) {
             AppLog.e(e);
         }
@@ -314,7 +321,7 @@ public class DbContentProviderClient {
         return null;
     }
 
-    public boolean addAppsToTag(@NonNull List<String> appIds,int tagId)
+    public boolean setAppsToTag(@NonNull List<String> appIds, int tagId)
     {
         try {
             Uri appsTagUri = DbContentProvider.TAGS_CONTENT_URI.buildUpon().appendPath(String.valueOf(tagId)).appendPath("apps").build();
@@ -329,6 +336,76 @@ public class DbContentProviderClient {
         }
         return false;
     }
+
+    public List<Integer> queryAppTags(int rowId) {
+        Uri appTagsUri = DbContentProvider.APPS_CONTENT_URI.buildUpon()
+                .appendPath(String.valueOf(rowId))
+                .appendPath("tags")
+                .build();
+
+        List<Integer> tagIds = new ArrayList<>();
+        try {
+            Cursor cr = mContentProviderClient.query(appTagsUri, AppTagsTable.PROJECTION, null, null, null);
+            if (cr == null || cr.getCount() == 0) {
+                return tagIds;
+            }
+            cr.moveToPosition(-1);
+            if (cr.moveToNext()) {
+                int tagId = cr.getInt(AppTagsTable.Projection.TAGID);
+                tagIds.add(tagId);
+            }
+            cr.close();
+        } catch (RemoteException e) {
+            AppLog.e(e);
+        }
+        return tagIds;
+    }
+
+    public boolean addAppToTag(@NonNull String appId, int tagId)
+    {
+        try {
+            Uri appsTagUri = DbContentProvider.TAGS_CONTENT_URI
+                    .buildUpon()
+                    .appendPath(String.valueOf(tagId))
+                    .appendPath("apps")
+                    .build();
+            ContentValues values = AppTagsTable.createContentValues(appId, tagId);
+            mContentProviderClient.insert(appsTagUri, values);
+            return true;
+        } catch (RemoteException e) {
+            AppLog.e(e);
+        }
+        return false;
+    }
+
+
+    public int deleteAppTags(@NonNull String appId) {
+        try {
+            return mContentProviderClient.delete(
+                    DbContentProvider.TAGS_APPS_CONTENT_URI,
+                    AppTagsTable.Columns.APPID + "=?",
+                    new String[] { appId });
+        } catch (RemoteException e) {
+            AppLog.e(e);
+        }
+        return 0;
+    }
+
+    public boolean removeAppFromTag(String appId, int tagId) {
+        try {
+            Uri appsTagUri = DbContentProvider.TAGS_CONTENT_URI
+                    .buildUpon()
+                    .appendPath(String.valueOf(tagId))
+                    .appendPath("apps")
+                    .build();
+            mContentProviderClient.delete(appsTagUri, AppTagsTable.Columns.APPID + "=?", new String[] {appId});
+            return true;
+        } catch (RemoteException e) {
+            AppLog.e(e);
+        }
+        return false;
+    }
+
 
     public void addAppTags(List<AppTag> appTags) {
         SimpleArrayMap<Integer, List<String>> tagApps = new SimpleArrayMap<>();
@@ -345,7 +422,8 @@ public class DbContentProviderClient {
         for (int i = 0; i < tagApps.size(); i++) {
             int tagId = tagApps.keyAt(i);
             List<String> list = tagApps.valueAt(i);
-            addAppsToTag(list, tagId);
+            setAppsToTag(list, tagId);
         }
     }
+
 }

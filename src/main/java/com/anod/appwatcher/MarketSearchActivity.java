@@ -31,6 +31,7 @@ import com.anod.appwatcher.model.WatchAppList;
 import com.anod.appwatcher.search.ResultsAdapter;
 import com.anod.appwatcher.search.ResultsAdapterDetails;
 import com.anod.appwatcher.search.ResultsAdapterSearch;
+import com.anod.appwatcher.tags.TagSnackbar;
 import com.anod.appwatcher.ui.ToolbarActivity;
 import com.anod.appwatcher.utils.Keyboard;
 import com.anod.appwatcher.utils.MetricsManagerEvent;
@@ -296,11 +297,7 @@ public class MarketSearchActivity extends ToolbarActivity implements AccountChoo
     public void onWatchListChangeSuccess(AppInfo info, int newStatus) {
         mAdapter.notifyDataSetChanged();
         if (newStatus == AppInfoMetadata.STATUS_NORMAL) {
-            String msg = mContext.getString(R.string.app_stored, info.title);
-            Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
-            if (mShareSource) {
-                finish();
-            }
+            TagSnackbar.make(this, info, mShareSource).show();
         }
     }
 

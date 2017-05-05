@@ -18,10 +18,16 @@ public class TagsTable {
 
     public static final String TABLE_NAME = "tags";
 
+    public class TableColumns {
+        public static final String _ID = TagsTable.TABLE_NAME + "." + TagsTable.Columns._ID;
+        public static final String NAME = TagsTable.TABLE_NAME + ".name";
+        public static final String COLOR = TagsTable.TABLE_NAME + ".color";
+    }
+
     public static final String[] PROJECTION = new String[] {
-            Columns._ID,
-            Columns.NAME,
-            Columns.COLOR
+            TableColumns._ID,
+            TableColumns.NAME,
+            TableColumns.COLOR
     };
 
     public static class Projection {

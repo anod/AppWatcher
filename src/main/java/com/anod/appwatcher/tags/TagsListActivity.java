@@ -1,12 +1,13 @@
 package com.anod.appwatcher.tags;
 
+import android.content.ComponentName;
 import android.content.Context;
-import android.content.res.ColorStateList;
+import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -14,6 +15,7 @@ import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,10 +27,13 @@ import com.anod.appwatcher.R;
 import com.anod.appwatcher.content.DbContentProviderClient;
 import com.anod.appwatcher.content.TagsContentProviderClient;
 import com.anod.appwatcher.content.TagsCursor;
+import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.model.Tag;
 import com.anod.appwatcher.model.schema.TagsTable;
 import com.anod.appwatcher.recyclerview.RecyclerViewCursorAdapter;
 import com.anod.appwatcher.ui.ToolbarActivity;
+
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -38,12 +43,20 @@ import butterknife.ButterKnife;
  * @date 10/03/2017.
  */
 
-public class TagsEditorActivity extends ToolbarActivity implements LoaderManager.LoaderCallbacks<Cursor>, View.OnClickListener {
+public class TagsListActivity extends ToolbarActivity implements LoaderManager.LoaderCallbacks<Cursor>, View.OnClickListener {
+    public static final String EXTRA_APP = "app";
 
     @BindView(android.R.id.list)
     RecyclerView mListView;
 
     private TagAdapter mAdapter;
+    private AppInfo mAppInfo;
+
+    public static Intent intent(Context context, @NonNull AppInfo app) {
+        Intent intent = new Intent(context, TagsListActivity.class);
+        intent.putExtra(EXTRA_APP, app);
+        return intent;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +65,10 @@ public class TagsEditorActivity extends ToolbarActivity implements LoaderManager
         ButterKnife.bind(this);
         setupToolbar();
 
+        mAppInfo = getIntentExtras().getParcelable(EXTRA_APP);
+        if (mAppInfo != null) {
+            setTitle(getString(R.string.tag_app, mAppInfo.title));
+        }
         mAdapter = new TagAdapter(this, this);
         mListView.setLayoutManager(new LinearLayoutManager(this));
         mListView.setAdapter(mAdapter);
@@ -68,8 +85,7 @@ public class TagsEditorActivity extends ToolbarActivity implements LoaderManager
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.add_tag)
-        {
+        if (item.getItemId() == R.id.add_tag) {
             EditTagDialog dialog = EditTagDialog.newInstance(null);
             dialog.show(getSupportFragmentManager(), "edit-tag-dialog");
             return true;
@@ -110,9 +126,26 @@ public class TagsEditorActivity extends ToolbarActivity implements LoaderManager
 
     @Override
     public void onClick(View v) {
-        Tag tag = (Tag)v.getTag();
-        EditTagDialog dialog = EditTagDialog.newInstance(tag);
-        dialog.show(getSupportFragmentManager(), "edit-tag-dialog");
+        TagHolder holder = (TagHolder) v.getTag();
+        if (mAppInfo == null) {
+            EditTagDialog dialog = EditTagDialog.newInstance(holder.tag);
+            dialog.show(getSupportFragmentManager(), "edit-tag-dialog");
+        } else {
+            DbContentProviderClient client = new DbContentProviderClient(this);
+            List<Integer> tags = client.queryAppTags(mAppInfo.getRowId());
+            if (tags.contains(holder.tag.id)) {
+                if (client.removeAppFromTag(mAppInfo.getAppId(), holder.tag.id)) {
+                    holder.name.setSelected(false);
+                    holder.name.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+                }
+            } else {
+                if (client.addAppToTag(mAppInfo.getAppId(), holder.tag.id)) {
+                    holder.name.setSelected(true);
+                    holder.name.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_check_black_24dp, 0);
+                }
+            }
+            client.close();
+        }
     }
 
     private static class TagsCursorLoader extends CursorLoader {
@@ -144,24 +177,24 @@ public class TagsEditorActivity extends ToolbarActivity implements LoaderManager
     }
 
     static class TagHolder extends RecyclerView.ViewHolder {
-        private final View.OnClickListener listener;
-        @BindView(android.R.id.text1) TextView mTagName;
-        @BindView(android.R.id.icon) ImageView mTagColor;
+        Tag tag;
 
+        @BindView(android.R.id.text1) TextView name;
+        @BindView(android.R.id.icon) ImageView color;
 
         TagHolder(View itemView, View.OnClickListener listener) {
             super(itemView);
-            this.listener = listener;
+            itemView.setTag(this);
+            itemView.setOnClickListener(listener);
             ButterKnife.bind(this, itemView);
         }
 
         void bindView(int position, Tag tag) {
-            mTagName.setText(tag.name);
-            mTagName.setTag(tag);
-            Drawable d = mTagColor.getDrawable().mutate();
+            this.tag = tag;
+            name.setText(tag.name);
+            Drawable d = color.getDrawable().mutate();
             DrawableCompat.setTint(DrawableCompat.wrap(d), tag.color);
-            mTagColor.setImageDrawable(d);
-            mTagName.setOnClickListener(this.listener);
+            color.setImageDrawable(d);
         }
    }
 }

@@ -39,6 +39,8 @@ import com.anod.appwatcher.market.PlayStoreEndpoint;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.content.DbContentProviderClient;
 import com.anod.appwatcher.model.WatchAppList;
+import com.anod.appwatcher.tags.TagSnackbar;
+import com.anod.appwatcher.tags.TagsListActivity;
 import com.anod.appwatcher.ui.ToolbarActivity;
 import com.anod.appwatcher.utils.AppIconLoader;
 import com.anod.appwatcher.utils.InstalledAppsProvider;
@@ -239,6 +241,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
         mAddMenu.setEnabled(false);
         if (mNewApp) {
             menu.findItem(R.id.menu_remove).setVisible(false);
+            menu.findItem(R.id.menu_tag_app).setVisible(false);
         } else {
             menu.findItem(R.id.menu_add).setVisible(false);
         }
@@ -277,6 +280,9 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
                 return true;
             case R.id.menu_share:
                 shareApp();
+                return true;
+            case R.id.menu_tag_app:
+                startActivity(TagsListActivity.intent(this, mApp));
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -370,12 +376,11 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
 
     @Override
     public void onWatchListChangeSuccess(AppInfo info, int newStatus) {
-        String msg = getString(R.string.app_stored, info.title);
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
         Intent data = new Intent();
         data.putExtra(EXTRA_ADD_APP_PACKAGE, info.packageName);
         setResult(RESULT_OK, data);
-        finish();
+
+        TagSnackbar.make(this, info, true).show();
     }
 
     @Override

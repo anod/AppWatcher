@@ -71,7 +71,7 @@ android {
     defaultConfig {
         applicationId 'com.anod.appwatcher'
         minSdkVersion 15
-        targetSdkVersion 24
+        targetSdkVersion 25
         versionCode 55
         versionName '1.9.0'
         resValue "string", "content_authority", "com.anod.appwatcher"

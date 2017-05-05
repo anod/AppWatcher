@@ -3,6 +3,8 @@ package com.anod.appwatcher.model;
 import android.content.ComponentName;
 import android.content.pm.PackageInfo;
 import android.net.Uri;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -15,7 +17,19 @@ import java.text.DateFormat;
 import java.util.Date;
 
 
-public class AppInfo extends AppInfoMetadata {
+public class AppInfo extends AppInfoMetadata implements Parcelable{
+
+    public static final Creator<AppInfo> CREATOR = new Creator<AppInfo>() {
+        @Override
+        public AppInfo createFromParcel(Parcel in) {
+            return new AppInfo(in);
+        }
+
+        @Override
+        public AppInfo[] newArray(int size) {
+            return new AppInfo[size];
+        }
+    };
 
     public static String createDetailsUrl(String packageName)
     {
@@ -65,7 +79,7 @@ public class AppInfo extends AppInfoMetadata {
 
     private AppInfo(String packageName, int versionCode, String versionName, String title, String iconUrl, int status, String uploadDate) {
         this(-1, packageName, packageName, versionCode, versionName, title, null, iconUrl,
-                status, uploadDate, null, null, 0, "details?doc=" + packageName, 0, "", 0);
+                status, uploadDate, null, null, 0, createDetailsUrl(packageName), 0, "", 0);
     }
 
     public AppInfo(int rowId, String appId, String pname, int versionNumber, String versionName,
@@ -116,6 +130,27 @@ public class AppInfo extends AppInfoMetadata {
         this.syncVersion = 0;
     }
 
+    protected AppInfo(Parcel in) {
+        super(in.readString(), in.readInt());
+        rowId = in.readInt();
+        packageName = in.readString();
+        versionNumber = in.readInt();
+        versionName = in.readString();
+        title = in.readString();
+        creator = in.readString();
+        uploadDate = in.readString();
+
+        priceText = in.readString();
+        priceCur = in.readString();
+        priceMicros = in.readInt();
+        detailsUrl = in.readString();
+
+        iconUrl = in.readString();
+        refreshTime = in.readLong();
+        appType = in.readString();
+        syncVersion = in.readInt();
+    }
+
     public int getRowId() {
         return rowId;
     }
@@ -132,4 +167,31 @@ public class AppInfo extends AppInfoMetadata {
         return this.detailsUrl;
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(appId);
+        dest.writeInt(status);
+        dest.writeInt(rowId);
+        dest.writeString(packageName);
+        dest.writeInt(versionNumber);
+        dest.writeString(versionName);
+        dest.writeString(title);
+        dest.writeString(creator);
+        dest.writeString(uploadDate);
+
+        dest.writeString(priceText);
+        dest.writeString(priceCur);
+        dest.writeInt(priceMicros);
+        dest.writeString(detailsUrl);
+
+        dest.writeString(iconUrl);
+        dest.writeLong(refreshTime);
+        dest.writeString(appType);
+        dest.writeInt(syncVersion);
+    }
 }

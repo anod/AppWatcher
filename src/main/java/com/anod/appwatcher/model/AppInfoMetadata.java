@@ -12,7 +12,6 @@ public class AppInfoMetadata {
 
     String appId;
     protected int status;
-    long modifyTime; // when the item was inserted or deleted
 
     AppInfoMetadata(String appId, int status) {
         this.appId = appId;
@@ -27,18 +26,8 @@ public class AppInfoMetadata {
         return status;
     }
 
-    public long getModifyTime() {
-        return modifyTime;
-    }
-    /**
-     * @param status
-     */
     public void setStatus(int status) {
         this.status = status;
-    }
-
-    public void setModifyTime(long modifyTime) {
-        this.modifyTime = modifyTime;
     }
 
     public void setAppId(String appId) {
