@@ -350,7 +350,7 @@ public class DbContentProviderClient {
                 return tagIds;
             }
             cr.moveToPosition(-1);
-            if (cr.moveToNext()) {
+            while (cr.moveToNext()) {
                 int tagId = cr.getInt(AppTagsTable.Projection.TAGID);
                 tagIds.add(tagId);
             }

@@ -24,6 +24,10 @@
         android:id="@+id/menu_tag_app"
         app:showAsAction="ifRoom"
         android:title="@string/tag" android:icon="@drawable/ic_label_black_24px">
+
+        <menu>
+            <group android:id="@+id/menu_group_tags" android:checkableBehavior="all" />
+        </menu>
     </item>
 
     <item

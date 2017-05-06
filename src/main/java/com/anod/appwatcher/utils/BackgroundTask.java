@@ -11,18 +11,18 @@ import android.os.AsyncTask;
 
 public class BackgroundTask {
 
-    public abstract static class Worker<P,R>
+    public abstract static class Worker<Param, Result>
     {
-        final P param;
+        final Param param;
         final Context context;
 
-        protected Worker(P param, Context context) {
+        protected Worker(Param param, Context context) {
             this.param = param;
             this.context = context;
         }
 
-        public abstract R run(P param, Context context);
-        public abstract void finished(R result, Context context);
+        public abstract Result run(Param param, Context context);
+        public abstract void finished(Result result, Context context);
     }
 
     public static <P,R> void execute(Worker<P,R> worker)

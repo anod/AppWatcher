@@ -1,6 +1,7 @@
 package com.anod.appwatcher;
 
 import android.accounts.Account;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -21,6 +22,7 @@ import android.text.util.Linkify;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -32,17 +34,20 @@ import com.android.volley.VolleyError;
 import com.anod.appwatcher.accounts.AuthTokenProvider;
 import com.anod.appwatcher.adapters.AppDetailsView;
 import com.anod.appwatcher.adapters.AppViewHolderDataProvider;
+import com.anod.appwatcher.content.TagsCursor;
 import com.anod.appwatcher.fragments.RemoveDialogFragment;
 import com.anod.appwatcher.market.DetailsEndpoint;
 import com.anod.appwatcher.market.MarketInfo;
 import com.anod.appwatcher.market.PlayStoreEndpoint;
 import com.anod.appwatcher.model.AppInfo;
 import com.anod.appwatcher.content.DbContentProviderClient;
+import com.anod.appwatcher.model.Tag;
 import com.anod.appwatcher.model.WatchAppList;
 import com.anod.appwatcher.tags.TagSnackbar;
 import com.anod.appwatcher.tags.TagsListActivity;
 import com.anod.appwatcher.ui.ToolbarActivity;
 import com.anod.appwatcher.utils.AppIconLoader;
+import com.anod.appwatcher.utils.BackgroundTask;
 import com.anod.appwatcher.utils.InstalledAppsProvider;
 import com.anod.appwatcher.utils.IntentUtils;
 import com.anod.appwatcher.utils.MetricsManagerEvent;
@@ -50,6 +55,9 @@ import com.anod.appwatcher.utils.PackageManagerUtils;
 import com.anod.appwatcher.utils.PaletteSwatch;
 import com.google.android.finsky.api.model.Document;
 import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -225,8 +233,7 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
         }
     };
 
-    private void setDefaultIcon()
-    {
+    private void setDefaultIcon() {
         Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_notifications_black_24dp);
         mBackground.setVisibility(View.VISIBLE);
         applyColor(ContextCompat.getColor(this, R.color.theme_primary));
@@ -244,12 +251,57 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
             menu.findItem(R.id.menu_tag_app).setVisible(false);
         } else {
             menu.findItem(R.id.menu_add).setVisible(false);
+            MenuItem tagMenu = menu.findItem(R.id.menu_tag_app);
+            loadTagSubmenu(tagMenu);
         }
         if (!mDataProvider.getInstalledAppsProvider().getInfo(mAppId).isInstalled()) {
             menu.findItem(R.id.menu_uninstall).setVisible(false);
         }
 
         return true;
+    }
+
+    private static class TagMenuItem {
+        final Tag tag;
+        final boolean selected;
+
+        private TagMenuItem(Tag tag, boolean selected) {
+            this.tag = tag;
+            this.selected = selected;
+        }
+    }
+
+    private void loadTagSubmenu(final MenuItem tagMenu) {
+
+        BackgroundTask.execute(new BackgroundTask.Worker<Void, List<TagMenuItem>>(null, this) {
+
+            @Override
+            public List<TagMenuItem> run(Void param, Context context) {
+                DbContentProviderClient cr = new DbContentProviderClient(context);
+                TagsCursor tags = cr.queryTags();
+                List<Integer> appTags = cr.queryAppTags(mApp.getRowId());
+
+                tags.moveToPosition(-1);
+                ArrayList<TagMenuItem> result = new ArrayList<>();
+                while (tags.moveToNext()) {
+                    Tag tag = tags.getTag();
+                    result.add(new TagMenuItem(tag, appTags.contains(tag.id)));
+                }
+                cr.close();
+                return result;
+            }
+
+            @Override
+            public void finished(List<TagMenuItem> result, Context context) {
+                SubMenu tagSubMenu = tagMenu.getSubMenu();
+                for (TagMenuItem item: result) {
+                    tagSubMenu.add(R.id.menu_group_tags, item.tag.id, 0, item.tag.name)
+                        .setChecked(item.selected);
+                }
+                tagSubMenu.setGroupCheckable(R.id.menu_group_tags, true, false);
+            }
+        });
+
     }
 
     @Override
@@ -281,11 +333,21 @@ public class ChangelogActivity extends ToolbarActivity implements PlayStoreEndpo
             case R.id.menu_share:
                 shareApp();
                 return true;
-            case R.id.menu_tag_app:
-                startActivity(TagsListActivity.intent(this, mApp));
-                return true;
+        }
+        if (item.getGroupId() == R.id.menu_group_tags) {
+            if (changeTag(item.getItemId(), item.isChecked())) {
+                item.setChecked(!item.isChecked());
+            }
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private boolean changeTag(int tagId, boolean checked) {
+        DbContentProviderClient cr = new DbContentProviderClient(this);
+        if (checked) {
+            return cr.removeAppFromTag(mApp.getAppId(), tagId);
+        }
+        return cr.addAppToTag(mApp.getAppId(), tagId);
     }
 
     private void shareApp() {

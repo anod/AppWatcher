@@ -161,10 +161,10 @@ public class DbContentProvider extends ContentProvider {
 
         SQLiteDatabase db = mDatabaseOpenHelper.getWritableDatabase();
         int count;
-        if (query.selection != null) {
-            count = db.delete(query.table, query.selection, query.selectionArgs);
-        } else {
+        if (selection != null) {
             count = db.delete(query.table, selection, selectionArgs);
+        } else {
+            count = db.delete(query.table, query.selection, query.selectionArgs);
         }
         if (count > 0 && query.notifyUri != null) {
             getContext().getContentResolver().notifyChange(query.notifyUri, null);
