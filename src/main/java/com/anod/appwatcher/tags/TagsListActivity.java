@@ -11,7 +11,9 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v7.content.res.AppCompatResources;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -32,6 +34,7 @@ import com.anod.appwatcher.model.Tag;
 import com.anod.appwatcher.model.schema.TagsTable;
 import com.anod.appwatcher.recyclerview.RecyclerViewCursorAdapter;
 import com.anod.appwatcher.ui.ToolbarActivity;
+import com.anod.appwatcher.utils.DrawableResource;
 
 import java.util.List;
 
@@ -141,7 +144,8 @@ public class TagsListActivity extends ToolbarActivity implements LoaderManager.L
             } else {
                 if (client.addAppToTag(mAppInfo.getAppId(), holder.tag.id)) {
                     holder.name.setSelected(true);
-                    holder.name.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_check_black_24dp, 0);
+                    Drawable d = DrawableResource.setTint(getResources(), R.drawable.ic_check_black_24dp, R.color.control_tint, getTheme());
+                    holder.name.setCompoundDrawablesWithIntrinsicBounds(null, null, d, null);
                 }
             }
             client.close();
