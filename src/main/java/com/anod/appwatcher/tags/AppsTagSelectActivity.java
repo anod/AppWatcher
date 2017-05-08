@@ -5,16 +5,22 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 
 import com.anod.appwatcher.AppListContentProvider;
+import com.anod.appwatcher.MarketSearchActivity;
 import com.anod.appwatcher.R;
 import com.anod.appwatcher.content.AppListCursor;
 import com.anod.appwatcher.model.AppListCursorLoader;
@@ -23,6 +29,7 @@ import com.anod.appwatcher.model.schema.AppListTable;
 import com.anod.appwatcher.model.schema.AppTagsTable;
 import com.anod.appwatcher.ui.ToolbarActivity;
 import com.anod.appwatcher.utils.BackgroundTask;
+import com.anod.appwatcher.utils.Keyboard;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -44,6 +51,7 @@ public class AppsTagSelectActivity extends ToolbarActivity implements LoaderMana
     private boolean mAllSelected;
     private Tag mTag;
     private TagAppsManager mManager;
+    private String mTitleFilter = "";
 
     public static Intent createIntent(Tag tag, Context context) {
         Intent intent = new Intent(context, AppsTagSelectActivity.class);
@@ -59,6 +67,7 @@ public class AppsTagSelectActivity extends ToolbarActivity implements LoaderMana
         setupToolbar();
 
         mTag = getIntentExtras().getParcelable(EXTRA_TAG);
+        mTitleFilter = savedInstanceState == null ? "" : savedInstanceState.getString("title_filter");
         mManager = new TagAppsManager(mTag, this);
 
         mList.setLayoutManager(new LinearLayoutManager(this));
@@ -67,9 +76,49 @@ public class AppsTagSelectActivity extends ToolbarActivity implements LoaderMana
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        outState.putString("title_filter", mTitleFilter);
+        super.onSaveInstanceState(outState, outPersistentState);
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.searchbox, menu);
+
+        final MenuItem searchItem = menu.findItem(R.id.menu_search);
+        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        searchView.setIconifiedByDefault(false);
+        MenuItemCompat.expandActionView(searchItem);
+
+        searchView.setQuery(mTitleFilter, true);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                Keyboard.hide(searchView, AppsTagSelectActivity.this);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String query) {
+                filterList(query);
+                return true;
+            }
+        });
+
+        Keyboard.hide(searchView, this);
+        return true;
+    }
+
+    private void filterList(String query) {
+        mTitleFilter = query;
+        getSupportLoaderManager().restartLoader(1, null, this);
+    }
+
 
     @OnClick(android.R.id.button3)
     public void onAllButtonClick() {
@@ -105,7 +154,7 @@ public class AppsTagSelectActivity extends ToolbarActivity implements LoaderMana
         {
             return new TagAppsCursorLoader(this, mTag);
         }
-        return new AppListCursorLoader(this, "", AppListTable.Columns.KEY_TITLE + " COLLATE LOCALIZED ASC", null, null);
+        return new AppListCursorLoader(this, mTitleFilter, AppListTable.Columns.KEY_TITLE + " COLLATE LOCALIZED ASC", null, null);
     }
 
     @Override
