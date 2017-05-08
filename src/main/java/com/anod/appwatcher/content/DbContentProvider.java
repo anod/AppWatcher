@@ -99,8 +99,9 @@ public class DbContentProvider extends ContentProvider {
                 query.notifyUri = APPS_TAG_CONTENT_URI;
                 return query;
             case APPS_TAGS_CLEAN:
-                query.table = AppTagsTable.TABLE_NAME + " LEFT OUTER JOIN " + AppListTable.TABLE_NAME;
-                query.selection = AppListTable.TableColumns._ID + " IS NULL";
+                query.table = AppTagsTable.TABLE_NAME;
+                query.selection = AppTagsTable.TableColumns.APPID
+                        + " NOT IN (SELECT " + AppTagsTable.TableColumns.APPID + " FROM " + AppTagsTable.TABLE_NAME + ")" ;
                 query.notifyUri = APPS_TAG_CONTENT_URI;
                 return query;
             case TAG_LIST:
