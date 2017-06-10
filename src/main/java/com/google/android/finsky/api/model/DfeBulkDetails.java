@@ -58,7 +58,7 @@ public class DfeBulkDetails extends DfeBaseModel<Details.BulkDetailsResponse>
         if (mResponseFiler == null || list == null) {
             return list;
         }
-        return CollectionsUtils.filter(list, mResponseFiler);
+        return CollectionsUtils.INSTANCE.filter(list, mResponseFiler);
     }
 
     @Override

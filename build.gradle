@@ -1,14 +1,15 @@
 
 buildscript {
+    ext.kotlin_version = '1.1.2-4'
     repositories {
         jcenter()
         mavenCentral()
         maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.0-alpha1'
-        classpath 'com.google.gms:google-services:3.0.0'
-        classpath 'com.google.firebase:firebase-plugins:1.0.5'
+        classpath 'com.android.tools.build:gradle:3.0.0-alpha3'
+        classpath 'com.google.gms:google-services:3.1.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
@@ -22,7 +23,8 @@ repositories {
 }
 
 apply plugin: 'com.android.application'
-apply plugin: 'com.google.firebase.firebase-crash'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 
 configurations.all {
     resolutionStrategy.cacheDynamicVersionsFor 10, 'minutes'
@@ -39,29 +41,25 @@ dependencies {
     compile 'com.android.support:cardview-v7:25.3.1'
     compile 'com.android.support:palette-v7:25.3.1'
 
-    compile 'com.google.android.gms:play-services-identity:10.2.6'
-    compile 'com.google.android.gms:play-services-drive:10.2.6'
-    compile 'com.google.android.gms:play-services-gcm:10.2.6'
+    compile 'com.google.android.gms:play-services-identity:11.0.0'
+    compile 'com.google.android.gms:play-services-drive:11.0.0'
+    compile 'com.google.android.gms:play-services-gcm:11.0.0'
 
-    compile 'com.google.firebase:firebase-core:10.2.6'
-    compile 'com.google.firebase:firebase-crash:10.2.6'
+    compile 'com.google.firebase:firebase-core:11.0.0'
+    compile 'com.google.firebase:firebase-crash:11.0.0'
 
     compile 'com.android.volley:volley:1.0.0'
     compile 'com.squareup.okhttp3:okhttp:3.8.0'
     compile 'com.squareup.picasso:picasso:3.0.0-SNAPSHOT'
 
     compile 'com.jakewharton:butterknife:8.6.0'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:8.6.0'
+    kapt 'com.jakewharton:butterknife-compiler:8.6.0'
 
     compile group: 'com.google.protobuf.nano', name: 'protobuf-javanano', version: '3.1.0'
 
-    // Find memory leaks tool
-    debugCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
-    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
-    testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
-
     testCompile 'junit:junit:4.12'
     compile project(path: ':colorpicker')
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
 }
 
 android {

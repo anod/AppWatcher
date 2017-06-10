@@ -42,7 +42,7 @@ public final class DfeList extends ContainerList<ListResponse>
         {
             return docs;
         }
-        List<Document> list = CollectionsUtils.filter(Arrays.asList(docs), mResponseFiler);
+        List<Document> list = CollectionsUtils.INSTANCE.filter(Arrays.asList(docs), mResponseFiler);
         return list.toArray(new Document[0]);
     }
 
