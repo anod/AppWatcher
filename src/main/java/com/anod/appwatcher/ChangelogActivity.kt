@@ -14,6 +14,7 @@ import android.support.v4.app.ShareCompat
 import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
 import android.support.v4.view.ViewCompat
+import android.support.v4.widget.TextViewCompat
 import android.support.v7.graphics.Palette
 import android.text.Html
 import android.text.TextUtils
@@ -90,7 +91,9 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
         MetricsManagerEvent.track(this, "open_changelog", "DETAILS_APP_ID", mAppId, "DETAILS_ROW_ID", rowId.toString())
 
         mDataProvider = AppViewHolderDataProvider(this, InstalledAppsProvider.PackageManager(packageManager))
-        mAppDetailsView = AppDetailsView(findViewById(R.id.container) as View, mDataProvider)
+        val contentView = findViewById<View>(R.id.container)
+        mAppDetailsView = AppDetailsView(contentView, mDataProvider)
+        TextViewCompat.setAutoSizeTextTypeWithDefaults(mAppDetailsView.title, TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM)
 
         mDetailsEndpoint = DetailsEndpoint(this)
         mDetailsEndpoint.url = mDetailsUrl

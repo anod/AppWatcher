@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.app.AppCompatDelegate
 import android.support.v7.widget.Toolbar
 import android.view.MenuItem
+import android.view.View
 import com.anod.appwatcher.Preferences
 import com.anod.appwatcher.R
 
@@ -22,7 +23,7 @@ open class ToolbarActivity : AppCompatActivity() {
     }
 
     protected fun setupToolbar() {
-        val toolbar = findViewById(R.id.toolbar) as Toolbar
+        val toolbar = findViewById<View>(R.id.toolbar) as Toolbar
         //set the Toolbar as ActionBar
         setSupportActionBar(toolbar)
 

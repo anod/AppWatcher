@@ -20,6 +20,7 @@ import android.text.TextUtils
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import com.anod.appwatcher.MarketSearchActivity
@@ -81,11 +82,11 @@ abstract class AppWatcherBaseActivity : DrawerActivity(), TextView.OnEditorActio
             AppLog.d("Restore tab: " + filterId)
         }
 
-        mViewPager = findViewById(R.id.viewpager) as ViewPager
+        mViewPager = findViewById<View>(R.id.viewpager) as ViewPager
         mViewPager.adapter = createViewPagerAdapter()
         mViewPager.currentItem = filterId
 
-        val tabLayout = findViewById(R.id.tabs) as TabLayout
+        val tabLayout = findViewById<View>(R.id.tabs) as TabLayout
         tabLayout.setupWithViewPager(mViewPager)
     }
 

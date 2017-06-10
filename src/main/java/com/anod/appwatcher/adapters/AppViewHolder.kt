@@ -45,7 +45,7 @@ open class AppViewHolder(
 
         this.detailsView = AppDetailsView(itemView, dataProvider)
 
-        itemView.findViewById(android.R.id.content).setOnClickListener(this)
+        itemView.findViewById<View>(android.R.id.content).setOnClickListener(this)
     }
 
     @OnClick(R.id.sec_action_button)

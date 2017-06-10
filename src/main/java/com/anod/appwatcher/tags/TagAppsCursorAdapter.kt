@@ -5,7 +5,6 @@ import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.widget.CheckedTextView
 import android.widget.ImageView
-import butterknife.BindView
 import butterknife.ButterKnife
 import com.anod.appwatcher.App
 import com.anod.appwatcher.R
@@ -32,7 +31,7 @@ internal class TagAppsCursorAdapter(context: Context, private val mManager: TagA
             this.app = app
             this.title.text = app.title
             this.title.isChecked = mManager.isSelected(app.appId)
-            this.itemView.findViewById(android.R.id.content).setOnClickListener(this)
+            this.itemView.findViewById<View>(android.R.id.content).setOnClickListener(this)
             mIconLoader.loadAppIntoImageView(app, this.icon, R.drawable.ic_notifications_black_24dp)
         }
 

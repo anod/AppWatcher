@@ -56,8 +56,8 @@ abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelec
         setupToolbar()
 
         if (isDrawerEnabled) {
-            mDrawerLayout = findViewById(R.id.drawer_layout) as DrawerLayout
-            mNavigationView = findViewById(R.id.nav_view) as NavigationView
+            mDrawerLayout = findViewById<View>(R.id.drawer_layout) as DrawerLayout
+            mNavigationView = findViewById<View>(R.id.nav_view) as NavigationView
             setupDrawerContent(mNavigationView!!)
             updateTags()
             val observer = TagsUpdateObserver(this)
@@ -69,14 +69,14 @@ abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelec
     private fun setupDrawerContent(navigationView: NavigationView) {
         val headerView = navigationView.getHeaderView(0)
 
-        mAccountNameView = headerView.findViewById(R.id.account_name) as TextView
-        val changeAccount = headerView.findViewById(R.id.account_change) as LinearLayout
+        mAccountNameView = headerView.findViewById<View>(R.id.account_name) as TextView
+        val changeAccount = headerView.findViewById<View>(R.id.account_change) as LinearLayout
         changeAccount.setOnClickListener { onAccountChooseClick() }
 
         val pref = Preferences(this)
         val time = pref.lastUpdateTime
 
-        val lastUpdateView = headerView.findViewById(R.id.last_update) as TextView
+        val lastUpdateView = headerView.findViewById<View>(R.id.last_update) as TextView
         if (time > 0) {
             val lastUpdate = getString(R.string.last_update, DateUtils.getRelativeDateTimeString(this, time, DateUtils.MINUTE_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, 0))
             lastUpdateView.text = lastUpdate
@@ -107,7 +107,7 @@ abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelec
             val count = counts.get(tag.id)
             val item = menu.add(1, tag.id, tag.id, tag.name)
             item.setActionView(R.layout.drawer_tag_indicator)
-            val tagIndicator = item.actionView.findViewById(android.R.id.text1) as TextView
+            val tagIndicator = item.actionView.findViewById<View>(android.R.id.text1) as TextView
             val d = ResourcesCompat.getDrawable(resources, R.drawable.circular_color, null)
             DrawableCompat.setTint(DrawableCompat.wrap(d!!), tag.color)
             tagIndicator.setBackgroundDrawable(d)

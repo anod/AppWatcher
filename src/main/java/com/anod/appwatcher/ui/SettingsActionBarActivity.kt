@@ -74,31 +74,31 @@ abstract class SettingsActionBarActivity : ToolbarActivity(), AdapterView.OnItem
                 view = convertView
             }
 
-            val title = view.findViewById(android.R.id.title) as TextView
+            val title = view.findViewById<View>(android.R.id.title) as TextView
             title.setText(pref!!.title)
 
             if (pref is Item) {
                 val item = pref
-                val icon = view.findViewById(android.R.id.icon)
+                val icon = view.findViewById<View>(android.R.id.icon)
                 if (icon != null) {
                     icon.visibility = View.GONE
                 }
 
-                val summary = view.findViewById(android.R.id.summary) as TextView
+                val summary = view.findViewById<View>(android.R.id.summary) as TextView
                 if (item.summaryRes > 0) {
                     summary.setText(item.summaryRes)
                 } else if (!TextUtils.isEmpty(item.summary)) {
                     summary.text = item.summary
                 }
 
-                val widgetFrame = view.findViewById(android.R.id.widget_frame) as ViewGroup
+                val widgetFrame = view.findViewById<View>(android.R.id.widget_frame) as ViewGroup
                 if (item.widget > 0) {
 
                     if (item is CheckboxItem) {
-                        var checkBox: CheckBox? = widgetFrame.findViewById(android.R.id.checkbox) as? CheckBox
+                        var checkBox: CheckBox? = widgetFrame.findViewById<View>(android.R.id.checkbox) as? CheckBox
                         if (checkBox == null) {
                             mInflater.inflate(item.widget, widgetFrame)
-                            checkBox = widgetFrame.findViewById(android.R.id.checkbox) as CheckBox
+                            checkBox = widgetFrame.findViewById<View>(android.R.id.checkbox) as CheckBox
                         }
                         checkBox.isChecked = item.checked
                     }
@@ -134,7 +134,7 @@ abstract class SettingsActionBarActivity : ToolbarActivity(), AdapterView.OnItem
         val preferences = initPreferenceItems()
 
         mPreferenceAdapter = PreferenceAdapter(this, preferences)
-        mListView = findViewById(android.R.id.list) as ListView
+        mListView = findViewById<View>(android.R.id.list) as ListView
         mListView.emptyView = findViewById(android.R.id.empty)
         mListView.adapter = mPreferenceAdapter
         mListView.onItemClickListener = this

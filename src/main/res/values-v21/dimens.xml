@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="playstore_button_margin_top">98dp</dimen>
+    <dimen name="playstore_button_margin_top">114dp</dimen>
 </resources>

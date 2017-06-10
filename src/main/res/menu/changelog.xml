@@ -3,12 +3,6 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/menu_uninstall"
-        app:showAsAction="ifRoom"
-        android:title="@string/uninstall" android:icon="@drawable/ic_delete_white_24dp">
-    </item>
-
-    <item
         android:id="@+id/menu_add"
         app:showAsAction="ifRoom"
         android:title="@string/menu_add" android:icon="@drawable/ic_visibility_white_24dp">
@@ -36,4 +30,9 @@
         android:title="@string/share" android:icon="@drawable/ic_share_white_24dp">
     </item>
 
+    <item
+        android:id="@+id/menu_uninstall"
+        app:showAsAction="ifRoom"
+        android:title="@string/uninstall" android:icon="@drawable/ic_delete_white_24dp">
+    </item>
 </menu>

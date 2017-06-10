@@ -85,18 +85,18 @@ class ListExportFragment : ListFragment(), ImportTask.Listener {
             }
             val entry = getItem(position)
 
-            val titleView = v!!.findViewById(android.R.id.title) as TextView
+            val titleView = v!!.findViewById<View>(android.R.id.title) as TextView
             var name = entry!!.name
             name = name.substring(0, name.lastIndexOf(DbBackupManager.FILE_EXT_DAT))
             titleView.tag = name
             titleView.text = name
 
             titleView.setOnClickListener(restoreListener)
-            val applyView = v.findViewById(R.id.apply_icon) as ImageView
+            val applyView = v.findViewById<View>(R.id.apply_icon) as ImageView
             applyView.tag = name
             applyView.setOnClickListener(restoreListener)
 
-            val deleteView = v.findViewById(R.id.delete_action_button) as ImageView
+            val deleteView = v.findViewById<View>(R.id.delete_action_button) as ImageView
             deleteView.tag = entry
             deleteView.setOnClickListener(deleteListener)
 

@@ -46,7 +46,7 @@ internal class ImportAppViewHolder(
         this.title.isChecked = checked
         title.isEnabled = !importDataProvider.isImportStarted
 
-        itemView.findViewById(android.R.id.content).setOnClickListener(this)
+        itemView.findViewById<View>(android.R.id.content).setOnClickListener(this)
 
         iconLoader.loadAppIntoImageView(app, this.icon, R.drawable.ic_notifications_black_24dp)
 

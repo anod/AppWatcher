@@ -27,7 +27,7 @@
     <dimen name="preference_item_padding_inner">8dip</dimen>
     <!-- Preference widget area width (to the left of the text) -->
     <dimen name="preference_widget_width">48dp</dimen>
-    <dimen name="playstore_button_margin_top">86dp</dimen>
+    <dimen name="playstore_button_margin_top">100dp</dimen>
 
     <!-- Navdrawer -->
 </resources>

@@ -2,6 +2,7 @@ package com.anod.appwatcher.adapters
 
 import android.support.annotation.ColorInt
 import android.support.annotation.Nullable
+import android.support.v4.widget.TextViewCompat
 import android.text.TextUtils
 import android.view.View
 import android.widget.TextView
@@ -29,8 +30,6 @@ class AppDetailsView(view: View, private val mDataProvider: AppViewHolderBase.Da
     @JvmField var price: TextView? = null
     @Nullable @BindView(R.id.update_date)
     @JvmField var updateDate: TextView? = null
-    @Nullable @BindView(R.id.app_type)
-    @JvmField var appType: TextView? = null
 
     init {
         ButterKnife.bind(this, view)
@@ -49,8 +48,6 @@ class AppDetailsView(view: View, private val mDataProvider: AppViewHolderBase.Da
             updateDate!!.text = uploadDate
             updateDate!!.visibility = View.VISIBLE
         }
-
-        appType?.visibility = View.GONE
 
         if (isLocalApp) {
             this.price!!.visibility = View.GONE

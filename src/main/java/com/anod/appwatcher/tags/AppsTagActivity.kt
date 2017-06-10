@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.support.design.widget.AppBarLayout
 import android.support.design.widget.TabLayout
 import android.view.MenuItem
+import android.view.View
 import com.anod.appwatcher.R
 import com.anod.appwatcher.fragments.AppWatcherListFragment
 import com.anod.appwatcher.model.Filters
@@ -34,14 +35,14 @@ class AppsTagActivity : AppWatcherBaseActivity() {
         mTag = intentExtras.getParcelable<Tag>(EXTRA_TAG)
         super.onCreate(savedInstanceState)
 
-        val appBarLayout = findViewById(R.id.appbar) as AppBarLayout
+        val appBarLayout = findViewById<View>(R.id.appbar) as AppBarLayout
         appBarLayout.setBackgroundColor(mTag.color)
 
         val hsv = FloatArray(3)
         Color.colorToHSV(mTag.color, hsv)
         hsv[2] *= 0.6f
         val dark = Color.HSVToColor(hsv)
-        val tabLayout = findViewById(R.id.tabs) as TabLayout
+        val tabLayout = findViewById<View>(R.id.tabs) as TabLayout
         tabLayout.setSelectedTabIndicatorColor(dark)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             window.statusBarColor = dark
