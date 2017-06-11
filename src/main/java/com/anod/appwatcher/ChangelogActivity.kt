@@ -93,7 +93,6 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
         mDataProvider = AppViewHolderDataProvider(this, InstalledAppsProvider.PackageManager(packageManager))
         val contentView = findViewById<View>(R.id.container)
         mAppDetailsView = AppDetailsView(contentView, mDataProvider)
-        TextViewCompat.setAutoSizeTextTypeWithDefaults(mAppDetailsView.title, TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM)
 
         mDetailsEndpoint = DetailsEndpoint(this)
         mDetailsEndpoint.url = mDetailsUrl

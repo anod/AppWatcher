@@ -50,6 +50,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@color/primary_text_dark"
+                    app:autoSizeTextType="uniform"
+                    app:autoSizeMinTextSize="12sp"
+                    app:autoSizeMaxTextSize="20sp"
+                    app:autoSizeStepGranularity="2sp"
                     tools:text="Netflix" />
 
                 <TextView
