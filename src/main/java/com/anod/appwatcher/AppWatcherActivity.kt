@@ -20,7 +20,7 @@ class AppWatcherActivity : AppWatcherBaseActivity(), TextView.OnEditorActionList
         supportActionBar!!.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp)
         App.provide(this).fireBase
 
-        if (mPreferences.useAutoSync()) {
+        if (mPreferences.useAutoSync) {
             SyncScheduler.schedule(this, mPreferences.isRequiresCharging)
         }
     }
@@ -29,7 +29,7 @@ class AppWatcherActivity : AppWatcherBaseActivity(), TextView.OnEditorActionList
         super.onResume()
 
         AppLog.d("mark updates as viewed.")
-        mPreferences.markViewed(true)
+        mPreferences.isLastUpdatesViewed = true
     }
 
     override val contentLayout: Int

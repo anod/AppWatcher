@@ -101,7 +101,7 @@
     <string name="pref_title_opensource">Лицензии с открытым исходным кодом</string>
     <string name="search">Поиск…</string>
     <string name="search_for_an_app">Поиск аппликации</string>
-    <string name="settings">Настройки</string>
+    <string name="preferences">Настройки</string>
     <string name="share_from_play_store">Поделиться из Play Store</string>
     <string name="sort">Упорядочить</string>
     <string name="tab_all">Все</string>

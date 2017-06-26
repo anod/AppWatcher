@@ -98,10 +98,10 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
         }
 
         val now = System.currentTimeMillis()
-        preferences.updateLastTime(now)
+        preferences.lastUpdateTime = now
 
         if (!manualSync && updatedApps.isNotEmpty() && lastUpdatesViewed) {
-            preferences.markViewed(false)
+            preferences.isLastUpdatesViewed = false
         }
 
         notifyIfNeeded(manualSync, updatedApps)
@@ -265,7 +265,7 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
             val driveSync = GDriveSync(context)
             try {
                 driveSync.syncLocked()
-                pref.saveDriveSyncTime(System.currentTimeMillis())
+                pref.lastDriveSyncTime = System.currentTimeMillis()
             } catch (e: GooglePlayServices.ResolutionException) {
                 driveSync.showResolutionNotification(e.resolution)
                 AppLog.e(e)

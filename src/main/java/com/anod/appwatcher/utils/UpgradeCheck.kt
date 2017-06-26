@@ -14,12 +14,12 @@ object UpgradeCheck {
     fun isNewVersion(preferences: Preferences): Boolean {
         val code = preferences.versionCode
         if (code > BuildConfig.VERSION_CODE) {
-            preferences.saveVersionCode(BuildConfig.VERSION_CODE)
+            preferences.versionCode = BuildConfig.VERSION_CODE
             return true
         }
 
         if (code == 0) {
-            preferences.saveVersionCode(BuildConfig.VERSION_CODE)
+            preferences.versionCode = BuildConfig.VERSION_CODE
         }
         return false
     }

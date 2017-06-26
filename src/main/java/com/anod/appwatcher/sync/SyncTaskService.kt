@@ -11,7 +11,7 @@ class SyncTaskService : GcmTaskService() {
     override fun onInitializeTasks() {
         super.onInitializeTasks()
         val prefs = Preferences(applicationContext)
-        if (prefs.useAutoSync()) {
+        if (prefs.useAutoSync) {
             SyncScheduler.schedule(applicationContext, prefs.isRequiresCharging)
         }
     }

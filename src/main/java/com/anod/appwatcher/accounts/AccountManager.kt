@@ -33,7 +33,7 @@ class AccountManager(context: Context) {
     }
 
     fun saveCurrentAccount(acc: Account) {
-        mPreferences.updateAccount(acc)
+        mPreferences.account = acc
         currentAccount = acc
     }
 }

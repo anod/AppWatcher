@@ -7,137 +7,94 @@ import android.support.v7.app.AppCompatDelegate
 
 class Preferences(context: Context) {
 
-    private val mSettings: SharedPreferences
+    private val preferences: SharedPreferences
 
     init {
-        mSettings = context.getSharedPreferences(PREFS_NAME, 0)
+        preferences = context.getSharedPreferences(PREFS_NAME, 0)
     }
 
-    val account: Account?
+    var account: Account?
         get() {
-            val name = mSettings.getString(ACCOUNT_NAME, null) ?: return null
-            val type = mSettings.getString(ACCOUNT_TYPE, null)
+            val name = preferences.getString(ACCOUNT_NAME, null) ?: return null
+            val type = preferences.getString(ACCOUNT_TYPE, null)
             return Account(name, type)
         }
-
-    fun checkFirstLaunch(): Boolean {
-        val value = mSettings.getBoolean(FIRST_LAUNCH, true)
-        if (value) {
-            saveBoolean(FIRST_LAUNCH, false)
+        set(value) {
+            val editor = preferences.edit()
+            if (value == null) {
+                editor.remove(ACCOUNT_NAME)
+                editor.remove(ACCOUNT_TYPE)
+            } else {
+                editor.putString(ACCOUNT_NAME, value.name)
+                editor.putString(ACCOUNT_TYPE, value.type)
+            }
+            editor.apply()
         }
-        return value
-    }
 
-    val lastUpdateTime: Long
-        get() = mSettings.getLong(LAST_UPDATE_TIME, -1)
+    var lastUpdateTime: Long
+        get() = preferences.getLong(LAST_UPDATE_TIME, -1)
+        set(value) = preferences.edit().putLong(LAST_UPDATE_TIME, value).apply()
 
-    val deviceId: String
-        get() = mSettings.getString(DEVICE_ID, "")
-
-    val isWifiOnly: Boolean
-        get() = mSettings.getBoolean(WIFI_ONLY, false)
-
-    fun saveDeviceId(deviceId: String?) {
-        val editor = mSettings.edit()
-        if (deviceId == null || deviceId.isEmpty()) {
-            editor.remove(DEVICE_ID)
-        } else {
-            editor.putString(DEVICE_ID, deviceId)
+    var deviceId: String
+        get() = preferences.getString(DEVICE_ID, "")
+        set(value) {
+            val editor = preferences.edit()
+            if (value.isEmpty()) {
+                editor.remove(DEVICE_ID)
+            } else {
+                editor.putString(DEVICE_ID, value)
+            }
+            editor.apply()
         }
-        editor.apply()
-    }
 
-    internal fun saveWifiOnly(useWifiOnly: Boolean) {
-        saveBoolean(WIFI_ONLY, useWifiOnly)
-    }
+    var isWifiOnly: Boolean
+        get() = preferences.getBoolean(WIFI_ONLY, false)
+        set(value) = preferences.edit().putBoolean(WIFI_ONLY, value).apply()
 
-    fun updateLastTime(time: Long) {
-        saveLong(LAST_UPDATE_TIME, time)
-    }
+    var isLastUpdatesViewed: Boolean
+        get() = preferences.getBoolean(VIEWED, true)
+        set(value) = preferences.edit().putBoolean(VIEWED, value).apply()
 
-    fun markViewed(viewed: Boolean) {
-        saveBoolean(VIEWED, viewed)
-    }
+    var isDriveSyncEnabled: Boolean
+        get() = preferences.getBoolean(DRIVE_SYNC, false)
+        set(value) = preferences.edit().putBoolean(DRIVE_SYNC, value).apply()
 
-    fun updateAccount(account: Account) {
-        val editor = mSettings.edit()
-        editor.putString(ACCOUNT_NAME, account.name)
-        editor.putString(ACCOUNT_TYPE, account.type)
-        editor.apply()
-    }
+    var lastDriveSyncTime: Long
+        get() = preferences.getLong(DRIVE_SYNC_TIME, -1)
+        set(value) = preferences.edit().putLong(DRIVE_SYNC_TIME, value).apply()
 
-    val isLastUpdatesViewed: Boolean
-        get() = mSettings.getBoolean(VIEWED, true)
-
-    val isDriveSyncEnabled: Boolean
-        get() = mSettings.getBoolean(DRIVE_SYNC, false)
-
-    internal fun saveDriveSyncEnabled(enabled: Boolean) {
-        saveBoolean(DRIVE_SYNC, enabled)
-    }
-
-    val lastDriveSyncTime: Long
-        get() = mSettings.getLong(DRIVE_SYNC_TIME, -1)
-
-    fun saveDriveSyncTime(time: Long) {
-        saveLong(DRIVE_SYNC_TIME, time)
-    }
-
-    private fun saveBoolean(key: String, value: Boolean) {
-        val editor = mSettings.edit()
-        editor.putBoolean(key, value)
-        editor.apply()
-    }
-
-    private fun saveLong(key: String, value: Long) {
-        val editor = mSettings.edit()
-        editor.putLong(key, value)
-        editor.apply()
-    }
-
-
-    fun useAutoSync(): Boolean {
-        return mSettings.getBoolean(AUTOSYNC, true)
-    }
-
-    internal fun setUseAutoSync(useAutoSync: Boolean) {
-        mSettings.edit().putBoolean(AUTOSYNC, useAutoSync).apply()
-    }
+    var useAutoSync: Boolean
+        get() = preferences.getBoolean(AUTOSYNC, true)
+        set(value) = preferences.edit().putBoolean(AUTOSYNC, value).apply()
 
     var isRequiresCharging: Boolean
-        get() = mSettings.getBoolean(REQUIRES_CHARGING, false)
-        internal set(requiresCharging) = mSettings.edit().putBoolean(REQUIRES_CHARGING, requiresCharging).apply()
+        get() = preferences.getBoolean(REQUIRES_CHARGING, false)
+        set(requiresCharging) = preferences.edit().putBoolean(REQUIRES_CHARGING, requiresCharging).apply()
 
     var sortIndex: Int
-        get() = mSettings.getInt(SORT_INDEX, 0)
-        set(index) = mSettings.edit().putInt(SORT_INDEX, index).apply()
+        get() = preferences.getInt(SORT_INDEX, 0)
+        set(index) = preferences.edit().putInt(SORT_INDEX, index).apply()
 
-    val versionCode: Int
-        get() = mSettings.getInt(VERSION_CODE, 0)
-
-    fun saveVersionCode(code: Int) {
-        mSettings.edit().putInt(VERSION_CODE, code).apply()
-    }
+    var versionCode: Int
+        get() = preferences.getInt(VERSION_CODE, 0)
+        set(value) = preferences.edit().putInt(VERSION_CODE, value).apply()
 
     var isNotifyInstalledUpToDate: Boolean
-        get() = mSettings.getBoolean(NOTIFY_INSTALLED_UPTODATE, true)
-        set(notify) = mSettings.edit().putBoolean(NOTIFY_INSTALLED_UPTODATE, notify).apply()
+        get() = preferences.getBoolean(NOTIFY_INSTALLED_UPTODATE, true)
+        set(notify) = preferences.edit().putBoolean(NOTIFY_INSTALLED_UPTODATE, notify).apply()
 
     var nightMode: Int
-        get() = mSettings.getInt(NIGHT_MODE, AppCompatDelegate.MODE_NIGHT_NO)
-        set(nightMode) = mSettings.edit().putInt(NIGHT_MODE, nightMode).apply()
+        get() = preferences.getInt(NIGHT_MODE, AppCompatDelegate.MODE_NIGHT_NO)
+        set(nightMode) = preferences.edit().putInt(NIGHT_MODE, nightMode).apply()
 
     companion object {
         private val VIEWED = "viewed"
-        private val FIRST_LAUNCH = "firt_launch"
         private val LAST_UPDATE_TIME = "last_update_time"
         private val WIFI_ONLY = "wifi_only"
         private val DEVICE_ID = "device_id"
-        private val DEVICE_ID_MESSAGE = "device_id_message"
         private val ACCOUNT_NAME = "account_name"
         private val ACCOUNT_TYPE = "account_type"
         private val SORT_INDEX = "sort_index"
-        private val EXTRACT_DATE_LOCALES = "date_locales"
 
         internal val SORT_NAME_ASC = 0
         val SORT_NAME_DESC = 1

@@ -21,7 +21,7 @@ object DeviceIdHelper {
         if (deviceId.isEmpty()) {
             return Secure.getString(cr, Secure.ANDROID_ID)
         }
-        prefs.saveDeviceId(deviceId)
+        prefs.deviceId = deviceId
         return deviceId
     }
 

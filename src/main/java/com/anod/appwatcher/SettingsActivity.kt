@@ -87,7 +87,7 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
 
         preferences.add(SettingsActionBarActivity.Category(R.string.category_updates))
 
-        val useAutoSync = mPrefs.useAutoSync()
+        val useAutoSync = mPrefs.useAutoSync
         preferences.add(SettingsActionBarActivity.CheckboxItem(R.string.menu_auto_update, 0, ACTION_AUTO_UPDATE, useAutoSync))
 
         mWifiItem = SettingsActionBarActivity.CheckboxItem(R.string.menu_wifi_only, 0, ACTION_WIFI_ONLY, mPrefs.isWifiOnly)
@@ -212,12 +212,12 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
             } else {
                 SyncScheduler.cancel(this)
             }
-            mPrefs.setUseAutoSync(useAutoSync)
+            mPrefs.useAutoSync = useAutoSync
             mWifiItem!!.enabled = useAutoSync
             mChargingItem!!.enabled = useAutoSync
         } else if (action == ACTION_WIFI_ONLY) {
             val useWifiOnly = (pref as SettingsActionBarActivity.CheckboxItem).checked
-            mPrefs.saveWifiOnly(useWifiOnly)
+            mPrefs.isWifiOnly = useWifiOnly
         } else if (action == ACTION_REQUIRES_CHARGING) {
             val requiresCharging = (pref as SettingsActionBarActivity.CheckboxItem).checked
             mPrefs.isRequiresCharging = requiresCharging
@@ -280,7 +280,7 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
         mSyncEnabledItem!!.checked = true
         mSyncEnabledItem!!.enabled = true
         mSyncNowItem!!.enabled = true
-        mPrefs.saveDriveSyncEnabled(true)
+        mPrefs.isDriveSyncEnabled = true
         notifyDataSetChanged()
         setProgressVisibility(false)
 
@@ -298,13 +298,12 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
 
     override fun onGDriveSyncFinish() {
         setProgressVisibility(false)
-        mPrefs.saveDriveSyncTime(System.currentTimeMillis())
+        mPrefs.lastDriveSyncTime = System.currentTimeMillis()
         mSyncNowItem!!.summary = getString(R.string.pref_descr_drive_sync_now, getString(R.string.now))
         mSyncNowItem!!.enabled = mSyncEnabledItem!!.checked
         notifyDataSetChanged()
         Toast.makeText(this, R.string.sync_finish, Toast.LENGTH_SHORT).show()
     }
-
 
     override fun onGDriveError() {
         setProgressVisibility(false)

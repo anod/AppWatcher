@@ -5,6 +5,7 @@ import android.content.Context
 import android.database.ContentObserver
 import android.net.Uri
 import android.os.Handler
+import com.anod.appwatcher.Preferences
 import com.anod.appwatcher.content.DbContentProvider
 import info.anodsplace.android.log.AppLog
 
@@ -23,6 +24,10 @@ class UploadServiceContentObserver(val context: Context, contentResolver: Conten
 
     override fun onChange(selfChange: Boolean, uri: Uri?) {
         super.onChange(selfChange, uri)
+
+        if (!Preferences(context).isDriveSyncEnabled) {
+            return
+        }
 
         AppLog.d("Schedule GDrive upload for ${uri.toString()}")
         UploadService.schedule(context)

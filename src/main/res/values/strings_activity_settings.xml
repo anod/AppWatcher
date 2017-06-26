@@ -1,6 +1,6 @@
 <resources>
 
-    <!-- Example settings for List sync -->
+    <!-- Exampreferencesings for List sync -->
     <string name="pref_header_drive_sync">List sync</string>
 
     <string name="pref_title_drive_sync_enabled">Google Drive sync</string>
@@ -8,7 +8,7 @@
     <string name="pref_title_drive_sync_now">Sync now</string>
     <string name="pref_descr_drive_sync_now">Last synced: %1$s</string>
 
-    <!-- Example settings for List backup -->
+    <!-- Exampreferencesings for List backup -->
     <string name="pref_header_backup">List backup</string>
 
     <string name="pref_title_export">Export</string>
@@ -17,7 +17,7 @@
     <string name="pref_descr_import">Import list for the local storage</string>
     <string name="pref_title_location">Location</string>
 
-    <!-- Example settings for About -->
+    <!-- Exampreferencesings for About -->
     <string name="pref_header_about">About</string>
 
     <string name="pref_title_about">Version</string>
