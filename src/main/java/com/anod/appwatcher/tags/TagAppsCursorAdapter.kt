@@ -15,7 +15,7 @@ import com.anod.appwatcher.utils.AppIconLoader
 
 internal class TagAppsCursorAdapter(context: Context, private val mManager: TagAppsManager)
     : RecyclerViewCursorAdapter<TagAppsCursorAdapter.ItemViewHolder, AppListCursor>(context, R.layout.list_item_import_app) {
-    private val mIconLoader: AppIconLoader = App.provide(context).iconLoader()
+    private val mIconLoader: AppIconLoader = App.provide(context).iconLoader
 
     internal class ItemViewHolder(
             itemView: View,

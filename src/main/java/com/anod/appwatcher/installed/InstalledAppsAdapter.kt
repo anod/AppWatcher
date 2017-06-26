@@ -26,7 +26,7 @@ open class InstalledAppsAdapter(
         protected val mListener: AppViewHolder.OnClickListener?)
     : ArrayAdapter<String, AppViewHolderBase>(ArrayList<String>()) {
 
-    internal val mIconLoader: AppIconLoader = App.provide(mContext).iconLoader()
+    internal val mIconLoader: AppIconLoader = App.provide(mContext).iconLoader
 
     override fun getItemViewType(position: Int): Int {
         return 2

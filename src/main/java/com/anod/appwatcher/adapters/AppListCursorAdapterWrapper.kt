@@ -21,7 +21,7 @@ class AppListCursorAdapterWrapper(
         private val mListener: AppViewHolder.OnClickListener) : RecyclerViewCursorAdapter<AppViewHolder, AppListCursor>(context, R.layout.list_item_app) {
 
     private val mDataProvider: AppViewHolderDataProvider = AppViewHolderDataProvider(context, iap)
-    private val mIconLoader: AppIconLoader = App.provide(context).iconLoader()
+    private val mIconLoader: AppIconLoader = App.provide(context).iconLoader
 
     override fun onCreateViewHolder(itemView: View): AppViewHolder {
         return AppViewHolder(itemView, mDataProvider, mIconLoader, mListener)

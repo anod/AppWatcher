@@ -84,7 +84,7 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
 
         val data = intent
 
-        mIconLoader = App.provide(this).iconLoader()
+        mIconLoader = App.provide(this).iconLoader
         mAppId = data.getStringExtra(EXTRA_APP_ID)
         mDetailsUrl = data.getStringExtra(EXTRA_DETAILS_URL)
         val rowId = data.getIntExtra(EXTRA_ROW_ID, -1)

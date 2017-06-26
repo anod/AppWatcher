@@ -11,6 +11,7 @@ import android.support.v4.app.ActivityCompat
 import android.support.v4.app.DialogFragment
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
+import com.anod.appwatcher.App
 
 import com.anod.appwatcher.AppWatcherApplication
 import com.anod.appwatcher.R
@@ -40,7 +41,7 @@ class AccountChooserFragment : DialogFragment(), DialogInterface.OnClickListener
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mAccountManager = AppWatcherApplication.provide(activity).accountManager()
+        mAccountManager = App.provide(activity).accountManager
     }
 
     override fun onAttach(context: Context?) {

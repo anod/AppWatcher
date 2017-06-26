@@ -3,6 +3,7 @@ package com.anod.appwatcher
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.NoCache
 import com.anod.appwatcher.accounts.AccountManager
+import com.anod.appwatcher.backup.gdrive.UploadServiceContentObserver
 import com.anod.appwatcher.market.DeviceIdHelper
 import com.anod.appwatcher.market.Network
 import com.anod.appwatcher.utils.AppIconLoader
@@ -15,50 +16,65 @@ import com.google.firebase.analytics.FirebaseAnalytics
  * @date 2015-02-22
  */
 class ObjectGraph internal constructor(private val app: AppWatcherApplication) {
-    private var mRequestQueue: RequestQueue? = null
-    private var mDeviceId: String? = null
-    private var mAccountManager: AccountManager? = null
-    private var mIconLoader: AppIconLoader? = null
-    private var mFirebaseAnalytics: FirebaseAnalytics? = null
 
-    fun accountManager(): AccountManager {
-        if (mAccountManager == null) {
-            mAccountManager = AccountManager(this.app)
+    private var _uploadServiceContentObserver: UploadServiceContentObserver? = null
+    val uploadServiceContentObserver: UploadServiceContentObserver
+        get() {
+            if (_uploadServiceContentObserver == null) {
+                _uploadServiceContentObserver = UploadServiceContentObserver(app, app.contentResolver)
+            }
+            return _uploadServiceContentObserver!!
         }
-        return mAccountManager!!
-    }
 
-    fun deviceId(): String {
-        if (mDeviceId == null) {
-            val prefs = Preferences(this.app)
-            mDeviceId = DeviceIdHelper.getDeviceId(this.app, prefs)
+    private var _accountManager: AccountManager? = null
+    val accountManager: AccountManager
+        get() {
+            if (_accountManager == null) {
+                _accountManager = AccountManager(this.app)
+            }
+            return _accountManager!!
         }
-        return mDeviceId!!
-    }
 
-    fun requestQueue(): RequestQueue {
-        if (mRequestQueue == null) {
-            mRequestQueue = RequestQueue(NoCache(), Network(), 2)
-            mRequestQueue!!.start()
+    private var _deviceId: String? = null
+    val deviceId: String
+        get() {
+            if (_deviceId == null) {
+                val prefs = Preferences(this.app)
+                _deviceId = DeviceIdHelper.getDeviceId(this.app, prefs)
+            }
+            return _deviceId!!
         }
-        return mRequestQueue!!
-    }
 
-    fun iconLoader(): AppIconLoader {
-        if (mIconLoader == null) {
-            mIconLoader = AppIconLoader(this.app)
+    private var _requestQueue: RequestQueue? = null
+    val requestQueue: RequestQueue
+        get() {
+            if (_requestQueue == null) {
+                _requestQueue = RequestQueue(NoCache(), Network(), 2)
+                _requestQueue!!.start()
+            }
+            return _requestQueue!!
         }
-        return mIconLoader!!
-    }
 
-    fun gcmNetworkManager(): GcmNetworkManager {
-        return GcmNetworkManager.getInstance(this.app)
-    }
-
-    fun firebase(): FirebaseAnalytics {
-        if (mFirebaseAnalytics == null) {
-            mFirebaseAnalytics = FirebaseAnalytics.getInstance(this.app)
+    private var _iconLoader: AppIconLoader? = null
+    val  iconLoader: AppIconLoader
+        get() {
+            if (_iconLoader == null) {
+                _iconLoader = AppIconLoader(this.app)
+            }
+            return _iconLoader!!
         }
-        return mFirebaseAnalytics!!
-    }
+
+    val gcmNetworkManager: GcmNetworkManager
+        get() {
+            return GcmNetworkManager.getInstance(this.app)
+        }
+
+    private var _fireBaseAnalytics: FirebaseAnalytics? = null
+    val fireBase: FirebaseAnalytics
+        get() {
+            if (_fireBaseAnalytics == null) {
+                _fireBaseAnalytics = FirebaseAnalytics.getInstance(this.app)
+            }
+            return _fireBaseAnalytics!!
+        }
 }

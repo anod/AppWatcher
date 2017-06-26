@@ -3,9 +3,7 @@ package com.anod.appwatcher.sync
 import android.content.Intent
 import com.anod.appwatcher.Preferences
 import com.anod.appwatcher.content.DbContentProvider
-import com.google.android.gms.gcm.GcmNetworkManager
-import com.google.android.gms.gcm.GcmTaskService
-import com.google.android.gms.gcm.TaskParams
+import com.google.android.gms.gcm.*
 import info.anodsplace.android.log.AppLog
 
 class SyncTaskService : GcmTaskService() {

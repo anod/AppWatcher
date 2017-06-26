@@ -10,11 +10,11 @@ import android.content.Context
 object App {
 
     fun with(context: Context): AppWatcherApplication {
-        return AppWatcherApplication.get(context)
+        return context.applicationContext as AppWatcherApplication
     }
 
     fun provide(context: Context): ObjectGraph {
-        return AppWatcherApplication.provide(context)
+        return (context.applicationContext as AppWatcherApplication).objectGraph
     }
 
 }

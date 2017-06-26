@@ -18,7 +18,7 @@ class AppWatcherActivity : AppWatcherBaseActivity(), TextView.OnEditorActionList
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportActionBar!!.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp)
-        App.provide(this).firebase()
+        App.provide(this).fireBase
 
         if (mPreferences.useAutoSync()) {
             SyncScheduler.schedule(this, mPreferences.isRequiresCharging)

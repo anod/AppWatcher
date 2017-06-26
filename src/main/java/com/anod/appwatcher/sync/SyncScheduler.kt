@@ -33,10 +33,10 @@ object SyncScheduler {
                 .setUpdateCurrent(true)
                 .build()
 
-        App.provide(context).gcmNetworkManager().schedule(task)
+        App.provide(context).gcmNetworkManager.schedule(task)
     }
 
     fun cancel(context: Context) {
-        App.provide(context).gcmNetworkManager().cancelTask(TASK_TAG, SyncTaskService::class.java)
+        App.provide(context).gcmNetworkManager.cancelTask(TASK_TAG, SyncTaskService::class.java)
     }
 }

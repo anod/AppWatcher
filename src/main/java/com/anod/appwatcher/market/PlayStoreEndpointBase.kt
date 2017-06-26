@@ -5,6 +5,7 @@ import android.content.Context
 
 import com.android.volley.Response
 import com.android.volley.VolleyError
+import com.anod.appwatcher.App
 import com.anod.appwatcher.AppWatcherApplication
 import com.google.android.finsky.api.DfeApi
 import com.google.android.finsky.api.DfeApiContext
@@ -54,8 +55,8 @@ abstract class PlayStoreEndpointBase internal constructor(context: Context) : Pl
 
     private fun init() {
         if (dfeApi == null) {
-            val queue = AppWatcherApplication.provide(mContext).requestQueue()
-            val deviceId = AppWatcherApplication.provide(mContext).deviceId()
+            val queue = App.provide(mContext).requestQueue
+            val deviceId = App.provide(mContext).deviceId
             val dfeApiContext = DfeApiContext.create(mContext, mAccount, authSubToken, deviceId, ContentLevel.create(mContext).dfeValue)
             dfeApi = DfeApiImpl(queue, dfeApiContext)
         }

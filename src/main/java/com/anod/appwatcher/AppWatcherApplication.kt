@@ -11,8 +11,7 @@ import com.google.firebase.crash.FirebaseCrash
 import info.anodsplace.android.log.AppLog
 
 class AppWatcherApplication : Application(), AppLog.Listener {
-    var objectGraph: ObjectGraph? = null
-        private set
+    lateinit var objectGraph: ObjectGraph
 
     override fun onCreate() {
         super.onCreate()
@@ -69,13 +68,4 @@ class AppWatcherApplication : Application(), AppLog.Listener {
         }
     }
 
-    companion object {
-        operator fun get(context: Context): AppWatcherApplication {
-            return context.applicationContext as AppWatcherApplication
-        }
-
-        fun provide(context: Context): ObjectGraph {
-            return (context.applicationContext as AppWatcherApplication).objectGraph!!
-        }
-    }
 }

@@ -197,21 +197,21 @@ open class DbContentProvider : ContentProvider() {
     }
 
     companion object {
-        val AUTHORITY = BuildConfig.APPLICATION_ID
+        const val AUTHORITY = BuildConfig.APPLICATION_ID
 
-        private val APP_LIST = 10
-        private val APP_ROW = 20
-        private val APP_TAGS = 100
-        private val APPS_TAG = 60
-        private val APPS_TAGS_CLEAN = 110
+        private const val APP_LIST = 10
+        private const val APP_ROW = 20
+        private const val APP_TAGS = 100
+        private const val APPS_TAG = 60
+        private const val APPS_TAGS_CLEAN = 110
 
-        private val TAG_LIST = 30
-        private val TAG_ROW = 40
-        private val TAG_APPS = 50
-        private val TAGS_APPS = 80
-        private val TAGS_APPS_COUNT = 90
+        private const val TAG_LIST = 30
+        private const val TAG_ROW = 40
+        private const val TAG_APPS = 50
+        private const val TAGS_APPS = 80
+        private const val TAGS_APPS_COUNT = 90
 
-        private val ICON_ROW = 70
+        private const val ICON_ROW = 70
 
         val APPS_CONTENT_URI = Uri.parse("content://$AUTHORITY/apps")!!
         val APPS_TAG_CONTENT_URI = Uri.parse("content://$AUTHORITY/apps/tags")!!

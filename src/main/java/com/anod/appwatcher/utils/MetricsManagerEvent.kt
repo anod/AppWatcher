@@ -20,6 +20,6 @@ object MetricsManagerEvent {
             i += 2
         }
 
-        App.provide(context).firebase().logEvent(eventName, bundle)
+        App.provide(context).fireBase.logEvent(eventName, bundle)
     }
 }
