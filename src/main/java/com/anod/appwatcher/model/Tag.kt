@@ -14,6 +14,8 @@ class Tag(val id: Int, val name: String, @ColorInt val color: Int) : Parcelable 
 
     constructor(name: String) : this(-1, name, DEFAULT_COLOR)
 
+    constructor(name: String, @ColorInt color: Int) : this(-1, name, color)
+
     internal constructor(source: Parcel) : this(
             source.readInt(),
             source.readString(),

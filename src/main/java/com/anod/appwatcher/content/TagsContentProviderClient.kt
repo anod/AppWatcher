@@ -16,14 +16,14 @@ import info.anodsplace.android.log.AppLog
 
 class TagsContentProviderClient {
 
-    private var mContentProviderClient: ContentProviderClient
+    private var contentProviderClient: ContentProviderClient
 
     constructor(context: Context) {
-        mContentProviderClient = context.contentResolver.acquireContentProviderClient(DbContentProvider.AUTHORITY)
+        contentProviderClient = context.contentResolver.acquireContentProviderClient(DbContentProvider.AUTHORITY)
     }
 
     constructor(provider: ContentProviderClient) {
-        mContentProviderClient = provider
+        contentProviderClient = provider
     }
 
     fun queryAll(): TagsCursor {
@@ -33,7 +33,7 @@ class TagsContentProviderClient {
     fun queryTagsAppsCounts(): SparseIntArray {
         val counts = SparseIntArray()
         try {
-            val cr = mContentProviderClient.query(DbContentProvider.TAGS_APPS_COUNT_CONTENT_URI, null, null, null, null) ?: NullCursor()
+            val cr = contentProviderClient.query(DbContentProvider.TAGS_APPS_COUNT_CONTENT_URI, null, null, null, null) ?: NullCursor()
             cr.moveToPosition(-1)
             while (cr.moveToNext()) {
                 counts.put(cr.getInt(0), cr.getInt(1))
@@ -49,7 +49,7 @@ class TagsContentProviderClient {
     fun query(sortOrder: String, selection: String?, selectionArgs: Array<String>?): TagsCursor {
         var cr: Cursor? = null
         try {
-            cr = mContentProviderClient.query(DbContentProvider.TAGS_CONTENT_URI,
+            cr = contentProviderClient.query(DbContentProvider.TAGS_CONTENT_URI,
                     TagsTable.PROJECTION, selection, selectionArgs, sortOrder
             )
         } catch (e: RemoteException) {
@@ -60,7 +60,7 @@ class TagsContentProviderClient {
     }
 
     fun close() {
-        mContentProviderClient.release()
+        contentProviderClient.release()
     }
 
     companion object {

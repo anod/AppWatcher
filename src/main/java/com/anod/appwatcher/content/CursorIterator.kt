@@ -10,16 +10,26 @@ import android.database.CursorWrapper
  * *
  * @date 10/03/2017.
  */
+abstract class CursorIterator<O>(cursor: Cursor?)
+    : CursorWrapper(cursor ?: NullCursor()), CrossProcessCursor, Iterable<O>, Iterator<O> {
 
-open class CursorWrapperCrossProcess(cursor: Cursor?)
-    : CursorWrapper(cursor ?: NullCursor()), CrossProcessCursor {
+    class Default(cursor: Cursor?): CursorIterator<Cursor>(cursor) {
+        override fun next(): Cursor {
+            return this
+        }
+    }
 
-//    @Throws(Throwable::class)
-//    protected override fun finalize() {
-//        // Do not remove this empty method. It is designed to prevent calls to super.
-//        // Fixes bug on Droid 2, Droid Razr, where CursorWrapper finalizer closes the Cursor!
-//        // @see http://stackoverflow.com/questions/6552405/android-compatibility-library-cursorloader-java-lang-illegalstateexception-cu
-//    }
+    init {
+        this.moveToPosition(-1)
+    }
+
+    override fun iterator(): Iterator<O> {
+        return this
+    }
+
+    override fun hasNext(): Boolean {
+        return moveToNext()
+    }
 
     /**
      * Wrapper of cursor that runs in another process should implement CrossProcessCursor

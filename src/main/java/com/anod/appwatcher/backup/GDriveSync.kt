@@ -10,6 +10,7 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.backup.gdrive.ApiClientAsyncTask
 import com.anod.appwatcher.backup.gdrive.SyncConnectedWorker
 import com.anod.appwatcher.backup.gdrive.SyncTask
+import com.anod.appwatcher.backup.gdrive.UploadConnectedWorker
 import com.anod.appwatcher.utils.GooglePlayServices
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.drive.Drive
@@ -76,6 +77,15 @@ class GDriveSync : GooglePlayServices, SyncTask.Listener {
         }
         val worker = SyncConnectedWorker(mContext, mGoogleApiClient!!)
         worker.doSyncInBackground()
+    }
+
+    @Throws(Exception::class)
+    fun uploadLocked() {
+        if (!isConnected) {
+            connectLocked()
+        }
+        val worker = UploadConnectedWorker(mContext, mGoogleApiClient!!)
+        worker.doUploadInBackground()
     }
 
     override fun createGoogleApiClientBuilder(): GoogleApiClient.Builder {

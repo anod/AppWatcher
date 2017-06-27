@@ -104,7 +104,6 @@ class DbContentProviderClient {
         } catch (e: RemoteException) {
             AppLog.e(e.message)
         }
-
         return null
     }
 
@@ -121,7 +120,6 @@ class DbContentProviderClient {
         } catch (e: RemoteException) {
             AppLog.e(e.message)
         }
-
         return 0
     }
 
@@ -134,7 +132,6 @@ class DbContentProviderClient {
         } catch (e: RemoteException) {
             AppLog.e(e)
         }
-
         return 0
     }
 
@@ -142,13 +139,13 @@ class DbContentProviderClient {
         var numRows = 0
         try {
             numRows = mContentProviderClient.delete(
-                    DbContentProvider.APPS_CONTENT_URI,
-                    AppListTable.Columns.KEY_STATUS + " = ?",
-                    arrayOf(AppInfoMetadata.STATUS_DELETED.toString())
+                DbContentProvider.APPS_CONTENT_URI,
+                AppListTable.Columns.KEY_STATUS + " = ?",
+                arrayOf(AppInfoMetadata.STATUS_DELETED.toString())
             )
 
             val tagsCleaned = mContentProviderClient.delete(
-                    DbContentProvider.APPS_TAG_CLEAN_CONTENT_URI, null, null
+                DbContentProvider.APPS_TAG_CLEAN_CONTENT_URI, null, null
             )
             AppLog.d("Deleted $numRows rows, tags $tagsCleaned cleaned")
         } catch (e: RemoteException) {
@@ -164,7 +161,8 @@ class DbContentProviderClient {
 
     fun queryAppId(packageName: String): AppInfo? {
         val cr = queryApps(null,
-                AppListTable.Columns.KEY_PACKAGE + " = ? AND " + AppListTable.Columns.KEY_STATUS + " != ?", arrayOf(packageName, AppInfoMetadata.STATUS_DELETED.toString()))
+                AppListTable.Columns.KEY_PACKAGE + " = ? AND " + AppListTable.Columns.KEY_STATUS + " != ?",
+                arrayOf(packageName, AppInfoMetadata.STATUS_DELETED.toString()))
         if (cr.count == 0) {
             return null
         }
@@ -184,11 +182,7 @@ class DbContentProviderClient {
         if (cr.count == 0) {
             return null
         }
-        cr.moveToPosition(-1)
-        var info: AppInfo? = null
-        if (cr.moveToNext()) {
-            info = cr.appInfo
-        }
+        val info = cr.appInfo
         cr.close()
 
         return info
@@ -295,21 +289,20 @@ class DbContentProviderClient {
         } catch (e: RemoteException) {
             AppLog.e(e)
         }
-
     }
 
-    fun queryAppTags(): Cursor {
+    fun queryAppTags(): AppTagCursor {
         try {
             val cr = mContentProviderClient.query(
                     DbContentProvider.TAGS_APPS_CONTENT_URI,
                     AppTagsTable.PROJECTION, null, null, null
             )
-            return cr ?: NullCursor()
+            return AppTagCursor(cr)
         } catch (e: RemoteException) {
             AppLog.e(e)
         }
 
-        return NullCursor()
+        return AppTagCursor(null)
     }
 
     fun setAppsToTag(appIds: List<String>, tagId: Int): Boolean {

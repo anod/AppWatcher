@@ -6,6 +6,7 @@ import android.database.ContentObserver
 import android.net.Uri
 import android.os.Bundle
 import com.anod.appwatcher.App
+import com.anod.appwatcher.Preferences
 import com.anod.appwatcher.backup.GDriveSync
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.utils.GooglePlayServices
@@ -45,9 +46,10 @@ class UploadService : GcmTaskService() {
 
             AppLog.d("DriveSync perform sync")
             val driveSync = GDriveSync(applicationContext)
+            val prefs = Preferences(applicationContext)
             try {
-                driveSync.syncLocked()
-//                pref.saveDriveSyncTime(System.currentTimeMillis())
+                driveSync.uploadLocked()
+                prefs.lastDriveSyncTime = System.currentTimeMillis()
             } catch (e: GooglePlayServices.ResolutionException) {
                 driveSync.showResolutionNotification(e.resolution)
                 AppLog.e(e)
