@@ -272,12 +272,12 @@ open class AppWatcherListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
     }
 
     companion object {
-        internal val ARG_FILTER = "filter"
-        internal val ARG_SORT = "sort"
-        internal val ARG_TAG = "tag"
-        internal val ARG_SECTION_PROVIDER = "section"
+        internal const val ARG_FILTER = "filter"
+        internal const val ARG_SORT = "sort"
+        internal const val ARG_TAG = "tag"
+        internal const val ARG_SECTION_PROVIDER = "section"
 
-        private val REQUEST_APP_INFO = 1
+        private const val REQUEST_APP_INFO = 1
 
         fun newInstance(filterId: Int, sortId: Int, sectionProvider: SectionProvider, tag: Tag?): AppWatcherListFragment {
             val frag = AppWatcherListFragment()

@@ -182,6 +182,7 @@ class DbContentProviderClient {
         if (cr.count == 0) {
             return null
         }
+        cr.moveToNext()
         val info = cr.appInfo
         cr.close()
 
