@@ -21,10 +21,13 @@ class InstalledLoader(
         tag: Tag?,
         private val mPackageManager: PackageManager)
     : AppListCursorLoader(context, titleFilter, sortId, cursorFilter, tag) {
+
     private val mTitleCache = SimpleArrayMap<String, String>()
     private val mUpdateTimeCache = SimpleArrayMap<String, Long>()
 
-    var installedApps: List<String> = ArrayList()
+    var installedApps = listOf<String>()
+        private set
+    var recentlyInstalled = listOf<String>()
         private set
 
     override fun loadInBackground(): Cursor {
@@ -45,6 +48,8 @@ class InstalledLoader(
         } else {
             Collections.sort(list, AppTitleComparator(1, this))
         }
+
+        this.recentlyInstalled = list.sortedWith(AppUpdateTimeComparator(-1, this)).take(10)
 
         if (!TextUtils.isEmpty(mTitleFilter)) {
             val filtered = ArrayList<String>(list.size)

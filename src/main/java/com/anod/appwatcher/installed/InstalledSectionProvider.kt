@@ -37,6 +37,6 @@ class InstalledSectionProvider : AppWatcherListFragment.DefaultSection() {
     }
 
     companion object {
-        private val ADAPTER_INSTALLED = 1
+        private const val ADAPTER_INSTALLED = 1
     }
 }

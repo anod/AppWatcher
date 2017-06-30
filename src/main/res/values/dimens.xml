@@ -3,6 +3,7 @@
 
     <dimen name="icon_size">40dip</dimen>
     <dimen name="icon_wrapper">56dip</dimen>
+    <dimen name="icon_size_big">56dip</dimen>
 
     <!-- Dialog title height -->
 
