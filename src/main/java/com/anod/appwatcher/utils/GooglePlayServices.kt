@@ -19,41 +19,47 @@ import java.util.concurrent.CountDownLatch
  * *
  * @date 7/30/14.
  */
-abstract class GooglePlayServices : GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ActivityListener.ResultListener {
-    private val activity: Activity?
-    protected val mContext: Context
-    protected var mGoogleApiClient: GoogleApiClient? = null
-    private var mOnConnectAction: Int = 0
-    private var mResolutionIntent: PendingIntent? = null
+class GooglePlayServices(context: Context, private val listener: Listener) : GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ActivityListener.ResultListener {
+    private val activity: Activity? = if (context is Activity) context else null
+    private val context: Context = context.applicationContext
+    val googleApiClient: GoogleApiClient by lazy {
+        listener.createGoogleApiClientBuilder()
+            .addConnectionCallbacks(this)
+            .addOnConnectionFailedListener(this)
+            .build()
+    }
+    private var onConnectAction: Int = 0
+    private var resolutionIntent: PendingIntent? = null
+
+
+    interface Listener {
+        fun onConnectAction(action: Int)
+        fun createGoogleApiClientBuilder(): GoogleApiClient.Builder
+        fun onConnectionError()
+        fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
+    }
 
     class ResolutionException internal constructor(message: String, val resolution: PendingIntent) : Exception(message)
 
-    constructor(activity: Activity) {
-        mContext = activity.applicationContext
-        this.activity = activity
-    }
+    val isConnected: Boolean
+        get() = googleApiClient.isConnected
 
-    constructor(context: Context) {
-        mContext = context.applicationContext
-        activity = null
-    }
+    val isSupported: Boolean
+        get() = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS
 
     fun connect() {
         if (!isConnected) {
             connectWithAction(ACTION_CONNECT)
         } else {
-            onConnectAction(ACTION_CONNECT)
+            listener.onConnectAction(ACTION_CONNECT)
         }
     }
 
     @Throws(Exception::class)
     fun connectLocked() {
-        if (mGoogleApiClient == null) {
-            mGoogleApiClient = createGoogleApiClientBuilder().build()
-        }
-        mResolutionIntent = null
+        resolutionIntent = null
         val latch = CountDownLatch(1)
-        mGoogleApiClient!!.registerConnectionCallbacks(object : GoogleApiClient.ConnectionCallbacks {
+        googleApiClient.registerConnectionCallbacks(object : GoogleApiClient.ConnectionCallbacks {
             override fun onConnectionSuspended(cause: Int) {}
 
             override fun onConnected(arg0: Bundle?) {
@@ -61,41 +67,37 @@ abstract class GooglePlayServices : GoogleApiClient.ConnectionCallbacks, GoogleA
             }
         })
 
-        mGoogleApiClient!!.registerConnectionFailedListener { result ->
-            mResolutionIntent = result.resolution
+        googleApiClient.registerConnectionFailedListener { result ->
+            resolutionIntent = result.resolution
             latch.countDown()
             AppLog.e(result.toString())
         }
-        mGoogleApiClient!!.connect()
+        googleApiClient.connect()
         latch.await()
-        if (!mGoogleApiClient!!.isConnected) {
-            val resolution = if (mResolutionIntent == null) "none" else mResolutionIntent!!.toString()
-            throw ResolutionException("Cannot connect to Google Play Services. See log. Resolution: " + resolution, mResolutionIntent!!)
+        if (!googleApiClient.isConnected) {
+            val resolution = if (resolutionIntent == null) "none" else resolutionIntent!!.toString()
+            throw ResolutionException("Cannot connect to Google Play Services. See log. Resolution: " + resolution, resolutionIntent!!)
         }
     }
 
     fun disconnect() {
-        mGoogleApiClient?.disconnect()
+        googleApiClient.disconnect()
     }
 
-    val isSupported: Boolean
-        get() = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(mContext) == ConnectionResult.SUCCESS
-
     override fun onConnected(bundle: Bundle?) {
-        onConnectAction(mOnConnectAction)
+        listener.onConnectAction(onConnectAction)
     }
 
     override fun onConnectionSuspended(i: Int) {
 
     }
 
-
     override fun onConnectionFailed(result: ConnectionResult) {
         AppLog.e("GoogleApiClient connection failed: " + result.toString())
 
         if (!result.hasResolution()) {
             // show the localized error dialog.
-            onConnectionError()
+            listener.onConnectionError()
             GoogleApiAvailability.getInstance().getErrorDialog(activity, result.errorCode, 0).show()
             return
         }
@@ -103,65 +105,47 @@ abstract class GooglePlayServices : GoogleApiClient.ConnectionCallbacks, GoogleA
             result.startResolutionForResult(activity, REQUEST_CODE_RESOLUTION)
         } catch (e: IntentSender.SendIntentException) {
             AppLog.e(e)
-            onConnectionError()
+            listener.onConnectionError()
         }
 
     }
 
-
-    val isConnected: Boolean
-        get() = mGoogleApiClient != null && mGoogleApiClient!!.isConnected
-
     /**
      * @return
      */
-    val playServiceStatusText: String
+    val errorCodeText: String
         get() {
-            val errorCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(mContext)
+            val errorCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context)
             if (errorCode == ConnectionResult.SERVICE_MISSING) {
-                return mContext.getString(R.string.gms_service_missing)
+                return context.getString(R.string.gms_service_missing)
             }
             if (errorCode == ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED) {
-                return mContext.getString(R.string.gms_service_update_required)
+                return context.getString(R.string.gms_service_update_required)
             }
             if (errorCode == ConnectionResult.SERVICE_DISABLED) {
-                return mContext.getString(R.string.gms_service_disabled)
+                return context.getString(R.string.gms_service_disabled)
             }
             if (errorCode == ConnectionResult.SERVICE_INVALID) {
-                return mContext.getString(R.string.gms_service_invalid)
+                return context.getString(R.string.gms_service_invalid)
             }
             return GoogleApiAvailability.getInstance().getErrorString(errorCode)
         }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_CODE_RESOLUTION && resultCode == Activity.RESULT_OK) {
-            connectWithAction(mOnConnectAction)
+            connectWithAction(onConnectAction)
         }
     }
 
 
-    protected fun connectWithAction(action: Int) {
-        mOnConnectAction = action
-        if (mGoogleApiClient == null) {
-
-            mGoogleApiClient = createGoogleApiClientBuilder()
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .build()
-        }
-        mGoogleApiClient!!.connect()
+    fun connectWithAction(action: Int) {
+        onConnectAction = action
+        googleApiClient.connect()
     }
-
-    protected abstract fun onConnectAction(action: Int)
-    protected abstract fun createGoogleApiClientBuilder(): GoogleApiClient.Builder
-    protected abstract fun onConnectionError()
 
     companion object {
-
-        internal val REQUEST_CODE_RESOLUTION = 123
-
-        private val ACTION_CONNECT = 1
+        internal const val REQUEST_CODE_RESOLUTION = 123
+        private const val ACTION_CONNECT = 1
     }
-
 
 }

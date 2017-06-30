@@ -1,9 +1,9 @@
 package com.anod.appwatcher.backup
 
-import android.app.Activity
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.support.v4.app.NotificationCompat
 import android.widget.Toast
 import com.anod.appwatcher.R
@@ -20,22 +20,30 @@ import com.google.android.gms.drive.Drive
  * *
  * @date 1/19/14
  */
-class GDriveSync : GooglePlayServices, SyncTask.Listener {
+class GDriveSync(private val context: Context): SyncTask.Listener, GooglePlayServices.Listener {
 
     var listener: Listener? = null
+    val playServices = GooglePlayServices(context, this)
+
+    val isSupported: Boolean
+        get() = playServices.isSupported
+
+    val playServiceStatusText: String
+        get() = playServices.errorCodeText
+
 
     fun showResolutionNotification(resolution: PendingIntent) {
-        val builder = NotificationCompat.Builder(mContext)
+        val builder = NotificationCompat.Builder(context)
         builder
                 .setAutoCancel(true)
                 .setSmallIcon(R.drawable.ic_stat_update)
-                .setContentTitle("Google Drive sync failed.")
-                .setContentText("Required user action")
+                .setContentTitle(context.getString(R.string.google_drive_sync_failed))
+                .setContentText(context.getString(R.string.user_action_required))
                 .setContentIntent(resolution)
 
         val notification = builder.build()
-        val mNotificationManager = mContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        mNotificationManager.notify(NOTIFICATION_ID, notification)
+        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.notify(NOTIFICATION_ID, notification)
     }
 
     interface Listener {
@@ -46,14 +54,47 @@ class GDriveSync : GooglePlayServices, SyncTask.Listener {
         fun onGDriveError()
     }
 
-    constructor(activity: Activity) : super(activity)
+    fun connect() {
+        playServices.connect()
+    }
 
-    constructor(context: Context) : super(context)
+    fun sync() {
+        listener?.onGDriveSyncStart()
+        if (!playServices.isConnected) {
+            playServices.connectWithAction(ACTION_SYNC)
+        } else {
+            SyncTask(context, this, createGoogleApiClientBuilder().build()).execute()
+        }
+    }
+
+    @Throws(Exception::class)
+    fun syncLocked() {
+        if (!playServices.isConnected) {
+            playServices.connectLocked()
+        }
+        val worker = SyncConnectedWorker(context, playServices.googleApiClient)
+        worker.doSyncInBackground()
+    }
+
+    @Throws(Exception::class)
+    fun uploadLocked() {
+        if (!playServices.isConnected) {
+            playServices.connectLocked()
+        }
+        val worker = UploadConnectedWorker(context, playServices.googleApiClient)
+        worker.doUploadInBackground()
+    }
+
+    override fun createGoogleApiClientBuilder(): GoogleApiClient.Builder {
+        return GoogleApiClient.Builder(context)
+                .addApi(Drive.API)
+                .addScope(Drive.SCOPE_APPFOLDER)
+    }
 
     override fun onConnectAction(action: Int) {
         listener?.onGDriveConnect()
         if (action == ACTION_SYNC) {
-            SyncTask(mContext, this, createGoogleApiClientBuilder().build()).execute()
+            SyncTask(context, this, createGoogleApiClientBuilder().build()).execute()
         }
     }
 
@@ -61,44 +102,16 @@ class GDriveSync : GooglePlayServices, SyncTask.Listener {
         listener?.onGDriveError()
     }
 
-    fun sync() {
-        listener?.onGDriveSyncStart()
-        if (!isConnected) {
-            connectWithAction(ACTION_SYNC)
-        } else {
-            SyncTask(mContext, this, createGoogleApiClientBuilder().build()).execute()
-        }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        playServices.onActivityResult(requestCode, resultCode, data)
     }
 
-    @Throws(Exception::class)
-    fun syncLocked() {
-        if (!isConnected) {
-            connectLocked()
-        }
-        val worker = SyncConnectedWorker(mContext, mGoogleApiClient!!)
-        worker.doSyncInBackground()
-    }
-
-    @Throws(Exception::class)
-    fun uploadLocked() {
-        if (!isConnected) {
-            connectLocked()
-        }
-        val worker = UploadConnectedWorker(mContext, mGoogleApiClient!!)
-        worker.doUploadInBackground()
-    }
-
-    override fun createGoogleApiClientBuilder(): GoogleApiClient.Builder {
-        return GoogleApiClient.Builder(mContext)
-                .addApi(Drive.API)
-                .addScope(Drive.SCOPE_APPFOLDER)
-    }
 
     override fun onResult(result: ApiClientAsyncTask.Result) {
         if (result.status) {
             listener?.onGDriveSyncFinish()
         } else {
-            Toast.makeText(mContext, result.ex?.message ?: "Error", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, result.ex?.message ?: "Error", Toast.LENGTH_SHORT).show()
             listener?.onGDriveError()
         }
     }
