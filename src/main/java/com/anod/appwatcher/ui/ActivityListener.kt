@@ -9,6 +9,6 @@ import android.content.Intent
 interface ActivityListener {
 
     interface ResultListener {
-        fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent)
+        fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
     }
 }

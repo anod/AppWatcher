@@ -151,14 +151,14 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_BACKUP_FILE) {
             if (resultCode == Activity.RESULT_OK) {
-                ImportTask(this, this).execute(data.data)
+                ImportTask(this, this).execute(data!!.data)
             }
         } else if (requestCode == REQUEST_BACKUP_DEST) {
             if (resultCode == Activity.RESULT_OK) {
-                ExportTask(this, this).execute(data.data)
+                ExportTask(this, this).execute(data!!.data)
             }
         } else {
             mGDriveSync!!.onActivityResult(requestCode, resultCode, data)

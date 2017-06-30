@@ -398,7 +398,7 @@ class DbContentProviderClient {
     fun addAppTags(appTags: List<AppTag>) {
         val tagApps = SimpleArrayMap<Int, List<String>>()
         for (appTag in appTags) {
-            var list: MutableList<String>? = tagApps.get(appTag.tagId).toMutableList()
+            var list: MutableList<String>? = tagApps.get(appTag.tagId)?.toMutableList()
             if (list == null) {
                 list = ArrayList<String>()
                 tagApps.put(appTag.tagId, list)
