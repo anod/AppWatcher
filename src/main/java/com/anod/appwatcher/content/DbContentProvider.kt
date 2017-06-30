@@ -11,6 +11,7 @@ import android.provider.BaseColumns
 
 import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.model.DbOpenHelper
+import com.anod.appwatcher.model.Tag
 import com.anod.appwatcher.model.schema.AppListTable
 import com.anod.appwatcher.model.schema.AppTagsTable
 import com.anod.appwatcher.model.schema.TagsTable
@@ -245,6 +246,12 @@ open class DbContentProvider : ContentProvider() {
         fun matchIconUri(uri: Uri): Boolean {
             return sURIMatcher.match(uri) == ICON_ROW
         }
-    }
 
+        fun appsContentUri(tag: Tag?): Uri {
+            return if (tag == null)
+                DbContentProvider.APPS_CONTENT_URI
+            else
+                DbContentProvider.APPS_TAG_CONTENT_URI.buildUpon().appendPath(tag.id.toString()).build()
+        }
+    }
 }

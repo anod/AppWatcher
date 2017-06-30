@@ -2,7 +2,6 @@ package com.anod.appwatcher.model
 
 import android.content.Context
 import android.database.Cursor
-import android.net.Uri
 import android.support.v4.content.CursorLoader
 import android.text.TextUtils
 import com.anod.appwatcher.Preferences
@@ -20,11 +19,15 @@ import java.util.*
  * *
  * @date 8/11/13
  */
-open class AppListCursorLoader(context: Context, protected val mTitleFilter: String, sortOrder: String, private val mCursorFilter: FilterCursorWrapper.CursorFilter?, tag: Tag?)
-    : CursorLoader(context, AppListCursorLoader.getContentUri(tag), AppListTable.PROJECTION, null, null, sortOrder) {
+open class AppListCursorLoader(context: Context,
+                               protected val titleFilter: String,
+                               sortOrder: String,
+                               private val cursorFilter: FilterCursorWrapper.CursorFilter?,
+                               private val tag: Tag?)
+    : CursorLoader(context, DbContentProvider.appsContentUri(tag), AppListTable.PROJECTION, null, null, sortOrder) {
 
-    private var mNewCount: Int = 0
-    private var mUpdatableNewCount: Int = 0
+    private var newCount: Int = 0
+    private var updatableNewCount: Int = 0
 
     constructor(context: Context, titleFilter: String, sortId: Int, cursorFilter: FilterCursorWrapper.CursorFilter?, tag: Tag?)
             : this(context, titleFilter, createSortOrder(sortId), cursorFilter, tag)
@@ -42,9 +45,9 @@ open class AppListCursorLoader(context: Context, protected val mTitleFilter: Str
             selc.add(AppTagsTable.TableColumns.APPID + " = " + AppListTable.TableColumns.APPID)
         }
 
-        if (!TextUtils.isEmpty(mTitleFilter)) {
+        if (!TextUtils.isEmpty(titleFilter)) {
             selc.add(AppListTable.Columns.KEY_TITLE + " LIKE ?")
-            args.add("%$mTitleFilter%")
+            args.add("%$titleFilter%")
         }
 
         val selection = TextUtils.join(" AND ", selc)
@@ -57,39 +60,47 @@ open class AppListCursorLoader(context: Context, protected val mTitleFilter: Str
     override fun loadInBackground(): Cursor {
         val cr = super.loadInBackground()
 
-        if (mCursorFilter == null) {
+        if (cursorFilter == null) {
             loadNewCount()
             return AppListCursor(cr)
         } else {
-            if (mCursorFilter is InstalledFilter) {
-                mCursorFilter.resetNewCount()
+            if (cursorFilter is InstalledFilter) {
+                cursorFilter.resetNewCount()
             }
-            return AppListCursor(FilterCursorWrapper(cr, mCursorFilter))
+            return AppListCursor(FilterCursorWrapper(cr, cursorFilter))
         }
     }
 
     val newCountFiltered: Int
         get() {
-            if (mCursorFilter is InstalledFilter) {
-                return mCursorFilter.newCount
+            if (cursorFilter is InstalledFilter) {
+                return cursorFilter.newCount
             }
-            return mNewCount
+            return newCount
+        }
+
+    val updatableCountFiltered: Int
+        get() {
+            if (cursorFilter is InstalledFilter) {
+                return cursorFilter.updatableNewCount
+            }
+            return updatableNewCount
         }
 
     private fun loadNewCount() {
         val cl = DbContentProviderClient(context)
-        val apps = cl.queryUpdated()
+        val apps = cl.queryUpdated(tag)
 
-        mNewCount = 0
-        mUpdatableNewCount = 0
-        mNewCount = apps.count
-        if (mNewCount > 0) {
+        newCount = 0
+        updatableNewCount = 0
+        newCount = apps.count
+        if (newCount > 0) {
             val iap = InstalledAppsProvider.PackageManager(context.packageManager)
             apps.moveToPosition(-1)
             while (apps.moveToNext()) {
                 val info = apps.appInfo
                 if (iap.getInfo(info.packageName).isUpdatable(info.versionNumber)) {
-                    mUpdatableNewCount++
+                    updatableNewCount++
                 }
             }
         }
@@ -98,23 +109,8 @@ open class AppListCursorLoader(context: Context, protected val mTitleFilter: Str
         cl.close()
     }
 
-    val updatableCountFiltered: Int
-        get() {
-            if (mCursorFilter is InstalledFilter) {
-                return mCursorFilter.updatableNewCount
-            }
-            return mUpdatableNewCount
-        }
-
     companion object {
         private val ORDER_DEFAULT = AppListTable.Columns.KEY_STATUS + " DESC, "+ AppListTable.Columns.KEY_TITLE + " COLLATE LOCALIZED ASC"
-
-        private fun getContentUri(tag: Tag?): Uri {
-            return if (tag == null)
-                DbContentProvider.APPS_CONTENT_URI
-            else
-                DbContentProvider.APPS_TAG_CONTENT_URI.buildUpon().appendPath(tag.id.toString()).build()
-        }
 
         private fun createSortOrder(sortId: Int): String {
             val filter = ArrayList<String>()

@@ -9,6 +9,7 @@ import android.net.Uri
 import android.os.RemoteException
 import android.provider.BaseColumns
 import android.support.v4.util.SimpleArrayMap
+import android.text.TextUtils
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.model.AppTag
@@ -58,10 +59,31 @@ class DbContentProviderClient {
         return queryApps(sortOrder, selection, selectionArgs)
     }
 
-    fun queryUpdated(): AppListCursor {
-        val selection = AppListTable.Columns.KEY_STATUS + " = ?"
-        val selectionArgs = arrayOf(AppInfoMetadata.STATUS_UPDATED.toString())
-        return queryApps(null, selection, selectionArgs)
+    fun queryUpdated(tag: Tag?): AppListCursor {
+        val selc = ArrayList<String>(2)
+        val args = ArrayList<String>(2)
+
+        selc.add(AppListTable.Columns.KEY_STATUS + " = ?")
+        args.add(AppInfoMetadata.STATUS_UPDATED.toString())
+
+        if (tag != null) {
+            selc.add(AppTagsTable.TableColumns.TAGID + " = ?")
+            args.add(tag.id.toString())
+            selc.add(AppTagsTable.TableColumns.APPID + " = " + AppListTable.TableColumns.APPID)
+        }
+
+        val selection = TextUtils.join(" AND ", selc)
+        val selectionArgs = args.toTypedArray()
+
+        var cr: Cursor? = null
+        try {
+            cr = mContentProviderClient.query(DbContentProvider.appsContentUri(tag),
+                    AppListTable.PROJECTION, selection, selectionArgs, null
+            )
+        } catch (e: RemoteException) {
+            AppLog.e(e.message)
+        }
+        return AppListCursor(cr)
     }
 
     fun getCount(includeDeleted: Boolean): Int {

@@ -51,9 +51,9 @@ class InstalledLoader(
 
         this.recentlyInstalled = list.sortedWith(AppUpdateTimeComparator(-1, this)).take(10)
 
-        if (!TextUtils.isEmpty(mTitleFilter)) {
+        if (!TextUtils.isEmpty(titleFilter)) {
             val filtered = ArrayList<String>(list.size)
-            val lcFilter = mTitleFilter.toLowerCase()
+            val lcFilter = titleFilter.toLowerCase()
             for (packageName in list) {
                 val title = getPackageTitle(packageName)
                 if (title.toLowerCase().contains(lcFilter)) {

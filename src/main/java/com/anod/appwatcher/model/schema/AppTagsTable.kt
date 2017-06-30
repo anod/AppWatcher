@@ -31,7 +31,7 @@ class AppTagsTable {
 
     companion object {
 
-        val TABLE_NAME = "app_tags"
+        const val TABLE_NAME = "app_tags"
 
         val PROJECTION = arrayOf(TableColumns._ID, TableColumns.APPID, TableColumns.TAGID)
 
