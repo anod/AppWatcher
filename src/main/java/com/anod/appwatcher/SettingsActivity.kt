@@ -81,9 +81,8 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
         mGDriveSync!!.listener = this
     }
 
-    override fun initPreferenceItems(): ArrayList<SettingsActionBarActivity.Preference> {
-        val preferences = ArrayList<SettingsActionBarActivity.Preference>()
-
+    override fun initPreferenceItems(): List<SettingsActionBarActivity.Preference> {
+        val preferences = mutableListOf<SettingsActionBarActivity.Preference>()
 
         preferences.add(SettingsActionBarActivity.Category(R.string.category_updates))
 
@@ -100,7 +99,6 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
 
         preferences.add(SettingsActionBarActivity.Category(R.string.settings_notifications))
         preferences.add(SettingsActionBarActivity.CheckboxItem(R.string.uptodate_title, R.string.uptodate_summary, ACTION_NOTIFY_UPTODATE, mPrefs.isNotifyInstalledUpToDate))
-
 
         preferences.add(SettingsActionBarActivity.Category(R.string.pref_header_drive_sync))
 
@@ -119,6 +117,9 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
         }
         preferences.add(mSyncEnabledItem!!)
         preferences.add(mSyncNowItem!!)
+        if (BuildConfig.DEBUG) {
+            preferences.add(SettingsActionBarActivity.Item(R.string.pref_gdrive_upload, 0, ACTION_GDRIVE_UPLOAD))
+        }
 
         preferences.add(SettingsActionBarActivity.Category(R.string.pref_header_backup))
         preferences.add(SettingsActionBarActivity.Item(R.string.pref_title_export, R.string.pref_descr_export, ACTION_EXPORT))
@@ -167,9 +168,8 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
     }
 
     override fun onPreferenceItemClick(action: Int, pref: SettingsActionBarActivity.Item) {
-        if (action == ACTION_EXPORT) {
-
-            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        when (action) {
+            ACTION_EXPORT -> if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
                 val uri = Uri.parse(DbBackupManager.defaultBackupDir.absolutePath)
                 intent.setDataAndType(uri, "application/json")
@@ -179,9 +179,7 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
                 val backupFile = DbBackupManager.generateBackupFile()
                 ExportTask(this, this).execute(Uri.fromFile(backupFile))
             }
-
-        } else if (action == ACTION_IMPORT) {
-            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            ACTION_IMPORT -> if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
                 intent.addCategory(Intent.CATEGORY_OPENABLE)
                 intent.type = "*/*"
@@ -191,61 +189,64 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
             } else {
                 startActivity(Intent(this, ListExportActivity::class.java))
             }
-        } else if (action == ACTION_LICENSES) {
-            LicensesDialog(this, R.raw.notices, false, true).show()
-        } else if (action == ACTION_SYNC_ENABLE) {
-            mSyncNowItem!!.enabled = false // disable temporary sync now
-            if (mSyncEnabledItem!!.checked) {
-                setProgressVisibility(true)
-                mGDriveSync!!.connect()
-            }
+            ACTION_LICENSES -> LicensesDialog(this, R.raw.notices, false, true).show()
+            ACTION_SYNC_ENABLE -> {
+                mSyncNowItem!!.enabled = false // disable temporary sync now
+                if (mSyncEnabledItem!!.checked) {
+                    setProgressVisibility(true)
+                    mGDriveSync!!.connect()
+                }
 
-        } else if (action == ACTION_SYNC_NOW) {
-            if (mSyncNowItem!!.enabled) {
+            }
+            ACTION_SYNC_NOW -> if (mSyncNowItem!!.enabled) {
                 mSyncNowItem!!.enabled = false
                 mGDriveSync!!.sync()
             }
-        } else if (action == ACTION_AUTO_UPDATE) {
-            val useAutoSync = (pref as SettingsActionBarActivity.CheckboxItem).checked
-            if (useAutoSync) {
-                SyncScheduler.schedule(this, mPrefs.isRequiresCharging)
-            } else {
-                SyncScheduler.cancel(this)
+            ACTION_GDRIVE_UPLOAD -> mGDriveSync!!.upload()
+            ACTION_AUTO_UPDATE -> {
+                val useAutoSync = (pref as SettingsActionBarActivity.CheckboxItem).checked
+                if (useAutoSync) {
+                    SyncScheduler.schedule(this, mPrefs.isRequiresCharging)
+                } else {
+                    SyncScheduler.cancel(this)
+                }
+                mPrefs.useAutoSync = useAutoSync
+                mWifiItem!!.enabled = useAutoSync
+                mChargingItem!!.enabled = useAutoSync
             }
-            mPrefs.useAutoSync = useAutoSync
-            mWifiItem!!.enabled = useAutoSync
-            mChargingItem!!.enabled = useAutoSync
-        } else if (action == ACTION_WIFI_ONLY) {
-            val useWifiOnly = (pref as SettingsActionBarActivity.CheckboxItem).checked
-            mPrefs.isWifiOnly = useWifiOnly
-        } else if (action == ACTION_REQUIRES_CHARGING) {
-            val requiresCharging = (pref as SettingsActionBarActivity.CheckboxItem).checked
-            mPrefs.isRequiresCharging = requiresCharging
-            SyncScheduler.schedule(this, requiresCharging)
-        } else if (action == ACTION_NOTIFY_UPTODATE) {
-            val notify = (pref as SettingsActionBarActivity.CheckboxItem).checked
-            mPrefs.isNotifyInstalledUpToDate = notify
-        } else if (action == ACTION_THEME) {
-            val dialog = AlertDialog.Builder(this)
-                    .setTitle(R.string.pref_title_theme)
-                    .setItems(R.array.themes) { _, which ->
-                        if (mPrefs.nightMode != which) {
-                            mPrefs.nightMode = which
-                            AppCompatDelegate.setDefaultNightMode(which)
-                            this@SettingsActivity.recreate()
-                            val i = Intent(this@SettingsActivity, AppWatcherActivity::class.java)
-                            i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-                            startActivity(i)
-                        }
-                    }.create()
-            dialog.show()
-        } else if (action == ACTION_EXPORT_DB) {
-            try {
+            ACTION_WIFI_ONLY -> {
+                val useWifiOnly = (pref as SettingsActionBarActivity.CheckboxItem).checked
+                mPrefs.isWifiOnly = useWifiOnly
+            }
+            ACTION_REQUIRES_CHARGING -> {
+                val requiresCharging = (pref as SettingsActionBarActivity.CheckboxItem).checked
+                mPrefs.isRequiresCharging = requiresCharging
+                SyncScheduler.schedule(this, requiresCharging)
+            }
+            ACTION_NOTIFY_UPTODATE -> {
+                val notify = (pref as SettingsActionBarActivity.CheckboxItem).checked
+                mPrefs.isNotifyInstalledUpToDate = notify
+            }
+            ACTION_THEME -> {
+                val dialog = AlertDialog.Builder(this)
+                        .setTitle(R.string.pref_title_theme)
+                        .setItems(R.array.themes) { _, which ->
+                            if (mPrefs.nightMode != which) {
+                                mPrefs.nightMode = which
+                                AppCompatDelegate.setDefaultNightMode(which)
+                                this@SettingsActivity.recreate()
+                                val i = Intent(this@SettingsActivity, AppWatcherActivity::class.java)
+                                i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                                startActivity(i)
+                            }
+                        }.create()
+                dialog.show()
+            }
+            ACTION_EXPORT_DB -> try {
                 exportDb()
             } catch (e: IOException) {
                 AppLog.e(e)
             }
-
         }
         notifyDataSetChanged()
     }
@@ -330,20 +331,21 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
     }
 
     companion object {
-        private val ACTION_EXPORT = 3
-        private val ACTION_IMPORT = 4
-        private val ACTION_LICENSES = 6
-        private val ACTION_ABOUT = 5
-        private val ACTION_SYNC_ENABLE = 1
-        private val ACTION_SYNC_NOW = 2
-        private val ACTION_AUTO_UPDATE = 7
-        private val ACTION_WIFI_ONLY = 8
-        private val ACTION_REQUIRES_CHARGING = 9
-        private val ACTION_NOTIFY_UPTODATE = 10
-        private val ACTION_THEME = 11
-        private val ACTION_EXPORT_DB = 12
+        private const val ACTION_EXPORT = 3
+        private const val ACTION_IMPORT = 4
+        private const val ACTION_LICENSES = 6
+        private const val ACTION_ABOUT = 5
+        private const val ACTION_SYNC_ENABLE = 1
+        private const val ACTION_SYNC_NOW = 2
+        private const val ACTION_AUTO_UPDATE = 7
+        private const val ACTION_WIFI_ONLY = 8
+        private const val ACTION_REQUIRES_CHARGING = 9
+        private const val ACTION_NOTIFY_UPTODATE = 10
+        private const val ACTION_THEME = 11
+        private const val ACTION_EXPORT_DB = 12
+        private const val ACTION_GDRIVE_UPLOAD = 13
 
-        private val REQUEST_BACKUP_DEST = 1
-        private val REQUEST_BACKUP_FILE = 2
+        private const val REQUEST_BACKUP_DEST = 1
+        private const val REQUEST_BACKUP_FILE = 2
     }
 }

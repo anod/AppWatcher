@@ -29,5 +29,6 @@
     <string name="pref_descr_theme">Choose between dark or default theme</string>
 
     <string name="pref_export_db" translatable="false">Export DB to SD-Card</string>
+    <string name="pref_gdrive_upload" translatable="false">Upload</string>
 
 </resources>

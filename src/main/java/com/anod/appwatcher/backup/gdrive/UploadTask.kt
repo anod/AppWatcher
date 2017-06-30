@@ -11,17 +11,17 @@ import info.anodsplace.android.log.AppLog
  * *
  * @date 7/29/14
  */
-class SyncTask(private val context: Context, private val listener: SyncTask.Listener, client: GoogleApiClient)
+class UploadTask(private val context: Context, private val listener: UploadTask.Listener, client: GoogleApiClient)
     : ApiClientAsyncTask(client) {
 
     interface Listener {
-        fun onSyncTaskResult(result: Result)
+        fun onUploadTaskResult(result: Result)
     }
 
     override fun doInBackgroundConnected(): Result {
-        val worker = SyncConnectedWorker(context, googleApiClient)
+        val worker = UploadConnectedWorker(context, googleApiClient)
         try {
-            worker.doSyncInBackground()
+            worker.doUploadInBackground()
         } catch (e: Exception) {
             AppLog.e(e)
             return Result(false, e)
@@ -31,6 +31,6 @@ class SyncTask(private val context: Context, private val listener: SyncTask.List
     }
 
     override fun onPostExecute(result: Result) {
-        listener.onSyncTaskResult(result)
+        listener.onUploadTaskResult(result)
     }
 }

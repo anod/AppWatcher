@@ -49,8 +49,8 @@ class TagsListActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<Cursor
         ButterKnife.bind(this)
         setupToolbar()
 
-        mAppInfo = intentExtras.getParcelable<AppInfo>(EXTRA_APP)
-        if (mAppInfo != null) {
+        if (intentExtras.containsKey(EXTRA_APP)) {
+            mAppInfo = intentExtras.getParcelable<AppInfo>(EXTRA_APP)
             title = getString(R.string.tag_app, mAppInfo!!.title)
         }
         mListView.layoutManager = LinearLayoutManager(this)
@@ -165,7 +165,7 @@ class TagsListActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<Cursor
     }
 
     companion object {
-        val EXTRA_APP = "app"
+        const val EXTRA_APP = "app"
 
         fun intent(context: Context, app: AppInfo): Intent {
             val intent = Intent(context, TagsListActivity::class.java)

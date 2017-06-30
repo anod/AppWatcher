@@ -7,10 +7,7 @@ import android.content.Intent
 import android.support.v4.app.NotificationCompat
 import android.widget.Toast
 import com.anod.appwatcher.R
-import com.anod.appwatcher.backup.gdrive.ApiClientAsyncTask
-import com.anod.appwatcher.backup.gdrive.SyncConnectedWorker
-import com.anod.appwatcher.backup.gdrive.SyncTask
-import com.anod.appwatcher.backup.gdrive.UploadConnectedWorker
+import com.anod.appwatcher.backup.gdrive.*
 import com.anod.appwatcher.utils.GooglePlayServices
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.drive.Drive
@@ -20,7 +17,7 @@ import com.google.android.gms.drive.Drive
  * *
  * @date 1/19/14
  */
-class GDriveSync(private val context: Context): SyncTask.Listener, GooglePlayServices.Listener {
+class GDriveSync(private val context: Context): SyncTask.Listener, UploadTask.Listener, GooglePlayServices.Listener {
 
     var listener: Listener? = null
     val playServices = GooglePlayServices(context, this)
@@ -67,6 +64,15 @@ class GDriveSync(private val context: Context): SyncTask.Listener, GooglePlaySer
         }
     }
 
+    fun upload() {
+        listener?.onGDriveSyncStart()
+        if (!playServices.isConnected) {
+            playServices.connectWithAction(ACTION_UPLOAD)
+        } else {
+            UploadTask(context, this, createGoogleApiClientBuilder().build()).execute()
+        }
+    }
+
     @Throws(Exception::class)
     fun syncLocked() {
         if (!playServices.isConnected) {
@@ -106,8 +112,16 @@ class GDriveSync(private val context: Context): SyncTask.Listener, GooglePlaySer
         playServices.onActivityResult(requestCode, resultCode, data)
     }
 
+    override fun onSyncTaskResult(result: ApiClientAsyncTask.Result) {
+        if (result.status) {
+            listener?.onGDriveSyncFinish()
+        } else {
+            Toast.makeText(context, result.ex?.message ?: "Error", Toast.LENGTH_SHORT).show()
+            listener?.onGDriveError()
+        }
+    }
 
-    override fun onResult(result: ApiClientAsyncTask.Result) {
+    override fun onUploadTaskResult(result: ApiClientAsyncTask.Result) {
         if (result.status) {
             listener?.onGDriveSyncFinish()
         } else {
@@ -117,7 +131,8 @@ class GDriveSync(private val context: Context): SyncTask.Listener, GooglePlaySer
     }
 
     companion object {
-        private val ACTION_SYNC = 2
-        private val NOTIFICATION_ID = 2
+        private const val ACTION_SYNC = 2
+        private const val ACTION_UPLOAD = 3
+        private const val NOTIFICATION_ID = 2
     }
 }

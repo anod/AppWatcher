@@ -130,7 +130,7 @@ class AppInfo : AppInfoMetadata, Parcelable {
 
     companion object {
 
-        val CREATOR: Parcelable.Creator<AppInfo> = object : Parcelable.Creator<AppInfo> {
+        @JvmField val CREATOR: Parcelable.Creator<AppInfo> = object : Parcelable.Creator<AppInfo> {
             override fun createFromParcel(`in`: Parcel): AppInfo {
                 return AppInfo(`in`)
             }

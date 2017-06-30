@@ -12,7 +12,6 @@ import android.view.ViewGroup
 import android.widget.*
 import com.anod.appwatcher.R
 import com.anod.appwatcher.utils.MenuItemAnimation
-import java.util.*
 
 abstract class SettingsActionBarActivity : ToolbarActivity(), AdapterView.OnItemClickListener {
     lateinit private var mListView: ListView
@@ -141,7 +140,7 @@ abstract class SettingsActionBarActivity : ToolbarActivity(), AdapterView.OnItem
     }
 
     protected abstract fun init()
-    protected abstract fun initPreferenceItems(): ArrayList<Preference>
+    protected abstract fun initPreferenceItems(): List<Preference>
     protected abstract fun onPreferenceItemClick(action: Int, pref: Item)
 
     protected fun setProgressVisibility(visible: Boolean) {

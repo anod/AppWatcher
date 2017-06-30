@@ -42,12 +42,9 @@ internal class TagAppsManager(private val mTag: Tag, private val mContext: Conte
     }
 
     fun runImport(): Boolean {
-        val appIds = ArrayList<String>()
-        for (i in 0..mApps.size() - 1) {
-            if (mApps.valueAt(i)) {
-                appIds.add(mApps.keyAt(i))
-            }
-        }
+        val appIds = (0..mApps.size() - 1)
+                .filter { mApps.valueAt(it) }
+                .map { mApps.keyAt(it) }
 
         val cr = DbContentProviderClient(mContext)
         val result = cr.setAppsToTag(appIds, mTag.id)

@@ -43,6 +43,9 @@ open class DbContentProvider : ContentProvider() {
             }
             APPS_TAG -> {
                 query.table = AppTagsTable.TABLE_NAME + ", " + AppListTable.TABLE_NAME
+                val tagId = uri.lastPathSegment
+                query.selection = AppTagsTable.TableColumns.TAGID + "=?"
+                query.selectionArgs = arrayOf(tagId)
                 query.notifyUri = APPS_CONTENT_URI
                 return query
             }
