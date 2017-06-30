@@ -16,6 +16,7 @@ import android.widget.Toast
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
+import com.anod.appwatcher.App
 import com.anod.appwatcher.Preferences
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AccountChooser
@@ -63,7 +64,7 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
     override fun onResume() {
         super.onResume()
 
-        mAccountChooser = AccountChooser(this, Preferences(this), this)
+        mAccountChooser = AccountChooser(this, App.provide(this).prefs, this)
         mAccountChooser!!.init()
     }
 

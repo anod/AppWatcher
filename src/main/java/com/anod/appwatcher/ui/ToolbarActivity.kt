@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatDelegate
 import android.support.v7.widget.Toolbar
 import android.view.MenuItem
 import android.view.View
+import com.anod.appwatcher.App
 import com.anod.appwatcher.Preferences
 import com.anod.appwatcher.R
 
@@ -17,8 +18,7 @@ import com.anod.appwatcher.R
 open class ToolbarActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val prefs = Preferences(this)
-        AppCompatDelegate.setDefaultNightMode(prefs.nightMode)
+        AppCompatDelegate.setDefaultNightMode(App.provide(this).prefs.nightMode)
         super.onCreate(savedInstanceState)
     }
 

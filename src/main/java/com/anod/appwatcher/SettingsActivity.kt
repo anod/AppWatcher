@@ -59,7 +59,7 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
 
     override fun init() {
         mGDriveSync = GDriveSync(this)
-        mPrefs = Preferences(this)
+        mPrefs = App.provide(this).prefs
         mAccountChooser = AccountChooser(this, mPrefs, this)
         mAccountChooser!!.init()
     }
@@ -282,6 +282,7 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
         mSyncEnabledItem!!.enabled = true
         mSyncNowItem!!.enabled = true
         mPrefs.isDriveSyncEnabled = true
+        App.provide(this).uploadServiceContentObserver
         notifyDataSetChanged()
         setProgressVisibility(false)
 

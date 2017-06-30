@@ -12,6 +12,7 @@ import android.os.RemoteException
 import android.text.TextUtils
 import android.text.format.DateUtils
 import com.android.volley.VolleyError
+import com.anod.appwatcher.App
 import com.anod.appwatcher.Preferences
 import com.anod.appwatcher.accounts.AuthTokenProvider
 import com.anod.appwatcher.backup.GDriveSync
@@ -55,7 +56,7 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
         val EXTRA_UPDATES_COUNT = "extra_updates_count"
     }
 
-    private val preferences = Preferences(context)
+    private val preferences = App.provide(context).prefs
     private val installedAppsProvider = InstalledAppsProvider.PackageManager(context.packageManager)
 
     internal fun onPerformSync(extras: Bundle, provider: ContentProviderClient): Int {

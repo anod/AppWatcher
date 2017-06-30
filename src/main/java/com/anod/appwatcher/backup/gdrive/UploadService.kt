@@ -46,7 +46,7 @@ class UploadService : GcmTaskService() {
 
         AppLog.d("DriveSync perform upload")
         val driveSync = GDriveSync(applicationContext)
-        val prefs = Preferences(applicationContext)
+        val prefs = App.provide(applicationContext).prefs
         try {
             driveSync.uploadLocked()
             prefs.lastDriveSyncTime = System.currentTimeMillis()

@@ -138,8 +138,7 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
         mDetailsEndpoint.listener = this
 
         val accHelper = AuthTokenProvider(this)
-        val prefs = Preferences(this)
-        val account = prefs.account
+        val account = App.provide(this).prefs.account
         mLoadingView.visibility = View.VISIBLE
         accHelper.requestToken(this, account!!, object : AuthTokenProvider.AuthenticateCallback {
             override fun onAuthTokenAvailable(token: String) {

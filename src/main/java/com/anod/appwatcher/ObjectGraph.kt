@@ -17,64 +17,19 @@ import com.google.firebase.analytics.FirebaseAnalytics
  */
 class ObjectGraph internal constructor(private val app: AppWatcherApplication) {
 
-    private var _uploadServiceContentObserver: UploadServiceContentObserver? = null
-    val uploadServiceContentObserver: UploadServiceContentObserver
-        get() {
-            if (_uploadServiceContentObserver == null) {
-                _uploadServiceContentObserver = UploadServiceContentObserver(app, app.contentResolver)
-            }
-            return _uploadServiceContentObserver!!
-        }
-
-    private var _accountManager: AccountManager? = null
-    val accountManager: AccountManager
-        get() {
-            if (_accountManager == null) {
-                _accountManager = AccountManager(this.app)
-            }
-            return _accountManager!!
-        }
-
-    private var _deviceId: String? = null
-    val deviceId: String
-        get() {
-            if (_deviceId == null) {
-                val prefs = Preferences(this.app)
-                _deviceId = DeviceIdHelper.getDeviceId(this.app, prefs)
-            }
-            return _deviceId!!
-        }
-
-    private var _requestQueue: RequestQueue? = null
-    val requestQueue: RequestQueue
-        get() {
-            if (_requestQueue == null) {
-                _requestQueue = RequestQueue(NoCache(), Network(), 2)
-                _requestQueue!!.start()
-            }
-            return _requestQueue!!
-        }
-
-    private var _iconLoader: AppIconLoader? = null
-    val  iconLoader: AppIconLoader
-        get() {
-            if (_iconLoader == null) {
-                _iconLoader = AppIconLoader(this.app)
-            }
-            return _iconLoader!!
-        }
-
+    val prefs = Preferences(app)
+    val uploadServiceContentObserver: UploadServiceContentObserver by lazy {UploadServiceContentObserver(app, app.contentResolver) }
+    val accountManager: AccountManager by lazy { AccountManager(this.app, prefs) }
+    val deviceId: String by lazy { DeviceIdHelper.getDeviceId(this.app, prefs) }
+    val requestQueue: RequestQueue by lazy {
+       val _requestQueue = RequestQueue(NoCache(), Network(), 2)
+        _requestQueue.start()
+        _requestQueue
+    }
+    val iconLoader: AppIconLoader by lazy { AppIconLoader(this.app) }
     val gcmNetworkManager: GcmNetworkManager
         get() {
             return GcmNetworkManager.getInstance(this.app)
         }
-
-    private var _fireBaseAnalytics: FirebaseAnalytics? = null
-    val fireBase: FirebaseAnalytics
-        get() {
-            if (_fireBaseAnalytics == null) {
-                _fireBaseAnalytics = FirebaseAnalytics.getInstance(this.app)
-            }
-            return _fireBaseAnalytics!!
-        }
+    val fireBase: FirebaseAnalytics by lazy { FirebaseAnalytics.getInstance(this.app) }
 }

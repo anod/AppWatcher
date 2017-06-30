@@ -20,8 +20,8 @@ class AppWatcherActivity : AppWatcherBaseActivity(), TextView.OnEditorActionList
         supportActionBar!!.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp)
         App.provide(this).fireBase
 
-        if (mPreferences.useAutoSync) {
-            SyncScheduler.schedule(this, mPreferences.isRequiresCharging)
+        if (prefs.useAutoSync) {
+            SyncScheduler.schedule(this, prefs.isRequiresCharging)
         }
     }
 
@@ -29,7 +29,7 @@ class AppWatcherActivity : AppWatcherBaseActivity(), TextView.OnEditorActionList
         super.onResume()
 
         AppLog.d("mark updates as viewed.")
-        mPreferences.isLastUpdatesViewed = true
+        prefs.isLastUpdatesViewed = true
     }
 
     override val contentLayout: Int
@@ -42,16 +42,16 @@ class AppWatcherActivity : AppWatcherBaseActivity(), TextView.OnEditorActionList
         val adapter = AppWatcherBaseActivity.Adapter(supportFragmentManager)
         adapter.addFragment(AppWatcherListFragment.newInstance(
                 Filters.TAB_ALL,
-                mPreferences.sortIndex,
+                prefs.sortIndex,
                 AppWatcherListFragment.DefaultSection(),
                 null), getString(R.string.tab_all))
         adapter.addFragment(AppWatcherListFragment.newInstance(
                 Filters.TAB_INSTALLED,
-                mPreferences.sortIndex,
+                prefs.sortIndex,
                 InstalledSectionProvider(), null), getString(R.string.tab_installed))
         adapter.addFragment(AppWatcherListFragment.newInstance(
                 Filters.TAB_UNINSTALLED,
-                mPreferences.sortIndex,
+                prefs.sortIndex,
                 AppWatcherListFragment.DefaultSection(), null), getString(R.string.tab_not_installed))
         return adapter
     }

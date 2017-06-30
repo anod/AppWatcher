@@ -16,10 +16,7 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import com.anod.appwatcher.MarketSearchActivity
-import com.anod.appwatcher.Preferences
-import com.anod.appwatcher.R
-import com.anod.appwatcher.SettingsActivity
+import com.anod.appwatcher.*
 import com.anod.appwatcher.accounts.AccountChooser
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.TagsContentProviderClient
@@ -40,15 +37,13 @@ abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelec
     private var mAuthToken: String? = null
 
     lateinit var mAccountChooser: AccountChooser
-    lateinit var mPreferences: Preferences
 
     protected open val isDrawerEnabled: Boolean
         get() = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mPreferences = Preferences(this)
-        mAccountChooser = AccountChooser(this, mPreferences, this)
+        mAccountChooser = AccountChooser(this, App.provide(this).prefs, this)
         mAccountChooser.init()
     }
 
@@ -73,8 +68,7 @@ abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelec
         val changeAccount = headerView.findViewById<View>(R.id.account_change) as LinearLayout
         changeAccount.setOnClickListener { onAccountChooseClick() }
 
-        val pref = Preferences(this)
-        val time = pref.lastUpdateTime
+        val time = App.provide(this).prefs.lastUpdateTime
 
         val lastUpdateView = headerView.findViewById<View>(R.id.last_update) as TextView
         if (time > 0) {

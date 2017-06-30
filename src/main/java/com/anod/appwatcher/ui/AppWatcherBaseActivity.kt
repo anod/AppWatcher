@@ -23,9 +23,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
-import com.anod.appwatcher.MarketSearchActivity
-import com.anod.appwatcher.R
-import com.anod.appwatcher.SettingsActivity
+import com.anod.appwatcher.*
 import com.anod.appwatcher.installed.ImportInstalledActivity
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.sync.ManualSyncService
@@ -50,6 +48,9 @@ abstract class AppWatcherBaseActivity : DrawerActivity(), TextView.OnEditorActio
     private lateinit var mViewPager: ViewPager
     private val mRefreshAnim: MenuItemAnimation = MenuItemAnimation(this, R.anim.rotate)
     private var mFilterQuery = ""
+
+    val prefs: Preferences
+        get() = App.provide(this).prefs
 
     interface EventListener {
         fun onSortChanged(sortIndex: Int)
@@ -196,10 +197,10 @@ abstract class AppWatcherBaseActivity : DrawerActivity(), TextView.OnEditorActio
     }
 
     private fun showSortOptions() {
-        val selected = mPreferences.sortIndex
+        val selected = prefs.sortIndex
         AlertDialog.Builder(this)
                 .setSingleChoiceItems(R.array.sort_titles, selected) { dialog, index ->
-                    mPreferences.sortIndex = index
+                    prefs.sortIndex = index
                     notifySortChange(index)
                     dialog.dismiss()
                 }
@@ -225,7 +226,7 @@ abstract class AppWatcherBaseActivity : DrawerActivity(), TextView.OnEditorActio
 
     override fun onAccountSelected(account: Account, authSubToken: String?) {
         super.onAccountSelected(account, authSubToken)
-        if (UpgradeCheck.isNewVersion(mPreferences)) {
+        if (UpgradeCheck.isNewVersion(prefs)) {
             requestRefresh()
         }
     }

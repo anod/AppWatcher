@@ -63,17 +63,17 @@ class AppsTagActivity : AppWatcherBaseActivity() {
         val adapter = AppWatcherBaseActivity.Adapter(supportFragmentManager)
         adapter.addFragment(AppsTagListFragment.newInstance(
                 Filters.TAB_ALL,
-                mPreferences.sortIndex,
+                prefs.sortIndex,
                 AppWatcherListFragment.DefaultSection(),
                 mTag), getString(R.string.tab_all))
         adapter.addFragment(AppsTagListFragment.newInstance(
                 Filters.TAB_INSTALLED,
-                mPreferences.sortIndex,
+                prefs.sortIndex,
                 AppWatcherListFragment.DefaultSection(),
                 mTag), getString(R.string.tab_installed))
         adapter.addFragment(AppsTagListFragment.newInstance(
                 Filters.TAB_UNINSTALLED,
-                mPreferences.sortIndex,
+                prefs.sortIndex,
                 AppWatcherListFragment.DefaultSection(),
                 mTag), getString(R.string.tab_not_installed))
         return adapter

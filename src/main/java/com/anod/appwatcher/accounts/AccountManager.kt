@@ -10,13 +10,12 @@ import com.anod.appwatcher.Preferences
  * *
  * @date 2015-03-03
  */
-class AccountManager(context: Context) {
+class AccountManager(context: Context, private val prefs: Preferences) {
 
     private val mAccountManager: android.accounts.AccountManager = android.accounts.AccountManager.get(context)
-    private val mPreferences: Preferences = Preferences(context)
     var accounts: Array<Account> = mAccountManager.getAccountsByType(AuthTokenProvider.ACCOUNT_TYPE)
         private set
-    var currentAccount: Account? = mPreferences.account
+    var currentAccount: Account? = prefs.account
         private set
 
     fun hasAccounts(): Boolean {
@@ -25,7 +24,7 @@ class AccountManager(context: Context) {
 
     fun reload() {
         accounts = mAccountManager.getAccountsByType(AuthTokenProvider.ACCOUNT_TYPE)
-        currentAccount = mPreferences.account
+        currentAccount = prefs.account
     }
 
     fun getAccount(idx: Int): Account {
@@ -33,7 +32,7 @@ class AccountManager(context: Context) {
     }
 
     fun saveCurrentAccount(acc: Account) {
-        mPreferences.account = acc
+        prefs.account = acc
         currentAccount = acc
     }
 }

@@ -117,7 +117,7 @@ class MarketSearchActivity : ToolbarActivity(), AccountChooser.OnAccountSelectio
     override fun onResume() {
         mWatchAppList.attach(this)
         super.onResume()
-        mAccountChooser = AccountChooser(this, Preferences(this), this)
+        mAccountChooser = AccountChooser(this, App.provide(this).prefs, this)
         mAccountChooser!!.init()
     }
 
