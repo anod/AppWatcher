@@ -19,7 +19,6 @@ class UploadServiceContentObserver(val context: Context, contentResolver: Conten
     init {
         contentResolver.registerContentObserver(DbContentProvider.APPS_CONTENT_URI, true, this)
         contentResolver.registerContentObserver(DbContentProvider.TAGS_CONTENT_URI, true, this)
-        contentResolver.registerContentObserver(DbContentProvider.APPS_TAG_CONTENT_URI, true, this)
     }
 
     override fun onChange(selfChange: Boolean, uri: Uri?) {

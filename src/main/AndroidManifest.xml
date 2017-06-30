@@ -98,6 +98,15 @@
             </intent-filter>
         </service>
 
+        <service
+            android:name=".backup.gdrive.UploadService"
+            android:exported="true"
+            android:permission="com.google.android.gms.permission.BIND_NETWORK_TASK_SERVICE">
+            <intent-filter>
+                <action android:name="com.google.android.gms.gcm.ACTION_TASK_READY"/>
+            </intent-filter>
+        </service>
+
         <meta-data
             android:name="com.google.android.backup.api_key"
             android:value="AEdPqrEAAAAIWapJJclZH281aXWN3VunYCHInRkwJag2VkVSIw"/>

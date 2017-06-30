@@ -20,8 +20,8 @@ import info.anodsplace.android.log.AppLog
 class UploadService : GcmTaskService() {
 
     companion object {
-        private const val windowStartDelaySeconds = 2L
-        private const val windowEndDelaySeconds = 20L
+        private const val windowStartDelaySeconds = 30L
+        private const val windowEndDelaySeconds = 300L
 
         private val TASK_TAG = "GDriveUpload"
 
@@ -44,18 +44,18 @@ class UploadService : GcmTaskService() {
     override fun onRunTask(taskParams: TaskParams): Int {
         AppLog.d("Scheduled call executed. Task: " + taskParams.tag)
 
-            AppLog.d("DriveSync perform sync")
-            val driveSync = GDriveSync(applicationContext)
-            val prefs = Preferences(applicationContext)
-            try {
-                driveSync.uploadLocked()
-                prefs.lastDriveSyncTime = System.currentTimeMillis()
-            } catch (e: GooglePlayServices.ResolutionException) {
-                driveSync.showResolutionNotification(e.resolution)
-                AppLog.e(e)
-            } catch (e: Exception) {
-                AppLog.e(e)
-            }
+        AppLog.d("DriveSync perform upload")
+        val driveSync = GDriveSync(applicationContext)
+        val prefs = Preferences(applicationContext)
+        try {
+            driveSync.uploadLocked()
+            prefs.lastDriveSyncTime = System.currentTimeMillis()
+        } catch (e: GooglePlayServices.ResolutionException) {
+            driveSync.showResolutionNotification(e.resolution)
+            AppLog.e(e)
+        } catch (e: Exception) {
+            AppLog.e(e)
+        }
 
         return GcmNetworkManager.RESULT_SUCCESS
     }

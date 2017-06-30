@@ -33,6 +33,7 @@ class AppWatcherApplication : Application(), AppLog.Listener {
         //VolleyLog.setTag("AppWatcher");
 
         objectGraph = ObjectGraph(this)
+        objectGraph.uploadServiceContentObserver
         val prefs = Preferences(this)
         AppCompatDelegate.setDefaultNightMode(prefs.nightMode)
     }
