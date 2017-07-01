@@ -104,6 +104,9 @@ class AppListTable {
         fun createContentValues(app: AppInfo): ContentValues {
             val values = ContentValues()
 
+            if (app.rowId > 0) {
+                values.put(BaseColumns._ID, app.rowId)
+            }
             values.put(AppListTable.Columns.APPID, app.appId)
             values.put(AppListTable.Columns.KEY_PACKAGE, app.packageName)
             values.put(AppListTable.Columns.KEY_TITLE, app.title)

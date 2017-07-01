@@ -31,6 +31,7 @@ import com.anod.appwatcher.wishlist.WishlistFragment
  * @date 2014-08-07
  */
 abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelectionListener {
+
     private var mDrawerLayout: DrawerLayout? = null
     private var mAccountNameView: TextView? = null
     private var mNavigationView: NavigationView? = null
@@ -52,6 +53,14 @@ abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelec
 
         if (isDrawerEnabled) {
             mDrawerLayout = findViewById<View>(R.id.drawer_layout) as DrawerLayout
+            mDrawerLayout?.addDrawerListener(object: DrawerLayout.SimpleDrawerListener() {
+                override fun onDrawerOpened(drawerView: View?) {
+                    super.onDrawerOpened(drawerView)
+                    drawerView?.postDelayed({
+                        updateTags()
+                    }, 300L)
+                }
+            })
             mNavigationView = findViewById<View>(R.id.nav_view) as NavigationView
             setupDrawerContent(mNavigationView!!)
             updateTags()
@@ -84,10 +93,15 @@ abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelec
             onOptionsItemSelected(menuItem)
             true
         }
-
     }
 
-    fun updateTags() {
+    fun updateTagsIfVisible() {
+        if (mDrawerLayout?.isDrawerVisible(GravityCompat.START) == true) {
+            updateTags()
+        }
+    }
+
+    private fun updateTags() {
         val menu = mNavigationView!!.menu
         menu.removeGroup(1)
 
@@ -205,7 +219,7 @@ abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelec
     internal class TagsUpdateObserver(private val mDrawerActivity: DrawerActivity) : ContentObserver(Handler()) {
 
         override fun onChange(selfChange: Boolean) {
-            mDrawerActivity.updateTags()
+            mDrawerActivity.updateTagsIfVisible()
         }
     }
 }

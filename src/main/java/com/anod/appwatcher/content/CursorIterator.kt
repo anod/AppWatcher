@@ -4,6 +4,7 @@ import android.database.CrossProcessCursor
 import android.database.Cursor
 import android.database.CursorWindow
 import android.database.CursorWrapper
+import info.anodsplace.android.log.AppLog
 
 /**
  * @author algavris
@@ -29,6 +30,15 @@ abstract class CursorIterator<O>(cursor: Cursor?)
 
     override fun hasNext(): Boolean {
         return moveToNext()
+    }
+
+    override fun getString(columnIndex: Int): String {
+        val value: String? = super.getString(columnIndex)
+        if (value == null) {
+            AppLog.e("$columnIndex is NULL")
+            return ""
+        }
+        return value
     }
 
     /**

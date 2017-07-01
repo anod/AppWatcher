@@ -9,6 +9,7 @@ import android.content.Intent
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.os.RemoteException
+import android.provider.BaseColumns
 import android.text.TextUtils
 import android.text.format.DateUtils
 import com.android.volley.VolleyError
@@ -183,15 +184,25 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
 
     private fun updateApps(documents: List<Document>, localApps: Map<String, AppInfo>, client: DbContentProviderClient, updatedTitles: ArrayList<UpdatedApp>, lastUpdatesViewed: Boolean) {
         val fetched = mutableMapOf<String, Boolean>()
+        val batch = mutableListOf<ContentValues>()
         for (marketApp in documents) {
             val docId = marketApp.docId
             val localApp = localApps[docId]!!
             fetched[docId] = true
-            updateApp(marketApp, localApp, client, updatedTitles, lastUpdatesViewed)
+            val values = updateApp(marketApp, localApp, updatedTitles, lastUpdatesViewed)
+            if (values.size() > 0) {
+                batch.add(values)
+            }
         }
+
+        if (batch.isNotEmpty()) {
+            client.applyBatchUpdates(batch)
+        }
+
         // Reset not fetched app statuses
         if (lastUpdatesViewed && fetched.size < localApps.size)
         {
+            val statusBatch = mutableListOf<ContentValues>()
             localApps.values.forEach({
                 if (fetched[it.appId] == null)
                 {
@@ -199,26 +210,29 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
                         it.status = AppInfoMetadata.STATUS_NORMAL
                         AppLog.d("Mark not fetched app as old")
                         val values = ContentValues()
+                        values.put(BaseColumns._ID, it.rowId)
                         values.put(AppListTable.Columns.KEY_STATUS, AppInfoMetadata.STATUS_NORMAL)
-                        client.update(it.rowId, values)
+                        statusBatch.add(values)
                     }
                 }
             })
+            if (batch.isNotEmpty()) {
+                client.applyBatchUpdates(statusBatch)
+            }
         }
     }
 
-    private fun updateApp(marketApp: Document, localApp: AppInfo, client: DbContentProviderClient, updatedTitles: ArrayList<UpdatedApp>, lastUpdatesViewed: Boolean) {
+    private fun updateApp(marketApp: Document, localApp: AppInfo, updatedTitles: ArrayList<UpdatedApp>, lastUpdatesViewed: Boolean): ContentValues {
         val appDetails = marketApp.appDetails
 
         if (appDetails.versionCode > localApp.versionNumber) {
             AppLog.d("New version found [" + appDetails.versionCode + "]")
             val newApp = createNewVersion(marketApp, localApp)
-            client.update(newApp)
-            val recentChanges = if (updatedTitles.size == 0) appDetails.recentChangesHtml else ""
 
+            val recentChanges = if (updatedTitles.size == 0) appDetails.recentChangesHtml else ""
             val installedInfo = installedAppsProvider.getInfo(appDetails.packageName)
             updatedTitles.add(UpdatedApp(localApp.appId, marketApp.title, appDetails.packageName, recentChanges!!, appDetails.versionCode, installedInfo.versionCode))
-            return
+            return AppListTable.createContentValues(newApp)
         }
 
         AppLog.d("No update found for: " + localApp.appId)
@@ -231,11 +245,10 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
         }
         //Refresh app icon if it wasn't fetched previously
         fillMissingData(marketApp, localApp, values)
-
         if (values.size() > 0) {
-            AppLog.d("ContentValues: " + values.toString())
-            client.update(localApp.rowId, values)
+            values.put(BaseColumns._ID, localApp.rowId)
         }
+        return values
     }
 
     private fun notifyIfNeeded(manualSync: Boolean, updatedApps: List<UpdatedApp>) {
