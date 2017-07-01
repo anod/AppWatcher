@@ -160,7 +160,7 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
 
         mAppDetailsView.fillDetails(app, app.rowId == -1)
 
-        if (TextUtils.isEmpty(app.iconUrl)) {
+        if (app.iconUrl.isEmpty()) {
             if (app.rowId > 0) {
                 val dbImageUri = DbContentProvider.ICONS_CONTENT_URI.buildUpon().appendPath(app.rowId.toString()).build()
                 mIconLoader.retrieve(dbImageUri).into(mIconLoadTarget)
@@ -178,12 +178,12 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
             mAppIcon.setImageBitmap(bitmap)
         }
 
-        override fun onBitmapFailed(e: Exception, errorDrawable: Drawable) {
+        override fun onBitmapFailed(e: Exception?, errorDrawable: Drawable?) {
             AppLog.e("mIconLoadTarget::onBitmapFailed", e)
             setDefaultIcon()
         }
 
-        override fun onPrepareLoad(placeHolderDrawable: Drawable) {
+        override fun onPrepareLoad(placeHolderDrawable: Drawable?) {
 
         }
     }

@@ -90,7 +90,7 @@ open class AppViewHolder(
                 sectionCount.text = dataProvider.newAppsCount.toString()
                 sectionCount.visibility = View.VISIBLE
             }
-        } else {
+        } else if (section.visibility == View.VISIBLE) {
             section.visibility = View.GONE
         }
     }

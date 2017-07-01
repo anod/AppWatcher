@@ -34,7 +34,8 @@ interface InstalledAppsProvider {
             }
 
             if (pkgInfo != null) {
-                return InstalledAppsProvider.Info(pkgInfo.versionCode, pkgInfo.versionName)
+                val versionName = pkgInfo.versionName ?: ""
+                return InstalledAppsProvider.Info(pkgInfo.versionCode, versionName)
             }
             return InstalledAppsProvider.Info(0, "")
         }

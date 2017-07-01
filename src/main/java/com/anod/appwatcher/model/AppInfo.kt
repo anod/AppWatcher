@@ -160,9 +160,10 @@ class AppInfo : AppInfoMetadata, Parcelable {
 
             val dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM)
             val lastUpdate = dateFormat.format(Date(packageInfo.lastUpdateTime))
+            val versionName = packageInfo.versionName ?: ""
 
             return AppInfo(
-                    packageInfo.packageName, packageInfo.versionCode, packageInfo.versionName,
+                    packageInfo.packageName, packageInfo.versionCode, versionName,
                     appTitle, iconUrl, AppInfoMetadata.STATUS_NORMAL, lastUpdate
             )
         }

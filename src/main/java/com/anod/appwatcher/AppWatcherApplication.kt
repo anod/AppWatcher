@@ -1,7 +1,6 @@
 package com.anod.appwatcher
 
 import android.app.Application
-import android.content.Context
 import android.content.res.Configuration
 import android.support.v7.app.AppCompatDelegate
 import android.view.ViewConfiguration
@@ -9,9 +8,9 @@ import com.anod.appwatcher.utils.AppDetailsUploadDate
 import com.anod.appwatcher.utils.MetricsManagerEvent
 import com.google.firebase.crash.FirebaseCrash
 import info.anodsplace.android.log.AppLog
-import android.net.NetworkInfo
-import android.net.ConnectivityManager
 import com.android.volley.NetworkError
+import com.android.volley.TimeoutError
+import com.android.volley.VolleyError
 import java.io.IOException
 
 
@@ -78,7 +77,10 @@ class AppWatcherApplication : Application(), AppLog.Listener {
     }
 
     private fun isNetworkError(tr: Throwable): Boolean {
-        return tr is NetworkError || (tr is IOException && tr.message?.contains("NetworkError") == true)
+        return tr is NetworkError
+                || (tr is IOException && tr.message?.contains("NetworkError") == true)
+                || tr is VolleyError
+                || tr is TimeoutError
     }
 
     private inner class FirebaseLogger : AppLog.Logger.Android() {
