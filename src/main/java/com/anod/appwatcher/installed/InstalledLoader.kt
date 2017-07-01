@@ -88,21 +88,19 @@ class InstalledLoader(
         }
     }
 
-    private class AppTitleComparator constructor(private val mOrder: Int, private val mLoader: InstalledLoader) : Comparator<String> {
+    private class AppTitleComparator(private val order: Int, private val loader: InstalledLoader) : Comparator<String> {
 
         override fun compare(lPackageName: String, rPackageName: String): Int {
-            return mOrder * mLoader.getPackageTitle(lPackageName).compareTo(mLoader.getPackageTitle(rPackageName))
+            return order * loader.getPackageTitle(lPackageName).compareTo(loader.getPackageTitle(rPackageName))
         }
     }
 
-    private class AppUpdateTimeComparator constructor(private val mOrder: Int, private val mLoader: InstalledLoader) : Comparator<String> {
+    private class AppUpdateTimeComparator(private val order: Int, private val loader: InstalledLoader) : Comparator<String> {
 
         override fun compare(lPackageName: String, rPackageName: String): Int {
-            if (mLoader.getPackageUpdateTime(lPackageName) > mLoader.getPackageUpdateTime(rPackageName)) {
-                return mOrder
-            } else {
-                return mOrder * -1
-            }
+            val lTime = loader.getPackageUpdateTime(lPackageName)
+            val rTime = loader.getPackageUpdateTime(rPackageName)
+            return order * lTime.compareTo(rTime)
         }
     }
 }
