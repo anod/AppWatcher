@@ -109,6 +109,6 @@ internal class ImportBulkManager(
     }
 
     companion object {
-        private val BULK_SIZE = 20
+        private const val BULK_SIZE = 20
     }
 }

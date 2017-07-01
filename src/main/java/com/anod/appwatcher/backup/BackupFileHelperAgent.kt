@@ -43,7 +43,7 @@ class BackupFileHelperAgent : BackupAgentHelper() {
 
     companion object {
         // A key to uniquely identify the set of backup data
-        private val APPDB_BACKUP_KEY = "appdb"
+        private const val APPDB_BACKUP_KEY = "appdb"
         // Object for intrinsic lock
         private val sDataLock = arrayOfNulls<Any>(0)
     }

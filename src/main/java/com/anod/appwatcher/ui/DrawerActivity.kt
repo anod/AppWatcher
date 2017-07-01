@@ -126,7 +126,11 @@ abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelec
     override fun onAccountSelected(account: Account, authSubToken: String?) {
         mAuthToken = authSubToken
         if (authSubToken == null) {
-            Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
+            if (App.with(this).isNetworkAvailable) {
+                Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()
+            }
             return
         }
 
@@ -136,7 +140,11 @@ abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelec
     }
 
     override fun onAccountNotFound() {
-        Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
+        if (App.with(this).isNetworkAvailable) {
+            Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
+        } else {
+            Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

@@ -102,15 +102,15 @@ class DbBackupManager(private val mContext: Context) {
     }
 
     companion object {
-        private val DIR_BACKUP = "/data/com.anod.appwatcher/backup"
+        private const val DIR_BACKUP = "/data/com.anod.appwatcher/backup"
 
-        val FILE_EXT_DAT = ".json"
-        val RESULT_OK = 0
-        val ERROR_STORAGE_NOT_AVAILABLE = 1
-        val ERROR_FILE_NOT_EXIST = 2
-        val ERROR_FILE_READ = 3
-        val ERROR_FILE_WRITE = 4
-        val ERROR_DESERIALIZE = 5
+        const val FILE_EXT_DAT = ".json"
+        const val RESULT_OK = 0
+        const val ERROR_STORAGE_NOT_AVAILABLE = 1
+        const val ERROR_FILE_NOT_EXIST = 2
+        const val ERROR_FILE_READ = 3
+        const val ERROR_FILE_WRITE = 4
+        const val ERROR_DESERIALIZE = 5
 
         /**
          * We serialize access to our persistent data through a global static

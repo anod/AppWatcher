@@ -1,5 +1,7 @@
 package com.anod.appwatcher
 
+import android.content.Context
+import android.net.ConnectivityManager
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.NoCache
 import com.anod.appwatcher.accounts.AccountManager
@@ -32,4 +34,6 @@ class ObjectGraph internal constructor(private val app: AppWatcherApplication) {
             return GcmNetworkManager.getInstance(this.app)
         }
     val fireBase: FirebaseAnalytics by lazy { FirebaseAnalytics.getInstance(this.app) }
+    val connectivityManager: ConnectivityManager
+        get() = app.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 }

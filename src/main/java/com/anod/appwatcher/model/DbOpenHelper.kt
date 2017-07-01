@@ -84,8 +84,8 @@ class DbOpenHelper(context: Context)
 
     companion object {
 
-        private val DATABASE_VERSION = 9
-        val DATABASE_NAME = "app_watcher"
+        private const val DATABASE_VERSION = 9
+        const val DATABASE_NAME = "app_watcher"
     }
 
 }

@@ -116,6 +116,6 @@ class AppIconLoader(context: Context) {
     }
 
     companion object {
-        val SCHEME = "application.icon"
+        const val SCHEME = "application.icon"
     }
 }

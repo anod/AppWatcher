@@ -42,6 +42,6 @@ class SearchEndpoint(context: Context, private val mAutoLoadNextPage: Boolean) :
     }
 
     companion object {
-        private val BACKEND_ID = 3
+        private const val BACKEND_ID = 3
     }
 }

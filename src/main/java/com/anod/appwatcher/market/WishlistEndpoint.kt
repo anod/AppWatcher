@@ -41,7 +41,7 @@ class WishlistEndpoint(context: Context, private val mAutoloadNext: Boolean) : P
     }
 
     companion object {
-        private val LIBRARY_ID = "u-wl"
-        private val BACKEND_ID = 0
+        private const val LIBRARY_ID = "u-wl"
+        private const val BACKEND_ID = 0
     }
 }

@@ -28,13 +28,13 @@ class NotificationActivity : Activity() {
     }
 
     companion object {
-        val EXTRA_TYPE = "type"
-        val EXTRA_PKG = "pkg"
+        const val EXTRA_TYPE = "type"
+        const val EXTRA_PKG = "pkg"
 
-        val TYPE_PLAY = 1
-        val TYPE_DISMISS = 2
-        val TYPE_MYAPPS = 3
-        val TYPE_MYAPPS_UPDATE = 4
+        const val TYPE_PLAY = 1
+        const val TYPE_DISMISS = 2
+        const val TYPE_MYAPPS = 3
+        const val TYPE_MYAPPS_UPDATE = 4
     }
 
 

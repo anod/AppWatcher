@@ -163,7 +163,7 @@ class SyncNotification(private val mContext: Context) {
 
     companion object {
 
-        internal val NOTIFICATION_ID = 1
+        internal const val NOTIFICATION_ID = 1
     }
 
 

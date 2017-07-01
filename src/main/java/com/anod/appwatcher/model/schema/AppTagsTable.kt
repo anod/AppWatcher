@@ -12,8 +12,8 @@ class AppTagsTable {
 
     class Columns : BaseColumns {
         companion object {
-            val APPID = "app_id"
-            val TAGID = "tags_id"
+            const val APPID = "app_id"
+            const val TAGID = "tags_id"
         }
     }
 
@@ -24,9 +24,9 @@ class AppTagsTable {
     }
 
     object Projection {
-        val _ID = 0
-        val APPID = 1
-        val TAGID = 2
+        const val _ID = 0
+        const val APPID = 1
+        const val TAGID = 2
     }
 
     companion object {

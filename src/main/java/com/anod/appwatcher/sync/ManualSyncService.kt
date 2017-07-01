@@ -34,7 +34,7 @@ class ManualSyncService : IntentService("ManualSyncService") {
     }
 
     companion object {
-        private val ACTION_MANUAL_SYNC = "com.anod.appwatcher.sync.action.SYNC"
+        private const val ACTION_MANUAL_SYNC = "com.anod.appwatcher.sync.action.SYNC"
 
         /**
          * Starts this service to perform action Sync. If

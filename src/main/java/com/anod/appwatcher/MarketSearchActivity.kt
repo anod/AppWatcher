@@ -190,7 +190,11 @@ class MarketSearchActivity : ToolbarActivity(), AccountChooser.OnAccountSelectio
 
     override fun onAccountSelected(account: Account, authSubToken: String?) {
         if (authSubToken == null) {
-            Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
+            if (App.with(this).isNetworkAvailable) {
+                Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()
+            }
             finish()
             return
         }
@@ -203,7 +207,11 @@ class MarketSearchActivity : ToolbarActivity(), AccountChooser.OnAccountSelectio
     }
 
     override fun onAccountNotFound() {
-        Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
+        if (App.with(this).isNetworkAvailable) {
+            Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
+        } else {
+            Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()
+        }
         finish()
     }
 
@@ -291,6 +299,12 @@ class MarketSearchActivity : ToolbarActivity(), AccountChooser.OnAccountSelectio
     }
 
     override fun onErrorResponse(id: Int, endpoint: PlayStoreEndpointBase, error: VolleyError) {
+        if (!App.with(this).isNetworkAvailable) {
+            mLoading.visibility = View.GONE
+            showRetryButton()
+            Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()
+            return
+        }
         if (id == DETAILS_ENDPOINT_ID) {
             mAdapter = ResultsAdapterSearch(this, mEndpoints.get(SEARCH_ENDPOINT_ID) as SearchEndpoint, mWatchAppList)
             mListView.adapter = mAdapter
@@ -302,13 +316,13 @@ class MarketSearchActivity : ToolbarActivity(), AccountChooser.OnAccountSelectio
     }
 
     companion object {
-        val EXTRA_KEYWORD = "keyword"
-        val EXTRA_EXACT = "exact"
-        val EXTRA_SHARE = "share"
-        val EXTRA_FOCUS = "focus"
-        val EXTRA_PACKAGE = "package"
+        const val EXTRA_KEYWORD = "keyword"
+        const val EXTRA_EXACT = "exact"
+        const val EXTRA_SHARE = "share"
+        const val EXTRA_FOCUS = "focus"
+        const val EXTRA_PACKAGE = "package"
 
-        private val DETAILS_ENDPOINT_ID = 0
-        private val SEARCH_ENDPOINT_ID = 1
+        private const val DETAILS_ENDPOINT_ID = 0
+        private const val SEARCH_ENDPOINT_ID = 1
     }
 }

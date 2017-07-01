@@ -9,6 +9,11 @@ import com.anod.appwatcher.utils.AppDetailsUploadDate
 import com.anod.appwatcher.utils.MetricsManagerEvent
 import com.google.firebase.crash.FirebaseCrash
 import info.anodsplace.android.log.AppLog
+import android.net.NetworkInfo
+import android.net.ConnectivityManager
+import com.android.volley.NetworkError
+import java.io.IOException
+
 
 class AppWatcherApplication : Application(), AppLog.Listener {
     lateinit var objectGraph: ObjectGraph
@@ -49,7 +54,16 @@ class AppWatcherApplication : Application(), AppLog.Listener {
             return false
         }
 
+    val isNetworkAvailable: Boolean
+        get() = objectGraph.connectivityManager.activeNetworkInfo?.isConnectedOrConnecting ?:false
+
     override fun onLogException(tr: Throwable) {
+
+        if (isNetworkError(tr) && !isNetworkAvailable) {
+            // Ignore
+            return
+        }
+
         FirebaseCrash.report(tr)
         if (tr is AppDetailsUploadDate.ExtractDateError) {
             val error = tr
@@ -61,6 +75,10 @@ class AppWatcherApplication : Application(), AppLog.Listener {
                     "EXPECTED_FORMAT", error.expectedFormat,
                     "CUSTOM", if (error.isCustomParser) "YES" else "NO")
         }
+    }
+
+    private fun isNetworkError(tr: Throwable): Boolean {
+        return tr is NetworkError || (tr is IOException && tr.message?.contains("NetworkError") == true)
     }
 
     private inner class FirebaseLogger : AppLog.Logger.Android() {

@@ -84,8 +84,8 @@ class AuthTokenProvider(context: Context) {
     }
 
     companion object {
-        private val AUTH_TOKEN_TYPE = "androidmarket"
-        val ACCOUNT_TYPE = "com.google"
+        private const val AUTH_TOKEN_TYPE = "androidmarket"
+        const val ACCOUNT_TYPE = "com.google"
     }
 
 }

@@ -91,9 +91,9 @@ internal class CustomMonthDateFormat(private val mMonthNames: Array<String>) : D
 
     companion object {
 
-        private val STATE_DAY = 0
-        private val STATE_MONTH = 1
-        private val STATE_YEAR = 2
+        private const val STATE_DAY = 0
+        private const val STATE_MONTH = 1
+        private const val STATE_YEAR = 2
 
         private fun toInt(text: String): Int {
             if ("" == text) {

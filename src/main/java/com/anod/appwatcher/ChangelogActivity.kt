@@ -82,12 +82,10 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
         ButterKnife.bind(this)
         setupToolbar()
 
-        val data = intent
-
         mIconLoader = App.provide(this).iconLoader
-        mAppId = data.getStringExtra(EXTRA_APP_ID)
-        mDetailsUrl = data.getStringExtra(EXTRA_DETAILS_URL)
-        val rowId = data.getIntExtra(EXTRA_ROW_ID, -1)
+        mAppId = intent.getStringExtra(EXTRA_APP_ID)
+        mDetailsUrl = intent.getStringExtra(EXTRA_DETAILS_URL)
+        val rowId = intent.getIntExtra(EXTRA_ROW_ID, -1)
         MetricsManagerEvent.track(this, "open_changelog", "DETAILS_APP_ID", mAppId, "DETAILS_ROW_ID", rowId.toString())
 
         mDataProvider = AppViewHolderDataProvider(this, InstalledAppsProvider.PackageManager(packageManager))
@@ -147,7 +145,7 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
             }
 
             override fun onUnRecoverableException(errorMessage: String) {
-
+                showRetryMessage()
             }
         })
     }
@@ -329,6 +327,10 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
     }
 
     override fun onErrorResponse(error: VolleyError) {
+        showRetryMessage()
+    }
+
+    private fun showRetryMessage() {
         mContent.visibility = View.VISIBLE
         mLoadingView.visibility = View.GONE
         mChangelog.visibility = View.VISIBLE
@@ -336,6 +338,9 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
 
         mChangelog.text = getString(R.string.error_fetching_info)
         mRetryButton.visibility = View.VISIBLE
+        if (!App.with(this).isNetworkAvailable) {
+            Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onGenerated(palette: Palette) {
@@ -393,11 +398,10 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
     }
 
     companion object {
-
-        val EXTRA_APP_ID = "app_id"
-        val EXTRA_DETAILS_URL = "url"
-        val EXTRA_ROW_ID = "row_id"
-        val EXTRA_ADD_APP_PACKAGE = "app_add_success"
-        val EXTRA_UNINSTALL_APP_PACKAGE = "app_uninstall"
+        const val EXTRA_APP_ID = "app_id"
+        const val EXTRA_DETAILS_URL = "url"
+        const val EXTRA_ROW_ID = "row_id"
+        const val EXTRA_ADD_APP_PACKAGE = "app_add_success"
+        const val EXTRA_UNINSTALL_APP_PACKAGE = "app_uninstall"
     }
 }

@@ -115,9 +115,9 @@ class WatchAppList(private val mListener: WatchAppList.Listener?) {
     }
 
     companion object {
-        val RESULT_OK = 0
-        val ERROR_INSERT = 1
-        val ERROR_ALREADY_ADDED = 2
-        val ERROR_DELETE = 3
+        const val RESULT_OK = 0
+        const val ERROR_INSERT = 1
+        const val ERROR_ALREADY_ADDED = 2
+        const val ERROR_DELETE = 3
     }
 }

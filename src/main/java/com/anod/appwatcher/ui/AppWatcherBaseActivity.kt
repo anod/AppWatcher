@@ -211,12 +211,16 @@ abstract class AppWatcherBaseActivity : DrawerActivity(), TextView.OnEditorActio
     fun requestRefresh(): Boolean {
         AppLog.d("Refresh pressed")
         if (!isAuthenticated) {
-            showAccountsDialogWithCheck()
+            if (App.with(this).isNetworkAvailable) {
+                showAccountsDialogWithCheck()
+            } else {
+                Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()
+            }
             return false
         }
 
-        Toast.makeText(this, "Refresh scheduled", Toast.LENGTH_SHORT).show()
         ManualSyncService.startActionSync(this)
+        Toast.makeText(this, R.string.refresh_scheduled, Toast.LENGTH_SHORT).show()
         return false
     }
 
@@ -317,7 +321,6 @@ abstract class AppWatcherBaseActivity : DrawerActivity(), TextView.OnEditorActio
     }
 
     companion object {
-
-        val EXTRA_FROM_NOTIFICATION = "extra_noti"
+        const val EXTRA_FROM_NOTIFICATION = "extra_noti"
     }
 }

@@ -131,7 +131,7 @@ class AccountChooserFragment : DialogFragment(), DialogInterface.OnClickListener
     }
 
     companion object {
-        val PERMISSION_REQUEST_GET_ACCOUNTS = 123
+        const val PERMISSION_REQUEST_GET_ACCOUNTS = 123
 
         fun newInstance(): AccountChooserFragment {
             val frag = AccountChooserFragment()

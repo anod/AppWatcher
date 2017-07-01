@@ -94,7 +94,7 @@ open class AppWatcherListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
         }
 
         companion object {
-            private val ADAPTER_WATCHLIST = 0
+            private const val ADAPTER_WATCHLIST = 0
         }
     }
 
@@ -262,7 +262,9 @@ open class AppWatcherListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
     }
 
     override fun onRefresh() {
-        (activity as AppWatcherBaseActivity).requestRefresh()
+       if (!(activity as AppWatcherBaseActivity).requestRefresh()) {
+           mSwipeLayout.isRefreshing = false
+       }
     }
 
     private fun restartLoader() {

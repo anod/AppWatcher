@@ -80,7 +80,7 @@ class AppsTagActivity : AppWatcherBaseActivity() {
     }
 
     companion object {
-        val EXTRA_TAG = "extra_tag"
+        const val EXTRA_TAG = "extra_tag"
 
         fun createTagIntent(tag: Tag, context: Context): Intent {
             val intent = Intent(context, AppsTagActivity::class.java)

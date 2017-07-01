@@ -119,6 +119,8 @@
     <string name="tag_app">Tag %1s</string>
     <string name="google_drive_sync_failed">Google Drive sync failed.</string>
     <string name="user_action_required">User action required</string>
+    <string name="check_connection">Please check internet connection</string>
+    <string name="refresh_scheduled">Refresh scheduled</string>
 
     <string-array name="sort_titles">
         <item>By name &#x2193;</item>

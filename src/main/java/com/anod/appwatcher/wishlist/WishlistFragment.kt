@@ -167,8 +167,8 @@ class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Li
     }
 
     companion object {
-        val TAG = "wishlist"
-        val EXTRA_ACCOUNT = "extra_account"
-        val EXTRA_AUTH_TOKEN = "extra_auth_token"
+        const val TAG = "wishlist"
+        const val EXTRA_ACCOUNT = "extra_account"
+        const val EXTRA_AUTH_TOKEN = "extra_auth_token"
     }
 }

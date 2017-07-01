@@ -88,26 +88,26 @@ class Preferences(context: Context) {
         set(nightMode) = preferences.edit().putInt(NIGHT_MODE, nightMode).apply()
 
     companion object {
-        private val VIEWED = "viewed"
-        private val LAST_UPDATE_TIME = "last_update_time"
-        private val WIFI_ONLY = "wifi_only"
-        private val DEVICE_ID = "device_id"
-        private val ACCOUNT_NAME = "account_name"
-        private val ACCOUNT_TYPE = "account_type"
-        private val SORT_INDEX = "sort_index"
+        private const val VIEWED = "viewed"
+        private const val LAST_UPDATE_TIME = "last_update_time"
+        private const val WIFI_ONLY = "wifi_only"
+        private const val DEVICE_ID = "device_id"
+        private const val ACCOUNT_NAME = "account_name"
+        private const val ACCOUNT_TYPE = "account_type"
+        private const val SORT_INDEX = "sort_index"
 
-        internal val SORT_NAME_ASC = 0
-        val SORT_NAME_DESC = 1
-        val SORT_DATE_ASC = 2
-        val SORT_DATE_DESC = 3
+        internal const val SORT_NAME_ASC = 0
+        const val SORT_NAME_DESC = 1
+        const val SORT_DATE_ASC = 2
+        const val SORT_DATE_DESC = 3
 
-        private val PREFS_NAME = "WatcherPrefs"
-        private val DRIVE_SYNC = "drive_sync"
-        private val DRIVE_SYNC_TIME = "drive_sync_time"
-        private val AUTOSYNC = "autosync"
-        private val REQUIRES_CHARGING = "requires-charging"
-        val VERSION_CODE = "version_code"
-        val NOTIFY_INSTALLED_UPTODATE = "notify_installed_uptodate"
-        val NIGHT_MODE = "night-mode"
+        private const val PREFS_NAME = "WatcherPrefs"
+        private const val DRIVE_SYNC = "drive_sync"
+        private const val DRIVE_SYNC_TIME = "drive_sync_time"
+        private const val AUTOSYNC = "autosync"
+        private const val REQUIRES_CHARGING = "requires-charging"
+        const val VERSION_CODE = "version_code"
+        const val NOTIFY_INSTALLED_UPTODATE = "notify_installed_uptodate"
+        const val NIGHT_MODE = "night-mode"
     }
 }

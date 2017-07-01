@@ -14,8 +14,8 @@ class TagsTable {
 
     class Columns : BaseColumns {
         companion object {
-            val NAME = "name"
-            val COLOR = "color"
+            const val NAME = "name"
+            const val COLOR = "color"
         }
     }
 
@@ -26,13 +26,13 @@ class TagsTable {
     }
 
     object Projection {
-        val _ID = 0
-        val NAME = 1
-        val COLOR = 2
+        const val _ID = 0
+        const val NAME = 1
+        const val COLOR = 2
     }
 
     companion object {
-        val TABLE_NAME = "tags"
+        const val TABLE_NAME = "tags"
         val PROJECTION = arrayOf(TableColumns._ID, TableColumns.NAME, TableColumns.COLOR)
         val TABLE_CREATE =
                 "CREATE TABLE " + TABLE_NAME + " (" +

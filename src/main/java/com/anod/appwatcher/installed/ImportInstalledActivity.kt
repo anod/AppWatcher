@@ -124,7 +124,11 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
 
     override fun onAccountSelected(account: Account, authSubToken: String?) {
         if (authSubToken == null) {
-            Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
+            if (App.with(this).isNetworkAvailable) {
+                Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()
+            }
             finish()
             return
         }

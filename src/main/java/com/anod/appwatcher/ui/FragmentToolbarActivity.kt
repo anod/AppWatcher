@@ -47,8 +47,8 @@ class FragmentToolbarActivity : ToolbarActivity() {
     }
 
     companion object {
-        private val EXTRA_FRAGMENT = "extra_fragment"
-        private val EXTRA_ARGUMENTS = "extra_arguments"
+        private const val EXTRA_FRAGMENT = "extra_fragment"
+        private const val EXTRA_ARGUMENTS = "extra_arguments"
 
         internal fun intent(fragmentTag: String, args: Bundle, context: Context): Intent {
             val intent = Intent(context, FragmentToolbarActivity::class.java)

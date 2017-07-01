@@ -168,7 +168,7 @@ class AppsTagSelectActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<C
     }
 
     companion object {
-        val EXTRA_TAG = "extra_tag"
+        const val EXTRA_TAG = "extra_tag"
 
         fun createIntent(tag: Tag, context: Context): Intent {
             val intent = Intent(context, AppsTagSelectActivity::class.java)

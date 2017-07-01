@@ -42,7 +42,7 @@ class ShareRecieverActivity : Activity() {
     }
 
     companion object {
-        private val URL_PLAYSTORE = "https://play.google.com"
+        private const val URL_PLAYSTORE = "https://play.google.com"
     }
 
 

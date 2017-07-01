@@ -47,13 +47,13 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
             val installedVersionCode: Int)
 
     companion object {
-        private val ONE_SEC_IN_MILLIS = 1000
-        private val BULK_SIZE = 20
-        internal val SYNC_EXTRAS_MANUAL = "manual"
+        private const val ONE_SEC_IN_MILLIS = 1000
+        private const val BULK_SIZE = 20
+        internal const val SYNC_EXTRAS_MANUAL = "manual"
 
-        val SYNC_STOP = "com.anod.appwatcher.sync.start"
-        val SYNC_PROGRESS = "com.anod.appwatcher.sync.progress"
-        val EXTRA_UPDATES_COUNT = "extra_updates_count"
+        const val SYNC_STOP = "com.anod.appwatcher.sync.start"
+        const val SYNC_PROGRESS = "com.anod.appwatcher.sync.progress"
+        const val EXTRA_UPDATES_COUNT = "extra_updates_count"
     }
 
     private val preferences = App.provide(context).prefs

@@ -29,8 +29,8 @@ class RemoveDialogFragment : DialogFragment() {
     }
 
     companion object {
-        private val ARG_ROW_ID = "rowId"
-        private val ARG_TITLE = "title"
+        private const val ARG_ROW_ID = "rowId"
+        private const val ARG_TITLE = "title"
 
         fun newInstance(title: String, rowId: Int): RemoveDialogFragment {
             val frag = RemoveDialogFragment()

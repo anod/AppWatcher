@@ -23,7 +23,7 @@ class UploadService : GcmTaskService() {
         private const val windowStartDelaySeconds = 30L
         private const val windowEndDelaySeconds = 300L
 
-        private val TASK_TAG = "GDriveUpload"
+        private const val TASK_TAG = "GDriveUpload"
 
         fun schedule(context: Context) {
             val task = OneoffTask.Builder()

@@ -41,9 +41,9 @@ internal class ImportDataProvider(context: Context, installedAppsProvider: Insta
     }
 
     companion object {
-        val STATUS_DEFAULT = 0
-        val STATUS_IMPORTING = 1
-        val STATUS_DONE = 2
-        val STATUS_ERROR = 3
+        const val STATUS_DEFAULT = 0
+        const val STATUS_IMPORTING = 1
+        const val STATUS_DONE = 2
+        const val STATUS_ERROR = 3
     }
 }
