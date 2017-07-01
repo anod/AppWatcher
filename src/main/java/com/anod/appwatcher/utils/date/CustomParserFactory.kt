@@ -15,6 +15,7 @@ object CustomParserFactory {
     private val SV_SHORT_MONTHS = arrayOf("jan", "feb", "mars", "apr", "maj", "juni", "juli", "aug", "sep", "okt", "nov", "dec")
     private val ES_SHORT_MONTHS = arrayOf("ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sept", "oct", "nov", "dic")
     private val ES_US_SHORT_MONTHS = arrayOf("ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic")
+    private val FR_CA_SHORT_MONTHS = arrayOf("janv", "févr", "mars", "avr", "mai", "juin", "juill", "août", "sept", "oct", "nov", "déc")
 
     fun create(locale: Locale): DateFormat? {
         val lang = locale.language
@@ -32,6 +33,10 @@ object CustomParserFactory {
 
         if (locale == Locale("es", "US")) {
             return CustomMonthDateFormat(ES_US_SHORT_MONTHS)
+        }
+
+        if (locale == Locale("fr", "CA")) {
+            return CustomMonthDateFormat(FR_CA_SHORT_MONTHS)
         }
 
         if (lang == Locale("de", "").language) {

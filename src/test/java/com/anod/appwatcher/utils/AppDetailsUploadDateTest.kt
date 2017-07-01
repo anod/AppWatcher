@@ -53,6 +53,9 @@ class AppDetailsUploadDateTest {
         dates.add(DateDesc("es_VE", "5 feb. 2017", "2017-02-05"))
         dates.add(DateDesc("fa_IR", "Feb 1, 2017", "2017-02-01"))
 
+        dates.add(DateDesc("fr_CA", "12 juill. 2016", "2016-07-12"))
+
+
         //        for (int i = 0; i < 12; i++) {
         //            DateFormat df = CustomParserFactory.create(new Locale("es", "US"));
         //            System.out.println(df.format(new Date(117,i,15)));
