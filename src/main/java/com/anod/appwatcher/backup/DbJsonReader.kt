@@ -40,6 +40,8 @@ class DbJsonReader {
                 readApps(jsonReader, listener)
             } else if (name == "tags") {
                 readTags(jsonReader, listener)
+            } else {
+                jsonReader.skipValue()
             }
         }
 
@@ -85,6 +87,8 @@ class DbJsonReader {
                 readApps(jsonReader, listener)
             } else if (name == "tags") {
                 readTags(jsonReader, listener)
+            } else {
+                jsonReader.skipValue()
             }
         }
 
