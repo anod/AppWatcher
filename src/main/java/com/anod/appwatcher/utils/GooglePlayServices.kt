@@ -20,7 +20,7 @@ import java.util.concurrent.CountDownLatch
  * @date 7/30/14.
  */
 class GooglePlayServices(context: Context, private val listener: Listener) : GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ActivityListener.ResultListener {
-    private val activity: Activity? = if (context is Activity) context else null
+    private val activity: Activity? = context as? Activity
     private val context: Context = context.applicationContext
     val googleApiClient: GoogleApiClient by lazy {
         listener.createGoogleApiClientBuilder()
@@ -98,11 +98,15 @@ class GooglePlayServices(context: Context, private val listener: Listener) : Goo
         if (!result.hasResolution()) {
             // show the localized error dialog.
             listener.onConnectionError()
-            GoogleApiAvailability.getInstance().getErrorDialog(activity, result.errorCode, 0).show()
+            if (activity?.window?.decorView?.isShown == true) {
+                GoogleApiAvailability.getInstance().getErrorDialog(activity, result.errorCode, 0).show()
+            }
             return
         }
         try {
-            result.startResolutionForResult(activity, REQUEST_CODE_RESOLUTION)
+            if (activity != null) {
+                result.startResolutionForResult(activity, REQUEST_CODE_RESOLUTION)
+            }
         } catch (e: IntentSender.SendIntentException) {
             AppLog.e(e)
             listener.onConnectionError()

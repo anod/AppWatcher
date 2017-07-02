@@ -134,20 +134,20 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
     override fun onResume() {
         super.onResume()
         mDetailsEndpoint.listener = this
-
-        val accHelper = AuthTokenProvider(this)
-        val account = App.provide(this).prefs.account
         mLoadingView.visibility = View.VISIBLE
-        accHelper.requestToken(this, account!!, object : AuthTokenProvider.AuthenticateCallback {
-            override fun onAuthTokenAvailable(token: String) {
-                mDetailsEndpoint.setAccount(account, token)
-                mDetailsEndpoint.startAsync()
-            }
 
-            override fun onUnRecoverableException(errorMessage: String) {
-                showRetryMessage()
-            }
-        })
+        App.provide(this).prefs.account?.let {
+            AuthTokenProvider(this).requestToken(this, it, object : AuthTokenProvider.AuthenticateCallback {
+                override fun onAuthTokenAvailable(token: String) {
+                    mDetailsEndpoint.setAccount(it, token)
+                    mDetailsEndpoint.startAsync()
+                }
+
+                override fun onUnRecoverableException(errorMessage: String) {
+                    showRetryMessage()
+                }
+            })
+        }
     }
 
     override fun onPause() {
