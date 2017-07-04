@@ -17,7 +17,7 @@ object AppDetailsUploadDate {
 
     fun extract(doc: Document): Long {
         val defaultLocale = Locale.getDefault()
-        val uploadDate = doc.appDetails.uploadDate
+        val uploadDate = doc.appDetails?.uploadDate ?: return 0
         val date = extract(uploadDate, defaultLocale) ?: return 0
         return date.time
     }

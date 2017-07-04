@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.database.Cursor
 import android.os.Bundle
+import android.support.annotation.Nullable
 import android.support.v4.app.Fragment
 import android.support.v4.app.LoaderManager
 import android.support.v4.content.Loader
@@ -54,7 +55,7 @@ open class AppWatcherListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
     @BindView(android.R.id.empty)
     lateinit var mEmptyView: View
     @BindView(R.id.swipe_layout)
-    lateinit var mSwipeLayout: SwipeRefreshLayout
+    @Nullable @JvmField var mSwipeLayout: SwipeRefreshLayout? = null
 
     private lateinit var mSection: SectionProvider
 
@@ -130,7 +131,7 @@ open class AppWatcherListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
         val root = inflateView(inflater, container, savedInstanceState)
         ButterKnife.bind(this, root)
         mEmptyView.visibility = View.GONE
-        mSwipeLayout.setOnRefreshListener(this)
+        mSwipeLayout?.setOnRefreshListener(this)
         return root
     }
 
@@ -205,11 +206,11 @@ open class AppWatcherListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
     }
 
     override fun onSyncStart() {
-        mSwipeLayout.isRefreshing = true
+        mSwipeLayout?.isRefreshing = true
     }
 
     override fun onSyncFinish() {
-        mSwipeLayout.isRefreshing = false
+        mSwipeLayout?.isRefreshing = false
     }
 
     override fun onItemClick(app: AppInfo) {
@@ -263,7 +264,7 @@ open class AppWatcherListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
 
     override fun onRefresh() {
        if (!(activity as AppWatcherBaseActivity).requestRefresh()) {
-           mSwipeLayout.isRefreshing = false
+           mSwipeLayout?.isRefreshing = false
        }
     }
 

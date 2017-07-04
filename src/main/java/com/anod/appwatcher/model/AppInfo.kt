@@ -64,20 +64,20 @@ class AppInfo : AppInfoMetadata, Parcelable {
         this.appId = doc.docId
         this.detailsUrl = doc.detailsUrl
         val app = doc.appDetails
-        this.packageName = app.packageName
+        this.packageName = app.packageName ?: ""
         this.title = doc.title
-        this.versionNumber = app.versionCode
-        this.versionName = app.versionString
+        this.versionNumber = app.versionCode ?: 0
+        this.versionName = app.versionString ?: ""
         this.creator = doc.creator
-        this.uploadDate = app.uploadDate
-        this.appType = app.appType
+        this.uploadDate = app.uploadDate ?: ""
+        this.appType = app.appType ?: ""
 
         val offer = doc.offer
         this.priceMicros = offer.micros.toInt()
-        this.priceText = offer.formattedAmount
-        this.priceCur = offer.currencyCode
+        this.priceText = offer.formattedAmount ?: ""
+        this.priceCur = offer.currencyCode ?: ""
 
-        this.iconUrl = doc.iconUrl
+        this.iconUrl = doc.iconUrl ?: ""
         this.refreshTime = AppDetailsUploadDate.extract(doc)
         this.syncVersion = 0
     }

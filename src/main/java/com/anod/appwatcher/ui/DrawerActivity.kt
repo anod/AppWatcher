@@ -37,15 +37,16 @@ abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelec
     private var mNavigationView: NavigationView? = null
     private var mAuthToken: String? = null
 
-    lateinit var mAccountChooser: AccountChooser
+    val accountChooser: AccountChooser by lazy {
+        AccountChooser(this, App.provide(this).prefs, this)
+    }
 
     protected open val isDrawerEnabled: Boolean
         get() = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mAccountChooser = AccountChooser(this, App.provide(this).prefs, this)
-        mAccountChooser.init()
+        accountChooser.init()
     }
 
     protected fun setupDrawer() {
@@ -126,15 +127,15 @@ abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelec
     }
 
     override val accountSelectionListener: AccountChooserFragment.OnAccountSelectionListener
-        get() = mAccountChooser
+        get() = accountChooser
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        mAccountChooser.onRequestPermissionResult(requestCode, permissions, grantResults)
+        accountChooser.onRequestPermissionResult(requestCode, permissions, grantResults)
     }
 
     protected fun onAccountChooseClick() {
-        mAccountChooser.showAccountsDialogWithCheck()
+        accountChooser.showAccountsDialogWithCheck()
     }
 
     override fun onAccountSelected(account: Account, authSubToken: String?) {
@@ -186,7 +187,7 @@ abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelec
             }
             R.id.menu_wishlist -> {
                 val args = Bundle()
-                args.putParcelable(WishlistFragment.EXTRA_ACCOUNT, mAccountChooser.account)
+                args.putParcelable(WishlistFragment.EXTRA_ACCOUNT, accountChooser.account)
                 args.putString(WishlistFragment.EXTRA_AUTH_TOKEN, mAuthToken)
                 startActivity(FragmentToolbarActivity.intent(WishlistFragment.TAG, args, this))
                 return true
@@ -213,7 +214,7 @@ abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelec
 
     fun showAccountsDialogWithCheck() {
         Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
-        mAccountChooser.showAccountsDialogWithCheck()
+        accountChooser.showAccountsDialogWithCheck()
     }
 
     internal class TagsUpdateObserver(private val mDrawerActivity: DrawerActivity) : ContentObserver(Handler()) {

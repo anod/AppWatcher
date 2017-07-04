@@ -1,6 +1,7 @@
 package com.google.android.finsky.api.model;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.SparseArray;
 
 import com.google.android.finsky.protos.nano.Messages.AppDetails;
@@ -24,7 +25,7 @@ public class Document {
         {
             return this.doc.details.appDetails;
         }
-        return null;
+        return new AppDetails();
     }
 
     public String getTitle() {
@@ -32,7 +33,7 @@ public class Document {
     }
 
     public String getDocId() {
-        return this.doc.docid;
+        return this.doc.docid == null ? "" : this.doc.docid;
     }
 
     public int getBackend() {
@@ -40,11 +41,11 @@ public class Document {
     }
 
     public String getDetailsUrl() {
-        return this.doc.detailsUrl;
+        return this.doc.detailsUrl == null ? "" : this.doc.detailsUrl;
     }
 
     public String getCreator() {
-        return this.doc.creator;
+        return this.doc.creator == null ? "" : this.doc.creator;
     }
 
     public Common.Offer getOffer() {
@@ -56,7 +57,7 @@ public class Document {
         return offer;
     }
 
-    public Common.Offer getOffer(final int type) {
+    public @Nullable Common.Offer getOffer(final int type) {
         for (final Common.Offer offer : this.doc.offer) {
             if (offer.offerType == type) {
                 return offer;
@@ -65,7 +66,7 @@ public class Document {
         return null;
     }
 
-    public String getIconUrl() {
+    public @Nullable String getIconUrl() {
         List<Common.Image> images = this.getImageTypeMap().get(4);
         if (images == null) {
             return null;
