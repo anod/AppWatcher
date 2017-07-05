@@ -37,29 +37,31 @@ import com.anod.appwatcher.utils.MetricsManagerEvent
 
 class MarketSearchActivity : ToolbarActivity(), AccountChooser.OnAccountSelectionListener, WatchAppList.Listener, CompositeStateEndpoint.Listener {
 
-    private lateinit var mAdapter: ResultsAdapter
+    private lateinit var adapter: ResultsAdapter
 
     @BindView(R.id.loading)
-    lateinit var mLoading: LinearLayout
+    lateinit var loading: LinearLayout
     @BindView(android.R.id.list)
-    lateinit var mListView: RecyclerView
+    lateinit var listView: RecyclerView
     @BindView(android.R.id.empty)
-    lateinit var mEmptyView: TextView
+    lateinit var emptyView: TextView
     @BindView(R.id.retry_box)
-    lateinit var mRetryView: LinearLayout
+    lateinit var retryView: LinearLayout
     @BindView(R.id.retry)
     lateinit var mRetryButton: Button
-    lateinit var mSearchView: SearchView
+    lateinit var searchView: SearchView
 
-    private var mInitiateSearch = false
-    private var mShareSource = false
+    private var initiateSearch = false
+    private var isShareSource = false
 
-    private var mAccountChooser: AccountChooser? = null
-    private var mSearchQuery: String = ""
-    private var mFocus: Boolean = false
-    private var mPackageSearch: Boolean = false
-    private lateinit var mEndpoints: CompositeStateEndpoint
-    private lateinit var mWatchAppList: WatchAppList
+    val accountChooser: AccountChooser by lazy {
+        AccountChooser(this, App.provide(this).prefs, this)
+    }
+    private var searchQuery = ""
+    private var hasFocus = false
+    private var isPackageSearch = false
+    private lateinit var endpoints: CompositeStateEndpoint
+    private lateinit var watchAppList: WatchAppList
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,21 +70,22 @@ class MarketSearchActivity : ToolbarActivity(), AccountChooser.OnAccountSelectio
 
         ButterKnife.bind(this)
 
-        mEndpoints = CompositeStateEndpoint(this)
-        mEndpoints.add(SEARCH_ENDPOINT_ID, SearchEndpoint(this, true))
-        mEndpoints.add(DETAILS_ENDPOINT_ID, DetailsEndpoint(this))
+        endpoints = CompositeStateEndpoint(this)
+        endpoints.add(SEARCH_ENDPOINT_ID, SearchEndpoint(this, true))
+        endpoints.add(DETAILS_ENDPOINT_ID, DetailsEndpoint(this))
 
-        mWatchAppList = WatchAppList(this)
+        watchAppList = WatchAppList(this)
 
         mRetryButton.setOnClickListener { retrySearchResult() }
-        mLoading.visibility = View.GONE
-        mListView.layoutManager = LinearLayoutManager(this)
-        mListView.visibility = View.GONE
-        mEmptyView.visibility = View.GONE
-        mLoading.visibility = View.VISIBLE
-        mRetryView.visibility = View.GONE
+        loading.visibility = View.GONE
+        listView.layoutManager = LinearLayoutManager(this)
+        listView.visibility = View.GONE
+        emptyView.visibility = View.GONE
+        loading.visibility = View.VISIBLE
+        retryView.visibility = View.GONE
 
         initFromIntent(intent)
+        accountChooser.init()
     }
 
     private fun initFromIntent(i: Intent?) {
@@ -91,50 +94,47 @@ class MarketSearchActivity : ToolbarActivity(), AccountChooser.OnAccountSelectio
         }
         val keyword = i.getStringExtra(EXTRA_KEYWORD)
         if (keyword != null) {
-            mSearchQuery = keyword
+            searchQuery = keyword
         }
-        mPackageSearch = i.getBooleanExtra(EXTRA_PACKAGE, false)
-        mInitiateSearch = i.getBooleanExtra(EXTRA_EXACT, false)
-        mShareSource = i.getBooleanExtra(EXTRA_SHARE, false)
-        mFocus = i.getBooleanExtra(EXTRA_FOCUS, false)
+        isPackageSearch = i.getBooleanExtra(EXTRA_PACKAGE, false)
+        initiateSearch = i.getBooleanExtra(EXTRA_EXACT, false)
+        isShareSource = i.getBooleanExtra(EXTRA_SHARE, false)
+        hasFocus = i.getBooleanExtra(EXTRA_FOCUS, false)
 
 
-        if (mPackageSearch) {
-            mEndpoints.setActive(DETAILS_ENDPOINT_ID)
-            mAdapter = ResultsAdapterDetails(this, mEndpoints.get(DETAILS_ENDPOINT_ID) as DetailsEndpoint, mWatchAppList)
+        if (isPackageSearch) {
+            endpoints.setActive(DETAILS_ENDPOINT_ID)
+            adapter = ResultsAdapterDetails(this, endpoints.get(DETAILS_ENDPOINT_ID) as DetailsEndpoint, watchAppList)
         } else {
-            mEndpoints.setActive(SEARCH_ENDPOINT_ID)
-            mAdapter = ResultsAdapterSearch(this, mEndpoints.get(SEARCH_ENDPOINT_ID) as SearchEndpoint, mWatchAppList)
+            endpoints.setActive(SEARCH_ENDPOINT_ID)
+            adapter = ResultsAdapterSearch(this, endpoints.get(SEARCH_ENDPOINT_ID) as SearchEndpoint, watchAppList)
         }
     }
 
     override fun onPause() {
-        mWatchAppList.detach()
+        watchAppList.detach()
         super.onPause()
-        mEndpoints.listener = null
     }
 
     override fun onResume() {
-        mWatchAppList.attach(this)
+        watchAppList.attach(this)
         super.onResume()
-        mAccountChooser = AccountChooser(this, App.provide(this).prefs, this)
-        mAccountChooser!!.init()
     }
 
     private fun searchResults() {
-        mListView.adapter = mAdapter
-        mEndpoints.reset()
+        listView.adapter = adapter
+        endpoints.reset()
         showLoading()
 
-        MetricsManagerEvent.track(this, "perform_search", "SEARCH_QUERY", mSearchQuery, "SEARCH_PACKAGE", mPackageSearch.toString(), "FROM_SHARE", mShareSource.toString())
+        MetricsManagerEvent.track(this, "perform_search", "SEARCH_QUERY", searchQuery, "SEARCH_PACKAGE", isPackageSearch.toString(), "FROM_SHARE", isShareSource.toString())
 
-        if (mSearchQuery.isNotEmpty()) {
-            if (mPackageSearch) {
-                val url = AppInfo.createDetailsUrl(mSearchQuery)
-                (mEndpoints.get(DETAILS_ENDPOINT_ID) as DetailsEndpoint).url = url
+        if (searchQuery.isNotEmpty()) {
+            if (isPackageSearch) {
+                val url = AppInfo.createDetailsUrl(searchQuery)
+                (endpoints[DETAILS_ENDPOINT_ID] as DetailsEndpoint).url = url
             }
-            (mEndpoints.get(SEARCH_ENDPOINT_ID) as SearchEndpoint).query = mSearchQuery
-            mEndpoints.active().startAsync()
+            (endpoints[SEARCH_ENDPOINT_ID] as SearchEndpoint).query = searchQuery
+            endpoints.active().startAsync()
         } else {
             showNoResults("")
         }
@@ -144,15 +144,15 @@ class MarketSearchActivity : ToolbarActivity(), AccountChooser.OnAccountSelectio
         menuInflater.inflate(R.menu.searchbox, menu)
 
         val searchItem = menu.findItem(R.id.menu_search)
-        mSearchView = MenuItemCompat.getActionView(searchItem) as SearchView
-        mSearchView.setIconifiedByDefault(false)
+        searchView = MenuItemCompat.getActionView(searchItem) as SearchView
+        searchView.setIconifiedByDefault(false)
         MenuItemCompat.expandActionView(searchItem)
 
-        mSearchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
-                mSearchQuery = query
+                searchQuery = query
                 searchResultsDelayed()
-                Keyboard.hide(mSearchView, this@MarketSearchActivity)
+                Keyboard.hide(searchView, this@MarketSearchActivity)
                 return false
             }
 
@@ -161,18 +161,18 @@ class MarketSearchActivity : ToolbarActivity(), AccountChooser.OnAccountSelectio
             }
         })
 
-        mSearchView.setQuery(mSearchQuery, true)
-        if (mFocus) {
-            mSearchView.post { mSearchView.requestFocus() }
+        searchView.setQuery(searchQuery, true)
+        if (hasFocus) {
+            searchView.post { searchView.requestFocus() }
         } else {
-            Keyboard.hide(mSearchView, this)
+            Keyboard.hide(searchView, this)
         }
         return true
     }
 
     private fun searchResultsDelayed() {
-        if (mEndpoints.authSubToken.isEmpty()) {
-            mInitiateSearch = true
+        if (endpoints.authSubToken.isEmpty()) {
+            initiateSearch = true
         } else {
             searchResults()
         }
@@ -198,8 +198,8 @@ class MarketSearchActivity : ToolbarActivity(), AccountChooser.OnAccountSelectio
             finish()
             return
         }
-        mEndpoints.setAccount(account, authSubToken)
-        if (mInitiateSearch && !TextUtils.isEmpty(mSearchQuery)) {
+        endpoints.setAccount(account, authSubToken)
+        if (initiateSearch && searchQuery.isNotEmpty()) {
             searchResults()
         } else {
             showNoResults("")
@@ -217,61 +217,61 @@ class MarketSearchActivity : ToolbarActivity(), AccountChooser.OnAccountSelectio
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        mAccountChooser!!.onRequestPermissionResult(requestCode, permissions, grantResults)
+        accountChooser.onRequestPermissionResult(requestCode, permissions, grantResults)
     }
 
     override val accountSelectionListener: AccountChooserFragment.OnAccountSelectionListener
-        get() = mAccountChooser!!
+        get() = accountChooser
 
     private fun showRetryButton() {
-        mListView.visibility = View.GONE
-        mEmptyView.visibility = View.GONE
-        mLoading.visibility = View.GONE
-        mRetryView.visibility = View.VISIBLE
+        listView.visibility = View.GONE
+        emptyView.visibility = View.GONE
+        loading.visibility = View.GONE
+        retryView.visibility = View.VISIBLE
     }
 
     private fun showLoading() {
-        mListView.visibility = View.GONE
-        mEmptyView.visibility = View.GONE
-        mLoading.visibility = View.VISIBLE
-        mRetryView.visibility = View.GONE
+        listView.visibility = View.GONE
+        emptyView.visibility = View.GONE
+        loading.visibility = View.VISIBLE
+        retryView.visibility = View.GONE
     }
 
     private fun showNoResults(query: String) {
-        mLoading.visibility = View.GONE
-        mListView.visibility = View.GONE
-        mRetryView.visibility = View.GONE
+        loading.visibility = View.GONE
+        listView.visibility = View.GONE
+        retryView.visibility = View.GONE
         val noResStr = if (query.isNotEmpty()) getString(R.string.no_result_found, query) else getString(R.string.search_for_app)
-        mEmptyView.text = noResStr
-        mEmptyView.visibility = View.VISIBLE
+        emptyView.text = noResStr
+        emptyView.visibility = View.VISIBLE
     }
 
     private fun showListView() {
-        mListView.visibility = View.VISIBLE
-        mEmptyView.visibility = View.GONE
-        mLoading.visibility = View.GONE
-        mRetryView.visibility = View.GONE
+        listView.visibility = View.VISIBLE
+        emptyView.visibility = View.GONE
+        loading.visibility = View.GONE
+        retryView.visibility = View.GONE
     }
 
     private fun retrySearchResult() {
-        if (mAdapter.isEmpty) {
+        if (adapter.isEmpty) {
             searchResultsDelayed()
         } else {
-            mEndpoints.active().startAsync()
+            endpoints.active().startAsync()
         }
     }
 
     override fun onWatchListChangeSuccess(info: AppInfo, newStatus: Int) {
-        mAdapter.notifyDataSetChanged()
+        adapter.notifyDataSetChanged()
         if (newStatus == AppInfoMetadata.STATUS_NORMAL) {
-            TagSnackbar.make(this, info, mShareSource).show()
+            TagSnackbar.make(this, info, isShareSource).show()
         }
     }
 
     override fun onWatchListChangeError(info: AppInfo, error: Int) {
         if (WatchAppList.ERROR_ALREADY_ADDED == error) {
             Toast.makeText(this, R.string.app_already_added, Toast.LENGTH_SHORT).show()
-            mAdapter.notifyDataSetChanged()
+            adapter.notifyDataSetChanged()
         } else if (error == WatchAppList.ERROR_INSERT) {
             Toast.makeText(this, R.string.error_insert_app, Toast.LENGTH_SHORT).show()
         }
@@ -281,11 +281,11 @@ class MarketSearchActivity : ToolbarActivity(), AccountChooser.OnAccountSelectio
         if (id == DETAILS_ENDPOINT_ID) {
             if ((endpoint as DetailsEndpoint).document != null) {
                 showListView()
-                mAdapter.notifyDataSetChanged()
+                adapter.notifyDataSetChanged()
             } else {
-                mAdapter = ResultsAdapterSearch(this, mEndpoints[SEARCH_ENDPOINT_ID] as SearchEndpoint, mWatchAppList)
-                mListView.adapter = mAdapter
-                mEndpoints.setActive(SEARCH_ENDPOINT_ID).startAsync()
+                adapter = ResultsAdapterSearch(this, endpoints[SEARCH_ENDPOINT_ID] as SearchEndpoint, watchAppList)
+                listView.adapter = adapter
+                endpoints.setActive(SEARCH_ENDPOINT_ID).startAsync()
             }
         } else {
             val searchEndpoint = endpoint as SearchEndpoint
@@ -293,24 +293,24 @@ class MarketSearchActivity : ToolbarActivity(), AccountChooser.OnAccountSelectio
                 showNoResults(searchEndpoint.query)
             } else {
                 showListView()
-                mAdapter.notifyDataSetChanged()
+                adapter.notifyDataSetChanged()
             }
         }
     }
 
     override fun onErrorResponse(id: Int, endpoint: PlayStoreEndpointBase, error: VolleyError) {
         if (!App.with(this).isNetworkAvailable) {
-            mLoading.visibility = View.GONE
+            loading.visibility = View.GONE
             showRetryButton()
             Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()
             return
         }
         if (id == DETAILS_ENDPOINT_ID) {
-            mAdapter = ResultsAdapterSearch(this, mEndpoints.get(SEARCH_ENDPOINT_ID) as SearchEndpoint, mWatchAppList)
-            mListView.adapter = mAdapter
-            mEndpoints.setActive(SEARCH_ENDPOINT_ID).startAsync()
+            adapter = ResultsAdapterSearch(this, endpoints.get(SEARCH_ENDPOINT_ID) as SearchEndpoint, watchAppList)
+            listView.adapter = adapter
+            endpoints.setActive(SEARCH_ENDPOINT_ID).startAsync()
         } else {
-            mLoading.visibility = View.GONE
+            loading.visibility = View.GONE
             showRetryButton()
         }
     }
