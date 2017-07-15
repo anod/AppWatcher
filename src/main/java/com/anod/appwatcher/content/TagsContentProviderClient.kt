@@ -53,7 +53,7 @@ class TagsContentProviderClient {
                     TagsTable.PROJECTION, selection, selectionArgs, sortOrder
             )
         } catch (e: RemoteException) {
-            AppLog.e(e.message)
+            AppLog.e(e)
         }
 
         return TagsCursor(cr)

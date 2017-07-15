@@ -7,7 +7,7 @@ buildscript {
         maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.0-alpha5'
+        classpath 'com.android.tools.build:gradle:3.0.0-alpha6'
         classpath 'com.google.gms:google-services:3.1.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
@@ -32,7 +32,7 @@ configurations.all {
 dependencies {
     compile files('libs/keyczar-0.71g-090613.jar')
 
-    compile 'com.github.anod:android-utils-lib:v1.0.2'
+    compile 'com.github.anod:android-utils-lib:v1.0.3'
 
     compile 'com.android.support:appcompat-v7:26.0.0-beta2'
     compile 'com.android.support:recyclerview-v7:26.0.0-beta2'

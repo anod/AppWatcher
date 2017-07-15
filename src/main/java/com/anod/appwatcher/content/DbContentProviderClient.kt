@@ -72,7 +72,7 @@ class DbContentProviderClient(private val contentProviderClient: ContentProvider
                     AppListTable.PROJECTION, selection, selectionArgs, null
             )
         } catch (e: RemoteException) {
-            AppLog.e(e.message)
+            AppLog.e(e)
         }
         return AppListCursor(cr)
     }
@@ -89,7 +89,7 @@ class DbContentProviderClient(private val contentProviderClient: ContentProvider
                     AppListTable.PROJECTION, selection, selectionArgs, sortOrder
             )
         } catch (e: RemoteException) {
-            AppLog.e(e.message)
+            AppLog.e(e)
         }
 
         return AppListCursor(cr)
@@ -115,7 +115,7 @@ class DbContentProviderClient(private val contentProviderClient: ContentProvider
         try {
             return contentProviderClient.insert(DbContentProvider.APPS_CONTENT_URI, values)
         } catch (e: RemoteException) {
-            AppLog.e(e.message)
+            AppLog.e(e)
         }
         return null
     }
@@ -146,7 +146,7 @@ class DbContentProviderClient(private val contentProviderClient: ContentProvider
         try {
             return contentProviderClient.update(updateUri, values, null, null)
         } catch (e: RemoteException) {
-            AppLog.e(e.message)
+            AppLog.e(e)
         }
         return 0
     }
@@ -291,7 +291,7 @@ class DbContentProviderClient(private val contentProviderClient: ContentProvider
         try {
             return contentProviderClient.insert(DbContentProvider.TAGS_CONTENT_URI, values)
         } catch (e: RemoteException) {
-            AppLog.e(e.message)
+            AppLog.e(e)
         }
 
         return null
@@ -303,7 +303,7 @@ class DbContentProviderClient(private val contentProviderClient: ContentProvider
         try {
             return contentProviderClient.update(updateUri, values, null, null)
         } catch (e: RemoteException) {
-            AppLog.e(e.message)
+            AppLog.e(e)
         }
 
         return 0

@@ -118,12 +118,12 @@ class AppsTagSelectActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<C
     @OnClick(android.R.id.button1)
     fun onImportButtonClick() {
 
-        BackgroundTask.execute(object : BackgroundTask.Worker<TagAppsManager, Boolean>(mManager, this) {
-            override fun finished(result: Boolean, context: Context) {
+        BackgroundTask.execute(object : BackgroundTask.Worker<TagAppsManager, Boolean>(mManager) {
+            override fun finished(result: Boolean) {
                 finish()
             }
 
-            override fun run(param: TagAppsManager, context: Context): Boolean {
+            override fun run(param: TagAppsManager): Boolean {
                 return param.runImport()
             }
         })

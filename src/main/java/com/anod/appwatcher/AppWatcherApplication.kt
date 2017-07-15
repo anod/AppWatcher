@@ -9,9 +9,11 @@ import com.anod.appwatcher.utils.MetricsManagerEvent
 import com.google.firebase.crash.FirebaseCrash
 import info.anodsplace.android.log.AppLog
 import com.android.volley.NetworkError
+import com.android.volley.NoConnectionError
 import com.android.volley.TimeoutError
 import com.android.volley.VolleyError
 import java.io.IOException
+import java.net.SocketException
 
 
 class AppWatcherApplication : Application(), AppLog.Listener {
@@ -63,6 +65,12 @@ class AppWatcherApplication : Application(), AppLog.Listener {
             return
         }
 
+        MetricsManagerEvent.track(this, "log_exception",
+            "CLASS_NAME", "${tr::class.qualifiedName}",
+            "MESSAGE", tr.message ?: "empty",
+            "NETWORK_AVAILABLE", isNetworkAvailable.toString()
+        )
+
         FirebaseCrash.report(tr)
         if (tr is AppDetailsUploadDate.ExtractDateError) {
             val error = tr
@@ -81,10 +89,12 @@ class AppWatcherApplication : Application(), AppLog.Listener {
                 || (tr is IOException && tr.message?.contains("NetworkError") == true)
                 || tr is VolleyError
                 || tr is TimeoutError
+                || tr is SocketException
+                || tr is NoConnectionError
     }
 
     private inner class FirebaseLogger : AppLog.Logger.Android() {
-        override fun println(priority: Int, tag: String?, msg: String?) {
+        override fun println(priority: Int, tag: String, msg: String) {
             super.println(priority, tag, msg)
             FirebaseCrash.logcat(priority, tag, msg)
         }

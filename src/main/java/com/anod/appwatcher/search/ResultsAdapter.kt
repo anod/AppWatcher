@@ -55,7 +55,7 @@ abstract class ResultsAdapter(
 
         val imageUrl = doc.iconUrl
 
-        Picasso.with(context).load(imageUrl)
+        Picasso.with().load(imageUrl)
                 .placeholder(R.drawable.ic_notifications_black_24dp)
                 .into(holder.icon)
 

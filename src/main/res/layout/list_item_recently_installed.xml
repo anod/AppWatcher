@@ -7,10 +7,24 @@
 
     <include layout="@layout/list_apps_header" />
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@android:id/list"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:minHeight="72dp"
-        tools:listitem="@layout/list_item_recently_installed_app" />
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:id="@android:id/list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="72dp"
+            android:orientation="horizontal">
+
+            <include android:id="@+id/app1" layout="@layout/list_item_recently_installed_app" />
+            <include android:id="@+id/app2" layout="@layout/list_item_recently_installed_app" />
+            <include android:id="@+id/app3" layout="@layout/list_item_recently_installed_app" />
+            <include android:id="@+id/app4" layout="@layout/list_item_recently_installed_app" />
+            <include android:id="@+id/app5" layout="@layout/list_item_recently_installed_app" />
+
+        </LinearLayout>
+    </ScrollView>
 </LinearLayout>

@@ -219,10 +219,10 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
 
     private fun loadTagSubmenu(tagMenu: MenuItem) {
 
-        BackgroundTask.execute(object : BackgroundTask.Worker<Void?, List<TagMenuItem>>(null, this) {
+        BackgroundTask.execute(object : BackgroundTask.Worker<Void?, List<TagMenuItem>>(null) {
 
-            override fun run(param: Void?, context: Context): List<TagMenuItem> {
-                val cr = DbContentProviderClient(context)
+            override fun run(param: Void?): List<TagMenuItem> {
+                val cr = DbContentProviderClient(this@ChangelogActivity)
                 val tags = cr.queryTags()
                 val appTags = cr.queryAppTags(mApp!!.rowId)
 
@@ -236,7 +236,7 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
                 return result
             }
 
-            override fun finished(result: List<TagMenuItem>, context: Context) {
+            override fun finished(result: List<TagMenuItem>) {
                 val tagSubMenu = tagMenu.subMenu
                 for (item in result) {
                     tagSubMenu.add(R.id.menu_group_tags, item.tag.id, 0, item.tag.name).isChecked = item.selected

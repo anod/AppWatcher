@@ -10,10 +10,12 @@ import android.support.annotation.Nullable
 import android.support.v4.app.Fragment
 import android.support.v4.app.LoaderManager
 import android.support.v4.content.Loader
+import android.support.v4.util.SimpleArrayMap
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.text.TextUtils
+import android.util.SparseIntArray
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -60,6 +62,7 @@ open class AppWatcherListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
     private lateinit var mSection: SectionProvider
 
     interface SectionProvider {
+        var adapterIndexMap: SparseIntArray
         fun fillAdapters(adapter: MergeRecyclerAdapter, context: Context, installedApps: InstalledAppsProvider, clickListener: AppViewHolder.OnClickListener)
         fun createLoader(context: Context, titleFilter: String, sortId: Int, filter: InstalledFilter?, tag: Tag?): Loader<Cursor>
         fun loadFinished(adapter: MergeRecyclerAdapter, loader: Loader<Cursor>, data: Cursor)
@@ -67,9 +70,11 @@ open class AppWatcherListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
     }
 
     open class DefaultSection : SectionProvider {
+        override var adapterIndexMap = SparseIntArray()
 
         override fun fillAdapters(adapter: MergeRecyclerAdapter, context: Context, installedApps: InstalledAppsProvider, clickListener: AppViewHolder.OnClickListener) {
-            adapter.addAdapter(ADAPTER_WATCHLIST, AppListCursorAdapterWrapper(context, installedApps, clickListener))
+            val index = adapter.addAdapter(AppListCursorAdapterWrapper(context, installedApps, clickListener))
+            adapterIndexMap.put(ADAPTER_WATCHLIST, index)
         }
 
         override fun createLoader(context: Context, titleFilter: String, sortId: Int, filter: InstalledFilter?, tag: Tag?): Loader<Cursor> {
@@ -77,7 +82,7 @@ open class AppWatcherListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
         }
 
         override fun loadFinished(adapter: MergeRecyclerAdapter, loader: Loader<Cursor>, data: Cursor) {
-            val watchlistAdapter = adapter.getAdapter(ADAPTER_WATCHLIST) as AppListCursorAdapterWrapper
+            val watchlistAdapter = getAdapter<AppListCursorAdapterWrapper>(ADAPTER_WATCHLIST, adapter)
             watchlistAdapter.swapData(data as AppListCursor)
 
             val newCount = (loader as AppListCursorLoader).newCountFiltered
@@ -90,8 +95,13 @@ open class AppWatcherListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
             // This is called when the last Cursor provided to onLoadFinished()
             // above is about to be closed.  We need to make sure we are no
             // longer using it.
-            val watchlistAdapter = adapter.getAdapter(ADAPTER_WATCHLIST) as AppListCursorAdapterWrapper
+            val watchlistAdapter = getAdapter<AppListCursorAdapterWrapper>(ADAPTER_WATCHLIST, adapter)
             watchlistAdapter.swapData(null)
+        }
+
+        fun <T: RecyclerView.Adapter<*>> getAdapter(id: Int, adapter: MergeRecyclerAdapter): T {
+            val index = adapterIndexMap.get(id)
+            return adapter.getAdapter(index) as T
         }
 
         companion object {

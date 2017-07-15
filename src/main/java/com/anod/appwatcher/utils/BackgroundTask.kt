@@ -12,24 +12,23 @@ import android.os.AsyncTask
 
 object BackgroundTask {
 
-    abstract class Worker<Param, Result> protected constructor(internal val param: Param, internal val context: Context) {
-
-        abstract fun run(param: Param, context: Context): Result
-        abstract fun finished(result: Result, context: Context)
+    abstract class Worker<Param, Result> protected constructor(internal val param: Param) {
+        abstract fun run(param: Param): Result
+        abstract fun finished(result: Result)
     }
 
     fun <P, R> execute(worker: Worker<P, R>) {
-        AsyncTaskRunner(worker, worker.context).execute()
+        AsyncTaskRunner(worker).execute()
     }
 
-    internal class AsyncTaskRunner<P, R>(private val worker: Worker<P, R>, private val context: Context) : AsyncTask<Void, Void, R>() {
+    internal class AsyncTaskRunner<P, R>(private val worker: Worker<P, R>) : AsyncTask<Void, Void, R>() {
 
         override fun doInBackground(vararg params: Void): R {
-            return this.worker.run(this.worker.param, this.context)
+            return this.worker.run(this.worker.param)
         }
 
         override fun onPostExecute(result: R) {
-            this.worker.finished(result, this.context)
+            this.worker.finished(result)
         }
     }
 
