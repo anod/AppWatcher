@@ -1,7 +1,6 @@
 package com.anod.appwatcher
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -14,17 +13,14 @@ import android.support.v4.app.ShareCompat
 import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
 import android.support.v4.view.ViewCompat
-import android.support.v4.widget.TextViewCompat
 import android.support.v7.graphics.Palette
 import android.text.Html
-import android.text.TextUtils
 import android.text.util.Linkify
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
-import butterknife.BindView
-import butterknife.ButterKnife
+import butterknife.bindView
 import com.android.volley.VolleyError
 import com.anod.appwatcher.accounts.AuthTokenProvider
 import com.anod.appwatcher.adapters.AppDetailsView
@@ -50,50 +46,42 @@ import java.util.*
 
 class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette.PaletteAsyncListener, View.OnClickListener, WatchAppList.Listener {
 
-    @BindView(R.id.progress_bar)
-    lateinit var mLoadingView: ProgressBar
-    @BindView(R.id.changelog)
-    lateinit var mChangelog: TextView
-    @BindView(R.id.retry)
-    lateinit var mRetryButton: Button
-    @BindView(android.R.id.icon)
-    lateinit var mAppIcon: ImageView
-    @BindView(R.id.background)
-    lateinit var mBackground: View
-    @BindView(R.id.market_btn)
-    lateinit var mPlayStoreButton: FloatingActionButton
-    @BindView(R.id.content)
-    lateinit var mContent: View
+    val mLoadingView: ProgressBar by bindView(R.id.progress_bar)
+    val mChangelog: TextView by bindView(R.id.changelog)
+    val mRetryButton: Button by bindView(R.id.retry)
+    val mAppIcon: ImageView by bindView(android.R.id.icon)
+    val mBackground: View by bindView(R.id.background)
+    val mPlayStoreButton: FloatingActionButton by bindView(R.id.market_btn)
+    val mContent: View by bindView(R.id.content)
 
-    private var mDetailsUrl: String = ""
-    var mAppId: String = ""
+    private var detailsUrl: String = ""
+    var appId: String = ""
 
-    lateinit var mDetailsEndpoint: DetailsEndpoint
-    private var mApp: AppInfo? = null
-    private var mNewApp: Boolean = false
+    private var appInfo: AppInfo? = null
+    private var isNewApp: Boolean = false
     private var mAddMenu: MenuItem? = null
-    lateinit var mIconLoader: AppIconLoader
+    lateinit var iconLoader: AppIconLoader
+    lateinit var mDetailsEndpoint: DetailsEndpoint
     lateinit var mDataProvider: AppViewHolderDataProvider
     lateinit var mAppDetailsView: AppDetailsView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_app_changelog)
-        ButterKnife.bind(this)
         setupToolbar()
 
-        mIconLoader = App.provide(this).iconLoader
-        mAppId = intent.getStringExtra(EXTRA_APP_ID)
-        mDetailsUrl = intent.getStringExtra(EXTRA_DETAILS_URL)
+        iconLoader = App.provide(this).iconLoader
+        appId = intent.getStringExtra(EXTRA_APP_ID) ?: ""
+        detailsUrl = intent.getStringExtra(EXTRA_DETAILS_URL) ?: ""
         val rowId = intent.getIntExtra(EXTRA_ROW_ID, -1)
-        MetricsManagerEvent.track(this, "open_changelog", "DETAILS_APP_ID", mAppId, "DETAILS_ROW_ID", rowId.toString())
+        MetricsManagerEvent.track(this, "open_changelog", "DETAILS_APP_ID", appId, "DETAILS_ROW_ID", rowId.toString())
 
         mDataProvider = AppViewHolderDataProvider(this, InstalledAppsProvider.PackageManager(packageManager))
         val contentView = findViewById<View>(R.id.container)
         mAppDetailsView = AppDetailsView(contentView, mDataProvider)
 
         mDetailsEndpoint = DetailsEndpoint(this)
-        mDetailsEndpoint.url = mDetailsUrl
+        mDetailsEndpoint.url = detailsUrl
 
         mContent.visibility = View.INVISIBLE
         mLoadingView.visibility = View.GONE
@@ -109,26 +97,22 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
         }
 
         if (rowId == -1) {
-            mApp = loadInstalledApp()
-            mNewApp = true
+            appInfo = PackageManagerUtils.packageToApp(appId, packageManager)
+            isNewApp = true
         } else {
             val cr = DbContentProviderClient(this)
-            mApp = cr.queryAppRow(rowId)
+            appInfo = cr.queryAppRow(rowId)
             cr.close()
-            mNewApp = false
+            isNewApp = false
         }
 
-        if (mApp == null) {
-            Toast.makeText(this, getString(R.string.cannot_load_app, mAppId), Toast.LENGTH_LONG).show()
-            AppLog.e("Cannot load app details: '$mAppId'")
+        if (appInfo == null) {
+            Toast.makeText(this, getString(R.string.cannot_load_app, appId), Toast.LENGTH_LONG).show()
+            AppLog.e("Cannot load app details: '$appId'")
             finish()
             return
         }
-        setupAppView(mApp!!)
-    }
-
-    private fun loadInstalledApp(): AppInfo {
-        return PackageManagerUtils.packageToApp(mAppId, packageManager)
+        setupAppView(appInfo!!)
     }
 
     override fun onResume() {
@@ -163,12 +147,12 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
         if (app.iconUrl.isEmpty()) {
             if (app.rowId > 0) {
                 val dbImageUri = DbContentProvider.ICONS_CONTENT_URI.buildUpon().appendPath(app.rowId.toString()).build()
-                mIconLoader.retrieve(dbImageUri).into(mIconLoadTarget)
+                iconLoader.retrieve(dbImageUri).into(mIconLoadTarget)
             } else {
                 setDefaultIcon()
             }
         } else {
-            mIconLoader.retrieve(app.iconUrl).into(mIconLoadTarget)
+            iconLoader.retrieve(app.iconUrl).into(mIconLoadTarget)
         }
     }
 
@@ -200,7 +184,7 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
         inflater.inflate(R.menu.changelog, menu)
         mAddMenu = menu.findItem(R.id.menu_add)
         mAddMenu!!.isEnabled = false
-        if (mNewApp) {
+        if (isNewApp) {
             menu.findItem(R.id.menu_remove).isVisible = false
             menu.findItem(R.id.menu_tag_app).isVisible = false
         } else {
@@ -208,7 +192,7 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
             val tagMenu = menu.findItem(R.id.menu_tag_app)
             loadTagSubmenu(tagMenu)
         }
-        if (!mDataProvider.installedAppsProvider.getInfo(mAppId).isInstalled) {
+        if (!mDataProvider.installedAppsProvider.getInfo(appId).isInstalled) {
             menu.findItem(R.id.menu_uninstall).isVisible = false
         }
 
@@ -224,7 +208,7 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
             override fun run(param: Void?): List<TagMenuItem> {
                 val cr = DbContentProviderClient(this@ChangelogActivity)
                 val tags = cr.queryTags()
-                val appTags = cr.queryAppTags(mApp!!.rowId)
+                val appTags = cr.queryAppTags(appInfo!!.rowId)
 
                 tags.moveToPosition(-1)
                 val result = ArrayList<TagMenuItem>()
@@ -251,7 +235,7 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
         when (item.itemId) {
             R.id.menu_remove -> {
                 val removeDialog = RemoveDialogFragment.newInstance(
-                        mApp!!.title, mApp!!.rowId
+                        appInfo!!.title, appInfo!!.rowId
                 )
                 removeDialog.show(supportFragmentManager, "removeDialog")
                 return true
@@ -269,9 +253,9 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
             }
             R.id.menu_uninstall -> {
                 val data = Intent()
-                data.putExtra(EXTRA_UNINSTALL_APP_PACKAGE, mAppId)
+                data.putExtra(EXTRA_UNINSTALL_APP_PACKAGE, appId)
                 setResult(Activity.RESULT_OK, data)
-                val uninstallIntent = IntentUtils.createUninstallIntent(mAppId)
+                val uninstallIntent = IntentUtils.createUninstallIntent(appId)
                 startActivity(uninstallIntent)
                 return true
             }
@@ -291,19 +275,19 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
     private fun changeTag(tagId: Int, checked: Boolean): Boolean {
         val cr = DbContentProviderClient(this)
         if (checked) {
-            return cr.removeAppFromTag(mApp!!.appId, tagId)
+            return cr.removeAppFromTag(appInfo!!.appId, tagId)
         }
-        return cr.addAppToTag(mApp!!.appId, tagId)
+        return cr.addAppToTag(appInfo!!.appId, tagId)
     }
 
     private fun shareApp() {
         val builder = ShareCompat.IntentBuilder.from(this)
-        if (mApp!!.status == AppInfoMetadata.STATUS_UPDATED) {
-            builder.setSubject(getString(R.string.share_subject_updated, mApp!!.title))
+        if (appInfo!!.status == AppInfoMetadata.STATUS_UPDATED) {
+            builder.setSubject(getString(R.string.share_subject_updated, appInfo!!.title))
         } else {
-            builder.setSubject(getString(R.string.share_subject_normal, mApp!!.title))
+            builder.setSubject(getString(R.string.share_subject_normal, appInfo!!.title))
         }
-        builder.setText(String.format(MarketInfo.URL_WEB_PLAY_STORE, mApp!!.packageName))
+        builder.setText(String.format(MarketInfo.URL_WEB_PLAY_STORE, appInfo!!.packageName))
         builder.setType("text/plain")
         builder.startChooser()
     }
@@ -349,9 +333,9 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
         animateBackground()
 
         if (App.with(this).isNightTheme) {
-            mAppDetailsView.updateAccentColor(ContextCompat.getColor(this, R.color.primary_text_dark), mApp!!)
+            mAppDetailsView.updateAccentColor(ContextCompat.getColor(this, R.color.primary_text_dark), appInfo!!)
         } else {
-            mAppDetailsView.updateAccentColor(darkSwatch.rgb, mApp!!)
+            mAppDetailsView.updateAccentColor(darkSwatch.rgb, appInfo!!)
         }
     }
 
@@ -376,7 +360,7 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
     override fun onClick(v: View) {
         val id = v.id
         if (id == R.id.market_btn) {
-            val intent = IntentUtils.createPlayStoreIntent(mApp!!.packageName)
+            val intent = IntentUtils.createPlayStoreIntent(appInfo!!.packageName)
             startActivity(intent)
         }
     }

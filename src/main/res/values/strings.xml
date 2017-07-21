@@ -121,6 +121,7 @@
     <string name="user_action_required">User action required</string>
     <string name="check_connection">Please check internet connection</string>
     <string name="refresh_scheduled">Refresh scheduled</string>
+    <string name="recently_installed">Recently installed</string>
 
     <string-array name="sort_titles">
         <item>By name &#x2193;</item>

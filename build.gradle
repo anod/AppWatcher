@@ -7,7 +7,7 @@ buildscript {
         maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.0-alpha6'
+        classpath 'com.android.tools.build:gradle:3.0.0-alpha7'
         classpath 'com.google.gms:google-services:3.1.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
@@ -23,7 +23,6 @@ repositories {
 
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
 
 configurations.all {
     resolutionStrategy.cacheDynamicVersionsFor 10, 'minutes'
@@ -51,8 +50,7 @@ dependencies {
     compile 'com.squareup.okhttp3:okhttp:3.8.0'
     compile 'com.squareup.picasso:picasso:3.0.0-SNAPSHOT'
 
-    compile 'com.jakewharton:butterknife:8.6.0'
-    kapt 'com.jakewharton:butterknife-compiler:8.6.0'
+    compile 'com.jakewharton:kotterknife:0.1.0-SNAPSHOT'
 
     compile group: 'com.google.protobuf.nano', name: 'protobuf-javanano', version: '3.1.0'
 
