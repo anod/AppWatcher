@@ -46,10 +46,10 @@ open class AppWatcherListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
 
     private var listenerIndex: Int = 0
 
-    val listView: RecyclerView by bindView(android.R.id.list)
-    val progressContainer: View by bindView(R.id.progress)
-    val emptyView: View by bindView(android.R.id.empty)
-    val swipeLayout: SwipeRefreshLayout? by bindOptionalView(R.id.swipe_layout)
+    lateinit var listView: RecyclerView
+    lateinit var progressContainer: View
+    lateinit var emptyView: View
+    var swipeLayout: SwipeRefreshLayout? = null
 
     private lateinit var section: SectionProvider
 
@@ -130,7 +130,14 @@ open class AppWatcherListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_applist, container, false)
+        val view = inflater.inflate(R.layout.fragment_applist, container, false)
+
+        listView = view.findViewById(android.R.id.list)
+        emptyView = view.findViewById(android.R.id.empty)
+        progressContainer = view.findViewById(R.id.progress)
+        swipeLayout = view.findViewById(R.id.swipe_layout)
+
+        return view
     }
 
     fun sectionForClassName(sectionClassName: String): SectionProvider {
