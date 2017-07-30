@@ -13,7 +13,7 @@
     <LinearLayout
         android:id="@android:id/content"
         android:layout_width="96dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:background="?android:attr/selectableItemBackground"
         android:padding="8dp"
         android:clickable="true"
@@ -39,4 +39,13 @@
 
     </LinearLayout>
 
+    <ImageView
+        android:id="@+id/watched"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:src="@drawable/ic_visibility_black_24px"
+        android:layout_gravity="bottom|right"
+        android:layout_margin="8dp"
+        android:tint="@color/neutral_theme_accent"
+        />
 </com.anod.appwatcher.installed.RecentAppView>
