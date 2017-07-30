@@ -98,7 +98,9 @@ class AccountChooser(
                     return
                 }
             }
-            listener?.onAccountNotFound()
+            if (this.preferences.account == null) {
+                listener?.onAccountNotFound()
+            }
             return
         }
     }
@@ -112,14 +114,14 @@ class AccountChooser(
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val intent = AccountManager.newChooseAccountIntent(
-                    null,
+                    account,
                     null,
                     arrayOf(AuthTokenProvider.ACCOUNT_TYPE),
                     null,
                     null,
                     null,
                     null)
-            activity.startActivityForResult(intent,  ACCOUNT_REQUEST)
+            activity.startActivityForResult(intent, ACCOUNT_REQUEST)
         } else {
             activity.startActivityForResult(AccountChooserActivity.intent(account, activity),  ACCOUNT_REQUEST)
         }
