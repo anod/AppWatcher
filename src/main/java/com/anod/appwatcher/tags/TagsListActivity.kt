@@ -16,8 +16,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
-import butterknife.BindView
-import butterknife.ButterKnife
+import butterknife.bindView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.DbContentProviderClient
@@ -38,24 +37,22 @@ import com.anod.appwatcher.utils.DrawableResource
 
 class TagsListActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<Cursor>, View.OnClickListener {
 
-    @BindView(android.R.id.list)
-    lateinit var mListView: RecyclerView
+    val listView: RecyclerView by bindView(android.R.id.list)
 
-    private var mAppInfo: AppInfo? = null
+    private var appInfo: AppInfo? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tags_editor)
-        ButterKnife.bind(this)
         setupToolbar()
 
         if (intentExtras.containsKey(EXTRA_APP)) {
-            mAppInfo = intentExtras.getParcelable<AppInfo>(EXTRA_APP)
-            title = getString(R.string.tag_app, mAppInfo!!.title)
+            appInfo = intentExtras.getParcelable<AppInfo>(EXTRA_APP)
+            title = getString(R.string.tag_app, appInfo!!.title)
         }
-        mListView.layoutManager = LinearLayoutManager(this)
-        mListView.adapter = TagAdapter(this, this)
-        mListView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.HORIZONTAL))
+        listView.layoutManager = LinearLayoutManager(this)
+        listView.adapter = TagAdapter(this, this)
+        listView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.HORIZONTAL))
 
         supportLoaderManager.initLoader(0, null, this).forceLoad()
     }
@@ -79,11 +76,11 @@ class TagsListActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<Cursor
     }
 
     override fun onLoadFinished(loader: Loader<Cursor>, data: Cursor) {
-        (mListView.adapter as TagAdapter).swapData(TagsCursor(data))
+        (listView.adapter as TagAdapter).swapData(TagsCursor(data))
     }
 
     override fun onLoaderReset(loader: Loader<Cursor>) {
-        (mListView.adapter as TagAdapter).swapData(null)
+        (listView.adapter as TagAdapter).swapData(null)
     }
 
     fun saveTag(tag: Tag) {
@@ -104,19 +101,19 @@ class TagsListActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<Cursor
 
     override fun onClick(v: View) {
         val holder = v.tag as TagHolder
-        if (mAppInfo == null) {
+        if (appInfo == null) {
             val dialog = EditTagDialog.newInstance(holder.tag)
             dialog.show(supportFragmentManager, "edit-tag-dialog")
         } else {
             val client = DbContentProviderClient(this)
-            val tags = client.queryAppTags(mAppInfo!!.rowId)
+            val tags = client.queryAppTags(appInfo!!.rowId)
             if (tags.contains(holder.tag.id)) {
-                if (client.removeAppFromTag(mAppInfo!!.appId, holder.tag.id)) {
+                if (client.removeAppFromTag(appInfo!!.appId, holder.tag.id)) {
                     holder.name.isSelected = false
                     holder.name.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
                 }
             } else {
-                if (client.addAppToTag(mAppInfo!!.appId, holder.tag.id)) {
+                if (client.addAppToTag(appInfo!!.appId, holder.tag.id)) {
                     holder.name.isSelected = true
                     val d = DrawableResource.setTint(resources, R.drawable.ic_check_black_24dp, R.color.control_tint, theme)
                     holder.name.setCompoundDrawablesWithIntrinsicBounds(null, null, d, null)
@@ -147,8 +144,8 @@ class TagsListActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<Cursor
     internal class TagHolder(itemView: View, listener: View.OnClickListener) : RecyclerView.ViewHolder(itemView) {
         lateinit var tag: Tag
 
-        val name: TextView = ButterKnife.findById(itemView, android.R.id.text1)
-        val color: ImageView = ButterKnife.findById(itemView, android.R.id.icon)
+        val name: TextView = itemView.findViewById(android.R.id.text1)
+        val color: ImageView = itemView.findViewById(android.R.id.icon)
 
         init {
             itemView.tag = this

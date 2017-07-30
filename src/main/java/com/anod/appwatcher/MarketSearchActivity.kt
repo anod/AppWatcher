@@ -3,11 +3,9 @@ package com.anod.appwatcher
 import android.accounts.Account
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.view.MenuItemCompat
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SearchView
-import android.text.TextUtils
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -15,11 +13,9 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import butterknife.BindView
-import butterknife.ButterKnife
+import butterknife.bindView
 import com.android.volley.VolleyError
 import com.anod.appwatcher.accounts.AccountChooser
-import com.anod.appwatcher.fragments.AccountChooserFragment
 import com.anod.appwatcher.market.CompositeStateEndpoint
 import com.anod.appwatcher.market.DetailsEndpoint
 import com.anod.appwatcher.market.PlayStoreEndpointBase
@@ -39,16 +35,11 @@ class MarketSearchActivity : ToolbarActivity(), AccountChooser.OnAccountSelectio
 
     private lateinit var adapter: ResultsAdapter
 
-    @BindView(R.id.loading)
-    lateinit var loading: LinearLayout
-    @BindView(android.R.id.list)
-    lateinit var listView: RecyclerView
-    @BindView(android.R.id.empty)
-    lateinit var emptyView: TextView
-    @BindView(R.id.retry_box)
-    lateinit var retryView: LinearLayout
-    @BindView(R.id.retry)
-    lateinit var mRetryButton: Button
+    val loading: LinearLayout by bindView(R.id.loading)
+    val listView: RecyclerView by bindView(android.R.id.list)
+    val emptyView: TextView by bindView(android.R.id.empty)
+    val retryView: LinearLayout by bindView(R.id.retry_box)
+    val retryButton: Button by bindView(R.id.retry)
     lateinit var searchView: SearchView
 
     private var initiateSearch = false
@@ -68,15 +59,13 @@ class MarketSearchActivity : ToolbarActivity(), AccountChooser.OnAccountSelectio
         setContentView(R.layout.activity_market_search)
         setupToolbar()
 
-        ButterKnife.bind(this)
-
         endpoints = CompositeStateEndpoint(this)
         endpoints.add(SEARCH_ENDPOINT_ID, SearchEndpoint(this, true))
         endpoints.add(DETAILS_ENDPOINT_ID, DetailsEndpoint(this))
 
         watchAppList = WatchAppList(this)
 
-        mRetryButton.setOnClickListener { retrySearchResult() }
+        retryButton.setOnClickListener { retrySearchResult() }
         loading.visibility = View.GONE
         listView.layoutManager = LinearLayoutManager(this)
         listView.visibility = View.GONE
@@ -144,9 +133,9 @@ class MarketSearchActivity : ToolbarActivity(), AccountChooser.OnAccountSelectio
         menuInflater.inflate(R.menu.searchbox, menu)
 
         val searchItem = menu.findItem(R.id.menu_search)
-        searchView = MenuItemCompat.getActionView(searchItem) as SearchView
+        searchView = searchItem.actionView as SearchView
         searchView.setIconifiedByDefault(false)
-        MenuItemCompat.expandActionView(searchItem)
+        searchItem.expandActionView()
 
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
@@ -220,8 +209,11 @@ class MarketSearchActivity : ToolbarActivity(), AccountChooser.OnAccountSelectio
         accountChooser.onRequestPermissionResult(requestCode, permissions, grantResults)
     }
 
-    override val accountSelectionListener: AccountChooserFragment.OnAccountSelectionListener
-        get() = accountChooser
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        accountChooser.onActivityResult(requestCode, resultCode, data)
+    }
 
     private fun showRetryButton() {
         listView.visibility = View.GONE

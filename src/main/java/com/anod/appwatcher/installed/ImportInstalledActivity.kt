@@ -2,6 +2,7 @@ package com.anod.appwatcher.installed
 
 import android.accounts.Account
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.LoaderManager
 import android.support.v4.content.AsyncTaskLoader
@@ -13,15 +14,11 @@ import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.Toast
-import butterknife.BindView
-import butterknife.ButterKnife
-import butterknife.OnClick
+import butterknife.bindView
 import com.anod.appwatcher.App
-import com.anod.appwatcher.Preferences
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AccountChooser
 import com.anod.appwatcher.content.DbContentProviderClient
-import com.anod.appwatcher.fragments.AccountChooserFragment
 import com.anod.appwatcher.model.WatchAppList
 import com.anod.appwatcher.ui.ToolbarActivity
 import com.anod.appwatcher.utils.InstalledAppsProvider
@@ -36,74 +33,69 @@ import java.util.*
  * @date 19/04/2016.
  */
 class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<List<String>>, AccountChooser.OnAccountSelectionListener, ImportBulkManager.Listener {
-    @BindView(android.R.id.list)
-    lateinit var mList: RecyclerView
-    @BindView(android.R.id.progress)
-    lateinit var mProgress: ProgressBar
+    val listView: RecyclerView by bindView(android.R.id.list)
+    val progressBar: ProgressBar by bindView(android.R.id.progress)
 
-    private var mAllSelected: Boolean = false
-    private lateinit var mDataProvider: ImportDataProvider
-    private lateinit var mImportManager: ImportBulkManager
-    private var mAccountChooser: AccountChooser? = null
+    private var allSelected: Boolean = false
+    private lateinit var dataProvider: ImportDataProvider
+    private lateinit var importManager: ImportBulkManager
+    private var accountChooser: AccountChooser? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_import_installed)
-        ButterKnife.bind(this)
         setupToolbar()
 
-        mImportManager = ImportBulkManager(this, this)
-        mDataProvider = ImportDataProvider(this, InstalledAppsProvider.MemoryCache(InstalledAppsProvider.PackageManager(packageManager)))
+        importManager = ImportBulkManager(this, this)
+        dataProvider = ImportDataProvider(this, InstalledAppsProvider.MemoryCache(InstalledAppsProvider.PackageManager(packageManager)))
 
-        mList.layoutManager = LinearLayoutManager(this)
-        mList.adapter = ImportAdapter(this, packageManager, mDataProvider)
-        mList.itemAnimator = ImportItemAnimator()
+        listView.layoutManager = LinearLayoutManager(this)
+        listView.adapter = ImportAdapter(this, packageManager, dataProvider)
+        listView.itemAnimator = ImportItemAnimator()
+
+        findViewById<View>(android.R.id.button3).setOnClickListener {
+            val importAdapter = listView.adapter as ImportAdapter
+            allSelected = !allSelected
+            dataProvider.selectAllPackages(allSelected)
+            importAdapter.notifyDataSetChanged()
+        }
+
+        findViewById<View>(android.R.id.button2).setOnClickListener {
+            if (dataProvider.isImportStarted) {
+                importManager.stop()
+            }
+            finish()
+        }
+
+        findViewById<View>(android.R.id.button1).setOnClickListener {
+            findViewById<View>(android.R.id.button3).visibility = View.GONE
+            findViewById<View>(android.R.id.button1).visibility = View.GONE
+            val adapter = listView.adapter as ImportAdapter
+
+            importManager.init()
+            adapter.clearPackageIndex()
+            for (idx in 0..adapter.itemCount - 1) {
+                val packageName = adapter.getItem(idx)
+                if (dataProvider.isPackageSelected(packageName)) {
+                    importManager.addPackage(packageName)
+                    adapter.storePackageIndex(packageName, idx)
+                }
+            }
+            if (importManager.isEmpty) {
+                finish()
+            } else {
+                importManager.start()
+            }
+        }
+
         supportLoaderManager.initLoader(0, null, this).forceLoad()
     }
 
     override fun onResume() {
         super.onResume()
 
-        mAccountChooser = AccountChooser(this, App.provide(this).prefs, this)
-        mAccountChooser!!.init()
-    }
-
-    @OnClick(android.R.id.button3)
-    fun onAllButtonClick() {
-        val importAdapter = mList.adapter as ImportAdapter
-        mAllSelected = !mAllSelected
-        mDataProvider.selectAllPackages(mAllSelected)
-        importAdapter.notifyDataSetChanged()
-    }
-
-    @OnClick(android.R.id.button2)
-    fun onCancelButtonClick() {
-        if (mDataProvider.isImportStarted) {
-            mImportManager.stop()
-        }
-        finish()
-    }
-
-    @OnClick(android.R.id.button1)
-    fun onImportButtonClick() {
-        ButterKnife.findById<View>(this, android.R.id.button3).visibility = View.GONE
-        ButterKnife.findById<View>(this, android.R.id.button1).visibility = View.GONE
-        val adapter = mList.adapter as ImportAdapter
-
-        mImportManager.init()
-        adapter.clearPackageIndex()
-        for (idx in 0..adapter.itemCount - 1) {
-            val packageName = adapter.getItem(idx)
-            if (mDataProvider.isPackageSelected(packageName)) {
-                mImportManager.addPackage(packageName)
-                adapter.storePackageIndex(packageName, idx)
-            }
-        }
-        if (mImportManager.isEmpty) {
-            finish()
-            return
-        }
-        mImportManager.start()
+        accountChooser = AccountChooser(this, App.provide(this).prefs, this)
+        accountChooser!!.init()
     }
 
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<List<String>> {
@@ -111,14 +103,14 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
     }
 
     override fun onLoadFinished(loader: Loader<List<String>>, data: List<String>) {
-        mProgress.visibility = View.GONE
-        val downloadedAdapter = mList.adapter as ImportAdapter
+        progressBar.visibility = View.GONE
+        val downloadedAdapter = listView.adapter as ImportAdapter
         downloadedAdapter.clear()
         downloadedAdapter.addAll(data)
     }
 
     override fun onLoaderReset(loader: Loader<List<String>>) {
-        val downloadedAdapter = mList.adapter as ImportAdapter
+        val downloadedAdapter = listView.adapter as ImportAdapter
         downloadedAdapter.clear()
     }
 
@@ -132,7 +124,7 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
             finish()
             return
         }
-        mImportManager.setAccount(account, authSubToken)
+        importManager.setAccount(account, authSubToken)
     }
 
     override fun onAccountNotFound() {
@@ -140,16 +132,18 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
         finish()
     }
 
-    override val accountSelectionListener: AccountChooserFragment.OnAccountSelectionListener
-        get() = mAccountChooser!!
-
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        mAccountChooser!!.onRequestPermissionResult(requestCode, permissions, grantResults)
+        accountChooser?.onRequestPermissionResult(requestCode, permissions, grantResults)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        accountChooser?.onActivityResult(requestCode, resultCode, data)
     }
 
     override fun onImportProgress(docIds: List<String>, result: SimpleArrayMap<String, Int>) {
-        val adapter = mList.adapter as ImportAdapter
+        val adapter = listView.adapter as ImportAdapter
         for (packageName in docIds) {
             val resultCode = result.get(packageName)
             val status: Int
@@ -158,25 +152,24 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
             } else {
                 status = if (resultCode == WatchAppList.RESULT_OK) ImportDataProvider.STATUS_DONE else ImportDataProvider.STATUS_ERROR
             }
-            mDataProvider.setPackageStatus(packageName, status)
+            dataProvider.setPackageStatus(packageName, status)
             adapter.notifyPackageStatusChanged(packageName)
         }
     }
 
     override fun onImportFinish() {
-        (ButterKnife.findById<View>(this, android.R.id.button2) as Button).setText(android.R.string.ok)
+        findViewById<Button>(android.R.id.button2).setText(android.R.string.ok)
     }
 
     override fun onImportStart(docIds: List<String>) {
-        val adapter = mList.adapter as ImportAdapter
-        mDataProvider.isImportStarted = true
+        val adapter = listView.adapter as ImportAdapter
+        dataProvider.isImportStarted = true
         for (packageName in docIds) {
             AppLog.d(packageName)
-            mDataProvider.setPackageStatus(packageName, ImportDataProvider.STATUS_IMPORTING)
+            dataProvider.setPackageStatus(packageName, ImportDataProvider.STATUS_IMPORTING)
             adapter.notifyPackageStatusChanged(packageName)
         }
     }
-
 
     private class LocalPackageLoader internal constructor(context: Context) : AsyncTaskLoader<List<String>>(context) {
         override fun loadInBackground(): List<String> {

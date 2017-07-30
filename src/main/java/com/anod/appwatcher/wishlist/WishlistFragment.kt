@@ -14,8 +14,7 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import butterknife.BindView
-import butterknife.ButterKnife
+import butterknife.bindView
 import com.android.volley.VolleyError
 import com.anod.appwatcher.R
 import com.anod.appwatcher.market.PlayStoreEndpoint
@@ -33,62 +32,52 @@ import com.anod.appwatcher.tags.TagSnackbar
 
 class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Listener {
 
-    @BindView(R.id.loading)
-    lateinit var mLoading: LinearLayout
-    @BindView(android.R.id.list)
-    lateinit var mListView: RecyclerView
-    @BindView(android.R.id.empty)
-    lateinit var mEmptyView: TextView
-    @BindView(R.id.retry_box)
-    lateinit var mRetryView: LinearLayout
-    @BindView(R.id.retry)
-    lateinit var mRetryButton: Button
+    val loading: LinearLayout by bindView(R.id.loading)
+    val listView: RecyclerView by bindView(android.R.id.list)
+    val emptyView: TextView by bindView(android.R.id.empty)
+    val retryView: LinearLayout by bindView(R.id.retry_box)
+    val retryButton: Button by bindView(R.id.retry)
 
-    private var mEndpoint: WishlistEndpoint? = null
-    private var mWatchAppList: WatchAppList? = null
+    private var endpoint: WishlistEndpoint? = null
+    private var watchAppList: WatchAppList? = null
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
 
-        if (mEndpoint == null) {
-            mEndpoint = WishlistEndpoint(context!!, true)
+        if (endpoint == null) {
+            endpoint = WishlistEndpoint(context!!, true)
         }
 
-        if (mWatchAppList == null) {
-            mWatchAppList = WatchAppList(this)
+        if (watchAppList == null) {
+            watchAppList = WatchAppList(this)
         }
 
-        mWatchAppList!!.attach(context!!)
-        mEndpoint!!.listener = this
+        watchAppList!!.attach(context!!)
+        endpoint!!.listener = this
     }
 
     override fun onDetach() {
         super.onDetach()
-        mEndpoint!!.listener = null
-        mWatchAppList!!.detach()
+        endpoint!!.listener = null
+        watchAppList!!.detach()
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater!!.inflate(R.layout.fragment_wishlist, container, false)
-        ButterKnife.bind(this, view)
-
-        val context = context
-
-        mListView.layoutManager = LinearLayoutManager(context)
-        mRetryButton.setOnClickListener { mEndpoint!!.startAsync() }
-
-        mListView.visibility = View.GONE
-        mEmptyView.visibility = View.GONE
-        mLoading.visibility = View.VISIBLE
-        mRetryView.visibility = View.GONE
-
-        activity.setTitle(R.string.wishlist)
-
-        return view
+        return inflater!!.inflate(R.layout.fragment_wishlist, container, false)
     }
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        listView.layoutManager = LinearLayoutManager(context)
+        retryButton.setOnClickListener { endpoint!!.startAsync() }
+
+        listView.visibility = View.GONE
+        emptyView.visibility = View.GONE
+        loading.visibility = View.VISIBLE
+        retryView.visibility = View.GONE
+
+        activity.setTitle(R.string.wishlist)
 
         val account = arguments.getParcelable<Account>(EXTRA_ACCOUNT)
         val authToken = arguments.getString(EXTRA_AUTH_TOKEN)
@@ -105,13 +94,13 @@ class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Li
         if (newStatus == AppInfoMetadata.STATUS_NORMAL) {
             TagSnackbar.make(activity, info, false).show()
         }
-        mListView.adapter.notifyDataSetChanged()
+        listView.adapter.notifyDataSetChanged()
     }
 
     override fun onWatchListChangeError(info: AppInfo, error: Int) {
         if (WatchAppList.ERROR_ALREADY_ADDED == error) {
             Toast.makeText(context, R.string.app_already_added, Toast.LENGTH_SHORT).show()
-            mListView.adapter.notifyDataSetChanged()
+            listView.adapter.notifyDataSetChanged()
         } else if (error == WatchAppList.ERROR_INSERT) {
             Toast.makeText(context, R.string.error_insert_app, Toast.LENGTH_SHORT).show()
         }
@@ -119,50 +108,50 @@ class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Li
 
 
     private fun startLoadingList(account: Account, authSubToken: String) {
-        mEndpoint!!.setAccount(account, authSubToken)
+        endpoint!!.setAccount(account, authSubToken)
 
         val context = context
 
-        val adapter = ResultsAdapterWishlist(context, mEndpoint!!, mWatchAppList!!)
-        mListView.adapter = adapter
+        val adapter = ResultsAdapterWishlist(context, endpoint!!, watchAppList!!)
+        listView.adapter = adapter
 
-        mEndpoint!!.startAsync()
+        endpoint!!.startAsync()
     }
 
 
     private fun showRetryButton() {
-        mListView.visibility = View.GONE
-        mEmptyView.visibility = View.GONE
-        mLoading.visibility = View.GONE
-        mRetryView.visibility = View.VISIBLE
+        listView.visibility = View.GONE
+        emptyView.visibility = View.GONE
+        loading.visibility = View.GONE
+        retryView.visibility = View.VISIBLE
     }
 
     private fun showListView() {
-        mListView.visibility = View.VISIBLE
-        mEmptyView.visibility = View.GONE
-        mLoading.visibility = View.GONE
-        mRetryView.visibility = View.GONE
+        listView.visibility = View.VISIBLE
+        emptyView.visibility = View.GONE
+        loading.visibility = View.GONE
+        retryView.visibility = View.GONE
     }
 
     private fun showNoResults() {
-        mLoading.visibility = View.GONE
-        mListView.visibility = View.GONE
-        mRetryView.visibility = View.GONE
-        mEmptyView.setText(R.string.no_result_found)
-        mEmptyView.visibility = View.VISIBLE
+        loading.visibility = View.GONE
+        listView.visibility = View.GONE
+        retryView.visibility = View.GONE
+        emptyView.setText(R.string.no_result_found)
+        emptyView.visibility = View.VISIBLE
     }
 
     override fun onDataChanged() {
-        if (mEndpoint!!.count == 0) {
+        if (endpoint!!.count == 0) {
             showNoResults()
         } else {
             showListView()
-            mListView.adapter.notifyDataSetChanged()
+            listView.adapter.notifyDataSetChanged()
         }
     }
 
     override fun onErrorResponse(error: VolleyError) {
-        mLoading.visibility = View.GONE
+        loading.visibility = View.GONE
         showRetryButton()
     }
 

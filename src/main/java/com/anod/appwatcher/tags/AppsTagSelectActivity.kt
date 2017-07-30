@@ -9,16 +9,14 @@ import android.os.PersistableBundle
 import android.support.v4.app.LoaderManager
 import android.support.v4.content.CursorLoader
 import android.support.v4.content.Loader
-import android.support.v4.view.MenuItemCompat
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SearchView
 import android.view.Menu
 import android.view.View
 import android.widget.ProgressBar
-import butterknife.BindView
-import butterknife.ButterKnife
-import butterknife.OnClick
+import butterknife.bindView
+
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.AppListCursor
 import com.anod.appwatcher.content.DbContentProvider
@@ -38,33 +36,53 @@ import com.anod.appwatcher.utils.Keyboard
  */
 class AppsTagSelectActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<Cursor> {
 
-    @BindView(android.R.id.list)
-    lateinit var mList: RecyclerView
-    @BindView(android.R.id.progress)
-    lateinit var mProgress: ProgressBar
+    val listView: RecyclerView by bindView(android.R.id.list)
+    val progressBar: ProgressBar by bindView(android.R.id.progress)
 
-    private var mAllSelected: Boolean = false
-    private lateinit var mTag: Tag
-    private lateinit var mManager: TagAppsManager
-    private var mTitleFilter = ""
+    private var isAllSelected: Boolean = false
+    private lateinit var tag: Tag
+    private lateinit var tagAppsManager: TagAppsManager
+    private var titleFilter = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tag_select)
-        ButterKnife.bind(this)
         setupToolbar()
 
-        mTag = intentExtras.getParcelable<Tag>(EXTRA_TAG)!!
-        mTitleFilter = savedInstanceState?.getString("title_filter") ?: ""
-        mManager = TagAppsManager(mTag, this)
+        tag = intentExtras.getParcelable<Tag>(EXTRA_TAG)!!
+        titleFilter = savedInstanceState?.getString("title_filter") ?: ""
+        tagAppsManager = TagAppsManager(tag, this)
 
-        mList.layoutManager = LinearLayoutManager(this)
-        mList.adapter = TagAppsCursorAdapter(this, mManager)
+        listView.layoutManager = LinearLayoutManager(this)
+        listView.adapter = TagAppsCursorAdapter(this, tagAppsManager)
+
+        findViewById<View>(android.R.id.button3).setOnClickListener {
+            val importAdapter = listView.adapter as TagAppsCursorAdapter
+            isAllSelected = !isAllSelected
+            importAdapter.selectAllApps(isAllSelected)
+        }
+
+        findViewById<View>(android.R.id.button2).setOnClickListener {
+            finish()
+        }
+
+        findViewById<View>(android.R.id.button1).setOnClickListener {
+            BackgroundTask.execute(object : BackgroundTask.Worker<TagAppsManager, Boolean>(tagAppsManager) {
+                override fun finished(result: Boolean) {
+                    finish()
+                }
+
+                override fun run(param: TagAppsManager): Boolean {
+                    return param.runImport()
+                }
+            })
+        }
+
         supportLoaderManager.initLoader(0, null, this).forceLoad()
     }
 
     override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
-        outState.putString("title_filter", mTitleFilter)
+        outState.putString("title_filter", titleFilter)
         super.onSaveInstanceState(outState, outPersistentState)
     }
 
@@ -76,11 +94,11 @@ class AppsTagSelectActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<C
         menuInflater.inflate(R.menu.searchbox, menu)
 
         val searchItem = menu.findItem(R.id.menu_search)
-        val searchView = MenuItemCompat.getActionView(searchItem) as SearchView
+        val searchView = searchItem.actionView as SearchView
         searchView.setIconifiedByDefault(false)
-        MenuItemCompat.expandActionView(searchItem)
+        searchItem.expandActionView()
 
-        searchView.setQuery(mTitleFilter, true)
+        searchView.setQuery(titleFilter, true)
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
                 Keyboard.hide(searchView, this@AppsTagSelectActivity)
@@ -98,59 +116,32 @@ class AppsTagSelectActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<C
     }
 
     private fun filterList(query: String) {
-        mTitleFilter = query
+        titleFilter = query
         supportLoaderManager.restartLoader(1, null, this)
-    }
-
-
-    @OnClick(android.R.id.button3)
-    fun onAllButtonClick() {
-        val importAdapter = mList.adapter as TagAppsCursorAdapter
-        mAllSelected = !mAllSelected
-        importAdapter.selectAllApps(mAllSelected)
-    }
-
-    @OnClick(android.R.id.button2)
-    fun onCancelButtonClick() {
-        finish()
-    }
-
-    @OnClick(android.R.id.button1)
-    fun onImportButtonClick() {
-
-        BackgroundTask.execute(object : BackgroundTask.Worker<TagAppsManager, Boolean>(mManager) {
-            override fun finished(result: Boolean) {
-                finish()
-            }
-
-            override fun run(param: TagAppsManager): Boolean {
-                return param.runImport()
-            }
-        })
     }
 
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<Cursor> {
         if (id == 0) {
-            return TagAppsCursorLoader(this, mTag)
+            return TagAppsCursorLoader(this, tag)
         }
-        return AppListCursorLoader(this, mTitleFilter, AppListTable.Columns.KEY_TITLE + " COLLATE LOCALIZED ASC", null, null)
+        return AppListCursorLoader(this, titleFilter, AppListTable.Columns.KEY_TITLE + " COLLATE LOCALIZED ASC", null, null)
     }
 
     override fun onLoadFinished(loader: Loader<Cursor>, data: Cursor) {
-        val adapter = mList.adapter as TagAppsCursorAdapter
+        val adapter = listView.adapter as TagAppsCursorAdapter
         if (loader.id == 0) {
-            mManager.initSelected(data)
+            tagAppsManager.initSelected(data)
             supportLoaderManager.initLoader(1, null, this).forceLoad()
             return
         }
 
-        mProgress.visibility = View.GONE
+        progressBar.visibility = View.GONE
         adapter.swapData(data as AppListCursor)
     }
 
     override fun onLoaderReset(loader: Loader<Cursor>) {
         if (loader.id == 1) {
-            val adapter = mList.adapter as TagAppsCursorAdapter
+            val adapter = listView.adapter as TagAppsCursorAdapter
             adapter.swapData(null)
         }
     }

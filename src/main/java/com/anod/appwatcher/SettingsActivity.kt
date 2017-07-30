@@ -15,7 +15,6 @@ import com.anod.appwatcher.backup.DbBackupManager
 import com.anod.appwatcher.backup.ExportTask
 import com.anod.appwatcher.backup.GDriveSync
 import com.anod.appwatcher.backup.ImportTask
-import com.anod.appwatcher.fragments.AccountChooserFragment
 import com.anod.appwatcher.model.DbOpenHelper
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.ui.SettingsActionBarActivity
@@ -163,7 +162,9 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
             }
         } else {
             mGDriveSync!!.onActivityResult(requestCode, resultCode, data)
+            mAccountChooser?.onActivityResult(requestCode, resultCode, data)
         }
+
         super.onActivityResult(requestCode, resultCode, data)
     }
 
@@ -327,9 +328,6 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
     override fun onAccountNotFound() {
         Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
     }
-
-    override val accountSelectionListener: AccountChooserFragment.OnAccountSelectionListener
-        get() = mAccountChooser!!
 
     override fun onImportFinish(code: Int) {
         ImportTask.showImportFinishToast(this, code)

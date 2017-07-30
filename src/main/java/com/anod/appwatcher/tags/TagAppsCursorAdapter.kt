@@ -5,7 +5,6 @@ import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.widget.CheckedTextView
 import android.widget.ImageView
-import butterknife.ButterKnife
 import com.anod.appwatcher.App
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.AppListCursor
@@ -22,8 +21,8 @@ internal class TagAppsCursorAdapter(context: Context, private val mManager: TagA
             private val mIconLoader: AppIconLoader,
             private val mManager: TagAppsManager) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
 
-        val title: CheckedTextView = ButterKnife.findById(itemView, android.R.id.title)
-        val icon: ImageView = ButterKnife.findById(itemView, android.R.id.icon)
+        val title: CheckedTextView = itemView.findViewById(android.R.id.title)
+        val icon: ImageView = itemView.findViewById(android.R.id.icon)
 
         private var app: AppInfo? = null
 

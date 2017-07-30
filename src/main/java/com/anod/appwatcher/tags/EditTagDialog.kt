@@ -11,9 +11,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.ImageView
-import butterknife.BindView
-import butterknife.ButterKnife
-import butterknife.OnClick
+import butterknife.bindView
 import com.android.colorpicker.ColorPickerSwatch
 import com.android.colorpicker.ColorStateDrawable
 import com.anod.appwatcher.R
@@ -28,73 +26,60 @@ import info.anodsplace.colorpicker.ColorPickerDialog
 
 class EditTagDialog : DialogFragment(), ColorPickerSwatch.OnColorSelectedListener {
 
-    @BindView(R.id.tag_name)
-    lateinit var mEditText: TextInputEditText
-    @BindView(R.id.color_preview)
-    lateinit var mColor: ImageView
-    @BindView(android.R.id.button3)
-    lateinit var mDeleteButton: Button
+    val editText: TextInputEditText by bindView(R.id.tag_name)
+    val colorPreview: ImageView by bindView(R.id.color_preview)
+    val deleteButton: Button by bindView(R.id.color_preview)
 
-    private lateinit var mTag: Tag
-
+    private lateinit var tag: Tag
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater!!.inflate(R.layout.dialog_edit_tag, container, false)
-        ButterKnife.bind(this, view)
-
-        return view
+        return inflater?.inflate(R.layout.dialog_edit_tag, container, false)
     }
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val tag = arguments.getParcelable<Tag>("tag")
-        mTag = tag ?: Tag("")
+        tag = arguments.getParcelable<Tag>("tag") ?: Tag("")
 
-        mEditText.setText(mTag.name)
+        editText.setText(tag.name)
         val colorDrawable = arrayOf<Drawable>(ResourcesCompat.getDrawable(resources, R.drawable.color_picker_swatch, null)!!)
-        mColor.setImageDrawable(ColorStateDrawable(colorDrawable, mTag.color))
-        mEditText.requestFocus()
+        colorPreview.setImageDrawable(ColorStateDrawable(colorDrawable, tag.color))
+        editText.requestFocus()
         dialog.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
 
-        if (mTag.id == -1) {
-            mDeleteButton.visibility = View.GONE
+        if (tag.id == -1) {
+            deleteButton.visibility = View.GONE
         } else {
-            mDeleteButton.visibility = View.VISIBLE
+            deleteButton.visibility = View.VISIBLE
+        }
+
+        view?.findViewById<View>(R.id.color_preview)?.setOnClickListener {
+            val dialog = ColorPickerDialog.newInstance(tag.color, false, activity)
+            dialog.setOnColorSelectedListener(this)
+            dialog.show(fragmentManager, "color-picker")
+        }
+
+        view?.findViewById<View>(android.R.id.button1)?.setOnClickListener {
+            tag = Tag(tag.id, editText.text.toString().trim { it <= ' ' }, tag.color)
+            (activity as TagsListActivity).saveTag(tag)
+            dismiss()
+        }
+
+        view?.findViewById<View>(android.R.id.button2)?.setOnClickListener {
+            dismiss()
+        }
+
+        view?.findViewById<View>(android.R.id.button3)?.setOnClickListener {
+            (activity as TagsListActivity).deleteTag(tag)
+            dismiss()
         }
     }
 
-
-    @OnClick(R.id.color_preview)
-    fun onColorClick() {
-        val dialog = ColorPickerDialog.newInstance(mTag.color, false, activity)
-        dialog.setOnColorSelectedListener(this)
-        dialog.show(fragmentManager, "color-picker")
-    }
-
-    @OnClick(android.R.id.button1)
-    fun onSaveClick() {
-        mTag = Tag(mTag.id, mEditText.text.toString().trim { it <= ' ' }, mTag.color)
-        (activity as TagsListActivity).saveTag(mTag)
-        dismiss()
-    }
-
-    @OnClick(android.R.id.button2)
-    fun onCancelClick() {
-        dismiss()
-    }
-
-    @OnClick(android.R.id.button3)
-    fun onDeleteClick() {
-        (activity as TagsListActivity).deleteTag(mTag)
-        dismiss()
-    }
-
     override fun onColorSelected(color: Int) {
-        mTag = Tag(mTag.id, mTag.name, color)
+        tag = Tag(tag.id, tag.name, color)
 
         val colorDrawable = arrayOf<Drawable>(ResourcesCompat.getDrawable(resources, R.drawable.color_picker_swatch, null)!!)
-        mColor.setImageDrawable(ColorStateDrawable(colorDrawable, mTag.color))
+        colorPreview.setImageDrawable(ColorStateDrawable(colorDrawable, tag.color))
     }
 
     companion object {

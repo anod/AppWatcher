@@ -12,7 +12,6 @@ import android.support.design.widget.TabLayout
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
-import android.support.v4.view.MenuItemCompat
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.SearchView
@@ -43,11 +42,12 @@ import java.util.*
 
 abstract class AppWatcherBaseActivity : DrawerActivity(), TextView.OnEditorActionListener, SearchView.OnQueryTextListener {
 
-    private var mSyncFinishedReceiverRegistered: Boolean = false
+    private var syncFinishedReceiverRegistered: Boolean = false
 
-    private lateinit var mViewPager: ViewPager
-    private val mRefreshAnim: MenuItemAnimation = MenuItemAnimation(this, R.anim.rotate)
-    private var mFilterQuery = ""
+    private lateinit var viewPager: ViewPager
+    private val refreshMenuAnimation: MenuItemAnimation = MenuItemAnimation(this, R.anim.rotate)
+    private var filterQuery = ""
+    private var expandSearch = false
 
     val prefs: Preferences
         get() = App.provide(this).prefs
@@ -59,15 +59,15 @@ abstract class AppWatcherBaseActivity : DrawerActivity(), TextView.OnEditorActio
         fun onSyncFinish()
     }
 
-    private var mSearchMenuItem: MenuItem? = null
-    private val mEventListener = ArrayList<AppWatcherBaseActivity.EventListener>(3)
+    private var searchMenuItem: MenuItem? = null
+    private val eventListeners = ArrayList<AppWatcherBaseActivity.EventListener>(3)
 
     @get:LayoutRes protected abstract val contentLayout: Int
     @get:MenuRes protected abstract val menuResource: Int
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putInt("tab_id", mViewPager.currentItem)
-        outState.putString("filter", mFilterQuery)
+        outState.putInt("tab_id", viewPager.currentItem)
+        outState.putString("filter", filterQuery)
         super.onSaveInstanceState(outState)
     }
 
@@ -79,16 +79,19 @@ abstract class AppWatcherBaseActivity : DrawerActivity(), TextView.OnEditorActio
         var filterId = Filters.TAB_ALL
         if (savedInstanceState != null) {
             filterId = savedInstanceState.getInt("tab_id", Filters.TAB_ALL)
-            mFilterQuery = savedInstanceState.getString("filter")
+            filterQuery = savedInstanceState.getString("filter") ?: ""
+            expandSearch = filterQuery.isNotEmpty()
             AppLog.d("Restore tab: " + filterId)
+        } else {
+            expandSearch = intentExtras.getBoolean(EXTRA_EXPAND_SEARCH)
         }
 
-        mViewPager = findViewById<View>(R.id.viewpager) as ViewPager
-        mViewPager.adapter = createViewPagerAdapter()
-        mViewPager.currentItem = filterId
+        viewPager = findViewById<View>(R.id.viewpager) as ViewPager
+        viewPager.adapter = createViewPagerAdapter()
+        viewPager.currentItem = filterId
 
         val tabLayout = findViewById<View>(R.id.tabs) as TabLayout
-        tabLayout.setupWithViewPager(mViewPager)
+        tabLayout.setupWithViewPager(viewPager)
     }
 
     protected abstract fun createViewPagerAdapter(): AppWatcherBaseActivity.Adapter
@@ -97,8 +100,8 @@ abstract class AppWatcherBaseActivity : DrawerActivity(), TextView.OnEditorActio
         // Inflate the menu
         menuInflater.inflate(menuResource, menu)
 
-        mSearchMenuItem = menu.findItem(R.id.menu_act_filter)
-        MenuItemCompat.setOnActionExpandListener(mSearchMenuItem, object : MenuItemCompat.OnActionExpandListener {
+        searchMenuItem = menu.findItem(R.id.menu_act_filter)
+        searchMenuItem?.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
             override fun onMenuItemActionExpand(menuItem: MenuItem): Boolean {
                 return true
             }
@@ -109,33 +112,32 @@ abstract class AppWatcherBaseActivity : DrawerActivity(), TextView.OnEditorActio
             }
         })
 
-        val searchView = MenuItemCompat.getActionView(mSearchMenuItem) as SearchView
+        val searchView = searchMenuItem?.actionView as SearchView
         searchView.setOnQueryTextListener(this)
         searchView.isSubmitButtonEnabled = true
         searchView.queryHint = getString(R.string.search)
 
-        val filterQuery = mFilterQuery
-        if (!TextUtils.isEmpty(filterQuery)) {
-            MenuItemCompat.expandActionView(mSearchMenuItem)
+        if (expandSearch) {
+            searchMenuItem?.expandActionView()
             searchView.setQuery(filterQuery, false)
         }
 
-        mRefreshAnim.menuItem = menu.findItem(R.id.menu_act_refresh)
+        refreshMenuAnimation.menuItem = menu.findItem(R.id.menu_act_refresh)
         return super.onCreateOptionsMenu(menu)
     }
 
     /**
      * Receive notifications from SyncAdapter
      */
-    private val mSyncFinishedReceiver = object : BroadcastReceiver() {
+    private val syncFinishedReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val action = intent.action
             if (GcmTaskService.SERVICE_ACTION_EXECUTE_TASK == action || SyncAdapter.SYNC_PROGRESS == action) {
-                mRefreshAnim.start()
+                refreshMenuAnimation.start()
                 notifySyncStart()
             } else if (SyncAdapter.SYNC_STOP == action) {
                 val updatesCount = intent.getIntExtra(SyncAdapter.EXTRA_UPDATES_COUNT, 0)
-                mRefreshAnim.stop()
+                refreshMenuAnimation.stop()
                 notifySyncStop()
                 if (updatesCount == 0) {
                     Toast.makeText(this@AppWatcherBaseActivity, R.string.no_updates_found, Toast.LENGTH_SHORT).show()
@@ -149,8 +151,8 @@ abstract class AppWatcherBaseActivity : DrawerActivity(), TextView.OnEditorActio
         filter.addAction(SyncAdapter.SYNC_PROGRESS)
         filter.addAction(SyncAdapter.SYNC_STOP)
         filter.addAction(GcmTaskService.SERVICE_ACTION_EXECUTE_TASK)
-        registerReceiver(mSyncFinishedReceiver, filter)
-        mSyncFinishedReceiverRegistered = true
+        registerReceiver(syncFinishedReceiver, filter)
+        syncFinishedReceiverRegistered = true
         super.onResume()
 
         notifySyncStop()
@@ -158,9 +160,9 @@ abstract class AppWatcherBaseActivity : DrawerActivity(), TextView.OnEditorActio
 
     override fun onPause() {
         super.onPause()
-        if (mSyncFinishedReceiverRegistered) {
-            unregisterReceiver(mSyncFinishedReceiver)
-            mSyncFinishedReceiverRegistered = false
+        if (syncFinishedReceiverRegistered) {
+            unregisterReceiver(syncFinishedReceiver)
+            syncFinishedReceiverRegistered = false
         }
     }
 
@@ -236,91 +238,90 @@ abstract class AppWatcherBaseActivity : DrawerActivity(), TextView.OnEditorActio
     }
 
     override fun onQueryTextSubmit(query: String): Boolean {
-        mFilterQuery = ""
+        filterQuery = ""
         if (TextUtils.isEmpty(query)) {
-            MenuItemCompat.collapseActionView(mSearchMenuItem)
+            searchMenuItem?.collapseActionView()
         } else {
             val searchIntent = Intent(this, MarketSearchActivity::class.java)
             searchIntent.putExtra(MarketSearchActivity.EXTRA_KEYWORD, query)
             searchIntent.putExtra(MarketSearchActivity.EXTRA_EXACT, true)
             startActivity(searchIntent)
             notifyQueryChange("")
-            if (mSearchMenuItem != null) {
-                MenuItemCompat.collapseActionView(mSearchMenuItem)
-            }
+            searchMenuItem?.collapseActionView()
         }
         return true
     }
 
     override fun onQueryTextChange(newText: String): Boolean {
-        mFilterQuery = newText
+        filterQuery = newText
         notifyQueryChange(newText)
         return true
     }
 
     private fun notifySortChange(sortIndex: Int) {
-        for (idx in mEventListener.indices) {
-            mEventListener[idx].onSortChanged(sortIndex)
+        for (idx in eventListeners.indices) {
+            eventListeners[idx].onSortChanged(sortIndex)
         }
     }
 
     private fun notifyQueryChange(newTexr: String) {
-        for (idx in mEventListener.indices) {
-            mEventListener[idx].onQueryTextChanged(newTexr)
+        for (idx in eventListeners.indices) {
+            eventListeners[idx].onQueryTextChanged(newTexr)
         }
     }
 
     fun addQueryChangeListener(listener: AppWatcherBaseActivity.EventListener): Int {
-        mEventListener.add(listener)
+        eventListeners.add(listener)
 
-        if (!TextUtils.isEmpty(mFilterQuery)) {
-            notifyQueryChange(mFilterQuery)
+        if (!TextUtils.isEmpty(filterQuery)) {
+            notifyQueryChange(filterQuery)
         }
 
-        return mEventListener.size - 1
+        return eventListeners.size - 1
     }
 
     fun removeQueryChangeListener(index: Int) {
-        if (index < mEventListener.size) {
-            mEventListener.removeAt(index)
+        if (index < eventListeners.size) {
+            eventListeners.removeAt(index)
         }
     }
 
     private fun notifySyncStart() {
-        for (idx in mEventListener.indices) {
-            mEventListener[idx].onSyncStart()
+        for (idx in eventListeners.indices) {
+            eventListeners[idx].onSyncStart()
         }
     }
 
     private fun notifySyncStop() {
-        for (idx in mEventListener.indices) {
-            mEventListener[idx].onSyncFinish()
+        for (idx in eventListeners.indices) {
+            eventListeners[idx].onSyncFinish()
         }
     }
 
     class Adapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
-        private val mFragments = ArrayList<Fragment>()
-        private val mFragmentTitles = ArrayList<String>()
+        private val fragments = mutableListOf<Fragment>()
+        private val fragmentTitles = mutableListOf<String>()
 
         fun addFragment(fragment: Fragment, title: String) {
-            mFragments.add(fragment)
-            mFragmentTitles.add(title)
+            fragments.add(fragment)
+            fragmentTitles.add(title)
         }
 
         override fun getItem(position: Int): Fragment {
-            return mFragments[position]
+            return fragments[position]
         }
 
         override fun getCount(): Int {
-            return mFragments.size
+            return fragments.size
         }
 
         override fun getPageTitle(position: Int): CharSequence {
-            return mFragmentTitles[position]
+            return fragmentTitles[position]
         }
     }
 
     companion object {
         const val EXTRA_FROM_NOTIFICATION = "extra_noti"
+        const val EXTRA_EXPAND_SEARCH = "expand_search"
     }
 }

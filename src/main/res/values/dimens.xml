@@ -30,5 +30,7 @@
     <dimen name="preference_widget_width">48dp</dimen>
     <dimen name="playstore_button_margin_top">100dp</dimen>
 
+    <dimen name="dialog_padding">16dp</dimen>
+    <dimen name="dialog_padding_top_material">18dp</dimen>
     <!-- Navdrawer -->
 </resources>

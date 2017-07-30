@@ -28,10 +28,10 @@ class MenuItemAnimation(private val mContext: Context, private val mAnimResource
         if (menuItem == null) {
             return
         }
-        val actionView = MenuItemCompat.getActionView(menuItem)
+        val actionView = menuItem?.actionView
         if (actionView != null) {
             actionView.clearAnimation()
-            MenuItemCompat.setActionView(menuItem, null)
+            menuItem?.actionView = null
         }
         if (isInvisibleMode) {
             menuItem!!.isVisible = false
@@ -45,9 +45,8 @@ class MenuItemAnimation(private val mContext: Context, private val mAnimResource
         if (menuItem == null) {
             return
         }
-        val actionView = MenuItemCompat.getActionView(menuItem)
         //already animating
-        if (actionView != null) {
+        if (menuItem?.actionView != null) {
             return
         }
         if (isInvisibleMode) {

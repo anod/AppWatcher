@@ -55,7 +55,7 @@ class DbJsonReader {
         val jsonReader = JsonReader(reader)
 
         val apps = mutableListOf<AppInfo>()
-        val tags = mutableListOf<Tag>()
+        val tagList = mutableListOf<Tag>()
         val appsTags = mutableMapOf<String, List<String>>()
 
         val listener = object : OnReadListener {
@@ -65,7 +65,7 @@ class DbJsonReader {
             }
 
             override fun onTagRead(tag: Tag) {
-                tags.add(tag)
+                tagList.add(tag)
             }
 
             override fun onFinish() { }
@@ -77,7 +77,7 @@ class DbJsonReader {
             reader.close()
             listener.onFinish()
 
-            return Container(apps, tags, listOf())
+            return Container(apps, tagList, listOf())
         }
 
         jsonReader.beginObject()
@@ -96,7 +96,7 @@ class DbJsonReader {
         reader.close()
         listener.onFinish()
 
-        val namedTags = tags.associate { it.name to it }
+        val namedTags = tagList.associate { it.name to it }
         val appTagList = mutableListOf<AppTag>()
         appsTags.forEach({ (appId, tags) ->
             tags.forEach {
@@ -104,7 +104,7 @@ class DbJsonReader {
             }
         })
 
-        return Container(apps, tags, appTagList)
+        return Container(apps, tagList, appTagList)
     }
 
     @Throws(IOException::class)

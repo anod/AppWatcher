@@ -85,7 +85,7 @@ class SyncConnectedWorker(private val context: Context, private val googleApiCli
         val currentIds = cr.queryPackagesMap(true)
         val currentTags = cr.queryTags().associate { it.name to it }.toMutableMap()
 
-        val tags = mutableListOf<Tag>()
+        val tagList = mutableListOf<Tag>()
         val tagApps = mutableMapOf<String, MutableList<String>>()
 
         jsonReader.read(driveBufferedReader, object : DbJsonReader.OnReadListener {
@@ -101,7 +101,7 @@ class SyncConnectedWorker(private val context: Context, private val googleApiCli
             }
 
             override fun onTagRead(tag: Tag) {
-                tags.add(tag)
+                tagList.add(tag)
             }
 
             @Throws(IOException::class)
@@ -110,7 +110,7 @@ class SyncConnectedWorker(private val context: Context, private val googleApiCli
                 contents.discard(googleApiClient)
 
                 // Add missing tags
-                tags.forEach { tag ->
+                tagList.forEach { tag ->
                     if (!currentTags.containsKey(tag.name)) {
                         cr.createTag(Tag(tag.name, tag.color))?.lastPathSegment?.toInt()?.let {
                             currentTags[tag.name] = Tag(it, tag.name, tag.color)

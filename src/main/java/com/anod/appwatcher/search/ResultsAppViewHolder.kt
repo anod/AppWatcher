@@ -4,8 +4,6 @@ import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
-import butterknife.BindView
-import butterknife.ButterKnife
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.WatchAppList
@@ -15,21 +13,14 @@ class ResultsAppViewHolder(itemView: View, private val watchAppList: WatchAppLis
     : RecyclerView.ViewHolder(itemView), View.OnClickListener {
     var doc: Document? = null
 
-    @BindView(android.R.id.content)
-    lateinit var row: View
-    @BindView(android.R.id.title)
-    lateinit var title: TextView
-    @BindView(R.id.details)
-    lateinit var details: TextView
-    @BindView(R.id.updated)
-    lateinit var updated: TextView
-    @BindView(R.id.price)
-    lateinit var price: TextView
-    @BindView(android.R.id.icon)
-    lateinit var icon: ImageView
+    val row: View = itemView.findViewById(android.R.id.content)
+    val title: TextView = itemView.findViewById(android.R.id.title)
+    val details: TextView = itemView.findViewById(R.id.details)
+    val updated: TextView = itemView.findViewById(R.id.updated)
+    val price: TextView = itemView.findViewById(R.id.price)
+    val icon: ImageView = itemView.findViewById(android.R.id.icon)
 
     init {
-        ButterKnife.bind(this, itemView)
         this.row.setOnClickListener(this)
     }
 

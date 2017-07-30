@@ -4,9 +4,6 @@ import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
-import butterknife.BindView
-import butterknife.ButterKnife
-import butterknife.OnClick
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
@@ -16,18 +13,18 @@ open class AppViewHolder(
         itemView: View,
         dataProvider: AppViewHolderBase.DataProvider,
         iconLoader: AppIconLoader,
-        private val mListener: AppViewHolder.OnClickListener?)
+        private val onClickListener: AppViewHolder.OnClickListener?)
     : AppViewHolderBase(itemView, dataProvider, iconLoader), View.OnClickListener {
 
     var app: AppInfo? = null
     var location: Int = 0
 
-    @BindView(R.id.sec_header) lateinit var section: View
-    @BindView(R.id.sec_header_title) lateinit var sectionText: TextView
-    @BindView(R.id.sec_header_count) lateinit var sectionCount: TextView
-    @BindView(android.R.id.icon) lateinit var icon: ImageView
-    @BindView(R.id.new_indicator) lateinit var newIndicator: View
-    @BindView(R.id.sec_action_button) lateinit var actionButton: Button
+    val section: View = itemView.findViewById(R.id.sec_header)
+    val sectionText: TextView = itemView.findViewById(R.id.sec_header_title)
+    val sectionCount: TextView = itemView.findViewById(R.id.sec_header_count)
+    val icon: ImageView = itemView.findViewById(android.R.id.icon)
+    val newIndicator: View = itemView.findViewById(R.id.new_indicator)
+    val actionButton: Button = itemView.findViewById(R.id.sec_action_button)
     val detailsView: AppDetailsView
 
     open val isLocalApp: Boolean
@@ -41,20 +38,18 @@ open class AppViewHolder(
     init {
         this.app = null
         this.location = 0
-        ButterKnife.bind(this, itemView)
 
         this.detailsView = AppDetailsView(itemView, dataProvider)
 
         itemView.findViewById<View>(android.R.id.content).setOnClickListener(this)
-    }
 
-    @OnClick(R.id.sec_action_button)
-    fun onAction() {
-        mListener?.onActionButton()
+        this.actionButton.setOnClickListener {
+            onClickListener?.onActionButton()
+        }
     }
 
     override fun onClick(v: View) {
-        mListener?.onItemClick(this.app!!)
+        onClickListener?.onItemClick(this.app!!)
     }
 
     override fun bindView(location: Int, app: AppInfo) {

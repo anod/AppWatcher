@@ -1,12 +1,10 @@
 package com.anod.appwatcher.installed
 
 import android.graphics.Color
+import android.support.v4.content.res.ResourcesCompat
 import android.view.View
 import android.widget.CheckedTextView
 import android.widget.ImageView
-import butterknife.BindColor
-import butterknife.BindView
-import butterknife.ButterKnife
 import com.anod.appwatcher.R
 import com.anod.appwatcher.adapters.AppViewHolderBase
 import com.anod.appwatcher.model.AppInfo
@@ -25,19 +23,11 @@ internal class ImportAppViewHolder(
 
     val importDataProvider = dataProvider
     var app: AppInfo? = null
-    @BindView(android.R.id.title)
-    lateinit var title: CheckedTextView
-    @BindView(android.R.id.icon)
-    lateinit var icon: ImageView
+    val title: CheckedTextView = itemView.findViewById(android.R.id.title)
+    val icon: ImageView = itemView.findViewById(android.R.id.icon)
 
-    @BindColor(R.color.theme_accent)
-    @JvmField var themeAccent: Int = 0
-    @BindColor(R.color.material_red_800)
-    @JvmField var materialRed: Int = 0
-
-    init {
-        ButterKnife.bind(this, itemView)
-    }
+    val themeAccent: Int = ResourcesCompat.getColor(itemView.resources, R.color.theme_accent, null)
+    val materialRed: Int = ResourcesCompat.getColor(itemView.resources, R.color.material_red_800, null)
 
     override fun bindView(location: Int, app: AppInfo) {
         this.app = app

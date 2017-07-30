@@ -6,11 +6,9 @@ import android.content.Context
 import android.content.Intent
 import android.database.Cursor
 import android.os.Bundle
-import android.support.annotation.Nullable
 import android.support.v4.app.Fragment
 import android.support.v4.app.LoaderManager
 import android.support.v4.content.Loader
-import android.support.v4.util.SimpleArrayMap
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -20,10 +18,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import butterknife.BindView
-import butterknife.ButterKnife
-import butterknife.OnClick
-import butterknife.Optional
+import butterknife.bindOptionalView
+import butterknife.bindView
 import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.ChangelogActivity
 import com.anod.appwatcher.MarketSearchActivity
@@ -41,25 +37,21 @@ import info.anodsplace.android.widget.recyclerview.MergeRecyclerAdapter
 
 open class AppWatcherListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, AppWatcherBaseActivity.EventListener, AppViewHolder.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
 
-    protected var mTitleFilter = ""
-    protected lateinit var mInstalledApps: InstalledAppsProvider
-    protected lateinit var mAdapter: MergeRecyclerAdapter
-    protected var mSortId: Int = 0
-    protected var mFilterId: Int = 0
-    protected var mTag: Tag? = null
+    protected var titleFilter = ""
+    protected lateinit var installedApps: InstalledAppsProvider
+    protected lateinit var adapter: MergeRecyclerAdapter
+    protected var sortId: Int = 0
+    protected var filterId: Int = 0
+    protected var tag: Tag? = null
 
-    private var mListenerIndex: Int = 0
+    private var listenerIndex: Int = 0
 
-    @BindView(android.R.id.list)
-    lateinit var mListView: RecyclerView
-    @BindView(R.id.progress)
-    lateinit var mProgressContainer: View
-    @BindView(android.R.id.empty)
-    lateinit var mEmptyView: View
-    @BindView(R.id.swipe_layout)
-    @Nullable @JvmField var mSwipeLayout: SwipeRefreshLayout? = null
+    val listView: RecyclerView by bindView(android.R.id.list)
+    val progressContainer: View by bindView(R.id.progress)
+    val emptyView: View by bindView(android.R.id.empty)
+    val swipeLayout: SwipeRefreshLayout? by bindOptionalView(R.id.swipe_layout)
 
-    private lateinit var mSection: SectionProvider
+    private lateinit var section: SectionProvider
 
     interface SectionProvider {
         var adapterIndexMap: SparseIntArray
@@ -111,41 +103,33 @@ open class AppWatcherListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
-        mListenerIndex = (context as AppWatcherBaseActivity).addQueryChangeListener(this)
-        AppLog.d("addQueryChangeListener with index: %d", mListenerIndex)
+        listenerIndex = (context as AppWatcherBaseActivity).addQueryChangeListener(this)
+        AppLog.d("addQueryChangeListener with index: %d", listenerIndex)
     }
 
     override fun onDetach() {
         super.onDetach()
-        (activity as AppWatcherBaseActivity).removeQueryChangeListener(mListenerIndex)
+        (activity as AppWatcherBaseActivity).removeQueryChangeListener(listenerIndex)
     }
 
     fun setListVisible(visible: Boolean) {
         if (visible) {
-            mProgressContainer.visibility = View.GONE
-            if (mAdapter.itemCount == 0) {
-                mEmptyView.visibility = View.VISIBLE
-                mListView.visibility = View.INVISIBLE
+            progressContainer.visibility = View.GONE
+            if (adapter.itemCount == 0) {
+                emptyView.visibility = View.VISIBLE
+                listView.visibility = View.INVISIBLE
             } else {
-                mEmptyView.visibility = View.GONE
-                mListView.visibility = View.VISIBLE
+                emptyView.visibility = View.GONE
+                listView.visibility = View.VISIBLE
             }
         } else {
-            mProgressContainer.visibility = View.VISIBLE
-            mListView.visibility = View.INVISIBLE
-            mEmptyView.visibility = View.GONE
+            progressContainer.visibility = View.VISIBLE
+            listView.visibility = View.INVISIBLE
+            emptyView.visibility = View.GONE
         }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val root = inflateView(inflater, container, savedInstanceState)
-        ButterKnife.bind(this, root)
-        mEmptyView.visibility = View.GONE
-        mSwipeLayout?.setOnRefreshListener(this)
-        return root
-    }
-
-    protected open fun inflateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_applist, container, false)
     }
 
@@ -157,70 +141,93 @@ open class AppWatcherListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        mInstalledApps = InstalledAppsProvider.PackageManager(activity.packageManager)
+        if (listView.adapter != null) {
+            return
+        }
+
+        emptyView.visibility = View.GONE
+        swipeLayout?.setOnRefreshListener(this)
+
+        installedApps = InstalledAppsProvider.PackageManager(activity.packageManager)
 
         val layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
-        mListView.layoutManager = layoutManager
+        listView.layoutManager = layoutManager
 
-        mSection = sectionForClassName(arguments.getString(ARG_SECTION_PROVIDER))
+        section = sectionForClassName(arguments.getString(ARG_SECTION_PROVIDER))
 
         // Create an empty adapter we will use to display the loaded data.
-        mAdapter = MergeRecyclerAdapter()
-        mSection.fillAdapters(mAdapter, activity, mInstalledApps, this)
-        mListView.adapter = mAdapter
+        adapter = MergeRecyclerAdapter()
+        section.fillAdapters(adapter, activity, installedApps, this)
+        listView.adapter = adapter
 
         // Start out with a progress indicator.
         setListVisible(false)
 
-        mSortId = arguments.getInt(ARG_SORT)
-        mFilterId = arguments.getInt(ARG_FILTER)
-        mTag = arguments.getParcelable<Tag>(ARG_TAG)
+        sortId = arguments.getInt(ARG_SORT)
+        filterId = arguments.getInt(ARG_FILTER)
+        tag = arguments.getParcelable<Tag>(ARG_TAG)
         // Prepare the loader.  Either re-connect with an existing one,
         // or start a new one.
         loaderManager.initLoader(0, null, this)
+
+        view?.findViewById<View>(android.R.id.button1)?.setOnClickListener {
+            val searchIntent = Intent(activity, MarketSearchActivity::class.java)
+            searchIntent.putExtra(MarketSearchActivity.EXTRA_KEYWORD, "")
+            searchIntent.putExtra(MarketSearchActivity.EXTRA_FOCUS, true)
+            startActivity(searchIntent)
+        }
+
+        view?.findViewById<View>(android.R.id.button2)?.setOnClickListener {
+            startActivity(Intent(activity, ImportInstalledActivity::class.java))
+        }
+
+        view?.findViewById<View>(android.R.id.button3)?.setOnClickListener {
+            val intent = Intent.makeMainActivity(ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity"))
+            IntentUtils.startActivitySafely(activity, intent)
+        }
     }
 
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<Cursor> {
-        return mSection.createLoader(activity, mTitleFilter, mSortId, createFilter(mFilterId), mTag)
+        return section.createLoader(activity, titleFilter, sortId, createFilter(filterId), tag)
     }
 
     override fun onLoadFinished(loader: Loader<Cursor>, data: Cursor) {
-        mSection.loadFinished(mAdapter, loader, data)
+        section.loadFinished(adapter, loader, data)
         setListVisible(true)
     }
 
     override fun onLoaderReset(loader: Loader<Cursor>) {
-        mSection.loaderReset(mAdapter)
+        section.loaderReset(adapter)
     }
 
     protected fun createFilter(filterId: Int): InstalledFilter? {
         if (filterId == Filters.TAB_INSTALLED) {
-            return InstalledFilter(true, mInstalledApps)
+            return InstalledFilter(true, installedApps)
         } else if (filterId == Filters.TAB_UNINSTALLED) {
-            return InstalledFilter(false, mInstalledApps)
+            return InstalledFilter(false, installedApps)
         }
         return null
     }
 
     override fun onSortChanged(sortIndex: Int) {
-        mSortId = sortIndex
+        sortId = sortIndex
         restartLoader()
     }
 
     override fun onQueryTextChanged(newQuery: String) {
         val newFilter = if (!TextUtils.isEmpty(newQuery)) newQuery else ""
-        if (!TextUtils.equals(newFilter, mTitleFilter)) {
-            mTitleFilter = newFilter
+        if (!TextUtils.equals(newFilter, titleFilter)) {
+            titleFilter = newFilter
             restartLoader()
         }
     }
 
     override fun onSyncStart() {
-        mSwipeLayout?.isRefreshing = true
+        swipeLayout?.isRefreshing = true
     }
 
     override fun onSyncFinish() {
-        mSwipeLayout?.isRefreshing = false
+        swipeLayout?.isRefreshing = false
     }
 
     override fun onItemClick(app: AppInfo) {
@@ -250,31 +257,9 @@ open class AppWatcherListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
         }
     }
 
-    @OnClick(android.R.id.button1)
-    @Optional
-    open fun onSearchButton() {
-        val searchIntent = Intent(activity, MarketSearchActivity::class.java)
-        searchIntent.putExtra(MarketSearchActivity.EXTRA_KEYWORD, "")
-        searchIntent.putExtra(MarketSearchActivity.EXTRA_FOCUS, true)
-        startActivity(searchIntent)
-    }
-
-    @OnClick(android.R.id.button2)
-    @Optional
-    fun onImportButton() {
-        startActivity(Intent(activity, ImportInstalledActivity::class.java))
-    }
-
-    @OnClick(android.R.id.button3)
-    @Optional
-    fun onShareButton() {
-        val intent = Intent.makeMainActivity(ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity"))
-        IntentUtils.startActivitySafely(activity, intent)
-    }
-
     override fun onRefresh() {
        if (!(activity as AppWatcherBaseActivity).requestRefresh()) {
-           mSwipeLayout?.isRefreshing = false
+           swipeLayout?.isRefreshing = false
        }
     }
 

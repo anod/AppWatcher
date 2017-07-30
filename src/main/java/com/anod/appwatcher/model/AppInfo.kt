@@ -66,7 +66,7 @@ class AppInfo : AppInfoMetadata, Parcelable {
         val app = doc.appDetails
         this.packageName = app.packageName ?: ""
         this.title = doc.title
-        this.versionNumber = app.versionCode ?: 0
+        this.versionNumber = app.versionCode
         this.versionName = app.versionString ?: ""
         this.creator = doc.creator
         this.uploadDate = app.uploadDate ?: ""

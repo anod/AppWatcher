@@ -20,7 +20,6 @@ import com.anod.appwatcher.*
 import com.anod.appwatcher.accounts.AccountChooser
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.TagsContentProviderClient
-import com.anod.appwatcher.fragments.AccountChooserFragment
 import com.anod.appwatcher.installed.ImportInstalledActivity
 import com.anod.appwatcher.tags.AppsTagActivity
 import com.anod.appwatcher.wishlist.WishlistFragment
@@ -126,12 +125,14 @@ abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelec
         cr.close()
     }
 
-    override val accountSelectionListener: AccountChooserFragment.OnAccountSelectionListener
-        get() = accountChooser
-
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         accountChooser.onRequestPermissionResult(requestCode, permissions, grantResults)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        accountChooser.onActivityResult(requestCode, resultCode, data)
     }
 
     protected fun onAccountChooseClick() {
@@ -187,7 +188,7 @@ abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelec
             }
             R.id.menu_wishlist -> {
                 val args = Bundle()
-                args.putParcelable(WishlistFragment.EXTRA_ACCOUNT, accountChooser.account)
+                args.putParcelable(WishlistFragment.EXTRA_ACCOUNT, App.provide(this).prefs.account)
                 args.putString(WishlistFragment.EXTRA_AUTH_TOKEN, mAuthToken)
                 startActivity(FragmentToolbarActivity.intent(WishlistFragment.TAG, args, this))
                 return true
