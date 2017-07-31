@@ -38,7 +38,9 @@
             android:layout_weight="1"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textSize="@dimen/textSizeTitle"
-            tools:text="Car Widget Pro" />
+            android:maxLines="2"
+            android:ellipsize="end"
+            tools:text="Nova Launcher Pro Prime" />
 
         <ImageView
             android:layout_marginBottom="2dp"

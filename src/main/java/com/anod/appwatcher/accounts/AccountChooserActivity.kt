@@ -24,17 +24,6 @@ class AccountChooserActivity : AppCompatActivity() {
 
     companion object {
         fun intent(selected: Account?, context: Context): Intent {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                return android.accounts.AccountManager.newChooseAccountIntent(
-                        selected,
-                        null,
-                        arrayOf(AuthTokenProvider.ACCOUNT_TYPE),
-                        null,
-                        null,
-                        null,
-                        null)
-            }
-
             val intent = Intent(context, AccountChooserActivity::class.java)
             intent.putExtra("account", selected)
             return intent
@@ -50,18 +39,19 @@ class AccountChooserActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_choose_account)
+        setTitle(R.string.choose_an_account)
 
         val accounts = accountManager.getAccountsByType(AuthTokenProvider.ACCOUNT_TYPE)
         if (accounts.isEmpty())
         {
-            setResult(Activity.RESULT_CANCELED)
-            Toast.makeText(this, R.string.no_registered_google_accounts, Toast.LENGTH_LONG).show()
+            val data = Intent()
+            data.putExtra(AccountManager.KEY_ERROR_MESSAGE, getString(R.string.no_registered_google_accounts))
+            setResult(Activity.RESULT_CANCELED, data)
             finish()
             return
         }
 
-        findViewById<TextView>(R.id.description).setText(R.string.choose_an_account)
-        findViewById<Button>(android.R.id.button1).setOnClickListener {
+        findViewById<Button>(android.R.id.button2).setOnClickListener {
 
             val account = (listView.adapter as AccountsAdapter).selectedAccount
             if (account == null) {
@@ -75,13 +65,13 @@ class AccountChooserActivity : AppCompatActivity() {
             finish()
         }
 
-        findViewById<Button>(android.R.id.button2).setOnClickListener {
+        findViewById<Button>(android.R.id.button1).setOnClickListener {
             setResult(Activity.RESULT_CANCELED)
             finish()
         }
 
         val adapter = AccountsAdapter(this, accounts)
-        adapter.selectedAccount = intent.extras.get("account") as Account
+        adapter.selectedAccount = intent.extras.get("account") as? Account
         listView.adapter = adapter
     }
 
@@ -93,11 +83,16 @@ class AccountChooserActivity : AppCompatActivity() {
             val view = super.getView(position, convertView, parent) as RadioButton
 
             val account = getItem(position)
-            view.isSelected = account.name == selectedAccount?.name
             view.tag = position
-            view.setOnClickListener { if (it.isSelected) {
-                selectedAccount = getItem(it.tag as Int)
-            } }
+            view.text = account.name
+            view.isChecked = account.name == selectedAccount?.name
+
+            view.setOnClickListener {
+                val radio = it as RadioButton
+                if (radio.isChecked) {
+                    selectedAccount = getItem(it.tag as Int)
+                }
+            }
 
             return view
         }

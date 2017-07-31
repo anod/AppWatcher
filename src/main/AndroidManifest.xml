@@ -68,7 +68,7 @@
             android:theme="@style/AppTheme.Dialog"/>
         <activity
             android:name=".accounts.AccountChooserActivity"
-            android:theme="@style/AppTheme.Dialog"/>
+            android:theme="@style/AlertDialog"/>
         <activity
             android:name=".NotificationActivity"
             android:exported="true"

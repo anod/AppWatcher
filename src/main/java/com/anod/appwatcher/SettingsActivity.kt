@@ -325,8 +325,12 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
         }
     }
 
-    override fun onAccountNotFound() {
-        Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
+    override fun onAccountNotFound(errorMessage: String) {
+        if (errorMessage.isNotBlank()) {
+            Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
+        } else {
+            Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
+        }
     }
 
     override fun onImportFinish(code: Int) {

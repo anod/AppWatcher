@@ -195,9 +195,13 @@ class MarketSearchActivity : ToolbarActivity(), AccountChooser.OnAccountSelectio
         }
     }
 
-    override fun onAccountNotFound() {
+    override fun onAccountNotFound(errorMessage: String) {
         if (App.with(this).isNetworkAvailable) {
-            Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
+            if (errorMessage.isNotBlank()) {
+                Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
+            }
         } else {
             Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()
         }

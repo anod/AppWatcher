@@ -41,7 +41,7 @@ class AccountChooser(
     // Container Activity must implement this interface
     interface OnAccountSelectionListener {
         fun onAccountSelected(account: Account, authSubToken: String?)
-        fun onAccountNotFound()
+        fun onAccountNotFound(errorMessage: String)
     }
 
     fun showAccountsDialogWithCheck() {
@@ -88,7 +88,8 @@ class AccountChooser(
                 }
             }
             if (this.preferences.account == null) {
-                listener?.onAccountNotFound()
+                val errorMessage = data?.extras?.getString(AccountManager.KEY_ERROR_MESSAGE, "") ?: ""
+                listener?.onAccountNotFound(errorMessage)
             }
             return
         }
@@ -142,13 +143,13 @@ class AccountChooser(
         }
         builder.setNegativeButton(android.R.string.cancel) { _, _ ->
             if (account == null) {
-                listener?.onAccountNotFound()
+                listener?.onAccountNotFound("")
             }
         }
         val dialog = builder.create()
         dialog.setOnDismissListener {
             if (account == null) {
-                listener?.onAccountNotFound()
+                listener?.onAccountNotFound("")
             }
         }
         dialog.show()
