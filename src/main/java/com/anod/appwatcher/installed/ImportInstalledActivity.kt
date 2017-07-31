@@ -178,7 +178,7 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
             cr.close()
 
             val pm = context.packageManager
-            val list = PackageManagerUtils.getDownloadedApps(watchingPackages, pm)
+            val list = PackageManagerUtils.getInstalledPackages(pm).filter { watchingPackages.containsKey(it) }
             Collections.sort(list) { lPackageName, rPackageName -> PackageManagerUtils.getAppTitle(lPackageName, pm).compareTo(PackageManagerUtils.getAppTitle(rPackageName, pm)) }
 
             return list

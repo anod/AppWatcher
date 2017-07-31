@@ -27,6 +27,9 @@
             <include android:id="@+id/app3" layout="@layout/list_item_recently_installed_app" />
             <include android:id="@+id/app4" layout="@layout/list_item_recently_installed_app" />
             <include android:id="@+id/app5" layout="@layout/list_item_recently_installed_app" />
+            <include android:id="@+id/app6" layout="@layout/list_item_recently_installed_app" />
+            <include android:id="@+id/app7" layout="@layout/list_item_recently_installed_app" />
+            <include android:id="@+id/app8" layout="@layout/list_item_recently_installed_app" />
 
         </LinearLayout>
     </HorizontalScrollView>

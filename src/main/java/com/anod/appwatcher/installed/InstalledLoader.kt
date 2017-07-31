@@ -27,7 +27,7 @@ class InstalledLoader(
 
     var installedApps = listOf<String>()
         private set
-    var recentlyInstalled = listOf<String>()
+    var recentlyInstalled = listOf<Pair<String, Boolean>>()
         private set
 
     override fun loadInBackground(): Cursor {
@@ -37,8 +37,16 @@ class InstalledLoader(
         val watchingPackages = cr.queryPackagesMap(false)
         cr.close()
 
-        val list = PackageManagerUtils.getDownloadedApps(watchingPackages, mPackageManager)
+        val installed = PackageManagerUtils.getInstalledPackages(mPackageManager)
 
+        this.recentlyInstalled = installed
+                .sortedWith(AppUpdateTimeComparator(-1, this))
+                .take(10)
+                .map {
+                    Pair(it, watchingPackages.containsKey(it))
+                }
+
+        val list = installed.filter { !watchingPackages.containsKey(it) }
         if (sortId == Preferences.SORT_NAME_DESC) {
             Collections.sort(list, AppTitleComparator(-1, this))
         } else if (sortId == Preferences.SORT_DATE_ASC) {
@@ -49,9 +57,7 @@ class InstalledLoader(
             Collections.sort(list, AppTitleComparator(1, this))
         }
 
-        this.recentlyInstalled = list.sortedWith(AppUpdateTimeComparator(-1, this)).take(10)
-
-        if (!TextUtils.isEmpty(titleFilter)) {
+        if (titleFilter.isNotEmpty()) {
             val filtered = ArrayList<String>(list.size)
             val lcFilter = titleFilter.toLowerCase()
             for (packageName in list) {

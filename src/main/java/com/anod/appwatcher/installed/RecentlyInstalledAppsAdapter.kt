@@ -13,6 +13,7 @@ import com.anod.appwatcher.adapters.AppViewHolder
 import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.PackageManagerUtils
 import butterknife.bindViews
+import com.anod.appwatcher.model.AppInfo
 
 /**
  * @author alex
@@ -25,7 +26,7 @@ open class RecentlyInstalledAppsAdapter(
         protected val listener: AppViewHolder.OnClickListener?)
     : RecyclerView.Adapter<RecentlyInstalledAppsAdapter.ViewHolder>() {
 
-    var recentlyInstalled: List<String> = mutableListOf()
+    var recentlyInstalled: List<Pair<String, Boolean>> = mutableListOf()
     private val iconLoader: AppIconLoader = App.provide(context).iconLoader
 
     override fun getItemCount(): Int {
@@ -34,7 +35,7 @@ open class RecentlyInstalledAppsAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): RecentlyInstalledAppsAdapter.ViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.list_item_recently_installed, parent, false)
-        return ViewHolder(view, iconLoader, packageManager)
+        return ViewHolder(view, iconLoader, packageManager, listener)
     }
 
     override fun onBindViewHolder(holder: RecentlyInstalledAppsAdapter.ViewHolder, position: Int) {
@@ -44,9 +45,11 @@ open class RecentlyInstalledAppsAdapter(
     class ViewHolder(
             itemView: View,
             private val iconLoader: AppIconLoader,
-            private val packageManager: PackageManager) : RecyclerView.ViewHolder(itemView) {
+            private val packageManager: PackageManager,
+            private val listener: AppViewHolder.OnClickListener?) : RecyclerView.ViewHolder(itemView) {
 
-        val appViews: List<RecentAppView> by bindViews(R.id.app1, R.id.app2, R.id.app3, R.id.app4, R.id.app5)
+        val appViews: List<RecentAppView> by bindViews(
+                R.id.app1, R.id.app2, R.id.app3, R.id.app4, R.id.app5, R.id.app6, R.id.app7, R.id.app8)
 
         init {
             val sectionCount: TextView = itemView.findViewById(R.id.sec_header_count)
@@ -57,16 +60,19 @@ open class RecentlyInstalledAppsAdapter(
             sectionText.setText(R.string.recently_installed)
         }
 
-        fun bind(packageNames: List<String>) {
+        fun bind(packages: List<Pair<String, Boolean>>) {
             appViews.forEachIndexed { index, view ->
-                val packageName: String? = packageNames[index]
-                if (packageName == null) {
+                if (index >= packages.size) {
                     view.visibility = View.GONE
                 } else {
-                    val app = PackageManagerUtils.packageToApp(packageName, packageManager)
+                    val app = PackageManagerUtils.packageToApp(packages[index].first, packageManager)
                     iconLoader.loadAppIntoImageView(app, view.icon, R.drawable.ic_notifications_black_24dp)
                     view.title.text = app.title
                     view.visibility = View.VISIBLE
+                    view.watched.visibility = if (packages[index].second) View.VISIBLE else View.INVISIBLE
+                    view.findViewById<View>(android.R.id.content).setOnClickListener {
+                        listener?.onItemClick(app)
+                    }
                 }
             }
         }

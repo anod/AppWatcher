@@ -14,14 +14,16 @@
         android:id="@android:id/content"
         android:layout_width="96dp"
         android:layout_height="match_parent"
-        android:background="?android:attr/selectableItemBackground"
-        android:padding="8dp"
         android:clickable="true"
         android:focusable="true"
+        android:background="?android:attr/selectableItemBackground"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
         android:gravity="center_vertical"
         android:orientation="vertical">
 
         <ImageView
+            android:layout_marginTop="8dp"
             android:id="@android:id/icon"
             android:layout_width="@dimen/icon_size_big"
             android:layout_height="@dimen/icon_size_big"
@@ -32,20 +34,20 @@
         <TextView
             android:id="@android:id/title"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textSize="@dimen/textSizeTitle"
             tools:text="Car Widget Pro" />
 
+        <ImageView
+            android:layout_marginBottom="2dp"
+            android:id="@+id/watched"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@drawable/ic_visibility_black_24px"
+            android:layout_gravity="bottom|left"
+            android:tint="@color/material_grey_500" />
     </LinearLayout>
 
-    <ImageView
-        android:id="@+id/watched"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
-        android:src="@drawable/ic_visibility_black_24px"
-        android:layout_gravity="bottom|right"
-        android:layout_margin="8dp"
-        android:tint="@color/neutral_theme_accent"
-        />
 </com.anod.appwatcher.installed.RecentAppView>

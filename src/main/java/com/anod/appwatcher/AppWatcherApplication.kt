@@ -66,7 +66,7 @@ class AppWatcherApplication : Application(), AppLog.Listener {
         }
 
         MetricsManagerEvent.track(this, "log_exception",
-            "CLASS_NAME", "${tr::class.qualifiedName}",
+            "CLASS_NAME", "${tr::class.java}",
             "MESSAGE", tr.message ?: "empty",
             "NETWORK_AVAILABLE", isNetworkAvailable.toString()
         )

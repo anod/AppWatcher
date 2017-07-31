@@ -3,13 +3,13 @@
     <shortcut
         android:shortcutId="search"
         android:enabled="true"
-        android:icon="@drawable/ic_search_white_24dp"
+        android:icon="@drawable/ic_search_black_18dp"
         android:shortcutShortLabel="@string/shortcut_search"
         android:shortcutLongLabel="@string/shortcut_search">
         <intent
             android:action="android.intent.action.VIEW"
             android:targetPackage="com.anod.appwatcher.debug"
-            android:targetClass="com.anod.appwatcher.debug.AppWatcherActivity">
+            android:targetClass="com.anod.appwatcher.AppWatcherActivity">
             <extra android:name="expand_search" android:value="true" />
         </intent>
     </shortcut>

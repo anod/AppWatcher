@@ -71,13 +71,13 @@ object PackageManagerUtils {
         return info.lastUpdateTime
     }
 
-    fun getDownloadedApps(filter: SimpleArrayMap<String, Int>?, pm: PackageManager): List<String> {
+    fun getInstalledPackages(pm: PackageManager): List<String> {
         val packs: List<PackageInfo>
         try {
             packs = pm.getInstalledPackages(0)
         } catch (e: Exception) {
             AppLog.e(e)
-            return getDownloadedPackagesFallback(filter)
+            return getInstalledPackagesFallback()
         }
 
         val downloaded = ArrayList<String>(packs.size)
@@ -88,15 +88,12 @@ object PackageManagerUtils {
             if (applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM == 1 && applicationInfo.flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP == 0) {
                 continue
             }
-            if (filter != null && filter.containsKey(packageInfo.packageName)) {
-                continue
-            }
             downloaded.add(packageInfo.packageName)
         }
         return downloaded
     }
 
-    private fun getDownloadedPackagesFallback(filter: SimpleArrayMap<String, Int>?): List<String> {
+    private fun getInstalledPackagesFallback(): List<String> {
         val downloaded = ArrayList<String>()
         var bufferedReader: BufferedReader? = null
         try {
@@ -106,9 +103,6 @@ object PackageManagerUtils {
             while (line != null) {
                 val packageName = line.substring(line.indexOf(':') + 1)
                 line = bufferedReader.readLine()
-                if (filter != null && filter.containsKey(packageName)) {
-                    continue
-                }
                 downloaded.add(packageName)
             }
             process.waitFor()

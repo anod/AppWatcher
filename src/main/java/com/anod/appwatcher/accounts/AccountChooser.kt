@@ -48,17 +48,6 @@ class AccountChooser(
         showAccountsDialog()
     }
 
-    fun onRequestPermissionResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        if (requestCode == PERMISSION_REQUEST_GET_ACCOUNTS) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // http://stackoverflow.com/questions/33264031/calling-dialogfragments-show-from-within-onrequestpermissionsresult-causes
-                Handler().postDelayed({ showAccountsDialog() }, 200)
-            } else {
-                Toast.makeText(activity, "Failed to gain access to Google accounts", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
     fun init() {
         val account = this.preferences.account
 
@@ -107,11 +96,6 @@ class AccountChooser(
 
     private fun showAccountsDialog() {
 
-        // Use the Builder class for convenient dialog construction
-        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.GET_ACCOUNTS) != PackageManager.PERMISSION_GRANTED) {
-            showPermissionsDialog()
-        }
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val intent = AccountManager.newChooseAccountIntent(
                     account,
@@ -123,7 +107,25 @@ class AccountChooser(
                     null)
             activity.startActivityForResult(intent, ACCOUNT_REQUEST)
         } else {
+            // Use the Builder class for convenient dialog construction
+            if (ContextCompat.checkSelfPermission(activity, Manifest.permission.GET_ACCOUNTS) != PackageManager.PERMISSION_GRANTED) {
+                showPermissionsDialog()
+                return
+            }
             activity.startActivityForResult(AccountChooserActivity.intent(account, activity),  ACCOUNT_REQUEST)
+        }
+    }
+
+    // For pre SDK 23
+
+    fun onRequestPermissionResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        if (requestCode == PERMISSION_REQUEST_GET_ACCOUNTS) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // http://stackoverflow.com/questions/33264031/calling-dialogfragments-show-from-within-onrequestpermissionsresult-causes
+                Handler().postDelayed({ showAccountsDialog() }, 200)
+            } else {
+                Toast.makeText(activity, "Failed to gain access to Google accounts", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -149,8 +151,7 @@ class AccountChooser(
                 listener?.onAccountNotFound()
             }
         }
+        dialog.show()
     }
-
-
 
 }
