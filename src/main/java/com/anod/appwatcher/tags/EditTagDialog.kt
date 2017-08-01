@@ -28,7 +28,7 @@ class EditTagDialog : DialogFragment(), ColorPickerSwatch.OnColorSelectedListene
 
     val editText: TextInputEditText by bindView(R.id.tag_name)
     val colorPreview: ImageView by bindView(R.id.color_preview)
-    val deleteButton: Button by bindView(R.id.color_preview)
+    val deleteButton: Button by bindView(android.R.id.button3)
 
     private lateinit var tag: Tag
 

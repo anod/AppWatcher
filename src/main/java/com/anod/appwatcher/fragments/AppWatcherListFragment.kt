@@ -130,14 +130,7 @@ open class AppWatcherListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_applist, container, false)
-
-        listView = view.findViewById(android.R.id.list)
-        emptyView = view.findViewById(android.R.id.empty)
-        progressContainer = view.findViewById(R.id.progress)
-        swipeLayout = view.findViewById(R.id.swipe_layout)
-
-        return view
+        return inflater.inflate(R.layout.fragment_applist, container, false)
     }
 
     fun sectionForClassName(sectionClassName: String): SectionProvider {
@@ -148,9 +141,12 @@ open class AppWatcherListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (listView.adapter != null) {
-            return
-        }
+        if (view == null) return
+
+        listView = view.findViewById(android.R.id.list)
+        emptyView = view.findViewById(android.R.id.empty)
+        progressContainer = view.findViewById(R.id.progress)
+        swipeLayout = view.findViewById(R.id.swipe_layout)
 
         emptyView.visibility = View.GONE
         swipeLayout?.setOnRefreshListener(this)
@@ -177,18 +173,18 @@ open class AppWatcherListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
         // or start a new one.
         loaderManager.initLoader(0, null, this)
 
-        view?.findViewById<View>(android.R.id.button1)?.setOnClickListener {
+        view.findViewById<View>(android.R.id.button1)?.setOnClickListener {
             val searchIntent = Intent(activity, MarketSearchActivity::class.java)
             searchIntent.putExtra(MarketSearchActivity.EXTRA_KEYWORD, "")
             searchIntent.putExtra(MarketSearchActivity.EXTRA_FOCUS, true)
             startActivity(searchIntent)
         }
 
-        view?.findViewById<View>(android.R.id.button2)?.setOnClickListener {
+        view.findViewById<View>(android.R.id.button2)?.setOnClickListener {
             startActivity(Intent(activity, ImportInstalledActivity::class.java))
         }
 
-        view?.findViewById<View>(android.R.id.button3)?.setOnClickListener {
+        view.findViewById<View>(android.R.id.button3)?.setOnClickListener {
             val intent = Intent.makeMainActivity(ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity"))
             IntentUtils.startActivitySafely(activity, intent)
         }
