@@ -98,7 +98,7 @@ public class DfeApiImpl implements DfeApi{
     }
 
     private void addNetworkTypeToRequest(final DfeRequest<?> dfeRequest) {
-        dfeRequest.addExtraHeader("X-DFE-Network-Type", Integer.toString(NetworkType.get(mApiContext.mContext)));
+        dfeRequest.addExtraHeader("X-DFE-Network-Type", Integer.toString(NetworkType.get(mApiContext.context)));
     }
 
 }

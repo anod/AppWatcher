@@ -15,38 +15,39 @@ import java.util.Map;
 
 public class DfeApiContext
 {
-    private static final String PLAY_VERSION_NAME = "5.12.10";
-    private static final int PLAY_VERSION_CODE = 80421000;
+    private static final int PLAY_VERSION_CODE = 80807300;
+    private static final String PLAY_VERSION_NAME = "8.0.73.R-all [0] [PR] 162689464";
     private static final String CLIENT_ID = "am-google";
-    final Context mContext;
-    private final Account mAccount;
-    private final Map<String, String> mHeaders;
-    private String mLastAuthToken;
+    final Context context;
+    public final Account account;
+    private final Map<String, String> headers;
+    private String lastAuthToken;
 
 
     private DfeApiContext(final Context context, final Account account, final String authToken, final String deviceId,
                             final Locale locale, final String mccmnc,
                             final String clientId, final String loggingId, final int filterLevel) {
-        this.mHeaders = new HashMap<String, String>();
-        mContext = context;
-        mAccount = account;
-        mLastAuthToken = authToken;
-        this.mHeaders.put("X-DFE-Device-Id", deviceId);//Long.toHexString(PlayG.androidId.get()));
-        this.mHeaders.put("Accept-Language", locale.getLanguage() + "-" + locale.getCountry());
-        if (!TextUtils.isEmpty((CharSequence)mccmnc)) {
-            this.mHeaders.put("X-DFE-MCCMNC", mccmnc);
+        this.headers = new HashMap<>();
+        this.context = context;
+        this.account = account;
+        lastAuthToken = authToken;
+        this.headers.put("X-DFE-Device-Id", deviceId);//Long.toHexString(PlayG.androidId.get()));
+        this.headers.put("Accept-Language", locale.getLanguage() + "-" + locale.getCountry());
+        if (!TextUtils.isEmpty(mccmnc)) {
+            this.headers.put("X-DFE-MCCMNC", mccmnc);
         }
-        if (!TextUtils.isEmpty((CharSequence)clientId)) {
-            this.mHeaders.put("X-DFE-Client-Id", clientId);
+        if (!TextUtils.isEmpty(clientId)) {
+            this.headers.put("X-DFE-Client-Id", clientId);
         }
-        if (!TextUtils.isEmpty((CharSequence)clientId)) {
-            this.mHeaders.put("X-DFE-Logging-Id", loggingId);
+        if (!TextUtils.isEmpty(clientId)) {
+            this.headers.put("X-DFE-Logging-Id", loggingId);
         }
-        this.mHeaders.put("User-Agent", makeUserAgentString(PLAY_VERSION_NAME, 3, PLAY_VERSION_CODE));
-        this.mHeaders.put("X-DFE-Filter-Level", String.valueOf(filterLevel));
+        final boolean isWideScreen = false;//context.getResources().getBoolean(2131492899);
+        this.headers.put("User-Agent", makeUserAgentString(PLAY_VERSION_NAME, PLAY_VERSION_CODE, isWideScreen, DfeUtils.supportedAbis()));
+        this.headers.put("X-DFE-Filter-Level", String.valueOf(filterLevel));
+
+        this.headers.put("X-DFE-Encoded-Targets", "CAEScFfqlIEG6gUYogFWrAISK1WDAg+hAZoCDgIU1gYEOIACFkLMAeQBnASLATlASUuyAyqCAjY5igOMBQzfA/IClwFbApUC4ANbtgKVAS7OAX8YswHFBhgDwAOPAmGEBt4OfKkB5weSB5AFASkiN68akgMaxAMSAQEBA9kBO7UBFE1KVwIDBGs3go6BBgEBAgMECQgJAQIEAQMEAQMBBQEBBAUEFQYCBgUEAwMBDwIBAgOrARwBEwMEAg0mrwESfTEcAQEKG4EBMxghChMBDwYGASI3hAEODEwXCVh/EREZA4sBYwEdFAgIIwkQcGQRDzQ2fTC2AjfVAQIBAYoBGRg2FhYFBwEqNzACJShzFFblAo0CFxpFNBzaAd0DHjIRI4sBJZcBPdwBCQGhAUd2A7kBLBVPngEECHl0UEUMtQETigHMAgUFCc0BBUUlTywdHDgBiAJ+vgKhAU0uAcYCAWQ/5ALUAw1UwQHUBpIBCdQDhgL4AY4CBQICjARbGFBGWzA1CAEMOQH+BRAOCAZywAIDyQZ2MgM3BxsoAgUEBwcHFia3AgcGTBwHBYwBAlcBggFxSGgIrAEEBw4QEqUCASsWadsHCgUCBQMD7QICA3tXCUw7ugJZAwGyAUwpIwM5AwkDBQMJA5sBCw8BNxBVVBwVKhebARkBAwsQEAgEAhESAgQJEBCZATMdzgEBBwG8AQQYKSMUkAEDAwY/CTs4/wEaAUt1AwEDAQUBAgIEAwYEDx1dB2wGeBFgTQ");
     }
-
-
 
     public static DfeApiContext create(final Context context, final Account account,final String authTokenStr, final String deviceId, final int filterLevel) {
         final TelephonyManager tm = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
@@ -57,37 +58,41 @@ public class DfeApiContext
         );
     }
 
+    private String makeUserAgentString(final String versionName, final int versionCode, boolean isWideScreen, String[] supportedAbis) {
+        int wideScreen = isWideScreen ? 1 : 0;
+        return String.format(Locale.US, "Android-Finsky/%s (api=%d,versionCode=%d,sdk=%d,device=%s,hardware=%s,product=%s,platformVersionRelease=%s,model=%s,buildId=%s,isWideScreen=%d,supportedAbis=%s)",
+                a(versionName), 3, versionCode, Build.VERSION.SDK_INT, a(Build.DEVICE), a(Build.HARDWARE), a(Build.PRODUCT),
+                a(Build.VERSION.RELEASE), a(Build.MODEL), a(Build.ID), wideScreen, a(supportedAbis));
 
-    private String makeUserAgentString(final String versionName, final int api, final int versionCode) {
-        return String.format(Locale.US, "Android-Finsky/%s (api=%d,versionCode=%d,sdk=%d,device=%s,hardware=%s,product=%s)",
-                versionName,
-                api, versionCode, Build.VERSION.SDK_INT, sanitizeHeaderValue(Build.DEVICE), sanitizeHeaderValue(Build.HARDWARE), sanitizeHeaderValue(Build.PRODUCT)
-        );
     }
 
-
-    private static String sanitizeHeaderValue(final String s) {
-        return Uri.encode(s).replace("(", "").replace(")", "");
+    private static String a(String replace) {
+        if (replace == null) {
+            replace = null;
+        }
+        else {
+            replace = Uri.encode(replace).replace("(", "%28").replace(")", "%29");
+        }
+        return replace;
     }
-    
-    public Account getAccount() {
-        return this.mAccount;
+
+    private static String a(final String[] array) {
+        final String[] array2 = new String[array.length];
+        for (int i = 0; i < array.length; ++i) {
+            array2[i] = a(array[i]);
+        }
+        return TextUtils.join(";", array2);
     }
 
     String getAccountName() {
-        final Account account = this.getAccount();
-        if (account == null) {
-            return null;
-        }
-        return account.name;
+        return this.account == null ? "" : account.name;
     }
-
 
     Map<String, String> getHeaders() throws AuthFailureError {
         synchronized (this) {
-            final HashMap<String, String> hashMap = new HashMap<String, String>();
-            hashMap.putAll(this.mHeaders);
-            hashMap.put("Authorization", "GoogleLogin auth=" + this.mLastAuthToken);
+            final HashMap<String, String> hashMap = new HashMap<>();
+            hashMap.putAll(this.headers);
+            hashMap.put("Authorization", "GoogleLogin auth=" + this.lastAuthToken);
 //            if (AppLog.DEBUG) {
 //                for(String key: hashMap.keySet()) {
 //                    AppLog.d("HTTP Header: "+key+" = "+hashMap.get(key));
@@ -102,14 +107,14 @@ public class DfeApiContext
         final StringBuilder sb = new StringBuilder();
         sb.append("[PlayDfeApiContext headers={");
         int n = 1;
-        for (final String s : this.mHeaders.keySet()) {
+        for (final String s : this.headers.keySet()) {
             if (n != 0) {
                 n = 0;
             }
             else {
                 sb.append(", ");
             }
-            sb.append(s).append(": ").append(this.mHeaders.get(s));
+            sb.append(s).append(": ").append(this.headers.get(s));
         }
         sb.append("}]");
         return sb.toString();
