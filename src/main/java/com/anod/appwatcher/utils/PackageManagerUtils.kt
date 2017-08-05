@@ -24,11 +24,11 @@ import java.util.*
  */
 object PackageManagerUtils {
 
-    fun packageToApp(packageName: String, pm: PackageManager): AppInfo {
-        val packageInfo = getPackageInfo(packageName, pm) ?: return AppInfo.fromLocalPackage(null, packageName, "", null)
+    fun packageToApp(rowId: Int, packageName: String, pm: PackageManager): AppInfo {
+        val packageInfo = getPackageInfo(packageName, pm) ?: return AppInfo.fromLocalPackage(rowId,null, packageName, "", null)
         val launchComponent = getLaunchComponent(packageInfo, pm)
         val appTitle = getAppTitle(packageInfo, pm)
-        return AppInfo.fromLocalPackage(packageInfo, packageName, appTitle, launchComponent)
+        return AppInfo.fromLocalPackage(rowId, packageInfo, packageName, appTitle, launchComponent)
     }
 
     internal fun loadIcon(componentName: ComponentName, displayMetrics: DisplayMetrics, pm: PackageManager): Bitmap? {

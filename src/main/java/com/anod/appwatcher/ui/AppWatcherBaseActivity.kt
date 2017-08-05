@@ -83,6 +83,7 @@ abstract class AppWatcherBaseActivity : DrawerActivity(), TextView.OnEditorActio
             expandSearch = filterQuery.isNotEmpty()
             AppLog.d("Restore tab: " + filterId)
         } else {
+            filterId = intentExtras.getInt("tab_id", Filters.TAB_ALL)
             expandSearch = intentExtras.getBoolean(EXTRA_EXPAND_SEARCH)
         }
 

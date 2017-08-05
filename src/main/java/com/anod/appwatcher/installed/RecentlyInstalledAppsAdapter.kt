@@ -26,7 +26,7 @@ open class RecentlyInstalledAppsAdapter(
         protected val listener: AppViewHolder.OnClickListener?)
     : RecyclerView.Adapter<RecentlyInstalledAppsAdapter.ViewHolder>() {
 
-    var recentlyInstalled: List<Pair<String, Boolean>> = mutableListOf()
+    var recentlyInstalled: List<Pair<String, Int>> = mutableListOf()
     private val iconLoader: AppIconLoader = App.provide(context).iconLoader
 
     override fun getItemCount(): Int {
@@ -60,16 +60,16 @@ open class RecentlyInstalledAppsAdapter(
             sectionText.setText(R.string.recently_installed)
         }
 
-        fun bind(packages: List<Pair<String, Boolean>>) {
+        fun bind(packages: List<Pair<String, Int>>) {
             appViews.forEachIndexed { index, view ->
                 if (index >= packages.size) {
                     view.visibility = View.GONE
                 } else {
-                    val app = PackageManagerUtils.packageToApp(packages[index].first, packageManager)
+                    val app = PackageManagerUtils.packageToApp(packages[index].second, packages[index].first, packageManager)
                     iconLoader.loadAppIntoImageView(app, view.icon, R.drawable.ic_notifications_black_24dp)
                     view.title.text = app.title
                     view.visibility = View.VISIBLE
-                    view.watched.visibility = if (packages[index].second) View.VISIBLE else View.INVISIBLE
+                    view.watched.visibility = if (packages[index].second > 0) View.VISIBLE else View.INVISIBLE
                     view.findViewById<View>(android.R.id.content).setOnClickListener {
                         listener?.onItemClick(app)
                     }

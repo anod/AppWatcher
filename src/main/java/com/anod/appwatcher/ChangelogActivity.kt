@@ -97,7 +97,7 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
         }
 
         if (rowId == -1) {
-            appInfo = PackageManagerUtils.packageToApp(appId, packageManager)
+            appInfo = PackageManagerUtils.packageToApp(-1, appId, packageManager)
             isNewApp = true
         } else {
             val cr = DbContentProviderClient(this)

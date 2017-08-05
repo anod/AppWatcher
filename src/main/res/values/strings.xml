@@ -123,6 +123,7 @@
     <string name="refresh_scheduled">Refresh scheduled</string>
     <string name="recently_installed">Recently installed</string>
     <string name="shortcut_search">Search</string>
+    <string name="shortcut_recent">Recent</string>
     <string-array name="sort_titles">
         <item>By name &#x2193;</item>
         <item>By name &#x2191;</item>

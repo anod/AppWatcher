@@ -27,7 +27,7 @@ class InstalledLoader(
 
     var installedApps = listOf<String>()
         private set
-    var recentlyInstalled = listOf<Pair<String, Boolean>>()
+    var recentlyInstalled = listOf<Pair<String, Int>>()
         private set
 
     override fun loadInBackground(): Cursor {
@@ -43,7 +43,8 @@ class InstalledLoader(
                 .sortedWith(AppUpdateTimeComparator(-1, this))
                 .take(10)
                 .map {
-                    Pair(it, watchingPackages.containsKey(it))
+                    val rowId = watchingPackages[it] ?: -1
+                    Pair(it, rowId)
                 }
 
         val list = installed.filter { !watchingPackages.containsKey(it) }

@@ -43,7 +43,7 @@ open class InstalledAppsAdapter(
 
     override fun onBindViewHolder(holder: AppViewHolderBase, position: Int) {
         val packageName = getItem(position)
-        val app = PackageManagerUtils.packageToApp(packageName, mPackageManager)
+        val app = PackageManagerUtils.packageToApp(-1, packageName, mPackageManager)
         /**
 
          * int rowId, String appId, String pname, int versionNumber, String versionName,

@@ -31,8 +31,8 @@ class AppInfo : AppInfoMetadata, Parcelable {
     val appType: String
     val syncVersion: Int
 
-    private constructor(packageName: String, versionCode: Int, versionName: String, title: String, iconUrl: String, status: Int, uploadDate: String)
-            : this(-1, packageName, packageName, versionCode, versionName, title, null, iconUrl,
+    private constructor(rowId: Int, packageName: String, versionCode: Int, versionName: String, title: String, iconUrl: String, status: Int, uploadDate: String)
+            : this(rowId, packageName, packageName, versionCode, versionName, title, null, iconUrl,
             status, uploadDate, null, null, 0, createDetailsUrl(packageName), 0, "", 0)
 
     constructor(rowId: Int, appId: String, pname: String, versionNumber: Int, versionName: String,
@@ -144,9 +144,9 @@ class AppInfo : AppInfoMetadata, Parcelable {
             return "details?doc=" + packageName
         }
 
-        fun fromLocalPackage(packageInfo: PackageInfo?, packageName: String, appTitle: String, launchComponent: ComponentName?): AppInfo {
+        fun fromLocalPackage(rowId: Int, packageInfo: PackageInfo?, packageName: String, appTitle: String, launchComponent: ComponentName?): AppInfo {
             if (packageInfo == null) {
-                return AppInfo(
+                return AppInfo(rowId,
                         packageName, 0, appTitle,
                         packageName, "", AppInfoMetadata.STATUS_DELETED, ""
                 )
@@ -162,7 +162,7 @@ class AppInfo : AppInfoMetadata, Parcelable {
             val lastUpdate = dateFormat.format(Date(packageInfo.lastUpdateTime))
             val versionName = packageInfo.versionName ?: ""
 
-            return AppInfo(
+            return AppInfo(rowId,
                     packageInfo.packageName, packageInfo.versionCode, versionName,
                     appTitle, iconUrl, AppInfoMetadata.STATUS_NORMAL, lastUpdate
             )
