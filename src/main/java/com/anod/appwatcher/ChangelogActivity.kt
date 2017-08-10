@@ -194,6 +194,7 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
         }
         if (!mDataProvider.installedAppsProvider.getInfo(appId).isInstalled) {
             menu.findItem(R.id.menu_uninstall).isVisible = false
+            menu.findItem(R.id.menu_open).isVisible = false
         }
 
         return true
@@ -262,6 +263,12 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
             R.id.menu_share -> {
                 shareApp()
                 return true
+            }
+            R.id.menu_open -> {
+                val launchIntent = packageManager.getLaunchIntentForPackage(appId)
+                if (launchIntent != null) {
+                    IntentUtils.startActivitySafely(this, launchIntent);
+                }
             }
         }
         if (item.groupId == R.id.menu_group_tags) {

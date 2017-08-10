@@ -23,12 +23,12 @@ interface InstalledAppsProvider {
             get() = this.versionCode > 0
     }
 
-    class PackageManager(private val mPackageManager: android.content.pm.PackageManager) : InstalledAppsProvider {
+    class PackageManager(private val packageManager: android.content.pm.PackageManager) : InstalledAppsProvider {
 
         override fun getInfo(packageName: String): Info {
             var pkgInfo: PackageInfo? = null
             try {
-                pkgInfo = mPackageManager.getPackageInfo(packageName, 0)
+                pkgInfo = packageManager.getPackageInfo(packageName, 0)
             } catch (e: android.content.pm.PackageManager.NameNotFoundException) {
                 // skip
             }
@@ -42,7 +42,7 @@ interface InstalledAppsProvider {
 
     }
 
-    class MemoryCache(private val mInstalledAppsProvider: InstalledAppsProvider) : InstalledAppsProvider {
+    class MemoryCache(private val installedAppsProvider: InstalledAppsProvider) : InstalledAppsProvider {
         private val mCache = ArrayMap<String, InstalledAppsProvider.Info>()
 
         override fun getInfo(packageName: String): InstalledAppsProvider.Info {
@@ -50,7 +50,7 @@ interface InstalledAppsProvider {
                 return mCache[packageName]!!
             }
 
-            val info = mInstalledAppsProvider.getInfo(packageName)
+            val info = installedAppsProvider.getInfo(packageName)
             mCache.put(packageName, info)
             return info
         }

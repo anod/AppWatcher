@@ -11,10 +11,7 @@ import com.anod.appwatcher.market.MarketInfo
 import info.anodsplace.android.log.AppLog
 
 object IntentUtils {
-    private val SCHEME = "package"
-    private val APP_PKG_NAME_22 = "pkg"
-    private val APP_DETAILS_PACKAGE_NAME = "com.android.settings"
-    private val APP_DETAILS_CLASS_NAME = "com.android.settings.InstalledAppDetails"
+    private const val SCHEME = "package"
 
     fun createPlayStoreIntent(pkg: String): Intent {
         val url = String.format(MarketInfo.URL_PLAY_STORE, pkg)
