@@ -4,6 +4,7 @@ import android.net.Uri;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
+import com.google.android.finsky.protos.nano.Messages;
 import com.google.android.finsky.protos.nano.Messages.Details;
 import com.google.android.finsky.protos.nano.Messages.ListResponse;
 import com.google.android.finsky.protos.nano.Messages.Search;
@@ -17,14 +18,14 @@ public interface DfeApi
     Uri BULK_DETAILS_URI = Uri.parse("bulkDetails");
     Uri LIBRARY_URI = Uri.parse("library");
 
-    Request<?> search(String url, Response.Listener<Search.SearchResponse> responseListener, Response.ErrorListener errorListener);
+    Request search(String url, Response.Listener<Messages.Response.ResponseWrapper> responseListener, Response.ErrorListener errorListener);
 
-    Request<?> getDetails(String url, boolean noPrefetch, boolean noBulkCancel, Response.Listener<Details.DetailsResponse> responseListener, Response.ErrorListener errorListener);
+    Request details(String url, boolean noPrefetch, boolean noBulkCancel, Response.Listener<Messages.Response.ResponseWrapper> responseListener, Response.ErrorListener errorListener);
 
-    Request<?> getDetails(final Collection<String> collection, final boolean includeDetails, final Response.Listener<Details.BulkDetailsResponse> listener, final Response.ErrorListener errorListener);
+    Request details(final Collection<String> collection, final boolean includeDetails, final Response.Listener<Messages.Response.ResponseWrapper> listener, final Response.ErrorListener errorListener);
 
-    String getLibraryUrl(int c, String libraryId, int dt, byte[] serverToken);
+    String createLibraryUrl(int c, String libraryId, int dt, byte[] serverToken);
 
-    Request<?> getList(final String url, final Response.Listener<ListResponse> listener, final Response.ErrorListener errorListener);
+    Request list(final String url, final Response.Listener<Messages.Response.ResponseWrapper> listener, final Response.ErrorListener errorListener);
 }
 

@@ -7,7 +7,7 @@ buildscript {
         maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.0-alpha9'
+        classpath 'com.android.tools.build:gradle:3.0.0-beta1'
         classpath 'com.google.gms:google-services:3.1.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
@@ -33,11 +33,11 @@ dependencies {
 
     compile 'com.github.anod:android-utils-lib:v1.0.3'
 
-    compile 'com.android.support:appcompat-v7:26.0.0'
-    compile 'com.android.support:recyclerview-v7:26.0.0'
-    compile 'com.android.support:design:26.0.0'
-    compile 'com.android.support:cardview-v7:26.0.0'
-    compile 'com.android.support:palette-v7:26.0.0'
+    compile 'com.android.support:appcompat-v7:26.0.1'
+    compile 'com.android.support:recyclerview-v7:26.0.1'
+    compile 'com.android.support:design:26.0.1'
+    compile 'com.android.support:cardview-v7:26.0.1'
+    compile 'com.android.support:palette-v7:26.0.1'
 
     compile 'com.google.android.gms:play-services-identity:11.0.4'
     compile 'com.google.android.gms:play-services-drive:11.0.4'

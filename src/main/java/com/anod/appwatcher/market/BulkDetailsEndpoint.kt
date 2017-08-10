@@ -21,12 +21,12 @@ class BulkDetailsEndpoint(context: Context) : PlayStoreEndpointBase(context) {
         }
 
     override fun executeAsync() {
-        bulkData?.setDocIds(mDocIds)
+        bulkData?.docIds = mDocIds
         bulkData?.startAsync()
     }
 
     override fun executeSync() {
-        bulkData?.setDocIds(mDocIds)
+        bulkData?.docIds = mDocIds
         bulkData?.startSync()
     }
 

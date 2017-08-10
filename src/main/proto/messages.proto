@@ -4,30 +4,79 @@ package com.google.android.finsky.protos;
 
 message Common
 {
-    message Image
-    {
+    message Image {
         optional int32 imageType = 1;
+        optional group Dimension = 2 {
+            optional int32 width = 3;
+            optional int32 height = 4;
+        }
         optional string imageUrl = 5;
+        optional string altTextLocalized = 6;
+        optional string secureUrl = 7;
+        optional int32 positionInSequence = 8;
+        optional bool supportsFifeUrlOptions = 9;
+        optional group Citation = 10 {
+            optional string titleLocalized = 11;
+            optional string url = 12;
+        }
+        optional string color = 15;
     }
 
-    message Offer
-    {
+    message Offer {
         enum TYPE
         {
             TYPE_1 = 1;
         }
+
         optional int64 micros = 1;
         optional string currencyCode = 2;
         optional string formattedAmount = 3;
-        optional TYPE offerType = 8;
+        repeated Offer convertedPrice = 4;
+        optional bool checkoutFlowRequired = 5;
+        optional int64 fullPriceMicros = 6;
+        optional string formattedFullAmount = 7;
+        optional int32 offerType = 8;
+        optional RentalTerms rentalTerms = 9;
+        optional int64 onSaleDate = 10;
+        repeated string promotionLabel = 11;
+        optional SubscriptionTerms subscriptionTerms = 12;
+        optional string formattedName = 13;
+        optional string formattedDescription = 14;
     }
+
+    message RentalTerms {
+        optional int32 grantPeriodSeconds = 1;
+        optional int32 activatePeriodSeconds = 2;
+    }
+
+    message SubscriptionTerms {
+        optional TimePeriod recurringPeriod = 1;
+        optional TimePeriod trialPeriod = 2;
+    }
+
+    message TimePeriod {
+        optional int32 unit = 1;
+        optional int32 count = 2;
+    }
+
+    message FileMetadata {
+        optional int32 fileType = 1;
+        optional int32 versionCode = 2;
+        optional int64 size = 3;
+    }
+
 }
 
 message Containers
 {
     message ContainerMetadata
     {
+        optional string browseUrl = 1;
         optional string nextPageUrl = 2;
+        optional double relevance = 3;
+        optional int64 estimatedResults = 4;
+        optional string analyticsCookie = 5;
+        optional bool ordered = 6;
     }
 }
 
@@ -40,16 +89,46 @@ message AppDetails
     optional string versionString = 4;
     optional string title = 5;
     repeated string appCategory = 7;
+    optional int32 contentRating = 8;
+    optional int64 installationSize = 9;
+    repeated string permission = 10;
+    optional string developerEmail = 11;
+    optional string developerWebsite = 12;
     optional string numDownloads = 13;
     optional string packageName = 14;
     optional string recentChangesHtml = 15;
     optional string uploadDate = 16;
+    repeated Common.FileMetadata file = 17;
     optional string appType = 18;
+    optional string containsAds = 30;
+    optional Dependencies dependencies = 34;
+}
+
+message Dependencies {
+    optional int32 unknown1 = 1;
+    optional int64 unknown2 = 2;
+    repeated Dependency dependency = 3;
+    optional int32 unknown3 = 4;
+}
+message Dependency {
+    optional string packageName = 1;
+    optional int32 version = 2;
+    optional int32 unknown4 = 4;
 }
 
 message DocDetails
 {
     optional AppDetails appDetails = 1;
+//    optional AlbumDetails albumDetails = 2;
+//    optional ArtistDetails artistDetails = 3;
+//    optional SongDetails songDetails = 4;
+//    optional BookDetails bookDetails = 5;
+//    optional VideoDetails videoDetails = 6;
+//    optional SubscriptionDetails subscriptionDetails = 7;
+//    optional MagazineDetails magazineDetails = 8;
+//    optional TvShowDetails tvShowDetails = 9;
+//    optional TvSeasonDetails tvSeasonDetails = 10;
+//    optional TvEpisodeDetails tvEpisodeDetails = 11;
 }
 
 message DocV2
@@ -62,12 +141,21 @@ message DocV2
     optional string creator = 6;
     optional string descriptionHtml = 7;
     repeated Common.Offer offer = 8;
+    //optional Availability availability = 9;
     repeated Common.Image image = 10;
     repeated DocV2 child = 11;
     optional Containers.ContainerMetadata containerMetadata = 12;
     optional DocDetails details = 13;
+    //optional AggregateRating aggregateRating = 14;
+    //optional RelatedLinks relatedLinks = 15;
     optional string detailsUrl = 16;
-
+    optional string shareUrl = 17;
+    optional string reviewsUrl = 18;
+    optional string backendUrl = 19;
+    optional string purchaseDetailsUrl = 20;
+    optional bool detailsReusable = 21;
+    optional string subtitle = 22;
+    //optional Unknown25 unknown25 = 25;
 }
 
 
@@ -75,7 +163,11 @@ message Details
 {
     message DetailsResponse
     {
+        //optional DocV1 docV1 = 1;
+        //optional string analyticsCookie = 2;
+        //optional Review userReview = 3;
         optional DocV2 docV2 = 4;
+        optional string footerHtml = 5;
     }
 
     message BulkDetailsEntry
@@ -102,8 +194,11 @@ message Search
         optional string originalQuery = 1;
         optional string suggestedQuery = 2;
         optional bool aggregateQuery = 3;
+        repeated Bucket bucket = 4;
         repeated DocV2 doc = 5;
+        //repeated RelatedSearch relatedSearch = 6;
         optional bool fullPageReplaced = 8;
+        optional string nextPageUrl = 10;
     }
 }
 
@@ -183,18 +278,36 @@ message ListResponse
 
 message Response
 {
-    message Payload
-    {
+    message Payload {
         optional ListResponse listResponse = 1;
         optional Details.DetailsResponse detailsResponse = 2;
+//        optional ReviewResponse reviewResponse = 3;
+//        optional BuyResponse buyResponse = 4;
         optional Search.SearchResponse searchResponse = 5;
+//        optional BrowseResponse browseResponse = 7;
+//        optional PurchaseStatusResponse purchaseStatusResponse = 8;
         optional Details.BulkDetailsResponse bulkDetailsResponse = 19;
+//        optional DeliveryResponse deliveryResponse = 21;
+//        optional UploadDeviceConfigResponse uploadDeviceConfigResponse = 25;
+//        optional AndroidCheckinResponse androidCheckinResponse = 26;
+//        optional SearchSuggestResponse searchSuggestResponse = 40;
     }
-    message ResponseWrapper
-    {
+
+    message PreFetch {
+        optional string url = 1;
+        optional ResponseWrapper response = 2;
+        optional string etag = 3;
+        optional int64 ttl = 4;
+        optional int64 softTtl = 5;
+    }
+
+    message ResponseWrapper {
         optional Payload payload = 1;
         optional ResponseMessages.ServerCommands commands = 2;
+        repeated PreFetch preFetch = 3;
+        // repeated Notification notification = 4;
         optional ResponseMessages.ServerMetadata serverMetadata = 5;
     }
+
 }
 

@@ -12,11 +12,9 @@ import com.android.volley.ParseError;
 import com.android.volley.ServerError;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
+import com.google.android.finsky.protos.nano.Messages;
 
 public class DfeUtils {
-    public static String createDetailsUrlFromId(String paramString) {
-        return "details?doc=" + paramString;
-    }
 
     private static Uri.Builder createSearchUrlBuilder(String query, int backendId) {
         if (backendId == 9) {
@@ -27,32 +25,6 @@ public class DfeUtils {
 
     public static String formSearchUrl(String query, int backendId) {
         return createSearchUrlBuilder(query, backendId).build().toString();
-    }
-
-    public static String formSearchUrlWithFprDisabled(String query, int backendId) {
-        Uri.Builder localBuilder = createSearchUrlBuilder(query, backendId);
-        localBuilder.appendQueryParameter("fpr", "0");
-        return localBuilder.build().toString();
-    }
-
-    public static String getLegacyErrorCode(VolleyError paramVolleyError) {
-        if ((paramVolleyError instanceof ServerError))
-            return "SERVER";
-        if ((paramVolleyError instanceof AuthFailureError))
-            return "AUTH";
-        if ((paramVolleyError instanceof NetworkError))
-            return "NETWORK";
-        if ((paramVolleyError instanceof TimeoutError))
-            return "TIMEOUT";
-        if ((paramVolleyError instanceof ParseError))
-            return "SERVER";
-        return "SERVER";
-    }
-
-    public static boolean isSameDocumentDetailsUrl(String paramString1, String paramString2) {
-        if ((paramString1 == null) || (paramString2 == null))
-            return false;
-        return TextUtils.equals(Uri.parse(paramString1).getQueryParameter("doc"), Uri.parse(paramString2).getQueryParameter("doc"));
     }
 
     public static String base64Encode(byte[] input) {
@@ -76,5 +48,34 @@ public class DfeUtils {
             }
             return arrayOfString;
         }
+    }
+
+    public static Messages.DocV2 getRootDoc(Messages.Response.Payload payload) {
+        if (null == payload) {
+            return null;
+        }
+        if (payload.searchResponse != null && payload.searchResponse.doc.length > 0) {
+            return getRootDoc(payload.searchResponse.doc[0]);
+        } else if (payload.listResponse != null && payload.listResponse.doc.length > 0) {
+            return getRootDoc(payload.listResponse.doc[0]);
+        }
+        return null;
+    }
+
+    private static Messages.DocV2 getRootDoc(Messages.DocV2 doc) {
+        if (isRootDoc(doc)) {
+            return doc;
+        }
+        for (Messages.DocV2 child: doc.child) {
+            Messages.DocV2 root = getRootDoc(child);
+            if (null != root) {
+                return root;
+            }
+        }
+        return null;
+    }
+
+    private static boolean isRootDoc(Messages.DocV2 doc) {
+        return doc.child.length > 0 && doc.child[0].backendId == 3 && doc.child[0].docType == 1;
     }
 }

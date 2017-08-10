@@ -7,47 +7,41 @@ import java.util.HashSet;
 
 public abstract class DfeModel implements Response.ErrorListener
 {
-    private HashSet<Response.ErrorListener> mErrorListeners;
-    private HashSet<OnDataChangedListener> mListeners;
-    private VolleyError mVolleyError;
+    private HashSet<Response.ErrorListener> errorListeners = new HashSet<>();
+    private HashSet<OnDataChangedListener> listeners = new HashSet<>();
+    private VolleyError volleyError;
     
     public DfeModel() {
         super();
-        this.mListeners = new HashSet<OnDataChangedListener>();
-        this.mErrorListeners = new HashSet<Response.ErrorListener>();
     }
     
     public final void addDataChangedListener(final OnDataChangedListener onDataChangedListener) {
-        this.mListeners.add(onDataChangedListener);
+        this.listeners.add(onDataChangedListener);
     }
     
     public final void addErrorListener(final Response.ErrorListener errorListener) {
-        this.mErrorListeners.add(errorListener);
+        this.errorListeners.add(errorListener);
     }
     
     protected void clearErrors() {
-        this.mVolleyError = null;
-    }
-    
-    public VolleyError getVolleyError() {
-        return this.mVolleyError;
+        this.volleyError = null;
     }
     
     public boolean inErrorState() {
-        return this.mVolleyError != null;
+        return this.volleyError != null;
     }
     
     public abstract boolean isReady();
     
     protected void notifyDataSetChanged() {
-        final OnDataChangedListener[] array = this.mListeners.toArray(new OnDataChangedListener[this.mListeners.size()]);
+        final OnDataChangedListener[] array = this.listeners.toArray(new OnDataChangedListener[this.listeners.size()]);
         for (int i = 0; i < array.length; ++i) {
             array[i].onDataChanged();
         }
     }
     
     protected void notifyErrorOccured(final VolleyError volleyError) {
-        final Response.ErrorListener[] array = this.mErrorListeners.toArray(new Response.ErrorListener[this.mErrorListeners.size()]);
+        final Response.ErrorListener[] array = this.errorListeners.toArray(new Response.ErrorListener[this.errorListeners.size()]);
         for (int i = 0; i < array.length; ++i) {
             array[i].onErrorResponse(volleyError);
         }
@@ -55,19 +49,19 @@ public abstract class DfeModel implements Response.ErrorListener
     
     @Override
     public void onErrorResponse(final VolleyError mVolleyError) {
-        this.notifyErrorOccured(this.mVolleyError = mVolleyError);
+        this.notifyErrorOccured(this.volleyError = mVolleyError);
     }
     
     public final void removeDataChangedListener(final OnDataChangedListener onDataChangedListener) {
-        this.mListeners.remove(onDataChangedListener);
+        this.listeners.remove(onDataChangedListener);
     }
     
     public final void removeErrorListener(final Response.ErrorListener errorListener) {
-        this.mErrorListeners.remove(errorListener);
+        this.errorListeners.remove(errorListener);
     }
     
     public final void unregisterAll() {
-        this.mListeners.clear();
-        this.mErrorListeners.clear();
+        this.listeners.clear();
+        this.errorListeners.clear();
     }
 }

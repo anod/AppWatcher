@@ -31,12 +31,12 @@ class DetailsEndpoint(context: Context) : PlayStoreEndpointBase(context) {
         get() = appDetails?.recentChangesHtml ?: ""
 
     override fun executeAsync() {
-        detailsData?.setDetailsUrl(url)
+        detailsData?.detailsUrl = url
         detailsData?.startAsync()
     }
 
     override fun executeSync() {
-        detailsData?.setDetailsUrl(url)
+        detailsData?.detailsUrl = url
         detailsData?.startSync()
     }
 

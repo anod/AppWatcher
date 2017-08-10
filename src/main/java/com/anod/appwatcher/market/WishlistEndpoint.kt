@@ -37,7 +37,7 @@ class WishlistEndpoint(context: Context, private val mAutoloadNext: Boolean) : P
 
 
     override fun createDfeModel(): DfeModel {
-        return DfeList(dfeApi, dfeApi!!.getLibraryUrl(BACKEND_ID, LIBRARY_ID, 7, null), mAutoloadNext, AppDetailsFilter.predicate)
+        return DfeList(dfeApi, dfeApi!!.createLibraryUrl(BACKEND_ID, LIBRARY_ID, 7, null), mAutoloadNext, AppDetailsFilter.predicate)
     }
 
     companion object {

@@ -18,11 +18,7 @@ object CollectionsUtils {
     fun <T> filter(source: List<T>, predicate: Predicate<in T>): List<T> {
         val result = ArrayList<T>(source.size)
 
-        for (el in source) {
-            if (!predicate.test(el)) {
-                result.add(el)
-            }
-        }
+        source.filterNotTo(result) { predicate.test(it) }
 
         return result
     }

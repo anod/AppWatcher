@@ -3,6 +3,7 @@ package com.google.android.finsky.api.model;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
+import com.google.android.finsky.protos.nano.Messages;
 
 import java.util.concurrent.ExecutionException;
 
@@ -12,17 +13,17 @@ import info.anodsplace.android.log.AppLog;
  * @author alex
  * @date 2015-02-23
  */
-public abstract class DfeBaseModel<DocType> extends DfeModel implements Response.Listener<DocType> {
+public abstract class DfeBaseModel extends DfeModel implements Response.Listener<Messages.Response.ResponseWrapper> {
 
     public void startAsync() {
         execute(this, this);
     }
 
     public void startSync() {
-        RequestFuture<DocType> future = RequestFuture.newFuture();
+        RequestFuture<Messages.Response.ResponseWrapper> future = RequestFuture.newFuture();
 
         execute(future, future);
-        DocType response = null;
+        Messages.Response.ResponseWrapper response = null;
         try {
             response = future.get();
         } catch (ExecutionException e) {
@@ -41,6 +42,6 @@ public abstract class DfeBaseModel<DocType> extends DfeModel implements Response
         onResponse(response);
     }
 
-    abstract protected void execute(Response.Listener<DocType> responseListener, Response.ErrorListener errorListener);
+    abstract protected void execute(Response.Listener<Messages.Response.ResponseWrapper> responseListener, Response.ErrorListener errorListener);
 
 }

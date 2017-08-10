@@ -2,42 +2,41 @@ package com.google.android.finsky.api.model;
 
 import com.android.volley.Response;
 import com.google.android.finsky.api.DfeApi;
+import com.google.android.finsky.protos.nano.Messages;
 import com.google.android.finsky.protos.nano.Messages.Details;
 
-public class DfeDetails extends DfeBaseModel<Details.DetailsResponse>
+public class DfeDetails extends DfeBaseModel
 {
-    private Details.DetailsResponse mDetailsResponse;
-    private String mDetailsUrl;
-    private DfeApi mDfeApi;
+    private Details.DetailsResponse detailsResponse;
+    public String detailsUrl;
+    private DfeApi api;
 
     public DfeDetails(final DfeApi dfeApi) {
         super();
-        mDfeApi = dfeApi;
+        this.api = dfeApi;
     }
 
     @Override
-    protected void execute(Response.Listener<Details.DetailsResponse> responseListener, Response.ErrorListener errorListener) {
-        mDfeApi.getDetails(mDetailsUrl, false, false, responseListener, errorListener);
+    protected void execute(Response.Listener<Messages.Response.ResponseWrapper> responseListener, Response.ErrorListener errorListener) {
+        api.details(detailsUrl, false, false, responseListener, errorListener);
     }
 
     public Document getDocument() {
-        if (this.mDetailsResponse == null || this.mDetailsResponse.docV2 == null) {
+        if (this.detailsResponse == null || this.detailsResponse.docV2 == null) {
             return null;
         }
-        return new Document(this.mDetailsResponse.docV2);
+        return new Document(this.detailsResponse.docV2);
     }
 
     @Override
     public boolean isReady() {
-        return this.mDetailsResponse != null;
+        return this.detailsResponse != null;
     }
-    
-    public void onResponse(final Details.DetailsResponse mDetailsResponse) {
-        this.mDetailsResponse = mDetailsResponse;
+
+    @Override
+    public void onResponse(Messages.Response.ResponseWrapper responseWrapper) {
+        this.detailsResponse = responseWrapper.payload.detailsResponse;
         this.notifyDataSetChanged();
     }
 
-    public void setDetailsUrl(String detailsUrl) {
-        mDetailsUrl = detailsUrl;
-    }
 }

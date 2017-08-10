@@ -11,6 +11,204 @@ public interface Messages {
     public static final class Image extends
         com.google.protobuf.nano.MessageNano {
 
+      public static final class Dimension extends
+          com.google.protobuf.nano.MessageNano {
+
+        private static volatile Dimension[] _emptyArray;
+        public static Dimension[] emptyArray() {
+          // Lazily initializes the empty array
+          if (_emptyArray == null) {
+            synchronized (
+                com.google.protobuf.nano.InternalNano.LAZY_INIT_LOCK) {
+              if (_emptyArray == null) {
+                _emptyArray = new Dimension[0];
+              }
+            }
+          }
+          return _emptyArray;
+        }
+
+        // optional int32 width = 3;
+        public int width;
+
+        // optional int32 height = 4;
+        public int height;
+
+        public Dimension() {
+          clear();
+        }
+
+        public Dimension clear() {
+          width = 0;
+          height = 0;
+          cachedSize = -1;
+          return this;
+        }
+
+        @Override
+        public void writeTo(com.google.protobuf.nano.CodedOutputByteBufferNano output)
+            throws java.io.IOException {
+          if (this.width != 0) {
+            output.writeInt32(3, this.width);
+          }
+          if (this.height != 0) {
+            output.writeInt32(4, this.height);
+          }
+          super.writeTo(output);
+        }
+
+        @Override
+        protected int computeSerializedSize() {
+          int size = super.computeSerializedSize();
+          if (this.width != 0) {
+            size += com.google.protobuf.nano.CodedOutputByteBufferNano
+                .computeInt32Size(3, this.width);
+          }
+          if (this.height != 0) {
+            size += com.google.protobuf.nano.CodedOutputByteBufferNano
+                .computeInt32Size(4, this.height);
+          }
+          return size;
+        }
+
+        @Override
+        public Dimension mergeFrom(
+                com.google.protobuf.nano.CodedInputByteBufferNano input)
+            throws java.io.IOException {
+          while (true) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                return this;
+              default: {
+                if (!com.google.protobuf.nano.WireFormatNano.parseUnknownField(input, tag)) {
+                  return this;
+                }
+                break;
+              }
+              case 24: {
+                this.width = input.readInt32();
+                break;
+              }
+              case 32: {
+                this.height = input.readInt32();
+                break;
+              }
+            }
+          }
+        }
+
+        public static Dimension parseFrom(byte[] data)
+            throws com.google.protobuf.nano.InvalidProtocolBufferNanoException {
+          return com.google.protobuf.nano.MessageNano.mergeFrom(new Dimension(), data);
+        }
+
+        public static Dimension parseFrom(
+                com.google.protobuf.nano.CodedInputByteBufferNano input)
+            throws java.io.IOException {
+          return new Dimension().mergeFrom(input);
+        }
+      }
+
+      public static final class Citation extends
+          com.google.protobuf.nano.MessageNano {
+
+        private static volatile Citation[] _emptyArray;
+        public static Citation[] emptyArray() {
+          // Lazily initializes the empty array
+          if (_emptyArray == null) {
+            synchronized (
+                com.google.protobuf.nano.InternalNano.LAZY_INIT_LOCK) {
+              if (_emptyArray == null) {
+                _emptyArray = new Citation[0];
+              }
+            }
+          }
+          return _emptyArray;
+        }
+
+        // optional string titleLocalized = 11;
+        public java.lang.String titleLocalized;
+
+        // optional string url = 12;
+        public java.lang.String url;
+
+        public Citation() {
+          clear();
+        }
+
+        public Citation clear() {
+          titleLocalized = "";
+          url = "";
+          cachedSize = -1;
+          return this;
+        }
+
+        @Override
+        public void writeTo(com.google.protobuf.nano.CodedOutputByteBufferNano output)
+            throws java.io.IOException {
+          if (!this.titleLocalized.equals("")) {
+            output.writeString(11, this.titleLocalized);
+          }
+          if (!this.url.equals("")) {
+            output.writeString(12, this.url);
+          }
+          super.writeTo(output);
+        }
+
+        @Override
+        protected int computeSerializedSize() {
+          int size = super.computeSerializedSize();
+          if (!this.titleLocalized.equals("")) {
+            size += com.google.protobuf.nano.CodedOutputByteBufferNano
+                .computeStringSize(11, this.titleLocalized);
+          }
+          if (!this.url.equals("")) {
+            size += com.google.protobuf.nano.CodedOutputByteBufferNano
+                .computeStringSize(12, this.url);
+          }
+          return size;
+        }
+
+        @Override
+        public Citation mergeFrom(
+                com.google.protobuf.nano.CodedInputByteBufferNano input)
+            throws java.io.IOException {
+          while (true) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                return this;
+              default: {
+                if (!com.google.protobuf.nano.WireFormatNano.parseUnknownField(input, tag)) {
+                  return this;
+                }
+                break;
+              }
+              case 90: {
+                this.titleLocalized = input.readString();
+                break;
+              }
+              case 98: {
+                this.url = input.readString();
+                break;
+              }
+            }
+          }
+        }
+
+        public static Citation parseFrom(byte[] data)
+            throws com.google.protobuf.nano.InvalidProtocolBufferNanoException {
+          return com.google.protobuf.nano.MessageNano.mergeFrom(new Citation(), data);
+        }
+
+        public static Citation parseFrom(
+                com.google.protobuf.nano.CodedInputByteBufferNano input)
+            throws java.io.IOException {
+          return new Citation().mergeFrom(input);
+        }
+      }
+
       private static volatile Image[] _emptyArray;
       public static Image[] emptyArray() {
         // Lazily initializes the empty array
@@ -28,8 +226,29 @@ public interface Messages {
       // optional int32 imageType = 1;
       public int imageType;
 
+      // optional group Dimension = 2 {
+      public com.google.android.finsky.protos.nano.Messages.Common.Image.Dimension dimension;
+
       // optional string imageUrl = 5;
       public java.lang.String imageUrl;
+
+      // optional string altTextLocalized = 6;
+      public java.lang.String altTextLocalized;
+
+      // optional string secureUrl = 7;
+      public java.lang.String secureUrl;
+
+      // optional int32 positionInSequence = 8;
+      public int positionInSequence;
+
+      // optional bool supportsFifeUrlOptions = 9;
+      public boolean supportsFifeUrlOptions;
+
+      // optional group Citation = 10 {
+      public com.google.android.finsky.protos.nano.Messages.Common.Image.Citation citation;
+
+      // optional string color = 15;
+      public java.lang.String color;
 
       public Image() {
         clear();
@@ -37,7 +256,14 @@ public interface Messages {
 
       public Image clear() {
         imageType = 0;
+        dimension = null;
         imageUrl = "";
+        altTextLocalized = "";
+        secureUrl = "";
+        positionInSequence = 0;
+        supportsFifeUrlOptions = false;
+        citation = null;
+        color = "";
         cachedSize = -1;
         return this;
       }
@@ -48,8 +274,29 @@ public interface Messages {
         if (this.imageType != 0) {
           output.writeInt32(1, this.imageType);
         }
+        if (this.dimension != null) {
+          output.writeGroup(2, this.dimension);
+        }
         if (!this.imageUrl.equals("")) {
           output.writeString(5, this.imageUrl);
+        }
+        if (!this.altTextLocalized.equals("")) {
+          output.writeString(6, this.altTextLocalized);
+        }
+        if (!this.secureUrl.equals("")) {
+          output.writeString(7, this.secureUrl);
+        }
+        if (this.positionInSequence != 0) {
+          output.writeInt32(8, this.positionInSequence);
+        }
+        if (this.supportsFifeUrlOptions != false) {
+          output.writeBool(9, this.supportsFifeUrlOptions);
+        }
+        if (this.citation != null) {
+          output.writeGroup(10, this.citation);
+        }
+        if (!this.color.equals("")) {
+          output.writeString(15, this.color);
         }
         super.writeTo(output);
       }
@@ -61,9 +308,37 @@ public interface Messages {
           size += com.google.protobuf.nano.CodedOutputByteBufferNano
               .computeInt32Size(1, this.imageType);
         }
+        if (this.dimension != null) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeGroupSize(2, this.dimension);
+        }
         if (!this.imageUrl.equals("")) {
           size += com.google.protobuf.nano.CodedOutputByteBufferNano
               .computeStringSize(5, this.imageUrl);
+        }
+        if (!this.altTextLocalized.equals("")) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeStringSize(6, this.altTextLocalized);
+        }
+        if (!this.secureUrl.equals("")) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeStringSize(7, this.secureUrl);
+        }
+        if (this.positionInSequence != 0) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeInt32Size(8, this.positionInSequence);
+        }
+        if (this.supportsFifeUrlOptions != false) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeBoolSize(9, this.supportsFifeUrlOptions);
+        }
+        if (this.citation != null) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeGroupSize(10, this.citation);
+        }
+        if (!this.color.equals("")) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeStringSize(15, this.color);
         }
         return size;
       }
@@ -87,8 +362,42 @@ public interface Messages {
               this.imageType = input.readInt32();
               break;
             }
+            case 19: {
+              if (this.dimension == null) {
+                this.dimension = new com.google.android.finsky.protos.nano.Messages.Common.Image.Dimension();
+              }
+              input.readGroup(this.dimension, 2);
+              break;
+            }
             case 42: {
               this.imageUrl = input.readString();
+              break;
+            }
+            case 50: {
+              this.altTextLocalized = input.readString();
+              break;
+            }
+            case 58: {
+              this.secureUrl = input.readString();
+              break;
+            }
+            case 64: {
+              this.positionInSequence = input.readInt32();
+              break;
+            }
+            case 72: {
+              this.supportsFifeUrlOptions = input.readBool();
+              break;
+            }
+            case 83: {
+              if (this.citation == null) {
+                this.citation = new com.google.android.finsky.protos.nano.Messages.Common.Image.Citation();
+              }
+              input.readGroup(this.citation, 10);
+              break;
+            }
+            case 122: {
+              this.color = input.readString();
               break;
             }
           }
@@ -136,8 +445,38 @@ public interface Messages {
       // optional string formattedAmount = 3;
       public java.lang.String formattedAmount;
 
-      // optional .com.google.android.finsky.protos.Common.Offer.TYPE offerType = 8;
+      // repeated .com.google.android.finsky.protos.Common.Offer convertedPrice = 4;
+      public com.google.android.finsky.protos.nano.Messages.Common.Offer[] convertedPrice;
+
+      // optional bool checkoutFlowRequired = 5;
+      public boolean checkoutFlowRequired;
+
+      // optional int64 fullPriceMicros = 6;
+      public long fullPriceMicros;
+
+      // optional string formattedFullAmount = 7;
+      public java.lang.String formattedFullAmount;
+
+      // optional int32 offerType = 8;
       public int offerType;
+
+      // optional .com.google.android.finsky.protos.Common.RentalTerms rentalTerms = 9;
+      public com.google.android.finsky.protos.nano.Messages.Common.RentalTerms rentalTerms;
+
+      // optional int64 onSaleDate = 10;
+      public long onSaleDate;
+
+      // repeated string promotionLabel = 11;
+      public java.lang.String[] promotionLabel;
+
+      // optional .com.google.android.finsky.protos.Common.SubscriptionTerms subscriptionTerms = 12;
+      public com.google.android.finsky.protos.nano.Messages.Common.SubscriptionTerms subscriptionTerms;
+
+      // optional string formattedName = 13;
+      public java.lang.String formattedName;
+
+      // optional string formattedDescription = 14;
+      public java.lang.String formattedDescription;
 
       public Offer() {
         clear();
@@ -147,7 +486,17 @@ public interface Messages {
         micros = 0L;
         currencyCode = "";
         formattedAmount = "";
-        offerType = com.google.android.finsky.protos.nano.Messages.Common.Offer.TYPE_1;
+        convertedPrice = com.google.android.finsky.protos.nano.Messages.Common.Offer.emptyArray();
+        checkoutFlowRequired = false;
+        fullPriceMicros = 0L;
+        formattedFullAmount = "";
+        offerType = 0;
+        rentalTerms = null;
+        onSaleDate = 0L;
+        promotionLabel = com.google.protobuf.nano.WireFormatNano.EMPTY_STRING_ARRAY;
+        subscriptionTerms = null;
+        formattedName = "";
+        formattedDescription = "";
         cachedSize = -1;
         return this;
       }
@@ -164,8 +513,48 @@ public interface Messages {
         if (!this.formattedAmount.equals("")) {
           output.writeString(3, this.formattedAmount);
         }
-        if (this.offerType != com.google.android.finsky.protos.nano.Messages.Common.Offer.TYPE_1) {
+        if (this.convertedPrice != null && this.convertedPrice.length > 0) {
+          for (int i = 0; i < this.convertedPrice.length; i++) {
+            com.google.android.finsky.protos.nano.Messages.Common.Offer element = this.convertedPrice[i];
+            if (element != null) {
+              output.writeMessage(4, element);
+            }
+          }
+        }
+        if (this.checkoutFlowRequired != false) {
+          output.writeBool(5, this.checkoutFlowRequired);
+        }
+        if (this.fullPriceMicros != 0L) {
+          output.writeInt64(6, this.fullPriceMicros);
+        }
+        if (!this.formattedFullAmount.equals("")) {
+          output.writeString(7, this.formattedFullAmount);
+        }
+        if (this.offerType != 0) {
           output.writeInt32(8, this.offerType);
+        }
+        if (this.rentalTerms != null) {
+          output.writeMessage(9, this.rentalTerms);
+        }
+        if (this.onSaleDate != 0L) {
+          output.writeInt64(10, this.onSaleDate);
+        }
+        if (this.promotionLabel != null && this.promotionLabel.length > 0) {
+          for (int i = 0; i < this.promotionLabel.length; i++) {
+            java.lang.String element = this.promotionLabel[i];
+            if (element != null) {
+              output.writeString(11, element);
+            }
+          }
+        }
+        if (this.subscriptionTerms != null) {
+          output.writeMessage(12, this.subscriptionTerms);
+        }
+        if (!this.formattedName.equals("")) {
+          output.writeString(13, this.formattedName);
+        }
+        if (!this.formattedDescription.equals("")) {
+          output.writeString(14, this.formattedDescription);
         }
         super.writeTo(output);
       }
@@ -185,9 +574,64 @@ public interface Messages {
           size += com.google.protobuf.nano.CodedOutputByteBufferNano
               .computeStringSize(3, this.formattedAmount);
         }
-        if (this.offerType != com.google.android.finsky.protos.nano.Messages.Common.Offer.TYPE_1) {
+        if (this.convertedPrice != null && this.convertedPrice.length > 0) {
+          for (int i = 0; i < this.convertedPrice.length; i++) {
+            com.google.android.finsky.protos.nano.Messages.Common.Offer element = this.convertedPrice[i];
+            if (element != null) {
+              size += com.google.protobuf.nano.CodedOutputByteBufferNano
+                .computeMessageSize(4, element);
+            }
+          }
+        }
+        if (this.checkoutFlowRequired != false) {
           size += com.google.protobuf.nano.CodedOutputByteBufferNano
-            .computeInt32Size(8, this.offerType);
+              .computeBoolSize(5, this.checkoutFlowRequired);
+        }
+        if (this.fullPriceMicros != 0L) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeInt64Size(6, this.fullPriceMicros);
+        }
+        if (!this.formattedFullAmount.equals("")) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeStringSize(7, this.formattedFullAmount);
+        }
+        if (this.offerType != 0) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeInt32Size(8, this.offerType);
+        }
+        if (this.rentalTerms != null) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeMessageSize(9, this.rentalTerms);
+        }
+        if (this.onSaleDate != 0L) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeInt64Size(10, this.onSaleDate);
+        }
+        if (this.promotionLabel != null && this.promotionLabel.length > 0) {
+          int dataCount = 0;
+          int dataSize = 0;
+          for (int i = 0; i < this.promotionLabel.length; i++) {
+            java.lang.String element = this.promotionLabel[i];
+            if (element != null) {
+              dataCount++;
+              dataSize += com.google.protobuf.nano.CodedOutputByteBufferNano
+                  .computeStringSizeNoTag(element);
+            }
+          }
+          size += dataSize;
+          size += 1 * dataCount;
+        }
+        if (this.subscriptionTerms != null) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeMessageSize(12, this.subscriptionTerms);
+        }
+        if (!this.formattedName.equals("")) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeStringSize(13, this.formattedName);
+        }
+        if (!this.formattedDescription.equals("")) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeStringSize(14, this.formattedDescription);
         }
         return size;
       }
@@ -219,13 +663,83 @@ public interface Messages {
               this.formattedAmount = input.readString();
               break;
             }
-            case 64: {
-              int value = input.readInt32();
-              switch (value) {
-                case com.google.android.finsky.protos.nano.Messages.Common.Offer.TYPE_1:
-                  this.offerType = value;
-                  break;
+            case 34: {
+              int arrayLength = com.google.protobuf.nano.WireFormatNano
+                  .getRepeatedFieldArrayLength(input, 34);
+              int i = this.convertedPrice == null ? 0 : this.convertedPrice.length;
+              com.google.android.finsky.protos.nano.Messages.Common.Offer[] newArray =
+                  new com.google.android.finsky.protos.nano.Messages.Common.Offer[i + arrayLength];
+              if (i != 0) {
+                java.lang.System.arraycopy(this.convertedPrice, 0, newArray, 0, i);
               }
+              for (; i < newArray.length - 1; i++) {
+                newArray[i] = new com.google.android.finsky.protos.nano.Messages.Common.Offer();
+                input.readMessage(newArray[i]);
+                input.readTag();
+              }
+              // Last one without readTag.
+              newArray[i] = new com.google.android.finsky.protos.nano.Messages.Common.Offer();
+              input.readMessage(newArray[i]);
+              this.convertedPrice = newArray;
+              break;
+            }
+            case 40: {
+              this.checkoutFlowRequired = input.readBool();
+              break;
+            }
+            case 48: {
+              this.fullPriceMicros = input.readInt64();
+              break;
+            }
+            case 58: {
+              this.formattedFullAmount = input.readString();
+              break;
+            }
+            case 64: {
+              this.offerType = input.readInt32();
+              break;
+            }
+            case 74: {
+              if (this.rentalTerms == null) {
+                this.rentalTerms = new com.google.android.finsky.protos.nano.Messages.Common.RentalTerms();
+              }
+              input.readMessage(this.rentalTerms);
+              break;
+            }
+            case 80: {
+              this.onSaleDate = input.readInt64();
+              break;
+            }
+            case 90: {
+              int arrayLength = com.google.protobuf.nano.WireFormatNano
+                  .getRepeatedFieldArrayLength(input, 90);
+              int i = this.promotionLabel == null ? 0 : this.promotionLabel.length;
+              java.lang.String[] newArray = new java.lang.String[i + arrayLength];
+              if (i != 0) {
+                java.lang.System.arraycopy(this.promotionLabel, 0, newArray, 0, i);
+              }
+              for (; i < newArray.length - 1; i++) {
+                newArray[i] = input.readString();
+                input.readTag();
+              }
+              // Last one without readTag.
+              newArray[i] = input.readString();
+              this.promotionLabel = newArray;
+              break;
+            }
+            case 98: {
+              if (this.subscriptionTerms == null) {
+                this.subscriptionTerms = new com.google.android.finsky.protos.nano.Messages.Common.SubscriptionTerms();
+              }
+              input.readMessage(this.subscriptionTerms);
+              break;
+            }
+            case 106: {
+              this.formattedName = input.readString();
+              break;
+            }
+            case 114: {
+              this.formattedDescription = input.readString();
               break;
             }
           }
@@ -241,6 +755,423 @@ public interface Messages {
               com.google.protobuf.nano.CodedInputByteBufferNano input)
           throws java.io.IOException {
         return new Offer().mergeFrom(input);
+      }
+    }
+
+    public static final class RentalTerms extends
+        com.google.protobuf.nano.MessageNano {
+
+      private static volatile RentalTerms[] _emptyArray;
+      public static RentalTerms[] emptyArray() {
+        // Lazily initializes the empty array
+        if (_emptyArray == null) {
+          synchronized (
+              com.google.protobuf.nano.InternalNano.LAZY_INIT_LOCK) {
+            if (_emptyArray == null) {
+              _emptyArray = new RentalTerms[0];
+            }
+          }
+        }
+        return _emptyArray;
+      }
+
+      // optional int32 grantPeriodSeconds = 1;
+      public int grantPeriodSeconds;
+
+      // optional int32 activatePeriodSeconds = 2;
+      public int activatePeriodSeconds;
+
+      public RentalTerms() {
+        clear();
+      }
+
+      public RentalTerms clear() {
+        grantPeriodSeconds = 0;
+        activatePeriodSeconds = 0;
+        cachedSize = -1;
+        return this;
+      }
+
+      @Override
+      public void writeTo(com.google.protobuf.nano.CodedOutputByteBufferNano output)
+          throws java.io.IOException {
+        if (this.grantPeriodSeconds != 0) {
+          output.writeInt32(1, this.grantPeriodSeconds);
+        }
+        if (this.activatePeriodSeconds != 0) {
+          output.writeInt32(2, this.activatePeriodSeconds);
+        }
+        super.writeTo(output);
+      }
+
+      @Override
+      protected int computeSerializedSize() {
+        int size = super.computeSerializedSize();
+        if (this.grantPeriodSeconds != 0) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeInt32Size(1, this.grantPeriodSeconds);
+        }
+        if (this.activatePeriodSeconds != 0) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeInt32Size(2, this.activatePeriodSeconds);
+        }
+        return size;
+      }
+
+      @Override
+      public RentalTerms mergeFrom(
+              com.google.protobuf.nano.CodedInputByteBufferNano input)
+          throws java.io.IOException {
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              return this;
+            default: {
+              if (!com.google.protobuf.nano.WireFormatNano.parseUnknownField(input, tag)) {
+                return this;
+              }
+              break;
+            }
+            case 8: {
+              this.grantPeriodSeconds = input.readInt32();
+              break;
+            }
+            case 16: {
+              this.activatePeriodSeconds = input.readInt32();
+              break;
+            }
+          }
+        }
+      }
+
+      public static RentalTerms parseFrom(byte[] data)
+          throws com.google.protobuf.nano.InvalidProtocolBufferNanoException {
+        return com.google.protobuf.nano.MessageNano.mergeFrom(new RentalTerms(), data);
+      }
+
+      public static RentalTerms parseFrom(
+              com.google.protobuf.nano.CodedInputByteBufferNano input)
+          throws java.io.IOException {
+        return new RentalTerms().mergeFrom(input);
+      }
+    }
+
+    public static final class SubscriptionTerms extends
+        com.google.protobuf.nano.MessageNano {
+
+      private static volatile SubscriptionTerms[] _emptyArray;
+      public static SubscriptionTerms[] emptyArray() {
+        // Lazily initializes the empty array
+        if (_emptyArray == null) {
+          synchronized (
+              com.google.protobuf.nano.InternalNano.LAZY_INIT_LOCK) {
+            if (_emptyArray == null) {
+              _emptyArray = new SubscriptionTerms[0];
+            }
+          }
+        }
+        return _emptyArray;
+      }
+
+      // optional .com.google.android.finsky.protos.Common.TimePeriod recurringPeriod = 1;
+      public com.google.android.finsky.protos.nano.Messages.Common.TimePeriod recurringPeriod;
+
+      // optional .com.google.android.finsky.protos.Common.TimePeriod trialPeriod = 2;
+      public com.google.android.finsky.protos.nano.Messages.Common.TimePeriod trialPeriod;
+
+      public SubscriptionTerms() {
+        clear();
+      }
+
+      public SubscriptionTerms clear() {
+        recurringPeriod = null;
+        trialPeriod = null;
+        cachedSize = -1;
+        return this;
+      }
+
+      @Override
+      public void writeTo(com.google.protobuf.nano.CodedOutputByteBufferNano output)
+          throws java.io.IOException {
+        if (this.recurringPeriod != null) {
+          output.writeMessage(1, this.recurringPeriod);
+        }
+        if (this.trialPeriod != null) {
+          output.writeMessage(2, this.trialPeriod);
+        }
+        super.writeTo(output);
+      }
+
+      @Override
+      protected int computeSerializedSize() {
+        int size = super.computeSerializedSize();
+        if (this.recurringPeriod != null) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeMessageSize(1, this.recurringPeriod);
+        }
+        if (this.trialPeriod != null) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeMessageSize(2, this.trialPeriod);
+        }
+        return size;
+      }
+
+      @Override
+      public SubscriptionTerms mergeFrom(
+              com.google.protobuf.nano.CodedInputByteBufferNano input)
+          throws java.io.IOException {
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              return this;
+            default: {
+              if (!com.google.protobuf.nano.WireFormatNano.parseUnknownField(input, tag)) {
+                return this;
+              }
+              break;
+            }
+            case 10: {
+              if (this.recurringPeriod == null) {
+                this.recurringPeriod = new com.google.android.finsky.protos.nano.Messages.Common.TimePeriod();
+              }
+              input.readMessage(this.recurringPeriod);
+              break;
+            }
+            case 18: {
+              if (this.trialPeriod == null) {
+                this.trialPeriod = new com.google.android.finsky.protos.nano.Messages.Common.TimePeriod();
+              }
+              input.readMessage(this.trialPeriod);
+              break;
+            }
+          }
+        }
+      }
+
+      public static SubscriptionTerms parseFrom(byte[] data)
+          throws com.google.protobuf.nano.InvalidProtocolBufferNanoException {
+        return com.google.protobuf.nano.MessageNano.mergeFrom(new SubscriptionTerms(), data);
+      }
+
+      public static SubscriptionTerms parseFrom(
+              com.google.protobuf.nano.CodedInputByteBufferNano input)
+          throws java.io.IOException {
+        return new SubscriptionTerms().mergeFrom(input);
+      }
+    }
+
+    public static final class TimePeriod extends
+        com.google.protobuf.nano.MessageNano {
+
+      private static volatile TimePeriod[] _emptyArray;
+      public static TimePeriod[] emptyArray() {
+        // Lazily initializes the empty array
+        if (_emptyArray == null) {
+          synchronized (
+              com.google.protobuf.nano.InternalNano.LAZY_INIT_LOCK) {
+            if (_emptyArray == null) {
+              _emptyArray = new TimePeriod[0];
+            }
+          }
+        }
+        return _emptyArray;
+      }
+
+      // optional int32 unit = 1;
+      public int unit;
+
+      // optional int32 count = 2;
+      public int count;
+
+      public TimePeriod() {
+        clear();
+      }
+
+      public TimePeriod clear() {
+        unit = 0;
+        count = 0;
+        cachedSize = -1;
+        return this;
+      }
+
+      @Override
+      public void writeTo(com.google.protobuf.nano.CodedOutputByteBufferNano output)
+          throws java.io.IOException {
+        if (this.unit != 0) {
+          output.writeInt32(1, this.unit);
+        }
+        if (this.count != 0) {
+          output.writeInt32(2, this.count);
+        }
+        super.writeTo(output);
+      }
+
+      @Override
+      protected int computeSerializedSize() {
+        int size = super.computeSerializedSize();
+        if (this.unit != 0) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeInt32Size(1, this.unit);
+        }
+        if (this.count != 0) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeInt32Size(2, this.count);
+        }
+        return size;
+      }
+
+      @Override
+      public TimePeriod mergeFrom(
+              com.google.protobuf.nano.CodedInputByteBufferNano input)
+          throws java.io.IOException {
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              return this;
+            default: {
+              if (!com.google.protobuf.nano.WireFormatNano.parseUnknownField(input, tag)) {
+                return this;
+              }
+              break;
+            }
+            case 8: {
+              this.unit = input.readInt32();
+              break;
+            }
+            case 16: {
+              this.count = input.readInt32();
+              break;
+            }
+          }
+        }
+      }
+
+      public static TimePeriod parseFrom(byte[] data)
+          throws com.google.protobuf.nano.InvalidProtocolBufferNanoException {
+        return com.google.protobuf.nano.MessageNano.mergeFrom(new TimePeriod(), data);
+      }
+
+      public static TimePeriod parseFrom(
+              com.google.protobuf.nano.CodedInputByteBufferNano input)
+          throws java.io.IOException {
+        return new TimePeriod().mergeFrom(input);
+      }
+    }
+
+    public static final class FileMetadata extends
+        com.google.protobuf.nano.MessageNano {
+
+      private static volatile FileMetadata[] _emptyArray;
+      public static FileMetadata[] emptyArray() {
+        // Lazily initializes the empty array
+        if (_emptyArray == null) {
+          synchronized (
+              com.google.protobuf.nano.InternalNano.LAZY_INIT_LOCK) {
+            if (_emptyArray == null) {
+              _emptyArray = new FileMetadata[0];
+            }
+          }
+        }
+        return _emptyArray;
+      }
+
+      // optional int32 fileType = 1;
+      public int fileType;
+
+      // optional int32 versionCode = 2;
+      public int versionCode;
+
+      // optional int64 size = 3;
+      public long size;
+
+      public FileMetadata() {
+        clear();
+      }
+
+      public FileMetadata clear() {
+        fileType = 0;
+        versionCode = 0;
+        size = 0L;
+        cachedSize = -1;
+        return this;
+      }
+
+      @Override
+      public void writeTo(com.google.protobuf.nano.CodedOutputByteBufferNano output)
+          throws java.io.IOException {
+        if (this.fileType != 0) {
+          output.writeInt32(1, this.fileType);
+        }
+        if (this.versionCode != 0) {
+          output.writeInt32(2, this.versionCode);
+        }
+        if (this.size != 0L) {
+          output.writeInt64(3, this.size);
+        }
+        super.writeTo(output);
+      }
+
+      @Override
+      protected int computeSerializedSize() {
+        int size = super.computeSerializedSize();
+        if (this.fileType != 0) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeInt32Size(1, this.fileType);
+        }
+        if (this.versionCode != 0) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeInt32Size(2, this.versionCode);
+        }
+        if (this.size != 0L) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeInt64Size(3, this.size);
+        }
+        return size;
+      }
+
+      @Override
+      public FileMetadata mergeFrom(
+              com.google.protobuf.nano.CodedInputByteBufferNano input)
+          throws java.io.IOException {
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              return this;
+            default: {
+              if (!com.google.protobuf.nano.WireFormatNano.parseUnknownField(input, tag)) {
+                return this;
+              }
+              break;
+            }
+            case 8: {
+              this.fileType = input.readInt32();
+              break;
+            }
+            case 16: {
+              this.versionCode = input.readInt32();
+              break;
+            }
+            case 24: {
+              this.size = input.readInt64();
+              break;
+            }
+          }
+        }
+      }
+
+      public static FileMetadata parseFrom(byte[] data)
+          throws com.google.protobuf.nano.InvalidProtocolBufferNanoException {
+        return com.google.protobuf.nano.MessageNano.mergeFrom(new FileMetadata(), data);
+      }
+
+      public static FileMetadata parseFrom(
+              com.google.protobuf.nano.CodedInputByteBufferNano input)
+          throws java.io.IOException {
+        return new FileMetadata().mergeFrom(input);
       }
     }
 
@@ -318,15 +1249,35 @@ public interface Messages {
         return _emptyArray;
       }
 
+      // optional string browseUrl = 1;
+      public java.lang.String browseUrl;
+
       // optional string nextPageUrl = 2;
       public java.lang.String nextPageUrl;
+
+      // optional double relevance = 3;
+      public double relevance;
+
+      // optional int64 estimatedResults = 4;
+      public long estimatedResults;
+
+      // optional string analyticsCookie = 5;
+      public java.lang.String analyticsCookie;
+
+      // optional bool ordered = 6;
+      public boolean ordered;
 
       public ContainerMetadata() {
         clear();
       }
 
       public ContainerMetadata clear() {
+        browseUrl = "";
         nextPageUrl = "";
+        relevance = 0D;
+        estimatedResults = 0L;
+        analyticsCookie = "";
+        ordered = false;
         cachedSize = -1;
         return this;
       }
@@ -334,8 +1285,24 @@ public interface Messages {
       @Override
       public void writeTo(com.google.protobuf.nano.CodedOutputByteBufferNano output)
           throws java.io.IOException {
+        if (!this.browseUrl.equals("")) {
+          output.writeString(1, this.browseUrl);
+        }
         if (!this.nextPageUrl.equals("")) {
           output.writeString(2, this.nextPageUrl);
+        }
+        if (java.lang.Double.doubleToLongBits(this.relevance)
+            != java.lang.Double.doubleToLongBits(0D)) {
+          output.writeDouble(3, this.relevance);
+        }
+        if (this.estimatedResults != 0L) {
+          output.writeInt64(4, this.estimatedResults);
+        }
+        if (!this.analyticsCookie.equals("")) {
+          output.writeString(5, this.analyticsCookie);
+        }
+        if (this.ordered != false) {
+          output.writeBool(6, this.ordered);
         }
         super.writeTo(output);
       }
@@ -343,9 +1310,30 @@ public interface Messages {
       @Override
       protected int computeSerializedSize() {
         int size = super.computeSerializedSize();
+        if (!this.browseUrl.equals("")) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeStringSize(1, this.browseUrl);
+        }
         if (!this.nextPageUrl.equals("")) {
           size += com.google.protobuf.nano.CodedOutputByteBufferNano
               .computeStringSize(2, this.nextPageUrl);
+        }
+        if (java.lang.Double.doubleToLongBits(this.relevance)
+            != java.lang.Double.doubleToLongBits(0D)) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeDoubleSize(3, this.relevance);
+        }
+        if (this.estimatedResults != 0L) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeInt64Size(4, this.estimatedResults);
+        }
+        if (!this.analyticsCookie.equals("")) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeStringSize(5, this.analyticsCookie);
+        }
+        if (this.ordered != false) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeBoolSize(6, this.ordered);
         }
         return size;
       }
@@ -365,8 +1353,28 @@ public interface Messages {
               }
               break;
             }
+            case 10: {
+              this.browseUrl = input.readString();
+              break;
+            }
             case 18: {
               this.nextPageUrl = input.readString();
+              break;
+            }
+            case 25: {
+              this.relevance = input.readDouble();
+              break;
+            }
+            case 32: {
+              this.estimatedResults = input.readInt64();
+              break;
+            }
+            case 42: {
+              this.analyticsCookie = input.readString();
+              break;
+            }
+            case 48: {
+              this.ordered = input.readBool();
               break;
             }
           }
@@ -474,6 +1482,21 @@ public interface Messages {
     // repeated string appCategory = 7;
     public java.lang.String[] appCategory;
 
+    // optional int32 contentRating = 8;
+    public int contentRating;
+
+    // optional int64 installationSize = 9;
+    public long installationSize;
+
+    // repeated string permission = 10;
+    public java.lang.String[] permission;
+
+    // optional string developerEmail = 11;
+    public java.lang.String developerEmail;
+
+    // optional string developerWebsite = 12;
+    public java.lang.String developerWebsite;
+
     // optional string numDownloads = 13;
     public java.lang.String numDownloads;
 
@@ -486,8 +1509,17 @@ public interface Messages {
     // optional string uploadDate = 16;
     public java.lang.String uploadDate;
 
+    // repeated .com.google.android.finsky.protos.Common.FileMetadata file = 17;
+    public com.google.android.finsky.protos.nano.Messages.Common.FileMetadata[] file;
+
     // optional string appType = 18;
     public java.lang.String appType;
+
+    // optional string containsAds = 30;
+    public java.lang.String containsAds;
+
+    // optional .com.google.android.finsky.protos.Dependencies dependencies = 34;
+    public com.google.android.finsky.protos.nano.Messages.Dependencies dependencies;
 
     public AppDetails() {
       clear();
@@ -500,11 +1532,19 @@ public interface Messages {
       versionString = "";
       title = "";
       appCategory = com.google.protobuf.nano.WireFormatNano.EMPTY_STRING_ARRAY;
+      contentRating = 0;
+      installationSize = 0L;
+      permission = com.google.protobuf.nano.WireFormatNano.EMPTY_STRING_ARRAY;
+      developerEmail = "";
+      developerWebsite = "";
       numDownloads = "";
       packageName = "";
       recentChangesHtml = "";
       uploadDate = "";
+      file = com.google.android.finsky.protos.nano.Messages.Common.FileMetadata.emptyArray();
       appType = "";
+      containsAds = "";
+      dependencies = null;
       cachedSize = -1;
       return this;
     }
@@ -535,6 +1575,26 @@ public interface Messages {
           }
         }
       }
+      if (this.contentRating != 0) {
+        output.writeInt32(8, this.contentRating);
+      }
+      if (this.installationSize != 0L) {
+        output.writeInt64(9, this.installationSize);
+      }
+      if (this.permission != null && this.permission.length > 0) {
+        for (int i = 0; i < this.permission.length; i++) {
+          java.lang.String element = this.permission[i];
+          if (element != null) {
+            output.writeString(10, element);
+          }
+        }
+      }
+      if (!this.developerEmail.equals("")) {
+        output.writeString(11, this.developerEmail);
+      }
+      if (!this.developerWebsite.equals("")) {
+        output.writeString(12, this.developerWebsite);
+      }
       if (!this.numDownloads.equals("")) {
         output.writeString(13, this.numDownloads);
       }
@@ -547,8 +1607,22 @@ public interface Messages {
       if (!this.uploadDate.equals("")) {
         output.writeString(16, this.uploadDate);
       }
+      if (this.file != null && this.file.length > 0) {
+        for (int i = 0; i < this.file.length; i++) {
+          com.google.android.finsky.protos.nano.Messages.Common.FileMetadata element = this.file[i];
+          if (element != null) {
+            output.writeMessage(17, element);
+          }
+        }
+      }
       if (!this.appType.equals("")) {
         output.writeString(18, this.appType);
+      }
+      if (!this.containsAds.equals("")) {
+        output.writeString(30, this.containsAds);
+      }
+      if (this.dependencies != null) {
+        output.writeMessage(34, this.dependencies);
       }
       super.writeTo(output);
     }
@@ -590,6 +1664,36 @@ public interface Messages {
         size += dataSize;
         size += 1 * dataCount;
       }
+      if (this.contentRating != 0) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeInt32Size(8, this.contentRating);
+      }
+      if (this.installationSize != 0L) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeInt64Size(9, this.installationSize);
+      }
+      if (this.permission != null && this.permission.length > 0) {
+        int dataCount = 0;
+        int dataSize = 0;
+        for (int i = 0; i < this.permission.length; i++) {
+          java.lang.String element = this.permission[i];
+          if (element != null) {
+            dataCount++;
+            dataSize += com.google.protobuf.nano.CodedOutputByteBufferNano
+                .computeStringSizeNoTag(element);
+          }
+        }
+        size += dataSize;
+        size += 1 * dataCount;
+      }
+      if (!this.developerEmail.equals("")) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeStringSize(11, this.developerEmail);
+      }
+      if (!this.developerWebsite.equals("")) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeStringSize(12, this.developerWebsite);
+      }
       if (!this.numDownloads.equals("")) {
         size += com.google.protobuf.nano.CodedOutputByteBufferNano
             .computeStringSize(13, this.numDownloads);
@@ -606,9 +1710,26 @@ public interface Messages {
         size += com.google.protobuf.nano.CodedOutputByteBufferNano
             .computeStringSize(16, this.uploadDate);
       }
+      if (this.file != null && this.file.length > 0) {
+        for (int i = 0; i < this.file.length; i++) {
+          com.google.android.finsky.protos.nano.Messages.Common.FileMetadata element = this.file[i];
+          if (element != null) {
+            size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeMessageSize(17, element);
+          }
+        }
+      }
       if (!this.appType.equals("")) {
         size += com.google.protobuf.nano.CodedOutputByteBufferNano
             .computeStringSize(18, this.appType);
+      }
+      if (!this.containsAds.equals("")) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeStringSize(30, this.containsAds);
+      }
+      if (this.dependencies != null) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+          .computeMessageSize(34, this.dependencies);
       }
       return size;
     }
@@ -665,6 +1786,39 @@ public interface Messages {
             this.appCategory = newArray;
             break;
           }
+          case 64: {
+            this.contentRating = input.readInt32();
+            break;
+          }
+          case 72: {
+            this.installationSize = input.readInt64();
+            break;
+          }
+          case 82: {
+            int arrayLength = com.google.protobuf.nano.WireFormatNano
+                .getRepeatedFieldArrayLength(input, 82);
+            int i = this.permission == null ? 0 : this.permission.length;
+            java.lang.String[] newArray = new java.lang.String[i + arrayLength];
+            if (i != 0) {
+              java.lang.System.arraycopy(this.permission, 0, newArray, 0, i);
+            }
+            for (; i < newArray.length - 1; i++) {
+              newArray[i] = input.readString();
+              input.readTag();
+            }
+            // Last one without readTag.
+            newArray[i] = input.readString();
+            this.permission = newArray;
+            break;
+          }
+          case 90: {
+            this.developerEmail = input.readString();
+            break;
+          }
+          case 98: {
+            this.developerWebsite = input.readString();
+            break;
+          }
           case 106: {
             this.numDownloads = input.readString();
             break;
@@ -681,8 +1835,39 @@ public interface Messages {
             this.uploadDate = input.readString();
             break;
           }
+          case 138: {
+            int arrayLength = com.google.protobuf.nano.WireFormatNano
+                .getRepeatedFieldArrayLength(input, 138);
+            int i = this.file == null ? 0 : this.file.length;
+            com.google.android.finsky.protos.nano.Messages.Common.FileMetadata[] newArray =
+                new com.google.android.finsky.protos.nano.Messages.Common.FileMetadata[i + arrayLength];
+            if (i != 0) {
+              java.lang.System.arraycopy(this.file, 0, newArray, 0, i);
+            }
+            for (; i < newArray.length - 1; i++) {
+              newArray[i] = new com.google.android.finsky.protos.nano.Messages.Common.FileMetadata();
+              input.readMessage(newArray[i]);
+              input.readTag();
+            }
+            // Last one without readTag.
+            newArray[i] = new com.google.android.finsky.protos.nano.Messages.Common.FileMetadata();
+            input.readMessage(newArray[i]);
+            this.file = newArray;
+            break;
+          }
           case 146: {
             this.appType = input.readString();
+            break;
+          }
+          case 242: {
+            this.containsAds = input.readString();
+            break;
+          }
+          case 274: {
+            if (this.dependencies == null) {
+              this.dependencies = new com.google.android.finsky.protos.nano.Messages.Dependencies();
+            }
+            input.readMessage(this.dependencies);
             break;
           }
         }
@@ -698,6 +1883,275 @@ public interface Messages {
             com.google.protobuf.nano.CodedInputByteBufferNano input)
         throws java.io.IOException {
       return new AppDetails().mergeFrom(input);
+    }
+  }
+
+  public static final class Dependencies extends
+      com.google.protobuf.nano.MessageNano {
+
+    private static volatile Dependencies[] _emptyArray;
+    public static Dependencies[] emptyArray() {
+      // Lazily initializes the empty array
+      if (_emptyArray == null) {
+        synchronized (
+            com.google.protobuf.nano.InternalNano.LAZY_INIT_LOCK) {
+          if (_emptyArray == null) {
+            _emptyArray = new Dependencies[0];
+          }
+        }
+      }
+      return _emptyArray;
+    }
+
+    // optional int32 unknown1 = 1;
+    public int unknown1;
+
+    // optional int64 unknown2 = 2;
+    public long unknown2;
+
+    // repeated .com.google.android.finsky.protos.Dependency dependency = 3;
+    public com.google.android.finsky.protos.nano.Messages.Dependency[] dependency;
+
+    // optional int32 unknown3 = 4;
+    public int unknown3;
+
+    public Dependencies() {
+      clear();
+    }
+
+    public Dependencies clear() {
+      unknown1 = 0;
+      unknown2 = 0L;
+      dependency = com.google.android.finsky.protos.nano.Messages.Dependency.emptyArray();
+      unknown3 = 0;
+      cachedSize = -1;
+      return this;
+    }
+
+    @Override
+    public void writeTo(com.google.protobuf.nano.CodedOutputByteBufferNano output)
+        throws java.io.IOException {
+      if (this.unknown1 != 0) {
+        output.writeInt32(1, this.unknown1);
+      }
+      if (this.unknown2 != 0L) {
+        output.writeInt64(2, this.unknown2);
+      }
+      if (this.dependency != null && this.dependency.length > 0) {
+        for (int i = 0; i < this.dependency.length; i++) {
+          com.google.android.finsky.protos.nano.Messages.Dependency element = this.dependency[i];
+          if (element != null) {
+            output.writeMessage(3, element);
+          }
+        }
+      }
+      if (this.unknown3 != 0) {
+        output.writeInt32(4, this.unknown3);
+      }
+      super.writeTo(output);
+    }
+
+    @Override
+    protected int computeSerializedSize() {
+      int size = super.computeSerializedSize();
+      if (this.unknown1 != 0) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeInt32Size(1, this.unknown1);
+      }
+      if (this.unknown2 != 0L) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeInt64Size(2, this.unknown2);
+      }
+      if (this.dependency != null && this.dependency.length > 0) {
+        for (int i = 0; i < this.dependency.length; i++) {
+          com.google.android.finsky.protos.nano.Messages.Dependency element = this.dependency[i];
+          if (element != null) {
+            size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeMessageSize(3, element);
+          }
+        }
+      }
+      if (this.unknown3 != 0) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeInt32Size(4, this.unknown3);
+      }
+      return size;
+    }
+
+    @Override
+    public Dependencies mergeFrom(
+            com.google.protobuf.nano.CodedInputByteBufferNano input)
+        throws java.io.IOException {
+      while (true) {
+        int tag = input.readTag();
+        switch (tag) {
+          case 0:
+            return this;
+          default: {
+            if (!com.google.protobuf.nano.WireFormatNano.parseUnknownField(input, tag)) {
+              return this;
+            }
+            break;
+          }
+          case 8: {
+            this.unknown1 = input.readInt32();
+            break;
+          }
+          case 16: {
+            this.unknown2 = input.readInt64();
+            break;
+          }
+          case 26: {
+            int arrayLength = com.google.protobuf.nano.WireFormatNano
+                .getRepeatedFieldArrayLength(input, 26);
+            int i = this.dependency == null ? 0 : this.dependency.length;
+            com.google.android.finsky.protos.nano.Messages.Dependency[] newArray =
+                new com.google.android.finsky.protos.nano.Messages.Dependency[i + arrayLength];
+            if (i != 0) {
+              java.lang.System.arraycopy(this.dependency, 0, newArray, 0, i);
+            }
+            for (; i < newArray.length - 1; i++) {
+              newArray[i] = new com.google.android.finsky.protos.nano.Messages.Dependency();
+              input.readMessage(newArray[i]);
+              input.readTag();
+            }
+            // Last one without readTag.
+            newArray[i] = new com.google.android.finsky.protos.nano.Messages.Dependency();
+            input.readMessage(newArray[i]);
+            this.dependency = newArray;
+            break;
+          }
+          case 32: {
+            this.unknown3 = input.readInt32();
+            break;
+          }
+        }
+      }
+    }
+
+    public static Dependencies parseFrom(byte[] data)
+        throws com.google.protobuf.nano.InvalidProtocolBufferNanoException {
+      return com.google.protobuf.nano.MessageNano.mergeFrom(new Dependencies(), data);
+    }
+
+    public static Dependencies parseFrom(
+            com.google.protobuf.nano.CodedInputByteBufferNano input)
+        throws java.io.IOException {
+      return new Dependencies().mergeFrom(input);
+    }
+  }
+
+  public static final class Dependency extends
+      com.google.protobuf.nano.MessageNano {
+
+    private static volatile Dependency[] _emptyArray;
+    public static Dependency[] emptyArray() {
+      // Lazily initializes the empty array
+      if (_emptyArray == null) {
+        synchronized (
+            com.google.protobuf.nano.InternalNano.LAZY_INIT_LOCK) {
+          if (_emptyArray == null) {
+            _emptyArray = new Dependency[0];
+          }
+        }
+      }
+      return _emptyArray;
+    }
+
+    // optional string packageName = 1;
+    public java.lang.String packageName;
+
+    // optional int32 version = 2;
+    public int version;
+
+    // optional int32 unknown4 = 4;
+    public int unknown4;
+
+    public Dependency() {
+      clear();
+    }
+
+    public Dependency clear() {
+      packageName = "";
+      version = 0;
+      unknown4 = 0;
+      cachedSize = -1;
+      return this;
+    }
+
+    @Override
+    public void writeTo(com.google.protobuf.nano.CodedOutputByteBufferNano output)
+        throws java.io.IOException {
+      if (!this.packageName.equals("")) {
+        output.writeString(1, this.packageName);
+      }
+      if (this.version != 0) {
+        output.writeInt32(2, this.version);
+      }
+      if (this.unknown4 != 0) {
+        output.writeInt32(4, this.unknown4);
+      }
+      super.writeTo(output);
+    }
+
+    @Override
+    protected int computeSerializedSize() {
+      int size = super.computeSerializedSize();
+      if (!this.packageName.equals("")) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeStringSize(1, this.packageName);
+      }
+      if (this.version != 0) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeInt32Size(2, this.version);
+      }
+      if (this.unknown4 != 0) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeInt32Size(4, this.unknown4);
+      }
+      return size;
+    }
+
+    @Override
+    public Dependency mergeFrom(
+            com.google.protobuf.nano.CodedInputByteBufferNano input)
+        throws java.io.IOException {
+      while (true) {
+        int tag = input.readTag();
+        switch (tag) {
+          case 0:
+            return this;
+          default: {
+            if (!com.google.protobuf.nano.WireFormatNano.parseUnknownField(input, tag)) {
+              return this;
+            }
+            break;
+          }
+          case 10: {
+            this.packageName = input.readString();
+            break;
+          }
+          case 16: {
+            this.version = input.readInt32();
+            break;
+          }
+          case 32: {
+            this.unknown4 = input.readInt32();
+            break;
+          }
+        }
+      }
+    }
+
+    public static Dependency parseFrom(byte[] data)
+        throws com.google.protobuf.nano.InvalidProtocolBufferNanoException {
+      return com.google.protobuf.nano.MessageNano.mergeFrom(new Dependency(), data);
+    }
+
+    public static Dependency parseFrom(
+            com.google.protobuf.nano.CodedInputByteBufferNano input)
+        throws java.io.IOException {
+      return new Dependency().mergeFrom(input);
     }
   }
 
@@ -844,6 +2298,24 @@ public interface Messages {
     // optional string detailsUrl = 16;
     public java.lang.String detailsUrl;
 
+    // optional string shareUrl = 17;
+    public java.lang.String shareUrl;
+
+    // optional string reviewsUrl = 18;
+    public java.lang.String reviewsUrl;
+
+    // optional string backendUrl = 19;
+    public java.lang.String backendUrl;
+
+    // optional string purchaseDetailsUrl = 20;
+    public java.lang.String purchaseDetailsUrl;
+
+    // optional bool detailsReusable = 21;
+    public boolean detailsReusable;
+
+    // optional string subtitle = 22;
+    public java.lang.String subtitle;
+
     public DocV2() {
       clear();
     }
@@ -862,6 +2334,12 @@ public interface Messages {
       containerMetadata = null;
       details = null;
       detailsUrl = "";
+      shareUrl = "";
+      reviewsUrl = "";
+      backendUrl = "";
+      purchaseDetailsUrl = "";
+      detailsReusable = false;
+      subtitle = "";
       cachedSize = -1;
       return this;
     }
@@ -922,6 +2400,24 @@ public interface Messages {
       }
       if (!this.detailsUrl.equals("")) {
         output.writeString(16, this.detailsUrl);
+      }
+      if (!this.shareUrl.equals("")) {
+        output.writeString(17, this.shareUrl);
+      }
+      if (!this.reviewsUrl.equals("")) {
+        output.writeString(18, this.reviewsUrl);
+      }
+      if (!this.backendUrl.equals("")) {
+        output.writeString(19, this.backendUrl);
+      }
+      if (!this.purchaseDetailsUrl.equals("")) {
+        output.writeString(20, this.purchaseDetailsUrl);
+      }
+      if (this.detailsReusable != false) {
+        output.writeBool(21, this.detailsReusable);
+      }
+      if (!this.subtitle.equals("")) {
+        output.writeString(22, this.subtitle);
       }
       super.writeTo(output);
     }
@@ -995,6 +2491,30 @@ public interface Messages {
       if (!this.detailsUrl.equals("")) {
         size += com.google.protobuf.nano.CodedOutputByteBufferNano
             .computeStringSize(16, this.detailsUrl);
+      }
+      if (!this.shareUrl.equals("")) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeStringSize(17, this.shareUrl);
+      }
+      if (!this.reviewsUrl.equals("")) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeStringSize(18, this.reviewsUrl);
+      }
+      if (!this.backendUrl.equals("")) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeStringSize(19, this.backendUrl);
+      }
+      if (!this.purchaseDetailsUrl.equals("")) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeStringSize(20, this.purchaseDetailsUrl);
+      }
+      if (this.detailsReusable != false) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeBoolSize(21, this.detailsReusable);
+      }
+      if (!this.subtitle.equals("")) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeStringSize(22, this.subtitle);
       }
       return size;
     }
@@ -1120,6 +2640,30 @@ public interface Messages {
             this.detailsUrl = input.readString();
             break;
           }
+          case 138: {
+            this.shareUrl = input.readString();
+            break;
+          }
+          case 146: {
+            this.reviewsUrl = input.readString();
+            break;
+          }
+          case 154: {
+            this.backendUrl = input.readString();
+            break;
+          }
+          case 162: {
+            this.purchaseDetailsUrl = input.readString();
+            break;
+          }
+          case 168: {
+            this.detailsReusable = input.readBool();
+            break;
+          }
+          case 178: {
+            this.subtitle = input.readString();
+            break;
+          }
         }
       }
     }
@@ -1159,12 +2703,16 @@ public interface Messages {
       // optional .com.google.android.finsky.protos.DocV2 docV2 = 4;
       public com.google.android.finsky.protos.nano.Messages.DocV2 docV2;
 
+      // optional string footerHtml = 5;
+      public java.lang.String footerHtml;
+
       public DetailsResponse() {
         clear();
       }
 
       public DetailsResponse clear() {
         docV2 = null;
+        footerHtml = "";
         cachedSize = -1;
         return this;
       }
@@ -1175,6 +2723,9 @@ public interface Messages {
         if (this.docV2 != null) {
           output.writeMessage(4, this.docV2);
         }
+        if (!this.footerHtml.equals("")) {
+          output.writeString(5, this.footerHtml);
+        }
         super.writeTo(output);
       }
 
@@ -1184,6 +2735,10 @@ public interface Messages {
         if (this.docV2 != null) {
           size += com.google.protobuf.nano.CodedOutputByteBufferNano
             .computeMessageSize(4, this.docV2);
+        }
+        if (!this.footerHtml.equals("")) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeStringSize(5, this.footerHtml);
         }
         return size;
       }
@@ -1208,6 +2763,10 @@ public interface Messages {
                 this.docV2 = new com.google.android.finsky.protos.nano.Messages.DocV2();
               }
               input.readMessage(this.docV2);
+              break;
+            }
+            case 42: {
+              this.footerHtml = input.readString();
               break;
             }
           }
@@ -1629,11 +3188,17 @@ public interface Messages {
       // optional bool aggregateQuery = 3;
       public boolean aggregateQuery;
 
+      // repeated .com.google.android.finsky.protos.Bucket bucket = 4;
+      public com.google.android.finsky.protos.nano.Messages.Bucket[] bucket;
+
       // repeated .com.google.android.finsky.protos.DocV2 doc = 5;
       public com.google.android.finsky.protos.nano.Messages.DocV2[] doc;
 
       // optional bool fullPageReplaced = 8;
       public boolean fullPageReplaced;
+
+      // optional string nextPageUrl = 10;
+      public java.lang.String nextPageUrl;
 
       public SearchResponse() {
         clear();
@@ -1643,8 +3208,10 @@ public interface Messages {
         originalQuery = "";
         suggestedQuery = "";
         aggregateQuery = false;
+        bucket = com.google.android.finsky.protos.nano.Messages.Bucket.emptyArray();
         doc = com.google.android.finsky.protos.nano.Messages.DocV2.emptyArray();
         fullPageReplaced = false;
+        nextPageUrl = "";
         cachedSize = -1;
         return this;
       }
@@ -1661,6 +3228,14 @@ public interface Messages {
         if (this.aggregateQuery != false) {
           output.writeBool(3, this.aggregateQuery);
         }
+        if (this.bucket != null && this.bucket.length > 0) {
+          for (int i = 0; i < this.bucket.length; i++) {
+            com.google.android.finsky.protos.nano.Messages.Bucket element = this.bucket[i];
+            if (element != null) {
+              output.writeMessage(4, element);
+            }
+          }
+        }
         if (this.doc != null && this.doc.length > 0) {
           for (int i = 0; i < this.doc.length; i++) {
             com.google.android.finsky.protos.nano.Messages.DocV2 element = this.doc[i];
@@ -1671,6 +3246,9 @@ public interface Messages {
         }
         if (this.fullPageReplaced != false) {
           output.writeBool(8, this.fullPageReplaced);
+        }
+        if (!this.nextPageUrl.equals("")) {
+          output.writeString(10, this.nextPageUrl);
         }
         super.writeTo(output);
       }
@@ -1690,6 +3268,15 @@ public interface Messages {
           size += com.google.protobuf.nano.CodedOutputByteBufferNano
               .computeBoolSize(3, this.aggregateQuery);
         }
+        if (this.bucket != null && this.bucket.length > 0) {
+          for (int i = 0; i < this.bucket.length; i++) {
+            com.google.android.finsky.protos.nano.Messages.Bucket element = this.bucket[i];
+            if (element != null) {
+              size += com.google.protobuf.nano.CodedOutputByteBufferNano
+                .computeMessageSize(4, element);
+            }
+          }
+        }
         if (this.doc != null && this.doc.length > 0) {
           for (int i = 0; i < this.doc.length; i++) {
             com.google.android.finsky.protos.nano.Messages.DocV2 element = this.doc[i];
@@ -1702,6 +3289,10 @@ public interface Messages {
         if (this.fullPageReplaced != false) {
           size += com.google.protobuf.nano.CodedOutputByteBufferNano
               .computeBoolSize(8, this.fullPageReplaced);
+        }
+        if (!this.nextPageUrl.equals("")) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeStringSize(10, this.nextPageUrl);
         }
         return size;
       }
@@ -1733,6 +3324,26 @@ public interface Messages {
               this.aggregateQuery = input.readBool();
               break;
             }
+            case 34: {
+              int arrayLength = com.google.protobuf.nano.WireFormatNano
+                  .getRepeatedFieldArrayLength(input, 34);
+              int i = this.bucket == null ? 0 : this.bucket.length;
+              com.google.android.finsky.protos.nano.Messages.Bucket[] newArray =
+                  new com.google.android.finsky.protos.nano.Messages.Bucket[i + arrayLength];
+              if (i != 0) {
+                java.lang.System.arraycopy(this.bucket, 0, newArray, 0, i);
+              }
+              for (; i < newArray.length - 1; i++) {
+                newArray[i] = new com.google.android.finsky.protos.nano.Messages.Bucket();
+                input.readMessage(newArray[i]);
+                input.readTag();
+              }
+              // Last one without readTag.
+              newArray[i] = new com.google.android.finsky.protos.nano.Messages.Bucket();
+              input.readMessage(newArray[i]);
+              this.bucket = newArray;
+              break;
+            }
             case 42: {
               int arrayLength = com.google.protobuf.nano.WireFormatNano
                   .getRepeatedFieldArrayLength(input, 42);
@@ -1755,6 +3366,10 @@ public interface Messages {
             }
             case 64: {
               this.fullPageReplaced = input.readBool();
+              break;
+            }
+            case 82: {
+              this.nextPageUrl = input.readString();
               break;
             }
           }
@@ -3204,6 +4819,153 @@ public interface Messages {
       }
     }
 
+    public static final class PreFetch extends
+        com.google.protobuf.nano.MessageNano {
+
+      private static volatile PreFetch[] _emptyArray;
+      public static PreFetch[] emptyArray() {
+        // Lazily initializes the empty array
+        if (_emptyArray == null) {
+          synchronized (
+              com.google.protobuf.nano.InternalNano.LAZY_INIT_LOCK) {
+            if (_emptyArray == null) {
+              _emptyArray = new PreFetch[0];
+            }
+          }
+        }
+        return _emptyArray;
+      }
+
+      // optional string url = 1;
+      public java.lang.String url;
+
+      // optional .com.google.android.finsky.protos.Response.ResponseWrapper response = 2;
+      public com.google.android.finsky.protos.nano.Messages.Response.ResponseWrapper response;
+
+      // optional string etag = 3;
+      public java.lang.String etag;
+
+      // optional int64 ttl = 4;
+      public long ttl;
+
+      // optional int64 softTtl = 5;
+      public long softTtl;
+
+      public PreFetch() {
+        clear();
+      }
+
+      public PreFetch clear() {
+        url = "";
+        response = null;
+        etag = "";
+        ttl = 0L;
+        softTtl = 0L;
+        cachedSize = -1;
+        return this;
+      }
+
+      @Override
+      public void writeTo(com.google.protobuf.nano.CodedOutputByteBufferNano output)
+          throws java.io.IOException {
+        if (!this.url.equals("")) {
+          output.writeString(1, this.url);
+        }
+        if (this.response != null) {
+          output.writeMessage(2, this.response);
+        }
+        if (!this.etag.equals("")) {
+          output.writeString(3, this.etag);
+        }
+        if (this.ttl != 0L) {
+          output.writeInt64(4, this.ttl);
+        }
+        if (this.softTtl != 0L) {
+          output.writeInt64(5, this.softTtl);
+        }
+        super.writeTo(output);
+      }
+
+      @Override
+      protected int computeSerializedSize() {
+        int size = super.computeSerializedSize();
+        if (!this.url.equals("")) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeStringSize(1, this.url);
+        }
+        if (this.response != null) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeMessageSize(2, this.response);
+        }
+        if (!this.etag.equals("")) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeStringSize(3, this.etag);
+        }
+        if (this.ttl != 0L) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeInt64Size(4, this.ttl);
+        }
+        if (this.softTtl != 0L) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeInt64Size(5, this.softTtl);
+        }
+        return size;
+      }
+
+      @Override
+      public PreFetch mergeFrom(
+              com.google.protobuf.nano.CodedInputByteBufferNano input)
+          throws java.io.IOException {
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              return this;
+            default: {
+              if (!com.google.protobuf.nano.WireFormatNano.parseUnknownField(input, tag)) {
+                return this;
+              }
+              break;
+            }
+            case 10: {
+              this.url = input.readString();
+              break;
+            }
+            case 18: {
+              if (this.response == null) {
+                this.response = new com.google.android.finsky.protos.nano.Messages.Response.ResponseWrapper();
+              }
+              input.readMessage(this.response);
+              break;
+            }
+            case 26: {
+              this.etag = input.readString();
+              break;
+            }
+            case 32: {
+              this.ttl = input.readInt64();
+              break;
+            }
+            case 40: {
+              this.softTtl = input.readInt64();
+              break;
+            }
+          }
+        }
+      }
+
+      public static PreFetch parseFrom(byte[] data)
+          throws com.google.protobuf.nano.InvalidProtocolBufferNanoException {
+        return com.google.protobuf.nano.MessageNano.mergeFrom(new PreFetch(), data);
+      }
+
+      public static PreFetch parseFrom(
+              com.google.protobuf.nano.CodedInputByteBufferNano input)
+          throws java.io.IOException {
+        return new PreFetch().mergeFrom(input);
+      }
+    }
+
     public static final class ResponseWrapper extends
         com.google.protobuf.nano.MessageNano {
 
@@ -3227,6 +4989,9 @@ public interface Messages {
       // optional .com.google.android.finsky.protos.ResponseMessages.ServerCommands commands = 2;
       public com.google.android.finsky.protos.nano.Messages.ResponseMessages.ServerCommands commands;
 
+      // repeated .com.google.android.finsky.protos.Response.PreFetch preFetch = 3;
+      public com.google.android.finsky.protos.nano.Messages.Response.PreFetch[] preFetch;
+
       // optional .com.google.android.finsky.protos.ResponseMessages.ServerMetadata serverMetadata = 5;
       public com.google.android.finsky.protos.nano.Messages.ResponseMessages.ServerMetadata serverMetadata;
 
@@ -3237,6 +5002,7 @@ public interface Messages {
       public ResponseWrapper clear() {
         payload = null;
         commands = null;
+        preFetch = com.google.android.finsky.protos.nano.Messages.Response.PreFetch.emptyArray();
         serverMetadata = null;
         cachedSize = -1;
         return this;
@@ -3250,6 +5016,14 @@ public interface Messages {
         }
         if (this.commands != null) {
           output.writeMessage(2, this.commands);
+        }
+        if (this.preFetch != null && this.preFetch.length > 0) {
+          for (int i = 0; i < this.preFetch.length; i++) {
+            com.google.android.finsky.protos.nano.Messages.Response.PreFetch element = this.preFetch[i];
+            if (element != null) {
+              output.writeMessage(3, element);
+            }
+          }
         }
         if (this.serverMetadata != null) {
           output.writeMessage(5, this.serverMetadata);
@@ -3267,6 +5041,15 @@ public interface Messages {
         if (this.commands != null) {
           size += com.google.protobuf.nano.CodedOutputByteBufferNano
             .computeMessageSize(2, this.commands);
+        }
+        if (this.preFetch != null && this.preFetch.length > 0) {
+          for (int i = 0; i < this.preFetch.length; i++) {
+            com.google.android.finsky.protos.nano.Messages.Response.PreFetch element = this.preFetch[i];
+            if (element != null) {
+              size += com.google.protobuf.nano.CodedOutputByteBufferNano
+                .computeMessageSize(3, element);
+            }
+          }
         }
         if (this.serverMetadata != null) {
           size += com.google.protobuf.nano.CodedOutputByteBufferNano
@@ -3302,6 +5085,26 @@ public interface Messages {
                 this.commands = new com.google.android.finsky.protos.nano.Messages.ResponseMessages.ServerCommands();
               }
               input.readMessage(this.commands);
+              break;
+            }
+            case 26: {
+              int arrayLength = com.google.protobuf.nano.WireFormatNano
+                  .getRepeatedFieldArrayLength(input, 26);
+              int i = this.preFetch == null ? 0 : this.preFetch.length;
+              com.google.android.finsky.protos.nano.Messages.Response.PreFetch[] newArray =
+                  new com.google.android.finsky.protos.nano.Messages.Response.PreFetch[i + arrayLength];
+              if (i != 0) {
+                java.lang.System.arraycopy(this.preFetch, 0, newArray, 0, i);
+              }
+              for (; i < newArray.length - 1; i++) {
+                newArray[i] = new com.google.android.finsky.protos.nano.Messages.Response.PreFetch();
+                input.readMessage(newArray[i]);
+                input.readTag();
+              }
+              // Last one without readTag.
+              newArray[i] = new com.google.android.finsky.protos.nano.Messages.Response.PreFetch();
+              input.readMessage(newArray[i]);
+              this.preFetch = newArray;
               break;
             }
             case 42: {

@@ -16,9 +16,7 @@ import com.android.volley.toolbox.HttpHeaderParser;
 import com.google.android.finsky.protos.nano.Messages.Response;
 import com.google.android.finsky.protos.nano.Messages.ResponseMessages;
 import com.google.android.finsky.utils.Utils;
-import com.google.android.play.dfe.utils.NanoProtoHelper;
 import com.google.protobuf.nano.InvalidProtocolBufferNanoException;
-import com.google.protobuf.nano.MessageNano;
 import com.google.protobuf.nano.MessageNanoPrinter;
 
 import java.io.ByteArrayInputStream;
@@ -30,7 +28,7 @@ import java.util.zip.GZIPInputStream;
 
 import info.anodsplace.android.log.AppLog;
 
-class DfeRequest<T extends MessageNano> extends Request<Response.ResponseWrapper>
+class DfeRequest extends Request<Response.ResponseWrapper>
 {    private static final boolean SKIP_ALL_CACHES = false;
 
     private static final boolean PROTO_DEBUG;
@@ -38,8 +36,7 @@ class DfeRequest<T extends MessageNano> extends Request<Response.ResponseWrapper
     private final DfeApiContext mApiContext;
     private boolean mAvoidBulkCancel;
     private Map<String, String> mExtraHeaders;
-    private com.android.volley.Response.Listener<T> mListener;
-    private final Class<T> mResponseClass;
+    private com.android.volley.Response.Listener<Response.ResponseWrapper> listener;
     private boolean mResponseDelivered;
     private DfeResponseVerifier mResponseVerifier;
     private long mServerLatencyMs;
@@ -48,23 +45,22 @@ class DfeRequest<T extends MessageNano> extends Request<Response.ResponseWrapper
         PROTO_DEBUG = Log.isLoggable("AppWatcher.DfeProto", Log.VERBOSE);
     }
     
-     DfeRequest(final int method, final String s, final DfeApiContext mApiContext, final Class<T> mResponseClass, final com.android.volley.Response.Listener<T> mListener, final com.android.volley.Response.ErrorListener errorListener) {
-        super(method, Uri.withAppendedPath(DfeApi.BASE_URI, s).toString(), errorListener);
+     DfeRequest(final int method, final String url, final DfeApiContext apiContext, final com.android.volley.Response.Listener<Response.ResponseWrapper> listener, final com.android.volley.Response.ErrorListener errorListener) {
+        super(method, Uri.withAppendedPath(DfeApi.BASE_URI, url).toString(), errorListener);
         this.mAllowMultipleResponses = false;
         this.mServerLatencyMs = -1L;
         this.mAvoidBulkCancel = false;
-        if (TextUtils.isEmpty((CharSequence)s)) {
+        if (TextUtils.isEmpty(url)) {
             AppLog.e("Empty DFE URL");
         }
         this.setShouldCache(!SKIP_ALL_CACHES);
-        this.setRetryPolicy(new DfeRetryPolicy(mApiContext));
-        this.mApiContext = mApiContext;
-        this.mListener = mListener;
-        this.mResponseClass = mResponseClass;
+        this.setRetryPolicy(new DfeRetryPolicy(apiContext));
+        this.mApiContext = apiContext;
+        this.listener = listener;
     }
     
-    DfeRequest(final String url, final DfeApiContext dfeApiContext, final Class<T> clazz, final com.android.volley.Response.Listener<T> listener, final com.android.volley.Response.ErrorListener errorListener) {
-        this(Method.GET, url, dfeApiContext, clazz, listener, errorListener);
+    DfeRequest(final String url, final DfeApiContext dfeApiContext, final com.android.volley.Response.Listener<Response.ResponseWrapper> listener, final com.android.volley.Response.ErrorListener errorListener) {
+        this(Method.GET, url, dfeApiContext, listener, errorListener);
     }
     
     private String getSignatureResponse(final NetworkResponse networkResponse) {
@@ -149,13 +145,13 @@ class DfeRequest<T extends MessageNano> extends Request<Response.ResponseWrapper
             }
             return this.parseWrapperAndVerifyFromBytes(networkResponse, signatureResponse);
         }
-        catch (InvalidProtocolBufferNanoException ex2) {
+        catch (InvalidProtocolBufferNanoException ex) {
 //            if (!gzip) {
 //                return this.parseWrapperAndVerifySignature(networkResponse, true);
 //            }
             AppLog.d("Cannot parse response as ResponseWrapper proto.");
         }
-        catch (IOException ex3) {
+        catch (IOException ex) {
             AppLog.w("IOException while manually unzipping request.");
         }
         catch (DfeResponseVerifier.DfeResponseVerifierException ex) {
@@ -175,11 +171,11 @@ class DfeRequest<T extends MessageNano> extends Request<Response.ResponseWrapper
         return from;
     }
     
-    public void addExtraHeader(final String s, final String s2) {
+    public void addExtraHeader(final String key, final String value) {
         if (this.mExtraHeaders == null) {
-            this.mExtraHeaders = new HashMap<String, String>();
+            this.mExtraHeaders = new HashMap<>();
         }
-        this.mExtraHeaders.put(s, s2);
+        this.mExtraHeaders.put(key, value);
     }
     
     @Override
@@ -191,10 +187,14 @@ class DfeRequest<T extends MessageNano> extends Request<Response.ResponseWrapper
         AppLog.d("Not delivering error response for request=[%s], error=[%s] because response already delivered.", this, volleyError);
     }
     
-    public void deliverResponse(final Response.ResponseWrapper responseWrapper) {
-        MessageNano parsedResponseFromWrapper;
+    protected void deliverResponse(final Response.ResponseWrapper wrapper) {
+        Response.Payload payload = wrapper.payload;
         try {
-            parsedResponseFromWrapper = NanoProtoHelper.getParsedResponseFromWrapper(responseWrapper.payload, Response.Payload.class, this.mResponseClass);
+            if (payload.searchResponse != null || payload.listResponse != null) {
+                if (wrapper.preFetch.length > 0) {
+                    payload = wrapper.preFetch[0].response.payload;
+                }
+            }
         }
         catch (Exception ex) {
             AppLog.e("Null wrapper parsed for request=[%s]", this);
@@ -202,13 +202,13 @@ class DfeRequest<T extends MessageNano> extends Request<Response.ResponseWrapper
             return;
         }
 
-        if (parsedResponseFromWrapper == null) {
+        if (payload == null) {
             AppLog.e("Null parsed response for request=[%s]", this);
             this.deliverError(new VolleyError());
             return;
         }
         if (this.mAllowMultipleResponses || !this.mResponseDelivered) {
-            this.mListener.onResponse((T)parsedResponseFromWrapper);
+            this.listener.onResponse(wrapper);
             this.mResponseDelivered = true;
         } else {
             AppLog.d("Not delivering second response for request=[%s]", this);
@@ -264,7 +264,10 @@ class DfeRequest<T extends MessageNano> extends Request<Response.ResponseWrapper
         if (error instanceof ServerError && error.networkResponse != null) {
             final Response.ResponseWrapper wrapperAndVerifySignature = this.parseWrapperAndVerifySignature(error.networkResponse, false);
             if (wrapperAndVerifySignature != null) {
-                error = this.handleServerCommands(wrapperAndVerifySignature).error;
+                com.android.volley.Response<Response.ResponseWrapper> response = this.handleServerCommands(wrapperAndVerifySignature);
+                if (response != null) {
+                    error = response.error;
+                }
             }
         }
         return error;
