@@ -14,7 +14,7 @@ internal class ImportAdapter(
         private val mDataProvider: ImportDataProvider)
     : InstalledAppsAdapter(context, pm, mDataProvider, null) {
 
-    private var mPackageIndex: SimpleArrayMap<String, Int> = SimpleArrayMap()
+    private var packageIndex: SimpleArrayMap<String, Int> = SimpleArrayMap()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppViewHolderBase {
         val v = LayoutInflater.from(mContext).inflate(R.layout.list_item_import_app, parent, false)
@@ -25,14 +25,14 @@ internal class ImportAdapter(
     }
 
     fun clearPackageIndex() {
-        mPackageIndex = SimpleArrayMap<String, Int>()
+        packageIndex = SimpleArrayMap<String, Int>()
     }
 
     fun storePackageIndex(packageName: String, idx: Int) {
-        mPackageIndex.put(packageName, idx)
+        packageIndex.put(packageName, idx)
     }
 
     fun notifyPackageStatusChanged(packageName: String) {
-        notifyItemChanged(mPackageIndex.get(packageName))
+        notifyItemChanged(packageIndex.get(packageName))
     }
 }
