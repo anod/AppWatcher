@@ -305,8 +305,7 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
     }
 
     private fun requestBulkDetails(docIds: Set<String>, endpoint: BulkDetailsEndpoint): List<Document> {
-        val listDocIds = ArrayList(docIds)
-        endpoint.setDocIds(listDocIds)
+        endpoint.docIds = docIds.toList()
         endpoint.startSync()
         return endpoint.documents
     }

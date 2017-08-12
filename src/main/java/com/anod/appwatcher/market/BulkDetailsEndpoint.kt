@@ -12,7 +12,7 @@ import com.google.android.finsky.api.model.Document
  * @date 2015-02-22
  */
 class BulkDetailsEndpoint(context: Context) : PlayStoreEndpointBase(context) {
-    private var mDocIds: List<String>? = null
+    var docIds: List<String> = listOf()
 
     var bulkData: DfeBulkDetails?
         get() = data as? DfeBulkDetails
@@ -20,22 +20,18 @@ class BulkDetailsEndpoint(context: Context) : PlayStoreEndpointBase(context) {
             data = value
         }
 
+    val documents: List<Document>
+        get() = bulkData?.documents ?: emptyList()
+
     override fun executeAsync() {
-        bulkData?.docIds = mDocIds
+        bulkData?.docIds = docIds
         bulkData?.startAsync()
     }
 
     override fun executeSync() {
-        bulkData?.docIds = mDocIds
+        bulkData?.docIds = docIds
         bulkData?.startSync()
     }
-
-    fun setDocIds(docIds: List<String>) {
-        mDocIds = docIds
-    }
-
-    val documents: List<Document>
-        get() = bulkData?.documents ?: emptyList()
 
     override fun createDfeModel(): DfeModel {
         return DfeBulkDetails(dfeApi, AppDetailsFilter.predicate)

@@ -175,11 +175,11 @@ public abstract class PaginatedList<T, D> extends DfeModel implements Response.L
     }
 
     @Override
-    public void onResponse(final Messages.Response.ResponseWrapper lastResponse) {
+    public void onResponse(final Messages.Response.ResponseWrapper wrapper) {
         this.clearErrors();
-        this.lastResponse = lastResponse;
+        this.lastResponse = wrapper;
         final int size = this.items.size();
-        final D[] itemsFromResponse = this.getItemsFromResponse(lastResponse);
+        final D[] itemsFromResponse = this.getItemsFromResponse(wrapper);
         this.updateItemsUntilEndCount(itemsFromResponse.length);
         for (int i = 0; i < itemsFromResponse.length; ++i) {
             if (i + this.currentOffset < this.items.size()) {
@@ -189,7 +189,7 @@ public abstract class PaginatedList<T, D> extends DfeModel implements Response.L
                 this.items.add(itemsFromResponse[i]);
             }
         }
-        final String nextPageUrl = this.getNextPageUrl(lastResponse);
+        final String nextPageUrl = this.getNextPageUrl(wrapper);
         if (!TextUtils.isEmpty(nextPageUrl) && (this.currentOffset == size || this.itemsRemoved)) {
             this.urlOffsetList.add(new UrlOffsetPair(this.items.size(), nextPageUrl));
         }

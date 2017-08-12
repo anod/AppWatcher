@@ -23,7 +23,7 @@ public abstract class DfeBaseModel extends DfeModel implements Response.Listener
         RequestFuture<Messages.Response.ResponseWrapper> future = RequestFuture.newFuture();
 
         execute(future, future);
-        Messages.Response.ResponseWrapper response = null;
+        Messages.Response.ResponseWrapper response;
         try {
             response = future.get();
         } catch (ExecutionException e) {
@@ -35,9 +35,19 @@ public abstract class DfeBaseModel extends DfeModel implements Response.Listener
                 AppLog.e(cause);
                 onErrorResponse(new VolleyError("Response exception: " + cause.getMessage(), cause));
             }
+            return;
         } catch (InterruptedException e) {
             AppLog.e(e);
             onErrorResponse(new VolleyError("Response exception: "+e.getMessage(), e));
+            return;
+        }
+        if (response == null) {
+            onErrorResponse(new VolleyError("Response exception: Response is null"));
+            return;
+        }
+        if (response.payload == null) {
+            onErrorResponse(new VolleyError("Response exception: Payload is null"));
+            return;
         }
         onResponse(response);
     }

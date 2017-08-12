@@ -73,7 +73,7 @@ internal class ImportBulkManager(
     private fun nextBulk() {
         val docIds = listsDocIds[currentBulk]
         mListener.onImportStart(docIds)
-        mEndpoint.setDocIds(docIds)
+        mEndpoint.docIds = docIds
         mEndpoint.startAsync()
     }
 
