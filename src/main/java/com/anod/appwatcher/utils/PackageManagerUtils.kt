@@ -33,7 +33,6 @@ object PackageManagerUtils {
 
     internal fun loadIcon(componentName: ComponentName, displayMetrics: DisplayMetrics, pm: PackageManager): Bitmap? {
         var d: Drawable? = null
-        val icon: Bitmap
         try {
             d = pm.getActivityIcon(componentName)
         } catch (ignored: PackageManager.NameNotFoundException) {
@@ -46,17 +45,20 @@ object PackageManagerUtils {
                 AppLog.e(e1)
                 return null
             }
-
         }
 
         if (d is BitmapDrawable) {
             // Ensure the bitmap has a density.
             val bitmapDrawable = d
-            icon = bitmapDrawable.bitmap
-            if (icon.density == Bitmap.DENSITY_NONE) {
+            if (bitmapDrawable.bitmap.density == Bitmap.DENSITY_NONE) {
                 bitmapDrawable.setTargetDensity(displayMetrics)
             }
-            return icon
+            if (bitmapDrawable.bitmap.isRecycled) {
+                AppLog.e("Bitmap is recycled for $componentName")
+                return null
+            }
+            // copy to avoid recycling problems
+            return bitmapDrawable.bitmap.copy(bitmapDrawable.bitmap.config, true)
         }
         return null
     }
