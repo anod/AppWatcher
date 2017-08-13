@@ -22,7 +22,7 @@ open class AppViewHolder(
     val section: View = itemView.findViewById(R.id.sec_header)
     val sectionText: TextView = itemView.findViewById(R.id.sec_header_title)
     val sectionCount: TextView = itemView.findViewById(R.id.sec_header_count)
-    val icon: ImageView = itemView.findViewById(android.R.id.icon)
+    val icon: ImageView = itemView.findViewById(R.id.icon)
     val newIndicator: View = itemView.findViewById(R.id.new_indicator)
     val actionButton: Button = itemView.findViewById(R.id.sec_action_button)
     val detailsView: AppDetailsView
