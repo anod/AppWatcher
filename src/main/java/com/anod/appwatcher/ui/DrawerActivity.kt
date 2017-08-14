@@ -31,17 +31,17 @@ import com.anod.appwatcher.wishlist.WishlistFragment
  */
 abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelectionListener {
 
-    private var mDrawerLayout: DrawerLayout? = null
-    private var mAccountNameView: TextView? = null
-    private var mNavigationView: NavigationView? = null
-    private var mAuthToken: String? = null
+    private var drawerLayout: DrawerLayout? = null
+    private var accountNameView: TextView? = null
+    private var navigationView: NavigationView? = null
+    private var authToken: String? = null
 
     val accountChooser: AccountChooser by lazy {
         AccountChooser(this, App.provide(this).prefs, this)
     }
 
-    protected open val isDrawerEnabled: Boolean
-        get() = true
+    open val isHomeAsMenu: Boolean
+        get() = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,9 +51,11 @@ abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelec
     protected fun setupDrawer() {
         setupToolbar()
 
-        if (isDrawerEnabled) {
-            mDrawerLayout = findViewById<View>(R.id.drawer_layout) as DrawerLayout
-            mDrawerLayout?.addDrawerListener(object: DrawerLayout.SimpleDrawerListener() {
+        this.drawerLayout = findViewById<DrawerLayout>(R.id.drawer_layout)
+        this.navigationView = findViewById<NavigationView>(R.id.nav_view)
+
+        if (this.navigationView != null) {
+            this.drawerLayout?.addDrawerListener(object: DrawerLayout.SimpleDrawerListener() {
                 override fun onDrawerOpened(drawerView: View?) {
                     super.onDrawerOpened(drawerView)
                     drawerView?.postDelayed({
@@ -61,8 +63,8 @@ abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelec
                     }, 300L)
                 }
             })
-            mNavigationView = findViewById<View>(R.id.nav_view) as NavigationView
-            setupDrawerContent(mNavigationView!!)
+
+            setupDrawerContent()
             updateTags()
             val observer = TagsUpdateObserver(this)
             contentResolver.registerContentObserver(DbContentProvider.TAGS_CONTENT_URI, true, observer)
@@ -70,10 +72,10 @@ abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelec
         }
     }
 
-    private fun setupDrawerContent(navigationView: NavigationView) {
-        val headerView = navigationView.getHeaderView(0)
+    private fun setupDrawerContent() {
+        val headerView = this.navigationView?.getHeaderView(0) ?: return
 
-        mAccountNameView = headerView.findViewById<View>(R.id.account_name) as TextView
+        accountNameView = headerView.findViewById<View>(R.id.account_name) as TextView
         val changeAccount = headerView.findViewById<View>(R.id.account_change) as LinearLayout
         changeAccount.setOnClickListener { onAccountChooseClick() }
 
@@ -85,24 +87,24 @@ abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelec
             lastUpdateView.text = lastUpdate
             lastUpdateView.visibility = View.VISIBLE
         } else {
-            lastUpdateView.visibility = View.GONE/**/
+            lastUpdateView.visibility = View.GONE
         }
 
-        navigationView.setNavigationItemSelectedListener { menuItem ->
-            mDrawerLayout?.closeDrawers()
+        this.navigationView?.setNavigationItemSelectedListener { menuItem ->
+            this.drawerLayout?.closeDrawers()
             onOptionsItemSelected(menuItem)
             true
         }
     }
 
     fun updateTagsIfVisible() {
-        if (mDrawerLayout?.isDrawerVisible(GravityCompat.START) == true) {
+        if (this.drawerLayout?.isDrawerVisible(GravityCompat.START) == true) {
             updateTags()
         }
     }
 
     private fun updateTags() {
-        val menu = mNavigationView!!.menu
+        val menu = this.navigationView?.menu ?: return
         menu.removeGroup(1)
 
         val tags = TagsContentProviderClient(this)
@@ -119,7 +121,7 @@ abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelec
             val d = ResourcesCompat.getDrawable(resources, R.drawable.circular_color, null)
             DrawableCompat.setTint(DrawableCompat.wrap(d!!), tag.color)
             tagIndicator.setBackgroundDrawable(d)
-            tagIndicator.text = if (count > 100) "99+" else "" + count
+            tagIndicator.text = if (count > 99) "99+" else "" + count
             item.intent = AppsTagActivity.createTagIntent(tag, this)
         }
         cr.close()
@@ -140,7 +142,7 @@ abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelec
     }
 
     override fun onAccountSelected(account: Account, authSubToken: String?) {
-        mAuthToken = authSubToken
+        authToken = authSubToken
         if (authSubToken == null) {
             if (App.with(this).isNetworkAvailable) {
                 Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
@@ -150,9 +152,7 @@ abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelec
             return
         }
 
-        if (isDrawerEnabled) {
-            setDrawerAccount(account)
-        }
+        setDrawerAccount(account)
     }
 
     override fun onAccountNotFound(errorMessage: String) {
@@ -170,8 +170,8 @@ abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelec
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> {
-                if (isDrawerEnabled) {
-                    mDrawerLayout?.openDrawer(GravityCompat.START)
+                if (this.isHomeAsMenu) {
+                    this.drawerLayout?.openDrawer(GravityCompat.START)
                     return true
                 }
                 return super.onOptionsItemSelected(item)
@@ -193,7 +193,7 @@ abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelec
             R.id.menu_wishlist -> {
                 val args = Bundle()
                 args.putParcelable(WishlistFragment.EXTRA_ACCOUNT, App.provide(this).prefs.account)
-                args.putString(WishlistFragment.EXTRA_AUTH_TOKEN, mAuthToken)
+                args.putString(WishlistFragment.EXTRA_AUTH_TOKEN, authToken)
                 startActivity(FragmentToolbarActivity.intent(WishlistFragment.TAG, args, this))
                 return true
             }
@@ -208,24 +208,23 @@ abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelec
 
     protected fun setDrawerAccount(account: Account?) {
         if (account == null) {
-            mAccountNameView!!.setText(R.string.choose_an_account)
+            accountNameView?.setText(R.string.choose_an_account)
         } else {
-            mAccountNameView!!.text = account.name
+            accountNameView?.text = account.name
         }
     }
 
     val isAuthenticated: Boolean
-        get() = mAuthToken != null
+        get() = authToken != null
 
     fun showAccountsDialogWithCheck() {
         Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
         accountChooser.showAccountsDialogWithCheck()
     }
 
-    internal class TagsUpdateObserver(private val mDrawerActivity: DrawerActivity) : ContentObserver(Handler()) {
-
+    internal class TagsUpdateObserver(private val activity: DrawerActivity) : ContentObserver(Handler()) {
         override fun onChange(selfChange: Boolean) {
-            mDrawerActivity.updateTagsIfVisible()
+            activity.updateTagsIfVisible()
         }
     }
 }

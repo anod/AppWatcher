@@ -76,7 +76,7 @@ abstract class AppWatcherBaseActivity : DrawerActivity(), TextView.OnEditorActio
         setContentView(contentLayout)
         setupDrawer()
 
-        var filterId = Filters.TAB_ALL
+        val filterId: Int
         if (savedInstanceState != null) {
             filterId = savedInstanceState.getInt("tab_id", Filters.TAB_ALL)
             filterQuery = savedInstanceState.getString("filter") ?: ""

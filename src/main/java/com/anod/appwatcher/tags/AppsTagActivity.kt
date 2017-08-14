@@ -28,8 +28,6 @@ class AppsTagActivity : AppWatcherBaseActivity() {
         get() = R.layout.activity_main
     override val menuResource: Int
         get() = R.menu.main_tag
-    override val isDrawerEnabled: Boolean
-        get() = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         mTag = intentExtras.getParcelable<Tag>(EXTRA_TAG)

@@ -15,6 +15,9 @@ import info.anodsplace.android.log.AppLog
 
 class AppWatcherActivity : AppWatcherBaseActivity(), TextView.OnEditorActionListener, SearchView.OnQueryTextListener {
 
+    override val isHomeAsMenu: Boolean
+        get() = true
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportActionBar!!.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp)
