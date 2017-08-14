@@ -1,7 +1,5 @@
 package com.anod.appwatcher.sync
 
-import android.accounts.AuthenticatorException
-import android.accounts.OperationCanceledException
 import android.content.ContentProviderClient
 import android.content.ContentValues
 import android.content.Context
@@ -29,7 +27,6 @@ import com.anod.appwatcher.utils.GooglePlayServices
 import com.anod.appwatcher.utils.InstalledAppsProvider
 import com.google.android.finsky.api.model.Document
 import info.anodsplace.android.log.AppLog
-import java.io.IOException
 import java.util.*
 
 /**
@@ -129,16 +126,15 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
 
 
     @Throws(RemoteException::class)
-    private fun doSync(client: DbContentProviderClient, lastUpdatesViewed: Boolean, endpoint: BulkDetailsEndpoint?): ArrayList<UpdatedApp> {
-        val updatedTitles = ArrayList<UpdatedApp>()
+    private fun doSync(client: DbContentProviderClient, lastUpdatesViewed: Boolean, endpoint: BulkDetailsEndpoint?): List<UpdatedApp> {
 
         if (endpoint == null) {
-            return updatedTitles
+            return listOf()
         }
 
         val apps = client.queryAll(false)
-        if (apps == null || !apps.moveToFirst()) {
-            return updatedTitles
+        if (!apps.moveToFirst()) {
+            return listOf()
         }
         apps.moveToPosition(-1)
 
@@ -146,6 +142,7 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
 
         val localApps = HashMap<String, AppInfo>(bulkSize)
         var i = 1
+        val updatedTitles = mutableListOf<UpdatedApp>()
         while (apps.moveToNext()) {
 
             val localApp = apps.appInfo
@@ -182,16 +179,17 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
         return updatedTitles
     }
 
-    private fun updateApps(documents: List<Document>, localApps: Map<String, AppInfo>, client: DbContentProviderClient, updatedTitles: ArrayList<UpdatedApp>, lastUpdatesViewed: Boolean) {
+    private fun updateApps(documents: List<Document>, localApps: Map<String, AppInfo>, client: DbContentProviderClient, updatedTitles: MutableList<UpdatedApp>, lastUpdatesViewed: Boolean) {
         val fetched = mutableMapOf<String, Boolean>()
         val batch = mutableListOf<ContentValues>()
         for (marketApp in documents) {
             val docId = marketApp.docId
-            val localApp = localApps[docId]!!
-            fetched[docId] = true
-            val values = updateApp(marketApp, localApp, updatedTitles, lastUpdatesViewed)
-            if (values.size() > 0) {
-                batch.add(values)
+            localApps[docId]?.let {
+                fetched[docId] = true
+                val values = updateApp(marketApp, it, updatedTitles, lastUpdatesViewed)
+                if (values.size() > 0) {
+                    batch.add(values)
+                }
             }
         }
 
@@ -208,7 +206,7 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
                 {
                     if (it.status == AppInfoMetadata.STATUS_UPDATED) {
                         it.status = AppInfoMetadata.STATUS_NORMAL
-                        AppLog.d("Mark not fetched app as old")
+                        AppLog.d("Set not fetched app as viewed")
                         val values = ContentValues()
                         values.put(BaseColumns._ID, it.rowId)
                         values.put(AppListTable.Columns.KEY_STATUS, AppInfoMetadata.STATUS_NORMAL)
@@ -222,26 +220,31 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
         }
     }
 
-    private fun updateApp(marketApp: Document, localApp: AppInfo, updatedTitles: ArrayList<UpdatedApp>, lastUpdatesViewed: Boolean): ContentValues {
+    private fun updateApp(marketApp: Document, localApp: AppInfo, updatedTitles: MutableList<UpdatedApp>, lastUpdatesViewed: Boolean): ContentValues {
         val appDetails = marketApp.appDetails
 
         if (appDetails.versionCode > localApp.versionNumber) {
             AppLog.d("New version found [" + appDetails.versionCode + "]")
             val newApp = createNewVersion(marketApp, localApp)
-
-            val recentChanges = if (updatedTitles.size == 0) appDetails.recentChangesHtml else ""
             val installedInfo = installedAppsProvider.getInfo(appDetails.packageName)
-            updatedTitles.add(UpdatedApp(localApp.appId, marketApp.title, appDetails.packageName, recentChanges!!, appDetails.versionCode, installedInfo.versionCode))
+            val recentChanges = if (updatedTitles.size == 0) appDetails.recentChangesHtml ?: "" else ""
+            updatedTitles.add(UpdatedApp(localApp.appId, marketApp.title, appDetails.packageName, recentChanges, appDetails.versionCode, installedInfo.versionCode))
             return AppListTable.createContentValues(newApp)
         }
 
         AppLog.d("No update found for: " + localApp.appId)
         val values = ContentValues()
+
         //Mark updated app as normal
         if (localApp.status == AppInfoMetadata.STATUS_UPDATED && lastUpdatesViewed) {
+            AppLog.d("Set application update as viewed")
             localApp.status = AppInfoMetadata.STATUS_NORMAL
-            AppLog.d("Mark application as old")
             values.put(AppListTable.Columns.KEY_STATUS, AppInfoMetadata.STATUS_NORMAL)
+        } else if (localApp.status == AppInfoMetadata.STATUS_UPDATED) {
+            // App was previously updated
+            val installedInfo = installedAppsProvider.getInfo(appDetails.packageName)
+            val recentChanges = if (updatedTitles.size == 0) appDetails.recentChangesHtml ?: "" else ""
+            updatedTitles.add(UpdatedApp(localApp.appId, marketApp.title, appDetails.packageName, recentChanges, appDetails.versionCode, installedInfo.versionCode))
         }
         //Refresh app icon if it wasn't fetched previously
         fillMissingData(marketApp, localApp, values)
@@ -266,8 +269,7 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
                 })
             }
             if (filteredApps.isNotEmpty()) {
-                val notification = sn.create(filteredApps)
-                sn.show(notification)
+                sn.show(filteredApps)
             }
         }
     }
@@ -323,12 +325,8 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
         val account = prefs.account ?: return null
         try {
             authToken = tokenHelper.requestTokenBlocking(null, account)
-        } catch (e: IOException) {
-            AppLog.e("AuthToken IOException: " + e.message, e)
-        } catch (e: AuthenticatorException) {
-            AppLog.e("AuthToken AuthenticatorException: " + e.message, e)
-        } catch (e: OperationCanceledException) {
-            AppLog.e("AuthToken OperationCanceledException: " + e.message, e)
+        } catch (e: Throwable) {
+            AppLog.e("AuthToken request exception: " + e.message, e)
         }
 
         if (authToken == null) {

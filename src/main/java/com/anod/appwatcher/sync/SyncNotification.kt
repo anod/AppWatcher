@@ -20,37 +20,38 @@ import com.anod.appwatcher.ui.AppWatcherBaseActivity
  * *
  * @date 2014-09-24
  */
-class SyncNotification(private val mContext: Context) {
+class SyncNotification(private val context: Context) {
 
-    fun show(notification: Notification) {
-        val mNotificationManager = mContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        mNotificationManager.notify(NOTIFICATION_ID, notification)
+    fun show(updatedApps: List<SyncAdapter.UpdatedApp>) {
+        val notification = this.create(updatedApps);
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(NOTIFICATION_ID, notification)
     }
 
     fun cancel() {
-        val mNotificationManager = mContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        mNotificationManager.cancel(NOTIFICATION_ID)
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(NOTIFICATION_ID)
     }
 
-    fun create(updatedApps: List<SyncAdapter.UpdatedApp>): Notification {
-        val notificationIntent = Intent(mContext, AppWatcherActivity::class.java)
+    private fun create(updatedApps: List<SyncAdapter.UpdatedApp>): Notification {
+        val notificationIntent = Intent(context, AppWatcherActivity::class.java)
         notificationIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
         val data = Uri.parse("com.anod.appwatcher://notification")
         notificationIntent.data = data
         notificationIntent.putExtra(AppWatcherBaseActivity.EXTRA_FROM_NOTIFICATION, true)
-        val contentIntent = PendingIntent.getActivity(mContext, 0, notificationIntent, 0)
+        val contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0)
 
-        val title = renderNotificationTitle(updatedApps)
-        val text = renderNotificationText(updatedApps)
+        val title = renderTitle(updatedApps)
+        val text = renderText(updatedApps)
 
-        val builder = NotificationCompat.Builder(mContext)
+        val builder = NotificationCompat.Builder(context)
         builder
-                .setAutoCancel(true)
-                .setSmallIcon(R.drawable.ic_stat_update)
-                .setContentTitle(title)
-                .setContentText(text)
-                .setContentIntent(contentIntent)
-                .setTicker(title)
+            .setAutoCancel(true)
+            .setSmallIcon(R.drawable.ic_stat_update)
+            .setContentTitle(title)
+            .setContentText(text)
+            .setContentIntent(contentIntent)
+            .setTicker(title)
 
         if (updatedApps.size == 1) {
             val app = updatedApps[0]
@@ -80,13 +81,13 @@ class SyncNotification(private val mContext: Context) {
         builder.setStyle(NotificationCompat.BigTextStyle().bigText(sb.toString()))
 
         val updateIntent = createActionIntent(Uri.parse("com.anod.appwatcher://play/myapps/1"), NotificationActivity.TYPE_MYAPPS_UPDATE)
-        builder.addAction(R.drawable.ic_system_update_alt_white_24dp, mContext.getString(R.string.noti_action_update),
-                PendingIntent.getActivity(mContext, 0, updateIntent, 0)
+        builder.addAction(R.drawable.ic_system_update_alt_white_24dp, context.getString(R.string.noti_action_update),
+                PendingIntent.getActivity(context, 0, updateIntent, 0)
         )
 
         val readIntent = createActionIntent(Uri.parse("com.anod.appwatcher://dismiss/"), NotificationActivity.TYPE_DISMISS)
-        builder.addAction(R.drawable.ic_clear_white_24dp, mContext.getString(R.string.dismiss),
-                PendingIntent.getActivity(mContext, 0, readIntent, 0)
+        builder.addAction(R.drawable.ic_clear_white_24dp, context.getString(R.string.dismiss),
+                PendingIntent.getActivity(context, 0, readIntent, 0)
         )
 
     }
@@ -95,7 +96,7 @@ class SyncNotification(private val mContext: Context) {
         var changes: String? = app.recentChanges
         if (changes != null) {
             if (changes == "") {
-                changes = mContext.getString(R.string.no_recent_changes)
+                changes = context.getString(R.string.no_recent_changes)
             } else {
                 builder.setContentText(Html.fromHtml(changes))
             }
@@ -106,65 +107,63 @@ class SyncNotification(private val mContext: Context) {
             val playIntent = createActionIntent(Uri.parse("com.anod.appwatcher://play/" + app.pkg), NotificationActivity.TYPE_PLAY)
             playIntent.putExtra(NotificationActivity.EXTRA_PKG, app.pkg)
 
-            builder.addAction(R.drawable.ic_play_arrow_white_24dp, mContext.getString(R.string.store),
-                    PendingIntent.getActivity(mContext, 0, playIntent, 0)
+            builder.addAction(R.drawable.ic_play_arrow_white_24dp, context.getString(R.string.store),
+                    PendingIntent.getActivity(context, 0, playIntent, 0)
             )
 
             if (app.installedVersionCode > 0) {
                 val updateIntent = createActionIntent(Uri.parse("com.anod.appwatcher://play/myapps/1"), NotificationActivity.TYPE_MYAPPS_UPDATE)
-                builder.addAction(R.drawable.ic_system_update_alt_white_24dp, mContext.getString(R.string.noti_action_update),
-                        PendingIntent.getActivity(mContext, 0, updateIntent, 0)
+                builder.addAction(R.drawable.ic_system_update_alt_white_24dp, context.getString(R.string.noti_action_update),
+                        PendingIntent.getActivity(context, 0, updateIntent, 0)
                 )
             }
 
             val readIntent = createActionIntent(Uri.parse("com.anod.appwatcher://dismiss/"), NotificationActivity.TYPE_DISMISS)
-            builder.addAction(R.drawable.ic_clear_white_24dp, mContext.getString(R.string.dismiss),
-                    PendingIntent.getActivity(mContext, 0, readIntent, 0)
+            builder.addAction(R.drawable.ic_clear_white_24dp, context.getString(R.string.dismiss),
+                    PendingIntent.getActivity(context, 0, readIntent, 0)
             )
         }
     }
 
     private fun createActionIntent(uri: Uri, type: Int): Intent {
-        val intent = Intent(mContext, NotificationActivity::class.java)
+        val intent = Intent(context, NotificationActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         intent.data = uri
         intent.putExtra(NotificationActivity.EXTRA_TYPE, type)
         return intent
     }
 
-    private fun renderNotificationText(apps: List<SyncAdapter.UpdatedApp>): String {
+    private fun renderText(apps: List<SyncAdapter.UpdatedApp>): String {
         val count = apps.size
         if (count == 1) {
-            return mContext.getString(R.string.notification_click)
+            return context.getString(R.string.notification_click)
         }
         if (count > 2) {
-            return mContext.getString(
+            return context.getString(
                     R.string.notification_2_apps_more,
                     apps[0].title,
                     apps[1].title
             )
         }
-        return mContext.getString(R.string.notification_2_apps,
+        return context.getString(R.string.notification_2_apps,
                 apps[0].title,
                 apps[1].title
         )
     }
 
-    private fun renderNotificationTitle(apps: List<SyncAdapter.UpdatedApp>): String {
+    private fun renderTitle(apps: List<SyncAdapter.UpdatedApp>): String {
         val title: String
         val count = apps.size
         if (count == 1) {
-            title = mContext.getString(R.string.notification_one_updated, apps[0].title)
+            title = context.getString(R.string.notification_one_updated, apps[0].title)
         } else {
-            title = mContext.getString(R.string.notification_many_updates, count)
+            title = context.getString(R.string.notification_many_updates, count)
         }
         return title
     }
 
     companion object {
-
         internal const val NOTIFICATION_ID = 1
     }
-
 
 }

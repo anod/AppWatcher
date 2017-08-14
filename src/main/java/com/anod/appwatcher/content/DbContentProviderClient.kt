@@ -36,7 +36,7 @@ class DbContentProviderClient(private val contentProviderClient: ContentProvider
         return queryAll(includeDeleted, DEFAULT_SORT_ORDER)
     }
 
-    fun queryAll(includeDeleted: Boolean): AppListCursor? {
+    fun queryAll(includeDeleted: Boolean): AppListCursor {
         return queryAll(includeDeleted, null)
     }
 
