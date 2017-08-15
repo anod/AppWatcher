@@ -5,6 +5,7 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.support.v4.util.SimpleArrayMap
@@ -15,6 +16,11 @@ import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
 import java.util.*
+import android.opengl.ETC1.getHeight
+import android.opengl.ETC1.getWidth
+import android.R.attr.bitmap
+import android.graphics.Canvas
+import com.google.android.finsky.utils.Utils
 
 
 /**
@@ -59,6 +65,12 @@ object PackageManagerUtils {
             }
             // copy to avoid recycling problems
             return bitmapDrawable.bitmap.copy(bitmapDrawable.bitmap.config, true)
+        } else if (d != null) {
+            val bitmap = Bitmap.createBitmap(d.getIntrinsicWidth(), d.getIntrinsicHeight(), Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(bitmap)
+            d.setBounds(0, 0, canvas.width, canvas.height)
+            d.draw(canvas)
+            return bitmap
         }
         return null
     }
