@@ -44,7 +44,6 @@ class AppWatcherApplication : Application(), AppLog.Listener {
             objectGraph.uploadServiceContentObserver
         }
         AppCompatDelegate.setDefaultNightMode(objectGraph.prefs.nightMode)
-
         SyncNotification(this).createChanngel()
     }
 

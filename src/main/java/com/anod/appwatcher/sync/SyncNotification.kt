@@ -28,7 +28,7 @@ class SyncNotification(private val context: Context) {
         val channelId = "versions_updates"
     }
 
-    fun createChanngel() {
+    fun createChannel() {
         if (Build.VERSION.SDK_INT < 26) {
             return
         }
