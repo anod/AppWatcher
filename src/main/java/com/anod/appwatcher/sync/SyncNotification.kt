@@ -13,7 +13,8 @@ import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.NotificationActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.ui.AppWatcherBaseActivity
-
+import android.app.NotificationChannel
+import android.os.Build
 
 /**
  * @author alex
@@ -21,6 +22,23 @@ import com.anod.appwatcher.ui.AppWatcherBaseActivity
  * @date 2014-09-24
  */
 class SyncNotification(private val context: Context) {
+
+    companion object {
+        internal const val NOTIFICATION_ID = 1
+        val channelId = "versions_updates"
+    }
+
+    fun createChanngel() {
+        if (Build.VERSION.SDK_INT < 26) {
+            return
+        }
+        val channel = NotificationChannel(channelId, context.getString(R.string.channel_name), NotificationManager.IMPORTANCE_DEFAULT)
+        channel.description = context.getString(R.string.channel_description)
+        channel.setShowBadge(true)
+
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
+    }
 
     fun show(updatedApps: List<SyncAdapter.UpdatedApp>) {
         val notification = this.create(updatedApps);
@@ -44,7 +62,7 @@ class SyncNotification(private val context: Context) {
         val title = renderTitle(updatedApps)
         val text = renderText(updatedApps)
 
-        val builder = NotificationCompat.Builder(context)
+        val builder = NotificationCompat.Builder(context, channelId)
         builder
             .setAutoCancel(true)
             .setSmallIcon(R.drawable.ic_stat_update)
@@ -162,8 +180,6 @@ class SyncNotification(private val context: Context) {
         return title
     }
 
-    companion object {
-        internal const val NOTIFICATION_ID = 1
-    }
+
 
 }

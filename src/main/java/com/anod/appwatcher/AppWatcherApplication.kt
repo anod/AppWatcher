@@ -12,6 +12,7 @@ import com.android.volley.NetworkError
 import com.android.volley.NoConnectionError
 import com.android.volley.TimeoutError
 import com.android.volley.VolleyError
+import com.anod.appwatcher.sync.SyncNotification
 import java.io.IOException
 import java.net.SocketException
 
@@ -43,6 +44,8 @@ class AppWatcherApplication : Application(), AppLog.Listener {
             objectGraph.uploadServiceContentObserver
         }
         AppCompatDelegate.setDefaultNightMode(objectGraph.prefs.nightMode)
+
+        SyncNotification(this).createChanngel()
     }
 
     val isNightTheme: Boolean
