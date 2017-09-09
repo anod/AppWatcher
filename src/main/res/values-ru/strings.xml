@@ -5,9 +5,11 @@
     <string name="menu_refresh">Обновить</string>
     <string name="failed_gain_access">Пожалуйста разрешите доступ. Разрешение требуется для того, чтобы связаться с Google Play Маркет.</string>
     <string name="search_action">Поиск</string>
-    <string name="search_for_app">Найдите приложение и нажмите на него.\n( Совет: Вы можете добавлять приложения непосредственно из Play Маркет с помощью кнопки \"Поделиться\" )</string>
-    <string name="loading">Загрузка&#8230;</string>
-    <string name="no_result_found">Нет результатов для \"%s\"</string>
+    <string name="search_for_app">Найдите приложение и нажмите на него.\n
+  ( Совет: Вы можете добавлять приложения непосредственно из Play Маркет с помощью кнопки \"Поделиться\" )</string>
+    <string name="loading">Загрузка…</string>
+    <string name="no_result_found">Нет результатов для \"%s"</string>
+    <string name="no_result_wishlist">Список пуст. Вы можете добавить аппликации в Play Маркете</string>
     <string name="error_insert_app">Не удалось добавить приложение в список для наблюдения.</string>
     <string name="application_icon">Иконка приложения</string>
     <string name="remove">Удалить</string>
@@ -27,17 +29,17 @@
     <string name="notification_click">Нажмите для деталей</string>
     <string name="no_updates_found">Обновления не найдены.</string>
     <string name="dialog_about_title">%1$s вер. %2$s</string>
-    <string name="dialog_about_text">Автор: Alex Gavrishev&lt;br/&gt;&lt;a href=&quot;https://play.google.com/store/apps/developer?id=Alex+Gavrishev&quot;&gt;Google Play Store&lt;/a&gt;&lt;br/&gt;&lt;br/&gt;Project is licensed under a &lt;a href=&quot;http://creativecommons.org/licenses/by-sa/3.0/&quot;&gt;Creative Commons Attribution-ShareAlike 3.0 Unported License.&lt;/a&gt;&lt;br/&gt;&lt;br/&gt;Source Code available at &lt;a href=&quot;https://github.com/anod/AppWatcher&quot;&gt;github.com&lt;/a&gt;.</string>
+    <string name="dialog_about_text">Автор: Alex Gavrishev<br/><a href=\"https://play.google.com/store/apps/developer?id=Alex+Gavrishev\">Google Play Store</a><br/><br/>Project is licensed under a <a href=\"http://creativecommons.org/licenses/by-sa/3.0/\">Creative Commons Attribution-ShareAlike 3.0 Unported License.</a><br/><br/>Source Code available at <a href=\"https://github.com/anod/AppWatcher\">github.com</a>.</string>
     <string name="share">Поделиться</string>
-    <string name="share_subject_normal">Взгляните на \"%s\"</string>
-    <string name="share_subject_updated">Взгляните на новую версию \"%s\"</string>
-    <string name="app_stored">\"%s\" добавлен в список для наблюдения</string>
+    <string name="share_subject_normal">Взгляните на \"%s"</string>
+    <string name="share_subject_updated">Взгляните на новую версию \"%s"</string>
+    <string name="app_stored">"%s\" добавлен в список для наблюдения</string>
     <string name="rate_app">Оценить в маркете</string>
     <string name="installed">Установленно</string>
     <string name="no_recent_changes">Нет информации о последних изменениях.</string>
     <string name="last_update">Последнее обновление: %1$s</string>
     <string name="no_files_found">Файлы не найдены</string>
-    <string name="please_wait">Подождите&#8230;</string>
+    <string name="please_wait">Подождите…</string>
     <string name="export_done">Завершено</string>
     <string name="unable_delete_file">Невозможно удалить файл</string>
     <string name="import_done">Импорт завершен</string>
@@ -47,85 +49,88 @@
     <string name="file_not_exist">Файл не существует</string>
     <string name="failed_to_write_file">Не удалось записать файл</string>
     <string name="import_export">Импорт/Экспорт</string>
-    <string name="action_settings">Настройки</string>
-    <string name="add_to_appwatcher">Добавить в App Watcher</string>
-    <string name="app_already_added">Аппликация уже в списке</string>
+    <string name="recently_updated">Недавно обновленные</string>
+    <string name="watching">Под наблюдением</string>
+    <string name="menu_filter">Поиск</string>
     <string name="choose_an_account">Выберите аккаунт</string>
+    <string name="app_already_added">Аппликация уже в списке</string>
     <string name="free">БЕСПЛАТНО</string>
-    <string name="gdrive_connected">Google Drive подключен</string>
-    <string name="gms_service_disabled">Google Play services отключены на этом устройстве</string>
+    <string name="error_fetching_info">Ошибка загрузки информации. Пожалуйста, попробуйте снова</string>
+    <string name="retry">Повторить</string>
     <string name="gms_service_missing">Google Play services отсутсвуют на этом устройстве.</string>
     <string name="gms_service_update_required">Версия Google Play services устарела.</string>
-    <string name="menu_filter">Поиск</string>
-    <string name="never">Никогда</string>
-    <string name="no_registered_google_accounts">Нет зарегистрированных аккаунтов google</string>
-    <string name="notices_close">Закрыть</string>
-    <string name="now">сейчас</string>
-    <string name="pref_descr_drive_sync_enabled">Синхронизировать список с Google Drive</string>
-    <string name="pref_descr_drive_sync_now">Последняя синхр.: %1$s</string>
-    <string name="pref_descr_export">Экспорт списка в память</string>
-    <string name="pref_descr_import">Импорт списка из памяти</string>
-    <string name="pref_header_about">О программе</string>
-    <string name="pref_header_drive_sync">Синхронизация списка</string>
-    <string name="pref_header_backup">Резервная копия</string>
-    <string name="pref_title_about">Версия</string>
-    <string name="pref_title_drive_sync_enabled"> Google Drive</string>
-    <string name="pref_title_drive_sync_now">Синхронизировать </string>
-    <string name="pref_title_export">Экспорт</string>
-    <string name="pref_title_import">Импорт</string>
-    <string name="recently_updated">Недавно обновленные</string>
-    <string name="retry">Повторить</string>
-    <string name="sync_error">Ошибка синхронизации</string>
-    <string name="sync_finish">Синхронизация завершена</string>
-    <string name="sync_start">Синхронизирую</string>
-    <string name="watching">Под наблюдением</string>
-    <string name="activity_market">Поиск</string>
-    <string name="all">Все</string>
-    <string name="allow">Разрешить</string>
-    <string name="allow_access_to_accounts">Разрешить доступ к спику аккаунтов Google</string>
-    <string name="cannot_load_app">Проблем загрузки данных аппликации: \'%s\'</string>
-    <string name="category_updates">Обновления</string>
-    <string name="dismiss">Отменить</string>
-    <string name="downloaded">На устройстве</string>
-    <string name="error_fetching_info">Ошибка загрузки информации. Пожалуйста, попробуйте снова</string>
-    <string name="export_permission_denied">Невозможно начать экспорт без разрешений</string>
+    <string name="gms_service_disabled">Google Play services отключены на этом устройстве</string>
     <string name="gms_service_invalid">Версия Google Play services, установленных на этом устройстве не является подлинным.</string>
-    <string name="import_action">Импорт</string>
-    <string name="import_installed">Импорт установленных</string>
-    <string name="import_permission_denied">Не удается запустить импорт без разрешений</string>
-    <string name="menu_requires_charging">Требует зарядки</string>
-    <string name="navdrawer_item_add">Добавить</string>
-    <string name="navdrawer_item_refresh">Обновить</string>
-    <string name="navdrawer_item_settings">Настройки</string>
-    <string name="pref_descr_opensource">Сведения о лицензиях на программное обеспечение с открытым исходным кодом</string>
-    <string name="pref_title_opensource">Лицензии с открытым исходным кодом</string>
-    <string name="search">Поиск…</string>
-    <string name="search_for_an_app">Поиск аппликации</string>
-    <string name="preferences">Настройки</string>
-    <string name="share_from_play_store">Поделиться из Play Store</string>
-    <string name="sort">Упорядочить</string>
+    <string name="never">Никогда</string>
+    <string name="now">сейчас</string>
+    <string name="no_registered_google_accounts">Нет зарегистрированных аккаунтов google</string>
+    <string name="gdrive_connected">Google Drive подключен</string>
+    <string name="sync_start">Синхронизирую</string>
+    <string name="sync_finish">Синхронизация завершена</string>
+    <string name="sync_error">Ошибка синхронизации</string>
+    <string name="action_settings">Настройки</string>
+    <string name="store">Маркет</string>
+    <string name="dismiss">Отменить</string>
+    <string name="add_to_appwatcher">Добавить в App Watcher</string>
+
     <string name="tab_all">Все</string>
     <string name="tab_installed">Установленные</string>
     <string name="tab_not_installed">Не установленные</string>
+
+    <string name="navdrawer_item_add">Добавить</string>
+    <string name="navdrawer_item_refresh">Обновить</string>
+    <string name="navdrawer_item_settings">Настройки</string>
+
+    <string name="activity_market">Поиск</string>
+    <string name="downloaded">На устройстве</string>
+    <string name="category_updates">Обновления</string>
+    <string name="cannot_load_app">Проблем загрузки данных аппликации: \'%s\'</string>
     <string name="uninstall">Удалить</string>
     <string name="watch_list_is_empty">Список наблюдений пуст</string>
-    <string name="navdrawer_item_wishlist">Список желаний</string>
-    <string name="no_result_wishlist">Список пуст. Вы можете добавить аппликации в Play Маркете</string>
-    <string name="noti_action_update">Обновить</string>
-    <string name="pref_descr_theme">Выбрать между темной и светлой темой</string>
-    <string name="pref_header_interface">Интерфейс</string>
-    <string name="pref_title_location">Место</string>
-    <string name="pref_title_theme">Тема</string>
+    <string name="search_for_an_app">Поиск аппликации</string>
+    <string name="import_installed">Импорт установленных</string>
+    <string name="share_from_play_store">Поделиться из Play Store</string>
+    <string name="search">Поиск…</string>
+    <string name="preferences">Настройки</string>
+    <string name="all">Все</string>
+    <string name="import_action">Импорт</string>
+    <string name="import_permission_denied">Не удается запустить импорт без разрешений</string>
+    <string name="export_permission_denied">Невозможно начать экспорт без разрешений</string>
+    <string name="menu_requires_charging">Требует зарядки</string>
+    <string name="sort">Упорядочить</string>
+    <string name="allow">Разрешить</string>
     <string name="settings_notifications">Уведомления</string>
-    <string name="update_all">Обновить все</string>
     <string name="uptodate_summary">Показывать уведомления об уже обновленных аппликациях</string>
     <string name="uptodate_title">Уведомлять об установленных</string>
+    <string name="noti_action_update">Обновить</string>
+    <string name="update_all">Обновить все</string>
+    <string name="navdrawer_item_wishlist">Список желаний</string>
     <string name="wishlist">Список желаний</string>
+    <string name="add_new_tag">Создать новый тэг</string>
+    <string name="tags">Тэги</string>
+    <string name="no_apps_with_this_tag">Нет аппликаций с этим тэгом</string>
+    <string name="add_apps">Добавить аппликации</string>
+    <string name="tag_name">Название</string>
+    <string name="save">Сохранить</string>
+    <string name="delete">Удалить</string>
+    <string name="tag">Тэг</string>
+    <string name="action_tag">%s Тэг</string>
+    <string name="tag_app">Таг %1s</string>
+    <string name="google_drive_sync_failed">Ошибка синхронизации Google Drive</string>
+    <string name="user_action_required">Требуется действие пользователя</string>
+    <string name="check_connection">Проверьте соединение с интернетом</string>
+    <string name="refresh_scheduled">Обновление запланировано</string>
+    <string name="recently_installed">Недавно установиленные</string>
+    <string name="shortcut_search">Поиск</string>
+    <string name="shortcut_recent">Последние</string>
+    <string name="open">Открыть</string>
+    <string name="channel_name">Обновления</string>
+    <string name="channel_description">Уведомления о новых версиях аппликации из списка</string>
     <string-array name="sort_titles">
-        <item>Название &#x2193;</item>
-        <item>Название &#x2191;</item>
-        <item>Дата &#x2193;</item>
-        <item>Дата &#x2191;</item>
+        <item>Название ↓</item>
+        <item>Название ↑</item>
+        <item>Дата ↓</item>
+        <item>Дата ↑</item>
     </string-array>
 
     <string-array name="themes">
@@ -133,13 +138,5 @@
         <item>Светлая</item> <!-- MODE_NIGHT_NO = 1; -->
         <item>Темная</item> <!-- MODE_NIGHT_YES = 2; -->
     </string-array>
-    <string name="add_apps">Добавить аппликации</string>
-    <string name="add_new_tag">Создать новый тэг</string>
-    <string name="delete">Удалить</string>
-    <string name="no_apps_with_this_tag">Нет аппликаций с этим тэгом</string>
-    <string name="save">Сохранить</string>
-    <string name="store">Маркет</string>
-    <string name="tag">Тэг</string>
-    <string name="tag_name">Название</string>
-    <string name="tags">Тэги</string>
+
 </resources>

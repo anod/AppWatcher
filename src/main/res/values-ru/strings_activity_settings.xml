@@ -1,0 +1,32 @@
+<resources>
+
+    <!-- Exampreferencesings for List sync -->
+    <string name="pref_header_drive_sync">Синхронизация списка</string>
+
+    <string name="pref_title_drive_sync_enabled">Google Drive</string>
+    <string name="pref_descr_drive_sync_enabled">Синхронизировать список с Google Drive</string>
+    <string name="pref_title_drive_sync_now">Синхронизировать</string>
+    <string name="pref_descr_drive_sync_now">Последняя синхр.: %1$s</string>
+
+    <!-- Exampreferencesings for List backup -->
+    <string name="pref_header_backup">Резервная копия</string>
+
+    <string name="pref_title_export">Экспорт</string>
+    <string name="pref_descr_export">Экспорт списка в память</string>
+    <string name="pref_title_import">Импорт</string>
+    <string name="pref_descr_import">Импорт списка из памяти</string>
+    <string name="pref_title_location">Место</string>
+
+    <!-- Exampreferencesings for About -->
+    <string name="pref_header_about">О программе</string>
+
+    <string name="pref_title_about">Версия</string>
+    <string name="pref_title_opensource">Лицензии с открытым исходным кодом</string>
+    <string name="pref_descr_opensource">Сведения о лицензиях на программное обеспечение с открытым исходным кодом</string>
+
+    <string name="pref_header_interface">Интерфейс</string>
+    <string name="pref_title_theme">Тема</string>
+    <string name="pref_descr_theme">Выбрать между темной и светлой темой</string>
+
+
+</resources>
