@@ -6,7 +6,6 @@ import android.database.ContentObserver
 import android.net.Uri
 import android.os.Handler
 import com.anod.appwatcher.App
-import com.anod.appwatcher.Preferences
 import com.anod.appwatcher.content.DbContentProvider
 import info.anodsplace.android.log.AppLog
 
@@ -18,7 +17,7 @@ import info.anodsplace.android.log.AppLog
 class UploadServiceContentObserver(val context: Context, contentResolver: ContentResolver) : ContentObserver(Handler()) {
 
     init {
-        contentResolver.registerContentObserver(DbContentProvider.APPS_CONTENT_URI, true, this)
+        contentResolver.registerContentObserver(DbContentProvider.appsUri, true, this)
         contentResolver.registerContentObserver(DbContentProvider.TAGS_CONTENT_URI, true, this)
     }
 

@@ -24,6 +24,13 @@ abstract class CursorIterator<O>(cursor: Cursor?)
         this.moveToPosition(-1)
     }
 
+    fun moveToNextObject(): O? {
+        if (this.moveToNext()) {
+            return this.next()
+        }
+        return null
+    }
+
     override fun iterator(): Iterator<O> {
         return this
     }

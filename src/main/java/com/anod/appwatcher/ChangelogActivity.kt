@@ -14,7 +14,6 @@ import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
 import android.support.v4.view.ViewCompat
 import android.support.v7.graphics.Palette
-import android.text.Html
 import android.text.util.Linkify
 import android.view.Menu
 import android.view.MenuItem
@@ -310,7 +309,7 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
         if (changes.isEmpty()) {
             changelog.setText(R.string.no_recent_changes)
         } else {
-            changelog.text = Html.fromHtml(changes)
+            changelog.text = Html.parse(changes)
         }
         if (detailsEndpoint.document != null) {
             addMenu!!.isEnabled = true

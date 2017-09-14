@@ -183,6 +183,7 @@ message Details
     message BulkDetailsRequest
     {
         repeated string docid = 1;
+        optional bool includeChildDocs = 2;
         required bool includeDetails = 3;
     }
 }

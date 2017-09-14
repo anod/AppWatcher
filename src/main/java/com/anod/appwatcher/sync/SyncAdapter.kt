@@ -50,7 +50,7 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
 
     companion object {
         private const val ONE_SEC_IN_MILLIS = 1000
-        private const val BULK_SIZE = 20
+        private const val bulkSize = 20
         internal const val SYNC_EXTRAS_MANUAL = "manual"
 
         const val SYNC_STOP = "com.anod.appwatcher.sync.start"
@@ -142,7 +142,7 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
         }
         apps.moveToPosition(-1)
 
-        val bulkSize = if (apps.count > BULK_SIZE) BULK_SIZE else apps.count
+        val bulkSize = if (apps.count > bulkSize) bulkSize else apps.count
 
         val localApps = HashMap<String, AppInfo>(bulkSize)
         var i = 1
@@ -201,12 +201,12 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
         if (batch.isNotEmpty()) {
             client.applyBatchUpdates(batch) {
                 val rowId = it.getAsString(BaseColumns._ID)
-                DbContentProvider.APPS_CONTENT_URI.buildUpon().appendPath(rowId).build()
+                DbContentProvider.appsUri.buildUpon().appendPath(rowId).build()
             }
         }
 
         if (changelog.isNotEmpty()) {
-            client.applyBatchUpdates(changelog) {
+            client.applyBatchInsert(changelog) {
                 DbContentProvider.changelogUri
                         .buildUpon()
                         .appendPath("apps")
@@ -235,7 +235,7 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
             if (statusBatch.isNotEmpty()) {
                 client.applyBatchUpdates(statusBatch) {
                     val rowId = it.getAsString(BaseColumns._ID)
-                    DbContentProvider.APPS_CONTENT_URI.buildUpon().appendPath(rowId).build()
+                    DbContentProvider.appsUri.buildUpon().appendPath(rowId).build()
                 }
             }
         }

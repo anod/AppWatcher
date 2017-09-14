@@ -12,7 +12,6 @@ import com.anod.appwatcher.model.*
 import com.anod.appwatcher.model.schema.AppListTable
 import com.anod.appwatcher.model.schema.AppTagsTable
 import com.anod.appwatcher.model.schema.TagsTable
-import com.anod.appwatcher.model.schema.contentValues
 import com.anod.appwatcher.utils.BitmapUtils
 import info.anodsplace.android.log.AppLog
 import kotlin.collections.ArrayList
@@ -82,7 +81,7 @@ class DbContentProviderClient(private val contentProviderClient: ContentProvider
     private fun queryApps(sortOrder: String?, selection: String?, selectionArgs: Array<String>?): AppListCursor {
         var cr: Cursor? = null
         try {
-            cr = contentProviderClient.query(DbContentProvider.APPS_CONTENT_URI,
+            cr = contentProviderClient.query(DbContentProvider.appsUri,
                     AppListTable.PROJECTION, selection, selectionArgs, sortOrder
             )
         } catch (e: RemoteException) {
@@ -110,7 +109,7 @@ class DbContentProviderClient(private val contentProviderClient: ContentProvider
     fun insert(app: AppInfo): Uri? {
         val values = AppListTable.createContentValues(app)
         try {
-            return contentProviderClient.insert(DbContentProvider.APPS_CONTENT_URI, values)
+            return contentProviderClient.insert(DbContentProvider.appsUri, values)
         } catch (e: RemoteException) {
             AppLog.e(e)
         }
@@ -135,9 +134,21 @@ class DbContentProviderClient(private val contentProviderClient: ContentProvider
         return contentProviderClient.applyBatch(ArrayList(operations))
     }
 
+    fun applyBatchInsert(values: List<ContentValues>, uriMapper: (ContentValues) -> Uri): Array<ContentProviderResult> {
+
+        val operations = values.map {
+            val insertUri = uriMapper(it)
+            ContentProviderOperation.newInsert(insertUri)
+                    .withValues(it)
+                    .build()
+        }
+
+        return contentProviderClient.applyBatch(ArrayList(operations))
+    }
+
 
     fun update(rowId: Int, values: ContentValues): Int {
-        val updateUri = DbContentProvider.APPS_CONTENT_URI.buildUpon().appendPath(rowId.toString()).build()
+        val updateUri = DbContentProvider.appsUri.buildUpon().appendPath(rowId.toString()).build()
         try {
             return contentProviderClient.update(updateUri, values)
         } catch (e: RemoteException) {
@@ -147,7 +158,7 @@ class DbContentProviderClient(private val contentProviderClient: ContentProvider
     }
 
     fun updateStatus(rowId: Int, status: Int): Int {
-        val updateUri = DbContentProvider.APPS_CONTENT_URI.buildUpon().appendPath(rowId.toString()).build()
+        val updateUri = DbContentProvider.appsUri.buildUpon().appendPath(rowId.toString()).build()
         val values = ContentValues()
         values.put(AppListTable.Columns.status, status)
         try {
@@ -162,7 +173,7 @@ class DbContentProviderClient(private val contentProviderClient: ContentProvider
         var numRows = 0
         try {
             numRows = contentProviderClient.delete(
-                DbContentProvider.APPS_CONTENT_URI,
+                DbContentProvider.appsUri,
                 AppListTable.Columns.status + " = ?",
                 arrayOf(AppInfoMetadata.STATUS_DELETED.toString())
             )
@@ -233,7 +244,7 @@ class DbContentProviderClient(private val contentProviderClient: ContentProvider
 
     fun discardAll() {
         try {
-            contentProviderClient.delete(DbContentProvider.APPS_CONTENT_URI)
+            contentProviderClient.delete(DbContentProvider.appsUri)
             contentProviderClient.delete(DbContentProvider.TAGS_CONTENT_URI)
             contentProviderClient.delete(DbContentProvider.TAGS_APPS_CONTENT_URI)
         } catch (e: RemoteException) {
@@ -337,7 +348,7 @@ class DbContentProviderClient(private val contentProviderClient: ContentProvider
     }
 
     fun queryAppTags(rowId: Int): List<Int> {
-        val appTagsUri = DbContentProvider.APPS_CONTENT_URI.buildUpon()
+        val appTagsUri = DbContentProvider.appsUri.buildUpon()
                 .appendPath(rowId.toString())
                 .appendPath("tags")
                 .build()
@@ -425,52 +436,8 @@ class DbContentProviderClient(private val contentProviderClient: ContentProvider
         }
     }
 
-    fun appChange(appId: String, versionCode: Int): AppChange? {
-        val uri = DbContentProvider.changelogUri
-                .buildUpon()
-                .appendPath("apps")
-                .appendPath(appId)
-                .appendPath("v")
-                .appendPath(versionCode.toString())
-                .build()
-        val cr = contentProviderClient.query(uri)
-        if (cr.count == 0) {
-            return null
-        }
-        cr.moveToNext()
-        val change = AppChangeCursor(cr).change
-        cr.close()
-        return change
-    }
-
-    fun appChanges(appId: String): AppChangeCursor {
-        val uri = DbContentProvider.changelogUri
-                .buildUpon()
-                .appendPath("apps")
-                .appendPath(appId)
-                .build()
-        val cr = contentProviderClient.query(uri)
-        return AppChangeCursor(cr)
-    }
-
     companion object {
         private val defaultAppsSortOrder =
                 AppListTable.Columns.status + " DESC, " + AppListTable.Columns.title + " COLLATE LOCALIZED ASC"
     }
-}
-
-private fun ContentProviderClient.update(uri: Uri, values: ContentValues): Int {
-    return update(uri, values, null, null)
-}
-
-private fun ContentProviderClient.delete(uri: Uri) {
-    delete(uri, null, null)
-}
-
-private fun ContentProviderClient.query(uri: Uri): Cursor {
-    return query(uri, null, null, null, null) ?: return NullCursor()
-}
-
-private fun ContentProviderClient.query(uri: Uri, projection: Array<String>): Cursor {
-    return query(uri, projection, null, null, null) ?: return NullCursor()
 }

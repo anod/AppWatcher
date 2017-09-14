@@ -39,7 +39,7 @@ open class DbContentProvider : ContentProvider() {
 
         private const val icon = 70
 
-        val APPS_CONTENT_URI = Uri.parse("content://$authority/apps")!!
+        val appsUri = Uri.parse("content://$authority/apps")!!
         val APPS_TAG_CONTENT_URI = Uri.parse("content://$authority/apps/tags")!!
         val APPS_TAG_CLEAN_CONTENT_URI = Uri.parse("content://$authority/apps/tags/clean")!!
         val TAGS_CONTENT_URI = Uri.parse("content://$authority/tags")!!
@@ -75,7 +75,7 @@ open class DbContentProvider : ContentProvider() {
 
         fun appsContentUri(tag: Tag?): Uri {
             return if (tag == null)
-                DbContentProvider.APPS_CONTENT_URI
+                DbContentProvider.appsUri
             else
                 DbContentProvider.APPS_TAG_CONTENT_URI.buildUpon().appendPath(tag.id.toString()).build()
         }
@@ -97,12 +97,12 @@ open class DbContentProvider : ContentProvider() {
                 rowId = uri.lastPathSegment
                 query.selection = BaseColumns._ID + "=?"
                 query.selectionArgs = arrayOf(rowId)
-                query.notifyUri = APPS_CONTENT_URI
+                query.notifyUri = appsUri
                 return query
             }
             apps -> {
                 query.table = AppListTable.table
-                query.notifyUri = APPS_CONTENT_URI
+                query.notifyUri = appsUri
                 return query
             }
             appsTags -> {
@@ -110,7 +110,7 @@ open class DbContentProvider : ContentProvider() {
                 val tagId = uri.lastPathSegment
                 query.selection = AppTagsTable.TableColumns.TAGID + "=?"
                 query.selectionArgs = arrayOf(tagId)
-                query.notifyUri = APPS_CONTENT_URI
+                query.notifyUri = appsUri
                 return query
             }
             appTags -> {
@@ -179,7 +179,7 @@ open class DbContentProvider : ContentProvider() {
                 query.table = ChangelogTable.table
                 query.selection = ChangelogTable.Columns.appId + "=? AND " + ChangelogTable.Columns.versionCode + "=?"
                 query.selectionArgs = arrayOf(
-                        uri.pathSegments[uri.pathSegments.size - 2],
+                        uri.pathSegments[uri.pathSegments.size - 3],
                         uri.lastPathSegment
                 )
                 query.notifyUri = changelogUri

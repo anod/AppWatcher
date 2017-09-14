@@ -53,7 +53,8 @@ class ChangelogTable {
                         ChangelogTable.Columns.appId + " TEXT not null," +
                         ChangelogTable.Columns.versionCode + " INTEGER," +
                         ChangelogTable.Columns.versionName + " TEXT not null," +
-                        ChangelogTable.Columns.details + " TEXT not null" +
+                        ChangelogTable.Columns.details + " TEXT not null," +
+                        "UNIQUE(${ChangelogTable.Columns.appId}, ${ChangelogTable.Columns.versionCode}) ON CONFLICT REPLACE" +
                         ") "
 
     }

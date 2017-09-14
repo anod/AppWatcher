@@ -6,6 +6,7 @@ import android.support.annotation.ColorRes
 import android.support.v4.content.ContextCompat
 
 import com.anod.appwatcher.R
+import com.anod.appwatcher.content.AppChangeContentProviderClient
 import com.anod.appwatcher.utils.InstalledAppsProvider
 
 /**
@@ -13,9 +14,11 @@ import com.anod.appwatcher.utils.InstalledAppsProvider
  * *
  * @date 2015-08-30
  */
-open class AppViewHolderDataProvider(private val mContext: Context, override val installedAppsProvider: InstalledAppsProvider)
+open class AppViewHolderDataProvider(private val context: Context, override val installedAppsProvider: InstalledAppsProvider)
     : AppViewHolderBase.DataProvider {
-    override val installedText = mContext.resources.getString(R.string.installed)!!
+    override val installedText = context.resources.getString(R.string.installed)!!
+    override val noRecentChangesText = context.resources.getString(R.string.no_recent_changes)!!
+    override val appChangeContentProvider = AppChangeContentProviderClient(context)
     override var totalAppsCount = 0
     final override var newAppsCount = 0
         private set
@@ -29,11 +32,11 @@ open class AppViewHolderDataProvider(private val mContext: Context, override val
 
     @ColorInt
     override fun getColor(@ColorRes colorRes: Int): Int {
-        return ContextCompat.getColor(mContext, colorRes)
+        return ContextCompat.getColor(context, colorRes)
     }
 
     override fun formatVersionText(versionName: String, versionNumber: Int): String {
-        return mContext.getString(R.string.version_text, versionName, versionNumber)
+        return context.getString(R.string.version_text, versionName, versionNumber)
     }
 
 }

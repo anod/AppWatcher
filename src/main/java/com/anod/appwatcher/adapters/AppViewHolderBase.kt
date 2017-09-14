@@ -4,6 +4,7 @@ import android.support.annotation.ColorInt
 import android.support.annotation.ColorRes
 import android.support.v7.widget.RecyclerView
 import android.view.View
+import com.anod.appwatcher.content.AppChangeContentProviderClient
 
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.utils.AppIconLoader
@@ -22,9 +23,11 @@ abstract class AppViewHolderBase(
 
      interface DataProvider {
         val installedText: String
+        val noRecentChangesText: String
         val totalAppsCount: Int
         val newAppsCount: Int
         val installedAppsProvider: InstalledAppsProvider
+        val appChangeContentProvider: AppChangeContentProviderClient
         fun formatVersionText(versionName: String, versionNumber: Int): String
         @ColorInt
         fun getColor(@ColorRes colorRes: Int): Int

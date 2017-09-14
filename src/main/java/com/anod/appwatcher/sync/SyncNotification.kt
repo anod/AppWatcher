@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.support.v4.app.NotificationCompat
-import android.text.Html
 
 import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.NotificationActivity
@@ -15,6 +14,7 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.ui.AppWatcherBaseActivity
 import android.app.NotificationChannel
 import android.os.Build
+import com.anod.appwatcher.utils.Html
 
 /**
  * @author alex
@@ -111,16 +111,11 @@ class SyncNotification(private val context: Context) {
     }
 
     private fun addExtraInfo(app: SyncAdapter.UpdatedApp, builder: NotificationCompat.Builder) {
-        var changes: String? = app.recentChanges
-        if (changes != null) {
-            if (changes == "") {
-                changes = context.getString(R.string.no_recent_changes)
-            } else {
-                builder.setContentText(Html.fromHtml(changes))
-            }
-            builder.setStyle(
-                    NotificationCompat.BigTextStyle().bigText(Html.fromHtml(changes))
-            )
+
+            val changes = if (app.recentChanges.isBlank()) context.getString(R.string.no_recent_changes) else app.recentChanges
+
+            builder.setContentText(Html.parse(changes))
+            builder.setStyle(NotificationCompat.BigTextStyle().bigText(Html.parse(changes)))
 
             val playIntent = createActionIntent(Uri.parse("com.anod.appwatcher://play/" + app.pkg), NotificationActivity.TYPE_PLAY)
             playIntent.putExtra(NotificationActivity.EXTRA_PKG, app.pkg)
@@ -140,7 +135,6 @@ class SyncNotification(private val context: Context) {
             builder.addAction(R.drawable.ic_clear_white_24dp, context.getString(R.string.dismiss),
                     PendingIntent.getActivity(context, 0, readIntent, 0)
             )
-        }
     }
 
     private fun createActionIntent(uri: Uri, type: Int): Intent {
