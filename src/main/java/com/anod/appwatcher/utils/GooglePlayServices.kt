@@ -31,7 +31,6 @@ class GooglePlayServices(context: Context, private val listener: Listener) : Goo
     private var onConnectAction: Int = 0
     private var resolutionIntent: PendingIntent? = null
 
-
     interface Listener {
         fun onConnectAction(action: Int)
         fun createGoogleApiClientBuilder(): GoogleApiClient.Builder

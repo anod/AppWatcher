@@ -10,8 +10,7 @@ import com.google.android.finsky.api.model.DfeModel
  * *
  * @date 16/12/2016.
  */
-
-class WishlistEndpoint(context: Context, private val mAutoloadNext: Boolean) : PlayStoreEndpointBase(context) {
+class WishlistEndpoint(context: Context, private val autoloadNext: Boolean) : PlayStoreEndpointBase(context) {
 
     var listData: DfeList?
         get() = data as? DfeList
@@ -37,11 +36,11 @@ class WishlistEndpoint(context: Context, private val mAutoloadNext: Boolean) : P
 
 
     override fun createDfeModel(): DfeModel {
-        return DfeList(dfeApi, dfeApi!!.createLibraryUrl(BACKEND_ID, LIBRARY_ID, 7, null), mAutoloadNext, AppDetailsFilter.predicate)
+        return DfeList(dfeApi!!, dfeApi!!.createLibraryUrl(backendId, libraryId, 7, null), autoloadNext, AppDetailsFilter.predicate)
     }
 
     companion object {
-        private const val LIBRARY_ID = "u-wl"
-        private const val BACKEND_ID = 0
+        private const val libraryId = "u-wl"
+        private const val backendId = 0
     }
 }

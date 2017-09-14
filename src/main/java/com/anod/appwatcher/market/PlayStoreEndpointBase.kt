@@ -6,7 +6,6 @@ import android.content.Context
 import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.anod.appwatcher.App
-import com.anod.appwatcher.AppWatcherApplication
 import com.google.android.finsky.api.DfeApi
 import com.google.android.finsky.api.DfeApiContext
 import com.google.android.finsky.api.DfeApiImpl
@@ -22,7 +21,7 @@ import info.anodsplace.android.log.AppLog
  * @date 2015-02-22
  */
 abstract class PlayStoreEndpointBase internal constructor(context: Context) : PlayStoreEndpoint, Response.ErrorListener, OnDataChangedListener {
-    protected val mContext: Context = context.applicationContext
+    protected val context: Context = context.applicationContext
 
     final override var authSubToken: String = ""
         private set
@@ -32,10 +31,10 @@ abstract class PlayStoreEndpointBase internal constructor(context: Context) : Pl
         internal set
     var dfeApi: DfeApi? = null
         private set
-    private var mAccount: Account? = null
+    private var account: Account? = null
 
     override fun setAccount(account: Account, authSubToken: String): PlayStoreEndpoint {
-        mAccount = account
+        this.account = account
         this.authSubToken = authSubToken
         return this
     }
@@ -55,9 +54,9 @@ abstract class PlayStoreEndpointBase internal constructor(context: Context) : Pl
 
     private fun init() {
         if (dfeApi == null) {
-            val queue = App.provide(mContext).requestQueue
-            val deviceId = App.provide(mContext).deviceId
-            val dfeApiContext = DfeApiContext.create(mContext, mAccount, authSubToken, deviceId, ContentLevel.create(mContext).dfeValue)
+            val queue = App.provide(context).requestQueue
+            val deviceId = App.provide(context).deviceId
+            val dfeApiContext = DfeApiContext.create(context, account, authSubToken, deviceId, ContentLevel.create(context).dfeValue)
             dfeApi = DfeApiImpl(queue, dfeApiContext)
         }
         if (data == null) {

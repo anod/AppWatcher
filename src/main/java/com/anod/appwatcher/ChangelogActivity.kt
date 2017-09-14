@@ -46,24 +46,24 @@ import java.util.*
 
 class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette.PaletteAsyncListener, View.OnClickListener, WatchAppList.Listener {
 
-    val mLoadingView: ProgressBar by bindView(R.id.progress_bar)
-    val mChangelog: TextView by bindView(R.id.changelog)
-    val mRetryButton: Button by bindView(R.id.retry)
-    val mAppIcon: ImageView by bindView(android.R.id.icon)
-    val mBackground: View by bindView(R.id.background)
-    val mPlayStoreButton: FloatingActionButton by bindView(R.id.market_btn)
-    val mContent: View by bindView(R.id.content)
+    val loadingView: ProgressBar by bindView(R.id.progress_bar)
+    val changelog: TextView by bindView(R.id.changelog)
+    val retryButton: Button by bindView(R.id.retry)
+    val appIcon: ImageView by bindView(android.R.id.icon)
+    val background: View by bindView(R.id.background)
+    val playStoreButton: FloatingActionButton by bindView(R.id.market_btn)
+    val content: View by bindView(R.id.content)
 
     private var detailsUrl: String = ""
     var appId: String = ""
 
     private var appInfo: AppInfo? = null
     private var isNewApp: Boolean = false
-    private var mAddMenu: MenuItem? = null
+    private var addMenu: MenuItem? = null
     lateinit var iconLoader: AppIconLoader
-    lateinit var mDetailsEndpoint: DetailsEndpoint
-    lateinit var mDataProvider: AppViewHolderDataProvider
-    lateinit var mAppDetailsView: AppDetailsView
+    lateinit var detailsEndpoint: DetailsEndpoint
+    lateinit var dataProvider: AppViewHolderDataProvider
+    lateinit var appDetailsView: AppDetailsView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,24 +76,24 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
         val rowId = intent.getIntExtra(EXTRA_ROW_ID, -1)
         MetricsManagerEvent.track(this, "open_changelog", "DETAILS_APP_ID", appId, "DETAILS_ROW_ID", rowId.toString())
 
-        mDataProvider = AppViewHolderDataProvider(this, InstalledAppsProvider.PackageManager(packageManager))
+        dataProvider = AppViewHolderDataProvider(this, InstalledAppsProvider.PackageManager(packageManager))
         val contentView = findViewById<View>(R.id.container)
-        mAppDetailsView = AppDetailsView(contentView, mDataProvider)
+        appDetailsView = AppDetailsView(contentView, dataProvider)
 
-        mDetailsEndpoint = DetailsEndpoint(this)
-        mDetailsEndpoint.url = detailsUrl
+        detailsEndpoint = DetailsEndpoint(this)
+        detailsEndpoint.url = detailsUrl
 
-        mContent.visibility = View.INVISIBLE
-        mLoadingView.visibility = View.GONE
-        mRetryButton.visibility = View.GONE
-        mChangelog.visibility = View.GONE
-        mBackground.visibility = View.INVISIBLE
+        content.visibility = View.INVISIBLE
+        loadingView.visibility = View.GONE
+        retryButton.visibility = View.GONE
+        changelog.visibility = View.GONE
+        background.visibility = View.INVISIBLE
 
-        mRetryButton.setOnClickListener {
-            mLoadingView.visibility = View.VISIBLE
-            mRetryButton.visibility = View.GONE
-            mChangelog.visibility = View.GONE
-            mRetryButton.postDelayed({ mDetailsEndpoint.startAsync() }, 500)
+        retryButton.setOnClickListener {
+            loadingView.visibility = View.VISIBLE
+            retryButton.visibility = View.GONE
+            changelog.visibility = View.GONE
+            retryButton.postDelayed({ detailsEndpoint.startAsync() }, 500)
         }
 
         if (rowId == -1) {
@@ -117,14 +117,14 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
 
     override fun onResume() {
         super.onResume()
-        mDetailsEndpoint.listener = this
-        mLoadingView.visibility = View.VISIBLE
+        detailsEndpoint.listener = this
+        loadingView.visibility = View.VISIBLE
 
         App.provide(this).prefs.account?.let {
             AuthTokenProvider(this).requestToken(this, it, object : AuthTokenProvider.AuthenticateCallback {
                 override fun onAuthTokenAvailable(token: String) {
-                    mDetailsEndpoint.setAccount(it, token)
-                    mDetailsEndpoint.startAsync()
+                    detailsEndpoint.setAccount(it, token)
+                    detailsEndpoint.startAsync()
                 }
 
                 override fun onUnRecoverableException(errorMessage: String) {
@@ -136,34 +136,34 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
 
     override fun onPause() {
         super.onPause()
-        mDetailsEndpoint.listener = null
+        detailsEndpoint.listener = null
     }
 
     private fun setupAppView(app: AppInfo) {
-        mPlayStoreButton.setOnClickListener(this)
+        playStoreButton.setOnClickListener(this)
 
-        mAppDetailsView.fillDetails(app, app.rowId == -1)
+        appDetailsView.fillDetails(app, app.rowId == -1)
 
         if (app.iconUrl.isEmpty()) {
             if (app.rowId > 0) {
                 val dbImageUri = DbContentProvider.ICONS_CONTENT_URI.buildUpon().appendPath(app.rowId.toString()).build()
-                iconLoader.retrieve(dbImageUri).into(mIconLoadTarget)
+                iconLoader.retrieve(dbImageUri).into(iconLoadTarget)
             } else {
                 setDefaultIcon()
             }
         } else {
-            iconLoader.retrieve(app.iconUrl).into(mIconLoadTarget)
+            iconLoader.retrieve(app.iconUrl).into(iconLoadTarget)
         }
     }
 
-    private val mIconLoadTarget = object : com.squareup.picasso.Target {
+    private val iconLoadTarget = object : com.squareup.picasso.Target {
         override fun onBitmapLoaded(bitmap: Bitmap, from: Picasso.LoadedFrom) {
             Palette.from(bitmap).generate(this@ChangelogActivity)
-            mAppIcon.setImageBitmap(bitmap)
+            appIcon.setImageBitmap(bitmap)
         }
 
         override fun onBitmapFailed(e: Exception?, errorDrawable: Drawable?) {
-            AppLog.e("mIconLoadTarget::onBitmapFailed", e)
+            AppLog.e("iconLoadTarget::onBitmapFailed", e)
             setDefaultIcon()
         }
 
@@ -174,16 +174,16 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
 
     private fun setDefaultIcon() {
         val icon = BitmapFactory.decodeResource(resources, R.drawable.ic_notifications_black_24dp)
-        mBackground.visibility = View.VISIBLE
+        background.visibility = View.VISIBLE
         applyColor(ContextCompat.getColor(this, R.color.theme_primary))
-        mAppIcon.setImageBitmap(icon)
+        appIcon.setImageBitmap(icon)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val inflater = menuInflater
         inflater.inflate(R.menu.changelog, menu)
-        mAddMenu = menu.findItem(R.id.menu_add)
-        mAddMenu!!.isEnabled = false
+        addMenu = menu.findItem(R.id.menu_add)
+        addMenu!!.isEnabled = false
         if (isNewApp) {
             menu.findItem(R.id.menu_remove).isVisible = false
             menu.findItem(R.id.menu_tag_app).isVisible = false
@@ -192,7 +192,7 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
             val tagMenu = menu.findItem(R.id.menu_tag_app)
             loadTagSubmenu(tagMenu)
         }
-        if (!mDataProvider.installedAppsProvider.getInfo(appId).isInstalled) {
+        if (!dataProvider.installedAppsProvider.getInfo(appId).isInstalled) {
             menu.findItem(R.id.menu_uninstall).isVisible = false
             menu.findItem(R.id.menu_open).isVisible = false
         }
@@ -242,7 +242,7 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
                 return true
             }
             R.id.menu_add -> {
-                val doc = mDetailsEndpoint.document
+                val doc = detailsEndpoint.document
                 if (doc != null) {
                     val info = AppInfo(doc)
                     val appList = WatchAppList(this)
@@ -300,20 +300,20 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
     }
 
     override fun onDataChanged() {
-        mLoadingView.visibility = View.GONE
-        mContent.visibility = View.VISIBLE
-        mChangelog.visibility = View.VISIBLE
-        mChangelog.autoLinkMask = Linkify.ALL
+        loadingView.visibility = View.GONE
+        content.visibility = View.VISIBLE
+        changelog.visibility = View.VISIBLE
+        changelog.autoLinkMask = Linkify.ALL
 
-        mRetryButton.visibility = View.GONE
-        val changes = mDetailsEndpoint.recentChanges
+        retryButton.visibility = View.GONE
+        val changes = detailsEndpoint.recentChanges
         if (changes.isEmpty()) {
-            mChangelog.setText(R.string.no_recent_changes)
+            changelog.setText(R.string.no_recent_changes)
         } else {
-            mChangelog.text = Html.fromHtml(changes)
+            changelog.text = Html.fromHtml(changes)
         }
-        if (mDetailsEndpoint.document != null) {
-            mAddMenu!!.isEnabled = true
+        if (detailsEndpoint.document != null) {
+            addMenu!!.isEnabled = true
         }
     }
 
@@ -322,13 +322,13 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
     }
 
     private fun showRetryMessage() {
-        mContent.visibility = View.VISIBLE
-        mLoadingView.visibility = View.GONE
-        mChangelog.visibility = View.VISIBLE
-        mChangelog.autoLinkMask = Linkify.ALL
+        content.visibility = View.VISIBLE
+        loadingView.visibility = View.GONE
+        changelog.visibility = View.VISIBLE
+        changelog.autoLinkMask = Linkify.ALL
 
-        mChangelog.text = getString(R.string.error_fetching_info)
-        mRetryButton.visibility = View.VISIBLE
+        changelog.text = getString(R.string.error_fetching_info)
+        retryButton.visibility = View.VISIBLE
         if (!App.with(this).isNetworkAvailable) {
             Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()
         }
@@ -340,26 +340,26 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
         animateBackground()
 
         if (App.with(this).isNightTheme) {
-            mAppDetailsView.updateAccentColor(ContextCompat.getColor(this, R.color.primary_text_dark), appInfo!!)
+            appDetailsView.updateAccentColor(ContextCompat.getColor(this, R.color.primary_text_dark), appInfo!!)
         } else {
-            mAppDetailsView.updateAccentColor(darkSwatch.rgb, appInfo!!)
+            appDetailsView.updateAccentColor(darkSwatch.rgb, appInfo!!)
         }
     }
 
     private fun applyColor(@ColorInt color: Int) {
-        val drawable = DrawableCompat.wrap(mPlayStoreButton.drawable)
+        val drawable = DrawableCompat.wrap(playStoreButton.drawable)
         DrawableCompat.setTint(drawable, color)
-        mPlayStoreButton.setImageDrawable(drawable)
-        mBackground.setBackgroundColor(color)
-        mLoadingView.indeterminateDrawable.setColorFilter(color, PorterDuff.Mode.SRC_IN)
+        playStoreButton.setImageDrawable(drawable)
+        background.setBackgroundColor(color)
+        loadingView.indeterminateDrawable.setColorFilter(color, PorterDuff.Mode.SRC_IN)
     }
 
     private fun animateBackground() {
-        mBackground.post {
+        background.post {
             val location = IntArray(2)
-            mAppIcon.getLocationOnScreen(location)
-            if (ViewCompat.isAttachedToWindow(mBackground)) {
-                RevealAnimatorCompat.show(mBackground, location[0], location[1], 0).start()
+            appIcon.getLocationOnScreen(location)
+            if (ViewCompat.isAttachedToWindow(background)) {
+                RevealAnimatorCompat.show(background, location[0], location[1], 0).start()
             }
         }
     }

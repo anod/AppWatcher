@@ -9,31 +9,31 @@ import com.android.volley.VolleyError
  */
 
 class CompositeStateEndpoint(val compositeListener: Listener) : CompositeEndpoint(), PlayStoreEndpoint.Listener {
-    private var mActiveId = -1
+    private var activeId = -1
 
     override fun add(id: Int, endpoint: PlayStoreEndpoint) {
         super.add(id, endpoint)
-        if (mActiveId == -1) {
-            mActiveId = id
+        if (activeId == -1) {
+            activeId = id
         }
         endpoint.listener = this
     }
 
     fun active(): PlayStoreEndpointBase {
-        return get(mActiveId) as PlayStoreEndpointBase
+        return get(activeId) as PlayStoreEndpointBase
     }
 
     fun setActive(id: Int): CompositeStateEndpoint {
-        mActiveId = id
+        activeId = id
         return this
     }
 
     override fun onDataChanged() {
-        compositeListener.onDataChanged(mActiveId, active())
+        compositeListener.onDataChanged(activeId, active())
     }
 
     override fun onErrorResponse(error: VolleyError) {
-        compositeListener.onErrorResponse(mActiveId, active(), error)
+        compositeListener.onErrorResponse(activeId, active(), error)
     }
 
     override fun startAsync() {

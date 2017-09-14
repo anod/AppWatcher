@@ -13,11 +13,11 @@ class AppListTable {
             const val KEY_PACKAGE = "package"
             const val KEY_VERSION_NUMBER = "ver_num"
             const val KEY_VERSION_NAME = "ver_name"
-            const val KEY_TITLE = "title"
+            const val title = "title"
             const val KEY_CREATOR = "creator"
             const val KEY_ICON_CACHE = "icon"
             const val KEY_ICON_URL = "iconUrl"
-            const val KEY_STATUS = "status"
+            const val status = "status"
             const val KEY_REFRESH_TIMESTAMP = "update_date"
             const val KEY_PRICE_TEXT = "price_text"
             const val KEY_PRICE_CURRENCY = "price_currency"
@@ -30,8 +30,8 @@ class AppListTable {
     }
 
     object TableColumns {
-        val _ID = AppListTable.TABLE_NAME + "." + BaseColumns._ID
-        val APPID = AppListTable.TABLE_NAME + ".app_id"
+        val _ID = AppListTable.table + "." + BaseColumns._ID
+        val APPID = AppListTable.table + ".app_id"
     }
 
     object Projection {
@@ -56,7 +56,7 @@ class AppListTable {
 
     companion object {
 
-        const val TABLE_NAME = "app_list"
+        const val table = "app_list"
 
         val PROJECTION = arrayOf(
                 TableColumns._ID,
@@ -64,9 +64,9 @@ class AppListTable {
                 Columns.KEY_PACKAGE,
                 Columns.KEY_VERSION_NUMBER,
                 Columns.KEY_VERSION_NAME,
-                Columns.KEY_TITLE,
+                Columns.title,
                 Columns.KEY_CREATOR,
-                Columns.KEY_STATUS,
+                Columns.status,
                 Columns.KEY_REFRESH_TIMESTAMP,
                 Columns.KEY_PRICE_TEXT,
                 Columns.KEY_PRICE_CURRENCY,
@@ -77,16 +77,16 @@ class AppListTable {
                 Columns.KEY_APP_TYPE,
                 Columns.KEY_SYNC_VERSION)
 
-        val TABLE_CREATE =
-                "CREATE TABLE " + TABLE_NAME + " (" +
+        val sqlCreate =
+                "CREATE TABLE " + table + " (" +
                         BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                         Columns.APPID + " TEXT not null," +
                         Columns.KEY_PACKAGE + " TEXT not null," +
                         Columns.KEY_VERSION_NUMBER + " INTEGER," +
                         Columns.KEY_VERSION_NAME + " TEXT," +
-                        Columns.KEY_TITLE + " TEXT not null," +
+                        Columns.title + " TEXT not null," +
                         Columns.KEY_CREATOR + " TEXT," +
-                        Columns.KEY_STATUS + " INTEGER," +
+                        Columns.status + " INTEGER," +
                         Columns.KEY_REFRESH_TIMESTAMP + " INTEGER," +
                         Columns.KEY_PRICE_TEXT + " TEXT," +
                         Columns.KEY_PRICE_CURRENCY + " TEXT," +
@@ -109,11 +109,11 @@ class AppListTable {
             }
             values.put(AppListTable.Columns.APPID, app.appId)
             values.put(AppListTable.Columns.KEY_PACKAGE, app.packageName)
-            values.put(AppListTable.Columns.KEY_TITLE, app.title)
+            values.put(AppListTable.Columns.title, app.title)
             values.put(AppListTable.Columns.KEY_VERSION_NUMBER, app.versionNumber)
             values.put(AppListTable.Columns.KEY_VERSION_NAME, app.versionName)
             values.put(AppListTable.Columns.KEY_CREATOR, app.creator)
-            values.put(AppListTable.Columns.KEY_STATUS, app.status)
+            values.put(AppListTable.Columns.status, app.status)
             values.put(AppListTable.Columns.KEY_UPLOAD_DATE, app.uploadDate)
 
             values.put(AppListTable.Columns.KEY_PRICE_TEXT, app.priceText)

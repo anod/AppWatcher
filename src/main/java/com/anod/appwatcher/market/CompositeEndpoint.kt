@@ -10,53 +10,53 @@ import android.support.v4.util.SparseArrayCompat
  */
 
 open class CompositeEndpoint : PlayStoreEndpoint {
-    private var mEndpoints = SparseArrayCompat<PlayStoreEndpoint>()
+    private var endpoints = SparseArrayCompat<PlayStoreEndpoint>()
 
     operator fun get(id: Int): PlayStoreEndpoint {
-        return mEndpoints.get(id)
+        return endpoints.get(id)
     }
 
     open fun add(id: Int, endpoint: PlayStoreEndpoint) {
-        mEndpoints.put(id, endpoint)
+        endpoints.put(id, endpoint)
     }
 
     fun clear() {
-        mEndpoints = SparseArrayCompat<PlayStoreEndpoint>()
+        endpoints = SparseArrayCompat<PlayStoreEndpoint>()
     }
 
     override var listener: PlayStoreEndpoint.Listener?
         get() = this.listener
         set(listener) {
-            for (i in 0..mEndpoints.size() - 1) {
-                mEndpoints.valueAt(i).listener = listener
+            for (i in 0 until endpoints.size()) {
+                endpoints.valueAt(i).listener = listener
             }
         }
 
     override val authSubToken: String
-        get() = if (mEndpoints.size() > 0) mEndpoints.valueAt(0).authSubToken else ""
+        get() = if (endpoints.size() > 0) endpoints.valueAt(0).authSubToken else ""
 
     override fun setAccount(account: Account, authSubToken: String): PlayStoreEndpoint {
-        for (i in 0..mEndpoints.size() - 1) {
-            mEndpoints.valueAt(i).setAccount(account, authSubToken)
+        for (i in 0 until endpoints.size()) {
+            endpoints.valueAt(i).setAccount(account, authSubToken)
         }
         return this
     }
 
     override fun startAsync() {
-        for (i in 0..mEndpoints.size() - 1) {
-            mEndpoints.valueAt(i).startAsync()
+        for (i in 0 until endpoints.size()) {
+            endpoints.valueAt(i).startAsync()
         }
     }
 
     override fun startSync() {
-        for (i in 0..mEndpoints.size() - 1) {
-            mEndpoints.valueAt(i).startSync()
+        for (i in 0 until endpoints.size()) {
+            endpoints.valueAt(i).startSync()
         }
     }
 
     override fun reset() {
-        (0..mEndpoints.size() - 1)
-                .map { mEndpoints.valueAt(it) }
+        (0 until endpoints.size())
+                .map { endpoints.valueAt(it) }
                 .forEach { it.reset() }
     }
 }

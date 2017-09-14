@@ -1,5 +1,6 @@
 package com.anod.appwatcher.backup
 
+import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
@@ -28,12 +29,11 @@ class GDriveSync(private val context: Context): SyncTask.Listener, UploadTask.Li
     val playServiceStatusText: String
         get() = playServices.errorCodeText
 
-
     fun showResolutionNotification(resolution: PendingIntent) {
-        val builder = NotificationCompat.Builder(context)
+        val builder = NotificationCompat.Builder(context, NotificationChannel.DEFAULT_CHANNEL_ID)
         builder
                 .setAutoCancel(true)
-                .setSmallIcon(R.drawable.ic_stat_update)
+                .setSmallIcon(R.drawable.ic_notification)
                 .setContentTitle(context.getString(R.string.google_drive_sync_failed))
                 .setContentText(context.getString(R.string.user_action_required))
                 .setContentIntent(resolution)

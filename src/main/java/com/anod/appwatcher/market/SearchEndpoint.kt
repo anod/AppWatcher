@@ -11,7 +11,7 @@ import com.google.android.finsky.api.model.DfeSearch
  * *
  * @date 2015-02-21
  */
-class SearchEndpoint(context: Context, private val mAutoLoadNextPage: Boolean) : PlayStoreEndpointBase(context) {
+class SearchEndpoint(context: Context, private val autoLoadNextPage: Boolean) : PlayStoreEndpointBase(context) {
     var query: String = ""
 
     var searchData: DfeSearch?
@@ -37,11 +37,11 @@ class SearchEndpoint(context: Context, private val mAutoLoadNextPage: Boolean) :
     }
 
     override fun createDfeModel(): DfeModel {
-        val searchUrl = DfeUtils.formSearchUrl(query, BACKEND_ID)
-        return DfeSearch(dfeApi, query, searchUrl, mAutoLoadNextPage, AppDetailsFilter.predicate)
+        val searchUrl = DfeUtils.formSearchUrl(query, backendId)
+        return DfeSearch(dfeApi!!, query, searchUrl, autoLoadNextPage, AppDetailsFilter.predicate)
     }
 
     companion object {
-        private const val BACKEND_ID = 3
+        private const val backendId = 3
     }
 }

@@ -18,7 +18,7 @@ class ManualSyncService : IntentService("ManualSyncService") {
     override fun onHandleIntent(intent: Intent?) {
         if (intent != null) {
             val syncAdapter = SyncAdapter(applicationContext)
-            val contentProviderClient = contentResolver.acquireContentProviderClient(DbContentProvider.AUTHORITY)
+            val contentProviderClient = contentResolver.acquireContentProviderClient(DbContentProvider.authority)
 
             val bundle = Bundle()
             if (!BuildConfig.DEBUG) {

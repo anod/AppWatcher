@@ -21,7 +21,7 @@ class DetailsEndpoint(context: Context) : PlayStoreEndpointBase(context) {
             super.data = value
         }
 
-    val appDetails: AppDetails?
+    private val appDetails: AppDetails?
         get() = detailsData?.document?.appDetails
 
     val document: Document?
@@ -41,7 +41,7 @@ class DetailsEndpoint(context: Context) : PlayStoreEndpointBase(context) {
     }
 
     override fun createDfeModel(): DfeModel {
-        return DfeDetails(dfeApi)
+        return DfeDetails(dfeApi!!)
     }
 
 }

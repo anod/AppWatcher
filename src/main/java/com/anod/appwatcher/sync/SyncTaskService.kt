@@ -2,7 +2,6 @@ package com.anod.appwatcher.sync
 
 import android.content.Intent
 import com.anod.appwatcher.App
-import com.anod.appwatcher.Preferences
 import com.anod.appwatcher.content.DbContentProvider
 import com.google.android.gms.gcm.*
 import info.anodsplace.android.log.AppLog
@@ -21,7 +20,7 @@ class SyncTaskService : GcmTaskService() {
         AppLog.d("Scheduled call executed. Task: " + taskParams.tag)
 
         val syncAdapter = SyncAdapter(applicationContext)
-        val contentProviderClient = contentResolver.acquireContentProviderClient(DbContentProvider.AUTHORITY)
+        val contentProviderClient = contentResolver.acquireContentProviderClient(DbContentProvider.authority)
 
         val updatesCount = syncAdapter.onPerformSync(taskParams.extras, contentProviderClient)
 

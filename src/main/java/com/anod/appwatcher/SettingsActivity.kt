@@ -15,7 +15,7 @@ import com.anod.appwatcher.backup.DbBackupManager
 import com.anod.appwatcher.backup.ExportTask
 import com.anod.appwatcher.backup.GDriveSync
 import com.anod.appwatcher.backup.ImportTask
-import com.anod.appwatcher.model.DbOpenHelper
+import com.anod.appwatcher.model.DbSchemaManager
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.ui.SettingsActionBarActivity
 import de.psdev.licensesdialog.LicensesDialog
@@ -261,7 +261,7 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
         } else {
             dbPath = filesDir.path + packageName + "/databases/"
         }
-        val currentDBPath = DbOpenHelper.DATABASE_NAME
+        val currentDBPath = DbSchemaManager.dbName
         val backupDBPath = "appwatcher.db"
         val currentDB = File(dbPath, currentDBPath)
         val backupDB = File(sd, backupDBPath)

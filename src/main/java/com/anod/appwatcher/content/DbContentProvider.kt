@@ -10,18 +10,81 @@ import android.net.Uri
 import android.provider.BaseColumns
 
 import com.anod.appwatcher.BuildConfig
-import com.anod.appwatcher.model.DbOpenHelper
+import com.anod.appwatcher.model.DbSchemaManager
 import com.anod.appwatcher.model.Tag
 import com.anod.appwatcher.model.schema.AppListTable
 import com.anod.appwatcher.model.schema.AppTagsTable
+import com.anod.appwatcher.model.schema.ChangelogTable
 import com.anod.appwatcher.model.schema.TagsTable
 
 open class DbContentProvider : ContentProvider() {
 
-    private var mDatabaseOpenHelper: DbOpenHelper? = null
+    companion object {
+        const val authority = BuildConfig.APPLICATION_ID
+
+        private const val apps = 10
+        private const val app = 20
+        private const val appTags = 100
+        private const val appsTags = 60
+        private const val appsTagsClean = 110
+
+        private const val tags = 30
+        private const val tag = 40
+        private const val tagApps = 50
+        private const val tagsApps = 80
+        private const val tagsAppsCount = 90
+
+        private const val changelogVersion = 200
+        private const val changelogApp = 201
+
+        private const val icon = 70
+
+        val APPS_CONTENT_URI = Uri.parse("content://$authority/apps")!!
+        val APPS_TAG_CONTENT_URI = Uri.parse("content://$authority/apps/tags")!!
+        val APPS_TAG_CLEAN_CONTENT_URI = Uri.parse("content://$authority/apps/tags/clean")!!
+        val TAGS_CONTENT_URI = Uri.parse("content://$authority/tags")!!
+        val TAGS_APPS_CONTENT_URI = Uri.parse("content://$authority/tags/apps")!!
+        val TAGS_APPS_COUNT_CONTENT_URI = Uri.parse("content://$authority/tags/apps/count")!!
+        val ICONS_CONTENT_URI = Uri.parse("content://$authority/icons")!!
+        val changelogUri = Uri.parse("content://$authority/changelog")!!
+
+        private val uriMatcher = UriMatcher(UriMatcher.NO_MATCH)
+
+        init {
+            uriMatcher.addURI(authority, "apps", apps)
+            uriMatcher.addURI(authority, "apps/#", app)
+            uriMatcher.addURI(authority, "apps/tags/#", appsTags)
+            uriMatcher.addURI(authority, "apps/tags/clean", appsTagsClean)
+            uriMatcher.addURI(authority, "apps/#/tags", appTags)
+
+            uriMatcher.addURI(authority, "tags", tags)
+            uriMatcher.addURI(authority, "tags/#", tag)
+            uriMatcher.addURI(authority, "tags/#/apps", tagApps)
+            uriMatcher.addURI(authority, "tags/apps", tagsApps)
+            uriMatcher.addURI(authority, "tags/apps/count", tagsAppsCount)
+
+            uriMatcher.addURI(authority, "icons/#", icon)
+
+            uriMatcher.addURI(authority, "changelog/apps/*", changelogApp)
+            uriMatcher.addURI(authority, "changelog/apps/*/v/#", changelogVersion)
+        }
+
+        fun matchIconUri(uri: Uri): Boolean {
+            return uriMatcher.match(uri) == icon
+        }
+
+        fun appsContentUri(tag: Tag?): Uri {
+            return if (tag == null)
+                DbContentProvider.APPS_CONTENT_URI
+            else
+                DbContentProvider.APPS_TAG_CONTENT_URI.buildUpon().appendPath(tag.id.toString()).build()
+        }
+    }
+
+    private lateinit var dbSchemaManager: DbSchemaManager
 
     private fun matchQuery(uri: Uri): Query? {
-        val matched = sURIMatcher.match(uri)
+        val matched = uriMatcher.match(uri)
         if (matched == -1) {
             return null
         }
@@ -29,80 +92,97 @@ open class DbContentProvider : ContentProvider() {
         query.type = matched
         val rowId: String
         when (matched) {
-            APP_ROW -> {
-                query.table = AppListTable.TABLE_NAME
+            app -> {
+                query.table = AppListTable.table
                 rowId = uri.lastPathSegment
                 query.selection = BaseColumns._ID + "=?"
                 query.selectionArgs = arrayOf(rowId)
                 query.notifyUri = APPS_CONTENT_URI
                 return query
             }
-            APP_LIST -> {
-                query.table = AppListTable.TABLE_NAME
+            apps -> {
+                query.table = AppListTable.table
                 query.notifyUri = APPS_CONTENT_URI
                 return query
             }
-            APPS_TAG -> {
-                query.table = AppTagsTable.TABLE_NAME + ", " + AppListTable.TABLE_NAME
+            appsTags -> {
+                query.table = AppTagsTable.table + ", " + AppListTable.table
                 val tagId = uri.lastPathSegment
                 query.selection = AppTagsTable.TableColumns.TAGID + "=?"
                 query.selectionArgs = arrayOf(tagId)
                 query.notifyUri = APPS_CONTENT_URI
                 return query
             }
-            APP_TAGS -> {
-                query.table = AppTagsTable.TABLE_NAME + ", " + AppListTable.TABLE_NAME
+            appTags -> {
+                query.table = AppTagsTable.table + ", " + AppListTable.table
                 rowId = uri.pathSegments[uri.pathSegments.size - 2]
                 query.selection = AppListTable.TableColumns._ID + "=? AND " + AppListTable.TableColumns.APPID + "=" + AppTagsTable.TableColumns.APPID
                 query.selectionArgs = arrayOf(rowId)
                 query.notifyUri = APPS_TAG_CONTENT_URI
                 return query
             }
-            APPS_TAGS_CLEAN -> {
-                query.table = AppTagsTable.TABLE_NAME
-                query.selection = AppTagsTable.TableColumns.APPID+" NOT IN (SELECT " + AppTagsTable.TableColumns.APPID + " FROM " + AppTagsTable.TABLE_NAME + ")"
+            appsTagsClean -> {
+                query.table = AppTagsTable.table
+                query.selection = AppTagsTable.TableColumns.APPID+" NOT IN (SELECT " + AppTagsTable.TableColumns.APPID + " FROM " + AppTagsTable.table + ")"
                 query.notifyUri = APPS_TAG_CONTENT_URI
                 return query
             }
-            TAG_LIST -> {
-                query.table = TagsTable.TABLE_NAME
+            tags -> {
+                query.table = TagsTable.table
                 query.notifyUri = TAGS_CONTENT_URI
                 return query
             }
-            TAG_ROW -> {
-                query.table = TagsTable.TABLE_NAME
+            tag -> {
+                query.table = TagsTable.table
                 rowId = uri.lastPathSegment
                 query.selection = BaseColumns._ID + "=?"
                 query.selectionArgs = arrayOf(rowId)
                 query.notifyUri = TAGS_CONTENT_URI
                 return query
             }
-            TAG_APPS -> {
-                query.table = AppTagsTable.TABLE_NAME
+            tagApps -> {
+                query.table = AppTagsTable.table
                 val tagId = uri.pathSegments[uri.pathSegments.size - 2]
                 query.selection = AppTagsTable.Columns.TAGID + "=?"
                 query.selectionArgs = arrayOf(tagId)
                 query.notifyUri = APPS_TAG_CONTENT_URI
                 return query
             }
-            TAGS_APPS -> {
-                query.table = AppTagsTable.TABLE_NAME
+            tagsApps -> {
+                query.table = AppTagsTable.table
                 query.notifyUri = APPS_TAG_CONTENT_URI
                 return query
             }
-            TAGS_APPS_COUNT -> {
-                query.table = AppTagsTable.TABLE_NAME
+            tagsAppsCount -> {
+                query.table = AppTagsTable.table
                 query.notifyUri = APPS_TAG_CONTENT_URI
                 query.projection = arrayOf(AppTagsTable.Columns.TAGID, "count() as count")
                 query.groupBy = AppTagsTable.Columns.TAGID
                 return query
             }
-            ICON_ROW -> {
-                query.table = AppListTable.TABLE_NAME
+            icon -> {
+                query.table = AppListTable.table
                 rowId = uri.lastPathSegment
                 query.selection = BaseColumns._ID + "=?"
                 query.selectionArgs = arrayOf(rowId)
                 query.notifyUri = ICONS_CONTENT_URI
+                return query
+            }
+            changelogApp -> {
+                query.table = ChangelogTable.table
+                query.selection = ChangelogTable.Columns.appId + "=?"
+                query.selectionArgs = arrayOf(uri.lastPathSegment)
+                query.notifyUri = changelogUri
+                return query
+            }
+            changelogVersion -> {
+                query.table = ChangelogTable.table
+                query.selection = ChangelogTable.Columns.appId + "=? AND " + ChangelogTable.Columns.versionCode + "=?"
+                query.selectionArgs = arrayOf(
+                        uri.pathSegments[uri.pathSegments.size - 2],
+                        uri.lastPathSegment
+                )
+                query.notifyUri = changelogUri
                 return query
             }
         }
@@ -122,7 +202,7 @@ open class DbContentProvider : ContentProvider() {
     override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int {
         val query = matchQuery(uri) ?: throw IllegalArgumentException("Unknown URI " + uri)
 
-        val db = mDatabaseOpenHelper!!.writableDatabase
+        val db = dbSchemaManager.writableDatabase
         val count: Int
         if (selection != null) {
             count = db.delete(query.table, selection, selectionArgs)
@@ -130,7 +210,7 @@ open class DbContentProvider : ContentProvider() {
             count = db.delete(query.table, query.selection, query.selectionArgs)
         }
         if (count > 0 && query.notifyUri != null) {
-            context!!.contentResolver.notifyChange(query.notifyUri!!, null)
+            context.contentResolver.notifyChange(query.notifyUri!!, null)
         }
         return count
     }
@@ -146,18 +226,18 @@ open class DbContentProvider : ContentProvider() {
             throw IllegalArgumentException("Values cannot be empty")
         }
 
-        val db = mDatabaseOpenHelper!!.writableDatabase
+        val db = dbSchemaManager.writableDatabase
         val rowId = db.insert(query.table, null, values)
         if (rowId > 0 && query.notifyUri != null) {
             val noteUri = ContentUris.withAppendedId(query.notifyUri, rowId)
-            context!!.contentResolver.notifyChange(noteUri, null)
+            context.contentResolver.notifyChange(noteUri, null)
             return noteUri
         }
         throw SQLException("Failed to insert row into " + uri)
     }
 
     override fun onCreate(): Boolean {
-        mDatabaseOpenHelper = DbOpenHelper(context)
+        dbSchemaManager = DbSchemaManager(context)
         return false
     }
 
@@ -178,11 +258,11 @@ open class DbContentProvider : ContentProvider() {
             proj = query.projection
         }
 
-        val db = mDatabaseOpenHelper!!.writableDatabase
+        val db = dbSchemaManager.writableDatabase
         val cursor = queryBuilder.query(db, proj, sel, selArgs, query.groupBy, null, sortOrder, null) ?: return null
 
 // Make sure that potential listeners are getting notified
-        cursor.setNotificationUri(context!!.contentResolver, uri)
+        cursor.setNotificationUri(context.contentResolver, uri)
         return AppListCursor(cursor)
     }
 
@@ -192,66 +272,12 @@ open class DbContentProvider : ContentProvider() {
             throw IllegalArgumentException("Values cannot be empty")
         }
 
-        val db = mDatabaseOpenHelper!!.writableDatabase
+        val db = dbSchemaManager.writableDatabase
         val count = db.update(query.table, values, query.selection, query.selectionArgs)
         if (count > 0 && query.notifyUri != null) {
-            context!!.contentResolver.notifyChange(query.notifyUri!!, null)
+            context.contentResolver.notifyChange(query.notifyUri!!, null)
         }
         return count
     }
 
-    companion object {
-        const val AUTHORITY = BuildConfig.APPLICATION_ID
-
-        private const val APP_LIST = 10
-        private const val APP_ROW = 20
-        private const val APP_TAGS = 100
-        private const val APPS_TAG = 60
-        private const val APPS_TAGS_CLEAN = 110
-
-        private const val TAG_LIST = 30
-        private const val TAG_ROW = 40
-        private const val TAG_APPS = 50
-        private const val TAGS_APPS = 80
-        private const val TAGS_APPS_COUNT = 90
-
-        private const val ICON_ROW = 70
-
-        val APPS_CONTENT_URI = Uri.parse("content://$AUTHORITY/apps")!!
-        val APPS_TAG_CONTENT_URI = Uri.parse("content://$AUTHORITY/apps/tags")!!
-        val APPS_TAG_CLEAN_CONTENT_URI = Uri.parse("content://$AUTHORITY/apps/tags/clean")!!
-        val TAGS_CONTENT_URI = Uri.parse("content://$AUTHORITY/tags")!!
-        val TAGS_APPS_CONTENT_URI = Uri.parse("content://$AUTHORITY/tags/apps")!!
-        val TAGS_APPS_COUNT_CONTENT_URI = Uri.parse("content://$AUTHORITY/tags/apps/count")!!
-        val ICONS_CONTENT_URI = Uri.parse("content://$AUTHORITY/icons")!!
-
-        private val sURIMatcher = UriMatcher(UriMatcher.NO_MATCH)
-
-        init {
-            sURIMatcher.addURI(AUTHORITY, "apps", APP_LIST)
-            sURIMatcher.addURI(AUTHORITY, "apps/#", APP_ROW)
-            sURIMatcher.addURI(AUTHORITY, "apps/tags/#", APPS_TAG)
-            sURIMatcher.addURI(AUTHORITY, "apps/tags/clean", APPS_TAGS_CLEAN)
-            sURIMatcher.addURI(AUTHORITY, "apps/#/tags", APP_TAGS)
-
-            sURIMatcher.addURI(AUTHORITY, "tags", TAG_LIST)
-            sURIMatcher.addURI(AUTHORITY, "tags/#", TAG_ROW)
-            sURIMatcher.addURI(AUTHORITY, "tags/#/apps", TAG_APPS)
-            sURIMatcher.addURI(AUTHORITY, "tags/apps", TAGS_APPS)
-            sURIMatcher.addURI(AUTHORITY, "tags/apps/count", TAGS_APPS_COUNT)
-
-            sURIMatcher.addURI(AUTHORITY, "icons/#", ICON_ROW)
-        }
-
-        fun matchIconUri(uri: Uri): Boolean {
-            return sURIMatcher.match(uri) == ICON_ROW
-        }
-
-        fun appsContentUri(tag: Tag?): Uri {
-            return if (tag == null)
-                DbContentProvider.APPS_CONTENT_URI
-            else
-                DbContentProvider.APPS_TAG_CONTENT_URI.buildUpon().appendPath(tag.id.toString()).build()
-        }
-    }
 }

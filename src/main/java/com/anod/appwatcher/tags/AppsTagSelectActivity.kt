@@ -124,7 +124,7 @@ class AppsTagSelectActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<C
         if (id == 0) {
             return TagAppsCursorLoader(this, tag)
         }
-        return AppListCursorLoader(this, titleFilter, AppListTable.Columns.KEY_TITLE + " COLLATE LOCALIZED ASC", null, null)
+        return AppListCursorLoader(this, titleFilter, AppListTable.Columns.title + " COLLATE LOCALIZED ASC", null, null)
     }
 
     override fun onLoadFinished(loader: Loader<Cursor>, data: Cursor) {

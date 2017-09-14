@@ -36,7 +36,7 @@ open class AppListCursorLoader(context: Context,
         val selc = ArrayList<String>(3)
         val args = ArrayList<String>(3)
 
-        selc.add(AppListTable.Columns.KEY_STATUS + " != ?")
+        selc.add(AppListTable.Columns.status + " != ?")
         args.add(AppInfoMetadata.STATUS_DELETED.toString())
 
         if (tag != null) {
@@ -46,7 +46,7 @@ open class AppListCursorLoader(context: Context,
         }
 
         if (!TextUtils.isEmpty(titleFilter)) {
-            selc.add(AppListTable.Columns.KEY_TITLE + " LIKE ?")
+            selc.add(AppListTable.Columns.title + " LIKE ?")
             args.add("%$titleFilter%")
         }
 
@@ -110,19 +110,19 @@ open class AppListCursorLoader(context: Context,
     }
 
     companion object {
-        private val ORDER_DEFAULT = AppListTable.Columns.KEY_STATUS + " DESC, "+ AppListTable.Columns.KEY_TITLE + " COLLATE LOCALIZED ASC"
+        private val ORDER_DEFAULT = AppListTable.Columns.status + " DESC, "+ AppListTable.Columns.title + " COLLATE LOCALIZED ASC"
 
         private fun createSortOrder(sortId: Int): String {
             val filter = ArrayList<String>()
-            filter.add(AppListTable.Columns.KEY_STATUS + " DESC")
+            filter.add(AppListTable.Columns.status + " DESC")
             if (sortId == Preferences.SORT_NAME_DESC) {
-                filter.add(AppListTable.Columns.KEY_TITLE + " COLLATE LOCALIZED DESC")
+                filter.add(AppListTable.Columns.title + " COLLATE LOCALIZED DESC")
             } else if (sortId == Preferences.SORT_DATE_ASC) {
                 filter.add(AppListTable.Columns.KEY_REFRESH_TIMESTAMP + " ASC")
             } else if (sortId == Preferences.SORT_DATE_DESC) {
                 filter.add(AppListTable.Columns.KEY_REFRESH_TIMESTAMP + " DESC")
             } else {
-                filter.add(AppListTable.Columns.KEY_TITLE + " COLLATE LOCALIZED ASC")
+                filter.add(AppListTable.Columns.title + " COLLATE LOCALIZED ASC")
             }
             return TextUtils.join(", ", filter)
         }

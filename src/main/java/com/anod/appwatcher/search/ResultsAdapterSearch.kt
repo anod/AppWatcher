@@ -17,7 +17,7 @@ class ResultsAdapterSearch(context: Context, private val mSearchEngine: SearchEn
 
     override fun getDocument(position: Int): Document {
         val isLastPosition = mSearchEngine.count - 1 == position
-        return mSearchEngine.searchData!!.getItem(position, isLastPosition)
+        return mSearchEngine.searchData!!.getItem(position, isLastPosition)!!
     }
 
     override fun getItemCount(): Int {

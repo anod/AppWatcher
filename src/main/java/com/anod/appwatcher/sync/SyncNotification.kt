@@ -65,7 +65,7 @@ class SyncNotification(private val context: Context) {
         val builder = NotificationCompat.Builder(context, channelId)
         builder
             .setAutoCancel(true)
-            .setSmallIcon(R.drawable.ic_stat_update)
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(text)
             .setContentIntent(contentIntent)

@@ -19,7 +19,7 @@ class TagsContentProviderClient {
     private var contentProviderClient: ContentProviderClient
 
     constructor(context: Context) {
-        contentProviderClient = context.contentResolver.acquireContentProviderClient(DbContentProvider.AUTHORITY)
+        contentProviderClient = context.contentResolver.acquireContentProviderClient(DbContentProvider.authority)
     }
 
     constructor(provider: ContentProviderClient) {

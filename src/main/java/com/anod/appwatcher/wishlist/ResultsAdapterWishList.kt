@@ -13,15 +13,15 @@ import com.google.android.finsky.api.model.Document
  * @date 16/12/2016.
  */
 
-internal class ResultsAdapterWishlist(context: Context, private val mEngine: WishlistEndpoint, newAppHandler: WatchAppList) : ResultsAdapter(context, newAppHandler) {
+internal class ResultsAdapterWishList(context: Context, private val endpoint: WishlistEndpoint, newAppHandler: WatchAppList) : ResultsAdapter(context, newAppHandler) {
 
     override fun getDocument(position: Int): Document {
-        val isLastPosition = mEngine.count - 1 == position
-        return mEngine.listData!!.getItem(position, isLastPosition)
+        val isLastPosition = endpoint.count - 1 == position
+        return endpoint.listData!!.getItem(position, isLastPosition)!!
     }
 
     override fun getItemCount(): Int {
-        return mEngine.count
+        return endpoint.count
     }
 
 }

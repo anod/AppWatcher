@@ -112,7 +112,7 @@ class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Li
 
         val context = context
 
-        val adapter = ResultsAdapterWishlist(context, endpoint!!, watchAppList!!)
+        val adapter = ResultsAdapterWishList(context, endpoint!!, watchAppList!!)
         listView.adapter = adapter
 
         endpoint!!.startAsync()

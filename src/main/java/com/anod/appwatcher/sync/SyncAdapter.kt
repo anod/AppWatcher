@@ -15,12 +15,16 @@ import com.anod.appwatcher.App
 import com.anod.appwatcher.Preferences
 import com.anod.appwatcher.accounts.AuthTokenProvider
 import com.anod.appwatcher.backup.GDriveSync
+import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.market.BulkDetailsEndpoint
 import com.anod.appwatcher.market.PlayStoreEndpoint
+import com.anod.appwatcher.model.AppChange
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.model.schema.AppListTable
+import com.anod.appwatcher.model.schema.ChangelogTable
+import com.anod.appwatcher.model.schema.contentValues
 import com.anod.appwatcher.utils.AppDetailsUploadDate
 import com.anod.appwatcher.utils.CollectionsUtils
 import com.anod.appwatcher.utils.GooglePlayServices
@@ -153,11 +157,7 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
                 val docIds = localApps.keys
                 AppLog.d("Sending bulk #$i... $docIds")
                 val documents = requestBulkDetails(docIds, endpoint)
-                if (true) {
-                    updateApps(documents, localApps, client, updatedTitles, lastUpdatesViewed)
-                } else {
-                    AppLog.e("No documents were received.")
-                }
+                updateApps(documents, localApps, client, updatedTitles, lastUpdatesViewed)
                 localApps.clear()
                 i++
             }
@@ -182,6 +182,7 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
     private fun updateApps(documents: List<Document>, localApps: Map<String, AppInfo>, client: DbContentProviderClient, updatedTitles: MutableList<UpdatedApp>, lastUpdatesViewed: Boolean) {
         val fetched = mutableMapOf<String, Boolean>()
         val batch = mutableListOf<ContentValues>()
+        val changelog = mutableListOf<ContentValues>()
         for (marketApp in documents) {
             val docId = marketApp.docId
             localApps[docId]?.let {
@@ -190,32 +191,52 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
                 if (values.size() > 0) {
                     batch.add(values)
                 }
+                val recentChanges = marketApp.appDetails.recentChangesHtml ?: ""
+                if (recentChanges.isNotBlank()) {
+                    changelog.add(AppChange(docId, marketApp.appDetails.versionCode, marketApp.appDetails.versionString, recentChanges).contentValues)
+                }
             }
         }
 
         if (batch.isNotEmpty()) {
-            client.applyBatchUpdates(batch)
+            client.applyBatchUpdates(batch) {
+                val rowId = it.getAsString(BaseColumns._ID)
+                DbContentProvider.APPS_CONTENT_URI.buildUpon().appendPath(rowId).build()
+            }
+        }
+
+        if (changelog.isNotEmpty()) {
+            client.applyBatchUpdates(changelog) {
+                DbContentProvider.changelogUri
+                        .buildUpon()
+                        .appendPath("apps")
+                        .appendPath(it.getAsString(ChangelogTable.Columns.appId))
+                        .appendPath("v")
+                        .appendPath(it.getAsString(ChangelogTable.Columns.versionCode))
+                        .build()
+            }
         }
 
         // Reset not fetched app statuses
-        if (lastUpdatesViewed && fetched.size < localApps.size)
-        {
+        if (lastUpdatesViewed && fetched.size < localApps.size) {
             val statusBatch = mutableListOf<ContentValues>()
             localApps.values.forEach({
-                if (fetched[it.appId] == null)
-                {
+                if (fetched[it.appId] == null) {
                     if (it.status == AppInfoMetadata.STATUS_UPDATED) {
                         it.status = AppInfoMetadata.STATUS_NORMAL
                         AppLog.d("Set not fetched app as viewed")
                         val values = ContentValues()
                         values.put(BaseColumns._ID, it.rowId)
-                        values.put(AppListTable.Columns.KEY_STATUS, AppInfoMetadata.STATUS_NORMAL)
+                        values.put(AppListTable.Columns.status, AppInfoMetadata.STATUS_NORMAL)
                         statusBatch.add(values)
                     }
                 }
             })
-            if (batch.isNotEmpty()) {
-                client.applyBatchUpdates(statusBatch)
+            if (statusBatch.isNotEmpty()) {
+                client.applyBatchUpdates(statusBatch) {
+                    val rowId = it.getAsString(BaseColumns._ID)
+                    DbContentProvider.APPS_CONTENT_URI.buildUpon().appendPath(rowId).build()
+                }
             }
         }
     }
@@ -239,7 +260,7 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
         if (localApp.status == AppInfoMetadata.STATUS_UPDATED && lastUpdatesViewed) {
             AppLog.d("Set application update as viewed")
             localApp.status = AppInfoMetadata.STATUS_NORMAL
-            values.put(AppListTable.Columns.KEY_STATUS, AppInfoMetadata.STATUS_NORMAL)
+            values.put(AppListTable.Columns.status, AppInfoMetadata.STATUS_NORMAL)
         } else if (localApp.status == AppInfoMetadata.STATUS_UPDATED) {
             // App was previously updated
             val installedInfo = installedAppsProvider.getInfo(appDetails.packageName)

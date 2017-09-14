@@ -32,7 +32,7 @@ object DeviceIdHelper {
             cursor.close()
             return ""
         }
-        var str: String = ""
+        var str = ""
         try {
             str = java.lang.Long.toHexString(cursor.getString(1).toLong())
         } catch (localNumberFormatException: NumberFormatException) { }

@@ -18,9 +18,9 @@ class AppTagsTable {
     }
 
     object TableColumns {
-        val _ID = AppTagsTable.TABLE_NAME + "." + BaseColumns._ID
-        val APPID = AppTagsTable.TABLE_NAME + ".app_id"
-        val TAGID = AppTagsTable.TABLE_NAME + ".tags_id"
+        val _ID = AppTagsTable.table + "." + BaseColumns._ID
+        val APPID = AppTagsTable.table + ".app_id"
+        val TAGID = AppTagsTable.table + ".tags_id"
     }
 
     object Projection {
@@ -31,12 +31,12 @@ class AppTagsTable {
 
     companion object {
 
-        const val TABLE_NAME = "app_tags"
+        const val table = "app_tags"
 
         val PROJECTION = arrayOf(TableColumns._ID, TableColumns.APPID, TableColumns.TAGID)
 
-        val TABLE_CREATE =
-                "CREATE TABLE " + TABLE_NAME + " (" +
+        val sqlCreate =
+                "CREATE TABLE " + table + " (" +
                         BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                         AppTagsTable.Columns.APPID + " TEXT not null," +
                         AppTagsTable.Columns.TAGID + " INTEGER" +

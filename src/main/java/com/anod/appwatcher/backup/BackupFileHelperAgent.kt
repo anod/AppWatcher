@@ -6,7 +6,7 @@ import android.app.backup.BackupDataOutput
 import android.app.backup.FileBackupHelper
 import android.os.ParcelFileDescriptor
 
-import com.anod.appwatcher.model.DbOpenHelper
+import com.anod.appwatcher.model.DbSchemaManager
 
 import java.io.File
 import java.io.IOException
@@ -14,12 +14,12 @@ import java.io.IOException
 class BackupFileHelperAgent : BackupAgentHelper() {
 
     override fun onCreate() {
-        val dbs = FileBackupHelper(this, DbOpenHelper.DATABASE_NAME)
+        val dbs = FileBackupHelper(this, DbSchemaManager.dbName)
         addHelper(APPDB_BACKUP_KEY, dbs)
     }
 
     override fun getFilesDir(): File {
-        val path = getDatabasePath(DbOpenHelper.DATABASE_NAME)
+        val path = getDatabasePath(DbSchemaManager.dbName)
         return path.parentFile
     }
 
