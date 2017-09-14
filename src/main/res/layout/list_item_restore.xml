@@ -19,9 +19,9 @@
             android:layout_height="wrap_content"
             android:ellipsize="marquee"
             android:fadingEdge="horizontal"
-            android:maxLines="1"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            tools:text="20999999_9999"/>
+            tools:text="20999999_9999"
+            android:singleLine="true" />
     </RelativeLayout>
 
     <ImageView
@@ -41,7 +41,7 @@
         android:layout_height="match_parent"
         android:layout_marginBottom="5dip"
         android:layout_marginTop="5dip"
-        android:background="@drawable/divider_vertical_dark" />
+        android:background="@color/material_grey_700" />
 
     <ImageView
         android:id="@+id/delete_action_button"
