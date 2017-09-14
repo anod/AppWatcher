@@ -60,15 +60,11 @@ class AppDetailsView(view: View, private val dataProvider: AppViewHolderBase.Dat
             version?.setTextColor(accentColor)
             this.recentChanges?.visibility = View.VISIBLE
             val appChange = dataProvider.appChangeContentProvider.query(app.appId, app.versionNumber)
-            this.recentChanges?.text = if (appChange?.details?.isNotEmpty() != false) dataProvider.noRecentChangesText else appChange.details
+            this.recentChanges?.text = if (appChange?.details?.isBlank() != false) dataProvider.noRecentChangesText else Html.parse(appChange.details)
         } else {
             this.recentChanges?.visibility = View.GONE
             version?.setTextColor(textColor)
         }
-
-        this.recentChanges?.visibility = View.VISIBLE
-        val appChange = dataProvider.appChangeContentProvider.query(app.appId, app.versionNumber)
-        this.recentChanges?.text = if (appChange?.details?.isBlank() != false) dataProvider.noRecentChangesText else Html.parse(appChange.details)
 
         price?.setTextColor(accentColor)
         if (isInstalled) {
