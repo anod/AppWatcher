@@ -18,6 +18,7 @@ import android.text.util.Linkify
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import android.widget.*
 import butterknife.bindView
 import com.android.volley.VolleyError
@@ -31,7 +32,6 @@ import com.anod.appwatcher.market.DetailsEndpoint
 import com.anod.appwatcher.market.MarketInfo
 import com.anod.appwatcher.market.PlayStoreEndpoint
 import com.anod.appwatcher.model.AppInfo
-import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.model.Tag
 import com.anod.appwatcher.model.WatchAppList
 import com.anod.appwatcher.tags.TagSnackbar
@@ -287,13 +287,14 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
     }
 
     private fun shareApp() {
+        val appInfo = this.appInfo ?: return
         val builder = ShareCompat.IntentBuilder.from(this)
-        if (appInfo!!.status == AppInfoMetadata.STATUS_UPDATED) {
-            builder.setSubject(getString(R.string.share_subject_updated, appInfo!!.title))
-        } else {
-            builder.setSubject(getString(R.string.share_subject_normal, appInfo!!.title))
-        }
-        builder.setText(String.format(MarketInfo.URL_WEB_PLAY_STORE, appInfo!!.packageName))
+
+        val changes = if (changelog.text.isBlank()) "" else "${changelog.text}\n\n"
+        val text = getString(R.string.share_text, changes ,String.format(MarketInfo.URL_WEB_PLAY_STORE, appInfo.packageName))
+
+        builder.setSubject(getString(R.string.share_subject, appInfo.title, appInfo.versionName))
+        builder.setText(text)
         builder.setType("text/plain")
         builder.startChooser()
     }

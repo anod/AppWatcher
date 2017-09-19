@@ -39,7 +39,7 @@
         <activity
             android:name=".ChangelogActivity"
             android:label=""
-            android:theme="@style/AppTheme.Dialog"/>
+            android:theme="@style/AppTheme.Dialog.Changelog"/>
         <activity
             android:name=".MarketSearchActivity"
             android:label="@string/activity_market"
