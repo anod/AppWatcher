@@ -4,8 +4,7 @@ import android.content.Context
 import android.os.Bundle
 
 import com.anod.appwatcher.App
-import com.google.android.gms.gcm.PeriodicTask
-import com.google.android.gms.gcm.Task
+import com.firebase.jobdispatcher.*
 
 /**
  * @author algavris
@@ -14,29 +13,38 @@ import com.google.android.gms.gcm.Task
  */
 
 object SyncScheduler {
-    private val ONE_HOUR_IN_SEC = 3600
-    private val TEN_MINUTES_IN_SEC = 600
+    private const val windowStartSec = 2 * 3600 //2 hours
+    private const val windowEndSec = windowStartSec + 600
 
-    private val TASK_TAG = "AppRefresh"
+    private const val tag = "AppRefresh"
 
-    fun schedule(context: Context, requiresCharging: Boolean) {
+    fun schedule(context: Context, requiresCharging: Boolean, requiresWifi: Boolean) {
 
-        val task = PeriodicTask.Builder()
-                .setExtras(Bundle())
+        val constraints = mutableListOf<Int>()
+        if (requiresCharging) {
+            constraints.add(Constraint.DEVICE_CHARGING)
+        }
+        if (requiresWifi) {
+            constraints.add(Constraint.ON_UNMETERED_NETWORK)
+        } else {
+            constraints.add(Constraint.ON_ANY_NETWORK)
+        }
+        val dispatcher = App.provide(context).jobDispatcher
+        val task = dispatcher.newJobBuilder()
                 .setService(SyncTaskService::class.java)
-                .setTag(TASK_TAG)
-                .setFlex(TEN_MINUTES_IN_SEC.toLong())
-                .setPeriod((2 * ONE_HOUR_IN_SEC).toLong())
-                .setRequiresCharging(requiresCharging)
-                .setPersisted(true)
-                .setRequiredNetwork(Task.NETWORK_STATE_CONNECTED)
-                .setUpdateCurrent(true)
+                .setTag(tag)
+                .setRecurring(true)
+                .setLifetime(Lifetime.FOREVER)
+                .setTrigger(Trigger.executionWindow(windowStartSec, windowEndSec))
+                .setReplaceCurrent(true)
+                .setConstraints(*constraints.toIntArray())
+                .setExtras(Bundle())
                 .build()
 
-        App.provide(context).gcmNetworkManager.schedule(task)
+        dispatcher.mustSchedule(task)
     }
 
     fun cancel(context: Context) {
-        App.provide(context).gcmNetworkManager.cancelTask(TASK_TAG, SyncTaskService::class.java)
+        App.provide(context).jobDispatcher.cancel(tag)
     }
 }

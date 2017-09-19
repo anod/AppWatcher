@@ -62,7 +62,7 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
     private val preferences = App.provide(context).prefs
     private val installedAppsProvider = InstalledAppsProvider.PackageManager(context.packageManager)
 
-    internal fun onPerformSync(extras: Bundle, provider: ContentProviderClient): Int {
+    fun onPerformSync(extras: Bundle, provider: ContentProviderClient): Int {
 
         val manualSync = extras.getBoolean(SYNC_EXTRAS_MANUAL, false)
         // Skip any check if sync requested from application
@@ -72,7 +72,7 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
                 return -1
             }
             val updateTime = preferences.lastUpdateTime
-            if (updateTime != -1.toLong() && System.currentTimeMillis() - updateTime < ONE_SEC_IN_MILLIS) {
+            if (updateTime != (-1).toLong() && System.currentTimeMillis() - updateTime < ONE_SEC_IN_MILLIS) {
                 AppLog.d("Last update less than second, skipping...")
                 return -1
             }
@@ -104,8 +104,6 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
         val now = System.currentTimeMillis()
         preferences.lastUpdateTime = now
 
-
-
         if (!manualSync
                 && updatedApps.isNotEmpty()
                 && (updatedApps.firstOrNull { it.isNewUpdate } != null)
@@ -133,7 +131,6 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
 
     override fun onErrorResponse(error: VolleyError) {
     }
-
 
     @Throws(RemoteException::class)
     private fun doSync(client: DbContentProviderClient, lastUpdatesViewed: Boolean, endpoint: BulkDetailsEndpoint?): List<UpdatedApp> {

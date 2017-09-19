@@ -8,7 +8,8 @@ import com.anod.appwatcher.backup.gdrive.UploadServiceContentObserver
 import com.anod.appwatcher.market.DeviceIdHelper
 import com.anod.appwatcher.market.Network
 import com.anod.appwatcher.utils.AppIconLoader
-import com.google.android.gms.gcm.GcmNetworkManager
+import com.firebase.jobdispatcher.FirebaseJobDispatcher
+import com.firebase.jobdispatcher.GooglePlayDriver
 import com.google.firebase.analytics.FirebaseAnalytics
 
 /**
@@ -27,11 +28,8 @@ class ObjectGraph internal constructor(private val app: AppWatcherApplication) {
         _requestQueue
     }
     val iconLoader: AppIconLoader by lazy { AppIconLoader(this.app) }
-    val gcmNetworkManager: GcmNetworkManager
-        get() {
-            return GcmNetworkManager.getInstance(this.app)
-        }
     val fireBase: FirebaseAnalytics by lazy { FirebaseAnalytics.getInstance(this.app) }
     val connectivityManager: ConnectivityManager
         get() = app.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val jobDispatcher: FirebaseJobDispatcher by lazy { FirebaseJobDispatcher(GooglePlayDriver(app)) }
 }

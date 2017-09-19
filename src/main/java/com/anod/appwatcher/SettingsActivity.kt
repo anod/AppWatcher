@@ -29,13 +29,13 @@ import java.util.*
 
 class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriveSync.Listener, AccountChooser.OnAccountSelectionListener, ImportTask.Listener {
 
-    private var mGDriveSync: GDriveSync? = null
-    private var mSyncEnabledItem: SettingsActionBarActivity.CheckboxItem? = null
-    private var mSyncNowItem: SettingsActionBarActivity.Item? = null
-    private var mAccountChooser: AccountChooser? = null
-    private var mWifiItem: SettingsActionBarActivity.CheckboxItem? = null
-    private var mChargingItem: SettingsActionBarActivity.CheckboxItem? = null
-    private lateinit var mPrefs: Preferences
+    private var gDriveSync: GDriveSync? = null
+    private var syncEnabledItem: SettingsActionBarActivity.CheckboxItem? = null
+    private var syncNowItem: SettingsActionBarActivity.Item? = null
+    private var accountChooser: AccountChooser? = null
+    private var wifiItem: SettingsActionBarActivity.CheckboxItem? = null
+    private var chargingItem: SettingsActionBarActivity.CheckboxItem? = null
+    private lateinit var prefs: Preferences
 
     override fun onExportStart() {
         AppLog.d("Exporting...")
@@ -57,27 +57,27 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
     }
 
     override fun init() {
-        mGDriveSync = GDriveSync(this)
-        mPrefs = App.provide(this).prefs
-        mAccountChooser = AccountChooser(this, mPrefs, this)
-        mAccountChooser!!.init()
+        gDriveSync = GDriveSync(this)
+        prefs = App.provide(this).prefs
+        accountChooser = AccountChooser(this, prefs, this)
+        accountChooser!!.init()
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        mAccountChooser!!.onRequestPermissionResult(requestCode, permissions, grantResults)
+        accountChooser!!.onRequestPermissionResult(requestCode, permissions, grantResults)
     }
 
     override fun onPause() {
         super.onPause()
-        mGDriveSync!!.listener = null
+        gDriveSync!!.listener = null
     }
 
     override fun onResume() {
         super.onResume()
 
-        mSyncNowItem!!.summary = renderDriveSyncTime()
-        mGDriveSync!!.listener = this
+        syncNowItem!!.summary = renderDriveSyncTime()
+        gDriveSync!!.listener = this
     }
 
     override fun initPreferenceItems(): List<SettingsActionBarActivity.Preference> {
@@ -85,37 +85,37 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
 
         preferences.add(SettingsActionBarActivity.Category(R.string.category_updates))
 
-        val useAutoSync = mPrefs.useAutoSync
+        val useAutoSync = prefs.useAutoSync
         preferences.add(SettingsActionBarActivity.CheckboxItem(R.string.menu_auto_update, 0, ACTION_AUTO_UPDATE, useAutoSync))
 
-        mWifiItem = SettingsActionBarActivity.CheckboxItem(R.string.menu_wifi_only, 0, ACTION_WIFI_ONLY, mPrefs.isWifiOnly)
-        preferences.add(mWifiItem!!)
-        mWifiItem!!.enabled = useAutoSync
+        wifiItem = SettingsActionBarActivity.CheckboxItem(R.string.menu_wifi_only, 0, ACTION_WIFI_ONLY, prefs.isWifiOnly)
+        preferences.add(wifiItem!!)
+        wifiItem!!.enabled = useAutoSync
 
-        mChargingItem = SettingsActionBarActivity.CheckboxItem(R.string.menu_requires_charging, 0, ACTION_REQUIRES_CHARGING, mPrefs.isRequiresCharging)
-        preferences.add(mChargingItem!!)
-        mChargingItem!!.enabled = useAutoSync
+        chargingItem = SettingsActionBarActivity.CheckboxItem(R.string.menu_requires_charging, 0, ACTION_REQUIRES_CHARGING, prefs.isRequiresCharging)
+        preferences.add(chargingItem!!)
+        chargingItem!!.enabled = useAutoSync
 
         preferences.add(SettingsActionBarActivity.Category(R.string.settings_notifications))
-        preferences.add(SettingsActionBarActivity.CheckboxItem(R.string.uptodate_title, R.string.uptodate_summary, ACTION_NOTIFY_UPTODATE, mPrefs.isNotifyInstalledUpToDate))
+        preferences.add(SettingsActionBarActivity.CheckboxItem(R.string.uptodate_title, R.string.uptodate_summary, ACTION_NOTIFY_UPTODATE, prefs.isNotifyInstalledUpToDate))
 
         preferences.add(SettingsActionBarActivity.Category(R.string.pref_header_drive_sync))
 
-        mSyncEnabledItem = SettingsActionBarActivity.CheckboxItem(R.string.pref_title_drive_sync_enabled, R.string.pref_descr_drive_sync_enabled, ACTION_SYNC_ENABLE)
-        mSyncNowItem = SettingsActionBarActivity.Item(R.string.pref_title_drive_sync_now, 0, ACTION_SYNC_NOW)
-        if (!mGDriveSync!!.isSupported) {
-            mSyncEnabledItem!!.checked = false
-            mSyncEnabledItem!!.enabled = false
-            mSyncNowItem!!.enabled = false
-            mSyncEnabledItem!!.summaryRes = 0
-            mSyncEnabledItem!!.summary = mGDriveSync!!.playServiceStatusText
+        syncEnabledItem = SettingsActionBarActivity.CheckboxItem(R.string.pref_title_drive_sync_enabled, R.string.pref_descr_drive_sync_enabled, ACTION_SYNC_ENABLE)
+        syncNowItem = SettingsActionBarActivity.Item(R.string.pref_title_drive_sync_now, 0, ACTION_SYNC_NOW)
+        if (!gDriveSync!!.isSupported) {
+            syncEnabledItem!!.checked = false
+            syncEnabledItem!!.enabled = false
+            syncNowItem!!.enabled = false
+            syncEnabledItem!!.summaryRes = 0
+            syncEnabledItem!!.summary = gDriveSync!!.playServiceStatusText
         } else {
-            mSyncEnabledItem!!.checked = mPrefs.isDriveSyncEnabled
-            mSyncNowItem!!.enabled = mSyncEnabledItem!!.checked
-            mSyncNowItem!!.summary = renderDriveSyncTime()
+            syncEnabledItem!!.checked = prefs.isDriveSyncEnabled
+            syncNowItem!!.enabled = syncEnabledItem!!.checked
+            syncNowItem!!.summary = renderDriveSyncTime()
         }
-        preferences.add(mSyncEnabledItem!!)
-        preferences.add(mSyncNowItem!!)
+        preferences.add(syncEnabledItem!!)
+        preferences.add(syncNowItem!!)
         if (BuildConfig.DEBUG) {
             preferences.add(SettingsActionBarActivity.Item(R.string.pref_gdrive_upload, 0, ACTION_GDRIVE_UPLOAD))
         }
@@ -141,8 +141,8 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
     }
 
     private fun renderDriveSyncTime(): String {
-        val time = mPrefs.lastDriveSyncTime
-        if (time == -1.toLong()) {
+        val time = prefs.lastDriveSyncTime
+        if (time == (-1).toLong()) {
             return getString(R.string.pref_descr_drive_sync_now, getString(R.string.never))
         } else {
             return getString(R.string.pref_descr_drive_sync_now,
@@ -161,8 +161,8 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
                 ExportTask(this, this).execute(data!!.data)
             }
         } else {
-            mGDriveSync!!.onActivityResult(requestCode, resultCode, data)
-            mAccountChooser?.onActivityResult(requestCode, resultCode, data)
+            gDriveSync!!.onActivityResult(requestCode, resultCode, data)
+            accountChooser?.onActivityResult(requestCode, resultCode, data)
         }
 
         super.onActivityResult(requestCode, resultCode, data)
@@ -192,48 +192,49 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
             }
             ACTION_LICENSES -> LicensesDialog(this, R.raw.notices, false, true).show()
             ACTION_SYNC_ENABLE -> {
-                mSyncNowItem!!.enabled = false // disable temporary sync now
-                if (mSyncEnabledItem!!.checked) {
+                syncNowItem!!.enabled = false // disable temporary sync now
+                if (syncEnabledItem!!.checked) {
                     setProgressVisibility(true)
-                    mGDriveSync!!.connect()
+                    gDriveSync!!.connect()
                 }
 
             }
-            ACTION_SYNC_NOW -> if (mSyncNowItem!!.enabled) {
-                mSyncNowItem!!.enabled = false
-                mGDriveSync!!.sync()
+            ACTION_SYNC_NOW -> if (syncNowItem!!.enabled) {
+                syncNowItem!!.enabled = false
+                gDriveSync!!.sync()
             }
-            ACTION_GDRIVE_UPLOAD -> mGDriveSync!!.upload()
+            ACTION_GDRIVE_UPLOAD -> gDriveSync!!.upload()
             ACTION_AUTO_UPDATE -> {
                 val useAutoSync = (pref as SettingsActionBarActivity.CheckboxItem).checked
                 if (useAutoSync) {
-                    SyncScheduler.schedule(this, mPrefs.isRequiresCharging)
+                    SyncScheduler.schedule(this, prefs.isRequiresCharging, prefs.isWifiOnly)
                 } else {
                     SyncScheduler.cancel(this)
                 }
-                mPrefs.useAutoSync = useAutoSync
-                mWifiItem!!.enabled = useAutoSync
-                mChargingItem!!.enabled = useAutoSync
+                prefs.useAutoSync = useAutoSync
+                wifiItem!!.enabled = useAutoSync
+                chargingItem!!.enabled = useAutoSync
             }
             ACTION_WIFI_ONLY -> {
                 val useWifiOnly = (pref as SettingsActionBarActivity.CheckboxItem).checked
-                mPrefs.isWifiOnly = useWifiOnly
+                prefs.isWifiOnly = useWifiOnly
+                SyncScheduler.schedule(this, prefs.isRequiresCharging, useWifiOnly)
             }
             ACTION_REQUIRES_CHARGING -> {
                 val requiresCharging = (pref as SettingsActionBarActivity.CheckboxItem).checked
-                mPrefs.isRequiresCharging = requiresCharging
-                SyncScheduler.schedule(this, requiresCharging)
+                prefs.isRequiresCharging = requiresCharging
+                SyncScheduler.schedule(this, requiresCharging, prefs.isWifiOnly)
             }
             ACTION_NOTIFY_UPTODATE -> {
                 val notify = (pref as SettingsActionBarActivity.CheckboxItem).checked
-                mPrefs.isNotifyInstalledUpToDate = notify
+                prefs.isNotifyInstalledUpToDate = notify
             }
             ACTION_THEME -> {
                 val dialog = AlertDialog.Builder(this)
                         .setTitle(R.string.pref_title_theme)
                         .setItems(R.array.themes) { _, which ->
-                            if (mPrefs.nightMode != which) {
-                                mPrefs.nightMode = which
+                            if (prefs.nightMode != which) {
+                                prefs.nightMode = which
                                 AppCompatDelegate.setDefaultNightMode(which)
                                 this@SettingsActivity.recreate()
                                 val i = Intent(this@SettingsActivity, AppWatcherActivity::class.java)
@@ -279,10 +280,10 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
         get() = String.format(Locale.US, "%s (%d)", BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE)
 
     override fun onGDriveConnect() {
-        mSyncEnabledItem!!.checked = true
-        mSyncEnabledItem!!.enabled = true
-        mSyncNowItem!!.enabled = true
-        mPrefs.isDriveSyncEnabled = true
+        syncEnabledItem!!.checked = true
+        syncEnabledItem!!.enabled = true
+        syncNowItem!!.enabled = true
+        prefs.isDriveSyncEnabled = true
         App.provide(this).uploadServiceContentObserver
         notifyDataSetChanged()
         setProgressVisibility(false)
@@ -301,16 +302,16 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
 
     override fun onGDriveSyncFinish() {
         setProgressVisibility(false)
-        mPrefs.lastDriveSyncTime = System.currentTimeMillis()
-        mSyncNowItem!!.summary = getString(R.string.pref_descr_drive_sync_now, getString(R.string.now))
-        mSyncNowItem!!.enabled = mSyncEnabledItem!!.checked
+        prefs.lastDriveSyncTime = System.currentTimeMillis()
+        syncNowItem!!.summary = getString(R.string.pref_descr_drive_sync_now, getString(R.string.now))
+        syncNowItem!!.enabled = syncEnabledItem!!.checked
         notifyDataSetChanged()
         Toast.makeText(this, R.string.sync_finish, Toast.LENGTH_SHORT).show()
     }
 
     override fun onGDriveError() {
         setProgressVisibility(false)
-        mSyncNowItem!!.enabled = mSyncEnabledItem!!.checked
+        syncNowItem!!.enabled = syncEnabledItem!!.checked
         notifyDataSetChanged()
         Toast.makeText(this, R.string.sync_error, Toast.LENGTH_SHORT).show()
     }

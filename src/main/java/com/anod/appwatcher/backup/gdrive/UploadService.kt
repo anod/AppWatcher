@@ -1,62 +1,86 @@
 package com.anod.appwatcher.backup.gdrive
 
-import android.content.ContentResolver
 import android.content.Context
-import android.database.ContentObserver
-import android.net.Uri
 import android.os.Bundle
 import com.anod.appwatcher.App
-import com.anod.appwatcher.Preferences
 import com.anod.appwatcher.backup.GDriveSync
-import com.anod.appwatcher.content.DbContentProvider
+import com.anod.appwatcher.utils.BackgroundTask
 import com.anod.appwatcher.utils.GooglePlayServices
-import com.google.android.gms.gcm.*
+import com.firebase.jobdispatcher.*
 import info.anodsplace.android.log.AppLog
 
 /**
  * @author algavris
  * @date 13/06/2017
  */
-class UploadService : GcmTaskService() {
+class UploadService : JobService() {
 
     companion object {
-        private const val windowStartDelaySeconds = 30L
-        private const val windowEndDelaySeconds = 300L
+        private const val windowStartDelaySeconds = 30
+        private const val windowEndDelaySeconds = 300
 
-        private const val TASK_TAG = "GDriveUpload"
+        private const val tag = "GDriveUpload"
 
         fun schedule(context: Context) {
-            val task = OneoffTask.Builder()
-                    .setExtras(Bundle())
+            val dispatcher = App.provide(context).jobDispatcher
+
+            val task = dispatcher.newJobBuilder()
                     .setService(UploadService::class.java)
-                    .setTag(TASK_TAG)
-                    .setRequiresCharging(false)
-                    .setPersisted(true)
-                    .setRequiredNetwork(Task.NETWORK_STATE_CONNECTED)
-                    .setUpdateCurrent(true)
-                    .setExecutionWindow(windowStartDelaySeconds,windowEndDelaySeconds)
+                    .setTag(tag)
+                    .setRecurring(false)
+                    .setLifetime(Lifetime.UNTIL_NEXT_BOOT)
+                    .setTrigger(Trigger.executionWindow(windowStartDelaySeconds, windowEndDelaySeconds))
+                    .setReplaceCurrent(true)
+                    .setConstraints(Constraint.ON_ANY_NETWORK)
+                    .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
+                    .setExtras(Bundle())
                     .build()
 
-            App.provide(context).gcmNetworkManager.schedule(task)
+            dispatcher.mustSchedule(task)
         }
     }
 
-    override fun onRunTask(taskParams: TaskParams): Int {
-        AppLog.d("Scheduled call executed. Task: " + taskParams.tag)
+    private var runner: BackgroundTask.AsyncTaskRunner<Void?, Boolean>? = null;
 
+    override fun onStartJob(job: JobParameters?): Boolean {
+        if (job == null) return false
+
+        AppLog.d("Scheduled call executed. Task: " + job.tag)
         AppLog.d("DriveSync perform upload")
-        val driveSync = GDriveSync(applicationContext)
-        val prefs = App.provide(applicationContext).prefs
-        try {
-            driveSync.uploadLocked()
-            prefs.lastDriveSyncTime = System.currentTimeMillis()
-        } catch (e: GooglePlayServices.ResolutionException) {
-            driveSync.showResolutionNotification(e.resolution)
-            AppLog.e(e)
-        } catch (e: Exception) {
-            AppLog.e(e)
-        }
 
-        return GcmNetworkManager.RESULT_SUCCESS
+        this.runner = BackgroundTask.execute(object : BackgroundTask.Worker<Void?, Boolean>(null) {
+            override fun run(param: Void?): Boolean {
+
+                val driveSync = GDriveSync(applicationContext)
+                try {
+                    driveSync.uploadLocked()
+                    return true
+                } catch (e: GooglePlayServices.ResolutionException) {
+                    driveSync.showResolutionNotification(e.resolution)
+                    AppLog.e(e)
+                    return false
+                } catch (e: Exception) {
+                    AppLog.e(e)
+                    return false
+                }
+            }
+
+            override fun finished(result: Boolean) {
+                if (result) {
+                    val prefs = App.provide(applicationContext).prefs
+                    prefs.lastDriveSyncTime = System.currentTimeMillis()
+                }
+                jobFinished(job, !result)
+            }
+        })
+        return true
     }
+
+
+    override fun onStopJob(job: JobParameters?): Boolean {
+        AppLog.e("Job stopped. Task: ${job?.tag ?: "unknown"}")
+        this.runner?.cancel(true)
+        return true
+    }
+
 }

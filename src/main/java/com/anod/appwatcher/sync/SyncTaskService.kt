@@ -1,33 +1,47 @@
 package com.anod.appwatcher.sync
 
 import android.content.Intent
-import com.anod.appwatcher.App
+import android.os.Bundle
 import com.anod.appwatcher.content.DbContentProvider
-import com.google.android.gms.gcm.*
+import com.anod.appwatcher.utils.BackgroundTask
+import com.firebase.jobdispatcher.JobParameters
+import com.firebase.jobdispatcher.JobService
 import info.anodsplace.android.log.AppLog
 
-class SyncTaskService : GcmTaskService() {
+class SyncTaskService : JobService() {
+    var runner: BackgroundTask.AsyncTaskRunner<Void?, Int>? = null
 
-    override fun onInitializeTasks() {
-        super.onInitializeTasks()
-        val prefs = App.provide(applicationContext).prefs
-        if (prefs.useAutoSync) {
-            SyncScheduler.schedule(applicationContext, prefs.isRequiresCharging)
-        }
+    override fun onStartJob(job: JobParameters?): Boolean {
+        if (job == null) return false
+
+        AppLog.d("Scheduled call executed. Task: " + job.tag)
+
+        this.runner = BackgroundTask.execute(object : BackgroundTask.Worker<Void?, Int>(null) {
+            override fun run(param: Void?): Int {
+                val syncAdapter = SyncAdapter(applicationContext)
+                val contentProviderClient = contentResolver.acquireContentProviderClient(DbContentProvider.authority)
+
+                val extras = job.extras ?: Bundle.EMPTY
+                return syncAdapter.onPerformSync(extras, contentProviderClient)
+            }
+
+            override fun finished(result: Int) {
+                val finishIntent = Intent(SyncAdapter.SYNC_STOP)
+                finishIntent.putExtra(SyncAdapter.EXTRA_UPDATES_COUNT, result)
+                sendBroadcast(finishIntent)
+
+                jobFinished(job, false)
+            }
+        })
+        return true
     }
 
-    override fun onRunTask(taskParams: TaskParams): Int {
-        AppLog.d("Scheduled call executed. Task: " + taskParams.tag)
-
-        val syncAdapter = SyncAdapter(applicationContext)
-        val contentProviderClient = contentResolver.acquireContentProviderClient(DbContentProvider.authority)
-
-        val updatesCount = syncAdapter.onPerformSync(taskParams.extras, contentProviderClient)
-
-        val finishIntent = Intent(SyncAdapter.SYNC_STOP)
-        finishIntent.putExtra(SyncAdapter.EXTRA_UPDATES_COUNT, updatesCount)
-        sendBroadcast(finishIntent)
-
-        return GcmNetworkManager.RESULT_SUCCESS
+    override fun onStopJob(job: JobParameters?): Boolean {
+        AppLog.e("Job stopped. Task: ${job?.tag ?: "unknown"}")
+        this.runner?.cancel(true)
+        return true
     }
 }
+
+
+

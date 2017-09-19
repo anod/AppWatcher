@@ -24,7 +24,7 @@ class AppWatcherActivity : AppWatcherBaseActivity(), TextView.OnEditorActionList
         App.provide(this).fireBase
 
         if (prefs.useAutoSync) {
-            SyncScheduler.schedule(this, prefs.isRequiresCharging)
+            SyncScheduler.schedule(this, prefs.isRequiresCharging, prefs.isWifiOnly)
         }
     }
 

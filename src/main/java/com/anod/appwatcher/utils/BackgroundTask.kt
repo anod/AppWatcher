@@ -1,7 +1,5 @@
 package com.anod.appwatcher.utils
 
-
-import android.content.Context
 import android.os.AsyncTask
 
 /**
@@ -17,11 +15,13 @@ object BackgroundTask {
         abstract fun finished(result: Result)
     }
 
-    fun <P, R> execute(worker: Worker<P, R>) {
-        AsyncTaskRunner(worker).execute()
+    fun <P, R> execute(worker: Worker<P, R>): AsyncTaskRunner<P, R> {
+        val runner = AsyncTaskRunner(worker)
+        runner.execute()
+        return runner
     }
 
-    internal class AsyncTaskRunner<P, R>(private val worker: Worker<P, R>) : AsyncTask<Void, Void, R>() {
+    class AsyncTaskRunner<P, R>(private val worker: Worker<P, R>) : AsyncTask<Void, Void, R>() {
 
         override fun doInBackground(vararg params: Void): R {
             return this.worker.run(this.worker.param)

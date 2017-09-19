@@ -30,7 +30,6 @@ import com.anod.appwatcher.sync.SyncAdapter
 import com.anod.appwatcher.tags.TagsListActivity
 import com.anod.appwatcher.utils.MenuItemAnimation
 import com.anod.appwatcher.utils.UpgradeCheck
-import com.google.android.gms.gcm.GcmTaskService
 import info.anodsplace.android.log.AppLog
 import java.util.*
 
@@ -133,7 +132,7 @@ abstract class AppWatcherBaseActivity : DrawerActivity(), TextView.OnEditorActio
     private val syncFinishedReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val action = intent.action
-            if (GcmTaskService.SERVICE_ACTION_EXECUTE_TASK == action || SyncAdapter.SYNC_PROGRESS == action) {
+            if (SyncAdapter.SYNC_PROGRESS == action) {
                 refreshMenuAnimation.start()
                 notifySyncStart()
             } else if (SyncAdapter.SYNC_STOP == action) {
@@ -151,7 +150,6 @@ abstract class AppWatcherBaseActivity : DrawerActivity(), TextView.OnEditorActio
         val filter = IntentFilter()
         filter.addAction(SyncAdapter.SYNC_PROGRESS)
         filter.addAction(SyncAdapter.SYNC_STOP)
-        filter.addAction(GcmTaskService.SERVICE_ACTION_EXECUTE_TASK)
         registerReceiver(syncFinishedReceiver, filter)
         syncFinishedReceiverRegistered = true
         super.onResume()
