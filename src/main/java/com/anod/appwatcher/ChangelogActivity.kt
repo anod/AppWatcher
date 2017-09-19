@@ -145,7 +145,7 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
 
         if (app.iconUrl.isEmpty()) {
             if (app.rowId > 0) {
-                val dbImageUri = DbContentProvider.ICONS_CONTENT_URI.buildUpon().appendPath(app.rowId.toString()).build()
+                val dbImageUri = DbContentProvider.iconsUri.buildUpon().appendPath(app.rowId.toString()).build()
                 iconLoader.retrieve(dbImageUri).into(iconLoadTarget)
             } else {
                 setDefaultIcon()

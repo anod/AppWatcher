@@ -24,7 +24,7 @@ open class AppListCursorLoader(context: Context,
                                sortOrder: String,
                                private val cursorFilter: FilterCursorWrapper.CursorFilter?,
                                private val tag: Tag?)
-    : CursorLoader(context, DbContentProvider.appsContentUri(tag), AppListTable.PROJECTION, null, null, sortOrder) {
+    : CursorLoader(context, DbContentProvider.appsContentUri(tag), AppListTable.projection, null, null, sortOrder) {
 
     private var newCount: Int = 0
     private var updatableNewCount: Int = 0
@@ -40,9 +40,9 @@ open class AppListCursorLoader(context: Context,
         args.add(AppInfoMetadata.STATUS_DELETED.toString())
 
         if (tag != null) {
-            selc.add(AppTagsTable.TableColumns.TAGID + " = ?")
+            selc.add(AppTagsTable.TableColumns.tagId + " = ?")
             args.add(tag.id.toString())
-            selc.add(AppTagsTable.TableColumns.APPID + " = " + AppListTable.TableColumns.APPID)
+            selc.add(AppTagsTable.TableColumns.appId + " = " + AppListTable.TableColumns.appId)
         }
 
         if (!TextUtils.isEmpty(titleFilter)) {
@@ -118,9 +118,9 @@ open class AppListCursorLoader(context: Context,
             if (sortId == Preferences.SORT_NAME_DESC) {
                 filter.add(AppListTable.Columns.title + " COLLATE LOCALIZED DESC")
             } else if (sortId == Preferences.SORT_DATE_ASC) {
-                filter.add(AppListTable.Columns.KEY_REFRESH_TIMESTAMP + " ASC")
+                filter.add(AppListTable.Columns.refreshTimestamp + " ASC")
             } else if (sortId == Preferences.SORT_DATE_DESC) {
-                filter.add(AppListTable.Columns.KEY_REFRESH_TIMESTAMP + " DESC")
+                filter.add(AppListTable.Columns.refreshTimestamp + " DESC")
             } else {
                 filter.add(AppListTable.Columns.title + " COLLATE LOCALIZED ASC")
             }

@@ -14,42 +14,43 @@ class TagsTable {
 
     class Columns : BaseColumns {
         companion object {
-            const val NAME = "name"
-            const val COLOR = "color"
+            const val name = "name"
+            const val color = "color"
         }
     }
 
     object TableColumns {
         val _ID = TagsTable.table + "." + BaseColumns._ID
-        val NAME = TagsTable.table + ".name"
-        val COLOR = TagsTable.table + ".color"
+        val name = TagsTable.table + ".name"
+        val color = TagsTable.table + ".color"
     }
 
     object Projection {
         const val _ID = 0
-        const val NAME = 1
-        const val COLOR = 2
+        const val name = 1
+        const val color = 2
     }
 
     companion object {
         const val table = "tags"
-        val PROJECTION = arrayOf(TableColumns._ID, TableColumns.NAME, TableColumns.COLOR)
+        val projection = arrayOf(TableColumns._ID, TableColumns.name, TableColumns.color)
         val sqlCreate =
                 "CREATE TABLE " + table + " (" +
                         BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                        Columns.NAME + " TEXT not null," +
-                        Columns.COLOR + " INTEGER" +
+                        Columns.name + " TEXT not null," +
+                        Columns.color + " INTEGER" +
                         ") "
-
-        fun createContentValues(tag: Tag): ContentValues {
-            val values = ContentValues()
-            if (tag.id > 0) {
-                values.put(BaseColumns._ID, tag.id)
-            }
-            values.put(Columns.NAME, tag.name)
-            values.put(Columns.COLOR, tag.color)
-            return values
-        }
     }
-
 }
+
+
+val Tag.contentValues: ContentValues
+    get() {
+        val values = ContentValues()
+        if (id > 0) {
+            values.put(BaseColumns._ID, id)
+        }
+        values.put(TagsTable.Columns.name, name)
+        values.put(TagsTable.Columns.color, color)
+        return values
+    }

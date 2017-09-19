@@ -67,8 +67,8 @@ abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelec
             setupDrawerContent()
             updateTags()
             val observer = TagsUpdateObserver(this)
-            contentResolver.registerContentObserver(DbContentProvider.TAGS_CONTENT_URI, true, observer)
-            contentResolver.registerContentObserver(DbContentProvider.APPS_TAG_CONTENT_URI, true, observer)
+            contentResolver.registerContentObserver(DbContentProvider.tagsUri, true, observer)
+            contentResolver.registerContentObserver(DbContentProvider.appsTagUri, true, observer)
         }
     }
 

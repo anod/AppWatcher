@@ -16,8 +16,8 @@ class TagsCursor(cursor: Cursor?) : CursorIterator<Tag>(cursor) {
     val tag: Tag
         get() = Tag(
             getInt(TagsTable.Projection._ID),
-            getString(TagsTable.Projection.NAME),
-            getInt(TagsTable.Projection.COLOR)
+            getString(TagsTable.Projection.name),
+            getInt(TagsTable.Projection.color)
         )
 
     override fun next(): Tag {

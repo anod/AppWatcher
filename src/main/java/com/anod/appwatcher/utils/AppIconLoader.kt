@@ -95,7 +95,7 @@ class AppIconLoader(context: Context) {
     fun loadAppIntoImageView(app: AppInfo, iconView: ImageView, @DrawableRes defaultRes: Int) {
         if (TextUtils.isEmpty(app.iconUrl)) {
             if (app.rowId > 0) {
-                val dbImageUri = DbContentProvider.ICONS_CONTENT_URI.buildUpon().appendPath(app.rowId.toString()).build()
+                val dbImageUri = DbContentProvider.iconsUri.buildUpon().appendPath(app.rowId.toString()).build()
                 this.retrieve(dbImageUri)
                         .placeholder(defaultRes)
                         .into(iconView)

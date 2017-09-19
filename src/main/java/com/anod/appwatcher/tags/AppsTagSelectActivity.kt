@@ -147,11 +147,11 @@ class AppsTagSelectActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<C
     }
 
     class TagAppsCursorLoader(context: Context, tag: Tag)
-        : CursorLoader(context, TagAppsCursorLoader.getContentUri(tag), AppTagsTable.PROJECTION, null, null, null) {
+        : CursorLoader(context, TagAppsCursorLoader.getContentUri(tag), AppTagsTable.projection, null, null, null) {
 
         companion object {
             private fun getContentUri(tag: Tag): Uri {
-                return DbContentProvider.APPS_TAG_CONTENT_URI
+                return DbContentProvider.appsTagUri
                         .buildUpon()
                         .appendPath(tag.id.toString()).build()
             }

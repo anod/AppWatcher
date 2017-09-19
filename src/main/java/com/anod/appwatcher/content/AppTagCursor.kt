@@ -12,8 +12,8 @@ class AppTagCursor(cursor: Cursor?) : CursorIterator<AppTag>(cursor) {
 
     override fun next(): AppTag {
         return AppTag(
-            getString(AppTagsTable.Projection.APPID),
-            getInt(AppTagsTable.Projection.TAGID)
+            getString(AppTagsTable.Projection.appId),
+            getInt(AppTagsTable.Projection.tagId)
         )
     }
 }

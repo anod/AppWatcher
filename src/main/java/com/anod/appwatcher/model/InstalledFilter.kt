@@ -17,9 +17,9 @@ class InstalledFilter(private val mIncludeInstalled: Boolean, private val mInsta
         private set
 
     override fun filterRecord(cursor: Cursor): Boolean {
-        val packageName = cursor.getString(AppListTable.Projection.PACKAGE)
-        val status = cursor.getInt(AppListTable.Projection.STATUS)
-        val versionCode = cursor.getInt(AppListTable.Projection.VERSION_NUMBER)
+        val packageName = cursor.getString(AppListTable.Projection.packageName)
+        val status = cursor.getInt(AppListTable.Projection.status)
+        val versionCode = cursor.getInt(AppListTable.Projection.versionNumber)
 
         val installedInfo = mInstalledAppsProvider.getInfo(packageName)
         val installed = installedInfo.isInstalled

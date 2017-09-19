@@ -7,7 +7,6 @@ import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.model.Tag
 import com.anod.appwatcher.model.schema.AppTagsTable
-import java.util.*
 
 internal class TagAppsManager(private val mTag: Tag, private val mContext: Context) {
     private val mApps = SimpleArrayMap<String, Boolean>()
@@ -35,7 +34,7 @@ internal class TagAppsManager(private val mTag: Tag, private val mContext: Conte
         }
         data.moveToPosition(-1)
         while (data.moveToNext()) {
-            val appId = data.getString(AppTagsTable.Projection.APPID)
+            val appId = data.getString(AppTagsTable.Projection.appId)
             mApps.put(appId, true)
         }
         data.close()
@@ -50,7 +49,7 @@ internal class TagAppsManager(private val mTag: Tag, private val mContext: Conte
         val result = cr.setAppsToTag(appIds, mTag.id)
         cr.close()
 
-        mContext.contentResolver.notifyChange(DbContentProvider.APPS_TAG_CONTENT_URI, null)
+        mContext.contentResolver.notifyChange(DbContentProvider.appsTagUri, null)
         return result
     }
 }

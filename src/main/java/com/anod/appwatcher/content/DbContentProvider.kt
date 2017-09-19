@@ -40,12 +40,12 @@ open class DbContentProvider : ContentProvider() {
         private const val icon = 70
 
         val appsUri = Uri.parse("content://$authority/apps")!!
-        val APPS_TAG_CONTENT_URI = Uri.parse("content://$authority/apps/tags")!!
-        val APPS_TAG_CLEAN_CONTENT_URI = Uri.parse("content://$authority/apps/tags/clean")!!
-        val TAGS_CONTENT_URI = Uri.parse("content://$authority/tags")!!
-        val TAGS_APPS_CONTENT_URI = Uri.parse("content://$authority/tags/apps")!!
-        val TAGS_APPS_COUNT_CONTENT_URI = Uri.parse("content://$authority/tags/apps/count")!!
-        val ICONS_CONTENT_URI = Uri.parse("content://$authority/icons")!!
+        val appsTagUri = Uri.parse("content://$authority/apps/tags")!!
+        val appsTagCleanUri = Uri.parse("content://$authority/apps/tags/clean")!!
+        val tagsUri = Uri.parse("content://$authority/tags")!!
+        val tagsAppsUri = Uri.parse("content://$authority/tags/apps")!!
+        val tagsAppsCountUri = Uri.parse("content://$authority/tags/apps/count")!!
+        val iconsUri = Uri.parse("content://$authority/icons")!!
         val changelogUri = Uri.parse("content://$authority/changelog")!!
 
         private val uriMatcher = UriMatcher(UriMatcher.NO_MATCH)
@@ -77,7 +77,7 @@ open class DbContentProvider : ContentProvider() {
             return if (tag == null)
                 DbContentProvider.appsUri
             else
-                DbContentProvider.APPS_TAG_CONTENT_URI.buildUpon().appendPath(tag.id.toString()).build()
+                DbContentProvider.appsTagUri.buildUpon().appendPath(tag.id.toString()).build()
         }
     }
 
@@ -108,7 +108,7 @@ open class DbContentProvider : ContentProvider() {
             appsTags -> {
                 query.table = AppTagsTable.table + ", " + AppListTable.table
                 val tagId = uri.lastPathSegment
-                query.selection = AppTagsTable.TableColumns.TAGID + "=?"
+                query.selection = AppTagsTable.TableColumns.tagId + "=?"
                 query.selectionArgs = arrayOf(tagId)
                 query.notifyUri = appsUri
                 return query
@@ -116,20 +116,20 @@ open class DbContentProvider : ContentProvider() {
             appTags -> {
                 query.table = AppTagsTable.table + ", " + AppListTable.table
                 rowId = uri.pathSegments[uri.pathSegments.size - 2]
-                query.selection = AppListTable.TableColumns._ID + "=? AND " + AppListTable.TableColumns.APPID + "=" + AppTagsTable.TableColumns.APPID
+                query.selection = AppListTable.TableColumns._ID + "=? AND " + AppListTable.TableColumns.appId + "=" + AppTagsTable.TableColumns.appId
                 query.selectionArgs = arrayOf(rowId)
-                query.notifyUri = APPS_TAG_CONTENT_URI
+                query.notifyUri = appsTagUri
                 return query
             }
             appsTagsClean -> {
                 query.table = AppTagsTable.table
-                query.selection = AppTagsTable.TableColumns.APPID+" NOT IN (SELECT " + AppTagsTable.TableColumns.APPID + " FROM " + AppTagsTable.table + ")"
-                query.notifyUri = APPS_TAG_CONTENT_URI
+                query.selection = AppTagsTable.TableColumns.appId +" NOT IN (SELECT " + AppTagsTable.TableColumns.appId + " FROM " + AppTagsTable.table + ")"
+                query.notifyUri = appsTagUri
                 return query
             }
             tags -> {
                 query.table = TagsTable.table
-                query.notifyUri = TAGS_CONTENT_URI
+                query.notifyUri = tagsUri
                 return query
             }
             tag -> {
@@ -137,27 +137,27 @@ open class DbContentProvider : ContentProvider() {
                 rowId = uri.lastPathSegment
                 query.selection = BaseColumns._ID + "=?"
                 query.selectionArgs = arrayOf(rowId)
-                query.notifyUri = TAGS_CONTENT_URI
+                query.notifyUri = tagsUri
                 return query
             }
             tagApps -> {
                 query.table = AppTagsTable.table
                 val tagId = uri.pathSegments[uri.pathSegments.size - 2]
-                query.selection = AppTagsTable.Columns.TAGID + "=?"
+                query.selection = AppTagsTable.Columns.tagId + "=?"
                 query.selectionArgs = arrayOf(tagId)
-                query.notifyUri = APPS_TAG_CONTENT_URI
+                query.notifyUri = appsTagUri
                 return query
             }
             tagsApps -> {
                 query.table = AppTagsTable.table
-                query.notifyUri = APPS_TAG_CONTENT_URI
+                query.notifyUri = appsTagUri
                 return query
             }
             tagsAppsCount -> {
                 query.table = AppTagsTable.table
-                query.notifyUri = APPS_TAG_CONTENT_URI
-                query.projection = arrayOf(AppTagsTable.Columns.TAGID, "count() as count")
-                query.groupBy = AppTagsTable.Columns.TAGID
+                query.notifyUri = appsTagUri
+                query.projection = arrayOf(AppTagsTable.Columns.tagId, "count() as count")
+                query.groupBy = AppTagsTable.Columns.tagId
                 return query
             }
             icon -> {
@@ -165,7 +165,7 @@ open class DbContentProvider : ContentProvider() {
                 rowId = uri.lastPathSegment
                 query.selection = BaseColumns._ID + "=?"
                 query.selectionArgs = arrayOf(rowId)
-                query.notifyUri = ICONS_CONTENT_URI
+                query.notifyUri = iconsUri
                 return query
             }
             changelogApp -> {

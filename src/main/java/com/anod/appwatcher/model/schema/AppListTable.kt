@@ -2,132 +2,129 @@ package com.anod.appwatcher.model.schema
 
 import android.content.ContentValues
 import android.provider.BaseColumns
-
 import com.anod.appwatcher.model.AppInfo
 
 class AppListTable {
 
     class Columns : BaseColumns {
         companion object {
-            const val APPID = "app_id"
-            const val KEY_PACKAGE = "package"
-            const val KEY_VERSION_NUMBER = "ver_num"
-            const val KEY_VERSION_NAME = "ver_name"
+            const val appId = "app_id"
+            const val packageName = "package"
+            const val versionNumber = "ver_num"
+            const val versionName = "ver_name"
             const val title = "title"
-            const val KEY_CREATOR = "creator"
-            const val KEY_ICON_CACHE = "icon"
-            const val KEY_ICON_URL = "iconUrl"
+            const val creator = "creator"
+            const val iconCache = "icon"
+            const val iconUrl = "iconUrl"
             const val status = "status"
-            const val KEY_REFRESH_TIMESTAMP = "update_date"
-            const val KEY_PRICE_TEXT = "price_text"
-            const val KEY_PRICE_CURRENCY = "price_currency"
-            const val KEY_PRICE_MICROS = "price_micros"
-            const val KEY_UPLOAD_DATE = "upload_date"
-            const val KEY_DETAILS_URL = "details_url"
-            const val KEY_APP_TYPE = "app_type"
-            const val KEY_SYNC_VERSION = "sync_version"
+            const val refreshTimestamp = "update_date"
+            const val priceText = "price_text"
+            const val priceCurrency = "price_currency"
+            const val priceMicros = "price_micros"
+            const val uploadDate = "upload_date"
+            const val detailsUrl = "details_url"
+            const val appType = "app_type"
+            const val syncVersion = "sync_version"
         }
     }
 
     object TableColumns {
         val _ID = AppListTable.table + "." + BaseColumns._ID
-        val APPID = AppListTable.table + ".app_id"
+        val appId = AppListTable.table + ".app_id"
     }
 
     object Projection {
         const val _ID = 0
-        const val APPID = 1
-        const val PACKAGE = 2
-        const val VERSION_NUMBER = 3
-        const val VERSION_NAME = 4
-        const val TITLE = 5
-        const val CREATOR = 6
-        const val STATUS = 7
-        const val REFRESH_TIME = 8
-        const val PRICE_TEXT = 9
-        const val PRICE_CURRENCY = 10
-        const val PRICE_MICROS = 11
-        const val UPLOAD_DATE = 12
-        const val DETAILS_URL = 13
-        const val ICON_URL = 14
-        const val APP_TYPE = 15
-        const val SYNC_VERSION = 16
+        const val appId = 1
+        const val packageName = 2
+        const val versionNumber = 3
+        const val versionName = 4
+        const val title = 5
+        const val creator = 6
+        const val status = 7
+        const val refreshTime = 8
+        const val priceText = 9
+        const val priceCurrency = 10
+        const val priceMicros = 11
+        const val uploadDate = 12
+        const val detailsUrl = 13
+        const val iconUrl = 14
+        const val appType = 15
+        const val syncVersion = 16
     }
 
     companion object {
 
         const val table = "app_list"
 
-        val PROJECTION = arrayOf(
+        val projection = arrayOf(
                 TableColumns._ID,
-                TableColumns.APPID,
-                Columns.KEY_PACKAGE,
-                Columns.KEY_VERSION_NUMBER,
-                Columns.KEY_VERSION_NAME,
+                TableColumns.appId,
+                Columns.packageName,
+                Columns.versionNumber,
+                Columns.versionName,
                 Columns.title,
-                Columns.KEY_CREATOR,
+                Columns.creator,
                 Columns.status,
-                Columns.KEY_REFRESH_TIMESTAMP,
-                Columns.KEY_PRICE_TEXT,
-                Columns.KEY_PRICE_CURRENCY,
-                Columns.KEY_PRICE_MICROS,
-                Columns.KEY_UPLOAD_DATE,
-                Columns.KEY_DETAILS_URL,
-                Columns.KEY_ICON_URL,
-                Columns.KEY_APP_TYPE,
-                Columns.KEY_SYNC_VERSION)
+                Columns.refreshTimestamp,
+                Columns.priceText,
+                Columns.priceCurrency,
+                Columns.priceMicros,
+                Columns.uploadDate,
+                Columns.detailsUrl,
+                Columns.iconUrl,
+                Columns.appType,
+                Columns.syncVersion)
 
         val sqlCreate =
                 "CREATE TABLE " + table + " (" +
-                        BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                        Columns.APPID + " TEXT not null," +
-                        Columns.KEY_PACKAGE + " TEXT not null," +
-                        Columns.KEY_VERSION_NUMBER + " INTEGER," +
-                        Columns.KEY_VERSION_NAME + " TEXT," +
-                        Columns.title + " TEXT not null," +
-                        Columns.KEY_CREATOR + " TEXT," +
-                        Columns.status + " INTEGER," +
-                        Columns.KEY_REFRESH_TIMESTAMP + " INTEGER," +
-                        Columns.KEY_PRICE_TEXT + " TEXT," +
-                        Columns.KEY_PRICE_CURRENCY + " TEXT," +
-                        Columns.KEY_PRICE_MICROS + " INTEGER," +
-                        Columns.KEY_UPLOAD_DATE + " TEXT," +
-                        Columns.KEY_DETAILS_URL + " TEXT," +
-                        Columns.KEY_ICON_URL + " TEXT," +
-                        Columns.KEY_APP_TYPE + " TEXT," +
-                        Columns.KEY_SYNC_VERSION + " INTEGER" +
-                        ") "
-
-        /**
-         * @return Content values for app
-         */
-        fun createContentValues(app: AppInfo): ContentValues {
-            val values = ContentValues()
-
-            if (app.rowId > 0) {
-                values.put(BaseColumns._ID, app.rowId)
-            }
-            values.put(AppListTable.Columns.APPID, app.appId)
-            values.put(AppListTable.Columns.KEY_PACKAGE, app.packageName)
-            values.put(AppListTable.Columns.title, app.title)
-            values.put(AppListTable.Columns.KEY_VERSION_NUMBER, app.versionNumber)
-            values.put(AppListTable.Columns.KEY_VERSION_NAME, app.versionName)
-            values.put(AppListTable.Columns.KEY_CREATOR, app.creator)
-            values.put(AppListTable.Columns.status, app.status)
-            values.put(AppListTable.Columns.KEY_UPLOAD_DATE, app.uploadDate)
-
-            values.put(AppListTable.Columns.KEY_PRICE_TEXT, app.priceText)
-            values.put(AppListTable.Columns.KEY_PRICE_CURRENCY, app.priceCur)
-            values.put(AppListTable.Columns.KEY_PRICE_MICROS, app.priceMicros)
-
-            values.put(AppListTable.Columns.KEY_DETAILS_URL, app.detailsUrl)
-
-            values.put(AppListTable.Columns.KEY_ICON_URL, app.iconUrl)
-            values.put(AppListTable.Columns.KEY_REFRESH_TIMESTAMP, app.refreshTime)
-
-            values.put(AppListTable.Columns.KEY_APP_TYPE, app.appType)
-            values.put(AppListTable.Columns.KEY_SYNC_VERSION, app.syncVersion)
-            return values
-        }
+                    BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    Columns.appId + " TEXT not null," +
+                    Columns.packageName + " TEXT not null," +
+                    Columns.versionNumber + " INTEGER," +
+                    Columns.versionName + " TEXT," +
+                    Columns.title + " TEXT not null," +
+                    Columns.creator + " TEXT," +
+                    Columns.status + " INTEGER," +
+                    Columns.refreshTimestamp + " INTEGER," +
+                    Columns.priceText + " TEXT," +
+                    Columns.priceCurrency + " TEXT," +
+                    Columns.priceMicros + " INTEGER," +
+                    Columns.uploadDate + " TEXT," +
+                    Columns.detailsUrl + " TEXT," +
+                    Columns.iconUrl + " TEXT," +
+                    Columns.appType + " TEXT," +
+                    Columns.syncVersion + " INTEGER" +
+                    ") "
     }
 }
+
+val AppInfo.contentValues: ContentValues
+    get() {
+        val values = ContentValues()
+
+        if (rowId > 0) {
+            values.put(BaseColumns._ID, rowId)
+        }
+        values.put(AppListTable.Columns.appId, appId)
+        values.put(AppListTable.Columns.packageName, packageName)
+        values.put(AppListTable.Columns.title, title)
+        values.put(AppListTable.Columns.versionNumber, versionNumber)
+        values.put(AppListTable.Columns.versionName, versionName)
+        values.put(AppListTable.Columns.creator, creator)
+        values.put(AppListTable.Columns.status, status)
+        values.put(AppListTable.Columns.uploadDate, uploadDate)
+
+        values.put(AppListTable.Columns.priceText, priceText)
+        values.put(AppListTable.Columns.priceCurrency, priceCur)
+        values.put(AppListTable.Columns.priceMicros, priceMicros)
+
+        values.put(AppListTable.Columns.detailsUrl, detailsUrl)
+
+        values.put(AppListTable.Columns.iconUrl, iconUrl)
+        values.put(AppListTable.Columns.refreshTimestamp, refreshTime)
+
+        values.put(AppListTable.Columns.appType, appType)
+        values.put(AppListTable.Columns.syncVersion, syncVersion)
+        return values
+    }

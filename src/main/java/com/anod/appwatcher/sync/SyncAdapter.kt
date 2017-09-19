@@ -250,7 +250,7 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
             val installedInfo = installedAppsProvider.getInfo(appDetails.packageName)
             val recentChanges = if (updatedTitles.size == 0) appDetails.recentChangesHtml ?: "" else ""
             updatedTitles.add(UpdatedApp(localApp.appId, marketApp.title, appDetails.packageName, recentChanges, appDetails.versionCode, installedInfo.versionCode))
-            return AppListTable.createContentValues(newApp)
+            return newApp.contentValues
         }
 
         AppLog.d("No update found for: " + localApp.appId)
@@ -360,30 +360,30 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
 
     private fun fillMissingData(marketApp: Document, localApp: AppInfo, values: ContentValues) {
         val refreshTime = AppDetailsUploadDate.extract(marketApp)
-        values.put(AppListTable.Columns.KEY_REFRESH_TIMESTAMP, refreshTime)
-        values.put(AppListTable.Columns.KEY_UPLOAD_DATE, marketApp.appDetails.uploadDate)
+        values.put(AppListTable.Columns.refreshTimestamp, refreshTime)
+        values.put(AppListTable.Columns.uploadDate, marketApp.appDetails.uploadDate)
         if (TextUtils.isEmpty(localApp.versionName)) {
-            values.put(AppListTable.Columns.KEY_VERSION_NAME, marketApp.appDetails.versionString)
+            values.put(AppListTable.Columns.versionName, marketApp.appDetails.versionString)
         }
 
         if (marketApp.appDetails.appType != localApp.appType) {
-            values.put(AppListTable.Columns.KEY_APP_TYPE, marketApp.appDetails.appType)
+            values.put(AppListTable.Columns.appType, marketApp.appDetails.appType)
         }
 
         val offer = marketApp.offer
         if (offer.currencyCode != localApp.priceCur) {
-            values.put(AppListTable.Columns.KEY_PRICE_CURRENCY, offer.currencyCode)
+            values.put(AppListTable.Columns.priceCurrency, offer.currencyCode)
         }
         if (offer.formattedAmount != localApp.priceText) {
-            values.put(AppListTable.Columns.KEY_PRICE_TEXT, offer.formattedAmount)
+            values.put(AppListTable.Columns.priceText, offer.formattedAmount)
         }
         if (localApp.priceMicros != offer.micros.toInt()) {
-            values.put(AppListTable.Columns.KEY_PRICE_MICROS, offer.micros)
+            values.put(AppListTable.Columns.priceMicros, offer.micros)
         }
 
         val iconUrl = marketApp.iconUrl
         if (!TextUtils.isEmpty(iconUrl)) {
-            values.put(AppListTable.Columns.KEY_ICON_URL, marketApp.iconUrl)
+            values.put(AppListTable.Columns.iconUrl, marketApp.iconUrl)
         }
     }
 }

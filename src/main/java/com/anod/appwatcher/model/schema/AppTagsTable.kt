@@ -2,6 +2,7 @@ package com.anod.appwatcher.model.schema
 
 import android.content.ContentValues
 import android.provider.BaseColumns
+import com.anod.appwatcher.model.AppTag
 
 /**
  * @author alex
@@ -12,41 +13,42 @@ class AppTagsTable {
 
     class Columns : BaseColumns {
         companion object {
-            const val APPID = "app_id"
-            const val TAGID = "tags_id"
+            const val appId = "app_id"
+            const val tagId = "tags_id"
         }
     }
 
     object TableColumns {
         val _ID = AppTagsTable.table + "." + BaseColumns._ID
-        val APPID = AppTagsTable.table + ".app_id"
-        val TAGID = AppTagsTable.table + ".tags_id"
+        val appId = AppTagsTable.table + ".app_id"
+        val tagId = AppTagsTable.table + ".tags_id"
     }
 
     object Projection {
         const val _ID = 0
-        const val APPID = 1
-        const val TAGID = 2
+        const val appId = 1
+        const val tagId = 2
     }
 
     companion object {
 
         const val table = "app_tags"
 
-        val PROJECTION = arrayOf(TableColumns._ID, TableColumns.APPID, TableColumns.TAGID)
+        val projection = arrayOf(TableColumns._ID, TableColumns.appId, TableColumns.tagId)
 
         val sqlCreate =
                 "CREATE TABLE " + table + " (" +
                         BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                        AppTagsTable.Columns.APPID + " TEXT not null," +
-                        AppTagsTable.Columns.TAGID + " INTEGER" +
+                        AppTagsTable.Columns.appId + " TEXT not null," +
+                        AppTagsTable.Columns.tagId + " INTEGER" +
                         ") "
-
-        fun createContentValues(appId: String, tagId: Int): ContentValues {
-            val values = ContentValues()
-            values.put(Columns.APPID, appId)
-            values.put(Columns.TAGID, tagId)
-            return values
-        }
     }
 }
+
+val AppTag.contentValues: ContentValues
+    get() {
+        val values = android.content.ContentValues()
+        values.put(AppTagsTable.Columns.appId, appId)
+        values.put(AppTagsTable.Columns.tagId, tagId)
+        return values
+    }

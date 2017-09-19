@@ -3,7 +3,6 @@ package com.anod.appwatcher.content
 import android.database.Cursor
 
 import com.anod.appwatcher.model.AppInfo
-import com.anod.appwatcher.model.Tag
 import com.anod.appwatcher.model.schema.AppListTable
 
 /**
@@ -18,22 +17,22 @@ class AppListCursor(cursor: Cursor?) : CursorIterator<AppInfo>(cursor) {
     val appInfo: AppInfo
         get() = AppInfo(
             getInt(AppListTable.Projection._ID),
-            getString(AppListTable.Projection.APPID),
-            getString(AppListTable.Projection.PACKAGE),
-            getInt(AppListTable.Projection.VERSION_NUMBER),
-            getString(AppListTable.Projection.VERSION_NAME),
-            getString(AppListTable.Projection.TITLE),
-            getString(AppListTable.Projection.CREATOR),
-            getString(AppListTable.Projection.ICON_URL),
-            getInt(AppListTable.Projection.STATUS),
-            getString(AppListTable.Projection.UPLOAD_DATE),
-            getString(AppListTable.Projection.PRICE_TEXT),
-            getString(AppListTable.Projection.PRICE_CURRENCY),
-            getInt(AppListTable.Projection.PRICE_MICROS),
-            getString(AppListTable.Projection.DETAILS_URL),
-            getLong(AppListTable.Projection.REFRESH_TIME),
-            getString(AppListTable.Projection.APP_TYPE),
-            getInt(AppListTable.Projection.SYNC_VERSION)
+            getString(AppListTable.Projection.appId),
+            getString(AppListTable.Projection.packageName),
+            getInt(AppListTable.Projection.versionNumber),
+            getString(AppListTable.Projection.versionName),
+            getString(AppListTable.Projection.title),
+            getString(AppListTable.Projection.creator),
+            getString(AppListTable.Projection.iconUrl),
+            getInt(AppListTable.Projection.status),
+            getString(AppListTable.Projection.uploadDate),
+            getString(AppListTable.Projection.priceText),
+            getString(AppListTable.Projection.priceCurrency),
+            getInt(AppListTable.Projection.priceMicros),
+            getString(AppListTable.Projection.detailsUrl),
+            getLong(AppListTable.Projection.refreshTime),
+            getString(AppListTable.Projection.appType),
+            getInt(AppListTable.Projection.syncVersion)
         )
 
 }

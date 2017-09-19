@@ -33,7 +33,7 @@ class TagsContentProviderClient {
     fun queryTagsAppsCounts(): SparseIntArray {
         val counts = SparseIntArray()
         try {
-            val cr = contentProviderClient.query(DbContentProvider.TAGS_APPS_COUNT_CONTENT_URI, null, null, null, null) ?: NullCursor()
+            val cr = contentProviderClient.query(DbContentProvider.tagsAppsCountUri, null, null, null, null) ?: NullCursor()
             cr.moveToPosition(-1)
             while (cr.moveToNext()) {
                 counts.put(cr.getInt(0), cr.getInt(1))
@@ -49,8 +49,8 @@ class TagsContentProviderClient {
     fun query(sortOrder: String, selection: String?, selectionArgs: Array<String>?): TagsCursor {
         var cr: Cursor? = null
         try {
-            cr = contentProviderClient.query(DbContentProvider.TAGS_CONTENT_URI,
-                    TagsTable.PROJECTION, selection, selectionArgs, sortOrder
+            cr = contentProviderClient.query(DbContentProvider.tagsUri,
+                    TagsTable.projection, selection, selectionArgs, sortOrder
             )
         } catch (e: RemoteException) {
             AppLog.e(e)
@@ -64,6 +64,6 @@ class TagsContentProviderClient {
     }
 
     companion object {
-        val DEFAULT_SORT_ORDER = TagsTable.Columns.NAME + " COLLATE LOCALIZED ASC"
+        val DEFAULT_SORT_ORDER = TagsTable.Columns.name + " COLLATE LOCALIZED ASC"
     }
 }

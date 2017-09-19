@@ -123,9 +123,9 @@ class TagsListActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<Cursor
         }
     }
 
-    private class TagsCursorLoader internal constructor(context: Context) : CursorLoader(context, TagsListActivity.TagsCursorLoader.CONTENT_URI, TagsTable.PROJECTION, null, null, TagsListActivity.TagsCursorLoader.ORDER_DEFAULT) {
+    private class TagsCursorLoader internal constructor(context: Context) : CursorLoader(context, TagsListActivity.TagsCursorLoader.CONTENT_URI, TagsTable.projection, null, null, TagsListActivity.TagsCursorLoader.ORDER_DEFAULT) {
         companion object {
-            private val CONTENT_URI = DbContentProvider.TAGS_CONTENT_URI
+            private val CONTENT_URI = DbContentProvider.tagsUri
             private val ORDER_DEFAULT = TagsContentProviderClient.DEFAULT_SORT_ORDER
         }
     }
