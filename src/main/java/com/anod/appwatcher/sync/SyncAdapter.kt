@@ -46,7 +46,8 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
             val pkg: String,
             val recentChanges: String,
             val versionCode: Int,
-            val installedVersionCode: Int)
+            val installedVersionCode: Int,
+            val isNewUpdate: Boolean)
 
     companion object {
         private const val ONE_SEC_IN_MILLIS = 1000
@@ -103,7 +104,12 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
         val now = System.currentTimeMillis()
         preferences.lastUpdateTime = now
 
-        if (!manualSync && updatedApps.isNotEmpty() && lastUpdatesViewed) {
+
+
+        if (!manualSync
+                && updatedApps.isNotEmpty()
+                && (updatedApps.firstOrNull { it.isNewUpdate } != null)
+                && lastUpdatesViewed) {
             preferences.isLastUpdatesViewed = false
         }
 
@@ -249,7 +255,17 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
             val newApp = createNewVersion(marketApp, localApp)
             val installedInfo = installedAppsProvider.getInfo(appDetails.packageName)
             val recentChanges = if (updatedTitles.size == 0) appDetails.recentChangesHtml ?: "" else ""
-            updatedTitles.add(UpdatedApp(localApp.appId, marketApp.title, appDetails.packageName, recentChanges, appDetails.versionCode, installedInfo.versionCode))
+            updatedTitles.add(
+                UpdatedApp(
+                    localApp.appId,
+                    marketApp.title,
+                    appDetails.packageName,
+                    recentChanges,
+                    appDetails.versionCode,
+                    installedInfo.versionCode,
+                    true
+                )
+            )
             return newApp.contentValues
         }
 
@@ -265,7 +281,17 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
             // App was previously updated
             val installedInfo = installedAppsProvider.getInfo(appDetails.packageName)
             val recentChanges = if (updatedTitles.size == 0) appDetails.recentChangesHtml ?: "" else ""
-            updatedTitles.add(UpdatedApp(localApp.appId, marketApp.title, appDetails.packageName, recentChanges, appDetails.versionCode, installedInfo.versionCode))
+            updatedTitles.add(
+                UpdatedApp(
+                    localApp.appId,
+                    marketApp.title,
+                    appDetails.packageName,
+                    recentChanges,
+                    appDetails.versionCode,
+                    installedInfo.versionCode,
+                    false
+                )
+            )
         }
         //Refresh app icon if it wasn't fetched previously
         fillMissingData(marketApp, localApp, values)
