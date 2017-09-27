@@ -1,0 +1,9 @@
+Volley. HTTP library.
+https://android.googlesource.com/platform/frameworks/volley/
+Copyright 2015 Google, Inc.
+Apache Software License 2.0
+
+Protocol Buffers
+https://github.com/google/protobuf/
+Copyright 2014, Google Inc.  All rights reserved.
+Protobuf License (https://raw.githubusercontent.com/google/protobuf/master/LICENSE)

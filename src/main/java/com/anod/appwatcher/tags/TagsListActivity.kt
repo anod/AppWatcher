@@ -16,7 +16,6 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
-import butterknife.bindView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.DbContentProviderClient
@@ -28,6 +27,7 @@ import com.anod.appwatcher.model.schema.TagsTable
 import com.anod.appwatcher.recyclerview.RecyclerViewCursorAdapter
 import com.anod.appwatcher.ui.ToolbarActivity
 import com.anod.appwatcher.utils.DrawableResource
+import kotterknife.bindView
 
 /**
  * @author algavris

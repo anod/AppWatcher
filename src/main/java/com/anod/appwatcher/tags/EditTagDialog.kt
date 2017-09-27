@@ -11,12 +11,12 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.ImageView
-import butterknife.bindView
 import com.android.colorpicker.ColorPickerSwatch
 import com.android.colorpicker.ColorStateDrawable
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.Tag
 import info.anodsplace.colorpicker.ColorPickerDialog
+import kotterknife.bindView
 
 /**
  * @author algavris

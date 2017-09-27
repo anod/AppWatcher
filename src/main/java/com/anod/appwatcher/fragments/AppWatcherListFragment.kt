@@ -18,8 +18,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import butterknife.bindOptionalView
-import butterknife.bindView
 import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.ChangelogActivity
 import com.anod.appwatcher.MarketSearchActivity

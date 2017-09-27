@@ -14,7 +14,6 @@ import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.Toast
-import butterknife.bindView
 import com.anod.appwatcher.App
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AccountChooser
@@ -24,6 +23,7 @@ import com.anod.appwatcher.ui.ToolbarActivity
 import com.anod.appwatcher.utils.InstalledAppsProvider
 import com.anod.appwatcher.utils.PackageManagerUtils
 import info.anodsplace.android.log.AppLog
+import kotterknife.bindView
 import java.util.*
 
 

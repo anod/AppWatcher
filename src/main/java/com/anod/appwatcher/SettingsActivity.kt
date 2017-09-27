@@ -18,7 +18,7 @@ import com.anod.appwatcher.backup.ImportTask
 import com.anod.appwatcher.model.DbSchemaManager
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.ui.SettingsActionBarActivity
-import de.psdev.licensesdialog.LicensesDialog
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import info.anodsplace.android.log.AppLog
 import java.io.File
 import java.io.FileInputStream
@@ -190,7 +190,7 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
             } else {
                 startActivity(Intent(this, ListExportActivity::class.java))
             }
-            ACTION_LICENSES -> LicensesDialog(this, R.raw.notices, false, true).show()
+            ACTION_LICENSES -> startActivity(Intent(this, OssLicensesMenuActivity::class.java))
             ACTION_SYNC_ENABLE -> {
                 syncNowItem!!.enabled = false // disable temporary sync now
                 if (syncEnabledItem!!.checked) {

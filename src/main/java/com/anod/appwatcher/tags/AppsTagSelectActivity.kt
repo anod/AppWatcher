@@ -15,7 +15,6 @@ import android.support.v7.widget.SearchView
 import android.view.Menu
 import android.view.View
 import android.widget.ProgressBar
-import butterknife.bindView
 
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.AppListCursor
@@ -27,6 +26,7 @@ import com.anod.appwatcher.model.schema.AppTagsTable
 import com.anod.appwatcher.ui.ToolbarActivity
 import com.anod.appwatcher.utils.BackgroundTask
 import com.anod.appwatcher.utils.Keyboard
+import kotterknife.bindView
 
 
 /**

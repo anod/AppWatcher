@@ -14,7 +14,6 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import butterknife.bindView
 import com.android.volley.VolleyError
 import com.anod.appwatcher.R
 import com.anod.appwatcher.market.PlayStoreEndpoint
@@ -23,6 +22,7 @@ import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.model.WatchAppList
 import com.anod.appwatcher.tags.TagSnackbar
+import kotterknife.bindView
 
 /**
  * @author algavris

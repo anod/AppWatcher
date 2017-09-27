@@ -5,15 +5,14 @@ import android.accounts.AccountManager
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import butterknife.bindView
 
 import com.anod.appwatcher.R
+import kotterknife.bindView
 
 /**
  * @author alex

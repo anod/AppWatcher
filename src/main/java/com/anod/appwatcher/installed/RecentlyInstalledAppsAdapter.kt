@@ -12,8 +12,7 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.adapters.AppViewHolder
 import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.PackageManagerUtils
-import butterknife.bindViews
-import com.anod.appwatcher.model.AppInfo
+import kotterknife.bindViews
 
 /**
  * @author alex

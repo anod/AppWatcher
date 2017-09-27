@@ -18,9 +18,7 @@ import android.text.util.Linkify
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
 import android.widget.*
-import butterknife.bindView
 import com.android.volley.VolleyError
 import com.anod.appwatcher.accounts.AuthTokenProvider
 import com.anod.appwatcher.adapters.AppDetailsView
@@ -40,6 +38,7 @@ import com.anod.appwatcher.utils.*
 import com.squareup.picasso.Picasso
 import info.anodsplace.android.anim.RevealAnimatorCompat
 import info.anodsplace.android.log.AppLog
+import kotterknife.bindView
 import java.util.*
 
 

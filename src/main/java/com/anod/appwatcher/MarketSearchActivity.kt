@@ -13,7 +13,6 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import butterknife.bindView
 import com.android.volley.VolleyError
 import com.anod.appwatcher.accounts.AccountChooser
 import com.anod.appwatcher.market.CompositeStateEndpoint
@@ -30,6 +29,7 @@ import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.ui.ToolbarActivity
 import com.anod.appwatcher.utils.Keyboard
 import com.anod.appwatcher.utils.MetricsManagerEvent
+import kotterknife.bindView
 
 class MarketSearchActivity : ToolbarActivity(), AccountChooser.OnAccountSelectionListener, WatchAppList.Listener, CompositeStateEndpoint.Listener {
 
