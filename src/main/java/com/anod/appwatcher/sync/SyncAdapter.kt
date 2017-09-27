@@ -104,10 +104,7 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
         val now = System.currentTimeMillis()
         preferences.lastUpdateTime = now
 
-        if (!manualSync
-                && updatedApps.isNotEmpty()
-                && (updatedApps.firstOrNull { it.isNewUpdate } != null)
-                && lastUpdatesViewed) {
+        if (!manualSync && (updatedApps.firstOrNull { it.isNewUpdate } != null)) {
             preferences.isLastUpdatesViewed = false
         }
 
@@ -302,7 +299,7 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
         val sn = SyncNotification(context)
         if (manualSync) {
             sn.cancel()
-        } else if (updatedApps.isNotEmpty()) {
+        } else if (updatedApps.firstOrNull { it.isNewUpdate } != null) {
             var filteredApps = updatedApps
 
             if (!preferences.isNotifyInstalledUpToDate) {
