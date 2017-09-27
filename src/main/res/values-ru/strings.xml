@@ -14,7 +14,7 @@
     <string name="application_icon">Иконка приложения</string>
     <string name="remove">Удалить</string>
     <string name="problem_occurred">Проблема произошла во время получения информации.</string>
-    <string name="menu_auto_update">Автоматическое обновление</string>
+    <string name="menu_update_frequency">Автоматическое обновление</string>
     <string name="menu_wifi_only">Только по Wi-Fi</string>
     <string name="alert_dialog_remove_title">Удалить?</string>
     <string name="alert_dialog_remove_message">Вы хотите прекратить наблюдать за обновлениями для \"%s\"?</string>

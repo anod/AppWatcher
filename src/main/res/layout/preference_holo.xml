@@ -5,23 +5,7 @@
     android:gravity="center_vertical"
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:paddingLeft="@dimen/preference_item_padding_side"
-    android:paddingRight="?android:attr/scrollbarSize">
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="horizontal">
-
-        <ImageView
-            android:id="@+id/imageView"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_gravity="center"
-            android:layout_marginRight="@dimen/preference_item_padding_inner"
-            android:minWidth="48dp"
-            android:scaleType="centerInside" />
-    </LinearLayout>
+    android:paddingRight="@dimen/preference_item_padding_side">
 
     <RelativeLayout
         android:layout_width="0dp"

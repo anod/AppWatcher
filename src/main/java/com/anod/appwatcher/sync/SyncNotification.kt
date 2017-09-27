@@ -41,7 +41,10 @@ class SyncNotification(private val context: Context) {
     }
 
     fun show(updatedApps: List<SyncAdapter.UpdatedApp>) {
-        val notification = this.create(updatedApps);
+
+        val sorted = updatedApps.sortedWith(compareBy({ it.isNewUpdate }, { it.title }))
+
+        val notification = this.create(sorted)
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(NOTIFICATION_ID, notification)
     }

@@ -63,9 +63,21 @@ class Preferences(context: Context) {
         get() = preferences.getLong(DRIVE_SYNC_TIME, -1)
         set(value) = preferences.edit().putLong(DRIVE_SYNC_TIME, value).apply()
 
-    var useAutoSync: Boolean
-        get() = preferences.getBoolean(AUTOSYNC, true)
-        set(value) = preferences.edit().putBoolean(AUTOSYNC, value).apply()
+    val useAutoSync: Boolean
+        get() = this.updatesFrequency > 0
+
+    var updatesFrequency: Int
+        get() {
+            val freq = preferences.getInt(updateFrequency, -1)
+            if (freq == -1) {
+                // 2 hrs fallback
+                return if (preferences.getBoolean(AUTOSYNC, true)) 7200 else 0
+            }
+            return freq
+        }
+        set(value) {
+            preferences.edit().putInt(updateFrequency, value).apply()
+        }
 
     var isRequiresCharging: Boolean
         get() = preferences.getBoolean(REQUIRES_CHARGING, false)
@@ -96,7 +108,6 @@ class Preferences(context: Context) {
         private const val ACCOUNT_TYPE = "account_type"
         private const val SORT_INDEX = "sort_index"
 
-        internal const val SORT_NAME_ASC = 0
         const val SORT_NAME_DESC = 1
         const val SORT_DATE_ASC = 2
         const val SORT_DATE_DESC = 3
@@ -106,6 +117,8 @@ class Preferences(context: Context) {
         private const val DRIVE_SYNC_TIME = "drive_sync_time"
         private const val AUTOSYNC = "autosync"
         private const val REQUIRES_CHARGING = "requires-charging"
+        private const val updateFrequency = "update_frequency"
+
         const val VERSION_CODE = "version_code"
         const val NOTIFY_INSTALLED_UPTODATE = "notify_installed_uptodate"
         const val NIGHT_MODE = "night-mode"

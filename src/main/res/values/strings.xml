@@ -13,7 +13,7 @@
     <string name="application_icon">Application icon</string>
     <string name="remove">Remove</string>
     <string name="problem_occurred">Problem occurred during receiving information.</string>
-    <string name="menu_auto_update">Automatic update</string>
+    <string name="menu_update_frequency">Update frequency</string>
     <string name="menu_wifi_only">Wi-Fi Only</string>
     <string name="alert_dialog_remove_title">Remove?</string>
     <string name="alert_dialog_remove_message">Do you want to stop watching after \"%s\" updates?</string>
@@ -138,6 +138,14 @@
         <item>Auto (Dark from 10pm till 6am)</item> <!-- MODE_NIGHT_AUTO = 0; -->
         <item>Light</item> <!-- MODE_NIGHT_NO = 1; -->
         <item>Dark</item> <!-- MODE_NIGHT_YES = 2; -->
+    </string-array>
+
+    <string-array name="updates_frequency">
+        <item>Manually</item>
+        <item>Every 2 hours</item>
+        <item>Every 4 hours</item>
+        <item>Every 8 hours</item>
+        <item>Every 12 hours</item>
     </string-array>
 
 </resources>

@@ -13,12 +13,11 @@ import com.firebase.jobdispatcher.*
  */
 
 object SyncScheduler {
-    private const val windowStartSec = 2 * 3600 //2 hours
-    private const val windowEndSec = windowStartSec + 600
+    private const val windowDuration = 600
 
     private const val tag = "AppRefresh"
 
-    fun schedule(context: Context, requiresCharging: Boolean, requiresWifi: Boolean) {
+    fun schedule(context: Context, requiresCharging: Boolean, requiresWifi: Boolean, windowStartSec: Int) {
 
         val constraints = mutableListOf<Int>()
         if (requiresCharging) {
@@ -35,7 +34,7 @@ object SyncScheduler {
                 .setTag(tag)
                 .setRecurring(true)
                 .setLifetime(Lifetime.FOREVER)
-                .setTrigger(Trigger.executionWindow(windowStartSec, windowEndSec))
+                .setTrigger(Trigger.executionWindow(windowStartSec, windowStartSec + windowDuration))
                 .setReplaceCurrent(true)
                 .setConstraints(*constraints.toIntArray())
                 .setExtras(Bundle())

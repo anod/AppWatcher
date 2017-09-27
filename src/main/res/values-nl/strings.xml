@@ -12,7 +12,7 @@
     <string name="application_icon">Applicatie icoon</string>
     <string name="remove">Verwijderen</string>
     <string name="problem_occurred">Er is een probleem opgetreden bij het opzoeken van de informatie.</string>
-    <string name="menu_auto_update">Automatisch bijwerken</string>
+    <string name="menu_update_frequency">Automatisch bijwerken</string>
     <string name="menu_wifi_only">Enkel Wi-Fi</string>
     <string name="alert_dialog_remove_title">Verwijderen?</string>
     <string name="alert_dialog_remove_message">Wilt u stoppen met het volgen van updates voor \"%s\" ?</string>

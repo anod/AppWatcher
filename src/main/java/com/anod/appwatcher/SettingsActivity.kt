@@ -35,6 +35,8 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
     private var accountChooser: AccountChooser? = null
     private var wifiItem: SettingsActionBarActivity.CheckboxItem? = null
     private var chargingItem: SettingsActionBarActivity.CheckboxItem? = null
+    private var frequencyItem: SettingsActionBarActivity.Item? = null
+
     private lateinit var prefs: Preferences
 
     override fun onExportStart() {
@@ -86,7 +88,11 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
         preferences.add(SettingsActionBarActivity.Category(R.string.category_updates))
 
         val useAutoSync = prefs.useAutoSync
-        preferences.add(SettingsActionBarActivity.CheckboxItem(R.string.menu_auto_update, 0, ACTION_AUTO_UPDATE, useAutoSync))
+        frequencyItem = SettingsActionBarActivity.Item(R.string.pref_title_updates_frequency, 0, ACTION_UPDATE_FREQUENCY)
+        frequencyItem?.summary = resources.getStringArray(R.array.updates_frequency)[
+                resources.getIntArray(R.array.updates_frequency_values).indexOf(prefs.updatesFrequency)
+                ]
+        preferences.add(frequencyItem!!)
 
         wifiItem = SettingsActionBarActivity.CheckboxItem(R.string.menu_wifi_only, 0, ACTION_WIFI_ONLY, prefs.isWifiOnly)
         preferences.add(wifiItem!!)
@@ -204,26 +210,35 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
                 gDriveSync!!.sync()
             }
             ACTION_GDRIVE_UPLOAD -> gDriveSync!!.upload()
-            ACTION_AUTO_UPDATE -> {
-                val useAutoSync = (pref as SettingsActionBarActivity.CheckboxItem).checked
-                if (useAutoSync) {
-                    SyncScheduler.schedule(this, prefs.isRequiresCharging, prefs.isWifiOnly)
-                } else {
-                    SyncScheduler.cancel(this)
-                }
-                prefs.useAutoSync = useAutoSync
-                wifiItem!!.enabled = useAutoSync
-                chargingItem!!.enabled = useAutoSync
+            ACTION_UPDATE_FREQUENCY -> {
+                val values = resources.getIntArray(R.array.updates_frequency_values)
+                val dialog = AlertDialog.Builder(this)
+                        .setTitle(R.string.pref_title_updates_frequency)
+                        .setSingleChoiceItems(R.array.updates_frequency, values.indexOf(prefs.updatesFrequency)) { d, which ->
+                            prefs.updatesFrequency = values[which]
+                            val useAutoSync = prefs.useAutoSync
+                            if (useAutoSync) {
+                                SyncScheduler.schedule(this, prefs.isRequiresCharging, prefs.isWifiOnly, prefs.updatesFrequency)
+                            } else {
+                                SyncScheduler.cancel(this)
+                            }
+                            frequencyItem?.summary = resources.getStringArray(R.array.updates_frequency)[which]
+                            wifiItem!!.enabled = useAutoSync
+                            chargingItem!!.enabled = useAutoSync
+                            d.dismiss()
+                            notifyDataSetChanged()
+                        }.create()
+                dialog.show()
             }
             ACTION_WIFI_ONLY -> {
                 val useWifiOnly = (pref as SettingsActionBarActivity.CheckboxItem).checked
                 prefs.isWifiOnly = useWifiOnly
-                SyncScheduler.schedule(this, prefs.isRequiresCharging, useWifiOnly)
+                SyncScheduler.schedule(this, prefs.isRequiresCharging, useWifiOnly, prefs.updatesFrequency)
             }
             ACTION_REQUIRES_CHARGING -> {
                 val requiresCharging = (pref as SettingsActionBarActivity.CheckboxItem).checked
                 prefs.isRequiresCharging = requiresCharging
-                SyncScheduler.schedule(this, requiresCharging, prefs.isWifiOnly)
+                SyncScheduler.schedule(this, requiresCharging, prefs.isWifiOnly, prefs.updatesFrequency)
             }
             ACTION_NOTIFY_UPTODATE -> {
                 val notify = (pref as SettingsActionBarActivity.CheckboxItem).checked
@@ -345,7 +360,7 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
         private const val ACTION_ABOUT = 5
         private const val ACTION_SYNC_ENABLE = 1
         private const val ACTION_SYNC_NOW = 2
-        private const val ACTION_AUTO_UPDATE = 7
+        private const val ACTION_UPDATE_FREQUENCY = 7
         private const val ACTION_WIFI_ONLY = 8
         private const val ACTION_REQUIRES_CHARGING = 9
         private const val ACTION_NOTIFY_UPTODATE = 10

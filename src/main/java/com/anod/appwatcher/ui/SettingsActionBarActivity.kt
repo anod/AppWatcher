@@ -21,7 +21,7 @@ abstract class SettingsActionBarActivity : ToolbarActivity(), AdapterView.OnItem
     open class Preference(@StringRes val title: Int, @LayoutRes val layout: Int)
     class Category(@StringRes title: Int) : Preference(title, R.layout.preference_category)
 
-    open class Item(@StringRes title: Int, /* @StringRes */ var summaryRes: Int, internal val action: Int)
+    open class Item(@StringRes title: Int, @StringRes var summaryRes: Int, internal val action: Int)
         : Preference(title, R.layout.preference_holo) {
         var summary: String? = null
         var widget: Int = 0
