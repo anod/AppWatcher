@@ -91,7 +91,7 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
         frequencyItem = SettingsActionBarActivity.Item(R.string.pref_title_updates_frequency, 0, ACTION_UPDATE_FREQUENCY)
         val currentIndex = resources.getIntArray(R.array.updates_frequency_values).indexOf(prefs.updatesFrequency)
         val frequencyTitles = resources.getStringArray(R.array.updates_frequency)
-        frequencyItem?.summary = if (currentIndex == -1) "Every ${prefs.updatesFrequency} minutes" else frequencyTitles[currentIndex]
+        frequencyItem?.summary = if (currentIndex == -1) frequencyTitles[1] else frequencyTitles[currentIndex]
         preferences.add(frequencyItem!!)
 
         wifiItem = SettingsActionBarActivity.CheckboxItem(R.string.menu_wifi_only, 0, ACTION_WIFI_ONLY, prefs.isWifiOnly)
