@@ -55,7 +55,6 @@ object AppDetailsUploadDate {
                     uploadDate,
                     expected,
                     format,
-                    isCustom,
                     e
             ))
         }
@@ -63,5 +62,11 @@ object AppDetailsUploadDate {
         return null
     }
 
-    class ExtractDateError internal constructor(val locale: String, val defaultlocale: String, val actual: String, val expected: String, val expectedFormat: String, val isCustomParser: Boolean, cause: ParseException) : Exception(cause)
+    class ExtractDateError(
+            locale: String,
+            defaultLocale: String,
+            actual: String,
+            expected: String,
+            expectedFormat: String, cause: ParseException)
+        : Exception("Unparseable date: $actual, expected: $expected ($expectedFormat) [$locale], default locale: $defaultLocale", cause)
 }

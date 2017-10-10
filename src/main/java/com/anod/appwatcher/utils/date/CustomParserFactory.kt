@@ -61,13 +61,15 @@ object CustomParserFactory {
 
         if (locale == Locale("en", "SE")
                 || locale == Locale("en", "PH")
-                || locale == Locale("en", "AU")
                 || lang == Locale("es", "").language
-                || locale == Locale("nl", "BE")) {
+                || locale == Locale("nl", "BE")
+                || locale == Locale("en", "RU")
+                || locale == Locale("en", "NL")) {
             return SimpleDateFormat("d MMM. yyyy", locale)
         }
 
-        if (locale == Locale("en", "GB")) {
+        if (locale == Locale("en", "GB")
+                || locale == Locale("en", "AU")) {
             return SimpleDateFormat("d MMM yyyy", locale)
         }
 

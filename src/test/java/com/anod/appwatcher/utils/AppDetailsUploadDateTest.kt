@@ -33,28 +33,31 @@ class AppDetailsUploadDateTest {
         AppLog.setLogLevel(Log.DEBUG)
         AppLog.LOGGER = AppLog.Logger.StdOut()
 
-        val dates = ArrayList<DateDesc>()
+        val dates = listOf(
+                DateDesc("en_RU", "28 Jun. 2017", "2017-06-28"),
 
-        dates.add(DateDesc("es_US", "16 oct. 2016", "2016-10-16"))
-        dates.add(DateDesc("es_US", "29 oct. 2016", "2016-10-29"))
-        dates.add(DateDesc("es_US", "14 abr. 2017", "2017-04-14"))
+                DateDesc("en_AU", "28 Jun 2017", "2017-06-28"),
 
-        dates.add(DateDesc("es_ES", "17 mar. 2017", "2017-03-17"))
-        dates.add(DateDesc("es_ES", "11 sept. 2016", "2016-09-11"))
-        dates.add(DateDesc("es_ES", "28 feb. 2017", "2017-02-28"))
-        dates.add(DateDesc("es_ES", "9 feb. 2017", "2017-02-09"))
-        dates.add(DateDesc("es_ES", "15 dic. 2017", "2017-12-15"))
-        dates.add(DateDesc("es_ES", "14 abr. 2017", "2017-04-14"))
+                DateDesc("es_US", "16 oct. 2016", "2016-10-16"),
+                DateDesc("es_US", "29 oct. 2016", "2016-10-29"),
+                DateDesc("es_US", "14 abr. 2017", "2017-04-14"),
 
-        dates.add(DateDesc("hi_IN", "20/01/2017", "2017-01-20"))
-        dates.add(DateDesc("nl_BE", "11 jul. 2016", "2016-07-11"))
-        dates.add(DateDesc("en_AU", "2 Feb. 2017", "2017-02-02"))
-        dates.add(DateDesc("es_MX", "1 feb. 2017", "2017-02-01"))
-        dates.add(DateDesc("es_VE", "5 feb. 2017", "2017-02-05"))
-        dates.add(DateDesc("fa_IR", "Feb 1, 2017", "2017-02-01"))
+                DateDesc("es_ES", "17 mar. 2017", "2017-03-17"),
+                DateDesc("es_ES", "11 sept. 2016", "2016-09-11"),
+                DateDesc("es_ES", "28 feb. 2017", "2017-02-28"),
+                DateDesc("es_ES", "9 feb. 2017", "2017-02-09"),
+                DateDesc("es_ES", "15 dic. 2017", "2017-12-15"),
+                DateDesc("es_ES", "14 abr. 2017", "2017-04-14"),
 
-        dates.add(DateDesc("fr_CA", "12 juill. 2016", "2016-07-12"))
+                DateDesc("hi_IN", "20/01/2017", "2017-01-20"),
+                DateDesc("nl_BE", "11 jul. 2016", "2016-07-11"),
+                DateDesc("en_AU", "2 Feb 2017", "2017-02-02"),
+                DateDesc("es_MX", "1 feb. 2017", "2017-02-01"),
+                DateDesc("es_VE", "5 feb. 2017", "2017-02-05"),
+                DateDesc("fa_IR", "Feb 1, 2017", "2017-02-01"),
 
+                DateDesc("fr_CA", "12 juill. 2016", "2016-07-12")
+        )
 
         //        for (int i = 0; i < 12; i++) {
         //            DateFormat df = CustomParserFactory.create(new Locale("es", "US"));
@@ -75,7 +78,7 @@ class AppDetailsUploadDateTest {
     }
 
     private inner class DateDesc @Throws(ParseException::class)
-       constructor(locale: String, internal val date: String, internal val expected: String) {
-            internal val locale: Locale = Locale(locale.substring(0, 2), locale.substring(3, 5))
+    constructor(locale: String, internal val date: String, internal val expected: String) {
+        internal val locale: Locale = Locale(locale.substring(0, 2), locale.substring(3, 5))
     }
 }

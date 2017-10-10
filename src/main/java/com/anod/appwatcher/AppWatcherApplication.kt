@@ -72,23 +72,7 @@ class AppWatcherApplication : Application(), AppLog.Listener {
             return
         }
 
-        MetricsManagerEvent.track(this, "log_exception",
-            "CLASS_NAME", "${tr::class.java}",
-            "MESSAGE", tr.message ?: "empty",
-            "NETWORK_AVAILABLE", isNetworkAvailable.toString()
-        )
-
         FirebaseCrash.report(tr)
-        if (tr is AppDetailsUploadDate.ExtractDateError) {
-            val error = tr
-            MetricsManagerEvent.track(this, "error_extract_date",
-                    "LOCALE", error.locale,
-                    "DEFAULT_LOCALE", error.defaultlocale,
-                    "ACTUAL", error.actual,
-                    "EXPECTED", error.expected,
-                    "EXPECTED_FORMAT", error.expectedFormat,
-                    "CUSTOM", if (error.isCustomParser) "YES" else "NO")
-        }
     }
 
     private fun isNetworkError(tr: Throwable): Boolean {
