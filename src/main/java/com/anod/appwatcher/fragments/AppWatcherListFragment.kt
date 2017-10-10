@@ -89,7 +89,7 @@ open class AppWatcherListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
             watchlistAdapter.swapData(null)
         }
 
-        fun <T: RecyclerView.Adapter<*>> getAdapter(id: Int, adapter: MergeRecyclerAdapter): T {
+        fun <T : RecyclerView.Adapter<*>> getAdapter(id: Int, adapter: MergeRecyclerAdapter): T {
             val index = adapterIndexMap.get(id)
             return adapter.getAdapter(index) as T
         }
@@ -110,22 +110,24 @@ open class AppWatcherListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
         (activity as AppWatcherBaseActivity).removeQueryChangeListener(listenerIndex)
     }
 
-    fun setListVisible(visible: Boolean) {
-        if (visible) {
-            progressContainer.visibility = View.GONE
-            if (adapter.itemCount == 0) {
-                emptyView.visibility = View.VISIBLE
-                listView.visibility = View.INVISIBLE
+    private var isListVisible: Boolean
+        get() = listView.visibility == View.VISIBLE
+        set(visible) {
+            if (visible) {
+                progressContainer.visibility = View.GONE
+                if (adapter.itemCount == 0) {
+                    emptyView.visibility = View.VISIBLE
+                    listView.visibility = View.INVISIBLE
+                } else {
+                    emptyView.visibility = View.GONE
+                    listView.visibility = View.VISIBLE
+                }
             } else {
+                progressContainer.visibility = View.VISIBLE
+                listView.visibility = View.INVISIBLE
                 emptyView.visibility = View.GONE
-                listView.visibility = View.VISIBLE
             }
-        } else {
-            progressContainer.visibility = View.VISIBLE
-            listView.visibility = View.INVISIBLE
-            emptyView.visibility = View.GONE
         }
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_applist, container, false)
@@ -162,7 +164,7 @@ open class AppWatcherListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
         listView.adapter = adapter
 
         // Start out with a progress indicator.
-        setListVisible(false)
+        this.isListVisible = false
 
         sortId = arguments.getInt(ARG_SORT)
         filterId = arguments.getInt(ARG_FILTER)
@@ -194,7 +196,7 @@ open class AppWatcherListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
 
     override fun onLoadFinished(loader: Loader<Cursor>, data: Cursor) {
         section.loadFinished(adapter, loader, data)
-        setListVisible(true)
+        this.isListVisible = true
     }
 
     override fun onLoaderReset(loader: Loader<Cursor>) {
@@ -259,9 +261,9 @@ open class AppWatcherListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
     }
 
     override fun onRefresh() {
-       if (!(activity as AppWatcherBaseActivity).requestRefresh()) {
-           swipeLayout?.isRefreshing = false
-       }
+        if (!(activity as AppWatcherBaseActivity).requestRefresh()) {
+            swipeLayout?.isRefreshing = false
+        }
     }
 
     private fun restartLoader() {

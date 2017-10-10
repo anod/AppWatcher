@@ -86,10 +86,6 @@ class AppsTagSelectActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<C
         super.onSaveInstanceState(outState, outPersistentState)
     }
 
-    override fun onResume() {
-        super.onResume()
-    }
-
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.searchbox, menu)
 

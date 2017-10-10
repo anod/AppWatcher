@@ -66,7 +66,7 @@ object PackageManagerUtils {
             // copy to avoid recycling problems
             return bitmapDrawable.bitmap.copy(bitmapDrawable.bitmap.config, true)
         } else if (d != null) {
-            val bitmap = Bitmap.createBitmap(d.getIntrinsicWidth(), d.getIntrinsicHeight(), Bitmap.Config.ARGB_8888)
+            val bitmap = Bitmap.createBitmap(d.intrinsicWidth, d.intrinsicHeight, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bitmap)
             d.setBounds(0, 0, canvas.width, canvas.height)
             d.draw(canvas)

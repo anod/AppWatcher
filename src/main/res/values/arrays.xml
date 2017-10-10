@@ -3,8 +3,8 @@
     <integer-array name="updates_frequency_values" translatable="false">
         <item>0</item>
         <item>7200</item>
-        <item>14400</item>
-        <item>28800</item>
+        <item>10800</item>
+        <item>21600</item>
         <item>43200</item>
     </integer-array>
 </resources>

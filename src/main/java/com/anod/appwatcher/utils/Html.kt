@@ -13,6 +13,9 @@ object Html {
 
     fun parse(source: String): Spanned {
         try {
+            if (source.isBlank()) {
+                return SpannableString(source)
+            }
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
                 return android.text.Html.fromHtml(source, android.text.Html.FROM_HTML_MODE_COMPACT)
             }

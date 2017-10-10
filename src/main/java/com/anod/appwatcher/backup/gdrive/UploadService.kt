@@ -40,7 +40,7 @@ class UploadService : JobService() {
         }
     }
 
-    private var runner: BackgroundTask.AsyncTaskRunner<Void?, Boolean>? = null;
+    private var runner: BackgroundTask.AsyncTaskRunner<Void?, Boolean>? = null
 
     override fun onStartJob(job: JobParameters?): Boolean {
         if (job == null) return false

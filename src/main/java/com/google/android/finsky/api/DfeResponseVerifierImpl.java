@@ -48,7 +48,7 @@ public class DfeResponseVerifierImpl implements DfeResponseVerifier
     }
     
     private static byte[] extractResponseSignature(final String s) throws DfeResponseVerifierException {
-        if (TextUtils.isEmpty((CharSequence)s)) {
+        if (TextUtils.isEmpty(s)) {
             AppLog.e("No signing response found.", new Object[0]);
             throw new DfeResponseVerifierException("No signing response found.");
         }

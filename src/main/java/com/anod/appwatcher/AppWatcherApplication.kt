@@ -14,7 +14,12 @@ import com.android.volley.TimeoutError
 import com.android.volley.VolleyError
 import com.anod.appwatcher.sync.SyncNotification
 import java.io.IOException
+import java.net.ConnectException
 import java.net.SocketException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
+import javax.net.ssl.SSLHandshakeException
+import javax.net.ssl.SSLPeerUnverifiedException
 
 
 class AppWatcherApplication : Application(), AppLog.Listener {
@@ -58,7 +63,7 @@ class AppWatcherApplication : Application(), AppLog.Listener {
         }
 
     val isNetworkAvailable: Boolean
-        get() = objectGraph.connectivityManager.activeNetworkInfo?.isConnectedOrConnecting ?:false
+        get() = objectGraph.connectivityManager.activeNetworkInfo?.isConnectedOrConnecting == true
 
     override fun onLogException(tr: Throwable) {
 
@@ -93,6 +98,11 @@ class AppWatcherApplication : Application(), AppLog.Listener {
                 || tr is TimeoutError
                 || tr is SocketException
                 || tr is NoConnectionError
+                || tr is UnknownHostException
+                || tr is SSLHandshakeException
+                || tr is SSLPeerUnverifiedException
+                || tr is ConnectException
+                || tr is SocketTimeoutException
     }
 
     private inner class FirebaseLogger : AppLog.Logger.Android() {

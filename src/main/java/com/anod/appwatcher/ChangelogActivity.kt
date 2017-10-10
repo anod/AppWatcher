@@ -265,7 +265,7 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
             R.id.menu_open -> {
                 val launchIntent = packageManager.getLaunchIntentForPackage(appId)
                 if (launchIntent != null) {
-                    IntentUtils.startActivitySafely(this, launchIntent);
+                    IntentUtils.startActivitySafely(this, launchIntent)
                 }
             }
         }
@@ -367,7 +367,7 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
         val id = v.id
         if (id == R.id.market_btn) {
             val intent = IntentUtils.createPlayStoreIntent(appInfo!!.packageName)
-            startActivity(intent)
+            IntentUtils.startActivitySafely(this, intent)
         }
     }
 
