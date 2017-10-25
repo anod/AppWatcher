@@ -25,10 +25,9 @@ import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.model.schema.AppListTable
 import com.anod.appwatcher.model.schema.ChangelogTable
 import com.anod.appwatcher.model.schema.contentValues
-import com.anod.appwatcher.utils.AppDetailsUploadDate
-import com.anod.appwatcher.utils.CollectionsUtils
 import com.anod.appwatcher.utils.GooglePlayServices
-import com.anod.appwatcher.utils.InstalledAppsProvider
+import com.anod.appwatcher.utils.InstalledApps
+import com.anod.appwatcher.utils.extractUploadDate
 import com.google.android.finsky.api.model.Document
 import info.anodsplace.android.log.AppLog
 import java.util.*
@@ -60,7 +59,7 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
     }
 
     private val preferences = App.provide(context).prefs
-    private val installedAppsProvider = InstalledAppsProvider.PackageManager(context.packageManager)
+    private val installedAppsProvider = InstalledApps.PackageManager(context.packageManager)
 
     fun onPerformSync(extras: Bundle, provider: ContentProviderClient): Int {
 
@@ -303,11 +302,9 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
             var filteredApps = updatedApps
 
             if (!preferences.isNotifyInstalledUpToDate) {
-                filteredApps = CollectionsUtils.filter(updatedApps, object : CollectionsUtils.Predicate<UpdatedApp> {
-                    override fun test(t: UpdatedApp): Boolean {
-                        return t.installedVersionCode > 0 && t.versionCode <= t.installedVersionCode
-                    }
-                })
+                filteredApps = updatedApps.filter {
+                    it.installedVersionCode > 0 && it.versionCode <= it.installedVersionCode
+                }
             }
             if (filteredApps.isNotEmpty()) {
                 sn.show(filteredApps)
@@ -379,7 +376,7 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
     }
 
     private fun fillMissingData(marketApp: Document, localApp: AppInfo, values: ContentValues) {
-        val refreshTime = AppDetailsUploadDate.extract(marketApp)
+        val refreshTime = marketApp.extractUploadDate()
         values.put(AppListTable.Columns.refreshTimestamp, refreshTime)
         values.put(AppListTable.Columns.uploadDate, marketApp.appDetails.uploadDate)
         if (TextUtils.isEmpty(localApp.versionName)) {

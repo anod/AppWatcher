@@ -12,14 +12,14 @@ import com.google.android.finsky.api.model.Document
  * @date 26/08/2016.
  */
 
-class ResultsAdapterDetails(context: Context, private val mDetailsEndpoint: DetailsEndpoint, newAppHandler: WatchAppList)
-    : ResultsAdapter(context, newAppHandler) {
+class ResultsAdapterDetails(context: Context, private val endpoint: DetailsEndpoint, watchAppList: WatchAppList)
+    : ResultsAdapter(context, watchAppList) {
 
     override fun getDocument(position: Int): Document {
-        return mDetailsEndpoint.document!!
+        return endpoint.document!!
     }
 
     override fun getItemCount(): Int {
-        return if (mDetailsEndpoint.document != null) 1 else 0
+        return if (endpoint.document != null) 1 else 0
     }
 }

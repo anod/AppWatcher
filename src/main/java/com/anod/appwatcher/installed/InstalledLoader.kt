@@ -4,26 +4,27 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.database.Cursor
 import android.support.v4.util.SimpleArrayMap
-import android.text.TextUtils
 import com.anod.appwatcher.Preferences
 import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.model.AppListCursorLoader
 import com.anod.appwatcher.model.Tag
-import com.anod.appwatcher.utils.FilterCursorWrapper
-import com.anod.appwatcher.utils.PackageManagerUtils
+import com.anod.appwatcher.utils.FilterCursor
+import com.anod.appwatcher.utils.getAppTitle
+import com.anod.appwatcher.utils.getAppUpdateTime
+import com.anod.appwatcher.utils.getInstalledPackagesCompat
 import java.util.*
 
 class InstalledLoader(
         context: Context,
         titleFilter: String,
         private val sortId: Int,
-        cursorFilter: FilterCursorWrapper.CursorFilter?,
+        cursorFilter: FilterCursor.CursorFilter?,
         tag: Tag?,
-        private val mPackageManager: PackageManager)
+        private val packageManager: PackageManager)
     : AppListCursorLoader(context, titleFilter, sortId, cursorFilter, tag) {
 
-    private val mTitleCache = SimpleArrayMap<String, String>()
-    private val mUpdateTimeCache = SimpleArrayMap<String, Long>()
+    private val titleCache = SimpleArrayMap<String, String>()
+    private val updateTimeCache = SimpleArrayMap<String, Long>()
 
     var installedApps = listOf<String>()
         private set
@@ -37,7 +38,7 @@ class InstalledLoader(
         val watchingPackages = cr.queryPackagesMap(false)
         cr.close()
 
-        val installed = PackageManagerUtils.getInstalledPackages(mPackageManager)
+        val installed = packageManager.getInstalledPackagesCompat()
 
         this.recentlyInstalled = installed
                 .sortedWith(AppUpdateTimeComparator(-1, this))
@@ -71,32 +72,31 @@ class InstalledLoader(
         } else {
             installedApps = list
         }
-        mTitleCache.clear()
+        titleCache.clear()
         return cursor
     }
 
     private fun getPackageTitle(packageName: String): String {
-        if (mTitleCache.containsKey(packageName)) {
-            return mTitleCache.get(packageName)
+        if (titleCache.containsKey(packageName)) {
+            return titleCache.get(packageName)
         } else {
-            val title = PackageManagerUtils.getAppTitle(packageName, mPackageManager)
-            mTitleCache.put(packageName, title)
+            val title = packageManager.getAppTitle(packageName)
+            titleCache.put(packageName, title)
             return title
         }
     }
 
     private fun getPackageUpdateTime(packageName: String): Long {
-        if (mUpdateTimeCache.containsKey(packageName)) {
-            return mUpdateTimeCache.get(packageName)
+        if (updateTimeCache.containsKey(packageName)) {
+            return updateTimeCache.get(packageName)
         } else {
-            val updateTime = PackageManagerUtils.getAppUpdateTime(packageName, mPackageManager)
-            mUpdateTimeCache.put(packageName, updateTime)
+            val updateTime = packageManager.getAppUpdateTime(packageName)
+            updateTimeCache.put(packageName, updateTime)
             return updateTime
         }
     }
 
     private class AppTitleComparator(private val order: Int, private val loader: InstalledLoader) : Comparator<String> {
-
         override fun compare(lPackageName: String, rPackageName: String): Int {
             return order * loader.getPackageTitle(lPackageName).compareTo(loader.getPackageTitle(rPackageName))
         }

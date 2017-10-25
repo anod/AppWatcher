@@ -10,8 +10,8 @@ import com.anod.appwatcher.App
  * *
  * @date 03/09/2016.
  */
-object MetricsManagerEvent {
-    fun track(context: Context, eventName: String, vararg params: String) {
+class MetricsManagerEvent(private val context: Context) {
+    fun track(eventName: String, vararg params: String) {
         val bundle = Bundle()
 
         var i = 0

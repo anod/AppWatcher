@@ -9,10 +9,10 @@ import info.anodsplace.android.log.AppLog
 /**
  * Cursor wrapper that filters MIME types not matching given list.
  */
-class FilterCursorWrapper(private val mCursor: Cursor, filter: FilterCursorWrapper.CursorFilter?) : AbstractCursor() {
-    private var mPosition: IntArray? = null
-    private var mCount: Int = mCursor.count
-    private val mFilterEnabled = (filter != null)
+class FilterCursor(private val cursor: Cursor, filter: FilterCursor.CursorFilter?) : AbstractCursor() {
+    private var position: IntArray? = null
+    private var count: Int = cursor.count
+    private val filterEnabled = (filter != null)
 
     interface CursorFilter {
         fun filterRecord(cursor: Cursor): Boolean
@@ -20,77 +20,77 @@ class FilterCursorWrapper(private val mCursor: Cursor, filter: FilterCursorWrapp
 
     init {
         if (filter != null) {
-            initPositions(mCursor, count, filter)
+            initPositions(cursor, count, filter)
         }
 
-        AppLog.d("Before filtering " + mCursor.count + ", after " + mCount)
+        AppLog.d("Before filtering " + cursor.count + ", after " + count)
     }
 
     private fun initPositions(cursor: Cursor, count: Int, filter: CursorFilter) {
-        mCount = 0
-        mPosition = IntArray(mCursor.count)
+        this.count = 0
+        position = IntArray(this.cursor.count)
         cursor.moveToPosition(-1)
-        while (cursor.moveToNext() && mCount < count) {
+        while (cursor.moveToNext() && count < count) {
             if (!filter.filterRecord(cursor)) {
-                mPosition!![mCount++] = cursor.position
+                position!![this.count++] = cursor.position
             }
         }
     }
 
     override fun getExtras(): Bundle {
-        return mCursor.extras
+        return cursor.extras
     }
 
     override fun close() {
         super.close()
-        mCursor.close()
+        cursor.close()
     }
 
     override fun onMove(oldPosition: Int, newPosition: Int): Boolean {
-        return if (mFilterEnabled) mCursor.moveToPosition(mPosition!![newPosition]) else true
+        return if (filterEnabled) cursor.moveToPosition(position!![newPosition]) else true
     }
 
     override fun getColumnNames(): Array<String> {
-        return mCursor.columnNames
+        return cursor.columnNames
     }
 
     override fun getCount(): Int {
-        return mCount
+        return count
     }
 
     override fun getDouble(column: Int): Double {
-        return mCursor.getDouble(column)
+        return cursor.getDouble(column)
     }
 
     override fun getFloat(column: Int): Float {
-        return mCursor.getFloat(column)
+        return cursor.getFloat(column)
     }
 
     override fun getInt(column: Int): Int {
-        return mCursor.getInt(column)
+        return cursor.getInt(column)
     }
 
     override fun getLong(column: Int): Long {
-        return mCursor.getLong(column)
+        return cursor.getLong(column)
     }
 
     override fun getShort(column: Int): Short {
-        return mCursor.getShort(column)
+        return cursor.getShort(column)
     }
 
     override fun getString(column: Int): String {
-        return mCursor.getString(column)
+        return cursor.getString(column)
     }
 
     override fun getType(column: Int): Int {
-        return mCursor.getType(column)
+        return cursor.getType(column)
     }
 
     override fun isNull(column: Int): Boolean {
-        return mCursor.isNull(column)
+        return cursor.isNull(column)
     }
 
     override fun getBlob(column: Int): ByteArray {
-        return mCursor.getBlob(column)
+        return cursor.getBlob(column)
     }
 }

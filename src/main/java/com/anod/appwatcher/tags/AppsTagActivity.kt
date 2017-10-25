@@ -22,7 +22,7 @@ import com.anod.appwatcher.ui.AppWatcherBaseActivity
  */
 
 class AppsTagActivity : AppWatcherBaseActivity() {
-    private lateinit var mTag: Tag
+    private lateinit var tag: Tag
 
     override val contentLayout: Int
         get() = R.layout.activity_main
@@ -30,14 +30,14 @@ class AppsTagActivity : AppWatcherBaseActivity() {
         get() = R.menu.main_tag
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        mTag = intentExtras.getParcelable<Tag>(EXTRA_TAG)
+        tag = intentExtras.getParcelable(EXTRA_TAG)
         super.onCreate(savedInstanceState)
 
         val appBarLayout = findViewById<View>(R.id.appbar) as AppBarLayout
-        appBarLayout.setBackgroundColor(mTag.color)
+        appBarLayout.setBackgroundColor(tag.color)
 
         val hsv = FloatArray(3)
-        Color.colorToHSV(mTag.color, hsv)
+        Color.colorToHSV(tag.color, hsv)
         hsv[2] *= 0.6f
         val dark = Color.HSVToColor(hsv)
         val tabLayout = findViewById<View>(R.id.tabs) as TabLayout
@@ -46,12 +46,12 @@ class AppsTagActivity : AppWatcherBaseActivity() {
             window.statusBarColor = dark
         }
 
-        title = mTag.name
+        title = tag.name
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.menu_act_addtag) {
-            startActivity(AppsTagSelectActivity.createIntent(mTag, this))
+            startActivity(AppsTagSelectActivity.createIntent(tag, this))
             return true
         }
         return super.onOptionsItemSelected(item)
@@ -63,17 +63,17 @@ class AppsTagActivity : AppWatcherBaseActivity() {
                 Filters.TAB_ALL,
                 prefs.sortIndex,
                 AppWatcherListFragment.DefaultSection(),
-                mTag), getString(R.string.tab_all))
+                tag), getString(R.string.tab_all))
         adapter.addFragment(AppsTagListFragment.newInstance(
                 Filters.TAB_INSTALLED,
                 prefs.sortIndex,
                 AppWatcherListFragment.DefaultSection(),
-                mTag), getString(R.string.tab_installed))
+                tag), getString(R.string.tab_installed))
         adapter.addFragment(AppsTagListFragment.newInstance(
                 Filters.TAB_UNINSTALLED,
                 prefs.sortIndex,
                 AppWatcherListFragment.DefaultSection(),
-                mTag), getString(R.string.tab_not_installed))
+                tag), getString(R.string.tab_not_installed))
         return adapter
     }
 

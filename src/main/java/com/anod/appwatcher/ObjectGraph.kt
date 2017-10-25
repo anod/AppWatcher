@@ -7,7 +7,7 @@ import com.android.volley.toolbox.NoCache
 import com.anod.appwatcher.backup.gdrive.UploadServiceContentObserver
 import com.anod.appwatcher.market.DeviceIdHelper
 import com.anod.appwatcher.market.Network
-import com.anod.appwatcher.utils.AppIconLoader
+import com.anod.appwatcher.utils.PicassoAppIcon
 import com.firebase.jobdispatcher.FirebaseJobDispatcher
 import com.firebase.jobdispatcher.GooglePlayDriver
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -27,7 +27,7 @@ class ObjectGraph internal constructor(private val app: AppWatcherApplication) {
         _requestQueue.start()
         _requestQueue
     }
-    val iconLoader: AppIconLoader by lazy { AppIconLoader(this.app) }
+    val iconLoader: PicassoAppIcon by lazy { PicassoAppIcon(this.app) }
     val fireBase: FirebaseAnalytics by lazy { FirebaseAnalytics.getInstance(this.app) }
     val connectivityManager: ConnectivityManager
         get() = app.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager

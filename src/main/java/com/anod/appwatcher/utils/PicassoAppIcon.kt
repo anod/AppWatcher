@@ -18,14 +18,21 @@ import com.squareup.picasso.RequestCreator
 import com.squareup.picasso.RequestHandler
 import java.io.IOException
 
+class PicassoAppIcon(context: Context) {
+    private val context: Context = context.applicationContext
+    private val picasso: Picasso by lazy {
+        Picasso.Builder(this.context)
+            .addRequestHandler(PackageIconRequestHandler(this.context))
+            .addRequestHandler(IconDbRequestHandler(this.context))
+            .build()
+    }
 
-class AppIconLoader(context: Context) {
-    private val mContext: Context = context.applicationContext
-    private var mPicasso: Picasso? = null
-    private var mIconSize = -1
+    private val iconSize: Int by lazy {
+        context.resources.getDimensionPixelSize(R.dimen.icon_size)
+    }
 
-    internal class PackageIconRequestHandler(private val mContext: Context) : RequestHandler() {
-        private val mPackageManager: PackageManager = mContext.packageManager
+    internal class PackageIconRequestHandler(private val context: Context) : RequestHandler() {
+        private val packageManager: PackageManager = context.packageManager
 
         override fun canHandleRequest(data: Request): Boolean {
             return SCHEME == data.uri.scheme
@@ -37,13 +44,12 @@ class AppIconLoader(context: Context) {
             val part = request.uri.schemeSpecificPart
             val cmp = ComponentName.unflattenFromString(part)
 
-            val icon = PackageManagerUtils.loadIcon(cmp, mContext.resources.displayMetrics, mPackageManager) ?: return null
+            val icon = packageManager.loadIcon(cmp, context.resources.displayMetrics) ?: return null
             return RequestHandler.Result(icon, DISK)
         }
-
     }
 
-    internal class IconDbRequestHandler(private val mContext: Context) : RequestHandler() {
+    internal class IconDbRequestHandler(private val context: Context) : RequestHandler() {
 
         override fun canHandleRequest(data: Request): Boolean {
             return DbContentProvider.matchIconUri(data.uri)
@@ -51,7 +57,7 @@ class AppIconLoader(context: Context) {
 
         @Throws(IOException::class)
         override fun load(request: Request, networkPolicy: Int): RequestHandler.Result? {
-            val client = DbContentProviderClient(mContext)
+            val client = DbContentProviderClient(context)
             val icon = client.queryAppIcon(request.uri)
             client.close()
             if (icon == null) {
@@ -61,33 +67,16 @@ class AppIconLoader(context: Context) {
         }
     }
 
-    private fun picasso(): Picasso {
-        if (mPicasso == null) {
-            mPicasso = Picasso.Builder(mContext)
-                    .addRequestHandler(PackageIconRequestHandler(mContext))
-                    .addRequestHandler(IconDbRequestHandler(mContext))
-                    .build()
-        }
-        return mPicasso!!
-    }
-
     fun retrieve(uri: Uri): RequestCreator {
-        if (mIconSize == -1) {
-            mIconSize = mContext.resources.getDimensionPixelSize(R.dimen.icon_size)
-        }
-        return picasso().load(uri)
-                .resize(mIconSize, mIconSize)
+        return picasso.load(uri)
+                .resize(iconSize, iconSize)
                 .centerInside()
                 .onlyScaleDown()
     }
 
-
     fun retrieve(imageUrl: String): RequestCreator {
-        if (mIconSize == -1) {
-            mIconSize = mContext.resources.getDimensionPixelSize(R.dimen.icon_size)
-        }
-        return picasso().load(imageUrl)
-                .resize(mIconSize, mIconSize)
+        return picasso.load(imageUrl)
+                .resize(iconSize, iconSize)
                 .centerInside()
                 .onlyScaleDown()
     }
@@ -111,8 +100,7 @@ class AppIconLoader(context: Context) {
 
 
     fun shutdown() {
-        mPicasso?.shutdown()
-        mPicasso = null
+        picasso.shutdown()
     }
 
     companion object {

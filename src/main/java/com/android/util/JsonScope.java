@@ -28,25 +28,25 @@ enum JsonScope {
     EMPTY_ARRAY,
 
     /**
-     * A array with at least one value requires a comma and newline before
+     * A array with at least one actual requires a comma and newline before
      * the next element.
      */
     NONEMPTY_ARRAY,
 
     /**
-     * An object with no name/value pairs requires no separators or newlines
+     * An object with no name/actual pairs requires no separators or newlines
      * before it is closed.
      */
     EMPTY_OBJECT,
 
     /**
      * An object whose most recent element is a key. The next element must
-     * be a value.
+     * be a actual.
      */
     DANGLING_NAME,
 
     /**
-     * An object with at least one name/value pair requires a comma and
+     * An object with at least one name/actual pair requires a comma and
      * newline before the next element.
      */
     NONEMPTY_OBJECT,

@@ -7,7 +7,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.WatchAppList
-import com.anod.appwatcher.utils.InstalledAppsProvider
+import com.anod.appwatcher.utils.InstalledApps
 import com.google.android.finsky.api.model.Document
 import com.google.android.finsky.protos.nano.Messages
 import com.squareup.picasso.Picasso
@@ -23,7 +23,7 @@ abstract class ResultsAdapter(
 
     private val colorBgDisabled = ContextCompat.getColor(context, R.color.row_inactive)
     private val colorBgNormal = ContextCompat.getColor(context, R.color.item_background)
-    private val installedAppsProvider = InstalledAppsProvider.MemoryCache(InstalledAppsProvider.PackageManager(context.packageManager))
+    private val installedAppsProvider = InstalledApps.MemoryCache(InstalledApps.PackageManager(context.packageManager))
 
     val isEmpty: Boolean
         get() = this.itemCount == 0
@@ -39,8 +39,8 @@ abstract class ResultsAdapter(
         val doc = getDocument(position)
 
         val app = doc.appDetails
-        val uploadDate = if (app == null) "" else app.uploadDate
-        val packageName = if (app == null) "" else app.packageName
+        val uploadDate = app.uploadDate
+        val packageName = app.packageName
 
         holder.doc = doc
         holder.title.text = doc.title

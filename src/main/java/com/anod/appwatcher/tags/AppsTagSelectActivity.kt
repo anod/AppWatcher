@@ -41,7 +41,7 @@ class AppsTagSelectActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<C
 
     private var isAllSelected: Boolean = false
     private lateinit var tag: Tag
-    private lateinit var tagAppsManager: TagAppsManager
+    private lateinit var tagAppsImport: TagAppsImport
     private var titleFilter = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,10 +51,10 @@ class AppsTagSelectActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<C
 
         tag = intentExtras.getParcelable<Tag>(EXTRA_TAG)!!
         titleFilter = savedInstanceState?.getString("title_filter") ?: ""
-        tagAppsManager = TagAppsManager(tag, this)
+        tagAppsImport = TagAppsImport(tag, this)
 
         listView.layoutManager = LinearLayoutManager(this)
-        listView.adapter = TagAppsCursorAdapter(this, tagAppsManager)
+        listView.adapter = TagAppsCursorAdapter(this, tagAppsImport)
 
         findViewById<View>(android.R.id.button3).setOnClickListener {
             val importAdapter = listView.adapter as TagAppsCursorAdapter
@@ -67,15 +67,15 @@ class AppsTagSelectActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<C
         }
 
         findViewById<View>(android.R.id.button1).setOnClickListener {
-            BackgroundTask.execute(object : BackgroundTask.Worker<TagAppsManager, Boolean>(tagAppsManager) {
+            BackgroundTask(object : BackgroundTask.Worker<TagAppsImport, Boolean>(tagAppsImport) {
                 override fun finished(result: Boolean) {
                     finish()
                 }
 
-                override fun run(param: TagAppsManager): Boolean {
-                    return param.runImport()
+                override fun run(param: TagAppsImport): Boolean {
+                    return param.run()
                 }
-            })
+            }).execute()
         }
 
         supportLoaderManager.initLoader(0, null, this).forceLoad()
@@ -126,7 +126,7 @@ class AppsTagSelectActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<C
     override fun onLoadFinished(loader: Loader<Cursor>, data: Cursor) {
         val adapter = listView.adapter as TagAppsCursorAdapter
         if (loader.id == 0) {
-            tagAppsManager.initSelected(data)
+            tagAppsImport.initSelected(data)
             supportLoaderManager.initLoader(1, null, this).forceLoad()
             return
         }

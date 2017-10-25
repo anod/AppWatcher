@@ -1,6 +1,5 @@
 package com.anod.appwatcher.market
 
-import com.anod.appwatcher.utils.CollectionsUtils
 import com.google.android.finsky.api.model.Document
 
 /**
@@ -10,12 +9,7 @@ import com.google.android.finsky.api.model.Document
  */
 
 internal object AppDetailsFilter {
-    val predicate: CollectionsUtils.Predicate<Document>
-        get() {
-        return object : CollectionsUtils.Predicate<Document> {
-            override fun test(t: Document): Boolean {
-                return t.appDetails == null
-            }
-        }
+    val predicate: (Document?) -> Boolean = {
+        it?.appDetails == null
     }
 }

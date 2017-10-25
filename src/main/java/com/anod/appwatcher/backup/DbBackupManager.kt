@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Environment
 import com.android.util.MalformedJsonException
 import com.anod.appwatcher.content.DbContentProviderClient
+import com.anod.appwatcher.utils.ApplicationContext
 import info.anodsplace.android.log.AppLog
 import java.io.*
 import java.text.SimpleDateFormat
@@ -15,8 +16,9 @@ import java.util.*
 
  * @author alex
  */
-class DbBackupManager(private val mContext: Context) {
+class DbBackupManager(private val context: ApplicationContext) {
 
+    constructor(context: Context): this(ApplicationContext(context))
     /**
      * List of files in the backup directory
      */
@@ -33,7 +35,7 @@ class DbBackupManager(private val mContext: Context) {
     internal fun doExport(destUri: Uri): Int {
         val outputStream: OutputStream
         try {
-            outputStream = mContext.contentResolver.openOutputStream(destUri)
+            outputStream = context.contentResolver.openOutputStream(destUri)
         } catch (e: FileNotFoundException) {
             return ERROR_FILE_WRITE
         }
@@ -47,7 +49,7 @@ class DbBackupManager(private val mContext: Context) {
     internal fun writeDb(outputStream: OutputStream): Boolean {
         AppLog.d("Write into: " + outputStream.toString())
         val writer = DbJsonWriter()
-        val client = DbContentProviderClient(mContext)
+        val client = DbContentProviderClient(context)
         try {
             synchronized(DbBackupManager.sDataLock) {
                 val buf = BufferedWriter(OutputStreamWriter(outputStream))
@@ -65,7 +67,7 @@ class DbBackupManager(private val mContext: Context) {
     internal fun doImport(uri: Uri): Int {
         val inputStream: InputStream?
         try {
-            inputStream = mContext.contentResolver.openInputStream(uri)
+            inputStream = context.contentResolver.openInputStream(uri)
         } catch (e: FileNotFoundException) {
             return ERROR_FILE_READ
         }
@@ -89,7 +91,7 @@ class DbBackupManager(private val mContext: Context) {
         }
 
         container?.let {
-            val cr = DbContentProviderClient(mContext)
+            val cr = DbContentProviderClient(context)
             if (it.apps.isNotEmpty()) {
                 cr.discardAll()
                 cr.addApps(it.apps)

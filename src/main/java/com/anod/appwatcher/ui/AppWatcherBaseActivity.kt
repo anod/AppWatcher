@@ -231,7 +231,7 @@ abstract class AppWatcherBaseActivity : DrawerActivity(), TextView.OnEditorActio
 
     override fun onAccountSelected(account: Account, authSubToken: String?) {
         super.onAccountSelected(account, authSubToken)
-        if (UpgradeCheck.isNewVersion(prefs)) {
+        if (UpgradeCheck(prefs).isNewVersion) {
             requestRefresh()
         }
     }

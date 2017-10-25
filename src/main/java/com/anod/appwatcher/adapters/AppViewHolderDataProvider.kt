@@ -7,15 +7,18 @@ import android.support.v4.content.ContextCompat
 
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.AppChangeContentProviderClient
-import com.anod.appwatcher.utils.InstalledAppsProvider
+import com.anod.appwatcher.utils.InstalledApps
 
 /**
  * @author alex
  * *
  * @date 2015-08-30
  */
-open class AppViewHolderDataProvider(private val context: Context, override val installedAppsProvider: InstalledAppsProvider)
+open class AppViewHolderDataProvider(
+        private val context: Context,
+        override val installedApps: InstalledApps)
     : AppViewHolderBase.DataProvider {
+
     override val installedText = context.resources.getString(R.string.installed)!!
     override val noRecentChangesText = context.resources.getString(R.string.no_recent_changes)!!
     override val appChangeContentProvider = AppChangeContentProviderClient(context)

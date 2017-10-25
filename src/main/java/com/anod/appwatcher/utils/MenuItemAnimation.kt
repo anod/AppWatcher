@@ -1,6 +1,7 @@
 package com.anod.appwatcher.utils
 
 import android.content.Context
+import android.support.annotation.AnimRes
 import android.support.v4.view.MenuItemCompat
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -15,7 +16,7 @@ import com.anod.appwatcher.R
  * @date 2014-11-15
  */
 
-class MenuItemAnimation(private val mContext: Context, private val mAnimResource: Int) {
+class MenuItemAnimation(private val context: Context, @AnimRes private val animResource: Int) {
 
     var menuItem: MenuItem? = null
     var isInvisibleMode: Boolean = false
@@ -53,10 +54,10 @@ class MenuItemAnimation(private val mContext: Context, private val mAnimResource
             menuItem!!.isVisible = true
         }
 
-        val inflater = mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val iv = inflater.inflate(R.layout.widget_refresh_action, null) as ImageView
 
-        val rotation = AnimationUtils.loadAnimation(mContext, mAnimResource)
+        val rotation = AnimationUtils.loadAnimation(context, animResource)
         rotation.repeatCount = Animation.INFINITE
         iv.startAnimation(rotation)
 

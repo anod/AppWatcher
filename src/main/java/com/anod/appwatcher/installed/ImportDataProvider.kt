@@ -4,40 +4,40 @@ import android.content.Context
 import android.support.v4.util.SimpleArrayMap
 
 import com.anod.appwatcher.adapters.AppViewHolderDataProvider
-import com.anod.appwatcher.utils.InstalledAppsProvider
+import com.anod.appwatcher.utils.InstalledApps
 
-internal class ImportDataProvider(context: Context, installedAppsProvider: InstalledAppsProvider) : AppViewHolderDataProvider(context, installedAppsProvider) {
+internal class ImportDataProvider(context: Context, installedApps: InstalledApps) : AppViewHolderDataProvider(context, installedApps) {
 
-    private val mSelectedPackages = SimpleArrayMap<String, Boolean>()
-    private var mDefaultSelected: Boolean = false
-    private val mProcessingPackages = SimpleArrayMap<String, Int>()
+    private val selectedPackages = SimpleArrayMap<String, Boolean>()
+    private var defaultSelected: Boolean = false
+    private val processingPackages = SimpleArrayMap<String, Int>()
     var isImportStarted: Boolean = false
 
     fun selectAllPackages(select: Boolean) {
-        mSelectedPackages.clear()
-        mDefaultSelected = select
+        selectedPackages.clear()
+        defaultSelected = select
     }
 
     fun selectPackage(packageName: String, select: Boolean) {
-        mSelectedPackages.put(packageName, select)
+        selectedPackages.put(packageName, select)
     }
 
     fun isPackageSelected(packageName: String): Boolean {
-        if (mSelectedPackages.containsKey(packageName)) {
-            return mSelectedPackages.get(packageName)
+        if (selectedPackages.containsKey(packageName)) {
+            return selectedPackages.get(packageName)
         }
-        return mDefaultSelected
+        return defaultSelected
     }
 
     fun getPackageStatus(packageName: String): Int {
-        if (mProcessingPackages.containsKey(packageName)) {
-            return mProcessingPackages.get(packageName)
+        if (processingPackages.containsKey(packageName)) {
+            return processingPackages.get(packageName)
         }
         return STATUS_DEFAULT
     }
 
     fun setPackageStatus(packageName: String, status: Int) {
-        mProcessingPackages.put(packageName, status)
+        processingPackages.put(packageName, status)
     }
 
     companion object {

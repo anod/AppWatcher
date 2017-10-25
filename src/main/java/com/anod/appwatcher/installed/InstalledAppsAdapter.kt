@@ -9,8 +9,8 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.adapters.AppViewHolder
 import com.anod.appwatcher.adapters.AppViewHolderBase
 import com.anod.appwatcher.adapters.AppViewHolderDataProvider
-import com.anod.appwatcher.utils.AppIconLoader
-import com.anod.appwatcher.utils.PackageManagerUtils
+import com.anod.appwatcher.utils.PicassoAppIcon
+import com.anod.appwatcher.utils.packageToApp
 import info.anodsplace.android.widget.recyclerview.ArrayAdapter
 import java.util.*
 
@@ -20,30 +20,30 @@ import java.util.*
  * @date 2015-08-30
  */
 open class InstalledAppsAdapter(
-        protected val mContext: Context,
-        private val mPackageManager: PackageManager,
-        private val mDataProvider: AppViewHolderDataProvider,
-        protected val mListener: AppViewHolder.OnClickListener?)
+        protected val context: Context,
+        private val packageManager: PackageManager,
+        private val dataProvider: AppViewHolderDataProvider,
+        protected val listener: AppViewHolder.OnClickListener?)
     : ArrayAdapter<String, AppViewHolderBase>(ArrayList<String>()) {
 
-    internal val mIconLoader: AppIconLoader = App.provide(mContext).iconLoader
+    internal val mIconLoader: PicassoAppIcon = App.provide(context).iconLoader
 
     override fun getItemViewType(position: Int): Int {
         return 2
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppViewHolderBase {
-        val v = LayoutInflater.from(mContext).inflate(R.layout.list_item_app, parent, false)
+        val v = LayoutInflater.from(context).inflate(R.layout.list_item_app, parent, false)
         v.isClickable = true
         v.isFocusable = true
 
-        return InstalledAppViewHolder(v, mDataProvider, mIconLoader, mListener)
+        return InstalledAppViewHolder(v, dataProvider, mIconLoader, listener)
 
     }
 
     override fun onBindViewHolder(holder: AppViewHolderBase, position: Int) {
         val packageName = getItem(position)
-        val app = PackageManagerUtils.packageToApp(-1, packageName, mPackageManager)
+        val app = packageManager.packageToApp(-1, packageName)
         /**
 
          * int rowId, String appId, String pname, int versionNumber, String versionName,
@@ -54,6 +54,6 @@ open class InstalledAppsAdapter(
 
     override fun addAll(objects: List<String>) {
         super.addAll(objects)
-        mDataProvider.totalAppsCount = itemCount
+        dataProvider.totalAppsCount = itemCount
     }
 }

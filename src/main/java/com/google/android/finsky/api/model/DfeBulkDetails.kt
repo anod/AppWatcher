@@ -2,7 +2,6 @@ package com.google.android.finsky.api.model
 
 import com.android.volley.Response
 import com.anod.appwatcher.BuildConfig
-import com.anod.appwatcher.utils.CollectionsUtils
 import com.google.android.finsky.api.DfeApi
 import com.google.android.finsky.protos.nano.Messages
 import com.google.android.finsky.protos.nano.Messages.Details
@@ -11,15 +10,10 @@ import java.util.ArrayList
 
 import info.anodsplace.android.log.AppLog
 
-class DfeBulkDetails(private val api: DfeApi, responseFilter: CollectionsUtils.Predicate<Document>) : DfeBaseModel() {
+class DfeBulkDetails(private val api: DfeApi,private val responseFilter: ((Document) -> Boolean)?) : DfeBaseModel() {
     private var bulkDetailsResponse: Details.BulkDetailsResponse? = null
     var docIds: List<String>? = null
 
-    private val responseFiler: CollectionsUtils.Predicate<in Document>?
-
-    init {
-        responseFiler = responseFilter
-    }
 
     override fun execute(responseListener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener) {
         api.details(docIds, true, responseListener, errorListener)
@@ -43,9 +37,11 @@ class DfeBulkDetails(private val api: DfeApi, responseFilter: CollectionsUtils.P
                     }
                 }
             }
-            return if (responseFiler == null || list == null) {
+            return if (responseFilter == null || list == null) {
                 list
-            } else CollectionsUtils.filter(list, responseFiler)
+            } else {
+                list.filter(responseFilter)
+            }
         }
 
     override val isReady: Boolean

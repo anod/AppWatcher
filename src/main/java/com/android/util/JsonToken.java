@@ -17,7 +17,7 @@
 package com.android.util;
 
 /**
- * A structure, name or value type in a JSON-encoded string.
+ * A structure, name or actual type in a JSON-encoded string.
  */
 public enum JsonToken {
 
@@ -74,8 +74,8 @@ public enum JsonToken {
     NULL,
 
     /**
-     * The end of the JSON stream. This sentinel value is returned by {@link
-     * JsonReader#peek()} to signal that the JSON-encoded value has no more
+     * The end of the JSON stream. This sentinel actual is returned by {@link
+     * JsonReader#peek()} to signal that the JSON-encoded actual has no more
      * tokens.
      */
     END_DOCUMENT

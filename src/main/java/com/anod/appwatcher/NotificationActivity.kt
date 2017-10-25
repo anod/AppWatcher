@@ -1,9 +1,12 @@
 package com.anod.appwatcher
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import com.anod.appwatcher.sync.SyncNotification
-import com.anod.appwatcher.utils.IntentUtils
+import com.anod.appwatcher.utils.forMyApps
+import com.anod.appwatcher.utils.forPlayStore
+import com.anod.appwatcher.utils.startActivitySafely
 
 class NotificationActivity : Activity() {
 
@@ -15,11 +18,11 @@ class NotificationActivity : Activity() {
         val type = intent.getIntExtra(EXTRA_TYPE, 0)
         if (type == TYPE_PLAY) {
             val pkg = intent.getStringExtra(EXTRA_PKG)
-            IntentUtils.startActivitySafely(this, IntentUtils.createPlayStoreIntent(pkg))
+            this.startActivitySafely(Intent().forPlayStore(pkg))
         } else if (type == TYPE_MYAPPS) {
-            IntentUtils.startActivitySafely(this, IntentUtils.createMyAppsIntent(false))
+            this.startActivitySafely(Intent().forMyApps(false))
         } else if (type == TYPE_MYAPPS_UPDATE) {
-            IntentUtils.startActivitySafely(this, IntentUtils.createMyAppsIntent(true))
+            this.startActivitySafely(Intent().forMyApps(true))
         }/* if (type == TYPE_DISMISS) {
             // Nothing
         } */

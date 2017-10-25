@@ -216,7 +216,7 @@ public final class JsonReader implements Closeable {
     private String name;
 
     /*
-     * For the next literal value, we may have the text value, or the position
+     * For the next literal actual, we may have the text actual, or the position
      * and length in the buffer.
      */
     private String value;
@@ -572,7 +572,7 @@ public final class JsonReader implements Closeable {
     }
 
     /**
-     * Replace the value on the top of the stack with the given value.
+     * Replace the actual on the top of the stack with the given actual.
      */
     private void replaceTop(JsonScope newTop) {
         stack.set(stack.size() - 1, newTop);

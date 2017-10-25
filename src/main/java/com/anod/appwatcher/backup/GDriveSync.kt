@@ -18,7 +18,7 @@ import com.google.android.gms.drive.Drive
  * *
  * @date 1/19/14
  */
-class GDriveSync(private val context: Context): SyncTask.Listener, UploadTask.Listener, GooglePlayServices.Listener {
+class GDriveSync(private val context: Context): SyncTask.Listener, UploadTask.Listener, GooglePlayServices.Client {
 
     var listener: Listener? = null
     val playServices = GooglePlayServices(context, this)

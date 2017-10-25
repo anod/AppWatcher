@@ -14,9 +14,9 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.utils.MenuItemAnimation
 
 abstract class SettingsActionBarActivity : ToolbarActivity(), AdapterView.OnItemClickListener {
-    lateinit private var mListView: ListView
-    lateinit private var mRefreshAnim: MenuItemAnimation
-    lateinit private var mPreferenceAdapter: PreferenceAdapter
+    lateinit private var listView: ListView
+    lateinit private var refreshAnim: MenuItemAnimation
+    lateinit private var preferenceAdapter: PreferenceAdapter
 
     open class Preference(@StringRes val title: Int, @LayoutRes val layout: Int)
     class Category(@StringRes title: Int) : Preference(title, R.layout.preference_category)
@@ -46,7 +46,7 @@ abstract class SettingsActionBarActivity : ToolbarActivity(), AdapterView.OnItem
     }
 
     internal class PreferenceAdapter(activity: SettingsActionBarActivity, objects: List<Preference>) : ArrayAdapter<Preference>(activity, 0, objects) {
-        private val mInflater: LayoutInflater = activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        private val inflater: LayoutInflater = activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         override fun getItemViewType(position: Int): Int {
             val pref = getItem(position)
@@ -68,7 +68,7 @@ abstract class SettingsActionBarActivity : ToolbarActivity(), AdapterView.OnItem
 
             val view: View
             if (convertView == null) {
-                view = mInflater.inflate(pref!!.layout, parent, false)
+                view = inflater.inflate(pref!!.layout, parent, false)
             } else {
                 view = convertView
             }
@@ -96,7 +96,7 @@ abstract class SettingsActionBarActivity : ToolbarActivity(), AdapterView.OnItem
                     if (item is CheckboxItem) {
                         var checkBox: CheckBox? = widgetFrame.findViewById<View>(android.R.id.checkbox) as? CheckBox
                         if (checkBox == null) {
-                            mInflater.inflate(item.widget, widgetFrame)
+                            inflater.inflate(item.widget, widgetFrame)
                             checkBox = widgetFrame.findViewById<View>(android.R.id.checkbox) as CheckBox
                         }
                         checkBox.isChecked = item.checked
@@ -126,17 +126,17 @@ abstract class SettingsActionBarActivity : ToolbarActivity(), AdapterView.OnItem
         setContentView(R.layout.activity_settings)
         setupToolbar()
 
-        mRefreshAnim = MenuItemAnimation(this, R.anim.rotate)
-        mRefreshAnim.isInvisibleMode = true
+        refreshAnim = MenuItemAnimation(this, R.anim.rotate)
+        refreshAnim.isInvisibleMode = true
         init()
 
         val preferences = initPreferenceItems()
 
-        mPreferenceAdapter = PreferenceAdapter(this, preferences)
-        mListView = findViewById<View>(android.R.id.list) as ListView
-        mListView.emptyView = findViewById(android.R.id.empty)
-        mListView.adapter = mPreferenceAdapter
-        mListView.onItemClickListener = this
+        preferenceAdapter = PreferenceAdapter(this, preferences)
+        listView = findViewById<View>(android.R.id.list) as ListView
+        listView.emptyView = findViewById(android.R.id.empty)
+        listView.adapter = preferenceAdapter
+        listView.onItemClickListener = this
     }
 
     protected abstract fun init()
@@ -145,22 +145,22 @@ abstract class SettingsActionBarActivity : ToolbarActivity(), AdapterView.OnItem
 
     protected fun setProgressVisibility(visible: Boolean) {
         if (visible) {
-            mRefreshAnim.start()
+            refreshAnim.start()
         } else {
-            mRefreshAnim.stop()
+            refreshAnim.stop()
         }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu
         menuInflater.inflate(R.menu.settings, menu)
-        mRefreshAnim.menuItem = menu.findItem(R.id.menu_act_refresh)
+        refreshAnim.menuItem = menu.findItem(R.id.menu_act_refresh)
 
         return super.onCreateOptionsMenu(menu)
     }
 
     override fun onItemClick(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-        val pref = mListView.getItemAtPosition(position) as Preference
+        val pref = listView.getItemAtPosition(position) as Preference
         if (pref is Item) {
             val action = pref.action
             if (pref is CheckboxItem) {
@@ -171,7 +171,7 @@ abstract class SettingsActionBarActivity : ToolbarActivity(), AdapterView.OnItem
     }
 
     protected fun notifyDataSetChanged() {
-        mPreferenceAdapter.notifyDataSetChanged()
+        preferenceAdapter.notifyDataSetChanged()
     }
 
 }

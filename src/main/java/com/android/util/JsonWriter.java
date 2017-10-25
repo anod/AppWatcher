@@ -108,7 +108,7 @@ import java.util.List;
  *   public void writeDoublesArray(JsonWriter writer, List<Double> doubles) throws IOException {
  *     writer.beginArray();
  *     for (Double value : doubles) {
- *       writer.value(value);
+ *       writer.actual(actual);
  *     }
  *     writer.endArray();
  *   }}</pre>
@@ -269,7 +269,7 @@ public final class JsonWriter implements Closeable {
     }
 
     /**
-     * Replace the value on the top of the stack with the given value.
+     * Replace the actual on the top of the stack with the given actual.
      */
     private void replaceTop(JsonScope topOfStack) {
         stack.set(stack.size() - 1, topOfStack);

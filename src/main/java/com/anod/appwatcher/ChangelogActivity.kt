@@ -58,7 +58,7 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
     private var appInfo: AppInfo? = null
     private var isNewApp: Boolean = false
     private var addMenu: MenuItem? = null
-    lateinit var iconLoader: AppIconLoader
+    lateinit var iconLoader: PicassoAppIcon
     lateinit var detailsEndpoint: DetailsEndpoint
     lateinit var dataProvider: AppViewHolderDataProvider
     lateinit var appDetailsView: AppDetailsView
@@ -72,9 +72,9 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
         appId = intent.getStringExtra(EXTRA_APP_ID) ?: ""
         detailsUrl = intent.getStringExtra(EXTRA_DETAILS_URL) ?: ""
         val rowId = intent.getIntExtra(EXTRA_ROW_ID, -1)
-        MetricsManagerEvent.track(this, "open_changelog", "DETAILS_APP_ID", appId, "DETAILS_ROW_ID", rowId.toString())
+        MetricsManagerEvent(this).track("open_changelog", "DETAILS_APP_ID", appId, "DETAILS_ROW_ID", rowId.toString())
 
-        dataProvider = AppViewHolderDataProvider(this, InstalledAppsProvider.PackageManager(packageManager))
+        dataProvider = AppViewHolderDataProvider(this, InstalledApps.PackageManager(packageManager))
         val contentView = findViewById<View>(R.id.container)
         appDetailsView = AppDetailsView(contentView, dataProvider)
 
@@ -95,7 +95,7 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
         }
 
         if (rowId == -1) {
-            appInfo = PackageManagerUtils.packageToApp(-1, appId, packageManager)
+            appInfo = packageManager.packageToApp(-1, appId)
             isNewApp = true
         } else {
             val cr = DbContentProviderClient(this)
@@ -190,7 +190,7 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
             val tagMenu = menu.findItem(R.id.menu_tag_app)
             loadTagSubmenu(tagMenu)
         }
-        if (!dataProvider.installedAppsProvider.getInfo(appId).isInstalled) {
+        if (!dataProvider.installedApps.getInfo(appId).isInstalled) {
             menu.findItem(R.id.menu_uninstall).isVisible = false
             menu.findItem(R.id.menu_open).isVisible = false
         }
@@ -202,7 +202,7 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
 
     private fun loadTagSubmenu(tagMenu: MenuItem) {
 
-        BackgroundTask.execute(object : BackgroundTask.Worker<Void?, List<TagMenuItem>>(null) {
+        BackgroundTask(object : BackgroundTask.Worker<Void?, List<TagMenuItem>>(null) {
 
             override fun run(param: Void?): List<TagMenuItem> {
                 val cr = DbContentProviderClient(this@ChangelogActivity)
@@ -226,7 +226,7 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
                 }
                 tagSubMenu.setGroupCheckable(R.id.menu_group_tags, true, false)
             }
-        })
+        }).execute()
 
     }
 
@@ -254,7 +254,7 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
                 val data = Intent()
                 data.putExtra(EXTRA_UNINSTALL_APP_PACKAGE, appId)
                 setResult(Activity.RESULT_OK, data)
-                val uninstallIntent = IntentUtils.createUninstallIntent(appId)
+                val uninstallIntent = Intent().forUninstall(appId)
                 startActivity(uninstallIntent)
                 return true
             }
@@ -265,7 +265,7 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
             R.id.menu_open -> {
                 val launchIntent = packageManager.getLaunchIntentForPackage(appId)
                 if (launchIntent != null) {
-                    IntentUtils.startActivitySafely(this, launchIntent)
+                    this.startActivitySafely(launchIntent)
                 }
             }
         }
@@ -334,7 +334,7 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
     }
 
     override fun onGenerated(palette: Palette) {
-        val darkSwatch = PaletteSwatch.getDark(palette, ContextCompat.getColor(this, R.color.theme_primary))
+        val darkSwatch = palette.chooseDark(ContextCompat.getColor(this, R.color.theme_primary))
         applyColor(darkSwatch.rgb)
         animateBackground()
 
@@ -366,8 +366,8 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
     override fun onClick(v: View) {
         val id = v.id
         if (id == R.id.market_btn) {
-            val intent = IntentUtils.createPlayStoreIntent(appInfo!!.packageName)
-            IntentUtils.startActivitySafely(this, intent)
+            val intent = Intent().forPlayStore(appInfo!!.packageName)
+            this.startActivitySafely(intent)
         }
     }
 

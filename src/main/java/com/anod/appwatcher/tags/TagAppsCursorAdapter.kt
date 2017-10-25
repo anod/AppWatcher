@@ -10,16 +10,16 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.content.AppListCursor
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.recyclerview.RecyclerViewCursorAdapter
-import com.anod.appwatcher.utils.AppIconLoader
+import com.anod.appwatcher.utils.PicassoAppIcon
 
-internal class TagAppsCursorAdapter(context: Context, private val mManager: TagAppsManager)
+internal class TagAppsCursorAdapter(context: Context, private val tagAppsImport: TagAppsImport)
     : RecyclerViewCursorAdapter<TagAppsCursorAdapter.ItemViewHolder, AppListCursor>(context, R.layout.list_item_import_app) {
-    private val mIconLoader: AppIconLoader = App.provide(context).iconLoader
+    private val mIconLoader: PicassoAppIcon = App.provide(context).iconLoader
 
     internal class ItemViewHolder(
             itemView: View,
-            private val mIconLoader: AppIconLoader,
-            private val mManager: TagAppsManager) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
+            private val mIconLoader: PicassoAppIcon,
+            private val tagAppsImport: TagAppsImport) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
 
         val title: CheckedTextView = itemView.findViewById(android.R.id.title)
         val icon: ImageView = itemView.findViewById(android.R.id.icon)
@@ -29,19 +29,19 @@ internal class TagAppsCursorAdapter(context: Context, private val mManager: TagA
         fun bindView(position: Int, app: AppInfo) {
             this.app = app
             this.title.text = app.title
-            this.title.isChecked = mManager.isSelected(app.appId)
+            this.title.isChecked = tagAppsImport.isSelected(app.appId)
             this.itemView.findViewById<View>(android.R.id.content).setOnClickListener(this)
             mIconLoader.loadAppIntoImageView(app, this.icon, R.drawable.ic_notifications_black_24dp)
         }
 
         override fun onClick(v: View) {
             this.title.toggle()
-            mManager.updateApp(this.app!!.appId, title.isChecked)
+            tagAppsImport.updateApp(this.app!!.appId, title.isChecked)
         }
     }
 
     override fun onCreateViewHolder(itemView: View): ItemViewHolder {
-        return ItemViewHolder(itemView, mIconLoader, mManager)
+        return ItemViewHolder(itemView, mIconLoader, tagAppsImport)
     }
 
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int, cursor: AppListCursor) {
@@ -54,7 +54,7 @@ internal class TagAppsCursorAdapter(context: Context, private val mManager: TagA
     }
 
     fun selectAllApps(select: Boolean) {
-        mManager.selectAll(select)
+        tagAppsImport.selectAll(select)
         this.notifyDataSetChanged()
     }
 }

@@ -5,10 +5,13 @@ import android.content.Context
 import android.net.Uri
 import android.os.AsyncTask
 import android.os.Environment
+import com.anod.appwatcher.utils.ApplicationContext
 
 import java.io.File
 
-class ExportTask(private val mContext: Context, private val mListener: ExportTask.Listener) : AsyncTask<Uri, Void, Int>() {
+class ExportTask(private val context: ApplicationContext, private val listener: ExportTask.Listener) : AsyncTask<Uri, Void, Int>() {
+
+    constructor(context: Context, listener: Listener): this(ApplicationContext(context), listener)
 
     interface Listener {
         fun onExportStart()
@@ -16,19 +19,19 @@ class ExportTask(private val mContext: Context, private val mListener: ExportTas
     }
 
     override fun onPreExecute() {
-        mListener.onExportStart()
+        listener.onExportStart()
     }
 
     override fun doInBackground(vararg dest: Uri): Int? {
         val destUri = dest[0]
-        val mBackupManager = DbBackupManager(mContext)
+
         if (destUri.scheme == ContentResolver.SCHEME_FILE) {
             val res = validateFileDestination(destUri)
             if (res != DbBackupManager.RESULT_OK) {
                 return res
             }
         }
-        return mBackupManager.doExport(destUri)
+        return DbBackupManager(context.actual).doExport(destUri)
     }
 
     private fun validateFileDestination(destUri: Uri): Int {
@@ -60,7 +63,7 @@ class ExportTask(private val mContext: Context, private val mListener: ExportTas
 
 
     override fun onPostExecute(result: Int?) {
-        mListener.onExportFinish(result!!)
+        listener.onExportFinish(result!!)
     }
 
 }

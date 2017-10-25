@@ -17,7 +17,7 @@ internal class ImportAdapter(
     private var packageIndex: SimpleArrayMap<String, Int> = SimpleArrayMap()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppViewHolderBase {
-        val v = LayoutInflater.from(mContext).inflate(R.layout.list_item_import_app, parent, false)
+        val v = LayoutInflater.from(context).inflate(R.layout.list_item_import_app, parent, false)
         v.isClickable = true
         v.isFocusable = true
 

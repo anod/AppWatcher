@@ -8,7 +8,7 @@ import android.widget.ImageView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.adapters.AppViewHolderBase
 import com.anod.appwatcher.model.AppInfo
-import com.anod.appwatcher.utils.AppIconLoader
+import com.anod.appwatcher.utils.PicassoAppIcon
 
 /**
  * @author alex
@@ -18,7 +18,7 @@ import com.anod.appwatcher.utils.AppIconLoader
 internal class ImportAppViewHolder(
         itemView: View,
         dataProvider: ImportDataProvider,
-        iconLoader: AppIconLoader)
+        iconLoader: PicassoAppIcon)
     : AppViewHolderBase(itemView, dataProvider, iconLoader), View.OnClickListener {
 
     val importDataProvider = dataProvider

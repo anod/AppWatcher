@@ -10,8 +10,8 @@ import android.widget.TextView
 import com.anod.appwatcher.App
 import com.anod.appwatcher.R
 import com.anod.appwatcher.adapters.AppViewHolder
-import com.anod.appwatcher.utils.AppIconLoader
-import com.anod.appwatcher.utils.PackageManagerUtils
+import com.anod.appwatcher.utils.PicassoAppIcon
+import com.anod.appwatcher.utils.packageToApp
 import kotterknife.bindViews
 
 /**
@@ -26,7 +26,7 @@ open class RecentlyInstalledAppsAdapter(
     : RecyclerView.Adapter<RecentlyInstalledAppsAdapter.ViewHolder>() {
 
     var recentlyInstalled: List<Pair<String, Int>> = mutableListOf()
-    private val iconLoader: AppIconLoader = App.provide(context).iconLoader
+    private val iconLoader: PicassoAppIcon = App.provide(context).iconLoader
 
     override fun getItemCount(): Int {
         return if (recentlyInstalled.isEmpty()) 0 else 1
@@ -43,7 +43,7 @@ open class RecentlyInstalledAppsAdapter(
 
     class ViewHolder(
             itemView: View,
-            private val iconLoader: AppIconLoader,
+            private val iconLoader: PicassoAppIcon,
             private val packageManager: PackageManager,
             private val listener: AppViewHolder.OnClickListener?) : RecyclerView.ViewHolder(itemView) {
 
@@ -64,7 +64,7 @@ open class RecentlyInstalledAppsAdapter(
                 if (index >= packages.size) {
                     view.visibility = View.GONE
                 } else {
-                    val app = PackageManagerUtils.packageToApp(packages[index].second, packages[index].first, packageManager)
+                    val app = packageManager.packageToApp(packages[index].second, packages[index].first)
                     iconLoader.loadAppIntoImageView(app, view.icon, R.drawable.ic_notifications_black_24dp)
                     view.title.text = app.title
                     view.visibility = View.VISIBLE

@@ -14,8 +14,8 @@ import android.view.ViewGroup
  * @date 2015-06-20
  */
 abstract class RecyclerViewCursorAdapter<VH : RecyclerView.ViewHolder, in CR : CursorWrapper>(
-        private val mContext: Context,
-        @param:LayoutRes private val mResource: Int) : RecyclerView.Adapter<VH>() {
+        private val context: Context,
+        @param:LayoutRes private val resource: Int) : RecyclerView.Adapter<VH>() {
 
     private var mDataValid: Boolean = false
     private var mCursor: CR? = null
@@ -47,7 +47,7 @@ abstract class RecyclerViewCursorAdapter<VH : RecyclerView.ViewHolder, in CR : C
     }
 
     protected fun createItemView(parent: ViewGroup, viewType: Int): View {
-        val v = LayoutInflater.from(mContext).inflate(mResource, parent, false)
+        val v = LayoutInflater.from(context).inflate(resource, parent, false)
         v.isClickable = true
         v.isFocusable = true
         return v

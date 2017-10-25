@@ -40,7 +40,7 @@ class UploadService : JobService() {
         }
     }
 
-    private var runner: BackgroundTask.AsyncTaskRunner<Void?, Boolean>? = null
+    private var runner: BackgroundTask<Void?, Boolean>? = null
 
     override fun onStartJob(job: JobParameters?): Boolean {
         if (job == null) return false
@@ -48,7 +48,7 @@ class UploadService : JobService() {
         AppLog.d("Scheduled call executed. Task: " + job.tag)
         AppLog.d("DriveSync perform upload")
 
-        this.runner = BackgroundTask.execute(object : BackgroundTask.Worker<Void?, Boolean>(null) {
+        this.runner = BackgroundTask(object : BackgroundTask.Worker<Void?, Boolean>(null) {
             override fun run(param: Void?): Boolean {
 
                 val driveSync = GDriveSync(applicationContext)
@@ -73,6 +73,7 @@ class UploadService : JobService() {
                 jobFinished(job, !result)
             }
         })
+        this.runner?.execute()
         return true
     }
 

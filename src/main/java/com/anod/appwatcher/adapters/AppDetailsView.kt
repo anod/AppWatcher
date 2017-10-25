@@ -5,7 +5,6 @@ import android.text.TextUtils
 import android.view.View
 import android.widget.TextView
 import com.anod.appwatcher.R
-import com.anod.appwatcher.content.AppChangeContentProviderClient
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.utils.Html
@@ -54,7 +53,7 @@ class AppDetailsView(view: View, private val dataProvider: AppViewHolderBase.Dat
 
     private fun fillWatchAppView(app: AppInfo) {
 
-        val isInstalled = dataProvider.installedAppsProvider.getInfo(app.packageName).isInstalled
+        val isInstalled = dataProvider.installedApps.getInfo(app.packageName).isInstalled
         version?.text = dataProvider.formatVersionText(app.versionName, app.versionNumber)
         if (app.status == AppInfoMetadata.STATUS_UPDATED) {
             version?.setTextColor(accentColor)
@@ -68,7 +67,7 @@ class AppDetailsView(view: View, private val dataProvider: AppViewHolderBase.Dat
 
         price?.setTextColor(accentColor)
         if (isInstalled) {
-            val installed = dataProvider.installedAppsProvider.getInfo(app.packageName)
+            val installed = dataProvider.installedApps.getInfo(app.packageName)
             price?.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stat_communication_stay_primary_portrait, 0, 0, 0)
             if (TextUtils.isEmpty(installed.versionName)) {
                 price?.text = dataProvider.installedText

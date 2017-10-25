@@ -20,8 +20,9 @@ import com.anod.appwatcher.accounts.AccountChooser
 import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.model.WatchAppList
 import com.anod.appwatcher.ui.ToolbarActivity
-import com.anod.appwatcher.utils.InstalledAppsProvider
-import com.anod.appwatcher.utils.PackageManagerUtils
+import com.anod.appwatcher.utils.InstalledApps
+import com.anod.appwatcher.utils.getAppTitle
+import com.anod.appwatcher.utils.getInstalledPackagesCompat
 import info.anodsplace.android.log.AppLog
 import kotterknife.bindView
 import java.util.*
@@ -47,7 +48,7 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
         setupToolbar()
 
         importManager = ImportBulkManager(this, this)
-        dataProvider = ImportDataProvider(this, InstalledAppsProvider.MemoryCache(InstalledAppsProvider.PackageManager(packageManager)))
+        dataProvider = ImportDataProvider(this, InstalledApps.MemoryCache(InstalledApps.PackageManager(packageManager)))
 
         listView.layoutManager = LinearLayoutManager(this)
         listView.adapter = ImportAdapter(this, packageManager, dataProvider)
@@ -182,8 +183,8 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
             cr.close()
 
             val pm = context.packageManager
-            val list = PackageManagerUtils.getInstalledPackages(pm).filter { !watchingPackages.containsKey(it) }
-            Collections.sort(list) { lPackageName, rPackageName -> PackageManagerUtils.getAppTitle(lPackageName, pm).compareTo(PackageManagerUtils.getAppTitle(rPackageName, pm)) }
+            val list = pm.getInstalledPackagesCompat().filter { !watchingPackages.containsKey(it) }
+            Collections.sort(list) { lPackageName, rPackageName -> pm.getAppTitle(lPackageName).compareTo(pm.getAppTitle(rPackageName)) }
 
             return list
         }

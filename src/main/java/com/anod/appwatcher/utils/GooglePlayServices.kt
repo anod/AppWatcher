@@ -19,11 +19,11 @@ import java.util.concurrent.CountDownLatch
  * *
  * @date 7/30/14.
  */
-class GooglePlayServices(context: Context, private val listener: Listener) : GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ActivityListener.ResultListener {
+class GooglePlayServices(context: Context, private val client: Client) : GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ActivityListener.ResultListener {
     private val activity: Activity? = context as? Activity
     private val context: Context = context.applicationContext
     val googleApiClient: GoogleApiClient by lazy {
-        listener.createGoogleApiClientBuilder()
+        client.createGoogleApiClientBuilder()
             .addConnectionCallbacks(this)
             .addOnConnectionFailedListener(this)
             .build()
@@ -31,7 +31,7 @@ class GooglePlayServices(context: Context, private val listener: Listener) : Goo
     private var onConnectAction: Int = 0
     private var resolutionIntent: PendingIntent? = null
 
-    interface Listener {
+    interface Client {
         fun onConnectAction(action: Int)
         fun createGoogleApiClientBuilder(): GoogleApiClient.Builder
         fun onConnectionError()
@@ -50,7 +50,7 @@ class GooglePlayServices(context: Context, private val listener: Listener) : Goo
         if (!isConnected) {
             connectWithAction(ACTION_CONNECT)
         } else {
-            listener.onConnectAction(ACTION_CONNECT)
+            client.onConnectAction(ACTION_CONNECT)
         }
     }
 
@@ -84,7 +84,7 @@ class GooglePlayServices(context: Context, private val listener: Listener) : Goo
     }
 
     override fun onConnected(bundle: Bundle?) {
-        listener.onConnectAction(onConnectAction)
+        client.onConnectAction(onConnectAction)
     }
 
     override fun onConnectionSuspended(i: Int) {
@@ -96,7 +96,7 @@ class GooglePlayServices(context: Context, private val listener: Listener) : Goo
 
         if (!result.hasResolution()) {
             // show the localized error dialog.
-            listener.onConnectionError()
+            client.onConnectionError()
             if (activity?.window?.decorView?.isShown == true) {
                 GoogleApiAvailability.getInstance().getErrorDialog(activity, result.errorCode, 0).show()
             }
@@ -108,7 +108,7 @@ class GooglePlayServices(context: Context, private val listener: Listener) : Goo
             }
         } catch (e: IntentSender.SendIntentException) {
             AppLog.e(e)
-            listener.onConnectionError()
+            client.onConnectionError()
         }
 
     }

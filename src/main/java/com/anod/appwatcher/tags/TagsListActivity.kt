@@ -26,7 +26,7 @@ import com.anod.appwatcher.model.Tag
 import com.anod.appwatcher.model.schema.TagsTable
 import com.anod.appwatcher.recyclerview.RecyclerViewCursorAdapter
 import com.anod.appwatcher.ui.ToolbarActivity
-import com.anod.appwatcher.utils.DrawableResource
+import com.anod.appwatcher.utils.DrawableTint
 import kotterknife.bindView
 
 /**
@@ -115,7 +115,7 @@ class TagsListActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<Cursor
             } else {
                 if (client.addAppToTag(appInfo!!.appId, holder.tag.id)) {
                     holder.name.isSelected = true
-                    val d = DrawableResource.setTint(resources, R.drawable.ic_check_black_24dp, R.color.control_tint, theme)
+                    val d = DrawableTint(resources, R.drawable.ic_check_black_24dp, theme).apply(R.color.control_tint)
                     holder.name.setCompoundDrawablesWithIntrinsicBounds(null, null, d, null)
                 }
             }

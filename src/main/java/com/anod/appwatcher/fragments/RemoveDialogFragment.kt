@@ -7,6 +7,7 @@ import android.support.v4.app.DialogFragment
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.model.AppInfoMetadata
+import com.anod.appwatcher.utils.ApplicationContext
 
 class RemoveDialogFragment : DialogFragment() {
 

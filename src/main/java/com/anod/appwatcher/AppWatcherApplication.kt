@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.res.Configuration
 import android.support.v7.app.AppCompatDelegate
 import android.view.ViewConfiguration
-import com.anod.appwatcher.utils.AppDetailsUploadDate
 import com.anod.appwatcher.utils.MetricsManagerEvent
 import com.google.firebase.crash.FirebaseCrash
 import info.anodsplace.android.log.AppLog
@@ -13,6 +12,7 @@ import com.android.volley.NoConnectionError
 import com.android.volley.TimeoutError
 import com.android.volley.VolleyError
 import com.anod.appwatcher.sync.SyncNotification
+import com.anod.appwatcher.utils.ExtractDateError
 import java.io.IOException
 import java.net.ConnectException
 import java.net.SocketException
@@ -28,16 +28,7 @@ class AppWatcherApplication : Application(), AppLog.Listener {
     override fun onCreate() {
         super.onCreate()
 
-        try {
-            val config = ViewConfiguration.get(this)
-            val menuKeyField = ViewConfiguration::class.java.getDeclaredField("sHasPermanentMenuKey")
-            if (menuKeyField != null) {
-                menuKeyField.isAccessible = true
-                menuKeyField.setBoolean(config, false)
-            }
-        } catch (ex: Exception) {
-            // Ignore
-        }
+        tryEnableMenuOnDeviceWithHardwareMenuButton()
 
         AppLog.LOGGER = FirebaseLogger()
         AppLog.setDebug(true, "AppWatcher")
@@ -96,4 +87,16 @@ class AppWatcherApplication : Application(), AppLog.Listener {
         }
     }
 
+    private fun tryEnableMenuOnDeviceWithHardwareMenuButton() {
+        try {
+            val config = ViewConfiguration.get(this)
+            val menuKeyField = ViewConfiguration::class.java.getDeclaredField("sHasPermanentMenuKey")
+            if (menuKeyField != null) {
+                menuKeyField.isAccessible = true
+                menuKeyField.setBoolean(config, false)
+            }
+        } catch (ex: Exception) {
+            // Ignore
+        }
+    }
 }

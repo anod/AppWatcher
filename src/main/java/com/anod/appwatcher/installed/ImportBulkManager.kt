@@ -13,15 +13,15 @@ import com.google.android.finsky.api.model.Document
 import java.util.*
 
 internal class ImportBulkManager(
-        private val mContext: Context,
-        private val mListener: ImportBulkManager.Listener)
+        private val context: Context,
+        private val listener: ImportBulkManager.Listener)
     : PlayStoreEndpoint.Listener, AddWatchAppAsyncTask.Listener {
 
-    private val mEndpoint = BulkDetailsEndpoint(mContext)
-    private val mWatchAppList = WatchAppList(null)
+    private val endpoint = BulkDetailsEndpoint(context)
+    private val watchAppList = WatchAppList(null)
     private var listsDocIds: MutableList<MutableList<String>> = ArrayList()
     private var currentBulk: Int = 0
-    private var mTask: AsyncTask<Document, Void, SimpleArrayMap<String, Int>>? = null
+    private var asyncTask: AsyncTask<Document, Void, SimpleArrayMap<String, Int>>? = null
 
     interface Listener {
         fun onImportProgress(docIds: List<String>, result: SimpleArrayMap<String, Int>)
@@ -30,7 +30,7 @@ internal class ImportBulkManager(
     }
 
     init {
-        mEndpoint.listener = this
+        endpoint.listener = this
     }
 
     fun init() {
@@ -39,10 +39,10 @@ internal class ImportBulkManager(
     }
 
     fun stop() {
-        mEndpoint.reset()
-        if (mTask != null && !mTask!!.isCancelled) {
-            mTask!!.cancel(true)
-            mTask = null
+        endpoint.reset()
+        if (asyncTask != null && !asyncTask!!.isCancelled) {
+            asyncTask!!.cancel(true)
+            asyncTask = null
         }
     }
 
@@ -72,37 +72,37 @@ internal class ImportBulkManager(
 
     private fun nextBulk() {
         val docIds = listsDocIds[currentBulk]
-        mListener.onImportStart(docIds)
-        mEndpoint.docIds = docIds
-        mEndpoint.startAsync()
+        listener.onImportStart(docIds)
+        endpoint.docIds = docIds
+        endpoint.startAsync()
     }
 
     override fun onDataChanged() {
-        val docs = mEndpoint.documents
-        mTask = AddWatchAppAsyncTask(mWatchAppList, mContext, this).execute(*docs.toTypedArray())
+        val docs = endpoint.documents
+        asyncTask = AddWatchAppAsyncTask(context, watchAppList, this).execute(*docs.toTypedArray())
     }
 
     override fun onErrorResponse(error: VolleyError) {
         val docIds = listsDocIds[currentBulk]
-        mListener.onImportProgress(docIds, SimpleArrayMap<String, Int>())
+        listener.onImportProgress(docIds, SimpleArrayMap<String, Int>())
         currentBulk++
         if (currentBulk == listsDocIds.size) {
-            mListener.onImportFinish()
+            listener.onImportFinish()
         } else {
             nextBulk()
         }
     }
 
     fun setAccount(account: Account, authSubToken: String) {
-        mEndpoint.setAccount(account, authSubToken)
+        endpoint.setAccount(account, authSubToken)
     }
 
     override fun onAddAppTaskFinish(result: SimpleArrayMap<String, Int>) {
         val docIds = listsDocIds[currentBulk]
-        mListener.onImportProgress(docIds, result)
+        listener.onImportProgress(docIds, result)
         currentBulk++
         if (currentBulk == listsDocIds.size) {
-            mListener.onImportFinish()
+            listener.onImportFinish()
         } else {
             nextBulk()
         }

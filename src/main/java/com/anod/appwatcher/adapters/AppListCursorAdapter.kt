@@ -7,24 +7,24 @@ import com.anod.appwatcher.App
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.AppListCursor
 import com.anod.appwatcher.recyclerview.RecyclerViewCursorAdapter
-import com.anod.appwatcher.utils.AppIconLoader
-import com.anod.appwatcher.utils.InstalledAppsProvider
+import com.anod.appwatcher.utils.PicassoAppIcon
+import com.anod.appwatcher.utils.InstalledApps
 
 /**
  * @author alex
  * *
  * @date 2015-06-20
  */
-class AppListCursorAdapterWrapper(
+class AppListCursorAdapter(
         context: Context,
-        iap: InstalledAppsProvider,
-        private val mListener: AppViewHolder.OnClickListener) : RecyclerViewCursorAdapter<AppViewHolder, AppListCursor>(context, R.layout.list_item_app) {
+        iap: InstalledApps,
+        private val listener: AppViewHolder.OnClickListener) : RecyclerViewCursorAdapter<AppViewHolder, AppListCursor>(context, R.layout.list_item_app) {
 
-    private val mDataProvider: AppViewHolderDataProvider = AppViewHolderDataProvider(context, iap)
-    private val mIconLoader: AppIconLoader = App.provide(context).iconLoader
+    private val dataProvider: AppViewHolderDataProvider = AppViewHolderDataProvider(context, iap)
+    private val appIcon: PicassoAppIcon = App.provide(context).iconLoader
 
     override fun onCreateViewHolder(itemView: View): AppViewHolder {
-        return AppViewHolder(itemView, mDataProvider, mIconLoader, mListener)
+        return AppViewHolder(itemView, dataProvider, appIcon, listener)
     }
 
     override fun onBindViewHolder(holder: AppViewHolder, position: Int, cursor: AppListCursor) {
@@ -37,11 +37,11 @@ class AppListCursorAdapterWrapper(
     }
 
     override fun swapData(newCursor: AppListCursor?) {
-        mDataProvider.totalAppsCount = newCursor?.count ?: 0
+        dataProvider.totalAppsCount = newCursor?.count ?: 0
         super.swapData(newCursor)
     }
 
     fun setNewAppsCount(newCount: Int, updatableCount: Int) {
-        mDataProvider.setNewAppsCount(newCount, updatableCount)
+        dataProvider.setNewAppsCount(newCount, updatableCount)
     }
 }

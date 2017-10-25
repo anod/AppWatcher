@@ -12,9 +12,8 @@ import android.support.v4.graphics.drawable.DrawableCompat
  * *
  * @date 06/05/2017.
  */
-
-object DrawableResource {
-    fun setTint(res: Resources, @DrawableRes drawableRes: Int, @ColorRes tint: Int, theme: Resources.Theme): Drawable {
+class DrawableTint(private val res: Resources, @DrawableRes private val drawableRes: Int,private val theme: Resources.Theme) {
+    fun apply(@ColorRes tint: Int): Drawable {
         val d = ResourcesCompat.getDrawable(res, drawableRes, theme)
         val wrapped = DrawableCompat.wrap(d!!)
         val color = ResourcesCompat.getColor(res, tint, theme)

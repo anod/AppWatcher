@@ -1,26 +1,25 @@
 package com.google.android.finsky.api.model
 
-import com.anod.appwatcher.utils.CollectionsUtils
 import com.google.android.finsky.api.DfeUtils
 import com.google.android.finsky.protos.nano.Messages
 
 abstract class ContainerList<T> constructor(
         url: String,
         autoLoadNextPage: Boolean,
-        responseFilter: CollectionsUtils.Predicate<Document>
+        private val filter: ((Document?) -> Boolean)?
     ) : PaginatedList<T, Document>(url, autoLoadNextPage) {
 
-    private val responseFiler: CollectionsUtils.Predicate<Document>? = responseFilter
 
     override fun getItemsFromResponse(wrapper: Messages.Response.ResponseWrapper): Array<Document> {
         val payload = payload(wrapper)
         val doc = DfeUtils.getRootDoc(payload) ?: return arrayOf()
 
         val docs = doc.child?.map { Document(it) } ?: listOf()
-        if (responseFiler == null) {
+        if (filter == null) {
             return docs.toTypedArray()
         }
-        val list = CollectionsUtils.filter(docs, responseFiler)
+
+        val list = docs.filter(filter)
         return list.toTypedArray()
     }
 

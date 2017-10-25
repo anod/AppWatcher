@@ -2,15 +2,15 @@ package com.anod.appwatcher.model
 
 import android.database.Cursor
 import com.anod.appwatcher.model.schema.AppListTable
-import com.anod.appwatcher.utils.FilterCursorWrapper
-import com.anod.appwatcher.utils.InstalledAppsProvider
+import com.anod.appwatcher.utils.FilterCursor
+import com.anod.appwatcher.utils.InstalledApps
 
 /**
  * @author alex
  * *
  * @date 8/4/14.
  */
-class InstalledFilter(private val mIncludeInstalled: Boolean, private val mInstalledAppsProvider: InstalledAppsProvider) : FilterCursorWrapper.CursorFilter {
+class InstalledFilter(private val mIncludeInstalled: Boolean, private val InstalledApps: InstalledApps) : FilterCursor.CursorFilter {
     internal var newCount: Int = 0
         private set
     internal var updatableNewCount: Int = 0
@@ -21,7 +21,7 @@ class InstalledFilter(private val mIncludeInstalled: Boolean, private val mInsta
         val status = cursor.getInt(AppListTable.Projection.status)
         val versionCode = cursor.getInt(AppListTable.Projection.versionNumber)
 
-        val installedInfo = mInstalledAppsProvider.getInfo(packageName)
+        val installedInfo = InstalledApps.getInfo(packageName)
         val installed = installedInfo.isInstalled
 
         if (mIncludeInstalled && !installed) {

@@ -9,7 +9,7 @@ import android.support.v4.util.ArrayMap
  * @date 03/03/2017.
  */
 
-interface InstalledAppsProvider {
+interface InstalledApps {
 
     fun getInfo(packageName: String): Info
 
@@ -23,7 +23,7 @@ interface InstalledAppsProvider {
             get() = this.versionCode > 0
     }
 
-    class PackageManager(private val packageManager: android.content.pm.PackageManager) : InstalledAppsProvider {
+    class PackageManager(private val packageManager: android.content.pm.PackageManager) : InstalledApps {
 
         override fun getInfo(packageName: String): Info {
             var pkgInfo: PackageInfo? = null
@@ -35,22 +35,22 @@ interface InstalledAppsProvider {
 
             if (pkgInfo != null) {
                 val versionName = pkgInfo.versionName ?: ""
-                return InstalledAppsProvider.Info(pkgInfo.versionCode, versionName)
+                return InstalledApps.Info(pkgInfo.versionCode, versionName)
             }
-            return InstalledAppsProvider.Info(0, "")
+            return InstalledApps.Info(0, "")
         }
 
     }
 
-    class MemoryCache(private val installedAppsProvider: InstalledAppsProvider) : InstalledAppsProvider {
-        private val mCache = ArrayMap<String, InstalledAppsProvider.Info>()
+    class MemoryCache(private val installedApps: InstalledApps) : InstalledApps {
+        private val mCache = ArrayMap<String, InstalledApps.Info>()
 
-        override fun getInfo(packageName: String): InstalledAppsProvider.Info {
+        override fun getInfo(packageName: String): InstalledApps.Info {
             if (mCache.containsKey(packageName)) {
                 return mCache[packageName]!!
             }
 
-            val info = installedAppsProvider.getInfo(packageName)
+            val info = installedApps.getInfo(packageName)
             mCache.put(packageName, info)
             return info
         }

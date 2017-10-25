@@ -11,7 +11,7 @@ import java.util.*
  * @date 12/09/2016.
  */
 
-internal class CustomMonthDateFormat(private val mMonthNames: Array<String>) : DateFormat() {
+internal class CustomMonthDateFormat(private val monthNames: Array<String>) : DateFormat() {
 
     override fun format(date: Date, toAppendTo: StringBuffer, fieldPosition: FieldPosition): StringBuffer {
         val sb = StringBuffer()
@@ -49,7 +49,7 @@ internal class CustomMonthDateFormat(private val mMonthNames: Array<String>) : D
                 }
                 if (ch == ' ') {
                     val monthName = sb.toString()
-                    month = Arrays.asList(*mMonthNames).indexOf(monthName)
+                    month = Arrays.asList(*monthNames).indexOf(monthName)
                     if (month == -1) {
                         pos.index = 0
                         pos.errorIndex = index

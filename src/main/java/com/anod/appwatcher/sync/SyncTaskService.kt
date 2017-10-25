@@ -9,14 +9,14 @@ import com.firebase.jobdispatcher.JobService
 import info.anodsplace.android.log.AppLog
 
 class SyncTaskService : JobService() {
-    var runner: BackgroundTask.AsyncTaskRunner<Void?, Int>? = null
+    var runner: BackgroundTask<Void?, Int>? = null
 
     override fun onStartJob(job: JobParameters?): Boolean {
         if (job == null) return false
 
         AppLog.d("Scheduled call executed. Task: " + job.tag)
 
-        this.runner = BackgroundTask.execute(object : BackgroundTask.Worker<Void?, Int>(null) {
+        this.runner = BackgroundTask(object : BackgroundTask.Worker<Void?, Int>(null) {
             override fun run(param: Void?): Int {
                 val syncAdapter = SyncAdapter(applicationContext)
                 val contentProviderClient = contentResolver.acquireContentProviderClient(DbContentProvider.authority)
@@ -33,6 +33,7 @@ class SyncTaskService : JobService() {
                 jobFinished(job, false)
             }
         })
+        this.runner?.execute()
         return true
     }
 

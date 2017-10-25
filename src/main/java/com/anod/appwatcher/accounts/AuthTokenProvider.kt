@@ -34,7 +34,7 @@ class AuthTokenProvider(context: Context) {
     }
 
     fun requestToken(activity: Activity?, account: Account, callback: AuthenticateCallback) {
-        BackgroundTask.execute(object : BackgroundTask.Worker<Void?, String>(null) {
+        BackgroundTask(object : BackgroundTask.Worker<Void?, String>(null) {
             override fun run(param: Void?): String {
                 return requestTokenBlocking(activity, account)
             }
@@ -46,7 +46,7 @@ class AuthTokenProvider(context: Context) {
                     callback.onAuthTokenAvailable(result)
                 }
             }
-        })
+        }).execute()
     }
 
     @Throws(AuthenticatorException::class, OperationCanceledException::class, IOException::class)

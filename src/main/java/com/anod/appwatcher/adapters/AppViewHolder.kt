@@ -7,12 +7,12 @@ import android.widget.TextView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
-import com.anod.appwatcher.utils.AppIconLoader
+import com.anod.appwatcher.utils.PicassoAppIcon
 
 open class AppViewHolder(
         itemView: View,
         dataProvider: AppViewHolderBase.DataProvider,
-        iconLoader: AppIconLoader,
+        iconLoader: PicassoAppIcon,
         private val onClickListener: AppViewHolder.OnClickListener?)
     : AppViewHolderBase(itemView, dataProvider, iconLoader), View.OnClickListener {
 

@@ -12,16 +12,16 @@ import com.google.android.finsky.api.model.Document
  * @date 26/08/2016.
  */
 
-class ResultsAdapterSearch(context: Context, private val mSearchEngine: SearchEndpoint, newAppHandler: WatchAppList)
-    : ResultsAdapter(context, newAppHandler) {
+class ResultsAdapterSearch(context: Context, private val endpoint: SearchEndpoint, watchAppList: WatchAppList)
+    : ResultsAdapter(context, watchAppList) {
 
     override fun getDocument(position: Int): Document {
-        val isLastPosition = mSearchEngine.count - 1 == position
-        return mSearchEngine.searchData!!.getItem(position, isLastPosition)!!
+        val isLastPosition = endpoint.count - 1 == position
+        return endpoint.searchData!!.getItem(position, isLastPosition)!!
     }
 
     override fun getItemCount(): Int {
-        return mSearchEngine.count
+        return endpoint.count
     }
 
 }

@@ -5,7 +5,7 @@ import android.view.View
 import com.anod.appwatcher.R
 import com.anod.appwatcher.adapters.AppViewHolder
 import com.anod.appwatcher.adapters.AppViewHolderBase
-import com.anod.appwatcher.utils.AppIconLoader
+import com.anod.appwatcher.utils.PicassoAppIcon
 
 /**
  * @author alex
@@ -15,7 +15,7 @@ import com.anod.appwatcher.utils.AppIconLoader
 internal class InstalledAppViewHolder(
         itemView: View,
         dataProvider: AppViewHolderBase.DataProvider,
-        iconLoader: AppIconLoader,
+        iconLoader: PicassoAppIcon,
         listener: AppViewHolder.OnClickListener?)
     : AppViewHolder(itemView, dataProvider, iconLoader, listener) {
 

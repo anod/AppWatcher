@@ -115,7 +115,7 @@ class MarketSearchActivity : ToolbarActivity(), AccountChooser.OnAccountSelectio
         endpoints.reset()
         showLoading()
 
-        MetricsManagerEvent.track(this, "perform_search", "SEARCH_QUERY", searchQuery, "SEARCH_PACKAGE", isPackageSearch.toString(), "FROM_SHARE", isShareSource.toString())
+        MetricsManagerEvent(this).track("perform_search", "SEARCH_QUERY", searchQuery, "SEARCH_PACKAGE", isPackageSearch.toString(), "FROM_SHARE", isShareSource.toString())
 
         if (searchQuery.isNotEmpty()) {
             if (isPackageSearch) {

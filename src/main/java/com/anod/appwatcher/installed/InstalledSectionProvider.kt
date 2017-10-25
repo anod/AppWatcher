@@ -8,7 +8,7 @@ import com.anod.appwatcher.adapters.AppViewHolderDataProvider
 import com.anod.appwatcher.fragments.AppWatcherListFragment
 import com.anod.appwatcher.model.InstalledFilter
 import com.anod.appwatcher.model.Tag
-import com.anod.appwatcher.utils.InstalledAppsProvider
+import com.anod.appwatcher.utils.InstalledApps
 import info.anodsplace.android.widget.recyclerview.MergeRecyclerAdapter
 
 /**
@@ -22,7 +22,7 @@ class InstalledSectionProvider : AppWatcherListFragment.DefaultSection() {
         return InstalledLoader(context, titleFilter, sortId, filter, tag, context.packageManager)
     }
 
-    override fun fillAdapters(adapter: MergeRecyclerAdapter, context: Context, installedApps: InstalledAppsProvider, clickListener: AppViewHolder.OnClickListener) {
+    override fun fillAdapters(adapter: MergeRecyclerAdapter, context: Context, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener) {
         val recentIndex = adapter.addAdapter(RecentlyInstalledAppsAdapter(context, context.packageManager, clickListener))
         adapterIndexMap.put(ADAPTER_RECENT, recentIndex)
         super.fillAdapters(adapter, context, installedApps, clickListener)

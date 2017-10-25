@@ -7,8 +7,8 @@ import android.view.View
 import com.anod.appwatcher.content.AppChangeContentProviderClient
 
 import com.anod.appwatcher.model.AppInfo
-import com.anod.appwatcher.utils.AppIconLoader
-import com.anod.appwatcher.utils.InstalledAppsProvider
+import com.anod.appwatcher.utils.PicassoAppIcon
+import com.anod.appwatcher.utils.InstalledApps
 
 /**
  * @author algavris
@@ -19,14 +19,14 @@ import com.anod.appwatcher.utils.InstalledAppsProvider
 abstract class AppViewHolderBase(
         itemView: View,
         protected val dataProvider: AppViewHolderBase.DataProvider,
-        protected val iconLoader: AppIconLoader) : RecyclerView.ViewHolder(itemView) {
+        protected val iconLoader: PicassoAppIcon) : RecyclerView.ViewHolder(itemView) {
 
      interface DataProvider {
         val installedText: String
         val noRecentChangesText: String
         val totalAppsCount: Int
         val newAppsCount: Int
-        val installedAppsProvider: InstalledAppsProvider
+        val installedApps: InstalledApps
         val appChangeContentProvider: AppChangeContentProviderClient
         fun formatVersionText(versionName: String, versionNumber: Int): String
         @ColorInt

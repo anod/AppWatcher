@@ -17,6 +17,7 @@ import com.anod.appwatcher.ListExportActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.backup.DbBackupManager
 import com.anod.appwatcher.backup.ImportTask
+import com.anod.appwatcher.utils.ApplicationContext
 import java.io.File
 import java.util.*
 
@@ -109,19 +110,19 @@ class ListExportFragment : ListFragment(), ImportTask.Listener {
         override fun onClick(v: View) {
             val file = DbBackupManager.getBackupFile(v.tag as String)
             val uri = Uri.fromFile(file)
-            ImportTask(context, this@ListExportFragment).execute(uri)
+            ImportTask(ApplicationContext(context), this@ListExportFragment).execute(uri)
         }
     }
 
     private inner class DeleteClickListener : View.OnClickListener {
         override fun onClick(v: View) {
             val file = v.tag as File
-            DeleteTask(context, listAdapter as ImportListAdapter, backupManager).execute(file)
+            DeleteTask(ApplicationContext(context), listAdapter as ImportListAdapter, backupManager).execute(file)
         }
     }
 
     private class DeleteTask(
-            val context: Context,
+            private val context: ApplicationContext,
             val adapter: ImportListAdapter,
             val backupManager: DbBackupManager) : AsyncTask<File, Void, Boolean>() {
 
@@ -131,7 +132,7 @@ class ListExportFragment : ListFragment(), ImportTask.Listener {
 
         override fun onPostExecute(result: Boolean) {
             if (result) {
-                Toast.makeText(context, context.getString(R.string.unable_delete_file), Toast.LENGTH_SHORT).show()
+                Toast.makeText(context.actual, R.string.unable_delete_file, Toast.LENGTH_SHORT).show()
             } else {
                 FileListTask(adapter, backupManager).execute(0)
             }

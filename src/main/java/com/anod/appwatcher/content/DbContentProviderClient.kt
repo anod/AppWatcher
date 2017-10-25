@@ -13,7 +13,8 @@ import com.anod.appwatcher.model.schema.AppListTable
 import com.anod.appwatcher.model.schema.AppTagsTable
 import com.anod.appwatcher.model.schema.TagsTable
 import com.anod.appwatcher.model.schema.contentValues
-import com.anod.appwatcher.utils.BitmapUtils
+import com.anod.appwatcher.utils.ApplicationContext
+import com.anod.appwatcher.utils.BitmapByteArray
 import info.anodsplace.android.log.AppLog
 import kotlin.collections.ArrayList
 
@@ -24,7 +25,9 @@ import kotlin.collections.ArrayList
  */
 class DbContentProviderClient(private val contentProviderClient: ContentProviderClient) {
 
-    constructor(context: Context) : this(context.contentResolver.acquireContentProviderClient(DbContentProvider.authority))
+    constructor(context: Context) : this(ApplicationContext(context))
+
+    constructor(context: ApplicationContext) : this(context.contentResolver.acquireContentProviderClient(DbContentProvider.authority))
 
     /**
      * Query all applications in db
@@ -236,7 +239,7 @@ class DbContentProviderClient(private val contentProviderClient: ContentProvider
         var icon: Bitmap? = null
         if (cr.moveToNext()) {
             val iconData = cr.getBlob(1)
-            icon = BitmapUtils.unFlattenBitmap(iconData)
+            icon = BitmapByteArray.unflatten(iconData)
         }
         cr.close()
 

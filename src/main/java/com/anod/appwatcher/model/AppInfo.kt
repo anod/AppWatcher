@@ -5,8 +5,8 @@ import android.content.pm.PackageInfo
 import android.net.Uri
 import android.os.Parcel
 import android.os.Parcelable
-import com.anod.appwatcher.utils.AppDetailsUploadDate
-import com.anod.appwatcher.utils.AppIconLoader
+import com.anod.appwatcher.utils.PicassoAppIcon
+import com.anod.appwatcher.utils.extractUploadDate
 import com.google.android.finsky.api.model.Document
 import java.text.DateFormat
 import java.util.*
@@ -78,7 +78,7 @@ class AppInfo : AppInfoMetadata, Parcelable {
         this.priceCur = offer.currencyCode ?: ""
 
         this.iconUrl = doc.iconUrl ?: ""
-        this.refreshTime = AppDetailsUploadDate.extract(doc)
+        this.refreshTime = doc.extractUploadDate()
         this.syncVersion = 0
     }
 
@@ -153,9 +153,9 @@ class AppInfo : AppInfoMetadata, Parcelable {
             }
             val iconUrl: String
             if (launchComponent != null) {
-                iconUrl = Uri.fromParts(AppIconLoader.SCHEME, launchComponent.flattenToShortString(), null).toString()
+                iconUrl = Uri.fromParts(PicassoAppIcon.SCHEME, launchComponent.flattenToShortString(), null).toString()
             } else {
-                iconUrl = Uri.fromParts(AppIconLoader.SCHEME, ComponentName(packageName, packageName).flattenToShortString(), null).toString()
+                iconUrl = Uri.fromParts(PicassoAppIcon.SCHEME, ComponentName(packageName, packageName).flattenToShortString(), null).toString()
             }
 
             val dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM)

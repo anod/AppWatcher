@@ -10,8 +10,8 @@ import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.model.schema.AppListTable
 import com.anod.appwatcher.model.schema.AppTagsTable
-import com.anod.appwatcher.utils.FilterCursorWrapper
-import com.anod.appwatcher.utils.InstalledAppsProvider
+import com.anod.appwatcher.utils.FilterCursor
+import com.anod.appwatcher.utils.InstalledApps
 import java.util.*
 
 /**
@@ -22,14 +22,14 @@ import java.util.*
 open class AppListCursorLoader(context: Context,
                                protected val titleFilter: String,
                                sortOrder: String,
-                               private val cursorFilter: FilterCursorWrapper.CursorFilter?,
+                               private val cursorFilter: FilterCursor.CursorFilter?,
                                private val tag: Tag?)
     : CursorLoader(context, DbContentProvider.appsContentUri(tag), AppListTable.projection, null, null, sortOrder) {
 
     private var newCount: Int = 0
     private var updatableNewCount: Int = 0
 
-    constructor(context: Context, titleFilter: String, sortId: Int, cursorFilter: FilterCursorWrapper.CursorFilter?, tag: Tag?)
+    constructor(context: Context, titleFilter: String, sortId: Int, cursorFilter: FilterCursor.CursorFilter?, tag: Tag?)
             : this(context, titleFilter, createSortOrder(sortId), cursorFilter, tag)
 
     init {
@@ -67,7 +67,7 @@ open class AppListCursorLoader(context: Context,
             if (cursorFilter is InstalledFilter) {
                 cursorFilter.resetNewCount()
             }
-            return AppListCursor(FilterCursorWrapper(cr, cursorFilter))
+            return AppListCursor(FilterCursor(cr, cursorFilter))
         }
     }
 
@@ -95,7 +95,7 @@ open class AppListCursorLoader(context: Context,
         updatableNewCount = 0
         newCount = apps.count
         if (newCount > 0) {
-            val iap = InstalledAppsProvider.PackageManager(context.packageManager)
+            val iap = InstalledApps.PackageManager(context.packageManager)
             apps.moveToPosition(-1)
             while (apps.moveToNext()) {
                 val info = apps.appInfo

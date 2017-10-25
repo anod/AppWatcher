@@ -8,10 +8,13 @@ import android.os.Environment
 import android.widget.Toast
 
 import com.anod.appwatcher.R
+import com.anod.appwatcher.utils.ApplicationContext
 
 import java.io.File
 
-class ImportTask(private val mContext: Context, private val mListener: ImportTask.Listener) : AsyncTask<Uri, Void, Int>() {
+class ImportTask(private val context: ApplicationContext, private val listener: ImportTask.Listener) : AsyncTask<Uri, Void, Int>() {
+
+    constructor(context: Context, listener: Listener): this(ApplicationContext(context), listener)
 
     interface Listener {
         fun onImportFinish(code: Int)
@@ -19,14 +22,14 @@ class ImportTask(private val mContext: Context, private val mListener: ImportTas
 
     override fun doInBackground(vararg sources: Uri): Int? {
         val srcUri = sources[0]
-        val mBackupManager = DbBackupManager(mContext)
+
         if (srcUri.scheme == ContentResolver.SCHEME_FILE) {
             val res = validateFileDestination(srcUri)
             if (res != DbBackupManager.RESULT_OK) {
                 return res
             }
         }
-        return mBackupManager.doImport(srcUri)
+        return DbBackupManager(context.actual).doImport(srcUri)
     }
 
     private fun validateFileDestination(destUri: Uri): Int {
@@ -58,7 +61,7 @@ class ImportTask(private val mContext: Context, private val mListener: ImportTas
     }
 
     override fun onPostExecute(result: Int?) {
-        mListener.onImportFinish(result!!)
+        listener.onImportFinish(result!!)
     }
 
     companion object {
