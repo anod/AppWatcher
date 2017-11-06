@@ -13,7 +13,7 @@ import android.text.format.DateUtils
 import com.android.volley.VolleyError
 import com.anod.appwatcher.App
 import com.anod.appwatcher.Preferences
-import com.anod.appwatcher.accounts.AuthTokenProvider
+import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.backup.GDriveSync
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.DbContentProviderClient
@@ -37,7 +37,7 @@ import java.util.*
  *  @date 6/3/2017
  */
 
-class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
+class VersionsCheck(private val context: Context): PlayStoreEndpoint.Listener {
 
     class UpdatedApp(
             val appId: String,
@@ -61,12 +61,12 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
     private val preferences = App.provide(context).prefs
     private val installedAppsProvider = InstalledApps.PackageManager(context.packageManager)
 
-    fun onPerformSync(extras: Bundle, provider: ContentProviderClient): Int {
+    fun perform(extras: Bundle, provider: ContentProviderClient): Int {
 
         val manualSync = extras.getBoolean(SYNC_EXTRAS_MANUAL, false)
         // Skip any check if sync requested from application
         if (!manualSync) {
-            if (preferences.isWifiOnly && !isWifiEnabled()) {
+            if (preferences.isWifiOnly && !App.with(context).isWifiEnabled) {
                 AppLog.d("Wifi not enabled, skipping update check....")
                 return -1
             }
@@ -118,7 +118,7 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
             }
         }
 
-        AppLog.d("Finish::onPerformSync()")
+        AppLog.d("Finish::perform()")
         return updatedApps.size
     }
 
@@ -332,18 +332,6 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
         }
     }
 
-    /**
-     * Check if device has wi-fi connection
-     */
-    private fun isWifiEnabled(): Boolean {
-        val activeNetwork = (context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager).activeNetworkInfo
-        if (activeNetwork == null) {
-            AppLog.e("No active network info")
-            return false
-        }
-        return activeNetwork.type == ConnectivityManager.TYPE_WIFI
-    }
-
     private fun requestBulkDetails(docIds: Set<String>, endpoint: BulkDetailsEndpoint): List<Document> {
         endpoint.docIds = docIds.toList()
         endpoint.startSync()
@@ -358,13 +346,13 @@ class SyncAdapter(private val context: Context): PlayStoreEndpoint.Listener {
     }
 
     private fun createEndpoint(prefs: Preferences): BulkDetailsEndpoint? {
-        val tokenHelper = AuthTokenProvider(context)
+        val tokenHelper = AuthTokenBlocking(context)
         var authToken: String? = null
         val account = prefs.account ?: return null
         try {
-            authToken = tokenHelper.requestTokenBlocking(null, account)
+            authToken = tokenHelper.request(null, account)
         } catch (e: Throwable) {
-            AppLog.e("AuthToken request exception: " + e.message, e)
+            AppLog.e("AuthTokenBlocking request exception: " + e.message, e)
         }
 
         if (authToken == null) {

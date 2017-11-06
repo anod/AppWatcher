@@ -20,7 +20,8 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import com.android.volley.VolleyError
-import com.anod.appwatcher.accounts.AuthTokenProvider
+import com.anod.appwatcher.accounts.AuthTokenAsync
+import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.adapters.AppDetailsView
 import com.anod.appwatcher.adapters.AppViewHolderDataProvider
 import com.anod.appwatcher.content.DbContentProvider
@@ -119,7 +120,7 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
         loadingView.visibility = View.VISIBLE
 
         App.provide(this).prefs.account?.let {
-            AuthTokenProvider(this).requestToken(this, it, object : AuthTokenProvider.AuthenticateCallback {
+            AuthTokenAsync(this).request(this, it, object : AuthTokenAsync.Callback {
                 override fun onAuthTokenAvailable(token: String) {
                     detailsEndpoint.setAccount(it, token)
                     detailsEndpoint.startAsync()

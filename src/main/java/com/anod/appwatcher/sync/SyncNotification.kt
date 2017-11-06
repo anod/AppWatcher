@@ -40,7 +40,7 @@ class SyncNotification(private val context: Context) {
         notificationManager.createNotificationChannel(channel)
     }
 
-    fun show(updatedApps: List<SyncAdapter.UpdatedApp>) {
+    fun show(updatedApps: List<VersionsCheck.UpdatedApp>) {
 
         val sorted = updatedApps.sortedWith(compareBy({ it.isNewUpdate }, { it.title }))
 
@@ -54,7 +54,7 @@ class SyncNotification(private val context: Context) {
         notificationManager.cancel(NOTIFICATION_ID)
     }
 
-    private fun create(updatedApps: List<SyncAdapter.UpdatedApp>): Notification {
+    private fun create(updatedApps: List<VersionsCheck.UpdatedApp>): Notification {
         val notificationIntent = Intent(context, AppWatcherActivity::class.java)
         notificationIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
         val data = Uri.parse("com.anod.appwatcher://notification")
@@ -84,7 +84,7 @@ class SyncNotification(private val context: Context) {
         return builder.build()
     }
 
-    private fun addMultipleExtraInfo(updatedApps: List<SyncAdapter.UpdatedApp>, builder: NotificationCompat.Builder) {
+    private fun addMultipleExtraInfo(updatedApps: List<VersionsCheck.UpdatedApp>, builder: NotificationCompat.Builder) {
         var isUpdatable = false
 
         val sb = StringBuilder()
@@ -113,7 +113,7 @@ class SyncNotification(private val context: Context) {
 
     }
 
-    private fun addExtraInfo(app: SyncAdapter.UpdatedApp, builder: NotificationCompat.Builder) {
+    private fun addExtraInfo(app: VersionsCheck.UpdatedApp, builder: NotificationCompat.Builder) {
 
             val changes = if (app.recentChanges.isBlank()) context.getString(R.string.no_recent_changes) else app.recentChanges
 
@@ -148,7 +148,7 @@ class SyncNotification(private val context: Context) {
         return intent
     }
 
-    private fun renderText(apps: List<SyncAdapter.UpdatedApp>): String {
+    private fun renderText(apps: List<VersionsCheck.UpdatedApp>): String {
         val count = apps.size
         if (count == 1) {
             return context.getString(R.string.notification_click)
@@ -166,7 +166,7 @@ class SyncNotification(private val context: Context) {
         )
     }
 
-    private fun renderTitle(apps: List<SyncAdapter.UpdatedApp>): String {
+    private fun renderTitle(apps: List<VersionsCheck.UpdatedApp>): String {
         val title: String
         val count = apps.size
         if (count == 1) {

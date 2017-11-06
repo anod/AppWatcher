@@ -17,7 +17,9 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import com.anod.appwatcher.*
-import com.anod.appwatcher.accounts.AccountChooser
+import com.anod.appwatcher.accounts.AccountSelectionDialog
+import com.anod.appwatcher.accounts.AuthTokenAsync
+import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.TagsContentProviderClient
 import com.anod.appwatcher.installed.ImportInstalledActivity
@@ -29,15 +31,15 @@ import com.anod.appwatcher.wishlist.WishlistFragment
  * *
  * @date 2014-08-07
  */
-abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelectionListener {
+abstract class DrawerActivity : ToolbarActivity(), AccountSelectionDialog.SelectionListener {
 
     private var drawerLayout: DrawerLayout? = null
     private var accountNameView: TextView? = null
     private var navigationView: NavigationView? = null
     private var authToken: String? = null
 
-    val accountChooser: AccountChooser by lazy {
-        AccountChooser(this, App.provide(this).prefs, this)
+    private val accountSelectionDialog: AccountSelectionDialog by lazy {
+        AccountSelectionDialog(this, App.provide(this).prefs, this)
     }
 
     open val isHomeAsMenu: Boolean
@@ -45,14 +47,20 @@ abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelec
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        accountChooser.init()
+
+        val account = App.provide(this).prefs.account
+        if (account== null) {
+            accountSelectionDialog.show()
+        } else {
+            onAccountSelected(account)
+        }
     }
 
     protected fun setupDrawer() {
         setupToolbar()
 
-        this.drawerLayout = findViewById<DrawerLayout>(R.id.drawer_layout)
-        this.navigationView = findViewById<NavigationView>(R.id.nav_view)
+        this.drawerLayout = findViewById(R.id.drawer_layout)
+        this.navigationView = findViewById(R.id.nav_view)
 
         if (this.navigationView != null) {
             this.drawerLayout?.addDrawerListener(object: DrawerLayout.SimpleDrawerListener() {
@@ -77,7 +85,9 @@ abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelec
 
         accountNameView = headerView.findViewById<View>(R.id.account_name) as TextView
         val changeAccount = headerView.findViewById<View>(R.id.account_change) as LinearLayout
-        changeAccount.setOnClickListener { onAccountChooseClick() }
+        changeAccount.setOnClickListener {
+            this.accountSelectionDialog.show()
+        }
 
         val time = App.provide(this).prefs.lastUpdateTime
 
@@ -129,30 +139,30 @@ abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelec
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        accountChooser.onRequestPermissionResult(requestCode, permissions, grantResults)
+        accountSelectionDialog.onRequestPermissionResult(requestCode, permissions, grantResults)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        accountChooser.onActivityResult(requestCode, resultCode, data)
+        accountSelectionDialog.onActivityResult(requestCode, resultCode, data)
     }
 
-    protected fun onAccountChooseClick() {
-        accountChooser.showAccountsDialogWithCheck()
-    }
-
-    override fun onAccountSelected(account: Account, authSubToken: String?) {
-        authToken = authSubToken
-        if (authSubToken == null) {
-            if (App.with(this).isNetworkAvailable) {
-                Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
-            } else {
-                Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()
+    override fun onAccountSelected(account: Account) {
+        AuthTokenAsync(this).request(this, account, object : AuthTokenAsync.Callback {
+            override fun onToken(token: String) {
+                authToken = token
+                setDrawerAccount(account)
             }
-            return
-        }
 
-        setDrawerAccount(account)
+            override fun onError(errorMessage: String) {
+                if (App.with(this@DrawerActivity).isNetworkAvailable) {
+                    Toast.makeText(this@DrawerActivity, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(this@DrawerActivity, R.string.check_connection, Toast.LENGTH_SHORT).show()
+                }
+                return
+            }
+        })
     }
 
     override fun onAccountNotFound(errorMessage: String) {
@@ -206,7 +216,7 @@ abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelec
         return super.onOptionsItemSelected(item)
     }
 
-    protected fun setDrawerAccount(account: Account?) {
+    private fun setDrawerAccount(account: Account?) {
         if (account == null) {
             accountNameView?.setText(R.string.choose_an_account)
         } else {
@@ -219,7 +229,7 @@ abstract class DrawerActivity : ToolbarActivity(), AccountChooser.OnAccountSelec
 
     fun showAccountsDialogWithCheck() {
         Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
-        accountChooser.showAccountsDialogWithCheck()
+        accountSelectionDialog.show()
     }
 
     internal class TagsUpdateObserver(private val activity: DrawerActivity) : ContentObserver(Handler()) {

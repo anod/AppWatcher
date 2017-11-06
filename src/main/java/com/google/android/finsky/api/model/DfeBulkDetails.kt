@@ -10,7 +10,7 @@ import java.util.ArrayList
 
 import info.anodsplace.android.log.AppLog
 
-class DfeBulkDetails(private val api: DfeApi,private val responseFilter: ((Document) -> Boolean)?) : DfeBaseModel() {
+class DfeBulkDetails(private val api: DfeApi,private val filter: FilterPredicate?) : DfeBaseModel() {
     private var bulkDetailsResponse: Details.BulkDetailsResponse? = null
     var docIds: List<String>? = null
 
@@ -37,10 +37,10 @@ class DfeBulkDetails(private val api: DfeApi,private val responseFilter: ((Docum
                     }
                 }
             }
-            return if (responseFilter == null || list == null) {
+            return if (filter == null || list == null) {
                 list
             } else {
-                list.filter(responseFilter)
+                list.filter(filter)
             }
         }
 

@@ -16,18 +16,17 @@ import android.widget.Toast
 
 import com.anod.appwatcher.Preferences
 import com.anod.appwatcher.R
+import com.anod.appwatcher.ui.ActivityListener
 
 /**
  * @author alex
  * *
  * @date 9/17/13
  */
-class AccountChooser(
+class AccountSelectionDialog(
         private val activity: AppCompatActivity,
         private val preferences: Preferences,
-        private val listener: AccountChooser.OnAccountSelectionListener?) {
-
-    private val authTokenProvider: AuthTokenProvider = AuthTokenProvider(activity)
+        private val listener: AccountSelectionDialog.SelectionListener): ActivityListener.ResultListener {
 
     companion object {
         const val PERMISSION_REQUEST_GET_ACCOUNTS = 123
@@ -39,69 +38,17 @@ class AccountChooser(
         set(value) { preferences.account = value }
 
     // Container Activity must implement this interface
-    interface OnAccountSelectionListener {
-        fun onAccountSelected(account: Account, authSubToken: String?)
+    interface SelectionListener {
+        fun onAccountSelected(account: Account)
         fun onAccountNotFound(errorMessage: String)
     }
 
-    fun showAccountsDialogWithCheck() {
-        showAccountsDialog()
-    }
-
-    fun init() {
-        val account = this.preferences.account
-
-        if (account == null) {
-            showAccountsDialogWithCheck()
-        } else {
-            authTokenProvider.requestToken(activity, account, object : AuthTokenProvider.AuthenticateCallback {
-                override fun onAuthTokenAvailable(token: String) {
-                    listener?.onAccountSelected(account, token)
-                }
-
-                override fun onUnRecoverableException(errorMessage: String) {
-                    listener?.onAccountSelected(account, null)
-                }
-            })
-        }
-    }
-
-    fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == ACCOUNT_REQUEST)
-        {
-            if (resultCode == Activity.RESULT_OK && data != null) {
-                val name = data.extras.getString(AccountManager.KEY_ACCOUNT_NAME, "")
-                val type = data.extras.getString(AccountManager.KEY_ACCOUNT_TYPE, "")
-                if (name.isNotBlank() && type.isNotBlank()) {
-                    val account = Account(name, type)
-                    this.preferences.account = account
-                    authTokenProvider.requestToken(activity, account, object : AuthTokenProvider.AuthenticateCallback {
-                        override fun onAuthTokenAvailable(token: String) {
-                            listener?.onAccountSelected(account, token)
-                        }
-
-                        override fun onUnRecoverableException(errorMessage: String) {
-                            listener?.onAccountSelected(account, null)
-                        }
-                    })
-                    return
-                }
-            }
-            if (this.preferences.account == null) {
-                val errorMessage = data?.extras?.getString(AccountManager.KEY_ERROR_MESSAGE, "") ?: ""
-                listener?.onAccountNotFound(errorMessage)
-            }
-            return
-        }
-    }
-
-    private fun showAccountsDialog() {
-
+    fun show() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val intent = AccountManager.newChooseAccountIntent(
                     account,
                     null,
-                    arrayOf(AuthTokenProvider.ACCOUNT_TYPE),
+                    arrayOf(AuthTokenBlocking.ACCOUNT_TYPE),
                     null,
                     null,
                     null,
@@ -113,7 +60,28 @@ class AccountChooser(
                 showPermissionsDialog()
                 return
             }
-            activity.startActivityForResult(AccountChooserActivity.intent(account, activity),  ACCOUNT_REQUEST)
+            activity.startActivityForResult(AccountSelectionDialogActivity.intent(account, activity),  ACCOUNT_REQUEST)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == ACCOUNT_REQUEST)
+        {
+            if (resultCode == Activity.RESULT_OK && data != null) {
+                val name = data.extras.getString(AccountManager.KEY_ACCOUNT_NAME, "")
+                val type = data.extras.getString(AccountManager.KEY_ACCOUNT_TYPE, "")
+                if (name.isNotBlank() && type.isNotBlank()) {
+                    val account = Account(name, type)
+                    this.preferences.account = account
+                    listener.onAccountSelected(account)
+                    return
+                }
+            }
+            if (this.preferences.account == null) {
+                val errorMessage = data?.extras?.getString(AccountManager.KEY_ERROR_MESSAGE, "") ?: ""
+                listener.onAccountNotFound(errorMessage)
+            }
+            return
         }
     }
 
@@ -123,7 +91,7 @@ class AccountChooser(
         if (requestCode == PERMISSION_REQUEST_GET_ACCOUNTS) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // http://stackoverflow.com/questions/33264031/calling-dialogfragments-show-from-within-onrequestpermissionsresult-causes
-                Handler().postDelayed({ showAccountsDialog() }, 200)
+                Handler().postDelayed({ show() }, 200)
             } else {
                 Toast.makeText(activity, "Failed to gain access to Google accounts", Toast.LENGTH_SHORT).show()
             }

@@ -1,7 +1,9 @@
 package com.anod.appwatcher
 
 import android.app.Application
+import android.content.Context
 import android.content.res.Configuration
+import android.net.ConnectivityManager
 import android.support.v7.app.AppCompatDelegate
 import android.view.ViewConfiguration
 import com.anod.appwatcher.utils.MetricsManagerEvent
@@ -55,6 +57,9 @@ class AppWatcherApplication : Application(), AppLog.Listener {
 
     val isNetworkAvailable: Boolean
         get() = objectGraph.connectivityManager.activeNetworkInfo?.isConnectedOrConnecting == true
+
+    val isWifiEnabled: Boolean
+        get() = objectGraph.connectivityManager.activeNetworkInfo?.type == ConnectivityManager.TYPE_WIFI
 
     override fun onLogException(tr: Throwable) {
 

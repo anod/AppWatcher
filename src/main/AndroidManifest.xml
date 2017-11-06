@@ -67,7 +67,7 @@
             android:label="@string/import_export"
             android:theme="@style/AppTheme.Dialog"/>
         <activity
-            android:name=".accounts.AccountChooserActivity"
+            android:name=".accounts.AccountSelectionDialogActivity"
             android:theme="@style/AlertDialog"/>
         <activity
             android:name=".NotificationActivity"

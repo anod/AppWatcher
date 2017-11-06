@@ -26,7 +26,7 @@ import com.anod.appwatcher.*
 import com.anod.appwatcher.installed.ImportInstalledActivity
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.sync.ManualSyncService
-import com.anod.appwatcher.sync.SyncAdapter
+import com.anod.appwatcher.sync.VersionsCheck
 import com.anod.appwatcher.tags.TagsListActivity
 import com.anod.appwatcher.utils.MenuItemAnimation
 import com.anod.appwatcher.utils.UpgradeCheck
@@ -127,16 +127,16 @@ abstract class AppWatcherBaseActivity : DrawerActivity(), TextView.OnEditorActio
     }
 
     /**
-     * Receive notifications from SyncAdapter
+     * Receive notifications from VersionsCheck
      */
     private val syncFinishedReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val action = intent.action
-            if (SyncAdapter.SYNC_PROGRESS == action) {
+            if (VersionsCheck.SYNC_PROGRESS == action) {
                 refreshMenuAnimation.start()
                 notifySyncStart()
-            } else if (SyncAdapter.SYNC_STOP == action) {
-                val updatesCount = intent.getIntExtra(SyncAdapter.EXTRA_UPDATES_COUNT, 0)
+            } else if (VersionsCheck.SYNC_STOP == action) {
+                val updatesCount = intent.getIntExtra(VersionsCheck.EXTRA_UPDATES_COUNT, 0)
                 refreshMenuAnimation.stop()
                 notifySyncStop()
                 if (updatesCount == 0) {
@@ -148,8 +148,8 @@ abstract class AppWatcherBaseActivity : DrawerActivity(), TextView.OnEditorActio
 
     override fun onResume() {
         val filter = IntentFilter()
-        filter.addAction(SyncAdapter.SYNC_PROGRESS)
-        filter.addAction(SyncAdapter.SYNC_STOP)
+        filter.addAction(VersionsCheck.SYNC_PROGRESS)
+        filter.addAction(VersionsCheck.SYNC_STOP)
         registerReceiver(syncFinishedReceiver, filter)
         syncFinishedReceiverRegistered = true
         super.onResume()
@@ -213,7 +213,7 @@ abstract class AppWatcherBaseActivity : DrawerActivity(), TextView.OnEditorActio
         AppLog.d("Refresh pressed")
         if (!isAuthenticated) {
             if (App.with(this).isNetworkAvailable) {
-                showAccountsDialogWithCheck()
+                this.showAccountsDialogWithCheck()
             } else {
                 Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()
             }
@@ -229,8 +229,8 @@ abstract class AppWatcherBaseActivity : DrawerActivity(), TextView.OnEditorActio
         return false
     }
 
-    override fun onAccountSelected(account: Account, authSubToken: String?) {
-        super.onAccountSelected(account, authSubToken)
+    override fun onAccountSelected(account: Account) {
+        super.onAccountSelected(account)
         if (UpgradeCheck(prefs).isNewVersion) {
             requestRefresh()
         }

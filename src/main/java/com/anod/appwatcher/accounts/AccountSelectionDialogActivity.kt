@@ -19,18 +19,18 @@ import kotterknife.bindView
  * *
  * @date 8/24/13
  */
-class AccountChooserActivity : AppCompatActivity() {
+class AccountSelectionDialogActivity : AppCompatActivity() {
 
     companion object {
         fun intent(selected: Account?, context: Context): Intent {
-            val intent = Intent(context, AccountChooserActivity::class.java)
+            val intent = Intent(context, AccountSelectionDialogActivity::class.java)
             intent.putExtra("account", selected)
             return intent
         }
     }
 
     val accountManager: AccountManager by lazy {
-        AccountManager.get(this@AccountChooserActivity)
+        AccountManager.get(this@AccountSelectionDialogActivity)
     }
 
     val listView: ListView by bindView(android.R.id.list)
@@ -40,7 +40,7 @@ class AccountChooserActivity : AppCompatActivity() {
         setContentView(R.layout.activity_choose_account)
         setTitle(R.string.choose_an_account)
 
-        val accounts = accountManager.getAccountsByType(AuthTokenProvider.ACCOUNT_TYPE)
+        val accounts = accountManager.getAccountsByType(AuthTokenBlocking.ACCOUNT_TYPE)
         if (accounts.isEmpty())
         {
             val data = Intent()

@@ -16,7 +16,8 @@ import android.widget.ProgressBar
 import android.widget.Toast
 import com.anod.appwatcher.App
 import com.anod.appwatcher.R
-import com.anod.appwatcher.accounts.AccountChooser
+import com.anod.appwatcher.accounts.AccountSelectionDialog
+import com.anod.appwatcher.accounts.AuthTokenAsync
 import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.model.WatchAppList
 import com.anod.appwatcher.ui.ToolbarActivity
@@ -33,14 +34,16 @@ import java.util.*
  * *
  * @date 19/04/2016.
  */
-class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<List<String>>, AccountChooser.OnAccountSelectionListener, ImportBulkManager.Listener {
+class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<List<String>>, AccountSelectionDialog.SelectionListener, ImportBulkManager.Listener {
     val listView: RecyclerView by bindView(android.R.id.list)
     val progressBar: ProgressBar by bindView(android.R.id.progress)
 
     private var allSelected: Boolean = false
     private lateinit var dataProvider: ImportDataProvider
     private lateinit var importManager: ImportBulkManager
-    private var accountChooser: AccountChooser? = null
+    private val accountSelectionDialog: AccountSelectionDialog by lazy {
+        AccountSelectionDialog(this, App.provide(this).prefs, this)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,7 +78,7 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
 
             importManager.init()
             adapter.clearPackageIndex()
-            for (idx in 0..adapter.itemCount - 1) {
+            for (idx in 0 until adapter.itemCount) {
                 val packageName = adapter.getItem(idx)
                 if (dataProvider.isPackageSelected(packageName)) {
                     importManager.addPackage(packageName)
@@ -90,13 +93,6 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
         }
 
         supportLoaderManager.initLoader(0, null, this).forceLoad()
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        accountChooser = AccountChooser(this, App.provide(this).prefs, this)
-        accountChooser!!.init()
     }
 
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<List<String>> {
@@ -115,17 +111,21 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
         downloadedAdapter.clear()
     }
 
-    override fun onAccountSelected(account: Account, authSubToken: String?) {
-        if (authSubToken == null) {
-            if (App.with(this).isNetworkAvailable) {
-                Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
-            } else {
-                Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()
+    override fun onAccountSelected(account: Account) {
+        AuthTokenAsync(this).request(this, account, object : AuthTokenAsync.Callback {
+            override fun onAuthTokenAvailable(token: String) {
+                importManager.setAccount(account, token)
             }
-            finish()
-            return
-        }
-        importManager.setAccount(account, authSubToken)
+
+            override fun onUnRecoverableException(errorMessage: String) {
+                if (App.with(this@ImportInstalledActivity).isNetworkAvailable) {
+                    Toast.makeText(this@ImportInstalledActivity, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(this@ImportInstalledActivity, R.string.check_connection, Toast.LENGTH_SHORT).show()
+                }
+                finish()
+            }
+        })
     }
 
     override fun onAccountNotFound(errorMessage: String) {
@@ -139,12 +139,12 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        accountChooser?.onRequestPermissionResult(requestCode, permissions, grantResults)
+        accountSelectionDialog.onRequestPermissionResult(requestCode, permissions, grantResults)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        accountChooser?.onActivityResult(requestCode, resultCode, data)
+        accountSelectionDialog.onActivityResult(requestCode, resultCode, data)
     }
 
     override fun onImportProgress(docIds: List<String>, result: SimpleArrayMap<String, Int>) {

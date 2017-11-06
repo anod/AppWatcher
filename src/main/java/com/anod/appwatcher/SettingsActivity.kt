@@ -10,7 +10,8 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatDelegate
 import android.text.format.DateUtils
 import android.widget.Toast
-import com.anod.appwatcher.accounts.AccountChooser
+import com.anod.appwatcher.accounts.AccountSelectionDialog
+import com.anod.appwatcher.accounts.AuthTokenAsync
 import com.anod.appwatcher.backup.DbBackupManager
 import com.anod.appwatcher.backup.ExportTask
 import com.anod.appwatcher.backup.GDriveSync
@@ -27,12 +28,12 @@ import java.io.IOException
 import java.util.*
 
 
-class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriveSync.Listener, AccountChooser.OnAccountSelectionListener, ImportTask.Listener {
+class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriveSync.Listener, AccountSelectionDialog.SelectionListener, ImportTask.Listener {
 
     private var gDriveSync: GDriveSync? = null
     private var syncEnabledItem: SettingsActionBarActivity.CheckboxItem? = null
     private var syncNowItem: SettingsActionBarActivity.Item? = null
-    private var accountChooser: AccountChooser? = null
+    private var accountSelectionDialog: AccountSelectionDialog? = null
     private var wifiItem: SettingsActionBarActivity.CheckboxItem? = null
     private var chargingItem: SettingsActionBarActivity.CheckboxItem? = null
     private var frequencyItem: SettingsActionBarActivity.Item? = null
@@ -61,13 +62,12 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
     override fun init() {
         gDriveSync = GDriveSync(this)
         prefs = App.provide(this).prefs
-        accountChooser = AccountChooser(this, prefs, this)
-        accountChooser!!.init()
+        accountSelectionDialog = AccountSelectionDialog(this, prefs, this)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        accountChooser!!.onRequestPermissionResult(requestCode, permissions, grantResults)
+        accountSelectionDialog!!.onRequestPermissionResult(requestCode, permissions, grantResults)
     }
 
     override fun onPause() {
@@ -168,7 +168,7 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
             }
         } else {
             gDriveSync!!.onActivityResult(requestCode, resultCode, data)
-            accountChooser?.onActivityResult(requestCode, resultCode, data)
+            accountSelectionDialog?.onActivityResult(requestCode, resultCode, data)
         }
 
         super.onActivityResult(requestCode, resultCode, data)
@@ -331,14 +331,20 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
         Toast.makeText(this, R.string.sync_error, Toast.LENGTH_SHORT).show()
     }
 
-    override fun onAccountSelected(account: Account, authSubToken: String?) {
-        if (authSubToken == null) {
-            if (App.with(this).isNetworkAvailable) {
-                Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
-            } else {
-                Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()
+    override fun onAccountSelected(account: Account) {
+        AuthTokenAsync(this).request(this, account, object : AuthTokenAsync.Callback {
+            override fun onUnRecoverableException(errorMessage: String) {
+                if (App.with(this@SettingsActivity).isNetworkAvailable) {
+                    Toast.makeText(this@SettingsActivity, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(this@SettingsActivity, R.string.check_connection, Toast.LENGTH_SHORT).show()
+                }
             }
-        }
+
+            override fun onAuthTokenAvailable(token: String) {
+
+            }
+        })
     }
 
     override fun onAccountNotFound(errorMessage: String) {

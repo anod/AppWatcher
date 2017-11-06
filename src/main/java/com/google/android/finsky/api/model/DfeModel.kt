@@ -9,6 +9,8 @@ interface OnDataChangedListener {
     fun onDataChanged()
 }
 
+typealias FilterPredicate = ((Document?) -> Boolean)
+
 abstract class DfeModel : Response.ErrorListener {
     private val errorListeners = HashSet<Response.ErrorListener>()
     private val listeners = HashSet<OnDataChangedListener>()

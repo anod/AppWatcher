@@ -1,6 +1,6 @@
 package com.anod.appwatcher.market
 
-import com.google.android.finsky.api.model.Document
+import com.google.android.finsky.api.model.FilterPredicate
 
 /**
  * @author algavris
@@ -9,7 +9,7 @@ import com.google.android.finsky.api.model.Document
  */
 
 internal object AppDetailsFilter {
-    val predicate: (Document?) -> Boolean = {
-        it?.appDetails == null
+    val predicate: FilterPredicate = {
+        it?.appDetails != null
     }
 }

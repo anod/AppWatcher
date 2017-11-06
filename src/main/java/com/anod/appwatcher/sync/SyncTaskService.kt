@@ -18,16 +18,16 @@ class SyncTaskService : JobService() {
 
         this.runner = BackgroundTask(object : BackgroundTask.Worker<Void?, Int>(null) {
             override fun run(param: Void?): Int {
-                val syncAdapter = SyncAdapter(applicationContext)
+                val syncAdapter = VersionsCheck(applicationContext)
                 val contentProviderClient = contentResolver.acquireContentProviderClient(DbContentProvider.authority)
 
                 val extras = job.extras ?: Bundle.EMPTY
-                return syncAdapter.onPerformSync(extras, contentProviderClient)
+                return syncAdapter.perform(extras, contentProviderClient)
             }
 
             override fun finished(result: Int) {
-                val finishIntent = Intent(SyncAdapter.SYNC_STOP)
-                finishIntent.putExtra(SyncAdapter.EXTRA_UPDATES_COUNT, result)
+                val finishIntent = Intent(VersionsCheck.SYNC_STOP)
+                finishIntent.putExtra(VersionsCheck.EXTRA_UPDATES_COUNT, result)
                 sendBroadcast(finishIntent)
 
                 jobFinished(job, false)

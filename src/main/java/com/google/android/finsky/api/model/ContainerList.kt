@@ -6,7 +6,7 @@ import com.google.android.finsky.protos.nano.Messages
 abstract class ContainerList<T> constructor(
         url: String,
         autoLoadNextPage: Boolean,
-        private val filter: ((Document?) -> Boolean)?
+        private val filter: FilterPredicate?
     ) : PaginatedList<T, Document>(url, autoLoadNextPage) {
 
 

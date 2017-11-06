@@ -17,18 +17,18 @@ class ManualSyncService : IntentService("ManualSyncService") {
 
     override fun onHandleIntent(intent: Intent?) {
         if (intent != null) {
-            val syncAdapter = SyncAdapter(applicationContext)
+            val syncAdapter = VersionsCheck(applicationContext)
             val contentProviderClient = contentResolver.acquireContentProviderClient(DbContentProvider.authority)
 
             val bundle = Bundle()
             if (!BuildConfig.DEBUG) {
-                bundle.putBoolean(SyncAdapter.SYNC_EXTRAS_MANUAL, true)
+                bundle.putBoolean(VersionsCheck.SYNC_EXTRAS_MANUAL, true)
             }
 
-            val updatesCount = syncAdapter.onPerformSync(bundle, contentProviderClient)
+            val updatesCount = syncAdapter.perform(bundle, contentProviderClient)
 
-            val finishIntent = Intent(SyncAdapter.SYNC_STOP)
-            finishIntent.putExtra(SyncAdapter.EXTRA_UPDATES_COUNT, updatesCount)
+            val finishIntent = Intent(VersionsCheck.SYNC_STOP)
+            finishIntent.putExtra(VersionsCheck.EXTRA_UPDATES_COUNT, updatesCount)
             sendBroadcast(finishIntent)
         }
     }

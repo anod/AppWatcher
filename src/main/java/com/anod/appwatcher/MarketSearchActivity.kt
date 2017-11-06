@@ -14,7 +14,8 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import com.android.volley.VolleyError
-import com.anod.appwatcher.accounts.AccountChooser
+import com.anod.appwatcher.accounts.AccountSelectionDialog
+import com.anod.appwatcher.accounts.AuthTokenAsync
 import com.anod.appwatcher.market.CompositeStateEndpoint
 import com.anod.appwatcher.market.DetailsEndpoint
 import com.anod.appwatcher.market.PlayStoreEndpointBase
@@ -31,7 +32,7 @@ import com.anod.appwatcher.utils.Keyboard
 import com.anod.appwatcher.utils.MetricsManagerEvent
 import kotterknife.bindView
 
-class MarketSearchActivity : ToolbarActivity(), AccountChooser.OnAccountSelectionListener, WatchAppList.Listener, CompositeStateEndpoint.Listener {
+class MarketSearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionListener, WatchAppList.Listener, CompositeStateEndpoint.Listener {
 
     private lateinit var adapter: ResultsAdapter
 
@@ -45,8 +46,8 @@ class MarketSearchActivity : ToolbarActivity(), AccountChooser.OnAccountSelectio
     private var initiateSearch = false
     private var isShareSource = false
 
-    val accountChooser: AccountChooser by lazy {
-        AccountChooser(this, App.provide(this).prefs, this)
+    val accountSelectionDialog: AccountSelectionDialog by lazy {
+        AccountSelectionDialog(this, App.provide(this).prefs, this)
     }
     private var searchQuery = ""
     private var hasFocus = false
@@ -74,7 +75,6 @@ class MarketSearchActivity : ToolbarActivity(), AccountChooser.OnAccountSelectio
         retryView.visibility = View.GONE
 
         initFromIntent(intent)
-        accountChooser.init()
     }
 
     private fun initFromIntent(i: Intent?) {
@@ -177,22 +177,26 @@ class MarketSearchActivity : ToolbarActivity(), AccountChooser.OnAccountSelectio
         }
     }
 
-    override fun onAccountSelected(account: Account, authSubToken: String?) {
-        if (authSubToken == null) {
-            if (App.with(this).isNetworkAvailable) {
-                Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
-            } else {
-                Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()
+    override fun onAccountSelected(account: Account) {
+        AuthTokenAsync(this).request(this, account, object : AuthTokenAsync.Callback {
+            override fun onAuthTokenAvailable(token: String) {
+                endpoints.setAccount(account, token)
+                if (initiateSearch && searchQuery.isNotEmpty()) {
+                    searchResults()
+                } else {
+                    showNoResults("")
+                }
             }
-            finish()
-            return
-        }
-        endpoints.setAccount(account, authSubToken)
-        if (initiateSearch && searchQuery.isNotEmpty()) {
-            searchResults()
-        } else {
-            showNoResults("")
-        }
+
+            override fun onUnRecoverableException(errorMessage: String) {
+                if (App.with(this@MarketSearchActivity).isNetworkAvailable) {
+                    Toast.makeText(this@MarketSearchActivity, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(this@MarketSearchActivity, R.string.check_connection, Toast.LENGTH_SHORT).show()
+                }
+                finish()
+            }
+        })
     }
 
     override fun onAccountNotFound(errorMessage: String) {
@@ -210,13 +214,13 @@ class MarketSearchActivity : ToolbarActivity(), AccountChooser.OnAccountSelectio
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        accountChooser.onRequestPermissionResult(requestCode, permissions, grantResults)
+        accountSelectionDialog.onRequestPermissionResult(requestCode, permissions, grantResults)
     }
 
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        accountChooser.onActivityResult(requestCode, resultCode, data)
+        accountSelectionDialog.onActivityResult(requestCode, resultCode, data)
     }
 
     private fun showRetryButton() {

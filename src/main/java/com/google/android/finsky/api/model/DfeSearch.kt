@@ -8,7 +8,7 @@ class DfeSearch(
         private val dfeApi: DfeApi,
         val query: String, initialUrl: String,
         autoLoadNextPage: Boolean,
-        filter: ((Document?) -> Boolean)?)
+        filter: FilterPredicate?)
     : ContainerList<Search.SearchResponse>(initialUrl, autoLoadNextPage, filter) {
 
     override fun makeRequest(url: String): Request<*> {
