@@ -111,13 +111,13 @@ class AccountSelectionDialog(
         }
         builder.setNegativeButton(android.R.string.cancel) { _, _ ->
             if (account == null) {
-                listener?.onAccountNotFound("")
+                listener.onAccountNotFound("")
             }
         }
         val dialog = builder.create()
         dialog.setOnDismissListener {
             if (account == null) {
-                listener?.onAccountNotFound("")
+                listener.onAccountNotFound("")
             }
         }
         dialog.show()

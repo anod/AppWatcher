@@ -179,7 +179,7 @@ class MarketSearchActivity : ToolbarActivity(), AccountSelectionDialog.Selection
 
     override fun onAccountSelected(account: Account) {
         AuthTokenAsync(this).request(this, account, object : AuthTokenAsync.Callback {
-            override fun onAuthTokenAvailable(token: String) {
+            override fun onToken(token: String) {
                 endpoints.setAccount(account, token)
                 if (initiateSearch && searchQuery.isNotEmpty()) {
                     searchResults()
@@ -188,7 +188,7 @@ class MarketSearchActivity : ToolbarActivity(), AccountSelectionDialog.Selection
                 }
             }
 
-            override fun onUnRecoverableException(errorMessage: String) {
+            override fun onError(errorMessage: String) {
                 if (App.with(this@MarketSearchActivity).isNetworkAvailable) {
                     Toast.makeText(this@MarketSearchActivity, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
                 } else {

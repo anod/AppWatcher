@@ -113,11 +113,11 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
 
     override fun onAccountSelected(account: Account) {
         AuthTokenAsync(this).request(this, account, object : AuthTokenAsync.Callback {
-            override fun onAuthTokenAvailable(token: String) {
+            override fun onToken(token: String) {
                 importManager.setAccount(account, token)
             }
 
-            override fun onUnRecoverableException(errorMessage: String) {
+            override fun onError(errorMessage: String) {
                 if (App.with(this@ImportInstalledActivity).isNetworkAvailable) {
                     Toast.makeText(this@ImportInstalledActivity, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
                 } else {

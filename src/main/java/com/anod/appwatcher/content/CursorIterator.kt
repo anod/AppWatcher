@@ -64,22 +64,11 @@ abstract class CursorIterator<O>(cursor: Cursor?)
             val columnNum = columnCount
             window.setNumColumns(columnNum)
             while (moveToNext() && window.allocRow()) {
-                for (i in 0..columnNum - 1) {
-                    var putNull = true
+                for (i in 0 until columnNum) {
                     val field = getString(i)
-                    if (field != null) {
-                        putNull = false
-                        if (!window.putString(field, getPosition(), i)) {
-                            window.freeLastRow()
-                            break
-                        }
-                    }
-                    //                    }
-                    if (putNull) {
-                        if (!window.putNull(getPosition(), i)) {
-                            window.freeLastRow()
-                            break
-                        }
+                    if (!window.putString(field, getPosition(), i)) {
+                        window.freeLastRow()
+                        break
                     }
                 }
             }

@@ -333,7 +333,7 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
 
     override fun onAccountSelected(account: Account) {
         AuthTokenAsync(this).request(this, account, object : AuthTokenAsync.Callback {
-            override fun onUnRecoverableException(errorMessage: String) {
+            override fun onError(errorMessage: String) {
                 if (App.with(this@SettingsActivity).isNetworkAvailable) {
                     Toast.makeText(this@SettingsActivity, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
                 } else {
@@ -341,7 +341,7 @@ class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriv
                 }
             }
 
-            override fun onAuthTokenAvailable(token: String) {
+            override fun onToken(token: String) {
 
             }
         })

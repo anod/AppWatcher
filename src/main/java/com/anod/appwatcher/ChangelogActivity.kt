@@ -121,12 +121,12 @@ class ChangelogActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette
 
         App.provide(this).prefs.account?.let {
             AuthTokenAsync(this).request(this, it, object : AuthTokenAsync.Callback {
-                override fun onAuthTokenAvailable(token: String) {
+                override fun onToken(token: String) {
                     detailsEndpoint.setAccount(it, token)
                     detailsEndpoint.startAsync()
                 }
 
-                override fun onUnRecoverableException(errorMessage: String) {
+                override fun onError(errorMessage: String) {
                     showRetryMessage()
                 }
             })
