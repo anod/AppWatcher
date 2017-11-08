@@ -1,6 +1,7 @@
 package com.anod.appwatcher.content
 
 import android.database.Cursor
+import com.anod.appwatcher.framework.CursorIterator
 import com.anod.appwatcher.model.AppChange
 import com.anod.appwatcher.model.schema.ChangelogTable
 

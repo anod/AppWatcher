@@ -2,13 +2,9 @@ package com.anod.appwatcher.content
 
 import android.content.ContentProviderClient
 import android.content.Context
-import android.database.Cursor
-import android.os.RemoteException
-import android.util.SparseIntArray
+import com.anod.appwatcher.framework.query
 import com.anod.appwatcher.model.AppChange
 import com.anod.appwatcher.model.schema.ChangelogTable
-import com.anod.appwatcher.model.schema.TagsTable
-import info.anodsplace.android.log.AppLog
 
 /**
  * @author algavris

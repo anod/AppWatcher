@@ -5,7 +5,6 @@ import android.accounts.AccountManager
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
-import com.anod.appwatcher.utils.BackgroundTask
 import info.anodsplace.android.log.AppLog
 import java.io.IOException
 

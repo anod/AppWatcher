@@ -5,6 +5,7 @@ import android.content.Context
 import android.database.Cursor
 import android.os.RemoteException
 import android.util.SparseIntArray
+import com.anod.appwatcher.framework.NullCursor
 import com.anod.appwatcher.model.schema.TagsTable
 import info.anodsplace.android.log.AppLog
 

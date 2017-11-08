@@ -20,10 +20,10 @@ import com.anod.appwatcher.accounts.AccountSelectionDialog
 import com.anod.appwatcher.accounts.AuthTokenAsync
 import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.model.WatchAppList
-import com.anod.appwatcher.ui.ToolbarActivity
-import com.anod.appwatcher.utils.InstalledApps
-import com.anod.appwatcher.utils.getAppTitle
-import com.anod.appwatcher.utils.getInstalledPackagesCompat
+import com.anod.appwatcher.framework.ToolbarActivity
+import com.anod.appwatcher.framework.InstalledApps
+import com.anod.appwatcher.framework.getAppTitle
+import com.anod.appwatcher.framework.getInstalledPackagesCompat
 import info.anodsplace.android.log.AppLog
 import kotterknife.bindView
 import java.util.*

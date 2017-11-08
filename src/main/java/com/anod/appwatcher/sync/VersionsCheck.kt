@@ -4,7 +4,6 @@ import android.content.ContentProviderClient
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
-import android.net.ConnectivityManager
 import android.os.Bundle
 import android.os.RemoteException
 import android.provider.BaseColumns
@@ -12,7 +11,7 @@ import android.text.TextUtils
 import android.text.format.DateUtils
 import com.android.volley.VolleyError
 import com.anod.appwatcher.App
-import com.anod.appwatcher.Preferences
+import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.backup.GDriveSync
 import com.anod.appwatcher.content.DbContentProvider
@@ -25,8 +24,8 @@ import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.model.schema.AppListTable
 import com.anod.appwatcher.model.schema.ChangelogTable
 import com.anod.appwatcher.model.schema.contentValues
-import com.anod.appwatcher.utils.GooglePlayServices
-import com.anod.appwatcher.utils.InstalledApps
+import com.anod.appwatcher.framework.GooglePlayServices
+import com.anod.appwatcher.framework.InstalledApps
 import com.anod.appwatcher.utils.extractUploadDate
 import com.google.android.finsky.api.model.Document
 import info.anodsplace.android.log.AppLog

@@ -10,6 +10,7 @@ import android.widget.ImageView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.DbContentProviderClient
+import com.anod.appwatcher.framework.loadIcon
 import com.anod.appwatcher.model.AppInfo
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Picasso.LoadedFrom.DISK

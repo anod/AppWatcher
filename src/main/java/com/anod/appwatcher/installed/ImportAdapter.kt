@@ -6,7 +6,7 @@ import android.support.v4.util.SimpleArrayMap
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.anod.appwatcher.R
-import com.anod.appwatcher.adapters.AppViewHolderBase
+import com.anod.appwatcher.watchlist.AppViewHolderBase
 
 internal class ImportAdapter(
         context: Context,

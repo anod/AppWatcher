@@ -24,9 +24,9 @@ import com.anod.appwatcher.content.TagsCursor
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.Tag
 import com.anod.appwatcher.model.schema.TagsTable
-import com.anod.appwatcher.recyclerview.RecyclerViewCursorAdapter
-import com.anod.appwatcher.ui.ToolbarActivity
-import com.anod.appwatcher.utils.DrawableTint
+import com.anod.appwatcher.framework.RecyclerViewCursorAdapter
+import com.anod.appwatcher.framework.ToolbarActivity
+import com.anod.appwatcher.framework.DrawableTint
 import kotterknife.bindView
 
 /**

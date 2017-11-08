@@ -1,7 +1,7 @@
 package com.anod.appwatcher.utils
 
 import com.anod.appwatcher.BuildConfig
-import com.anod.appwatcher.Preferences
+import com.anod.appwatcher.preferences.Preferences
 
 /**
  * @author algavris

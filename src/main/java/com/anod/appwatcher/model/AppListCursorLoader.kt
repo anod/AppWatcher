@@ -4,14 +4,14 @@ import android.content.Context
 import android.database.Cursor
 import android.support.v4.content.CursorLoader
 import android.text.TextUtils
-import com.anod.appwatcher.Preferences
+import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.content.AppListCursor
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.model.schema.AppListTable
 import com.anod.appwatcher.model.schema.AppTagsTable
-import com.anod.appwatcher.utils.FilterCursor
-import com.anod.appwatcher.utils.InstalledApps
+import com.anod.appwatcher.framework.FilterCursor
+import com.anod.appwatcher.framework.InstalledApps
 import java.util.*
 
 /**

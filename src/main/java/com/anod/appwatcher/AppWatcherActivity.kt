@@ -5,15 +5,15 @@ import android.support.annotation.LayoutRes
 import android.support.v7.widget.SearchView
 import android.widget.TextView
 
-import com.anod.appwatcher.fragments.AppWatcherListFragment
+import com.anod.appwatcher.watchlist.WatchListFragment
 import com.anod.appwatcher.installed.InstalledSectionProvider
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.sync.SyncScheduler
-import com.anod.appwatcher.ui.AppWatcherBaseActivity
+import com.anod.appwatcher.watchlist.WatchListActivity
 
 import info.anodsplace.android.log.AppLog
 
-class AppWatcherActivity : AppWatcherBaseActivity(), TextView.OnEditorActionListener, SearchView.OnQueryTextListener {
+class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener, SearchView.OnQueryTextListener {
 
     override val isHomeAsMenu: Boolean
         get() = true
@@ -41,21 +41,21 @@ class AppWatcherActivity : AppWatcherBaseActivity(), TextView.OnEditorActionList
     override val menuResource: Int
         get() = R.menu.main
 
-    override fun createViewPagerAdapter(): AppWatcherBaseActivity.Adapter {
-        val adapter = AppWatcherBaseActivity.Adapter(supportFragmentManager)
-        adapter.addFragment(AppWatcherListFragment.newInstance(
+    override fun createViewPagerAdapter(): WatchListActivity.Adapter {
+        val adapter = WatchListActivity.Adapter(supportFragmentManager)
+        adapter.addFragment(WatchListFragment.newInstance(
                 Filters.TAB_ALL,
                 prefs.sortIndex,
-                AppWatcherListFragment.DefaultSection(),
+                WatchListFragment.DefaultSection(),
                 null), getString(R.string.tab_all))
-        adapter.addFragment(AppWatcherListFragment.newInstance(
+        adapter.addFragment(WatchListFragment.newInstance(
                 Filters.TAB_INSTALLED,
                 prefs.sortIndex,
                 InstalledSectionProvider(), null), getString(R.string.tab_installed))
-        adapter.addFragment(AppWatcherListFragment.newInstance(
+        adapter.addFragment(WatchListFragment.newInstance(
                 Filters.TAB_UNINSTALLED,
                 prefs.sortIndex,
-                AppWatcherListFragment.DefaultSection(), null), getString(R.string.tab_not_installed))
+                WatchListFragment.DefaultSection(), null), getString(R.string.tab_not_installed))
         return adapter
     }
 }

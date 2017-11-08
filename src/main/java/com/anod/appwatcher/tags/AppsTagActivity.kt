@@ -10,10 +10,10 @@ import android.support.design.widget.TabLayout
 import android.view.MenuItem
 import android.view.View
 import com.anod.appwatcher.R
-import com.anod.appwatcher.fragments.AppWatcherListFragment
+import com.anod.appwatcher.watchlist.WatchListFragment
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.model.Tag
-import com.anod.appwatcher.ui.AppWatcherBaseActivity
+import com.anod.appwatcher.watchlist.WatchListActivity
 
 /**
  * @author algavris
@@ -21,7 +21,7 @@ import com.anod.appwatcher.ui.AppWatcherBaseActivity
  * @date 18/03/2017.
  */
 
-class AppsTagActivity : AppWatcherBaseActivity() {
+class AppsTagActivity : WatchListActivity() {
     private lateinit var tag: Tag
 
     override val contentLayout: Int
@@ -57,22 +57,22 @@ class AppsTagActivity : AppWatcherBaseActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    override fun createViewPagerAdapter(): AppWatcherBaseActivity.Adapter {
-        val adapter = AppWatcherBaseActivity.Adapter(supportFragmentManager)
+    override fun createViewPagerAdapter(): WatchListActivity.Adapter {
+        val adapter = WatchListActivity.Adapter(supportFragmentManager)
         adapter.addFragment(AppsTagListFragment.newInstance(
                 Filters.TAB_ALL,
                 prefs.sortIndex,
-                AppWatcherListFragment.DefaultSection(),
+                WatchListFragment.DefaultSection(),
                 tag), getString(R.string.tab_all))
         adapter.addFragment(AppsTagListFragment.newInstance(
                 Filters.TAB_INSTALLED,
                 prefs.sortIndex,
-                AppWatcherListFragment.DefaultSection(),
+                WatchListFragment.DefaultSection(),
                 tag), getString(R.string.tab_installed))
         adapter.addFragment(AppsTagListFragment.newInstance(
                 Filters.TAB_UNINSTALLED,
                 prefs.sortIndex,
-                AppWatcherListFragment.DefaultSection(),
+                WatchListFragment.DefaultSection(),
                 tag), getString(R.string.tab_not_installed))
         return adapter
     }

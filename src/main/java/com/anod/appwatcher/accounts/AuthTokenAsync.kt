@@ -3,7 +3,7 @@ package com.anod.appwatcher.accounts
 import android.accounts.Account
 import android.app.Activity
 import android.content.Context
-import com.anod.appwatcher.utils.BackgroundTask
+import com.anod.appwatcher.framework.BackgroundTask
 
 /**
  * @author algavris

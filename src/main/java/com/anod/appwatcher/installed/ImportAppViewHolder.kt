@@ -6,7 +6,7 @@ import android.view.View
 import android.widget.CheckedTextView
 import android.widget.ImageView
 import com.anod.appwatcher.R
-import com.anod.appwatcher.adapters.AppViewHolderBase
+import com.anod.appwatcher.watchlist.AppViewHolderBase
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.utils.PicassoAppIcon
 

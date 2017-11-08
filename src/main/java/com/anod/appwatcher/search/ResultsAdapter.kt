@@ -7,7 +7,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.WatchAppList
-import com.anod.appwatcher.utils.InstalledApps
+import com.anod.appwatcher.framework.InstalledApps
 import com.google.android.finsky.api.model.Document
 import com.google.android.finsky.protos.nano.Messages
 import com.squareup.picasso.Picasso

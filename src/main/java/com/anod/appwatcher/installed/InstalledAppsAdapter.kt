@@ -6,11 +6,11 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.anod.appwatcher.App
 import com.anod.appwatcher.R
-import com.anod.appwatcher.adapters.AppViewHolder
-import com.anod.appwatcher.adapters.AppViewHolderBase
-import com.anod.appwatcher.adapters.AppViewHolderDataProvider
+import com.anod.appwatcher.watchlist.AppViewHolder
+import com.anod.appwatcher.watchlist.AppViewHolderBase
+import com.anod.appwatcher.watchlist.AppViewHolderDataProvider
 import com.anod.appwatcher.utils.PicassoAppIcon
-import com.anod.appwatcher.utils.packageToApp
+import com.anod.appwatcher.framework.packageToApp
 import info.anodsplace.android.widget.recyclerview.ArrayAdapter
 import java.util.*
 

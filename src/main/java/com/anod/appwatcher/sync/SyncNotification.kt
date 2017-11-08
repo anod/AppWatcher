@@ -11,10 +11,10 @@ import android.support.v4.app.NotificationCompat
 import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.NotificationActivity
 import com.anod.appwatcher.R
-import com.anod.appwatcher.ui.AppWatcherBaseActivity
+import com.anod.appwatcher.watchlist.WatchListActivity
 import android.app.NotificationChannel
 import android.os.Build
-import com.anod.appwatcher.utils.Html
+import com.anod.appwatcher.framework.Html
 
 /**
  * @author alex
@@ -59,7 +59,7 @@ class SyncNotification(private val context: Context) {
         notificationIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
         val data = Uri.parse("com.anod.appwatcher://notification")
         notificationIntent.data = data
-        notificationIntent.putExtra(AppWatcherBaseActivity.EXTRA_FROM_NOTIFICATION, true)
+        notificationIntent.putExtra(WatchListActivity.EXTRA_FROM_NOTIFICATION, true)
         val contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0)
 
         val title = renderTitle(updatedApps)

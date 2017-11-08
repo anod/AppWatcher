@@ -31,7 +31,7 @@ public class DfeApiContext
         this.context = context;
         this.account = account;
         lastAuthToken = authToken;
-        this.headers.put("X-DFE-Device-Id", deviceId);//Long.toHexString(PlayG.androidId.get()));
+        this.headers.put("X-DFE-Device-Id", deviceId);//Long.toHexString(PlayG.androidId.load()));
         this.headers.put("Accept-Language", locale.getLanguage() + "-" + locale.getCountry());
         if (!TextUtils.isEmpty(mccmnc)) {
             this.headers.put("X-DFE-MCCMNC", mccmnc);
@@ -95,7 +95,7 @@ public class DfeApiContext
             hashMap.put("Authorization", "GoogleLogin auth=" + this.lastAuthToken);
 //            if (AppLog.DEBUG) {
 //                for(String key: hashMap.keySet()) {
-//                    AppLog.d("HTTP Header: "+key+" = "+hashMap.get(key));
+//                    AppLog.d("HTTP Header: "+key+" = "+hashMap.load(key));
 //                }
 //            }
             return hashMap;

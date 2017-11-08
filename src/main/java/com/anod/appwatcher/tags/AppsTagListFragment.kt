@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.anod.appwatcher.R
-import com.anod.appwatcher.fragments.AppWatcherListFragment
+import com.anod.appwatcher.watchlist.WatchListFragment
 import com.anod.appwatcher.model.Tag
 
 /**
@@ -14,7 +14,7 @@ import com.anod.appwatcher.model.Tag
  * @date 01/04/2017.
  */
 
-class AppsTagListFragment : AppWatcherListFragment() {
+class AppsTagListFragment : WatchListFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_appstag_list, container, false)
@@ -29,9 +29,9 @@ class AppsTagListFragment : AppWatcherListFragment() {
     }
 
     companion object {
-        fun newInstance(filterId: Int, sortId: Int, sectionProvider: AppWatcherListFragment.SectionProvider, tag: Tag?): AppsTagListFragment {
+        fun newInstance(filterId: Int, sortId: Int, sectionProvider: WatchListFragment.SectionProvider, tag: Tag?): AppsTagListFragment {
             val frag = AppsTagListFragment()
-            frag.arguments = AppWatcherListFragment.createArguments(filterId, sortId, sectionProvider, tag)
+            frag.arguments = WatchListFragment.createArguments(filterId, sortId, sectionProvider, tag)
             return frag
         }
     }

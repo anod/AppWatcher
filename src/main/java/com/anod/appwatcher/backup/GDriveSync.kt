@@ -9,7 +9,7 @@ import android.support.v4.app.NotificationCompat
 import android.widget.Toast
 import com.anod.appwatcher.R
 import com.anod.appwatcher.backup.gdrive.*
-import com.anod.appwatcher.utils.GooglePlayServices
+import com.anod.appwatcher.framework.GooglePlayServices
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.drive.Drive
 

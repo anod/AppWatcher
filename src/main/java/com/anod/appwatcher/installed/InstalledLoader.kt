@@ -4,14 +4,14 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.database.Cursor
 import android.support.v4.util.SimpleArrayMap
-import com.anod.appwatcher.Preferences
+import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.model.AppListCursorLoader
 import com.anod.appwatcher.model.Tag
-import com.anod.appwatcher.utils.FilterCursor
-import com.anod.appwatcher.utils.getAppTitle
-import com.anod.appwatcher.utils.getAppUpdateTime
-import com.anod.appwatcher.utils.getInstalledPackagesCompat
+import com.anod.appwatcher.framework.FilterCursor
+import com.anod.appwatcher.framework.getAppTitle
+import com.anod.appwatcher.framework.getAppUpdateTime
+import com.anod.appwatcher.framework.getInstalledPackagesCompat
 import java.util.*
 
 class InstalledLoader(

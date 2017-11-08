@@ -4,8 +4,8 @@ import android.content.Context
 import android.os.Bundle
 import com.anod.appwatcher.App
 import com.anod.appwatcher.backup.GDriveSync
-import com.anod.appwatcher.utils.BackgroundTask
-import com.anod.appwatcher.utils.GooglePlayServices
+import com.anod.appwatcher.framework.BackgroundTask
+import com.anod.appwatcher.framework.GooglePlayServices
 import com.firebase.jobdispatcher.*
 import info.anodsplace.android.log.AppLog
 

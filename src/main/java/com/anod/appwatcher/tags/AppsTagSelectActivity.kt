@@ -23,9 +23,9 @@ import com.anod.appwatcher.model.AppListCursorLoader
 import com.anod.appwatcher.model.Tag
 import com.anod.appwatcher.model.schema.AppListTable
 import com.anod.appwatcher.model.schema.AppTagsTable
-import com.anod.appwatcher.ui.ToolbarActivity
-import com.anod.appwatcher.utils.BackgroundTask
-import com.anod.appwatcher.utils.Keyboard
+import com.anod.appwatcher.framework.ToolbarActivity
+import com.anod.appwatcher.framework.BackgroundTask
+import com.anod.appwatcher.framework.Keyboard
 import kotterknife.bindView
 
 

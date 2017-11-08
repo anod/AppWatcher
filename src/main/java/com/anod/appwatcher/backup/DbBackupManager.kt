@@ -5,7 +5,7 @@ import android.net.Uri
 import android.os.Environment
 import com.android.util.MalformedJsonException
 import com.anod.appwatcher.content.DbContentProviderClient
-import com.anod.appwatcher.utils.ApplicationContext
+import com.anod.appwatcher.framework.ApplicationContext
 import info.anodsplace.android.log.AppLog
 import java.io.*
 import java.text.SimpleDateFormat

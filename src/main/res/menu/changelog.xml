@@ -25,15 +25,15 @@
     </item>
 
     <item
-        android:id="@+id/menu_open"
-        app:showAsAction="ifRoom"
-        android:title="@string/open" android:icon="@drawable/ic_open_in_new_white_24dp">
-    </item>
-
-    <item
         android:id="@+id/menu_share"
         app:showAsAction="ifRoom"
         android:title="@string/share" android:icon="@drawable/ic_share_white_24dp">
+    </item>
+
+    <item
+        android:id="@+id/menu_open"
+        app:showAsAction="ifRoom"
+        android:title="@string/open" android:icon="@drawable/ic_open_in_new_white_24dp">
     </item>
 
     <item

@@ -14,9 +14,9 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
 
-import com.anod.appwatcher.Preferences
+import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.R
-import com.anod.appwatcher.ui.ActivityListener
+import com.anod.appwatcher.framework.ActivityListener
 
 /**
  * @author alex

@@ -9,7 +9,7 @@ import com.anod.appwatcher.App
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.AppListCursor
 import com.anod.appwatcher.model.AppInfo
-import com.anod.appwatcher.recyclerview.RecyclerViewCursorAdapter
+import com.anod.appwatcher.framework.RecyclerViewCursorAdapter
 import com.anod.appwatcher.utils.PicassoAppIcon
 
 internal class TagAppsCursorAdapter(context: Context, private val tagAppsImport: TagAppsImport)

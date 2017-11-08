@@ -3,7 +3,7 @@ package com.anod.appwatcher.sync
 import android.content.Intent
 import android.os.Bundle
 import com.anod.appwatcher.content.DbContentProvider
-import com.anod.appwatcher.utils.BackgroundTask
+import com.anod.appwatcher.framework.BackgroundTask
 import com.firebase.jobdispatcher.JobParameters
 import com.firebase.jobdispatcher.JobService
 import info.anodsplace.android.log.AppLog
