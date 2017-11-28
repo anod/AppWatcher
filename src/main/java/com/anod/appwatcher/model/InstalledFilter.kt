@@ -10,7 +10,7 @@ import com.anod.appwatcher.framework.InstalledApps
  * *
  * @date 8/4/14.
  */
-class InstalledFilter(private val mIncludeInstalled: Boolean, private val InstalledApps: InstalledApps) : FilterCursor.CursorFilter {
+class InstalledFilter(private val includeInstalled: Boolean, private val InstalledApps: InstalledApps) : FilterCursor.CursorFilter {
     internal var newCount: Int = 0
         private set
     internal var updatableNewCount: Int = 0
@@ -24,11 +24,11 @@ class InstalledFilter(private val mIncludeInstalled: Boolean, private val Instal
         val installedInfo = InstalledApps.getInfo(packageName)
         val installed = installedInfo.isInstalled
 
-        if (mIncludeInstalled && !installed) {
+        if (includeInstalled && !installed) {
             return true
         }
 
-        if (!mIncludeInstalled && installed) {
+        if (!includeInstalled && installed) {
             return true
         }
 

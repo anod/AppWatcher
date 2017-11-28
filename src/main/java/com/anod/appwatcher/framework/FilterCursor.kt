@@ -28,9 +28,9 @@ class FilterCursor(private val cursor: Cursor, filter: CursorFilter?) : Abstract
 
     private fun initPositions(cursor: Cursor, count: Int, filter: CursorFilter) {
         this.count = 0
-        position = IntArray(this.cursor.count)
+        position = IntArray(cursor.count)
         cursor.moveToPosition(-1)
-        while (cursor.moveToNext() && count < count) {
+        while (cursor.moveToNext() && this.count < count) {
             if (!filter.filterRecord(cursor)) {
                 position!![this.count++] = cursor.position
             }
