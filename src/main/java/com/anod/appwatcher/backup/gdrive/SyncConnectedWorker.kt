@@ -4,10 +4,15 @@ import android.content.Context
 import com.anod.appwatcher.backup.DbJsonReader
 import com.anod.appwatcher.backup.DbJsonWriter
 import com.anod.appwatcher.content.DbContentProviderClient
+import com.anod.appwatcher.framework.ApplicationContext
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.Tag
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.drive.*
+import com.google.android.gms.tasks.Tasks
 import info.anodsplace.android.log.AppLog
 import java.io.*
 
@@ -16,9 +21,8 @@ import java.io.*
  * *
  * @date 2014-11-15
  */
-class SyncConnectedWorker(private val context: Context, private val googleApiClient: GoogleApiClient) {
+class SyncConnectedWorker(private val context: ApplicationContext, private val googleAccount: GoogleSignInAccount) {
 
-    @Throws(Exception::class)
     fun doSyncInBackground() {
         synchronized(sLock) {
             val cr = DbContentProviderClient(context)
@@ -32,11 +36,12 @@ class SyncConnectedWorker(private val context: Context, private val googleApiCli
         }
     }
 
-    @Throws(Exception::class)
     private fun doSyncLocked(cr: DbContentProviderClient) {
-        Drive.DriveApi.requestSync(googleApiClient).await()
+        Tasks.await(Drive.getDriveClient(context.actual, googleAccount).requestSync())
 
-        val file = DriveIdFile(AppListFile, googleApiClient)
+        val driveClient = Drive.getDriveResourceClient(context.actual, googleAccount)
+
+        val file = DriveIdFile(AppListFile, driveClient)
 
         val driveId = file.driveId
         // There is as file exist, create driveFileReader
@@ -57,10 +62,9 @@ class SyncConnectedWorker(private val context: Context, private val googleApiCli
         val numRows = cr.cleanDeleted()
         AppLog.d("[GDrive] Cleaned $numRows rows")
 
-        Drive.DriveApi.requestSync(googleApiClient).await()
+        Tasks.await(Drive.getDriveClient(context.actual, googleAccount).requestSync())
     }
 
-    @Throws(Exception::class)
     private fun getFileInputStream(contents: DriveContents): InputStreamReader {
         val inputStream = contents.inputStream ?: throw Exception("Empty input stream ")
         return InputStreamReader(inputStream, "UTF-8")
@@ -69,12 +73,12 @@ class SyncConnectedWorker(private val context: Context, private val googleApiCli
     @Throws(Exception::class)
     private fun insertRemoteItems(driveId: DriveId, cr: DbContentProviderClient) {
         val file = driveId.asDriveFile()
-        val contentsResult = file.open(googleApiClient, DriveFile.MODE_READ_ONLY, null).await()
-        if (!contentsResult.status.isSuccess) {
-            throw Exception("Error read file : " + contentsResult.status.statusMessage!!)
-        }
-        val contents = contentsResult.driveContents
-        val driveFileReader = getFileInputStream(contents)
+
+        val driveClient = Drive.getDriveResourceClient(context.actual, googleAccount)
+
+        val driveContents = Tasks.await(driveClient.openFile(file, DriveFile.MODE_READ_ONLY))
+
+        val driveFileReader = getFileInputStream(driveContents)
 
         AppLog.d("[GDrive] Sync remote list " + AppListFile.fileName)
 
@@ -104,10 +108,9 @@ class SyncConnectedWorker(private val context: Context, private val googleApiCli
                 tagList.add(tag)
             }
 
-            @Throws(IOException::class)
             override fun onFinish() {
                 driveFileReader.close()
-                contents.discard(googleApiClient)
+                driveClient.discardContents(driveContents)
 
                 // Add missing tags
                 tagList.forEach { tag ->

@@ -66,7 +66,6 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
         watchAppList = WatchAppList(this)
 
         retryButton.setOnClickListener { retrySearchResult() }
-        loading.visibility = View.GONE
         listView.layoutManager = LinearLayoutManager(this)
         listView.visibility = View.GONE
         emptyView.visibility = View.GONE
@@ -74,6 +73,13 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
         retryView.visibility = View.GONE
 
         initFromIntent(intent)
+
+        val account = provide.prefs.account
+        if (account== null) {
+            accountSelectionDialog.show()
+        } else {
+            onAccountSelected(account)
+        }
     }
 
     private fun initFromIntent(i: Intent?) {
@@ -133,7 +139,6 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
 
         val searchItem = menu.findItem(R.id.menu_search)
         searchView = searchItem.actionView as SearchView
-        searchView.setIconifiedByDefault(false)
         searchItem.expandActionView()
 
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {

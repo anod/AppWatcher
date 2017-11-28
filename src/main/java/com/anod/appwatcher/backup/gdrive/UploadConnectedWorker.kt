@@ -3,15 +3,21 @@ package com.anod.appwatcher.backup.gdrive
 import android.content.Context
 import com.anod.appwatcher.backup.DbJsonWriter
 import com.anod.appwatcher.content.DbContentProviderClient
+import com.anod.appwatcher.framework.ApplicationContext
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.drive.Drive
+import com.google.android.gms.tasks.Tasks
 import info.anodsplace.android.log.AppLog
 
 /**
  * @author algavris
  * @date 26/06/2017
  */
-class UploadConnectedWorker(private val context: Context, private val googleApiClient: GoogleApiClient) {
+class UploadConnectedWorker(private val context: ApplicationContext, private val googleAccount: GoogleSignInAccount) {
+
+    constructor(context: Context, googleAccount: GoogleSignInAccount)
+        : this(ApplicationContext(context), googleAccount)
 
     @Throws(Exception::class)
     fun doUploadInBackground() {
@@ -29,9 +35,10 @@ class UploadConnectedWorker(private val context: Context, private val googleApiC
 
     @Throws(Exception::class)
     private fun doUploadLocked(cr: DbContentProviderClient) {
-        Drive.DriveApi.requestSync(googleApiClient).await()
+        Tasks.await(Drive.getDriveClient(context.actual, googleAccount).requestSync())
 
-        val file = DriveIdFile(AppListFile, googleApiClient)
+        val driveClient = Drive.getDriveResourceClient(context.actual, googleAccount)
+        val file = DriveIdFile(AppListFile, driveClient)
 
         if (file.driveId == null) {
             file.create()
@@ -44,7 +51,7 @@ class UploadConnectedWorker(private val context: Context, private val googleApiC
         val numRows = cr.cleanDeleted()
         AppLog.d("[GDrive] Cleaned $numRows rows")
 
-        Drive.DriveApi.requestSync(googleApiClient).await()
+        Tasks.await(Drive.getDriveClient(context.actual, googleAccount).requestSync())
     }
 
     companion object {

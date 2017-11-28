@@ -62,11 +62,11 @@ class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Li
         watchAppList!!.detach()
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater!!.inflate(R.layout.fragment_wishlist, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return inflater.inflate(R.layout.fragment_wishlist, container, false)
     }
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         listView.layoutManager = LinearLayoutManager(context)
@@ -77,14 +77,14 @@ class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Li
         loading.visibility = View.VISIBLE
         retryView.visibility = View.GONE
 
-        activity.setTitle(R.string.wishlist)
+        activity!!.setTitle(R.string.wishlist)
 
-        val account = arguments.getParcelable<Account>(EXTRA_ACCOUNT)
-        val authToken = arguments.getString(EXTRA_AUTH_TOKEN)
+        val account = arguments!!.getParcelable<Account>(EXTRA_ACCOUNT)
+        val authToken = arguments!!.getString(EXTRA_AUTH_TOKEN)
 
         if (account == null || TextUtils.isEmpty(authToken)) {
             Toast.makeText(context, R.string.choose_an_account, Toast.LENGTH_SHORT).show()
-            activity.finish()
+            activity!!.finish()
         } else {
             startLoadingList(account, authToken!!)
         }
@@ -92,7 +92,7 @@ class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Li
 
     override fun onWatchListChangeSuccess(info: AppInfo, newStatus: Int) {
         if (newStatus == AppInfoMetadata.STATUS_NORMAL) {
-            TagSnackbar.make(activity, info, false).show()
+            TagSnackbar.make(activity!!, info, false).show()
         }
         listView.adapter.notifyDataSetChanged()
     }
@@ -112,7 +112,7 @@ class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Li
 
         val context = context
 
-        val adapter = ResultsAdapterWishList(context, endpoint!!, watchAppList!!)
+        val adapter = ResultsAdapterWishList(context!!, endpoint!!, watchAppList!!)
         listView.adapter = adapter
 
         endpoint!!.startAsync()

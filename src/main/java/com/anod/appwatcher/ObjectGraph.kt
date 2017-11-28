@@ -1,5 +1,6 @@
 package com.anod.appwatcher
 
+import android.app.NotificationManager
 import android.content.Context
 import android.net.ConnectivityManager
 import android.util.LruCache
@@ -40,4 +41,6 @@ class ObjectGraph internal constructor(private val app: AppWatcherApplication) {
         val cacheSize = maxMemory / 8
         LruCache<String, Any?>(cacheSize.toInt())
     }
+    val notificationManager: NotificationManager
+        get() = app.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 }

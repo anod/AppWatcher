@@ -1,20 +1,18 @@
 package com.anod.appwatcher
 
 import android.app.Application
-import android.content.Context
 import android.content.res.Configuration
 import android.net.ConnectivityManager
 import android.support.v7.app.AppCompatDelegate
 import android.view.ViewConfiguration
-import com.anod.appwatcher.utils.MetricsManagerEvent
 import com.google.firebase.crash.FirebaseCrash
 import info.anodsplace.android.log.AppLog
 import com.android.volley.NetworkError
 import com.android.volley.NoConnectionError
 import com.android.volley.TimeoutError
 import com.android.volley.VolleyError
+import com.anod.appwatcher.framework.ApplicationContext
 import com.anod.appwatcher.sync.SyncNotification
-import com.anod.appwatcher.utils.ExtractDateError
 import java.io.IOException
 import java.net.ConnectException
 import java.net.SocketException
@@ -42,7 +40,7 @@ class AppWatcherApplication : Application(), AppLog.Listener {
             objectGraph.uploadServiceContentObserver
         }
         AppCompatDelegate.setDefaultNightMode(objectGraph.prefs.nightMode)
-        SyncNotification(this).createChannel()
+        SyncNotification(ApplicationContext(this)).createChannel()
     }
 
     val isNightTheme: Boolean

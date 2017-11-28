@@ -3,10 +3,10 @@ package com.anod.appwatcher.backup.gdrive
 import android.content.Context
 import android.os.Bundle
 import com.anod.appwatcher.App
-import com.anod.appwatcher.backup.GDriveSync
 import com.anod.appwatcher.framework.BackgroundTask
-import com.anod.appwatcher.framework.GooglePlayServices
 import com.firebase.jobdispatcher.*
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import info.anodsplace.android.log.AppLog
 
 /**
@@ -40,7 +40,7 @@ class UploadService : JobService() {
         }
     }
 
-    private var runner: BackgroundTask<Void?, Boolean>? = null
+    private var runner: BackgroundTask<GoogleSignInAccount, Boolean>? = null
 
     override fun onStartJob(job: JobParameters?): Boolean {
         if (job == null) return false
@@ -48,17 +48,19 @@ class UploadService : JobService() {
         AppLog.d("Scheduled call executed. Task: " + job.tag)
         AppLog.d("DriveSync perform upload")
 
-        this.runner = BackgroundTask(object : BackgroundTask.Worker<Void?, Boolean>(null) {
-            override fun run(param: Void?): Boolean {
+        val googleAccount = GoogleSignIn.getLastSignedInAccount(applicationContext)
+        if (googleAccount == null) {
+            AppLog.e("Account is null")
+            return false
+        }
 
-                val driveSync = GDriveSync(applicationContext)
+        this.runner = BackgroundTask(object : BackgroundTask.Worker<GoogleSignInAccount, Boolean>(googleAccount) {
+            override fun run(param: GoogleSignInAccount): Boolean {
+
+                val worker = UploadConnectedWorker(applicationContext, googleAccount)
                 try {
-                    driveSync.uploadLocked()
+                    worker.doUploadInBackground()
                     return true
-                } catch (e: GooglePlayServices.ResolutionException) {
-                    driveSync.showResolutionNotification(e.resolution)
-                    AppLog.e(e)
-                    return false
                 } catch (e: Exception) {
                     AppLog.e(e)
                     return false

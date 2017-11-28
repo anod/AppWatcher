@@ -3,6 +3,7 @@ package com.anod.appwatcher.sync
 import android.content.Intent
 import android.os.Bundle
 import com.anod.appwatcher.content.DbContentProvider
+import com.anod.appwatcher.framework.ApplicationContext
 import com.anod.appwatcher.framework.BackgroundTask
 import com.firebase.jobdispatcher.JobParameters
 import com.firebase.jobdispatcher.JobService
@@ -18,7 +19,7 @@ class SyncTaskService : JobService() {
 
         this.runner = BackgroundTask(object : BackgroundTask.Worker<Void?, Int>(null) {
             override fun run(param: Void?): Int {
-                val syncAdapter = VersionsCheck(applicationContext)
+                val syncAdapter = VersionsCheck(ApplicationContext(applicationContext))
                 val contentProviderClient = contentResolver.acquireContentProviderClient(DbContentProvider.authority)
 
                 val extras = job.extras ?: Bundle.EMPTY

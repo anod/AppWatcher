@@ -3,6 +3,7 @@ package com.anod.appwatcher
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import com.anod.appwatcher.framework.ApplicationContext
 import com.anod.appwatcher.sync.SyncNotification
 import com.anod.appwatcher.framework.forMyApps
 import com.anod.appwatcher.framework.forPlayStore
@@ -12,7 +13,7 @@ class NotificationActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val sn = SyncNotification(this)
+        val sn = SyncNotification(ApplicationContext(this))
         sn.cancel()
         val type = intent.getIntExtra(EXTRA_TYPE, 0)
         when (type) {

@@ -20,11 +20,11 @@ class AppsTagListFragment : WatchListFragment() {
         return inflater.inflate(R.layout.fragment_appstag_list, container, false)
     }
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        view?.findViewById<View>(android.R.id.button1)?.setOnClickListener {
-            startActivity(AppsTagSelectActivity.createIntent(tag!!, activity))
+        view.findViewById<View>(android.R.id.button1)?.setOnClickListener {
+            startActivity(AppsTagSelectActivity.createIntent(tag!!, activity!!))
         }
     }
 

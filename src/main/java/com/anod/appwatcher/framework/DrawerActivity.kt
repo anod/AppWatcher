@@ -63,9 +63,9 @@ abstract class DrawerActivity : ToolbarActivity(), AccountSelectionDialog.Select
 
         if (this.navigationView != null) {
             this.drawerLayout?.addDrawerListener(object: DrawerLayout.SimpleDrawerListener() {
-                override fun onDrawerOpened(drawerView: View?) {
+                override fun onDrawerOpened(drawerView: View) {
                     super.onDrawerOpened(drawerView)
-                    drawerView?.postDelayed({
+                    drawerView.postDelayed({
                         updateTags()
                     }, 300L)
                 }

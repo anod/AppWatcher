@@ -2,7 +2,6 @@ package com.anod.appwatcher.sync
 
 import android.content.ContentProviderClient
 import android.content.ContentValues
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.RemoteException
@@ -13,9 +12,11 @@ import com.android.volley.VolleyError
 import com.anod.appwatcher.App
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.accounts.AuthTokenBlocking
-import com.anod.appwatcher.backup.GDriveSync
+import com.anod.appwatcher.backup.gdrive.GDriveSilentSignIn
+import com.anod.appwatcher.backup.gdrive.SyncConnectedWorker
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.DbContentProviderClient
+import com.anod.appwatcher.framework.ApplicationContext
 import com.anod.appwatcher.market.BulkDetailsEndpoint
 import com.anod.appwatcher.market.PlayStoreEndpoint
 import com.anod.appwatcher.model.AppChange
@@ -24,7 +25,6 @@ import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.model.schema.AppListTable
 import com.anod.appwatcher.model.schema.ChangelogTable
 import com.anod.appwatcher.model.schema.contentValues
-import com.anod.appwatcher.framework.GooglePlayServices
 import com.anod.appwatcher.framework.InstalledApps
 import com.anod.appwatcher.utils.extractUploadDate
 import com.google.android.finsky.api.model.Document
@@ -36,7 +36,7 @@ import java.util.*
  *  @date 6/3/2017
  */
 
-class VersionsCheck(private val context: Context): PlayStoreEndpoint.Listener {
+class VersionsCheck(private val context: ApplicationContext): PlayStoreEndpoint.Listener {
 
     class UpdatedApp(
             val appId: String,
@@ -315,13 +315,13 @@ class VersionsCheck(private val context: Context): PlayStoreEndpoint.Listener {
         val driveSyncTime = pref.lastDriveSyncTime
         if (driveSyncTime == -1.toLong() || now > DateUtils.DAY_IN_MILLIS + driveSyncTime) {
             AppLog.d("DriveSync perform sync")
-            val driveSync = GDriveSync(context)
+            val signIn = GDriveSilentSignIn(context)
+
+            val googleAccount = signIn.signInLocked()
+            val worker = SyncConnectedWorker(context, googleAccount)
             try {
-                driveSync.syncLocked()
+                worker.doSyncInBackground()
                 pref.lastDriveSyncTime = System.currentTimeMillis()
-            } catch (e: GooglePlayServices.ResolutionException) {
-                driveSync.showResolutionNotification(e.resolution)
-                AppLog.e(e)
             } catch (e: Exception) {
                 AppLog.e(e)
             }
@@ -357,7 +357,7 @@ class VersionsCheck(private val context: Context): PlayStoreEndpoint.Listener {
         if (authToken == null) {
             return null
         }
-        val endpoint = BulkDetailsEndpoint(context)
+        val endpoint = BulkDetailsEndpoint(context.actual)
         endpoint.setAccount(account, authToken)
         return endpoint
     }

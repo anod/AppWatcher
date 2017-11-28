@@ -3,11 +3,9 @@ package com.anod.appwatcher.backup.gdrive
 import com.anod.appwatcher.backup.DbJsonWriter
 import com.anod.appwatcher.content.DbContentProviderClient
 import com.google.android.gms.common.api.GoogleApiClient
-import com.google.android.gms.drive.Drive
-import com.google.android.gms.drive.DriveFile
-import com.google.android.gms.drive.DriveId
-import com.google.android.gms.drive.MetadataChangeSet
+import com.google.android.gms.drive.*
 import com.google.android.gms.drive.query.*
+import com.google.android.gms.tasks.Tasks
 import info.anodsplace.android.log.AppLog
 import java.io.BufferedWriter
 import java.io.IOException
@@ -17,7 +15,7 @@ import java.io.OutputStreamWriter
  * @author algavris
  * @date 26/06/2017
  */
-class DriveIdFile(private val file: FileDescription, private val googleApiClient: GoogleApiClient) {
+class DriveIdFile(private val file: FileDescription, private val driveClient: DriveResourceClient) {
 
     interface FileDescription {
         val fileName: String
@@ -33,7 +31,6 @@ class DriveIdFile(private val file: FileDescription, private val googleApiClient
             return _driveId
         }
 
-    @Throws(Exception::class)
     private fun retrieve(): DriveId? {
 
         val order = SortOrder.Builder()
@@ -48,49 +45,34 @@ class DriveIdFile(private val file: FileDescription, private val googleApiClient
                 .setSortOrder(order)
                 .build()
 
-        val metadataBufferResult = Drive.DriveApi
-                .getAppFolder(googleApiClient)
-                .queryChildren(googleApiClient, query)
-                .await()
 
-        if (!metadataBufferResult.status.isSuccess) {
-            throw Exception("Problem retrieving " + file.fileName + " : " + metadataBufferResult.status.statusMessage)
-        }
-        val metadataList = metadataBufferResult.metadataBuffer
-        if (metadataList.count == 0) {
+        val appFolder = Tasks.await(driveClient.appFolder)
+        val metadataBuffer = Tasks.await(driveClient.queryChildren(appFolder, query))
+        if (metadataBuffer.count == 0) {
             AppLog.d("[GDrive] File NOT found " + file.fileName)
             return null
         } else {
-            val metadata = metadataList.get(0)
+            val metadata = metadataBuffer.get(0)
             AppLog.d("[GDrive] File found " + file.fileName)
             return metadata.driveId
         }
+
     }
 
-    @Throws(Exception::class)
     fun create() {
-        val contentsResult = Drive.DriveApi.newDriveContents(googleApiClient).await()
+        val appFolder = Tasks.await(driveClient.appFolder)
+        val driveContents = Tasks.await(driveClient.createContents())
         AppLog.d("[GDrive] Create new file ")
 
-        if (!contentsResult.status.isSuccess) {
-            throw Exception("[Google Drive] File create request filed: " + contentsResult.status.statusMessage!!)
-        }
         val changeSet = MetadataChangeSet.Builder()
                 .setTitle(file.fileName)
                 .setMimeType(file.mimeType)
                 .build()
 
-        val driveFileResult = Drive.DriveApi
-                .getAppFolder(googleApiClient)
-                .createFile(googleApiClient, changeSet, contentsResult.driveContents).await()
-
-        if (!driveFileResult.status.isSuccess) {
-            throw Exception("[Google Drive] File create result filed: " + driveFileResult.status.statusMessage!!)
-        }
-        _driveId = driveFileResult.driveFile.driveId
+        val driveFile = Tasks.await(driveClient.createFile(appFolder, changeSet, driveContents))
+        _driveId = driveFile.driveId
     }
 
-    @Throws(Exception::class)
     internal fun write(writer: DbJsonWriter, cr: DbContentProviderClient) {
 
         if (this._driveId == null)
@@ -104,13 +86,9 @@ class DriveIdFile(private val file: FileDescription, private val googleApiClient
 
         val target = driveId.asDriveFile()
 
-        val contentsResult = target.open(googleApiClient, DriveFile.MODE_WRITE_ONLY, null).await()
-        if (!contentsResult.status.isSuccess) {
-            throw Exception("Error open file for write : " + contentsResult.status.statusMessage!!)
-        }
+        val driveContents = Tasks.await(driveClient.openFile(target, DriveFile.MODE_WRITE_ONLY))
 
-        val contents = contentsResult.driveContents
-        val outputStream = contents.outputStream
+        val outputStream = driveContents.outputStream
         val outWriter = BufferedWriter(OutputStreamWriter(outputStream))
         try {
             writer.write(outWriter, cr)
@@ -124,9 +102,7 @@ class DriveIdFile(private val file: FileDescription, private val googleApiClient
             }
 
         }
-        val status = contents.commit(googleApiClient, null).await()
-        if (!status.status.isSuccess) {
-            throw Exception("Error commit changes to file : " + status.statusMessage!!)
-        }
+
+        Tasks.await(driveClient.commitContents(driveContents, null))
     }
 }

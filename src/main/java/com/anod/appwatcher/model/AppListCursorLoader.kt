@@ -12,6 +12,7 @@ import com.anod.appwatcher.model.schema.AppListTable
 import com.anod.appwatcher.model.schema.AppTagsTable
 import com.anod.appwatcher.framework.FilterCursor
 import com.anod.appwatcher.framework.InstalledApps
+import com.anod.appwatcher.framework.NullCursor
 import java.util.*
 
 /**
@@ -58,7 +59,7 @@ open class AppListCursorLoader(context: Context,
     }
 
     override fun loadInBackground(): Cursor {
-        val cr = super.loadInBackground()
+        val cr = super.loadInBackground() ?: NullCursor()
 
         if (cursorFilter == null) {
             loadNewCount()

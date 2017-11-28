@@ -138,10 +138,8 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
         return sectionClass.newInstance() as SectionProvider
     }
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        if (view == null) return
 
         listView = view.findViewById(android.R.id.list)
         emptyView = view.findViewById(android.R.id.empty)
@@ -151,24 +149,24 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
         emptyView.visibility = View.GONE
         swipeLayout?.setOnRefreshListener(this)
 
-        installedApps = InstalledApps.PackageManager(activity.packageManager)
+        installedApps = InstalledApps.PackageManager(activity!!.packageManager)
 
         val layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
         listView.layoutManager = layoutManager
 
-        section = sectionForClassName(arguments.getString(ARG_SECTION_PROVIDER))
+        section = sectionForClassName(arguments!!.getString(ARG_SECTION_PROVIDER))
 
         // Create an empty adapter we will use to display the loaded data.
         adapter = MergeRecyclerAdapter()
-        section.fillAdapters(adapter, activity, installedApps, this)
+        section.fillAdapters(adapter, activity!!, installedApps, this)
         listView.adapter = adapter
 
         // Start out with a progress indicator.
         this.isListVisible = false
 
-        sortId = arguments.getInt(ARG_SORT)
-        filterId = arguments.getInt(ARG_FILTER)
-        tag = arguments.getParcelable<Tag>(ARG_TAG)
+        sortId = arguments!!.getInt(ARG_SORT)
+        filterId = arguments!!.getInt(ARG_FILTER)
+        tag = arguments!!.getParcelable<Tag>(ARG_TAG)
         // Prepare the loader.  Either re-connect with an existing one,
         // or start a new one.
         loaderManager.initLoader(0, null, this)
@@ -186,12 +184,12 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
 
         view.findViewById<View>(android.R.id.button3)?.setOnClickListener {
             val intent = Intent.makeMainActivity(ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity"))
-            activity.startActivitySafely(intent)
+            activity?.startActivitySafely(intent)
         }
     }
 
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<Cursor> {
-        return section.createLoader(activity, titleFilter, sortId, createFilter(filterId), tag)
+        return section.createLoader(activity!!, titleFilter, sortId, createFilter(filterId), tag)
     }
 
     override fun onLoadFinished(loader: Loader<Cursor>, data: Cursor) {
@@ -248,7 +246,7 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
     }
 
     override fun onActionButton() {
-        context.startActivitySafely(Intent().forMyApps(true))
+        context?.startActivitySafely(Intent().forMyApps(true))
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

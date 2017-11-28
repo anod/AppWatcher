@@ -15,11 +15,15 @@ import com.anod.appwatcher.accounts.AccountSelectionDialog
 import com.anod.appwatcher.accounts.AuthTokenAsync
 import com.anod.appwatcher.backup.DbBackupManager
 import com.anod.appwatcher.backup.ExportTask
-import com.anod.appwatcher.backup.GDriveSync
+import com.anod.appwatcher.backup.gdrive.GDrive
 import com.anod.appwatcher.backup.ImportTask
+import com.anod.appwatcher.backup.gdrive.GDriveSignIn
+import com.anod.appwatcher.framework.GooglePlayServices
 import com.anod.appwatcher.model.DbSchemaManager
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.framework.SettingsActionBarActivity
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import info.anodsplace.android.log.AppLog
 import java.io.File
@@ -28,17 +32,25 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.util.*
 
-open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDriveSync.Listener, AccountSelectionDialog.SelectionListener, ImportTask.Listener {
+open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDrive.Listener, GDriveSignIn.Listener, AccountSelectionDialog.SelectionListener, ImportTask.Listener {
 
-    private var gDriveSync: GDriveSync? = null
     private var syncEnabledItem: CheckboxItem? = null
     private var syncNowItem: Item? = null
-    private var accountSelectionDialog: AccountSelectionDialog? = null
     private var wifiItem: CheckboxItem? = null
     private var chargingItem: CheckboxItem? = null
     private var frequencyItem: Item? = null
 
-    private lateinit var prefs: Preferences
+    private val gDriveSignIn: GDriveSignIn by lazy { GDriveSignIn(this, this) }
+
+    private val accountSelectionDialog: AccountSelectionDialog by lazy {
+        AccountSelectionDialog(this, prefs, this)
+    }
+
+    private val prefs: Preferences
+        get() = App.provide(this).prefs
+
+    override fun init() {
+    }
 
     override fun onExportStart() {
         AppLog.d("Exporting...")
@@ -59,27 +71,15 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
         }
     }
 
-    override fun init() {
-        gDriveSync = GDriveSync(this)
-        prefs = App.provide(this).prefs
-        accountSelectionDialog = AccountSelectionDialog(this, prefs, this)
-    }
-
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        accountSelectionDialog!!.onRequestPermissionResult(requestCode, permissions, grantResults)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        gDriveSync!!.listener = null
+        accountSelectionDialog.onRequestPermissionResult(requestCode, permissions, grantResults)
     }
 
     override fun onResume() {
         super.onResume()
 
         syncNowItem!!.summary = renderDriveSyncTime()
-        gDriveSync!!.listener = this
     }
 
     override fun initPreferenceItems(): List<Preference> {
@@ -109,12 +109,13 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
 
         syncEnabledItem = CheckboxItem(R.string.pref_title_drive_sync_enabled, R.string.pref_descr_drive_sync_enabled, ACTION_SYNC_ENABLE)
         syncNowItem = Item(R.string.pref_title_drive_sync_now, 0, ACTION_SYNC_NOW)
-        if (!gDriveSync!!.isSupported) {
+        val gps = GooglePlayServices(this)
+        if (!gps.isSupported) {
             syncEnabledItem!!.checked = false
             syncEnabledItem!!.enabled = false
             syncNowItem!!.enabled = false
             syncEnabledItem!!.summaryRes = 0
-            syncEnabledItem!!.summary = gDriveSync!!.playServiceStatusText
+            syncEnabledItem!!.summary = gps.availabilityMessage
         } else {
             syncEnabledItem!!.checked = prefs.isDriveSyncEnabled
             syncNowItem!!.enabled = syncEnabledItem!!.checked
@@ -167,8 +168,8 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
                 ExportTask(this, this).execute(data!!.data)
             }
         } else {
-            gDriveSync!!.onActivityResult(requestCode, resultCode, data)
-            accountSelectionDialog?.onActivityResult(requestCode, resultCode, data)
+            gDriveSignIn.onActivityResult(requestCode, resultCode, data)
+            accountSelectionDialog.onActivityResult(requestCode, resultCode, data)
         }
 
         super.onActivityResult(requestCode, resultCode, data)
@@ -201,15 +202,25 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
                 syncNowItem!!.enabled = false // disable temporary sync now
                 if (syncEnabledItem!!.checked) {
                     setProgressVisibility(true)
-                    gDriveSync!!.connect()
+                    gDriveSignIn.signIn()
                 }
 
             }
             ACTION_SYNC_NOW -> if (syncNowItem!!.enabled) {
                 syncNowItem!!.enabled = false
-                gDriveSync!!.sync()
+                val googleAccount = GoogleSignIn.getLastSignedInAccount(this)
+                if (googleAccount != null) {
+                    GDrive(this, googleAccount, this).sync()
+                } else {
+                    onGDriveLoginError(0)
+                }
             }
-            ACTION_GDRIVE_UPLOAD -> gDriveSync!!.upload()
+            ACTION_GDRIVE_UPLOAD -> {
+                val googleAccount = GoogleSignIn.getLastSignedInAccount(this)
+                if (googleAccount != null) {
+                    GDrive(this, googleAccount).upload()
+                }
+            }
             ACTION_UPDATE_FREQUENCY -> {
                 val values = resources.getIntArray(R.array.updates_frequency_values)
                 val dialog = AlertDialog.Builder(this)
@@ -294,7 +305,7 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
     private val appVersion: String
         get() = String.format(Locale.US, "%s (%d)", BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE)
 
-    override fun onGDriveConnect() {
+    override fun onGDriveLoginSuccess(googleSignInAccount: GoogleSignInAccount) {
         syncEnabledItem!!.checked = true
         syncEnabledItem!!.enabled = true
         syncNowItem!!.enabled = true
@@ -304,6 +315,14 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
         setProgressVisibility(false)
 
         Toast.makeText(this, R.string.gdrive_connected, Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onGDriveLoginError(errorCode: Int) {
+        setProgressVisibility(false)
+        syncNowItem!!.enabled = syncEnabledItem!!.checked
+        notifyDataSetChanged()
+        Toast.makeText(this, "Login error", Toast.LENGTH_SHORT).show()
+
     }
 
     override fun onGDriveSyncProgress() {

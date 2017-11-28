@@ -32,14 +32,14 @@ class EditTagDialog : DialogFragment(), ColorPickerSwatch.OnColorSelectedListene
 
     private lateinit var tag: Tag
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater?.inflate(R.layout.dialog_edit_tag, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return inflater.inflate(R.layout.dialog_edit_tag, container, false)
     }
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        tag = arguments.getParcelable<Tag>("tag") ?: Tag("")
+        tag = arguments!!.getParcelable("tag") ?: Tag("")
 
         editText.setText(tag.name)
         val colorDrawable = arrayOf<Drawable>(ResourcesCompat.getDrawable(resources, R.drawable.color_picker_swatch, null)!!)
@@ -53,7 +53,7 @@ class EditTagDialog : DialogFragment(), ColorPickerSwatch.OnColorSelectedListene
             deleteButton.visibility = View.VISIBLE
         }
 
-        view?.findViewById<View>(R.id.color_preview)?.setOnClickListener {
+        view.findViewById<View>(R.id.color_preview)?.setOnClickListener {
             val dialog = ColorPickerDialog.newInstance(tag.color, false, activity)
             dialog.setOnColorSelectedListener(this)
             dialog.show(fragmentManager, "color-picker")

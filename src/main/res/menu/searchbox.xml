@@ -8,6 +8,4 @@
 			android:icon="@drawable/ic_search_white_24dp"
 			appwatcher:actionViewClass="android.support.v7.widget.SearchView">
 	</item>
-
-
 </menu>

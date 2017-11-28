@@ -22,14 +22,14 @@ import java.util.*
 class ListExportFragment : ListFragment(), ImportTask.Listener {
     private lateinit var backupManager: DbBackupManager
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater!!.inflate(R.layout.fragment_restore_list, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return inflater.inflate(R.layout.fragment_restore_list, container, false)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         backupManager = (activity as ListExportActivity).backupManager
-        listAdapter = ImportListAdapter(context, R.layout.list_item_restore, ArrayList<File>(), ImportClickListener(), DeleteClickListener())
+        listAdapter = ImportListAdapter(context!!, R.layout.list_item_restore, ArrayList(), ImportClickListener(), DeleteClickListener())
         reload()
     }
 
@@ -63,9 +63,8 @@ class ListExportFragment : ListFragment(), ImportTask.Listener {
             return
         }
 
-        ImportTask.showImportFinishToast(context, code)
-
-        activity.supportFragmentManager.popBackStack()
+        ImportTask.showImportFinishToast(context!!, code)
+        activity?.supportFragmentManager?.popBackStack()
     }
 
     private class ImportListAdapter internal constructor(
@@ -108,14 +107,14 @@ class ListExportFragment : ListFragment(), ImportTask.Listener {
         override fun onClick(v: View) {
             val file = DbBackupManager.getBackupFile(v.tag as String)
             val uri = Uri.fromFile(file)
-            ImportTask(ApplicationContext(context), this@ListExportFragment).execute(uri)
+            ImportTask(ApplicationContext(context!!), this@ListExportFragment).execute(uri)
         }
     }
 
     private inner class DeleteClickListener : View.OnClickListener {
         override fun onClick(v: View) {
             val file = v.tag as File
-            DeleteTask(ApplicationContext(context), listAdapter as ImportListAdapter, backupManager).execute(file)
+            DeleteTask(ApplicationContext(context!!), listAdapter as ImportListAdapter, backupManager).execute(file)
         }
     }
 

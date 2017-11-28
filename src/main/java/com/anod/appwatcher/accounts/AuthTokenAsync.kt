@@ -3,6 +3,7 @@ package com.anod.appwatcher.accounts
 import android.accounts.Account
 import android.app.Activity
 import android.content.Context
+import com.anod.appwatcher.framework.ApplicationContext
 import com.anod.appwatcher.framework.BackgroundTask
 
 /**
@@ -11,7 +12,8 @@ import com.anod.appwatcher.framework.BackgroundTask
  */
 class AuthTokenAsync(private val authTokenBlocking: AuthTokenBlocking) {
 
-    constructor(context: Context): this(AuthTokenBlocking(context))
+    constructor(context: ApplicationContext): this(AuthTokenBlocking(context))
+    constructor(context: Context): this(ApplicationContext(context))
 
     fun request(activity: Activity?, account: Account, callback: Callback) {
         BackgroundTask(object : BackgroundTask.Worker<Void?, String>(null) {
@@ -28,7 +30,6 @@ class AuthTokenAsync(private val authTokenBlocking: AuthTokenBlocking) {
             }
         }).execute()
     }
-
 
     interface Callback {
         fun onToken(token: String)

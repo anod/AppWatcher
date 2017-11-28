@@ -61,7 +61,6 @@ class MenuItemAnimation(private val context: Context, @AnimRes private val animR
         rotation.repeatCount = Animation.INFINITE
         iv.startAnimation(rotation)
 
-        MenuItemCompat.setActionView(menuItem, iv)
-
+        menuItem?.actionView = iv
     }
 }

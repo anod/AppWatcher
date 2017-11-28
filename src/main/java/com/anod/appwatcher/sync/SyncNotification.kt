@@ -14,6 +14,7 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.watchlist.WatchListActivity
 import android.app.NotificationChannel
 import android.os.Build
+import com.anod.appwatcher.framework.ApplicationContext
 import com.anod.appwatcher.framework.Html
 
 /**
@@ -21,10 +22,11 @@ import com.anod.appwatcher.framework.Html
  * *
  * @date 2014-09-24
  */
-class SyncNotification(private val context: Context) {
+class SyncNotification(private val context: ApplicationContext) {
 
     companion object {
-        internal const val NOTIFICATION_ID = 1
+        internal const val syncNotificationId = 1
+        internal const val gpsNotificationId = 2
         val channelId = "versions_updates"
     }
 
@@ -36,7 +38,7 @@ class SyncNotification(private val context: Context) {
         channel.description = context.getString(R.string.channel_description)
         channel.setShowBadge(true)
 
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager = context.notificationManager
         notificationManager.createNotificationChannel(channel)
     }
 
@@ -45,27 +47,27 @@ class SyncNotification(private val context: Context) {
         val sorted = updatedApps.sortedWith(compareBy({ it.isNewUpdate }, { it.title }))
 
         val notification = this.create(sorted)
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.notify(NOTIFICATION_ID, notification)
+        val notificationManager = context.notificationManager
+        notificationManager.notify(syncNotificationId, notification)
     }
 
     fun cancel() {
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.cancel(NOTIFICATION_ID)
+        val notificationManager = context.notificationManager
+        notificationManager.cancel(syncNotificationId)
     }
 
     private fun create(updatedApps: List<VersionsCheck.UpdatedApp>): Notification {
-        val notificationIntent = Intent(context, AppWatcherActivity::class.java)
+        val notificationIntent = Intent(context.actual, AppWatcherActivity::class.java)
         notificationIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
         val data = Uri.parse("com.anod.appwatcher://notification")
         notificationIntent.data = data
         notificationIntent.putExtra(WatchListActivity.EXTRA_FROM_NOTIFICATION, true)
-        val contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0)
+        val contentIntent = PendingIntent.getActivity(context.actual, 0, notificationIntent, 0)
 
         val title = renderTitle(updatedApps)
         val text = renderText(updatedApps)
 
-        val builder = NotificationCompat.Builder(context, channelId)
+        val builder = NotificationCompat.Builder(context.actual, channelId)
         builder
             .setAutoCancel(true)
             .setSmallIcon(R.drawable.ic_notification)
@@ -103,12 +105,12 @@ class SyncNotification(private val context: Context) {
 
         val updateIntent = createActionIntent(Uri.parse("com.anod.appwatcher://play/myapps/1"), NotificationActivity.TYPE_MYAPPS_UPDATE)
         builder.addAction(R.drawable.ic_system_update_alt_white_24dp, context.getString(R.string.noti_action_update),
-                PendingIntent.getActivity(context, 0, updateIntent, 0)
+                PendingIntent.getActivity(context.actual, 0, updateIntent, 0)
         )
 
         val readIntent = createActionIntent(Uri.parse("com.anod.appwatcher://dismiss/"), NotificationActivity.TYPE_DISMISS)
         builder.addAction(R.drawable.ic_clear_white_24dp, context.getString(R.string.dismiss),
-                PendingIntent.getActivity(context, 0, readIntent, 0)
+                PendingIntent.getActivity(context.actual, 0, readIntent, 0)
         )
 
     }
@@ -124,24 +126,24 @@ class SyncNotification(private val context: Context) {
             playIntent.putExtra(NotificationActivity.EXTRA_PKG, app.pkg)
 
             builder.addAction(R.drawable.ic_play_arrow_white_24dp, context.getString(R.string.store),
-                    PendingIntent.getActivity(context, 0, playIntent, 0)
+                    PendingIntent.getActivity(context.actual, 0, playIntent, 0)
             )
 
             if (app.installedVersionCode > 0) {
                 val updateIntent = createActionIntent(Uri.parse("com.anod.appwatcher://play/myapps/1"), NotificationActivity.TYPE_MYAPPS_UPDATE)
                 builder.addAction(R.drawable.ic_system_update_alt_white_24dp, context.getString(R.string.noti_action_update),
-                        PendingIntent.getActivity(context, 0, updateIntent, 0)
+                        PendingIntent.getActivity(context.actual, 0, updateIntent, 0)
                 )
             }
 
             val readIntent = createActionIntent(Uri.parse("com.anod.appwatcher://dismiss/"), NotificationActivity.TYPE_DISMISS)
             builder.addAction(R.drawable.ic_clear_white_24dp, context.getString(R.string.dismiss),
-                    PendingIntent.getActivity(context, 0, readIntent, 0)
+                    PendingIntent.getActivity(context.actual, 0, readIntent, 0)
             )
     }
 
     private fun createActionIntent(uri: Uri, type: Int): Intent {
-        val intent = Intent(context, NotificationActivity::class.java)
+        val intent = Intent(context.actual, NotificationActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         intent.data = uri
         intent.putExtra(NotificationActivity.EXTRA_TYPE, type)

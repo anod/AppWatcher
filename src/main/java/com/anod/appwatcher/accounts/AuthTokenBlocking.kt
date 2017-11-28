@@ -5,11 +5,12 @@ import android.accounts.AccountManager
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
+import com.anod.appwatcher.framework.ApplicationContext
 import info.anodsplace.android.log.AppLog
 import java.io.IOException
 
-class AuthTokenBlocking(context: Context) {
-    private val accountManager: AccountManager = AccountManager.get(context)
+class AuthTokenBlocking(context: ApplicationContext) {
+    private val accountManager: AccountManager = AccountManager.get(context.actual)
 
     fun request(activity: Activity?, acc: Account): String {
         var token = ""
