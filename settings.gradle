@@ -1,1 +1,1 @@
-include ':colorpicker'
+include ':colorpicker', ':framework', ':playstore'

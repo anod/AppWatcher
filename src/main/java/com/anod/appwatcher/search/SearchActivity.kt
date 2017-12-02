@@ -18,17 +18,17 @@ import com.anod.appwatcher.App
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AccountSelectionDialog
 import com.anod.appwatcher.accounts.AuthTokenAsync
-import com.anod.appwatcher.market.CompositeStateEndpoint
-import com.anod.appwatcher.market.DetailsEndpoint
-import com.anod.appwatcher.market.PlayStoreEndpointBase
-import com.anod.appwatcher.market.SearchEndpoint
+import info.anodsplace.playstore.CompositeStateEndpoint
+import info.anodsplace.playstore.DetailsEndpoint
+import info.anodsplace.playstore.PlayStoreEndpointBase
+import info.anodsplace.playstore.SearchEndpoint
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.model.WatchAppList
 import com.anod.appwatcher.tags.TagSnackbar
-import com.anod.appwatcher.framework.ToolbarActivity
-import com.anod.appwatcher.framework.Keyboard
 import com.anod.appwatcher.utils.MetricsManagerEvent
+import info.anodsplace.appwatcher.framework.Keyboard
+import info.anodsplace.appwatcher.framework.ToolbarActivity
 import kotterknife.bindView
 
 open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionListener, WatchAppList.Listener, CompositeStateEndpoint.Listener {
@@ -60,8 +60,8 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
         setupToolbar()
 
         endpoints = CompositeStateEndpoint(this)
-        endpoints.add(SEARCH_ENDPOINT_ID, SearchEndpoint(this, true))
-        endpoints.add(DETAILS_ENDPOINT_ID, DetailsEndpoint(this))
+        endpoints.add(SEARCH_ENDPOINT_ID, SearchEndpoint(this, App.provide(this).requestQueue, App.provide(this).deviceInfo, true))
+        endpoints.add(DETAILS_ENDPOINT_ID, DetailsEndpoint(this, App.provide(this).requestQueue, App.provide(this).deviceInfo))
 
         watchAppList = WatchAppList(this)
 
@@ -74,7 +74,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
 
         initFromIntent(intent)
 
-        val account = provide.prefs.account
+        val account = App.provide(this).prefs.account
         if (account== null) {
             accountSelectionDialog.show()
         } else {
@@ -97,10 +97,10 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
 
 
         if (isPackageSearch) {
-            endpoints.setActive(DETAILS_ENDPOINT_ID)
+            endpoints.activeId = DETAILS_ENDPOINT_ID
             adapter = ResultsAdapterDetails(this, endpoints.get(DETAILS_ENDPOINT_ID) as DetailsEndpoint, watchAppList)
         } else {
-            endpoints.setActive(SEARCH_ENDPOINT_ID)
+            endpoints.activeId = SEARCH_ENDPOINT_ID
             adapter = ResultsAdapterSearch(this, endpoints.get(SEARCH_ENDPOINT_ID) as SearchEndpoint, watchAppList)
         }
     }
@@ -128,7 +128,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
                 (endpoints[DETAILS_ENDPOINT_ID] as DetailsEndpoint).url = url
             }
             (endpoints[SEARCH_ENDPOINT_ID] as SearchEndpoint).query = searchQuery
-            endpoints.active().startAsync()
+            endpoints.active.startAsync()
         } else {
             showNoResults("")
         }
@@ -261,7 +261,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
         if (adapter.isEmpty) {
             searchResultsDelayed()
         } else {
-            endpoints.active().startAsync()
+            endpoints.active.startAsync()
         }
     }
 
@@ -289,7 +289,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
             } else {
                 adapter = ResultsAdapterSearch(this, endpoints[SEARCH_ENDPOINT_ID] as SearchEndpoint, watchAppList)
                 listView.adapter = adapter
-                endpoints.setActive(SEARCH_ENDPOINT_ID).startAsync()
+                endpoints.activate(SEARCH_ENDPOINT_ID).startAsync()
             }
         } else {
             val searchEndpoint = endpoint as SearchEndpoint
@@ -312,7 +312,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
         if (id == DETAILS_ENDPOINT_ID) {
             adapter = ResultsAdapterSearch(this, endpoints.get(SEARCH_ENDPOINT_ID) as SearchEndpoint, watchAppList)
             listView.adapter = adapter
-            endpoints.setActive(SEARCH_ENDPOINT_ID).startAsync()
+            endpoints.activate(SEARCH_ENDPOINT_ID).startAsync()
         } else {
             loading.visibility = View.GONE
             showRetryButton()

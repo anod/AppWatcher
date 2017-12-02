@@ -6,7 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.content.DbContentProvider
-import com.anod.appwatcher.framework.ApplicationContext
+import info.anodsplace.appwatcher.framework.ApplicationContext
 
 /**
  * An [IntentService] subclass for handling asynchronous task requests in
@@ -18,18 +18,18 @@ class ManualSyncService : IntentService("ManualSyncService") {
 
     override fun onHandleIntent(intent: Intent?) {
         if (intent != null) {
-            val syncAdapter = VersionsCheck(ApplicationContext(applicationContext))
+            val syncAdapter = UpdateCheck(ApplicationContext(applicationContext))
             val contentProviderClient = contentResolver.acquireContentProviderClient(DbContentProvider.authority)
 
             val bundle = Bundle()
             if (!BuildConfig.DEBUG) {
-                bundle.putBoolean(VersionsCheck.SYNC_EXTRAS_MANUAL, true)
+                bundle.putBoolean(UpdateCheck.extrasManual, true)
             }
 
             val updatesCount = syncAdapter.perform(bundle, contentProviderClient)
 
-            val finishIntent = Intent(VersionsCheck.SYNC_STOP)
-            finishIntent.putExtra(VersionsCheck.EXTRA_UPDATES_COUNT, updatesCount)
+            val finishIntent = Intent(UpdateCheck.syncStop)
+            finishIntent.putExtra(UpdateCheck.extrasUpdatesCount, updatesCount)
             sendBroadcast(finishIntent)
         }
     }

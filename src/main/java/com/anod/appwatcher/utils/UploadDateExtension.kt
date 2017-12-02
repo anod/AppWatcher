@@ -1,7 +1,7 @@
 package com.anod.appwatcher.utils
 
 import com.anod.appwatcher.utils.date.CustomParserFactory
-import com.google.android.finsky.api.model.Document
+import finsky.api.model.Document
 import info.anodsplace.android.log.AppLog
 import java.text.DateFormat
 import java.text.ParseException

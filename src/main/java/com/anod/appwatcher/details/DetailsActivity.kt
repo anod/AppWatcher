@@ -26,18 +26,18 @@ import com.anod.appwatcher.accounts.AuthTokenAsync
 import com.anod.appwatcher.watchlist.AppViewHolderDataProvider
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.DbContentProviderClient
-import com.anod.appwatcher.framework.*
-import com.anod.appwatcher.market.DetailsEndpoint
-import com.anod.appwatcher.market.MarketInfo
-import com.anod.appwatcher.market.PlayStoreEndpoint
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.Tag
 import com.anod.appwatcher.model.WatchAppList
+import com.anod.appwatcher.model.packageToApp
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.*
 import com.squareup.picasso.Picasso
 import info.anodsplace.android.anim.RevealAnimatorCompat
 import info.anodsplace.android.log.AppLog
+import info.anodsplace.appwatcher.framework.*
+import info.anodsplace.playstore.DetailsEndpoint
+import info.anodsplace.playstore.PlayStoreEndpoint
 import kotterknife.bindView
 
 open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette.PaletteAsyncListener, View.OnClickListener, WatchAppList.Listener {
@@ -76,7 +76,7 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
         val contentView = findViewById<View>(R.id.container)
         appDetailsView = AppDetailsView(contentView, dataProvider)
 
-        detailsEndpoint = DetailsEndpoint(this)
+        detailsEndpoint = DetailsEndpoint(this, App.provide(this).requestQueue, App.provide(this).deviceInfo)
         detailsEndpoint.url = detailsUrl
 
         content.visibility = View.INVISIBLE

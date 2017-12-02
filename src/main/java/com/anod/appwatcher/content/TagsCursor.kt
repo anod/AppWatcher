@@ -1,10 +1,10 @@
 package com.anod.appwatcher.content
 
 import android.database.Cursor
-import com.anod.appwatcher.framework.CursorIterator
 
 import com.anod.appwatcher.model.Tag
 import com.anod.appwatcher.model.schema.TagsTable
+import info.anodsplace.appwatcher.framework.CursorIterator
 
 /**
  * @author algavris

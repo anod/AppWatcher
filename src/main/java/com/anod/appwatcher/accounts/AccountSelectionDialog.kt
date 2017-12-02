@@ -3,6 +3,7 @@ package com.anod.appwatcher.accounts
 import android.Manifest
 import android.accounts.Account
 import android.accounts.AccountManager
+import android.annotation.TargetApi
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -16,7 +17,7 @@ import android.widget.Toast
 
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.R
-import com.anod.appwatcher.framework.ActivityListener
+import info.anodsplace.appwatcher.framework.ActivityListener
 
 /**
  * @author alex
@@ -43,6 +44,7 @@ class AccountSelectionDialog(
         fun onAccountNotFound(errorMessage: String)
     }
 
+    @TargetApi(Build.VERSION_CODES.M)
     fun show() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val intent = AccountManager.newChooseAccountIntent(

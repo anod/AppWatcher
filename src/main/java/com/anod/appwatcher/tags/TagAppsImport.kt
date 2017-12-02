@@ -7,7 +7,7 @@ import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.model.Tag
 import com.anod.appwatcher.model.schema.AppTagsTable
-import com.anod.appwatcher.framework.ApplicationContext
+import info.anodsplace.appwatcher.framework.ApplicationContext
 
 internal class TagAppsImport(private val tag: Tag, private val context: ApplicationContext) {
 

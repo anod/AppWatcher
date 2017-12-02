@@ -4,8 +4,9 @@ import android.accounts.Account
 import android.content.Context
 import android.content.SharedPreferences
 import android.support.v7.app.AppCompatDelegate
+import info.anodsplace.playstore.DeviceIdStorage
 
-class Preferences(context: Context) {
+class Preferences(context: Context) : DeviceIdStorage {
 
     private val preferences: SharedPreferences
 
@@ -35,7 +36,7 @@ class Preferences(context: Context) {
         get() = preferences.getLong(LAST_UPDATE_TIME, -1)
         set(value) = preferences.edit().putLong(LAST_UPDATE_TIME, value).apply()
 
-    var deviceId: String
+    override var deviceId: String
         get() = preferences.getString(DEVICE_ID, "")
         set(value) {
             val editor = preferences.edit()

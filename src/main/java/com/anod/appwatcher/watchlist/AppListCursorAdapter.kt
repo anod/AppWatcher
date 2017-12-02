@@ -6,9 +6,9 @@ import android.view.View
 import com.anod.appwatcher.App
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.AppListCursor
-import com.anod.appwatcher.framework.RecyclerViewCursorAdapter
 import com.anod.appwatcher.utils.PicassoAppIcon
-import com.anod.appwatcher.framework.InstalledApps
+import info.anodsplace.appwatcher.framework.RecyclerViewCursorAdapter
+import info.anodsplace.appwatcher.framework.InstalledApps
 
 /**
  * @author alex

@@ -5,7 +5,7 @@ import android.content.Context
 import android.os.AsyncTask
 import android.support.v4.util.SimpleArrayMap
 
-import com.google.android.finsky.api.model.Document
+import finsky.api.model.Document
 
 class AddWatchAppAsyncTask(
         context: Context,

@@ -23,17 +23,16 @@ import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import com.anod.appwatcher.*
-import com.anod.appwatcher.framework.DrawerActivity
 import com.anod.appwatcher.installed.ImportInstalledActivity
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.sync.ManualSyncService
-import com.anod.appwatcher.sync.VersionsCheck
+import com.anod.appwatcher.sync.UpdateCheck
 import com.anod.appwatcher.tags.TagsListActivity
-import com.anod.appwatcher.framework.MenuItemAnimation
 import com.anod.appwatcher.search.SearchActivity
 import com.anod.appwatcher.utils.UpgradeCheck
 import info.anodsplace.android.log.AppLog
+import info.anodsplace.appwatcher.framework.MenuItemAnimation
 import java.util.*
 
 /**
@@ -130,16 +129,16 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     }
 
     /**
-     * Receive notifications from VersionsCheck
+     * Receive notifications from UpdateCheck
      */
     private val syncFinishedReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val action = intent.action
-            if (VersionsCheck.SYNC_PROGRESS == action) {
+            if (UpdateCheck.syncProgress == action) {
                 refreshMenuAnimation.start()
                 notifySyncStart()
-            } else if (VersionsCheck.SYNC_STOP == action) {
-                val updatesCount = intent.getIntExtra(VersionsCheck.EXTRA_UPDATES_COUNT, 0)
+            } else if (UpdateCheck.syncStop == action) {
+                val updatesCount = intent.getIntExtra(UpdateCheck.extrasUpdatesCount, 0)
                 refreshMenuAnimation.stop()
                 notifySyncStop()
                 if (updatesCount == 0) {
@@ -151,8 +150,8 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
 
     override fun onResume() {
         val filter = IntentFilter()
-        filter.addAction(VersionsCheck.SYNC_PROGRESS)
-        filter.addAction(VersionsCheck.SYNC_STOP)
+        filter.addAction(UpdateCheck.syncProgress)
+        filter.addAction(UpdateCheck.syncStop)
         registerReceiver(syncFinishedReceiver, filter)
         syncFinishedReceiverRegistered = true
         super.onResume()

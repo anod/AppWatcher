@@ -3,10 +3,9 @@ package com.anod.appwatcher.accounts
 import android.accounts.*
 import android.accounts.AccountManager
 import android.app.Activity
-import android.content.Context
 import android.os.Bundle
-import com.anod.appwatcher.framework.ApplicationContext
 import info.anodsplace.android.log.AppLog
+import info.anodsplace.appwatcher.framework.ApplicationContext
 import java.io.IOException
 
 class AuthTokenBlocking(context: ApplicationContext) {

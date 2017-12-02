@@ -15,13 +15,15 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import com.android.volley.VolleyError
+import com.anod.appwatcher.App
 import com.anod.appwatcher.R
-import com.anod.appwatcher.market.PlayStoreEndpoint
-import com.anod.appwatcher.market.WishlistEndpoint
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.model.WatchAppList
 import com.anod.appwatcher.tags.TagSnackbar
+import info.anodsplace.appwatcher.framework.FragmentToolbarActivity
+import info.anodsplace.playstore.PlayStoreEndpoint
+import info.anodsplace.playstore.WishlistEndpoint
 import kotterknife.bindView
 
 /**
@@ -45,7 +47,7 @@ class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Li
         super.onAttach(context)
 
         if (endpoint == null) {
-            endpoint = WishlistEndpoint(context!!, true)
+            endpoint = WishlistEndpoint(context!!, App.provide(context).requestQueue, App.provide(context).deviceInfo, true)
         }
 
         if (watchAppList == null) {
@@ -159,5 +161,9 @@ class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Li
         const val TAG = "wishlist"
         const val EXTRA_ACCOUNT = "extra_account"
         const val EXTRA_AUTH_TOKEN = "extra_auth_token"
+
+        init {
+            FragmentToolbarActivity.register(TAG) { WishlistFragment() }
+        }
     }
 }

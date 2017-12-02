@@ -59,17 +59,17 @@ class EditTagDialog : DialogFragment(), ColorPickerSwatch.OnColorSelectedListene
             dialog.show(fragmentManager, "color-picker")
         }
 
-        view?.findViewById<View>(android.R.id.button1)?.setOnClickListener {
+        view.findViewById<View>(android.R.id.button1)?.setOnClickListener {
             tag = Tag(tag.id, editText.text.toString().trim { it <= ' ' }, tag.color)
             (activity as TagsListActivity).saveTag(tag)
             dismiss()
         }
 
-        view?.findViewById<View>(android.R.id.button2)?.setOnClickListener {
+        view.findViewById<View>(android.R.id.button2)?.setOnClickListener {
             dismiss()
         }
 
-        view?.findViewById<View>(android.R.id.button3)?.setOnClickListener {
+        view.findViewById<View>(android.R.id.button3)?.setOnClickListener {
             (activity as TagsListActivity).deleteTag(tag)
             dismiss()
         }

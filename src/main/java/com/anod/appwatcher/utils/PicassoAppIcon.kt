@@ -10,13 +10,13 @@ import android.widget.ImageView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.DbContentProviderClient
-import com.anod.appwatcher.framework.loadIcon
 import com.anod.appwatcher.model.AppInfo
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Picasso.LoadedFrom.DISK
 import com.squareup.picasso.Request
 import com.squareup.picasso.RequestCreator
 import com.squareup.picasso.RequestHandler
+import info.anodsplace.appwatcher.framework.loadIcon
 import java.io.IOException
 
 class PicassoAppIcon(context: Context) {
@@ -98,7 +98,6 @@ class PicassoAppIcon(context: Context) {
                     .into(iconView)
         }
     }
-
 
     fun shutdown() {
         picasso.shutdown()

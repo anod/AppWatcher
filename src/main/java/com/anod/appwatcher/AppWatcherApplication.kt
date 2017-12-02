@@ -1,9 +1,13 @@
 package com.anod.appwatcher
 
 import android.app.Application
+import android.app.NotificationManager
+import android.content.ContentResolver
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.net.ConnectivityManager
 import android.support.v7.app.AppCompatDelegate
+import android.util.LruCache
 import android.view.ViewConfiguration
 import com.google.firebase.crash.FirebaseCrash
 import info.anodsplace.android.log.AppLog
@@ -11,8 +15,9 @@ import com.android.volley.NetworkError
 import com.android.volley.NoConnectionError
 import com.android.volley.TimeoutError
 import com.android.volley.VolleyError
-import com.anod.appwatcher.framework.ApplicationContext
 import com.anod.appwatcher.sync.SyncNotification
+import info.anodsplace.appwatcher.framework.ApplicationContext
+import info.anodsplace.appwatcher.framework.ApplicationInstance
 import java.io.IOException
 import java.net.ConnectException
 import java.net.SocketException
@@ -22,7 +27,15 @@ import javax.net.ssl.SSLHandshakeException
 import javax.net.ssl.SSLPeerUnverifiedException
 
 
-class AppWatcherApplication : Application(), AppLog.Listener {
+class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstance {
+
+    override val notificationManager: NotificationManager
+        get() = objectGraph.notificationManager
+    override val memoryCache: LruCache<String, Any?>
+        get() = objectGraph.memoryCache
+    override val nightMode: Int
+        get() = objectGraph.prefs.nightMode
+
     lateinit var objectGraph: ObjectGraph
 
     override fun onCreate() {

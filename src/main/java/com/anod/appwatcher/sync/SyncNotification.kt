@@ -3,7 +3,6 @@ package com.anod.appwatcher.sync
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.support.v4.app.NotificationCompat
@@ -14,8 +13,8 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.watchlist.WatchListActivity
 import android.app.NotificationChannel
 import android.os.Build
-import com.anod.appwatcher.framework.ApplicationContext
-import com.anod.appwatcher.framework.Html
+import info.anodsplace.appwatcher.framework.ApplicationContext
+import info.anodsplace.appwatcher.framework.Html
 
 /**
  * @author alex
@@ -42,7 +41,7 @@ class SyncNotification(private val context: ApplicationContext) {
         notificationManager.createNotificationChannel(channel)
     }
 
-    fun show(updatedApps: List<VersionsCheck.UpdatedApp>) {
+    fun show(updatedApps: List<UpdateCheck.UpdatedApp>) {
 
         val sorted = updatedApps.sortedWith(compareBy({ it.isNewUpdate }, { it.title }))
 
@@ -56,7 +55,7 @@ class SyncNotification(private val context: ApplicationContext) {
         notificationManager.cancel(syncNotificationId)
     }
 
-    private fun create(updatedApps: List<VersionsCheck.UpdatedApp>): Notification {
+    private fun create(updatedApps: List<UpdateCheck.UpdatedApp>): Notification {
         val notificationIntent = Intent(context.actual, AppWatcherActivity::class.java)
         notificationIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
         val data = Uri.parse("com.anod.appwatcher://notification")
@@ -86,7 +85,7 @@ class SyncNotification(private val context: ApplicationContext) {
         return builder.build()
     }
 
-    private fun addMultipleExtraInfo(updatedApps: List<VersionsCheck.UpdatedApp>, builder: NotificationCompat.Builder) {
+    private fun addMultipleExtraInfo(updatedApps: List<UpdateCheck.UpdatedApp>, builder: NotificationCompat.Builder) {
         var isUpdatable = false
 
         val sb = StringBuilder()
@@ -115,7 +114,7 @@ class SyncNotification(private val context: ApplicationContext) {
 
     }
 
-    private fun addExtraInfo(app: VersionsCheck.UpdatedApp, builder: NotificationCompat.Builder) {
+    private fun addExtraInfo(app: UpdateCheck.UpdatedApp, builder: NotificationCompat.Builder) {
 
             val changes = if (app.recentChanges.isBlank()) context.getString(R.string.no_recent_changes) else app.recentChanges
 
@@ -150,7 +149,7 @@ class SyncNotification(private val context: ApplicationContext) {
         return intent
     }
 
-    private fun renderText(apps: List<VersionsCheck.UpdatedApp>): String {
+    private fun renderText(apps: List<UpdateCheck.UpdatedApp>): String {
         val count = apps.size
         if (count == 1) {
             return context.getString(R.string.notification_click)
@@ -168,7 +167,7 @@ class SyncNotification(private val context: ApplicationContext) {
         )
     }
 
-    private fun renderTitle(apps: List<VersionsCheck.UpdatedApp>): String {
+    private fun renderTitle(apps: List<UpdateCheck.UpdatedApp>): String {
         val title: String
         val count = apps.size
         if (count == 1) {

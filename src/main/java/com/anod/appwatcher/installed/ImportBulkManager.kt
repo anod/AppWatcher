@@ -5,11 +5,12 @@ import android.content.Context
 import android.os.AsyncTask
 import android.support.v4.util.SimpleArrayMap
 import com.android.volley.VolleyError
-import com.anod.appwatcher.market.BulkDetailsEndpoint
-import com.anod.appwatcher.market.PlayStoreEndpoint
+import com.anod.appwatcher.App
 import com.anod.appwatcher.model.AddWatchAppAsyncTask
 import com.anod.appwatcher.model.WatchAppList
-import com.google.android.finsky.api.model.Document
+import finsky.api.model.Document
+import info.anodsplace.playstore.BulkDetailsEndpoint
+import info.anodsplace.playstore.PlayStoreEndpoint
 import java.util.*
 
 internal class ImportBulkManager(
@@ -17,7 +18,7 @@ internal class ImportBulkManager(
         private val listener: ImportBulkManager.Listener)
     : PlayStoreEndpoint.Listener, AddWatchAppAsyncTask.Listener {
 
-    private val endpoint = BulkDetailsEndpoint(context)
+    private val endpoint = BulkDetailsEndpoint(context, App.provide(context).requestQueue, App.provide(context).deviceInfo)
     private val watchAppList = WatchAppList(null)
     private var listsDocIds: MutableList<MutableList<String>> = ArrayList()
     private var currentBulk: Int = 0

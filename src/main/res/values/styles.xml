@@ -49,8 +49,6 @@
         <item name="colorAccent">@color/neutral_theme_accent</item>
     </style>
 
-    <style name="ActionButton" parent="Widget.AppCompat.ActionButton" />
-
     <style name="ListHeader">
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textSize">16sp</item>

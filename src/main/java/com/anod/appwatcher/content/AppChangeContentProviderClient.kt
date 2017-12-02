@@ -2,9 +2,9 @@ package com.anod.appwatcher.content
 
 import android.content.ContentProviderClient
 import android.content.Context
-import com.anod.appwatcher.framework.query
 import com.anod.appwatcher.model.AppChange
 import com.anod.appwatcher.model.schema.ChangelogTable
+import info.anodsplace.appwatcher.framework.query
 
 /**
  * @author algavris

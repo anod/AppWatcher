@@ -18,14 +18,14 @@ import com.anod.appwatcher.backup.ExportTask
 import com.anod.appwatcher.backup.gdrive.GDrive
 import com.anod.appwatcher.backup.ImportTask
 import com.anod.appwatcher.backup.gdrive.GDriveSignIn
-import com.anod.appwatcher.framework.GooglePlayServices
 import com.anod.appwatcher.model.DbSchemaManager
 import com.anod.appwatcher.sync.SyncScheduler
-import com.anod.appwatcher.framework.SettingsActionBarActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import info.anodsplace.android.log.AppLog
+import info.anodsplace.appwatcher.framework.GooglePlayServices
+import info.anodsplace.appwatcher.framework.SettingsActionBarActivity
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream

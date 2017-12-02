@@ -1,6 +1,6 @@
 
 buildscript {
-    ext.kotlin_version = '1.1.51'
+    ext.kotlin_version = '1.2.0'
     repositories {
         jcenter()
         mavenCentral()
@@ -27,46 +27,34 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'com.google.gms.oss.licenses.plugin'
 
-configurations.all {
-    resolutionStrategy.cacheDynamicVersionsFor 10, 'minutes'
-}
-
 dependencies {
-    compile files('libs/keyczar-0.71g-090613.jar')
-
     compile 'com.github.anod:android-utils-lib:v1.0.3'
 
-    compile 'com.android.support:recyclerview-v7:27.0.1'
-    compile 'com.android.support:design:27.0.1'
-    compile 'com.android.support:cardview-v7:27.0.1'
-    compile 'com.android.support:palette-v7:27.0.1'
+    compile 'com.android.support:cardview-v7:26.1.0'
 
-    compile 'com.google.android.gms:play-services-identity:11.6.0'
-    compile 'com.google.android.gms:play-services-auth:11.6.0'
-    compile 'com.google.android.gms:play-services-drive:11.6.0'
-    compile 'com.google.android.gms:play-services-oss-licenses:11.6.0'
+    compile 'com.google.android.gms:play-services-drive:11.6.2'
+    compile 'com.google.android.gms:play-services-oss-licenses:11.6.2'
 
-    compile 'com.google.firebase:firebase-core:11.6.0'
-    compile 'com.google.firebase:firebase-crash:11.6.0'
-    compile 'com.firebase:firebase-jobdispatcher:0.8.4'
+    compile 'com.google.firebase:firebase-core:11.6.2'
+    compile 'com.google.firebase:firebase-crash:11.6.2'
+    compile 'com.firebase:firebase-jobdispatcher:0.8.5'
 
-    compile 'com.android.volley:volley:1.0.0'
     compile 'com.squareup.okhttp3:okhttp:3.9.0'
     compile 'com.squareup.picasso:picasso:3.0.0-SNAPSHOT'
 
     compile 'com.jakewharton:kotterknife:0.1.0-SNAPSHOT'
 
-    compile group: 'com.google.protobuf.nano', name: 'protobuf-javanano', version: '3.1.0'
-
     testCompile 'junit:junit:4.12'
-    compile project(path: ':colorpicker')
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+
+    compile project(path: ':colorpicker')
+    compile project(path: ':framework')
+    compile project(path: ':playstore')
 }
 
 android {
     compileSdkVersion 26
-    buildToolsVersion '27.0.1'
 
     defaultConfig {
         applicationId 'com.anod.appwatcher'

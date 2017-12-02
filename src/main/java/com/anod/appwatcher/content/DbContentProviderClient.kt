@@ -8,13 +8,13 @@ import android.os.RemoteException
 import android.provider.BaseColumns
 import android.support.v4.util.SimpleArrayMap
 import android.text.TextUtils
-import com.anod.appwatcher.framework.*
 import com.anod.appwatcher.model.*
 import com.anod.appwatcher.model.schema.AppListTable
 import com.anod.appwatcher.model.schema.AppTagsTable
 import com.anod.appwatcher.model.schema.TagsTable
 import com.anod.appwatcher.model.schema.contentValues
 import info.anodsplace.android.log.AppLog
+import info.anodsplace.appwatcher.framework.*
 import kotlin.collections.ArrayList
 
 /**

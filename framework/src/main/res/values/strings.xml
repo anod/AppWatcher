@@ -1,0 +1,9 @@
+<resources>
+    <string name="menu_refresh">Refresh</string>
+
+
+    <string name="gms_service_missing">Google Play services is missing on this device.</string>
+    <string name="gms_service_update_required">The installed version of Google Play services is out of date.</string>
+    <string name="gms_service_disabled">The installed version of Google Play services has been disabled on this device.</string>
+    <string name="gms_service_invalid">The version of the Google Play services installed on this device is not authentic.</string>
+</resources>

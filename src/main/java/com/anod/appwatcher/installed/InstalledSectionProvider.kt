@@ -8,8 +8,8 @@ import com.anod.appwatcher.watchlist.AppViewHolderDataProvider
 import com.anod.appwatcher.watchlist.WatchListFragment
 import com.anod.appwatcher.model.InstalledFilter
 import com.anod.appwatcher.model.Tag
-import com.anod.appwatcher.framework.InstalledApps
 import info.anodsplace.android.widget.recyclerview.MergeRecyclerAdapter
+import info.anodsplace.appwatcher.framework.InstalledApps
 
 /**
  * @author algavris

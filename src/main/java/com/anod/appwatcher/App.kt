@@ -1,7 +1,7 @@
 package com.anod.appwatcher
 
 import android.content.Context
-import com.anod.appwatcher.framework.ApplicationContext
+import info.anodsplace.appwatcher.framework.ApplicationContext
 
 /**
  * @author algavris
@@ -15,7 +15,7 @@ object App {
     }
 
     fun with(context: ApplicationContext): AppWatcherApplication {
-        return context.actual
+        return with(context)
     }
 
     fun provide(context: Context): ObjectGraph {
@@ -23,6 +23,6 @@ object App {
     }
 
     fun provide(context: ApplicationContext): ObjectGraph {
-        return context.actual.objectGraph
+        return with(context.actual).objectGraph
     }
 }

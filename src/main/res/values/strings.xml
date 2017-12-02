@@ -57,10 +57,6 @@
     <string name="free">FREE</string>
     <string name="error_fetching_info">Error fetching information. Please, try again</string>
     <string name="retry">Retry</string>
-    <string name="gms_service_missing">Google Play services is missing on this device.</string>
-    <string name="gms_service_update_required">The installed version of Google Play services is out of date.</string>
-    <string name="gms_service_disabled">The installed version of Google Play services has been disabled on this device.</string>
-    <string name="gms_service_invalid">The version of the Google Play services installed on this device is not authentic.</string>
     <string name="never">never</string>
     <string name="now">now</string>
     <string name="no_registered_google_accounts">No registered google accounts</string>

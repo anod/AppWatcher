@@ -3,11 +3,11 @@ package com.anod.appwatcher
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import com.anod.appwatcher.framework.ApplicationContext
 import com.anod.appwatcher.sync.SyncNotification
-import com.anod.appwatcher.framework.forMyApps
-import com.anod.appwatcher.framework.forPlayStore
-import com.anod.appwatcher.framework.startActivitySafely
+import info.anodsplace.appwatcher.framework.ApplicationContext
+import info.anodsplace.appwatcher.framework.forMyApps
+import info.anodsplace.appwatcher.framework.forPlayStore
+import info.anodsplace.appwatcher.framework.startActivitySafely
 
 class NotificationActivity : Activity() {
 

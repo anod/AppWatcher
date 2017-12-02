@@ -2,9 +2,9 @@ package com.anod.appwatcher.search
 
 import android.content.Context
 
-import com.anod.appwatcher.market.SearchEndpoint
+import info.anodsplace.playstore.SearchEndpoint
 import com.anod.appwatcher.model.WatchAppList
-import com.google.android.finsky.api.model.Document
+import finsky.api.model.Document
 
 /**
  * @author algavris

@@ -2,15 +2,25 @@ package com.anod.appwatcher.model
 
 import android.content.ComponentName
 import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Parcel
 import android.os.Parcelable
 import com.anod.appwatcher.utils.PicassoAppIcon
 import com.anod.appwatcher.utils.extractUploadDate
-import com.google.android.finsky.api.model.Document
+import finsky.api.model.Document
+import info.anodsplace.appwatcher.framework.getAppTitle
+import info.anodsplace.appwatcher.framework.getLaunchComponent
+import info.anodsplace.appwatcher.framework.getPackageInfo
 import java.text.DateFormat
 import java.util.*
 
+fun PackageManager.packageToApp(rowId: Int, packageName: String): AppInfo {
+    val packageInfo = this.getPackageInfo(packageName, this) ?: return AppInfo.fromLocalPackage(rowId, null, packageName, "", null)
+    val launchComponent = this.getLaunchComponent(packageInfo, this)
+    val appTitle = this.getAppTitle(packageInfo, this)
+    return AppInfo.fromLocalPackage(rowId, packageInfo, packageName, appTitle, launchComponent)
+}
 
 class AppInfo : AppInfoMetadata, Parcelable {
 

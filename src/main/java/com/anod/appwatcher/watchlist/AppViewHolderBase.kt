@@ -8,7 +8,7 @@ import com.anod.appwatcher.content.AppChangeContentProviderClient
 
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.utils.PicassoAppIcon
-import com.anod.appwatcher.framework.InstalledApps
+import info.anodsplace.appwatcher.framework.InstalledApps
 
 /**
  * @author algavris

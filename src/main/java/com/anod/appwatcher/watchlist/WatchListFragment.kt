@@ -27,11 +27,11 @@ import com.anod.appwatcher.details.DetailsActivity
 import com.anod.appwatcher.installed.ImportInstalledActivity
 import com.anod.appwatcher.model.*
 import com.anod.appwatcher.search.SearchActivity
-import com.anod.appwatcher.framework.InstalledApps
-import com.anod.appwatcher.framework.forMyApps
-import com.anod.appwatcher.framework.startActivitySafely
 import info.anodsplace.android.log.AppLog
 import info.anodsplace.android.widget.recyclerview.MergeRecyclerAdapter
+import info.anodsplace.appwatcher.framework.InstalledApps
+import info.anodsplace.appwatcher.framework.forMyApps
+import info.anodsplace.appwatcher.framework.startActivitySafely
 
 open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, WatchListActivity.EventListener, AppViewHolder.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
 

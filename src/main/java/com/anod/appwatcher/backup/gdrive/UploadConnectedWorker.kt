@@ -3,12 +3,11 @@ package com.anod.appwatcher.backup.gdrive
 import android.content.Context
 import com.anod.appwatcher.backup.DbJsonWriter
 import com.anod.appwatcher.content.DbContentProviderClient
-import com.anod.appwatcher.framework.ApplicationContext
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.drive.Drive
 import com.google.android.gms.tasks.Tasks
 import info.anodsplace.android.log.AppLog
+import info.anodsplace.appwatcher.framework.ApplicationContext
 
 /**
  * @author algavris

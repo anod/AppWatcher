@@ -7,7 +7,7 @@ import android.widget.TextView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.WatchAppList
-import com.google.android.finsky.api.model.Document
+import finsky.api.model.Document
 
 class ResultsAppViewHolder(itemView: View, private val watchAppList: WatchAppList)
     : RecyclerView.ViewHolder(itemView), View.OnClickListener {
