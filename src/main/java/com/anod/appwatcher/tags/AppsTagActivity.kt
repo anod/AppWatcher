@@ -40,8 +40,6 @@ class AppsTagActivity : WatchListActivity() {
         Color.colorToHSV(tag.color, hsv)
         hsv[2] *= 0.6f
         val dark = Color.HSVToColor(hsv)
-        val tabLayout = findViewById<View>(R.id.tabs) as TabLayout
-        tabLayout.setSelectedTabIndicatorColor(dark)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             window.statusBarColor = dark
         }

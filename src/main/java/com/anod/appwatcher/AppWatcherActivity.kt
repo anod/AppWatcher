@@ -10,6 +10,7 @@ import com.anod.appwatcher.installed.InstalledSectionProvider
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.watchlist.WatchListActivity
+import com.anod.appwatcher.watchlist.WatchListSection
 
 import info.anodsplace.android.log.AppLog
 
@@ -46,12 +47,12 @@ class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener,
         adapter.addFragment(WatchListFragment.newInstance(
                 Filters.TAB_ALL,
                 prefs.sortIndex,
-                WatchListFragment.DefaultSection(),
+                WatchListSection(),
                 null), getString(R.string.tab_all))
         adapter.addFragment(WatchListFragment.newInstance(
                 Filters.TAB_INSTALLED,
                 prefs.sortIndex,
-                InstalledSectionProvider(), null), getString(R.string.tab_installed))
+                WatchListFragment.DefaultSection(), null), getString(R.string.tab_installed))
         adapter.addFragment(WatchListFragment.newInstance(
                 Filters.TAB_UNINSTALLED,
                 prefs.sortIndex,

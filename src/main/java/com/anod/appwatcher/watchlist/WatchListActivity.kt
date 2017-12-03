@@ -91,9 +91,6 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         viewPager = findViewById<View>(R.id.viewpager) as ViewPager
         viewPager.adapter = createViewPagerAdapter()
         viewPager.currentItem = filterId
-
-        val tabLayout = findViewById<View>(R.id.tabs) as TabLayout
-        tabLayout.setupWithViewPager(viewPager)
     }
 
     protected abstract fun createViewPagerAdapter(): Adapter
