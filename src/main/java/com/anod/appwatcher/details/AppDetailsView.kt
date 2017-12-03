@@ -15,10 +15,11 @@ import info.anodsplace.appwatcher.framework.Html
  * @date 14/05/2016.
  */
 class AppDetailsView(view: View, private val dataProvider: AppViewHolderBase.DataProvider) {
-    private val textColor: Int
-    @ColorInt private var accentColor: Int = 0
+    @ColorInt private val textColor: Int
+    @ColorInt private var accentColor: Int
+    @ColorInt private var warningColor: Int
 
-    val title: TextView = view.findViewById<TextView>(android.R.id.title)
+    val title: TextView = view.findViewById(android.R.id.title)
     val details: TextView? = view.findViewById<TextView?>(R.id.details)
     val version: TextView? = view.findViewById<TextView?>(R.id.updated)
     val price: TextView? = view.findViewById<TextView?>(R.id.price)
@@ -28,6 +29,7 @@ class AppDetailsView(view: View, private val dataProvider: AppViewHolderBase.Dat
     init {
         accentColor = dataProvider.getColor(R.color.theme_accent)
         textColor = dataProvider.getColor(R.color.primary_text)
+        warningColor = dataProvider.getColor(R.color.material_amber_800)
     }
 
     fun fillDetails(app: AppInfo, isLocalApp: Boolean) {
@@ -55,15 +57,23 @@ class AppDetailsView(view: View, private val dataProvider: AppViewHolderBase.Dat
     private fun fillWatchAppView(app: AppInfo) {
 
         val isInstalled = dataProvider.installedApps.getInfo(app.packageName).isInstalled
-        version?.text = dataProvider.formatVersionText(app.versionName, app.versionNumber)
-        if (app.status == AppInfoMetadata.STATUS_UPDATED) {
-            version?.setTextColor(accentColor)
-            this.recentChanges?.visibility = View.VISIBLE
-            val appChange = dataProvider.appChangeContentProvider.query(app.appId, app.versionNumber)
-            this.recentChanges?.text = if (appChange?.details?.isBlank() != false) dataProvider.noRecentChangesText else Html.parse(appChange.details)
-        } else {
-            this.recentChanges?.visibility = View.GONE
-            version?.setTextColor(textColor)
+        when {
+            app.versionNumber == 0 -> {
+                version?.setTextColor(warningColor)
+                version?.text = dataProvider.getString(R.string.updates_not_available)
+            }
+            app.status == AppInfoMetadata.STATUS_UPDATED -> {
+                version?.text = dataProvider.formatVersionText(app.versionName, app.versionNumber)
+                version?.setTextColor(accentColor)
+                this.recentChanges?.visibility = View.VISIBLE
+                val appChange = dataProvider.appChangeContentProvider.query(app.appId, app.versionNumber)
+                this.recentChanges?.text = if (appChange?.details?.isBlank() != false) dataProvider.noRecentChangesText else Html.parse(appChange.details)
+            }
+            else -> {
+                version?.text = dataProvider.formatVersionText(app.versionName, app.versionNumber)
+                this.recentChanges?.visibility = View.GONE
+                version?.setTextColor(textColor)
+            }
         }
 
         price?.setTextColor(accentColor)
@@ -75,10 +85,9 @@ class AppDetailsView(view: View, private val dataProvider: AppViewHolderBase.Dat
             } else {
                 price?.text = dataProvider.formatVersionText(installed.versionName, installed.versionCode)
             }
-            if (app.versionNumber > installed.versionCode) {
-                version?.setTextColor(dataProvider.getColor(R.color.material_amber_800))
-            } else {
-                version?.setTextColor(textColor)
+            when {
+                app.versionNumber > installed.versionCode -> version?.setTextColor(warningColor)
+                app.versionNumber > 0 -> version?.setTextColor(textColor)
             }
         } else {
             price?.setCompoundDrawables(null, null, null, null)

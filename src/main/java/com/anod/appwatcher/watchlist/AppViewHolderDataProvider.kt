@@ -3,6 +3,7 @@ package com.anod.appwatcher.watchlist
 import android.content.Context
 import android.support.annotation.ColorInt
 import android.support.annotation.ColorRes
+import android.support.annotation.StringRes
 import android.support.v4.content.ContextCompat
 
 import com.anod.appwatcher.R
@@ -31,6 +32,10 @@ open class AppViewHolderDataProvider(
     internal fun setNewAppsCount(newAppsCount: Int, updatableAppsCount: Int) {
         this.newAppsCount = newAppsCount
         this.updatableAppsCount = updatableAppsCount
+    }
+
+    override fun getString(@StringRes resId: Int): String {
+        return context.getString(resId)
     }
 
     @ColorInt

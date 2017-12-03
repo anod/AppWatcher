@@ -2,6 +2,7 @@ package com.anod.appwatcher.watchlist
 
 import android.support.annotation.ColorInt
 import android.support.annotation.ColorRes
+import android.support.annotation.StringRes
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import com.anod.appwatcher.content.AppChangeContentProviderClient
@@ -29,11 +30,12 @@ abstract class AppViewHolderBase(
         val installedApps: InstalledApps
         val appChangeContentProvider: AppChangeContentProviderClient
         fun formatVersionText(versionName: String, versionNumber: Int): String
+        fun getString(@StringRes resId: Int): String
         @ColorInt
         fun getColor(@ColorRes colorRes: Int): Int
 
         val updatableAppsCount: Int
-    }
+     }
 
     abstract fun bindView(location: Int, app: AppInfo)
 }

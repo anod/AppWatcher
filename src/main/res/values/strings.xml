@@ -123,6 +123,7 @@
     <string name="open">Open</string>
     <string name="channel_name">Apps updates</string>
     <string name="channel_description">Notifications about new versions of watching apps</string>
+    <string name="updates_not_available">Updates information is not available</string>
     <string-array name="sort_titles">
         <item>By name &#x2193;</item>
         <item>By name &#x2191;</item>
