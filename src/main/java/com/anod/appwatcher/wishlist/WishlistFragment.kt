@@ -162,8 +162,5 @@ class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Li
         const val EXTRA_ACCOUNT = "extra_account"
         const val EXTRA_AUTH_TOKEN = "extra_auth_token"
 
-        init {
-            FragmentToolbarActivity.register(TAG) { WishlistFragment() }
-        }
     }
 }

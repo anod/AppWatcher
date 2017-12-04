@@ -2,6 +2,7 @@ package com.anod.appwatcher.search
 
 import android.content.Context
 import android.support.v4.content.ContextCompat
+import android.support.v4.content.res.ResourcesCompat
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -11,6 +12,7 @@ import finsky.api.model.Document
 import finsky.protos.nano.Messages
 import com.squareup.picasso.Picasso
 import info.anodsplace.appwatcher.framework.InstalledApps
+import info.anodsplace.appwatcher.framework.ThemeCompat
 
 /**
  *  @author alex
@@ -21,8 +23,8 @@ abstract class ResultsAdapter(
         private val context: Context,
         private val watchAppList: WatchAppList): RecyclerView.Adapter<ResultsAppViewHolder>() {
 
-    private val colorBgDisabled = ContextCompat.getColor(context, R.color.row_inactive)
-    private val colorBgNormal = ContextCompat.getColor(context, R.color.item_background)
+    private val colorBgDisabled = ThemeCompat.getColor(context, R.attr.inactiveRow)
+    private val colorBgNormal = ThemeCompat.getColor(context, R.attr.colorItemBackground)
     private val installedAppsProvider = InstalledApps.MemoryCache(InstalledApps.PackageManager(context.packageManager))
 
     val isEmpty: Boolean

@@ -16,6 +16,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import com.anod.appwatcher.App
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.DbContentProviderClient
@@ -36,6 +37,9 @@ import kotterknife.bindView
  */
 
 class TagsListActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<Cursor>, View.OnClickListener {
+
+    override val themeRes: Int
+        get() = App.with(this).theme
 
     val listView: RecyclerView by bindView(android.R.id.list)
 

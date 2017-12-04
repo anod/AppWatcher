@@ -19,6 +19,10 @@
     <color name="neutral_theme_primary_dark">@color/material_grey_900</color>
     <color name="neutral_theme_accent">@color/material_grey_700</color>
 
+    <color name="black_theme_primary">@android:color/black</color>
+    <color name="black_theme_primary_dark">@android:color/black</color>
+    <color name="black_theme_accent">@android:color/black</color>
+
     <color name="theme_primary">@color/material_blue_500</color>
     <color name="theme_primary_dark">@color/material_blue_800</color>
     <color name="theme_accent">#FF03a9f4</color>

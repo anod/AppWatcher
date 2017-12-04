@@ -34,6 +34,9 @@ import java.util.*
 
 open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDrive.Listener, GDriveSignIn.Listener, AccountSelectionDialog.SelectionListener, ImportTask.Listener {
 
+    override val themeRes: Int
+        get() = App.with(this).theme
+
     private var syncEnabledItem: CheckboxItem? = null
     private var syncNowItem: Item? = null
     private var wifiItem: CheckboxItem? = null

@@ -34,6 +34,9 @@
         <!-- Override color for Material.Small -->
         <item name="android:textColorTertiary">@color/primary_text</item>
         <item name="android:buttonStyle">@style/BrandButtonStyle</item>
+
+        <item name="inactiveRow">@color/row_inactive</item>
+        <item name="colorItemBackground">@color/item_background</item>
     </style>
 
     <style name="BrandButtonStyle" parent="Widget.AppCompat.Button.Colored">
@@ -47,6 +50,20 @@
         <item name="colorPrimary">@color/neutral_theme_primary</item>
         <item name="colorPrimaryDark">@color/neutral_theme_primary_dark</item>
         <item name="colorAccent">@color/neutral_theme_accent</item>
+    </style>
+
+    <style name="AppTheme.Black" parent="AppTheme.Base">
+        <item name="colorPrimary">@color/black_theme_primary</item>
+        <item name="colorPrimaryDark">@color/black_theme_primary_dark</item>
+
+        <item name="android:colorBackground">@android:color/black</item>
+        <item name="android:colorBackgroundCacheHint">@android:color/black</item>
+
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="controlBackground">@android:color/black</item>
+
+        <item name="colorItemBackground">@android:color/black</item>
+
     </style>
 
     <style name="ListHeader">

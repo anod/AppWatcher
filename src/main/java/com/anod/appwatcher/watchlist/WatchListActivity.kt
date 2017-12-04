@@ -39,6 +39,9 @@ import java.util.*
 
 abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionListener, SearchView.OnQueryTextListener {
 
+    override val themeRes: Int
+        get() = App.with(this).theme
+
     private var syncFinishedReceiverRegistered: Boolean = false
 
     private lateinit var viewPager: ViewPager

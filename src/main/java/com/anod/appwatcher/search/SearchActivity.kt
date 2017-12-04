@@ -33,6 +33,9 @@ import kotterknife.bindView
 
 open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionListener, WatchAppList.Listener, CompositeStateEndpoint.Listener {
 
+    override val themeRes: Int
+        get() = App.with(this).theme
+
     private lateinit var adapter: ResultsAdapter
 
     val loading: LinearLayout by bindView(R.id.loading)

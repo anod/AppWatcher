@@ -1,6 +1,7 @@
 package info.anodsplace.appwatcher.framework
 
 import android.os.Bundle
+import android.support.annotation.StyleRes
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.app.AppCompatDelegate
 import android.support.v7.widget.Toolbar
@@ -11,13 +12,16 @@ import android.view.View
  * *
  * @date 2015-06-20
  */
-open class ToolbarActivity : AppCompatActivity() {
+open class ToolbarActivity : AppCompatActivity(), CustomThemeActivity {
 
-    val nightMode: Int
-        get() = ApplicationContext(this).nightMode
+    override val themeRes = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AppCompatDelegate.setDefaultNightMode(this.nightMode)
+        val app = ApplicationContext(this)
+        AppCompatDelegate.setDefaultNightMode(app.nightMode)
+        if (this.themeRes > 0) {
+            this.setTheme(this.themeRes)
+        }
         super.onCreate(savedInstanceState)
     }
 

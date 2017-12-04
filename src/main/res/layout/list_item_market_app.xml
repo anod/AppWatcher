@@ -7,7 +7,7 @@
     android:layout_marginBottom="1dp"
 
     android:clickable="true"
-    card_view:cardBackgroundColor="@color/item_background"
+    card_view:cardBackgroundColor="?attr/colorItemBackground"
     card_view:cardCornerRadius="1dp"
     card_view:cardElevation="1dp"
     >
