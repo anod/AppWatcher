@@ -45,7 +45,6 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
     private var listenerIndex: Int = 0
 
     lateinit var listView: RecyclerView
-    lateinit var progressContainer: View
     lateinit var emptyView: View
     var swipeLayout: SwipeRefreshLayout? = null
 
@@ -114,7 +113,6 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
         get() = listView.visibility == View.VISIBLE
         set(visible) {
             if (visible) {
-                progressContainer.visibility = View.GONE
                 if (adapter.itemCount == 0) {
                     emptyView.visibility = View.VISIBLE
                     listView.visibility = View.INVISIBLE
@@ -123,7 +121,6 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
                     listView.visibility = View.VISIBLE
                 }
             } else {
-                progressContainer.visibility = View.VISIBLE
                 listView.visibility = View.INVISIBLE
                 emptyView.visibility = View.GONE
             }
@@ -143,7 +140,6 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
 
         listView = view.findViewById(android.R.id.list)
         emptyView = view.findViewById(android.R.id.empty)
-        progressContainer = view.findViewById(R.id.progress)
         swipeLayout = view.findViewById(R.id.swipe_layout)
 
         emptyView.visibility = View.GONE

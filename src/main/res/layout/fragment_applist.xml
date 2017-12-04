@@ -16,13 +16,6 @@
             android:layout_height="match_parent"
             tools:listitem="@layout/list_item_app"/>
 
-        <ProgressBar
-            android:id="@+id/progress"
-            style="?android:attr/progressBarStyleLarge"
-            android:layout_gravity="center"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-
         <LinearLayout
             android:id="@android:id/empty"
             android:layout_width="240dp"

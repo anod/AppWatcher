@@ -49,14 +49,11 @@ class InstalledLoader(
                 }
 
         val list = installed.filter { !watchingPackages.containsKey(it) }
-        if (sortId == Preferences.SORT_NAME_DESC) {
-            Collections.sort(list, AppTitleComparator(-1, this))
-        } else if (sortId == Preferences.SORT_DATE_ASC) {
-            Collections.sort(list, AppUpdateTimeComparator(1, this))
-        } else if (sortId == Preferences.SORT_DATE_DESC) {
-            Collections.sort(list, AppUpdateTimeComparator(-1, this))
-        } else {
-            Collections.sort(list, AppTitleComparator(1, this))
+        when (sortId) {
+            Preferences.SORT_NAME_DESC -> Collections.sort(list, AppTitleComparator(-1, this))
+            Preferences.SORT_DATE_ASC -> Collections.sort(list, AppUpdateTimeComparator(1, this))
+            Preferences.SORT_DATE_DESC -> Collections.sort(list, AppUpdateTimeComparator(-1, this))
+            else -> Collections.sort(list, AppTitleComparator(1, this))
         }
 
         if (titleFilter.isNotEmpty()) {
