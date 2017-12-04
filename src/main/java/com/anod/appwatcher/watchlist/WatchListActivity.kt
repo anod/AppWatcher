@@ -8,7 +8,6 @@ import android.content.IntentFilter
 import android.os.Bundle
 import android.support.annotation.LayoutRes
 import android.support.annotation.MenuRes
-import android.support.design.widget.TabLayout
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
@@ -23,16 +22,13 @@ import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import com.anod.appwatcher.*
-import com.anod.appwatcher.installed.ImportInstalledActivity
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.sync.ManualSyncService
 import com.anod.appwatcher.sync.UpdateCheck
-import com.anod.appwatcher.tags.TagsListActivity
 import com.anod.appwatcher.search.SearchActivity
 import com.anod.appwatcher.utils.UpgradeCheck
 import info.anodsplace.android.log.AppLog
-import info.anodsplace.appwatcher.framework.MenuItemAnimation
 import java.util.*
 
 /**
@@ -46,9 +42,6 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     private var syncFinishedReceiverRegistered: Boolean = false
 
     private lateinit var viewPager: ViewPager
-    private val refreshMenuAnimation: MenuItemAnimation = MenuItemAnimation(this, R.anim.rotate)
-    private var filterQuery = ""
-    private var expandSearch = false
 
     val prefs: Preferences
         get() = App.provide(this).prefs
@@ -60,7 +53,8 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         fun onSyncFinish()
     }
 
-    private var searchMenuItem: MenuItem? = null
+    private val actionMenu by lazy { WatchListMenu(this, this) }
+
     private val eventListeners = ArrayList<EventListener>(3)
 
     @get:LayoutRes protected abstract val contentLayout: Int
@@ -68,7 +62,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
 
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putInt("tab_id", viewPager.currentItem)
-        outState.putString("filter", filterQuery)
+        outState.putString("filter", actionMenu.searchQuery)
         super.onSaveInstanceState(outState)
     }
 
@@ -80,48 +74,43 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         val filterId: Int
         if (savedInstanceState != null) {
             filterId = savedInstanceState.getInt("tab_id", Filters.TAB_ALL)
-            filterQuery = savedInstanceState.getString("filter") ?: ""
-            expandSearch = filterQuery.isNotEmpty()
+            actionMenu.searchQuery = savedInstanceState.getString("filter") ?: ""
             AppLog.d("Restore tab: " + filterId)
         } else {
             filterId = intentExtras.getInt("tab_id", Filters.TAB_ALL)
-            expandSearch = intentExtras.getBoolean(EXTRA_EXPAND_SEARCH)
+            actionMenu.expandSearch = intentExtras.getBoolean(EXTRA_EXPAND_SEARCH)
         }
 
         viewPager = findViewById<View>(R.id.viewpager) as ViewPager
         viewPager.adapter = createViewPagerAdapter()
+        viewPager.offscreenPageLimit = 0
+
         viewPager.currentItem = filterId
+        actionMenu.filterId = filterId
+        viewPager.addOnPageChangeListener(object: ViewPager.SimpleOnPageChangeListener() {
+            override fun onPageSelected(position: Int) {
+                actionMenu.filterId = position
+                if (position == 0) {
+                    supportActionBar?.subtitle = ""
+                } else {
+                    supportActionBar?.subtitle = viewPager.adapter.getPageTitle(position)
+                }
+            }
+        })
     }
 
     protected abstract fun createViewPagerAdapter(): Adapter
+
+    fun applyFilter(filterId: Int) {
+        viewPager.currentItem = filterId
+    }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu
         menuInflater.inflate(menuResource, menu)
 
-        searchMenuItem = menu.findItem(R.id.menu_act_filter)
-        searchMenuItem?.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
-            override fun onMenuItemActionExpand(menuItem: MenuItem): Boolean {
-                return true
-            }
+        actionMenu.init(menu)
 
-            override fun onMenuItemActionCollapse(menuItem: MenuItem): Boolean {
-                notifyQueryChange("")
-                return true
-            }
-        })
-
-        val searchView = searchMenuItem?.actionView as SearchView
-        searchView.setOnQueryTextListener(this)
-        searchView.isSubmitButtonEnabled = true
-        searchView.queryHint = getString(R.string.search)
-
-        if (expandSearch) {
-            searchMenuItem?.expandActionView()
-            searchView.setQuery(filterQuery, false)
-        }
-
-        refreshMenuAnimation.menuItem = menu.findItem(R.id.menu_act_refresh)
         return super.onCreateOptionsMenu(menu)
     }
 
@@ -132,11 +121,11 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         override fun onReceive(context: Context, intent: Intent) {
             val action = intent.action
             if (UpdateCheck.syncProgress == action) {
-                refreshMenuAnimation.start()
+                actionMenu.startRefresh()
                 notifySyncStart()
             } else if (UpdateCheck.syncStop == action) {
                 val updatesCount = intent.getIntExtra(UpdateCheck.extrasUpdatesCount, 0)
-                refreshMenuAnimation.stop()
+                actionMenu.stopRefresh()
                 notifySyncStop()
                 if (updatesCount == 0) {
                     Toast.makeText(this@WatchListActivity, R.string.no_updates_found, Toast.LENGTH_SHORT).show()
@@ -165,38 +154,13 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.menu_add -> {
-                val addActivity = Intent(this, MarketSearchActivity::class.java)
-                startActivity(addActivity)
-                return true
-            }
-            R.id.menu_act_refresh -> {
-                requestRefresh()
-                return true
-            }
-            R.id.menu_settings -> {
-                val settingsActivity = Intent(this, SettingsActivity::class.java)
-                startActivity(settingsActivity)
-                return true
-            }
-            R.id.menu_act_import -> {
-                startActivity(Intent(this, ImportInstalledActivity::class.java))
-                return true
-            }
-            R.id.menu_act_tags -> {
-                startActivity(Intent(this, TagsListActivity::class.java))
-                return true
-            }
-            R.id.menu_act_sort -> {
-                showSortOptions()
-                return true
-            }
+        if (actionMenu.onItemSelected(item)) {
+            return true
         }
         return super.onOptionsItemSelected(item)
     }
 
-    private fun showSortOptions() {
+    fun showSortOptions() {
         val selected = prefs.sortIndex
         AlertDialog.Builder(this)
                 .setSingleChoiceItems(R.array.sort_titles, selected) { dialog, index ->
@@ -236,22 +200,15 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     }
 
     override fun onQueryTextSubmit(query: String): Boolean {
-        filterQuery = ""
-        if (TextUtils.isEmpty(query)) {
-            searchMenuItem?.collapseActionView()
-        } else {
-            val searchIntent = Intent(this, MarketSearchActivity::class.java)
-            searchIntent.putExtra(SearchActivity.EXTRA_KEYWORD, query)
-            searchIntent.putExtra(SearchActivity.EXTRA_EXACT, true)
-            startActivity(searchIntent)
-            notifyQueryChange("")
-            searchMenuItem?.collapseActionView()
-        }
+        val searchIntent = Intent(this, MarketSearchActivity::class.java)
+        searchIntent.putExtra(SearchActivity.EXTRA_KEYWORD, query)
+        searchIntent.putExtra(SearchActivity.EXTRA_EXACT, true)
+        startActivity(searchIntent)
         return true
     }
 
     override fun onQueryTextChange(newText: String): Boolean {
-        filterQuery = newText
+
         notifyQueryChange(newText)
         return true
     }
@@ -271,8 +228,8 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     fun addQueryChangeListener(listener: EventListener): Int {
         eventListeners.add(listener)
 
-        if (!TextUtils.isEmpty(filterQuery)) {
-            notifyQueryChange(filterQuery)
+        if (!TextUtils.isEmpty(actionMenu.searchQuery)) {
+            notifyQueryChange(actionMenu.searchQuery)
         }
 
         return eventListeners.size - 1

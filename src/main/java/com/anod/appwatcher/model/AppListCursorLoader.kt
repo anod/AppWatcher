@@ -65,7 +65,7 @@ open class AppListCursorLoader(context: Context,
             loadNewCount()
             return AppListCursor(cr)
         } else {
-            if (cursorFilter is InstalledFilter) {
+            if (cursorFilter is AppListFilter) {
                 cursorFilter.resetNewCount()
             }
             return AppListCursor(FilterCursor(cr, cursorFilter))
@@ -74,7 +74,7 @@ open class AppListCursorLoader(context: Context,
 
     val newCountFiltered: Int
         get() {
-            if (cursorFilter is InstalledFilter) {
+            if (cursorFilter is AppListFilter) {
                 return cursorFilter.newCount
             }
             return newCount
@@ -82,7 +82,7 @@ open class AppListCursorLoader(context: Context,
 
     val updatableCountFiltered: Int
         get() {
-            if (cursorFilter is InstalledFilter) {
+            if (cursorFilter is AppListFilter) {
                 return cursorFilter.updatableNewCount
             }
             return updatableNewCount

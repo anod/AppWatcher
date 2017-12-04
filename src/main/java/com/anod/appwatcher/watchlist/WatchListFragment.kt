@@ -54,7 +54,7 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
     interface SectionProvider {
         var adapterIndexMap: SparseIntArray
         fun fillAdapters(adapter: MergeRecyclerAdapter, context: Context, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener)
-        fun createLoader(context: Context, titleFilter: String, sortId: Int, filter: InstalledFilter?, tag: Tag?): Loader<Cursor>
+        fun createLoader(context: Context, titleFilter: String, sortId: Int, filter: AppListFilter?, tag: Tag?): Loader<Cursor>
         fun loadFinished(adapter: MergeRecyclerAdapter, loader: Loader<Cursor>, data: Cursor)
         fun loaderReset(adapter: MergeRecyclerAdapter)
     }
@@ -67,7 +67,7 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
             adapterIndexMap.put(ADAPTER_WATCHLIST, index)
         }
 
-        override fun createLoader(context: Context, titleFilter: String, sortId: Int, filter: InstalledFilter?, tag: Tag?): Loader<Cursor> {
+        override fun createLoader(context: Context, titleFilter: String, sortId: Int, filter: AppListFilter?, tag: Tag?): Loader<Cursor> {
             return AppListCursorLoader(context, titleFilter, sortId, filter, tag)
         }
 
@@ -166,7 +166,7 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
 
         sortId = arguments!!.getInt(ARG_SORT)
         filterId = arguments!!.getInt(ARG_FILTER)
-        tag = arguments!!.getParcelable<Tag>(ARG_TAG)
+        tag = arguments!!.getParcelable(ARG_TAG)
         // Prepare the loader.  Either re-connect with an existing one,
         // or start a new one.
         loaderManager.initLoader(0, null, this)
@@ -201,13 +201,13 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
         section.loaderReset(adapter)
     }
 
-    protected fun createFilter(filterId: Int): InstalledFilter? {
-        if (filterId == Filters.TAB_INSTALLED) {
-            return InstalledFilter(true, installedApps)
-        } else if (filterId == Filters.TAB_UNINSTALLED) {
-            return InstalledFilter(false, installedApps)
+    protected fun createFilter(filterId: Int): AppListFilter? {
+        when (filterId) {
+            Filters.TAB_INSTALLED -> return AppListFilter(AppListFilterInclusionInstalled(), installedApps)
+            Filters.TAB_UNINSTALLED -> return AppListFilter(AppListFilterInclusionUninstalled(), installedApps)
+            Filters.TAB_UPDATABLE -> return AppListFilter(AppListFilterInclusionUpdatable(), installedApps)
+            else -> return null
         }
-        return null
     }
 
     override fun onSortChanged(sortIndex: Int) {

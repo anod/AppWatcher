@@ -16,7 +16,7 @@ interface InstalledApps {
     class Info(val versionCode: Int, val versionName: String) {
 
         fun isUpdatable(versionNumber: Int): Boolean {
-            return this.versionCode > 0 && this.versionCode != versionNumber
+            return this.versionCode > 0 && this.versionCode < versionNumber
         }
 
         val isInstalled: Boolean
@@ -43,20 +43,20 @@ interface InstalledApps {
     }
 
     class MemoryCache(private val installedApps: InstalledApps) : InstalledApps {
-        private val mCache = ArrayMap<String, Info>()
+        private val cache = ArrayMap<String, Info>()
 
         override fun getInfo(packageName: String): Info {
-            if (mCache.containsKey(packageName)) {
-                return mCache[packageName]!!
+            if (cache.containsKey(packageName)) {
+                return cache[packageName]!!
             }
 
             val info = installedApps.getInfo(packageName)
-            mCache.put(packageName, info)
+            cache.put(packageName, info)
             return info
         }
 
         fun reset() {
-            mCache.clear()
+            cache.clear()
         }
 
     }

@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.AppBarLayout
-import android.support.design.widget.TabLayout
 import android.view.MenuItem
 import android.view.View
 import com.anod.appwatcher.R
@@ -27,7 +26,7 @@ class AppsTagActivity : WatchListActivity() {
     override val contentLayout: Int
         get() = R.layout.activity_main
     override val menuResource: Int
-        get() = R.menu.main_tag
+        get() = R.menu.tagslist
 
     override fun onCreate(savedInstanceState: Bundle?) {
         tag = intentExtras.getParcelable(EXTRA_TAG)
@@ -72,6 +71,10 @@ class AppsTagActivity : WatchListActivity() {
                 prefs.sortIndex,
                 WatchListFragment.DefaultSection(),
                 tag), getString(R.string.tab_not_installed))
+        adapter.addFragment(WatchListFragment.newInstance(
+                Filters.TAB_UPDATABLE,
+                prefs.sortIndex,
+                WatchListFragment.DefaultSection(), null), getString(R.string.tab_updatable))
         return adapter
     }
 

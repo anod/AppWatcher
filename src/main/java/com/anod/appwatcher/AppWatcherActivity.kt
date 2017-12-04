@@ -6,7 +6,6 @@ import android.support.v7.widget.SearchView
 import android.widget.TextView
 
 import com.anod.appwatcher.watchlist.WatchListFragment
-import com.anod.appwatcher.installed.InstalledSectionProvider
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.watchlist.WatchListActivity
@@ -40,7 +39,7 @@ class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener,
         @LayoutRes get() = R.layout.activity_main
 
     override val menuResource: Int
-        get() = R.menu.main
+        get() = R.menu.watchlist
 
     override fun createViewPagerAdapter(): WatchListActivity.Adapter {
         val adapter = WatchListActivity.Adapter(supportFragmentManager)
@@ -57,6 +56,10 @@ class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener,
                 Filters.TAB_UNINSTALLED,
                 prefs.sortIndex,
                 WatchListFragment.DefaultSection(), null), getString(R.string.tab_not_installed))
+        adapter.addFragment(WatchListFragment.newInstance(
+                Filters.TAB_UPDATABLE,
+                prefs.sortIndex,
+                WatchListFragment.DefaultSection(), null), getString(R.string.tab_updatable))
         return adapter
     }
 }
