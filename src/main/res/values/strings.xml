@@ -119,7 +119,7 @@
     <string name="refresh_scheduled">Refresh scheduled</string>
     <string name="recently_installed">Recently installed</string>
     <string name="shortcut_search">Search</string>
-    <string name="shortcut_recent">Recent</string>
+    <string name="shortcut_updates">Updatable</string>
     <string name="open">Open</string>
     <string name="channel_name">Apps updates</string>
     <string name="channel_description">Notifications about new versions of watching apps</string>

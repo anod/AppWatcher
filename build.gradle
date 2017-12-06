@@ -60,8 +60,8 @@ android {
         applicationId 'com.anod.appwatcher'
         minSdkVersion 15
         targetSdkVersion 26
-        versionCode 75
-        versionName '1.9.2'
+        versionCode 76
+        versionName '1.10'
         resValue "string", "content_authority", "com.anod.appwatcher"
 
         vectorDrawables.generatedDensities = ['hdpi','xxhdpi']

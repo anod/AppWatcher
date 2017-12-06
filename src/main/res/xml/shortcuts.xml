@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
     <shortcut
-        android:shortcutId="recent"
+        android:shortcutId="updates"
         android:enabled="true"
-        android:icon="@drawable/ic_shortcut_recent_48dp"
-        android:shortcutShortLabel="@string/shortcut_recent"
-        android:shortcutLongLabel="@string/shortcut_recent">
+        android:icon="@drawable/ic_shortcut_updates_48dp"
+        android:shortcutShortLabel="@string/shortcut_updates"
+        android:shortcutLongLabel="@string/shortcut_updates">
         <intent
             android:action="android.intent.action.VIEW"
             android:targetPackage="com.anod.appwatcher"
             android:targetClass="com.anod.appwatcher.AppWatcherActivity">
-            <extra android:name="tab_id" android:value="1" />
+            <extra android:name="tab_id" android:value="3" />
         </intent>
     </shortcut>
     <shortcut
