@@ -17,6 +17,7 @@ import com.android.volley.NetworkError
 import com.android.volley.NoConnectionError
 import com.android.volley.TimeoutError
 import com.android.volley.VolleyError
+import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.sync.SyncNotification
 import info.anodsplace.appwatcher.framework.ApplicationContext
 import info.anodsplace.appwatcher.framework.ApplicationInstance
@@ -32,14 +33,24 @@ import javax.net.ssl.SSLPeerUnverifiedException
 
 class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstance {
 
-
-
     override val theme: Int
         get() {
             if (isNightTheme) {
-                return R.style.AppTheme_Black
+                if (objectGraph.prefs.theme == Preferences.THEME_BLACK) {
+                    return R.style.AppTheme_Black
+                }
             }
             return R.style.AppTheme_Main
+        }
+
+    val themeDialog: Int
+        get() {
+            if (isNightTheme) {
+                if (objectGraph.prefs.theme == Preferences.THEME_BLACK) {
+                    return R.style.AppTheme_Dialog_Black
+                }
+            }
+            return R.style.AppTheme_Dialog
         }
 
     override val notificationManager: NotificationManager
@@ -128,6 +139,7 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
             // Ignore
         }
     }
+
 }
 
 class LifecycleCallbacks(private val app: AppWatcherApplication) : Application.ActivityLifecycleCallbacks {

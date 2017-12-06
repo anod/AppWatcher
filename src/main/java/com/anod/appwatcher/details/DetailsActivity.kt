@@ -30,6 +30,7 @@ import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.Tag
 import com.anod.appwatcher.model.WatchAppList
 import com.anod.appwatcher.model.packageToApp
+import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.*
 import com.squareup.picasso.Picasso
@@ -41,6 +42,16 @@ import info.anodsplace.playstore.PlayStoreEndpoint
 import kotterknife.bindView
 
 open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette.PaletteAsyncListener, View.OnClickListener, WatchAppList.Listener {
+
+    override val themeRes: Int
+        get() {
+            if (App.with(this).isNightTheme) {
+                if (App.provide(this).prefs.theme == Preferences.THEME_BLACK) {
+                    return R.style.AppTheme_Dialog_Black_Changelog
+                }
+            }
+            return R.style.AppTheme_Dialog_Changelog
+        }
 
     val loadingView: ProgressBar by bindView(R.id.progress_bar)
     val changelog: TextView by bindView(R.id.changelog)

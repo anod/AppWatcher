@@ -136,6 +136,7 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
 
         preferences.add(Category(R.string.pref_header_interface))
         preferences.add(Item(R.string.pref_title_theme, R.string.pref_descr_theme, ACTION_THEME))
+        preferences.add(Item(R.string.pref_title_dark_theme, R.string.pref_descr_dark_theme, ACTION_DARK_THEME))
 
         preferences.add(Category(R.string.pref_header_about))
 
@@ -273,6 +274,20 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
                         }.create()
                 dialog.show()
             }
+            ACTION_DARK_THEME -> {
+                val dialog = AlertDialog.Builder(this)
+                        .setTitle(R.string.pref_title_dark_theme)
+                        .setItems(R.array.dark_themes) { _, which ->
+                            if (prefs.theme != which) {
+                                prefs.theme = which
+                                this@SettingsActivity.recreate()
+                                val i = Intent(this@SettingsActivity, AppWatcherActivity::class.java)
+                                i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                                startActivity(i)
+                            }
+                        }.create()
+                dialog.show()
+            }
             ACTION_EXPORT_DB -> try {
                 exportDb()
             } catch (e: IOException) {
@@ -395,6 +410,7 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
         private const val ACTION_THEME = 11
         private const val ACTION_EXPORT_DB = 12
         private const val ACTION_GDRIVE_UPLOAD = 13
+        private const val ACTION_DARK_THEME = 14
 
         private const val REQUEST_BACKUP_DEST = 1
         private const val REQUEST_BACKUP_FILE = 2

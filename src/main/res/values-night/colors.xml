@@ -9,4 +9,7 @@
     <color name="row_inactive">@color/material_grey_700</color>
     <color name="control_tint">@android:color/white</color>
 
+    <color name="black_theme_primary">@android:color/black</color>
+    <color name="black_theme_primary_dark">@android:color/black</color>
+    <color name="black_theme_accent">@android:color/black</color>
 </resources>

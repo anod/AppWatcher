@@ -31,4 +31,5 @@
 
         <item name="colorItemBackground">@android:color/black</item>
     </style>
+
 </resources>

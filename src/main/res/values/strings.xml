@@ -139,6 +139,11 @@
         <item>Dark</item> <!-- MODE_NIGHT_YES = 2; -->
     </string-array>
 
+    <string-array name="dark_themes">
+        <item>Default</item>
+        <item>Black (AMOLED friendly)</item>
+    </string-array>
+
     <string-array name="updates_frequency">
         <item>Manually</item>
         <item>Every 2 hours</item>

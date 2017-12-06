@@ -35,6 +35,10 @@ import java.util.*
  * @date 19/04/2016.
  */
 class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<List<String>>, AccountSelectionDialog.SelectionListener, ImportBulkManager.Listener {
+
+    override val themeRes: Int
+        get() = App.with(this).themeDialog
+
     val listView: RecyclerView by bindView(android.R.id.list)
     val progressBar: ProgressBar by bindView(android.R.id.progress)
 

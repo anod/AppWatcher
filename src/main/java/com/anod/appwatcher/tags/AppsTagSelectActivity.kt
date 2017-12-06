@@ -15,6 +15,7 @@ import android.support.v7.widget.SearchView
 import android.view.Menu
 import android.view.View
 import android.widget.ProgressBar
+import com.anod.appwatcher.App
 
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.AppListCursor
@@ -34,6 +35,9 @@ import kotterknife.bindView
  * @date 19/04/2016.
  */
 class AppsTagSelectActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<Cursor> {
+
+    override val themeRes: Int
+        get() = App.with(this).themeDialog
 
     val listView: RecyclerView by bindView(android.R.id.list)
     val progressBar: ProgressBar by bindView(android.R.id.progress)

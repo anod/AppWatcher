@@ -100,6 +100,10 @@ class Preferences(context: Context) : DeviceIdStorage {
         get() = preferences.getInt(NIGHT_MODE, AppCompatDelegate.MODE_NIGHT_NO)
         set(nightMode) = preferences.edit().putInt(NIGHT_MODE, nightMode).apply()
 
+    var theme: Int
+        get() = preferences.getInt(THEME, THEME_DEFAULT)
+        set(theme) = preferences.edit().putInt(THEME, theme).apply()
+
     companion object {
         private const val VIEWED = "viewed"
         private const val LAST_UPDATE_TIME = "last_update_time"
@@ -123,5 +127,9 @@ class Preferences(context: Context) : DeviceIdStorage {
         const val VERSION_CODE = "version_code"
         const val NOTIFY_INSTALLED_UPTODATE = "notify_installed_uptodate"
         const val NIGHT_MODE = "night-mode"
+        const val THEME = "theme"
+
+        const val THEME_DEFAULT = 0
+        const val THEME_BLACK = 1
     }
 }

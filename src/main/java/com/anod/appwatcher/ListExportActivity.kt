@@ -4,8 +4,13 @@ import android.os.Bundle
 import android.support.v4.app.FragmentActivity
 
 import com.anod.appwatcher.backup.DbBackupManager
+import info.anodsplace.appwatcher.framework.CustomThemeActivity
 
-class ListExportActivity : FragmentActivity() {
+class ListExportActivity : FragmentActivity(), CustomThemeActivity {
+
+    override val themeRes: Int
+        get() = App.with(this).themeDialog
+
     lateinit var backupManager: DbBackupManager
         private set
 
