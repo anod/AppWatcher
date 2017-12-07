@@ -44,14 +44,7 @@ import kotterknife.bindView
 open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette.PaletteAsyncListener, View.OnClickListener, WatchAppList.Listener {
 
     override val themeRes: Int
-        get() {
-            if (App.with(this).isNightTheme) {
-                if (App.provide(this).prefs.theme == Preferences.THEME_BLACK) {
-                    return R.style.AppTheme_Dialog_Black_Changelog
-                }
-            }
-            return R.style.AppTheme_Dialog_Changelog
-        }
+        get() = Theme(this).themeChangelog
 
     val loadingView: ProgressBar by bindView(R.id.progress_bar)
     val changelog: TextView by bindView(R.id.changelog)
@@ -355,7 +348,7 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
         applyColor(darkSwatch.rgb)
         animateBackground()
 
-        if (App.with(this).isNightTheme) {
+        if (Theme(this).isNightTheme) {
             appDetailsView.updateAccentColor(ContextCompat.getColor(this, R.color.primary_text_dark), appInfo!!)
         } else {
             appDetailsView.updateAccentColor(darkSwatch.rgb, appInfo!!)

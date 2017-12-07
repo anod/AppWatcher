@@ -25,6 +25,7 @@ import com.anod.appwatcher.content.TagsCursor
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.Tag
 import com.anod.appwatcher.model.schema.TagsTable
+import com.anod.appwatcher.utils.Theme
 import info.anodsplace.appwatcher.framework.DrawableTint
 import info.anodsplace.appwatcher.framework.RecyclerViewCursorAdapter
 import info.anodsplace.appwatcher.framework.ToolbarActivity
@@ -39,7 +40,7 @@ import kotterknife.bindView
 class TagsListActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<Cursor>, View.OnClickListener {
 
     override val themeRes: Int
-        get() = App.with(this).theme
+        get() =  Theme(this).theme
 
     val listView: RecyclerView by bindView(android.R.id.list)
 

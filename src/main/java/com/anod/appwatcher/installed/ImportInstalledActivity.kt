@@ -20,6 +20,7 @@ import com.anod.appwatcher.accounts.AccountSelectionDialog
 import com.anod.appwatcher.accounts.AuthTokenAsync
 import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.model.WatchAppList
+import com.anod.appwatcher.utils.Theme
 import info.anodsplace.android.log.AppLog
 import info.anodsplace.appwatcher.framework.InstalledApps
 import info.anodsplace.appwatcher.framework.ToolbarActivity
@@ -37,7 +38,7 @@ import java.util.*
 class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<List<String>>, AccountSelectionDialog.SelectionListener, ImportBulkManager.Listener {
 
     override val themeRes: Int
-        get() = App.with(this).themeDialog
+        get() = Theme(this).themeDialog
 
     val listView: RecyclerView by bindView(android.R.id.list)
     val progressBar: ProgressBar by bindView(android.R.id.progress)

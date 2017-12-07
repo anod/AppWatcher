@@ -24,6 +24,7 @@ import com.anod.appwatcher.model.AppListCursorLoader
 import com.anod.appwatcher.model.Tag
 import com.anod.appwatcher.model.schema.AppListTable
 import com.anod.appwatcher.model.schema.AppTagsTable
+import com.anod.appwatcher.utils.Theme
 import info.anodsplace.appwatcher.framework.BackgroundTask
 import info.anodsplace.appwatcher.framework.Keyboard
 import info.anodsplace.appwatcher.framework.ToolbarActivity
@@ -37,7 +38,7 @@ import kotterknife.bindView
 class AppsTagSelectActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<Cursor> {
 
     override val themeRes: Int
-        get() = App.with(this).themeDialog
+        get() =  Theme(this).themeDialog
 
     val listView: RecyclerView by bindView(android.R.id.list)
     val progressBar: ProgressBar by bindView(android.R.id.progress)

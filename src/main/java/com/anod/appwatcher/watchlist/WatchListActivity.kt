@@ -27,6 +27,7 @@ import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.sync.ManualSyncService
 import com.anod.appwatcher.sync.UpdateCheck
 import com.anod.appwatcher.search.SearchActivity
+import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.utils.UpgradeCheck
 import info.anodsplace.android.log.AppLog
 import java.util.*
@@ -40,7 +41,7 @@ import java.util.*
 abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionListener, SearchView.OnQueryTextListener {
 
     override val themeRes: Int
-        get() = App.with(this).theme
+        get() = Theme(this).theme
 
     private var syncFinishedReceiverRegistered: Boolean = false
 
@@ -96,7 +97,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
                 if (position == 0) {
                     supportActionBar?.subtitle = ""
                 } else {
-                    supportActionBar?.subtitle = viewPager.adapter.getPageTitle(position)
+                    supportActionBar?.subtitle = viewPager.adapter?.getPageTitle(position) ?: ""
                 }
             }
         })

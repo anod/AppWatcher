@@ -14,7 +14,6 @@ import com.android.volley.NetworkError
 import com.android.volley.NoConnectionError
 import com.android.volley.TimeoutError
 import com.android.volley.VolleyError
-import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.sync.SyncNotification
 import com.crashlytics.android.Crashlytics
 import info.anodsplace.appwatcher.framework.ApplicationContext
@@ -30,26 +29,6 @@ import javax.net.ssl.SSLPeerUnverifiedException
 
 
 class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstance {
-
-    override val theme: Int
-        get() {
-            if (isNightTheme) {
-                if (objectGraph.prefs.theme == Preferences.THEME_BLACK) {
-                    return R.style.AppTheme_Black
-                }
-            }
-            return R.style.AppTheme_Main
-        }
-
-    val themeDialog: Int
-        get() {
-            if (isNightTheme) {
-                if (objectGraph.prefs.theme == Preferences.THEME_BLACK) {
-                    return R.style.AppTheme_Dialog_Black
-                }
-            }
-            return R.style.AppTheme_Dialog
-        }
 
     override val notificationManager: NotificationManager
         get() = objectGraph.notificationManager
@@ -77,16 +56,6 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
         SyncNotification(ApplicationContext(this)).createChannel()
         registerActivityLifecycleCallbacks(LifecycleCallbacks(this))
     }
-
-    val isNightTheme: Boolean
-        get() {
-            val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-            when (currentNightMode) {
-                Configuration.UI_MODE_NIGHT_YES -> return true
-                Configuration.UI_MODE_NIGHT_NO, Configuration.UI_MODE_NIGHT_UNDEFINED -> return false
-            }
-            return false
-        }
 
     val isNetworkAvailable: Boolean
         get() = objectGraph.connectivityManager.activeNetworkInfo?.isConnectedOrConnecting == true
@@ -163,8 +132,9 @@ class LifecycleCallbacks(private val app: AppWatcherApplication) : Application.A
         if (activity == null) return
 
         if (activity is CustomThemeActivity) {
-            if (activity.themeRes > 0) {
-                activity.setTheme(activity.themeRes)
+            val themeRes = activity.themeRes
+            if (themeRes > 0) {
+                activity.setTheme(themeRes)
             }
         }
     }

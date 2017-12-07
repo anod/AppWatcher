@@ -27,6 +27,7 @@ import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.model.WatchAppList
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.MetricsManagerEvent
+import com.anod.appwatcher.utils.Theme
 import info.anodsplace.appwatcher.framework.Keyboard
 import info.anodsplace.appwatcher.framework.ToolbarActivity
 import kotterknife.bindView
@@ -34,7 +35,7 @@ import kotterknife.bindView
 open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionListener, WatchAppList.Listener, CompositeStateEndpoint.Listener {
 
     override val themeRes: Int
-        get() = App.with(this).theme
+        get() =  Theme(this).theme
 
     private lateinit var adapter: ResultsAdapter
 

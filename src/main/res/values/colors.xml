@@ -7,9 +7,11 @@
 
     <color name="material_grey_500">#9E9E9E</color>
     <color name="material_grey_700">#616161</color>
+    <color name="material_grey_800_">#424242</color>
     <color name="material_red_800">#C62828</color>
     <color name="material_amber_800">#FF8F00</color>
 
+    material_grey_800
     <!--
     <color name="material_grey_900">#212121</color>
     <color name="material_grey_800">#424242</color>

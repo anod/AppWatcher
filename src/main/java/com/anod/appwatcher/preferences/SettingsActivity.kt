@@ -20,6 +20,7 @@ import com.anod.appwatcher.backup.ImportTask
 import com.anod.appwatcher.backup.gdrive.GDriveSignIn
 import com.anod.appwatcher.model.DbSchemaManager
 import com.anod.appwatcher.sync.SyncScheduler
+import com.anod.appwatcher.utils.Theme
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
@@ -35,7 +36,7 @@ import java.util.*
 open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDrive.Listener, GDriveSignIn.Listener, AccountSelectionDialog.SelectionListener, ImportTask.Listener {
 
     override val themeRes: Int
-        get() = App.with(this).theme
+        get() =  Theme(this).theme
 
     private var syncEnabledItem: CheckboxItem? = null
     private var syncNowItem: Item? = null

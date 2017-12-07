@@ -15,21 +15,16 @@
     </style>
 
     <style name="AppTheme.Black" parent="AppTheme.Base">
-        <item name="android:windowDisablePreview">true</item>
-
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@color/black_theme_primary</item>
 
         <item name="colorPrimary">@color/black_theme_primary</item>
         <item name="colorPrimaryDark">@color/black_theme_primary_dark</item>
-
         <item name="android:colorBackground">@android:color/black</item>
         <item name="android:colorBackgroundCacheHint">@android:color/black</item>
-
         <item name="android:windowBackground">@android:color/black</item>
-        <item name="controlBackground">@android:color/black</item>
-
         <item name="colorItemBackground">@android:color/black</item>
+        <item name="colorItemLine">@color/material_grey_800_</item>
     </style>
 
 </resources>

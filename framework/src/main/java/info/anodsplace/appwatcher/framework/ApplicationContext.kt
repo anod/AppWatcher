@@ -17,7 +17,6 @@ interface ApplicationInstance {
     val notificationManager: NotificationManager
     val memoryCache: LruCache<String, Any?>
     val nightMode: Int
-    val theme: Int
 
     fun sendBroadcast(intent: Intent)
     fun getString(@StringRes resId: Int): String
@@ -36,8 +35,6 @@ class ApplicationContext(context: Context) {
         get() = app.memoryCache
     val nightMode: Int
         get() = app.nightMode
-    val theme: Int
-        get() = app.theme
 
     fun getString(@StringRes resId: Int): String {
         return actual.getString(resId)

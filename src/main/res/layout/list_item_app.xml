@@ -137,6 +137,14 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/price"
                 tools:text="1.9.1 beta3Fix search results Fix import installed Add open app menu item" />
+
         </android.support.constraint.ConstraintLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?attr/colorItemLine"
+            android:layout_gravity="bottom"
+        />
     </android.support.v7.widget.CardView>
 </LinearLayout>

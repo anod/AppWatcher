@@ -51,5 +51,10 @@
             android:layout_gravity="bottom|left"
             android:tint="@color/material_grey_500" />
     </LinearLayout>
-
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?attr/colorItemLine"
+        android:layout_gravity="bottom"
+        />
 </com.anod.appwatcher.installed.RecentAppView>

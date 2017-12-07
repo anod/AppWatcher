@@ -17,9 +17,6 @@ typealias FragmentCreator = () -> Fragment
 
 class FragmentToolbarActivity : ToolbarActivity() {
 
-    override val themeRes: Int
-        get() = ApplicationContext(this).theme
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_fragment)

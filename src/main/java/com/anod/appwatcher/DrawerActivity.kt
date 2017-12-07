@@ -21,7 +21,9 @@ import com.anod.appwatcher.accounts.AuthTokenAsync
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.TagsContentProviderClient
 import com.anod.appwatcher.installed.ImportInstalledActivity
+import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.tags.AppsTagActivity
+import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.wishlist.WishlistFragment
 import info.anodsplace.appwatcher.framework.FragmentToolbarActivity
 import info.anodsplace.appwatcher.framework.ToolbarActivity
@@ -31,6 +33,9 @@ import info.anodsplace.appwatcher.framework.ToolbarActivity
  * @date 01/12/2017
  */
 open class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.SelectionListener  {
+
+    override val themeRes: Int
+        get() = Theme(this).theme
 
     private var authToken: String? = null
     private var accountNameView: TextView? = null
