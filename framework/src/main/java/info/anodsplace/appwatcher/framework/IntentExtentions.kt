@@ -17,9 +17,9 @@ fun Intent.forPlayStore(pkg: String): Intent {
 }
 
 fun Intent.forMyApps(update: Boolean): Intent {
-    this.action = "finsky.VIEW_MY_DOWNLOADS"
+    this.action = "com.google.android.finsky.VIEW_MY_DOWNLOADS"
     this.component = ComponentName("com.android.vending",
-            "finsky.activities.MainActivity")
+            "com.google.android.finsky.activities.MainActivity")
     if (update) {
         this.putExtra("trigger_update_all", true)
     }

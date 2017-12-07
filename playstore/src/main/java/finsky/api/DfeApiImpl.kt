@@ -32,8 +32,7 @@ class DfeApiImpl(private val queue: RequestQueue, private val apiContext: DfeApi
 
     override fun details(docIds: List<String>, includeDetails: Boolean, listener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener): Request<*> {
         val bulkDetailsRequest = Details.BulkDetailsRequest()
-        Collections.sort(docIds)
-        bulkDetailsRequest.docid = docIds.toTypedArray()
+        bulkDetailsRequest.docid = docIds.sorted().toTypedArray()
         bulkDetailsRequest.includeDetails = includeDetails
         val dfeRequest = object : ProtoDfeRequest(
                 DfeApi.BULK_DETAILS_URI.toString(), bulkDetailsRequest, apiContext, listener, errorListener) {

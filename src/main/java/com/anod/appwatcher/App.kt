@@ -15,7 +15,7 @@ object App {
     }
 
     fun with(context: ApplicationContext): AppWatcherApplication {
-        return with(context)
+        return context.actual as AppWatcherApplication
     }
 
     fun provide(context: Context): ObjectGraph {
@@ -23,6 +23,6 @@ object App {
     }
 
     fun provide(context: ApplicationContext): ObjectGraph {
-        return with(context.actual).objectGraph
+        return (context.actual as AppWatcherApplication).objectGraph
     }
 }

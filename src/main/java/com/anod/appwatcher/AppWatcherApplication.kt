@@ -3,15 +3,12 @@ package com.anod.appwatcher
 import android.app.Activity
 import android.app.Application
 import android.app.NotificationManager
-import android.content.pm.ActivityInfo
-import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.support.v7.app.AppCompatDelegate
 import android.util.LruCache
 import android.view.ViewConfiguration
-import com.google.firebase.crash.FirebaseCrash
 import info.anodsplace.android.log.AppLog
 import com.android.volley.NetworkError
 import com.android.volley.NoConnectionError
@@ -19,6 +16,7 @@ import com.android.volley.TimeoutError
 import com.android.volley.VolleyError
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.sync.SyncNotification
+import com.crashlytics.android.Crashlytics
 import info.anodsplace.appwatcher.framework.ApplicationContext
 import info.anodsplace.appwatcher.framework.ApplicationInstance
 import info.anodsplace.appwatcher.framework.CustomThemeActivity
@@ -103,7 +101,7 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
             return
         }
 
-        FirebaseCrash.report(tr)
+        Crashlytics.logException(tr)
     }
 
     private fun isNetworkError(tr: Throwable): Boolean {
@@ -123,7 +121,7 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
     private inner class FirebaseLogger : AppLog.Logger.Android() {
         override fun println(priority: Int, tag: String, msg: String) {
             super.println(priority, tag, msg)
-            FirebaseCrash.logcat(priority, tag, msg)
+            Crashlytics.log(priority, tag, msg)
         }
     }
 
