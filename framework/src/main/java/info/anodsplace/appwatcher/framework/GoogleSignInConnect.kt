@@ -7,6 +7,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Tasks
+import java.util.concurrent.ExecutionException
 
 /**
  * @author algavris
@@ -26,10 +27,9 @@ class GoogleSignInConnect(private val context: ApplicationContext, private val s
         fun onError(errorCode: Int, client: GoogleSignInClient)
     }
 
-    @Throws(ApiException::class)
+    @Throws(ApiException::class, ExecutionException::class, InterruptedException::class)
     fun connectLocked(): GoogleSignInAccount {
         val client = createGoogleApiSignInClient()
-
         return Tasks.await(client.silentSignIn())
     }
 

@@ -325,7 +325,6 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
             } catch (e: Exception) {
                 AppLog.e(e)
             }
-
         } else {
             AppLog.d("DriveSync backup is fresh")
         }

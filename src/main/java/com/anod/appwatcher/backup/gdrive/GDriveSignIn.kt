@@ -17,6 +17,7 @@ import com.google.android.gms.drive.Drive
 import info.anodsplace.appwatcher.framework.ActivityListener
 import info.anodsplace.appwatcher.framework.ApplicationContext
 import info.anodsplace.appwatcher.framework.GoogleSignInConnect
+import java.util.concurrent.ExecutionException
 
 internal fun createGDriveSignInOptions(): GoogleSignInOptions {
     return GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -97,7 +98,6 @@ class GDriveSilentSignIn(private val context: ApplicationContext) {
     }
 
     fun signInLocked(): GoogleSignInAccount {
-
         val lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(context.actual)
         if (lastSignedInAccount != null) {
             return lastSignedInAccount
@@ -114,7 +114,17 @@ class GDriveSilentSignIn(private val context: ApplicationContext) {
                 showResolutionNotification(PendingIntent.getActivity(context.actual, 0, settingActivity, 0))
             }
             throw Exception("Google drive account is null", e)
+        } catch (e: ExecutionException) {
+            AppLog.e(e)
+            throw Exception(e.message, e)
+            // The Task failed, this is the same exception you'd get in a non-blocking
+            // failure handler.
+        } catch (e: InterruptedException) {
+            AppLog.e(e)
+            throw Exception(e.message, e)
+            // An interrupt occurred while waiting for the task to complete.
         }
+
     }
 
 }
