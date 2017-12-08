@@ -313,13 +313,13 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
 
     private fun performGDriveSync(pref: Preferences, now: Long) {
         val driveSyncTime = pref.lastDriveSyncTime
-        if (driveSyncTime == -1.toLong() || now > DateUtils.DAY_IN_MILLIS + driveSyncTime) {
+        if (driveSyncTime == (-1).toLong() || now > DateUtils.DAY_IN_MILLIS + driveSyncTime) {
             AppLog.d("DriveSync perform sync")
             val signIn = GDriveSilentSignIn(context)
 
-            val googleAccount = signIn.signInLocked()
-            val worker = SyncConnectedWorker(context, googleAccount)
             try {
+                val googleAccount = signIn.signInLocked()
+                val worker = SyncConnectedWorker(context, googleAccount)
                 worker.doSyncInBackground()
                 pref.lastDriveSyncTime = System.currentTimeMillis()
             } catch (e: Exception) {
