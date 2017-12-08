@@ -8,11 +8,13 @@ import android.os.Bundle
 import android.support.design.widget.AppBarLayout
 import android.view.MenuItem
 import android.view.View
+import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.watchlist.WatchListFragment
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.model.Tag
 import com.anod.appwatcher.watchlist.WatchListActivity
+import info.anodsplace.android.log.AppLog
 
 /**
  * @author algavris
@@ -21,7 +23,7 @@ import com.anod.appwatcher.watchlist.WatchListActivity
  */
 
 class AppsTagActivity : WatchListActivity() {
-    private lateinit var tag: Tag
+    private var tag: Tag = Tag("")
 
     override val contentLayout: Int
         get() = R.layout.activity_main
@@ -29,8 +31,15 @@ class AppsTagActivity : WatchListActivity() {
         get() = R.menu.tagslist
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        tag = intentExtras.getParcelable(EXTRA_TAG)
+        tag = restoreTag(savedInstanceState)
         super.onCreate(savedInstanceState)
+
+        if (tag.id == 0) {
+            AppLog.e("Tag is empty")
+            startActivity(Intent(this, AppWatcherActivity::class.java))
+            finish()
+            return
+        }
 
         val appBarLayout = findViewById<View>(R.id.appbar) as AppBarLayout
         appBarLayout.setBackgroundColor(tag.color)
@@ -44,6 +53,23 @@ class AppsTagActivity : WatchListActivity() {
         }
 
         title = tag.name
+    }
+
+    fun restoreTag(savedInstanceState: Bundle?): Tag {
+        if (intentExtras.containsKey(EXTRA_TAG)){
+            return intentExtras.getParcelable(EXTRA_TAG)
+        } else if (savedInstanceState != null){
+            val savedTag = savedInstanceState.getParcelable<Tag?>(EXTRA_TAG)
+            if (savedTag != null) {
+                return savedTag
+            }
+        }
+        return Tag("")
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putParcelable(EXTRA_TAG, tag)
+        super.onSaveInstanceState(outState)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
