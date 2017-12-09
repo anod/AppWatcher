@@ -340,8 +340,7 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
         setProgressVisibility(false)
         syncNowItem!!.enabled = syncEnabledItem!!.checked
         notifyDataSetChanged()
-        Toast.makeText(this, "Login error", Toast.LENGTH_SHORT).show()
-
+        Toast.makeText(this, "Drive login error $errorCode", Toast.LENGTH_SHORT).show()
     }
 
     override fun onGDriveSyncProgress() {

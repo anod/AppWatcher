@@ -19,6 +19,10 @@ class FragmentToolbarActivity : ToolbarActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val themeRes = intentExtras.getInt("themeRes", 0)
+        if (themeRes > 0) {
+            setTheme(themeRes)
+        }
         setContentView(R.layout.activity_fragment)
         setupToolbar()
 
@@ -55,11 +59,12 @@ class FragmentToolbarActivity : ToolbarActivity() {
             fragments[tag] = creator
         }
 
-        fun intent(tag: String, creator: FragmentCreator, args: Bundle, context: Context): Intent {
+        fun intent(tag: String, creator: FragmentCreator, themeRes: Int, args: Bundle, context: Context): Intent {
             register(tag, creator)
             val intent = Intent(context, FragmentToolbarActivity::class.java)
             intent.putExtra(EXTRA_FRAGMENT, tag)
             intent.putExtra(EXTRA_ARGUMENTS, args)
+            intent.putExtra("themeRes", themeRes)
             return intent
         }
     }

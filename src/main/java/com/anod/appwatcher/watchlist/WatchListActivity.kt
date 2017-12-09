@@ -1,6 +1,7 @@
 package com.anod.appwatcher.watchlist
 
 import android.accounts.Account
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -22,6 +23,7 @@ import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import com.anod.appwatcher.*
+import com.anod.appwatcher.backup.gdrive.GDriveSignIn
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.sync.ManualSyncService
@@ -29,7 +31,10 @@ import com.anod.appwatcher.sync.UpdateCheck
 import com.anod.appwatcher.search.SearchActivity
 import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.utils.UpgradeCheck
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import info.anodsplace.android.log.AppLog
+import info.anodsplace.appwatcher.framework.ApplicationContext
 import java.util.*
 
 /**
@@ -192,15 +197,34 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         return false
     }
 
-    override fun onEditorAction(textView: TextView, i: Int, keyEvent: KeyEvent): Boolean {
-        return false
-    }
-
     override fun onAccountSelected(account: Account) {
         super.onAccountSelected(account)
-        if (UpgradeCheck(prefs).isNewVersion) {
+
+        if (!UpgradeCheck(prefs).isNewVersion) {
+            return
+        }
+
+        val googleAccount = GoogleSignIn.getLastSignedInAccount(this)
+        if (googleAccount == null) {
+            GDriveSignIn(this, object : GDriveSignIn.Listener {
+                override fun onGDriveLoginSuccess(googleSignInAccount: GoogleSignInAccount) {
+                    requestRefresh()
+                }
+
+                override fun onGDriveLoginError(errorCode: Int) {
+                    val settingActivity = Intent(this@WatchListActivity, SettingsActivity::class.java)
+                    settingActivity.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    GDriveSignIn.showResolutionNotification(
+                            PendingIntent.getActivity(this@WatchListActivity, 0, settingActivity, 0), ApplicationContext(this@WatchListActivity))
+                }
+            }).signIn()
+        } else {
             requestRefresh()
         }
+    }
+
+    override fun onEditorAction(textView: TextView, i: Int, keyEvent: KeyEvent): Boolean {
+        return false
     }
 
     override fun onQueryTextSubmit(query: String): Boolean {

@@ -185,7 +185,12 @@ open class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.SelectionLi
                 val args = Bundle()
                 args.putParcelable(WishlistFragment.EXTRA_ACCOUNT, App.provide(this).prefs.account)
                 args.putString(WishlistFragment.EXTRA_AUTH_TOKEN, authToken)
-                startActivity(FragmentToolbarActivity.intent(WishlistFragment.TAG, { WishlistFragment() }, args, this))
+                startActivity(FragmentToolbarActivity.intent(
+                        WishlistFragment.TAG,
+                        { WishlistFragment() },
+                        themeRes,
+                        args,
+                        this))
                 return true
             }
         }

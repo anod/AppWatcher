@@ -31,6 +31,19 @@ class GDriveSignIn(private val activity: Activity, private val listener: Listene
 
     companion object {
         const val resultCodeGDriveSignIn = 123
+
+        fun showResolutionNotification(resolution: PendingIntent, context: ApplicationContext) {
+            val builder = NotificationCompat.Builder(context.actual, NotificationChannel.DEFAULT_CHANNEL_ID)
+            builder
+                    .setAutoCancel(true)
+                    .setSmallIcon(R.drawable.ic_notification)
+                    .setContentTitle(context.getString(R.string.google_drive_sync_failed))
+                    .setContentText(context.getString(R.string.user_action_required))
+                    .setContentIntent(resolution)
+
+            val notification = builder.build()
+            context.notificationManager.notify(SyncNotification.gpsNotificationId, notification)
+        }
     }
 
     interface Listener {
@@ -84,18 +97,6 @@ class GDriveSilentSignIn(private val context: ApplicationContext) {
 
     private val driveConnect by lazy { GoogleSignInConnect(context, createGDriveSignInOptions()) }
 
-    private fun showResolutionNotification(resolution: PendingIntent) {
-        val builder = NotificationCompat.Builder(context.actual, NotificationChannel.DEFAULT_CHANNEL_ID)
-        builder
-                .setAutoCancel(true)
-                .setSmallIcon(R.drawable.ic_notification)
-                .setContentTitle(context.getString(R.string.google_drive_sync_failed))
-                .setContentText(context.getString(R.string.user_action_required))
-                .setContentIntent(resolution)
-
-        val notification = builder.build()
-        context.notificationManager.notify(SyncNotification.gpsNotificationId, notification)
-    }
 
     fun signInLocked(): GoogleSignInAccount {
         val lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(context.actual)
@@ -111,7 +112,8 @@ class GDriveSilentSignIn(private val context: ApplicationContext) {
             if (errorCode == GoogleSignInStatusCodes.SIGN_IN_REQUIRED) {
                 val settingActivity = Intent(context.actual, SettingsActivity::class.java)
                 settingActivity.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                showResolutionNotification(PendingIntent.getActivity(context.actual, 0, settingActivity, 0))
+                GDriveSignIn.showResolutionNotification(
+                        PendingIntent.getActivity(context.actual, 0, settingActivity, 0), context)
             }
             throw Exception("Google drive account is null", e)
         } catch (e: ExecutionException) {
