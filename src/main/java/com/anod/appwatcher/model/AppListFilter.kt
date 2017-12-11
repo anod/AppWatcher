@@ -51,7 +51,7 @@ class AppListFilter(private val inclusion: AppListFilterInclusion, private val i
         val status = cursor.getInt(AppListTable.Projection.status)
         val versionCode = cursor.getInt(AppListTable.Projection.versionNumber)
 
-        val installedInfo = installedApps.getInfo(packageName)
+        val installedInfo = installedApps.packageInfo(packageName)
 
         if (!inclusion.include(versionCode, installedInfo)) {
             return true

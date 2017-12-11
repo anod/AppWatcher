@@ -9,10 +9,8 @@ import android.support.v4.content.AsyncTaskLoader
 import android.support.v4.content.Loader
 import android.support.v4.util.SimpleArrayMap
 import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.widget.Button
-import android.widget.ProgressBar
 import android.widget.Toast
 import com.anod.appwatcher.App
 import com.anod.appwatcher.R
@@ -26,7 +24,7 @@ import info.anodsplace.appwatcher.framework.InstalledApps
 import info.anodsplace.appwatcher.framework.ToolbarActivity
 import info.anodsplace.appwatcher.framework.getAppTitle
 import info.anodsplace.appwatcher.framework.getInstalledPackagesCompat
-import kotterknife.bindView
+import kotlinx.android.synthetic.main.activity_import_installed.*
 import java.util.*
 
 
@@ -39,9 +37,6 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
 
     override val themeRes: Int
         get() = Theme(this).themeDialog
-
-    val listView: RecyclerView by bindView(android.R.id.list)
-    val progressBar: ProgressBar by bindView(android.R.id.progress)
 
     private var allSelected: Boolean = false
     private lateinit var dataProvider: ImportDataProvider
@@ -58,12 +53,12 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
         importManager = ImportBulkManager(this, this)
         dataProvider = ImportDataProvider(this, InstalledApps.MemoryCache(InstalledApps.PackageManager(packageManager)))
 
-        listView.layoutManager = LinearLayoutManager(this)
-        listView.adapter = ImportAdapter(this, packageManager, dataProvider)
-        listView.itemAnimator = ImportItemAnimator()
+        list.layoutManager = LinearLayoutManager(this)
+        list.adapter = ImportAdapter(this, packageManager, dataProvider)
+        list.itemAnimator = ImportItemAnimator()
 
         findViewById<View>(android.R.id.button3).setOnClickListener {
-            val importAdapter = listView.adapter as ImportAdapter
+            val importAdapter = list.adapter as ImportAdapter
             allSelected = !allSelected
             dataProvider.selectAllPackages(allSelected)
             importAdapter.notifyDataSetChanged()
@@ -79,7 +74,7 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
         findViewById<View>(android.R.id.button1).setOnClickListener {
             findViewById<View>(android.R.id.button3).visibility = View.GONE
             findViewById<View>(android.R.id.button1).visibility = View.GONE
-            val adapter = listView.adapter as ImportAdapter
+            val adapter = list.adapter as ImportAdapter
 
             importManager.init()
             adapter.clearPackageIndex()
@@ -105,14 +100,14 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
     }
 
     override fun onLoadFinished(loader: Loader<List<String>>, data: List<String>) {
-        progressBar.visibility = View.GONE
-        val downloadedAdapter = listView.adapter as ImportAdapter
+        progress.visibility = View.GONE
+        val downloadedAdapter = list.adapter as ImportAdapter
         downloadedAdapter.clear()
         downloadedAdapter.addAll(data)
     }
 
     override fun onLoaderReset(loader: Loader<List<String>>) {
-        val downloadedAdapter = listView.adapter as ImportAdapter
+        val downloadedAdapter = list.adapter as ImportAdapter
         downloadedAdapter.clear()
     }
 
@@ -153,7 +148,7 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
     }
 
     override fun onImportProgress(docIds: List<String>, result: SimpleArrayMap<String, Int>) {
-        val adapter = listView.adapter as ImportAdapter
+        val adapter = list.adapter as ImportAdapter
         for (packageName in docIds) {
             val resultCode = result.get(packageName)
             val status: Int
@@ -172,7 +167,7 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
     }
 
     override fun onImportStart(docIds: List<String>) {
-        val adapter = listView.adapter as ImportAdapter
+        val adapter = list.adapter as ImportAdapter
         dataProvider.isImportStarted = true
         for (packageName in docIds) {
             AppLog.d(packageName)

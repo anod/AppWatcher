@@ -5,11 +5,9 @@ import android.support.annotation.LayoutRes
 import android.support.v7.widget.SearchView
 import android.widget.TextView
 
-import com.anod.appwatcher.watchlist.WatchListFragment
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.sync.SyncScheduler
-import com.anod.appwatcher.watchlist.WatchListActivity
-import com.anod.appwatcher.watchlist.WatchListSection
+import com.anod.appwatcher.watchlist.*
 
 import info.anodsplace.android.log.AppLog
 
@@ -46,7 +44,7 @@ class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener,
         adapter.addFragment(WatchListFragment.newInstance(
                 Filters.TAB_ALL,
                 prefs.sortIndex,
-                WatchListSection(),
+                sectionForAll(prefs.showRecent, prefs.showOnDevice),
                 null), getString(R.string.tab_all))
         adapter.addFragment(WatchListFragment.newInstance(
                 Filters.TAB_INSTALLED,
@@ -61,5 +59,18 @@ class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener,
                 prefs.sortIndex,
                 WatchListFragment.DefaultSection(), null), getString(R.string.tab_updatable))
         return adapter
+    }
+
+    private fun sectionForAll(showRecent: Boolean, showOnDevice: Boolean): WatchListFragment.Section {
+        if (showRecent && showOnDevice) {
+            return RecentAndOnDeviceSection()
+        }
+        if (showRecent) {
+            return RecentSection()
+        }
+        if (showOnDevice) {
+            return OnDeviceSection()
+        }
+        return WatchListFragment.DefaultSection()
     }
 }

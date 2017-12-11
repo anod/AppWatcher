@@ -15,7 +15,7 @@ import finsky.api.model.Document
 class ResultsAdapterSearch(context: Context, private val endpoint: SearchEndpoint, watchAppList: WatchAppList)
     : ResultsAdapter(context, watchAppList) {
 
-    override fun getDocument(position: Int): Document {
+    override fun document(position: Int): Document {
         val isLastPosition = endpoint.count - 1 == position
         return endpoint.searchData!!.getItem(position, isLastPosition)!!
     }

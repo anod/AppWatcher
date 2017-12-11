@@ -39,11 +39,6 @@ class SearchEndpoint(context: Context, requestQueue: RequestQueue, deviceInfoPro
     }
 
     override fun createDfeModel(): DfeModel {
-        val searchUrl = DfeUtils.formSearchUrl(query, backendId)
-        return DfeSearch(dfeApi!!, query, searchUrl, autoLoadNextPage, AppDetailsFilter.predicate)
-    }
-
-    companion object {
-        private const val backendId = 3
+        return DfeSearch(dfeApi!!, query, autoLoadNextPage, AppDetailsFilter.predicate)
     }
 }

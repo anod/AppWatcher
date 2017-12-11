@@ -48,9 +48,9 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
     lateinit var emptyView: View
     var swipeLayout: SwipeRefreshLayout? = null
 
-    private lateinit var section: SectionProvider
+    private lateinit var section: Section
 
-    interface SectionProvider {
+    interface Section {
         var adapterIndexMap: SparseIntArray
         fun fillAdapters(adapter: MergeRecyclerAdapter, context: Context, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener)
         fun createLoader(context: Context, titleFilter: String, sortId: Int, filter: AppListFilter?, tag: Tag?): Loader<Cursor>
@@ -58,7 +58,7 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
         fun loaderReset(adapter: MergeRecyclerAdapter)
     }
 
-    open class DefaultSection : SectionProvider {
+    open class DefaultSection : Section {
         override var adapterIndexMap = SparseIntArray()
 
         override fun fillAdapters(adapter: MergeRecyclerAdapter, context: Context, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener) {
@@ -130,9 +130,9 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
         return inflater.inflate(R.layout.fragment_applist, container, false)
     }
 
-    fun sectionForClassName(sectionClassName: String): SectionProvider {
+    fun sectionForClassName(sectionClassName: String): Section {
         val sectionClass = Class.forName(sectionClassName)
-        return sectionClass.newInstance() as SectionProvider
+        return sectionClass.newInstance() as Section
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -274,17 +274,17 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
 
         private const val REQUEST_APP_INFO = 1
 
-        fun newInstance(filterId: Int, sortId: Int, sectionProvider: SectionProvider, tag: Tag?): WatchListFragment {
+        fun newInstance(filterId: Int, sortId: Int, section: Section, tag: Tag?): WatchListFragment {
             val frag = WatchListFragment()
-            frag.arguments = createArguments(filterId, sortId, sectionProvider, tag)
+            frag.arguments = createArguments(filterId, sortId, section, tag)
             return frag
         }
 
-        fun createArguments(filterId: Int, sortId: Int, sectionProvider: SectionProvider, tag: Tag?): Bundle {
+        fun createArguments(filterId: Int, sortId: Int, section: Section, tag: Tag?): Bundle {
             val args = Bundle()
             args.putInt(ARG_FILTER, filterId)
             args.putInt(ARG_SORT, sortId)
-            args.putString(ARG_SECTION_PROVIDER, sectionProvider.javaClass.name)
+            args.putString(ARG_SECTION_PROVIDER, section.javaClass.name)
             if (tag != null) {
                 args.putParcelable(ARG_TAG, tag)
             }

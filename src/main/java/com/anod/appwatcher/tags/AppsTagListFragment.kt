@@ -29,9 +29,9 @@ class AppsTagListFragment : WatchListFragment() {
     }
 
     companion object {
-        fun newInstance(filterId: Int, sortId: Int, sectionProvider: WatchListFragment.SectionProvider, tag: Tag?): AppsTagListFragment {
+        fun newInstance(filterId: Int, sortId: Int, section: WatchListFragment.Section, tag: Tag?): AppsTagListFragment {
             val frag = AppsTagListFragment()
-            frag.arguments = WatchListFragment.createArguments(filterId, sortId, sectionProvider, tag)
+            frag.arguments = WatchListFragment.createArguments(filterId, sortId, section, tag)
             return frag
         }
     }

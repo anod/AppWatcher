@@ -56,7 +56,7 @@ class AppDetailsView(view: View, private val dataProvider: AppViewHolderBase.Dat
 
     private fun fillWatchAppView(app: AppInfo) {
 
-        val isInstalled = dataProvider.installedApps.getInfo(app.packageName).isInstalled
+        val isInstalled = dataProvider.installedApps.packageInfo(app.packageName).isInstalled
         when {
             app.versionNumber == 0 -> {
                 version?.setTextColor(warningColor)
@@ -78,7 +78,7 @@ class AppDetailsView(view: View, private val dataProvider: AppViewHolderBase.Dat
 
         price?.setTextColor(accentColor)
         if (isInstalled) {
-            val installed = dataProvider.installedApps.getInfo(app.packageName)
+            val installed = dataProvider.installedApps.packageInfo(app.packageName)
             price?.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stat_communication_stay_primary_portrait, 0, 0, 0)
             if (TextUtils.isEmpty(installed.versionName)) {
                 price?.text = dataProvider.installedText

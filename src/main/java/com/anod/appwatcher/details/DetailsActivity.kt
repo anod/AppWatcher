@@ -8,7 +8,6 @@ import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.support.annotation.ColorInt
-import android.support.design.widget.FloatingActionButton
 import android.support.v4.app.ShareCompat
 import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
@@ -30,7 +29,6 @@ import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.Tag
 import com.anod.appwatcher.model.WatchAppList
 import com.anod.appwatcher.model.packageToApp
-import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.*
 import com.squareup.picasso.Picasso
@@ -39,20 +37,12 @@ import info.anodsplace.android.log.AppLog
 import info.anodsplace.appwatcher.framework.*
 import info.anodsplace.playstore.DetailsEndpoint
 import info.anodsplace.playstore.PlayStoreEndpoint
-import kotterknife.bindView
+import kotlinx.android.synthetic.main.activity_app_changelog.*
 
 open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette.PaletteAsyncListener, View.OnClickListener, WatchAppList.Listener {
 
     override val themeRes: Int
         get() = Theme(this).themeChangelog
-
-    val loadingView: ProgressBar by bindView(R.id.progress_bar)
-    val changelog: TextView by bindView(R.id.changelog)
-    val retryButton: Button by bindView(R.id.retry)
-    val appIcon: ImageView by bindView(android.R.id.icon)
-    val background: View by bindView(R.id.background)
-    val playStoreButton: FloatingActionButton by bindView(R.id.market_btn)
-    val content: View by bindView(R.id.content)
 
     private var detailsUrl: String = ""
     var appId: String = ""
@@ -84,13 +74,13 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
         detailsEndpoint.url = detailsUrl
 
         content.visibility = View.INVISIBLE
-        loadingView.visibility = View.GONE
+        progressBar.visibility = View.GONE
         retryButton.visibility = View.GONE
         changelog.visibility = View.GONE
         background.visibility = View.INVISIBLE
 
         retryButton.setOnClickListener {
-            loadingView.visibility = View.VISIBLE
+            progressBar.visibility = View.VISIBLE
             retryButton.visibility = View.GONE
             changelog.visibility = View.GONE
             retryButton.postDelayed({ detailsEndpoint.startAsync() }, 500)
@@ -118,7 +108,7 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
     override fun onResume() {
         super.onResume()
         detailsEndpoint.listener = this
-        loadingView.visibility = View.VISIBLE
+        progressBar.visibility = View.VISIBLE
 
         App.provide(this).prefs.account?.let {
             AuthTokenAsync(this).request(this, it, object : AuthTokenAsync.Callback {
@@ -159,7 +149,7 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
     private val iconLoadTarget = object : com.squareup.picasso.Target {
         override fun onBitmapLoaded(bitmap: Bitmap, from: Picasso.LoadedFrom) {
             Palette.from(bitmap).generate(this@DetailsActivity)
-            appIcon.setImageBitmap(bitmap)
+            icon.setImageBitmap(bitmap)
         }
 
         override fun onBitmapFailed(e: Exception?, errorDrawable: Drawable?) {
@@ -173,10 +163,10 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
     }
 
     private fun setDefaultIcon() {
-        val icon = BitmapFactory.decodeResource(resources, R.drawable.ic_notifications_black_24dp)
+        val defaultIcon = BitmapFactory.decodeResource(resources, R.drawable.ic_notifications_black_24dp)
         background.visibility = View.VISIBLE
         applyColor(ContextCompat.getColor(this, R.color.theme_primary))
-        appIcon.setImageBitmap(icon)
+        icon.setImageBitmap(defaultIcon)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -192,7 +182,7 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
             val tagMenu = menu.findItem(R.id.menu_tag_app)
             loadTagSubmenu(tagMenu)
         }
-        if (!dataProvider.installedApps.getInfo(appId).isInstalled) {
+        if (!dataProvider.installedApps.packageInfo(appId).isInstalled) {
             menu.findItem(R.id.menu_uninstall).isVisible = false
             menu.findItem(R.id.menu_open).isVisible = false
         }
@@ -309,7 +299,7 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
     }
 
     override fun onDataChanged() {
-        loadingView.visibility = View.GONE
+        progressBar.visibility = View.GONE
         content.visibility = View.VISIBLE
         changelog.visibility = View.VISIBLE
         changelog.autoLinkMask = Linkify.ALL
@@ -332,7 +322,7 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
 
     private fun showRetryMessage() {
         content.visibility = View.VISIBLE
-        loadingView.visibility = View.GONE
+        progressBar.visibility = View.GONE
         changelog.visibility = View.VISIBLE
         changelog.autoLinkMask = Linkify.ALL
 
@@ -360,13 +350,13 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
         DrawableCompat.setTint(drawable, color)
         playStoreButton.setImageDrawable(drawable)
         background.setBackgroundColor(color)
-        loadingView.indeterminateDrawable.setColorFilter(color, PorterDuff.Mode.SRC_IN)
+        progressBar.indeterminateDrawable.setColorFilter(color, PorterDuff.Mode.SRC_IN)
     }
 
     private fun animateBackground() {
         background.post {
             val location = IntArray(2)
-            appIcon.getLocationOnScreen(location)
+            icon.getLocationOnScreen(location)
             if (ViewCompat.isAttachedToWindow(background)) {
                 RevealAnimatorCompat.show(background, location[0], location[1], 0).start()
             }
@@ -375,7 +365,7 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
 
     override fun onClick(v: View) {
         val id = v.id
-        if (id == R.id.market_btn) {
+        if (id == R.id.playStoreButton) {
             val intent = Intent().forPlayStore(appInfo!!.packageName)
             this.startActivitySafely(intent)
         }

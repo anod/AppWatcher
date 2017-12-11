@@ -245,7 +245,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         if (appDetails.versionCode > localApp.versionNumber) {
             AppLog.d("New version found [" + appDetails.versionCode + "]")
             val newApp = createNewVersion(marketApp, localApp)
-            val installedInfo = installedAppsProvider.getInfo(appDetails.packageName)
+            val installedInfo = installedAppsProvider.packageInfo(appDetails.packageName)
             val recentChanges = if (updatedTitles.size == 0) appDetails.recentChangesHtml ?: "" else ""
             updatedTitles.add(
                 UpdatedApp(
@@ -271,7 +271,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
             values.put(AppListTable.Columns.status, AppInfoMetadata.STATUS_NORMAL)
         } else if (localApp.status == AppInfoMetadata.STATUS_UPDATED) {
             // App was previously updated
-            val installedInfo = installedAppsProvider.getInfo(appDetails.packageName)
+            val installedInfo = installedAppsProvider.packageInfo(appDetails.packageName)
             val recentChanges = if (updatedTitles.size == 0) appDetails.recentChangesHtml ?: "" else ""
             updatedTitles.add(
                 UpdatedApp(

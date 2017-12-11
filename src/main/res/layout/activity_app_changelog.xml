@@ -86,7 +86,7 @@
             android:orientation="vertical">
 
             <ProgressBar
-                android:id="@+id/progress_bar"
+                android:id="@+id/progressBar"
                 style="?android:attr/progressBarStyleLarge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -142,7 +142,7 @@
                         android:text="@string/problem_occurred" />
 
                     <Button
-                        android:id="@+id/retry"
+                        android:id="@+id/retryButton"
                         style="@style/BrandButtonStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -156,7 +156,7 @@
     </LinearLayout>
 
     <android.support.design.widget.FloatingActionButton xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/market_btn"
+        android:id="@+id/playStoreButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="right"

@@ -10,12 +10,9 @@ import android.support.v4.app.LoaderManager
 import android.support.v4.content.CursorLoader
 import android.support.v4.content.Loader
 import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SearchView
 import android.view.Menu
 import android.view.View
-import android.widget.ProgressBar
-import com.anod.appwatcher.App
 
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.AppListCursor
@@ -28,7 +25,7 @@ import com.anod.appwatcher.utils.Theme
 import info.anodsplace.appwatcher.framework.BackgroundTask
 import info.anodsplace.appwatcher.framework.Keyboard
 import info.anodsplace.appwatcher.framework.ToolbarActivity
-import kotterknife.bindView
+import kotlinx.android.synthetic.main.activity_tag_select.*
 
 /**
  * @author algavris
@@ -39,9 +36,6 @@ class AppsTagSelectActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<C
 
     override val themeRes: Int
         get() =  Theme(this).themeDialog
-
-    val listView: RecyclerView by bindView(android.R.id.list)
-    val progressBar: ProgressBar by bindView(android.R.id.progress)
 
     private var isAllSelected: Boolean = false
     private lateinit var tag: Tag
@@ -57,11 +51,11 @@ class AppsTagSelectActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<C
         titleFilter = savedInstanceState?.getString("title_filter") ?: ""
         tagAppsImport = TagAppsImport(tag, this)
 
-        listView.layoutManager = LinearLayoutManager(this)
-        listView.adapter = TagAppsCursorAdapter(this, tagAppsImport)
+        list.layoutManager = LinearLayoutManager(this)
+        list.adapter = TagAppsCursorAdapter(this, tagAppsImport)
 
         findViewById<View>(android.R.id.button3).setOnClickListener {
-            val importAdapter = listView.adapter as TagAppsCursorAdapter
+            val importAdapter = list.adapter as TagAppsCursorAdapter
             isAllSelected = !isAllSelected
             importAdapter.selectAllApps(isAllSelected)
         }
@@ -128,20 +122,20 @@ class AppsTagSelectActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<C
     }
 
     override fun onLoadFinished(loader: Loader<Cursor>, data: Cursor) {
-        val adapter = listView.adapter as TagAppsCursorAdapter
+        val adapter = list.adapter as TagAppsCursorAdapter
         if (loader.id == 0) {
             tagAppsImport.initSelected(data)
             supportLoaderManager.initLoader(1, null, this).forceLoad()
             return
         }
 
-        progressBar.visibility = View.GONE
+        progress.visibility = View.GONE
         adapter.swapData(data as AppListCursor)
     }
 
     override fun onLoaderReset(loader: Loader<Cursor>) {
         if (loader.id == 1) {
-            val adapter = listView.adapter as TagAppsCursorAdapter
+            val adapter = list.adapter as TagAppsCursorAdapter
             adapter.swapData(null)
         }
     }

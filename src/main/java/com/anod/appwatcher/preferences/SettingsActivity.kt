@@ -54,6 +54,7 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
         get() = App.provide(this).prefs
 
     override fun init() {
+
     }
 
     override fun onExportStart() {
@@ -82,7 +83,6 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
 
     override fun onResume() {
         super.onResume()
-
         syncNowItem!!.summary = renderDriveSyncTime()
     }
 
@@ -268,9 +268,7 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
                                 prefs.nightMode = which
                                 AppCompatDelegate.setDefaultNightMode(which)
                                 this@SettingsActivity.recreate()
-                                val i = Intent(this@SettingsActivity, AppWatcherActivity::class.java)
-                                i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-                                startActivity(i)
+                                this.recreateWatchlist()
                             }
                         }.create()
                 dialog.show()
@@ -281,10 +279,8 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
                         .setItems(R.array.dark_themes) { _, which ->
                             if (prefs.theme != which) {
                                 prefs.theme = which
-                                this@SettingsActivity.recreate()
-                                val i = Intent(this@SettingsActivity, AppWatcherActivity::class.java)
-                                i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-                                startActivity(i)
+                                this@SettingsActivity.setResult(android.app.Activity.RESULT_OK, Intent().putExtra("recreateWatchlistOnBack", true))
+                                this.recreateWatchlist()
                             }
                         }.create()
                 dialog.show()
@@ -296,6 +292,12 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
             }
         }
         notifyDataSetChanged()
+    }
+
+    private fun recreateWatchlist() {
+        val i = Intent(this@SettingsActivity, AppWatcherActivity::class.java)
+        i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+        startActivity(i)
     }
 
     @Throws(IOException::class)

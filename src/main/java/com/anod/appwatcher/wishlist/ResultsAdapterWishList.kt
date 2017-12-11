@@ -15,7 +15,7 @@ import info.anodsplace.playstore.WishlistEndpoint
 
 internal class ResultsAdapterWishList(context: Context, private val endpoint: WishlistEndpoint, newAppHandler: WatchAppList) : ResultsAdapter(context, newAppHandler) {
 
-    override fun getDocument(position: Int): Document {
+    override fun document(position: Int): Document {
         val isLastPosition = endpoint.count - 1 == position
         return endpoint.listData!!.getItem(position, isLastPosition)!!
     }

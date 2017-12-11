@@ -4,14 +4,10 @@ import android.accounts.Account
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SearchView
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
 import com.android.volley.VolleyError
 import com.anod.appwatcher.App
@@ -30,7 +26,7 @@ import com.anod.appwatcher.utils.MetricsManagerEvent
 import com.anod.appwatcher.utils.Theme
 import info.anodsplace.appwatcher.framework.Keyboard
 import info.anodsplace.appwatcher.framework.ToolbarActivity
-import kotterknife.bindView
+import kotlinx.android.synthetic.main.activity_market_search.*
 
 open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionListener, WatchAppList.Listener, CompositeStateEndpoint.Listener {
 
@@ -39,11 +35,6 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
 
     private lateinit var adapter: ResultsAdapter
 
-    val loading: LinearLayout by bindView(R.id.loading)
-    val listView: RecyclerView by bindView(android.R.id.list)
-    val emptyView: TextView by bindView(android.R.id.empty)
-    val retryView: LinearLayout by bindView(R.id.retry_box)
-    val retryButton: Button by bindView(R.id.retry)
     lateinit var searchView: SearchView
 
     private var initiateSearch = false
@@ -70,11 +61,11 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
         watchAppList = WatchAppList(this)
 
         retryButton.setOnClickListener { retrySearchResult() }
-        listView.layoutManager = LinearLayoutManager(this)
-        listView.visibility = View.GONE
-        emptyView.visibility = View.GONE
+        list.layoutManager = LinearLayoutManager(this)
+        list.visibility = View.GONE
+        empty.visibility = View.GONE
         loading.visibility = View.VISIBLE
-        retryView.visibility = View.GONE
+        retryBox.visibility = View.GONE
 
         initFromIntent(intent)
 
@@ -120,7 +111,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
     }
 
     private fun searchResults() {
-        listView.adapter = adapter
+        list.adapter = adapter
         endpoints.reset()
         showLoading()
 
@@ -232,33 +223,33 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
     }
 
     private fun showRetryButton() {
-        listView.visibility = View.GONE
-        emptyView.visibility = View.GONE
+        list.visibility = View.GONE
+        empty.visibility = View.GONE
         loading.visibility = View.GONE
-        retryView.visibility = View.VISIBLE
+        retryBox.visibility = View.VISIBLE
     }
 
     private fun showLoading() {
-        listView.visibility = View.GONE
-        emptyView.visibility = View.GONE
+        list.visibility = View.GONE
+        empty.visibility = View.GONE
         loading.visibility = View.VISIBLE
-        retryView.visibility = View.GONE
+        retryBox.visibility = View.GONE
     }
 
     private fun showNoResults(query: String) {
         loading.visibility = View.GONE
-        listView.visibility = View.GONE
-        retryView.visibility = View.GONE
+        list.visibility = View.GONE
+        retryBox.visibility = View.GONE
         val noResStr = if (query.isNotEmpty()) getString(R.string.no_result_found, query) else getString(R.string.search_for_app)
-        emptyView.text = noResStr
-        emptyView.visibility = View.VISIBLE
+        empty.text = noResStr
+        empty.visibility = View.VISIBLE
     }
 
     private fun showListView() {
-        listView.visibility = View.VISIBLE
-        emptyView.visibility = View.GONE
+        list.visibility = View.VISIBLE
+        empty.visibility = View.GONE
         loading.visibility = View.GONE
-        retryView.visibility = View.GONE
+        retryBox.visibility = View.GONE
     }
 
     private fun retrySearchResult() {
@@ -292,7 +283,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
                 adapter.notifyDataSetChanged()
             } else {
                 adapter = ResultsAdapterSearch(this, endpoints[SEARCH_ENDPOINT_ID] as SearchEndpoint, watchAppList)
-                listView.adapter = adapter
+                list.adapter = adapter
                 endpoints.activate(SEARCH_ENDPOINT_ID).startAsync()
             }
         } else {
@@ -315,7 +306,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
         }
         if (id == DETAILS_ENDPOINT_ID) {
             adapter = ResultsAdapterSearch(this, endpoints.get(SEARCH_ENDPOINT_ID) as SearchEndpoint, watchAppList)
-            listView.adapter = adapter
+            list.adapter = adapter
             endpoints.activate(SEARCH_ENDPOINT_ID).startAsync()
         } else {
             loading.visibility = View.GONE

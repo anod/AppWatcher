@@ -12,7 +12,6 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.model.packageToApp
 import com.anod.appwatcher.watchlist.AppViewHolder
 import com.anod.appwatcher.utils.PicassoAppIcon
-import kotterknife.bindViews
 
 /**
  * @author alex
@@ -47,8 +46,8 @@ open class RecentlyInstalledAppsAdapter(
             private val packageManager: PackageManager,
             private val listener: AppViewHolder.OnClickListener?) : RecyclerView.ViewHolder(itemView) {
 
-        val appViews: List<RecentAppView> by bindViews(
-                R.id.app1, R.id.app2, R.id.app3, R.id.app4, R.id.app5, R.id.app6, R.id.app7, R.id.app8)
+        val appViews: List<RecentAppView> = arrayListOf(R.id.app1, R.id.app2, R.id.app3, R.id.app4, R.id.app5, R.id.app6, R.id.app7, R.id.app8)
+                .map { itemView.findViewById<RecentAppView>(it) }
 
         init {
             val sectionCount: TextView = itemView.findViewById(R.id.sec_header_count)

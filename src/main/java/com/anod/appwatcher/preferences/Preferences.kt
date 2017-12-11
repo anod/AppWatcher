@@ -96,6 +96,14 @@ class Preferences(context: Context) : DeviceIdStorage {
         get() = preferences.getBoolean(NOTIFY_INSTALLED_UPTODATE, true)
         set(notify) = preferences.edit().putBoolean(NOTIFY_INSTALLED_UPTODATE, notify).apply()
 
+    var showRecent: Boolean
+        get() = preferences.getBoolean("show-recent", true)
+        set(value) = preferences.edit().putBoolean("show-recent", value).apply()
+
+    var showOnDevice: Boolean
+        get() = preferences.getBoolean("show-on-device", true)
+        set(value) = preferences.edit().putBoolean("show-on-device", value).apply()
+
     var nightMode: Int
         get() = preferences.getInt(NIGHT_MODE, AppCompatDelegate.MODE_NIGHT_NO)
         set(nightMode) = preferences.edit().putInt(NIGHT_MODE, nightMode).apply()
@@ -132,4 +140,5 @@ class Preferences(context: Context) : DeviceIdStorage {
         const val THEME_DEFAULT = 0
         const val THEME_BLACK = 1
     }
+
 }

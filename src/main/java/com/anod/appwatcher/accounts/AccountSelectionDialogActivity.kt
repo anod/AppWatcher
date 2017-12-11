@@ -12,7 +12,7 @@ import android.view.ViewGroup
 import android.widget.*
 
 import com.anod.appwatcher.R
-import kotterknife.bindView
+import kotlinx.android.synthetic.main.activity_choose_account.*
 
 /**
  * @author alex
@@ -33,8 +33,6 @@ class AccountSelectionDialogActivity : AppCompatActivity() {
         AccountManager.get(this@AccountSelectionDialogActivity)
     }
 
-    val listView: ListView by bindView(android.R.id.list)
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_choose_account)
@@ -52,7 +50,7 @@ class AccountSelectionDialogActivity : AppCompatActivity() {
 
         findViewById<Button>(android.R.id.button2).setOnClickListener {
 
-            val account = (listView.adapter as AccountsAdapter).selectedAccount
+            val account = (list.adapter as AccountsAdapter).selectedAccount
             if (account == null) {
                 setResult(Activity.RESULT_CANCELED)
             } else {
@@ -71,7 +69,7 @@ class AccountSelectionDialogActivity : AppCompatActivity() {
 
         val adapter = AccountsAdapter(this, accounts)
         adapter.selectedAccount = intent.extras.get("account") as? Account
-        listView.adapter = adapter
+        list.adapter = adapter
     }
 
     class AccountsAdapter(context: Context,accounts: Array<Account>): ArrayAdapter<Account>(context, R.layout.list_item_radio, accounts) {

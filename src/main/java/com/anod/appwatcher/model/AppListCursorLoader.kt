@@ -100,7 +100,7 @@ open class AppListCursorLoader(context: Context,
             apps.moveToPosition(-1)
             while (apps.moveToNext()) {
                 val info = apps.appInfo
-                if (iap.getInfo(info.packageName).isUpdatable(info.versionNumber)) {
+                if (iap.packageInfo(info.packageName).isUpdatable(info.versionNumber)) {
                     updatableNewCount++
                 }
             }

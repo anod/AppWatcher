@@ -11,7 +11,7 @@ import android.support.v4.util.ArrayMap
 
 interface InstalledApps {
 
-    fun getInfo(packageName: String): Info
+    fun packageInfo(packageName: String): Info
 
     class Info(val versionCode: Int, val versionName: String) {
 
@@ -25,7 +25,7 @@ interface InstalledApps {
 
     class PackageManager(private val packageManager: android.content.pm.PackageManager) : InstalledApps {
 
-        override fun getInfo(packageName: String): Info {
+        override fun packageInfo(packageName: String): Info {
             var pkgInfo: PackageInfo? = null
             try {
                 pkgInfo = packageManager.getPackageInfo(packageName, 0)
@@ -45,12 +45,12 @@ interface InstalledApps {
     class MemoryCache(private val installedApps: InstalledApps) : InstalledApps {
         private val cache = ArrayMap<String, Info>()
 
-        override fun getInfo(packageName: String): Info {
+        override fun packageInfo(packageName: String): Info {
             if (cache.containsKey(packageName)) {
                 return cache[packageName]!!
             }
 
-            val info = installedApps.getInfo(packageName)
+            val info = installedApps.packageInfo(packageName)
             cache.put(packageName, info)
             return info
         }

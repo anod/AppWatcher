@@ -10,9 +10,9 @@ import com.anod.appwatcher.content.DbContentProviderClient
  * *
  * @date 2015-09-19
  */
-class WatchAppList(private val mListener: WatchAppList.Listener?) {
-    private var mAddedApps: SimpleArrayMap<String, Int> = SimpleArrayMap()
-    private var mContentProvider: DbContentProviderClient? = null
+class WatchAppList(private val listener: WatchAppList.Listener?) {
+    private var addedApps: SimpleArrayMap<String, Int> = SimpleArrayMap()
+    private var contentProvider: DbContentProviderClient? = null
 
     interface Listener {
         fun onWatchListChangeSuccess(info: AppInfo, newStatus: Int)
@@ -24,30 +24,29 @@ class WatchAppList(private val mListener: WatchAppList.Listener?) {
     }
 
     private fun attach(contentProvider: DbContentProviderClient) {
-        mContentProvider = contentProvider
-        mAddedApps = mContentProvider!!.queryPackagesMap(false)
+        this.contentProvider = contentProvider
+        addedApps = this.contentProvider!!.queryPackagesMap(false)
     }
 
     fun detach() {
-        mContentProvider?.close()
-        mContentProvider = null
+        contentProvider?.close()
+        contentProvider = null
     }
 
     operator fun contains(packageName: String): Boolean {
-        return mAddedApps.containsKey(packageName)
+        return addedApps.containsKey(packageName)
     }
 
-
     internal fun addSync(info: AppInfo): Int {
-        if (mAddedApps.containsKey(info.packageName)) {
+        if (addedApps.containsKey(info.packageName)) {
             return 0
         }
 
-        mAddedApps.put(info.packageName, -1)
-        val existingApp = mContentProvider?.queryAppId(info.packageName)
+        addedApps.put(info.packageName, -1)
+        val existingApp = contentProvider?.queryAppId(info.packageName)
         if (existingApp != null) {
             if (existingApp.status == AppInfoMetadata.STATUS_DELETED) {
-                val success = mContentProvider?.updateStatus(existingApp.rowId, AppInfoMetadata.STATUS_NORMAL) ?: -1
+                val success = contentProvider?.updateStatus(existingApp.rowId, AppInfoMetadata.STATUS_NORMAL) ?: -1
                 if (success > 0) {
                     return RESULT_OK
                 } else {
@@ -57,28 +56,28 @@ class WatchAppList(private val mListener: WatchAppList.Listener?) {
             return ERROR_ALREADY_ADDED
         }
 
-        mContentProvider?.insert(info) ?: return ERROR_INSERT
+        contentProvider?.insert(info) ?: return ERROR_INSERT
         return RESULT_OK
     }
 
     fun add(info: AppInfo) {
-        if (mAddedApps.containsKey(info.packageName)) {
+        if (addedApps.containsKey(info.packageName)) {
             return
         }
 
-        mAddedApps.put(info.packageName, -1)
-        val existingApp = mContentProvider?.queryAppId(info.packageName)
+        addedApps.put(info.packageName, -1)
+        val existingApp = contentProvider?.queryAppId(info.packageName)
         if (existingApp != null) {
             if (existingApp.status == AppInfoMetadata.STATUS_DELETED) {
-                val success = mContentProvider?.updateStatus(existingApp.rowId, AppInfoMetadata.STATUS_NORMAL) ?: -1
+                val success = contentProvider?.updateStatus(existingApp.rowId, AppInfoMetadata.STATUS_NORMAL) ?: -1
                 if (success > 0) {
-                    mListener?.onWatchListChangeSuccess(info, AppInfoMetadata.STATUS_NORMAL)
+                    listener?.onWatchListChangeSuccess(info, AppInfoMetadata.STATUS_NORMAL)
                 } else {
-                    mListener?.onWatchListChangeError(info, ERROR_INSERT)
+                    listener?.onWatchListChangeError(info, ERROR_INSERT)
                 }
                 return
             }
-            mListener?.onWatchListChangeError(info, ERROR_ALREADY_ADDED)
+            listener?.onWatchListChangeError(info, ERROR_ALREADY_ADDED)
             return
         }
 
@@ -86,31 +85,31 @@ class WatchAppList(private val mListener: WatchAppList.Listener?) {
     }
 
     fun delete(info: AppInfo) {
-        if (!mAddedApps.containsKey(info.packageName)) return
+        if (!addedApps.containsKey(info.packageName)) return
 
-        val existingApp = mContentProvider?.queryAppId(info.packageName)
+        val existingApp = contentProvider?.queryAppId(info.packageName)
         if (existingApp != null) {
-            val success = mContentProvider?.updateStatus(existingApp.rowId, AppInfoMetadata.STATUS_DELETED) ?: -1
+            val success = contentProvider?.updateStatus(existingApp.rowId, AppInfoMetadata.STATUS_DELETED) ?: -1
             if (success > 0) {
-                mContentProvider!!.deleteAppTags(existingApp.appId)
-                mAddedApps.remove(info.packageName)
-                mListener?.onWatchListChangeSuccess(info, AppInfoMetadata.STATUS_DELETED)
+                contentProvider!!.deleteAppTags(existingApp.appId)
+                addedApps.remove(info.packageName)
+                listener?.onWatchListChangeSuccess(info, AppInfoMetadata.STATUS_DELETED)
             } else {
-                mListener?.onWatchListChangeError(info, ERROR_DELETE)
+                listener?.onWatchListChangeError(info, ERROR_DELETE)
             }
         }
     }
 
     private fun insertApp(info: AppInfo) {
-        val uri = mContentProvider?.insert(info)
+        val uri = contentProvider?.insert(info)
 
         if (uri == null) {
-            mListener?.onWatchListChangeError(info, ERROR_INSERT)
+            listener?.onWatchListChangeError(info, ERROR_INSERT)
         } else {
             val rowId = Integer.parseInt(uri.lastPathSegment)
             info.rowId = rowId
-            mAddedApps.put(info.appId, -1)
-            mListener?.onWatchListChangeSuccess(info, AppInfoMetadata.STATUS_NORMAL)
+            addedApps.put(info.appId, -1)
+            listener?.onWatchListChangeSuccess(info, AppInfoMetadata.STATUS_NORMAL)
         }
     }
 

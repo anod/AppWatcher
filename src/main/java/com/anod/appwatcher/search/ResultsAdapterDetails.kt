@@ -15,7 +15,7 @@ import info.anodsplace.playstore.DetailsEndpoint
 class ResultsAdapterDetails(context: Context, private val endpoint: DetailsEndpoint, watchAppList: WatchAppList)
     : ResultsAdapter(context, watchAppList) {
 
-    override fun getDocument(position: Int): Document {
+    override fun document(position: Int): Document {
         return endpoint.document!!
     }
 

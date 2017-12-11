@@ -9,7 +9,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.0-alpha04'
+        classpath 'com.android.tools.build:gradle:3.1.0-alpha05'
         classpath 'com.google.gms:google-services:3.1.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'com.google.gms:oss-licenses:0.9.1'
@@ -29,6 +29,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'com.google.gms.oss.licenses.plugin'
 apply plugin: 'io.fabric'
+apply plugin: 'kotlin-android-extensions'
 
 dependencies {
     compile 'com.github.anod:android-utils-lib:v1.0.3'
@@ -44,8 +45,6 @@ dependencies {
 
     compile 'com.squareup.okhttp3:okhttp:3.9.0'
     compile 'com.squareup.picasso:picasso:3.0.0-SNAPSHOT'
-
-    compile 'com.jakewharton:kotterknife:0.1.0-SNAPSHOT'
 
     testCompile 'junit:junit:4.12'
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"

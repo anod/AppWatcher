@@ -16,7 +16,6 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
-import com.anod.appwatcher.App
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.DbContentProviderClient
@@ -29,7 +28,7 @@ import com.anod.appwatcher.utils.Theme
 import info.anodsplace.appwatcher.framework.DrawableTint
 import info.anodsplace.appwatcher.framework.RecyclerViewCursorAdapter
 import info.anodsplace.appwatcher.framework.ToolbarActivity
-import kotterknife.bindView
+import kotlinx.android.synthetic.main.activity_tags_editor.*
 
 /**
  * @author algavris
@@ -42,8 +41,6 @@ class TagsListActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<Cursor
     override val themeRes: Int
         get() =  Theme(this).theme
 
-    val listView: RecyclerView by bindView(android.R.id.list)
-
     private var appInfo: AppInfo? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,9 +52,9 @@ class TagsListActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<Cursor
             appInfo = intentExtras.getParcelable<AppInfo>(EXTRA_APP)
             title = getString(R.string.tag_app, appInfo!!.title)
         }
-        listView.layoutManager = LinearLayoutManager(this)
-        listView.adapter = TagAdapter(this, this)
-        listView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.HORIZONTAL))
+        list.layoutManager = LinearLayoutManager(this)
+        list.adapter = TagAdapter(this, this)
+        list.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.HORIZONTAL))
 
         supportLoaderManager.initLoader(0, null, this).forceLoad()
     }
@@ -81,11 +78,11 @@ class TagsListActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<Cursor
     }
 
     override fun onLoadFinished(loader: Loader<Cursor>, data: Cursor) {
-        (listView.adapter as TagAdapter).swapData(TagsCursor(data))
+        (list.adapter as TagAdapter).swapData(TagsCursor(data))
     }
 
     override fun onLoaderReset(loader: Loader<Cursor>) {
-        (listView.adapter as TagAdapter).swapData(null)
+        (list.adapter as TagAdapter).swapData(null)
     }
 
     fun saveTag(tag: Tag) {

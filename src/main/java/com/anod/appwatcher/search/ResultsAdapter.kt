@@ -1,8 +1,6 @@
 package com.anod.appwatcher.search
 
 import android.content.Context
-import android.support.v4.content.ContextCompat
-import android.support.v4.content.res.ResourcesCompat
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -25,7 +23,7 @@ abstract class ResultsAdapter(
 
     private val colorBgDisabled = ThemeCompat.getColor(context, R.attr.inactiveRow)
     private val colorBgNormal = ThemeCompat.getColor(context, R.attr.colorItemBackground)
-    private val installedAppsProvider = InstalledApps.MemoryCache(InstalledApps.PackageManager(context.packageManager))
+    private val installedApps = InstalledApps.MemoryCache(InstalledApps.PackageManager(context.packageManager))
 
     val isEmpty: Boolean
         get() = this.itemCount == 0
@@ -35,10 +33,10 @@ abstract class ResultsAdapter(
         return ResultsAppViewHolder(view, watchAppList)
     }
 
-    abstract fun getDocument(position: Int): Document
+    abstract fun document(position: Int): Document
 
     override fun onBindViewHolder(holder: ResultsAppViewHolder, position: Int) {
-        val doc = getDocument(position)
+        val doc = document(position)
 
         val app = doc.appDetails
         val uploadDate = app.uploadDate
@@ -61,17 +59,15 @@ abstract class ResultsAdapter(
                 .placeholder(R.drawable.ic_notifications_black_24dp)
                 .into(holder.icon)
 
-        val isInstalled = installedAppsProvider.getInfo(packageName).isInstalled
+        val isInstalled = installedApps.packageInfo(packageName).isInstalled
         if (isInstalled) {
             holder.price.setText(R.string.installed)
         } else {
             val offer = doc.getOffer(Messages.Common.Offer.TYPE_1)
-            if (offer == null) {
-                holder.price.text = ""
-            } else if (offer.micros.toInt() == 0) {
-                holder.price.setText(R.string.free)
-            } else {
-                holder.price.text = offer.formattedAmount
+            when {
+                offer == null -> holder.price.text = ""
+                offer.micros.toInt() == 0 -> holder.price.setText(R.string.free)
+                else -> holder.price.text = offer.formattedAmount
             }
         }
     }

@@ -5,14 +5,10 @@ import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
 import com.android.volley.VolleyError
 import com.anod.appwatcher.App
@@ -21,47 +17,38 @@ import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.model.WatchAppList
 import com.anod.appwatcher.tags.TagSnackbar
-import info.anodsplace.appwatcher.framework.FragmentToolbarActivity
 import info.anodsplace.playstore.PlayStoreEndpoint
 import info.anodsplace.playstore.WishlistEndpoint
-import kotterknife.bindView
+
+import kotlinx.android.synthetic.main.fragment_wishlist.*
 
 /**
  * @author algavris
  * *
  * @date 16/12/2016.
  */
-
 class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Listener {
 
-    val loading: LinearLayout by bindView(R.id.loading)
-    val listView: RecyclerView by bindView(android.R.id.list)
-    val emptyView: TextView by bindView(android.R.id.empty)
-    val retryView: LinearLayout by bindView(R.id.retry_box)
-    val retryButton: Button by bindView(R.id.retry)
-
-    private var endpoint: WishlistEndpoint? = null
-    private var watchAppList: WatchAppList? = null
+    private val endpoint: WishlistEndpoint? by lazy {
+        if (context != null) {
+            WishlistEndpoint(context!!, App.provide(context!!).requestQueue, App.provide(context!!).deviceInfo, true)
+        } else {
+            null
+        }
+    }
+    private val watchAppList: WatchAppList by lazy { WatchAppList(this) }
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
 
-        if (endpoint == null) {
-            endpoint = WishlistEndpoint(context!!, App.provide(context).requestQueue, App.provide(context).deviceInfo, true)
-        }
-
-        if (watchAppList == null) {
-            watchAppList = WatchAppList(this)
-        }
-
-        watchAppList!!.attach(context!!)
-        endpoint!!.listener = this
+        watchAppList.attach(context!!)
+        endpoint?.listener = this
     }
 
     override fun onDetach() {
         super.onDetach()
-        endpoint!!.listener = null
-        watchAppList!!.detach()
+        endpoint?.listener = null
+        watchAppList.detach()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -71,11 +58,11 @@ class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Li
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        listView.layoutManager = LinearLayoutManager(context)
-        retryButton.setOnClickListener { endpoint!!.startAsync() }
+        list.layoutManager = LinearLayoutManager(context)
+        retryButton.setOnClickListener { endpoint?.startAsync() }
 
-        listView.visibility = View.GONE
-        emptyView.visibility = View.GONE
+        list.visibility = View.GONE
+        empty.visibility = View.GONE
         loading.visibility = View.VISIBLE
         retryView.visibility = View.GONE
 
@@ -96,51 +83,47 @@ class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Li
         if (newStatus == AppInfoMetadata.STATUS_NORMAL) {
             TagSnackbar.make(activity!!, info, false).show()
         }
-        listView.adapter.notifyDataSetChanged()
+        list.adapter.notifyDataSetChanged()
     }
 
     override fun onWatchListChangeError(info: AppInfo, error: Int) {
         if (WatchAppList.ERROR_ALREADY_ADDED == error) {
             Toast.makeText(context, R.string.app_already_added, Toast.LENGTH_SHORT).show()
-            listView.adapter.notifyDataSetChanged()
+            list.adapter.notifyDataSetChanged()
         } else if (error == WatchAppList.ERROR_INSERT) {
             Toast.makeText(context, R.string.error_insert_app, Toast.LENGTH_SHORT).show()
         }
     }
 
-
     private fun startLoadingList(account: Account, authSubToken: String) {
         endpoint!!.setAccount(account, authSubToken)
 
-        val context = context
-
         val adapter = ResultsAdapterWishList(context!!, endpoint!!, watchAppList!!)
-        listView.adapter = adapter
+        list.adapter = adapter
 
         endpoint!!.startAsync()
     }
 
-
     private fun showRetryButton() {
-        listView.visibility = View.GONE
-        emptyView.visibility = View.GONE
+        list.visibility = View.GONE
+        empty.visibility = View.GONE
         loading.visibility = View.GONE
         retryView.visibility = View.VISIBLE
     }
 
     private fun showListView() {
-        listView.visibility = View.VISIBLE
-        emptyView.visibility = View.GONE
+        list.visibility = View.VISIBLE
+        empty.visibility = View.GONE
         loading.visibility = View.GONE
         retryView.visibility = View.GONE
     }
 
     private fun showNoResults() {
         loading.visibility = View.GONE
-        listView.visibility = View.GONE
+        list.visibility = View.GONE
         retryView.visibility = View.GONE
-        emptyView.setText(R.string.no_result_found)
-        emptyView.visibility = View.VISIBLE
+        empty.setText(R.string.no_result_found)
+        empty.visibility = View.VISIBLE
     }
 
     override fun onDataChanged() {
@@ -148,7 +131,7 @@ class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Li
             showNoResults()
         } else {
             showListView()
-            listView.adapter.notifyDataSetChanged()
+            list.adapter.notifyDataSetChanged()
         }
     }
 
@@ -161,6 +144,5 @@ class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Li
         const val TAG = "wishlist"
         const val EXTRA_ACCOUNT = "extra_account"
         const val EXTRA_AUTH_TOKEN = "extra_auth_token"
-
     }
 }
