@@ -39,6 +39,8 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
 
     private var initiateSearch = false
     private var isShareSource = false
+    private var account: Account? = null
+
 
     val accountSelectionDialog: AccountSelectionDialog by lazy {
         AccountSelectionDialog(this, App.provide(this).prefs, this)
@@ -46,19 +48,13 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
     private var searchQuery = ""
     private var hasFocus = false
     private var isPackageSearch = false
-    private lateinit var endpoints: CompositeStateEndpoint
-    private lateinit var watchAppList: WatchAppList
+    private val endpoints: CompositeStateEndpoint by lazy { CompositeStateEndpoint(this) }
+    private val watchAppList: WatchAppList by lazy { WatchAppList(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_market_search)
         setupToolbar()
-
-        endpoints = CompositeStateEndpoint(this)
-        endpoints.add(SEARCH_ENDPOINT_ID, SearchEndpoint(this, App.provide(this).requestQueue, App.provide(this).deviceInfo, true))
-        endpoints.add(DETAILS_ENDPOINT_ID, DetailsEndpoint(this, App.provide(this).requestQueue, App.provide(this).deviceInfo))
-
-        watchAppList = WatchAppList(this)
 
         retryButton.setOnClickListener { retrySearchResult() }
         list.layoutManager = LinearLayoutManager(this)
@@ -89,15 +85,6 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
         initiateSearch = i.getBooleanExtra(EXTRA_EXACT, false)
         isShareSource = i.getBooleanExtra(EXTRA_SHARE, false)
         hasFocus = i.getBooleanExtra(EXTRA_FOCUS, false)
-
-
-        if (isPackageSearch) {
-            endpoints.activeId = DETAILS_ENDPOINT_ID
-            adapter = ResultsAdapterDetails(this, endpoints.get(DETAILS_ENDPOINT_ID) as DetailsEndpoint, watchAppList)
-        } else {
-            endpoints.activeId = SEARCH_ENDPOINT_ID
-            adapter = ResultsAdapterSearch(this, endpoints.get(SEARCH_ENDPOINT_ID) as SearchEndpoint, watchAppList)
-        }
     }
 
     override fun onPause() {
@@ -110,7 +97,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
         super.onResume()
     }
 
-    private fun searchResults() {
+    private fun searchResults(account: Account) {
         list.adapter = adapter
         endpoints.reset()
         showLoading()
@@ -118,11 +105,22 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
         MetricsManagerEvent(this).track("perform_search", "SEARCH_QUERY", searchQuery, "SEARCH_PACKAGE", isPackageSearch.toString(), "FROM_SHARE", isShareSource.toString())
 
         if (searchQuery.isNotEmpty()) {
+            val requestQueue = App.provide(this).requestQueue
+            val deviceInfo = App.provide(this).deviceInfo
             if (isPackageSearch) {
-                val url = AppInfo.createDetailsUrl(searchQuery)
-                (endpoints[DETAILS_ENDPOINT_ID] as DetailsEndpoint).url = url
+                val detailsUrl = AppInfo.createDetailsUrl(searchQuery)
+                endpoints.put(DETAILS_ENDPOINT_ID, DetailsEndpoint(this, requestQueue, deviceInfo, account, detailsUrl))
             }
-            (endpoints[SEARCH_ENDPOINT_ID] as SearchEndpoint).query = searchQuery
+            endpoints.put(SEARCH_ENDPOINT_ID, SearchEndpoint(this, requestQueue, deviceInfo, account, searchQuery, true))
+
+            if (isPackageSearch) {
+                endpoints.activeId = DETAILS_ENDPOINT_ID
+                adapter = ResultsAdapterDetails(this, endpoints[DETAILS_ENDPOINT_ID] as DetailsEndpoint, watchAppList)
+            } else {
+                endpoints.activeId = SEARCH_ENDPOINT_ID
+                adapter = ResultsAdapterSearch(this, endpoints[SEARCH_ENDPOINT_ID] as SearchEndpoint, watchAppList)
+            }
+
             endpoints.active.startAsync()
         } else {
             showNoResults("")
@@ -159,10 +157,11 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
     }
 
     private fun searchResultsDelayed() {
-        if (endpoints.authSubToken.isEmpty()) {
+        val account = this.account
+        if (endpoints.authToken.isEmpty() || account == null) {
             initiateSearch = true
         } else {
-            searchResults()
+            searchResults(account)
         }
     }
 
@@ -177,11 +176,12 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
     }
 
     override fun onAccountSelected(account: Account) {
+        this.account = account
         AuthTokenAsync(this).request(this, account, object : AuthTokenAsync.Callback {
             override fun onToken(token: String) {
-                endpoints.setAccount(account, token)
+                endpoints.authToken = token
                 if (initiateSearch && searchQuery.isNotEmpty()) {
-                    searchResults()
+                    searchResults(account)
                 } else {
                     showNoResults("")
                 }
@@ -305,7 +305,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
             return
         }
         if (id == DETAILS_ENDPOINT_ID) {
-            adapter = ResultsAdapterSearch(this, endpoints.get(SEARCH_ENDPOINT_ID) as SearchEndpoint, watchAppList)
+            adapter = ResultsAdapterSearch(this, endpoints[SEARCH_ENDPOINT_ID] as SearchEndpoint, watchAppList)
             list.adapter = adapter
             endpoints.activate(SEARCH_ENDPOINT_ID).startAsync()
         } else {

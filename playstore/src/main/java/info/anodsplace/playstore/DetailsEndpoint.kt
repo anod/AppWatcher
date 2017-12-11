@@ -1,5 +1,6 @@
 package info.anodsplace.playstore
 
+import android.accounts.Account
 import android.content.Context
 import com.android.volley.RequestQueue
 
@@ -13,9 +14,8 @@ import finsky.protos.nano.Messages.AppDetails
  * *
  * @date 2015-02-22
  */
-class DetailsEndpoint(context: Context, requestQueue: RequestQueue, deviceInfoProvider: DeviceInfoProvider)
-    : PlayStoreEndpointBase(context, requestQueue, deviceInfoProvider) {
-    var url: String = ""
+class DetailsEndpoint(context: Context, requestQueue: RequestQueue, deviceInfoProvider: DeviceInfoProvider, account: Account, private val detailsUrl: String)
+    : PlayStoreEndpointBase(context, requestQueue, deviceInfoProvider, account) {
 
     var detailsData: DfeDetails?
         get() = data as? DfeDetails
@@ -33,17 +33,17 @@ class DetailsEndpoint(context: Context, requestQueue: RequestQueue, deviceInfoPr
         get() = appDetails?.recentChangesHtml ?: ""
 
     override fun executeAsync() {
-        detailsData?.detailsUrl = url
+        detailsData?.detailsUrl = detailsUrl
         detailsData?.startAsync()
     }
 
     override fun executeSync() {
-        detailsData?.detailsUrl = url
+        detailsData?.detailsUrl = detailsUrl
         detailsData?.startSync()
     }
 
     override fun createDfeModel(): DfeModel {
-        return DfeDetails(dfeApi!!)
+        return DfeDetails(dfeApi)
     }
 
 }

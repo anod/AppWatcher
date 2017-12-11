@@ -1,5 +1,6 @@
 package com.anod.appwatcher.sync
 
+import android.accounts.Account
 import android.content.ContentProviderClient
 import android.content.ContentValues
 import android.content.Intent
@@ -76,18 +77,23 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
                 return -1
             }
         }
-        if (preferences.account == null) {
+        val account = preferences.account
+        if (account == null) {
             AppLog.d("No active account, skipping sync...")
             return -1
         }
 
         AppLog.v("Perform synchronization")
 
+        val authToken = requestAuthToken(account)
+        if (authToken == null) {
+            AppLog.e("Cannot receive token")
+            return -1
+        }
+
         //Broadcast progress intent
         val startIntent = Intent(syncProgress)
         context.sendBroadcast(startIntent)
-
-        val endpoint = createEndpoint(preferences)
 
         val lastUpdatesViewed = preferences.isLastUpdatesViewed
         AppLog.d("Last update viewed: " + lastUpdatesViewed)
@@ -95,7 +101,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         var updatedApps: List<UpdatedApp> = emptyList()
         val appListProvider = DbContentProviderClient(provider)
         try {
-            updatedApps = doSync(appListProvider, lastUpdatesViewed, endpoint)
+            updatedApps = doSync(appListProvider, lastUpdatesViewed, authToken, account)
         } catch (e: RemoteException) {
             AppLog.e(e)
         }
@@ -129,11 +135,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
     }
 
     @Throws(RemoteException::class)
-    private fun doSync(client: DbContentProviderClient, lastUpdatesViewed: Boolean, endpoint: BulkDetailsEndpoint?): List<UpdatedApp> {
-
-        if (endpoint == null) {
-            return listOf()
-        }
+    private fun doSync(client: DbContentProviderClient, lastUpdatesViewed: Boolean, authToken: String, account: Account): List<UpdatedApp> {
 
         val apps = client.queryAll(false)
         if (!apps.moveToFirst()) {
@@ -153,24 +155,22 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
             localApps.put(docId, localApp)
 
             if (localApps.size == bulkSize) {
-                val docIds = localApps.keys
+                val docIds = localApps.keys.toList()
+                val endpoint = createEndpoint(docIds, authToken, account)
                 AppLog.d("Sending bulk #$i... $docIds")
-                val documents = requestBulkDetails(docIds, endpoint)
-                updateApps(documents, localApps, client, updatedTitles, lastUpdatesViewed)
+                endpoint.startSync()
+                updateApps(endpoint.documents, localApps, client, updatedTitles, lastUpdatesViewed)
                 localApps.clear()
                 i++
             }
 
         }
         if (localApps.size > 0) {
-            val docIds = localApps.keys
+            val docIds = localApps.keys.toList()
+            val endpoint = createEndpoint(docIds, authToken, account)
             AppLog.d("Sending bulk #$i... $docIds")
-            val documents = requestBulkDetails(docIds, endpoint)
-            if (documents.isNotEmpty()) {
-                updateApps(documents, localApps, client, updatedTitles, lastUpdatesViewed)
-            } else {
-                AppLog.e("No documents were received.")
-            }
+            endpoint.startSync()
+            updateApps(endpoint.documents, localApps, client, updatedTitles, lastUpdatesViewed)
             localApps.clear()
         }
         apps.close()
@@ -245,7 +245,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
 
         if (appDetails.versionCode > localApp.versionNumber) {
             AppLog.d("New version found [" + appDetails.versionCode + "]")
-            val newApp = createNewVersion(marketApp, localApp)
+            val newApp = AppInfo(localApp.rowId, AppInfoMetadata.STATUS_UPDATED, marketApp)
             val installedInfo = installedAppsProvider.packageInfo(appDetails.packageName)
             val recentChanges = if (updatedTitles.size == 0) appDetails.recentChangesHtml ?: "" else ""
             updatedTitles.add(
@@ -331,34 +331,22 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         }
     }
 
-    private fun requestBulkDetails(docIds: Set<String>, endpoint: BulkDetailsEndpoint): List<Document> {
-        endpoint.docIds = docIds.toList()
-        endpoint.startSync()
-        return endpoint.documents
-    }
-
-    private fun createNewVersion(marketApp: Document, localApp: AppInfo): AppInfo {
-        val newApp = AppInfo(marketApp)
-        newApp.rowId = localApp.rowId
-        newApp.status = AppInfoMetadata.STATUS_UPDATED
-        return newApp
-    }
-
-    private fun createEndpoint(prefs: Preferences): BulkDetailsEndpoint? {
+    private fun requestAuthToken(account: Account): String? {
         val tokenHelper = AuthTokenBlocking(context)
         var authToken: String? = null
-        val account = prefs.account ?: return null
         try {
             authToken = tokenHelper.request(null, account)
         } catch (e: Throwable) {
             AppLog.e("AuthTokenBlocking request exception: " + e.message, e)
         }
 
-        if (authToken == null) {
-            return null
-        }
-        val endpoint = BulkDetailsEndpoint(context.actual, App.provide(context).requestQueue, App.provide(context).deviceInfo)
-        endpoint.setAccount(account, authToken)
+        return authToken
+    }
+
+    private fun createEndpoint(docIds: List<String>, authToken: String, account: Account): BulkDetailsEndpoint {
+        val endpoint = BulkDetailsEndpoint(context.actual, App.provide(context).requestQueue, App.provide(context).deviceInfo, account, docIds)
+        endpoint.authToken = authToken
+        endpoint.listener = this
         return endpoint
     }
 

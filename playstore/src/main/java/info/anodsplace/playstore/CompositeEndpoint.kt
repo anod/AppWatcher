@@ -1,6 +1,5 @@
 package info.anodsplace.playstore
 
-import android.accounts.Account
 import android.support.v4.util.SparseArrayCompat
 
 /**
@@ -15,7 +14,7 @@ open class CompositeEndpoint : PlayStoreEndpoint {
         return endpoints.get(id)
     }
 
-    open fun add(id: Int, endpoint: PlayStoreEndpoint) {
+    open fun put(id: Int, endpoint: PlayStoreEndpoint) {
         endpoints.put(id, endpoint)
     }
 
@@ -31,15 +30,13 @@ open class CompositeEndpoint : PlayStoreEndpoint {
             }
         }
 
-    override val authSubToken: String
-        get() = if (endpoints.size() > 0) endpoints.valueAt(0).authSubToken else ""
-
-    override fun setAccount(account: Account, authSubToken: String): PlayStoreEndpoint {
-        for (i in 0 until endpoints.size()) {
-            endpoints.valueAt(i).setAccount(account, authSubToken)
+    override var authToken: String
+        get() = if (endpoints.size() > 0) endpoints.valueAt(0).authToken else ""
+        set(value) {
+            for (i in 0 until endpoints.size()) {
+                endpoints.valueAt(i).authToken = authToken
+            }
         }
-        return this
-    }
 
     override fun startAsync() {
         for (i in 0 until endpoints.size()) {

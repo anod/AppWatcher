@@ -68,9 +68,11 @@ class AppInfo : AppInfoMetadata, Parcelable {
         this.syncVersion = syncVersion
     }
 
-    constructor(doc: Document) : super(doc.docId, AppInfoMetadata.STATUS_NORMAL)
+    constructor(doc: Document) : this(0, AppInfoMetadata.STATUS_NORMAL, doc)
+
+    constructor(rowId: Int, status: Int, doc: Document) : super(doc.docId, status)
     {
-        this.rowId = 0
+        this.rowId = rowId
         this.appId = doc.docId
         this.detailsUrl = doc.detailsUrl
         val app = doc.appDetails

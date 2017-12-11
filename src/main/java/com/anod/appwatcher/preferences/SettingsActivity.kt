@@ -1,6 +1,5 @@
 package com.anod.appwatcher.preferences
 
-import android.accounts.Account
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
@@ -11,8 +10,6 @@ import android.support.v7.app.AppCompatDelegate
 import android.text.format.DateUtils
 import android.widget.Toast
 import com.anod.appwatcher.*
-import com.anod.appwatcher.accounts.AccountSelectionDialog
-import com.anod.appwatcher.accounts.AuthTokenAsync
 import com.anod.appwatcher.backup.DbBackupManager
 import com.anod.appwatcher.backup.ExportTask
 import com.anod.appwatcher.backup.gdrive.GDrive
@@ -33,7 +30,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.util.*
 
-open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDrive.Listener, GDriveSignIn.Listener, AccountSelectionDialog.SelectionListener, ImportTask.Listener {
+open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDrive.Listener, GDriveSignIn.Listener, ImportTask.Listener {
 
     override val themeRes: Int
         get() =  Theme(this).theme
@@ -46,15 +43,20 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
 
     private val gDriveSignIn: GDriveSignIn by lazy { GDriveSignIn(this, this) }
 
-    private val accountSelectionDialog: AccountSelectionDialog by lazy {
-        AccountSelectionDialog(this, prefs, this)
-    }
+    private var recreateWatchlistOnBack: Boolean = false
 
     private val prefs: Preferences
         get() = App.provide(this).prefs
 
     override fun init() {
 
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        if (this.recreateWatchlistOnBack) {
+            this.recreateWatchlist()
+        }
     }
 
     override fun onExportStart() {
@@ -74,11 +76,6 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
             DbBackupManager.ERROR_STORAGE_NOT_AVAILABLE -> Toast.makeText(this, r.getString(R.string.external_storage_not_available), Toast.LENGTH_SHORT).show()
             DbBackupManager.ERROR_FILE_WRITE -> Toast.makeText(this, r.getString(R.string.failed_to_write_file), Toast.LENGTH_SHORT).show()
         }
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        accountSelectionDialog.onRequestPermissionResult(requestCode, permissions, grantResults)
     }
 
     override fun onResume() {
@@ -138,6 +135,8 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
         preferences.add(Category(R.string.pref_header_interface))
         preferences.add(Item(R.string.pref_title_theme, R.string.pref_descr_theme, ACTION_THEME))
         preferences.add(Item(R.string.pref_title_dark_theme, R.string.pref_descr_dark_theme, ACTION_DARK_THEME))
+        preferences.add(CheckboxItem(R.string.pref_show_recent_title, R.string.pref_show_recent_descr, ACTION_SHOW_RECENT, prefs.showRecent))
+        preferences.add(CheckboxItem(R.string.pref_show_ondevice_title, R.string.pref_show_ondevice_descr, ACTION_SHOW_ONDEVICE, prefs.showOnDevice))
 
         preferences.add(Category(R.string.pref_header_about))
 
@@ -174,7 +173,6 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
             }
         } else {
             gDriveSignIn.onActivityResult(requestCode, resultCode, data)
-            accountSelectionDialog.onActivityResult(requestCode, resultCode, data)
         }
 
         super.onActivityResult(requestCode, resultCode, data)
@@ -290,6 +288,20 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
             } catch (e: IOException) {
                 AppLog.e(e)
             }
+            ACTION_SHOW_RECENT -> {
+                val showRecent = (pref as CheckboxItem).checked
+                if (!this.recreateWatchlistOnBack) {
+                    this.recreateWatchlistOnBack = prefs.showRecent != showRecent
+                }
+                prefs.showRecent = showRecent
+            }
+            ACTION_SHOW_ONDEVICE -> {
+                val showOnDevice = (pref as CheckboxItem).checked
+                if (!this.recreateWatchlistOnBack) {
+                    this.recreateWatchlistOnBack = prefs.showOnDevice != showOnDevice
+                }
+                prefs.showOnDevice = showOnDevice
+            }
         }
         notifyDataSetChanged()
     }
@@ -370,35 +382,14 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
         Toast.makeText(this, R.string.sync_error, Toast.LENGTH_SHORT).show()
     }
 
-    override fun onAccountSelected(account: Account) {
-        AuthTokenAsync(this).request(this, account, object : AuthTokenAsync.Callback {
-            override fun onError(errorMessage: String) {
-                if (App.with(this@SettingsActivity).isNetworkAvailable) {
-                    Toast.makeText(this@SettingsActivity, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
-                } else {
-                    Toast.makeText(this@SettingsActivity, R.string.check_connection, Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onToken(token: String) {
-
-            }
-        })
-    }
-
-    override fun onAccountNotFound(errorMessage: String) {
-        if (errorMessage.isNotBlank()) {
-            Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
-        } else {
-            Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
-        }
-    }
-
     override fun onImportFinish(code: Int) {
         ImportTask.showImportFinishToast(this, code)
     }
 
     companion object {
+        private const val REQUEST_BACKUP_DEST = 1
+        private const val REQUEST_BACKUP_FILE = 2
+
         private const val ACTION_EXPORT = 3
         private const val ACTION_IMPORT = 4
         private const val ACTION_LICENSES = 6
@@ -413,8 +404,7 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
         private const val ACTION_EXPORT_DB = 12
         private const val ACTION_GDRIVE_UPLOAD = 13
         private const val ACTION_DARK_THEME = 14
-
-        private const val REQUEST_BACKUP_DEST = 1
-        private const val REQUEST_BACKUP_FILE = 2
+        private const val ACTION_SHOW_RECENT = 15
+        private const val ACTION_SHOW_ONDEVICE = 16
     }
 }

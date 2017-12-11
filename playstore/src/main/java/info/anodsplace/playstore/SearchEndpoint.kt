@@ -1,5 +1,6 @@
 package info.anodsplace.playstore
 
+import android.accounts.Account
 import android.content.Context
 import com.android.volley.RequestQueue
 
@@ -12,9 +13,8 @@ import finsky.api.model.DfeSearch
  * *
  * @date 2015-02-21
  */
-class SearchEndpoint(context: Context, requestQueue: RequestQueue, deviceInfoProvider: DeviceInfoProvider, private val autoLoadNextPage: Boolean)
-        : PlayStoreEndpointBase(context, requestQueue, deviceInfoProvider) {
-    var query: String = ""
+class SearchEndpoint(context: Context, requestQueue: RequestQueue, deviceInfoProvider: DeviceInfoProvider, account: Account, val query: String, private val autoLoadNextPage: Boolean)
+        : PlayStoreEndpointBase(context, requestQueue, deviceInfoProvider, account) {
 
     var searchData: DfeSearch?
         get() = data as? DfeSearch
@@ -39,6 +39,6 @@ class SearchEndpoint(context: Context, requestQueue: RequestQueue, deviceInfoPro
     }
 
     override fun createDfeModel(): DfeModel {
-        return DfeSearch(dfeApi!!, query, autoLoadNextPage, AppDetailsFilter.predicate)
+        return DfeSearch(dfeApi, query, autoLoadNextPage, AppDetailsFilter.predicate)
     }
 }

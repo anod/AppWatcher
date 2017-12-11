@@ -12,15 +12,15 @@ import finsky.utils.NetworkType
 import java.util.HashMap
 import java.util.Locale
 
-class DfeApiContext private constructor(internal val context: Context, val account: Account?, private val lastAuthToken: String, deviceId: String,
+class DfeApiContext private constructor(internal val context: Context, val account: Account, private val lastAuthToken: String, deviceId: String,
                                         locale: Locale, mccmnc: String,
                                         clientId: String, loggingId: String, filterLevel: Int) {
     private val headers: MutableMap<String, String> = HashMap()
 
     internal val accountName: String
-        get() = if (this.account == null) "" else account.name
+        get() = account.name
 
-    constructor(context: Context, account: Account?, authTokenStr: String, deviceId: String,  mccmnc: String, filterLevel: Int) : this(
+    constructor(context: Context, account: Account, authTokenStr: String, deviceId: String,  mccmnc: String, filterLevel: Int) : this(
             context, account, authTokenStr, deviceId,
             Locale.getDefault(), mccmnc, CLIENT_ID, "", filterLevel
     )

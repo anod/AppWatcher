@@ -78,10 +78,9 @@ internal class ImportBulkManager(
 
         val docIds = listsDocIds[currentBulk]
         listener.onImportStart(docIds)
-        val endpoint = BulkDetailsEndpoint(context, App.provide(context).requestQueue, App.provide(context).deviceInfo)
-        endpoint.docIds = docIds
+        val endpoint = BulkDetailsEndpoint(context, App.provide(context).requestQueue, App.provide(context).deviceInfo, account, docIds)
         endpoint.listener = this
-        endpoint.setAccount(account, authSubToken)
+        endpoint.authToken = authSubToken
         endpoint.startAsync()
     }
 
@@ -100,7 +99,6 @@ internal class ImportBulkManager(
             nextBulk()
         }
     }
-
 
     override fun onAddAppTaskFinish(result: SimpleArrayMap<String, Int>) {
         val docIds = listsDocIds[currentBulk]

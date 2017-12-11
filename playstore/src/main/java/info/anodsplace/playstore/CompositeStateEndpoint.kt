@@ -11,8 +11,8 @@ import finsky.api.model.DfeModel
 
 class CompositeStateEndpoint(private val compositeListener: Listener) : CompositeEndpoint(), PlayStoreEndpoint.Listener {
 
-    override fun add(id: Int, endpoint: PlayStoreEndpoint) {
-        super.add(id, endpoint)
+    override fun put(id: Int, endpoint: PlayStoreEndpoint) {
+        super.put(id, endpoint)
         if (activeId == -1) {
             activeId = id
         }

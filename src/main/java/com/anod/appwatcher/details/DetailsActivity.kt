@@ -51,28 +51,21 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
     private var appInfo: AppInfo? = null
     private var isNewApp: Boolean = false
     private var addMenu: MenuItem? = null
-    lateinit var iconLoader: PicassoAppIcon
-    lateinit var detailsEndpoint: DetailsEndpoint
-    lateinit var dataProvider: AppViewHolderDataProvider
-    lateinit var appDetailsView: AppDetailsView
+    var detailsEndpoint: DetailsEndpoint? = null
+
+    val iconLoader: PicassoAppIcon by lazy { App.provide(this).iconLoader }
+    val dataProvider: AppViewHolderDataProvider by lazy { AppViewHolderDataProvider(this, InstalledApps.PackageManager(packageManager)) }
+    val appDetailsView: AppDetailsView by lazy { AppDetailsView(container, dataProvider) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_app_changelog)
         setupToolbar()
 
-        iconLoader = App.provide(this).iconLoader
         appId = intent.getStringExtra(EXTRA_APP_ID) ?: ""
         detailsUrl = intent.getStringExtra(EXTRA_DETAILS_URL) ?: ""
         val rowId = intent.getIntExtra(EXTRA_ROW_ID, -1)
         MetricsManagerEvent(this).track("open_changelog", "DETAILS_APP_ID", appId, "DETAILS_ROW_ID", rowId.toString())
-
-        dataProvider = AppViewHolderDataProvider(this, InstalledApps.PackageManager(packageManager))
-        val contentView = findViewById<View>(R.id.container)
-        appDetailsView = AppDetailsView(contentView, dataProvider)
-
-        detailsEndpoint = DetailsEndpoint(this, App.provide(this).requestQueue, App.provide(this).deviceInfo)
-        detailsEndpoint.url = detailsUrl
 
         content.visibility = View.INVISIBLE
         progressBar.visibility = View.GONE
@@ -84,7 +77,7 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
             progressBar.visibility = View.VISIBLE
             retryButton.visibility = View.GONE
             changelog.visibility = View.GONE
-            retryButton.postDelayed({ detailsEndpoint.startAsync() }, 500)
+            retryButton.postDelayed({ detailsEndpoint?.startAsync() }, 500)
         }
 
         if (rowId == -1) {
@@ -108,14 +101,17 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
 
     override fun onResume() {
         super.onResume()
-        detailsEndpoint.listener = this
         progressBar.visibility = View.VISIBLE
 
-        App.provide(this).prefs.account?.let {
-            AuthTokenAsync(this).request(this, it, object : AuthTokenAsync.Callback {
+        val requestQueue = App.provide(this).requestQueue
+        val deviceInfo = App.provide(this).deviceInfo
+
+        App.provide(this).prefs.account?.let { account ->
+            AuthTokenAsync(this).request(this, account, object : AuthTokenAsync.Callback {
                 override fun onToken(token: String) {
-                    detailsEndpoint.setAccount(it, token)
-                    detailsEndpoint.startAsync()
+                    detailsEndpoint = DetailsEndpoint(this@DetailsActivity, requestQueue, deviceInfo, account, detailsUrl)
+                    detailsEndpoint!!.listener = this@DetailsActivity
+                    detailsEndpoint!!.startAsync()
                 }
 
                 override fun onError(errorMessage: String) {
@@ -127,7 +123,7 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
 
     override fun onPause() {
         super.onPause()
-        detailsEndpoint.listener = null
+        detailsEndpoint?.listener = null
     }
 
     private fun setupAppView(app: AppInfo) {
@@ -241,7 +237,7 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
                 return true
             }
             R.id.menu_add -> {
-                val doc = detailsEndpoint.document
+                val doc = detailsEndpoint?.document
                 if (doc != null) {
                     val info = AppInfo(doc)
                     val appList = WatchAppList(this)
@@ -306,13 +302,13 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
         changelog.autoLinkMask = Linkify.ALL
 
         retryButton.visibility = View.GONE
-        val changes = detailsEndpoint.recentChanges
+        val changes = detailsEndpoint?.recentChanges ?: ""
         if (changes.isEmpty()) {
             changelog.setText(R.string.no_recent_changes)
         } else {
             changelog.text = Html.parse(changes)
         }
-        if (detailsEndpoint.document != null) {
+        if (detailsEndpoint?.document != null) {
             addMenu!!.isEnabled = true
         }
     }

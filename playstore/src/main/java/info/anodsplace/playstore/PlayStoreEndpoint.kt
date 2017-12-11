@@ -1,7 +1,5 @@
 package info.anodsplace.playstore
 
-import android.accounts.Account
-
 import com.android.volley.VolleyError
 import finsky.api.model.DfeModel
 
@@ -12,9 +10,7 @@ import finsky.api.model.DfeModel
  */
 interface PlayStoreEndpoint {
     var listener: Listener?
-    val authSubToken: String
-
-    fun setAccount(account: Account, authSubToken: String): PlayStoreEndpoint
+    var authToken: String
 
     fun startAsync()
     fun startSync()

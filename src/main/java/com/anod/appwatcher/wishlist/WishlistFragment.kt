@@ -5,7 +5,6 @@ import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
-import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -30,13 +29,7 @@ import kotlinx.android.synthetic.main.fragment_wishlist.*
  */
 class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Listener {
 
-    private val endpoint: WishlistEndpoint? by lazy {
-        if (context != null) {
-            WishlistEndpoint(context!!, App.provide(context!!).requestQueue, App.provide(context!!).deviceInfo, true)
-        } else {
-            null
-        }
-    }
+    private var endpoint: WishlistEndpoint? = null
     private val watchAppList: WatchAppList by lazy { WatchAppList(this) }
 
     override fun onAttach(context: Context?) {
@@ -72,11 +65,11 @@ class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Li
         val account = arguments!!.getParcelable<Account>(EXTRA_ACCOUNT)
         val authToken = arguments!!.getString(EXTRA_AUTH_TOKEN)
 
-        if (account == null || TextUtils.isEmpty(authToken)) {
+        if (account == null || authToken.isEmpty() || context == null) {
             Toast.makeText(context, R.string.choose_an_account, Toast.LENGTH_SHORT).show()
             activity!!.finish()
         } else {
-            startLoadingList(account, authToken!!)
+            startLoadingList(account, authToken, context!!)
         }
     }
 
@@ -96,13 +89,16 @@ class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Li
         }
     }
 
-    private fun startLoadingList(account: Account, authSubToken: String) {
-        endpoint!!.setAccount(account, authSubToken)
+    private fun startLoadingList(account: Account, authSubToken: String, context: Context) {
+        val endpoint = WishlistEndpoint(context, App.provide(context).requestQueue, App.provide(context).deviceInfo, account, true)
+        endpoint.authToken = authSubToken
+        endpoint.listener = this
 
-        val adapter = ResultsAdapterWishList(context!!, endpoint!!, watchAppList!!)
+        val adapter = ResultsAdapterWishList(context, endpoint, watchAppList)
         list.adapter = adapter
 
-        endpoint!!.startAsync()
+        this.endpoint = endpoint
+        endpoint.startAsync()
     }
 
     private fun showRetryButton() {
