@@ -23,6 +23,7 @@ import com.anod.appwatcher.model.schema.AppListTable
 import com.anod.appwatcher.model.schema.ChangelogTable
 import com.anod.appwatcher.model.schema.contentValues
 import com.anod.appwatcher.utils.extractUploadDate
+import finsky.api.model.DfeModel
 import finsky.api.model.Document
 import info.anodsplace.android.log.AppLog
 import info.anodsplace.appwatcher.framework.ApplicationContext
@@ -121,7 +122,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         return updatedApps.size
     }
 
-    override fun onDataChanged() {
+    override fun onDataChanged(data: DfeModel) {
     }
 
     override fun onErrorResponse(error: VolleyError) {

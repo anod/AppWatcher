@@ -32,6 +32,7 @@ import com.anod.appwatcher.model.packageToApp
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.*
 import com.squareup.picasso.Picasso
+import finsky.api.model.DfeModel
 import info.anodsplace.android.anim.RevealAnimatorCompat
 import info.anodsplace.android.log.AppLog
 import info.anodsplace.appwatcher.framework.*
@@ -298,7 +299,7 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
         builder.startChooser()
     }
 
-    override fun onDataChanged() {
+    override fun onDataChanged(data: DfeModel) {
         progressBar.visibility = View.GONE
         content.visibility = View.VISIBLE
         changelog.visibility = View.VISIBLE

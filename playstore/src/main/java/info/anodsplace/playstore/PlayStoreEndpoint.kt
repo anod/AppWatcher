@@ -3,6 +3,7 @@ package info.anodsplace.playstore
 import android.accounts.Account
 
 import com.android.volley.VolleyError
+import finsky.api.model.DfeModel
 
 /**
  * @author algavris
@@ -20,7 +21,7 @@ interface PlayStoreEndpoint {
     fun reset()
 
     interface Listener {
-        fun onDataChanged()
+        fun onDataChanged(data: DfeModel)
         fun onErrorResponse(error: VolleyError)
     }
 }

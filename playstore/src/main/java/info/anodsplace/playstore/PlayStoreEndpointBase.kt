@@ -1,6 +1,7 @@
 package info.anodsplace.playstore
 
 import android.accounts.Account
+import android.app.Application
 import android.content.Context
 import com.android.volley.RequestQueue
 
@@ -60,6 +61,12 @@ abstract class PlayStoreEndpointBase
     protected abstract fun executeSync()
 
     private fun init() {
+        if (this.account == null) {
+            AppLog.e("Account is empty")
+        }
+        if (this.authSubToken.isBlank()) {
+            AppLog.e("Account authentication token is empty")
+        }
         if (dfeApi == null) {
             val deviceId = deviceInfoProvider.deviceId
             val simOperator = deviceInfoProvider.simOperator
@@ -84,7 +91,7 @@ abstract class PlayStoreEndpointBase
 
     override fun onDataChanged() {
         if (data!!.isReady) {
-            listener?.onDataChanged()
+            listener?.onDataChanged(data!!)
         }
     }
 

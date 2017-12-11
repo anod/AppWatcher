@@ -1,8 +1,6 @@
 package com.anod.appwatcher.installed
 
-import android.accounts.Account
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.LoaderManager
 import android.support.v4.content.AsyncTaskLoader
@@ -14,7 +12,6 @@ import android.widget.Button
 import android.widget.Toast
 import com.anod.appwatcher.App
 import com.anod.appwatcher.R
-import com.anod.appwatcher.accounts.AccountSelectionDialog
 import com.anod.appwatcher.accounts.AuthTokenAsync
 import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.model.WatchAppList
@@ -33,7 +30,7 @@ import java.util.*
  * *
  * @date 19/04/2016.
  */
-class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<List<String>>, AccountSelectionDialog.SelectionListener, ImportBulkManager.Listener {
+class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<List<String>>, ImportBulkManager.Listener {
 
     override val themeRes: Int
         get() = Theme(this).themeDialog
@@ -41,9 +38,6 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
     private var allSelected: Boolean = false
     private lateinit var dataProvider: ImportDataProvider
     private lateinit var importManager: ImportBulkManager
-    private val accountSelectionDialog: AccountSelectionDialog by lazy {
-        AccountSelectionDialog(this, App.provide(this).prefs, this)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -88,11 +82,35 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
             if (importManager.isEmpty) {
                 finish()
             } else {
-                importManager.start()
+                startImport()
+
             }
         }
 
         supportLoaderManager.initLoader(0, null, this).forceLoad()
+    }
+
+    private fun startImport() {
+        val account = App.provide(this).prefs.account
+        if (account == null) {
+            Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
+            return
+        }
+
+        AuthTokenAsync(this).request(this, account, object : AuthTokenAsync.Callback {
+            override fun onToken(token: String) {
+                importManager.start(account, token)
+            }
+
+            override fun onError(errorMessage: String) {
+                if (App.with(this@ImportInstalledActivity).isNetworkAvailable) {
+                    Toast.makeText(this@ImportInstalledActivity, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(this@ImportInstalledActivity, R.string.check_connection, Toast.LENGTH_SHORT).show()
+                }
+                finish()
+            }
+        })
     }
 
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<List<String>> {
@@ -109,42 +127,6 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
     override fun onLoaderReset(loader: Loader<List<String>>) {
         val downloadedAdapter = list.adapter as ImportAdapter
         downloadedAdapter.clear()
-    }
-
-    override fun onAccountSelected(account: Account) {
-        AuthTokenAsync(this).request(this, account, object : AuthTokenAsync.Callback {
-            override fun onToken(token: String) {
-                importManager.setAccount(account, token)
-            }
-
-            override fun onError(errorMessage: String) {
-                if (App.with(this@ImportInstalledActivity).isNetworkAvailable) {
-                    Toast.makeText(this@ImportInstalledActivity, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
-                } else {
-                    Toast.makeText(this@ImportInstalledActivity, R.string.check_connection, Toast.LENGTH_SHORT).show()
-                }
-                finish()
-            }
-        })
-    }
-
-    override fun onAccountNotFound(errorMessage: String) {
-        if (errorMessage.isNotBlank()) {
-            Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
-        } else {
-            Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
-        }
-        finish()
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        accountSelectionDialog.onRequestPermissionResult(requestCode, permissions, grantResults)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        accountSelectionDialog.onActivityResult(requestCode, resultCode, data)
     }
 
     override fun onImportProgress(docIds: List<String>, result: SimpleArrayMap<String, Int>) {

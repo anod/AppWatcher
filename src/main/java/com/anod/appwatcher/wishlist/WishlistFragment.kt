@@ -17,6 +17,7 @@ import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.model.WatchAppList
 import com.anod.appwatcher.tags.TagSnackbar
+import finsky.api.model.DfeModel
 import info.anodsplace.playstore.PlayStoreEndpoint
 import info.anodsplace.playstore.WishlistEndpoint
 
@@ -126,7 +127,7 @@ class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Li
         empty.visibility = View.VISIBLE
     }
 
-    override fun onDataChanged() {
+    override fun onDataChanged(data: DfeModel) {
         if (endpoint!!.count == 0) {
             showNoResults()
         } else {

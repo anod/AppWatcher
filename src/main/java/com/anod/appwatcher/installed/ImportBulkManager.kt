@@ -8,6 +8,8 @@ import com.android.volley.VolleyError
 import com.anod.appwatcher.App
 import com.anod.appwatcher.model.AddWatchAppAsyncTask
 import com.anod.appwatcher.model.WatchAppList
+import finsky.api.model.DfeBulkDetails
+import finsky.api.model.DfeModel
 import finsky.api.model.Document
 import info.anodsplace.playstore.BulkDetailsEndpoint
 import info.anodsplace.playstore.PlayStoreEndpoint
@@ -18,20 +20,18 @@ internal class ImportBulkManager(
         private val listener: ImportBulkManager.Listener)
     : PlayStoreEndpoint.Listener, AddWatchAppAsyncTask.Listener {
 
-    private val endpoint = BulkDetailsEndpoint(context, App.provide(context).requestQueue, App.provide(context).deviceInfo)
     private val watchAppList = WatchAppList(null)
     private var listsDocIds: MutableList<MutableList<String>> = ArrayList()
     private var currentBulk: Int = 0
     private var asyncTask: AsyncTask<Document, Void, SimpleArrayMap<String, Int>>? = null
 
+    private var account: Account? = null
+    private var authSubToken: String = ""
+
     interface Listener {
         fun onImportProgress(docIds: List<String>, result: SimpleArrayMap<String, Int>)
         fun onImportFinish()
         fun onImportStart(docIds: List<String>)
-    }
-
-    init {
-        endpoint.listener = this
     }
 
     fun init() {
@@ -40,7 +40,7 @@ internal class ImportBulkManager(
     }
 
     fun stop() {
-        endpoint.reset()
+//        endpoint.reset()
         if (asyncTask != null && !asyncTask!!.isCancelled) {
             asyncTask!!.cancel(true)
             asyncTask = null
@@ -66,26 +66,33 @@ internal class ImportBulkManager(
     val isEmpty: Boolean
         get() = listsDocIds.isEmpty()
 
-    fun start() {
+    fun start(account: Account, authSubToken: String) {
+        this.account = account
+        this.authSubToken = authSubToken
         currentBulk = 0
         nextBulk()
     }
 
     private fun nextBulk() {
+        val account = this.account ?: return
+
         val docIds = listsDocIds[currentBulk]
         listener.onImportStart(docIds)
+        val endpoint = BulkDetailsEndpoint(context, App.provide(context).requestQueue, App.provide(context).deviceInfo)
         endpoint.docIds = docIds
+        endpoint.listener = this
+        endpoint.setAccount(account, authSubToken)
         endpoint.startAsync()
     }
 
-    override fun onDataChanged() {
-        val docs = endpoint.documents
-        asyncTask = AddWatchAppAsyncTask(context, watchAppList, this).execute(*docs.toTypedArray())
+    override fun onDataChanged(data: DfeModel) {
+        val docs = (data as DfeBulkDetails).documents.toTypedArray()
+        asyncTask = AddWatchAppAsyncTask(context, watchAppList, this).execute(*docs)
     }
 
     override fun onErrorResponse(error: VolleyError) {
         val docIds = listsDocIds[currentBulk]
-        listener.onImportProgress(docIds, SimpleArrayMap<String, Int>())
+        listener.onImportProgress(docIds, SimpleArrayMap())
         currentBulk++
         if (currentBulk == listsDocIds.size) {
             listener.onImportFinish()
@@ -94,9 +101,6 @@ internal class ImportBulkManager(
         }
     }
 
-    fun setAccount(account: Account, authSubToken: String) {
-        endpoint.setAccount(account, authSubToken)
-    }
 
     override fun onAddAppTaskFinish(result: SimpleArrayMap<String, Int>) {
         val docIds = listsDocIds[currentBulk]

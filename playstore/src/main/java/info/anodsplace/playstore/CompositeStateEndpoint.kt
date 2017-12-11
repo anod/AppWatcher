@@ -1,6 +1,7 @@
 package info.anodsplace.playstore
 
 import com.android.volley.VolleyError
+import finsky.api.model.DfeModel
 
 /**
  * @author algavris
@@ -28,7 +29,7 @@ class CompositeStateEndpoint(private val compositeListener: Listener) : Composit
         return this
     }
 
-    override fun onDataChanged() {
+    override fun onDataChanged(data: DfeModel) {
         compositeListener.onDataChanged(activeId, active)
     }
 
