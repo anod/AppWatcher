@@ -36,6 +36,6 @@ class BulkDetailsEndpoint(context: Context, requestQueue: RequestQueue, deviceIn
     }
 
     override fun createDfeModel(): DfeModel {
-        return DfeBulkDetails(dfeApi!!, AppDetailsFilter.predicate)
+        return DfeBulkDetails(dfeApi, AppDetailsFilter.predicate)
     }
 }

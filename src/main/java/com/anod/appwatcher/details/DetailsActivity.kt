@@ -110,6 +110,7 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
             AuthTokenAsync(this).request(this, account, object : AuthTokenAsync.Callback {
                 override fun onToken(token: String) {
                     detailsEndpoint = DetailsEndpoint(this@DetailsActivity, requestQueue, deviceInfo, account, detailsUrl)
+                    detailsEndpoint!!.authToken = token
                     detailsEndpoint!!.listener = this@DetailsActivity
                     detailsEndpoint!!.startAsync()
                 }
