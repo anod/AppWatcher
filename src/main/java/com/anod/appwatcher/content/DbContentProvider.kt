@@ -76,8 +76,10 @@ open class DbContentProvider : ContentProvider() {
         fun appsContentUri(tag: Tag?): Uri {
             return if (tag == null)
                 DbContentProvider.appsUri
-            else
-                DbContentProvider.appsTagUri.buildUpon().appendPath(tag.id.toString()).build()
+            else {
+                val tagId = if (tag.id == -1) 0 else tag.id
+                DbContentProvider.appsTagUri.buildUpon().appendPath(tagId.toString()).build()
+            }
         }
     }
 
