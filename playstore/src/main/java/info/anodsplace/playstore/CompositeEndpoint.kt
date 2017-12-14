@@ -15,27 +15,25 @@ open class CompositeEndpoint : PlayStoreEndpoint {
     }
 
     open fun put(id: Int, endpoint: PlayStoreEndpoint) {
+        endpoint.authToken = this.authToken
+        endpoint.listener = this.listener
         endpoints.put(id, endpoint)
     }
 
     fun clear() {
+        (0 until endpoints.size()).map { endpoints.valueAt(it) }.forEach { it.listener = null }
         endpoints = SparseArrayCompat()
     }
 
-    override var listener: PlayStoreEndpoint.Listener?
-        get() = this.listener
+    override var listener: PlayStoreEndpoint.Listener? = null
         set(listener) {
-            for (i in 0 until endpoints.size()) {
-                endpoints.valueAt(i).listener = listener
-            }
+            (0 until endpoints.size()).map { endpoints.valueAt(it) }.forEach { it.listener = listener }
         }
 
-    override var authToken: String
-        get() = if (endpoints.size() > 0) endpoints.valueAt(0).authToken else ""
+    override var authToken: String = ""
         set(value) {
-            for (i in 0 until endpoints.size()) {
-                endpoints.valueAt(i).authToken = authToken
-            }
+            field = value
+            (0 until endpoints.size()).map { endpoints.valueAt(it) }.forEach { it.authToken = authToken }
         }
 
     override fun startAsync() {

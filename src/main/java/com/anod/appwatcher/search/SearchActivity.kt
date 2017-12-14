@@ -33,14 +33,13 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
     override val themeRes: Int
         get() =  Theme(this).theme
 
-    private lateinit var adapter: ResultsAdapter
+    private var adapter: ResultsAdapter? = null
 
     lateinit var searchView: SearchView
 
     private var initiateSearch = false
     private var isShareSource = false
     private var account: Account? = null
-
 
     val accountSelectionDialog: AccountSelectionDialog by lazy {
         AccountSelectionDialog(this, App.provide(this).prefs, this)
@@ -98,8 +97,6 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
     }
 
     private fun searchResults(account: Account) {
-        list.adapter = adapter
-        endpoints.reset()
         showLoading()
 
         MetricsManagerEvent(this).track("perform_search", "SEARCH_QUERY", searchQuery, "SEARCH_PACKAGE", isPackageSearch.toString(), "FROM_SHARE", isShareSource.toString())
@@ -120,7 +117,8 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
                 endpoints.activeId = SEARCH_ENDPOINT_ID
                 adapter = ResultsAdapterSearch(this, endpoints[SEARCH_ENDPOINT_ID] as SearchEndpoint, watchAppList)
             }
-
+            list.adapter = adapter
+            endpoints.reset()
             endpoints.active.startAsync()
         } else {
             showNoResults("")
@@ -240,8 +238,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
         loading.visibility = View.GONE
         list.visibility = View.GONE
         retryBox.visibility = View.GONE
-        val noResStr = if (query.isNotEmpty()) getString(R.string.no_result_found, query) else getString(R.string.search_for_app)
-        empty.text = noResStr
+        empty.text = if (query.isNotEmpty()) getString(R.string.no_result_found, query) else getString(R.string.search_for_app)
         empty.visibility = View.VISIBLE
     }
 
@@ -253,15 +250,15 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
     }
 
     private fun retrySearchResult() {
-        if (adapter.isEmpty) {
-            searchResultsDelayed()
-        } else {
+        if (adapter?.isNotEmpty == true) {
             endpoints.active.startAsync()
+        } else {
+            searchResultsDelayed()
         }
     }
 
     override fun onWatchListChangeSuccess(info: AppInfo, newStatus: Int) {
-        adapter.notifyDataSetChanged()
+        adapter?.notifyDataSetChanged()
         if (newStatus == AppInfoMetadata.STATUS_NORMAL) {
             TagSnackbar.make(this, info, isShareSource).show()
         }
@@ -270,7 +267,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
     override fun onWatchListChangeError(info: AppInfo, error: Int) {
         if (WatchAppList.ERROR_ALREADY_ADDED == error) {
             Toast.makeText(this, R.string.app_already_added, Toast.LENGTH_SHORT).show()
-            adapter.notifyDataSetChanged()
+            adapter?.notifyDataSetChanged()
         } else if (error == WatchAppList.ERROR_INSERT) {
             Toast.makeText(this, R.string.error_insert_app, Toast.LENGTH_SHORT).show()
         }
@@ -280,7 +277,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
         if (id == DETAILS_ENDPOINT_ID) {
             if ((endpoint as DetailsEndpoint).document != null) {
                 showListView()
-                adapter.notifyDataSetChanged()
+                adapter?.notifyDataSetChanged()
             } else {
                 adapter = ResultsAdapterSearch(this, endpoints[SEARCH_ENDPOINT_ID] as SearchEndpoint, watchAppList)
                 list.adapter = adapter
@@ -292,7 +289,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
                 showNoResults(searchEndpoint.query)
             } else {
                 showListView()
-                adapter.notifyDataSetChanged()
+                adapter?.notifyDataSetChanged()
             }
         }
     }

@@ -47,30 +47,32 @@ object CustomParserFactory {
             return SimpleDateFormat("yyyy. MMM d.", locale)
         }
 
-        if (lang == Locale("pl", "").language) {
-            return SimpleDateFormat("d MMM yyyy", locale)
-        }
-
-        if (lang == Locale("it", "").language) {
-            return SimpleDateFormat("d MMM yyyy", locale)
-        }
-
         if (locale == Locale("en", "IN")) {
             return SimpleDateFormat("dd-MMM-yyyy", locale)
         }
 
-        if (locale == Locale("en", "SE")
-                || locale == Locale("en", "PH")
+        if (locale == Locale("en", "CA")) {
+            return SimpleDateFormat("MMM. dd, yyyy", locale)
+        }
+
+        if (locale == Locale("pt", "BR")) {
+            return SimpleDateFormat("dd 'de' MMM 'de' yyyy", locale)
+        }
+
+        if (locale == Locale("en", "GB")
+                || locale == Locale("en", "AU")
+                || lang == Locale("pl", "").language
+                || lang == Locale("it", "").language
+                || locale == Locale("en", "SE")) {
+            return SimpleDateFormat("d MMM yyyy", locale)
+        }
+
+        if (locale == Locale("en", "PH")
                 || lang == Locale("es", "").language
                 || locale == Locale("nl", "BE")
                 || locale == Locale("en", "RU")
                 || locale == Locale("en", "NL")) {
             return SimpleDateFormat("d MMM. yyyy", locale)
-        }
-
-        if (locale == Locale("en", "GB")
-                || locale == Locale("en", "AU")) {
-            return SimpleDateFormat("d MMM yyyy", locale)
         }
 
         if (locale == Locale("hi", "IN")) {

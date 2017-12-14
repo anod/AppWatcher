@@ -145,9 +145,10 @@ class AppsTagSelectActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<C
 
         companion object {
             private fun getContentUri(tag: Tag): Uri {
+                val tagId = if (tag.id == -1) 0 else tag.id
                 return DbContentProvider.appsTagUri
                         .buildUpon()
-                        .appendPath(tag.id.toString()).build()
+                        .appendPath(tagId.toString()).build()
             }
         }
     }

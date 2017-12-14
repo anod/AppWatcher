@@ -7,11 +7,8 @@ import com.anod.appwatcher.utils.date.CustomParserFactory
 
 import org.junit.Test
 
-import java.text.DateFormat
 import java.text.ParseException
 import java.text.SimpleDateFormat
-import java.util.ArrayList
-import java.util.Date
 import java.util.Locale
 
 import info.anodsplace.android.log.AppLog
@@ -37,6 +34,7 @@ class AppDetailsUploadDateTest {
                 DateDesc("en_RU", "28 Jun. 2017", "2017-06-28"),
 
                 DateDesc("en_AU", "28 Jun 2017", "2017-06-28"),
+                DateDesc("en_CA", "Nov. 18, 2017", "2017-11-18"),
 
                 DateDesc("es_US", "16 oct. 2016", "2016-10-16"),
                 DateDesc("es_US", "29 oct. 2016", "2016-10-29"),
@@ -54,9 +52,13 @@ class AppDetailsUploadDateTest {
                 DateDesc("en_AU", "2 Feb 2017", "2017-02-02"),
                 DateDesc("es_MX", "1 feb. 2017", "2017-02-01"),
                 DateDesc("es_VE", "5 feb. 2017", "2017-02-05"),
+                DateDesc("es_AR", "4 dic. 2017", "2017-12-04"),
+                DateDesc("en_SE", "27 May 2017", "2017-05-27"),
+
                 DateDesc("fa_IR", "Feb 1, 2017", "2017-02-01"),
 
-                DateDesc("fr_CA", "12 juill. 2016", "2016-07-12")
+                DateDesc("fr_CA", "12 juill. 2016", "2016-07-12"),
+                DateDesc("pt_BR", "5 de nov de 2017", "2017-11-05")
         )
 
         //        for (int i = 0; i < 12; i++) {
@@ -67,7 +69,7 @@ class AppDetailsUploadDateTest {
         val sdf = SimpleDateFormat("YYYY-MM-dd", Locale.US)
         for (date in dates) {
             try {
-                val actualDate = AppDetailsUploadDate.extract(date.date, date.locale)
+                val actualDate = extractUploadDate(date.date, date.locale)
                 assertEquals(date.locale.toString(), date.expected, sdf.format(actualDate))
             } catch (e: Exception) {
                 val df = CustomParserFactory.create(date.locale)

@@ -17,11 +17,11 @@ import java.util.*
 fun Document.extractUploadDate(): Long {
     val defaultLocale = Locale.getDefault()
     val uploadDate = this.appDetails.uploadDate ?: return 0
-    val date = extract(uploadDate, defaultLocale) ?: return 0
+    val date = extractUploadDate(uploadDate, defaultLocale) ?: return 0
     return date.time
 }
 
-internal fun extract(uploadDate: String, locale: Locale): Date? {
+fun extractUploadDate(uploadDate: String, locale: Locale): Date? {
     if ("" == uploadDate) {
         return null
     }

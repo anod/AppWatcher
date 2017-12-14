@@ -324,7 +324,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
                 worker.doSyncInBackground()
                 pref.lastDriveSyncTime = System.currentTimeMillis()
             } catch (e: Exception) {
-                AppLog.e(e)
+                AppLog.e("Perform Google Drive sync exception: ${e.message ?: "'empty message'"}", e)
             }
         } else {
             AppLog.d("DriveSync backup is fresh")

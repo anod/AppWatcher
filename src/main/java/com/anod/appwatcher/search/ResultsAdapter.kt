@@ -28,6 +28,9 @@ abstract class ResultsAdapter(
     val isEmpty: Boolean
         get() = this.itemCount == 0
 
+    val isNotEmpty: Boolean
+        get() = this.itemCount > 0
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ResultsAppViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.list_item_market_app, parent, false)
         return ResultsAppViewHolder(view, watchAppList)
