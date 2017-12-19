@@ -1,10 +1,2 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="info.anodsplace.colorpicker"
-    >
-
-    <application
-        android:allowBackup="true"
-        android:supportsRtl="true">
-    </application>
-
-</manifest>
+          package="info.anodsplace.colorpicker" />

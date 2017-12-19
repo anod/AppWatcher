@@ -1,6 +1,6 @@
 
 buildscript {
-    ext.kotlin_version = '1.2.0'
+    ext.kotlin_version = '1.2.10'
     repositories {
         jcenter()
         mavenCentral()
@@ -34,10 +34,10 @@ apply plugin: 'kotlin-android-extensions'
 dependencies {
     compile 'com.github.anod:android-utils-lib:v1.0.3'
 
-    compile 'com.google.android.gms:play-services-drive:11.6.2'
-    compile 'com.google.android.gms:play-services-oss-licenses:11.6.2'
+    compile 'com.google.android.gms:play-services-drive:11.8.0'
+    compile 'com.google.android.gms:play-services-oss-licenses:11.8.0'
 
-    compile 'com.google.firebase:firebase-core:11.6.2'
+    compile 'com.google.firebase:firebase-core:11.8.0'
     compile('com.crashlytics.sdk.android:crashlytics:2.7.1@aar') {
         transitive = true
     }
