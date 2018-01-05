@@ -29,7 +29,7 @@ internal class CustomMonthDateFormat(private val monthNames: Array<String>) : Da
         var month = -1
         var year = 0
         // "d MMM. y г."
-        for (index in start..textLength - 1) {
+        for (index in start until textLength) {
             val ch = source[index]
             if (state == STATE_DAY) {
                 if (ch == ' ') {
@@ -49,7 +49,7 @@ internal class CustomMonthDateFormat(private val monthNames: Array<String>) : Da
                 }
                 if (ch == ' ') {
                     val monthName = sb.toString()
-                    month = Arrays.asList(*monthNames).indexOf(monthName)
+                    month = monthNames.indexOf(monthName)
                     if (month == -1) {
                         pos.index = 0
                         pos.errorIndex = index

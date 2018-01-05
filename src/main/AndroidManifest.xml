@@ -44,6 +44,9 @@
         <activity
             android:name=".MarketSearchActivity"
             android:label="@string/activity_market"/>
+        <activity android:name=".userLog.UserLogActivity"
+            android:label="@string/log"
+            android:theme="@style/AppTheme.Black"/>
         <activity
             android:name=".AppWatcherActivity"
             android:clearTaskOnLaunch="true"

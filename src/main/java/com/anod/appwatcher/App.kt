@@ -1,6 +1,7 @@
 package com.anod.appwatcher
 
 import android.content.Context
+import com.anod.appwatcher.userLog.UserLogger
 import info.anodsplace.appwatcher.framework.ApplicationContext
 
 /**
@@ -24,5 +25,9 @@ object App {
 
     fun provide(context: ApplicationContext): ObjectGraph {
         return (context.actual as AppWatcherApplication).objectGraph
+    }
+
+    fun log(context: Context): UserLogger {
+        return (context.applicationContext as AppWatcherApplication).objectGraph.userLogger
     }
 }

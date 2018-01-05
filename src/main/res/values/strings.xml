@@ -130,6 +130,7 @@
     <string name="pref_show_recent_descr">Show recently installed section in the main view</string>
     <string name="pref_show_ondevice_title">Show On device</string>
     <string name="pref_show_ondevice_descr">Show On device section in the main view</string>
+    <string name="log">Log</string>
 
     <string-array name="sort_titles">
         <item>By name &#x2193;</item>

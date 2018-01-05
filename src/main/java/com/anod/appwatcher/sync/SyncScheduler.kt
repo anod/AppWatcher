@@ -40,6 +40,7 @@ object SyncScheduler {
                 .setExtras(Bundle())
                 .build()
 
+        App.log(context).info("Schedule sync in ${windowStartSec/3600} hours")
         dispatcher.mustSchedule(task)
     }
 

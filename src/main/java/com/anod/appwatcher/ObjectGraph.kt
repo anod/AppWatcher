@@ -10,12 +10,15 @@ import com.android.volley.toolbox.NoCache
 import com.anod.appwatcher.backup.gdrive.UploadServiceContentObserver
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.PicassoAppIcon
+import com.anod.appwatcher.userLog.UserLogger
 import com.firebase.jobdispatcher.FirebaseJobDispatcher
 import com.firebase.jobdispatcher.GooglePlayDriver
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.squareup.tape2.QueueFile
 import info.anodsplace.playstore.DeviceId
 import info.anodsplace.playstore.DeviceInfoProvider
 import info.anodsplace.playstore.Network
+import java.io.File
 
 /**
  * @author alex
@@ -55,4 +58,10 @@ class ObjectGraph internal constructor(private val app: AppWatcherApplication): 
 
     val deviceInfo: DeviceInfoProvider
         get() = this
+
+    val userLogger: UserLogger by lazy {
+        val file = File(app.filesDir, "user-log")
+        val queueFile = QueueFile.Builder(file).build()
+        UserLogger(queueFile)
+    }
 }
