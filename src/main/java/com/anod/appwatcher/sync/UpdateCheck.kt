@@ -116,7 +116,10 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         val now = System.currentTimeMillis()
         preferences.lastUpdateTime = now
 
-        if (!manualSync && (updatedApps.firstOrNull { it.isNewUpdate } != null)) {
+        if (!manualSync
+                && updatedApps.isNotEmpty()
+                && (updatedApps.firstOrNull { it.isNewUpdate } != null)
+                && lastUpdatesViewed) {
             preferences.isLastUpdatesViewed = false
         }
 
@@ -307,7 +310,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         val sn = SyncNotification(context)
         if (manualSync) {
             sn.cancel()
-        } else if (updatedApps.firstOrNull { it.isNewUpdate } != null) {
+        } else if (updatedApps.isNotEmpty()) {
             var filteredApps = updatedApps
 
             if (!preferences.isNotifyInstalledUpToDate) {
