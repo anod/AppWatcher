@@ -139,6 +139,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
                 if (updatesCount == 0) {
                     Toast.makeText(this@WatchListActivity, R.string.no_updates_found, Toast.LENGTH_SHORT).show()
                 }
+                refreshLastUpdateTime()
             }
         }
     }

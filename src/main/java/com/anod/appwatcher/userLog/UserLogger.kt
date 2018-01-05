@@ -3,7 +3,6 @@ package com.anod.appwatcher.userLog
 import android.util.Log
 import com.squareup.tape2.ObjectQueue
 import com.squareup.tape2.QueueFile
-import info.anodsplace.appwatcher.framework.R.id.date
 import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.*

@@ -17,6 +17,7 @@ import com.anod.appwatcher.backup.ImportTask
 import com.anod.appwatcher.backup.gdrive.GDriveSignIn
 import com.anod.appwatcher.model.DbSchemaManager
 import com.anod.appwatcher.sync.SyncScheduler
+import com.anod.appwatcher.userLog.UserLogActivity
 import com.anod.appwatcher.utils.Theme
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -144,6 +145,8 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
         aboutItem.summary = appVersion
         preferences.add(aboutItem)
         preferences.add(Item(R.string.pref_title_opensource, R.string.pref_descr_opensource, ACTION_LICENSES))
+
+        preferences.add(Item(R.string.user_log, 0, ACTION_USER_LOG))
 
         if (BuildConfig.DEBUG) {
             preferences.add(Item(R.string.pref_export_db, 0, ACTION_EXPORT_DB))
@@ -302,6 +305,9 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
                 }
                 prefs.showOnDevice = showOnDevice
             }
+            ACTION_USER_LOG -> {
+                startActivity(Intent(this, UserLogActivity::class.java))
+            }
         }
         notifyDataSetChanged()
     }
@@ -406,5 +412,6 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
         private const val ACTION_DARK_THEME = 14
         private const val ACTION_SHOW_RECENT = 15
         private const val ACTION_SHOW_ONDEVICE = 16
+        private const val ACTION_USER_LOG = 17
     }
 }

@@ -100,8 +100,19 @@ open class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.SelectionLi
             this.accountSelectionDialog.show()
         }
 
-        val time = App.provide(this).prefs.lastUpdateTime
+        this.refreshLastUpdateTime()
 
+        this.navigationView?.setNavigationItemSelectedListener { menuItem ->
+            this.drawerLayout?.closeDrawers()
+            onOptionsItemSelected(menuItem)
+            true
+        }
+    }
+
+    fun refreshLastUpdateTime() {
+        val headerView = this.navigationView?.getHeaderView(0) ?: return
+
+        val time = App.provide(this).prefs.lastUpdateTime
         val lastUpdateView = headerView.findViewById<View>(R.id.last_update) as TextView
         if (time > 0) {
             val lastUpdate = getString(R.string.last_update, DateUtils.getRelativeDateTimeString(this, time, DateUtils.MINUTE_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, 0))
@@ -109,12 +120,6 @@ open class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.SelectionLi
             lastUpdateView.visibility = View.VISIBLE
         } else {
             lastUpdateView.visibility = View.GONE
-        }
-
-        this.navigationView?.setNavigationItemSelectedListener { menuItem ->
-            this.drawerLayout?.closeDrawers()
-            onOptionsItemSelected(menuItem)
-            true
         }
     }
 
