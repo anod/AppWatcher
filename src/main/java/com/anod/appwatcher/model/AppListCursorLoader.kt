@@ -117,13 +117,13 @@ open class AppListCursorLoader(context: Context,
             val filter = ArrayList<String>()
             filter.add(AppListTable.Columns.status + " DESC")
             if (sortId == Preferences.SORT_NAME_DESC) {
-                filter.add(AppListTable.Columns.title + " COLLATE LOCALIZED DESC")
+                filter.add(AppListTable.Columns.title + " COLLATE NOCASE DESC")
             } else if (sortId == Preferences.SORT_DATE_ASC) {
                 filter.add(AppListTable.Columns.refreshTimestamp + " ASC")
             } else if (sortId == Preferences.SORT_DATE_DESC) {
                 filter.add(AppListTable.Columns.refreshTimestamp + " DESC")
             } else {
-                filter.add(AppListTable.Columns.title + " COLLATE LOCALIZED ASC")
+                filter.add(AppListTable.Columns.title + " COLLATE NOCASE ASC")
             }
             return TextUtils.join(", ", filter)
         }
