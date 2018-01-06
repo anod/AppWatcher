@@ -30,4 +30,5 @@
     <dimen name="dialog_padding_top_material">18dp</dimen>
 
     <dimen name="dialog_min_width_major">90%</dimen>
+    <dimen name="log_message_size">12dp</dimen>
 </resources>

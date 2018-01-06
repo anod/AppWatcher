@@ -31,15 +31,18 @@ class UserLogMessage(override val date: Date, override val message: String, over
 
             val levelIndex = str.indexOf('[')
             val date = str.substring(0, levelIndex)
-            val level = str[levelIndex+1].toInt()
-            val message = str.substring(levelIndex+2)
+            val level = str[levelIndex+1].toInt() - '0'.toInt()
+            val message = str.substring(levelIndex+3)
             return UserLogMessage(format.parse(date), message, level)
         }
     }
 
     override val asBytes: ByteArray
-        get() = "${format.format(date)}[$level]$message".toByteArray(Charsets.UTF_8)
+        get() = toString().toByteArray(Charsets.UTF_8)
 
+    override fun toString(): String {
+        return "${format.format(date)}[$level]$message"
+    }
 }
 
 class MessageConverter : ObjectQueue.Converter<Message> {
@@ -78,5 +81,8 @@ class UserLogger(queueFile: QueueFile) {
     fun remove(n: Int) {
         objectQueue.remove(n)
     }
+
+    val content: String
+        get() = objectQueue.asList().joinToString("\n")
 }
 
