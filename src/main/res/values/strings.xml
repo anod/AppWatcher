@@ -134,8 +134,8 @@
     <string name="user_log">App log</string>
 
     <string-array name="sort_titles">
-        <item>By name &#x2191;</item>
         <item>By name &#x2193;</item>
+        <item>By name &#x2191;</item>
         <item>By date &#x2191;</item>
         <item>By date &#x2193;</item>
     </string-array>
