@@ -83,16 +83,19 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
         if (rowId == -1) {
             appInfo = packageManager.packageToApp(-1, appId)
             isNewApp = true
+            App.log(this).info("Show details for unwatched $appId")
         } else {
             val cr = DbContentProviderClient(this)
             appInfo = cr.queryAppRow(rowId)
             cr.close()
             isNewApp = false
+            App.log(this).info("Show details for watched $appId")
         }
 
         if (appInfo == null) {
             Toast.makeText(this, getString(R.string.cannot_load_app, appId), Toast.LENGTH_LONG).show()
             AppLog.e("Cannot load app details: '$appId'")
+            App.log(this).error("Cannot load details for $appId")
             finish()
             return
         }
@@ -116,6 +119,7 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
                 }
 
                 override fun onError(errorMessage: String) {
+                    App.log(this@DetailsActivity).error(errorMessage)
                     showRetryMessage()
                 }
             })
@@ -315,6 +319,7 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
     }
 
     override fun onErrorResponse(error: VolleyError) {
+        App.log(this).error("Fetching app details failed '${error.message}'")
         showRetryMessage()
     }
 

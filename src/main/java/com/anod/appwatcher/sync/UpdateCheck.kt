@@ -123,7 +123,6 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
             preferences.isLastUpdatesViewed = false
         }
 
-        userLogger.info("Updated apps: [${updatedApps.joinToString(",") { it.title }}]")
         notifyIfNeeded(manualSync, updatedApps, userLogger)
 
         if (!manualSync) {
@@ -318,7 +317,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
                     it.installedVersionCode > 0 && it.versionCode <= it.installedVersionCode
                 }
             }
-            userLogger.info("Notifying about: [${filteredApps.joinToString(",") { it.title }}]")
+            userLogger.info("Notifying about: [${filteredApps.joinToString(",") { "${it.title} (${it.versionCode})" }}]")
             if (filteredApps.isNotEmpty()) {
                 sn.show(filteredApps)
             }

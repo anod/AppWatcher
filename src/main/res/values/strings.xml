@@ -72,6 +72,8 @@
     <string name="tab_all">All</string>
     <string name="tab_installed">Installed</string>
     <string name="tab_not_installed">Not Installed</string>
+    <string name="tab_updatable">Updatable</string>
+    <string name="tab_unwatched">Unwatched</string>
 
     <string name="navdrawer_item_add">Add</string>
     <string name="navdrawer_item_refresh">Update</string>
@@ -125,7 +127,6 @@
     <string name="channel_description">Notifications about new versions of watching apps</string>
     <string name="updates_not_available">Updates information is not available</string>
     <string name="filter">Filter</string>
-    <string name="tab_updatable">Updatable</string>
     <string name="pref_show_recent_title">Show recently installed</string>
     <string name="pref_show_recent_descr">Show recently installed section in the main view</string>
     <string name="pref_show_ondevice_title">Show On device</string>
