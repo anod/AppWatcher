@@ -24,7 +24,7 @@ interface Message {
 class UserLogMessage(override val date: Date, override val message: String, override val level: Int) : Message {
 
     companion object {
-        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.US)
+        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US)
 
         fun from(bytes: ByteArray): UserLogMessage {
             val str = String(bytes, Charsets.UTF_8)
