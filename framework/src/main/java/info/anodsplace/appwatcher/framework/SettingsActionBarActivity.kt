@@ -21,7 +21,7 @@ abstract class SettingsActionBarActivity : ToolbarActivity(), AdapterView.OnItem
 
     open class Item(@StringRes title: Int, @StringRes var summaryRes: Int, internal val action: Int)
         : Preference(title, R.layout.preference_holo) {
-        var summary: String? = null
+        var summary = ""
         var widget: Int = 0
         var enabled = true
     }
@@ -84,7 +84,7 @@ abstract class SettingsActionBarActivity : ToolbarActivity(), AdapterView.OnItem
                 val summary = view.findViewById<View>(android.R.id.summary) as TextView
                 if (item.summaryRes > 0) {
                     summary.setText(item.summaryRes)
-                } else if (!TextUtils.isEmpty(item.summary)) {
+                } else {
                     summary.text = item.summary
                 }
 

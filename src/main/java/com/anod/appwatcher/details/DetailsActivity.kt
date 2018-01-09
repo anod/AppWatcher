@@ -319,7 +319,7 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
     }
 
     override fun onErrorResponse(error: VolleyError) {
-        App.log(this).error("Fetching app details failed '${error.message}'")
+        App.log(this).error("Fetching of details failed ${error.message ?: ""}")
         showRetryMessage()
     }
 

@@ -36,7 +36,6 @@ class UserLogActivity: ToolbarActivity() {
         )
 
         fun apply(message: Message) {
-            val level = levels[message.level] ?: "UNKNOWN"
             val tv = itemView as TextView
             tv.text = "${format.format(message.date)} - ${message.message}"
             if (message.level > Log.WARN) {

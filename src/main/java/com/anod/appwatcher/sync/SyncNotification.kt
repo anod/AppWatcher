@@ -43,7 +43,7 @@ class SyncNotification(private val context: ApplicationContext) {
 
     fun show(updatedApps: List<UpdateCheck.UpdatedApp>) {
 
-        val sorted = updatedApps.sortedWith(compareBy({ it.isNewUpdate }, { it.title }))
+        val sorted = updatedApps.sortedWith(compareBy({ it.isNewUpdate }, { it.app.title }))
 
         val notification = this.create(sorted)
         val notificationManager = context.notificationManager
@@ -89,11 +89,11 @@ class SyncNotification(private val context: ApplicationContext) {
         var isUpdatable = false
 
         val sb = StringBuilder()
-        for (app in updatedApps) {
-            if (app.installedVersionCode > 0 && app.versionCode > app.installedVersionCode) {
+        for (update in updatedApps) {
+            if (update.installedVersionCode > 0 && update.app.versionNumber > update.installedVersionCode) {
                 isUpdatable = true
             }
-            sb.append(app.title).append("\n")
+            sb.append(update.app.title).append("\n")
         }
 
         if (!isUpdatable) {
@@ -114,21 +114,21 @@ class SyncNotification(private val context: ApplicationContext) {
 
     }
 
-    private fun addExtraInfo(app: UpdateCheck.UpdatedApp, builder: NotificationCompat.Builder) {
+    private fun addExtraInfo(update: UpdateCheck.UpdatedApp, builder: NotificationCompat.Builder) {
 
-            val changes = if (app.recentChanges.isBlank()) context.getString(R.string.no_recent_changes) else app.recentChanges
+            val changes = if (update.recentChanges.isBlank()) context.getString(R.string.no_recent_changes) else update.recentChanges
 
             builder.setContentText(Html.parse(changes))
             builder.setStyle(NotificationCompat.BigTextStyle().bigText(Html.parse(changes)))
 
-            val playIntent = createActionIntent(Uri.parse("com.anod.appwatcher://play/" + app.pkg), NotificationActivity.TYPE_PLAY)
-            playIntent.putExtra(NotificationActivity.EXTRA_PKG, app.pkg)
+            val playIntent = createActionIntent(Uri.parse("com.anod.appwatcher://play/" + update.app.packageName), NotificationActivity.TYPE_PLAY)
+            playIntent.putExtra(NotificationActivity.EXTRA_PKG, update.app.packageName)
 
             builder.addAction(R.drawable.ic_play_arrow_white_24dp, context.getString(R.string.store),
                     PendingIntent.getActivity(context.actual, 0, playIntent, 0)
             )
 
-            if (app.installedVersionCode > 0) {
+            if (update.installedVersionCode > 0) {
                 val updateIntent = createActionIntent(Uri.parse("com.anod.appwatcher://play/myapps/1"), NotificationActivity.TYPE_MYAPPS_UPDATE)
                 builder.addAction(R.drawable.ic_system_update_alt_white_24dp, context.getString(R.string.noti_action_update),
                         PendingIntent.getActivity(context.actual, 0, updateIntent, 0)
@@ -157,13 +157,13 @@ class SyncNotification(private val context: ApplicationContext) {
         if (count > 2) {
             return context.getString(
                     R.string.notification_2_apps_more,
-                    apps[0].title,
-                    apps[1].title
+                    apps[0].app.title,
+                    apps[1].app.title
             )
         }
         return context.getString(R.string.notification_2_apps,
-                apps[0].title,
-                apps[1].title
+                apps[0].app.title,
+                apps[1].app.title
         )
     }
 
@@ -171,13 +171,11 @@ class SyncNotification(private val context: ApplicationContext) {
         val title: String
         val count = apps.size
         if (count == 1) {
-            title = context.getString(R.string.notification_one_updated, apps[0].title)
+            title = context.getString(R.string.notification_one_updated, apps[0].app.title)
         } else {
             title = context.getString(R.string.notification_many_updates, count)
         }
         return title
     }
-
-
 
 }

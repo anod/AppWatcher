@@ -24,6 +24,7 @@ import com.anod.appwatcher.model.schema.AppListTable
 import com.anod.appwatcher.model.schema.ChangelogTable
 import com.anod.appwatcher.model.schema.contentValues
 import com.anod.appwatcher.userLog.UserLogger
+import com.anod.appwatcher.utils.date.CustomParserFactory
 import com.anod.appwatcher.utils.extractUploadDate
 import finsky.api.model.DfeModel
 import finsky.api.model.Document
@@ -32,6 +33,7 @@ import info.anodsplace.appwatcher.framework.ApplicationContext
 import info.anodsplace.appwatcher.framework.InstalledApps
 import info.anodsplace.playstore.BulkDetailsEndpoint
 import info.anodsplace.playstore.PlayStoreEndpoint
+import java.text.ParseException
 import java.util.*
 
 /**
@@ -42,11 +44,8 @@ import java.util.*
 class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Listener {
 
     class UpdatedApp(
-        val appId: String,
-        val title: String,
-        val pkg: String,
+        val app: AppInfo,
         val recentChanges: String,
-        val versionCode: Int,
         val installedVersionCode: Int,
         val isNewUpdate: Boolean)
 
@@ -110,7 +109,15 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         try {
             updatedApps = doSync(appListProvider, lastUpdatesViewed, authToken, account)
         } catch (e: RemoteException) {
+            userLogger.error("Error during synchronization ${e.message}")
             AppLog.e(e)
+        }
+
+        if (updatedApps.isNotEmpty() && updatedApps.first().app.refreshTime == 0.toLong()) {
+            val uploadDate = updatedApps.first().app.uploadDate
+            val locale = Locale.getDefault()
+            userLogger.error("Cannot parse date '$uploadDate' for locale '$locale'")
+            AppLog.e("Unparseable date: $uploadDate for locale $locale")
         }
 
         val now = System.currentTimeMillis()
@@ -251,25 +258,15 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         }
     }
 
-    private fun updateApp(marketApp: Document, localApp: AppInfo, updatedTitles: MutableList<UpdatedApp>, lastUpdatesViewed: Boolean): ContentValues {
+    private fun updateApp(marketApp: Document, localApp: AppInfo, updates: MutableList<UpdatedApp>, lastUpdatesViewed: Boolean): ContentValues {
         val appDetails = marketApp.appDetails
 
         if (appDetails.versionCode > localApp.versionNumber) {
             AppLog.d("New version found [" + appDetails.versionCode + "]")
             val newApp = AppInfo(localApp.rowId, AppInfoMetadata.STATUS_UPDATED, marketApp)
             val installedInfo = installedAppsProvider.packageInfo(appDetails.packageName)
-            val recentChanges = if (updatedTitles.size == 0) appDetails.recentChangesHtml ?: "" else ""
-            updatedTitles.add(
-                UpdatedApp(
-                    localApp.appId,
-                    marketApp.title,
-                    appDetails.packageName,
-                    recentChanges,
-                    appDetails.versionCode,
-                    installedInfo.versionCode,
-                    true
-                )
-            )
+            val recentChanges = if (updates.isEmpty()) appDetails.recentChangesHtml ?: "" else ""
+            updates.add(UpdatedApp(newApp, recentChanges, installedInfo.versionCode,true ))
             return newApp.contentValues
         }
 
@@ -284,18 +281,8 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         } else if (localApp.status == AppInfoMetadata.STATUS_UPDATED) {
             // App was previously updated
             val installedInfo = installedAppsProvider.packageInfo(appDetails.packageName)
-            val recentChanges = if (updatedTitles.size == 0) appDetails.recentChangesHtml ?: "" else ""
-            updatedTitles.add(
-                UpdatedApp(
-                    localApp.appId,
-                    marketApp.title,
-                    appDetails.packageName,
-                    recentChanges,
-                    appDetails.versionCode,
-                    installedInfo.versionCode,
-                    false
-                )
-            )
+            val recentChanges = if (updates.isEmpty()) appDetails.recentChangesHtml ?: "" else ""
+            updates.add(UpdatedApp(localApp, recentChanges, installedInfo.versionCode,false))
         }
         //Refresh app icon if it wasn't fetched previously
         fillMissingData(marketApp, localApp, values)
@@ -308,16 +295,21 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
     private fun notifyIfNeeded(manualSync: Boolean, updatedApps: List<UpdatedApp>, userLogger: UserLogger) {
         val sn = SyncNotification(context)
         if (manualSync) {
+            if (updatedApps.isEmpty()) {
+                userLogger.info("No new updates")
+            } else {
+                userLogger.info("Updates: [${updatedApps.joinToString(",") { "${it.app.title} (${it.app.versionNumber})" }}]")
+            }
             sn.cancel()
         } else if (updatedApps.isNotEmpty()) {
             var filteredApps = updatedApps
 
             if (!preferences.isNotifyInstalledUpToDate) {
                 filteredApps = updatedApps.filter {
-                    it.installedVersionCode > 0 && it.versionCode <= it.installedVersionCode
+                    it.installedVersionCode > 0 && it.app.versionNumber <= it.installedVersionCode
                 }
             }
-            userLogger.info("Notifying about: [${filteredApps.joinToString(",") { "${it.title} (${it.versionCode})" }}]")
+            userLogger.info("Notifying about: [${filteredApps.joinToString(",") { "${it.app.title} (${it.app.versionNumber})" }}]")
             if (filteredApps.isNotEmpty()) {
                 sn.show(filteredApps)
             }
