@@ -1,61 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.SwipeRefreshLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/swipe_layout"
+
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                 android:layout_width="match_parent"
-                 android:layout_height="match_parent">
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
         <android.support.v7.widget.RecyclerView
             android:id="@android:id/list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:listitem="@layout/list_item_app"/>
+            app:fastScrollEnabled="true"
+            app:fastScrollHorizontalThumbDrawable="@drawable/fastscroll_thumb_states"
+            app:fastScrollHorizontalTrackDrawable="@drawable/fastscroll_line_states"
+            app:fastScrollVerticalThumbDrawable="@drawable/fastscroll_thumb_states"
+            app:fastScrollVerticalTrackDrawable="@drawable/fastscroll_line_states"
+            tools:listitem="@layout/list_item_app" />
+    </android.support.v4.widget.SwipeRefreshLayout>
 
-        <LinearLayout
-            android:id="@android:id/empty"
-            android:layout_width="240dp"
+    <LinearLayout
+        android:id="@android:id/empty"
+        android:layout_width="240dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="96dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="top|center_horizontal"
-            android:layout_marginTop="96dp"
-            android:orientation="vertical">
+            android:gravity="center"
+            android:text="@string/watch_list_is_empty"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="@string/watch_list_is_empty"
-                android:textAppearance="?android:attr/textAppearanceMedium"/>
+        <Button
+            android:id="@android:id/button1"
+            style="@style/BrandButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_search_white_24dp"
+            android:text="@string/search_for_an_app" />
 
-            <Button
-                android:id="@android:id/button1"
-                style="@style/BrandButtonStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:drawableLeft="@drawable/ic_search_white_24dp"
-                android:text="@string/search_for_an_app"/>
+        <Button
+            android:id="@android:id/button2"
+            style="@style/BrandButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_system_update_alt_white_24dp"
+            android:text="@string/import_installed" />
 
-            <Button
-                android:id="@android:id/button2"
-                style="@style/BrandButtonStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:drawableLeft="@drawable/ic_system_update_alt_white_24dp"
-                android:text="@string/import_installed"/>
+        <Button
+            android:id="@android:id/button3"
+            style="@style/BrandButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_share_white_24dp"
+            android:text="@string/share_from_play_store" />
 
-            <Button
-                android:id="@android:id/button3"
-                style="@style/BrandButtonStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:drawableLeft="@drawable/ic_share_white_24dp"
-                android:text="@string/share_from_play_store"/>
+    </LinearLayout>
 
-        </LinearLayout>
-
-    </FrameLayout>
-</android.support.v4.widget.SwipeRefreshLayout>
+</FrameLayout>
