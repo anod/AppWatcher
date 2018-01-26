@@ -69,13 +69,13 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
 
         content.visibility = View.INVISIBLE
         progressBar.visibility = View.GONE
-        retryButton.visibility = View.GONE
+        error.visibility = View.GONE
         changelog.visibility = View.GONE
         background.visibility = View.INVISIBLE
 
         retryButton.setOnClickListener {
             progressBar.visibility = View.VISIBLE
-            retryButton.visibility = View.GONE
+            error.visibility = View.GONE
             changelog.visibility = View.GONE
             retryButton.postDelayed({ detailsEndpoint?.startAsync() }, 500)
         }
@@ -306,7 +306,7 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
         changelog.visibility = View.VISIBLE
         changelog.autoLinkMask = Linkify.ALL
 
-        retryButton.visibility = View.GONE
+        error.visibility = View.GONE
         val changes = detailsEndpoint?.recentChanges ?: ""
         if (changes.isEmpty()) {
             changelog.setText(R.string.no_recent_changes)
@@ -324,13 +324,9 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
     }
 
     private fun showRetryMessage() {
-        content.visibility = View.VISIBLE
         progressBar.visibility = View.GONE
-        changelog.visibility = View.VISIBLE
-        changelog.autoLinkMask = Linkify.ALL
+        error.visibility = View.VISIBLE
 
-        changelog.text = getString(R.string.error_fetching_info)
-        retryButton.visibility = View.VISIBLE
         if (!App.with(this).isNetworkAvailable) {
             Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()
         }

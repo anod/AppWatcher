@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
@@ -8,163 +8,204 @@
 
     <View
         android:id="@+id/background"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="136dp"
-        android:background="@color/theme_primary" />
+        android:background="@color/theme_primary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/toolbar_transparent"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@android:id/icon"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_gravity="left"
+        android:layout_marginStart="16dp"
+        android:src="@drawable/ic_notifications_black_24dp"
+        app:layout_constraintStart_toStartOf="@+id/background"
+        app:layout_constraintTop_toBottomOf="@id/toolbar" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:layout_gravity="left"
+        android:layout_marginLeft="88dp"
+        android:orientation="vertical"
+        android:paddingBottom="4dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@android:id/icon"
+        app:layout_constraintTop_toBottomOf="@id/toolbar">
+
+        <TextView
+            android:id="@android:id/title"
+            style="@style/TextAppearance.AppCompat.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:textColor="@color/primary_text_dark"
+            app:autoSizeMaxTextSize="20sp"
+            app:autoSizeMinTextSize="12sp"
+            app:autoSizeStepGranularity="2sp"
+            app:autoSizeTextType="uniform"
+            tools:text="Netflix" />
+
+        <TextView
+            android:id="@+id/details"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@color/primary_text_dark"
+            android:textSize="10sp"
+            tools:text="Netflix" />
+
+        <TextView
+            android:id="@+id/update_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="bottom"
+            android:textColor="@color/primary_text_dark"
+            android:textSize="@dimen/textSize"
+            tools:text="Date" />
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/error"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <include layout="@layout/toolbar_transparent" />
-
-        <FrameLayout
+        <TextView
             android:layout_width="match_parent"
-            android:layout_height="72dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:layout_height="wrap_content"
+            android:paddingTop="8dp"
+            android:text="@string/problem_occurred" />
 
-            <ImageView
-                android:id="@android:id/icon"
-                android:layout_width="64dp"
-                android:layout_height="64dp"
-                android:layout_gravity="left"
-                android:layout_marginLeft="16dp"
-                android:src="@drawable/ic_notifications_black_24dp" />
+        <Button
+            android:id="@+id/retryButton"
+            style="@style/BrandButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/retry" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/frameLayout"
+        android:layout_width="368dp"
+        android:layout_height="415dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/background"
+        app:layout_constraintVertical_bias="0.0">
+
+
+        <ScrollView
+            android:id="@+id/content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:minHeight="192dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="64dp"
-                android:layout_gravity="left"
-                android:layout_marginLeft="88dp"
-                android:orientation="vertical"
-                android:paddingBottom="4dp"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp">
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
                 <TextView
-                    android:id="@android:id/title"
-                    style="@style/TextAppearance.AppCompat.Title"
+                    android:id="@+id/updated"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:drawableLeft="@drawable/ic_stat_av_play_shopping_bag"
+                    android:drawablePadding="4dp"
+                    android:ellipsize="end"
+                    android:gravity="left"
                     android:maxLines="1"
-                    android:textColor="@color/primary_text_dark"
-                    app:autoSizeMaxTextSize="20sp"
-                    app:autoSizeMinTextSize="12sp"
-                    app:autoSizeStepGranularity="2sp"
-                    app:autoSizeTextType="uniform"
-                    tools:text="Netflix" />
-
-                <TextView
-                    android:id="@+id/details"
-                    android:layout_width="wrap_content"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="@color/primary_text_dark"
-                    android:textSize="10sp"
-                    tools:text="Netflix" />
+                    android:textSize="@dimen/textSize"
+                    tools:text="5.6.1609P.1258283" />
+
 
                 <TextView
-                    android:id="@+id/update_date"
+                    android:id="@+id/price"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="bottom"
-                    android:textColor="@color/primary_text_dark"
+                    android:layout_gravity="left"
+                    android:drawableLeft="@drawable/ic_stat_communication_stay_primary_portrait"
+                    android:drawablePadding="4dp"
+                    android:ellipsize="end"
+                    android:gravity="left"
+                    android:maxLines="1"
+                    android:textColor="@color/theme_accent"
                     android:textSize="@dimen/textSize"
-                    tools:text="Date" />
-            </LinearLayout>
-        </FrameLayout>
+                    tools:text="5.6.1609P.1258283" />
 
-        <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_margin="16dp"
-            android:gravity="center_horizontal"
-            android:orientation="vertical">
-
-            <ProgressBar
-                android:id="@+id/progressBar"
-                style="?android:attr/progressBarStyleLarge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_margin="16dp" />
-
-
-            <ScrollView
-                android:id="@+id/content"
-                android:minHeight="192dp"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <LinearLayout
+                <TextView
+                    android:id="@+id/changelog"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
+                    android:layout_height="wrap_content"
+                    android:paddingTop="8dp"
+                    android:text="@string/problem_occurred" />
 
-                    <TextView
-                        android:id="@+id/updated"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="left"
-                        android:drawableLeft="@drawable/ic_stat_av_play_shopping_bag"
-                        android:drawablePadding="4dp"
-                        android:ellipsize="end"
-                        android:gravity="left"
-                        android:maxLines="1"
-                        android:textAppearance="?android:attr/textAppearanceSmall"
-                        android:textSize="@dimen/textSize"
-                        tools:text="5.6.1609P.1258283" />
+            </LinearLayout>
 
+        </ScrollView>
 
-                    <TextView
-                        android:id="@+id/price"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="left"
-                        android:drawableLeft="@drawable/ic_stat_communication_stay_primary_portrait"
-                        android:drawablePadding="4dp"
-                        android:ellipsize="end"
-                        android:gravity="left"
-                        android:maxLines="1"
-                        android:textColor="@color/theme_accent"
-                        android:textSize="@dimen/textSize"
-                        tools:text="5.6.1609P.1258283" />
-
-                    <TextView
-                        android:id="@+id/changelog"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingTop="8dp"
-                        android:text="@string/problem_occurred" />
-
-                    <Button
-                        android:id="@+id/retryButton"
-                        style="@style/BrandButtonStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:text="@string/retry" />
-                </LinearLayout>
-
-            </ScrollView>
-
-        </FrameLayout>
-    </LinearLayout>
+    </FrameLayout>
 
     <android.support.design.widget.FloatingActionButton xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/playStoreButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="right"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginBottom="16dp"
         android:layout_marginRight="16dp"
-        android:layout_marginTop="@dimen/playstore_button_margin_top"
         android:src="@drawable/ic_play_arrow_black_48dp"
         app:backgroundTint="@color/fab_tint"
         app:elevation="1dp"
-        app:fabSize="mini" />
+        app:fabSize="mini"
+        app:layout_constraintBottom_toTopOf="@+id/frameLayout"
+        app:layout_constraintEnd_toEndOf="@id/background"
+        app:layout_constraintTop_toBottomOf="@id/background" />
 
-</FrameLayout>
+</android.support.constraint.ConstraintLayout>
