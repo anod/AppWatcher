@@ -101,9 +101,9 @@ class AppDetailsView(view: View, private val dataProvider: AppViewHolderBase.Dat
 
     fun updateAccentColor(@ColorInt color: Int, app: AppInfo) {
         accentColor = color
-        price!!.setTextColor(accentColor)
+        price?.setTextColor(accentColor)
         if (app.status == AppInfoMetadata.STATUS_UPDATED) {
-            version!!.setTextColor(accentColor)
+            version?.setTextColor(accentColor)
         }
     }
 }

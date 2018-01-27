@@ -329,7 +329,7 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
     }
 
     override fun onLoadFinished(loader: Loader<Cursor>?, data: Cursor?) {
-        adapter.swapData(data as AppChangeCursor)
+        adapter.swapData(data as? AppChangeCursor)
     }
 
     override fun onErrorResponse(error: VolleyError) {
