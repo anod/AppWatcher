@@ -2,18 +2,21 @@ package com.anod.appwatcher.details
 
 import android.app.Activity
 import android.content.Intent
+import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.support.annotation.ColorInt
+import android.support.v4.app.LoaderManager
 import android.support.v4.app.ShareCompat
 import android.support.v4.content.ContextCompat
+import android.support.v4.content.Loader
 import android.support.v4.graphics.drawable.DrawableCompat
 import android.support.v4.view.ViewCompat
 import android.support.v7.graphics.Palette
-import android.text.util.Linkify
+import android.support.v7.widget.LinearLayoutManager
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -22,13 +25,11 @@ import com.android.volley.VolleyError
 import com.anod.appwatcher.App
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenAsync
+import com.anod.appwatcher.content.AppChangeCursor
 import com.anod.appwatcher.watchlist.AppViewHolderDataProvider
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.DbContentProviderClient
-import com.anod.appwatcher.model.AppInfo
-import com.anod.appwatcher.model.Tag
-import com.anod.appwatcher.model.WatchAppList
-import com.anod.appwatcher.model.packageToApp
+import com.anod.appwatcher.model.*
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.*
 import com.squareup.picasso.Picasso
@@ -40,7 +41,7 @@ import info.anodsplace.playstore.DetailsEndpoint
 import info.anodsplace.playstore.PlayStoreEndpoint
 import kotlinx.android.synthetic.main.activity_app_changelog.*
 
-open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette.PaletteAsyncListener, View.OnClickListener, WatchAppList.Listener {
+open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette.PaletteAsyncListener, View.OnClickListener, WatchAppList.Listener, LoaderManager.LoaderCallbacks<Cursor> {
 
     override val themeRes: Int
         get() = Theme(this).themeChangelog
@@ -56,6 +57,7 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
     val iconLoader: PicassoAppIcon by lazy { App.provide(this).iconLoader }
     val dataProvider: AppViewHolderDataProvider by lazy { AppViewHolderDataProvider(this, InstalledApps.PackageManager(packageManager)) }
     val appDetailsView: AppDetailsView by lazy { AppDetailsView(container, dataProvider) }
+    val adapter: ChangesAdapter by lazy { ChangesAdapter(this, AppChange(appId, 0, "", "") ) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,16 +69,15 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
         val rowId = intent.getIntExtra(EXTRA_ROW_ID, -1)
         MetricsManagerEvent(this).track("open_changelog", "DETAILS_APP_ID", appId, "DETAILS_ROW_ID", rowId.toString())
 
-        content.visibility = View.INVISIBLE
         progressBar.visibility = View.GONE
         error.visibility = View.GONE
-        changelog.visibility = View.GONE
+        list.visibility = View.GONE
         background.visibility = View.INVISIBLE
 
         retryButton.setOnClickListener {
             progressBar.visibility = View.VISIBLE
             error.visibility = View.GONE
-            changelog.visibility = View.GONE
+            list.visibility = View.GONE
             retryButton.postDelayed({ detailsEndpoint?.startAsync() }, 500)
         }
 
@@ -100,6 +101,9 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
             return
         }
         setupAppView(appInfo!!)
+        list.layoutManager = LinearLayoutManager(this)
+        list.adapter = adapter
+        supportLoaderManager.initLoader(0, null, this).forceLoad()
     }
 
     override fun onResume() {
@@ -291,7 +295,7 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
         val appInfo = this.appInfo ?: return
         val builder = ShareCompat.IntentBuilder.from(this)
 
-        val changes = if (changelog.text.isBlank()) "" else "${changelog.text}\n\n"
+        val changes = if (adapter.recentChange.details.isBlank()) "" else "${adapter.recentChange.details}\n\n"
         val text = getString(R.string.share_text, changes ,String.format(MarketInfo.URL_WEB_PLAY_STORE, appInfo.packageName))
 
         builder.setSubject(getString(R.string.share_subject, appInfo.title, appInfo.versionName))
@@ -302,20 +306,30 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
 
     override fun onDataChanged(data: DfeModel) {
         progressBar.visibility = View.GONE
-        content.visibility = View.VISIBLE
-        changelog.visibility = View.VISIBLE
-        changelog.autoLinkMask = Linkify.ALL
-
+        list.visibility = View.VISIBLE
         error.visibility = View.GONE
-        val changes = detailsEndpoint?.recentChanges ?: ""
-        if (changes.isEmpty()) {
-            changelog.setText(R.string.no_recent_changes)
-        } else {
-            changelog.text = Html.parse(changes)
+
+        if (detailsEndpoint?.document == null) {
+            showRetryMessage()
+            return
         }
-        if (detailsEndpoint?.document != null) {
-            addMenu!!.isEnabled = true
-        }
+        val appDetails = detailsEndpoint?.appDetails!!
+
+        addMenu!!.isEnabled = true
+
+        adapter.recentChange = AppChange(appId, appDetails.versionCode, appDetails.versionString, appDetails.recentChangesHtml ?: "")
+    }
+
+    override fun onCreateLoader(id: Int, args: Bundle?): Loader<Cursor> {
+        return ChangesLoader(this, appId)
+    }
+
+    override fun onLoaderReset(loader: Loader<Cursor>?) {
+        adapter.swapData(null)
+    }
+
+    override fun onLoadFinished(loader: Loader<Cursor>?, data: Cursor?) {
+        adapter.swapData(data as AppChangeCursor)
     }
 
     override fun onErrorResponse(error: VolleyError) {
@@ -326,6 +340,7 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
     private fun showRetryMessage() {
         progressBar.visibility = View.GONE
         error.visibility = View.VISIBLE
+        list.visibility = View.GONE
 
         if (!App.with(this).isNetworkAvailable) {
             Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()

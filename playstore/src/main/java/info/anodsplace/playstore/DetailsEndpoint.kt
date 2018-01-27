@@ -23,14 +23,11 @@ class DetailsEndpoint(context: Context, requestQueue: RequestQueue, deviceInfoPr
             super.data = value
         }
 
-    private val appDetails: AppDetails?
+    val appDetails: AppDetails?
         get() = detailsData?.document?.appDetails
 
     val document: Document?
         get() = detailsData?.document
-
-    val recentChanges: String
-        get() = appDetails?.recentChangesHtml ?: ""
 
     override fun executeAsync() {
         detailsData?.detailsUrl = detailsUrl

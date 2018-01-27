@@ -17,8 +17,8 @@ abstract class RecyclerViewCursorAdapter<VH : RecyclerView.ViewHolder, in CR : C
         private val context: Context,
         @param:LayoutRes private val resource: Int) : RecyclerView.Adapter<VH>() {
 
-    private var mDataValid: Boolean = false
-    private var mCursor: CR? = null
+    private var isDataValid: Boolean = false
+    private var cursor: CR? = null
 
     protected abstract fun onCreateViewHolder(itemView: View): VH
     protected abstract fun onBindViewHolder(holder: VH, position: Int, cursor: CR)
@@ -28,15 +28,15 @@ abstract class RecyclerViewCursorAdapter<VH : RecyclerView.ViewHolder, in CR : C
     }
 
     override fun onBindViewHolder(holder: VH, position: Int) {
-        if (mCursor == null || !mCursor!!.moveToPosition(position)) {
+        if (cursor == null || !cursor!!.moveToPosition(position)) {
             throw IllegalStateException("couldn't move cursor to position " + position)
         }
-        onBindViewHolder(holder, position, mCursor!!)
+        onBindViewHolder(holder, position, cursor!!)
     }
 
     override fun getItemCount(): Int {
-        if (mDataValid && mCursor != null) {
-            return mCursor!!.count
+        if (isDataValid && cursor != null) {
+            return cursor!!.count
         } else {
             return 0
         }
@@ -46,7 +46,7 @@ abstract class RecyclerViewCursorAdapter<VH : RecyclerView.ViewHolder, in CR : C
         return 1
     }
 
-    protected fun createItemView(parent: ViewGroup, viewType: Int): View {
+    private fun createItemView(parent: ViewGroup, viewType: Int): View {
         val v = LayoutInflater.from(context).inflate(resource, parent, false)
         v.isClickable = true
         v.isFocusable = true
@@ -54,16 +54,16 @@ abstract class RecyclerViewCursorAdapter<VH : RecyclerView.ViewHolder, in CR : C
     }
 
     open fun swapData(newCursor: CR?) {
-        if (newCursor === mCursor) {
+        if (newCursor === cursor) {
             return
         }
-        mCursor = newCursor
+        cursor = newCursor
         if (newCursor != null) {
-            mDataValid = true
+            isDataValid = true
             // notify the observers about the new cursor
             notifyDataSetChanged()
         } else {
-            mDataValid = false
+            isDataValid = false
             // notify the observers about the lack of a data set
             notifyDataSetChanged()
         }

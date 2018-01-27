@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="16dp"
+    android:layout_marginRight="16dp"
+    android:layout_marginBottom="8dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/version"
+        tools:text="5.6.1609P.1258283"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left"
+        android:drawableLeft="@drawable/ic_stat_av_play_shopping_bag"
+        android:drawablePadding="4dp"
+        android:ellipsize="end"
+        android:gravity="left"
+        android:maxLines="1"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textSize="@dimen/textSize" />
+
+    <TextView
+        android:id="@+id/changelog"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="8dp"
+        tools:text="- Added hardware connection instructions for DSL Modem Router, 3G/4G Router and Archer C5400X.\n- Added connection guidance whenever you are disconnected.- Enhanced the visual design.\n- Reduced the download size of this App.\n- Fixed various bugs." />
+
+</LinearLayout>

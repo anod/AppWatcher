@@ -21,11 +21,11 @@ class ChangelogTable {
     }
 
     object TableColumns {
-        val _ID = AppTagsTable.table + "." + BaseColumns._ID
-        val appId = AppTagsTable.table + ".appId"
-        val versionCode = AppTagsTable.table + ".code"
-        val versionName = AppTagsTable.table + ".name"
-        val details = AppTagsTable.table + ".details"
+        val _ID = ChangelogTable.table + "." + BaseColumns._ID
+        val appId = ChangelogTable.table + ".app_id"
+        val versionCode = ChangelogTable.table + ".code"
+        val versionName = ChangelogTable.table + ".name"
+        val details = ChangelogTable.table + ".details"
     }
 
     object Projection {
