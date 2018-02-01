@@ -16,6 +16,9 @@ class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener,
     override val isHomeAsMenu: Boolean
         get() = true
 
+    override val defaultFilterId: Int
+        get() = prefs.defaultMainFilterId
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportActionBar!!.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp)
@@ -38,6 +41,11 @@ class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener,
 
     override val menuResource: Int
         get() = R.menu.watchlist
+
+    override fun onFilterSelected(filterId: Int) {
+        super.onFilterSelected(filterId)
+        prefs.defaultMainFilterId = filterId
+    }
 
     override fun createViewPagerAdapter(): WatchListActivity.Adapter {
         val adapter = WatchListActivity.Adapter(supportFragmentManager)

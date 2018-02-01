@@ -55,6 +55,8 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     val prefs: Preferences
         get() = App.provide(this).prefs
 
+    open val defaultFilterId = Filters.TAB_ALL
+
     interface EventListener {
         fun onSortChanged(sortIndex: Int)
         fun onQueryTextChanged(newQuery: String)
@@ -82,11 +84,11 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
 
         val filterId: Int
         if (savedInstanceState != null) {
-            filterId = savedInstanceState.getInt("tab_id", Filters.TAB_ALL)
+            filterId = savedInstanceState.getInt("tab_id", defaultFilterId)
             actionMenu.searchQuery = savedInstanceState.getString("filter") ?: ""
             AppLog.d("Restore tab: " + filterId)
         } else {
-            filterId = intentExtras.getInt("tab_id", Filters.TAB_ALL)
+            filterId = intentExtras.getInt("tab_id", defaultFilterId)
             actionMenu.expandSearch = intentExtras.getBoolean(EXTRA_EXPAND_SEARCH)
         }
 
@@ -96,14 +98,10 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
 
         viewPager.currentItem = filterId
         actionMenu.filterId = filterId
+        updateSubtitle(filterId)
         viewPager.addOnPageChangeListener(object: ViewPager.SimpleOnPageChangeListener() {
             override fun onPageSelected(position: Int) {
-                actionMenu.filterId = position
-                if (position == 0) {
-                    supportActionBar?.subtitle = ""
-                } else {
-                    supportActionBar?.subtitle = viewPager.adapter?.getPageTitle(position) ?: ""
-                }
+                onFilterSelected(position)
             }
         })
     }
@@ -112,6 +110,19 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
 
     fun applyFilter(filterId: Int) {
         viewPager.currentItem = filterId
+    }
+
+    open fun onFilterSelected(filterId: Int) {
+        actionMenu.filterId = filterId
+        updateSubtitle(filterId)
+    }
+
+    private fun updateSubtitle(filterId: Int) {
+        if (filterId == 0) {
+            supportActionBar?.subtitle = ""
+        } else {
+            supportActionBar?.subtitle = viewPager.adapter?.getPageTitle(filterId) ?: ""
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

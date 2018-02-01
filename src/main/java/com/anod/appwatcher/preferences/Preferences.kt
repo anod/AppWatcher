@@ -4,6 +4,7 @@ import android.accounts.Account
 import android.content.Context
 import android.content.SharedPreferences
 import android.support.v7.app.AppCompatDelegate
+import com.anod.appwatcher.model.Filters
 import info.anodsplace.playstore.DeviceIdStorage
 
 class Preferences(context: Context) : DeviceIdStorage {
@@ -112,6 +113,10 @@ class Preferences(context: Context) : DeviceIdStorage {
         get() = preferences.getInt(THEME, THEME_DEFAULT)
         set(theme) = preferences.edit().putInt(THEME, theme).apply()
 
+    var defaultMainFilterId: Int
+        get() = preferences.getInt(FILTER_ID, Filters.TAB_ALL)
+        set(filterId) = preferences.edit().putInt(FILTER_ID, filterId).apply()
+
     companion object {
         private const val VIEWED = "viewed"
         private const val LAST_UPDATE_TIME = "last_update_time"
@@ -120,6 +125,7 @@ class Preferences(context: Context) : DeviceIdStorage {
         private const val ACCOUNT_NAME = "account_name"
         private const val ACCOUNT_TYPE = "account_type"
         private const val SORT_INDEX = "sort_index"
+        private const val FILTER_ID = "default_main_filter_id"
 
         const val SORT_NAME_DESC = 1
         const val SORT_DATE_ASC = 2
