@@ -1,5 +1,7 @@
 package com.anod.appwatcher.userLog
 
+import android.os.Handler
+import android.os.HandlerThread
 import android.util.Log
 import com.squareup.tape2.ObjectQueue
 import com.squareup.tape2.QueueFile
@@ -31,8 +33,8 @@ class UserLogMessage(override val date: Date, override val message: String, over
 
             val levelIndex = str.indexOf('[')
             val date = str.substring(0, levelIndex)
-            val level = str[levelIndex+1].toInt() - '0'.toInt()
-            val message = str.substring(levelIndex+3)
+            val level = str[levelIndex + 1].toInt() - '0'.toInt()
+            val message = str.substring(levelIndex + 3)
             return UserLogMessage(format.parse(date), message, level)
         }
     }
@@ -56,6 +58,30 @@ class MessageConverter : ObjectQueue.Converter<Message> {
 }
 
 class UserLogger(queueFile: QueueFile) {
+    private val handlerThread = HandlerThread("UserLogger");
+    private val handler: Handler by lazy {
+        Handler(handlerThread.looper) {
+            when (it.what) {
+                messageRemove -> {
+                    objectQueue.remove(it.arg1); true
+                }
+                messageLog -> {
+                    objectQueue.add(it.obj as UserLogMessage);true
+                }
+                else -> true
+            }
+        }
+    }
+
+    init {
+        handlerThread.start()
+    }
+
+    companion object {
+        const val messageRemove = 1
+        const val messageLog = 2
+    }
+
     private val objectQueue = ObjectQueue.create(queueFile, MessageConverter())
 
     fun info(message: String) {
@@ -68,18 +94,19 @@ class UserLogger(queueFile: QueueFile) {
 
     fun log(level: Int, message: String) {
         val userMessage = UserLogMessage(Calendar.getInstance().time, message, level)
-        objectQueue.add(userMessage)
+        val message = handler.obtainMessage(messageLog, userMessage)
+        handler.sendMessage(message)
     }
 
     val count: Int
         get() = objectQueue.size()
 
-    fun iterator(): MutableIterator<Message> {
-        return objectQueue.iterator()
-    }
+    val iterator: MutableIterator<Message>
+        get() = objectQueue.iterator()
 
     fun remove(n: Int) {
-        objectQueue.remove(n)
+        val message = handler.obtainMessage(messageRemove, n)
+        handler.sendMessage(message)
     }
 
     val content: String

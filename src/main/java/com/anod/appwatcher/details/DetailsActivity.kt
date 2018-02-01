@@ -321,7 +321,7 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
     }
 
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<Cursor> {
-        return ChangesLoader(this, appId)
+        return if (appId.isBlank()) EmptyLoader(this, NullCursor()) else ChangesLoader(this, appId)
     }
 
     override fun onLoaderReset(loader: Loader<Cursor>?) {

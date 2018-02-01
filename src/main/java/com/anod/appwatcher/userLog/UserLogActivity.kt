@@ -54,6 +54,12 @@ class UserLogActivity: ToolbarActivity() {
             }
         }
 
+        init {
+            userLogger.iterator.asSequence().take(2000).forEachIndexed {
+                index, message -> messagesCache.put(index, message)
+            }
+        }
+
         override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): UserLogViewHolder {
             val view = LayoutInflater.from(context).inflate(R.layout.list_item_log, parent, false)
             return UserLogViewHolder(view)
@@ -67,7 +73,7 @@ class UserLogActivity: ToolbarActivity() {
             val cached = messagesCache[position]
             if (cached == null) {
                 if (position < userLogger.count) {
-                    val userMessage = userLogger.iterator().asSequence().elementAt(position)
+                    val userMessage = userLogger.iterator.asSequence().elementAt(position)
                     messagesCache.put(position, userMessage)
                     holder.apply(userMessage)
                 }
