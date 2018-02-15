@@ -88,8 +88,10 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
             actionMenu.searchQuery = savedInstanceState.getString("filter") ?: ""
             AppLog.d("Restore tab: " + filterId)
         } else {
-            filterId = intentExtras.getInt("tab_id", defaultFilterId)
-            actionMenu.expandSearch = intentExtras.getBoolean(EXTRA_EXPAND_SEARCH)
+            val fromNotification = intentExtras.getBoolean(EXTRA_FROM_NOTIFICATION, false)
+            val expandSearch = intentExtras.getBoolean(EXTRA_EXPAND_SEARCH)
+            filterId = if (fromNotification || expandSearch) defaultFilterId else intentExtras.getInt("tab_id", defaultFilterId)
+            actionMenu.expandSearch = expandSearch
         }
 
         viewPager = findViewById<View>(R.id.viewpager) as ViewPager
