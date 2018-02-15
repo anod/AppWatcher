@@ -22,9 +22,9 @@ import com.anod.appwatcher.model.Tag
 import com.anod.appwatcher.model.schema.AppListTable
 import com.anod.appwatcher.model.schema.AppTagsTable
 import com.anod.appwatcher.utils.Theme
-import info.anodsplace.appwatcher.framework.BackgroundTask
-import info.anodsplace.appwatcher.framework.Keyboard
-import info.anodsplace.appwatcher.framework.ToolbarActivity
+import info.anodsplace.framework.os.BackgroundTask
+import info.anodsplace.framework.view.Keyboard
+import info.anodsplace.framework.app.ToolbarActivity
 import kotlinx.android.synthetic.main.activity_tag_select.*
 
 /**

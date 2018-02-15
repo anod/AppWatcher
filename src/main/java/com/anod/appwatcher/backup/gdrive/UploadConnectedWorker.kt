@@ -6,8 +6,8 @@ import com.anod.appwatcher.content.DbContentProviderClient
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.drive.Drive
 import com.google.android.gms.tasks.Tasks
-import info.anodsplace.android.log.AppLog
-import info.anodsplace.appwatcher.framework.ApplicationContext
+import info.anodsplace.framework.AppLog
+import info.anodsplace.framework.app.ApplicationContext
 
 /**
  * @author algavris

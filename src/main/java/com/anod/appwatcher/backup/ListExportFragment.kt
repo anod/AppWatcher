@@ -15,7 +15,7 @@ import android.widget.TextView
 import android.widget.Toast
 import com.anod.appwatcher.ListExportActivity
 import com.anod.appwatcher.R
-import info.anodsplace.appwatcher.framework.ApplicationContext
+import info.anodsplace.framework.app.ApplicationContext
 import java.io.File
 import java.util.*
 

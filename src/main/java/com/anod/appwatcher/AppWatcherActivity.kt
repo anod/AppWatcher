@@ -9,7 +9,7 @@ import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.watchlist.*
 
-import info.anodsplace.android.log.AppLog
+import info.anodsplace.framework.AppLog
 
 class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener, SearchView.OnQueryTextListener {
 

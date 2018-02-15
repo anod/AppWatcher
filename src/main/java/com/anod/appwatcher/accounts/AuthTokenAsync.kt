@@ -3,8 +3,8 @@ package com.anod.appwatcher.accounts
 import android.accounts.Account
 import android.app.Activity
 import android.content.Context
-import info.anodsplace.appwatcher.framework.ApplicationContext
-import info.anodsplace.appwatcher.framework.BackgroundTask
+import info.anodsplace.framework.app.ApplicationContext
+import info.anodsplace.framework.os.BackgroundTask
 
 /**
  * @author algavris

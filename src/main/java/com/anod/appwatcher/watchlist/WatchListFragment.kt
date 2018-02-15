@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.app.LoaderManager
 import android.support.v4.content.Loader
+import android.support.v4.util.ArrayMap
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -27,11 +28,12 @@ import com.anod.appwatcher.details.DetailsActivity
 import com.anod.appwatcher.installed.ImportInstalledActivity
 import com.anod.appwatcher.model.*
 import com.anod.appwatcher.search.SearchActivity
-import info.anodsplace.android.log.AppLog
-import info.anodsplace.android.widget.recyclerview.MergeRecyclerAdapter
-import info.anodsplace.appwatcher.framework.InstalledApps
-import info.anodsplace.appwatcher.framework.forMyApps
-import info.anodsplace.appwatcher.framework.startActivitySafely
+import com.anod.appwatcher.utils.forMyApps
+import info.anodsplace.framework.AppLog
+import info.anodsplace.framework.content.InstalledApps
+import info.anodsplace.framework.content.startActivitySafely
+import info.anodsplace.framework.widget.recyclerview.MergeRecyclerAdapter
+
 
 open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, WatchListActivity.EventListener, AppViewHolder.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
 
@@ -62,7 +64,7 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
         override var adapterIndexMap = SparseIntArray()
 
         override fun fillAdapters(adapter: MergeRecyclerAdapter, context: Context, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener) {
-            val index = adapter.addAdapter(AppListCursorAdapter(context, installedApps, clickListener))
+            val index = adapter.add(AppListCursorAdapter(context, installedApps, clickListener) as RecyclerView.Adapter<RecyclerView.ViewHolder>)
             adapterIndexMap.put(ADAPTER_WATCHLIST, index)
         }
 
@@ -90,7 +92,7 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
 
         fun <T : RecyclerView.Adapter<*>> getAdapter(id: Int, adapter: MergeRecyclerAdapter): T {
             val index = adapterIndexMap.get(id)
-            return adapter.getAdapter(index) as T
+            return adapter[index] as T
         }
 
         companion object {

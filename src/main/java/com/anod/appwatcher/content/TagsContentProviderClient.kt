@@ -6,8 +6,8 @@ import android.database.Cursor
 import android.os.RemoteException
 import android.util.SparseIntArray
 import com.anod.appwatcher.model.schema.TagsTable
-import info.anodsplace.android.log.AppLog
-import info.anodsplace.appwatcher.framework.NullCursor
+import info.anodsplace.framework.AppLog
+import info.anodsplace.framework.database.NullCursor
 
 /**
  * @author algavris

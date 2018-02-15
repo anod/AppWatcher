@@ -8,11 +8,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import com.android.colorpicker.ColorPickerSwatch
-import com.android.colorpicker.ColorStateDrawable
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.Tag
 import info.anodsplace.colorpicker.ColorPickerDialog
+import info.anodsplace.colorpicker.ColorPickerSwatch
+import info.anodsplace.colorpicker.ColorStateDrawable
 import kotlinx.android.synthetic.main.dialog_edit_tag.*
 
 /**

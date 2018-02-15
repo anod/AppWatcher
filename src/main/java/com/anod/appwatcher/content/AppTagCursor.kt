@@ -3,7 +3,7 @@ package com.anod.appwatcher.content
 import android.database.Cursor
 import com.anod.appwatcher.model.AppTag
 import com.anod.appwatcher.model.schema.AppTagsTable
-import info.anodsplace.appwatcher.framework.CursorIterator
+import info.anodsplace.framework.database.CursorIterator
 
 /**
  * @author algavris

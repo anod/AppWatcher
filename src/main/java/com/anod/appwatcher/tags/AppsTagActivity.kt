@@ -14,7 +14,7 @@ import com.anod.appwatcher.watchlist.WatchListFragment
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.model.Tag
 import com.anod.appwatcher.watchlist.WatchListActivity
-import info.anodsplace.android.log.AppLog
+import info.anodsplace.framework.AppLog
 
 /**
  * @author algavris

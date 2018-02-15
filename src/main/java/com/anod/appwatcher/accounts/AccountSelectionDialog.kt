@@ -17,7 +17,7 @@ import android.widget.Toast
 
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.R
-import info.anodsplace.appwatcher.framework.ActivityListener
+import info.anodsplace.framework.app.ActivityListener
 
 /**
  * @author alex

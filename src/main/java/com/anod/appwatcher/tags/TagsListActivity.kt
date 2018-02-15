@@ -25,9 +25,9 @@ import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.Tag
 import com.anod.appwatcher.model.schema.TagsTable
 import com.anod.appwatcher.utils.Theme
-import info.anodsplace.appwatcher.framework.DrawableTint
-import info.anodsplace.appwatcher.framework.RecyclerViewCursorAdapter
-import info.anodsplace.appwatcher.framework.ToolbarActivity
+import info.anodsplace.framework.graphics.DrawableTint
+import info.anodsplace.framework.widget.recyclerview.RecyclerViewCursorAdapter
+import info.anodsplace.framework.app.ToolbarActivity
 import kotlinx.android.synthetic.main.activity_tags_editor.*
 
 /**

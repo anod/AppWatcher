@@ -8,7 +8,7 @@ import android.support.v4.content.ContextCompat
 
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.AppChangeContentProviderClient
-import info.anodsplace.appwatcher.framework.InstalledApps
+import info.anodsplace.framework.content.InstalledApps
 
 /**
  * @author alex

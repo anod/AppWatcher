@@ -1,7 +1,7 @@
 package com.anod.appwatcher.backup
 
-import com.android.util.JsonWriter
 import com.anod.appwatcher.content.DbContentProviderClient
+import info.anodsplace.framework.json.JsonWriter
 import java.io.IOException
 import java.io.Writer
 

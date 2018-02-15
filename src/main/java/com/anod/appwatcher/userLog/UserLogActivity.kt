@@ -6,14 +6,12 @@ import android.support.v4.util.LruCache
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
-import android.util.TypedValue
 import android.widget.TextView
 import com.anod.appwatcher.App
 import com.anod.appwatcher.R
-import info.anodsplace.appwatcher.framework.ToolbarActivity
+import info.anodsplace.framework.app.ToolbarActivity
 import kotlinx.android.synthetic.main.activity_user_log.*
 import java.text.SimpleDateFormat
-import java.util.*
 import android.content.Intent
 import android.view.*
 

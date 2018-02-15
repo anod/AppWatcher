@@ -9,7 +9,7 @@ import com.anod.appwatcher.model.schema.AppTagsTable
 import com.anod.appwatcher.model.schema.ChangelogTable
 import com.anod.appwatcher.model.schema.TagsTable
 
-import info.anodsplace.android.log.AppLog
+import info.anodsplace.framework.AppLog
 
 class DbSchemaManager(context: Context)
     : SQLiteOpenHelper(context, DbSchemaManager.dbName, null, DbSchemaManager.version) {

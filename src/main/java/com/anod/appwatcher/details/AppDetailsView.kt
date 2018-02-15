@@ -8,7 +8,7 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.watchlist.AppViewHolderBase
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
-import info.anodsplace.appwatcher.framework.Html
+import info.anodsplace.framework.text.Html
 
 /**
  * @author algavris

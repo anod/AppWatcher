@@ -4,7 +4,7 @@ import android.database.Cursor
 
 import com.anod.appwatcher.model.Tag
 import com.anod.appwatcher.model.schema.TagsTable
-import info.anodsplace.appwatcher.framework.CursorIterator
+import info.anodsplace.framework.database.CursorIterator
 
 /**
  * @author algavris

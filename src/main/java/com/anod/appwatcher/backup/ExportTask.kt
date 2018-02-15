@@ -5,7 +5,7 @@ import android.content.Context
 import android.net.Uri
 import android.os.AsyncTask
 import android.os.Environment
-import info.anodsplace.appwatcher.framework.ApplicationContext
+import info.anodsplace.framework.app.ApplicationContext
 
 import java.io.File
 

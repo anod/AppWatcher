@@ -7,8 +7,8 @@ import com.anod.appwatcher.App
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.AppListCursor
 import com.anod.appwatcher.utils.PicassoAppIcon
-import info.anodsplace.appwatcher.framework.RecyclerViewCursorAdapter
-import info.anodsplace.appwatcher.framework.InstalledApps
+import info.anodsplace.framework.widget.recyclerview.RecyclerViewCursorAdapter
+import info.anodsplace.framework.content.InstalledApps
 
 /**
  * @author alex

@@ -4,10 +4,10 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import com.anod.appwatcher.sync.SyncNotification
-import info.anodsplace.appwatcher.framework.ApplicationContext
-import info.anodsplace.appwatcher.framework.forMyApps
-import info.anodsplace.appwatcher.framework.forPlayStore
-import info.anodsplace.appwatcher.framework.startActivitySafely
+import com.anod.appwatcher.utils.forMyApps
+import com.anod.appwatcher.utils.forPlayStore
+import info.anodsplace.framework.app.ApplicationContext
+import info.anodsplace.framework.content.startActivitySafely
 
 class NotificationActivity : Activity() {
 

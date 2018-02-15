@@ -22,9 +22,9 @@ import com.anod.appwatcher.utils.Theme
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
-import info.anodsplace.android.log.AppLog
-import info.anodsplace.appwatcher.framework.GooglePlayServices
-import info.anodsplace.appwatcher.framework.SettingsActionBarActivity
+import info.anodsplace.framework.AppLog
+import info.anodsplace.framework.playservices.GooglePlayServices
+import info.anodsplace.framework.app.SettingsActionBarActivity
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream

@@ -34,9 +34,18 @@ import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.*
 import com.squareup.picasso.Picasso
 import finsky.api.model.DfeModel
-import info.anodsplace.android.anim.RevealAnimatorCompat
-import info.anodsplace.android.log.AppLog
-import info.anodsplace.appwatcher.framework.*
+import info.anodsplace.framework.anim.RevealAnimatorCompat
+import info.anodsplace.framework.AppLog
+import info.anodsplace.framework.app.ApplicationContext
+import info.anodsplace.framework.app.ToolbarActivity
+import info.anodsplace.framework.content.EmptyLoader
+import info.anodsplace.framework.content.InstalledApps
+import info.anodsplace.framework.content.forUninstall
+import info.anodsplace.framework.content.startActivitySafely
+import info.anodsplace.framework.database.NullCursor
+import info.anodsplace.framework.graphics.chooseDark
+import info.anodsplace.framework.os.BackgroundTask
+import info.anodsplace.framework.os.CachedBackgroundTask
 import info.anodsplace.playstore.DetailsEndpoint
 import info.anodsplace.playstore.PlayStoreEndpoint
 import kotlinx.android.synthetic.main.activity_app_changelog.*
@@ -158,7 +167,7 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
             icon.setImageBitmap(bitmap)
         }
 
-        override fun onBitmapFailed(e: Exception?, errorDrawable: Drawable?) {
+        override fun onBitmapFailed(e: Exception, errorDrawable: Drawable?) {
             AppLog.e("iconLoadTarget::onBitmapFailed", e)
             setDefaultIcon()
         }
@@ -296,7 +305,7 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
         val builder = ShareCompat.IntentBuilder.from(this)
 
         val changes = if (adapter.recentChange.details.isBlank()) "" else "${adapter.recentChange.details}\n\n"
-        val text = getString(R.string.share_text, changes ,String.format(MarketInfo.URL_WEB_PLAY_STORE, appInfo.packageName))
+        val text = getString(R.string.share_text, changes ,String.format(Storeintent.URL_WEB_PLAY_STORE, appInfo.packageName))
 
         builder.setSubject(getString(R.string.share_subject, appInfo.title, appInfo.versionName))
         builder.setText(text)

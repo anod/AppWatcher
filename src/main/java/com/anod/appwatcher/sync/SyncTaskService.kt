@@ -6,9 +6,9 @@ import com.anod.appwatcher.App
 import com.anod.appwatcher.content.DbContentProvider
 import com.firebase.jobdispatcher.JobParameters
 import com.firebase.jobdispatcher.JobService
-import info.anodsplace.android.log.AppLog
-import info.anodsplace.appwatcher.framework.ApplicationContext
-import info.anodsplace.appwatcher.framework.BackgroundTask
+import info.anodsplace.framework.AppLog
+import info.anodsplace.framework.app.ApplicationContext
+import info.anodsplace.framework.os.BackgroundTask
 
 class SyncTaskService : JobService() {
     var runner: BackgroundTask<Void?, Int>? = null

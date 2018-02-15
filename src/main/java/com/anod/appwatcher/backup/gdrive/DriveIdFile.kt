@@ -6,7 +6,7 @@ import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.drive.*
 import com.google.android.gms.drive.query.*
 import com.google.android.gms.tasks.Tasks
-import info.anodsplace.android.log.AppLog
+import info.anodsplace.framework.AppLog
 import java.io.BufferedWriter
 import java.io.IOException
 import java.io.OutputStreamWriter

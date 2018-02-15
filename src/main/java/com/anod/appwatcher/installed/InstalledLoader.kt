@@ -8,10 +8,10 @@ import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.model.AppListCursorLoader
 import com.anod.appwatcher.model.Tag
-import info.anodsplace.appwatcher.framework.FilterCursor
-import info.anodsplace.appwatcher.framework.getAppTitle
-import info.anodsplace.appwatcher.framework.getAppUpdateTime
-import info.anodsplace.appwatcher.framework.getInstalledPackagesCompat
+import info.anodsplace.framework.database.FilterCursor
+import info.anodsplace.framework.content.getAppTitle
+import info.anodsplace.framework.content.getAppUpdateTime
+import info.anodsplace.framework.content.getInstalledPackagesCompat
 import java.util.*
 
 class InstalledLoader(

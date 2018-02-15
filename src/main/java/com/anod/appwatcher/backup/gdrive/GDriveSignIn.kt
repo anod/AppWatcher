@@ -11,12 +11,12 @@ import com.anod.appwatcher.SettingsActivity
 import com.anod.appwatcher.sync.SyncNotification
 import com.google.android.gms.auth.api.signin.*
 import com.google.android.gms.common.api.ApiException
-import info.anodsplace.android.log.AppLog
+import info.anodsplace.framework.AppLog
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.drive.Drive
-import info.anodsplace.appwatcher.framework.ActivityListener
-import info.anodsplace.appwatcher.framework.ApplicationContext
-import info.anodsplace.appwatcher.framework.GoogleSignInConnect
+import info.anodsplace.framework.app.ActivityListener
+import info.anodsplace.framework.app.ApplicationContext
+import info.anodsplace.framework.playservices.GoogleSignInConnect
 import java.util.concurrent.ExecutionException
 
 internal fun createGDriveSignInOptions(): GoogleSignInOptions {

@@ -16,7 +16,7 @@ import com.squareup.picasso.Picasso.LoadedFrom.DISK
 import com.squareup.picasso.Request
 import com.squareup.picasso.RequestCreator
 import com.squareup.picasso.RequestHandler
-import info.anodsplace.appwatcher.framework.loadIcon
+import info.anodsplace.framework.content.loadIcon
 import java.io.IOException
 
 class PicassoAppIcon(context: Context) {

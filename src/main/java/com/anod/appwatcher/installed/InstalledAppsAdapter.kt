@@ -11,7 +11,7 @@ import com.anod.appwatcher.watchlist.AppViewHolder
 import com.anod.appwatcher.watchlist.AppViewHolderBase
 import com.anod.appwatcher.watchlist.AppViewHolderDataProvider
 import com.anod.appwatcher.utils.PicassoAppIcon
-import info.anodsplace.android.widget.recyclerview.ArrayAdapter
+import info.anodsplace.framework.widget.recyclerview.ArrayAdapter
 import java.util.*
 
 /**

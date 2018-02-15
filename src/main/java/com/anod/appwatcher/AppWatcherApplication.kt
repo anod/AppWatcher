@@ -9,16 +9,16 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatDelegate
 import android.util.LruCache
 import android.view.ViewConfiguration
-import info.anodsplace.android.log.AppLog
+import info.anodsplace.framework.AppLog
 import com.android.volley.NetworkError
 import com.android.volley.NoConnectionError
 import com.android.volley.TimeoutError
 import com.android.volley.VolleyError
 import com.anod.appwatcher.sync.SyncNotification
 import com.crashlytics.android.Crashlytics
-import info.anodsplace.appwatcher.framework.ApplicationContext
-import info.anodsplace.appwatcher.framework.ApplicationInstance
-import info.anodsplace.appwatcher.framework.CustomThemeActivity
+import info.anodsplace.framework.app.ApplicationContext
+import info.anodsplace.framework.app.ApplicationInstance
+import info.anodsplace.framework.app.CustomThemeActivity
 import java.io.IOException
 import java.net.ConnectException
 import java.net.SocketException
@@ -44,9 +44,9 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
 
         tryEnableMenuOnDeviceWithHardwareMenuButton()
 
-        AppLog.LOGGER = FirebaseLogger()
+        AppLog.logger = FirebaseLogger()
         AppLog.setDebug(true, "AppWatcher")
-        AppLog.instance().setListener(this)
+        AppLog.instance.listener = this
 
         objectGraph = ObjectGraph(this)
         if (objectGraph.prefs.isDriveSyncEnabled) {

@@ -16,11 +16,11 @@ import com.anod.appwatcher.accounts.AuthTokenAsync
 import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.model.WatchAppList
 import com.anod.appwatcher.utils.Theme
-import info.anodsplace.android.log.AppLog
-import info.anodsplace.appwatcher.framework.InstalledApps
-import info.anodsplace.appwatcher.framework.ToolbarActivity
-import info.anodsplace.appwatcher.framework.getAppTitle
-import info.anodsplace.appwatcher.framework.getInstalledPackagesCompat
+import info.anodsplace.framework.AppLog
+import info.anodsplace.framework.content.InstalledApps
+import info.anodsplace.framework.app.ToolbarActivity
+import info.anodsplace.framework.content.getAppTitle
+import info.anodsplace.framework.content.getInstalledPackagesCompat
 import kotlinx.android.synthetic.main.activity_import_installed.*
 import java.util.*
 

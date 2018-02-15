@@ -11,7 +11,7 @@ import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-import info.anodsplace.android.log.AppLog
+import info.anodsplace.framework.AppLog
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.fail

@@ -9,9 +9,9 @@ import android.os.Parcelable
 import com.anod.appwatcher.utils.PicassoAppIcon
 import com.anod.appwatcher.utils.extractUploadDate
 import finsky.api.model.Document
-import info.anodsplace.appwatcher.framework.getAppTitle
-import info.anodsplace.appwatcher.framework.getLaunchComponent
-import info.anodsplace.appwatcher.framework.getPackageInfo
+import info.anodsplace.framework.content.getAppTitle
+import info.anodsplace.framework.content.getLaunchComponent
+import info.anodsplace.framework.content.getPackageInfo
 import java.text.DateFormat
 import java.util.*
 

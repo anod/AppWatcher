@@ -24,8 +24,8 @@ import com.anod.appwatcher.model.WatchAppList
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.MetricsManagerEvent
 import com.anod.appwatcher.utils.Theme
-import info.anodsplace.appwatcher.framework.Keyboard
-import info.anodsplace.appwatcher.framework.ToolbarActivity
+import info.anodsplace.framework.view.Keyboard
+import info.anodsplace.framework.app.ToolbarActivity
 import kotlinx.android.synthetic.main.activity_market_search.*
 
 open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionListener, WatchAppList.Listener, CompositeStateEndpoint.Listener {

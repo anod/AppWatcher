@@ -1,10 +1,10 @@
 package com.anod.appwatcher.backup
 
-import com.android.util.JsonReader
-import com.android.util.JsonToken
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppTag
 import com.anod.appwatcher.model.Tag
+import info.anodsplace.framework.json.JsonReader
+import info.anodsplace.framework.json.JsonToken
 import java.io.IOException
 import java.io.Reader
 

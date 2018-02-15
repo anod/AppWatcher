@@ -3,13 +3,14 @@ package com.anod.appwatcher.installed
 import android.content.Context
 import android.database.Cursor
 import android.support.v4.content.Loader
+import android.support.v7.widget.RecyclerView
 import com.anod.appwatcher.watchlist.AppViewHolder
 import com.anod.appwatcher.watchlist.AppViewHolderDataProvider
 import com.anod.appwatcher.watchlist.WatchListFragment
 import com.anod.appwatcher.model.AppListFilter
 import com.anod.appwatcher.model.Tag
-import info.anodsplace.android.widget.recyclerview.MergeRecyclerAdapter
-import info.anodsplace.appwatcher.framework.InstalledApps
+import info.anodsplace.framework.widget.recyclerview.MergeRecyclerAdapter
+import info.anodsplace.framework.content.InstalledApps
 
 /**
  * @author algavris
@@ -23,11 +24,11 @@ class InstalledSection : WatchListFragment.DefaultSection() {
     }
 
     override fun fillAdapters(adapter: MergeRecyclerAdapter, context: Context, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener) {
-        val recentIndex = adapter.addAdapter(RecentlyInstalledAppsAdapter(context, context.packageManager, clickListener))
+        val recentIndex = adapter.add(RecentlyInstalledAppsAdapter(context, context.packageManager, clickListener) as RecyclerView.Adapter<RecyclerView.ViewHolder>)
         adapterIndexMap.put(ADAPTER_RECENT, recentIndex)
         super.fillAdapters(adapter, context, installedApps, clickListener)
         val dataProvider = AppViewHolderDataProvider(context, installedApps)
-        val index = adapter.addAdapter(InstalledAppsAdapter(context, context.packageManager, dataProvider, clickListener))
+        val index = adapter.add(InstalledAppsAdapter(context, context.packageManager, dataProvider, clickListener) as RecyclerView.Adapter<RecyclerView.ViewHolder>)
         adapterIndexMap.put(ADAPTER_INSTALLED, index)
     }
 

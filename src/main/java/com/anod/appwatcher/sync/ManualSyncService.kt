@@ -7,7 +7,7 @@ import android.os.Bundle
 import com.anod.appwatcher.App
 import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.content.DbContentProvider
-import info.anodsplace.appwatcher.framework.ApplicationContext
+import info.anodsplace.framework.app.ApplicationContext
 
 /**
  * An [IntentService] subclass for handling asynchronous task requests in

@@ -13,8 +13,12 @@ import com.anod.appwatcher.model.schema.AppListTable
 import com.anod.appwatcher.model.schema.AppTagsTable
 import com.anod.appwatcher.model.schema.TagsTable
 import com.anod.appwatcher.model.schema.contentValues
-import info.anodsplace.android.log.AppLog
-import info.anodsplace.appwatcher.framework.*
+import info.anodsplace.framework.AppLog
+import info.anodsplace.framework.app.ApplicationContext
+import info.anodsplace.framework.content.delete
+import info.anodsplace.framework.content.query
+import info.anodsplace.framework.content.update
+import info.anodsplace.framework.graphics.BitmapByteArray
 import kotlin.collections.ArrayList
 
 /**

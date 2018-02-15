@@ -33,8 +33,8 @@ import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.utils.UpgradeCheck
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import info.anodsplace.android.log.AppLog
-import info.anodsplace.appwatcher.framework.ApplicationContext
+import info.anodsplace.framework.AppLog
+import info.anodsplace.framework.app.ApplicationContext
 import java.util.*
 
 /**

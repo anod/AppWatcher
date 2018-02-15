@@ -5,7 +5,7 @@ import finsky.api.DfeApi
 import finsky.protos.nano.Messages
 import finsky.protos.nano.Messages.Details
 
-import info.anodsplace.android.log.AppLog
+import info.anodsplace.framework.AppLog
 import info.anodsplace.playstore.BuildConfig
 
 class DfeBulkDetails(private val api: DfeApi,private val filter: FilterPredicate) : DfeBaseModel() {

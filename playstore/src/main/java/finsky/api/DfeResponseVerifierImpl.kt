@@ -15,7 +15,7 @@ import java.io.File
 import java.security.NoSuchAlgorithmException
 import java.security.SecureRandom
 
-import info.anodsplace.android.log.AppLog
+import info.anodsplace.framework.AppLog
 import info.anodsplace.playstore.BuildConfig
 
 class DfeResponseVerifierImpl(private val mContext: Context) : DfeResponseVerifier {
@@ -62,7 +62,7 @@ class DfeResponseVerifierImpl(private val mContext: Context) : DfeResponseVerifi
         if (!b) {
             val fallbackReader = getFallbackReader(this.mContext)
             if (fallbackReader != null) {
-                AppLog.d("Retry verification using fallback keys.", *arrayOfNulls(0))
+                AppLog.d("Retry verification using fallback keys.")
                 b = this.internalVerify(fallbackReader, this.mNonce, paramArrayOfByte, paramString)
             }
         }
@@ -96,7 +96,7 @@ class DfeResponseVerifierImpl(private val mContext: Context) : DfeResponseVerifi
         @Throws(DfeResponseVerifier.DfeResponseVerifierException::class)
         private fun extractResponseSignature(s: String): ByteArray {
             if (TextUtils.isEmpty(s)) {
-                AppLog.e("No signing response found.", *arrayOfNulls(0))
+                AppLog.e("No signing response found.")
                 throw DfeResponseVerifier.DfeResponseVerifierException("No signing response found.")
             }
             val split = s.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()

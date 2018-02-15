@@ -9,8 +9,8 @@ import com.anod.appwatcher.model.WatchAppList
 import finsky.api.model.Document
 import finsky.protos.nano.Messages
 import com.squareup.picasso.Picasso
-import info.anodsplace.appwatcher.framework.InstalledApps
-import info.anodsplace.appwatcher.framework.ThemeCompat
+import info.anodsplace.framework.content.InstalledApps
+import info.anodsplace.framework.app.ThemeCompat
 
 /**
  *  @author alex
@@ -67,10 +67,12 @@ abstract class ResultsAdapter(
             holder.price.setText(R.string.installed)
         } else {
             val offer = doc.getOffer(Messages.Common.Offer.TYPE_1)
-            when {
-                offer == null -> holder.price.text = ""
-                offer.micros.toInt() == 0 -> holder.price.setText(R.string.free)
-                else -> holder.price.text = offer.formattedAmount
+            if (offer == null) {
+                holder.price.text = ""
+            } else if (offer.micros.toInt() == 0) {
+                holder.price.setText(R.string.free)
+            } else {
+                holder.price.text = offer.formattedAmount
             }
         }
     }

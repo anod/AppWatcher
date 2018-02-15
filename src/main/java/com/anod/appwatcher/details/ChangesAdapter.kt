@@ -11,10 +11,10 @@ import android.widget.TextView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.AppChangeCursor
 import com.anod.appwatcher.model.AppChange
-import info.anodsplace.android.widget.recyclerview.ArrayAdapter
-import info.anodsplace.appwatcher.framework.Html
-import info.anodsplace.appwatcher.framework.RecyclerViewCursorAdapter
-import info.anodsplace.appwatcher.framework.RecyclerViewStateAdapter
+import info.anodsplace.framework.widget.recyclerview.ArrayAdapter
+import info.anodsplace.framework.text.Html
+import info.anodsplace.framework.widget.recyclerview.RecyclerViewCursorAdapter
+import info.anodsplace.framework.widget.recyclerview.RecyclerViewStateAdapter
 
 class ChangeView(itemView: View) : RecyclerView.ViewHolder(itemView) {
     val changelog: TextView by lazy {
@@ -35,21 +35,22 @@ class ChangeView(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
 }
 
-class ChangesAdapter(private val context: Context, recentChange: AppChange): RecyclerViewStateAdapter<ChangeView>(arrayOf(ChangesCursorAdapter(context, recentChange)))  {
+class ChangesAdapter(private val context: Context, recentChange: AppChange):
+        RecyclerViewStateAdapter(arrayOf(ChangesCursorAdapter(context, recentChange)) as Array<RecyclerView.Adapter<RecyclerView.ViewHolder>>)  {
     private val arrayId = 1
 
     var recentChange = recentChange
         set(value) {
             field = value
             if (cursorAdapter.itemCount == 0) {
-                addAdapter(arrayId, RecentChangeAdapter(context, value))
+                add(arrayId, RecentChangeAdapter(context, value))
                 selectedId = arrayId
             }
             notifyItemChanged(0)
         }
 
     private val cursorAdapter: ChangesCursorAdapter
-        get() = getAdapter(0) as ChangesCursorAdapter
+        get() = get(0) as ChangesCursorAdapter
 
     fun swapData(cursor: AppChangeCursor?) {
         cursorAdapter.swapData(cursor)

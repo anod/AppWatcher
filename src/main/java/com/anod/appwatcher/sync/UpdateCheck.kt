@@ -28,9 +28,9 @@ import com.anod.appwatcher.utils.date.CustomParserFactory
 import com.anod.appwatcher.utils.extractUploadDate
 import finsky.api.model.DfeModel
 import finsky.api.model.Document
-import info.anodsplace.android.log.AppLog
-import info.anodsplace.appwatcher.framework.ApplicationContext
-import info.anodsplace.appwatcher.framework.InstalledApps
+import info.anodsplace.framework.AppLog
+import info.anodsplace.framework.app.ApplicationContext
+import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.playstore.BulkDetailsEndpoint
 import info.anodsplace.playstore.PlayStoreEndpoint
 import java.text.ParseException

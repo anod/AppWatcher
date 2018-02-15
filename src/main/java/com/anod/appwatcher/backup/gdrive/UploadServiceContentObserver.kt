@@ -7,7 +7,7 @@ import android.net.Uri
 import android.os.Handler
 import com.anod.appwatcher.App
 import com.anod.appwatcher.content.DbContentProvider
-import info.anodsplace.android.log.AppLog
+import info.anodsplace.framework.AppLog
 
 /**
  * @author algavris

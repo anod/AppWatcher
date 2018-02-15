@@ -2,8 +2,8 @@ package com.anod.appwatcher.model
 
 import android.database.Cursor
 import com.anod.appwatcher.model.schema.AppListTable
-import info.anodsplace.appwatcher.framework.FilterCursor
-import info.anodsplace.appwatcher.framework.InstalledApps
+import info.anodsplace.framework.database.FilterCursor
+import info.anodsplace.framework.content.InstalledApps
 
 /**
  * @author alex

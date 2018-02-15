@@ -1,12 +1,12 @@
 package com.anod.appwatcher.backup
 
 import android.text.TextUtils
-import com.android.util.JsonReader
-import com.android.util.JsonToken
-import com.android.util.JsonWriter
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.Tag
-import info.anodsplace.android.log.AppLog
+import info.anodsplace.framework.AppLog
+import info.anodsplace.framework.json.JsonReader
+import info.anodsplace.framework.json.JsonToken
+import info.anodsplace.framework.json.JsonWriter
 
 /**
  * @author algavris

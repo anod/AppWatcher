@@ -11,7 +11,7 @@ import com.anod.appwatcher.SettingsActivity
 import com.anod.appwatcher.installed.ImportInstalledActivity
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.tags.TagsListActivity
-import info.anodsplace.appwatcher.framework.MenuItemAnimation
+import info.anodsplace.framework.view.MenuItemAnimation
 
 /**
  * @author algavris
@@ -30,7 +30,7 @@ class WatchListMenu(private var searchListener: SearchView.OnQueryTextListener, 
         }
 
     private var searchMenuItem: MenuItem? = null
-    private val refreshMenuAnimation: MenuItemAnimation = MenuItemAnimation(activity, R.anim.rotate)
+    private val refreshMenuAnimation = MenuItemAnimation(activity, R.anim.rotate)
 
     private var filterItem: MenuItem? = null
 

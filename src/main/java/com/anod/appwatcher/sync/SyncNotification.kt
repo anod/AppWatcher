@@ -13,8 +13,8 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.watchlist.WatchListActivity
 import android.app.NotificationChannel
 import android.os.Build
-import info.anodsplace.appwatcher.framework.ApplicationContext
-import info.anodsplace.appwatcher.framework.Html
+import info.anodsplace.framework.app.ApplicationContext
+import info.anodsplace.framework.text.Html
 
 /**
  * @author alex

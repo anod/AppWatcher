@@ -15,7 +15,7 @@
         android:paddingTop="8dp"
         android:paddingBottom="4dp">
 
-        <info.anodsplace.android.widget.recyclerview.EndlessRecyclerView
+        <info.anodsplace.framework.widget.recyclerview.EndlessRecyclerView
             android:id="@android:id/list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

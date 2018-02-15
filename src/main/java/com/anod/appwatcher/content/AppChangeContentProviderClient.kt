@@ -4,7 +4,7 @@ import android.content.ContentProviderClient
 import android.content.Context
 import com.anod.appwatcher.model.AppChange
 import com.anod.appwatcher.model.schema.ChangelogTable
-import info.anodsplace.appwatcher.framework.query
+import info.anodsplace.framework.content.query
 
 /**
  * @author algavris

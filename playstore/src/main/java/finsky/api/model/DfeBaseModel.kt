@@ -7,7 +7,7 @@ import finsky.protos.nano.Messages
 
 import java.util.concurrent.ExecutionException
 
-import info.anodsplace.android.log.AppLog
+import info.anodsplace.framework.AppLog
 
 /**
  * @author alex

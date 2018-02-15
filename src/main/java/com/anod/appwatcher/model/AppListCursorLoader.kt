@@ -10,9 +10,9 @@ import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.model.schema.AppListTable
 import com.anod.appwatcher.model.schema.AppTagsTable
-import info.anodsplace.appwatcher.framework.FilterCursor
-import info.anodsplace.appwatcher.framework.InstalledApps
-import info.anodsplace.appwatcher.framework.NullCursor
+import info.anodsplace.framework.database.FilterCursor
+import info.anodsplace.framework.content.InstalledApps
+import info.anodsplace.framework.database.NullCursor
 import java.util.*
 
 /**

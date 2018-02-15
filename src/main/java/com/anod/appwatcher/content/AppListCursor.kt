@@ -4,7 +4,7 @@ import android.database.Cursor
 
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.schema.AppListTable
-import info.anodsplace.appwatcher.framework.CursorIterator
+import info.anodsplace.framework.database.CursorIterator
 
 /**
  * @author alex

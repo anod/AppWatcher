@@ -6,8 +6,8 @@ import com.anod.appwatcher.App
 import com.firebase.jobdispatcher.*
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import info.anodsplace.android.log.AppLog
-import info.anodsplace.appwatcher.framework.BackgroundTask
+import info.anodsplace.framework.AppLog
+import info.anodsplace.framework.os.BackgroundTask
 
 /**
  * @author algavris

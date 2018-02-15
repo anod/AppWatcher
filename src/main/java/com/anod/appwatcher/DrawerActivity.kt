@@ -25,8 +25,8 @@ import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.tags.AppsTagActivity
 import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.wishlist.WishlistFragment
-import info.anodsplace.appwatcher.framework.FragmentToolbarActivity
-import info.anodsplace.appwatcher.framework.ToolbarActivity
+import info.anodsplace.framework.app.FragmentToolbarActivity
+import info.anodsplace.framework.app.ToolbarActivity
 
 /**
  * @author algavris

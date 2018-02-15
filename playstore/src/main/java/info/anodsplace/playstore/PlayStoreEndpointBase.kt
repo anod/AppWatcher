@@ -13,7 +13,7 @@ import finsky.api.model.DfeModel
 import finsky.api.model.OnDataChangedListener
 import finsky.config.ContentLevel
 
-import info.anodsplace.android.log.AppLog
+import info.anodsplace.framework.AppLog
 
 /**
  * @author alex

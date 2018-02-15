@@ -1,7 +1,7 @@
 package com.anod.appwatcher.backup
 
-import com.android.util.JsonReader
-import info.anodsplace.android.log.AppLog
+import info.anodsplace.framework.AppLog
+import info.anodsplace.framework.json.JsonReader
 import java.io.IOException
 import java.io.Reader
 

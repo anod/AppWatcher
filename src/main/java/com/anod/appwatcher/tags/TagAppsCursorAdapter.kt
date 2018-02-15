@@ -10,7 +10,7 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.content.AppListCursor
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.utils.PicassoAppIcon
-import info.anodsplace.appwatcher.framework.RecyclerViewCursorAdapter
+import info.anodsplace.framework.widget.recyclerview.RecyclerViewCursorAdapter
 
 internal class TagAppsCursorAdapter(context: Context, private val tagAppsImport: TagAppsImport)
     : RecyclerViewCursorAdapter<TagAppsCursorAdapter.ItemViewHolder, AppListCursor>(context, R.layout.list_item_import_app) {

@@ -22,7 +22,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.util.zip.GZIPInputStream
 
-import info.anodsplace.android.log.AppLog
+import info.anodsplace.framework.AppLog
 
 internal open class DfeRequest(
         method: Int,
@@ -226,7 +226,7 @@ internal open class DfeRequest(
     }
 
     public override fun parseNetworkResponse(networkResponse: NetworkResponse): com.android.volley.Response<Response.ResponseWrapper>? {
-        if (AppLog.LOG_DEBUG) {
+        if (AppLog.isDebug) {
             val headers = networkResponse.headers
             var n = 0
             if (headers != null) {
