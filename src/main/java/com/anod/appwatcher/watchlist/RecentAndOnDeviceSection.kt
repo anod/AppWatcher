@@ -30,22 +30,25 @@ open class RecentSection : WatchListFragment.DefaultSection() {
         return InstalledLoader(context, titleFilter, sortId, filter, tag, context.packageManager)
     }
 
-    override fun fillAdapters(adapter: MergeRecyclerAdapter, context: Context, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener) {
+    override fun initAdapter(context: Context, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener) {
         val recentIndex = adapter.add(RecentlyInstalledAppsAdapter(context, context.packageManager, clickListener) as RecyclerView.Adapter<RecyclerView.ViewHolder>)
         adapterIndexMap.put(ADAPTER_RECENT, recentIndex)
-        super.fillAdapters(adapter, context, installedApps, clickListener)
+        super.initAdapter(context, installedApps, clickListener)
     }
 
-    override fun loadFinished(adapter: MergeRecyclerAdapter, loader: Loader<Cursor>, data: Cursor) {
-        super.loadFinished(adapter, loader, data)
+    override fun loadFinished(loader: Loader<Cursor>, data: Cursor) {
+        super.loadFinished(loader, data)
         val installedLoader = (loader as InstalledLoader)
-        val recentAdapter = getAdapter<RecentlyInstalledAppsAdapter>(ADAPTER_RECENT, adapter)
+        val recentAdapter = getInnerAdapter<RecentlyInstalledAppsAdapter>(ADAPTER_RECENT)
         recentAdapter.recentlyInstalled = installedLoader.recentlyInstalled
     }
 
     companion object {
         const val ADAPTER_RECENT = 2
     }
+
+    override val isEmpty: Boolean
+        get() = getInnerAdapter<AppListCursorAdapter>(ADAPTER_WATCHLIST).itemCount == 0
 }
 
 class OnDeviceSection : WatchListFragment.DefaultSection() {
@@ -54,20 +57,23 @@ class OnDeviceSection : WatchListFragment.DefaultSection() {
         return InstalledLoader(context, titleFilter, sortId, filter, tag, context.packageManager)
     }
 
-    override fun fillAdapters(adapter: MergeRecyclerAdapter, context: Context, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener) {
-        super.fillAdapters(adapter, context, installedApps, clickListener)
+    override fun initAdapter(context: Context, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener) {
+        super.initAdapter(context, installedApps, clickListener)
         val dataProvider = AppViewHolderDataProvider(context, installedApps)
         val index = adapter.add(InstalledAppsAdapter(context, context.packageManager, dataProvider, clickListener) as RecyclerView.Adapter<RecyclerView.ViewHolder>)
         adapterIndexMap.put(ADAPTER_INSTALLED, index)
     }
 
-    override fun loadFinished(adapter: MergeRecyclerAdapter, loader: Loader<Cursor>, data: Cursor) {
-        super.loadFinished(adapter, loader, data)
+    override fun loadFinished(loader: Loader<Cursor>, data: Cursor) {
+        super.loadFinished(loader, data)
         val installedLoader = (loader as InstalledLoader)
-        val downloadedAdapter = getAdapter<InstalledAppsAdapter>(ADAPTER_INSTALLED, adapter)
+        val downloadedAdapter = getInnerAdapter<InstalledAppsAdapter>(ADAPTER_INSTALLED)
         downloadedAdapter.clear()
         downloadedAdapter.addAll(installedLoader.installedApps)
     }
+
+    override val isEmpty: Boolean
+        get() = getInnerAdapter<AppListCursorAdapter>(ADAPTER_WATCHLIST).itemCount == 0
 
     companion object {
         const val ADAPTER_INSTALLED = 1
@@ -81,18 +87,22 @@ class RecentAndOnDeviceSection : RecentSection() {
         return InstalledLoader(context, titleFilter, sortId, filter, tag, context.packageManager)
     }
 
-    override fun fillAdapters(adapter: MergeRecyclerAdapter, context: Context, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener) {
-        super.fillAdapters(adapter, context, installedApps, clickListener)
+    override fun initAdapter(context: Context, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener) {
+        super.initAdapter(context, installedApps, clickListener)
         val dataProvider = AppViewHolderDataProvider(context, installedApps)
         val index = adapter.add(InstalledAppsAdapter(context, context.packageManager, dataProvider, clickListener) as RecyclerView.Adapter<RecyclerView.ViewHolder>)
         adapterIndexMap.put(ADAPTER_INSTALLED, index)
     }
 
-    override fun loadFinished(adapter: MergeRecyclerAdapter, loader: Loader<Cursor>, data: Cursor) {
-        super.loadFinished(adapter, loader, data)
+    override fun loadFinished(loader: Loader<Cursor>, data: Cursor) {
+        super.loadFinished(loader, data)
         val installedLoader = (loader as InstalledLoader)
-        val downloadedAdapter = getAdapter<InstalledAppsAdapter>(ADAPTER_INSTALLED, adapter)
+        val downloadedAdapter = getInnerAdapter<InstalledAppsAdapter>(ADAPTER_INSTALLED)
         downloadedAdapter.clear()
         downloadedAdapter.addAll(installedLoader.installedApps)
     }
+
+    override val isEmpty: Boolean
+        get() = getInnerAdapter<AppListCursorAdapter>(ADAPTER_WATCHLIST).itemCount == 0
+
 }

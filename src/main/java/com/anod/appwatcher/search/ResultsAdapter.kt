@@ -66,8 +66,8 @@ abstract class ResultsAdapter(
         if (isInstalled) {
             holder.price.setText(R.string.installed)
         } else {
-            val offer = doc.getOffer(Messages.Common.Offer.TYPE_1)
-            if (offer == null) {
+            val offer = doc.offer
+            if (offer.offerType == 0) {
                 holder.price.text = ""
             } else if (offer.micros.toInt() == 0) {
                 holder.price.setText(R.string.free)

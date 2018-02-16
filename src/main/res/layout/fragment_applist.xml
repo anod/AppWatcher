@@ -9,7 +9,8 @@
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swipe_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:visibility="gone">
 
         <android.support.v7.widget.RecyclerView
             android:id="@android:id/list"
@@ -28,13 +29,19 @@
         android:layout_width="240dp"
         android:layout_height="wrap_content"
         android:layout_gravity="top|center_horizontal"
-        android:layout_marginTop="96dp"
+        android:layout_marginTop="104dp"
         android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_empty_box"/>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
+            android:layout_marginTop="8dp"
             android:text="@string/watch_list_is_empty"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
@@ -43,6 +50,7 @@
             style="@style/BrandButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:drawableLeft="@drawable/ic_search_white_24dp"
             android:text="@string/search_for_an_app" />
 
