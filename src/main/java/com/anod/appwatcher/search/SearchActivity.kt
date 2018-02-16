@@ -186,7 +186,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
             }
 
             override fun onError(errorMessage: String) {
-                if (App.with(this@SearchActivity).isNetworkAvailable) {
+                if (App.provide(this@SearchActivity).networkConnection.isNetworkAvailable) {
                     Toast.makeText(this@SearchActivity, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
                 } else {
                     Toast.makeText(this@SearchActivity, R.string.check_connection, Toast.LENGTH_SHORT).show()
@@ -197,7 +197,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
     }
 
     override fun onAccountNotFound(errorMessage: String) {
-        if (App.with(this).isNetworkAvailable) {
+        if (App.provide(this).networkConnection.isNetworkAvailable) {
             if (errorMessage.isNotBlank()) {
                 Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
             } else {
@@ -295,7 +295,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
     }
 
     override fun onErrorResponse(id: Int, endpoint: PlayStoreEndpointBase, error: VolleyError) {
-        if (!App.with(this).isNetworkAvailable) {
+        if (!App.provide(this).networkConnection.isNetworkAvailable) {
             loading.visibility = View.GONE
             showRetryButton()
             Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()

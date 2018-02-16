@@ -225,7 +225,7 @@ open class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.SelectionLi
             }
 
             override fun onError(errorMessage: String) {
-                if (App.with(this@DrawerActivity).isNetworkAvailable) {
+                if (App.provide(this@DrawerActivity).networkConnection.isNetworkAvailable) {
                     Toast.makeText(this@DrawerActivity, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
                 } else {
                     Toast.makeText(this@DrawerActivity, R.string.check_connection, Toast.LENGTH_SHORT).show()
@@ -236,7 +236,7 @@ open class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.SelectionLi
     }
 
     override fun onAccountNotFound(errorMessage: String) {
-        if (App.with(this).isNetworkAvailable) {
+        if (App.provide(this@DrawerActivity).networkConnection.isNetworkAvailable) {
             if (errorMessage.isNotBlank()) {
                 Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
             } else {

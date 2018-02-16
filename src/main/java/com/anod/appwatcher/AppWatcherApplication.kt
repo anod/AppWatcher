@@ -57,15 +57,9 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
         registerActivityLifecycleCallbacks(LifecycleCallbacks(this))
     }
 
-    val isNetworkAvailable: Boolean
-        get() = objectGraph.connectivityManager.activeNetworkInfo?.isConnectedOrConnecting == true
-
-    val isWifiEnabled: Boolean
-        get() = objectGraph.connectivityManager.activeNetworkInfo?.type == ConnectivityManager.TYPE_WIFI
-
     override fun onLogException(tr: Throwable) {
 
-        if (isNetworkError(tr) && !isNetworkAvailable) {
+        if (isNetworkError(tr) && !objectGraph.networkConnection.isNetworkAvailable) {
             // Ignore
             return
         }

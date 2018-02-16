@@ -343,7 +343,13 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
 
     override fun onErrorResponse(error: VolleyError) {
         App.log(this).error("Fetching of details failed ${error.message ?: ""}")
-        showRetryMessage()
+        if (adapter.isEmpty) {
+            showRetryMessage()
+        } else {
+            progressBar.visibility = View.GONE
+            list.visibility = View.VISIBLE
+            this.error.visibility = View.GONE
+        }
     }
 
     private fun showRetryMessage() {
@@ -351,7 +357,7 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
         error.visibility = View.VISIBLE
         list.visibility = View.GONE
 
-        if (!App.with(this).isNetworkAvailable) {
+        if (!App.provide(this).networkConnection.isNetworkAvailable) {
             Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()
         }
     }

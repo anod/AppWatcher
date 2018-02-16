@@ -68,7 +68,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         userLogger.info("Perform ${ if (manualSync) "manual" else "scheduled" } sync")
         // Skip any check if sync requested from application
         if (!manualSync) {
-            if (preferences.isWifiOnly && !App.with(context).isWifiEnabled) {
+            if (preferences.isWifiOnly && !App.provide(context).networkConnection.isWifiEnabled) {
                 userLogger.info("Wifi not enabled, skipping update check...")
                 AppLog.d("Wifi not enabled, skipping update check....")
                 return -1

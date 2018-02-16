@@ -49,6 +49,9 @@ class ChangesAdapter(private val context: Context, recentChange: AppChange):
             notifyItemChanged(0)
         }
 
+    val isEmpty: Boolean
+        get() = cursorAdapter.itemCount == 0
+
     private val cursorAdapter: ChangesCursorAdapter
         get() = get(0) as ChangesCursorAdapter
 

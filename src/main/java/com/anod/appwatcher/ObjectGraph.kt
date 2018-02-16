@@ -5,7 +5,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.telephony.TelephonyManager
 import android.util.LruCache
-import com.android.volley.RequestQueue
+import com.android.volley.*
 import com.android.volley.toolbox.NoCache
 import com.anod.appwatcher.backup.gdrive.UploadServiceContentObserver
 import com.anod.appwatcher.preferences.Preferences
@@ -35,14 +35,16 @@ class ObjectGraph internal constructor(private val app: AppWatcherApplication): 
     val uploadServiceContentObserver: UploadServiceContentObserver by lazy {UploadServiceContentObserver(app, app.contentResolver) }
 
     val requestQueue: RequestQueue by lazy {
-       val requestQueue = RequestQueue(NoCache(), Network(), 2)
+       val requestQueue = RequestQueue(NoCache(), OnlineNetwork(networkConnection, Network()), 2)
         requestQueue.start()
         requestQueue
     }
     val iconLoader: PicassoAppIcon by lazy { PicassoAppIcon(this.app) }
     val fireBase: FirebaseAnalytics by lazy { FirebaseAnalytics.getInstance(this.app) }
-    val connectivityManager: ConnectivityManager
-        get() = app.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val networkConnection: NetworkConnection by lazy {
+        val cm: ConnectivityManager = app.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        NetworkConnection(cm)
+    }
     val jobDispatcher: FirebaseJobDispatcher by lazy { FirebaseJobDispatcher(GooglePlayDriver(app)) }
     val memoryCache: LruCache<String, Any?> by lazy {
         val maxMemory = (Runtime.getRuntime().maxMemory() / 1024)

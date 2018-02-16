@@ -103,7 +103,7 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
             }
 
             override fun onError(errorMessage: String) {
-                if (App.with(this@ImportInstalledActivity).isNetworkAvailable) {
+                if (App.provide(this@ImportInstalledActivity).networkConnection.isNetworkAvailable) {
                     Toast.makeText(this@ImportInstalledActivity, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
                 } else {
                     Toast.makeText(this@ImportInstalledActivity, R.string.check_connection, Toast.LENGTH_SHORT).show()

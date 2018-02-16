@@ -198,7 +198,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     fun requestRefresh(): Boolean {
         AppLog.d("Refresh pressed")
         if (!isAuthenticated) {
-            if (App.with(this).isNetworkAvailable) {
+            if (App.provide(this).networkConnection.isNetworkAvailable) {
                 this.showAccountsDialogWithCheck()
             } else {
                 Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()
