@@ -29,16 +29,12 @@ class Document(private val doc: DocV2) {
     // Type 1 ?
     val offer: Common.Offer
         get() {
-            var offer = this.getOffer(Common.Offer.TYPE_1)
+            var offer = this.doc.offer.firstOrNull { it.offerType == Common.Offer.TYPE_1 }
             if (offer == null) {
                 offer = Common.Offer()
             }
             return offer
         }
-
-    fun getOffer(type: Int): Common.Offer? {
-        return this.doc.offer.firstOrNull { it.offerType == type }
-    }
 
     val iconUrl: String?
         get() {
