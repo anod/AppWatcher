@@ -3,6 +3,7 @@ package com.anod.appwatcher.sync
 import android.accounts.Account
 import android.content.ContentProviderClient
 import android.content.ContentValues
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.RemoteException
@@ -107,7 +108,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         var updatedApps: List<UpdatedApp> = emptyList()
         val appListProvider = DbContentProviderClient(provider)
         try {
-            updatedApps = doSync(appListProvider, lastUpdatesViewed, authToken, account)
+            updatedApps = doSync(appListProvider, lastUpdatesViewed, authToken, account, context)
         } catch (e: RemoteException) {
             userLogger.error("Error during synchronization ${e.message}")
             AppLog.e(e)
@@ -153,7 +154,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
     }
 
     @Throws(RemoteException::class)
-    private fun doSync(client: DbContentProviderClient, lastUpdatesViewed: Boolean, authToken: String, account: Account): List<UpdatedApp> {
+    private fun doSync(client: DbContentProviderClient, lastUpdatesViewed: Boolean, authToken: String, account: Account, context: ApplicationContext): List<UpdatedApp> {
 
         val apps = client.queryAll(false)
         if (!apps.moveToFirst()) {
@@ -176,7 +177,11 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
                 val docIds = localApps.keys.toList()
                 val endpoint = createEndpoint(docIds, authToken, account)
                 AppLog.d("Sending bulk #$i... $docIds")
-                endpoint.startSync()
+                try {
+                    endpoint.startSync()
+                } catch (e: VolleyError) {
+                    App.log(context.actual).error("Fetching of bulk updates failed ${e.message ?: ""}")
+                }
                 updateApps(endpoint.documents, localApps, client, updatedTitles, lastUpdatesViewed)
                 localApps.clear()
                 i++
@@ -187,7 +192,11 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
             val docIds = localApps.keys.toList()
             val endpoint = createEndpoint(docIds, authToken, account)
             AppLog.d("Sending bulk #$i... $docIds")
-            endpoint.startSync()
+            try {
+                endpoint.startSync()
+            } catch (e: VolleyError) {
+                App.log(context.actual).error("Fetching of bulk updates failed ${e.message ?: ""}")
+            }
             updateApps(endpoint.documents, localApps, client, updatedTitles, lastUpdatesViewed)
             localApps.clear()
         }

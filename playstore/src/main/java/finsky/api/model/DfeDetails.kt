@@ -5,7 +5,7 @@ import finsky.api.DfeApi
 import finsky.protos.nano.Messages
 import finsky.protos.nano.Messages.Details
 
-class DfeDetails(private val api: DfeApi) : DfeBaseModel() {
+class DfeDetails(private val api: DfeApi) : DfeRequestModel() {
     private var detailsResponse: Details.DetailsResponse? = null
     var detailsUrl: String = ""
 

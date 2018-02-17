@@ -6,6 +6,7 @@ import com.android.volley.RequestQueue
 
 import finsky.api.model.DfeDetails
 import finsky.api.model.DfeModel
+import finsky.api.model.DfeSync
 import finsky.api.model.Document
 import finsky.protos.nano.Messages.AppDetails
 
@@ -31,12 +32,13 @@ class DetailsEndpoint(context: Context, requestQueue: RequestQueue, deviceInfoPr
 
     override fun executeAsync() {
         detailsData?.detailsUrl = detailsUrl
-        detailsData?.startAsync()
+        detailsData?.execute()
     }
 
     override fun executeSync() {
-        detailsData?.detailsUrl = detailsUrl
-        detailsData?.startSync()
+        val data = detailsData ?: return
+        data.detailsUrl = detailsUrl
+        DfeSync<DfeDetails>(data).execute()
     }
 
     override fun createDfeModel(): DfeModel {

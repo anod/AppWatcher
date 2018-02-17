@@ -2,6 +2,7 @@ package finsky.api.model
 
 import com.android.volley.Response
 import com.android.volley.VolleyError
+import finsky.protos.nano.Messages
 
 import java.util.HashSet
 
@@ -11,7 +12,14 @@ interface OnDataChangedListener {
 
 typealias FilterPredicate = ((Document?) -> Boolean)
 
-abstract class DfeModel : Response.ErrorListener {
+abstract class DfeRequestModel: DfeModel() {
+    open fun execute() {
+        execute(this, this)
+    }
+    abstract fun execute(responseListener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener)
+}
+
+abstract class DfeModel : Response.ErrorListener, Response.Listener<Messages.Response.ResponseWrapper> {
     private val errorListeners = HashSet<Response.ErrorListener>()
     private val listeners = HashSet<OnDataChangedListener>()
 

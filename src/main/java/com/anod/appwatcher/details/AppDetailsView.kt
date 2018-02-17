@@ -45,7 +45,7 @@ class AppDetailsView(view: View, private val dataProvider: AppViewHolderBase.Dat
         }
 
         if (isLocalApp) {
-            this.price?.visibility = View.GONE
+            this.price?.visibility = View.INVISIBLE
             this.recentChanges?.visibility = View.GONE
             this.version?.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stat_communication_stay_primary_portrait, 0, 0, 0)
             this.version?.text = dataProvider.formatVersionText(app.versionName, app.versionNumber)

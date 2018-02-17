@@ -50,7 +50,7 @@ import info.anodsplace.playstore.DetailsEndpoint
 import info.anodsplace.playstore.PlayStoreEndpoint
 import kotlinx.android.synthetic.main.activity_app_changelog.*
 
-open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Palette.PaletteAsyncListener, View.OnClickListener, WatchAppList.Listener, LoaderManager.LoaderCallbacks<Cursor> {
+open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, View.OnClickListener, WatchAppList.Listener, LoaderManager.LoaderCallbacks<Cursor> {
 
     override val themeRes: Int
         get() = Theme(this).themeChangelog
@@ -61,7 +61,8 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
     private var appInfo: AppInfo? = null
     private var isNewApp: Boolean = false
     private var addMenu: MenuItem? = null
-    var detailsEndpoint: DetailsEndpoint? = null
+
+    private var detailsEndpoint: DetailsEndpoint? = null
 
     val iconLoader: PicassoAppIcon by lazy { App.provide(this).iconLoader }
     val dataProvider: AppViewHolderDataProvider by lazy { AppViewHolderDataProvider(this, InstalledApps.PackageManager(packageManager)) }
@@ -87,7 +88,9 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
             progressBar.visibility = View.VISIBLE
             error.visibility = View.GONE
             list.visibility = View.GONE
-            retryButton.postDelayed({ detailsEndpoint?.startAsync() }, 500)
+            retryButton.postDelayed({
+                supportLoaderManager.initLoader(0, null, this).forceLoad()
+            }, 500)
         }
 
         if (rowId == -1) {
@@ -112,7 +115,6 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
         setupAppView(appInfo!!)
         list.layoutManager = LinearLayoutManager(this)
         list.adapter = adapter
-        supportLoaderManager.initLoader(0, null, this).forceLoad()
     }
 
     override fun onResume() {
@@ -127,21 +129,20 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
                 override fun onToken(token: String) {
                     detailsEndpoint = DetailsEndpoint(this@DetailsActivity, requestQueue, deviceInfo, account, detailsUrl)
                     detailsEndpoint!!.authToken = token
-                    detailsEndpoint!!.listener = this@DetailsActivity
-                    detailsEndpoint!!.startAsync()
+
+                    supportLoaderManager.initLoader(0, null, this@DetailsActivity).forceLoad()
                 }
 
                 override fun onError(errorMessage: String) {
                     App.log(this@DetailsActivity).error(errorMessage)
-                    showRetryMessage()
+                    if (App.provide(this@DetailsActivity).networkConnection.isNetworkAvailable) {
+                        showRetryMessage()
+                    } else {
+                        supportLoaderManager.initLoader(0, null, this@DetailsActivity).forceLoad()
+                    }
                 }
             })
         }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        detailsEndpoint?.listener = null
     }
 
     private fun setupAppView(app: AppInfo) {
@@ -245,6 +246,9 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
 
     }
 
+    val changesLoader: ChangesLoader?
+        get() = supportLoaderManager.getLoader<Cursor?>(0) as? ChangesLoader
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.menu_remove -> {
@@ -255,7 +259,8 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
                 return true
             }
             R.id.menu_add -> {
-                val doc = detailsEndpoint?.document
+
+                val doc = changesLoader?.document
                 if (doc != null) {
                     val info = AppInfo(doc)
                     val appList = WatchAppList(this)
@@ -313,24 +318,10 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
         builder.startChooser()
     }
 
-    override fun onDataChanged(data: DfeModel) {
-        progressBar.visibility = View.GONE
-        list.visibility = View.VISIBLE
-        error.visibility = View.GONE
-
-        if (detailsEndpoint?.document == null) {
-            showRetryMessage()
-            return
-        }
-        val appDetails = detailsEndpoint?.appDetails!!
-
-        addMenu!!.isEnabled = true
-
-        adapter.recentChange = AppChange(appId, appDetails.versionCode, appDetails.versionString, appDetails.recentChangesHtml ?: "")
-    }
-
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<Cursor> {
-        return if (appId.isBlank()) EmptyLoader(this, NullCursor()) else ChangesLoader(this, appId)
+        return if (appId.isBlank())
+            EmptyLoader(this, NullCursor())
+        else ChangesLoader(this, appId, detailsEndpoint)
     }
 
     override fun onLoaderReset(loader: Loader<Cursor>?) {
@@ -338,18 +329,18 @@ open class DetailsActivity : ToolbarActivity(), PlayStoreEndpoint.Listener, Pale
     }
 
     override fun onLoadFinished(loader: Loader<Cursor>?, data: Cursor?) {
-        adapter.swapData(data as? AppChangeCursor)
-    }
-
-    override fun onErrorResponse(error: VolleyError) {
-        App.log(this).error("Fetching of details failed ${error.message ?: ""}")
-        if (adapter.isEmpty) {
+        val changesLoader = (loader as ChangesLoader)
+        val cursor = data as? AppChangeCursor
+        if (changesLoader.document == null && (cursor == null || !cursor.hasNext()) ) {
             showRetryMessage()
-        } else {
-            progressBar.visibility = View.GONE
-            list.visibility = View.VISIBLE
-            this.error.visibility = View.GONE
+            return
         }
+        addMenu!!.isEnabled = true
+        adapter.swapData(cursor)
+        adapter.recentChange = changesLoader.recentChange
+        progressBar.visibility = View.GONE
+        list.visibility = View.VISIBLE
+        error.visibility = View.GONE
     }
 
     private fun showRetryMessage() {

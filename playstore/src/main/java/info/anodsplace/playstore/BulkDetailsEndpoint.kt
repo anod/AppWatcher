@@ -6,6 +6,7 @@ import android.accounts.Account
 
 import finsky.api.model.DfeBulkDetails
 import finsky.api.model.DfeModel
+import finsky.api.model.DfeSync
 import finsky.api.model.Document
 
 /**
@@ -27,12 +28,13 @@ class BulkDetailsEndpoint(context: Context, requestQueue: RequestQueue, deviceIn
 
     override fun executeAsync() {
         bulkData?.docIds = docIds
-        bulkData?.startAsync()
+        bulkData?.execute()
     }
 
     override fun executeSync() {
-        bulkData?.docIds = docIds
-        bulkData?.startSync()
+        val data = bulkData ?: return
+        data.docIds = docIds
+        DfeSync<DfeBulkDetails>(data).execute()
     }
 
     override fun createDfeModel(): DfeModel {

@@ -1,7 +1,6 @@
 package finsky.api.model
 
 import com.android.volley.Request
-import com.android.volley.Response
 import com.android.volley.VolleyError
 import finsky.protos.nano.Messages
 
@@ -11,7 +10,7 @@ class UrlOffsetPair(val offset: Int, val url: String)
 
 abstract class PaginatedList<T, D>(
         private val urlOffsetList: MutableList<UrlOffsetPair>,
-        private val autoLoadNextPage: Boolean = true) : DfeModel(), Response.Listener<Messages.Response.ResponseWrapper> {
+        private val autoLoadNextPage: Boolean = true) : DfeModel() {
     private var currentOffset: Int = 0
     private var currentRequest: Request<*>? = null
     private val items = mutableListOf<D>()
@@ -99,8 +98,6 @@ abstract class PaginatedList<T, D>(
         return value
     }
 
-    protected abstract fun getItemsFromResponse(wrapper: Messages.Response.ResponseWrapper): Array<D>
-
     val listPageUrls: List<String>
         get() {
             val list = ArrayList<String>(this.urlOffsetList.size)
@@ -112,6 +109,8 @@ abstract class PaginatedList<T, D>(
         }
 
     protected abstract fun getNextPageUrl(wrapper: Messages.Response.ResponseWrapper): String?
+    protected abstract fun getItemsFromResponse(wrapper: Messages.Response.ResponseWrapper): Array<D>
+
 
     override val isReady: Boolean
         get() = this.lastResponse != null || this.items.size > 0

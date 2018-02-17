@@ -8,7 +8,7 @@ import finsky.protos.nano.Messages.Details
 import info.anodsplace.framework.AppLog
 import info.anodsplace.playstore.BuildConfig
 
-class DfeBulkDetails(private val api: DfeApi,private val filter: FilterPredicate) : DfeBaseModel() {
+class DfeBulkDetails(private val api: DfeApi,private val filter: FilterPredicate) : DfeRequestModel() {
     private var bulkDetailsResponse: Details.BulkDetailsResponse? = null
     var docIds: List<String> = listOf()
 
