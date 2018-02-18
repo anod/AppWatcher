@@ -1,6 +1,7 @@
 package com.anod.appwatcher.model
 
 import android.database.Cursor
+import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.model.schema.AppListTable
 import info.anodsplace.framework.database.FilterCursor
 import info.anodsplace.framework.content.InstalledApps
@@ -18,29 +19,38 @@ interface CountableFilter {
     fun resetNewCount()
 }
 
-interface AppListFilterInclusion {
-    fun include(versionCode: Int, installedInfo: InstalledApps.Info): Boolean
-}
+interface AppListFilter: FilterCursor.CursorFilter, CountableFilter
 
-class AppListFilterInclusionInstalled : AppListFilterInclusion {
-    override fun include(versionCode: Int, installedInfo: InstalledApps.Info): Boolean {
-        return installedInfo.isInstalled
+class AppListFilterInclusion(private val inclusion: Inclusion, private val installedApps: InstalledApps) : AppListFilter {
+
+    interface Inclusion {
+        fun include(versionCode: Int, installedInfo: InstalledApps.Info): Boolean
     }
-}
 
-class AppListFilterInclusionUninstalled : AppListFilterInclusion {
-    override fun include(versionCode: Int, installedInfo: InstalledApps.Info): Boolean {
-        return !installedInfo.isInstalled
+    class All : Inclusion {
+        override fun include(versionCode: Int, installedInfo: InstalledApps.Info): Boolean {
+            return true
+        }
     }
-}
 
-class AppListFilterInclusionUpdatable : AppListFilterInclusion {
-    override fun include(versionCode: Int, installedInfo: InstalledApps.Info): Boolean {
-        return installedInfo.isInstalled && installedInfo.isUpdatable(versionCode)
+    class Installed : Inclusion {
+        override fun include(versionCode: Int, installedInfo: InstalledApps.Info): Boolean {
+            return installedInfo.isInstalled
+        }
     }
-}
 
-class AppListFilter(private val inclusion: AppListFilterInclusion, private val installedApps: InstalledApps) : FilterCursor.CursorFilter, CountableFilter {
+    class Uninstalled : Inclusion {
+        override fun include(versionCode: Int, installedInfo: InstalledApps.Info): Boolean {
+            return !installedInfo.isInstalled
+        }
+    }
+
+    class Updatable : Inclusion {
+        override fun include(versionCode: Int, installedInfo: InstalledApps.Info): Boolean {
+            return installedInfo.isInstalled && installedInfo.isUpdatable(versionCode)
+        }
+    }
+
     override var newCount: Int = 0
         private set
     override var updatableNewCount: Int = 0
@@ -62,6 +72,8 @@ class AppListFilter(private val inclusion: AppListFilterInclusion, private val i
             if (installedInfo.isUpdatable(versionCode)) {
                 updatableNewCount++
             }
+        } else if (status == AppInfoMetadata.STATUS_NORMAL) {
+            val refreshTime = cursor.getLong(AppListTable.Projection.refreshTime)
         }
         return false
     }

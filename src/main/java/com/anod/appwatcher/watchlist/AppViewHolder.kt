@@ -76,7 +76,7 @@ open class AppViewHolder(
             section.visibility = View.VISIBLE
             actionButton.visibility = View.GONE
         } else if (location == 0 && dataProvider.newAppsCount > 0) {
-            sectionText.setText(R.string.recently_updated)
+            sectionText.setText(R.string.new_updates)
             section.visibility = View.VISIBLE
             if (dataProvider.updatableAppsCount > 0) {
                 actionButton.visibility = View.VISIBLE

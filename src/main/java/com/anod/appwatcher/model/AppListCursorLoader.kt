@@ -7,11 +7,9 @@ import android.text.TextUtils
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.content.AppListCursor
 import com.anod.appwatcher.content.DbContentProvider
-import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.model.schema.AppListTable
 import com.anod.appwatcher.model.schema.AppTagsTable
 import info.anodsplace.framework.database.FilterCursor
-import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.database.NullCursor
 import java.util.*
 
@@ -23,14 +21,11 @@ import java.util.*
 open class AppListCursorLoader(context: Context,
                                protected val titleFilter: String,
                                sortOrder: String,
-                               private val cursorFilter: FilterCursor.CursorFilter?,
-                               private val tag: Tag?)
+                               private val cursorFilter: AppListFilter,
+                               tag: Tag?)
     : CursorLoader(context, DbContentProvider.appsContentUri(tag), AppListTable.projection, null, null, sortOrder) {
 
-    private var newCount: Int = 0
-    private var updatableNewCount: Int = 0
-
-    constructor(context: Context, titleFilter: String, sortId: Int, cursorFilter: FilterCursor.CursorFilter?, tag: Tag?)
+    constructor(context: Context, titleFilter: String, sortId: Int, cursorFilter: AppListFilter, tag: Tag?)
             : this(context, titleFilter, createSortOrder(sortId), cursorFilter, tag)
 
     init {
@@ -61,58 +56,17 @@ open class AppListCursorLoader(context: Context,
     override fun loadInBackground(): Cursor {
         val cr = super.loadInBackground() ?: NullCursor()
 
-        if (cursorFilter == null) {
-            loadNewCount()
-            return AppListCursor(cr)
-        } else {
-            if (cursorFilter is AppListFilter) {
-                cursorFilter.resetNewCount()
-            }
-            return AppListCursor(FilterCursor(cr, cursorFilter))
-        }
+        cursorFilter.resetNewCount()
+        return AppListCursor(FilterCursor(cr, cursorFilter))
     }
 
     val newCountFiltered: Int
-        get() {
-            if (cursorFilter is AppListFilter) {
-                return cursorFilter.newCount
-            }
-            return newCount
-        }
+        get() = cursorFilter.newCount
 
     val updatableCountFiltered: Int
-        get() {
-            if (cursorFilter is AppListFilter) {
-                return cursorFilter.updatableNewCount
-            }
-            return updatableNewCount
-        }
-
-    private fun loadNewCount() {
-        val cl = DbContentProviderClient(context)
-        val apps = cl.queryUpdated(tag)
-
-        newCount = 0
-        updatableNewCount = 0
-        newCount = apps.count
-        if (newCount > 0) {
-            val iap = InstalledApps.PackageManager(context.packageManager)
-            apps.moveToPosition(-1)
-            while (apps.moveToNext()) {
-                val info = apps.appInfo
-                if (iap.packageInfo(info.packageName).isUpdatable(info.versionNumber)) {
-                    updatableNewCount++
-                }
-            }
-        }
-
-        apps.close()
-        cl.close()
-    }
+        get() = cursorFilter.updatableNewCount
 
     companion object {
-        private val ORDER_DEFAULT = AppListTable.Columns.status + " DESC, "+ AppListTable.Columns.title + " COLLATE LOCALIZED ASC"
-
         private fun createSortOrder(sortId: Int): String {
             val filter = ArrayList<String>()
             filter.add(AppListTable.Columns.status + " DESC")

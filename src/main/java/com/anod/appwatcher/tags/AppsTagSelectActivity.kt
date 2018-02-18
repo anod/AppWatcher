@@ -18,6 +18,7 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.content.AppListCursor
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.model.AppListCursorLoader
+import com.anod.appwatcher.model.AppListFilterInclusion
 import com.anod.appwatcher.model.Tag
 import com.anod.appwatcher.model.schema.AppListTable
 import com.anod.appwatcher.model.schema.AppTagsTable
@@ -25,6 +26,7 @@ import com.anod.appwatcher.utils.Theme
 import info.anodsplace.framework.os.BackgroundTask
 import info.anodsplace.framework.view.Keyboard
 import info.anodsplace.framework.app.ToolbarActivity
+import info.anodsplace.framework.content.InstalledApps
 import kotlinx.android.synthetic.main.activity_tag_select.*
 
 /**
@@ -118,7 +120,8 @@ class AppsTagSelectActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<C
         if (id == 0) {
             return TagAppsCursorLoader(this, tag)
         }
-        return AppListCursorLoader(this, titleFilter, AppListTable.Columns.title + " COLLATE LOCALIZED ASC", null, null)
+        val installedApps = InstalledApps.PackageManager(packageManager)
+        return AppListCursorLoader(this, titleFilter, AppListTable.Columns.title + " COLLATE LOCALIZED ASC", AppListFilterInclusion(AppListFilterInclusion.All(), installedApps), null)
     }
 
     override fun onLoadFinished(loader: Loader<Cursor>, data: Cursor) {

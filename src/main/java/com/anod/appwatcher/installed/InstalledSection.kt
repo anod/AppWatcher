@@ -19,7 +19,7 @@ import info.anodsplace.framework.content.InstalledApps
  */
 class InstalledSection : WatchListFragment.DefaultSection() {
 
-    override fun createLoader(context: Context, titleFilter: String, sortId: Int, filter: AppListFilter?, tag: Tag?): Loader<Cursor> {
+    override fun createLoader(context: Context, titleFilter: String, sortId: Int, filter: AppListFilter, tag: Tag?): Loader<Cursor> {
         return InstalledLoader(context, titleFilter, sortId, filter, tag, context.packageManager)
     }
 

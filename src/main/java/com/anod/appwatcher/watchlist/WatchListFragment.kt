@@ -54,7 +54,7 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
         val adapter: MergeRecyclerAdapter
         var adapterIndexMap: SparseIntArray
         fun initAdapter(context: Context, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener)
-        fun createLoader(context: Context, titleFilter: String, sortId: Int, filter: AppListFilter?, tag: Tag?): Loader<Cursor>
+        fun createLoader(context: Context, titleFilter: String, sortId: Int, filter: AppListFilter, tag: Tag?): Loader<Cursor>
         fun loadFinished(loader: Loader<Cursor>, data: Cursor)
         fun loaderReset()
         val isEmpty: Boolean
@@ -69,7 +69,7 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
             adapterIndexMap.put(ADAPTER_WATCHLIST, index)
         }
 
-        override fun createLoader(context: Context, titleFilter: String, sortId: Int, filter: AppListFilter?, tag: Tag?): Loader<Cursor> {
+        override fun createLoader(context: Context, titleFilter: String, sortId: Int, filter: AppListFilter, tag: Tag?): Loader<Cursor> {
             return AppListCursorLoader(context, titleFilter, sortId, filter, tag)
         }
 
@@ -199,12 +199,12 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
         section.loaderReset()
     }
 
-    protected fun createFilter(filterId: Int): AppListFilter? {
+    protected fun createFilter(filterId: Int): AppListFilter {
         when (filterId) {
-            Filters.TAB_INSTALLED -> return AppListFilter(AppListFilterInclusionInstalled(), installedApps)
-            Filters.TAB_UNINSTALLED -> return AppListFilter(AppListFilterInclusionUninstalled(), installedApps)
-            Filters.TAB_UPDATABLE -> return AppListFilter(AppListFilterInclusionUpdatable(), installedApps)
-            else -> return null
+            Filters.TAB_INSTALLED -> return AppListFilterInclusion(AppListFilterInclusion.Installed(), installedApps)
+            Filters.TAB_UNINSTALLED -> return AppListFilterInclusion(AppListFilterInclusion.Uninstalled(), installedApps)
+            Filters.TAB_UPDATABLE -> return AppListFilterInclusion(AppListFilterInclusion.Updatable(), installedApps)
+            else -> return AppListFilterInclusion(AppListFilterInclusion.All(), installedApps)
         }
     }
 

@@ -26,7 +26,7 @@ import info.anodsplace.framework.content.InstalledApps
 
 open class RecentSection : WatchListFragment.DefaultSection() {
 
-    override fun createLoader(context: Context, titleFilter: String, sortId: Int, filter: AppListFilter?, tag: Tag?): Loader<Cursor> {
+    override fun createLoader(context: Context, titleFilter: String, sortId: Int, filter: AppListFilter, tag: Tag?): Loader<Cursor> {
         return InstalledLoader(context, titleFilter, sortId, filter, tag, context.packageManager)
     }
 
@@ -53,7 +53,7 @@ open class RecentSection : WatchListFragment.DefaultSection() {
 
 class OnDeviceSection : WatchListFragment.DefaultSection() {
 
-    override fun createLoader(context: Context, titleFilter: String, sortId: Int, filter: AppListFilter?, tag: Tag?): Loader<Cursor> {
+    override fun createLoader(context: Context, titleFilter: String, sortId: Int, filter: AppListFilter, tag: Tag?): Loader<Cursor> {
         return InstalledLoader(context, titleFilter, sortId, filter, tag, context.packageManager)
     }
 
@@ -83,7 +83,7 @@ class OnDeviceSection : WatchListFragment.DefaultSection() {
 
 class RecentAndOnDeviceSection : RecentSection() {
 
-    override fun createLoader(context: Context, titleFilter: String, sortId: Int, filter: AppListFilter?, tag: Tag?): Loader<Cursor> {
+    override fun createLoader(context: Context, titleFilter: String, sortId: Int, filter: AppListFilter, tag: Tag?): Loader<Cursor> {
         return InstalledLoader(context, titleFilter, sortId, filter, tag, context.packageManager)
     }
 
