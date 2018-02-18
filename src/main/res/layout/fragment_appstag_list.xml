@@ -22,13 +22,19 @@
             android:layout_width="240dp"
             android:layout_height="wrap_content"
             android:layout_gravity="top|center_horizontal"
-            android:layout_marginTop="96dp"
+            android:layout_marginTop="104dp"
             android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_empty_box"/>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
+                android:layout_marginTop="8dp"
                 android:text="@string/no_apps_with_this_tag"
                 android:textAppearance="?android:attr/textAppearanceMedium"/>
 
@@ -37,6 +43,7 @@
                 style="@style/BrandButtonStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:drawableLeft="@drawable/ic_library_add_black_24px"
                 android:text="@string/add_apps"/>
 
