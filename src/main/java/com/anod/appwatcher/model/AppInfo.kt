@@ -37,18 +37,19 @@ class AppInfo : AppInfoMetadata, Parcelable {
     val priceCur: String
     val priceMicros: Int?
     val iconUrl: String
-    val refreshTime: Long
+    val uploadTime: Long
     val appType: String
-    val syncVersion: Int
+    val refreshTime: Long
+    val recentFlag: Boolean
 
     private constructor(rowId: Int, packageName: String, versionCode: Int, versionName: String, title: String, iconUrl: String, status: Int, uploadDate: String)
             : this(rowId, packageName, packageName, versionCode, versionName, title, null, iconUrl,
-            status, uploadDate, null, null, 0, createDetailsUrl(packageName), 0, "", 0)
+            status, uploadDate, null, null, 0, createDetailsUrl(packageName), 0, "", 0, false)
 
     constructor(rowId: Int, appId: String, pname: String, versionNumber: Int, versionName: String,
                 title: String, creator: String?, iconUrl: String, status: Int, uploadDate: String,
                 priceText: String?, priceCur: String?, priceMicros: Int?, detailsUrl: String,
-                refreshTime: Long, appType: String, syncVersion: Int) : super(appId, status) {
+                uploadTime: Long, appType: String, refreshTime: Long, recentFlag: Boolean) : super(appId, status) {
         this.rowId = rowId
         this.packageName = pname
         this.versionNumber = versionNumber
@@ -63,9 +64,10 @@ class AppInfo : AppInfoMetadata, Parcelable {
         this.detailsUrl = detailsUrl
 
         this.iconUrl = iconUrl
-        this.refreshTime = refreshTime
+        this.uploadTime = uploadTime
         this.appType = appType
-        this.syncVersion = syncVersion
+        this.refreshTime = refreshTime
+        this.recentFlag = recentFlag
     }
 
     constructor(doc: Document) : this(0, AppInfoMetadata.STATUS_NORMAL, doc)
@@ -90,8 +92,9 @@ class AppInfo : AppInfoMetadata, Parcelable {
         this.priceCur = offer.currencyCode ?: ""
 
         this.iconUrl = doc.iconUrl ?: ""
-        this.refreshTime = doc.extractUploadDate()
-        this.syncVersion = 0
+        this.uploadTime = doc.extractUploadDate()
+        this.refreshTime = System.currentTimeMillis()
+        this.recentFlag = true
     }
 
      constructor(`in`: Parcel) : super(`in`.readString(), `in`.readInt()) {
@@ -109,9 +112,10 @@ class AppInfo : AppInfoMetadata, Parcelable {
         detailsUrl = `in`.readString()
 
         iconUrl = `in`.readString()
-        refreshTime = `in`.readLong()
+        uploadTime = `in`.readLong()
         appType = `in`.readString()
-        syncVersion = `in`.readInt()
+        refreshTime = `in`.readLong()
+        recentFlag = `in`.readInt() == 1
     }
 
     override fun describeContents(): Int {
@@ -135,9 +139,10 @@ class AppInfo : AppInfoMetadata, Parcelable {
         dest.writeString(detailsUrl)
 
         dest.writeString(iconUrl)
-        dest.writeLong(refreshTime)
+        dest.writeLong(uploadTime)
         dest.writeString(appType)
-        dest.writeInt(syncVersion)
+        dest.writeLong(refreshTime)
+        dest.writeInt(if (recentFlag) 1 else 0)
     }
 
     companion object {

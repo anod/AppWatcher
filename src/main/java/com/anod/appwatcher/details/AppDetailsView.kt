@@ -69,6 +69,12 @@ class AppDetailsView(view: View, private val dataProvider: AppViewHolderBase.Dat
                 val appChange = dataProvider.appChangeContentProvider.query(app.appId, app.versionNumber)
                 this.recentChanges?.text = if (appChange?.details?.isBlank() != false) dataProvider.noRecentChangesText else Html.parse(appChange.details)
             }
+            app.recentFlag -> {
+                version?.text = dataProvider.formatVersionText(app.versionName, app.versionNumber)
+                this.recentChanges?.visibility = View.VISIBLE
+                val appChange = dataProvider.appChangeContentProvider.query(app.appId, app.versionNumber)
+                this.recentChanges?.text = if (appChange?.details?.isBlank() != false) dataProvider.noRecentChangesText else Html.parse(appChange.details)
+            }
             else -> {
                 version?.text = dataProvider.formatVersionText(app.versionName, app.versionNumber)
                 this.recentChanges?.visibility = View.GONE

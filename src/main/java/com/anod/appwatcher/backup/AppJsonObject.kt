@@ -3,6 +3,7 @@ package com.anod.appwatcher.backup
 import android.text.TextUtils
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.Tag
+import com.anod.appwatcher.model.schema.AppListTable
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.json.JsonReader
 import info.anodsplace.framework.json.JsonToken
@@ -36,9 +37,9 @@ class AppJsonObject(val app: AppInfo?, val tags: List<String>) {
             writer.name("status").value(app.status.toLong())
             writer.name("detailsUrl").value(app.detailsUrl)
             writer.name("iconUrl").value(app.iconUrl)
-            writer.name("refreshTime").value(app.refreshTime)
+            writer.name("uploadTime").value(app.uploadTime)
             writer.name("appType").value(app.appType)
-            writer.name("syncVersion").value(app.syncVersion.toLong())
+            writer.name("refreshTimestamp").value(app.refreshTime.toLong())
 
             val tagsWriter = writer.name("tags")
             tagsWriter.beginArray()
@@ -62,9 +63,10 @@ class AppJsonObject(val app: AppInfo?, val tags: List<String>) {
             var appType = ""
             var versionNumber = 0
             var status = 0
-            var syncVersion = 0
             var refreshTime: Long = 0
+            var uploadTime: Long = 0
             val tags = mutableListOf<String>()
+            val recentTime = AppListTable.recentTime
 
             reader.beginObject()
             while (reader.hasNext()) {
@@ -91,12 +93,12 @@ class AppJsonObject(val app: AppInfo?, val tags: List<String>) {
                     detailsUrl = if (isNull) "" else reader.nextString()
                 } else if (name == "iconUrl") {
                     iconUrl = if (isNull) "" else reader.nextString()
-                } else if (name == "refreshTime") {
-                    refreshTime = reader.nextLong()
+                } else if (name == "uploadTime") {
+                    uploadTime = reader.nextLong()
                 } else if (name == "appType") {
                     appType = if (isNull) "" else reader.nextString()
-                } else if (name == "syncVersion") {
-                    syncVersion = if (isNull) 0 else reader.nextInt()
+                } else if (name == "refreshTimestamp") {
+                    refreshTime = if (isNull) 0 else reader.nextLong()
                 } else if (name == "tags") {
                     reader.beginArray()
                     while (reader.hasNext()) {
@@ -116,7 +118,7 @@ class AppJsonObject(val app: AppInfo?, val tags: List<String>) {
             if (appId != null && pname != null) {
                 val info = AppInfo(0, appId, pname, versionNumber, versionName,
                         title, creator, iconUrl, status, uploadDate, null, null, null,
-                        detailsUrl, refreshTime, appType, syncVersion)
+                        detailsUrl, uploadTime, appType, refreshTime, uploadTime > recentTime)
                 onUpgrade(info)
                 return Pair(info, tags)
             }

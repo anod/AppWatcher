@@ -41,7 +41,7 @@ class AppListCursorAdapter(
         super.swapData(newCursor)
     }
 
-    fun setNewAppsCount(newCount: Int, updatableCount: Int) {
-        dataProvider.setNewAppsCount(newCount, updatableCount)
+    fun setNewAppsCount(newCount: Int, updatableCount: Int, recentlyUpdatedCount: Int) {
+        dataProvider.setNewAppsCount(newCount, updatableCount, recentlyUpdatedCount)
     }
 }

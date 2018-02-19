@@ -42,7 +42,7 @@ class DbSchemaManager(context: Context)
                 db.execSQL(AppTagsTable.sqlCreate)
                 db.execSQL("ALTER TABLE " + AppListTable.table + " ADD COLUMN " + AppListTable.Columns.iconUrl + " TEXT")
                 db.execSQL("ALTER TABLE " + AppListTable.table + " ADD COLUMN " + AppListTable.Columns.appType + " TEXT")
-                db.execSQL("ALTER TABLE " + AppListTable.table + " ADD COLUMN " + AppListTable.Columns.syncVersion + " INTEGER")
+                db.execSQL("ALTER TABLE " + AppListTable.table + " ADD COLUMN " + AppListTable.Columns.refreshTimestamp + " INTEGER")
             }
             2, 3 -> {
                 db.execSQL("ALTER TABLE " + AppListTable.table + " ADD COLUMN " + AppListTable.Columns.priceText + " TEXT")
@@ -56,7 +56,7 @@ class DbSchemaManager(context: Context)
                 db.execSQL(AppTagsTable.sqlCreate)
                 db.execSQL("ALTER TABLE " + AppListTable.table + " ADD COLUMN " + AppListTable.Columns.iconUrl + " TEXT")
                 db.execSQL("ALTER TABLE " + AppListTable.table + " ADD COLUMN " + AppListTable.Columns.appType + " TEXT")
-                db.execSQL("ALTER TABLE " + AppListTable.table + " ADD COLUMN " + AppListTable.Columns.syncVersion + " INTEGER")
+                db.execSQL("ALTER TABLE " + AppListTable.table + " ADD COLUMN " + AppListTable.Columns.refreshTimestamp + " INTEGER")
             }
             4 -> {
                 db.execSQL("ALTER TABLE " + AppListTable.table + " ADD COLUMN " + AppListTable.Columns.uploadDate + " TEXT")
@@ -67,23 +67,23 @@ class DbSchemaManager(context: Context)
                 db.execSQL(AppTagsTable.sqlCreate)
                 db.execSQL("ALTER TABLE " + AppListTable.table + " ADD COLUMN " + AppListTable.Columns.iconUrl + " TEXT")
                 db.execSQL("ALTER TABLE " + AppListTable.table + " ADD COLUMN " + AppListTable.Columns.appType + " TEXT")
-                db.execSQL("ALTER TABLE " + AppListTable.table + " ADD COLUMN " + AppListTable.Columns.syncVersion + " INTEGER")
+                db.execSQL("ALTER TABLE " + AppListTable.table + " ADD COLUMN " + AppListTable.Columns.refreshTimestamp + " INTEGER")
             }
             5 -> {
                 db.execSQL(TagsTable.sqlCreate)
                 db.execSQL(AppTagsTable.sqlCreate)
                 db.execSQL("ALTER TABLE " + AppListTable.table + " ADD COLUMN " + AppListTable.Columns.iconUrl + " TEXT")
                 db.execSQL("ALTER TABLE " + AppListTable.table + " ADD COLUMN " + AppListTable.Columns.appType + " TEXT")
-                db.execSQL("ALTER TABLE " + AppListTable.table + " ADD COLUMN " + AppListTable.Columns.syncVersion + " INTEGER")
+                db.execSQL("ALTER TABLE " + AppListTable.table + " ADD COLUMN " + AppListTable.Columns.refreshTimestamp + " INTEGER")
             }
             6, 7 -> {
                 db.execSQL("ALTER TABLE " + AppListTable.table + " ADD COLUMN " + AppListTable.Columns.iconUrl + " TEXT")
                 db.execSQL("ALTER TABLE " + AppListTable.table + " ADD COLUMN " + AppListTable.Columns.appType + " TEXT")
-                db.execSQL("ALTER TABLE " + AppListTable.table + " ADD COLUMN " + AppListTable.Columns.syncVersion + " INTEGER")
+                db.execSQL("ALTER TABLE " + AppListTable.table + " ADD COLUMN " + AppListTable.Columns.refreshTimestamp + " INTEGER")
             }
             8 -> {
                 db.execSQL("ALTER TABLE " + AppListTable.table + " ADD COLUMN " + AppListTable.Columns.appType + " TEXT")
-                db.execSQL("ALTER TABLE " + AppListTable.table + " ADD COLUMN " + AppListTable.Columns.syncVersion + " INTEGER")
+                db.execSQL("ALTER TABLE " + AppListTable.table + " ADD COLUMN " + AppListTable.Columns.refreshTimestamp + " INTEGER")
             }
             9,10,11 -> {
                 db.execSQL(ChangelogTable.sqlCreate)

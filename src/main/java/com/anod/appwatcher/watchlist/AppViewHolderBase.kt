@@ -35,6 +35,7 @@ abstract class AppViewHolderBase(
         fun getColor(@ColorRes colorRes: Int): Int
 
         val updatableAppsCount: Int
+        val recentlyUpdatedCount: Int
      }
 
     abstract fun bindView(location: Int, app: AppInfo)

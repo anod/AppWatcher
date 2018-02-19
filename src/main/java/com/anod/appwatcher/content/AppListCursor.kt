@@ -31,9 +31,10 @@ class AppListCursor(cursor: Cursor?) : CursorIterator<AppInfo>(cursor) {
             getString(AppListTable.Projection.priceCurrency),
             getInt(AppListTable.Projection.priceMicros),
             getString(AppListTable.Projection.detailsUrl),
-            getLong(AppListTable.Projection.refreshTime),
+            getLong(AppListTable.Projection.uploadTime),
             getString(AppListTable.Projection.appType),
-            getInt(AppListTable.Projection.syncVersion)
+            getLong(AppListTable.Projection.refreshTime),
+            getInt(AppListTable.Projection.recentFlag) == 1
         )
 
 }

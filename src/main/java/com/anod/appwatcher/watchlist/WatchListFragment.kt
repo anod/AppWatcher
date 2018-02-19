@@ -77,10 +77,11 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
             val watchlistAdapter = getInnerAdapter<AppListCursorAdapter>(ADAPTER_WATCHLIST)
             watchlistAdapter.swapData(data as AppListCursor)
 
-            val newCount = (loader as AppListCursorLoader).newCountFiltered
-            val updatableCount = loader.updatableCountFiltered
+            val newCount = (loader as AppListCursorLoader).newCount
+            val updatableCount = loader.updatableCount
+            val recentlyUpdatedCount = loader.recentlyUpdatedCount
 
-            watchlistAdapter.setNewAppsCount(newCount, updatableCount)
+            watchlistAdapter.setNewAppsCount(newCount, updatableCount, recentlyUpdatedCount)
         }
 
         override fun loaderReset() {

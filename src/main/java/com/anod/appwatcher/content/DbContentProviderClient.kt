@@ -53,33 +53,6 @@ class DbContentProviderClient(private val contentProviderClient: ContentProvider
         return queryApps(sortOrder, selection, selectionArgs)
     }
 
-    fun queryUpdated(tag: Tag?): AppListCursor {
-        val selc = ArrayList<String>(2)
-        val args = ArrayList<String>(2)
-
-        selc.add(AppListTable.Columns.status + " = ?")
-        args.add(AppInfoMetadata.STATUS_UPDATED.toString())
-
-        if (tag != null) {
-            selc.add(AppTagsTable.TableColumns.tagId + " = ?")
-            args.add(tag.id.toString())
-            selc.add(AppTagsTable.TableColumns.appId + " = " + AppListTable.TableColumns.appId)
-        }
-
-        val selection = TextUtils.join(" AND ", selc)
-        val selectionArgs = args.toTypedArray()
-
-        var cr: Cursor? = null
-        try {
-            cr = contentProviderClient.query(DbContentProvider.appsContentUri(tag),
-                    AppListTable.projection, selection, selectionArgs, null
-            )
-        } catch (e: RemoteException) {
-            AppLog.e(e)
-        }
-        return AppListCursor(cr)
-    }
-
     fun getCount(includeDeleted: Boolean): Int {
         val cr = queryAll(includeDeleted)
         return cr.count

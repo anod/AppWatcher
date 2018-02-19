@@ -3,7 +3,6 @@ package com.anod.appwatcher.sync
 import android.accounts.Account
 import android.content.ContentProviderClient
 import android.content.ContentValues
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.RemoteException
@@ -25,7 +24,6 @@ import com.anod.appwatcher.model.schema.AppListTable
 import com.anod.appwatcher.model.schema.ChangelogTable
 import com.anod.appwatcher.model.schema.contentValues
 import com.anod.appwatcher.userLog.UserLogger
-import com.anod.appwatcher.utils.date.CustomParserFactory
 import com.anod.appwatcher.utils.extractUploadDate
 import finsky.api.model.DfeModel
 import finsky.api.model.Document
@@ -34,7 +32,6 @@ import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.playstore.BulkDetailsEndpoint
 import info.anodsplace.playstore.PlayStoreEndpoint
-import java.text.ParseException
 import java.util.*
 
 /**
@@ -114,7 +111,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
             AppLog.e(e)
         }
 
-        if (updatedApps.isNotEmpty() && updatedApps.first().app.refreshTime == 0.toLong()) {
+        if (updatedApps.isNotEmpty() && updatedApps.first().app.uploadTime == 0.toLong()) {
             val uploadDate = updatedApps.first().app.uploadDate
             val locale = Locale.getDefault()
             userLogger.error("Cannot parse date '$uploadDate' for locale '$locale'")
@@ -376,7 +373,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
 
     private fun fillMissingData(marketApp: Document, localApp: AppInfo, values: ContentValues) {
         val refreshTime = marketApp.extractUploadDate()
-        values.put(AppListTable.Columns.refreshTimestamp, refreshTime)
+        values.put(AppListTable.Columns.uploadTimestamp, refreshTime)
         values.put(AppListTable.Columns.uploadDate, marketApp.appDetails.uploadDate)
         if (TextUtils.isEmpty(localApp.versionName)) {
             values.put(AppListTable.Columns.versionName, marketApp.appDetails.versionString)

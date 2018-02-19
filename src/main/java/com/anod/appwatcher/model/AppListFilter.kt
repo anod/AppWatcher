@@ -1,10 +1,10 @@
 package com.anod.appwatcher.model
 
 import android.database.Cursor
-import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.model.schema.AppListTable
 import info.anodsplace.framework.database.FilterCursor
 import info.anodsplace.framework.content.InstalledApps
+import java.util.concurrent.TimeUnit
 
 /**
  * @author alex
@@ -15,6 +15,7 @@ import info.anodsplace.framework.content.InstalledApps
 interface CountableFilter {
     val newCount: Int
     val updatableNewCount: Int
+    val recentlyUpdatedCount: Int
 
     fun resetNewCount()
 }
@@ -55,6 +56,8 @@ class AppListFilterInclusion(private val inclusion: Inclusion, private val insta
         private set
     override var updatableNewCount: Int = 0
         private set
+    override var recentlyUpdatedCount: Int = 0
+        private set
 
     override fun filterRecord(cursor: Cursor): Boolean {
         val packageName = cursor.getString(AppListTable.Projection.packageName)
@@ -73,7 +76,10 @@ class AppListFilterInclusion(private val inclusion: Inclusion, private val insta
                 updatableNewCount++
             }
         } else if (status == AppInfoMetadata.STATUS_NORMAL) {
-            val refreshTime = cursor.getLong(AppListTable.Projection.refreshTime)
+            val isRecent = cursor.getInt(AppListTable.Projection.recentFlag) == 1
+            if (isRecent) {
+                recentlyUpdatedCount++
+            }
         }
         return false
     }
@@ -81,5 +87,6 @@ class AppListFilterInclusion(private val inclusion: Inclusion, private val insta
     override fun resetNewCount() {
         newCount = 0
         updatableNewCount = 0
+        recentlyUpdatedCount = 0
     }
 }

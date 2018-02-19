@@ -28,10 +28,13 @@ open class AppViewHolderDataProvider(
         private set
     final override var updatableAppsCount = 0
         private set
+    final override var recentlyUpdatedCount = 0
+        private set
 
-    internal fun setNewAppsCount(newAppsCount: Int, updatableAppsCount: Int) {
+    internal fun setNewAppsCount(newAppsCount: Int, updatableAppsCount: Int, recentlyUpdatedCount: Int) {
         this.newAppsCount = newAppsCount
         this.updatableAppsCount = updatableAppsCount
+        this.recentlyUpdatedCount = recentlyUpdatedCount
     }
 
     override fun getString(@StringRes resId: Int): String {

@@ -60,22 +60,26 @@ open class AppListCursorLoader(context: Context,
         return AppListCursor(FilterCursor(cr, cursorFilter))
     }
 
-    val newCountFiltered: Int
+    val newCount: Int
         get() = cursorFilter.newCount
 
-    val updatableCountFiltered: Int
+    val updatableCount: Int
         get() = cursorFilter.updatableNewCount
+
+    val recentlyUpdatedCount: Int
+        get() = cursorFilter.recentlyUpdatedCount
 
     companion object {
         private fun createSortOrder(sortId: Int): String {
             val filter = ArrayList<String>()
             filter.add(AppListTable.Columns.status + " DESC")
+            filter.add(AppListTable.Columns.recentFlag + " DESC")
             if (sortId == Preferences.SORT_NAME_DESC) {
                 filter.add(AppListTable.Columns.title + " COLLATE NOCASE DESC")
             } else if (sortId == Preferences.SORT_DATE_ASC) {
-                filter.add(AppListTable.Columns.refreshTimestamp + " ASC")
+                filter.add(AppListTable.Columns.uploadTimestamp + " ASC")
             } else if (sortId == Preferences.SORT_DATE_DESC) {
-                filter.add(AppListTable.Columns.refreshTimestamp + " DESC")
+                filter.add(AppListTable.Columns.uploadTimestamp + " DESC")
             } else {
                 filter.add(AppListTable.Columns.title + " COLLATE NOCASE ASC")
             }
