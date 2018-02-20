@@ -14,13 +14,14 @@ class UpgradeCheck(private val preferences: Preferences) {
     val isNewVersion: Boolean
         get() {
             val code = preferences.versionCode
-            if (code > BuildConfig.VERSION_CODE) {
-                preferences.versionCode = BuildConfig.VERSION_CODE
-                return true
-            }
-
             if (code == 0) {
                 preferences.versionCode = BuildConfig.VERSION_CODE
+                return false
+            }
+
+            if (code < BuildConfig.VERSION_CODE) {
+                preferences.versionCode = BuildConfig.VERSION_CODE
+                return true
             }
             return false
         }

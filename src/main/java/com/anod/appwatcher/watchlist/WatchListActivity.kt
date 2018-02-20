@@ -219,7 +219,8 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         }
 
         val googleAccount = GoogleSignIn.getLastSignedInAccount(this)
-        if (googleAccount == null) {
+        if (prefs.isDriveSyncEnabled && googleAccount == null) {
+            Toast.makeText(this, getString(R.string.refresh_gdrive_mesage), Toast.LENGTH_LONG).show()
             GDriveSignIn(this, object : GDriveSignIn.Listener {
                 override fun onGDriveLoginSuccess(googleSignInAccount: GoogleSignInAccount) {
                     requestRefresh()

@@ -134,6 +134,7 @@
     <string name="pref_show_ondevice_descr">Show On device section in the main view</string>
     <string name="log">App log</string>
     <string name="user_log">App log</string>
+    <string name="refresh_gdrive_mesage">Refreshing Google Drive account after upgrade</string>
 
     <string-array name="sort_titles">
         <item>By name &#x2193;</item>
