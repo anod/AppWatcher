@@ -81,9 +81,8 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
             || tr is SocketTimeoutException
     }
 
-    private inner class FirebaseLogger : AppLog.Logger.Android() {
+    private inner class FirebaseLogger : AppLog.Logger {
         override fun println(priority: Int, tag: String, msg: String) {
-            super.println(priority, tag, msg)
             Crashlytics.log(priority, tag, msg)
         }
     }

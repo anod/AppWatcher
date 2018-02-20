@@ -329,7 +329,11 @@ open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, Vi
     }
 
     override fun onLoadFinished(loader: Loader<Cursor>?, data: Cursor?) {
-        val changesLoader = (loader as ChangesLoader)
+        val changesLoader = (loader as? ChangesLoader)
+        if (changesLoader == null) { // EmptyLoader
+            showRetryMessage()
+            return
+        }
         val cursor = data as? AppChangeCursor
         if (changesLoader.document == null && (cursor == null || !cursor.hasNext()) ) {
             showRetryMessage()

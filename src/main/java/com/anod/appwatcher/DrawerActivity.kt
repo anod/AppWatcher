@@ -23,8 +23,10 @@ import com.anod.appwatcher.content.TagsContentProviderClient
 import com.anod.appwatcher.installed.ImportInstalledActivity
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.tags.AppsTagActivity
+import com.anod.appwatcher.utils.Hash
 import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.wishlist.WishlistFragment
+import com.crashlytics.android.Crashlytics
 import info.anodsplace.framework.app.FragmentToolbarActivity
 import info.anodsplace.framework.app.ToolbarActivity
 
@@ -221,6 +223,7 @@ open class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.SelectionLi
         AuthTokenAsync(this).request(this, account, object : AuthTokenAsync.Callback {
             override fun onToken(token: String) {
                 authToken = token
+                Crashlytics.setUserIdentifier(Hash.sha256(account.name).encoded)
                 setDrawerAccount(account)
             }
 

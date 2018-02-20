@@ -29,6 +29,7 @@ class UploadServiceContentObserver(val context: Context, contentResolver: Conten
         }
 
         AppLog.d("Schedule GDrive upload for ${uri.toString()}")
-        UploadService.schedule(context)
+        val prefs = App.provide(context).prefs
+        UploadService.schedule(context, prefs.isWifiOnly, prefs.isRequiresCharging)
     }
 }

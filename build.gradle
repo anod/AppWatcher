@@ -1,5 +1,6 @@
 buildscript {
     ext.kotlin_version = '1.2.10'
+    ext.gradle_plugin_version = '3.2.0-alpha01'
     repositories {
         jcenter()
         mavenCentral()
@@ -8,10 +9,11 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.2.0-alpha01'
+        classpath "com.android.tools.build:gradle:$gradle_plugin_version"
         classpath 'com.google.gms:google-services:3.1.0'
         classpath 'com.google.gms:oss-licenses:0.9.1'
         classpath 'io.fabric.tools:gradle:1.24.4'
+        classpath 'com.google.firebase:firebase-plugins:1.1.5'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -29,6 +31,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'com.google.gms.oss.licenses.plugin'
 apply plugin: 'io.fabric'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'com.google.firebase.firebase-perf'
 
 dependencies {
     implementation 'com.google.android.gms:play-services-drive:11.8.0'
@@ -39,6 +42,7 @@ dependencies {
         transitive = true
     }
     implementation 'com.firebase:firebase-jobdispatcher:0.8.5'
+    implementation 'com.google.firebase:firebase-perf:11.8.0'
 
     implementation 'com.squareup.tape2:tape:2.0.0-SNAPSHOT'
     implementation 'com.squareup.okhttp3:okhttp:3.9.0'

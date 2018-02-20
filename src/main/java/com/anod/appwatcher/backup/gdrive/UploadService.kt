@@ -16,13 +16,23 @@ import info.anodsplace.framework.os.BackgroundTask
 class UploadService : JobService() {
 
     companion object {
-        private const val windowStartDelaySeconds = 30
-        private const val windowEndDelaySeconds = 300
+        private const val windowStartDelaySeconds = 60
+        private const val windowEndDelaySeconds = 600
 
         private const val tag = "GDriveUpload"
 
-        fun schedule(context: Context) {
+        fun schedule(context: Context, requiresWifi: Boolean, requiresCharging: Boolean) {
             val dispatcher = App.provide(context).jobDispatcher
+
+            val constraints = mutableListOf<Int>()
+            if (requiresCharging) {
+                constraints.add(Constraint.DEVICE_CHARGING)
+            }
+            if (requiresWifi) {
+                constraints.add(Constraint.ON_UNMETERED_NETWORK)
+            } else {
+                constraints.add(Constraint.ON_ANY_NETWORK)
+            }
 
             val task = dispatcher.newJobBuilder()
                     .setService(UploadService::class.java)
@@ -31,7 +41,7 @@ class UploadService : JobService() {
                     .setLifetime(Lifetime.UNTIL_NEXT_BOOT)
                     .setTrigger(Trigger.executionWindow(windowStartDelaySeconds, windowEndDelaySeconds))
                     .setReplaceCurrent(true)
-                    .setConstraints(Constraint.ON_ANY_NETWORK)
+                    .setConstraints(*constraints.toIntArray())
                     .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
                     .setExtras(Bundle())
                     .build()

@@ -3,6 +3,8 @@
 -keepattributes Signature
 -keepattributes *Annotation*
 
+-keep public class * extends java.lang.Exception
+
 ## Google Play Services 4.3.23 specific rules ##
 ## https://developer.android.com/google/play-services/setup.html#Proguard ##
 
