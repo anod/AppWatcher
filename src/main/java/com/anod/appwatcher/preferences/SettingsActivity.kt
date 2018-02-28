@@ -36,11 +36,11 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
     override val themeRes: Int
         get() =  Theme(this).theme
 
-    private var syncEnabledItem: CheckboxItem? = null
-    private var syncNowItem: Item? = null
-    private var wifiItem: CheckboxItem? = null
-    private var chargingItem: CheckboxItem? = null
-    private var frequencyItem: Item? = null
+    private val syncEnabledItem: SwitchItem by lazy { SwitchItem(R.string.pref_title_drive_sync_enabled, R.string.pref_descr_drive_sync_enabled, ACTION_SYNC_ENABLE) }
+    private val syncNowItem: TextItem by lazy { TextItem(R.string.pref_title_drive_sync_now, 0, ACTION_SYNC_NOW) }
+    private val wifiItem: SwitchItem by lazy { SwitchItem(R.string.menu_wifi_only, 0, ACTION_WIFI_ONLY, prefs.isWifiOnly) }
+    private val chargingItem: SwitchItem by lazy { SwitchItem(R.string.menu_requires_charging, 0, ACTION_REQUIRES_CHARGING, prefs.isRequiresCharging) }
+    private val frequencyItem: TextItem by lazy { TextItem(R.string.pref_title_updates_frequency, 0, ACTION_UPDATE_FREQUENCY) }
 
     private val gDriveSignIn: GDriveSignIn by lazy { GDriveSignIn(this, this) }
 
@@ -48,10 +48,6 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
 
     private val prefs: Preferences
         get() = App.provide(this).prefs
-
-    override fun init() {
-
-    }
 
     override fun onBackPressed() {
         super.onBackPressed()
@@ -62,12 +58,12 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
 
     override fun onExportStart() {
         AppLog.d("Exporting...")
-        setProgressVisibility(true)
+        isProgressVisible = true
     }
 
     override fun onExportFinish(code: Int) {
         AppLog.d("Code: " + code)
-        setProgressVisibility(false)
+        isProgressVisible = false
         val r = resources
         if (code == DbBackupManager.RESULT_OK) {
             Toast.makeText(this, r.getString(R.string.export_done), Toast.LENGTH_SHORT).show()
@@ -84,72 +80,67 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
         syncNowItem!!.summary = renderDriveSyncTime()
     }
 
-    override fun initPreferenceItems(): List<Preference> {
+    override fun createPreferenceItems(): List<Preference> {
         val preferences = mutableListOf<Preference>()
 
         preferences.add(Category(R.string.category_updates))
 
         val useAutoSync = prefs.useAutoSync
-        frequencyItem = Item(R.string.pref_title_updates_frequency, 0, ACTION_UPDATE_FREQUENCY)
         val currentIndex = resources.getIntArray(R.array.updates_frequency_values).indexOf(prefs.updatesFrequency)
         val frequencyTitles = resources.getStringArray(R.array.updates_frequency)
-        frequencyItem?.summary = if (currentIndex == -1) "Every ${prefs.updatesFrequency} minutes" else frequencyTitles[currentIndex]
-        preferences.add(frequencyItem!!)
+        frequencyItem.summary = if (currentIndex == -1) "Every ${prefs.updatesFrequency} minutes" else frequencyTitles[currentIndex]
+        preferences.add(frequencyItem)
 
-        wifiItem = CheckboxItem(R.string.menu_wifi_only, 0, ACTION_WIFI_ONLY, prefs.isWifiOnly)
-        preferences.add(wifiItem!!)
-        wifiItem!!.enabled = useAutoSync
+        preferences.add(wifiItem)
+        wifiItem.enabled = useAutoSync
 
-        chargingItem = CheckboxItem(R.string.menu_requires_charging, 0, ACTION_REQUIRES_CHARGING, prefs.isRequiresCharging)
-        preferences.add(chargingItem!!)
-        chargingItem!!.enabled = useAutoSync
+        preferences.add(chargingItem)
+        chargingItem.enabled = useAutoSync
 
         preferences.add(Category(R.string.settings_notifications))
-        preferences.add(CheckboxItem(R.string.uptodate_title, R.string.uptodate_summary, ACTION_NOTIFY_UPTODATE, prefs.isNotifyInstalledUpToDate))
+        preferences.add(SwitchItem(R.string.uptodate_title, R.string.uptodate_summary, ACTION_NOTIFY_UPTODATE, prefs.isNotifyInstalledUpToDate))
 
         preferences.add(Category(R.string.pref_header_drive_sync))
 
-        syncEnabledItem = CheckboxItem(R.string.pref_title_drive_sync_enabled, R.string.pref_descr_drive_sync_enabled, ACTION_SYNC_ENABLE)
-        syncNowItem = Item(R.string.pref_title_drive_sync_now, 0, ACTION_SYNC_NOW)
         val gps = GooglePlayServices(this)
         if (!gps.isSupported) {
-            syncEnabledItem!!.checked = false
-            syncEnabledItem!!.enabled = false
-            syncNowItem!!.enabled = false
-            syncEnabledItem!!.summaryRes = 0
-            syncEnabledItem!!.summary = gps.availabilityMessage
+            syncEnabledItem.checked = false
+            syncEnabledItem.enabled = false
+            syncNowItem.enabled = false
+            syncEnabledItem.summaryRes = 0
+            syncEnabledItem.summary = gps.availabilityMessage
         } else {
-            syncEnabledItem!!.checked = prefs.isDriveSyncEnabled
-            syncNowItem!!.enabled = syncEnabledItem!!.checked
-            syncNowItem!!.summary = renderDriveSyncTime()
+            syncEnabledItem.checked = prefs.isDriveSyncEnabled
+            syncNowItem.enabled = syncEnabledItem.checked
+            syncNowItem.summary = renderDriveSyncTime()
         }
-        preferences.add(syncEnabledItem!!)
-        preferences.add(syncNowItem!!)
+        preferences.add(syncEnabledItem)
+        preferences.add(syncNowItem)
         if (BuildConfig.DEBUG) {
-            preferences.add(Item(R.string.pref_gdrive_upload, 0, ACTION_GDRIVE_UPLOAD))
+            preferences.add(TextItem(R.string.pref_gdrive_upload, 0, ACTION_GDRIVE_UPLOAD))
         }
 
         preferences.add(Category(R.string.pref_header_backup))
-        preferences.add(Item(R.string.pref_title_export, R.string.pref_descr_export, ACTION_EXPORT))
-        preferences.add(Item(R.string.pref_title_import, R.string.pref_descr_import, ACTION_IMPORT))
+        preferences.add(TextItem(R.string.pref_title_export, R.string.pref_descr_export, ACTION_EXPORT))
+        preferences.add(TextItem(R.string.pref_title_import, R.string.pref_descr_import, ACTION_IMPORT))
 
         preferences.add(Category(R.string.pref_header_interface))
-        preferences.add(Item(R.string.pref_title_theme, R.string.pref_descr_theme, ACTION_THEME))
-        preferences.add(Item(R.string.pref_title_dark_theme, R.string.pref_descr_dark_theme, ACTION_DARK_THEME))
-        preferences.add(CheckboxItem(R.string.pref_show_recent_title, R.string.pref_show_recent_descr, ACTION_SHOW_RECENT, prefs.showRecent))
-        preferences.add(CheckboxItem(R.string.pref_show_ondevice_title, R.string.pref_show_ondevice_descr, ACTION_SHOW_ONDEVICE, prefs.showOnDevice))
+        preferences.add(TextItem(R.string.pref_title_theme, R.string.pref_descr_theme, ACTION_THEME))
+        preferences.add(TextItem(R.string.pref_title_dark_theme, R.string.pref_descr_dark_theme, ACTION_DARK_THEME))
+        preferences.add(SwitchItem(R.string.pref_show_recent_title, R.string.pref_show_recent_descr, ACTION_SHOW_RECENT, prefs.showRecent))
+        preferences.add(SwitchItem(R.string.pref_show_ondevice_title, R.string.pref_show_ondevice_descr, ACTION_SHOW_ONDEVICE, prefs.showOnDevice))
 
         preferences.add(Category(R.string.pref_header_about))
 
-        val aboutItem = Item(R.string.pref_title_about, 0, ACTION_ABOUT)
+        val aboutItem = TextItem(R.string.pref_title_about, 0, ACTION_ABOUT)
         aboutItem.summary = appVersion
         preferences.add(aboutItem)
-        preferences.add(Item(R.string.pref_title_opensource, R.string.pref_descr_opensource, ACTION_LICENSES))
+        preferences.add(TextItem(R.string.pref_title_opensource, R.string.pref_descr_opensource, ACTION_LICENSES))
 
-        preferences.add(Item(R.string.user_log, 0, ACTION_USER_LOG))
+        preferences.add(TextItem(R.string.user_log, 0, ACTION_USER_LOG))
 
         if (BuildConfig.DEBUG) {
-            preferences.add(Item(R.string.pref_export_db, 0, ACTION_EXPORT_DB))
+            preferences.add(TextItem(R.string.pref_export_db, 0, ACTION_EXPORT_DB))
         }
         return preferences
     }
@@ -205,9 +196,9 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
             }
             ACTION_LICENSES -> startActivity(Intent(this, OssLicensesMenuActivity::class.java))
             ACTION_SYNC_ENABLE -> {
-                syncNowItem!!.enabled = false // disable temporary sync now
-                if (syncEnabledItem!!.checked) {
-                    setProgressVisibility(true)
+                syncNowItem.enabled = false // disable temporary sync now
+                if (syncEnabledItem.checked) {
+                    isProgressVisible = true
                     gDriveSignIn.signIn()
                 }
 
@@ -239,9 +230,9 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
                             } else {
                                 SyncScheduler.cancel(this)
                             }
-                            frequencyItem?.summary = resources.getStringArray(R.array.updates_frequency)[which]
-                            wifiItem!!.enabled = useAutoSync
-                            chargingItem!!.enabled = useAutoSync
+                            frequencyItem.summary = resources.getStringArray(R.array.updates_frequency)[which]
+                            wifiItem.enabled = useAutoSync
+                            chargingItem.enabled = useAutoSync
                             d.dismiss()
                             notifyDataSetChanged()
                         }.create()
@@ -345,20 +336,20 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
         get() = String.format(Locale.US, "%s (%d)", BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE)
 
     override fun onGDriveLoginSuccess(googleSignInAccount: GoogleSignInAccount) {
-        syncEnabledItem!!.checked = true
-        syncEnabledItem!!.enabled = true
+        syncEnabledItem.checked = true
+        syncEnabledItem.enabled = true
         syncNowItem!!.enabled = true
         prefs.isDriveSyncEnabled = true
         App.provide(this).uploadServiceContentObserver
         notifyDataSetChanged()
-        setProgressVisibility(false)
+        isProgressVisible = false
 
         Toast.makeText(this, R.string.gdrive_connected, Toast.LENGTH_SHORT).show()
     }
 
     override fun onGDriveLoginError(errorCode: Int) {
-        setProgressVisibility(false)
-        syncNowItem!!.enabled = syncEnabledItem!!.checked
+        isProgressVisible = false
+        syncNowItem!!.enabled = syncEnabledItem.checked
         notifyDataSetChanged()
         Toast.makeText(this, "Drive login error $errorCode", Toast.LENGTH_SHORT).show()
     }
@@ -368,22 +359,22 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
     }
 
     override fun onGDriveSyncStart() {
-        setProgressVisibility(true)
+        isProgressVisible = true
         Toast.makeText(this, R.string.sync_start, Toast.LENGTH_SHORT).show()
     }
 
     override fun onGDriveSyncFinish() {
-        setProgressVisibility(false)
+        isProgressVisible = false
         prefs.lastDriveSyncTime = System.currentTimeMillis()
-        syncNowItem!!.summary = getString(R.string.pref_descr_drive_sync_now, getString(R.string.now))
-        syncNowItem!!.enabled = syncEnabledItem!!.checked
+        syncNowItem.summary = getString(R.string.pref_descr_drive_sync_now, getString(R.string.now))
+        syncNowItem.enabled = syncEnabledItem.checked
         notifyDataSetChanged()
         Toast.makeText(this, R.string.sync_finish, Toast.LENGTH_SHORT).show()
     }
 
     override fun onGDriveError() {
-        setProgressVisibility(false)
-        syncNowItem!!.enabled = syncEnabledItem!!.checked
+        isProgressVisible = false
+        syncNowItem.enabled = syncEnabledItem.checked
         notifyDataSetChanged()
         Toast.makeText(this, R.string.sync_error, Toast.LENGTH_SHORT).show()
     }
