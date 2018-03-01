@@ -17,6 +17,7 @@ import android.util.SparseIntArray
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
 import android.widget.Toast
 import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.ChangelogActivity
@@ -46,6 +47,7 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
 
     lateinit var listView: RecyclerView
     lateinit var emptyView: View
+    lateinit var progress: ProgressBar
     var swipeLayout: SwipeRefreshLayout? = null
 
     private lateinit var section: Section
@@ -149,6 +151,7 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
         emptyView = view.findViewById(android.R.id.empty)
         swipeLayout = view.findViewById(R.id.swipe_layout)
         swipeLayout?.setOnRefreshListener(this)
+        progress = view.findViewById(R.id.progress)
 
         installedApps = InstalledApps.PackageManager(activity!!.packageManager)
 
@@ -193,11 +196,13 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
 
     override fun onLoadFinished(loader: Loader<Cursor>, data: Cursor) {
         section.loadFinished(loader, data)
+        progress.visibility = View.GONE
         this.isListVisible = true
     }
 
     override fun onLoaderReset(loader: Loader<Cursor>) {
         section.loaderReset()
+        progress.visibility = View.GONE
     }
 
     protected fun createFilter(filterId: Int): AppListFilter {

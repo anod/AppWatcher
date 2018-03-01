@@ -85,6 +85,12 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
             return -1
         }
 
+        if (!App.provide(context).networkConnection.isNetworkAvailable) {
+            AppLog.d("Network is not available, skipping sync...")
+            userLogger.error("Network is not available, skipping sync...")
+            return -1
+        }
+
         AppLog.v("Perform synchronization")
         userLogger.info("Performing synchronization")
 

@@ -12,8 +12,8 @@
         android:id="@+id/activity_frame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingTop="8dp"
-        android:paddingBottom="4dp">
+        android:paddingBottom="4dp"
+        android:paddingTop="8dp">
 
         <info.anodsplace.framework.widget.recyclerview.EndlessRecyclerView
             android:id="@android:id/list"
@@ -30,23 +30,11 @@
             android:gravity="center_horizontal"
             android:text="@string/search_for_app" />
 
-        <LinearLayout
+        <ProgressBar
             android:id="@+id/loading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <ProgressBar
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/loading" />
-        </LinearLayout>
+            android:layout_gravity="center" />
 
         <LinearLayout
             android:id="@+id/retryBox"

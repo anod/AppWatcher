@@ -1,53 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.SwipeRefreshLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/swipe_layout"
+
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                 android:layout_width="match_parent"
-                 android:layout_height="match_parent">
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
         <android.support.v7.widget.RecyclerView
             android:id="@android:id/list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:listitem="@layout/list_item_app"/>
+            app:fastScrollEnabled="true"
+            app:fastScrollHorizontalThumbDrawable="@drawable/fastscroll_thumb_states"
+            app:fastScrollHorizontalTrackDrawable="@drawable/fastscroll_line_states"
+            app:fastScrollVerticalThumbDrawable="@drawable/fastscroll_thumb_states"
+            app:fastScrollVerticalTrackDrawable="@drawable/fastscroll_line_states"
+            tools:listitem="@layout/list_item_app" />
+    </android.support.v4.widget.SwipeRefreshLayout>
 
-        <LinearLayout
-            android:id="@android:id/empty"
-            android:layout_width="240dp"
+    <LinearLayout
+        android:id="@android:id/empty"
+        android:layout_width="240dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="104dp"
+        android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="top|center_horizontal"
-            android:layout_marginTop="104dp"
-            android:orientation="vertical">
+            android:src="@drawable/ic_empty_box" />
 
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_empty_box"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:text="@string/no_apps_with_this_tag"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:layout_marginTop="8dp"
-                android:text="@string/no_apps_with_this_tag"
-                android:textAppearance="?android:attr/textAppearanceMedium"/>
+        <Button
+            android:id="@android:id/button1"
+            style="@style/BrandButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:drawableLeft="@drawable/ic_library_add_black_24px"
+            android:text="@string/add_apps" />
 
-            <Button
-                android:id="@android:id/button1"
-                style="@style/BrandButtonStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:drawableLeft="@drawable/ic_library_add_black_24px"
-                android:text="@string/add_apps"/>
+    </LinearLayout>
 
-        </LinearLayout>
-
-    </FrameLayout>
-</android.support.v4.widget.SwipeRefreshLayout>
+    <ProgressBar
+        android:id="@+id/progress"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
+</FrameLayout>

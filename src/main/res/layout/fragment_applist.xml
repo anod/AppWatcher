@@ -34,13 +34,13 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_empty_box"/>
+            android:src="@drawable/ic_empty_box" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
             android:layout_marginTop="8dp"
+            android:gravity="center"
             android:text="@string/watch_list_is_empty"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
@@ -71,4 +71,10 @@
 
     </LinearLayout>
 
+    <ProgressBar
+        android:id="@+id/progress"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
 </FrameLayout>
