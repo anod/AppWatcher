@@ -5,9 +5,9 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
-import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatDelegate
 import android.text.format.DateUtils
+import android.widget.CompoundButton
 import android.widget.Toast
 import com.anod.appwatcher.*
 import com.anod.appwatcher.backup.DbBackupManager
@@ -18,6 +18,8 @@ import com.anod.appwatcher.backup.gdrive.GDriveSignIn
 import com.anod.appwatcher.model.DbSchemaManager
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.userLog.UserLogActivity
+import com.anod.appwatcher.utils.DialogItems
+import com.anod.appwatcher.utils.DialogSingleChoice
 import com.anod.appwatcher.utils.Theme
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -203,8 +205,8 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
                 }
 
             }
-            ACTION_SYNC_NOW -> if (syncNowItem!!.enabled) {
-                syncNowItem!!.enabled = false
+            ACTION_SYNC_NOW -> if (syncNowItem.enabled) {
+                syncNowItem.enabled = false
                 val googleAccount = GoogleSignIn.getLastSignedInAccount(this)
                 if (googleAccount != null) {
                     GDrive(this, googleAccount, this).sync()
@@ -220,9 +222,10 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
             }
             ACTION_UPDATE_FREQUENCY -> {
                 val values = resources.getIntArray(R.array.updates_frequency_values)
-                val dialog = AlertDialog.Builder(this)
-                        .setTitle(R.string.pref_title_updates_frequency)
-                        .setSingleChoiceItems(R.array.updates_frequency, values.indexOf(prefs.updatesFrequency)) { d, which ->
+                DialogSingleChoice(this,
+                        R.string.pref_title_updates_frequency,
+                        R.array.updates_frequency,
+                        values.indexOf(prefs.updatesFrequency), { dialog, which ->
                             prefs.updatesFrequency = values[which]
                             val useAutoSync = prefs.useAutoSync
                             if (useAutoSync) {
@@ -233,49 +236,42 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
                             frequencyItem.summary = resources.getStringArray(R.array.updates_frequency)[which]
                             wifiItem.enabled = useAutoSync
                             chargingItem.enabled = useAutoSync
-                            d.dismiss()
+                            dialog.dismiss()
                             notifyDataSetChanged()
-                        }.create()
-                dialog.show()
+                        }).show()
             }
             ACTION_WIFI_ONLY -> {
-                val useWifiOnly = (pref as CheckboxItem).checked
+                val useWifiOnly = (pref as ToggleItem).checked
                 prefs.isWifiOnly = useWifiOnly
                 SyncScheduler.schedule(this, prefs.isRequiresCharging, useWifiOnly, prefs.updatesFrequency)
             }
             ACTION_REQUIRES_CHARGING -> {
-                val requiresCharging = (pref as CheckboxItem).checked
+                val requiresCharging = (pref as ToggleItem).checked
                 prefs.isRequiresCharging = requiresCharging
                 SyncScheduler.schedule(this, requiresCharging, prefs.isWifiOnly, prefs.updatesFrequency)
             }
             ACTION_NOTIFY_UPTODATE -> {
-                val notify = (pref as CheckboxItem).checked
+                val notify = (pref as ToggleItem).checked
                 prefs.isNotifyInstalledUpToDate = notify
             }
             ACTION_THEME -> {
-                val dialog = AlertDialog.Builder(this)
-                        .setTitle(R.string.pref_title_theme)
-                        .setItems(R.array.themes) { _, which ->
+                DialogItems(this, R.string.pref_title_theme, R.array.themes, { _, which ->
                             if (prefs.nightMode != which) {
                                 prefs.nightMode = which
                                 AppCompatDelegate.setDefaultNightMode(which)
                                 this@SettingsActivity.recreate()
                                 this.recreateWatchlist()
                             }
-                        }.create()
-                dialog.show()
+                        }).show()
             }
             ACTION_DARK_THEME -> {
-                val dialog = AlertDialog.Builder(this)
-                        .setTitle(R.string.pref_title_dark_theme)
-                        .setItems(R.array.dark_themes) { _, which ->
+                DialogItems(this, R.string.pref_title_dark_theme, R.array.dark_themes, { _, which ->
                             if (prefs.theme != which) {
                                 prefs.theme = which
                                 this@SettingsActivity.setResult(android.app.Activity.RESULT_OK, Intent().putExtra("recreateWatchlistOnBack", true))
                                 this.recreateWatchlist()
                             }
-                        }.create()
-                dialog.show()
+                        }).show()
             }
             ACTION_EXPORT_DB -> try {
                 exportDb()
@@ -283,14 +279,14 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
                 AppLog.e(e)
             }
             ACTION_SHOW_RECENT -> {
-                val showRecent = (pref as CheckboxItem).checked
+                val showRecent = (pref as ToggleItem).checked
                 if (!this.recreateWatchlistOnBack) {
                     this.recreateWatchlistOnBack = prefs.showRecent != showRecent
                 }
                 prefs.showRecent = showRecent
             }
             ACTION_SHOW_ONDEVICE -> {
-                val showOnDevice = (pref as CheckboxItem).checked
+                val showOnDevice = (pref as ToggleItem).checked
                 if (!this.recreateWatchlistOnBack) {
                     this.recreateWatchlistOnBack = prefs.showOnDevice != showOnDevice
                 }

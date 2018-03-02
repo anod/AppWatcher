@@ -11,12 +11,12 @@ import android.os.Build
 import android.os.Handler
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
-import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
 
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.R
+import com.anod.appwatcher.utils.DialogMessage
 import info.anodsplace.framework.app.ActivityListener
 
 /**
@@ -101,22 +101,20 @@ class AccountSelectionDialog(
     }
 
     private fun showPermissionsDialog() {
-        val builder = AlertDialog.Builder(activity, R.style.AlertDialog)
-        builder.setTitle(R.string.choose_an_account)
-        builder.setMessage(R.string.failed_gain_access)
-        builder.setPositiveButton(R.string.allow) { _, _ ->
-            ActivityCompat.requestPermissions(
-                    activity,
-                    arrayOf(Manifest.permission.GET_ACCOUNTS),
-                    PERMISSION_REQUEST_GET_ACCOUNTS
-            )
-        }
-        builder.setNegativeButton(android.R.string.cancel) { _, _ ->
-            if (account == null) {
-                listener.onAccountNotFound("")
+        val dialog = DialogMessage(activity, R.string.choose_an_account, R.string.failed_gain_access, { builder ->
+            builder.setPositiveButton(R.string.allow) { _, _ ->
+                ActivityCompat.requestPermissions(
+                        activity,
+                        arrayOf(Manifest.permission.GET_ACCOUNTS),
+                        PERMISSION_REQUEST_GET_ACCOUNTS
+                )
             }
-        }
-        val dialog = builder.create()
+            builder.setNegativeButton(android.R.string.cancel) { _, _ ->
+                if (account == null) {
+                    listener.onAccountNotFound("")
+                }
+            }
+        }).create()
         dialog.setOnDismissListener {
             if (account == null) {
                 listener.onAccountNotFound("")

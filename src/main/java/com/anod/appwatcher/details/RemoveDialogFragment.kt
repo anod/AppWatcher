@@ -1,12 +1,12 @@
 package com.anod.appwatcher.details
 
-import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.model.AppInfoMetadata
+import com.anod.appwatcher.utils.DialogMessage
 
 class RemoveDialogFragment : DialogFragment() {
 
@@ -15,17 +15,16 @@ class RemoveDialogFragment : DialogFragment() {
         val rowId = arguments!!.getInt(ARG_ROW_ID)
         val message = getString(R.string.alert_dialog_remove_message, title)
 
-        return AlertDialog.Builder(activity)
-                .setTitle(R.string.alert_dialog_remove_title)
-                .setMessage(message)
-                .setPositiveButton(R.string.alert_dialog_remove) { _, _ ->
-                    val cl = DbContentProviderClient(activity!!)
-                    cl.updateStatus(rowId, AppInfoMetadata.STATUS_DELETED)
-                    cl.close()
-                    activity!!.finish()
-                }
-                .setNegativeButton(R.string.alert_dialog_cancel) { _, _ -> }
-                .create()
+        return DialogMessage(activity!!, R.string.alert_dialog_remove_title, message, { builder ->
+            builder.setPositiveButton(R.string.alert_dialog_remove) { _, _ ->
+                val cl = DbContentProviderClient(activity!!)
+                cl.updateStatus(rowId, AppInfoMetadata.STATUS_DELETED)
+                cl.close()
+                activity!!.finish()
+            }
+
+            builder.setNegativeButton(R.string.alert_dialog_cancel) { _, _ -> }
+        }).create()
     }
 
     companion object {

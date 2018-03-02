@@ -1,10 +1,7 @@
 package com.anod.appwatcher.watchlist
 
 import android.accounts.Account
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.os.Bundle
 import android.support.annotation.LayoutRes
 import android.support.annotation.MenuRes
@@ -12,7 +9,6 @@ import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.view.ViewPager
-import android.support.v7.app.AlertDialog
 import android.support.v7.widget.SearchView
 import android.text.TextUtils
 import android.view.KeyEvent
@@ -31,6 +27,7 @@ import com.anod.appwatcher.upgrade.SetupInterfaceUpgrade
 import com.anod.appwatcher.upgrade.UpgradeRefresh
 import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.upgrade.UpgradeCheck
+import com.anod.appwatcher.utils.DialogSingleChoice
 import info.anodsplace.framework.AppLog
 import java.util.*
 
@@ -182,14 +179,12 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
 
     fun showSortOptions() {
         val selected = prefs.sortIndex
-        AlertDialog.Builder(this)
-                .setSingleChoiceItems(R.array.sort_titles, selected) { dialog, index ->
-                    prefs.sortIndex = index
-                    notifySortChange(index)
-                    dialog.dismiss()
-                }
-                .create()
-                .show()
+        DialogSingleChoice(this, R.array.sort_titles, selected, { dialog, index ->
+            prefs.sortIndex = index
+            notifySortChange(index)
+            dialog.dismiss()
+        })
+        .show()
     }
 
     fun requestRefresh(): Boolean {
