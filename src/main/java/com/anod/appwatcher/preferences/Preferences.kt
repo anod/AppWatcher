@@ -98,11 +98,11 @@ class Preferences(context: Context) : DeviceIdStorage {
         set(notify) = preferences.edit().putBoolean(NOTIFY_INSTALLED_UPTODATE, notify).apply()
 
     var showRecent: Boolean
-        get() = preferences.getBoolean("show-recent", true)
+        get() = preferences.getBoolean("show-recent", false)
         set(value) = preferences.edit().putBoolean("show-recent", value).apply()
 
     var showOnDevice: Boolean
-        get() = preferences.getBoolean("show-on-device", true)
+        get() = preferences.getBoolean("show-on-device", false)
         set(value) = preferences.edit().putBoolean("show-on-device", value).apply()
 
     var nightMode: Int

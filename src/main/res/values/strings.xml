@@ -135,6 +135,10 @@
     <string name="log">App log</string>
     <string name="user_log">App log</string>
     <string name="refresh_gdrive_mesage">Refreshing Google Drive account after upgrade</string>
+    <string name="setup_new_interface_message">Configure main screen to include \"Recently installed\" and \"On Device\" sections.\nPreviously those sections were available under \"Installed\" filter.\nCan be changed later in the settings.</string>
+    <string name="setup_interface_title">Configure interface</string>
+    <string name="setup_interface_section_ondevice">Show installed on device apps section under the watch list</string>
+    <string name="setup_interface_section_recent">Show recently installed apps section on the top</string>
 
     <string-array name="sort_titles">
         <item>By name &#x2193;</item>

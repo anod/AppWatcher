@@ -77,7 +77,7 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
 
     override fun onResume() {
         super.onResume()
-        syncNowItem!!.summary = renderDriveSyncTime()
+        syncNowItem.summary = renderDriveSyncTime()
     }
 
     override fun createPreferenceItems(): List<Preference> {
@@ -338,7 +338,7 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
     override fun onGDriveLoginSuccess(googleSignInAccount: GoogleSignInAccount) {
         syncEnabledItem.checked = true
         syncEnabledItem.enabled = true
-        syncNowItem!!.enabled = true
+        syncNowItem.enabled = true
         prefs.isDriveSyncEnabled = true
         App.provide(this).uploadServiceContentObserver
         notifyDataSetChanged()
@@ -349,7 +349,7 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
 
     override fun onGDriveLoginError(errorCode: Int) {
         isProgressVisible = false
-        syncNowItem!!.enabled = syncEnabledItem.checked
+        syncNowItem.enabled = syncEnabledItem.checked
         notifyDataSetChanged()
         Toast.makeText(this, "Drive login error $errorCode", Toast.LENGTH_SHORT).show()
     }
