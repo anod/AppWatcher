@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent" android:layout_height="80dp" >
+
+    <ImageView
+        android:id="@android:id/icon"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_gravity="left"
+        android:layout_marginLeft="16dp"
+        android:src="@drawable/ic_notifications_black_24dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:layout_gravity="left"
+        android:layout_marginLeft="88dp"
+        android:orientation="vertical"
+        android:paddingBottom="4dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp">
+
+        <TextView
+            android:id="@android:id/title"
+            style="@style/TextAppearance.AppCompat.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:textColor="@color/primary_text_dark"
+            app:autoSizeMaxTextSize="20sp"
+            app:autoSizeMinTextSize="12sp"
+            app:autoSizeStepGranularity="2sp"
+            app:autoSizeTextType="uniform"
+            tools:text="Netflix" />
+
+        <TextView
+            android:id="@+id/details"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@color/primary_text_dark"
+            android:textSize="10sp"
+            tools:text="Netflix" />
+
+        <TextView
+            android:id="@+id/update_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="bottom"
+            android:textColor="@color/primary_text_dark"
+            android:textSize="@dimen/textSize"
+            tools:text="Date" />
+    </LinearLayout>
+
+</FrameLayout>

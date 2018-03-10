@@ -117,6 +117,10 @@ class Preferences(context: Context) : DeviceIdStorage {
         get() = preferences.getInt(FILTER_ID, Filters.TAB_ALL)
         set(filterId) = preferences.edit().putInt(FILTER_ID, filterId).apply()
 
+    var updateAllConfirmed: Boolean
+        get() = preferences.getBoolean("update-all-confirmedt", false)
+        set(value) = preferences.edit().putBoolean("update-all-confirmed", value).apply()
+
     companion object {
         private const val VIEWED = "viewed"
         private const val LAST_UPDATE_TIME = "last_update_time"
@@ -146,5 +150,6 @@ class Preferences(context: Context) : DeviceIdStorage {
         const val THEME_DEFAULT = 0
         const val THEME_BLACK = 1
     }
+
 
 }

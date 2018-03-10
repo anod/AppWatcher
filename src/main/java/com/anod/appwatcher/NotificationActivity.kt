@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import com.anod.appwatcher.sync.SyncNotification
+import com.anod.appwatcher.utils.UpdateAll
 import com.anod.appwatcher.utils.forMyApps
 import com.anod.appwatcher.utils.forPlayStore
 import info.anodsplace.framework.app.ApplicationContext
@@ -22,7 +23,7 @@ class NotificationActivity : Activity() {
                 this.startActivitySafely(Intent().forPlayStore(pkg))
             }
             TYPE_MYAPPS -> this.startActivitySafely(Intent().forMyApps(false))
-            TYPE_MYAPPS_UPDATE -> this.startActivitySafely(Intent().forMyApps(true))
+            TYPE_MYAPPS_UPDATE -> UpdateAll(this, App.provide(this).prefs).withConfirmation()
             // TYPE_DISMISS -> nothing
         }
         finish()

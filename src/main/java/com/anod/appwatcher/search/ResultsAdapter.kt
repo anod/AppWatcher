@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.WatchAppList
 import finsky.api.model.Document
-import finsky.protos.nano.Messages
 import com.squareup.picasso.Picasso
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.app.ThemeCompat
@@ -56,9 +55,7 @@ abstract class ResultsAdapter(
             holder.row.setBackgroundColor(colorBgNormal)
         }
 
-        val imageUrl = doc.iconUrl
-
-        Picasso.get().load(imageUrl)
+        Picasso.get().load(doc.iconUrl)
                 .placeholder(R.drawable.ic_notifications_black_24dp)
                 .into(holder.icon)
 

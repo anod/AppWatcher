@@ -43,8 +43,8 @@ dependencies {
     implementation 'com.firebase:firebase-jobdispatcher:0.8.5'
 
     implementation 'com.squareup.tape2:tape:2.0.0-SNAPSHOT'
-    implementation 'com.squareup.okhttp3:okhttp:3.9.0'
-    implementation 'com.squareup.picasso:picasso:3.0.0-SNAPSHOT'
+    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
+    implementation 'com.squareup.picasso:picasso:2.71828'
 
     testImplementation 'junit:junit:4.12'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"

@@ -1,86 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
     android:layout_width="match_parent"
-    android:layout_height="400dp">
+    android:layout_height="400dp"
+    android:elevation="0dp"
+    android:paddingTop="0dp">
 
-    <View
-        android:id="@+id/background"
-        android:layout_width="wrap_content"
-        android:layout_height="136dp"
-        android:background="@color/theme_primary" />
-
-    <include layout="@layout/toolbar_transparent" />
-
-    <ImageView
-        android:id="@android:id/icon"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:layout_gravity="left"
-        android:layout_marginLeft="16dp"
-        android:layout_marginTop="?attr/actionBarSize"
-        android:src="@drawable/ic_notifications_black_24dp" />
-
-    <LinearLayout
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appbar"
+        app:elevation="0dp"
         android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:layout_gravity="left"
-        android:layout_marginLeft="88dp"
-        android:layout_marginTop="?attr/actionBarSize"
-        android:orientation="vertical"
-        android:paddingBottom="4dp"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp">
+        android:layout_height="wrap_content" android:background="@android:color/transparent">
 
-        <TextView
-            android:id="@android:id/title"
-            style="@style/TextAppearance.AppCompat.Title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:maxLines="1"
-            android:textColor="@color/primary_text_dark"
-            app:autoSizeMaxTextSize="20sp"
-            app:autoSizeMinTextSize="12sp"
-            app:autoSizeStepGranularity="2sp"
-            app:autoSizeTextType="uniform"
-            tools:text="Netflix" />
+        <android.support.design.widget.CollapsingToolbarLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:titleEnabled="false"
+            app:toolbarId="@id/toolbar"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
-        <TextView
-            android:id="@+id/details"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="@color/primary_text_dark"
-            android:textSize="10sp"
-            tools:text="Netflix" />
+            <View
+                android:id="@+id/background"
+                android:layout_width="wrap_content"
+                android:layout_height="136dp"
+                app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed"
+                app:layout_collapseMode="parallax"
+                android:background="@color/theme_primary" />
 
-        <TextView
-            android:id="@+id/update_date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="bottom"
-            android:textColor="@color/primary_text_dark"
-            android:textSize="@dimen/textSize"
-            tools:text="Date" />
-    </LinearLayout>
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+                app:titleTextAppearance="@style/ChangelogTitle"
+                app:subtitleTextAppearance="@style/ChangelogSubtitle"
+                app:titleMarginStart="16dp"
+                app:layout_collapseMode="pin"
+                app:contentInsetStartWithNavigation="0dp"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="144dp"
-        android:orientation="vertical">
+            <include layout="@layout/view_changelog_header"
+                android:id="@+id/header"
+                android:layout_marginTop="?attr/actionBarSize"
+                app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed"
+                android:layout_width="match_parent" android:layout_height="80dp"
+                app:layout_collapseMode="parallax"
+                />
+
+        </android.support.design.widget.CollapsingToolbarLayout>
 
         <TextView
             android:id="@+id/price"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="left"
+            android:layout_marginBottom="8dp"
             android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
-            android:layout_marginBottom="8dp"
             android:drawableLeft="@drawable/ic_stat_communication_stay_primary_portrait"
             android:drawablePadding="4dp"
             android:ellipsize="end"
@@ -90,12 +68,15 @@
             android:textSize="@dimen/textSize"
             tools:text="5.6.1609P.1258283" />
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@android:id/list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            tools:listitem="@layout/list_item_change" />
-    </LinearLayout>
+
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@android:id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:listitem="@layout/list_item_change"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
     <ProgressBar
         android:id="@+id/progressBar"
@@ -103,19 +84,19 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:paddingTop="96dp"/>
+        android:paddingTop="96dp" />
 
     <LinearLayout
         android:id="@+id/error"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
         android:layout_gravity="center"
         android:layout_margin="16dp"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
-        android:paddingTop="80dp"
-        android:orientation="vertical">
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingTop="80dp">
 
         <TextView
             android:layout_width="match_parent"
@@ -126,12 +107,13 @@
         <Button
             android:id="@+id/retryButton"
             style="@style/BrandButtonStyle"
-            android:layout_marginTop="8dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_marginTop="8dp"
             android:text="@string/retry" />
     </LinearLayout>
+
 
     <android.support.design.widget.FloatingActionButton xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/playStoreButton"
@@ -142,8 +124,10 @@
         android:layout_marginRight="16dp"
         android:layout_marginTop="112dp"
         android:src="@drawable/ic_play_arrow_black_48dp"
+        app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed"
         app:backgroundTint="@color/fab_tint"
         app:elevation="1dp"
-        app:fabSize="mini" />
+        app:fabSize="mini"
+        />
 
-</FrameLayout>
+</android.support.design.widget.CoordinatorLayout>

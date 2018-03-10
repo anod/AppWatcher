@@ -19,15 +19,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.Toast
-import com.anod.appwatcher.BuildConfig
-import com.anod.appwatcher.ChangelogActivity
-import com.anod.appwatcher.MarketSearchActivity
-import com.anod.appwatcher.R
+import com.anod.appwatcher.*
 import com.anod.appwatcher.content.AppListCursor
 import com.anod.appwatcher.details.DetailsActivity
 import com.anod.appwatcher.installed.ImportInstalledActivity
 import com.anod.appwatcher.model.*
 import com.anod.appwatcher.search.SearchActivity
+import com.anod.appwatcher.utils.UpdateAll
 import com.anod.appwatcher.utils.forMyApps
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.content.InstalledApps
@@ -250,7 +248,8 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
     }
 
     override fun onActionButton() {
-        context?.startActivitySafely(Intent().forMyApps(true))
+        val context = context ?: return
+        UpdateAll(context, App.provide(context).prefs).withConfirmation()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

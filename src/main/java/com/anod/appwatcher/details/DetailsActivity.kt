@@ -5,10 +5,15 @@ import android.content.Intent
 import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.graphics.PorterDuff
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.support.annotation.ColorInt
+import android.support.design.widget.AppBarLayout
 import android.support.v4.app.LoaderManager
 import android.support.v4.app.ShareCompat
 import android.support.v4.content.ContextCompat
@@ -21,7 +26,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
-import com.android.volley.VolleyError
 import com.anod.appwatcher.App
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenAsync
@@ -33,7 +37,6 @@ import com.anod.appwatcher.model.*
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.*
 import com.squareup.picasso.Picasso
-import finsky.api.model.DfeModel
 import info.anodsplace.framework.anim.RevealAnimatorCompat
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
@@ -47,10 +50,10 @@ import info.anodsplace.framework.graphics.chooseDark
 import info.anodsplace.framework.os.BackgroundTask
 import info.anodsplace.framework.os.CachedBackgroundTask
 import info.anodsplace.playstore.DetailsEndpoint
-import info.anodsplace.playstore.PlayStoreEndpoint
 import kotlinx.android.synthetic.main.activity_app_changelog.*
+import kotlinx.android.synthetic.main.view_changelog_header.*
 
-open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, View.OnClickListener, WatchAppList.Listener, LoaderManager.LoaderCallbacks<Cursor> {
+open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, View.OnClickListener, WatchAppList.Listener, LoaderManager.LoaderCallbacks<Cursor>, AppBarLayout.OnOffsetChangedListener {
 
     override val themeRes: Int
         get() = Theme(this).themeChangelog
@@ -61,7 +64,14 @@ open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, Vi
     private var appInfo: AppInfo? = null
     private var isNewApp: Boolean = false
     private var addMenu: MenuItem? = null
-
+    private val titleString: AlphaSpannableString by lazy {
+        val span = AlphaForegroundColorSpan(ColorAttribute(android.R.attr.textColor, this, Color.WHITE).value)
+        AlphaSpannableString(appInfo!!.title, span)
+    }
+    private val subtitleString: AlphaSpannableString by lazy {
+        val span = AlphaForegroundColorSpan(ColorAttribute(android.R.attr.textColor, this, Color.WHITE).value)
+        AlphaSpannableString(appInfo!!.uploadDate, span)
+    }
     private var detailsEndpoint: DetailsEndpoint? = null
 
     val iconLoader: PicassoAppIcon by lazy { App.provide(this).iconLoader }
@@ -83,6 +93,7 @@ open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, Vi
         error.visibility = View.GONE
         list.visibility = View.GONE
         background.visibility = View.INVISIBLE
+        appbar.addOnOffsetChangedListener(this)
 
         retryButton.setOnClickListener {
             progressBar.visibility = View.VISIBLE
@@ -149,6 +160,7 @@ open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, Vi
         playStoreButton.setOnClickListener(this)
 
         appDetailsView.fillDetails(app, app.rowId == -1)
+        supportActionBar?.title = titleString
 
         if (app.iconUrl.isEmpty()) {
             if (app.rowId > 0) {
@@ -166,6 +178,8 @@ open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, Vi
         override fun onBitmapLoaded(bitmap: Bitmap, from: Picasso.LoadedFrom) {
             Palette.from(bitmap).generate(this@DetailsActivity)
             icon.setImageBitmap(bitmap)
+            toolbar.logo = BitmapDrawable(resources, bitmap)
+            toolbar.logo.alpha = 0
         }
 
         override fun onBitmapFailed(e: Exception, errorDrawable: Drawable?) {
@@ -410,6 +424,28 @@ open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, Vi
             Toast.makeText(this, R.string.error_insert_app, Toast.LENGTH_SHORT).show()
         }
     }
+
+    val mainHandler = Handler(Looper.getMainLooper())
+
+    override fun onOffsetChanged(appBarLayout: AppBarLayout, verticalOffset: Int) {
+        val totalScrollRange = appBarLayout.totalScrollRange.toFloat()
+        val alpha = 1.0f - Math.abs(verticalOffset.toFloat() / totalScrollRange)
+
+        header.alpha = alpha
+        playStoreButton.alpha = alpha
+        playStoreButton.isEnabled = alpha > 0.8f
+
+        val inverseAlpha = (1.0f - alpha)
+        toolbar.logo.alpha = (inverseAlpha * 255).toInt()
+        titleString.alpha = inverseAlpha
+        subtitleString.alpha = inverseAlpha
+        mainHandler.post({
+            supportActionBar?.title = titleString
+            toolbar.subtitle = subtitleString
+            playStoreButton.translationY = verticalOffset.toFloat()
+        })
+    }
+
 
     companion object {
         const val EXTRA_APP_ID = "app_id"
