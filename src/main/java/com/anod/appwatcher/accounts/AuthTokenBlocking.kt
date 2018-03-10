@@ -1,7 +1,6 @@
 package com.anod.appwatcher.accounts
 
 import android.accounts.*
-import android.accounts.AccountManager
 import android.app.Activity
 import android.os.Bundle
 import info.anodsplace.framework.AppLog

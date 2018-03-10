@@ -9,8 +9,8 @@ import android.net.Uri
  * @date 14/02/2018
  */
 object Storeintent {
-    val URL_PLAY_STORE = "market://details?id=%s"
-    val URL_WEB_PLAY_STORE = "https://play.google.com/store/apps/details?id=%s"
+    const val URL_PLAY_STORE = "market://details?id=%s"
+    const val URL_WEB_PLAY_STORE = "https://play.google.com/store/apps/details?id=%s"
 }
 
 fun Intent.forPlayStore(pkg: String): Intent {

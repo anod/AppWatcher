@@ -5,9 +5,9 @@ import android.text.TextUtils
 import android.view.View
 import android.widget.TextView
 import com.anod.appwatcher.R
-import com.anod.appwatcher.watchlist.AppViewHolderBase
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
+import com.anod.appwatcher.watchlist.AppViewHolderBase
 import info.anodsplace.framework.text.Html
 
 /**

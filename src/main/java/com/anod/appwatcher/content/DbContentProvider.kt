@@ -202,7 +202,7 @@ open class DbContentProvider : ContentProvider() {
     }
 
     override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int {
-        val query = matchQuery(uri) ?: throw IllegalArgumentException("Unknown URI " + uri)
+        val query = matchQuery(uri) ?: throw IllegalArgumentException("Unknown URI $uri")
 
         val db = dbSchemaManager.writableDatabase
         val count: Int
@@ -223,7 +223,7 @@ open class DbContentProvider : ContentProvider() {
     }
 
     override fun insert(uri: Uri, values: ContentValues?): Uri? {
-        val query = matchQuery(uri) ?: throw IllegalArgumentException("Unknown URI " + uri)
+        val query = matchQuery(uri) ?: throw IllegalArgumentException("Unknown URI $uri")
         if (values == null || values.size() == 0) {
             throw IllegalArgumentException("Values cannot be empty")
         }
@@ -235,7 +235,7 @@ open class DbContentProvider : ContentProvider() {
             context.contentResolver.notifyChange(noteUri, null)
             return noteUri
         }
-        throw SQLException("Failed to insert row into " + uri)
+        throw SQLException("Failed to insert row into $uri")
     }
 
     override fun onCreate(): Boolean {
@@ -247,7 +247,7 @@ open class DbContentProvider : ContentProvider() {
         var proj = projection
         var sel = selection
         var selArgs = selectionArgs
-        val query = matchQuery(uri) ?: throw IllegalArgumentException("Unknown URI " + uri)
+        val query = matchQuery(uri) ?: throw IllegalArgumentException("Unknown URI $uri")
 // Using SQLiteQueryBuilder instead of queryApps() method
         val queryBuilder = SQLiteQueryBuilder()
         queryBuilder.tables = query.table
@@ -269,7 +269,7 @@ open class DbContentProvider : ContentProvider() {
     }
 
     override fun update(uri: Uri, values: ContentValues?, selection: String?, selectionArgs: Array<String>?): Int {
-        val query = matchQuery(uri) ?: throw IllegalArgumentException("Unknown URI " + uri)
+        val query = matchQuery(uri) ?: throw IllegalArgumentException("Unknown URI $uri")
         if (values == null || values.size() == 0) {
             throw IllegalArgumentException("Values cannot be empty")
         }

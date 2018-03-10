@@ -58,7 +58,7 @@ class MessageConverter : ObjectQueue.Converter<Message> {
 }
 
 class UserLogger(queueFile: QueueFile) {
-    private val handlerThread = HandlerThread("UserLogger");
+    private val handlerThread = HandlerThread("UserLogger")
     private val handler: Handler by lazy {
         Handler(handlerThread.looper) {
             when (it.what) {

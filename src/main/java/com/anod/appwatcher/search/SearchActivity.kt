@@ -14,18 +14,18 @@ import com.anod.appwatcher.App
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AccountSelectionDialog
 import com.anod.appwatcher.accounts.AuthTokenAsync
-import info.anodsplace.playstore.CompositeStateEndpoint
-import info.anodsplace.playstore.DetailsEndpoint
-import info.anodsplace.playstore.PlayStoreEndpointBase
-import info.anodsplace.playstore.SearchEndpoint
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.model.WatchAppList
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.MetricsManagerEvent
 import com.anod.appwatcher.utils.Theme
-import info.anodsplace.framework.view.Keyboard
 import info.anodsplace.framework.app.ToolbarActivity
+import info.anodsplace.framework.view.Keyboard
+import info.anodsplace.playstore.CompositeStateEndpoint
+import info.anodsplace.playstore.DetailsEndpoint
+import info.anodsplace.playstore.PlayStoreEndpointBase
+import info.anodsplace.playstore.SearchEndpoint
 import kotlinx.android.synthetic.main.activity_market_search.*
 
 open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionListener, WatchAppList.Listener, CompositeStateEndpoint.Listener {

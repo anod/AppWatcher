@@ -25,7 +25,7 @@ internal class ImportAdapter(
     }
 
     fun clearPackageIndex() {
-        packageIndex = SimpleArrayMap<String, Int>()
+        packageIndex = SimpleArrayMap()
     }
 
     fun storePackageIndex(packageName: String, idx: Int) {

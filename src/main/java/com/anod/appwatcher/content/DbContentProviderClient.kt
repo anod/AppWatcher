@@ -7,8 +7,10 @@ import android.net.Uri
 import android.os.RemoteException
 import android.provider.BaseColumns
 import android.support.v4.util.SimpleArrayMap
-import android.text.TextUtils
-import com.anod.appwatcher.model.*
+import com.anod.appwatcher.model.AppInfo
+import com.anod.appwatcher.model.AppInfoMetadata
+import com.anod.appwatcher.model.AppTag
+import com.anod.appwatcher.model.Tag
 import com.anod.appwatcher.model.schema.AppListTable
 import com.anod.appwatcher.model.schema.AppTagsTable
 import com.anod.appwatcher.model.schema.TagsTable
@@ -19,7 +21,6 @@ import info.anodsplace.framework.content.delete
 import info.anodsplace.framework.content.query
 import info.anodsplace.framework.content.update
 import info.anodsplace.framework.graphics.BitmapByteArray
-import kotlin.collections.ArrayList
 
 /**
  * Wrapper above ContentResolver to simplify access to AppInfo
@@ -417,7 +418,7 @@ class DbContentProviderClient(private val contentProviderClient: ContentProvider
     }
 
     companion object {
-        private val defaultAppsSortOrder =
+        private const val defaultAppsSortOrder =
                 AppListTable.Columns.status + " DESC, " + AppListTable.Columns.title + " COLLATE LOCALIZED ASC"
     }
 }

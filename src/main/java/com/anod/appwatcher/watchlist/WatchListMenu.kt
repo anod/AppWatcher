@@ -4,7 +4,8 @@ import android.content.Intent
 import android.support.v4.content.res.ResourcesCompat
 import android.support.v7.widget.SearchView
 import android.text.TextUtils
-import android.view.*
+import android.view.Menu
+import android.view.MenuItem
 import com.anod.appwatcher.MarketSearchActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.SettingsActivity

@@ -10,7 +10,6 @@ import com.anod.appwatcher.installed.RecentlyInstalledAppsAdapter
 import com.anod.appwatcher.model.AppListFilter
 import com.anod.appwatcher.model.Tag
 import com.anod.appwatcher.watchlist.OnDeviceSection.Companion.ADAPTER_INSTALLED
-import info.anodsplace.framework.widget.recyclerview.MergeRecyclerAdapter
 import info.anodsplace.framework.content.InstalledApps
 
 /**

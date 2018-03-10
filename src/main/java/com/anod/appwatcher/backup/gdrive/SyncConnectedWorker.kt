@@ -6,11 +6,15 @@ import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.Tag
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.drive.*
+import com.google.android.gms.drive.Drive
+import com.google.android.gms.drive.DriveContents
+import com.google.android.gms.drive.DriveFile
+import com.google.android.gms.drive.DriveId
 import com.google.android.gms.tasks.Tasks
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
-import java.io.*
+import java.io.BufferedReader
+import java.io.InputStreamReader
 
 /**
  * @author alex

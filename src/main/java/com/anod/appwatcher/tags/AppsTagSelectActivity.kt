@@ -13,7 +13,6 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.SearchView
 import android.view.Menu
 import android.view.View
-
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.AppListCursor
 import com.anod.appwatcher.content.DbContentProvider
@@ -23,10 +22,10 @@ import com.anod.appwatcher.model.Tag
 import com.anod.appwatcher.model.schema.AppListTable
 import com.anod.appwatcher.model.schema.AppTagsTable
 import com.anod.appwatcher.utils.Theme
-import info.anodsplace.framework.os.BackgroundTask
-import info.anodsplace.framework.view.Keyboard
 import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.content.InstalledApps
+import info.anodsplace.framework.os.BackgroundTask
+import info.anodsplace.framework.view.Keyboard
 import kotlinx.android.synthetic.main.activity_tag_select.*
 
 /**
@@ -49,7 +48,7 @@ class AppsTagSelectActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<C
         setContentView(R.layout.activity_tag_select)
         setupToolbar()
 
-        tag = intentExtras.getParcelable<Tag>(EXTRA_TAG)!!
+        tag = intentExtras.getParcelable(EXTRA_TAG)!!
         titleFilter = savedInstanceState?.getString("title_filter") ?: ""
         tagAppsImport = TagAppsImport(tag, this)
 

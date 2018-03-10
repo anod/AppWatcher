@@ -21,7 +21,6 @@ import com.anod.appwatcher.accounts.AuthTokenAsync
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.TagsContentProviderClient
 import com.anod.appwatcher.installed.ImportInstalledActivity
-import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.tags.AppsTagActivity
 import com.anod.appwatcher.utils.Hash
 import com.anod.appwatcher.utils.Theme

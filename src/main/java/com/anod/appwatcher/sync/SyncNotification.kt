@@ -1,18 +1,17 @@
 package com.anod.appwatcher.sync
 
 import android.app.Notification
+import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.support.v4.app.NotificationCompat
-
 import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.NotificationActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.watchlist.WatchListActivity
-import android.app.NotificationChannel
-import android.os.Build
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.text.Html
 
@@ -26,7 +25,7 @@ class SyncNotification(private val context: ApplicationContext) {
     companion object {
         internal const val syncNotificationId = 1
         internal const val gpsNotificationId = 2
-        val channelId = "versions_updates"
+        const val channelId = "versions_updates"
     }
 
     fun createChannel() {

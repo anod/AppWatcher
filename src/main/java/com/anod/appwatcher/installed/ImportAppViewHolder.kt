@@ -6,9 +6,9 @@ import android.view.View
 import android.widget.CheckedTextView
 import android.widget.ImageView
 import com.anod.appwatcher.R
-import com.anod.appwatcher.watchlist.AppViewHolderBase
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.utils.PicassoAppIcon
+import com.anod.appwatcher.watchlist.AppViewHolderBase
 
 /**
  * @author alex
@@ -40,12 +40,10 @@ internal class ImportAppViewHolder(
 
         iconLoader.loadAppIntoImageView(app, this.icon, R.drawable.ic_notifications_black_24dp)
 
-        if (status() == ImportDataProvider.STATUS_DONE) {
-            itemView.setBackgroundColor(themeAccent)
-        } else if (status() == ImportDataProvider.STATUS_ERROR) {
-            itemView.setBackgroundColor(materialRed)
-        } else {
-            itemView.setBackgroundColor(Color.TRANSPARENT)
+        when {
+            status() == ImportDataProvider.STATUS_DONE -> itemView.setBackgroundColor(themeAccent)
+            status() == ImportDataProvider.STATUS_ERROR -> itemView.setBackgroundColor(materialRed)
+            else -> itemView.setBackgroundColor(Color.TRANSPARENT)
         }
     }
 

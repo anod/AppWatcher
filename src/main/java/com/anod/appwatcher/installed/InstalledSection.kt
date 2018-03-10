@@ -4,12 +4,11 @@ import android.content.Context
 import android.database.Cursor
 import android.support.v4.content.Loader
 import android.support.v7.widget.RecyclerView
+import com.anod.appwatcher.model.AppListFilter
+import com.anod.appwatcher.model.Tag
 import com.anod.appwatcher.watchlist.AppViewHolder
 import com.anod.appwatcher.watchlist.AppViewHolderDataProvider
 import com.anod.appwatcher.watchlist.WatchListFragment
-import com.anod.appwatcher.model.AppListFilter
-import com.anod.appwatcher.model.Tag
-import info.anodsplace.framework.widget.recyclerview.MergeRecyclerAdapter
 import info.anodsplace.framework.content.InstalledApps
 
 /**

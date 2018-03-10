@@ -33,7 +33,7 @@ class Tag(val id: Int, val name: String, @ColorInt val color: Int) : Parcelable 
     }
 
     companion object {
-        val DEFAULT_COLOR = 0xFF9E9E9E.toInt()
+        const val DEFAULT_COLOR = 0xFF9E9E9E.toInt()
 
         @JvmField val CREATOR: Parcelable.Creator<Tag> = object : Parcelable.Creator<Tag> {
             override fun createFromParcel(source: Parcel): Tag {

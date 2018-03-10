@@ -1,7 +1,10 @@
 package com.anod.appwatcher.watchlist
 
 import android.accounts.Account
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.support.annotation.LayoutRes
 import android.support.annotation.MenuRes
@@ -17,17 +20,20 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
-import com.anod.appwatcher.*
+import com.anod.appwatcher.App
+import com.anod.appwatcher.DrawerActivity
+import com.anod.appwatcher.MarketSearchActivity
+import com.anod.appwatcher.R
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
+import com.anod.appwatcher.search.SearchActivity
 import com.anod.appwatcher.sync.ManualSyncService
 import com.anod.appwatcher.sync.UpdateCheck
-import com.anod.appwatcher.search.SearchActivity
 import com.anod.appwatcher.upgrade.SetupInterfaceUpgrade
-import com.anod.appwatcher.upgrade.UpgradeRefresh
-import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.upgrade.UpgradeCheck
+import com.anod.appwatcher.upgrade.UpgradeRefresh
 import com.anod.appwatcher.utils.DialogSingleChoice
+import com.anod.appwatcher.utils.Theme
 import info.anodsplace.framework.AppLog
 import java.util.*
 
@@ -80,7 +86,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         if (savedInstanceState != null) {
             filterId = savedInstanceState.getInt("tab_id", defaultFilterId)
             actionMenu.searchQuery = savedInstanceState.getString("filter") ?: ""
-            AppLog.d("Restore tab: " + filterId)
+            AppLog.d("Restore tab: $filterId")
         } else {
             val fromNotification = intentExtras.getBoolean(EXTRA_FROM_NOTIFICATION, false)
             val expandSearch = intentExtras.getBoolean(EXTRA_EXPAND_SEARCH)
@@ -206,7 +212,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     override fun onAccountSelected(account: Account) {
         super.onAccountSelected(account)
 
-        val upgrade = UpgradeCheck(prefs).result;
+        val upgrade = UpgradeCheck(prefs).result
         if (!upgrade.isNewVersion) {
             return
         }

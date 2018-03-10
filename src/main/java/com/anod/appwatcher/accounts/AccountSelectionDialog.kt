@@ -13,9 +13,8 @@ import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
-
-import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.R
+import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.DialogMessage
 import info.anodsplace.framework.app.ActivityListener
 

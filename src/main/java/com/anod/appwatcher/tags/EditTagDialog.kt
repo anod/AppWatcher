@@ -1,6 +1,5 @@
 package com.anod.appwatcher.tags
 
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import android.support.v4.content.res.ResourcesCompat
@@ -35,7 +34,7 @@ class EditTagDialog : DialogFragment(), ColorPickerSwatch.OnColorSelectedListene
         tag = arguments!!.getParcelable("tag") ?: Tag("")
 
         tagName.setText(tag.name)
-        val colorDrawable = arrayOf<Drawable>(ResourcesCompat.getDrawable(resources, R.drawable.color_picker_swatch, null)!!)
+        val colorDrawable = arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.color_picker_swatch, null)!!)
         colorPreview.setImageDrawable(ColorStateDrawable(colorDrawable, tag.color))
         tagName.requestFocus()
         dialog.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
@@ -71,7 +70,7 @@ class EditTagDialog : DialogFragment(), ColorPickerSwatch.OnColorSelectedListene
     override fun onColorSelected(color: Int) {
         tag = Tag(tag.id, tag.name, color)
 
-        val colorDrawable = arrayOf<Drawable>(ResourcesCompat.getDrawable(resources, R.drawable.color_picker_swatch, null)!!)
+        val colorDrawable = arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.color_picker_swatch, null)!!)
         colorPreview.setImageDrawable(ColorStateDrawable(colorDrawable, tag.color))
     }
 

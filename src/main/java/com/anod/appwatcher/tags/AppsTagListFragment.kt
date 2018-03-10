@@ -5,8 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.anod.appwatcher.R
-import com.anod.appwatcher.watchlist.WatchListFragment
 import com.anod.appwatcher.model.Tag
+import com.anod.appwatcher.watchlist.WatchListFragment
 
 /**
  * @author algavris

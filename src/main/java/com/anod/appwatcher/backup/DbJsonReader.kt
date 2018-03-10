@@ -36,12 +36,10 @@ class DbJsonReader {
         jsonReader.beginObject()
         while (jsonReader.hasNext()) {
             val name = jsonReader.nextName()
-            if (name == "apps") {
-                readApps(jsonReader, listener)
-            } else if (name == "tags") {
-                readTags(jsonReader, listener)
-            } else {
-                jsonReader.skipValue()
+            when (name) {
+                "apps" -> readApps(jsonReader, listener)
+                "tags" -> readTags(jsonReader, listener)
+                else -> jsonReader.skipValue()
             }
         }
 
@@ -83,12 +81,10 @@ class DbJsonReader {
         jsonReader.beginObject()
         while (jsonReader.hasNext()) {
             val name = jsonReader.nextName()
-            if (name == "apps") {
-                readApps(jsonReader, listener)
-            } else if (name == "tags") {
-                readTags(jsonReader, listener)
-            } else {
-                jsonReader.skipValue()
+            when (name) {
+                "apps" -> readApps(jsonReader, listener)
+                "tags" -> readTags(jsonReader, listener)
+                else -> jsonReader.skipValue()
             }
         }
 

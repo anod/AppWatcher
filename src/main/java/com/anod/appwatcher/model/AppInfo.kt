@@ -158,7 +158,7 @@ class AppInfo : AppInfoMetadata, Parcelable {
         }
 
         fun createDetailsUrl(packageName: String): String {
-            return "details?doc=" + packageName
+            return "details?doc=$packageName"
         }
 
         fun fromLocalPackage(rowId: Int, packageInfo: PackageInfo?, packageName: String, appTitle: String, launchComponent: ComponentName?): AppInfo {

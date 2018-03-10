@@ -2,13 +2,12 @@ package com.anod.appwatcher.watchlist
 
 import android.content.Context
 import android.view.View
-
 import com.anod.appwatcher.App
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.AppListCursor
 import com.anod.appwatcher.utils.PicassoAppIcon
-import info.anodsplace.framework.widget.recyclerview.RecyclerViewCursorAdapter
 import info.anodsplace.framework.content.InstalledApps
+import info.anodsplace.framework.widget.recyclerview.RecyclerViewCursorAdapter
 
 /**
  * @author alex

@@ -10,8 +10,8 @@ import android.widget.TextView
 import com.anod.appwatcher.App
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.packageToApp
-import com.anod.appwatcher.watchlist.AppViewHolder
 import com.anod.appwatcher.utils.PicassoAppIcon
+import com.anod.appwatcher.watchlist.AppViewHolder
 
 /**
  * @author alex

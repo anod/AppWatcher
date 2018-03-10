@@ -26,7 +26,6 @@ import com.anod.appwatcher.installed.ImportInstalledActivity
 import com.anod.appwatcher.model.*
 import com.anod.appwatcher.search.SearchActivity
 import com.anod.appwatcher.utils.UpdateAll
-import com.anod.appwatcher.utils.forMyApps
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.startActivitySafely
@@ -60,7 +59,7 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
         val isEmpty: Boolean
     }
 
-    open class DefaultSection() : Section {
+    open class DefaultSection : Section {
         override var adapterIndexMap = SparseIntArray()
         override val adapter: MergeRecyclerAdapter by lazy { MergeRecyclerAdapter() }
 

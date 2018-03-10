@@ -11,7 +11,6 @@ import android.text.TextUtils
 import android.text.format.DateUtils
 import com.android.volley.VolleyError
 import com.anod.appwatcher.App
-import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.backup.gdrive.GDriveSilentSignIn
 import com.anod.appwatcher.backup.gdrive.SyncConnectedWorker
@@ -23,6 +22,7 @@ import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.model.schema.AppListTable
 import com.anod.appwatcher.model.schema.ChangelogTable
 import com.anod.appwatcher.model.schema.contentValues
+import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.userLog.UserLogger
 import com.anod.appwatcher.utils.extractUploadDate
 import finsky.api.model.DfeModel
@@ -106,7 +106,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         context.sendBroadcast(startIntent)
 
         val lastUpdatesViewed = preferences.isLastUpdatesViewed
-        AppLog.d("Last update viewed: " + lastUpdatesViewed)
+        AppLog.d("Last update viewed: $lastUpdatesViewed")
 
         var updatedApps: List<UpdatedApp> = emptyList()
         val appListProvider = DbContentProviderClient(provider)

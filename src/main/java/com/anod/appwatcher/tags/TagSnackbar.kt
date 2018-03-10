@@ -14,7 +14,7 @@ import com.anod.appwatcher.model.AppInfo
  */
 
 object TagSnackbar {
-    private val GREEN_BOOK = "📗"
+    private const val GREEN_BOOK = "📗"
 
     fun make(activity: Activity, info: AppInfo, finishActivity: Boolean): Snackbar {
         return make(activity.findViewById(android.R.id.content), info, finishActivity, activity)

@@ -25,7 +25,7 @@ class DbJsonWriter {
         val appsTags = mutableMapOf<String, MutableList<Int>>()
         appTagsCursor.forEach {
             if (appsTags[it.appId] == null) {
-                appsTags[it.appId] = mutableListOf<Int>()
+                appsTags[it.appId] = mutableListOf()
             }
             appsTags[it.appId]!!.add(it.tagId)
         }

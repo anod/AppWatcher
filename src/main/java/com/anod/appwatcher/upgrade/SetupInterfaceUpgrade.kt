@@ -3,8 +3,8 @@ package com.anod.appwatcher.upgrade
 import android.content.Context
 import android.content.Intent
 import android.widget.Switch
-import com.anod.appwatcher.R
 import com.anod.appwatcher.AppWatcherActivity
+import com.anod.appwatcher.R
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.DialogCustom
 

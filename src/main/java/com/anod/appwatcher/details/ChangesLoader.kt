@@ -31,8 +31,8 @@ class ChangesLoader(context: Context, private var appId: String,private val deta
     }
 
     companion object {
-        val sortOrder = "${ChangelogTable.Columns.versionCode} DESC"
-        val selection = "${ChangelogTable.Columns.appId}  = ?"
+        const val sortOrder = "${ChangelogTable.Columns.versionCode} DESC"
+        const val selection = "${ChangelogTable.Columns.appId} = ?"
         fun uri(appId: String): Uri {
             return DbContentProvider.changelogUri.buildUpon().appendPath("apps").appendPath(appId).build()
         }

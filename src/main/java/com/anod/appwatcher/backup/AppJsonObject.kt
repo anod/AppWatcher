@@ -39,7 +39,7 @@ class AppJsonObject(val app: AppInfo?, val tags: List<String>) {
             writer.name("iconUrl").value(app.iconUrl)
             writer.name("uploadTime").value(app.uploadTime)
             writer.name("appType").value(app.appType)
-            writer.name("refreshTimestamp").value(app.refreshTime.toLong())
+            writer.name("refreshTimestamp").value(app.refreshTime)
 
             val tagsWriter = writer.name("tags")
             tagsWriter.beginArray()
@@ -58,8 +58,8 @@ class AppJsonObject(val app: AppInfo?, val tags: List<String>) {
             var title = ""
             var creator = ""
             var uploadDate = ""
-            var detailsUrl: String = ""
-            var iconUrl: String = ""
+            var detailsUrl = ""
+            var iconUrl = ""
             var appType = ""
             var versionNumber = 0
             var status = 0

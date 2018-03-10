@@ -2,9 +2,10 @@ package com.anod.appwatcher.sync
 
 import android.content.Context
 import android.os.Bundle
-
 import com.anod.appwatcher.App
-import com.firebase.jobdispatcher.*
+import com.firebase.jobdispatcher.Constraint
+import com.firebase.jobdispatcher.Lifetime
+import com.firebase.jobdispatcher.Trigger
 
 /**
  * @author algavris

@@ -53,11 +53,11 @@ internal class ImportBulkManager(
             currentList = listsDocIds[currentBulk]
         }
         if (currentList == null) {
-            currentList = ArrayList<String>()
+            currentList = ArrayList()
             listsDocIds.add(currentList)
         } else if (currentList.size > BULK_SIZE) {
             currentBulk++
-            currentList = ArrayList<String>()
+            currentList = ArrayList()
             listsDocIds.add(currentList)
         }
         currentList.add(packageName)

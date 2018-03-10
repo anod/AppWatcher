@@ -1,19 +1,19 @@
 package com.anod.appwatcher.userLog
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.util.LruCache
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
+import android.view.*
 import android.widget.TextView
 import com.anod.appwatcher.App
 import com.anod.appwatcher.R
 import info.anodsplace.framework.app.ToolbarActivity
 import kotlinx.android.synthetic.main.activity_user_log.*
 import java.text.SimpleDateFormat
-import android.content.Intent
-import android.view.*
 
 
 /**
@@ -45,7 +45,7 @@ class UserLogActivity: ToolbarActivity() {
     }
 
     class UserLogAdapter(private val userLogger: UserLogger, val context: Context): RecyclerView.Adapter<UserLogViewHolder>() {
-        val cacheSize = 1 * 1024 * 1024; // 1MiB
+        val cacheSize = 1 * 1024 * 1024 // 1MiB
         private val messagesCache = object: LruCache<Int, Message?>(cacheSize) {
             override fun sizeOf(key: Int?, value: Message?): Int {
                 return value?.asBytes?.size ?: 0

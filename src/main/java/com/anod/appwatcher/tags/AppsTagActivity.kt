@@ -10,10 +10,10 @@ import android.view.MenuItem
 import android.view.View
 import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.R
-import com.anod.appwatcher.watchlist.WatchListFragment
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.model.Tag
 import com.anod.appwatcher.watchlist.WatchListActivity
+import com.anod.appwatcher.watchlist.WatchListFragment
 import info.anodsplace.framework.AppLog
 
 /**

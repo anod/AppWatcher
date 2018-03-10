@@ -25,9 +25,9 @@ import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.Tag
 import com.anod.appwatcher.model.schema.TagsTable
 import com.anod.appwatcher.utils.Theme
+import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.graphics.DrawableTint
 import info.anodsplace.framework.widget.recyclerview.RecyclerViewCursorAdapter
-import info.anodsplace.framework.app.ToolbarActivity
 import kotlinx.android.synthetic.main.activity_tags_editor.*
 
 /**
@@ -49,7 +49,7 @@ class TagsListActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<Cursor
         setupToolbar()
 
         if (intentExtras.containsKey(EXTRA_APP)) {
-            appInfo = intentExtras.getParcelable<AppInfo>(EXTRA_APP)
+            appInfo = intentExtras.getParcelable(EXTRA_APP)
             title = getString(R.string.tag_app, appInfo!!.title)
         }
         list.layoutManager = LinearLayoutManager(this)

@@ -2,8 +2,8 @@ package com.anod.appwatcher.installed
 
 import android.content.Context
 import android.support.v4.util.SimpleArrayMap
-import info.anodsplace.framework.content.InstalledApps
 import com.anod.appwatcher.watchlist.AppViewHolderDataProvider
+import info.anodsplace.framework.content.InstalledApps
 
 internal class ImportDataProvider(context: Context, installedApps: InstalledApps) : AppViewHolderDataProvider(context, installedApps) {
 

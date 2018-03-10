@@ -127,7 +127,7 @@ class DbBackupManager(private val context: ApplicationContext) {
          * merely allocating an Object, and can still be synchronized on.
          */
         internal val sDataLock = arrayOfNulls<Any>(0)
-        internal val DATE_FORMAT_FILENAME = "yyyyMMdd_HHmmss"
+        const val DATE_FORMAT_FILENAME = "yyyyMMdd_HHmmss"
 
         /**
          * @return Full path to Backup dir

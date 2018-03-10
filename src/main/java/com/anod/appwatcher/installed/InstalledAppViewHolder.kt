@@ -1,11 +1,10 @@
 package com.anod.appwatcher.installed
 
 import android.view.View
-
 import com.anod.appwatcher.R
+import com.anod.appwatcher.utils.PicassoAppIcon
 import com.anod.appwatcher.watchlist.AppViewHolder
 import com.anod.appwatcher.watchlist.AppViewHolderBase
-import com.anod.appwatcher.utils.PicassoAppIcon
 
 /**
  * @author alex

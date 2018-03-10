@@ -22,18 +22,17 @@ internal class ImportItemAnimator : DefaultItemAnimator() {
         newHolder.itemView.clearAnimation()
 
         if (newHolder is ImportAppViewHolder) {
-            val holder = newHolder
-            val status = holder.status()
-            if (status == ImportDataProvider.STATUS_IMPORTING) {
-                val anim = AlphaAnimation(0.2f, 1.0f)
-                anim.duration = 500
-                anim.repeatMode = Animation.REVERSE
-                anim.repeatCount = Animation.INFINITE
-                holder.itemView.startAnimation(anim)
-            } else if (status == ImportDataProvider.STATUS_DONE) {
-                animateColor(holder.itemView, Color.TRANSPARENT, holder.themeAccent)
-            } else if (status == ImportDataProvider.STATUS_ERROR) {
-                animateColor(holder.itemView, Color.TRANSPARENT, holder.materialRed)
+            val status = newHolder.status()
+            when (status) {
+                ImportDataProvider.STATUS_IMPORTING -> {
+                    val anim = AlphaAnimation(0.2f, 1.0f)
+                    anim.duration = 500
+                    anim.repeatMode = Animation.REVERSE
+                    anim.repeatCount = Animation.INFINITE
+                    newHolder.itemView.startAnimation(anim)
+                }
+                ImportDataProvider.STATUS_DONE -> animateColor(newHolder.itemView, Color.TRANSPARENT, newHolder.themeAccent)
+                ImportDataProvider.STATUS_ERROR -> animateColor(newHolder.itemView, Color.TRANSPARENT, newHolder.materialRed)
             }
         }
 

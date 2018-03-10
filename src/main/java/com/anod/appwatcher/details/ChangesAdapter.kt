@@ -11,8 +11,8 @@ import android.widget.TextView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.AppChangeCursor
 import com.anod.appwatcher.model.AppChange
-import info.anodsplace.framework.widget.recyclerview.ArrayAdapter
 import info.anodsplace.framework.text.Html
+import info.anodsplace.framework.widget.recyclerview.ArrayAdapter
 import info.anodsplace.framework.widget.recyclerview.RecyclerViewCursorAdapter
 import info.anodsplace.framework.widget.recyclerview.RecyclerViewStateAdapter
 

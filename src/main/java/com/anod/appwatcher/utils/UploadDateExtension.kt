@@ -2,10 +2,8 @@ package com.anod.appwatcher.utils
 
 import com.anod.appwatcher.utils.date.CustomParserFactory
 import finsky.api.model.Document
-import info.anodsplace.framework.AppLog
 import java.text.DateFormat
 import java.text.ParseException
-import java.text.SimpleDateFormat
 import java.util.*
 
 /**

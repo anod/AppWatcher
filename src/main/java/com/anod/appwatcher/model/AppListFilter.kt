@@ -2,9 +2,8 @@ package com.anod.appwatcher.model
 
 import android.database.Cursor
 import com.anod.appwatcher.model.schema.AppListTable
-import info.anodsplace.framework.database.FilterCursor
 import info.anodsplace.framework.content.InstalledApps
-import java.util.concurrent.TimeUnit
+import info.anodsplace.framework.database.FilterCursor
 
 /**
  * @author alex

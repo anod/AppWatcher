@@ -6,10 +6,10 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.WatchAppList
-import finsky.api.model.Document
 import com.squareup.picasso.Picasso
-import info.anodsplace.framework.content.InstalledApps
+import finsky.api.model.Document
 import info.anodsplace.framework.app.ThemeCompat
+import info.anodsplace.framework.content.InstalledApps
 
 /**
  *  @author alex
@@ -64,12 +64,10 @@ abstract class ResultsAdapter(
             holder.price.setText(R.string.installed)
         } else {
             val offer = doc.offer
-            if (offer.offerType == 0) {
-                holder.price.text = ""
-            } else if (offer.micros.toInt() == 0) {
-                holder.price.setText(R.string.free)
-            } else {
-                holder.price.text = offer.formattedAmount
+            when {
+                offer.offerType == 0 -> holder.price.text = ""
+                offer.micros.toInt() == 0 -> holder.price.setText(R.string.free)
+                else -> holder.price.text = offer.formattedAmount
             }
         }
     }

@@ -7,13 +7,12 @@ import android.os.Build
 import android.os.Environment
 import android.support.v7.app.AppCompatDelegate
 import android.text.format.DateUtils
-import android.widget.CompoundButton
 import android.widget.Toast
 import com.anod.appwatcher.*
 import com.anod.appwatcher.backup.DbBackupManager
 import com.anod.appwatcher.backup.ExportTask
-import com.anod.appwatcher.backup.gdrive.GDrive
 import com.anod.appwatcher.backup.ImportTask
+import com.anod.appwatcher.backup.gdrive.GDrive
 import com.anod.appwatcher.backup.gdrive.GDriveSignIn
 import com.anod.appwatcher.model.DbSchemaManager
 import com.anod.appwatcher.sync.SyncScheduler
@@ -25,8 +24,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import info.anodsplace.framework.AppLog
-import info.anodsplace.framework.playservices.GooglePlayServices
 import info.anodsplace.framework.app.SettingsActionBarActivity
+import info.anodsplace.framework.playservices.GooglePlayServices
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -64,7 +63,7 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
     }
 
     override fun onExportFinish(code: Int) {
-        AppLog.d("Code: " + code)
+        AppLog.d("Code: $code")
         isProgressVisible = false
         val r = resources
         if (code == DbBackupManager.RESULT_OK) {

@@ -1,10 +1,9 @@
 package com.anod.appwatcher.search
 
 import android.content.Context
-
-import info.anodsplace.playstore.SearchEndpoint
 import com.anod.appwatcher.model.WatchAppList
 import finsky.api.model.Document
+import info.anodsplace.playstore.SearchEndpoint
 
 /**
  * @author algavris

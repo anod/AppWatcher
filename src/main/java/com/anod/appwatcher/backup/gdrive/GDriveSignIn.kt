@@ -3,7 +3,6 @@ package com.anod.appwatcher.backup.gdrive
 import android.app.Activity
 import android.app.NotificationChannel
 import android.app.PendingIntent
-import com.google.android.gms.tasks.Task
 import android.content.Intent
 import android.support.v4.app.NotificationCompat
 import com.anod.appwatcher.R
@@ -11,9 +10,9 @@ import com.anod.appwatcher.SettingsActivity
 import com.anod.appwatcher.sync.SyncNotification
 import com.google.android.gms.auth.api.signin.*
 import com.google.android.gms.common.api.ApiException
-import info.anodsplace.framework.AppLog
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.drive.Drive
+import com.google.android.gms.tasks.Task
+import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ActivityListener
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.playservices.GoogleSignInConnect

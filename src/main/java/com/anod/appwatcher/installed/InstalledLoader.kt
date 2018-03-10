@@ -4,12 +4,11 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.database.Cursor
 import android.support.v4.util.SimpleArrayMap
-import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.model.AppListCursorLoader
 import com.anod.appwatcher.model.AppListFilter
 import com.anod.appwatcher.model.Tag
-import info.anodsplace.framework.database.FilterCursor
+import com.anod.appwatcher.preferences.Preferences
 import info.anodsplace.framework.content.getAppTitle
 import info.anodsplace.framework.content.getAppUpdateTime
 import info.anodsplace.framework.content.getInstalledPackagesCompat

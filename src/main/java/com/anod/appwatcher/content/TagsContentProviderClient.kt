@@ -65,6 +65,6 @@ class TagsContentProviderClient {
     }
 
     companion object {
-        val DEFAULT_SORT_ORDER = TagsTable.Columns.name + " COLLATE LOCALIZED ASC"
+        const val DEFAULT_SORT_ORDER = TagsTable.Columns.name + " COLLATE LOCALIZED ASC"
     }
 }

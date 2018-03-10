@@ -7,10 +7,10 @@ import android.view.ViewGroup
 import com.anod.appwatcher.App
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.packageToApp
+import com.anod.appwatcher.utils.PicassoAppIcon
 import com.anod.appwatcher.watchlist.AppViewHolder
 import com.anod.appwatcher.watchlist.AppViewHolderBase
 import com.anod.appwatcher.watchlist.AppViewHolderDataProvider
-import com.anod.appwatcher.utils.PicassoAppIcon
 import info.anodsplace.framework.widget.recyclerview.ArrayAdapter
 import java.util.*
 
@@ -24,7 +24,7 @@ open class InstalledAppsAdapter(
         private val packageManager: PackageManager,
         private val dataProvider: AppViewHolderDataProvider,
         protected val listener: AppViewHolder.OnClickListener?)
-    : ArrayAdapter<String, AppViewHolderBase>(ArrayList<String>()) {
+    : ArrayAdapter<String, AppViewHolderBase>(ArrayList()) {
 
     internal val mIconLoader: PicassoAppIcon = App.provide(context).iconLoader
 

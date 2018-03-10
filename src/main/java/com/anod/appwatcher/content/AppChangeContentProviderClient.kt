@@ -57,6 +57,6 @@ class AppChangeContentProviderClient {
     }
 
     companion object {
-        val sortOrder = ChangelogTable.Columns.versionCode + " DESC"
+        const val sortOrder = ChangelogTable.Columns.versionCode + " DESC"
     }
 }

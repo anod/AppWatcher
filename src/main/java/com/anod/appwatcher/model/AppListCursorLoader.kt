@@ -4,11 +4,11 @@ import android.content.Context
 import android.database.Cursor
 import android.support.v4.content.CursorLoader
 import android.text.TextUtils
-import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.content.AppListCursor
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.model.schema.AppListTable
 import com.anod.appwatcher.model.schema.AppTagsTable
+import com.anod.appwatcher.preferences.Preferences
 import info.anodsplace.framework.database.FilterCursor
 import info.anodsplace.framework.database.NullCursor
 import java.util.*
@@ -74,14 +74,11 @@ open class AppListCursorLoader(context: Context,
             val filter = ArrayList<String>()
             filter.add(AppListTable.Columns.status + " DESC")
             filter.add(AppListTable.Columns.recentFlag + " DESC")
-            if (sortId == Preferences.SORT_NAME_DESC) {
-                filter.add(AppListTable.Columns.title + " COLLATE NOCASE DESC")
-            } else if (sortId == Preferences.SORT_DATE_ASC) {
-                filter.add(AppListTable.Columns.uploadTimestamp + " ASC")
-            } else if (sortId == Preferences.SORT_DATE_DESC) {
-                filter.add(AppListTable.Columns.uploadTimestamp + " DESC")
-            } else {
-                filter.add(AppListTable.Columns.title + " COLLATE NOCASE ASC")
+            when (sortId) {
+                Preferences.SORT_NAME_DESC -> filter.add(AppListTable.Columns.title + " COLLATE NOCASE DESC")
+                Preferences.SORT_DATE_ASC -> filter.add(AppListTable.Columns.uploadTimestamp + " ASC")
+                Preferences.SORT_DATE_DESC -> filter.add(AppListTable.Columns.uploadTimestamp + " DESC")
+                else -> filter.add(AppListTable.Columns.title + " COLLATE NOCASE ASC")
             }
             return TextUtils.join(", ", filter)
         }
