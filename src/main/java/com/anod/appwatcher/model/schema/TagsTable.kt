@@ -20,9 +20,9 @@ class TagsTable {
     }
 
     object TableColumns {
-        val _ID = TagsTable.table + "." + BaseColumns._ID
-        val name = TagsTable.table + ".name"
-        val color = TagsTable.table + ".color"
+        const val _ID = TagsTable.table + "." + BaseColumns._ID
+        const val name = TagsTable.table + ".name"
+        const val color = TagsTable.table + ".color"
     }
 
     object Projection {
@@ -34,7 +34,7 @@ class TagsTable {
     companion object {
         const val table = "tags"
         val projection = arrayOf(TableColumns._ID, TableColumns.name, TableColumns.color)
-        val sqlCreate =
+        const val sqlCreate =
                 "CREATE TABLE " + table + " (" +
                         BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                         Columns.name + " TEXT not null," +

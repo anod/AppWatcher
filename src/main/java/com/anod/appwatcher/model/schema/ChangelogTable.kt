@@ -21,11 +21,11 @@ class ChangelogTable {
     }
 
     object TableColumns {
-        val _ID = ChangelogTable.table + "." + BaseColumns._ID
-        val appId = ChangelogTable.table + ".app_id"
-        val versionCode = ChangelogTable.table + ".code"
-        val versionName = ChangelogTable.table + ".name"
-        val details = ChangelogTable.table + ".details"
+        const val _ID = ChangelogTable.table + "." + BaseColumns._ID
+        const val appId = ChangelogTable.table + ".app_id"
+        const val versionCode = ChangelogTable.table + ".code"
+        const val versionName = ChangelogTable.table + ".name"
+        const val details = ChangelogTable.table + ".details"
     }
 
     object Projection {
@@ -47,7 +47,7 @@ class ChangelogTable {
                 TableColumns.versionName,
                 TableColumns.details)
 
-        val sqlCreate =
+        const val sqlCreate =
                 "CREATE TABLE " + table + " (" +
                         BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                         ChangelogTable.Columns.appId + " TEXT not null," +

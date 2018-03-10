@@ -31,8 +31,8 @@ class AppListTable {
     }
 
     object TableColumns {
-        val _ID = AppListTable.table + "." + BaseColumns._ID
-        val appId = AppListTable.table + ".app_id"
+        const val _ID = AppListTable.table + "." + BaseColumns._ID
+        const val appId = AppListTable.table + ".app_id"
     }
 
     object Projection {
@@ -59,7 +59,7 @@ class AppListTable {
     companion object {
 
         const val table = "app_list"
-        const val recentDays: Long = 3
+        private const val recentDays: Long = 3
 
         val recentTime: Long
             get() {
@@ -92,10 +92,12 @@ class AppListTable {
                     Columns.iconUrl,
                     Columns.appType,
                     Columns.refreshTimestamp,
-                    "case when ${Columns.uploadTimestamp} > $recentTime then 1 else 0 end ${Columns.recentFlag}")
+                    "case " +
+                            "when ${Columns.uploadTimestamp} > $recentTime then 1 " +
+                            "else 0 end ${Columns.recentFlag}")
         }
 
-        val sqlCreate =
+        const val sqlCreate =
                 "CREATE TABLE " + table + " (" +
                     BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                     Columns.appId + " TEXT not null," +
