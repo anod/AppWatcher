@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.2.10'
+    ext.kotlin_version = '1.2.30'
     ext.gradle_plugin_version = '3.2.0-alpha01'
     repositories {
         jcenter()
@@ -60,7 +60,7 @@ android {
         applicationId 'com.anod.appwatcher'
         minSdkVersion 15
         targetSdkVersion 27
-        versionCode 90
+        versionCode 91
         versionName '1.10'
         resValue "string", "content_authority", "com.anod.appwatcher"
 

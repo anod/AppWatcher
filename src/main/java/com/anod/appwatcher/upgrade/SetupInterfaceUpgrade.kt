@@ -21,23 +21,18 @@ class SetupInterfaceUpgrade(val prefs: Preferences, val context: Context): Upgra
         }
 
         DialogCustom(context, R.string.setup_interface_title, R.layout.dialog_setup_interface, { view, builder ->
-                var recreate = false
                 view.findViewById<Switch>(R.id.recentToggle).setOnCheckedChangeListener({ _, checked ->
                     prefs.showRecent = checked
-                    recreate = true
                 })
 
                 view.findViewById<Switch>(R.id.onDeviceToggle).setOnCheckedChangeListener({ _, checked ->
                     prefs.showOnDevice = checked
-                    recreate = true
                 })
 
                 builder.setPositiveButton(android.R.string.ok, { dialog, which ->
-                    if (recreate) {
-                        val i = Intent(context, AppWatcherActivity::class.java)
-                        i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-                        context.startActivity(i)
-                    }
+                    val i = Intent(context, AppWatcherActivity::class.java)
+                    i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    context.startActivity(i)
                     dialog.dismiss()
                 })
         }).show()
