@@ -118,7 +118,7 @@ class Preferences(context: Context) : DeviceIdStorage {
         set(filterId) = preferences.edit().putInt(FILTER_ID, filterId).apply()
 
     var updateAllConfirmed: Boolean
-        get() = preferences.getBoolean("update-all-confirmedt", false)
+        get() = preferences.getBoolean("update-all-confirmed", false)
         set(value) = preferences.edit().putBoolean("update-all-confirmed", value).apply()
 
     companion object {

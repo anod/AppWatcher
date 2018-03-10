@@ -139,7 +139,7 @@
     <string name="setup_interface_title">Configure interface</string>
     <string name="setup_interface_section_ondevice">Show installed on device apps section under the watch list</string>
     <string name="setup_interface_section_recent">Show recently installed apps section on the top</string>
-    <string name="update_all_warning">Notice, this triggers update for ANY available update in Play Store</string>
+    <string name="update_all_warning">This triggers update for ANY available update in Play Store</string>
     <string name="i_understand">I understand</string>
 
     <string-array name="sort_titles">

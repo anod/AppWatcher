@@ -31,6 +31,6 @@ class UpdateAll(private val context: Context, private val prefs: Preferences) {
             builder.setNegativeButton(android.R.string.cancel, {
                 _, _ ->
             })
-        })
+        }).show()
     }
 }
