@@ -200,10 +200,9 @@ open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, Vi
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        val inflater = menuInflater
-        inflater.inflate(R.menu.changelog, menu)
+        menuInflater.inflate(R.menu.changelog, menu)
         addMenu = menu.findItem(R.id.menu_add)
-        addMenu!!.isEnabled = false
+        addMenu?.isEnabled = false
         if (isNewApp) {
             menu.findItem(R.id.menu_remove).isVisible = false
             menu.findItem(R.id.menu_tag_app).isVisible = false
@@ -353,7 +352,7 @@ open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, Vi
             showRetryMessage()
             return
         }
-        addMenu!!.isEnabled = true
+        addMenu?.isEnabled = true
         adapter.swapData(cursor)
         adapter.recentChange = changesLoader.recentChange
         progressBar.visibility = View.GONE
@@ -436,7 +435,7 @@ open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, Vi
         playStoreButton.isEnabled = alpha > 0.8f
 
         val inverseAlpha = (1.0f - alpha)
-        toolbar.logo.alpha = (inverseAlpha * 255).toInt()
+        toolbar.logo?.alpha = (inverseAlpha * 255).toInt()
         titleString.alpha = inverseAlpha
         subtitleString.alpha = inverseAlpha
         mainHandler.post({
