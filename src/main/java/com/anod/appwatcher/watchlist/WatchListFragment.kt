@@ -24,6 +24,7 @@ import com.anod.appwatcher.content.AppListCursor
 import com.anod.appwatcher.details.DetailsActivity
 import com.anod.appwatcher.installed.ImportInstalledActivity
 import com.anod.appwatcher.model.*
+import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.search.SearchActivity
 import com.anod.appwatcher.utils.UpdateAll
 import info.anodsplace.framework.AppLog
@@ -59,11 +60,14 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
         val isEmpty: Boolean
     }
 
-    open class DefaultSection : Section {
+    // Must have empty constructor
+    open class DefaultSection: Section {
+        private var showRecentlyUpdated = false
         override var adapterIndexMap = SparseIntArray()
         override val adapter: MergeRecyclerAdapter by lazy { MergeRecyclerAdapter() }
 
         override fun initAdapter(context: Context, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener) {
+            this.showRecentlyUpdated = App.provide(context).prefs.showRecentlyUpdated
             val index = adapter.add(AppListCursorAdapter(context, installedApps, clickListener) as RecyclerView.Adapter<RecyclerView.ViewHolder>)
             adapterIndexMap.put(ADAPTER_WATCHLIST, index)
         }
@@ -78,7 +82,7 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
 
             val newCount = (loader as AppListCursorLoader).newCount
             val updatableCount = loader.updatableCount
-            val recentlyUpdatedCount = loader.recentlyUpdatedCount
+            val recentlyUpdatedCount = if (showRecentlyUpdated) loader.recentlyUpdatedCount else 0
 
             watchlistAdapter.setNewAppsCount(newCount, updatableCount, recentlyUpdatedCount)
         }

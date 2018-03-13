@@ -130,6 +130,7 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
         preferences.add(TextItem(R.string.pref_title_dark_theme, R.string.pref_descr_dark_theme, ACTION_DARK_THEME))
         preferences.add(SwitchItem(R.string.pref_show_recent_title, R.string.pref_show_recent_descr, ACTION_SHOW_RECENT, prefs.showRecent))
         preferences.add(SwitchItem(R.string.pref_show_ondevice_title, R.string.pref_show_ondevice_descr, ACTION_SHOW_ONDEVICE, prefs.showOnDevice))
+        preferences.add(SwitchItem(R.string.pref_show_recently_updated_title, R.string.pref_show_recently_updated_descr, ACTION_SHOW_RECENTLY_UPDATED, prefs.showRecentlyUpdated))
 
         preferences.add(Category(R.string.pref_header_about))
 
@@ -291,6 +292,13 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
                 }
                 prefs.showOnDevice = showOnDevice
             }
+            ACTION_SHOW_RECENTLY_UPDATED -> {
+                val showRecentlyUpdated = (pref as ToggleItem).checked
+                if (!this.recreateWatchlistOnBack) {
+                    this.recreateWatchlistOnBack = prefs.showRecentlyUpdated != showRecentlyUpdated
+                }
+                prefs.showRecentlyUpdated = showRecentlyUpdated
+            }
             ACTION_USER_LOG -> {
                 startActivity(Intent(this, UserLogActivity::class.java))
             }
@@ -399,5 +407,6 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
         private const val ACTION_SHOW_RECENT = 15
         private const val ACTION_SHOW_ONDEVICE = 16
         private const val ACTION_USER_LOG = 17
+        private const val ACTION_SHOW_RECENTLY_UPDATED = 18
     }
 }

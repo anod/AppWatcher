@@ -76,6 +76,32 @@
                 app:layout_constraintStart_toEndOf="@+id/showOnDevice"
                 app:layout_constraintTop_toBottomOf="@+id/recentToggle" />
         </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp"
+            android:gravity="top">
+
+            <TextView
+                android:id="@+id/showRecentlyUpdated"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/showRecent"
+                android:text="@string/setup_interface_section_recently_updated" />
+
+            <Switch
+                android:id="@+id/recentlyUpdatedToggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/showRecentlyUpdated"
+                app:layout_constraintTop_toBottomOf="@+id/showOnDevice" />
+        </LinearLayout>
+
     </LinearLayout>
 
 </LinearLayout>

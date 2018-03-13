@@ -31,8 +31,6 @@
     <string name="dialog_about_title">%1$s вер. %2$s</string>
     <string name="dialog_about_text">Автор: Alex Gavrishev&lt;br/&gt;&lt;a href="https://play.google.com/store/apps/developer?id=Alex+Gavrishev\">Google Play Store /&lt;</string>
     <string name="share">Поделиться</string>
-    <string name="share_subject_normal">Взгляните на \"%s"</string>
-    <string name="share_subject_updated">Взгляните на новую версию \"%s"</string>
     <string name="app_stored">"%s\" добавлен в список для наблюдения</string>
     <string name="rate_app">Оценить в маркете</string>
     <string name="installed">Установленно</string>
@@ -57,10 +55,6 @@
     <string name="free">БЕСПЛАТНО</string>
     <string name="error_fetching_info">Ошибка загрузки информации. Пожалуйста, попробуйте снова</string>
     <string name="retry">Повторить</string>
-    <string name="gms_service_missing">Google Play services отсутсвуют на этом устройстве.</string>
-    <string name="gms_service_update_required">Версия Google Play services устарела.</string>
-    <string name="gms_service_disabled">Google Play services отключены на этом устройстве</string>
-    <string name="gms_service_invalid">Версия Google Play services, установленных на этом устройстве не является подлинным.</string>
     <string name="never">Никогда</string>
     <string name="now">сейчас</string>
     <string name="no_registered_google_accounts">Нет зарегистрированных аккаунтов google</string>
@@ -122,7 +116,6 @@
     <string name="refresh_scheduled">Обновление запланировано</string>
     <string name="recently_installed">Недавно установиленные</string>
     <string name="shortcut_search">Поиск</string>
-    <string name="shortcut_recent">Последние</string>
     <string name="open">Открыть</string>
     <string name="channel_name">Обновления</string>
     <string name="channel_description">Уведомления о новых версиях аппликации из списка</string>
@@ -138,5 +131,31 @@
         <item>Светлая</item> <!-- MODE_NIGHT_NO = 1; -->
         <item>Темная</item> <!-- MODE_NIGHT_YES = 2; -->
     </string-array>
+    <string name="pref_title_dark_theme">Темная тема</string>
+  <string name="pref_descr_dark_theme">Выбор между темной и AMOLED черной темой</string>
+  <string name="pref_title_updates_frequency">Переодичность проверки</string>
+  <string name="share_subject">%s версия %s</string>
+  <string name="new_updates">Новые обновления</string>
+  <string name="tab_updatable">Обновляемые</string>
+  <string name="tab_unwatched">Не отслеживаемые</string>
+  <string name="shortcut_updates">Обновляемые</string>
+  <string name="updates_not_available">Информация об обновлениях не доступна</string>
+  <string name="filter">Фильтр</string>
+  <string name="pref_show_recent_title">Последние установленные</string>
+  <string name="pref_show_recent_descr">Отображать раздел с последними установленными аппликациями на главном экране</string>
+  <string name="pref_show_ondevice_title">На устройстве</string>
+  <string name="pref_show_ondevice_descr">Отображать секцию с аппликациями на устройстве на главном экране</string>
+  <string name="log">Логи</string>
+  <string name="user_log">Логи</string>
+  <string name="refresh_gdrive_mesage">Регистрация Google Drive аккаунта после обновления</string>
+  <string name="setup_new_interface_message">Настройте главный экран, чтобы включить дополнительные разделы. Ранее разделы были доступны в Установленныx. Можнo поменять позже в настройках.</string>
+  <string name="setup_interface_title">Настройка интерфейса</string>
+  <string name="setup_interface_section_ondevice">Отображать раздел с аппликациями на устройстве под списком наблюдений</string>
+  <string name="update_all_warning">Вызывает обновление для ЛЮБОГО доступного обновления в Play Маркете</string>
+  <string name="i_understand">Я понял</string>
+  <string name="pref_show_recently_updated_title">Недавно обновленные</string>
+  <string name="pref_show_recently_updated_descr">Отображать раздел с недавно обновленными аппликациями в течение нескольких дней</string>
+  <string name="setup_interface_section_recent">Отображать раздел с последними установленными аппликациями в начале списка</string>
+  <string name="setup_interface_section_recently_updated">Отображать раздел с недавно обновленными приложениями в течение нескольких дней</string>
 
 </resources>

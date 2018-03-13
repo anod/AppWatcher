@@ -31,7 +31,7 @@
     <string name="dialog_about_text">Author: Alex Gavrishev&lt;br/&gt;&lt;a href="https://play.google.com/store/apps/developer?id=Alex+Gavrishev" /&lt;</string>
     <string name="share">Share</string>
     <string name="share_subject">%s version %s</string>
-    <string name="share_text">%s %s</string>
+    <string name="share_text" translatable="false">%s %s</string>
     <string name="app_stored">\"%s\" was added</string>
     <string name="rate_app">Rate this app</string>
     <string name="installed">INSTALLED</string>
@@ -132,13 +132,16 @@
     <string name="pref_show_recent_descr">Show recently installed section in the main view</string>
     <string name="pref_show_ondevice_title">Show On device</string>
     <string name="pref_show_ondevice_descr">Show On device section in the main view</string>
+    <string name="pref_show_recently_updated_title">Show recently updated</string>
+    <string name="pref_show_recently_updated_descr">Show a section with recently updated apps for several days</string>
     <string name="log">App log</string>
     <string name="user_log">App log</string>
     <string name="refresh_gdrive_mesage">Refreshing Google Drive account after upgrade</string>
-    <string name="setup_new_interface_message">Configure main screen to include \"Recently installed\" and \"On Device\" sections.\nPreviously those sections were available under \"Installed\" filter.\nCan be changed later in the settings.</string>
+    <string name="setup_new_interface_message">Configure main screen to include additional sections. Previously those sections were available under \"Installed\" filter. Can be changed later in the settings.</string>
     <string name="setup_interface_title">Configure interface</string>
     <string name="setup_interface_section_ondevice">Show installed on device apps section under the watch list</string>
-    <string name="setup_interface_section_recent">Show recently installed apps section on the top</string>
+    <string name="setup_interface_section_recent">Show section with recently installed apps on the top</string>
+    <string name="setup_interface_section_recently_updated">Show recently updated apps section for several days</string>
     <string name="update_all_warning">This triggers update for ANY available update in Play Store</string>
     <string name="i_understand">I understand</string>
 

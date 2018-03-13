@@ -29,8 +29,6 @@
     <string name="dialog_about_title">%1$s ver. %2$s</string>
     <string name="dialog_about_text">Auteur: Alex Gavrishev&lt;br/&gt;&lt;a href=&quot;https://play.google.com/store/apps/developer?id=Alex+Gavrishev&quot;&gt;Google Play Store&lt;/a&gt;&lt;br/&gt;&lt;br/&gt;Dit project is onderhevig aan de volgende licentie: &lt;a href=&quot;http://creativecommons.org/licenses/by-sa/3.0/&quot;&gt;Creative Commons Attribution-ShareAlike 3.0 Unported License.&lt;/a&gt;&lt;br/&gt;&lt;br/&gt;De broncode is beschikbaar op &lt;a href=&quot;https://github.com/anod/AppWatcher&quot;&gt;github.com&lt;/a&gt;.</string>
    <string name="share">Delen</string>
-    <string name="share_subject_normal"> Check \"%s\" out</string>
-    <string name="share_subject_updated">Check de nieuwe versie van \"%s\" out.</string>
     <string name="app_stored">\"%s\" is toegevoegd aan de volglijst</string>
     <string name="rate_app">App beoordelen</string>
     <string name="installed">Installed</string>
