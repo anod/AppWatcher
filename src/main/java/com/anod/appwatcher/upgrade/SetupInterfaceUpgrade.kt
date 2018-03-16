@@ -24,6 +24,7 @@ class SetupInterfaceUpgrade(val prefs: Preferences, val context: Context): Upgra
                 var recreate = false
                 view.findViewById<Switch>(R.id.recentToggle).isChecked = prefs.showRecent
                 view.findViewById<Switch>(R.id.onDeviceToggle).isChecked = prefs.showOnDevice
+                view.findViewById<Switch>(R.id.recentlyUpdatedToggle).isChecked = prefs.showRecentlyUpdated
 
                 view.findViewById<Switch>(R.id.recentToggle).setOnCheckedChangeListener({ _, checked ->
                     prefs.showRecent = checked
@@ -32,6 +33,11 @@ class SetupInterfaceUpgrade(val prefs: Preferences, val context: Context): Upgra
 
                 view.findViewById<Switch>(R.id.onDeviceToggle).setOnCheckedChangeListener({ _, checked ->
                     prefs.showOnDevice = checked
+                    recreate = true
+                })
+
+                view.findViewById<Switch>(R.id.recentlyUpdatedToggle).setOnCheckedChangeListener({ _, checked ->
+                    prefs.showRecentlyUpdated = checked
                     recreate = true
                 })
 

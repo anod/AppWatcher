@@ -7,6 +7,7 @@ import android.widget.TextView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.WatchAppList
+import com.anod.appwatcher.utils.DialogMessage
 import finsky.api.model.Document
 
 class ResultsAppViewHolder(itemView: View, private val watchAppList: WatchAppList)
@@ -26,8 +27,17 @@ class ResultsAppViewHolder(itemView: View, private val watchAppList: WatchAppLis
 
     override fun onClick(v: View) {
         val info = AppInfo(doc!!)
+
         if (watchAppList.contains(info.packageName)) {
-            watchAppList.delete(info)
+            DialogMessage(itemView.context, R.string.already_exist, R.string.delete_existing_item, {
+                builder ->
+                builder.setPositiveButton(R.string.delete, { _, _ ->
+                    watchAppList.delete(info)
+                })
+                builder.setNegativeButton(android.R.string.cancel, { _, _ ->
+
+                })
+            }).show()
         } else {
             watchAppList.add(info)
         }

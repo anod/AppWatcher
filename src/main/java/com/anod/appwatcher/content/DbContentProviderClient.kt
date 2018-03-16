@@ -176,8 +176,8 @@ class DbContentProviderClient(private val contentProviderClient: ContentProvider
 
     fun queryAppId(packageName: String): AppInfo? {
         val cr = queryApps(null,
-                AppListTable.Columns.packageName + " = ? AND " + AppListTable.Columns.status + " != ?",
-                arrayOf(packageName, AppInfoMetadata.STATUS_DELETED.toString()))
+                AppListTable.Columns.packageName + " = ?",
+                arrayOf(packageName))
         if (cr.count == 0) {
             return null
         }

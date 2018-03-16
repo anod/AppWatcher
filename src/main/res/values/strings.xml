@@ -141,9 +141,11 @@
     <string name="setup_interface_title">Configure interface</string>
     <string name="setup_interface_section_ondevice">Show installed on device apps section under the watch list</string>
     <string name="setup_interface_section_recent">Show section with recently installed apps on the top</string>
-    <string name="setup_interface_section_recently_updated">Show recently updated apps section for several days</string>
+    <string name="setup_interface_section_recently_updated">Show recently updated apps section</string>
     <string name="update_all_warning">This triggers update for ANY available update in Play Store</string>
     <string name="i_understand">I understand</string>
+    <string name="already_exist">Already watched</string>
+    <string name="delete_existing_item">Do you want to delete?</string>
 
     <string-array name="sort_titles">
         <item>By name &#x2193;</item>

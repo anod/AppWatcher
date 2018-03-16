@@ -47,10 +47,10 @@ class WatchAppList(private val listener: WatchAppList.Listener?) {
         if (existingApp != null) {
             if (existingApp.status == AppInfoMetadata.STATUS_DELETED) {
                 val success = contentProvider?.updateStatus(existingApp.rowId, AppInfoMetadata.STATUS_NORMAL) ?: -1
-                if (success > 0) {
-                    return RESULT_OK
+                return if (success > 0) {
+                    RESULT_OK
                 } else {
-                    return ERROR_INSERT
+                    ERROR_INSERT
                 }
             }
             return ERROR_ALREADY_ADDED

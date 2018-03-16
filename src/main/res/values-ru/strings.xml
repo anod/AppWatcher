@@ -154,8 +154,10 @@
   <string name="update_all_warning">Вызывает обновление для ЛЮБОГО доступного обновления в Play Маркете</string>
   <string name="i_understand">Я понял</string>
   <string name="pref_show_recently_updated_title">Недавно обновленные</string>
-  <string name="pref_show_recently_updated_descr">Отображать раздел с недавно обновленными аппликациями в течение нескольких дней</string>
+  <string name="pref_show_recently_updated_descr">Отображать раздел с недавно обновленными аппликациями за последние нескольких дней</string>
   <string name="setup_interface_section_recent">Отображать раздел с последними установленными аппликациями в начале списка</string>
-  <string name="setup_interface_section_recently_updated">Отображать раздел с недавно обновленными приложениями в течение нескольких дней</string>
+  <string name="setup_interface_section_recently_updated">Отображать раздел с недавно обновленными приложениями за последние нескольких дней</string>
+  <string name="already_exist">Уже в списке</string>
+  <string name="delete_existing_item">Желаете удалить из списка?</string>
 
 </resources>

@@ -20,10 +20,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
-import com.anod.appwatcher.App
-import com.anod.appwatcher.DrawerActivity
-import com.anod.appwatcher.MarketSearchActivity
-import com.anod.appwatcher.R
+import com.anod.appwatcher.*
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.search.SearchActivity
