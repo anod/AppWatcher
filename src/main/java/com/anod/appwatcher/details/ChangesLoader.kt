@@ -46,8 +46,8 @@ class ChangesLoader(context: Context, private var appId: String,private val deta
 
     val recentChange: AppChange
         get() {
-            val details = appDetails ?: return AppChange(appId, 0, "", "")
-            return AppChange(appId, details.versionCode, details.versionString, details.recentChangesHtml ?: "")
+            val details = appDetails ?: return AppChange(appId, 0, "", "", "")
+            return AppChange(appId, details.versionCode, details.versionString, details.recentChangesHtml ?: "", details.uploadDate)
         }
 
 }

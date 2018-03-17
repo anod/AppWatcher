@@ -25,6 +25,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.SettingsActionBarActivity
+import info.anodsplace.framework.content.startActivitySafely
 import info.anodsplace.framework.playservices.GooglePlayServices
 import java.io.File
 import java.io.FileInputStream
@@ -181,7 +182,13 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
                 val uri = Uri.parse(DbBackupManager.defaultBackupDir.absolutePath)
                 intent.setDataAndType(uri, "application/json")
                 intent.putExtra(Intent.EXTRA_TITLE, "appwatcher-" + DbBackupManager.generateFileName())
-                startActivityForResult(intent, REQUEST_BACKUP_DEST)
+
+                try {
+                    startActivityForResult(intent, REQUEST_BACKUP_DEST)
+                } catch (e: Exception) {
+                    AppLog.e(e)
+                    Toast.makeText(this, "Cannot start activity: " + intent.toString(), Toast.LENGTH_SHORT).show()
+                }
             } else {
                 val backupFile = DbBackupManager.generateBackupFile()
                 ExportTask(this, this).execute(Uri.fromFile(backupFile))

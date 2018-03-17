@@ -16,7 +16,8 @@ class AppChangeCursor(cursor: Cursor?) : CursorIterator<AppChange>(cursor) {
                 getString(ChangelogTable.Projection.appId),
                 getInt(ChangelogTable.Projection.versionCode),
                 getString(ChangelogTable.Projection.versionName),
-                getString(ChangelogTable.Projection.details)
+                getString(ChangelogTable.Projection.details),
+                getString(ChangelogTable.Projection.uploadDate)
         )
 
     override fun next(): AppChange {

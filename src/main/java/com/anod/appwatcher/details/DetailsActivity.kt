@@ -77,7 +77,7 @@ open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, Vi
     val iconLoader: PicassoAppIcon by lazy { App.provide(this).iconLoader }
     val dataProvider: AppViewHolderDataProvider by lazy { AppViewHolderDataProvider(this, InstalledApps.PackageManager(packageManager)) }
     val appDetailsView: AppDetailsView by lazy { AppDetailsView(container, dataProvider) }
-    val adapter: ChangesAdapter by lazy { ChangesAdapter(this, AppChange(appId, 0, "", "") ) }
+    val adapter: ChangesAdapter by lazy { ChangesAdapter(this, AppChange(appId, 0, "", "", "") ) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

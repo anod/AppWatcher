@@ -17,6 +17,7 @@ class ChangelogTable {
             const val versionCode = "code"
             const val versionName = "name"
             const val details = "details"
+            const val uploadDate = "upload_date"
         }
     }
 
@@ -26,6 +27,7 @@ class ChangelogTable {
         const val versionCode = ChangelogTable.table + ".code"
         const val versionName = ChangelogTable.table + ".name"
         const val details = ChangelogTable.table + ".details"
+        const val uploadDate = ChangelogTable.table + ".upload_date"
     }
 
     object Projection {
@@ -34,6 +36,7 @@ class ChangelogTable {
         const val versionCode = 2
         const val versionName = 3
         const val details = 4
+        const val uploadDate = 5
     }
 
     companion object {
@@ -45,7 +48,8 @@ class ChangelogTable {
                 TableColumns.appId,
                 TableColumns.versionCode,
                 TableColumns.versionName,
-                TableColumns.details)
+                TableColumns.details,
+                TableColumns.uploadDate)
 
         const val sqlCreate =
                 "CREATE TABLE " + table + " (" +
@@ -54,6 +58,7 @@ class ChangelogTable {
                         ChangelogTable.Columns.versionCode + " INTEGER," +
                         ChangelogTable.Columns.versionName + " TEXT not null," +
                         ChangelogTable.Columns.details + " TEXT not null," +
+                        ChangelogTable.Columns.uploadDate + " TEXT not null," +
                         "UNIQUE(${ChangelogTable.Columns.appId}, ${ChangelogTable.Columns.versionCode}) ON CONFLICT REPLACE" +
                         ") "
 
@@ -67,5 +72,6 @@ val AppChange.contentValues: ContentValues
         values.put(ChangelogTable.Columns.versionCode, versionCode)
         values.put(ChangelogTable.Columns.versionName, versionName)
         values.put(ChangelogTable.Columns.details, details)
+        values.put(ChangelogTable.Columns.uploadDate, uploadDate)
         return values
     }

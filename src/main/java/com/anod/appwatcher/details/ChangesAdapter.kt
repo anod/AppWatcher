@@ -23,16 +23,17 @@ class ChangeView(itemView: View) : RecyclerView.ViewHolder(itemView) {
         view
     }
     val version: TextView by lazy { itemView.findViewById<TextView>(R.id.version) }
+    val uploadDate: TextView  by lazy { itemView.findViewById<TextView>(R.id.upload_date) }
 
     fun bindView(change: AppChange) {
         version.text = "${change.versionName} (${change.versionCode})"
+        uploadDate.text = change.uploadDate
         if (change.details.isEmpty()) {
             changelog.setText(R.string.no_recent_changes)
         } else {
             changelog.text = Html.parse(change.details)
         }
     }
-
 }
 
 class ChangesAdapter(private val context: Context, recentChange: AppChange):
@@ -63,7 +64,7 @@ class ChangesAdapter(private val context: Context, recentChange: AppChange):
 
 class RecentChangeAdapter(private val context: Context, recentChange: AppChange) : ArrayAdapter<AppChange, ChangeView>(mutableListOf(recentChange)) {
 
-    @LayoutRes val resource: Int =  R.layout.list_item_change
+    @LayoutRes val resource: Int = R.layout.list_item_change
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChangeView {
         val v = LayoutInflater.from(context).inflate(resource, parent, false)

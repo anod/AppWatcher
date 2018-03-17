@@ -222,7 +222,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
                 }
                 val recentChanges = marketApp.appDetails.recentChangesHtml ?: ""
                 if (recentChanges.isNotBlank()) {
-                    changelog.add(AppChange(docId, marketApp.appDetails.versionCode, marketApp.appDetails.versionString, recentChanges).contentValues)
+                    changelog.add(AppChange(docId, marketApp.appDetails.versionCode, marketApp.appDetails.versionString, recentChanges, marketApp.appDetails.uploadDate).contentValues)
                 }
             }
         }

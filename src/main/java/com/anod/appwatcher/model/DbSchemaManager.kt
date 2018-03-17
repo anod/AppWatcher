@@ -15,7 +15,7 @@ class DbSchemaManager(context: Context)
     : SQLiteOpenHelper(context, DbSchemaManager.dbName, null, DbSchemaManager.version) {
 
     companion object {
-        private const val version = 12
+        private const val version = 13
         const val dbName = "app_watcher"
     }
 
@@ -87,6 +87,10 @@ class DbSchemaManager(context: Context)
             }
             9,10,11 -> {
                 db.execSQL(ChangelogTable.sqlCreate)
+            }
+            12 -> {
+                db.execSQL("ALTER TABLE " + ChangelogTable.table + " ADD COLUMN " + ChangelogTable.Columns.uploadDate + " TEXT")
+
             }
         }
     }
