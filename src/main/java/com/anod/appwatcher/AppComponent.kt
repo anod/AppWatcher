@@ -14,9 +14,11 @@ import com.anod.appwatcher.utils.PicassoAppIcon
 import com.firebase.jobdispatcher.FirebaseJobDispatcher
 import com.firebase.jobdispatcher.GooglePlayDriver
 import com.squareup.tape2.QueueFile
+import info.anodsplace.framework.net.NetworkConnectivity
 import info.anodsplace.playstore.DeviceId
 import info.anodsplace.playstore.DeviceInfoProvider
 import info.anodsplace.playstore.Network
+import info.anodsplace.playstore.OnlineNetwork
 import java.io.File
 
 /**
@@ -24,7 +26,7 @@ import java.io.File
  * *
  * @date 2015-02-22
  */
-class ObjectGraph internal constructor(private val app: AppWatcherApplication): DeviceInfoProvider {
+class AppComponent internal constructor(private val app: AppWatcherApplication): DeviceInfoProvider {
 
     override val deviceId: String by lazy { DeviceId(this.app, prefs).load() }
     override val simOperator: String
@@ -39,9 +41,9 @@ class ObjectGraph internal constructor(private val app: AppWatcherApplication): 
         requestQueue
     }
     val iconLoader: PicassoAppIcon by lazy { PicassoAppIcon(this.app) }
-    val networkConnection: NetworkConnection by lazy {
+    val networkConnection: NetworkConnectivity by lazy {
         val cm: ConnectivityManager = app.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        NetworkConnection(cm)
+        NetworkConnectivity(app)
     }
     val jobDispatcher: FirebaseJobDispatcher by lazy { FirebaseJobDispatcher(GooglePlayDriver(app)) }
     val memoryCache: LruCache<String, Any?> by lazy {

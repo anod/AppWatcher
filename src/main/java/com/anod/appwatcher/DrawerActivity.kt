@@ -46,7 +46,7 @@ open class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.SelectionLi
     open val isHomeAsMenu: Boolean
         get() = false
 
-    val provide: ObjectGraph
+    val provide: AppComponent
         get() = App.provide(this)
 
     val isAuthenticated: Boolean

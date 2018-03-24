@@ -18,24 +18,19 @@ import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.app.ApplicationInstance
 import info.anodsplace.framework.app.CustomThemeActivity
 import java.io.IOException
-import java.net.ConnectException
-import java.net.SocketException
-import java.net.SocketTimeoutException
-import java.net.UnknownHostException
-import javax.net.ssl.SSLHandshakeException
-import javax.net.ssl.SSLPeerUnverifiedException
+
 
 
 class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstance {
 
     override val notificationManager: NotificationManager
-        get() = objectGraph.notificationManager
+        get() = appComponent.notificationManager
     override val memoryCache: LruCache<String, Any?>
-        get() = objectGraph.memoryCache
+        get() = appComponent.memoryCache
     override val nightMode: Int
-        get() = objectGraph.prefs.nightMode
+        get() = appComponent.prefs.nightMode
 
-    lateinit var objectGraph: ObjectGraph
+    lateinit var appComponent: AppComponent
 
     override fun onCreate() {
         super.onCreate()
@@ -46,18 +41,18 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
         AppLog.setDebug(true, "AppWatcher")
         AppLog.instance.listener = this
 
-        objectGraph = ObjectGraph(this)
-        if (objectGraph.prefs.isDriveSyncEnabled) {
-            objectGraph.uploadServiceContentObserver
+        appComponent = AppComponent(this)
+        if (appComponent.prefs.isDriveSyncEnabled) {
+            appComponent.uploadServiceContentObserver
         }
-        AppCompatDelegate.setDefaultNightMode(objectGraph.prefs.nightMode)
+        AppCompatDelegate.setDefaultNightMode(appComponent.prefs.nightMode)
         SyncNotification(ApplicationContext(this)).createChannel()
         registerActivityLifecycleCallbacks(LifecycleCallbacks(this))
     }
 
     override fun onLogException(tr: Throwable) {
 
-        if (isNetworkError(tr) && !objectGraph.networkConnection.isNetworkAvailable) {
+        if (isNetworkError(tr) && !appComponent.networkConnection.isNetworkAvailable) {
             // Ignore
             return
         }
@@ -67,16 +62,11 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
 
     private fun isNetworkError(tr: Throwable): Boolean {
         return tr is NetworkError
-            || (tr is IOException && tr.message?.contains("NetworkError") == true)
-            || tr is VolleyError
-            || tr is TimeoutError
-            || tr is SocketException
-            || tr is NoConnectionError
-            || tr is UnknownHostException
-            || tr is SSLHandshakeException
-            || tr is SSLPeerUnverifiedException
-            || tr is ConnectException
-            || tr is SocketTimeoutException
+                || (tr is IOException && tr.message?.contains("NetworkError") == true)
+                || tr is VolleyError
+                || tr is TimeoutError
+                || tr is NoConnectionError
+                || appComponent.networkConnection.isNetworkException(tr)
     }
 
     private inner class FirebaseLogger : AppLog.Logger {

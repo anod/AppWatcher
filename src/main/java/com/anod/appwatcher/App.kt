@@ -19,15 +19,15 @@ object App {
         return context.actual as AppWatcherApplication
     }
 
-    fun provide(context: Context): ObjectGraph {
-        return (context.applicationContext as AppWatcherApplication).objectGraph
+    fun provide(context: Context): AppComponent {
+        return (context.applicationContext as AppWatcherApplication).appComponent
     }
 
-    fun provide(context: ApplicationContext): ObjectGraph {
-        return (context.actual as AppWatcherApplication).objectGraph
+    fun provide(context: ApplicationContext): AppComponent {
+        return (context.actual as AppWatcherApplication).appComponent
     }
 
     fun log(context: Context): UserLogger {
-        return (context.applicationContext as AppWatcherApplication).objectGraph.userLogger
+        return (context.applicationContext as AppWatcherApplication).appComponent.userLogger
     }
 }
