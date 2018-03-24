@@ -94,8 +94,8 @@ class UserLogger(queueFile: QueueFile) {
 
     fun log(level: Int, message: String) {
         val userMessage = UserLogMessage(Calendar.getInstance().time, message, level)
-        val message = handler.obtainMessage(messageLog, userMessage)
-        handler.sendMessage(message)
+        val handlerMessage = handler.obtainMessage(messageLog, userMessage)
+        handler.sendMessage(handlerMessage)
     }
 
     val count: Int

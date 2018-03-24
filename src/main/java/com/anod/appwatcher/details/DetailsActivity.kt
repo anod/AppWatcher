@@ -87,7 +87,6 @@ open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, Vi
         appId = intent.getStringExtra(EXTRA_APP_ID) ?: ""
         detailsUrl = intent.getStringExtra(EXTRA_DETAILS_URL) ?: ""
         val rowId = intent.getIntExtra(EXTRA_ROW_ID, -1)
-        MetricsManagerEvent(this).track("open_changelog", "DETAILS_APP_ID", appId, "DETAILS_ROW_ID", rowId.toString())
 
         progressBar.visibility = View.GONE
         error.visibility = View.GONE
@@ -337,11 +336,11 @@ open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, Vi
         else ChangesLoader(this, appId, detailsEndpoint)
     }
 
-    override fun onLoaderReset(loader: Loader<Cursor>?) {
+    override fun onLoaderReset(loader: Loader<Cursor>) {
         adapter.swapData(null)
     }
 
-    override fun onLoadFinished(loader: Loader<Cursor>?, data: Cursor?) {
+    override fun onLoadFinished(loader: Loader<Cursor>, data: Cursor?) {
         val changesLoader = (loader as? ChangesLoader)
         if (changesLoader == null) { // EmptyLoader
             showRetryMessage()

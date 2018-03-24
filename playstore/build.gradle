@@ -24,6 +24,7 @@ apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 27
+    buildToolsVersion '27.0.3'
 
     defaultConfig {
         minSdkVersion 15
@@ -51,7 +52,8 @@ dependencies {
 
     api group: 'com.google.protobuf.nano', name: 'protobuf-javanano', version: '3.1.0'
     api 'com.android.volley:volley:1.1.0'
-    api 'com.github.anod:android-framework-lib:34ce6b0d57'
 
+    implementation 'com.android.support:support-v4:27.1.0'
+    implementation project(':android-framework-lib:framework')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
 }

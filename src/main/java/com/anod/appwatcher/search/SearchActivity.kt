@@ -18,7 +18,6 @@ import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.model.WatchAppList
 import com.anod.appwatcher.tags.TagSnackbar
-import com.anod.appwatcher.utils.MetricsManagerEvent
 import com.anod.appwatcher.utils.Theme
 import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.view.Keyboard
@@ -98,8 +97,6 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
 
     private fun searchResults(account: Account) {
         showLoading()
-
-        MetricsManagerEvent(this).track("perform_search", "SEARCH_QUERY", searchQuery, "SEARCH_PACKAGE", isPackageSearch.toString(), "FROM_SHARE", isShareSource.toString())
 
         if (searchQuery.isNotEmpty()) {
             val requestQueue = App.provide(this).requestQueue

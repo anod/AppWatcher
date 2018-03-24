@@ -58,7 +58,7 @@ class UserLogActivity: ToolbarActivity() {
             }
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): UserLogViewHolder {
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserLogViewHolder {
             val view = LayoutInflater.from(context).inflate(R.layout.list_item_log, parent, false)
             return UserLogViewHolder(view)
         }

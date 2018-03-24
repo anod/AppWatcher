@@ -78,8 +78,8 @@
         <item name="android:windowMinWidthMinor">@dimen/dialog_min_width_major</item>
     </style>
 
-    <style name="AppTheme.Splash" parent="AppTheme.Black">
-        <!--<item name="android:windowBackground">@drawable/background_splash</item>-->
+    <style name="AppTheme.Splash" parent="AppTheme.Base">
+        <item name="android:windowBackground">@drawable/splash_screen</item>
     </style>
 
     <style name="ListHeader">

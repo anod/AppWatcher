@@ -6,7 +6,7 @@ import android.support.v4.app.DialogFragment
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.model.AppInfoMetadata
-import com.anod.appwatcher.utils.DialogMessage
+import info.anodsplace.framework.app.DialogMessage
 
 class RemoveDialogFragment : DialogFragment() {
 
@@ -15,7 +15,7 @@ class RemoveDialogFragment : DialogFragment() {
         val rowId = arguments!!.getInt(ARG_ROW_ID)
         val message = getString(R.string.alert_dialog_remove_message, title)
 
-        return DialogMessage(activity!!, R.string.alert_dialog_remove_title, message, { builder ->
+        return DialogMessage(activity!!, R.style.AlertDialog, R.string.alert_dialog_remove_title, message, { builder ->
             builder.setPositiveButton(R.string.alert_dialog_remove) { _, _ ->
                 val cl = DbContentProviderClient(activity!!)
                 cl.updateStatus(rowId, AppInfoMetadata.STATUS_DELETED)

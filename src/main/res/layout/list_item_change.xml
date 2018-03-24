@@ -49,6 +49,7 @@
         android:paddingTop="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         tools:text="- Added hardware connection instructions for DSL Modem Router, 3G/4G Router and Archer C5400X.\n- Added connection guidance whenever you are disconnected.- Enhanced the visual design.\n- Reduced the download size of this App.\n- Fixed various bugs." />
 
 

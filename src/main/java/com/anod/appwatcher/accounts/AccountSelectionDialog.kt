@@ -15,7 +15,7 @@ import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
 import com.anod.appwatcher.R
 import com.anod.appwatcher.preferences.Preferences
-import com.anod.appwatcher.utils.DialogMessage
+import info.anodsplace.framework.app.DialogMessage
 import info.anodsplace.framework.app.ActivityListener
 
 /**
@@ -100,7 +100,7 @@ class AccountSelectionDialog(
     }
 
     private fun showPermissionsDialog() {
-        val dialog = DialogMessage(activity, R.string.choose_an_account, R.string.failed_gain_access, { builder ->
+        val dialog = DialogMessage(activity, R.style.AlertDialog, R.string.choose_an_account, R.string.failed_gain_access, { builder ->
             builder.setPositiveButton(R.string.allow) { _, _ ->
                 ActivityCompat.requestPermissions(
                         activity,

@@ -17,8 +17,8 @@ import com.anod.appwatcher.backup.gdrive.GDriveSignIn
 import com.anod.appwatcher.model.DbSchemaManager
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.userLog.UserLogActivity
-import com.anod.appwatcher.utils.DialogItems
-import com.anod.appwatcher.utils.DialogSingleChoice
+import info.anodsplace.framework.app.DialogItems
+import info.anodsplace.framework.app.DialogSingleChoice
 import com.anod.appwatcher.utils.Theme
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -262,7 +262,7 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
                 prefs.isNotifyInstalledUpToDate = notify
             }
             ACTION_THEME -> {
-                DialogItems(this, R.string.pref_title_theme, R.array.themes, { _, which ->
+                DialogItems(this, R.style.AlertDialog, R.string.pref_title_theme, R.array.themes, { _, which ->
                             if (prefs.nightMode != which) {
                                 prefs.nightMode = which
                                 AppCompatDelegate.setDefaultNightMode(which)
@@ -272,7 +272,7 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
                         }).show()
             }
             ACTION_DARK_THEME -> {
-                DialogItems(this, R.string.pref_title_dark_theme, R.array.dark_themes, { _, which ->
+                DialogItems(this, R.style.AlertDialog, R.string.pref_title_dark_theme, R.array.dark_themes, { _, which ->
                             if (prefs.theme != which) {
                                 prefs.theme = which
                                 this@SettingsActivity.setResult(android.app.Activity.RESULT_OK, Intent().putExtra("recreateWatchlistOnBack", true))

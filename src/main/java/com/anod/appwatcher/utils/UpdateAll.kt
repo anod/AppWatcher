@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import com.anod.appwatcher.R
 import com.anod.appwatcher.preferences.Preferences
+import info.anodsplace.framework.app.DialogMessage
 import info.anodsplace.framework.content.startActivitySafely
 
 /**
@@ -19,7 +20,7 @@ class UpdateAll(private val context: Context, private val prefs: Preferences) {
             return
         }
 
-        DialogMessage(context, R.string.update_all, R.string.update_all_warning,{
+        DialogMessage(context,R.style.AlertDialog, R.string.update_all, R.string.update_all_warning,{
             builder ->
 
             builder.setPositiveButton(R.string.i_understand, {

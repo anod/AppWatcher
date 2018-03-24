@@ -31,7 +31,7 @@ open class RecentlyInstalledAppsAdapter(
         return if (recentlyInstalled.isEmpty()) 0 else 1
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): RecentlyInstalledAppsAdapter.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecentlyInstalledAppsAdapter.ViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.list_item_recently_installed, parent, false)
         return ViewHolder(view, iconLoader, packageManager, listener)
     }

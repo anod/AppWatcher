@@ -29,7 +29,7 @@ import com.anod.appwatcher.sync.UpdateCheck
 import com.anod.appwatcher.upgrade.SetupInterfaceUpgrade
 import com.anod.appwatcher.upgrade.UpgradeCheck
 import com.anod.appwatcher.upgrade.UpgradeRefresh
-import com.anod.appwatcher.utils.DialogSingleChoice
+import info.anodsplace.framework.app.DialogSingleChoice
 import com.anod.appwatcher.utils.Theme
 import info.anodsplace.framework.AppLog
 import java.util.*
@@ -182,7 +182,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
 
     fun showSortOptions() {
         val selected = prefs.sortIndex
-        DialogSingleChoice(this, R.array.sort_titles, selected, { dialog, index ->
+        DialogSingleChoice(this, R.style.AlertDialog, R.array.sort_titles, selected, { dialog, index ->
             prefs.sortIndex = index
             notifySortChange(index)
             dialog.dismiss()

@@ -13,7 +13,6 @@ import com.anod.appwatcher.userLog.UserLogger
 import com.anod.appwatcher.utils.PicassoAppIcon
 import com.firebase.jobdispatcher.FirebaseJobDispatcher
 import com.firebase.jobdispatcher.GooglePlayDriver
-import com.google.firebase.analytics.FirebaseAnalytics
 import com.squareup.tape2.QueueFile
 import info.anodsplace.playstore.DeviceId
 import info.anodsplace.playstore.DeviceInfoProvider
@@ -40,7 +39,6 @@ class ObjectGraph internal constructor(private val app: AppWatcherApplication): 
         requestQueue
     }
     val iconLoader: PicassoAppIcon by lazy { PicassoAppIcon(this.app) }
-    val fireBase: FirebaseAnalytics by lazy { FirebaseAnalytics.getInstance(this.app) }
     val networkConnection: NetworkConnection by lazy {
         val cm: ConnectivityManager = app.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         NetworkConnection(cm)

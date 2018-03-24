@@ -6,7 +6,7 @@ import android.widget.Switch
 import com.anod.appwatcher.R
 import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.preferences.Preferences
-import com.anod.appwatcher.utils.DialogCustom
+import info.anodsplace.framework.app.DialogCustom
 
 
 /**
@@ -20,7 +20,7 @@ class SetupInterfaceUpgrade(val prefs: Preferences, val context: Context): Upgra
             return
         }
 
-        DialogCustom(context, R.string.setup_interface_title, R.layout.dialog_setup_interface, { view, builder ->
+        DialogCustom(context, R.style.AlertDialog,R.string.setup_interface_title, R.layout.dialog_setup_interface, { view, builder ->
                 var recreate = false
                 view.findViewById<Switch>(R.id.recentToggle).isChecked = prefs.showRecent
                 view.findViewById<Switch>(R.id.onDeviceToggle).isChecked = prefs.showOnDevice
@@ -41,7 +41,7 @@ class SetupInterfaceUpgrade(val prefs: Preferences, val context: Context): Upgra
                     recreate = true
                 })
 
-                builder.setPositiveButton(android.R.string.ok, { dialog, which ->
+                builder.setPositiveButton(android.R.string.ok, { dialog, _ ->
                     if (recreate) {
                         val i = Intent(context, AppWatcherActivity::class.java)
                         i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
