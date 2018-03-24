@@ -27,7 +27,7 @@ import com.anod.appwatcher.model.schema.TagsTable
 import com.anod.appwatcher.utils.Theme
 import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.graphics.DrawableTint
-import info.anodsplace.framework.widget.recyclerview.RecyclerViewCursorAdapter
+import info.anodsplace.framework.widget.recyclerview.RecyclerViewCursorListAdapter
 import kotlinx.android.synthetic.main.activity_tags_editor.*
 
 /**
@@ -132,14 +132,22 @@ class TagsListActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<Cursor
         }
     }
 
-    private class TagAdapter internal constructor(context: Context, private val mListener: View.OnClickListener) : RecyclerViewCursorAdapter<TagHolder, TagsCursor>(context, R.layout.list_item_tag) {
+    private class TagAdapter internal constructor(context: Context, private val mListener: View.OnClickListener)
+        : RecyclerViewCursorListAdapter<TagHolder, Tag, TagsCursor>(context, R.layout.list_item_tag) {
+        override fun areItemsTheSame(oldItem: Tag, newItem: Tag): Boolean {
+            return oldItem.id == newItem.id
+        }
+
+        override fun areContentsTheSame(oldItem: Tag, newItem: Tag): Boolean {
+            return oldItem == newItem
+        }
 
         override fun onCreateViewHolder(itemView: View): TagHolder {
             return TagHolder(itemView, mListener)
         }
 
-        override fun onBindViewHolder(holder: TagHolder, position: Int, cursor: TagsCursor) {
-            holder.bindView(position, cursor.tag)
+        override fun onBindViewHolder(holder: TagHolder, position: Int, tag: Tag) {
+            holder.bindView(position, tag)
         }
     }
 

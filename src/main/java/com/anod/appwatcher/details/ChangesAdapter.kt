@@ -13,7 +13,7 @@ import com.anod.appwatcher.content.AppChangeCursor
 import com.anod.appwatcher.model.AppChange
 import info.anodsplace.framework.text.Html
 import info.anodsplace.framework.widget.recyclerview.ArrayAdapter
-import info.anodsplace.framework.widget.recyclerview.RecyclerViewCursorAdapter
+import info.anodsplace.framework.widget.recyclerview.RecyclerViewCursorListAdapter
 import info.anodsplace.framework.widget.recyclerview.RecyclerViewStateAdapter
 
 class ChangeView(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -76,22 +76,25 @@ class RecentChangeAdapter(private val context: Context, recentChange: AppChange)
     }
 }
 
-class ChangesCursorAdapter(context: Context,private var recentChange: AppChange) : RecyclerViewCursorAdapter<ChangeView, AppChangeCursor>(context, R.layout.list_item_change) {
+class ChangesCursorAdapter(context: Context,private var recentChange: AppChange) : RecyclerViewCursorListAdapter<ChangeView, AppChange, AppChangeCursor>(context, R.layout.list_item_change) {
+
+    override fun areItemsTheSame(oldItem: AppChange, newItem: AppChange): Boolean {
+        return oldItem.appId == newItem.appId && oldItem.versionCode == newItem.versionCode
+    }
+
+    override fun areContentsTheSame(oldItem: AppChange, newItem: AppChange): Boolean {
+        return oldItem == newItem
+    }
 
     override fun onCreateViewHolder(itemView: View): ChangeView {
         return ChangeView(itemView)
     }
 
-    override fun onBindViewHolder(holder: ChangeView, position: Int, cursor: AppChangeCursor) {
-        val change = cursor.change
+    override fun onBindViewHolder(holder: ChangeView, position: Int, change: AppChange) {
         if (recentChange.versionCode == change.versionCode) {
             holder.bindView(recentChange)
         } else {
             holder.bindView(change)
         }
-    }
-
-    override fun getItemViewType(position: Int): Int {
-        return 1
     }
 }

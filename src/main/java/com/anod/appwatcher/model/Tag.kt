@@ -22,6 +22,16 @@ class Tag(val id: Int, val name: String, @ColorInt val color: Int) : Parcelable 
             source.readInt()
     )
 
+    override fun equals(other: Any?): Boolean {
+        other as? Tag ?: return false
+        return when {
+            id != other.id -> false
+            name != other.name -> false
+            color != other.color -> false
+            else -> true
+        }
+    }
+
     override fun describeContents(): Int {
         return 0
     }

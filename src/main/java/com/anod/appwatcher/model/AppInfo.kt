@@ -145,6 +145,30 @@ class AppInfo : AppInfoMetadata, Parcelable {
         dest.writeInt(if (recentFlag) 1 else 0)
     }
 
+    override fun equals(other: Any?): Boolean {
+        other as? AppInfo ?: return false
+
+        return when {
+            appId != other.appId -> false
+            status != other.status -> false
+            packageName != other.packageName -> false
+            versionNumber != other.versionNumber -> false
+            versionName != other.versionName -> false
+            creator != other.creator -> false
+            uploadDate != other.uploadDate -> false
+            priceText != other.priceText -> false
+            priceCur != other.priceCur -> false
+            priceMicros != other.priceMicros -> false
+            detailsUrl != other.detailsUrl -> false
+            iconUrl != other.iconUrl -> false
+            uploadTime != other.uploadTime -> false
+            appType != other.appType -> false
+            refreshTime != other.refreshTime -> false
+            else -> true
+        }
+    }
+
+
     companion object {
 
         @JvmField val CREATOR: Parcelable.Creator<AppInfo> = object : Parcelable.Creator<AppInfo> {

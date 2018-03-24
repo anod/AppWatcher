@@ -10,10 +10,19 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.content.AppListCursor
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.utils.PicassoAppIcon
-import info.anodsplace.framework.widget.recyclerview.RecyclerViewCursorAdapter
+import info.anodsplace.framework.widget.recyclerview.RecyclerViewCursorListAdapter
 
 internal class TagAppsCursorAdapter(context: Context, private val tagAppsImport: TagAppsImport)
-    : RecyclerViewCursorAdapter<TagAppsCursorAdapter.ItemViewHolder, AppListCursor>(context, R.layout.list_item_import_app) {
+    : RecyclerViewCursorListAdapter<TagAppsCursorAdapter.ItemViewHolder, AppInfo, AppListCursor>(context, R.layout.list_item_import_app) {
+
+    override fun areItemsTheSame(oldItem: AppInfo, newItem: AppInfo): Boolean {
+        return  oldItem.rowId == newItem.rowId
+    }
+
+    override fun areContentsTheSame(oldItem: AppInfo, newItem: AppInfo): Boolean {
+        return oldItem == newItem
+    }
+
     private val mIconLoader: PicassoAppIcon = App.provide(context).iconLoader
 
     internal class ItemViewHolder(
@@ -44,13 +53,8 @@ internal class TagAppsCursorAdapter(context: Context, private val tagAppsImport:
         return ItemViewHolder(itemView, mIconLoader, tagAppsImport)
     }
 
-    override fun onBindViewHolder(holder: ItemViewHolder, position: Int, cursor: AppListCursor) {
-        val app = cursor.appInfo
-        holder.bindView(cursor.position, app)
-    }
-
-    override fun getItemViewType(position: Int): Int {
-        return 1
+    override fun onBindViewHolder(holder: ItemViewHolder, position: Int, item: AppInfo) {
+        holder.bindView(position, item)
     }
 
     fun selectAllApps(select: Boolean) {

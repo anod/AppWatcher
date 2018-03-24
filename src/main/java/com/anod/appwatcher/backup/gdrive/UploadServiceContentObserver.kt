@@ -24,12 +24,12 @@ class UploadServiceContentObserver(val context: Context, contentResolver: Conten
     override fun onChange(selfChange: Boolean, uri: Uri?) {
         super.onChange(selfChange, uri)
 
-        if (!App.provide(context).prefs.isDriveSyncEnabled) {
+        val prefs = App.provide(context).prefs
+        if (!prefs.isDriveSyncEnabled) {
             return
         }
 
         AppLog.d("Schedule GDrive upload for ${uri.toString()}")
-        val prefs = App.provide(context).prefs
         UploadService.schedule(context, prefs.isWifiOnly, prefs.isRequiresCharging)
     }
 }

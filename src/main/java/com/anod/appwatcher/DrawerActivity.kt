@@ -161,7 +161,6 @@ open class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.SelectionLi
             item.intent = AppsTagActivity.createTagIntent(tag, this)
         }
         provide.memoryCache.put("tags", tags)
-        cr.close()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
