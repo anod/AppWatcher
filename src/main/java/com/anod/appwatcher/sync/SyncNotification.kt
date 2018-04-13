@@ -25,19 +25,22 @@ class SyncNotification(private val context: ApplicationContext) {
     companion object {
         internal const val syncNotificationId = 1
         internal const val gpsNotificationId = 2
-        const val channelId = "versions_updates"
+        const val updatesChannelId = "versions_updates"
+        const val pricesChannelId = "prices_change"
     }
 
-    fun createChannel() {
+    fun createChannels() {
         if (Build.VERSION.SDK_INT < 26) {
             return
         }
-        val channel = NotificationChannel(channelId, context.getString(R.string.channel_name), NotificationManager.IMPORTANCE_DEFAULT)
-        channel.description = context.getString(R.string.channel_description)
-        channel.setShowBadge(true)
+        val updates = NotificationChannel(updatesChannelId, context.getString(R.string.channel_app_updates), NotificationManager.IMPORTANCE_DEFAULT)
+        updates.description = context.getString(R.string.channel_updates_description)
+        updates.setShowBadge(true)
 
-        val notificationManager = context.notificationManager
-        notificationManager.createNotificationChannel(channel)
+        val prices = NotificationChannel(pricesChannelId, context.getString(R.string.channel_prices), NotificationManager.IMPORTANCE_DEFAULT)
+        prices.description = context.getString(R.string.channel_prices_description)
+        prices.setShowBadge(true)
+        context.notificationManager.createNotificationChannels(listOf(updates, prices))
     }
 
     fun show(updatedApps: List<UpdateCheck.UpdatedApp>) {
@@ -65,7 +68,7 @@ class SyncNotification(private val context: ApplicationContext) {
         val title = renderTitle(updatedApps)
         val text = renderText(updatedApps)
 
-        val builder = NotificationCompat.Builder(context.actual, channelId)
+        val builder = NotificationCompat.Builder(context.actual, updatesChannelId)
         builder
             .setAutoCancel(true)
             .setSmallIcon(R.drawable.ic_notification)

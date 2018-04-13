@@ -117,8 +117,8 @@
     <string name="recently_installed">Недавно установиленные</string>
     <string name="shortcut_search">Поиск</string>
     <string name="open">Открыть</string>
-    <string name="channel_name">Обновления</string>
-    <string name="channel_description">Уведомления о новых версиях аппликации из списка</string>
+    <string name="channel_app_updates">Обновления</string>
+    <string name="channel_updates_description">Уведомления о новых версиях аппликации из списка</string>
     <string-array name="sort_titles">
         <item>Название ↓</item>
         <item>Название ↑</item>

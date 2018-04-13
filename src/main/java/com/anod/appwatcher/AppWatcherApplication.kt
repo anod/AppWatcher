@@ -46,7 +46,7 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
             appComponent.uploadServiceContentObserver
         }
         AppCompatDelegate.setDefaultNightMode(appComponent.prefs.nightMode)
-        SyncNotification(ApplicationContext(this)).createChannel()
+        SyncNotification(ApplicationContext(this)).createChannels()
         registerActivityLifecycleCallbacks(LifecycleCallbacks(this))
     }
 

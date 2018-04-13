@@ -124,8 +124,10 @@
     <string name="shortcut_search">Search</string>
     <string name="shortcut_updates">Updatable</string>
     <string name="open">Open</string>
-    <string name="channel_name">Apps updates</string>
-    <string name="channel_description">Notifications about new versions of watching apps</string>
+    <string name="channel_app_updates">Apps updates</string>
+    <string name="channel_updates_description">Notifications about new versions of watching apps</string>
+    <string name="channel_prices">Price changes</string>
+    <string name="channel_prices_description">Notifications about price changes of watching apps</string>
     <string name="updates_not_available">Updates information is not available</string>
     <string name="filter">Filter</string>
     <string name="pref_show_recent_title">Show recently installed</string>
