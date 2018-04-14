@@ -5,8 +5,6 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <include layout="@layout/list_apps_header" />
-
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:minHeight="72dp"

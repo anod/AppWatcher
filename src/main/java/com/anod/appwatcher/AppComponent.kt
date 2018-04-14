@@ -42,7 +42,6 @@ class AppComponent internal constructor(private val app: AppWatcherApplication):
     }
     val iconLoader: PicassoAppIcon by lazy { PicassoAppIcon(this.app) }
     val networkConnection: NetworkConnectivity by lazy {
-        val cm: ConnectivityManager = app.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         NetworkConnectivity(app)
     }
     val jobDispatcher: FirebaseJobDispatcher by lazy { FirebaseJobDispatcher(GooglePlayDriver(app)) }

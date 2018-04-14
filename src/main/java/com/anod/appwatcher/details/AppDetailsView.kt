@@ -14,7 +14,7 @@ import info.anodsplace.framework.text.Html
  * @author algavris
  * @date 14/05/2016.
  */
-class AppDetailsView(view: View, private val dataProvider: AppViewHolderBase.DataProvider) {
+class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase.ResourceProvider) {
     @ColorInt private val textColor: Int
     @ColorInt private var accentColor: Int
     @ColorInt private var warningColor: Int
@@ -27,9 +27,9 @@ class AppDetailsView(view: View, private val dataProvider: AppViewHolderBase.Dat
     val recentChanges = view.findViewById<TextView?>(R.id.recent_changes)
 
     init {
-        accentColor = dataProvider.getColor(R.color.theme_accent)
-        textColor = dataProvider.getColor(R.color.primary_text)
-        warningColor = dataProvider.getColor(R.color.material_amber_800)
+        accentColor = resourceProvider.getColor(R.color.theme_accent)
+        textColor = resourceProvider.getColor(R.color.primary_text)
+        warningColor = resourceProvider.getColor(R.color.material_amber_800)
     }
 
     fun fillDetails(app: AppInfo, isLocalApp: Boolean) {
@@ -48,7 +48,7 @@ class AppDetailsView(view: View, private val dataProvider: AppViewHolderBase.Dat
             this.price?.visibility = View.INVISIBLE
             this.recentChanges?.visibility = View.GONE
             this.version?.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stat_communication_stay_primary_portrait, 0, 0, 0)
-            this.version?.text = dataProvider.formatVersionText(app.versionName, app.versionNumber)
+            this.version?.text = resourceProvider.formatVersionText(app.versionName, app.versionNumber)
         } else {
             this.fillWatchAppView(app)
         }
@@ -56,27 +56,27 @@ class AppDetailsView(view: View, private val dataProvider: AppViewHolderBase.Dat
 
     private fun fillWatchAppView(app: AppInfo) {
 
-        val isInstalled = dataProvider.installedApps.packageInfo(app.packageName).isInstalled
+        val isInstalled = resourceProvider.installedApps.packageInfo(app.packageName).isInstalled
         when {
             app.versionNumber == 0 -> {
                 version?.setTextColor(warningColor)
-                version?.text = dataProvider.getString(R.string.updates_not_available)
+                version?.text = resourceProvider.getString(R.string.updates_not_available)
             }
             app.status == AppInfoMetadata.STATUS_UPDATED -> {
-                version?.text = dataProvider.formatVersionText(app.versionName, app.versionNumber)
+                version?.text = resourceProvider.formatVersionText(app.versionName, app.versionNumber)
                 version?.setTextColor(accentColor)
                 this.recentChanges?.visibility = View.VISIBLE
-                val appChange = dataProvider.appChangeContentProvider.query(app.appId, app.versionNumber)
-                this.recentChanges?.text = if (appChange?.details?.isBlank() != false) dataProvider.noRecentChangesText else Html.parse(appChange.details)
+                val appChange = resourceProvider.appChangeContentProvider.query(app.appId, app.versionNumber)
+                this.recentChanges?.text = if (appChange?.details?.isBlank() != false) resourceProvider.noRecentChangesText else Html.parse(appChange.details)
             }
             app.recentFlag -> {
-                version?.text = dataProvider.formatVersionText(app.versionName, app.versionNumber)
+                version?.text = resourceProvider.formatVersionText(app.versionName, app.versionNumber)
                 this.recentChanges?.visibility = View.VISIBLE
-                val appChange = dataProvider.appChangeContentProvider.query(app.appId, app.versionNumber)
-                this.recentChanges?.text = if (appChange?.details?.isBlank() != false) dataProvider.noRecentChangesText else Html.parse(appChange.details)
+                val appChange = resourceProvider.appChangeContentProvider.query(app.appId, app.versionNumber)
+                this.recentChanges?.text = if (appChange?.details?.isBlank() != false) resourceProvider.noRecentChangesText else Html.parse(appChange.details)
             }
             else -> {
-                version?.text = dataProvider.formatVersionText(app.versionName, app.versionNumber)
+                version?.text = resourceProvider.formatVersionText(app.versionName, app.versionNumber)
                 this.recentChanges?.visibility = View.GONE
                 version?.setTextColor(textColor)
             }
@@ -84,12 +84,12 @@ class AppDetailsView(view: View, private val dataProvider: AppViewHolderBase.Dat
 
         price?.setTextColor(accentColor)
         if (isInstalled) {
-            val installed = dataProvider.installedApps.packageInfo(app.packageName)
+            val installed = resourceProvider.installedApps.packageInfo(app.packageName)
             price?.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stat_communication_stay_primary_portrait, 0, 0, 0)
             if (TextUtils.isEmpty(installed.versionName)) {
-                price?.text = dataProvider.installedText
+                price?.text = resourceProvider.installedText
             } else {
-                price?.text = dataProvider.formatVersionText(installed.versionName, installed.versionCode)
+                price?.text = resourceProvider.formatVersionText(installed.versionName, installed.versionCode)
             }
             when {
                 app.versionNumber > installed.versionCode -> version?.setTextColor(warningColor)

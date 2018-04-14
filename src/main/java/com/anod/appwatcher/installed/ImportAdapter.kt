@@ -11,7 +11,7 @@ import com.anod.appwatcher.watchlist.AppViewHolderBase
 internal class ImportAdapter(
         context: Context,
         pm: PackageManager,
-        private val mDataProvider: ImportDataProvider)
+        private val mDataProvider: ImportResourceProvider)
     : InstalledAppsAdapter(context, pm, mDataProvider, null) {
 
     private var packageIndex: SimpleArrayMap<String, Int> = SimpleArrayMap()

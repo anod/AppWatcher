@@ -35,7 +35,7 @@ import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.model.*
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.*
-import com.anod.appwatcher.watchlist.AppViewHolderDataProvider
+import com.anod.appwatcher.watchlist.AppViewHolderResourceProvider
 import com.squareup.picasso.Picasso
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.anim.RevealAnimatorCompat
@@ -75,7 +75,7 @@ open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, Vi
     private var detailsEndpoint: DetailsEndpoint? = null
 
     val iconLoader: PicassoAppIcon by lazy { App.provide(this).iconLoader }
-    val dataProvider: AppViewHolderDataProvider by lazy { AppViewHolderDataProvider(this, InstalledApps.PackageManager(packageManager)) }
+    val dataProvider: AppViewHolderResourceProvider by lazy { AppViewHolderResourceProvider(this, InstalledApps.PackageManager(packageManager)) }
     val appDetailsView: AppDetailsView by lazy { AppDetailsView(container, dataProvider) }
     val adapter: ChangesAdapter by lazy { ChangesAdapter(this, AppChange(appId, 0, "", "", "") ) }
 

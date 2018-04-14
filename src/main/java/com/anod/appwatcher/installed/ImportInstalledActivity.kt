@@ -36,7 +36,7 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
         get() = Theme(this).themeDialog
 
     private var allSelected: Boolean = false
-    private lateinit var dataProvider: ImportDataProvider
+    private lateinit var dataProvider: ImportResourceProvider
     private lateinit var importManager: ImportBulkManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,7 +45,7 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
         setupToolbar()
 
         importManager = ImportBulkManager(this, this)
-        dataProvider = ImportDataProvider(this, InstalledApps.MemoryCache(InstalledApps.PackageManager(packageManager)))
+        dataProvider = ImportResourceProvider(this, InstalledApps.MemoryCache(InstalledApps.PackageManager(packageManager)))
 
         list.layoutManager = LinearLayoutManager(this)
         list.adapter = ImportAdapter(this, packageManager, dataProvider)
@@ -135,9 +135,9 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
             val resultCode = result.get(packageName)
             val status: Int
             if (resultCode == null) {
-                status = ImportDataProvider.STATUS_ERROR
+                status = ImportResourceProvider.STATUS_ERROR
             } else {
-                status = if (resultCode == WatchAppList.RESULT_OK) ImportDataProvider.STATUS_DONE else ImportDataProvider.STATUS_ERROR
+                status = if (resultCode == WatchAppList.RESULT_OK) ImportResourceProvider.STATUS_DONE else ImportResourceProvider.STATUS_ERROR
             }
             dataProvider.setPackageStatus(packageName, status)
             adapter.notifyPackageStatusChanged(packageName)
@@ -153,7 +153,7 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
         dataProvider.isImportStarted = true
         for (packageName in docIds) {
             AppLog.d(packageName)
-            dataProvider.setPackageStatus(packageName, ImportDataProvider.STATUS_IMPORTING)
+            dataProvider.setPackageStatus(packageName, ImportResourceProvider.STATUS_IMPORTING)
             adapter.notifyPackageStatusChanged(packageName)
         }
     }

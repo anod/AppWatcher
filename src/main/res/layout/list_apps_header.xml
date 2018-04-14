@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/sec_header"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="@dimen/list_apps_header_height"
     android:orientation="horizontal"
     android:paddingBottom="4dp"
     android:paddingLeft="8dp"
@@ -11,7 +11,7 @@
     android:paddingTop="4dp">
 
     <TextView
-        android:id="@+id/sec_header_title"
+        android:id="@android:id/text1"
         style="@style/ListHeader"
         android:layout_width="0dp"
         android:layout_weight="1"
@@ -22,19 +22,13 @@
         android:textColor="@color/list_header_text"
         tools:text="Recently updated" />
 
-    <Button
-        android:id="@+id/sec_action_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical|right"
-        android:text="@string/update_all" />
-
     <TextView
-        android:id="@+id/sec_header_count"
+        android:id="@android:id/text2"
         style="@style/ListHeader"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="right"
         android:textColor="@color/list_header_text"
+        android:text="99+"
         tools:text="6" />
 </LinearLayout>

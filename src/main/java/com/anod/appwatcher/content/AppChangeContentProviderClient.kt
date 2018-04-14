@@ -4,6 +4,7 @@ import android.content.ContentProviderClient
 import android.content.Context
 import com.anod.appwatcher.model.AppChange
 import com.anod.appwatcher.model.schema.ChangelogTable
+import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.content.query
 
 /**
@@ -16,13 +17,15 @@ class AppChangeContentProviderClient {
 
     private var contentProviderClient: ContentProviderClient
 
-    constructor(context: Context) {
+    constructor(context: ApplicationContext) {
         contentProviderClient = context.contentResolver.acquireContentProviderClient(DbContentProvider.authority)
     }
 
     constructor(provider: ContentProviderClient) {
         contentProviderClient = provider
     }
+
+    constructor(context: Context): this(ApplicationContext(context))
 
     fun query(appId: String, versionCode: Int): AppChange? {
         val uri = DbContentProvider.changelogUri

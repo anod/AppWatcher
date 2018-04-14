@@ -10,7 +10,7 @@ import com.anod.appwatcher.model.packageToApp
 import com.anod.appwatcher.utils.PicassoAppIcon
 import com.anod.appwatcher.watchlist.AppViewHolder
 import com.anod.appwatcher.watchlist.AppViewHolderBase
-import com.anod.appwatcher.watchlist.AppViewHolderDataProvider
+import com.anod.appwatcher.watchlist.AppViewHolderResourceProvider
 import info.anodsplace.framework.widget.recyclerview.ArrayAdapter
 import java.util.*
 
@@ -22,7 +22,7 @@ import java.util.*
 open class InstalledAppsAdapter(
         protected val context: Context,
         private val packageManager: PackageManager,
-        private val dataProvider: AppViewHolderDataProvider,
+        private val dataProvider: AppViewHolderResourceProvider,
         protected val listener: AppViewHolder.OnClickListener?)
     : ArrayAdapter<String, AppViewHolderBase>(ArrayList()) {
 
@@ -52,8 +52,4 @@ open class InstalledAppsAdapter(
         holder.bindView(position, app)
     }
 
-    override fun addAll(objects: List<String>) {
-        super.addAll(objects)
-        dataProvider.totalAppsCount = itemCount
-    }
 }

@@ -1,14 +1,13 @@
 package com.anod.appwatcher.watchlist
 
 import android.app.Activity
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProviders
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.database.Cursor
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.support.v4.app.LoaderManager
-import android.support.v4.content.Loader
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -20,11 +19,9 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.Toast
 import com.anod.appwatcher.*
-import com.anod.appwatcher.content.AppListCursor
 import com.anod.appwatcher.details.DetailsActivity
 import com.anod.appwatcher.installed.ImportInstalledActivity
 import com.anod.appwatcher.model.*
-import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.search.SearchActivity
 import com.anod.appwatcher.utils.UpdateAll
 import info.anodsplace.framework.AppLog
@@ -33,30 +30,29 @@ import info.anodsplace.framework.content.startActivitySafely
 import info.anodsplace.framework.widget.recyclerview.MergeRecyclerAdapter
 
 
-open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, WatchListActivity.EventListener, AppViewHolder.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
+open class WatchListFragment : Fragment(), WatchListActivity.EventListener, AppViewHolder.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
 
-    protected var titleFilter = ""
+    private var titleFilter = ""
+    private var sortId: Int = 0
+    private var filterId: Int = 0
+
     protected lateinit var installedApps: InstalledApps
-    protected var sortId: Int = 0
-    protected var filterId: Int = 0
     protected var tag: Tag? = null
 
     private var listenerIndex: Int = 0
 
-    lateinit var listView: RecyclerView
-    lateinit var emptyView: View
-    lateinit var progress: ProgressBar
-    var swipeLayout: SwipeRefreshLayout? = null
+    private lateinit var listView: RecyclerView
+    private lateinit var emptyView: View
+    private var swipeLayout: SwipeRefreshLayout? = null
 
+    lateinit var progress: ProgressBar
     private lateinit var section: Section
 
     interface Section {
         val adapter: MergeRecyclerAdapter
         var adapterIndexMap: SparseIntArray
-        fun initAdapter(context: Context, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener)
-        fun createLoader(context: Context, titleFilter: String, sortId: Int, filter: AppListFilter, tag: Tag?): Loader<Cursor>
-        fun loadFinished(loader: Loader<Cursor>, data: Cursor)
-        fun loaderReset()
+        fun viewModel(fragment: WatchListFragment): WatchListViewModel
+        fun attach(fragment: WatchListFragment, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener, onLoadFinished: () -> Unit)
         val isEmpty: Boolean
     }
 
@@ -66,33 +62,21 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
         override var adapterIndexMap = SparseIntArray()
         override val adapter: MergeRecyclerAdapter by lazy { MergeRecyclerAdapter() }
 
-        override fun initAdapter(context: Context, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener) {
+        override fun attach(fragment: WatchListFragment, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener, onLoadFinished: () -> Unit) {
+            val context = fragment.context!!
             this.showRecentlyUpdated = App.provide(context).prefs.showRecentlyUpdated
-            val index = adapter.add(AppListCursorAdapter(context, installedApps, clickListener) as RecyclerView.Adapter<RecyclerView.ViewHolder>)
+            val index = adapter.add(AppInfoAdapter(context, installedApps, clickListener))
             adapterIndexMap.put(ADAPTER_WATCHLIST, index)
+
+            viewModel(fragment).appList.observe(fragment, Observer {
+                list ->
+                getInnerAdapter<AppInfoAdapter>(ADAPTER_WATCHLIST).updateList(list ?: emptyList())
+                onLoadFinished()
+            })
         }
 
-        override fun createLoader(context: Context, titleFilter: String, sortId: Int, filter: AppListFilter, tag: Tag?): Loader<Cursor> {
-            return AppListCursorLoader(context, titleFilter, sortId, filter, tag)
-        }
-
-        override fun loadFinished(loader: Loader<Cursor>, data: Cursor) {
-            val watchlistAdapter = getInnerAdapter<AppListCursorAdapter>(ADAPTER_WATCHLIST)
-            watchlistAdapter.swapData(data as AppListCursor)
-
-            val newCount = (loader as AppListCursorLoader).newCount
-            val updatableCount = loader.updatableCount
-            val recentlyUpdatedCount = if (showRecentlyUpdated) loader.recentlyUpdatedCount else 0
-
-            watchlistAdapter.setNewAppsCount(newCount, updatableCount, recentlyUpdatedCount)
-        }
-
-        override fun loaderReset() {
-            // This is called when the last Cursor provided to onLoadFinished()
-            // above is about to be closed.  We need to make sure we are no
-            // longer using it.
-            val watchlistAdapter = getInnerAdapter<AppListCursorAdapter>(ADAPTER_WATCHLIST)
-            watchlistAdapter.swapData(null)
+        override fun viewModel(fragment: WatchListFragment): WatchListViewModel {
+            return ViewModelProviders.of(fragment).get(WatchListViewModel::class.java)
         }
 
         fun <T : RecyclerView.Adapter<*>> getInnerAdapter(id: Int): T {
@@ -101,7 +85,7 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
         }
 
         override val isEmpty: Boolean
-            get() = adapter.itemCount == 0
+            get() = getInnerAdapter<AppInfoAdapter>(ADAPTER_WATCHLIST).itemCount == 0
 
         companion object {
             const val ADAPTER_WATCHLIST = 0
@@ -156,12 +140,21 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
 
         installedApps = InstalledApps.PackageManager(activity!!.packageManager)
 
+        // Setup layout manager
         val layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
         listView.layoutManager = layoutManager
 
-        section = sectionForClassName(arguments!!.getString(ARG_SECTION_PROVIDER))
+        // Setup header decorator
 
-        section.initAdapter(activity!!, installedApps, this)
+        // Setup adapter for the sеction
+        section = sectionForClassName(arguments!!.getString(ARG_SECTION_PROVIDER))
+        section.attach(this, installedApps, this) {
+            progress.visibility = View.GONE
+            this.isListVisible = true
+        }
+        listView.addItemDecoration(HeaderItemDecorator(
+                section.viewModel(this).sections,
+                this, context!!))
         listView.adapter = section.adapter
 
         // Start out with a progress indicator.
@@ -170,9 +163,6 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
         sortId = arguments!!.getInt(ARG_SORT)
         filterId = arguments!!.getInt(ARG_FILTER)
         tag = arguments!!.getParcelable(ARG_TAG)
-        // Prepare the loader.  Either re-connect with an existing one,
-        // or start a new one.
-        loaderManager.initLoader(0, null, this)
 
         view.findViewById<View>(android.R.id.button1)?.setOnClickListener {
             val searchIntent = Intent(activity, MarketSearchActivity::class.java)
@@ -189,24 +179,11 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
             val intent = Intent.makeMainActivity(ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity"))
             activity?.startActivitySafely(intent)
         }
+
+        section.viewModel(this).load(titleFilter, sortId, createFilter(filterId), tag)
     }
 
-    override fun onCreateLoader(id: Int, args: Bundle?): Loader<Cursor> {
-        return section.createLoader(activity!!, titleFilter, sortId, createFilter(filterId), tag)
-    }
-
-    override fun onLoadFinished(loader: Loader<Cursor>, data: Cursor) {
-        section.loadFinished(loader, data)
-        progress.visibility = View.GONE
-        this.isListVisible = true
-    }
-
-    override fun onLoaderReset(loader: Loader<Cursor>) {
-        section.loaderReset()
-        progress.visibility = View.GONE
-    }
-
-    protected fun createFilter(filterId: Int): AppListFilter {
+    private fun createFilter(filterId: Int): AppListFilter {
         when (filterId) {
             Filters.TAB_INSTALLED -> return AppListFilterInclusion(AppListFilterInclusion.Installed(), installedApps)
             Filters.TAB_UNINSTALLED -> return AppListFilterInclusion(AppListFilterInclusion.Uninstalled(), installedApps)
@@ -217,14 +194,14 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
 
     override fun onSortChanged(sortIndex: Int) {
         sortId = sortIndex
-        restartLoader()
+        reload()
     }
 
     override fun onQueryTextChanged(newQuery: String) {
         val newFilter = if (!TextUtils.isEmpty(newQuery)) newQuery else ""
         if (!TextUtils.equals(newFilter, titleFilter)) {
             titleFilter = newFilter
-            restartLoader()
+            reload()
         }
     }
 
@@ -259,7 +236,7 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_APP_INFO && resultCode == Activity.RESULT_OK) {
             if (data!!.extras != null) {
-                restartLoader()
+                reload()
             }
         }
     }
@@ -270,10 +247,8 @@ open class WatchListFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>
         }
     }
 
-    private fun restartLoader() {
-        if (isResumed) {
-            loaderManager.restartLoader(0, null, this)
-        }
+    private fun reload() {
+        section.viewModel(this).load(titleFilter, sortId, createFilter(filterId), tag)
     }
 
     companion object {

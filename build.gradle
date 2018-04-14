@@ -23,7 +23,7 @@ repositories {
     jcenter()
     maven { url "https://jitpack.io" }
     maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
-    maven { url 'https://maven.google.com' }
+    google()
 }
 
 apply plugin: 'com.android.application'
@@ -121,6 +121,10 @@ dependencies {
     implementation 'com.squareup.tape2:tape:2.0.0-SNAPSHOT'
     implementation 'com.squareup.okhttp3:okhttp:3.10.0'
     implementation 'com.squareup.picasso:picasso:2.71828'
+
+    // ViewModel and LiveData
+    implementation "android.arch.lifecycle:extensions:1.1.1"
+    annotationProcessor "android.arch.lifecycle:compiler:1.1.1"
 
     testImplementation 'junit:junit:4.12'
 

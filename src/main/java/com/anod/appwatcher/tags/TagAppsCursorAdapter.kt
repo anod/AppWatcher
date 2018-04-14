@@ -35,7 +35,7 @@ internal class TagAppsCursorAdapter(context: Context, private val tagAppsImport:
 
         private var app: AppInfo? = null
 
-        fun bindView(position: Int, app: AppInfo) {
+        fun bindView(app: AppInfo) {
             this.app = app
             this.title.text = app.title
             this.title.isChecked = tagAppsImport.isSelected(app.appId)
@@ -54,7 +54,7 @@ internal class TagAppsCursorAdapter(context: Context, private val tagAppsImport:
     }
 
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int, item: AppInfo) {
-        holder.bindView(position, item)
+        holder.bindView(item)
     }
 
     fun selectAllApps(select: Boolean) {

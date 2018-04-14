@@ -17,7 +17,7 @@ import com.anod.appwatcher.watchlist.AppViewHolderBase
  */
 internal class ImportAppViewHolder(
         itemView: View,
-        dataProvider: ImportDataProvider,
+        dataProvider: ImportResourceProvider,
         iconLoader: PicassoAppIcon)
     : AppViewHolderBase(itemView, dataProvider, iconLoader), View.OnClickListener {
 
@@ -41,8 +41,8 @@ internal class ImportAppViewHolder(
         iconLoader.loadAppIntoImageView(app, this.icon, R.drawable.ic_notifications_black_24dp)
 
         when {
-            status() == ImportDataProvider.STATUS_DONE -> itemView.setBackgroundColor(themeAccent)
-            status() == ImportDataProvider.STATUS_ERROR -> itemView.setBackgroundColor(materialRed)
+            status() == ImportResourceProvider.STATUS_DONE -> itemView.setBackgroundColor(themeAccent)
+            status() == ImportResourceProvider.STATUS_ERROR -> itemView.setBackgroundColor(materialRed)
             else -> itemView.setBackgroundColor(Color.TRANSPARENT)
         }
     }

@@ -6,7 +6,6 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import com.anod.appwatcher.App
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.packageToApp
@@ -24,11 +23,19 @@ open class RecentlyInstalledAppsAdapter(
         protected val listener: AppViewHolder.OnClickListener?)
     : RecyclerView.Adapter<RecentlyInstalledAppsAdapter.ViewHolder>() {
 
-    var recentlyInstalled: List<Pair<String, Int>> = mutableListOf()
+    var recentlyInstalled: List<PackageRowPair> = mutableListOf()
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
     private val iconLoader: PicassoAppIcon = App.provide(context).iconLoader
 
     override fun getItemCount(): Int {
         return if (recentlyInstalled.isEmpty()) 0 else 1
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return 0
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecentlyInstalledAppsAdapter.ViewHolder {
@@ -46,17 +53,8 @@ open class RecentlyInstalledAppsAdapter(
             private val packageManager: PackageManager,
             private val listener: AppViewHolder.OnClickListener?) : RecyclerView.ViewHolder(itemView) {
 
-        val appViews: List<RecentAppView> = arrayListOf(R.id.app1, R.id.app2, R.id.app3, R.id.app4, R.id.app5, R.id.app6, R.id.app7, R.id.app8)
+        private val appViews: List<RecentAppView> = arrayListOf(R.id.app1, R.id.app2, R.id.app3, R.id.app4, R.id.app5, R.id.app6, R.id.app7, R.id.app8)
                 .map { itemView.findViewById<RecentAppView>(it) }
-
-        init {
-            val sectionCount: TextView = itemView.findViewById(R.id.sec_header_count)
-            val sectionButton: TextView = itemView.findViewById(R.id.sec_action_button)
-            sectionCount.visibility = View.GONE
-            sectionButton.visibility = View.GONE
-            val sectionText: TextView = itemView.findViewById(R.id.sec_header_title)
-            sectionText.setText(R.string.recently_installed)
-        }
 
         fun bind(packages: List<Pair<String, Int>>) {
             appViews.forEachIndexed { index, view ->

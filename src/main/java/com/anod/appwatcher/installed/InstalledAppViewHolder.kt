@@ -13,22 +13,11 @@ import com.anod.appwatcher.watchlist.AppViewHolderBase
  */
 internal class InstalledAppViewHolder(
         itemView: View,
-        dataProvider: AppViewHolderBase.DataProvider,
+        resourceProvider: AppViewHolderBase.ResourceProvider,
         iconLoader: PicassoAppIcon,
         listener: AppViewHolder.OnClickListener?)
-    : AppViewHolder(itemView, dataProvider, iconLoader, listener) {
+    : AppViewHolder(itemView, resourceProvider, iconLoader, listener) {
 
     override val isLocalApp: Boolean
         get() = true
-
-    override fun bindSectionView() {
-        if (location == 0) {
-            sectionText.setText(R.string.downloaded)
-            sectionCount.text = dataProvider.totalAppsCount.toString()
-            section.visibility = View.VISIBLE
-            actionButton.visibility = View.GONE
-        } else {
-            section.visibility = View.GONE
-        }
-    }
 }

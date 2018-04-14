@@ -1,9 +1,7 @@
 package com.anod.appwatcher.watchlist
 
 import android.view.View
-import android.widget.Button
 import android.widget.ImageView
-import android.widget.TextView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.details.AppDetailsView
 import com.anod.appwatcher.model.AppInfo
@@ -12,20 +10,16 @@ import com.anod.appwatcher.utils.PicassoAppIcon
 
 open class AppViewHolder(
         itemView: View,
-        dataProvider: DataProvider,
+        resourceProvider: ResourceProvider,
         iconLoader: PicassoAppIcon,
         private val onClickListener: OnClickListener?)
-    : AppViewHolderBase(itemView, dataProvider, iconLoader), View.OnClickListener {
+    : AppViewHolderBase(itemView, resourceProvider, iconLoader), View.OnClickListener {
 
     var app: AppInfo? = null
     var location: Int = 0
 
-    val section: View = itemView.findViewById(R.id.sec_header)
-    val sectionText: TextView = itemView.findViewById(R.id.sec_header_title)
-    val sectionCount: TextView = itemView.findViewById(R.id.sec_header_count)
     val icon: ImageView = itemView.findViewById(R.id.icon)
     val newIndicator: View = itemView.findViewById(R.id.new_indicator)
-    val actionButton: Button = itemView.findViewById(R.id.sec_action_button)
     val detailsView: AppDetailsView
 
     open val isLocalApp: Boolean
@@ -40,13 +34,9 @@ open class AppViewHolder(
         this.app = null
         this.location = 0
 
-        this.detailsView = AppDetailsView(itemView, dataProvider)
+        this.detailsView = AppDetailsView(itemView, resourceProvider)
 
         itemView.findViewById<View>(android.R.id.content).setOnClickListener(this)
-
-        this.actionButton.setOnClickListener {
-            onClickListener?.onActionButton()
-        }
     }
 
     override fun onClick(v: View) {
@@ -66,33 +56,5 @@ open class AppViewHolder(
         }
 
         iconLoader.loadAppIntoImageView(app, this.icon, R.drawable.ic_notifications_black_24dp)
-        bindSectionView()
-    }
-
-    open fun bindSectionView() {
-        if (location == 0 && dataProvider.newAppsCount > 0) {
-            sectionText.setText(R.string.new_updates)
-            section.visibility = View.VISIBLE
-            if (dataProvider.updatableAppsCount > 0) {
-                actionButton.visibility = View.VISIBLE
-                sectionCount.visibility = View.GONE
-            } else {
-                actionButton.visibility = View.GONE
-                sectionCount.text = dataProvider.newAppsCount.toString()
-                sectionCount.visibility = View.VISIBLE
-            }
-        } else if (location == dataProvider.newAppsCount && dataProvider.recentlyUpdatedCount > 0) {
-            sectionText.setText(R.string.recently_updated)
-            sectionCount.text = dataProvider.recentlyUpdatedCount.toString()
-            section.visibility = View.VISIBLE
-            actionButton.visibility = View.GONE
-        } else if (location == (dataProvider.recentlyUpdatedCount + dataProvider.newAppsCount)) {
-            sectionText.setText(R.string.watching)
-            sectionCount.text = (dataProvider.totalAppsCount - dataProvider.recentlyUpdatedCount - dataProvider.newAppsCount).toString()
-            section.visibility = View.VISIBLE
-            actionButton.visibility = View.GONE
-        } else if (section.visibility == View.VISIBLE) {
-            section.visibility = View.GONE
-        }
     }
 }

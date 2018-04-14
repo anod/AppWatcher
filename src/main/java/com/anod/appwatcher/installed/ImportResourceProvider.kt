@@ -2,10 +2,10 @@ package com.anod.appwatcher.installed
 
 import android.content.Context
 import android.support.v4.util.SimpleArrayMap
-import com.anod.appwatcher.watchlist.AppViewHolderDataProvider
+import com.anod.appwatcher.watchlist.AppViewHolderResourceProvider
 import info.anodsplace.framework.content.InstalledApps
 
-internal class ImportDataProvider(context: Context, installedApps: InstalledApps) : AppViewHolderDataProvider(context, installedApps) {
+internal class ImportResourceProvider(context: Context, installedApps: InstalledApps) : AppViewHolderResourceProvider(context, installedApps) {
 
     private val selectedPackages = SimpleArrayMap<String, Boolean>()
     private var defaultSelected: Boolean = false

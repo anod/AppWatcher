@@ -24,15 +24,15 @@ internal class ImportItemAnimator : DefaultItemAnimator() {
         if (newHolder is ImportAppViewHolder) {
             val status = newHolder.status()
             when (status) {
-                ImportDataProvider.STATUS_IMPORTING -> {
+                ImportResourceProvider.STATUS_IMPORTING -> {
                     val anim = AlphaAnimation(0.2f, 1.0f)
                     anim.duration = 500
                     anim.repeatMode = Animation.REVERSE
                     anim.repeatCount = Animation.INFINITE
                     newHolder.itemView.startAnimation(anim)
                 }
-                ImportDataProvider.STATUS_DONE -> animateColor(newHolder.itemView, Color.TRANSPARENT, newHolder.themeAccent)
-                ImportDataProvider.STATUS_ERROR -> animateColor(newHolder.itemView, Color.TRANSPARENT, newHolder.materialRed)
+                ImportResourceProvider.STATUS_DONE -> animateColor(newHolder.itemView, Color.TRANSPARENT, newHolder.themeAccent)
+                ImportResourceProvider.STATUS_ERROR -> animateColor(newHolder.itemView, Color.TRANSPARENT, newHolder.materialRed)
             }
         }
 
