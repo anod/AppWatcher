@@ -73,7 +73,7 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
             importManager.init()
             adapter.clearPackageIndex()
             for (idx in 0 until adapter.itemCount) {
-                val packageName = adapter.getItem(idx)
+                val packageName = adapter.installedPackages[idx]
                 if (dataProvider.isPackageSelected(packageName)) {
                     importManager.addPackage(packageName)
                     adapter.storePackageIndex(packageName, idx)
@@ -120,13 +120,12 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
     override fun onLoadFinished(loader: Loader<List<String>>, data: List<String>) {
         progress.visibility = View.GONE
         val downloadedAdapter = list.adapter as ImportAdapter
-        downloadedAdapter.clear()
-        downloadedAdapter.addAll(data)
+        downloadedAdapter.installedPackages = data
     }
 
     override fun onLoaderReset(loader: Loader<List<String>>) {
         val downloadedAdapter = list.adapter as ImportAdapter
-        downloadedAdapter.clear()
+        downloadedAdapter.installedPackages = emptyList()
     }
 
     override fun onImportProgress(docIds: List<String>, result: SimpleArrayMap<String, Int>) {

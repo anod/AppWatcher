@@ -21,7 +21,7 @@ internal class ImportAdapter(
         v.isClickable = true
         v.isFocusable = true
 
-        return ImportAppViewHolder(v, mDataProvider, mIconLoader)
+        return ImportAppViewHolder(v, mDataProvider, iconLoader)
     }
 
     fun clearPackageIndex() {

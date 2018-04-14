@@ -2,6 +2,7 @@ package com.anod.appwatcher.installed
 
 import android.content.Context
 import android.content.pm.PackageManager
+import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.anod.appwatcher.App
@@ -24,9 +25,19 @@ open class InstalledAppsAdapter(
         private val packageManager: PackageManager,
         private val dataProvider: AppViewHolderResourceProvider,
         protected val listener: AppViewHolder.OnClickListener?)
-    : ArrayAdapter<String, AppViewHolderBase>(ArrayList()) {
+    : RecyclerView.Adapter<AppViewHolderBase>() {
 
-    internal val mIconLoader: PicassoAppIcon = App.provide(context).iconLoader
+    var installedPackages: List<String> = mutableListOf()
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
+
+    internal val iconLoader: PicassoAppIcon = App.provide(context).iconLoader
+
+    override fun getItemCount(): Int {
+        return this.installedPackages.size
+    }
 
     override fun getItemViewType(position: Int): Int {
         return 2
@@ -34,21 +45,12 @@ open class InstalledAppsAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppViewHolderBase {
         val v = LayoutInflater.from(context).inflate(R.layout.list_item_app, parent, false)
-        v.isClickable = true
-        v.isFocusable = true
-
-        return InstalledAppViewHolder(v, dataProvider, mIconLoader, listener)
-
+        return InstalledAppViewHolder(v, dataProvider, iconLoader, listener)
     }
 
     override fun onBindViewHolder(holder: AppViewHolderBase, position: Int) {
-        val packageName = getItem(position)
+        val packageName = installedPackages[position]
         val app = packageManager.packageToApp(-1, packageName)
-        /**
-
-         * int rowId, String appId, String pname, int versionNumber, String versionName,
-         * String title, String creator, Bitmap icon, int status, String uploadDate, String priceText, String priceCur, Integer priceMicros, String detailsUrl) {
-         */
         holder.bindView(position, app)
     }
 

@@ -2,8 +2,11 @@ package com.anod.appwatcher.watchlist
 
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Context
+import com.anod.appwatcher.installed.InstalledAppsAdapter
 import com.anod.appwatcher.installed.InstalledWatchListViewModel
 import com.anod.appwatcher.installed.RecentlyInstalledAppsAdapter
+import com.anod.appwatcher.watchlist.OnDeviceSection.Companion.ADAPTER_INSTALLED
 import info.anodsplace.framework.content.InstalledApps
 
 /**
@@ -27,7 +30,9 @@ open class RecentSection : WatchListFragment.DefaultSection() {
         //
         super.attach(fragment, installedApps, clickListener, onLoadFinished)
 
-        ViewModelProviders.of(fragment).get(InstalledWatchListViewModel::class.java).recentlyInstalled.observe(fragment, Observer {
+        val viewModel = ViewModelProviders.of(fragment).get(InstalledWatchListViewModel::class.java)
+        viewModel.hasSectionRecent = true
+        viewModel.recentlyInstalled.observe(fragment, Observer {
             value ->
             val adapter = getInnerAdapter<RecentlyInstalledAppsAdapter>(ADAPTER_RECENT)
             adapter.recentlyInstalled = value ?: emptyList()
@@ -48,13 +53,31 @@ class OnDeviceSection : WatchListFragment.DefaultSection() {
 
     override fun attach(fragment: WatchListFragment, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener, onLoadFinished: () -> Unit) {
         super.attach(fragment, installedApps, clickListener, onLoadFinished)
-//        val dataProvider = AppViewHolderResourceProvider(context, installedApps)
-//        val index = adapter.add(InstalledAppsAdapter(context, context.packageManager, dataProvider, clickListener) as RecyclerView.Adapter<RecyclerView.ViewHolder>)
-//        adapterIndexMap.put(ADAPTER_INSTALLED, index)
+
+        OnDeviceSection.attach(fragment, installedApps, clickListener, this)
+    }
+
+    override fun viewModel(fragment: WatchListFragment): WatchListViewModel {
+        return ViewModelProviders.of(fragment).get(InstalledWatchListViewModel::class.java)
     }
 
     companion object {
         const val ADAPTER_INSTALLED = 1
+
+        fun attach(fragment: WatchListFragment, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener, section: WatchListFragment.DefaultSection) {
+            val context = fragment.context!!
+            val dataProvider = AppViewHolderResourceProvider(context, installedApps)
+            val index = section.adapter.add(InstalledAppsAdapter(context, context.packageManager, dataProvider, clickListener))
+
+            section.adapterIndexMap.put(ADAPTER_INSTALLED, index)
+            val viewModel = ViewModelProviders.of(fragment).get(InstalledWatchListViewModel::class.java)
+            viewModel.hasSectionOnDevice = true
+            viewModel.installedPackages.observe(fragment, Observer {
+                value ->
+                val adapter = section.getInnerAdapter<InstalledAppsAdapter>(ADAPTER_INSTALLED)
+                adapter.installedPackages = value ?: emptyList()
+            })
+        }
     }
 }
 
@@ -62,9 +85,10 @@ class RecentAndOnDeviceSection : RecentSection() {
 
     override fun attach(fragment: WatchListFragment, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener, onLoadFinished: () -> Unit) {
         super.attach(fragment, installedApps, clickListener, onLoadFinished)
-//        val dataProvider = AppViewHolderResourceProvider(context, installedApps)
-//        val index = adapter.add(InstalledAppsAdapter(context, context.packageManager, dataProvider, clickListener) as RecyclerView.Adapter<RecyclerView.ViewHolder>)
-//        adapterIndexMap.put(ADAPTER_INSTALLED, index)
+        OnDeviceSection.attach(fragment, installedApps, clickListener, this)
     }
 
+    override fun viewModel(fragment: WatchListFragment): WatchListViewModel {
+        return ViewModelProviders.of(fragment).get(InstalledWatchListViewModel::class.java)
+    }
 }
