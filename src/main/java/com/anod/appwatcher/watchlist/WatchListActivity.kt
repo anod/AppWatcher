@@ -1,6 +1,7 @@
 package com.anod.appwatcher.watchlist
 
 import android.accounts.Account
+import android.arch.lifecycle.ViewModelProviders
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -54,16 +55,9 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
 
     open val defaultFilterId = Filters.TAB_ALL
 
-    interface EventListener {
-        fun onSortChanged(sortIndex: Int)
-        fun onQueryTextChanged(newQuery: String)
-        fun onSyncStart()
-        fun onSyncFinish()
-    }
-
     private val actionMenu by lazy { WatchListMenu(this, this) }
 
-    private val eventListeners = ArrayList<EventListener>(3)
+    private val stateViewModel: WatchListStateViewModel by lazy { ViewModelProviders.of(this).get(WatchListStateViewModel::class.java) }
 
     @get:LayoutRes protected abstract val contentLayout: Int
     @get:MenuRes protected abstract val menuResource: Int
@@ -141,11 +135,11 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
             val action = intent.action
             if (UpdateCheck.syncProgress == action) {
                 actionMenu.startRefresh()
-                notifySyncStart()
+                stateViewModel.refresing.value = true
             } else if (UpdateCheck.syncStop == action) {
                 val updatesCount = intent.getIntExtra(UpdateCheck.extrasUpdatesCount, 0)
                 actionMenu.stopRefresh()
-                notifySyncStop()
+                stateViewModel.refresing.value = false
                 if (updatesCount == 0) {
                     Toast.makeText(this@WatchListActivity, R.string.no_updates_found, Toast.LENGTH_SHORT).show()
                 }
@@ -155,14 +149,12 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     }
 
     override fun onResume() {
+        super.onResume()
         val filter = IntentFilter()
         filter.addAction(UpdateCheck.syncProgress)
         filter.addAction(UpdateCheck.syncStop)
         registerReceiver(syncFinishedReceiver, filter)
         syncFinishedReceiverRegistered = true
-        super.onResume()
-
-        notifySyncStop()
     }
 
     override fun onPause() {
@@ -184,7 +176,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         val selected = prefs.sortIndex
         DialogSingleChoice(this, R.style.AlertDialog, R.array.sort_titles, selected, { dialog, index ->
             prefs.sortIndex = index
-            notifySortChange(index)
+            stateViewModel.sortId.value = index
             dialog.dismiss()
         })
         .show()
@@ -233,48 +225,11 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
 
     override fun onQueryTextChange(newText: String): Boolean {
 
-        notifyQueryChange(newText)
+        if (newText != stateViewModel.titleFilter.value) {
+            stateViewModel.titleFilter.value = newText
+        }
+
         return true
-    }
-
-    private fun notifySortChange(sortIndex: Int) {
-        for (idx in eventListeners.indices) {
-            eventListeners[idx].onSortChanged(sortIndex)
-        }
-    }
-
-    private fun notifyQueryChange(newTexr: String) {
-        for (idx in eventListeners.indices) {
-            eventListeners[idx].onQueryTextChanged(newTexr)
-        }
-    }
-
-    fun addQueryChangeListener(listener: EventListener): Int {
-        eventListeners.add(listener)
-
-        if (!TextUtils.isEmpty(actionMenu.searchQuery)) {
-            notifyQueryChange(actionMenu.searchQuery)
-        }
-
-        return eventListeners.size - 1
-    }
-
-    fun removeQueryChangeListener(index: Int) {
-        if (index < eventListeners.size) {
-            eventListeners.removeAt(index)
-        }
-    }
-
-    private fun notifySyncStart() {
-        for (idx in eventListeners.indices) {
-            eventListeners[idx].onSyncStart()
-        }
-    }
-
-    private fun notifySyncStop() {
-        for (idx in eventListeners.indices) {
-            eventListeners[idx].onSyncFinish()
-        }
     }
 
     class Adapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {

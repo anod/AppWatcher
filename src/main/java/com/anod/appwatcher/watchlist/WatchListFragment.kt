@@ -1,6 +1,9 @@
 package com.anod.appwatcher.watchlist
 
 import android.app.Activity
+import android.app.Application
+import android.arch.lifecycle.AndroidViewModel
+import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.ComponentName
@@ -29,17 +32,15 @@ import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.startActivitySafely
 import info.anodsplace.framework.widget.recyclerview.MergeRecyclerAdapter
 
+class WatchListStateViewModel(application: Application) : AndroidViewModel(application) {
+    var titleFilter = MutableLiveData<String>()
+    var sortId = MutableLiveData<Int>()
+    var refresing = MutableLiveData<Boolean>()
+}
 
-open class WatchListFragment : Fragment(), WatchListActivity.EventListener, AppViewHolder.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
-
-    private var titleFilter = ""
-    private var sortId: Int = 0
-    private var filterId: Int = 0
+open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
 
     protected lateinit var installedApps: InstalledApps
-    protected var tag: Tag? = null
-
-    private var listenerIndex: Int = 0
 
     private lateinit var listView: RecyclerView
     private lateinit var emptyView: View
@@ -47,6 +48,13 @@ open class WatchListFragment : Fragment(), WatchListActivity.EventListener, AppV
 
     lateinit var progress: ProgressBar
     private lateinit var section: Section
+
+    protected var tag: Tag? = null
+    private var sortId: Int = 0
+    private var filterId: Int = 0
+    private var titleFilter = ""
+
+    private val stateViewModel: WatchListStateViewModel by lazy { ViewModelProviders.of(activity!!).get(WatchListStateViewModel::class.java) }
 
     interface Section {
         val adapter: MergeRecyclerAdapter
@@ -91,17 +99,6 @@ open class WatchListFragment : Fragment(), WatchListActivity.EventListener, AppV
         companion object {
             const val ADAPTER_WATCHLIST = 0
         }
-    }
-
-    override fun onAttach(context: Context?) {
-        super.onAttach(context)
-        listenerIndex = (context as WatchListActivity).addQueryChangeListener(this)
-        AppLog.d("addQueryChangeListener with index: %d", listenerIndex)
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-        (activity as WatchListActivity).removeQueryChangeListener(listenerIndex)
     }
 
     private var isListVisible: Boolean
@@ -182,6 +179,26 @@ open class WatchListFragment : Fragment(), WatchListActivity.EventListener, AppV
         }
 
         section.viewModel(this).load(titleFilter, sortId, createFilter(filterId), tag)
+
+        stateViewModel.sortId.observe(this, Observer {
+            this.sortId = it ?: 0
+            reload()
+        })
+
+        stateViewModel.titleFilter.observe(this, Observer {
+            this.titleFilter = it ?: ""
+            reload()
+        })
+
+        stateViewModel.refresing.observe(this, Observer {
+            val refreshing = it ?: false
+            if (refreshing) {
+                swipeLayout?.isRefreshing = true
+            } else {
+                swipeLayout?.isRefreshing = false
+                reload()
+            }
+        })
     }
 
     private fun createFilter(filterId: Int): AppListFilter {
@@ -191,28 +208,6 @@ open class WatchListFragment : Fragment(), WatchListActivity.EventListener, AppV
             Filters.TAB_UPDATABLE -> return AppListFilterInclusion(AppListFilterInclusion.Updatable(), installedApps)
             else -> return AppListFilterInclusion(AppListFilterInclusion.All(), installedApps)
         }
-    }
-
-    override fun onSortChanged(sortIndex: Int) {
-        sortId = sortIndex
-        reload()
-    }
-
-    override fun onQueryTextChanged(newQuery: String) {
-        val newFilter = if (!TextUtils.isEmpty(newQuery)) newQuery else ""
-        if (!TextUtils.equals(newFilter, titleFilter)) {
-            titleFilter = newFilter
-            reload()
-        }
-    }
-
-    override fun onSyncStart() {
-        swipeLayout?.isRefreshing = true
-    }
-
-    override fun onSyncFinish() {
-        swipeLayout?.isRefreshing = false
-        reload()
     }
 
     override fun onItemClick(app: AppInfo) {
@@ -245,7 +240,7 @@ open class WatchListFragment : Fragment(), WatchListActivity.EventListener, AppV
 
     override fun onRefresh() {
         if (!(activity as WatchListActivity).requestRefresh()) {
-            swipeLayout?.isRefreshing = false
+            stateViewModel.refresing.value = true
         }
     }
 
