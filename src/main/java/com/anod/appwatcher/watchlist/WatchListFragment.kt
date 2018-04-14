@@ -212,6 +212,7 @@ open class WatchListFragment : Fragment(), WatchListActivity.EventListener, AppV
 
     override fun onSyncFinish() {
         swipeLayout?.isRefreshing = false
+        reload()
     }
 
     override fun onItemClick(app: AppInfo) {
