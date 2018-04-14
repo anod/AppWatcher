@@ -64,11 +64,12 @@ open class WatchListFragment : Fragment(), WatchListActivity.EventListener, AppV
 
         override fun attach(fragment: WatchListFragment, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener, onLoadFinished: () -> Unit) {
             val context = fragment.context!!
-            this.showRecentlyUpdated = App.provide(context).prefs.showRecentlyUpdated
+            val viewModel = viewModel(fragment)
+            viewModel.showRecentlyUpdated = App.provide(context).prefs.showRecentlyUpdated
             val index = adapter.add(AppInfoAdapter(context, installedApps, clickListener))
             adapterIndexMap.put(ADAPTER_WATCHLIST, index)
 
-            viewModel(fragment).appList.observe(fragment, Observer {
+            viewModel.appList.observe(fragment, Observer {
                 list ->
                 getInnerAdapter<AppInfoAdapter>(ADAPTER_WATCHLIST).updateList(list ?: emptyList())
                 onLoadFinished()

@@ -16,6 +16,7 @@ open class WatchListViewModel(application: Application): AndroidViewModel(applic
 
     val appList: MutableLiveData<List<AppInfo>> = MutableLiveData()
     val sections: MutableLiveData<SparseArray<SectionHeader>> = MutableLiveData()
+    var showRecentlyUpdated = false
 
     open fun load(titleFilter: String, sortId: Int, filter: AppListFilter, tag: Tag?) {
         AppListAsyncTask(getApplication<AppWatcherApplication>(), titleFilter, sortId, filter, tag, {
@@ -33,10 +34,11 @@ open class WatchListViewModel(application: Application): AndroidViewModel(applic
         if (newAppsCount > 0) {
             sections[0] = New(newAppsCount)
         }
-        if (recentlyUpdatedCount > 0) {
-            sections[newAppsCount] = RecentlyUpdated(recentlyUpdatedCount)
+        val effectiveRecentlyUpdatedCount  = if (showRecentlyUpdated) recentlyUpdatedCount else 0
+        if (effectiveRecentlyUpdatedCount > 0) {
+            sections[newAppsCount] = RecentlyUpdated(effectiveRecentlyUpdatedCount)
         }
-        sections[recentlyUpdatedCount + newAppsCount] = Watching(totalAppsCount - recentlyUpdatedCount - newAppsCount)
+        sections[effectiveRecentlyUpdatedCount + newAppsCount] = Watching(totalAppsCount - effectiveRecentlyUpdatedCount - newAppsCount)
         return sections
     }
 }

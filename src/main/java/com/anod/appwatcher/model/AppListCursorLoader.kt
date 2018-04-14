@@ -25,9 +25,6 @@ open class AppListCursorLoader(context: Context,
                                tag: Tag?)
     : CursorLoader(context, DbContentProvider.appsContentUri(tag), AppListTable.projection, null, null, sortOrder) {
 
-    constructor(context: Context, titleFilter: String, sortId: Int, cursorFilter: AppListFilter, tag: Tag?)
-            : this(context, titleFilter, createSortOrder(sortId), cursorFilter, tag)
-
     init {
         val selc = ArrayList<String>(3)
         val args = ArrayList<String>(3)
@@ -58,29 +55,5 @@ open class AppListCursorLoader(context: Context,
 
         cursorFilter.resetNewCount()
         return AppListCursor(FilterCursor(cr, cursorFilter))
-    }
-
-    val newCount: Int
-        get() = cursorFilter.newCount
-
-    val updatableCount: Int
-        get() = cursorFilter.updatableNewCount
-
-    val recentlyUpdatedCount: Int
-        get() = cursorFilter.recentlyUpdatedCount
-
-    companion object {
-        private fun createSortOrder(sortId: Int): String {
-            val filter = ArrayList<String>()
-            filter.add(AppListTable.Columns.status + " DESC")
-            filter.add(AppListTable.Columns.recentFlag + " DESC")
-            when (sortId) {
-                Preferences.SORT_NAME_DESC -> filter.add(AppListTable.Columns.title + " COLLATE NOCASE DESC")
-                Preferences.SORT_DATE_ASC -> filter.add(AppListTable.Columns.uploadTimestamp + " ASC")
-                Preferences.SORT_DATE_DESC -> filter.add(AppListTable.Columns.uploadTimestamp + " DESC")
-                else -> filter.add(AppListTable.Columns.title + " COLLATE NOCASE ASC")
-            }
-            return TextUtils.join(", ", filter)
-        }
     }
 }
