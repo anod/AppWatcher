@@ -1,5 +1,5 @@
 repositories {
-    mavenCentral()
+    jcenter()
     maven { url 'https://maven.google.com' }
 }
 
@@ -10,7 +10,7 @@ android {
     compileSdkVersion 27
 
     defaultConfig {
-        minSdkVersion 15
+        minSdkVersion 16
         targetSdkVersion 27
         versionCode 200
         versionName "2.0.0"

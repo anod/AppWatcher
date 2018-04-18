@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.widget.Toolbar;
@@ -74,7 +75,7 @@ public class ColorPickerDialog extends ColorPickerDialogSystem {
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.color_picker_dialog, container, false);
 
         Toolbar toolbar = view.findViewById(R.id.color_dialog_toolbar);
@@ -102,8 +103,7 @@ public class ColorPickerDialog extends ColorPickerDialogSystem {
             float density = getResources().getDisplayMetrics().density;
             mAlpha = view.findViewById(R.id.alpha_picker);
 
-                mAlpha.setBackground(new AlphaPatternDrawable((int) (5 * density)));
-                mAlpha.setBackgroundDrawable(new AlphaPatternDrawable((int) (5 * density)));
+            mAlpha.setBackground(new AlphaPatternDrawable((int) (5 * density)));
 
             mAlpha.setVisibility(View.VISIBLE);
             mAlpha.init(mSize, ALPHA_LEVELS, mAlphaSelectListener);
