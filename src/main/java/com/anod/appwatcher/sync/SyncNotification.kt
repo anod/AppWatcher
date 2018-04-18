@@ -70,12 +70,13 @@ class SyncNotification(private val context: ApplicationContext) {
 
         val builder = NotificationCompat.Builder(context.actual, updatesChannelId)
         builder
-            .setAutoCancel(true)
-            .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle(title)
-            .setContentText(text)
-            .setContentIntent(contentIntent)
-            .setTicker(title)
+                .setAutoCancel(true)
+                .setSmallIcon(R.drawable.ic_notification)
+                .setContentTitle(title)
+                .setContentText(text)
+                .setContentIntent(contentIntent)
+                .setTicker(title)
+                .color = context.getColor(R.color.material_blue_800)
 
         if (updatedApps.size == 1) {
             val app = updatedApps[0]

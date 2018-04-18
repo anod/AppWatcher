@@ -16,6 +16,7 @@ open class WatchListViewModel(application: Application): AndroidViewModel(applic
 
     val appList: MutableLiveData<List<AppInfo>> = MutableLiveData()
     val sections: MutableLiveData<SparseArray<SectionHeader>> = MutableLiveData()
+    val updatable = MutableLiveData<Boolean>()
     var showRecentlyUpdated = false
 
     open fun load(titleFilter: String, sortId: Int, filter: AppListFilter, tag: Tag?) {
@@ -27,6 +28,9 @@ open class WatchListViewModel(application: Application): AndroidViewModel(applic
     fun setValues(list: List<AppInfo>, listFilter: AppListFilter) {
         appList.value = list
         sections.value = this.createHeader(list.size, listFilter.newCount, listFilter.recentlyUpdatedCount)
+        if (listFilter.updatableNewCount > 0) {
+            updatable.value = true
+        }
     }
 
     protected open fun createHeader(totalAppsCount: Int, newAppsCount: Int, recentlyUpdatedCount: Int): SparseArray<SectionHeader> {

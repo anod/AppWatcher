@@ -7,18 +7,17 @@ import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.text.TextUtils
 import android.util.SparseIntArray
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.Toast
 import com.anod.appwatcher.*
@@ -33,9 +32,10 @@ import info.anodsplace.framework.content.startActivitySafely
 import info.anodsplace.framework.widget.recyclerview.MergeRecyclerAdapter
 
 class WatchListStateViewModel(application: Application) : AndroidViewModel(application) {
-    var titleFilter = MutableLiveData<String>()
-    var sortId = MutableLiveData<Int>()
-    var refresing = MutableLiveData<Boolean>()
+    val titleFilter = MutableLiveData<String>()
+    val sortId = MutableLiveData<Int>()
+    val refreshing = MutableLiveData<Boolean>()
+    val updateAllVisible = MutableLiveData<Boolean>()
 }
 
 open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
@@ -122,7 +122,7 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         return inflater.inflate(R.layout.fragment_applist, container, false)
     }
 
-    fun sectionForClassName(sectionClassName: String): Section {
+    private fun sectionForClassName(sectionClassName: String): Section {
         val sectionClass = Class.forName(sectionClassName)
         return sectionClass.newInstance() as Section
     }
@@ -134,6 +134,10 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         emptyView = view.findViewById(android.R.id.empty)
         swipeLayout = view.findViewById(R.id.swipe_layout)
         swipeLayout?.setOnRefreshListener(this)
+
+        val metrics = resources.displayMetrics
+        swipeLayout?.setDistanceToTriggerSync((16 * metrics.density).toInt())
+
         progress = view.findViewById(R.id.progress)
 
         installedApps = InstalledApps.PackageManager(activity!!.packageManager)
@@ -142,18 +146,29 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         val layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
         listView.layoutManager = layoutManager
 
-        // Setup header decorator
-
         // Setup adapter for the sеction
         section = sectionForClassName(arguments!!.getString(ARG_SECTION_PROVIDER))
         section.attach(this, installedApps, this) {
             progress.visibility = View.GONE
             this.isListVisible = true
         }
+        // Setup header decorator
         listView.addItemDecoration(HeaderItemDecorator(
                 section.viewModel(this).sections,
                 this, context!!))
         listView.adapter = section.adapter
+
+        listView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                val isOnTop = !recyclerView.canScrollVertically(-1)
+                swipeLayout?.isEnabled = isOnTop
+                stateViewModel.updateAllVisible.value = isOnTop && (section.viewModel(this@WatchListFragment).updatable.value ?: false)
+            }
+        })
+
+        section.viewModel(this).updatable.observe(this, Observer {
+            stateViewModel.updateAllVisible.value = it ?: false
+        })
 
         // Start out with a progress indicator.
         this.isListVisible = false
@@ -190,7 +205,7 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
             reload()
         })
 
-        stateViewModel.refresing.observe(this, Observer {
+        stateViewModel.refreshing.observe(this, Observer {
             val refreshing = it ?: false
             if (refreshing) {
                 swipeLayout?.isRefreshing = true
@@ -239,8 +254,9 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
     }
 
     override fun onRefresh() {
-        if (!(activity as WatchListActivity).requestRefresh()) {
-            stateViewModel.refresing.value = true
+        val isRefreshing = stateViewModel.refreshing.value ?: false
+        if (!isRefreshing && !(activity as WatchListActivity).requestRefresh()) {
+            stateViewModel.refreshing.value = true
         }
     }
 

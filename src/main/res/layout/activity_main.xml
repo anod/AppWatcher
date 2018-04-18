@@ -28,6 +28,19 @@
             android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
+        <Button
+            android:id="@+id/updateAll"
+            android:background="@drawable/button_round_bg"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_margin="@dimen/activity_horizontal_margin"
+            android:text="@string/update_all"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            app:layout_anchor="@id/viewpager"
+            app:layout_anchorGravity="bottom|center"
+            android:foreground="?attr/selectableItemBackground"
+            />
     </android.support.design.widget.CoordinatorLayout>
 
     <!-- Nav drawer -->

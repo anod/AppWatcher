@@ -100,7 +100,8 @@ class AppsTagActivity : WatchListActivity() {
         adapter.addFragment(WatchListFragment.newInstance(
                 Filters.TAB_UPDATABLE,
                 prefs.sortIndex,
-                WatchListFragment.DefaultSection(), null), getString(R.string.tab_updatable))
+                WatchListFragment.DefaultSection(),
+                tag), getString(R.string.tab_updatable))
         return adapter
     }
 

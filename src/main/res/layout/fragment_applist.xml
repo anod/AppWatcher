@@ -28,7 +28,7 @@
         android:layout_width="240dp"
         android:layout_height="wrap_content"
         android:layout_gravity="top|center_horizontal"
-        android:layout_marginTop="104dp"
+        android:layout_marginTop="88dp"
         android:orientation="vertical">
 
         <ImageView
@@ -39,7 +39,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="16dp"
             android:gravity="center"
             android:text="@string/watch_list_is_empty"
             android:textAppearance="?android:attr/textAppearanceMedium" />
@@ -49,7 +49,7 @@
             style="@style/BrandButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="16dp"
             android:drawableLeft="@drawable/ic_search_white_24dp"
             android:text="@string/search_for_an_app" />
 

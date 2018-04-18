@@ -4,7 +4,7 @@
 
     <item
         android:id="@+id/add_tag"
-        android:icon="@drawable/ic_library_add_black_24px"
+        android:icon="@drawable/ic_add_circle_white_24dp"
         android:title="Add a tag"
         app:showAsAction="always"/>
 </menu>

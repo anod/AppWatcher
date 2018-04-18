@@ -1,13 +1,13 @@
 package com.anod.appwatcher.watchlist
 
 import android.accounts.Account
+import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
-import android.support.annotation.LayoutRes
 import android.support.annotation.MenuRes
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
@@ -31,9 +31,13 @@ import com.anod.appwatcher.sync.UpdateCheck
 import com.anod.appwatcher.upgrade.SetupInterfaceUpgrade
 import com.anod.appwatcher.upgrade.UpgradeCheck
 import com.anod.appwatcher.upgrade.UpgradeRefresh
+import com.anod.appwatcher.utils.Storeintent
 import info.anodsplace.framework.app.DialogSingleChoice
 import com.anod.appwatcher.utils.Theme
+import com.anod.appwatcher.utils.forMyApps
 import info.anodsplace.framework.AppLog
+import info.anodsplace.framework.content.startActivitySafely
+import kotlinx.android.synthetic.main.activity_main.*
 
 /**
  * @author algavris
@@ -94,6 +98,17 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
                 onFilterSelected(position)
             }
         })
+
+        stateViewModel.updateAllVisible.observe(this, Observer {
+            val visible = it ?: false
+            updateAll.visibility = if (visible) View.VISIBLE else View.GONE
+        })
+
+        updateAll?.visibility = View.GONE
+        updateAll?.setOnClickListener {
+            startActivitySafely(Intent().forMyApps(true))
+            it.visibility = View.GONE
+        }
     }
 
     protected abstract fun createViewPagerAdapter(): Adapter
@@ -132,11 +147,11 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
             val action = intent.action
             if (UpdateCheck.syncProgress == action) {
                 actionMenu.startRefresh()
-                stateViewModel.refresing.value = true
+                stateViewModel.refreshing.value = true
             } else if (UpdateCheck.syncStop == action) {
                 val updatesCount = intent.getIntExtra(UpdateCheck.extrasUpdatesCount, 0)
                 actionMenu.stopRefresh()
-                stateViewModel.refresing.value = false
+                stateViewModel.refreshing.value = false
                 if (updatesCount == 0) {
                     Toast.makeText(this@WatchListActivity, R.string.no_updates_found, Toast.LENGTH_SHORT).show()
                 }
