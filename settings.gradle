@@ -1,1 +1,1 @@
-include ':android-framework-lib:framework', ':android-framework-lib:colorpicker', ':playstore'
+include ':framework', ':colorpicker', ':playstore'
