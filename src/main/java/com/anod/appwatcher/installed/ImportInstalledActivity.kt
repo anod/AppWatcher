@@ -39,10 +39,11 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
     private lateinit var dataProvider: ImportResourceProvider
     private lateinit var importManager: ImportBulkManager
 
+    override val layoutResource: Int
+        get() = R.layout.activity_import_installed
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_import_installed)
-        setupToolbar()
 
         importManager = ImportBulkManager(this, this)
         dataProvider = ImportResourceProvider(this, InstalledApps.MemoryCache(InstalledApps.PackageManager(packageManager)))

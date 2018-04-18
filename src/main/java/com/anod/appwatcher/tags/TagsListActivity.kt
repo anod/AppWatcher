@@ -43,10 +43,11 @@ class TagsListActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<Cursor
 
     private var appInfo: AppInfo? = null
 
+    override val layoutResource: Int
+        get() = R.layout.activity_tags_editor
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_tags_editor)
-        setupToolbar()
 
         if (intentExtras.containsKey(EXTRA_APP)) {
             appInfo = intentExtras.getParcelable(EXTRA_APP)

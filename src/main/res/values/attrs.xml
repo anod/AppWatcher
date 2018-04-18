@@ -6,6 +6,7 @@
     </declare-styleable>
 
     <attr name="colorItemBackground" format="reference"/>
+    <attr name="colorPreferenceBackground" format="reference"/>
     <attr name="colorItemLine" format="reference"/>
     <attr name="inactiveRow" format="reference"/>
 </resources>

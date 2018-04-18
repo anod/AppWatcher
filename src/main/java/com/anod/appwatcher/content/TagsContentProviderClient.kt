@@ -7,6 +7,7 @@ import android.os.RemoteException
 import android.util.SparseIntArray
 import com.anod.appwatcher.model.schema.TagsTable
 import info.anodsplace.framework.AppLog
+import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.database.NullCursor
 
 /**
@@ -19,7 +20,7 @@ class TagsContentProviderClient {
 
     private var contentProviderClient: ContentProviderClient
 
-    constructor(context: Context) {
+    constructor(context: ApplicationContext) {
         contentProviderClient = context.contentResolver.acquireContentProviderClient(DbContentProvider.authority)
     }
 

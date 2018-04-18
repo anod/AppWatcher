@@ -37,6 +37,7 @@
 
         <item name="inactiveRow">@color/row_inactive</item>
         <item name="colorItemBackground">@color/item_background</item>
+        <item name="colorPreferenceBackground">@color/preference_background</item>
         <item name="colorItemLine">@android:color/transparent</item>
     </style>
 
@@ -60,6 +61,7 @@
         <item name="android:colorBackgroundCacheHint">@android:color/black</item>
         <item name="android:windowBackground">@android:color/black</item>
         <item name="colorItemBackground">@android:color/black</item>
+        <item name="colorPreferenceBackground">@android:color/black</item>
         <item name="colorItemLine">@color/material_grey_800_</item>
     </style>
 

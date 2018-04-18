@@ -100,8 +100,8 @@
     <string name="sort">Sort</string>
     <string name="allow">Allow</string>
     <string name="settings_notifications">Notifications</string>
-    <string name="uptodate_summary">Show notification if the app is installed and already updated.</string>
-    <string name="uptodate_title">Installed notifications</string>
+    <string name="uptodate_summary">Show notification if the app is already updated.</string>
+    <string name="uptodate_title">Updated notifications</string>
     <string name="noti_action_update">Update</string>
     <string name="update_all">Update All</string>
     <string name="navdrawer_item_wishlist">Wishlist</string>
@@ -148,6 +148,10 @@
     <string name="i_understand">I understand</string>
     <string name="already_exist">Already watched</string>
     <string name="delete_existing_item">Do you want to delete?</string>
+    <string name="pref_default_filter">Default list</string>
+    <string name="pref_default_filter_summary">Choose which filter will be applied when app is opened</string>
+    <string name="pref_notify_installed_summary">Show notifications for installed apps</string>
+    <string name="pref_notify_installed">Installed notifications</string>
 
     <string-array name="sort_titles">
         <item>By name &#x2193;</item>

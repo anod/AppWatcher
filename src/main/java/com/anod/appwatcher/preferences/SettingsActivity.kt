@@ -1,5 +1,6 @@
 package com.anod.appwatcher.preferences
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
@@ -25,7 +26,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.SettingsActionBarActivity
-import info.anodsplace.framework.content.startActivitySafely
 import info.anodsplace.framework.playservices.GooglePlayServices
 import java.io.File
 import java.io.FileInputStream
@@ -33,6 +33,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.util.*
 
+@SuppressLint("Registered")
 open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDrive.Listener, GDriveSignIn.Listener, ImportTask.Listener {
 
     override val themeRes: Int
@@ -83,26 +84,14 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
     }
 
     override fun createPreferenceItems(): List<Preference> {
-        val preferences = mutableListOf<Preference>()
-
-        preferences.add(Category(R.string.category_updates))
 
         val useAutoSync = prefs.useAutoSync
         val currentIndex = resources.getIntArray(R.array.updates_frequency_values).indexOf(prefs.updatesFrequency)
         val frequencyTitles = resources.getStringArray(R.array.updates_frequency)
         frequencyItem.summary = if (currentIndex == -1) "Every ${prefs.updatesFrequency} minutes" else frequencyTitles[currentIndex]
-        preferences.add(frequencyItem)
 
-        preferences.add(wifiItem)
         wifiItem.enabled = useAutoSync
-
-        preferences.add(chargingItem)
         chargingItem.enabled = useAutoSync
-
-        preferences.add(Category(R.string.settings_notifications))
-        preferences.add(SwitchItem(R.string.uptodate_title, R.string.uptodate_summary, ACTION_NOTIFY_UPTODATE, prefs.isNotifyInstalledUpToDate))
-
-        preferences.add(Category(R.string.pref_header_drive_sync))
 
         val gps = GooglePlayServices(this)
         if (!gps.isSupported) {
@@ -116,31 +105,41 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
             syncNowItem.enabled = syncEnabledItem.checked
             syncNowItem.summary = renderDriveSyncTime()
         }
-        preferences.add(syncEnabledItem)
-        preferences.add(syncNowItem)
-        if (BuildConfig.DEBUG) {
-            preferences.add(TextItem(R.string.pref_gdrive_upload, 0, ACTION_GDRIVE_UPLOAD))
-        }
-
-        preferences.add(Category(R.string.pref_header_backup))
-        preferences.add(TextItem(R.string.pref_title_export, R.string.pref_descr_export, ACTION_EXPORT))
-        preferences.add(TextItem(R.string.pref_title_import, R.string.pref_descr_import, ACTION_IMPORT))
-
-        preferences.add(Category(R.string.pref_header_interface))
-        preferences.add(TextItem(R.string.pref_title_theme, R.string.pref_descr_theme, ACTION_THEME))
-        preferences.add(TextItem(R.string.pref_title_dark_theme, R.string.pref_descr_dark_theme, ACTION_DARK_THEME))
-        preferences.add(SwitchItem(R.string.pref_show_recent_title, R.string.pref_show_recent_descr, ACTION_SHOW_RECENT, prefs.showRecent))
-        preferences.add(SwitchItem(R.string.pref_show_ondevice_title, R.string.pref_show_ondevice_descr, ACTION_SHOW_ONDEVICE, prefs.showOnDevice))
-        preferences.add(SwitchItem(R.string.pref_show_recently_updated_title, R.string.pref_show_recently_updated_descr, ACTION_SHOW_RECENTLY_UPDATED, prefs.showRecentlyUpdated))
-
-        preferences.add(Category(R.string.pref_header_about))
 
         val aboutItem = TextItem(R.string.pref_title_about, 0, ACTION_ABOUT)
         aboutItem.summary = appVersion
-        preferences.add(aboutItem)
-        preferences.add(TextItem(R.string.pref_title_opensource, R.string.pref_descr_opensource, ACTION_LICENSES))
 
-        preferences.add(TextItem(R.string.user_log, 0, ACTION_USER_LOG))
+        val preferences = mutableListOf(
+                Category(R.string.category_updates),
+                frequencyItem,
+                wifiItem,
+                chargingItem,
+
+                Category(R.string.settings_notifications),
+                SwitchItem(R.string.uptodate_title, R.string.uptodate_summary, ACTION_NOTIFY_UPTODATE, prefs.isNotifyInstalledUpToDate),
+                SwitchItem(R.string.pref_notify_installed, R.string.pref_notify_installed_summary, ACTION_NOTIFY_UPTODATE, prefs.isNotifyInstalledUpToDate),
+
+                Category(R.string.pref_header_drive_sync),
+                syncEnabledItem,
+                syncNowItem,
+
+                Category(R.string.pref_header_backup),
+                TextItem(R.string.pref_title_export, R.string.pref_descr_export, ACTION_EXPORT),
+                TextItem(R.string.pref_title_import, R.string.pref_descr_import, ACTION_IMPORT),
+
+                Category(R.string.pref_header_interface),
+                TextItem(R.string.pref_title_theme, R.string.pref_descr_theme, ACTION_THEME),
+                TextItem(R.string.pref_title_dark_theme, R.string.pref_descr_dark_theme, ACTION_DARK_THEME),
+                SwitchItem(R.string.pref_show_recent_title, R.string.pref_show_recent_descr, ACTION_SHOW_RECENT, prefs.showRecent),
+                SwitchItem(R.string.pref_show_ondevice_title, R.string.pref_show_ondevice_descr, ACTION_SHOW_ONDEVICE, prefs.showOnDevice),
+                SwitchItem(R.string.pref_show_recently_updated_title, R.string.pref_show_recently_updated_descr, ACTION_SHOW_RECENTLY_UPDATED, prefs.showRecentlyUpdated),
+                TextItem(R.string.pref_default_filter, R.string.pref_default_filter_summary, ACTION_DEFAULT_FILTER),
+
+                Category(R.string.pref_header_about),
+                aboutItem,
+                TextItem(R.string.pref_title_opensource, R.string.pref_descr_opensource, ACTION_LICENSES),
+                TextItem(R.string.user_log, 0, ACTION_USER_LOG)
+        )
 
         if (BuildConfig.DEBUG) {
             preferences.add(TextItem(R.string.pref_export_db, 0, ACTION_EXPORT_DB))
@@ -219,12 +218,6 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
                     GDrive(this, googleAccount, this).sync()
                 } else {
                     onGDriveLoginError(0)
-                }
-            }
-            ACTION_GDRIVE_UPLOAD -> {
-                val googleAccount = GoogleSignIn.getLastSignedInAccount(this)
-                if (googleAccount != null) {
-                    GDrive(this, googleAccount).upload()
                 }
             }
             ACTION_UPDATE_FREQUENCY -> {
@@ -409,11 +402,13 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
         private const val ACTION_NOTIFY_UPTODATE = 10
         private const val ACTION_THEME = 11
         private const val ACTION_EXPORT_DB = 12
-        private const val ACTION_GDRIVE_UPLOAD = 13
         private const val ACTION_DARK_THEME = 14
         private const val ACTION_SHOW_RECENT = 15
         private const val ACTION_SHOW_ONDEVICE = 16
         private const val ACTION_USER_LOG = 17
         private const val ACTION_SHOW_RECENTLY_UPDATED = 18
+        private const val ACTION_DEFAULT_FILTER = 19
+        private const val ACTION_NOTIFY_INSTALLED = 20
+
     }
 }

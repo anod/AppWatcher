@@ -25,7 +25,7 @@ import info.anodsplace.framework.AppLog
 class AppsTagActivity : WatchListActivity() {
     private var tag: Tag = Tag("")
 
-    override val contentLayout: Int
+    override val layoutResource: Int
         get() = R.layout.activity_main
     override val menuResource: Int
         get() = R.menu.tagslist
@@ -55,7 +55,7 @@ class AppsTagActivity : WatchListActivity() {
         title = tag.name
     }
 
-    fun restoreTag(savedInstanceState: Bundle?): Tag {
+    private fun restoreTag(savedInstanceState: Bundle?): Tag {
         if (intentExtras.containsKey(EXTRA_TAG)){
             return intentExtras.getParcelable(EXTRA_TAG)
         } else if (savedInstanceState != null){

@@ -49,10 +49,11 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
     private val endpoints: CompositeStateEndpoint by lazy { CompositeStateEndpoint(this) }
     private val watchAppList: WatchAppList by lazy { WatchAppList(this) }
 
+    override val layoutResource: Int
+        get() = R.layout.activity_market_search
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_market_search)
-        setupToolbar()
 
         retryButton.setOnClickListener { retrySearchResult() }
         list.layoutManager = LinearLayoutManager(this)

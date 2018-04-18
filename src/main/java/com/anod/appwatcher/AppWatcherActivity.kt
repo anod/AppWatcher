@@ -20,6 +20,12 @@ class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener,
     override val defaultFilterId: Int
         get() = prefs.defaultMainFilterId
 
+    override val layoutResource: Int
+        @LayoutRes get() = R.layout.activity_main
+
+    override val menuResource: Int
+        get() = R.menu.watchlist
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportActionBar!!.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp)
@@ -35,12 +41,6 @@ class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener,
         AppLog.d("mark updates as viewed.")
         prefs.isLastUpdatesViewed = true
     }
-
-    override val contentLayout: Int
-        @LayoutRes get() = R.layout.activity_main
-
-    override val menuResource: Int
-        get() = R.menu.watchlist
 
     override fun onFilterSelected(filterId: Int) {
         super.onFilterSelected(filterId)

@@ -14,7 +14,6 @@ import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.view.ViewPager
 import android.support.v7.widget.SearchView
-import android.text.TextUtils
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
@@ -23,6 +22,8 @@ import android.widget.TextView
 import android.widget.Toast
 import com.anod.appwatcher.*
 import com.anod.appwatcher.model.Filters
+import com.anod.appwatcher.navigation.DrawerActivity
+import com.anod.appwatcher.navigation.DrawerViewModel
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.search.SearchActivity
 import com.anod.appwatcher.sync.ManualSyncService
@@ -33,7 +34,6 @@ import com.anod.appwatcher.upgrade.UpgradeRefresh
 import info.anodsplace.framework.app.DialogSingleChoice
 import com.anod.appwatcher.utils.Theme
 import info.anodsplace.framework.AppLog
-import java.util.*
 
 /**
  * @author algavris
@@ -59,7 +59,6 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
 
     private val stateViewModel: WatchListStateViewModel by lazy { ViewModelProviders.of(this).get(WatchListStateViewModel::class.java) }
 
-    @get:LayoutRes protected abstract val contentLayout: Int
     @get:MenuRes protected abstract val menuResource: Int
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -70,8 +69,6 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(contentLayout)
-        setupDrawer()
 
         val filterId: Int
         if (savedInstanceState != null) {
@@ -143,7 +140,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
                 if (updatesCount == 0) {
                     Toast.makeText(this@WatchListActivity, R.string.no_updates_found, Toast.LENGTH_SHORT).show()
                 }
-                refreshLastUpdateTime()
+                ViewModelProviders.of(this@WatchListActivity).get(DrawerViewModel::class.java).refreshLastUpdateTime()
             }
         }
     }

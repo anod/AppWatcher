@@ -43,10 +43,11 @@ class AppsTagSelectActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<C
     private lateinit var tagAppsImport: TagAppsImport
     private var titleFilter = ""
 
+    override val layoutResource: Int
+        get() = R.layout.activity_tag_select
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_tag_select)
-        setupToolbar()
 
         tag = intentExtras.getParcelable(EXTRA_TAG)!!
         titleFilter = savedInstanceState?.getString("title_filter") ?: ""

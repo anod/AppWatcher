@@ -79,10 +79,11 @@ open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, Vi
     val appDetailsView: AppDetailsView by lazy { AppDetailsView(container, dataProvider) }
     val adapter: ChangesAdapter by lazy { ChangesAdapter(this, AppChange(appId, 0, "", "", "") ) }
 
+    override val layoutResource: Int
+        get() = R.layout.activity_app_changelog
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_app_changelog)
-        setupToolbar()
 
         appId = intent.getStringExtra(EXTRA_APP_ID) ?: ""
         detailsUrl = intent.getStringExtra(EXTRA_DETAILS_URL) ?: ""

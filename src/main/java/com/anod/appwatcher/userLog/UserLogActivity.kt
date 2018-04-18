@@ -81,10 +81,11 @@ class UserLogActivity: ToolbarActivity() {
         }
     }
 
+    override val layoutResource: Int
+        get() = R.layout.activity_user_log
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_user_log)
-        setupToolbar()
 
         list.layoutManager = LinearLayoutManager(this)
         list.adapter = UserLogAdapter(App.log(this), this)
