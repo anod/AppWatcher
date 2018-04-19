@@ -136,8 +136,6 @@
   <string name="pref_title_updates_frequency">Переодичность проверки</string>
   <string name="share_subject">%s версия %s</string>
   <string name="new_updates">Новые обновления</string>
-  <string name="tab_updatable">Обновляемые</string>
-  <string name="tab_unwatched">Не отслеживаемые</string>
   <string name="shortcut_updates">Обновляемые</string>
   <string name="updates_not_available">Информация об обновлениях не доступна</string>
   <string name="filter">Фильтр</string>

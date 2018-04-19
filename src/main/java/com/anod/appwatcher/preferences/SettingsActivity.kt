@@ -117,7 +117,7 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
 
                 Category(R.string.settings_notifications),
                 SwitchItem(R.string.uptodate_title, R.string.uptodate_summary, ACTION_NOTIFY_UPTODATE, prefs.isNotifyInstalledUpToDate),
-                SwitchItem(R.string.pref_notify_installed, R.string.pref_notify_installed_summary, ACTION_NOTIFY_UPTODATE, prefs.isNotifyInstalledUpToDate),
+                SwitchItem(R.string.pref_notify_installed, R.string.pref_notify_installed_summary, ACTION_NOTIFY_INSTALLED, prefs.isNotifyInstalledUpToDate),
 
                 Category(R.string.pref_header_drive_sync),
                 syncEnabledItem,
@@ -134,6 +134,7 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
                 SwitchItem(R.string.pref_show_ondevice_title, R.string.pref_show_ondevice_descr, ACTION_SHOW_ONDEVICE, prefs.showOnDevice),
                 SwitchItem(R.string.pref_show_recently_updated_title, R.string.pref_show_recently_updated_descr, ACTION_SHOW_RECENTLY_UPDATED, prefs.showRecentlyUpdated),
                 TextItem(R.string.pref_default_filter, R.string.pref_default_filter_summary, ACTION_DEFAULT_FILTER),
+                SwitchItem(R.string.pref_pull_to_refresh, 0, ACTION_ENABLE_PULL_TO_REFRESH, prefs.enablePullToRefresh),
 
                 Category(R.string.pref_header_about),
                 aboutItem,
@@ -209,7 +210,6 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
                     isProgressVisible = true
                     gDriveSignIn.signIn()
                 }
-
             }
             ACTION_SYNC_NOW -> if (syncNowItem.enabled) {
                 syncNowItem.enabled = false
@@ -222,7 +222,7 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
             }
             ACTION_UPDATE_FREQUENCY -> {
                 val values = resources.getIntArray(R.array.updates_frequency_values)
-                DialogSingleChoice(this,
+                DialogSingleChoice(this, R.style.AlertDialog,
                         R.string.pref_title_updates_frequency,
                         R.array.updates_frequency,
                         values.indexOf(prefs.updatesFrequency), { dialog, which ->
@@ -278,32 +278,28 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
             } catch (e: IOException) {
                 AppLog.e(e)
             }
-            ACTION_SHOW_RECENT -> {
-                val showRecent = (pref as ToggleItem).checked
-                if (!this.recreateWatchlistOnBack) {
-                    this.recreateWatchlistOnBack = prefs.showRecent != showRecent
-                }
-                prefs.showRecent = showRecent
-            }
-            ACTION_SHOW_ONDEVICE -> {
-                val showOnDevice = (pref as ToggleItem).checked
-                if (!this.recreateWatchlistOnBack) {
-                    this.recreateWatchlistOnBack = prefs.showOnDevice != showOnDevice
-                }
-                prefs.showOnDevice = showOnDevice
-            }
-            ACTION_SHOW_RECENTLY_UPDATED -> {
-                val showRecentlyUpdated = (pref as ToggleItem).checked
-                if (!this.recreateWatchlistOnBack) {
-                    this.recreateWatchlistOnBack = prefs.showRecentlyUpdated != showRecentlyUpdated
-                }
-                prefs.showRecentlyUpdated = showRecentlyUpdated
-            }
+            ACTION_SHOW_RECENT -> prefs.showRecent = this.applyToggle(pref, prefs.showRecent)
+            ACTION_SHOW_ONDEVICE -> prefs.showOnDevice = this.applyToggle(pref, prefs.showOnDevice)
+            ACTION_SHOW_RECENTLY_UPDATED -> prefs.showRecentlyUpdated = this.applyToggle(pref, prefs.showRecentlyUpdated)
             ACTION_USER_LOG -> {
                 startActivity(Intent(this, UserLogActivity::class.java))
             }
+            ACTION_DEFAULT_FILTER -> {
+                DialogSingleChoice(this, R.style.AlertDialog, R.string.pref_default_filter, R.array.filter_titles, prefs.defaultMainFilterId, { _, which ->
+                    prefs.defaultMainFilterId = which
+                }).show()
+            }
+            ACTION_ENABLE_PULL_TO_REFRESH -> prefs.enablePullToRefresh = this.applyToggle(pref, prefs.enablePullToRefresh)
         }
         notifyDataSetChanged()
+    }
+
+    private fun applyToggle(pref: Item, oldValue: Boolean): Boolean {
+        val newValue = (pref as ToggleItem).checked
+        if (!this.recreateWatchlistOnBack) {
+            this.recreateWatchlistOnBack = oldValue != newValue
+        }
+        return newValue
     }
 
     private fun recreateWatchlist() {
@@ -409,6 +405,6 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
         private const val ACTION_SHOW_RECENTLY_UPDATED = 18
         private const val ACTION_DEFAULT_FILTER = 19
         private const val ACTION_NOTIFY_INSTALLED = 20
-
+        private const val ACTION_ENABLE_PULL_TO_REFRESH = 21
     }
 }

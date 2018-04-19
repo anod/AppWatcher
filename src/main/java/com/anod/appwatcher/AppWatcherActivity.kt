@@ -42,30 +42,27 @@ class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener,
         prefs.isLastUpdatesViewed = true
     }
 
-    override fun onFilterSelected(filterId: Int) {
-        super.onFilterSelected(filterId)
-        prefs.defaultMainFilterId = filterId
-    }
-
     override fun createViewPagerAdapter(): WatchListActivity.Adapter {
         val adapter = WatchListActivity.Adapter(supportFragmentManager)
+        val title = resources.getStringArray(R.array.filter_titles)
+
         adapter.addFragment(WatchListFragment.newInstance(
                 Filters.TAB_ALL,
                 prefs.sortIndex,
                 sectionForAll(prefs),
-                null), getString(R.string.tab_all))
+                null), title[Filters.TAB_ALL])
         adapter.addFragment(WatchListFragment.newInstance(
                 Filters.TAB_INSTALLED,
                 prefs.sortIndex,
-                WatchListFragment.DefaultSection(), null), getString(R.string.tab_installed))
+                WatchListFragment.DefaultSection(), null), title[Filters.TAB_INSTALLED])
         adapter.addFragment(WatchListFragment.newInstance(
                 Filters.TAB_UNINSTALLED,
                 prefs.sortIndex,
-                WatchListFragment.DefaultSection(), null), getString(R.string.tab_not_installed))
+                WatchListFragment.DefaultSection(), null), title[Filters.TAB_UNINSTALLED])
         adapter.addFragment(WatchListFragment.newInstance(
                 Filters.TAB_UPDATABLE,
                 prefs.sortIndex,
-                WatchListFragment.DefaultSection(), null), getString(R.string.tab_updatable))
+                WatchListFragment.DefaultSection(), null), title[Filters.TAB_UPDATABLE])
         return adapter
     }
 

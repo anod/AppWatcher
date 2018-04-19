@@ -28,12 +28,13 @@ import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.search.SearchActivity
 import com.anod.appwatcher.sync.ManualSyncService
 import com.anod.appwatcher.sync.UpdateCheck
+import com.anod.appwatcher.upgrade.SettingsUpgrade
 import com.anod.appwatcher.upgrade.SetupInterfaceUpgrade
 import com.anod.appwatcher.upgrade.UpgradeCheck
 import com.anod.appwatcher.upgrade.UpgradeRefresh
-import com.anod.appwatcher.utils.Storeintent
 import info.anodsplace.framework.app.DialogSingleChoice
 import com.anod.appwatcher.utils.Theme
+import com.anod.appwatcher.utils.UpdateAll
 import com.anod.appwatcher.utils.forMyApps
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.content.startActivitySafely
@@ -106,7 +107,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
 
         updateAll?.visibility = View.GONE
         updateAll?.setOnClickListener {
-            startActivitySafely(Intent().forMyApps(true))
+            UpdateAll(this, prefs).withConfirmation()
             it.visibility = View.GONE
         }
     }
@@ -220,7 +221,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
 
         SetupInterfaceUpgrade(prefs, this).onUpgrade(upgrade)
         UpgradeRefresh(prefs, this).onUpgrade(upgrade)
-
+        SettingsUpgrade(prefs, this).onUpgrade(upgrade)
     }
 
     override fun onEditorAction(textView: TextView, i: Int, keyEvent: KeyEvent): Boolean {

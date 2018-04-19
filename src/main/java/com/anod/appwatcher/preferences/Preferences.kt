@@ -125,6 +125,10 @@ class Preferences(context: Context) : DeviceIdStorage {
         get() = preferences.getBoolean("update-all-confirmed", false)
         set(value) = preferences.edit().putBoolean("update-all-confirmed", value).apply()
 
+    var enablePullToRefresh: Boolean
+        get() = preferences.getBoolean("pull-to-refresh", true)
+        set(value) = preferences.edit().putBoolean("pull-to-refresh", value).apply()
+
     companion object {
         private const val VIEWED = "viewed"
         private const val LAST_UPDATE_TIME = "last_update_time"

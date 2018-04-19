@@ -27,7 +27,6 @@ open class AppViewHolder(
 
     interface OnClickListener {
         fun onItemClick(app: AppInfo)
-        fun onActionButton()
     }
 
     init {

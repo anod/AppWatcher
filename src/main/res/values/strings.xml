@@ -74,7 +74,12 @@
     <string name="tab_installed">Installed</string>
     <string name="tab_not_installed">Not Installed</string>
     <string name="tab_updatable">Updatable</string>
-    <string name="tab_unwatched">Unwatched</string>
+    <string-array name="filter_titles">
+        <item>@string/tab_all</item>
+        <item>@string/tab_installed</item>
+        <item>@string/tab_not_installed</item>
+        <item>@string/tab_updatable</item>
+    </string-array>
 
     <string name="navdrawer_item_add">Add</string>
     <string name="navdrawer_item_refresh">Update</string>
@@ -152,6 +157,7 @@
     <string name="pref_default_filter_summary">Choose which filter will be applied when app is opened</string>
     <string name="pref_notify_installed_summary">Show notifications for installed apps</string>
     <string name="pref_notify_installed">Installed notifications</string>
+    <string name="pref_pull_to_refresh">Pull to refresh</string>
 
     <string-array name="sort_titles">
         <item>By name &#x2193;</item>

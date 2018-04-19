@@ -24,6 +24,7 @@ import com.anod.appwatcher.*
 import com.anod.appwatcher.details.DetailsActivity
 import com.anod.appwatcher.installed.ImportInstalledActivity
 import com.anod.appwatcher.model.*
+import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.search.SearchActivity
 import com.anod.appwatcher.utils.UpdateAll
 import info.anodsplace.framework.AppLog
@@ -64,6 +65,10 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         val isEmpty: Boolean
     }
 
+    private val prefs: Preferences by lazy {
+        App.provide(context!!).prefs
+    }
+
     // Must have empty constructor
     open class DefaultSection: Section {
         private var showRecentlyUpdated = false
@@ -73,7 +78,7 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         override fun attach(fragment: WatchListFragment, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener, onLoadFinished: () -> Unit) {
             val context = fragment.context!!
             val viewModel = viewModel(fragment)
-            viewModel.showRecentlyUpdated = App.provide(context).prefs.showRecentlyUpdated
+            viewModel.showRecentlyUpdated = fragment.prefs.showRecentlyUpdated
             val index = adapter.add(AppInfoAdapter(context, installedApps, clickListener))
             adapterIndexMap.put(ADAPTER_WATCHLIST, index)
 
@@ -133,8 +138,14 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         listView = view.findViewById(android.R.id.list)
         emptyView = view.findViewById(android.R.id.empty)
         swipeLayout = view.findViewById(R.id.swipe_layout)
-        swipeLayout?.setOnRefreshListener(this)
-
+        
+        if (prefs.enablePullToRefresh) {
+            swipeLayout?.setOnRefreshListener(this)
+        } else {
+            swipeLayout?.isEnabled = false
+            swipeLayout = null
+        }
+        
         val metrics = resources.displayMetrics
         swipeLayout?.setDistanceToTriggerSync((16 * metrics.density).toInt())
 
@@ -237,11 +248,6 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
             Toast.makeText(activity, app.packageName, Toast.LENGTH_SHORT).show()
         }
 
-    }
-
-    override fun onActionButton() {
-        val context = context ?: return
-        UpdateAll(context, App.provide(context).prefs).withConfirmation()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
