@@ -1,5 +1,6 @@
 package com.anod.appwatcher.content
 
+import android.app.Application
 import android.content.*
 import android.database.Cursor
 import android.graphics.Bitmap
@@ -30,7 +31,7 @@ import info.anodsplace.framework.graphics.BitmapByteArray
 class DbContentProviderClient(private val contentProviderClient: ContentProviderClient) {
 
     constructor(context: Context) : this(ApplicationContext(context))
-
+    constructor(application: Application) : this(application.contentResolver.acquireContentProviderClient(DbContentProvider.authority))
     constructor(context: ApplicationContext) : this(context.contentResolver.acquireContentProviderClient(DbContentProvider.authority))
 
     /**

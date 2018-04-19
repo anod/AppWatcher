@@ -17,4 +17,7 @@ class AppChange(val appId: String, val versionCode: Int, val versionName: String
             else -> true
         }
     }
+
+    val isEmpty: Boolean
+        get() = appId.isEmpty()
 }

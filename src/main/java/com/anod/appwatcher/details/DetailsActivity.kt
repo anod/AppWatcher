@@ -1,25 +1,22 @@
 package com.anod.appwatcher.details
 
 import android.app.Activity
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
-import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.provider.Settings
 import android.support.annotation.ColorInt
 import android.support.design.widget.AppBarLayout
-import android.support.v4.app.LoaderManager
 import android.support.v4.app.ShareCompat
 import android.support.v4.content.ContextCompat
-import android.support.v4.content.Loader
 import android.support.v4.graphics.drawable.DrawableCompat
 import android.support.v4.view.ViewCompat
 import android.support.v7.graphics.Palette
@@ -31,7 +28,6 @@ import android.widget.Toast
 import com.anod.appwatcher.App
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenAsync
-import com.anod.appwatcher.content.AppChangeCursor
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.model.*
@@ -41,42 +37,33 @@ import com.anod.appwatcher.watchlist.AppViewHolderResourceProvider
 import com.squareup.picasso.Picasso
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.anim.RevealAnimatorCompat
-import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.content.*
-import info.anodsplace.framework.database.NullCursor
 import info.anodsplace.framework.graphics.chooseDark
-import info.anodsplace.framework.os.BackgroundTask
-import info.anodsplace.framework.os.CachedBackgroundTask
-import info.anodsplace.playstore.DetailsEndpoint
 import kotlinx.android.synthetic.main.activity_app_changelog.*
 import kotlinx.android.synthetic.main.view_changelog_header.*
 
-open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, View.OnClickListener, WatchAppList.Listener, LoaderManager.LoaderCallbacks<Cursor>, AppBarLayout.OnOffsetChangedListener {
+abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, View.OnClickListener, WatchAppList.Listener, AppBarLayout.OnOffsetChangedListener {
 
     override val themeRes: Int
         get() = Theme(this).themeChangelog
 
-    private var detailsUrl: String = ""
-    var appId: String = ""
+    val viewModel: DetailsViewModel by lazy { ViewModelProviders.of(this).get(DetailsViewModel::class.java) }
 
-    private var appInfo: AppInfo? = null
-    private var isNewApp: Boolean = false
     private var addMenu: MenuItem? = null
     private val titleString: AlphaSpannableString by lazy {
         val span = AlphaForegroundColorSpan(ColorAttribute(android.R.attr.textColor, this, Color.WHITE).value)
-        AlphaSpannableString(appInfo!!.title, span)
+        AlphaSpannableString(viewModel.app!!.title, span)
     }
     private val subtitleString: AlphaSpannableString by lazy {
         val span = AlphaForegroundColorSpan(ColorAttribute(android.R.attr.textColor, this, Color.WHITE).value)
-        AlphaSpannableString(appInfo!!.uploadDate, span)
+        AlphaSpannableString(viewModel.app!!.uploadDate, span)
     }
-    private var detailsEndpoint: DetailsEndpoint? = null
 
     val iconLoader: PicassoAppIcon by lazy { App.provide(this).iconLoader }
     private val dataProvider: AppViewHolderResourceProvider by lazy { AppViewHolderResourceProvider(this, InstalledApps.PackageManager(packageManager)) }
     private val appDetailsView: AppDetailsView by lazy { AppDetailsView(container, dataProvider) }
-    val adapter: ChangesAdapter by lazy { ChangesAdapter(this, AppChange(appId, 0, "", "", "") ) }
+    val adapter: ChangesAdapter by lazy { ChangesAdapter(this) }
 
     override val layoutResource: Int
         get() = R.layout.activity_app_changelog
@@ -84,8 +71,8 @@ open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, Vi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        appId = intent.getStringExtra(EXTRA_APP_ID) ?: ""
-        detailsUrl = intent.getStringExtra(EXTRA_DETAILS_URL) ?: ""
+        val appId = intent.getStringExtra(EXTRA_APP_ID) ?: ""
+        val detailsUrl = intent.getStringExtra(EXTRA_DETAILS_URL) ?: ""
         val rowId = intent.getIntExtra(EXTRA_ROW_ID, -1)
 
         progressBar.visibility = View.GONE
@@ -99,30 +86,38 @@ open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, Vi
             error.visibility = View.GONE
             list.visibility = View.GONE
             retryButton.postDelayed({
-                supportLoaderManager.initLoader(0, null, this).forceLoad()
+                viewModel.loadChangelog()
             }, 500)
         }
 
-        if (rowId == -1) {
-            appInfo = packageManager.packageToApp(-1, appId)
-            isNewApp = true
-            App.log(this).info("Show details for unwatched $appId")
-        } else {
-            val cr = DbContentProviderClient(this)
-            appInfo = cr.queryAppRow(rowId)
-            cr.close()
-            isNewApp = false
-            App.log(this).info("Show details for watched $appId")
-        }
+        viewModel.detailsUrl = detailsUrl
+        viewModel.appId = appId
+        viewModel.loadApp(rowId, appId)
 
-        if (appInfo == null) {
+        if (viewModel.app == null) {
             Toast.makeText(this, getString(R.string.cannot_load_app, appId), Toast.LENGTH_LONG).show()
-            AppLog.e("Cannot load app details: '$appId'")
-            App.log(this).error("Cannot load details for $appId")
+            AppLog.e("Cannot loadChangelog app details: '$appId'")
+            App.log(this).error("Cannot loadChangelog details for $appId")
             finish()
             return
         }
-        setupAppView(appInfo!!)
+
+        viewModel.changelogState.observe(this, Observer {
+            val state = it ?: false
+            if (state == 2) {
+                addMenu?.isEnabled = true
+                adapter.setData(viewModel.localChangelog, viewModel.recentChange)
+                if (adapter.isEmpty) {
+                    showRetryMessage()
+                } else {
+                    progressBar.visibility = View.GONE
+                    list.visibility = View.VISIBLE
+                    error.visibility = View.GONE
+                }
+            }
+        })
+
+        setupAppView(viewModel.app!!)
         list.layoutManager = LinearLayoutManager(this)
         list.adapter = adapter
     }
@@ -131,25 +126,16 @@ open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, Vi
         super.onResume()
         progressBar.visibility = View.VISIBLE
 
-        val requestQueue = App.provide(this).requestQueue
-        val deviceInfo = App.provide(this).deviceInfo
-
-        App.provide(this).prefs.account?.let { account ->
+        viewModel.account?.let { account ->
             AuthTokenAsync(this).request(this, account, object : AuthTokenAsync.Callback {
                 override fun onToken(token: String) {
-                    detailsEndpoint = DetailsEndpoint(this@DetailsActivity, requestQueue, deviceInfo, account, detailsUrl)
-                    detailsEndpoint!!.authToken = token
-
-                    supportLoaderManager.initLoader(0, null, this@DetailsActivity).forceLoad()
+                    viewModel.authToken = token
+                    viewModel.loadChangelog()
                 }
 
                 override fun onError(errorMessage: String) {
                     App.log(this@DetailsActivity).error(errorMessage)
-                    if (App.provide(this@DetailsActivity).networkConnection.isNetworkAvailable) {
-                        showRetryMessage()
-                    } else {
-                        supportLoaderManager.initLoader(0, null, this@DetailsActivity).forceLoad()
-                    }
+                    viewModel.loadChangelog()
                 }
             })
         }
@@ -202,7 +188,7 @@ open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, Vi
         menuInflater.inflate(R.menu.changelog, menu)
         addMenu = menu.findItem(R.id.menu_add)
         addMenu?.isEnabled = false
-        if (isNewApp) {
+        if (viewModel.isNewApp) {
             menu.findItem(R.id.menu_remove).isVisible = false
             menu.findItem(R.id.menu_tag_app).isVisible = false
         } else {
@@ -210,7 +196,7 @@ open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, Vi
             val tagMenu = menu.findItem(R.id.menu_tag_app)
             loadTagSubmenu(tagMenu)
         }
-        if (!dataProvider.installedApps.packageInfo(appId).isInstalled) {
+        if (!dataProvider.installedApps.packageInfo(viewModel.appId).isInstalled) {
             menu.findItem(R.id.menu_uninstall).isVisible = false
             menu.findItem(R.id.menu_open).isVisible = false
             menu.findItem(R.id.menu_app_info).isVisible = false
@@ -219,61 +205,38 @@ open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, Vi
         return true
     }
 
-    private class TagMenuItem constructor(internal val tag: Tag, internal val selected: Boolean)
-
     private fun loadTagSubmenu(tagMenu: MenuItem) {
         tagMenu.isVisible = false
-        CachedBackgroundTask("tags", object : BackgroundTask.Worker<Void?, List<Tag>>(null) {
-
-            override fun run(param: Void?): List<Tag> {
-                val cr = DbContentProviderClient(this@DetailsActivity)
-                val tags = cr.queryTags()
-                cr.close()
-                return tags.toList()
+        viewModel.tags.observe(this, Observer {
+            val result = it ?: emptyList()
+            if (result.isEmpty()) {
+                tagMenu.isVisible = false
             }
-
-            override fun finished(result: List<Tag>) {
-                if (result.isEmpty()) {
-                    tagMenu.isVisible = false
-                    return
-                }
-                tagMenu.isVisible = true
-                BackgroundTask(object : BackgroundTask.Worker<List<Tag>, List<TagMenuItem>>(result) {
-                    override fun run(param: List<Tag>): List<TagMenuItem> {
-                        val cr = DbContentProviderClient(this@DetailsActivity)
-                        val appTags = cr.queryAppTags(appInfo!!.rowId)
-                        cr.close()
-                        return param.map { TagMenuItem(it, appTags.contains(it.id)) }
-                    }
-
-                    override fun finished(result: List<TagMenuItem>) {
-                        val tagSubMenu = tagMenu.subMenu
-                        for (item in result) {
-                            tagSubMenu.add(R.id.menu_group_tags, item.tag.id, 0, item.tag.name).isChecked = item.selected
-                        }
-                        tagSubMenu.setGroupCheckable(R.id.menu_group_tags, true, false)
-                    }
-                }).execute()
+            tagMenu.isVisible = true
+        })
+        viewModel.tagsMenuItems.observe(this, Observer {
+            val result = it ?: emptyList()
+            val tagSubMenu = tagMenu.subMenu
+            for (item in result) {
+                tagSubMenu.add(R.id.menu_group_tags, item.first.id, 0, item.first.name).isChecked = item.second
             }
-        }, ApplicationContext(this)).execute()
-
+            tagSubMenu.setGroupCheckable(R.id.menu_group_tags, true, false)
+        })
+        viewModel.loadTags()
     }
 
-    private val changesLoader: ChangesLoader?
-        get() = supportLoaderManager.getLoader<Cursor?>(0) as? ChangesLoader
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.menu_remove -> {
                 val removeDialog = RemoveDialogFragment.newInstance(
-                        appInfo!!.title, appInfo!!.rowId
+                        viewModel.app!!.title, viewModel.app!!.rowId
                 )
                 removeDialog.show(supportFragmentManager, "removeDialog")
                 return true
             }
             R.id.menu_add -> {
-
-                val doc = changesLoader?.document
+                val doc = viewModel.document
                 if (doc != null) {
                     val info = AppInfo(doc)
                     val appList = WatchAppList(this)
@@ -285,9 +248,9 @@ open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, Vi
             }
             R.id.menu_uninstall -> {
                 val data = Intent()
-                data.putExtra(EXTRA_UNINSTALL_APP_PACKAGE, appId)
+                data.putExtra(EXTRA_UNINSTALL_APP_PACKAGE, viewModel.appId)
                 setResult(Activity.RESULT_OK, data)
-                val uninstallIntent = Intent().forUninstall(appId)
+                val uninstallIntent = Intent().forUninstall(viewModel.appId)
                 startActivity(uninstallIntent)
                 return true
             }
@@ -296,13 +259,13 @@ open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, Vi
                 return true
             }
             R.id.menu_open -> {
-                val launchIntent = packageManager.getLaunchIntentForPackage(appId)
+                val launchIntent = packageManager.getLaunchIntentForPackage(viewModel.appId)
                 if (launchIntent != null) {
                     this.startActivitySafely(launchIntent)
                 }
             }
             R.id.menu_app_info -> {
-                startActivity(Intent().forAppInfo(appId))
+                startActivity(Intent().forAppInfo(viewModel.appId))
             }
         }
         if (item.groupId == R.id.menu_group_tags) {
@@ -316,51 +279,22 @@ open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, Vi
     private fun changeTag(tagId: Int, checked: Boolean): Boolean {
         val cr = DbContentProviderClient(this)
         if (checked) {
-            return cr.removeAppFromTag(appInfo!!.appId, tagId)
+            return cr.removeAppFromTag(viewModel.appId, tagId)
         }
-        return cr.addAppToTag(appInfo!!.appId, tagId)
+        return cr.addAppToTag(viewModel.appId, tagId)
     }
 
     private fun shareApp() {
-        val appInfo = this.appInfo ?: return
+        val appInfo = this.viewModel.app ?: return
         val builder = ShareCompat.IntentBuilder.from(this)
 
-        val changes = if (adapter.recentChange.details.isBlank()) "" else "${adapter.recentChange.details}\n\n"
+        val changes = if (viewModel.recentChange.details.isBlank()) "" else "${viewModel.recentChange.details}\n\n"
         val text = getString(R.string.share_text, changes ,String.format(Storeintent.URL_WEB_PLAY_STORE, appInfo.packageName))
 
         builder.setSubject(getString(R.string.share_subject, appInfo.title, appInfo.versionName))
         builder.setText(text)
         builder.setType("text/plain")
         builder.startChooser()
-    }
-
-    override fun onCreateLoader(id: Int, args: Bundle?): Loader<Cursor> {
-        return if (appId.isBlank())
-            EmptyLoader(this, NullCursor())
-        else ChangesLoader(this, appId, detailsEndpoint)
-    }
-
-    override fun onLoaderReset(loader: Loader<Cursor>) {
-        adapter.swapData(null)
-    }
-
-    override fun onLoadFinished(loader: Loader<Cursor>, data: Cursor?) {
-        val changesLoader = (loader as? ChangesLoader)
-        if (changesLoader == null) { // EmptyLoader
-            showRetryMessage()
-            return
-        }
-        val cursor = data as? AppChangeCursor
-        if (changesLoader.document == null && (cursor == null || !cursor.hasNext()) ) {
-            showRetryMessage()
-            return
-        }
-        addMenu?.isEnabled = true
-        adapter.swapData(cursor)
-        adapter.recentChange = changesLoader.recentChange
-        progressBar.visibility = View.GONE
-        list.visibility = View.VISIBLE
-        error.visibility = View.GONE
     }
 
     private fun showRetryMessage() {
@@ -379,9 +313,9 @@ open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, Vi
         animateBackground()
 
         if (Theme(this).isNightTheme) {
-            appDetailsView.updateAccentColor(ContextCompat.getColor(this, R.color.primary_text_dark), appInfo!!)
+            appDetailsView.updateAccentColor(ContextCompat.getColor(this, R.color.primary_text_dark), viewModel.app!!)
         } else {
-            appDetailsView.updateAccentColor(darkSwatch.rgb, appInfo!!)
+            appDetailsView.updateAccentColor(darkSwatch.rgb, viewModel.app!!)
         }
     }
 
@@ -406,7 +340,7 @@ open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, Vi
     override fun onClick(v: View) {
         val id = v.id
         if (id == R.id.playStoreButton) {
-            val intent = Intent().forPlayStore(appInfo!!.packageName)
+            val intent = Intent().forPlayStore(viewModel.app!!.packageName)
             this.startActivitySafely(intent)
         }
     }

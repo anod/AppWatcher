@@ -1,5 +1,6 @@
 package com.anod.appwatcher
 
+import android.app.Application
 import android.content.Context
 import com.anod.appwatcher.userLog.UserLogger
 import info.anodsplace.framework.app.ApplicationContext
@@ -19,6 +20,10 @@ object App {
         return context.actual as AppWatcherApplication
     }
 
+    fun provide(application: Application): AppComponent {
+        return (application as AppWatcherApplication).appComponent
+    }
+
     fun provide(context: Context): AppComponent {
         return (context.applicationContext as AppWatcherApplication).appComponent
     }
@@ -29,5 +34,9 @@ object App {
 
     fun log(context: Context): UserLogger {
         return (context.applicationContext as AppWatcherApplication).appComponent.userLogger
+    }
+
+    fun log(context: ApplicationContext): UserLogger {
+        return (context.actual as AppWatcherApplication).appComponent.userLogger
     }
 }

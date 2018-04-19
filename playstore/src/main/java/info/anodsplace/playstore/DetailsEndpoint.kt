@@ -38,7 +38,7 @@ class DetailsEndpoint(context: Context, requestQueue: RequestQueue, deviceInfoPr
     override fun executeSync() {
         val data = detailsData ?: return
         data.detailsUrl = detailsUrl
-        DfeSync<DfeDetails>(data).execute()
+        DfeSync(data).execute()
     }
 
     override fun createDfeModel(): DfeModel {

@@ -11,6 +11,7 @@ import android.widget.TextView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.AppChangeCursor
 import com.anod.appwatcher.model.AppChange
+import com.anod.appwatcher.model.AppInfo
 import info.anodsplace.framework.text.Html
 import info.anodsplace.framework.widget.recyclerview.ArrayAdapter
 import info.anodsplace.framework.widget.recyclerview.RecyclerViewCursorListAdapter
@@ -36,65 +37,42 @@ class ChangeView(itemView: View) : RecyclerView.ViewHolder(itemView) {
     }
 }
 
-class ChangesAdapter(private val context: Context, recentChange: AppChange):
-        RecyclerViewStateAdapter(arrayOf(ChangesCursorAdapter(context, recentChange)) as Array<RecyclerView.Adapter<RecyclerView.ViewHolder>>)  {
-    private val arrayId = 1
+class ChangesAdapter(private val context: Context): RecyclerView.Adapter<ChangeView>()  {
 
-    var recentChange = recentChange
-        set(value) {
-            field = value
-            if (cursorAdapter.itemCount == 0) {
-                add(arrayId, RecentChangeAdapter(context, value))
-                selectedId = arrayId
-            }
-            notifyItemChanged(0)
-        }
+    private var localChanges = emptyList<AppChange>()
 
-    val isEmpty: Boolean
-        get() = cursorAdapter.itemCount == 0
-
-    private val cursorAdapter: ChangesCursorAdapter
-        get() = get(0) as ChangesCursorAdapter
-
-    fun swapData(cursor: AppChangeCursor?) {
-        cursorAdapter.swapData(cursor)
+    override fun getItemCount(): Int {
+        return localChanges.size
     }
 
-}
-
-class RecentChangeAdapter(private val context: Context, recentChange: AppChange) : ArrayAdapter<AppChange, ChangeView>(mutableListOf(recentChange)) {
-
-    @LayoutRes val resource: Int = R.layout.list_item_change
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChangeView {
-        val v = LayoutInflater.from(context).inflate(resource, parent, false)
+        val v = LayoutInflater.from(context).inflate(R.layout.list_item_change, parent, false)
         return ChangeView(v)
     }
 
     override fun onBindViewHolder(holder: ChangeView, position: Int) {
-        holder.bindView(getItem(position))
-    }
-}
-
-class ChangesCursorAdapter(context: Context,private var recentChange: AppChange) : RecyclerViewCursorListAdapter<ChangeView, AppChange, AppChangeCursor>(context, R.layout.list_item_change) {
-
-    override fun areItemsTheSame(oldItem: AppChange, newItem: AppChange): Boolean {
-        return oldItem.appId == newItem.appId && oldItem.versionCode == newItem.versionCode
+        holder.bindView(localChanges[position])
     }
 
-    override fun areContentsTheSame(oldItem: AppChange, newItem: AppChange): Boolean {
-        return oldItem == newItem
-    }
+    val isEmpty: Boolean
+        get() = itemCount == 0
 
-    override fun onCreateViewHolder(itemView: View): ChangeView {
-        return ChangeView(itemView)
-    }
-
-    override fun onBindViewHolder(holder: ChangeView, position: Int, change: AppChange) {
-        if (recentChange.versionCode == change.versionCode) {
-            holder.bindView(recentChange)
-        } else {
-            holder.bindView(change)
+    fun setData(localChanges: List<AppChange>, recentChange: AppChange) {
+        when {
+            localChanges.isEmpty() -> {
+                if (!recentChange.isEmpty) {
+                    this.localChanges = listOf(recentChange)
+                }
+            }
+            localChanges.first() == recentChange -> this.localChanges = localChanges
+            else -> {
+                if (recentChange.isEmpty) {
+                    this.localChanges = localChanges
+                } else {
+                    this.localChanges = listOf(recentChange, *localChanges.toTypedArray())
+                }
+            }
         }
+        notifyDataSetChanged()
     }
 }
