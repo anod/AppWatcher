@@ -9,9 +9,11 @@ import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.support.annotation.ColorInt
 import android.support.design.widget.AppBarLayout
 import android.support.v4.app.LoaderManager
@@ -41,10 +43,7 @@ import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.anim.RevealAnimatorCompat
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.app.ToolbarActivity
-import info.anodsplace.framework.content.EmptyLoader
-import info.anodsplace.framework.content.InstalledApps
-import info.anodsplace.framework.content.forUninstall
-import info.anodsplace.framework.content.startActivitySafely
+import info.anodsplace.framework.content.*
 import info.anodsplace.framework.database.NullCursor
 import info.anodsplace.framework.graphics.chooseDark
 import info.anodsplace.framework.os.BackgroundTask
@@ -75,8 +74,8 @@ open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, Vi
     private var detailsEndpoint: DetailsEndpoint? = null
 
     val iconLoader: PicassoAppIcon by lazy { App.provide(this).iconLoader }
-    val dataProvider: AppViewHolderResourceProvider by lazy { AppViewHolderResourceProvider(this, InstalledApps.PackageManager(packageManager)) }
-    val appDetailsView: AppDetailsView by lazy { AppDetailsView(container, dataProvider) }
+    private val dataProvider: AppViewHolderResourceProvider by lazy { AppViewHolderResourceProvider(this, InstalledApps.PackageManager(packageManager)) }
+    private val appDetailsView: AppDetailsView by lazy { AppDetailsView(container, dataProvider) }
     val adapter: ChangesAdapter by lazy { ChangesAdapter(this, AppChange(appId, 0, "", "", "") ) }
 
     override val layoutResource: Int
@@ -214,6 +213,7 @@ open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, Vi
         if (!dataProvider.installedApps.packageInfo(appId).isInstalled) {
             menu.findItem(R.id.menu_uninstall).isVisible = false
             menu.findItem(R.id.menu_open).isVisible = false
+            menu.findItem(R.id.menu_app_info).isVisible = false
         }
 
         return true
@@ -259,7 +259,7 @@ open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, Vi
 
     }
 
-    val changesLoader: ChangesLoader?
+    private val changesLoader: ChangesLoader?
         get() = supportLoaderManager.getLoader<Cursor?>(0) as? ChangesLoader
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -300,6 +300,9 @@ open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, Vi
                 if (launchIntent != null) {
                     this.startActivitySafely(launchIntent)
                 }
+            }
+            R.id.menu_app_info -> {
+                startActivity(Intent().forAppInfo(appId))
             }
         }
         if (item.groupId == R.id.menu_group_tags) {
@@ -424,7 +427,7 @@ open class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, Vi
         }
     }
 
-    val mainHandler = Handler(Looper.getMainLooper())
+    private val mainHandler = Handler(Looper.getMainLooper())
 
     override fun onOffsetChanged(appBarLayout: AppBarLayout, verticalOffset: Int) {
         val totalScrollRange = appBarLayout.totalScrollRange.toFloat()

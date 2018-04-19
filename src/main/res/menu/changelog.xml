@@ -41,4 +41,10 @@
         app:showAsAction="ifRoom"
         android:title="@string/uninstall" android:icon="@drawable/ic_delete_white_24dp">
     </item>
+
+    <item
+        android:id="@+id/menu_app_info"
+        app:showAsAction="never"
+        android:title="@string/app_info" />
+
 </menu>

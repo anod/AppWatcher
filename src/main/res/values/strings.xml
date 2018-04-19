@@ -158,6 +158,7 @@
     <string name="pref_notify_installed_summary">Show notifications for installed apps</string>
     <string name="pref_notify_installed">Installed notifications</string>
     <string name="pref_pull_to_refresh">Pull to refresh</string>
+    <string name="app_info">App Info</string>
 
     <string-array name="sort_titles">
         <item>By name &#x2193;</item>
