@@ -49,7 +49,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
 
     companion object {
         private const val oneSecInMillis = 1000
-        private const val bulkSize = 20
+        private const val bulkSize = 100
         internal const val extrasManual = "manual"
 
         const val syncStop = "com.anod.appwatcher.sync.start"
@@ -161,6 +161,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
 
         val apps = client.queryAll(false)
         if (!apps.moveToFirst()) {
+            App.log(context.actual).info("Sync finished: no apps")
             return listOf()
         }
         apps.moveToPosition(-1)
@@ -174,7 +175,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
 
             val localApp = apps.appInfo
             val docId = localApp.appId
-            localApps.put(docId, localApp)
+            localApps[docId] = localApp
 
             if (localApps.size == bulkSize) {
                 val docIds = localApps.keys.toList()
@@ -205,6 +206,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         }
         apps.close()
 
+        App.log(context.actual).info("Sync finished for ${apps.count} apps")
         return updatedTitles
     }
 
