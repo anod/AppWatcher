@@ -51,4 +51,9 @@
         android:title="@string/menu_refresh"
         appwatcher:showAsAction="ifRoom" />
 
+    <item
+        android:id="@+id/menu_update_all"
+        android:title="@string/update_all"
+        appwatcher:showAsAction="never" />
+
 </menu>

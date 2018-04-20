@@ -12,6 +12,7 @@ import com.anod.appwatcher.SettingsActivity
 import com.anod.appwatcher.installed.ImportInstalledActivity
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.tags.TagsListActivity
+import com.anod.appwatcher.utils.UpdateAll
 import info.anodsplace.framework.view.MenuItemAnimation
 
 /**
@@ -136,7 +137,10 @@ class WatchListMenu(private var searchListener: SearchView.OnQueryTextListener, 
                 activity.applyFilter(item.order)
                 return true
             }
-
+            R.id.menu_update_all -> {
+                UpdateAll(activity, activity.prefs).withConfirmation()
+                return true
+            }
         }
         return false
     }

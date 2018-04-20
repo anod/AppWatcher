@@ -32,4 +32,5 @@
     <dimen name="dialog_min_width_major">90%</dimen>
     <dimen name="log_message_size">12dp</dimen>
     <dimen name="list_apps_header_height">32dp</dimen>
+    <dimen name="list_apps_header_button_height">48dp</dimen>
 </resources>

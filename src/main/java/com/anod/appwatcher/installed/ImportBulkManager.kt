@@ -11,6 +11,7 @@ import com.anod.appwatcher.model.WatchAppList
 import finsky.api.model.DfeBulkDetails
 import finsky.api.model.DfeModel
 import finsky.api.model.Document
+import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.playstore.BulkDetailsEndpoint
 import info.anodsplace.playstore.PlayStoreEndpoint
 import java.util.*
@@ -86,7 +87,7 @@ internal class ImportBulkManager(
 
     override fun onDataChanged(data: DfeModel) {
         val docs = (data as DfeBulkDetails).documents.toTypedArray()
-        asyncTask = AddWatchAppAsyncTask(context, watchAppList, this).execute(*docs)
+        asyncTask = AddWatchAppAsyncTask(ApplicationContext(context), watchAppList, this).execute(*docs)
     }
 
     override fun onErrorResponse(error: VolleyError) {

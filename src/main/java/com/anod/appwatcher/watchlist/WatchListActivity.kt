@@ -99,17 +99,6 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
                 onFilterSelected(position)
             }
         })
-
-        stateViewModel.updateAllVisible.observe(this, Observer {
-            val visible = it ?: false
-            updateAll.visibility = if (visible) View.VISIBLE else View.GONE
-        })
-
-        updateAll?.visibility = View.GONE
-        updateAll?.setOnClickListener {
-            UpdateAll(this, prefs).withConfirmation()
-            it.visibility = View.GONE
-        }
     }
 
     protected abstract fun createViewPagerAdapter(): Adapter

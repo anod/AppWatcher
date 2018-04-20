@@ -16,27 +16,23 @@ open class WatchListViewModel(application: Application): AndroidViewModel(applic
 
     val appList: MutableLiveData<List<AppInfo>> = MutableLiveData()
     val sections: MutableLiveData<SparseArray<SectionHeader>> = MutableLiveData()
-    val updatable = MutableLiveData<Boolean>()
     var showRecentlyUpdated = false
 
     open fun load(titleFilter: String, sortId: Int, filter: AppListFilter, tag: Tag?) {
-        AppListAsyncTask(getApplication<AppWatcherApplication>(), titleFilter, sortId, filter, tag, {
-            list, listFilter -> this.setValues(list, listFilter)
+        AppListAsyncTask(getApplication<AppWatcherApplication>(), titleFilter, sortId, filter, tag, { list, listFilter ->
+            this.setValues(list, listFilter)
         }).execute()
     }
 
     fun setValues(list: List<AppInfo>, listFilter: AppListFilter) {
         appList.value = list
-        sections.value = this.createHeader(list.size, listFilter.newCount, listFilter.recentlyUpdatedCount)
-        if (listFilter.updatableNewCount > 0) {
-            updatable.value = true
-        }
+        sections.value = this.createHeader(list.size, listFilter.newCount, listFilter.recentlyUpdatedCount, listFilter.updatableNewCount)
     }
 
-    protected open fun createHeader(totalAppsCount: Int, newAppsCount: Int, recentlyUpdatedCount: Int): SparseArray<SectionHeader> {
+    protected open fun createHeader(totalAppsCount: Int, newAppsCount: Int, recentlyUpdatedCount: Int, updatableNewCount: Int): SparseArray<SectionHeader> {
         val sections = SparseArray<SectionHeader>()
         if (newAppsCount > 0) {
-            sections[0] = New(newAppsCount)
+            sections[0] = New(newAppsCount, updatableNewCount)
         }
         val effectiveRecentlyUpdatedCount  = if (showRecentlyUpdated) recentlyUpdatedCount else 0
         if (effectiveRecentlyUpdatedCount > 0) {

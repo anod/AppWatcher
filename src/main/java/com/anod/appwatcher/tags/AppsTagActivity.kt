@@ -97,7 +97,7 @@ class AppsTagActivity : WatchListActivity() {
                 prefs.sortIndex,
                 WatchListFragment.DefaultSection(),
                 tag), getString(R.string.tab_not_installed))
-        adapter.addFragment(WatchListFragment.newInstance(
+        adapter.addFragment(AppsTagListFragment.newInstance(
                 Filters.TAB_UPDATABLE,
                 prefs.sortIndex,
                 WatchListFragment.DefaultSection(),

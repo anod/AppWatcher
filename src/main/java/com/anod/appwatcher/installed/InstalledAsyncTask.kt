@@ -5,7 +5,7 @@ import android.content.pm.PackageManager
 import android.support.v4.util.SimpleArrayMap
 import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.model.AppInfo
-import com.anod.appwatcher.model.AppListAsyncTask
+import com.anod.appwatcher.watchlist.AppListAsyncTask
 import com.anod.appwatcher.model.AppListFilter
 import com.anod.appwatcher.model.Tag
 import com.anod.appwatcher.preferences.Preferences
@@ -23,8 +23,8 @@ import java.util.*
 typealias PackageRowPair = Pair<String, Int>
 typealias InstalledAsyncTaskCompletion = (List<AppInfo>, AppListFilter, installedPackages: List<String>, recentlyInstalled: List<PackageRowPair>) -> Unit
 
-class InstalledAsyncTask(context: ApplicationContext,
-                         titleFilter: String,
+class InstalledAsyncTask(private val context: ApplicationContext,
+                         private val titleFilter: String,
                          private val sortId: Int,
                          cursorFilter: AppListFilter,
                          tag: Tag?,

@@ -14,10 +14,6 @@ import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.SparseIntArray
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.Toast
 import com.anod.appwatcher.*
@@ -26,17 +22,17 @@ import com.anod.appwatcher.installed.ImportInstalledActivity
 import com.anod.appwatcher.model.*
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.search.SearchActivity
-import com.anod.appwatcher.utils.UpdateAll
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.startActivitySafely
 import info.anodsplace.framework.widget.recyclerview.MergeRecyclerAdapter
+import android.view.*
+
 
 class WatchListStateViewModel(application: Application) : AndroidViewModel(application) {
     val titleFilter = MutableLiveData<String>()
     val sortId = MutableLiveData<Int>()
     val refreshing = MutableLiveData<Boolean>()
-    val updateAllVisible = MutableLiveData<Boolean>()
 }
 
 open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
@@ -173,12 +169,7 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 val isOnTop = !recyclerView.canScrollVertically(-1)
                 swipeLayout?.isEnabled = isOnTop
-                stateViewModel.updateAllVisible.value = isOnTop && (section.viewModel(this@WatchListFragment).updatable.value ?: false)
             }
-        })
-
-        section.viewModel(this).updatable.observe(this, Observer {
-            stateViewModel.updateAllVisible.value = it ?: false
         })
 
         // Start out with a progress indicator.

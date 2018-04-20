@@ -13,27 +13,63 @@ import android.widget.TextView
 import android.view.LayoutInflater
 import androidx.core.util.containsKey
 import android.view.ViewGroup
+import android.widget.Button
 import androidx.core.graphics.withTranslation
 
 sealed class SectionHeader
-class New(val count: Int) : SectionHeader()
+class New(val count: Int, val updatable: Int) : SectionHeader()
 class RecentlyUpdated(val count: Int) : SectionHeader()
 class Watching(val count: Int) : SectionHeader()
 class RecentlyInstalled: SectionHeader()
 class OnDevice: SectionHeader()
 
+private fun View.requestMeasure(parent: ViewGroup) {
+    if (this.layoutParams == null) {
+        this.layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+    }
+    val displayMetrics = parent.context.resources.displayMetrics
+
+    val widthSpec = View.MeasureSpec.makeMeasureSpec(displayMetrics.widthPixels, View.MeasureSpec.EXACTLY)
+    val heightSpec = View.MeasureSpec.makeMeasureSpec(displayMetrics.heightPixels, View.MeasureSpec.EXACTLY)
+
+    val childWidth = ViewGroup.getChildMeasureSpec(widthSpec,
+            parent.paddingLeft + parent.paddingRight, this.layoutParams.width)
+    val childHeight = ViewGroup.getChildMeasureSpec(heightSpec,
+            parent.paddingTop + parent.paddingBottom, this.layoutParams.height)
+
+    this.measure(childWidth, childHeight)
+
+    this.layout(0, 0, this.measuredWidth, this.measuredHeight)
+}
+
+interface SectionHeaderView {
+    val height: Int
+    val view: View
+    val title: TextView
+    val count: TextView
+}
+
+class CountHeaderView(parent: ViewGroup): SectionHeaderView {
+    override val height = parent.context.resources.getDimension(R.dimen.list_apps_header_height).toInt()
+    override val view: View = LayoutInflater.from(parent.context).inflate(R.layout.list_apps_header, parent, false)
+    override val title: TextView by lazy { view.findViewById<TextView>(android.R.id.text1) }
+    override val count: TextView by lazy { view.findViewById<TextView>(android.R.id.text2) }
+
+    init {
+        view.requestMeasure(parent)
+    }
+}
+
 class HeaderItemDecorator(sections: LiveData<SparseArray<SectionHeader>>, lifecycleOwner: LifecycleOwner, context: Context) : RecyclerView.ItemDecoration() {
 
-    val height = context.resources.getDimension(R.dimen.list_apps_header_height)
-
-    private var headerView: View? = null
-    private val title: TextView by lazy { headerView!!.findViewById<TextView>(android.R.id.text1) }
-    private val count: TextView by lazy { headerView!!.findViewById<TextView>(android.R.id.text2) }
     private var values = SparseArray<SectionHeader>()
 
     private val textNew = context.getString(R.string.new_updates)
     private val textRecentlyUpdated = context.getString(R.string.recently_updated)
     private val textWatching = context.getString(R.string.watching)
+
+    private var header: CountHeaderView? = null
 
     init {
         sections.observe(lifecycleOwner, Observer {
@@ -42,11 +78,6 @@ class HeaderItemDecorator(sections: LiveData<SparseArray<SectionHeader>>, lifecy
     }
 
     override fun onDraw(c: Canvas, parent: RecyclerView, state: RecyclerView.State?) {
-        if (headerView == null) {
-            headerView = LayoutInflater.from(parent.context)
-                    .inflate(R.layout.list_apps_header, parent, false)
-            measureHeaderView(headerView!!, parent)
-        }
 
         for (i in 0 until parent.childCount) {
             val child = parent.getChildAt(i)
@@ -54,30 +85,30 @@ class HeaderItemDecorator(sections: LiveData<SparseArray<SectionHeader>>, lifecy
 
             if (values.containsKey(position)) {
                 val section = values[position]
+                val header = header(parent)
                 when (section) {
                     is New -> {
-                        title.text = this.textNew
-                        count.text = section.count.toString()
+                        header.title.text = this.textNew
+                        header.count.text = section.count.toString()
                     }
                     is RecentlyUpdated -> {
-                        title.text = this.textRecentlyUpdated
-                        count.text = section.count.toString()
+                        header.title.text = this.textRecentlyUpdated
+                        header.count.text = section.count.toString()
                     }
                     is Watching -> {
-                        title.text = this.textWatching
-                        count.text = section.count.toString()
+                        header.title.text = this.textWatching
+                        header.count.text = section.count.toString()
                     }
                     is RecentlyInstalled -> {
-                        title.setText(R.string.recently_installed)
-                        count.text = ""
+                        header.title.setText(R.string.recently_installed)
+                        header.count.text = ""
                     }
                     is OnDevice -> {
-                        title.setText(R.string.downloaded)
-                        count.text = ""
+                        header.title.setText(R.string.downloaded)
                     }
                 }
-                c.withTranslation(y = child.y - height) {
-                    headerView!!.draw(c)
+                c.withTranslation(y = child.y - header.height) {
+                    header.view.draw(c)
                 }
             }
         }
@@ -88,29 +119,17 @@ class HeaderItemDecorator(sections: LiveData<SparseArray<SectionHeader>>, lifecy
 
         val position = parent.getChildAdapterPosition(view)
         if (values.containsKey(position)) {
-            outRect.top = this.height.toInt()
+            val header = header(parent)
+            outRect.top = header.height
         } else {
             outRect.top = 0
         }
     }
 
-    private fun measureHeaderView(view: View, parent: ViewGroup) {
-        if (view.layoutParams == null) {
-            view.layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+    private fun header(parent: RecyclerView): SectionHeaderView {
+        if (this.header == null) {
+            this.header = CountHeaderView(parent)
         }
-        val displayMetrics = parent.context.resources.displayMetrics
-
-        val widthSpec = View.MeasureSpec.makeMeasureSpec(displayMetrics.widthPixels, View.MeasureSpec.EXACTLY)
-        val heightSpec = View.MeasureSpec.makeMeasureSpec(displayMetrics.heightPixels, View.MeasureSpec.EXACTLY)
-
-        val childWidth = ViewGroup.getChildMeasureSpec(widthSpec,
-                parent.paddingLeft + parent.paddingRight, view.layoutParams.width)
-        val childHeight = ViewGroup.getChildMeasureSpec(heightSpec,
-                parent.paddingTop + parent.paddingBottom, view.layoutParams.height)
-
-        view.measure(childWidth, childHeight)
-
-        view.layout(0, 0, view.measuredWidth, view.measuredHeight)
+        return this.header!!
     }
 }

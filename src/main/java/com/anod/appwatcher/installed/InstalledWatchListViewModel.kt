@@ -36,8 +36,8 @@ class InstalledWatchListViewModel(application: Application) : WatchListViewModel
         }).execute()
     }
 
-    override fun createHeader(totalAppsCount: Int, newAppsCount: Int, recentlyUpdatedCount: Int): SparseArray<SectionHeader> {
-        val sections = super.createHeader(totalAppsCount, newAppsCount, recentlyUpdatedCount)
+    override fun createHeader(totalAppsCount: Int, newAppsCount: Int, recentlyUpdatedCount: Int, updatableNewCount: Int): SparseArray<SectionHeader> {
+        val sections = super.createHeader(totalAppsCount, newAppsCount, recentlyUpdatedCount, updatableNewCount)
         val isRecentVisible = hasSectionRecent && !(this.recentlyInstalled.value?.isEmpty() ?: false)
         val isOnDeviceVisible = hasSectionOnDevice && !(this.installedPackages.value?.isEmpty() ?: false)
 

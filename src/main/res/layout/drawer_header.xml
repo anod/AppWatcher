@@ -1,25 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="wrap_content"
-             android:background="?attr/colorPrimaryDark"
-             android:padding="16dp"
-             android:theme="@style/ThemeOverlay.AppCompat.Dark"
-    >
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/colorPrimaryDark"
+    android:padding="16dp"
+    android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
     <ImageView
-        android:layout_marginTop="32dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_drawer_header"
-    />
+        android:layout_marginTop="48dp"
+        android:src="@drawable/ic_drawer_header" />
 
     <LinearLayout
-        android:layout_marginTop="32dp"
-        android:layout_marginLeft="56dp"
         android:id="@+id/account_change"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="56dp"
+        android:layout_marginTop="44dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:clickable="true"
         android:orientation="vertical">
@@ -31,15 +29,13 @@
             android:drawableRight="@drawable/ic_drawer_accounts_expand"
             android:gravity="center_vertical"
             android:text="@string/choose_an_account"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-            />
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
         <TextView
             android:id="@+id/last_update"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/last_update"
-            />
+            android:text="@string/last_update" />
 
     </LinearLayout>
 </FrameLayout>
