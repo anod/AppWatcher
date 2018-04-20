@@ -1,6 +1,7 @@
 package finsky.api.model
 
 import com.android.volley.Response
+import finsky.api.BulkDocId
 import finsky.api.DfeApi
 import finsky.protos.nano.Messages
 import finsky.protos.nano.Messages.Details
@@ -10,7 +11,7 @@ import info.anodsplace.playstore.BuildConfig
 
 class DfeBulkDetails(private val api: DfeApi,private val filter: FilterPredicate) : DfeRequestModel() {
     private var bulkDetailsResponse: Details.BulkDetailsResponse? = null
-    var docIds: List<String> = listOf()
+    var docIds: List<BulkDocId> = listOf()
 
     override fun execute(responseListener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener) {
         api.details(docIds, true, responseListener, errorListener)

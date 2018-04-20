@@ -12,6 +12,7 @@ import com.anod.appwatcher.utils.PicassoAppIcon
 import com.anod.appwatcher.watchlist.AppViewHolder
 import com.anod.appwatcher.watchlist.AppViewHolderBase
 import com.anod.appwatcher.watchlist.AppViewHolderResourceProvider
+import info.anodsplace.framework.content.PackageWithCode
 import info.anodsplace.framework.widget.recyclerview.ArrayAdapter
 import java.util.*
 
@@ -27,7 +28,7 @@ open class InstalledAppsAdapter(
         protected val listener: AppViewHolder.OnClickListener?)
     : RecyclerView.Adapter<AppViewHolderBase>() {
 
-    var installedPackages: List<String> = mutableListOf()
+    var installedPackages: List<PackageWithCode> = mutableListOf()
         set(value) {
             field = value
             notifyDataSetChanged()
@@ -49,8 +50,8 @@ open class InstalledAppsAdapter(
     }
 
     override fun onBindViewHolder(holder: AppViewHolderBase, position: Int) {
-        val packageName = installedPackages[position]
-        val app = packageManager.packageToApp(-1, packageName)
+        val installedPackage = installedPackages[position]
+        val app = packageManager.packageToApp(-1, installedPackage.first)
         holder.bindView(position, app)
     }
 

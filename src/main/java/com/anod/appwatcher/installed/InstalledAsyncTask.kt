@@ -10,6 +10,7 @@ import com.anod.appwatcher.model.AppListFilter
 import com.anod.appwatcher.model.Tag
 import com.anod.appwatcher.preferences.Preferences
 import info.anodsplace.framework.app.ApplicationContext
+import info.anodsplace.framework.content.PackageWithCode
 import info.anodsplace.framework.content.getAppTitle
 import info.anodsplace.framework.content.getAppUpdateTime
 import info.anodsplace.framework.content.getInstalledPackagesCompat
@@ -21,7 +22,7 @@ import java.util.*
  */
 
 typealias PackageRowPair = Pair<String, Int>
-typealias InstalledAsyncTaskCompletion = (List<AppInfo>, AppListFilter, installedPackages: List<String>, recentlyInstalled: List<PackageRowPair>) -> Unit
+typealias InstalledAsyncTaskCompletion = (List<AppInfo>, AppListFilter, installedPackages: List<PackageWithCode>, recentlyInstalled: List<PackageRowPair>) -> Unit
 
 class InstalledAsyncTask(private val context: ApplicationContext,
                          private val titleFilter: String,
@@ -36,7 +37,7 @@ class InstalledAsyncTask(private val context: ApplicationContext,
 
     private val packageManager: PackageManager = context.packageManager
 
-    private var installedApps = listOf<String>()
+    private var installedApps = listOf<PackageWithCode>()
     private var recentlyInstalled = listOf<PackageRowPair>()
 
     private val titleCache = SimpleArrayMap<String, String>()
@@ -55,8 +56,8 @@ class InstalledAsyncTask(private val context: ApplicationContext,
                 .sortedWith(InstalledAsyncTask.AppUpdateTimeComparator(-1, this))
                 .take(10)
                 .map {
-                    val rowId = watchingPackages[it] ?: -1
-                    Pair(it, rowId)
+                    val rowId = watchingPackages[it.first] ?: -1
+                    Pair(it.first, rowId)
                 }
 
         val list = installed.filter { !watchingPackages.containsKey(it) }
@@ -68,12 +69,12 @@ class InstalledAsyncTask(private val context: ApplicationContext,
         }
 
         if (titleFilter.isNotEmpty()) {
-            val filtered = ArrayList<String>(list.size)
+            val filtered = ArrayList<PackageWithCode>(list.size)
             val lcFilter = titleFilter.toLowerCase()
-            for (packageName in list) {
-                val title = getPackageTitle(packageName)
+            for (installedPackage in list) {
+                val title = getPackageTitle(installedPackage.first)
                 if (title.toLowerCase().contains(lcFilter)) {
-                    filtered.add(packageName)
+                    filtered.add(installedPackage)
                 }
             }
             installedApps = filtered
@@ -109,17 +110,17 @@ class InstalledAsyncTask(private val context: ApplicationContext,
         }
     }
 
-    private class AppTitleComparator(private val order: Int, private val task: InstalledAsyncTask) : Comparator<String> {
-        override fun compare(lPackageName: String, rPackageName: String): Int {
-            return order * task.getPackageTitle(lPackageName).compareTo(task.getPackageTitle(rPackageName))
+    private class AppTitleComparator(private val order: Int, private val task: InstalledAsyncTask) : Comparator<PackageWithCode> {
+        override fun compare(lPackage: PackageWithCode, rPackage: PackageWithCode): Int {
+            return order * task.getPackageTitle(lPackage.first).compareTo(task.getPackageTitle(rPackage.first))
         }
     }
 
-    private class AppUpdateTimeComparator(private val order: Int, private val task: InstalledAsyncTask) : Comparator<String> {
+    private class AppUpdateTimeComparator(private val order: Int, private val task: InstalledAsyncTask) : Comparator<PackageWithCode> {
 
-        override fun compare(lPackageName: String, rPackageName: String): Int {
-            val lTime = task.getPackageUpdateTime(lPackageName)
-            val rTime = task.getPackageUpdateTime(rPackageName)
+        override fun compare(lPackage: PackageWithCode, rPackage: PackageWithCode): Int {
+            val lTime = task.getPackageUpdateTime(lPackage.first)
+            val rTime = task.getPackageUpdateTime(rPackage.first)
             return order * lTime.compareTo(rTime)
         }
     }

@@ -19,18 +19,18 @@ import com.anod.appwatcher.utils.Theme
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.content.InstalledApps
+import info.anodsplace.framework.content.PackageWithCode
 import info.anodsplace.framework.content.getAppTitle
 import info.anodsplace.framework.content.getInstalledPackagesCompat
 import kotlinx.android.synthetic.main.activity_import_installed.*
 import java.util.*
-
 
 /**
  * @author algavris
  * *
  * @date 19/04/2016.
  */
-class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<List<String>>, ImportBulkManager.Listener {
+class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<List<PackageWithCode>>, ImportBulkManager.Listener {
 
     override val themeRes: Int
         get() = Theme(this).themeDialog
@@ -74,10 +74,10 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
             importManager.init()
             adapter.clearPackageIndex()
             for (idx in 0 until adapter.itemCount) {
-                val packageName = adapter.installedPackages[idx]
-                if (dataProvider.isPackageSelected(packageName)) {
-                    importManager.addPackage(packageName)
-                    adapter.storePackageIndex(packageName, idx)
+                val installedPackage = adapter.installedPackages[idx]
+                if (dataProvider.isPackageSelected(installedPackage.first)) {
+                    importManager.addPackage(installedPackage.first, installedPackage.second)
+                    adapter.storePackageIndex(installedPackage.first, idx)
                 }
             }
             if (importManager.isEmpty) {
@@ -114,17 +114,17 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
         })
     }
 
-    override fun onCreateLoader(id: Int, args: Bundle?): Loader<List<String>> {
+    override fun onCreateLoader(id: Int, args: Bundle?): Loader<List<PackageWithCode>> {
         return LocalPackageLoader(this)
     }
 
-    override fun onLoadFinished(loader: Loader<List<String>>, data: List<String>) {
+    override fun onLoadFinished(loader: Loader<List<PackageWithCode>>, data: List<PackageWithCode>) {
         progress.visibility = View.GONE
         val downloadedAdapter = list.adapter as ImportAdapter
         downloadedAdapter.installedPackages = data
     }
 
-    override fun onLoaderReset(loader: Loader<List<String>>) {
+    override fun onLoaderReset(loader: Loader<List<PackageWithCode>>) {
         val downloadedAdapter = list.adapter as ImportAdapter
         downloadedAdapter.installedPackages = emptyList()
     }
@@ -158,15 +158,15 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
         }
     }
 
-    private class LocalPackageLoader internal constructor(context: Context) : AsyncTaskLoader<List<String>>(context) {
-        override fun loadInBackground(): List<String> {
+    private class LocalPackageLoader internal constructor(context: Context) : AsyncTaskLoader<List<PackageWithCode>>(context) {
+        override fun loadInBackground(): List<PackageWithCode>? {
             val cr = DbContentProviderClient(context)
             val watchingPackages = cr.queryPackagesMap(false)
             cr.close()
 
             val pm = context.packageManager
-            val list = pm.getInstalledPackagesCompat().filter { !watchingPackages.containsKey(it) }
-            Collections.sort(list) { lPackageName, rPackageName -> pm.getAppTitle(lPackageName).compareTo(pm.getAppTitle(rPackageName)) }
+            val list = pm.getInstalledPackagesCompat().filter { !watchingPackages.containsKey(it.first) }
+            Collections.sort(list) { lPackage, rPackage -> pm.getAppTitle(lPackage.first).compareTo(pm.getAppTitle(rPackage.first)) }
 
             return list
         }

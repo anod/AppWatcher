@@ -10,7 +10,7 @@ interface DeviceIdStorage {
 }
 
 class DeviceId(private val context: Context,private val storage: DeviceIdStorage) {
-    private val URI_GSERVICES = Uri.parse("content://com.google.android.gsf.gservices")
+    private val GSERVICES = Uri.parse("content://com.google.android.gsf.gservices")
 
     fun load(): String {
         var deviceId = storage.deviceId
@@ -28,7 +28,7 @@ class DeviceId(private val context: Context,private val storage: DeviceIdStorage
     }
 
     private fun queryDeviceId(cr: ContentResolver): String {
-        val cursor = cr.query(URI_GSERVICES, null, null, arrayOf("android_id"), null
+        val cursor = cr.query(GSERVICES, null, null, arrayOf("android_id"), null
         ) ?: return ""
         if (!cursor.moveToFirst() || cursor.columnCount < 2) {
             cursor.close()

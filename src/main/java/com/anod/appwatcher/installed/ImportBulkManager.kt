@@ -8,6 +8,7 @@ import com.android.volley.VolleyError
 import com.anod.appwatcher.App
 import com.anod.appwatcher.model.AddWatchAppAsyncTask
 import com.anod.appwatcher.model.WatchAppList
+import finsky.api.BulkDocId
 import finsky.api.model.DfeBulkDetails
 import finsky.api.model.DfeModel
 import finsky.api.model.Document
@@ -22,7 +23,7 @@ internal class ImportBulkManager(
     : PlayStoreEndpoint.Listener, AddWatchAppAsyncTask.Listener {
 
     private val watchAppList = WatchAppList(null)
-    private var listsDocIds: MutableList<MutableList<String>> = ArrayList()
+    private var listsDocIds: MutableList<MutableList<BulkDocId>> = ArrayList()
     private var currentBulk: Int = 0
     private var asyncTask: AsyncTask<Document, Void, SimpleArrayMap<String, Int>>? = null
 
@@ -48,8 +49,8 @@ internal class ImportBulkManager(
         }
     }
 
-    fun addPackage(packageName: String) {
-        var currentList: MutableList<String>? = null
+    fun addPackage(packageName: String, versionNumber: Int) {
+        var currentList: MutableList<BulkDocId>? = null
         if (listsDocIds.size > currentBulk) {
             currentList = listsDocIds[currentBulk]
         }
@@ -61,7 +62,7 @@ internal class ImportBulkManager(
             currentList = ArrayList()
             listsDocIds.add(currentList)
         }
-        currentList.add(packageName)
+        currentList.add(BulkDocId(packageName, versionNumber))
     }
 
     val isEmpty: Boolean
@@ -78,7 +79,7 @@ internal class ImportBulkManager(
         val account = this.account ?: return
 
         val docIds = listsDocIds[currentBulk]
-        listener.onImportStart(docIds)
+        listener.onImportStart(docIds.map { it.packageName })
         val endpoint = BulkDetailsEndpoint(context, App.provide(context).requestQueue, App.provide(context).deviceInfo, account, docIds)
         endpoint.listener = this
         endpoint.authToken = authSubToken
@@ -92,7 +93,7 @@ internal class ImportBulkManager(
 
     override fun onErrorResponse(error: VolleyError) {
         val docIds = listsDocIds[currentBulk]
-        listener.onImportProgress(docIds, SimpleArrayMap())
+        listener.onImportProgress(docIds.map { it.packageName }, SimpleArrayMap())
         currentBulk++
         if (currentBulk == listsDocIds.size) {
             listener.onImportFinish()
@@ -103,7 +104,7 @@ internal class ImportBulkManager(
 
     override fun onAddAppTaskFinish(result: SimpleArrayMap<String, Int>) {
         val docIds = listsDocIds[currentBulk]
-        listener.onImportProgress(docIds, result)
+        listener.onImportProgress(docIds.map { it.packageName }, result)
         currentBulk++
         if (currentBulk == listsDocIds.size) {
             listener.onImportFinish()

@@ -3099,6 +3099,183 @@ public interface Messages {
       }
     }
 
+    public static final class BulkDetailsRequestDocProperties extends
+        com.google.protobuf.nano.MessageNano {
+
+      private static volatile BulkDetailsRequestDocProperties[] _emptyArray;
+      public static BulkDetailsRequestDocProperties[] emptyArray() {
+        // Lazily initializes the empty array
+        if (_emptyArray == null) {
+          synchronized (
+              com.google.protobuf.nano.InternalNano.LAZY_INIT_LOCK) {
+            if (_emptyArray == null) {
+              _emptyArray = new BulkDetailsRequestDocProperties[0];
+            }
+          }
+        }
+        return _emptyArray;
+      }
+
+      public BulkDetailsRequestDocProperties() {
+        clear();
+      }
+
+      public BulkDetailsRequestDocProperties clear() {
+        cachedSize = -1;
+        return this;
+      }
+
+      @Override
+      public BulkDetailsRequestDocProperties mergeFrom(
+              com.google.protobuf.nano.CodedInputByteBufferNano input)
+          throws java.io.IOException {
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              return this;
+            default: {
+              if (!com.google.protobuf.nano.WireFormatNano.parseUnknownField(input, tag)) {
+                return this;
+              }
+              break;
+            }
+          }
+        }
+      }
+
+      public static BulkDetailsRequestDocProperties parseFrom(byte[] data)
+          throws com.google.protobuf.nano.InvalidProtocolBufferNanoException {
+        return com.google.protobuf.nano.MessageNano.mergeFrom(new BulkDetailsRequestDocProperties(), data);
+      }
+
+      public static BulkDetailsRequestDocProperties parseFrom(
+              com.google.protobuf.nano.CodedInputByteBufferNano input)
+          throws java.io.IOException {
+        return new BulkDetailsRequestDocProperties().mergeFrom(input);
+      }
+    }
+
+    public static final class BulkDetailsRequestDoc extends
+        com.google.protobuf.nano.MessageNano {
+
+      private static volatile BulkDetailsRequestDoc[] _emptyArray;
+      public static BulkDetailsRequestDoc[] emptyArray() {
+        // Lazily initializes the empty array
+        if (_emptyArray == null) {
+          synchronized (
+              com.google.protobuf.nano.InternalNano.LAZY_INIT_LOCK) {
+            if (_emptyArray == null) {
+              _emptyArray = new BulkDetailsRequestDoc[0];
+            }
+          }
+        }
+        return _emptyArray;
+      }
+
+      // required string docid = 1;
+      public java.lang.String docid;
+
+      // required int32 versionCode = 2;
+      public int versionCode;
+
+      // required int32 num2 = 3;
+      public int num2;
+
+      // required .finsky.protos.Details.BulkDetailsRequestDocProperties properties = 7;
+      public finsky.protos.nano.Messages.Details.BulkDetailsRequestDocProperties properties;
+
+      public BulkDetailsRequestDoc() {
+        clear();
+      }
+
+      public BulkDetailsRequestDoc clear() {
+        docid = "";
+        versionCode = 0;
+        num2 = 0;
+        properties = null;
+        cachedSize = -1;
+        return this;
+      }
+
+      @Override
+      public void writeTo(com.google.protobuf.nano.CodedOutputByteBufferNano output)
+          throws java.io.IOException {
+        output.writeString(1, this.docid);
+        output.writeInt32(2, this.versionCode);
+        output.writeInt32(3, this.num2);
+        if (this.properties != null) {
+          output.writeMessage(7, this.properties);
+        }
+        super.writeTo(output);
+      }
+
+      @Override
+      protected int computeSerializedSize() {
+        int size = super.computeSerializedSize();
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeStringSize(1, this.docid);
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeInt32Size(2, this.versionCode);
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeInt32Size(3, this.num2);
+        if (this.properties != null) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeMessageSize(7, this.properties);
+        }
+        return size;
+      }
+
+      @Override
+      public BulkDetailsRequestDoc mergeFrom(
+              com.google.protobuf.nano.CodedInputByteBufferNano input)
+          throws java.io.IOException {
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              return this;
+            default: {
+              if (!com.google.protobuf.nano.WireFormatNano.parseUnknownField(input, tag)) {
+                return this;
+              }
+              break;
+            }
+            case 10: {
+              this.docid = input.readString();
+              break;
+            }
+            case 16: {
+              this.versionCode = input.readInt32();
+              break;
+            }
+            case 24: {
+              this.num2 = input.readInt32();
+              break;
+            }
+            case 58: {
+              if (this.properties == null) {
+                this.properties = new finsky.protos.nano.Messages.Details.BulkDetailsRequestDocProperties();
+              }
+              input.readMessage(this.properties);
+              break;
+            }
+          }
+        }
+      }
+
+      public static BulkDetailsRequestDoc parseFrom(byte[] data)
+          throws com.google.protobuf.nano.InvalidProtocolBufferNanoException {
+        return com.google.protobuf.nano.MessageNano.mergeFrom(new BulkDetailsRequestDoc(), data);
+      }
+
+      public static BulkDetailsRequestDoc parseFrom(
+              com.google.protobuf.nano.CodedInputByteBufferNano input)
+          throws java.io.IOException {
+        return new BulkDetailsRequestDoc().mergeFrom(input);
+      }
+    }
+
     public static final class BulkDetailsRequest extends
         com.google.protobuf.nano.MessageNano {
 
@@ -3116,23 +3293,15 @@ public interface Messages {
         return _emptyArray;
       }
 
-      // repeated string docid = 1;
-      public java.lang.String[] docid;
-
-      // optional bool includeChildDocs = 2;
-      public boolean includeChildDocs;
-
-      // required bool includeDetails = 3;
-      public boolean includeDetails;
+      // repeated .finsky.protos.Details.BulkDetailsRequestDoc docs = 8;
+      public finsky.protos.nano.Messages.Details.BulkDetailsRequestDoc[] docs;
 
       public BulkDetailsRequest() {
         clear();
       }
 
       public BulkDetailsRequest clear() {
-        docid = com.google.protobuf.nano.WireFormatNano.EMPTY_STRING_ARRAY;
-        includeChildDocs = false;
-        includeDetails = false;
+        docs = finsky.protos.nano.Messages.Details.BulkDetailsRequestDoc.emptyArray();
         cachedSize = -1;
         return this;
       }
@@ -3140,44 +3309,29 @@ public interface Messages {
       @Override
       public void writeTo(com.google.protobuf.nano.CodedOutputByteBufferNano output)
           throws java.io.IOException {
-        if (this.docid != null && this.docid.length > 0) {
-          for (int i = 0; i < this.docid.length; i++) {
-            java.lang.String element = this.docid[i];
+        if (this.docs != null && this.docs.length > 0) {
+          for (int i = 0; i < this.docs.length; i++) {
+            finsky.protos.nano.Messages.Details.BulkDetailsRequestDoc element = this.docs[i];
             if (element != null) {
-              output.writeString(1, element);
+              output.writeMessage(8, element);
             }
           }
         }
-        if (this.includeChildDocs != false) {
-          output.writeBool(2, this.includeChildDocs);
-        }
-        output.writeBool(3, this.includeDetails);
         super.writeTo(output);
       }
 
       @Override
       protected int computeSerializedSize() {
         int size = super.computeSerializedSize();
-        if (this.docid != null && this.docid.length > 0) {
-          int dataCount = 0;
-          int dataSize = 0;
-          for (int i = 0; i < this.docid.length; i++) {
-            java.lang.String element = this.docid[i];
+        if (this.docs != null && this.docs.length > 0) {
+          for (int i = 0; i < this.docs.length; i++) {
+            finsky.protos.nano.Messages.Details.BulkDetailsRequestDoc element = this.docs[i];
             if (element != null) {
-              dataCount++;
-              dataSize += com.google.protobuf.nano.CodedOutputByteBufferNano
-                  .computeStringSizeNoTag(element);
+              size += com.google.protobuf.nano.CodedOutputByteBufferNano
+                .computeMessageSize(8, element);
             }
           }
-          size += dataSize;
-          size += 1 * dataCount;
         }
-        if (this.includeChildDocs != false) {
-          size += com.google.protobuf.nano.CodedOutputByteBufferNano
-              .computeBoolSize(2, this.includeChildDocs);
-        }
-        size += com.google.protobuf.nano.CodedOutputByteBufferNano
-            .computeBoolSize(3, this.includeDetails);
         return size;
       }
 
@@ -3196,29 +3350,24 @@ public interface Messages {
               }
               break;
             }
-            case 10: {
+            case 66: {
               int arrayLength = com.google.protobuf.nano.WireFormatNano
-                  .getRepeatedFieldArrayLength(input, 10);
-              int i = this.docid == null ? 0 : this.docid.length;
-              java.lang.String[] newArray = new java.lang.String[i + arrayLength];
+                  .getRepeatedFieldArrayLength(input, 66);
+              int i = this.docs == null ? 0 : this.docs.length;
+              finsky.protos.nano.Messages.Details.BulkDetailsRequestDoc[] newArray =
+                  new finsky.protos.nano.Messages.Details.BulkDetailsRequestDoc[i + arrayLength];
               if (i != 0) {
-                java.lang.System.arraycopy(this.docid, 0, newArray, 0, i);
+                java.lang.System.arraycopy(this.docs, 0, newArray, 0, i);
               }
               for (; i < newArray.length - 1; i++) {
-                newArray[i] = input.readString();
+                newArray[i] = new finsky.protos.nano.Messages.Details.BulkDetailsRequestDoc();
+                input.readMessage(newArray[i]);
                 input.readTag();
               }
               // Last one without readTag.
-              newArray[i] = input.readString();
-              this.docid = newArray;
-              break;
-            }
-            case 16: {
-              this.includeChildDocs = input.readBool();
-              break;
-            }
-            case 24: {
-              this.includeDetails = input.readBool();
+              newArray[i] = new finsky.protos.nano.Messages.Details.BulkDetailsRequestDoc();
+              input.readMessage(newArray[i]);
+              this.docs = newArray;
               break;
             }
           }

@@ -11,6 +11,7 @@ import com.anod.appwatcher.watchlist.OnDevice
 import com.anod.appwatcher.watchlist.RecentlyInstalled
 import com.anod.appwatcher.watchlist.SectionHeader
 import com.anod.appwatcher.watchlist.WatchListViewModel
+import info.anodsplace.framework.content.PackageWithCode
 
 /**
  * @author algavris
@@ -22,7 +23,7 @@ class InstalledWatchListViewModel(application: Application) : WatchListViewModel
     var hasSectionRecent = false
     var hasSectionOnDevice = false
 
-    val installedPackages: MutableLiveData<List<String>> = MutableLiveData()
+    val installedPackages: MutableLiveData<List<PackageWithCode>> = MutableLiveData()
     val recentlyInstalled: MutableLiveData<List<PackageRowPair>> = MutableLiveData()
 
     override fun load(titleFilter: String, sortId: Int, filter: AppListFilter, tag: Tag?) {

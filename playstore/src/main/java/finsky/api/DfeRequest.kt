@@ -187,14 +187,14 @@ internal open class DfeRequest(
             return headers
         }
         try {
-            headers.put("X-DFE-Signature-Request", this.responseVerifier!!.signatureRequest)
+            headers["X-DFE-Signature-Request"] = this.responseVerifier!!.signatureRequest
             val retryPolicy = this.retryPolicy
             var s = "timeoutMs=" + retryPolicy.currentTimeout
             val currentRetryCount = retryPolicy.currentRetryCount
             if (currentRetryCount > 0) {
-                s = s + "; retryAttempt=" + currentRetryCount
+                s = "$s; retryAttempt=$currentRetryCount"
             }
-            headers.put("X-DFE-Request-Params", s)
+            headers["X-DFE-Request-Params"] = s
         } catch (ex: DfeResponseVerifier.DfeResponseVerifierException) {
             AppLog.d("Couldn't create signature request: %s", ex)
             this.cancel()
@@ -226,18 +226,6 @@ internal open class DfeRequest(
     }
 
     public override fun parseNetworkResponse(networkResponse: NetworkResponse): com.android.volley.Response<Response.ResponseWrapper>? {
-        if (AppLog.isDebug) {
-            val headers = networkResponse.headers
-            var n = 0
-            if (headers != null) {
-                val containsKey = networkResponse.headers.containsKey("X-DFE-Content-Length")
-                n = 0
-                if (containsKey) {
-                    n = Integer.parseInt(networkResponse.headers["X-DFE-Content-Length"]) / 1024
-                }
-            }
-            AppLog.v("Parsed response for url=[%s] contentLength=[%d KB]", this.url, n)
-        }
         val wrapperAndVerifySignature = this.parseWrapperAndVerifySignature(networkResponse, false)
         val response: com.android.volley.Response<Response.ResponseWrapper>?
         if (wrapperAndVerifySignature == null) {
@@ -306,7 +294,7 @@ internal open class DfeRequest(
 //    }
 
     companion object {
-        private val SKIP_ALL_CACHES = false
+        private const val SKIP_ALL_CACHES = false
         private val PROTO_DEBUG: Boolean = Log.isLoggable("AppWatcher.DfeProto", Log.VERBOSE)
 
         fun parseCacheHeaders(networkResponse: NetworkResponse): Cache.Entry? {

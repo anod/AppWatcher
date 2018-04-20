@@ -1,6 +1,7 @@
 package finsky.api
 
 import android.accounts.Account
+import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
 import android.os.Build
@@ -8,6 +9,7 @@ import android.text.TextUtils
 
 import com.android.volley.AuthFailureError
 import finsky.utils.NetworkType
+import java.net.URI
 
 import java.util.HashMap
 import java.util.Locale
@@ -40,8 +42,14 @@ class DfeApiContext private constructor(internal val context: Context, val accou
         val isWideScreen = false//context.getResources().getBoolean(2131492899);
         this.headers.put("User-Agent", makeUserAgentString(PLAY_VERSION_NAME, PLAY_VERSION_CODE, isWideScreen, DfeUtils.supportedAbis()))
         this.headers.put("X-DFE-Filter-Level", filterLevel.toString())
-        this.headers.put("X-DFE-Encoded-Targets", "CAEScFfqlIEG6gUYogFWrAISK1WDAg+hAZoCDgIU1gYEOIACFkLMAeQBnASLATlASUuyAyqCAjY5igOMBQzfA/IClwFbApUC4ANbtgKVAS7OAX8YswHFBhgDwAOPAmGEBt4OfKkB5weSB5AFASkiN68akgMaxAMSAQEBA9kBO7UBFE1KVwIDBGs3go6BBgEBAgMECQgJAQIEAQMEAQMBBQEBBAUEFQYCBgUEAwMBDwIBAgOrARwBEwMEAg0mrwESfTEcAQEKG4EBMxghChMBDwYGASI3hAEODEwXCVh/EREZA4sBYwEdFAgIIwkQcGQRDzQ2fTC2AjfVAQIBAYoBGRg2FhYFBwEqNzACJShzFFblAo0CFxpFNBzaAd0DHjIRI4sBJZcBPdwBCQGhAUd2A7kBLBVPngEECHl0UEUMtQETigHMAgUFCc0BBUUlTywdHDgBiAJ+vgKhAU0uAcYCAWQ/5ALUAw1UwQHUBpIBCdQDhgL4AY4CBQICjARbGFBGWzA1CAEMOQH+BRAOCAZywAIDyQZ2MgM3BxsoAgUEBwcHFia3AgcGTBwHBYwBAlcBggFxSGgIrAEEBw4QEqUCASsWadsHCgUCBQMD7QICA3tXCUw7ugJZAwGyAUwpIwM5AwkDBQMJA5sBCw8BNxBVVBwVKhebARkBAwsQEAgEAhESAgQJEBCZATMdzgEBBwG8AQQYKSMUkAEDAwY/CTs4/wEaAUt1AwEDAQUBAgIEAwYEDx1dB2wGeBFgTQ")
         this.headers.put("X-DFE-Content-Filters", "")
+
+        //this.headers["x-dfe-device-config-token"] = "CisaKQoTMzg0OTM3NjYyNDk2MTQ5NjgxNRISChAxNTI0MjMyMzUxNTE1MzAw"
+       // this.headers["x-dfe-cookie"] = "EAEYACICSUwoATI8Q2lzYUtRb1RNemcwT1RNM05qWXlORGsyTVRRNU5qZ3hOUklTQ2hBeE5USTBNak15TXpVeE5URTFNekF3"
+        //this.headers["x-dfe-device-checkin-consistency-token"] = "ABFEt1UPzbDK9X12FRVrRuPrsuTSIcBk9c7kw5LPUhfSiE5wZNiQaLrRUGgtSKvZKPsrcdONNtgEtjuB6WfFC2MsdF-vP9PiHE0s6cEsTFmxzHpv3tS9EOv8ghbWCab2JKBcPuMXl5sfZwH07NYfSXBSIQ-7TTvQNawbo-qs4BrEC985bBmJKMRyyFACHw758CwC2xbRA1SLSDbHQY4u9fAYYkV042yncfbbY_9pgGzvFWkcw4GHpVBUjMDXndVCqg7OEqKE9a3w57S7t_E4OzB74F91czFzRlg1Plb0n77sGRaawUeJGyoGhsyTK2nD97nnw4Os1W7CSyvElLHlNQHZ7yUeqgu75R5EcdIxG8ICygASRrLWva0UEFcIpWGOYMOyUMSWYoDMezlTeCtx7qmfy5PouMjbr7qrdc0mhgNnMW6G8EZpQTc"
+        //this.headers["x-dfe-phenotype"] = "H4sIAAAAAAAAABXPSW6DMAAAQPXaY_-BZFJKsNSLCXYgBAih2bggoCa2WUKJWb_ZD1WdH8zr78sG4agOMTIe0inMYenvPwKltN8DxK6UfMgF6ZGM3A6rXX1ssBaiy6HmHJ6QB5tDbOEkbofQcTnJInJR1meu2lXgxYQU8OCsJghkey7V0hSZvNBnu9aLRABFp9sFKFMOkW9kx0fKHP9JMencMi8ifMJ80cVGu43vjjq72tYPrp6ZKPbNFtJOm6yuvqQNbrwTNOiiWbA5vBcV21mceW-f_yk3tGYOmEHXG8ubAq0b4Hc69jmowkGO17wO9mS3WuYxroJ-tGnOjBy2x-QPf6LmcxQBAAA"
+        //this.headers["x-dfe-logging-id"] = "-3f92be94f987cdb6"
+        this.headers["x-dfe-encoded-targets"] = "CAESjALBlYEGpgrRAkLwA5IHgAKkCLUBWEDUBTKSAekKmAG6ATKGAS9o8gLdASfcARb7C7gDAQLPBa4DzxPRCLwB2xC2AQGlA54DMCjjC8MCowKtA7AC9AOvDbgC0wHfBlcBxQTLAVGDAxdu9gHlAUyIAhgC5QECxwEHYkJLYgHXCg2hBNwBQE4BYROnAl0y8wKiAoADzQK2AasEyAHeBArIApMCYgnaAmwP6wIxASLNAuYBhgK/Ad0BDhO5AaoBwQMD1wIcB6UBAcUBOgED8wGXAgEH5QGWBANGDgjrAcoBV8kB5QEFHOwCZ5sBlAKQAjjfAgElbI4KkwVwRYQINcwBKtAB3wk2RfoFnALeBvMGGowHEgEBAQTYAQ0ttgFhSlcCAwRrN4DTzwKCu7EDAQEDAgQJCAkBAggEAQIBAQYBAQMFBBUGAwUEBAQDAQ8CAQIDxwEBFgQPJsEBfS8CHAEBCpABDDMXASEKFA8GByI3hAEODBZNCVIBBX8RERgBA4sBGGkUECMIEXBkEQ9qnwHEAoQBBIgBigEZGAsrEwMWBQcBKmUCAiUocxQnLfQEMQ43GIUBjQG0AVlCjgEeJwskECYvW9QBYnoJAQreAXmqAQwDLGSeAQSBAXRQRdQBigHMAgUFCc0BBAFFoAE53wJgNS7OAQ1yqwEgiwM/+wImlwMeQ60ChAZ24wX2Aw8HAQL2AxZznAFVbQEJPAHeBSAQDntVXpsHKxjYAQEhAQcCIAgSHQemAzgBGkaEAQG7AnWnARgBIgKjAhIBARgWD8YLHYABhwGEAsoBAQIBwwEn6wIBOQHbAVLnA0H1AsIBdQETKQSLAbIDSpsBBhI/RDgUK1VF4gKDAgsMCC9cF1EbuQEO9wG3ASrnA98DlwEE6wGHAWIVGdMBBhMSC1ooJAECAoQFtQENBiNZKJ8BMh4YAQQgAlYBIwKQAR0SGyd+iQFdDA/9AUkjBCIqHoACPwQbAxcg3AE9sgHKAgsYsQIlfhtauwEMiAEjeYsBigEDOwErBTcCVAFipAIhMQ1FA54DzgHmAimUBAvsAQc4jAEeDP8DAQK1AWtsOlAKCAKKBBQUAgMBMTJRGgIDygGZAToBAQcBVYQBlwPJAWkIfYkBdw5eMhE03gFGRsECBA89YREcP4kBHCdRBleRATIBCgGdAtICBBJNJQKIAYcBhgEgMpACEcYBBQQCBgQCBAIHBAIEAgUGBAIHBgQBBwYEAgQBBiLUAX5VOSEkH14BAQUDKQGkAXQFBwUEAwICmwHtAoUCBQQCBgcVAisdFAIKAb4BCDoWFChoJoYCGwM9LocBAwERmQEEEgsCRNcBPCG0AQ4BV3EBCV0gFQoFFxqSASoBLB4vCB4DRwgJiwEUCX4E2gEFBgcFBwQCBQYEAz8OJAQDBAEEAwYEH5EBtAMmBzsCAwICAgECE10QDBhVqQEDAgMFAQIJJw5YASEJCiEtOg4KLBQsFAcmJTSdAXoEAQcEAgQBMjMkFitdHqECJwooAwEuGS8FAgIBAwICRhwaAcMBCKMDBQUaUaQBDMUBDCAVbzkFAhYJJBYEAgQDBgU"
     }
 
     private fun makeUserAgentString(versionName: String, versionCode: Int, isWideScreen: Boolean, supportedAbis: Array<String>): String {
@@ -84,9 +92,9 @@ class DfeApiContext private constructor(internal val context: Context, val accou
     }
 
     companion object {
-        private val PLAY_VERSION_CODE = 80841900
-        private val PLAY_VERSION_NAME = "8.4.19.V-all [0] [FP] 175058788"
-        private val CLIENT_ID = "am-android-google"
+        private const val PLAY_VERSION_CODE = 80963000
+        private const val PLAY_VERSION_NAME = "9.6.30-all%20%5B0%5D%20%5BPR%5D%20192669274"
+        private const val CLIENT_ID = "am-android-google"
 
         private fun a(replace: String?): String? {
             if (replace.isNullOrBlank()) {

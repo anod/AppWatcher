@@ -30,10 +30,16 @@ class DfeApiImpl(private val queue: RequestQueue, private val apiContext: DfeApi
         return this.queue.add<Messages.Response.ResponseWrapper>(dfeRequest)
     }
 
-    override fun details(docIds: List<String>, includeDetails: Boolean, listener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener): Request<*> {
+    override fun details(docIds: List<BulkDocId>, includeDetails: Boolean, listener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener): Request<*> {
         val bulkDetailsRequest = Details.BulkDetailsRequest()
-        bulkDetailsRequest.docid = docIds.sorted().toTypedArray()
-        bulkDetailsRequest.includeDetails = includeDetails
+        bulkDetailsRequest.docs = docIds.sorted().map {
+            val doc = Details.BulkDetailsRequestDoc()
+            doc.docid = it.packageName
+            doc.versionCode = it.versionCode
+            doc.properties = Details.BulkDetailsRequestDocProperties()
+            doc
+        }.toTypedArray()
+
         val dfeRequest = object : ProtoDfeRequest(
                 DfeApi.BULK_DETAILS_URI.toString(), bulkDetailsRequest, apiContext, listener, errorListener) {
             private fun computeDocumentIdHash(): String {
@@ -71,9 +77,9 @@ class DfeApiImpl(private val queue: RequestQueue, private val apiContext: DfeApi
     }
 
     companion object {
-        private val BULK_DETAILS_BACKOFF_MULT = 1.0f
-        private val BULK_DETAILS_MAX_RETRIES = 1
-        private val BULK_DETAILS_TIMEOUT_MS = 30000
+        private const val BULK_DETAILS_BACKOFF_MULT = 1.0f
+        private const val BULK_DETAILS_MAX_RETRIES = 1
+        private const val BULK_DETAILS_TIMEOUT_MS = 30000
     }
 
 }

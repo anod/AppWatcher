@@ -25,6 +25,7 @@ import com.anod.appwatcher.model.schema.contentValues
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.userLog.UserLogger
 import com.anod.appwatcher.utils.extractUploadDate
+import finsky.api.BulkDocId
 import finsky.api.model.DfeModel
 import finsky.api.model.Document
 import info.anodsplace.framework.AppLog
@@ -178,7 +179,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
             localApps[docId] = localApp
 
             if (localApps.size == bulkSize) {
-                val docIds = localApps.keys.toList()
+                val docIds = localApps.map { BulkDocId(it.key, it.value.versionNumber) }
                 val endpoint = createEndpoint(docIds, authToken, account)
                 AppLog.d("Sending bulk #$i... $docIds")
                 try {
@@ -193,7 +194,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
 
         }
         if (localApps.size > 0) {
-            val docIds = localApps.keys.toList()
+            val docIds = localApps.map { BulkDocId(it.key, it.value.versionNumber) }
             val endpoint = createEndpoint(docIds, authToken, account)
             AppLog.d("Sending bulk #$i... $docIds")
             try {
@@ -372,7 +373,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         return authToken
     }
 
-    private fun createEndpoint(docIds: List<String>, authToken: String, account: Account): BulkDetailsEndpoint {
+    private fun createEndpoint(docIds: List<BulkDocId>, authToken: String, account: Account): BulkDetailsEndpoint {
         val endpoint = BulkDetailsEndpoint(context.actual, App.provide(context).requestQueue, App.provide(context).deviceInfo, account, docIds)
         endpoint.authToken = authToken
         endpoint.listener = this

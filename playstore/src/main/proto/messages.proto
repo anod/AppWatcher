@@ -185,11 +185,21 @@ message Details
         repeated BulkDetailsEntry entry = 1;
     }
 
+    message BulkDetailsRequestDocProperties
+    {
+    }
+
+    message BulkDetailsRequestDoc
+    {
+        required string docid = 1;
+        required int32 versionCode = 2;
+        required int32 num2 = 3;
+        required BulkDetailsRequestDocProperties properties = 7;
+    }
+
     message BulkDetailsRequest
     {
-        repeated string docid = 1;
-        optional bool includeChildDocs = 2;
-        required bool includeDetails = 3;
+        repeated BulkDetailsRequestDoc docs = 8;
     }
 }
 

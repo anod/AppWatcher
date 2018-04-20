@@ -3,6 +3,7 @@ package info.anodsplace.playstore
 import android.content.Context
 import com.android.volley.RequestQueue
 import android.accounts.Account
+import finsky.api.BulkDocId
 
 import finsky.api.model.DfeBulkDetails
 import finsky.api.model.DfeModel
@@ -14,7 +15,7 @@ import finsky.api.model.Document
  * *
  * @date 2015-02-22
  */
-class BulkDetailsEndpoint(context: Context, requestQueue: RequestQueue, deviceInfoProvider: DeviceInfoProvider, account: Account, private var docIds: List<String>)
+class BulkDetailsEndpoint(context: Context, requestQueue: RequestQueue, deviceInfoProvider: DeviceInfoProvider, account: Account, private var docIds: List<BulkDocId>)
     : PlayStoreEndpointBase(context, requestQueue, deviceInfoProvider, account) {
 
     var bulkData: DfeBulkDetails?
@@ -34,7 +35,7 @@ class BulkDetailsEndpoint(context: Context, requestQueue: RequestQueue, deviceIn
     override fun executeSync() {
         val data = bulkData ?: return
         data.docIds = docIds
-        DfeSync<DfeBulkDetails>(data).execute()
+        DfeSync(data).execute()
     }
 
     override fun createDfeModel(): DfeModel {

@@ -6,13 +6,19 @@ import com.android.volley.Request
 import com.android.volley.Response
 import finsky.protos.nano.Messages
 
+class BulkDocId(val packageName: String, val versionCode: Int) : Comparable<BulkDocId> {
+    override fun compareTo(other: BulkDocId): Int {
+        return packageName.compareTo(other.packageName)
+    }
+}
+
 interface DfeApi {
 
     fun search(url: String, responseListener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener): Request<*>
 
     fun details(url: String, noPrefetch: Boolean, noBulkCancel: Boolean, responseListener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener): Request<*>
 
-    fun details(docIds: List<String>, includeDetails: Boolean, listener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener): Request<*>
+    fun details(docIds: List<BulkDocId>, includeDetails: Boolean, listener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener): Request<*>
 
     fun createLibraryUrl(c: Int, libraryId: String, dt: Int, serverToken: ByteArray?): String
 
