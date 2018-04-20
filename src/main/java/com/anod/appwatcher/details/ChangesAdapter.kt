@@ -64,7 +64,9 @@ class ChangesAdapter(private val context: Context): RecyclerView.Adapter<ChangeV
                     this.localChanges = listOf(recentChange)
                 }
             }
-            localChanges.first() == recentChange -> this.localChanges = localChanges
+            localChanges.first().versionCode == recentChange.versionCode -> {
+                this.localChanges = listOf(recentChange, *localChanges.subList(1, localChanges.size).toTypedArray())
+            }
             else -> {
                 if (recentChange.isEmpty) {
                     this.localChanges = localChanges
