@@ -81,6 +81,14 @@ open class MergeRecyclerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>(
             val offset = getOffsetForAdapterIndex(adapterIndex)
             notifyItemRangeRemoved(offset + positionStart, itemCount)
         }
+
+        override fun onItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) {
+            super.onItemRangeMoved(fromPosition, toPosition, itemCount)
+            val offset = getOffsetForAdapterIndex(adapterIndex)
+            for (index in 0 until itemCount) {
+                notifyItemMoved(offset + fromPosition + index, offset + toPosition + index)
+            }
+        }
     }
 
     protected open fun getOffsetForAdapterIndex(adapterIndex: Int): Int {

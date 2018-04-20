@@ -40,7 +40,7 @@ android {
         applicationId 'com.anod.appwatcher'
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 95
+        versionCode 96
         versionName '1.10'
         resValue "string", "content_authority", "com.anod.appwatcher"
 

@@ -79,7 +79,7 @@ class AppInfoAdapter(private val context: Context,
             return
         }
         val callback = DiffCallback(data, list, itemCallback)
-        val result = DiffUtil.calculateDiff(callback)
+        val result = DiffUtil.calculateDiff(callback, true)
         data = list
         result.dispatchUpdatesTo(this)
     }
