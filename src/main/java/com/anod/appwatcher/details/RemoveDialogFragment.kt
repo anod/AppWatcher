@@ -1,10 +1,12 @@
 package com.anod.appwatcher.details
 
 import android.app.Dialog
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.DbContentProviderClient
+import com.anod.appwatcher.model.AddWatchAppAsyncTask
 import com.anod.appwatcher.model.AppInfoMetadata
 import info.anodsplace.framework.app.DialogMessage
 
@@ -20,6 +22,7 @@ class RemoveDialogFragment : DialogFragment() {
                 val cl = DbContentProviderClient(activity!!)
                 cl.updateStatus(rowId, AppInfoMetadata.STATUS_DELETED)
                 cl.close()
+                activity!!.sendBroadcast(Intent(AddWatchAppAsyncTask.listChanged))
                 activity!!.finish()
             }
 

@@ -1,6 +1,9 @@
 package com.anod.appwatcher.watchlist
 
 import android.accounts.Account
+import android.app.Application
+import android.arch.lifecycle.AndroidViewModel
+import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.BroadcastReceiver
@@ -21,6 +24,7 @@ import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import com.anod.appwatcher.*
+import com.anod.appwatcher.model.AddWatchAppAsyncTask
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.navigation.DrawerActivity
 import com.anod.appwatcher.navigation.DrawerViewModel
@@ -34,24 +38,58 @@ import com.anod.appwatcher.upgrade.UpgradeCheck
 import com.anod.appwatcher.upgrade.UpgradeRefresh
 import info.anodsplace.framework.app.DialogSingleChoice
 import com.anod.appwatcher.utils.Theme
-import com.anod.appwatcher.utils.UpdateAll
-import com.anod.appwatcher.utils.forMyApps
 import info.anodsplace.framework.AppLog
-import info.anodsplace.framework.content.startActivitySafely
-import kotlinx.android.synthetic.main.activity_main.*
+
+sealed class ListState
+class SyncStarted: ListState()
+class SyncStopped(val updatesCount: Int): ListState()
+class Updated: ListState()
 
 /**
  * @author algavris
  * *
  * @date 18/03/2017.
  */
+class WatchListStateViewModel(application: Application) : AndroidViewModel(application) {
+    val titleFilter = MutableLiveData<String>()
+    val sortId = MutableLiveData<Int>()
+    val listState = MutableLiveData<ListState>()
+
+    /**
+     * Receive notifications from UpdateCheck
+     */
+    private val syncFinishedReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val action = intent.action
+            when (action) {
+                UpdateCheck.syncProgress -> listState.value = SyncStarted()
+                UpdateCheck.syncStop -> {
+                    val updatesCount = intent.getIntExtra(UpdateCheck.extrasUpdatesCount, 0)
+                    listState.value = SyncStopped(updatesCount)
+                }
+                AddWatchAppAsyncTask.listChanged -> listState.value = Updated()
+            }
+        }
+    }
+
+    init {
+        val filter = IntentFilter()
+        filter.addAction(UpdateCheck.syncProgress)
+        filter.addAction(UpdateCheck.syncStop)
+        filter.addAction(AddWatchAppAsyncTask.listChanged)
+        application.registerReceiver(syncFinishedReceiver, filter)
+    }
+
+    override fun onCleared() {
+        getApplication<AppWatcherApplication>().unregisterReceiver(syncFinishedReceiver)
+    }
+
+}
 
 abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionListener, SearchView.OnQueryTextListener {
 
     override val themeRes: Int
         get() = Theme(this).theme
-
-    private var syncFinishedReceiverRegistered: Boolean = false
 
     private lateinit var viewPager: ViewPager
 
@@ -99,6 +137,19 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
                 onFilterSelected(position)
             }
         })
+
+        stateViewModel.listState.observe(this, Observer {
+            when (it) {
+                is SyncStarted -> { actionMenu.startRefresh() }
+                is SyncStopped -> {
+                    actionMenu.stopRefresh()
+                    if (it.updatesCount == 0) {
+                        Toast.makeText(this@WatchListActivity, R.string.no_updates_found, Toast.LENGTH_SHORT).show()
+                    }
+                    ViewModelProviders.of(this@WatchListActivity).get(DrawerViewModel::class.java).refreshLastUpdateTime()
+                }
+            }
+        })
     }
 
     protected abstract fun createViewPagerAdapter(): Adapter
@@ -127,44 +178,6 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         actionMenu.init(menu)
 
         return super.onCreateOptionsMenu(menu)
-    }
-
-    /**
-     * Receive notifications from UpdateCheck
-     */
-    private val syncFinishedReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            val action = intent.action
-            if (UpdateCheck.syncProgress == action) {
-                actionMenu.startRefresh()
-                stateViewModel.refreshing.value = true
-            } else if (UpdateCheck.syncStop == action) {
-                val updatesCount = intent.getIntExtra(UpdateCheck.extrasUpdatesCount, 0)
-                actionMenu.stopRefresh()
-                stateViewModel.refreshing.value = false
-                if (updatesCount == 0) {
-                    Toast.makeText(this@WatchListActivity, R.string.no_updates_found, Toast.LENGTH_SHORT).show()
-                }
-                ViewModelProviders.of(this@WatchListActivity).get(DrawerViewModel::class.java).refreshLastUpdateTime()
-            }
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        val filter = IntentFilter()
-        filter.addAction(UpdateCheck.syncProgress)
-        filter.addAction(UpdateCheck.syncStop)
-        registerReceiver(syncFinishedReceiver, filter)
-        syncFinishedReceiverRegistered = true
-    }
-
-    override fun onPause() {
-        super.onPause()
-        if (syncFinishedReceiverRegistered) {
-            unregisterReceiver(syncFinishedReceiver)
-            syncFinishedReceiverRegistered = false
-        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

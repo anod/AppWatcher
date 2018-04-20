@@ -2,6 +2,7 @@ package com.anod.appwatcher.wishlist
 
 import android.accounts.Account
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
@@ -12,6 +13,7 @@ import android.widget.Toast
 import com.android.volley.VolleyError
 import com.anod.appwatcher.App
 import com.anod.appwatcher.R
+import com.anod.appwatcher.model.AddWatchAppAsyncTask
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.model.WatchAppList
@@ -77,6 +79,7 @@ class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Li
         if (newStatus == AppInfoMetadata.STATUS_NORMAL) {
             TagSnackbar.make(activity!!, info, false).show()
         }
+        context?.sendBroadcast(Intent(AddWatchAppAsyncTask.listChanged))
         list.adapter.notifyDataSetChanged()
     }
 

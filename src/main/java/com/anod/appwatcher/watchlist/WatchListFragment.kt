@@ -1,9 +1,6 @@
 package com.anod.appwatcher.watchlist
 
 import android.app.Activity
-import android.app.Application
-import android.arch.lifecycle.AndroidViewModel
-import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.ComponentName
@@ -14,6 +11,9 @@ import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.SparseIntArray
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.Toast
 import com.anod.appwatcher.*
@@ -26,14 +26,6 @@ import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.startActivitySafely
 import info.anodsplace.framework.widget.recyclerview.MergeRecyclerAdapter
-import android.view.*
-
-
-class WatchListStateViewModel(application: Application) : AndroidViewModel(application) {
-    val titleFilter = MutableLiveData<String>()
-    val sortId = MutableLiveData<Int>()
-    val refreshing = MutableLiveData<Boolean>()
-}
 
 open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
 
@@ -207,13 +199,14 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
             reload()
         })
 
-        stateViewModel.refreshing.observe(this, Observer {
+        stateViewModel.listState.observe(this, Observer {
             val refreshing = it ?: false
-            if (refreshing) {
-                swipeLayout?.isRefreshing = true
-            } else {
-                swipeLayout?.isRefreshing = false
-                reload()
+            when (it) {
+                is SyncStarted -> { swipeLayout?.isRefreshing = true }
+                else -> {
+                    swipeLayout?.isRefreshing = false
+                    reload()
+                }
             }
         })
     }
@@ -251,9 +244,9 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
     }
 
     override fun onRefresh() {
-        val isRefreshing = stateViewModel.refreshing.value ?: false
+        val isRefreshing = (stateViewModel.listState.value is SyncStarted)
         if (!isRefreshing && !(activity as WatchListActivity).requestRefresh()) {
-            stateViewModel.refreshing.value = true
+            stateViewModel.listState.value = SyncStarted()
         }
     }
 

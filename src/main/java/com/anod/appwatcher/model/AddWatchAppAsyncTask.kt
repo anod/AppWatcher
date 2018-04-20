@@ -1,11 +1,14 @@
 package com.anod.appwatcher.model
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.AsyncTask
 import android.support.v4.util.SimpleArrayMap
+import com.anod.appwatcher.sync.UpdateCheck
 
 import finsky.api.model.Document
 import info.anodsplace.framework.app.ApplicationContext
+
 
 class AddWatchAppAsyncTask(
         context: ApplicationContext,
@@ -36,5 +39,10 @@ class AddWatchAppAsyncTask(
 
     override fun onPostExecute(result: SimpleArrayMap<String, Int>) {
         listener.onAddAppTaskFinish(result)
+        context.sendBroadcast(Intent(listChanged))
+    }
+
+    companion object {
+        const val listChanged = "com.anod.appwatcher.list.changed"
     }
 }

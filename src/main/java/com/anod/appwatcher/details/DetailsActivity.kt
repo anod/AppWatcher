@@ -350,6 +350,8 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
         data.putExtra(EXTRA_ADD_APP_PACKAGE, info.packageName)
         setResult(Activity.RESULT_OK, data)
 
+        sendBroadcast(Intent(AddWatchAppAsyncTask.listChanged))
+
         TagSnackbar.make(this, info, true).show()
     }
 

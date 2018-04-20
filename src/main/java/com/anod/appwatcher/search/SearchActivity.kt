@@ -14,6 +14,7 @@ import com.anod.appwatcher.App
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AccountSelectionDialog
 import com.anod.appwatcher.accounts.AuthTokenAsync
+import com.anod.appwatcher.model.AddWatchAppAsyncTask
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.model.WatchAppList
@@ -257,6 +258,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
 
     override fun onWatchListChangeSuccess(info: AppInfo, newStatus: Int) {
         adapter?.notifyDataSetChanged()
+        sendBroadcast(Intent(AddWatchAppAsyncTask.listChanged))
         if (newStatus == AppInfoMetadata.STATUS_NORMAL) {
             TagSnackbar.make(this, info, isShareSource).show()
         }
