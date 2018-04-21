@@ -7,6 +7,7 @@ import com.android.volley.toolbox.BasicNetwork
 import com.android.volley.toolbox.ByteArrayPool
 import com.android.volley.toolbox.HttpResponse
 import okhttp3.OkHttpClient
+import java.util.concurrent.TimeUnit
 
 /**
  * @author alex
@@ -58,7 +59,10 @@ private class OkHttpStack @JvmOverloads constructor(client: OkHttpClient? = OkHt
         val responseBody = response.body()
         return HttpResponse(response.code(), responseHeaders, responseBody?.contentLength()?.toInt() ?: -1, responseBody?.byteStream())
     }
-
 }
 
-class Network : BasicNetwork(OkHttpStack(), ByteArrayPool(1024 * 256))
+class Network : BasicNetwork(OkHttpStack(
+        OkHttpClient.Builder()
+                .connectTimeout(2, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .build()), ByteArrayPool(1024 * 256))
