@@ -61,6 +61,7 @@ object CustomParserFactory {
 
         if (locale == Locale("en", "GB")
                 || locale == Locale("en", "AU")
+                || lang == Locale("es", "").language
                 || lang == Locale("pl", "").language
                 || lang == Locale("it", "").language
                 || locale == Locale("en", "SE")) {
@@ -68,7 +69,6 @@ object CustomParserFactory {
         }
 
         if (locale == Locale("en", "PH")
-                || lang == Locale("es", "").language
                 || locale == Locale("nl", "BE")
                 || locale == Locale("en", "RU")
                 || locale == Locale("en", "NL")) {

@@ -2,6 +2,7 @@ package com.anod.appwatcher.utils
 
 import com.anod.appwatcher.utils.date.CustomParserFactory
 import finsky.api.model.Document
+import info.anodsplace.framework.AppLog
 import java.text.DateFormat
 import java.text.ParseException
 import java.util.*
@@ -29,6 +30,7 @@ fun extractUploadDate(uploadDate: String, locale: Locale): Date? {
         try {
             date = df.parse(uploadDate)
         } catch (e: ParseException) {
+            AppLog.e("Cannot parse $uploadDate for $locale using custom parser", e)
         }
 
         if (date != null) {
@@ -40,6 +42,7 @@ fun extractUploadDate(uploadDate: String, locale: Locale): Date? {
     try {
         return df.parse(uploadDate)
     } catch (e: ParseException) {
+        AppLog.e("Cannot parse $uploadDate for $locale using system parser", e)
     }
     return null
 }
