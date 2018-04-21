@@ -14,6 +14,7 @@ import com.anod.appwatcher.model.schema.AppListTable
 import com.anod.appwatcher.model.schema.AppTagsTable
 import com.anod.appwatcher.preferences.Preferences
 import info.anodsplace.framework.app.ApplicationContext
+import info.anodsplace.framework.database.FilterCursor
 import java.util.*
 
 /**
@@ -42,11 +43,11 @@ open class AppListAsyncTask(context: ApplicationContext,
             : this(ApplicationContext(application), createSelection(tag, titleFilter), createSortOrder(sortId), listFilter, tag, completion)
 
     override fun convert(cursor: Cursor): AppListCursor {
-        return AppListCursor(cursor)
+        return AppListCursor(FilterCursor(cursor, listFilter))
     }
 
     override fun doInBackground(vararg params: Void?): List<AppInfo> {
-        listFilter.resetNewCount()
+        listFilter.resetNewCount() // TODO: Remove, no needed anymore
         return super.doInBackground(*params)
     }
 

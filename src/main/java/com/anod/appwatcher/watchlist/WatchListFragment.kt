@@ -200,7 +200,6 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         })
 
         stateViewModel.listState.observe(this, Observer {
-            val refreshing = it ?: false
             when (it) {
                 is SyncStarted -> { swipeLayout?.isRefreshing = true }
                 else -> {
