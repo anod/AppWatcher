@@ -10,7 +10,7 @@ class DfeDetails(private val api: DfeApi) : DfeRequestModel() {
     var detailsUrl: String = ""
 
     override fun execute(responseListener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener) {
-        api.details(detailsUrl, false, false, responseListener, errorListener)
+        api.details(detailsUrl, responseListener, errorListener)
     }
 
     val document: Document?

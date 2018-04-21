@@ -10,13 +10,17 @@ class BulkDocId(val packageName: String, val versionCode: Int) : Comparable<Bulk
     override fun compareTo(other: BulkDocId): Int {
         return packageName.compareTo(other.packageName)
     }
+
+    override fun toString(): String {
+        return "$packageName ($versionCode)"
+    }
 }
 
 interface DfeApi {
 
     fun search(url: String, responseListener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener): Request<*>
 
-    fun details(url: String, noPrefetch: Boolean, noBulkCancel: Boolean, responseListener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener): Request<*>
+    fun details(url: String, responseListener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener): Request<*>
 
     fun details(docIds: List<BulkDocId>, includeDetails: Boolean, listener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener): Request<*>
 

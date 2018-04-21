@@ -26,7 +26,7 @@ class DfeBulkDetails(private val api: DfeApi,private val filter: FilterPredicate
                 val doc = response.entry[i].doc
                 if (doc == null) {
                     if (BuildConfig.DEBUG) {
-                        AppLog.d("Null document for requested docId: %s ", this.docIds[i])
+                        AppLog.e("Null document for requested docId: ${this.docIds[i]} ")
                     }
                 } else {
                     list.add(Document(doc))

@@ -19,15 +19,9 @@ class DfeApiImpl(private val queue: RequestQueue, private val apiContext: DfeApi
         return this.queue.add(dfeRequest)
     }
 
-    override fun details(url: String, noPrefetch: Boolean, noBulkCancel: Boolean, responseListener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener): Request<*> {
+    override fun details(url: String, responseListener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener): Request<*> {
         val dfeRequest = DfeRequest(url, this.apiContext, responseListener, errorListener)
-        if (noPrefetch) {
-            dfeRequest.addExtraHeader("X-DFE-No-Prefetch", "true")
-        }
-        if (noBulkCancel) {
-            dfeRequest.setAvoidBulkCancel()
-        }
-        return this.queue.add<Messages.Response.ResponseWrapper>(dfeRequest)
+        return this.queue.add(dfeRequest)
     }
 
     override fun details(docIds: List<BulkDocId>, includeDetails: Boolean, listener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener): Request<*> {
@@ -40,12 +34,11 @@ class DfeApiImpl(private val queue: RequestQueue, private val apiContext: DfeApi
             doc
         }.toTypedArray()
 
-        val dfeRequest = object : ProtoDfeRequest(
-                DfeApi.BULK_DETAILS_URI.toString(), bulkDetailsRequest, apiContext, listener, errorListener) {
+        val dfeRequest = object : ProtoDfeRequest(DfeApi.BULK_DETAILS_URI.toString(), bulkDetailsRequest, apiContext, listener, errorListener) {
             private fun computeDocumentIdHash(): String {
                 var n = 0L
                 for (item in docIds) {
-                    n = 31L * n + item.hashCode()
+                    n = 31L * n + item.packageName.hashCode()
                 }
                 return java.lang.Long.toString(n)
             }
@@ -55,8 +48,7 @@ class DfeApiImpl(private val queue: RequestQueue, private val apiContext: DfeApi
             }
         }
         dfeRequest.setShouldCache(true)
-        dfeRequest.retryPolicy = DfeRetryPolicy(DfeApiImpl.BULK_DETAILS_TIMEOUT_MS, DfeApiImpl.BULK_DETAILS_MAX_RETRIES, DfeApiImpl.BULK_DETAILS_BACKOFF_MULT, apiContext)
-        return this.queue.add<Messages.Response.ResponseWrapper>(dfeRequest)
+        return this.queue.add(dfeRequest)
     }
 
     override fun createLibraryUrl(c: Int, libraryId: String, dt: Int, serverToken: ByteArray?): String {
@@ -74,12 +66,6 @@ class DfeApiImpl(private val queue: RequestQueue, private val apiContext: DfeApi
     override fun list(url: String, listener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener): Request<*> {
         val dfeRequest = DfeRequest(url, this.apiContext, listener, errorListener)
         return this.queue.add<Messages.Response.ResponseWrapper>(dfeRequest)
-    }
-
-    companion object {
-        private const val BULK_DETAILS_BACKOFF_MULT = 1.0f
-        private const val BULK_DETAILS_MAX_RETRIES = 1
-        private const val BULK_DETAILS_TIMEOUT_MS = 30000
     }
 
 }

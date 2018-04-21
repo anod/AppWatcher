@@ -16,7 +16,7 @@
         android:drawSelectorOnTop="false"
         android:paddingBottom="0dip"
         android:paddingTop="0dip"
-        android:scrollbarAlwaysDrawVerticalTrack="true"
+        android:scrollbarAlwaysDrawVerticalTrack="false"
         android:scrollbarStyle="outsideOverlay" />
 
 </LinearLayout>
