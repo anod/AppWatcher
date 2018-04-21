@@ -16,7 +16,7 @@ class ResultsAppViewHolder(itemView: View, private val watchAppList: WatchAppLis
 
     val row: View = itemView.findViewById(android.R.id.content)
     val title: TextView = itemView.findViewById(android.R.id.title)
-    val details: TextView = itemView.findViewById(R.id.details)
+    val creator: TextView = itemView.findViewById(R.id.creator)
     val updated: TextView = itemView.findViewById(R.id.updated)
     val price: TextView = itemView.findViewById(R.id.price)
     val icon: ImageView = itemView.findViewById(android.R.id.icon)

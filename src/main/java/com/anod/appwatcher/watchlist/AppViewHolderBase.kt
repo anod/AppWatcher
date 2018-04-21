@@ -31,7 +31,7 @@ abstract class AppViewHolderBase(
         val noRecentChangesText: String
         val installedApps: InstalledApps
         val appChangeContentProvider: AppChangeContentProviderClient
-        fun formatVersionText(versionName: String, versionNumber: Int): String
+        fun formatVersionText(versionName: String, versionNumber: Int, newVersionNumber: Int): String
         fun getString(@StringRes resId: Int): String
         @ColorInt
         fun getColor(@ColorRes colorRes: Int): Int
@@ -59,7 +59,10 @@ open class AppViewHolderResourceProvider(
         return ContextCompat.getColor(context, colorRes)
     }
 
-    override fun formatVersionText(versionName: String, versionNumber: Int): String {
+    override fun formatVersionText(versionName: String, versionNumber: Int, newVersionNumber: Int): String {
+        if (newVersionNumber > 0) {
+            return context.getString(R.string.version_updated_text, versionName, versionNumber, newVersionNumber)
+        }
         return context.getString(R.string.version_text, versionName, versionNumber)
     }
 

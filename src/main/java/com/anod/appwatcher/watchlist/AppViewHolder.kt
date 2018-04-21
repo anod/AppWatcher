@@ -19,8 +19,7 @@ open class AppViewHolder(
     var location: Int = 0
 
     val icon: ImageView = itemView.findViewById(R.id.icon)
-    val newIndicator: View = itemView.findViewById(R.id.new_indicator)
-    val detailsView: AppDetailsView
+    private val detailsView: AppDetailsView
 
     open val isLocalApp: Boolean
         get() = false
@@ -47,13 +46,6 @@ open class AppViewHolder(
         this.app = app
 
         this.detailsView.fillDetails(app, isLocalApp)
-
-        if (app.status == AppInfoMetadata.STATUS_UPDATED) {
-            newIndicator.visibility = View.VISIBLE
-        } else {
-            newIndicator.visibility = View.INVISIBLE
-        }
-
         iconLoader.loadAppIntoImageView(app, this.icon, R.drawable.ic_notifications_black_24dp)
     }
 }

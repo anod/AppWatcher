@@ -46,7 +46,7 @@ abstract class ResultsAdapter(
 
         holder.doc = doc
         holder.title.text = doc.title
-        holder.details.text = doc.creator
+        holder.creator.text = doc.creator
         holder.updated.text = uploadDate
 
         if (watchAppList.contains(packageName)) {

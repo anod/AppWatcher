@@ -313,9 +313,9 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
         animateBackground()
 
         if (Theme(this).isNightTheme) {
-            appDetailsView.updateAccentColor(ContextCompat.getColor(this, R.color.primary_text_dark), viewModel.app!!)
+            appDetailsView.updateAccentColor(ContextCompat.getColor(this, R.color.primary_text_dark))
         } else {
-            appDetailsView.updateAccentColor(darkSwatch.rgb, viewModel.app!!)
+            appDetailsView.updateAccentColor(darkSwatch.rgb)
         }
     }
 

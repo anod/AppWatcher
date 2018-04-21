@@ -19,12 +19,11 @@ class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase
     @ColorInt private var accentColor: Int
     @ColorInt private var warningColor: Int
 
-    val title: TextView = view.findViewById(android.R.id.title)
-    val details: TextView? = view.findViewById<TextView?>(R.id.details)
-    val version: TextView? = view.findViewById<TextView?>(R.id.updated)
-    val price: TextView? = view.findViewById<TextView?>(R.id.price)
-    val updateDate: TextView? = view.findViewById<TextView?>(R.id.update_date)
-    val recentChanges = view.findViewById<TextView?>(R.id.recent_changes)
+    private val title: TextView = view.findViewById(android.R.id.title)
+    private val creator: TextView? = view.findViewById<TextView?>(R.id.creator)
+    private val price: TextView? = view.findViewById<TextView?>(R.id.price)
+    private val updateDate: TextView? = view.findViewById<TextView?>(R.id.update_date)
+    private val recentChanges = view.findViewById<TextView?>(R.id.recent_changes)
 
     init {
         accentColor = resourceProvider.getColor(R.color.theme_accent)
@@ -34,7 +33,7 @@ class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase
 
     fun fillDetails(app: AppInfo, isLocalApp: Boolean) {
         title.text = app.title
-        details?.text = app.creator
+        creator?.text = app.creator
         val uploadDate = app.uploadDate
 
         if (TextUtils.isEmpty(uploadDate)) {
@@ -45,71 +44,78 @@ class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase
         }
 
         if (isLocalApp) {
-            this.price?.visibility = View.INVISIBLE
             this.recentChanges?.visibility = View.GONE
-            this.version?.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stat_communication_stay_primary_portrait, 0, 0, 0)
-            this.version?.text = resourceProvider.formatVersionText(app.versionName, app.versionNumber)
+            this.price?.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stat_communication_stay_primary_portrait, 0, 0, 0)
+            this.price?.text = resourceProvider.formatVersionText(app.versionName, app.versionNumber, 0)
         } else {
+            this.price?.visibility = View.VISIBLE
             this.fillWatchAppView(app)
         }
     }
 
     private fun fillWatchAppView(app: AppInfo) {
+        val price = this.price ?: return
 
+        // Price field
         val isInstalled = resourceProvider.installedApps.packageInfo(app.packageName).isInstalled
         when {
             app.versionNumber == 0 -> {
-                version?.setTextColor(warningColor)
-                version?.text = resourceProvider.getString(R.string.updates_not_available)
+                this.recentChanges?.visibility = View.GONE
+                price.setTextColor(warningColor)
+                price.text = resourceProvider.getString(R.string.updates_not_available)
             }
-            app.status == AppInfoMetadata.STATUS_UPDATED -> {
-                version?.text = resourceProvider.formatVersionText(app.versionName, app.versionNumber)
-                version?.setTextColor(accentColor)
-                this.recentChanges?.visibility = View.VISIBLE
-                val appChange = resourceProvider.appChangeContentProvider.query(app.appId, app.versionNumber)
-                this.recentChanges?.text = if (appChange?.details?.isBlank() != false) resourceProvider.noRecentChangesText else Html.parse(appChange.details)
+            isInstalled -> {
+                val installed = resourceProvider.installedApps.packageInfo(app.packageName)
+                price.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stat_communication_stay_primary_portrait, 0, 0, 0)
+                when {
+                    app.versionNumber > installed.versionCode -> {
+                        price.setTextColor(warningColor)
+                        price.text = resourceProvider.formatVersionText(installed.versionName, installed.versionCode, app.versionNumber)
+                    }
+                    app.status == AppInfoMetadata.STATUS_UPDATED || app.recentFlag -> {
+                        price.setTextColor(accentColor)
+                        price.text = resourceProvider.formatVersionText(installed.versionName, installed.versionCode, 0)
+                    }
+                    else -> {
+                        price.setTextColor(textColor)
+                        price.text = resourceProvider.formatVersionText(installed.versionName, installed.versionCode, 0)
+                    }
+                }
             }
-            app.recentFlag -> {
-                version?.text = resourceProvider.formatVersionText(app.versionName, app.versionNumber)
+            else -> {
+                price.setCompoundDrawables(null, null, null, null)
+                if (app.priceMicros == 0) {
+                    price.setText(R.string.free)
+                } else {
+                    price.text = app.priceText
+                }
+
+                when {
+                    app.status == AppInfoMetadata.STATUS_UPDATED || app.recentFlag -> {
+                        price.setTextColor(accentColor)
+                    }
+                    else -> {
+                        price.setTextColor(textColor)
+                    }
+                }
+            }
+        }
+
+        // Recent changes
+        when {
+            app.status == AppInfoMetadata.STATUS_UPDATED || app.recentFlag -> {
                 this.recentChanges?.visibility = View.VISIBLE
                 val appChange = resourceProvider.appChangeContentProvider.query(app.appId, app.versionNumber)
                 this.recentChanges?.text = if (appChange?.details?.isBlank() != false) resourceProvider.noRecentChangesText else Html.parse(appChange.details)
             }
             else -> {
-                version?.text = resourceProvider.formatVersionText(app.versionName, app.versionNumber)
                 this.recentChanges?.visibility = View.GONE
-                version?.setTextColor(textColor)
-            }
-        }
-
-        price?.setTextColor(accentColor)
-        if (isInstalled) {
-            val installed = resourceProvider.installedApps.packageInfo(app.packageName)
-            price?.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stat_communication_stay_primary_portrait, 0, 0, 0)
-            if (TextUtils.isEmpty(installed.versionName)) {
-                price?.text = resourceProvider.installedText
-            } else {
-                price?.text = resourceProvider.formatVersionText(installed.versionName, installed.versionCode)
-            }
-            when {
-                app.versionNumber > installed.versionCode -> version?.setTextColor(warningColor)
-                app.versionNumber > 0 -> version?.setTextColor(textColor)
-            }
-        } else {
-            price?.setCompoundDrawables(null, null, null, null)
-            if (app.priceMicros == 0) {
-                price?.setText(R.string.free)
-            } else {
-                price?.text = app.priceText
             }
         }
     }
 
-    fun updateAccentColor(@ColorInt color: Int, app: AppInfo) {
+    fun updateAccentColor(@ColorInt color: Int) {
         accentColor = color
-        price?.setTextColor(accentColor)
-        if (app.status == AppInfoMetadata.STATUS_UPDATED) {
-            version?.setTextColor(accentColor)
-        }
+        price!!.setTextColor(accentColor)
     }
 }

@@ -22,17 +22,6 @@
         android:paddingBottom="8dp"
         android:paddingTop="8dp">
 
-        <View
-            android:id="@+id/new_indicator"
-            android:layout_width="4dp"
-            android:layout_height="wrap_content"
-            android:background="@color/theme_accent"
-            android:gravity="left|center_vertical"
-            android:orientation="horizontal"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
         <ImageView
             android:id="@+id/icon"
             android:layout_width="@dimen/icon_size"
@@ -58,12 +47,11 @@
             tools:text="Car Widget Pro" />
 
         <TextView
-            android:id="@+id/updated"
+            android:id="@+id/creator"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
-            android:drawableLeft="@drawable/ic_stat_av_play_shopping_bag"
             android:drawablePadding="4dp"
             android:ellipsize="end"
             android:gravity="left"
@@ -73,7 +61,7 @@
             app:layout_constraintEnd_toStartOf="@+id/update_date"
             app:layout_constraintStart_toEndOf="@+id/icon"
             app:layout_constraintTop_toBottomOf="@android:id/title"
-            tools:text="5.6.1609P.1258283" />
+            tools:text="Alex Gavrishev" />
 
         <TextView
             android:id="@+id/price"
@@ -88,9 +76,9 @@
             android:maxLines="1"
             android:textColor="@color/theme_accent"
             android:textSize="@dimen/textSize"
-            app:layout_constraintEnd_toStartOf="@+id/details"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/icon"
-            app:layout_constraintTop_toBottomOf="@id/updated"
+            app:layout_constraintTop_toBottomOf="@id/creator"
             tools:text="5.6.1609P.1258283" />
 
         <TextView
@@ -102,18 +90,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@android:id/title"
             tools:text="11 Aug 2017" />
-
-        <TextView
-            android:id="@+id/details"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="8dp"
-            android:gravity="right"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textSize="10sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/update_date"
-            tools:text="Alex Gavrishev" />
 
         <TextView
             android:id="@+id/recent_changes"
