@@ -117,7 +117,7 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
 
                 Category(R.string.settings_notifications),
                 SwitchItem(R.string.uptodate_title, R.string.uptodate_summary, ACTION_NOTIFY_UPTODATE, prefs.isNotifyInstalledUpToDate),
-                SwitchItem(R.string.pref_notify_installed, R.string.pref_notify_installed_summary, ACTION_NOTIFY_INSTALLED, prefs.isNotifyInstalledUpToDate),
+                SwitchItem(R.string.pref_notify_installed, R.string.pref_notify_installed_summary, ACTION_NOTIFY_INSTALLED, prefs.isNotifyInstalled),
 
                 Category(R.string.pref_header_drive_sync),
                 syncEnabledItem,
@@ -250,10 +250,7 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
                 prefs.isRequiresCharging = requiresCharging
                 SyncScheduler.schedule(this, requiresCharging, prefs.isWifiOnly, prefs.updatesFrequency)
             }
-            ACTION_NOTIFY_UPTODATE -> {
-                val notify = (pref as ToggleItem).checked
-                prefs.isNotifyInstalledUpToDate = notify
-            }
+            ACTION_NOTIFY_UPTODATE -> prefs.isNotifyInstalledUpToDate = (pref as ToggleItem).checked
             ACTION_THEME -> {
                 DialogItems(this, R.style.AlertDialog, R.string.pref_title_theme, R.array.themes, { _, which ->
                             if (prefs.nightMode != which) {
@@ -290,6 +287,7 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
                 }).show()
             }
             ACTION_ENABLE_PULL_TO_REFRESH -> prefs.enablePullToRefresh = this.applyToggle(pref, prefs.enablePullToRefresh)
+            ACTION_NOTIFY_INSTALLED -> prefs.isNotifyInstalled = (pref as ToggleItem).checked
         }
         notifyDataSetChanged()
     }

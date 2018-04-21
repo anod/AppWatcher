@@ -319,7 +319,9 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         } else if (updatedApps.isNotEmpty()) {
             var filteredApps = updatedApps
 
-            if (!preferences.isNotifyInstalledUpToDate) {
+            if (!preferences.isNotifyInstalled) {
+                filteredApps = updatedApps.filter { it.installedVersionCode > 0 }
+            } else if (!preferences.isNotifyInstalledUpToDate) {
                 filteredApps = updatedApps.filter {
                     it.installedVersionCode > 0 && it.app.versionNumber <= it.installedVersionCode
                 }

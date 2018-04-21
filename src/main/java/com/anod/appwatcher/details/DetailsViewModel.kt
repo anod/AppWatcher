@@ -88,7 +88,7 @@ class DetailsViewModel(application: Application) : AndroidViewModel(application)
     }
 
     override fun onErrorResponse(error: VolleyError) {
-        App.log(context).info("Cannot fetch details for $appId - $error")
+        App.log(context).error("Cannot fetch details for $appId - $error")
         val state = this.changelogState.value ?: 0
         this.changelogState.value = state + 1
     }

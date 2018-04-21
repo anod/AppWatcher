@@ -97,6 +97,10 @@ class Preferences(context: Context) : DeviceIdStorage {
         get() = preferences.getBoolean(NOTIFY_INSTALLED_UPTODATE, true)
         set(notify) = preferences.edit().putBoolean(NOTIFY_INSTALLED_UPTODATE, notify).apply()
 
+    var isNotifyInstalled: Boolean
+        get() = preferences.getBoolean("notify-installed", true)
+        set(notify) = preferences.edit().putBoolean("notify-installed", notify).apply()
+
     var showRecent: Boolean
         get() = preferences.getBoolean("show-recent", false)
         set(value) = preferences.edit().putBoolean("show-recent", value).apply()
