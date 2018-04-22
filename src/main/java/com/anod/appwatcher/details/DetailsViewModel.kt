@@ -63,6 +63,10 @@ class DetailsViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun loadLocalChangelog() {
+        if (appId.isBlank()) {
+            this.updateChangelogState(LocalComplete())
+            return
+        }
         ChangesAsyncTask(ApplicationContext(getApplication()), appId, {
             this.localChangelog = it
             this.updateChangelogState(LocalComplete())
