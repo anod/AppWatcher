@@ -86,7 +86,7 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
             error.visibility = View.GONE
             list.visibility = View.GONE
             retryButton.postDelayed({
-                viewModel.loadChangelog()
+                viewModel.loadRemoteChangelog()
             }, 500)
         }
 
@@ -103,18 +103,22 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
         }
 
         viewModel.changelogState.observe(this, Observer {
-            val state = it ?: 0
-            if (state >= 1) {
-                addMenu?.isEnabled = true
-                adapter.setData(viewModel.localChangelog, viewModel.recentChange)
-                if (adapter.isEmpty) {
-                    if (state == 2) {
+            when (it) {
+                is Complete -> {
+                    addMenu?.isEnabled = true
+                    if (adapter.isEmpty) {
                         showRetryMessage()
+                    } else {
+                        progressBar.visibility = View.GONE
+                        list.visibility = View.VISIBLE
+                        error.visibility = View.GONE
                     }
-                } else {
+                }
+                else -> {
                     progressBar.visibility = View.GONE
                     list.visibility = View.VISIBLE
                     error.visibility = View.GONE
+                    adapter.setData(viewModel.localChangelog, viewModel.recentChange)
                 }
             }
         })
@@ -128,17 +132,17 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
         super.onResume()
         progressBar.visibility = View.VISIBLE
 
-        viewModel.loadChangelog()
+        viewModel.loadLocalChangelog()
         viewModel.account?.let { account ->
             AuthTokenAsync(this).request(this, account, object : AuthTokenAsync.Callback {
                 override fun onToken(token: String) {
                     viewModel.authToken = token
-                    viewModel.loadChangelog()
+                    viewModel.loadRemoteChangelog()
                 }
 
                 override fun onError(errorMessage: String) {
                     App.log(this@DetailsActivity).error(errorMessage)
-                    viewModel.loadChangelog()
+                    viewModel.loadRemoteChangelog()
                 }
             })
         }

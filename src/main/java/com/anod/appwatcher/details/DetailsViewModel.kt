@@ -22,6 +22,11 @@ import info.anodsplace.playstore.PlayStoreEndpoint
 
 typealias TagMenuItem = Pair<Tag,Boolean>
 
+sealed class ChangelogLoadState
+class LocalComplete: ChangelogLoadState()
+class RemoteComplete(val error: Boolean): ChangelogLoadState()
+class Complete: ChangelogLoadState()
+
 class DetailsViewModel(application: Application) : AndroidViewModel(application), PlayStoreEndpoint.Listener {
 
     val context: ApplicationContext
@@ -46,7 +51,7 @@ class DetailsViewModel(application: Application) : AndroidViewModel(application)
     val tags = MutableLiveData<List<Tag>>()
     val tagsMenuItems = MutableLiveData<List<TagMenuItem>>()
 
-    val changelogState = MutableLiveData<Int>()
+    val changelogState = MutableLiveData<ChangelogLoadState>()
 
     val document: Document?
         get() = detailsEndpoint.document
@@ -57,18 +62,16 @@ class DetailsViewModel(application: Application) : AndroidViewModel(application)
         detailsEndpoint.listener = null
     }
 
-    fun loadChangelog() {
-        this.changelogState.value = 0
-
+    fun loadLocalChangelog() {
         ChangesAsyncTask(ApplicationContext(getApplication()), appId, {
             this.localChangelog = it
-            val state = this.changelogState.value ?: 0
-            this.changelogState.value = state + 1
+            this.updateChangelogState(LocalComplete())
         }).execute()
+    }
 
+    fun loadRemoteChangelog() {
         if (this.authToken.isEmpty()) {
-            val state = this.changelogState.value ?: 0
-            this.changelogState.value = state + 1
+            this.updateChangelogState(RemoteComplete(true))
         } else {
             detailsEndpoint.authToken = this.authToken
             detailsEndpoint.listener = this
@@ -83,14 +86,31 @@ class DetailsViewModel(application: Application) : AndroidViewModel(application)
             recentChange = AppChange(appId, appDetails.versionCode, appDetails.versionString, appDetails.recentChangesHtml
                     ?: "", appDetails.uploadDate)
         }
-        val state = this.changelogState.value ?: 0
-        this.changelogState.value = state + 1
+        this.updateChangelogState(RemoteComplete(false))
+    }
+
+    private fun updateChangelogState(state: ChangelogLoadState) {
+        when (state) {
+            is LocalComplete -> {
+                if (this.changelogState.value is RemoteComplete || this.changelogState.value is Complete) {
+                    this.changelogState.value = Complete()
+                } else {
+                    this.changelogState.value = state
+                }
+            }
+            is RemoteComplete -> {
+                if (this.changelogState.value is LocalComplete || this.changelogState.value is Complete) {
+                    this.changelogState.value = Complete()
+                } else {
+                    this.changelogState.value = state
+                }
+            }
+        }
     }
 
     override fun onErrorResponse(error: VolleyError) {
         App.log(context).error("Cannot fetch details for $appId - $error")
-        val state = this.changelogState.value ?: 0
-        this.changelogState.value = state + 1
+        this.updateChangelogState(RemoteComplete(true))
     }
 
     fun loadApp(rowId: Int, appId: String) {
