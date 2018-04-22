@@ -61,8 +61,4 @@ private class OkHttpStack @JvmOverloads constructor(client: OkHttpClient? = OkHt
     }
 }
 
-class Network : BasicNetwork(OkHttpStack(
-        OkHttpClient.Builder()
-                .connectTimeout(2, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
-                .build()), ByteArrayPool(1024 * 256))
+class Network : BasicNetwork(OkHttpStack(), ByteArrayPool(1024 * 256))

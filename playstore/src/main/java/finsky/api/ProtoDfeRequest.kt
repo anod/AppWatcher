@@ -1,15 +1,16 @@
 package finsky.api
 
+import com.android.volley.Request
 import com.android.volley.Response
 import finsky.protos.nano.Messages
 import com.google.protobuf.nano.MessageNano
 
 internal open class ProtoDfeRequest(
-        s: String,
-        private val request: MessageNano,
+        url: String,
+        val request: MessageNano,
         dfeApiContext: DfeApiContext,
         listener: Response.Listener<Messages.Response.ResponseWrapper>,
-        errorListener: Response.ErrorListener) : DfeRequest(1, s, dfeApiContext, listener, errorListener) {
+        errorListener: Response.ErrorListener) : DfeRequest(Request.Method.POST, url, dfeApiContext, listener, errorListener) {
 
     init {
         this.setShouldCache(false)

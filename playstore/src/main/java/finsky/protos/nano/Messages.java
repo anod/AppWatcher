@@ -3293,6 +3293,15 @@ public interface Messages {
         return _emptyArray;
       }
 
+      // repeated string docid = 1;
+      public java.lang.String[] docid;
+
+      // optional bool includeChildDocs = 2;
+      public boolean includeChildDocs;
+
+      // required bool includeDetails = 3;
+      public boolean includeDetails;
+
       // repeated .finsky.protos.Details.BulkDetailsRequestDoc docs = 8;
       public finsky.protos.nano.Messages.Details.BulkDetailsRequestDoc[] docs;
 
@@ -3301,6 +3310,9 @@ public interface Messages {
       }
 
       public BulkDetailsRequest clear() {
+        docid = com.google.protobuf.nano.WireFormatNano.EMPTY_STRING_ARRAY;
+        includeChildDocs = false;
+        includeDetails = false;
         docs = finsky.protos.nano.Messages.Details.BulkDetailsRequestDoc.emptyArray();
         cachedSize = -1;
         return this;
@@ -3309,6 +3321,18 @@ public interface Messages {
       @Override
       public void writeTo(com.google.protobuf.nano.CodedOutputByteBufferNano output)
           throws java.io.IOException {
+        if (this.docid != null && this.docid.length > 0) {
+          for (int i = 0; i < this.docid.length; i++) {
+            java.lang.String element = this.docid[i];
+            if (element != null) {
+              output.writeString(1, element);
+            }
+          }
+        }
+        if (this.includeChildDocs != false) {
+          output.writeBool(2, this.includeChildDocs);
+        }
+        output.writeBool(3, this.includeDetails);
         if (this.docs != null && this.docs.length > 0) {
           for (int i = 0; i < this.docs.length; i++) {
             finsky.protos.nano.Messages.Details.BulkDetailsRequestDoc element = this.docs[i];
@@ -3323,6 +3347,26 @@ public interface Messages {
       @Override
       protected int computeSerializedSize() {
         int size = super.computeSerializedSize();
+        if (this.docid != null && this.docid.length > 0) {
+          int dataCount = 0;
+          int dataSize = 0;
+          for (int i = 0; i < this.docid.length; i++) {
+            java.lang.String element = this.docid[i];
+            if (element != null) {
+              dataCount++;
+              dataSize += com.google.protobuf.nano.CodedOutputByteBufferNano
+                  .computeStringSizeNoTag(element);
+            }
+          }
+          size += dataSize;
+          size += 1 * dataCount;
+        }
+        if (this.includeChildDocs != false) {
+          size += com.google.protobuf.nano.CodedOutputByteBufferNano
+              .computeBoolSize(2, this.includeChildDocs);
+        }
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeBoolSize(3, this.includeDetails);
         if (this.docs != null && this.docs.length > 0) {
           for (int i = 0; i < this.docs.length; i++) {
             finsky.protos.nano.Messages.Details.BulkDetailsRequestDoc element = this.docs[i];
@@ -3348,6 +3392,31 @@ public interface Messages {
               if (!com.google.protobuf.nano.WireFormatNano.parseUnknownField(input, tag)) {
                 return this;
               }
+              break;
+            }
+            case 10: {
+              int arrayLength = com.google.protobuf.nano.WireFormatNano
+                  .getRepeatedFieldArrayLength(input, 10);
+              int i = this.docid == null ? 0 : this.docid.length;
+              java.lang.String[] newArray = new java.lang.String[i + arrayLength];
+              if (i != 0) {
+                java.lang.System.arraycopy(this.docid, 0, newArray, 0, i);
+              }
+              for (; i < newArray.length - 1; i++) {
+                newArray[i] = input.readString();
+                input.readTag();
+              }
+              // Last one without readTag.
+              newArray[i] = input.readString();
+              this.docid = newArray;
+              break;
+            }
+            case 16: {
+              this.includeChildDocs = input.readBool();
+              break;
+            }
+            case 24: {
+              this.includeDetails = input.readBool();
               break;
             }
             case 66: {

@@ -3,6 +3,7 @@ package com.anod.appwatcher.accounts
 import android.accounts.Account
 import android.app.Activity
 import android.content.Context
+import android.os.AsyncTask
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.os.BackgroundTask
 
@@ -28,7 +29,7 @@ class AuthTokenAsync(private val authTokenBlocking: AuthTokenBlocking) {
                     callback.onToken(result)
                 }
             }
-        }).execute()
+        }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
     }
 
     interface Callback {

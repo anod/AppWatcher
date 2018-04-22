@@ -103,12 +103,14 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
         }
 
         viewModel.changelogState.observe(this, Observer {
-            val state = it ?: false
-            if (state == 2) {
+            val state = it ?: 0
+            if (state >= 1) {
                 addMenu?.isEnabled = true
                 adapter.setData(viewModel.localChangelog, viewModel.recentChange)
                 if (adapter.isEmpty) {
-                    showRetryMessage()
+                    if (state == 2) {
+                        showRetryMessage()
+                    }
                 } else {
                     progressBar.visibility = View.GONE
                     list.visibility = View.VISIBLE
@@ -126,6 +128,7 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
         super.onResume()
         progressBar.visibility = View.VISIBLE
 
+        viewModel.loadChangelog()
         viewModel.account?.let { account ->
             AuthTokenAsync(this).request(this, account, object : AuthTokenAsync.Callback {
                 override fun onToken(token: String) {
