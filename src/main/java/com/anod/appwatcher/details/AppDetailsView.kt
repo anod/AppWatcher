@@ -44,11 +44,13 @@ class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase
         }
 
         if (isLocalApp) {
+            this.creator?.visibility = View.GONE
             this.recentChanges?.visibility = View.GONE
             this.price?.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stat_communication_stay_primary_portrait, 0, 0, 0)
+            this.price?.setTextColor(textColor)
             this.price?.text = resourceProvider.formatVersionText(app.versionName, app.versionNumber, 0)
         } else {
-            this.price?.visibility = View.VISIBLE
+            this.creator?.visibility = View.VISIBLE
             this.fillWatchAppView(app)
         }
     }

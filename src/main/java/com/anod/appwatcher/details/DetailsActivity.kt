@@ -106,6 +106,7 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
             when (it) {
                 is Complete -> {
                     addMenu?.isEnabled = true
+                    adapter.setData(viewModel.localChangelog, viewModel.recentChange)
                     if (adapter.isEmpty) {
                         showRetryMessage()
                     } else {

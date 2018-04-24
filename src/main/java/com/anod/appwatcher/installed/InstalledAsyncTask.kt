@@ -60,7 +60,7 @@ class InstalledAsyncTask(private val context: ApplicationContext,
                     Pair(it.first, rowId)
                 }
 
-        val list = installed.filter { !watchingPackages.containsKey(it) }
+        val list = installed.filter { !watchingPackages.containsKey(it.first) }
         when (sortId) {
             Preferences.SORT_NAME_DESC -> Collections.sort(list, InstalledAsyncTask.AppTitleComparator(-1, this))
             Preferences.SORT_DATE_ASC -> Collections.sort(list, InstalledAsyncTask.AppUpdateTimeComparator(1, this))
