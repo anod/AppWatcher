@@ -44,12 +44,8 @@ class AppsTagActivity : WatchListActivity() {
         val appBarLayout = findViewById<View>(R.id.appbar) as AppBarLayout
         appBarLayout.setBackgroundColor(tag.color)
 
-        val hsv = FloatArray(3)
-        Color.colorToHSV(tag.color, hsv)
-        hsv[2] *= 0.6f
-        val dark = Color.HSVToColor(hsv)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            window.statusBarColor = dark
+            window.statusBarColor = tag.darkColor
         }
 
         title = tag.name

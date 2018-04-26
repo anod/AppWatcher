@@ -22,6 +22,14 @@ object Html {
         } catch (e: RuntimeException) {
             AppLog.e(e)
             return SpannableString(source)
+        } catch (e: android.util.AndroidRuntimeException) {
+            //
+            // Fatal Exception: android.util.AndroidRuntimeException
+            //        android.webkit.WebViewFactory$MissingWebViewPackageException: Failed to load WebView provider: No WebView installed
+
+            AppLog.e(e)
+            return SpannableString(source)
         }
     }
+
 }

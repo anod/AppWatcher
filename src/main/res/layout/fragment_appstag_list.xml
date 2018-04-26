@@ -51,6 +51,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:drawableLeft="@drawable/ic_add_circle_white_24dp"
+            android:foreground="?android:attr/selectableItemBackground"
             android:text="@string/add_apps" />
 
     </LinearLayout>

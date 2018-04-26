@@ -2,25 +2,37 @@ package com.anod.appwatcher.tags
 
 import android.content.Context
 import android.support.v7.widget.RecyclerView
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.CheckedTextView
 import android.widget.ImageView
 import com.anod.appwatcher.App
 import com.anod.appwatcher.R
-import com.anod.appwatcher.content.AppListCursor
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.utils.PicassoAppIcon
-import info.anodsplace.framework.widget.recyclerview.RecyclerViewCursorListAdapter
 
-internal class TagAppsCursorAdapter(context: Context, private val tagAppsImport: TagAppsImport)
-    : RecyclerViewCursorListAdapter<TagAppsCursorAdapter.ItemViewHolder, AppInfo, AppListCursor>(context, R.layout.list_item_import_app) {
+internal class TagAppsAdapter(private val context: Context, private val tagAppsImport: TagAppsImport)
+    : RecyclerView.Adapter<TagAppsAdapter.ItemViewHolder>() {
 
-    override fun areItemsTheSame(oldItem: AppInfo, newItem: AppInfo): Boolean {
-        return  oldItem.rowId == newItem.rowId
+    private var apps: List<AppInfo> = emptyList()
+
+    fun setData(apps: List<AppInfo>) {
+        this.apps = apps
+        notifyDataSetChanged()
     }
 
-    override fun areContentsTheSame(oldItem: AppInfo, newItem: AppInfo): Boolean {
-        return oldItem == newItem
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
+        val itemView = LayoutInflater.from(context).inflate(R.layout.list_item_import_app, parent, false)
+        return ItemViewHolder(itemView, mIconLoader, tagAppsImport)
+    }
+
+    override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
+        holder.bindView(apps[position])
+    }
+
+    override fun getItemCount(): Int {
+        return apps.size
     }
 
     private val mIconLoader: PicassoAppIcon = App.provide(context).iconLoader
@@ -49,16 +61,8 @@ internal class TagAppsCursorAdapter(context: Context, private val tagAppsImport:
         }
     }
 
-    override fun onCreateViewHolder(itemView: View): ItemViewHolder {
-        return ItemViewHolder(itemView, mIconLoader, tagAppsImport)
-    }
-
-    override fun onBindViewHolder(holder: ItemViewHolder, position: Int, item: AppInfo) {
-        holder.bindView(item)
-    }
-
     fun selectAllApps(select: Boolean) {
         tagAppsImport.selectAll(select)
-        this.notifyDataSetChanged()
+        notifyDataSetChanged()
     }
 }

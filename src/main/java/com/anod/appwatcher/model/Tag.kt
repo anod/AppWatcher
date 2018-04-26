@@ -1,5 +1,6 @@
 package com.anod.appwatcher.model
 
+import android.graphics.Color
 import android.os.Parcel
 import android.os.Parcelable
 import android.support.annotation.ColorInt
@@ -11,6 +12,14 @@ import android.support.annotation.ColorInt
  */
 
 class Tag(val id: Int, val name: String, @ColorInt val color: Int) : Parcelable {
+
+    val darkColor: Int
+        get() {
+            val hsv = FloatArray(3)
+            Color.colorToHSV(color, hsv)
+            hsv[2] *= 0.6f
+            return Color.HSVToColor(hsv)
+        }
 
     constructor(name: String) : this(-1, name, DEFAULT_COLOR)
 

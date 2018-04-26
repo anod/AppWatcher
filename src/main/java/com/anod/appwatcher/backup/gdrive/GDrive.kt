@@ -2,6 +2,7 @@ package com.anod.appwatcher.backup.gdrive
 
 import android.content.Context
 import android.widget.Toast
+import com.anod.appwatcher.content.DbContentProvider
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
@@ -43,6 +44,7 @@ class GDrive(private val context: ApplicationContext, private val googleAccount:
 
             override fun finished(result: ApiClientAsyncTask.Result) {
                 if (result.status) {
+                    context.contentResolver.notifyChange(DbContentProvider.appsUri, null)
                     listener?.onGDriveSyncFinish()
                 } else {
                     Toast.makeText(context.actual, result.ex?.message ?: "Error", Toast.LENGTH_SHORT).show()

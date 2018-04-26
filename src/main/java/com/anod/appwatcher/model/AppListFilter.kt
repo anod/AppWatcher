@@ -19,7 +19,21 @@ interface CountableFilter {
     fun resetNewCount()
 }
 
-interface AppListFilter: FilterCursor.CursorFilter, CountableFilter
+interface AppListFilter: FilterCursor.CursorFilter, CountableFilter {
+
+    class None() : AppListFilter {
+        override fun filterRecord(cursor: Cursor): Boolean {
+            return false
+        }
+
+        override fun resetNewCount() {
+        }
+
+        override val newCount: Int = 0
+        override val updatableNewCount: Int = 0
+        override val recentlyUpdatedCount: Int = 0
+    }
+}
 
 class AppListFilterInclusion(private val inclusion: Inclusion, private val installedApps: InstalledApps) : AppListFilter {
 

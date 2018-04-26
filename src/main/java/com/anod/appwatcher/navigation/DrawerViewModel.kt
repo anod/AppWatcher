@@ -24,7 +24,7 @@ import info.anodsplace.framework.os.BackgroundTask
 
 typealias TagCountList = List<Pair<Tag, Int>>
 
-class TagsUpdateObserver(private val viewModel: DrawerViewModel) : ContentObserver(Handler()) {
+private class TagsUpdateObserver(private val viewModel: DrawerViewModel) : ContentObserver(Handler()) {
     override fun onChange(selfChange: Boolean) {
         viewModel.updateTags()
     }

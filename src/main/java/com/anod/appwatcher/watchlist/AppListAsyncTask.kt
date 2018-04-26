@@ -36,6 +36,9 @@ open class AppListAsyncTask(context: ApplicationContext,
         selection.second,
         sortOrder) {
 
+    constructor(context: ApplicationContext, titleFilter: String, sortOrder: String, listFilter: AppListFilter, completion: (List<AppInfo>, AppListFilter) -> Unit)
+            : this(context, createSelection(null, titleFilter), sortOrder, listFilter, null, completion)
+
     constructor(context: ApplicationContext, titleFilter: String, sortId: Int, listFilter: AppListFilter, tag: Tag?, completion: (List<AppInfo>, AppListFilter) -> Unit)
             : this(context, createSelection(tag, titleFilter), createSortOrder(sortId), listFilter, tag, completion)
 

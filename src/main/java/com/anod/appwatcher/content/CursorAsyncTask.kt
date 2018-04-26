@@ -22,6 +22,8 @@ abstract class CursorAsyncTask<R, out CR : CursorIterator<R>>(
         private val selectionArgs: Array<String>, private val sortOrder: String)
     : AsyncTask<Void, Void, List<R>>() {
 
+    constructor(context: ApplicationContext, uri: Uri, projection: Array<String>) : this(context, uri, projection, "", emptyArray(), "")
+
     abstract fun convert(cursor: Cursor): CR
 
     override fun doInBackground(vararg params: Void?): List<R> {
@@ -30,8 +32,12 @@ abstract class CursorAsyncTask<R, out CR : CursorIterator<R>>(
                 throw OperationCanceledException()
             }
         }
+        val querySelection = if (selection.isEmpty()) null else selection
+        val querySelectionArgs = if (selectionArgs.isEmpty()) null else selectionArgs
+        val querySortOrder = if (sortOrder.isEmpty()) null else sortOrder
+
         val cursor = ContentResolverCompat.query(context.contentResolver,
-                uri, projection, selection, selectionArgs, sortOrder,
+                uri, projection, querySelection, querySelectionArgs, querySortOrder,
                 CancellationSignal()) ?: NullCursor()
         try {
             // Ensure the cursor window is filled.

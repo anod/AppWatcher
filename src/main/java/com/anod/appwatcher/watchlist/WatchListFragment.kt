@@ -249,7 +249,7 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         }
     }
 
-    private fun reload() {
+    internal fun reload() {
         section.viewModel(this).load(titleFilter, sortId, createFilter(filterId), tag)
     }
 
