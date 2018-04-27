@@ -39,7 +39,7 @@ class AppInfo : AppInfoMetadata, Parcelable {
     val iconUrl: String
     val uploadTime: Long
     val appType: String
-    val refreshTime: Long
+    val updateTime: Long
     val recentFlag: Boolean
 
     private constructor(rowId: Int, packageName: String, versionCode: Int, versionName: String, title: String, iconUrl: String, status: Int, uploadDate: String)
@@ -49,7 +49,7 @@ class AppInfo : AppInfoMetadata, Parcelable {
     constructor(rowId: Int, appId: String, pname: String, versionNumber: Int, versionName: String,
                 title: String, creator: String?, iconUrl: String, status: Int, uploadDate: String,
                 priceText: String?, priceCur: String?, priceMicros: Int?, detailsUrl: String,
-                uploadTime: Long, appType: String, refreshTime: Long, recentFlag: Boolean) : super(appId, status) {
+                uploadTime: Long, appType: String, updateTime: Long, recentFlag: Boolean) : super(appId, status) {
         this.rowId = rowId
         this.packageName = pname
         this.versionNumber = versionNumber
@@ -66,7 +66,7 @@ class AppInfo : AppInfoMetadata, Parcelable {
         this.iconUrl = iconUrl
         this.uploadTime = uploadTime
         this.appType = appType
-        this.refreshTime = refreshTime
+        this.updateTime = updateTime
         this.recentFlag = recentFlag
     }
 
@@ -93,7 +93,7 @@ class AppInfo : AppInfoMetadata, Parcelable {
 
         this.iconUrl = doc.iconUrl ?: ""
         this.uploadTime = doc.extractUploadDate()
-        this.refreshTime = System.currentTimeMillis()
+        this.updateTime = System.currentTimeMillis()
         this.recentFlag = true
     }
 
@@ -114,7 +114,7 @@ class AppInfo : AppInfoMetadata, Parcelable {
         iconUrl = `in`.readString()
         uploadTime = `in`.readLong()
         appType = `in`.readString()
-        refreshTime = `in`.readLong()
+        updateTime = `in`.readLong()
         recentFlag = `in`.readInt() == 1
     }
 
@@ -141,7 +141,7 @@ class AppInfo : AppInfoMetadata, Parcelable {
         dest.writeString(iconUrl)
         dest.writeLong(uploadTime)
         dest.writeString(appType)
-        dest.writeLong(refreshTime)
+        dest.writeLong(updateTime)
         dest.writeInt(if (recentFlag) 1 else 0)
     }
 
@@ -163,7 +163,7 @@ class AppInfo : AppInfoMetadata, Parcelable {
             iconUrl != other.iconUrl -> false
             uploadTime != other.uploadTime -> false
             appType != other.appType -> false
-            refreshTime != other.refreshTime -> false
+            updateTime != other.updateTime -> false
             else -> true
         }
     }

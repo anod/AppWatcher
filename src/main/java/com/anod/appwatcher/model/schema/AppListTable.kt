@@ -25,7 +25,7 @@ class AppListTable {
             const val uploadDate = "upload_date"
             const val detailsUrl = "details_url"
             const val appType = "app_type"
-            const val refreshTimestamp = "sync_version"
+            const val updateTimestamp = "sync_version"
             const val recentFlag = "recent_flag"
         }
     }
@@ -91,9 +91,9 @@ class AppListTable {
                     Columns.detailsUrl,
                     Columns.iconUrl,
                     Columns.appType,
-                    Columns.refreshTimestamp,
+                    Columns.updateTimestamp,
                     "case " +
-                            "when ${Columns.uploadTimestamp} > $recentTime then 1 " +
+                            "when ${Columns.updateTimestamp} > $recentTime then 1 " +
                             "else 0 end ${Columns.recentFlag}")
         }
 
@@ -115,7 +115,7 @@ class AppListTable {
                     Columns.detailsUrl + " TEXT," +
                     Columns.iconUrl + " TEXT," +
                     Columns.appType + " TEXT," +
-                    Columns.refreshTimestamp + " INTEGER" +
+                    Columns.updateTimestamp + " INTEGER" +
                     ") "
     }
 }
@@ -146,6 +146,6 @@ val AppInfo.contentValues: ContentValues
         values.put(AppListTable.Columns.uploadTimestamp, uploadTime)
 
         values.put(AppListTable.Columns.appType, appType)
-        values.put(AppListTable.Columns.refreshTimestamp, refreshTime)
+        values.put(AppListTable.Columns.updateTimestamp, updateTime)
         return values
     }

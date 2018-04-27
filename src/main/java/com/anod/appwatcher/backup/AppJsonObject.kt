@@ -39,7 +39,7 @@ class AppJsonObject(val app: AppInfo?, val tags: List<String>) {
             writer.name("iconUrl").value(app.iconUrl)
             writer.name("uploadTime").value(app.uploadTime)
             writer.name("appType").value(app.appType)
-            writer.name("refreshTimestamp").value(app.refreshTime)
+            writer.name("refreshTimestamp").value(app.updateTime)
 
             val tagsWriter = writer.name("tags")
             tagsWriter.beginArray()
