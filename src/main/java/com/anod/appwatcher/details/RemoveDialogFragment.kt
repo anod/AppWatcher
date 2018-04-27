@@ -6,7 +6,7 @@ import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.DbContentProviderClient
-import com.anod.appwatcher.model.AddWatchAppAsyncTask
+import com.anod.appwatcher.content.AddWatchAppAsyncTask
 import com.anod.appwatcher.model.AppInfoMetadata
 import info.anodsplace.framework.app.DialogMessage
 

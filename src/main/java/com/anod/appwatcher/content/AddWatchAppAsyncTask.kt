@@ -1,10 +1,10 @@
-package com.anod.appwatcher.model
+package com.anod.appwatcher.content
 
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.AsyncTask
 import android.support.v4.util.SimpleArrayMap
-import com.anod.appwatcher.sync.UpdateCheck
+import com.anod.appwatcher.model.AppInfo
 
 import finsky.api.model.Document
 import info.anodsplace.framework.app.ApplicationContext
@@ -13,7 +13,7 @@ import info.anodsplace.framework.app.ApplicationContext
 class AddWatchAppAsyncTask(
         context: ApplicationContext,
         private val appList: WatchAppList,
-        private val listener: AddWatchAppAsyncTask.Listener) : AsyncTask<Document, Void, SimpleArrayMap<String, Int>>() {
+        private val listener: Listener) : AsyncTask<Document, Void, SimpleArrayMap<String, Int>>() {
 
     @SuppressLint("StaticFieldLeak")
     private val context = context.actual

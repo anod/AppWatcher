@@ -3,7 +3,7 @@ package com.anod.appwatcher.backup
 import android.text.TextUtils
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.Tag
-import com.anod.appwatcher.model.schema.AppListTable
+import com.anod.appwatcher.content.schema.AppListTable
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.json.JsonReader
 import info.anodsplace.framework.json.JsonToken

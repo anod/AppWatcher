@@ -23,7 +23,7 @@ import com.anod.appwatcher.content.TagsContentProviderClient
 import com.anod.appwatcher.content.TagsCursor
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.Tag
-import com.anod.appwatcher.model.schema.TagsTable
+import com.anod.appwatcher.content.schema.TagsTable
 import com.anod.appwatcher.utils.Theme
 import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.graphics.DrawableTint

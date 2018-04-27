@@ -1,18 +1,18 @@
-package com.anod.appwatcher.model
+package com.anod.appwatcher.content
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 
-import com.anod.appwatcher.model.schema.AppListTable
-import com.anod.appwatcher.model.schema.AppTagsTable
-import com.anod.appwatcher.model.schema.ChangelogTable
-import com.anod.appwatcher.model.schema.TagsTable
+import com.anod.appwatcher.content.schema.AppListTable
+import com.anod.appwatcher.content.schema.AppTagsTable
+import com.anod.appwatcher.content.schema.ChangelogTable
+import com.anod.appwatcher.content.schema.TagsTable
 
 import info.anodsplace.framework.AppLog
 
 class DbSchemaManager(context: Context)
-    : SQLiteOpenHelper(context, DbSchemaManager.dbName, null, DbSchemaManager.version) {
+    : SQLiteOpenHelper(context, dbName, null, version) {
 
     companion object {
         private const val version = 13

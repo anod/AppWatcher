@@ -10,7 +10,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.support.design.widget.AppBarLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.SearchView
 import android.view.Menu
@@ -18,7 +17,7 @@ import android.view.View
 import com.anod.appwatcher.AppWatcherApplication
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.*
-import com.anod.appwatcher.model.schema.AppListTable
+import com.anod.appwatcher.content.schema.AppListTable
 import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.watchlist.AppListAsyncTask
 import info.anodsplace.framework.app.ApplicationContext

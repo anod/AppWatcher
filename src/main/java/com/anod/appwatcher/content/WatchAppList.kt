@@ -1,8 +1,9 @@
-package com.anod.appwatcher.model
+package com.anod.appwatcher.content
 
 import android.content.Context
 import android.support.v4.util.SimpleArrayMap
-import com.anod.appwatcher.content.DbContentProviderClient
+import com.anod.appwatcher.model.AppInfo
+import com.anod.appwatcher.model.AppInfoMetadata
 
 
 /**
@@ -10,7 +11,7 @@ import com.anod.appwatcher.content.DbContentProviderClient
  * *
  * @date 2015-09-19
  */
-class WatchAppList(private val listener: WatchAppList.Listener?) {
+class WatchAppList(private val listener: Listener?) {
     private var addedApps: SimpleArrayMap<String, Int> = SimpleArrayMap()
     private var contentProvider: DbContentProviderClient? = null
 

@@ -2,7 +2,7 @@ package com.anod.appwatcher.content
 
 import android.database.Cursor
 import com.anod.appwatcher.model.AppChange
-import com.anod.appwatcher.model.schema.ChangelogTable
+import com.anod.appwatcher.content.schema.ChangelogTable
 import info.anodsplace.framework.database.CursorIterator
 
 /**
@@ -11,7 +11,7 @@ import info.anodsplace.framework.database.CursorIterator
  */
 class AppChangeCursor(cursor: Cursor?) : CursorIterator<AppChange>(cursor) {
 
-    val change: AppChange
+    private val change: AppChange
         get() = AppChange(
                 getString(ChangelogTable.Projection.appId),
                 getInt(ChangelogTable.Projection.versionCode),

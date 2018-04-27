@@ -3,7 +3,7 @@ package com.anod.appwatcher.content
 import android.content.ContentProviderClient
 import android.content.Context
 import com.anod.appwatcher.model.AppChange
-import com.anod.appwatcher.model.schema.ChangelogTable
+import com.anod.appwatcher.content.schema.ChangelogTable
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.content.query
 

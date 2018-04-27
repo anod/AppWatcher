@@ -12,10 +12,10 @@ import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.model.AppTag
 import com.anod.appwatcher.model.Tag
-import com.anod.appwatcher.model.schema.AppListTable
-import com.anod.appwatcher.model.schema.AppTagsTable
-import com.anod.appwatcher.model.schema.TagsTable
-import com.anod.appwatcher.model.schema.contentValues
+import com.anod.appwatcher.content.schema.AppListTable
+import com.anod.appwatcher.content.schema.AppTagsTable
+import com.anod.appwatcher.content.schema.TagsTable
+import com.anod.appwatcher.content.schema.contentValues
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.content.delete

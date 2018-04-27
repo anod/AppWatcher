@@ -2,7 +2,7 @@ package com.anod.appwatcher.wishlist
 
 import android.content.Context
 
-import com.anod.appwatcher.model.WatchAppList
+import com.anod.appwatcher.content.WatchAppList
 import com.anod.appwatcher.search.ResultsAdapter
 import finsky.api.model.Document
 import info.anodsplace.playstore.WishlistEndpoint

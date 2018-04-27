@@ -15,7 +15,7 @@ import com.anod.appwatcher.backup.ExportTask
 import com.anod.appwatcher.backup.ImportTask
 import com.anod.appwatcher.backup.gdrive.GDrive
 import com.anod.appwatcher.backup.gdrive.GDriveSignIn
-import com.anod.appwatcher.model.DbSchemaManager
+import com.anod.appwatcher.content.DbSchemaManager
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.userLog.UserLogActivity
 import info.anodsplace.framework.app.DialogItems

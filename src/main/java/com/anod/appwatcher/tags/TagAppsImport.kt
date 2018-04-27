@@ -1,13 +1,10 @@
 package com.anod.appwatcher.tags
 
 import android.content.Context
-import android.database.Cursor
-import android.support.v4.util.SimpleArrayMap
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.model.AppTag
 import com.anod.appwatcher.model.Tag
-import com.anod.appwatcher.model.schema.AppTagsTable
 import info.anodsplace.framework.app.ApplicationContext
 
 internal class TagAppsImport(private val tag: Tag, private val context: ApplicationContext) {

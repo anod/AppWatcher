@@ -6,7 +6,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.AppInfo
-import com.anod.appwatcher.model.WatchAppList
+import com.anod.appwatcher.content.WatchAppList
 import info.anodsplace.framework.app.DialogMessage
 import finsky.api.model.Document
 

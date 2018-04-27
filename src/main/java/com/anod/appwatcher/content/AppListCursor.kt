@@ -3,7 +3,7 @@ package com.anod.appwatcher.content
 import android.database.Cursor
 
 import com.anod.appwatcher.model.AppInfo
-import com.anod.appwatcher.model.schema.AppListTable
+import com.anod.appwatcher.content.schema.AppListTable
 import info.anodsplace.framework.database.CursorIterator
 
 /**

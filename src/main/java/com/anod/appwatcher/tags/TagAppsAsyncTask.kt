@@ -7,7 +7,7 @@ import com.anod.appwatcher.content.CursorAsyncTask
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.model.AppTag
 import com.anod.appwatcher.model.Tag
-import com.anod.appwatcher.model.schema.AppTagsTable
+import com.anod.appwatcher.content.schema.AppTagsTable
 import info.anodsplace.framework.app.ApplicationContext
 
 /**

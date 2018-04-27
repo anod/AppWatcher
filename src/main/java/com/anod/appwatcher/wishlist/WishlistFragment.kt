@@ -13,10 +13,10 @@ import android.widget.Toast
 import com.android.volley.VolleyError
 import com.anod.appwatcher.App
 import com.anod.appwatcher.R
-import com.anod.appwatcher.model.AddWatchAppAsyncTask
+import com.anod.appwatcher.content.AddWatchAppAsyncTask
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
-import com.anod.appwatcher.model.WatchAppList
+import com.anod.appwatcher.content.WatchAppList
 import com.anod.appwatcher.tags.TagSnackbar
 import finsky.api.model.DfeModel
 import info.anodsplace.playstore.PlayStoreEndpoint

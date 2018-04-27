@@ -6,8 +6,8 @@ import android.os.AsyncTask
 import android.support.v4.util.SimpleArrayMap
 import com.android.volley.VolleyError
 import com.anod.appwatcher.App
-import com.anod.appwatcher.model.AddWatchAppAsyncTask
-import com.anod.appwatcher.model.WatchAppList
+import com.anod.appwatcher.content.AddWatchAppAsyncTask
+import com.anod.appwatcher.content.WatchAppList
 import finsky.api.BulkDocId
 import finsky.api.model.DfeBulkDetails
 import finsky.api.model.DfeModel

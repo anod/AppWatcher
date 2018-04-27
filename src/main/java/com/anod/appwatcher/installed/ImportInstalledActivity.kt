@@ -14,7 +14,7 @@ import com.anod.appwatcher.App
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenAsync
 import com.anod.appwatcher.content.DbContentProviderClient
-import com.anod.appwatcher.model.WatchAppList
+import com.anod.appwatcher.content.WatchAppList
 import com.anod.appwatcher.utils.Theme
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ToolbarActivity

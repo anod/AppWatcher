@@ -19,9 +19,9 @@ import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.model.AppChange
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
-import com.anod.appwatcher.model.schema.AppListTable
-import com.anod.appwatcher.model.schema.ChangelogTable
-import com.anod.appwatcher.model.schema.contentValues
+import com.anod.appwatcher.content.schema.AppListTable
+import com.anod.appwatcher.content.schema.ChangelogTable
+import com.anod.appwatcher.content.schema.contentValues
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.userLog.UserLogger
 import com.anod.appwatcher.utils.extractUploadDate

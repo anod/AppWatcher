@@ -5,7 +5,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.anod.appwatcher.R
-import com.anod.appwatcher.model.WatchAppList
+import com.anod.appwatcher.content.WatchAppList
 import com.squareup.picasso.Picasso
 import finsky.api.model.Document
 import info.anodsplace.framework.app.ThemeCompat

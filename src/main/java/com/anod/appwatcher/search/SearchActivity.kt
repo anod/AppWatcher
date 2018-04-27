@@ -14,10 +14,10 @@ import com.anod.appwatcher.App
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AccountSelectionDialog
 import com.anod.appwatcher.accounts.AuthTokenAsync
-import com.anod.appwatcher.model.AddWatchAppAsyncTask
+import com.anod.appwatcher.content.AddWatchAppAsyncTask
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
-import com.anod.appwatcher.model.WatchAppList
+import com.anod.appwatcher.content.WatchAppList
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.Theme
 import info.anodsplace.framework.app.ToolbarActivity

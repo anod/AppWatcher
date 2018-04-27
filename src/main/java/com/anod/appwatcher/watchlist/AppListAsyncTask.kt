@@ -10,8 +10,8 @@ import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.model.AppListFilter
 import com.anod.appwatcher.model.Tag
-import com.anod.appwatcher.model.schema.AppListTable
-import com.anod.appwatcher.model.schema.AppTagsTable
+import com.anod.appwatcher.content.schema.AppListTable
+import com.anod.appwatcher.content.schema.AppTagsTable
 import com.anod.appwatcher.preferences.Preferences
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.database.FilterCursor

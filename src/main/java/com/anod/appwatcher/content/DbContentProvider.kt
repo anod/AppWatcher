@@ -10,12 +10,11 @@ import android.net.Uri
 import android.provider.BaseColumns
 
 import com.anod.appwatcher.BuildConfig
-import com.anod.appwatcher.model.DbSchemaManager
 import com.anod.appwatcher.model.Tag
-import com.anod.appwatcher.model.schema.AppListTable
-import com.anod.appwatcher.model.schema.AppTagsTable
-import com.anod.appwatcher.model.schema.ChangelogTable
-import com.anod.appwatcher.model.schema.TagsTable
+import com.anod.appwatcher.content.schema.AppListTable
+import com.anod.appwatcher.content.schema.AppTagsTable
+import com.anod.appwatcher.content.schema.ChangelogTable
+import com.anod.appwatcher.content.schema.TagsTable
 
 open class DbContentProvider : ContentProvider() {
 

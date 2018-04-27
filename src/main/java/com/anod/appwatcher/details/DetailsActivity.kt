@@ -28,8 +28,10 @@ import android.widget.Toast
 import com.anod.appwatcher.App
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenAsync
+import com.anod.appwatcher.content.AddWatchAppAsyncTask
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.DbContentProviderClient
+import com.anod.appwatcher.content.WatchAppList
 import com.anod.appwatcher.model.*
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.*

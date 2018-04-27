@@ -24,7 +24,7 @@ import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import com.anod.appwatcher.*
-import com.anod.appwatcher.model.AddWatchAppAsyncTask
+import com.anod.appwatcher.content.AddWatchAppAsyncTask
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.navigation.DrawerActivity
 import com.anod.appwatcher.navigation.DrawerViewModel

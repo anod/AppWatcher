@@ -1,4 +1,4 @@
-package com.anod.appwatcher.model.schema
+package com.anod.appwatcher.content.schema
 
 import android.content.ContentValues
 import android.provider.BaseColumns

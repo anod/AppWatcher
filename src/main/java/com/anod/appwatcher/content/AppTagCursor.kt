@@ -2,7 +2,7 @@ package com.anod.appwatcher.content
 
 import android.database.Cursor
 import com.anod.appwatcher.model.AppTag
-import com.anod.appwatcher.model.schema.AppTagsTable
+import com.anod.appwatcher.content.schema.AppTagsTable
 import info.anodsplace.framework.database.CursorIterator
 
 /**
