@@ -9,17 +9,12 @@ import info.anodsplace.framework.app.ApplicationContext
 
 import java.io.File
 
-class ExportTask(private val context: ApplicationContext, private val listener: ExportTask.Listener) : AsyncTask<Uri, Void, Int>() {
+class ExportTask(private val context: ApplicationContext, private val listener: (code: Int) -> Unit) : AsyncTask<Uri, Void, Int>() {
 
-    constructor(context: Context, listener: Listener): this(ApplicationContext(context), listener)
-
-    interface Listener {
-        fun onExportStart()
-        fun onExportFinish(code: Int)
-    }
+    constructor(context: Context, listener: (code: Int) -> Unit): this(ApplicationContext(context), listener)
 
     override fun onPreExecute() {
-        listener.onExportStart()
+        listener(-1)
     }
 
     override fun doInBackground(vararg dest: Uri): Int? {
@@ -63,7 +58,7 @@ class ExportTask(private val context: ApplicationContext, private val listener: 
 
 
     override fun onPostExecute(result: Int?) {
-        listener.onExportFinish(result!!)
+        listener(result!!)
     }
 
 }

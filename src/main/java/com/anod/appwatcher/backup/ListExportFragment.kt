@@ -19,7 +19,7 @@ import info.anodsplace.framework.app.ApplicationContext
 import java.io.File
 import java.util.*
 
-class ListExportFragment : ListFragment(), ImportTask.Listener {
+class ListExportFragment : ListFragment() {
     private lateinit var backupManager: DbBackupManager
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -55,16 +55,6 @@ class ListExportFragment : ListFragment(), ImportTask.Listener {
             }
             adapter.notifyDataSetChanged()
         }
-    }
-
-    override fun onImportFinish(code: Int) {
-        //Avoid crash when fragment not attached to activity
-        if (!isAdded) {
-            return
-        }
-
-        ImportTask.showImportFinishToast(context!!, code)
-        activity?.supportFragmentManager?.popBackStack()
     }
 
     private class ImportListAdapter internal constructor(
@@ -107,7 +97,17 @@ class ListExportFragment : ListFragment(), ImportTask.Listener {
         override fun onClick(v: View) {
             val file = DbBackupManager.getBackupFile(v.tag as String)
             val uri = Uri.fromFile(file)
-            ImportTask(ApplicationContext(context!!), this@ListExportFragment).execute(uri)
+            ImportTask(ApplicationContext(context!!), { code ->
+                when(code) {
+                    -1 -> { }
+                    else -> {
+                        context?.let {
+                            ImportTask.showImportFinishToast(it, code)
+                            activity?.supportFragmentManager?.popBackStack()
+                        }
+                    }
+                }
+            }).execute(uri)
         }
     }
 

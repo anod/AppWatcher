@@ -34,7 +34,7 @@ import java.io.IOException
 import java.util.*
 
 @SuppressLint("Registered")
-open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, GDrive.Listener, GDriveSignIn.Listener, ImportTask.Listener {
+open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDriveSignIn.Listener {
 
     override val themeRes: Int
         get() =  Theme(this).theme
@@ -56,25 +56,6 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
         super.onBackPressed()
         if (this.recreateWatchlistOnBack) {
             this.recreateWatchlist()
-        }
-    }
-
-    override fun onExportStart() {
-        AppLog.d("Exporting...")
-        isProgressVisible = true
-    }
-
-    override fun onExportFinish(code: Int) {
-        AppLog.d("Code: $code")
-        isProgressVisible = false
-        val r = resources
-        if (code == DbBackupManager.RESULT_OK) {
-            Toast.makeText(this, r.getString(R.string.export_done), Toast.LENGTH_SHORT).show()
-            return
-        }
-        when (code) {
-            DbBackupManager.ERROR_STORAGE_NOT_AVAILABLE -> Toast.makeText(this, r.getString(R.string.external_storage_not_available), Toast.LENGTH_SHORT).show()
-            DbBackupManager.ERROR_FILE_WRITE -> Toast.makeText(this, r.getString(R.string.failed_to_write_file), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -162,11 +143,35 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_BACKUP_FILE) {
             if (resultCode == Activity.RESULT_OK) {
-                ImportTask(this, this).execute(data!!.data)
+                ImportTask(this, {
+                    when (it) {
+                        -1 -> isProgressVisible = true
+                        else -> {
+                            isProgressVisible = false
+                            ImportTask.showImportFinishToast(this, it)
+                        }
+                    }
+                }).execute(data!!.data)
             }
         } else if (requestCode == REQUEST_BACKUP_DEST) {
             if (resultCode == Activity.RESULT_OK) {
-                ExportTask(this, this).execute(data!!.data)
+                ExportTask(this, {
+                    when (it) {
+                        -1 -> {
+                            AppLog.d("Exporting...")
+                            isProgressVisible = true
+                        }
+                        else -> {
+                            AppLog.d("Code: $it")
+                            isProgressVisible = false
+                            when (it) {
+                                DbBackupManager.RESULT_OK -> Toast.makeText(this, resources.getString(R.string.export_done), Toast.LENGTH_SHORT).show()
+                                DbBackupManager.ERROR_STORAGE_NOT_AVAILABLE -> Toast.makeText(this, resources.getString(R.string.external_storage_not_available), Toast.LENGTH_SHORT).show()
+                                DbBackupManager.ERROR_FILE_WRITE -> Toast.makeText(this, resources.getString(R.string.failed_to_write_file), Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                }).execute(data!!.data)
             }
         } else {
             gDriveSignIn.onActivityResult(requestCode, resultCode, data)
@@ -191,7 +196,23 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
                 }
             } else {
                 val backupFile = DbBackupManager.generateBackupFile()
-                ExportTask(this, this).execute(Uri.fromFile(backupFile))
+                ExportTask(this, {
+                    when (it) {
+                        -1 -> {
+                            AppLog.d("Exporting...")
+                            isProgressVisible = true
+                        }
+                        else -> {
+                            AppLog.d("Code: $it")
+                            isProgressVisible = false
+                            when (it) {
+                                DbBackupManager.RESULT_OK -> Toast.makeText(this, resources.getString(R.string.export_done), Toast.LENGTH_SHORT).show()
+                                DbBackupManager.ERROR_STORAGE_NOT_AVAILABLE -> Toast.makeText(this, resources.getString(R.string.external_storage_not_available), Toast.LENGTH_SHORT).show()
+                                DbBackupManager.ERROR_FILE_WRITE -> Toast.makeText(this, resources.getString(R.string.failed_to_write_file), Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                }).execute(Uri.fromFile(backupFile))
             }
             ACTION_IMPORT -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
@@ -374,10 +395,6 @@ open class SettingsActivity : SettingsActionBarActivity(), ExportTask.Listener, 
         syncNowItem.enabled = syncEnabledItem.checked
         notifyDataSetChanged()
         Toast.makeText(this, R.string.sync_error, Toast.LENGTH_SHORT).show()
-    }
-
-    override fun onImportFinish(code: Int) {
-        ImportTask.showImportFinishToast(this, code)
     }
 
     companion object {

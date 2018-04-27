@@ -12,12 +12,13 @@ import info.anodsplace.framework.app.ApplicationContext
 
 import java.io.File
 
-class ImportTask(private val context: ApplicationContext, private val listener: ImportTask.Listener) : AsyncTask<Uri, Void, Int>() {
+class ImportTask(private val context: ApplicationContext, private val listener: (code: Int) -> Unit) : AsyncTask<Uri, Void, Int>() {
 
-    constructor(context: Context, listener: Listener): this(ApplicationContext(context), listener)
+    constructor(context: Context, listener: (code: Int) -> Unit): this(ApplicationContext(context), listener)
 
-    interface Listener {
-        fun onImportFinish(code: Int)
+
+    override fun onPreExecute() {
+        listener(-1)
     }
 
     override fun doInBackground(vararg sources: Uri): Int? {
@@ -61,7 +62,7 @@ class ImportTask(private val context: ApplicationContext, private val listener: 
     }
 
     override fun onPostExecute(result: Int?) {
-        listener.onImportFinish(result!!)
+        listener(result!!)
     }
 
     companion object {
