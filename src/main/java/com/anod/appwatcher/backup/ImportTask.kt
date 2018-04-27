@@ -8,6 +8,7 @@ import android.os.Environment
 import android.widget.Toast
 
 import com.anod.appwatcher.R
+import com.anod.appwatcher.content.DbContentProvider
 import info.anodsplace.framework.app.ApplicationContext
 
 import java.io.File
@@ -62,6 +63,7 @@ class ImportTask(private val context: ApplicationContext, private val listener: 
     }
 
     override fun onPostExecute(result: Int?) {
+        context.contentResolver.notifyChange(DbContentProvider.appsUri, null)
         listener(result!!)
     }
 

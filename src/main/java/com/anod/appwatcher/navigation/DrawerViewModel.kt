@@ -5,6 +5,7 @@ import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.MutableLiveData
 import android.database.ContentObserver
+import android.net.Uri
 import android.os.Handler
 import android.text.format.DateUtils
 import android.view.View
@@ -14,6 +15,7 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.TagsContentProviderClient
 import com.anod.appwatcher.model.Tag
+import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.os.BackgroundTask
 
@@ -25,8 +27,12 @@ import info.anodsplace.framework.os.BackgroundTask
 typealias TagCountList = List<Pair<Tag, Int>>
 
 private class TagsUpdateObserver(private val viewModel: DrawerViewModel) : ContentObserver(Handler()) {
-    override fun onChange(selfChange: Boolean) {
-        viewModel.updateTags()
+
+    override fun onChange(selfChange: Boolean, uri: Uri?) {
+        uri?.let {
+            AppLog.d("onChange: $it")
+            viewModel.updateTags()
+        }
     }
 }
 

@@ -4,12 +4,14 @@ import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.MutableLiveData
 import android.database.ContentObserver
+import android.net.Uri
 import android.os.Handler
 import android.util.SparseArray
 import androidx.core.util.set
 import com.anod.appwatcher.AppWatcherApplication
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.model.*
+import info.anodsplace.framework.AppLog
 
 /**
  * @author algavris
@@ -17,8 +19,12 @@ import com.anod.appwatcher.model.*
  */
 
 private class AppsUpdateObserver(private val viewModel: WatchListViewModel) : ContentObserver(Handler()) {
-    override fun onChange(selfChange: Boolean) {
-        viewModel.reload()
+
+    override fun onChange(selfChange: Boolean, uri: Uri?) {
+        uri?.let {
+            AppLog.d("onChange: $it")
+            viewModel.reload()
+        }
     }
 }
 
@@ -30,7 +36,7 @@ open class WatchListViewModel(application: Application): AndroidViewModel(applic
 
     private val observer = AppsUpdateObserver(this)
     init {
-        application.contentResolver.registerContentObserver(DbContentProvider.appsUri, true, observer)
+        application.contentResolver.registerContentObserver(DbContentProvider.appsUri, false, observer)
 
     }
 

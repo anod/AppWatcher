@@ -98,7 +98,7 @@ open class DbContentProvider : ContentProvider() {
                 rowId = uri.lastPathSegment
                 query.selection = BaseColumns._ID + "=?"
                 query.selectionArgs = arrayOf(rowId)
-                query.notifyUri = appsUri
+                query.notifyUri = appsUri.buildUpon().appendPath(rowId).build()
                 return query
             }
             apps -> {

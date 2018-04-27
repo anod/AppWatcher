@@ -45,7 +45,7 @@ class AppsTagViewModel(application: Application): AndroidViewModel(application) 
         loadApps()
     }
 
-    fun loadTags() {
+    private fun loadTags() {
         TagAppsAsyncTask(context, tag, {
             this.appTags.value = it
         }).execute()
