@@ -24,25 +24,35 @@ fun extractUploadDate(uploadDate: String, locale: Locale): Date? {
     if (uploadDate.isBlank()) {
         return null
     }
+
     var date: Date? = null
-    var df = CustomParserFactory.create(locale)
-    if (df != null) {
+    val dfs = CustomParserFactory.create(locale)
+    var parseException: ParseException? = null
+    for (df in dfs) {
         try {
             date = df.parse(uploadDate)
         } catch (e: ParseException) {
-            AppLog.e("Cannot parse $uploadDate for $locale using custom parser", e)
+            parseException = e
         }
 
         if (date != null) {
+            break
+        }
+    }
+
+    if (dfs.isNotEmpty()) {
+        if (date == null) {
+            AppLog.e("Cannot parse '$uploadDate' for '$locale' using custom parser", Throwable("Cannot parse '$locale' using custom parser", parseException) )
+        } else {
             return date
         }
     }
 
-    df = DateFormat.getDateInstance(DateFormat.MEDIUM, locale)
+    val df = DateFormat.getDateInstance(DateFormat.MEDIUM, locale)
     try {
         return df.parse(uploadDate)
     } catch (e: ParseException) {
-        AppLog.e("Cannot parse $uploadDate for $locale using system parser", e)
+        AppLog.e("Cannot parse '$uploadDate' for '$locale' using system parser", Throwable("Cannot parse '$locale' using system parser", parseException) )
     }
     return null
 }

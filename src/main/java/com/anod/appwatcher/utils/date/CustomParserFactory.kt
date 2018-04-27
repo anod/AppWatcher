@@ -17,68 +17,90 @@ object CustomParserFactory {
     private val ES_US_SHORT_MONTHS = arrayOf("ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic")
     private val FR_CA_SHORT_MONTHS = arrayOf("janv", "févr", "mars", "avr", "mai", "juin", "juill", "août", "sept", "oct", "nov", "déc")
 
-    fun create(locale: Locale): DateFormat? {
+    private val ru_ALL = Locale("ru", "")
+    private val sv_ALL = Locale("sv", "")
+    private val es_ES  = Locale("es", "ES")
+    private val es_US = Locale("es", "US")
+    private val fr_CA = Locale("fr", "CA")
+    private val de_ALL = Locale("de", "")
+    private val hu_ALL = Locale("hu", "")
+    private val en_IN = Locale("en", "IN")
+    private val en_CA = Locale("en", "CA")
+    private val en_AU = Locale("en", "AU")
+    private val en_SE = Locale("en", "SE")
+    private val pt_BR = Locale("pt", "BR")
+    private val en_PH = Locale("en", "PH")
+    private val nl_BE = Locale("nl", "BE")
+    private val en_RU = Locale("en", "RU")
+    private val en_NL = Locale("en", "NL")
+    private val en_GB = Locale("en", "GB")
+    private val es_ALL = Locale("es", "")
+    private val pl_ALL = Locale("pl", "")
+    private val it_ALL = Locale("it", "")
+
+    fun create(locale: Locale): List<DateFormat> {
         val lang = locale.language
-        if (lang == Locale("ru", "").language) {
-            return CustomMonthDateFormat(RU_SHORT_MONTHS)
+        if (lang == ru_ALL.language) {
+            return listOf(CustomMonthDateFormat(RU_SHORT_MONTHS))
         }
 
-        if (lang == Locale("sv", "").language) {
-            return CustomMonthDateFormat(SV_SHORT_MONTHS)
+        if (lang == sv_ALL.language) {
+            return listOf(CustomMonthDateFormat(SV_SHORT_MONTHS))
         }
 
-        if (locale == Locale("es", "ES")) {
-            return CustomMonthDateFormat(ES_SHORT_MONTHS)
+        if (locale == es_ES) {
+            return listOf(CustomMonthDateFormat(ES_SHORT_MONTHS))
         }
 
-        if (locale == Locale("es", "US")) {
-            return CustomMonthDateFormat(ES_US_SHORT_MONTHS)
+        if (locale == es_US) {
+            return listOf(CustomMonthDateFormat(ES_US_SHORT_MONTHS))
         }
 
-        if (locale == Locale("fr", "CA")) {
-            return CustomMonthDateFormat(FR_CA_SHORT_MONTHS)
+        if (locale == fr_CA) {
+            return listOf(CustomMonthDateFormat(FR_CA_SHORT_MONTHS))
         }
 
-        if (lang == Locale("de", "").language) {
-            return SimpleDateFormat("dd.M.yyyy", locale)
+        if (lang == de_ALL.language) {
+            return listOf(SimpleDateFormat("dd.M.yyyy", locale))
         }
 
-        if (lang == Locale("hu", "").language) {
-            return SimpleDateFormat("yyyy. MMM d.", locale)
+        if (lang == hu_ALL.language) {
+            return listOf(SimpleDateFormat("yyyy. MMM d.", locale))
         }
 
-        if (locale == Locale("en", "IN")) {
-            return SimpleDateFormat("dd-MMM-yyyy", locale)
+        if (locale == en_IN) {
+            return listOf(SimpleDateFormat("dd-MMM-yyyy", locale))
         }
 
-        if (locale == Locale("en", "CA")) {
-            return SimpleDateFormat("MMM. dd, yyyy", locale)
+        if (locale == en_CA) {
+            return listOf(SimpleDateFormat("MMM dd, yyyy", locale),
+                    SimpleDateFormat("MMM. dd, yyyy", locale))
         }
 
-        if (locale == Locale("pt", "BR")) {
-            return SimpleDateFormat("dd 'de' MMM 'de' yyyy", locale)
-        }
-
-        if (locale == Locale("en", "GB")
-                || locale == Locale("en", "AU")
-                || lang == Locale("es", "").language
-                || lang == Locale("pl", "").language
-                || lang == Locale("it", "").language
-                || locale == Locale("en", "SE")) {
-            return SimpleDateFormat("d MMM yyyy", locale)
-        }
-
-        if (locale == Locale("en", "PH")
-                || locale == Locale("nl", "BE")
-                || locale == Locale("en", "RU")
-                || locale == Locale("en", "NL")) {
-            return SimpleDateFormat("d MMM. yyyy", locale)
+        if (locale == pt_BR) {
+            return listOf(SimpleDateFormat("dd 'de' MMM 'de' yyyy", locale))
         }
 
         if (locale == Locale("hi", "IN")) {
-            return SimpleDateFormat("dd/MM/yyyy", locale)
+            return listOf(SimpleDateFormat("dd/MM/yyyy", locale))
         }
 
-        return null
+        if (locale == en_AU
+                || locale == en_SE
+                || locale == en_PH
+                || locale == nl_BE
+                || locale == en_RU
+                || locale == en_NL
+                || locale == en_GB
+                || lang == es_ALL.language
+                || lang == pl_ALL.language
+                || lang == it_ALL.language
+
+        ) {
+            return listOf(SimpleDateFormat("d MMM. yyyy", locale),
+                    SimpleDateFormat("d MMM yyyy", locale))
+        }
+
+        return emptyList()
     }
 }
