@@ -33,10 +33,7 @@ class CachedBackgroundTask<P, R>(private val key: String, private val worker: Ba
             }
         }).execute()
     }
-
 }
-
-
 
 class BackgroundTask<P, R>(private val worker: Worker<P, R>) : AsyncTask<Void, Void, R>() {
 

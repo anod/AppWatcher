@@ -26,6 +26,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.SettingsActionBarActivity
+import info.anodsplace.framework.content.startActivityForResultSafely
+import info.anodsplace.framework.content.startActivitySafely
 import info.anodsplace.framework.playservices.GooglePlayServices
 import java.io.File
 import java.io.FileInputStream
@@ -220,7 +222,7 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
                 intent.type = "*/*"
                 val mimeTypes = arrayOf("application/json", "text/plain", "*/*")
                 intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
-                startActivityForResult(intent, REQUEST_BACKUP_FILE)
+                startActivityForResultSafely(intent, REQUEST_BACKUP_FILE)
             } else {
                 startActivity(Intent(this, ListExportActivity::class.java))
             }

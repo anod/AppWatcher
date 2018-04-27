@@ -1,7 +1,6 @@
 package com.anod.appwatcher.details
 
 import android.content.Context
-import android.support.annotation.LayoutRes
 import android.support.v7.widget.RecyclerView
 import android.text.util.Linkify
 import android.view.LayoutInflater
@@ -9,13 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.anod.appwatcher.R
-import com.anod.appwatcher.content.AppChangeCursor
 import com.anod.appwatcher.model.AppChange
-import com.anod.appwatcher.model.AppInfo
 import info.anodsplace.framework.text.Html
-import info.anodsplace.framework.widget.recyclerview.ArrayAdapter
-import info.anodsplace.framework.widget.recyclerview.RecyclerViewCursorListAdapter
-import info.anodsplace.framework.widget.recyclerview.RecyclerViewStateAdapter
 
 class ChangeView(itemView: View) : RecyclerView.ViewHolder(itemView) {
     val changelog: TextView by lazy {

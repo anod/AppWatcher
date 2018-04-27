@@ -13,6 +13,8 @@ import com.anod.appwatcher.userLog.UserLogger
 import com.anod.appwatcher.utils.PicassoAppIcon
 import com.firebase.jobdispatcher.FirebaseJobDispatcher
 import com.firebase.jobdispatcher.GooglePlayDriver
+import com.squareup.picasso.Picasso
+import com.squareup.picasso.PicassoProvider
 import com.squareup.tape2.QueueFile
 import info.anodsplace.framework.net.NetworkConnectivity
 import info.anodsplace.playstore.DeviceId
@@ -33,7 +35,8 @@ class AppComponent internal constructor(private val app: AppWatcherApplication):
         get() = telephonyManager.simOperator
 
     val prefs = Preferences(app)
-    val uploadServiceContentObserver: UploadServiceContentObserver by lazy {UploadServiceContentObserver(app, app.contentResolver) }
+
+    val uploadServiceContentObserver: UploadServiceContentObserver by lazy { UploadServiceContentObserver(app, app.contentResolver) }
 
     val requestQueue: RequestQueue by lazy {
        val requestQueue = RequestQueue(NoCache(), OnlineNetwork(networkConnection, Network()), 2)
@@ -54,8 +57,10 @@ class AppComponent internal constructor(private val app: AppWatcherApplication):
     val notificationManager: NotificationManager
         get() = app.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-    val telephonyManager: TelephonyManager
+    private val telephonyManager: TelephonyManager
         get() = app.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+
+    val picasso: Picasso by lazy { Picasso.Builder(app).build(); }
 
     val deviceInfo: DeviceInfoProvider
         get() = this

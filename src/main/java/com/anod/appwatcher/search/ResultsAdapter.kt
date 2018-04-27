@@ -4,6 +4,7 @@ import android.content.Context
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import com.anod.appwatcher.App
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.WatchAppList
 import com.squareup.picasso.Picasso
@@ -30,6 +31,8 @@ abstract class ResultsAdapter(
     val isNotEmpty: Boolean
         get() = this.itemCount > 0
 
+    private val picasso = App.provide(context).picasso
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ResultsAppViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.list_item_market_app, parent, false)
         return ResultsAppViewHolder(view, watchAppList)
@@ -55,7 +58,7 @@ abstract class ResultsAdapter(
             holder.row.setBackgroundColor(colorBgNormal)
         }
 
-        Picasso.get().load(doc.iconUrl)
+        picasso.load(doc.iconUrl)
                 .placeholder(R.drawable.ic_notifications_black_24dp)
                 .into(holder.icon)
 

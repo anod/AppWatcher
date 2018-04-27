@@ -1,5 +1,6 @@
 package info.anodsplace.framework.content
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -29,3 +30,11 @@ fun Context.startActivitySafely(intent: Intent) {
     }
 }
 
+fun Activity.startActivityForResultSafely(intent: Intent, requestCode: Int) {
+    try {
+        this.startActivityForResult(intent, requestCode)
+    } catch (e: Exception) {
+        AppLog.e(e)
+        Toast.makeText(this, "Cannot start activity: " + intent.toString(), Toast.LENGTH_SHORT).show()
+    }
+}
