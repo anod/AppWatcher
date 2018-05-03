@@ -330,3 +330,10 @@ message Response
 
 }
 
+
+message EncodedTargets {
+    optional int32 version = 1;
+    repeated int64 supportedTarget = 2;
+    repeated int64 otherTarget = 3;
+}
+
