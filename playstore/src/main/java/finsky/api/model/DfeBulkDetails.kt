@@ -23,13 +23,8 @@ class DfeBulkDetails(private val api: DfeApi,private val filter: FilterPredicate
 
             val list = mutableListOf<Document>()
             for (i in response.entry.indices) {
-                val doc = response.entry[i].doc
-                if (doc == null) {
-                    if (BuildConfig.DEBUG) {
-                        AppLog.e("Null document for requested docId: ${this.docIds[i]} ")
-                    }
-                } else {
-                    list.add(Document(doc))
+                response.entry[i].doc?.let {
+                    list.add(Document(it))
                 }
             }
 

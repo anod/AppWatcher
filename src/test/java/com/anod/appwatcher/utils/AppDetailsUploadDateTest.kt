@@ -46,6 +46,9 @@ class AppDetailsUploadDateTest {
                 DateDesc("en_AU", "25 Apr. 2018", "2018-04-25"),
                 DateDesc("en_AU", "28 Jun. 2017", "2017-06-28"),
                 DateDesc("en_AU", "2 Feb. 2017", "2017-02-02"),
+                DateDesc("en_AU", "7 May 2018", "2018-05-07"),
+                DateDesc("en_AU", "3 May 2018", "2018-05-03"),
+                DateDesc("en_AU", "30 Apr. 2018", "2018-04-30"),
 
                 DateDesc("en_CA", "May 18, 2017", "2017-05-18"),
                 DateDesc("en_CA", "Nov. 18, 2017", "2017-11-18"),

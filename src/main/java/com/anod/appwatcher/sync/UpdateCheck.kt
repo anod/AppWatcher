@@ -187,6 +187,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
                 } catch (e: VolleyError) {
                     App.log(context.actual).error("Fetching of bulk updates failed ${e.message ?: ""}")
                 }
+                AppLog.d("Sent ${docIds.size}. Received ${endpoint.documents.size}")
                 updateApps(endpoint.documents, localApps, client, updatedTitles, lastUpdatesViewed)
                 localApps.clear()
                 i++
@@ -202,6 +203,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
             } catch (e: VolleyError) {
                 App.log(context.actual).error("Fetching of bulk updates failed ${e.message ?: ""}")
             }
+            AppLog.d("Sent ${docIds.size}. Received ${endpoint.documents.size}")
             updateApps(endpoint.documents, localApps, client, updatedTitles, lastUpdatesViewed)
             localApps.clear()
         }
@@ -285,12 +287,11 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
             return newApp.contentValues
         }
 
-        AppLog.d("No update found for: " + localApp.appId)
         val values = ContentValues()
 
         //Mark updated app as normal
         if (localApp.status == AppInfoMetadata.STATUS_UPDATED && lastUpdatesViewed) {
-            AppLog.d("Set application update as viewed")
+            AppLog.d("Set ${localApp.appId} update as viewed")
             localApp.status = AppInfoMetadata.STATUS_NORMAL
             values.put(AppListTable.Columns.status, AppInfoMetadata.STATUS_NORMAL)
         } else if (localApp.status == AppInfoMetadata.STATUS_UPDATED) {
