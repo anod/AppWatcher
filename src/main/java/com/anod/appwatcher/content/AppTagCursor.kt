@@ -11,10 +11,9 @@ import info.anodsplace.framework.database.CursorIterator
  */
 class AppTagCursor(cursor: Cursor?) : CursorIterator<AppTag>(cursor) {
 
-    override fun next(): AppTag {
-        return AppTag(
+    override val current: AppTag
+        get() = AppTag(
             getString(AppTagsTable.Projection.appId),
             getInt(AppTagsTable.Projection.tagId)
         )
-    }
 }

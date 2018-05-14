@@ -10,7 +10,7 @@ import java.util.*
  * @date 12/09/2016.
  */
 
-object CustomParserFactory {
+object UploadDateParserFactory {
     private val RU_SHORT_MONTHS = arrayOf("янв", "февр", "мар", "апр", "мая", "июн", "июл", "авг", "сент", "окт", "нояб", "дек")
     private val SV_SHORT_MONTHS = arrayOf("jan", "feb", "mars", "apr", "maj", "juni", "juli", "aug", "sep", "okt", "nov", "dec")
     private val ES_SHORT_MONTHS = arrayOf("ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sept", "oct", "nov", "dic")
@@ -26,17 +26,7 @@ object CustomParserFactory {
     private val hu_ALL = Locale("hu", "")
     private val en_IN = Locale("en", "IN")
     private val en_CA = Locale("en", "CA")
-    private val en_AU = Locale("en", "AU")
-    private val en_SE = Locale("en", "SE")
     private val pt_BR = Locale("pt", "BR")
-    private val en_PH = Locale("en", "PH")
-    private val nl_BE = Locale("nl", "BE")
-    private val en_RU = Locale("en", "RU")
-    private val en_NL = Locale("en", "NL")
-    private val en_GB = Locale("en", "GB")
-    private val es_ALL = Locale("es", "")
-    private val pl_ALL = Locale("pl", "")
-    private val it_ALL = Locale("it", "")
 
     fun create(locale: Locale): List<DateFormat> {
         val lang = locale.language
@@ -85,22 +75,8 @@ object CustomParserFactory {
             return listOf(SimpleDateFormat("dd/MM/yyyy", locale))
         }
 
-        if (locale == en_AU
-                || locale == en_SE
-                || locale == en_PH
-                || locale == nl_BE
-                || locale == en_RU
-                || locale == en_NL
-                || locale == en_GB
-                || lang == es_ALL.language
-                || lang == pl_ALL.language
-                || lang == it_ALL.language
-
-        ) {
-            return listOf(SimpleDateFormat("d MMM. yyyy", locale),
-                    SimpleDateFormat("d MMM yyyy", locale))
-        }
-
-        return emptyList()
+        return listOf(SimpleDateFormat("d MMM. yyyy", locale),
+                SimpleDateFormat("d MMM yyyy", locale),
+                DateFormat.getDateInstance(DateFormat.MEDIUM, locale))
     }
 }

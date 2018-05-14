@@ -50,7 +50,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
 
     companion object {
         private const val oneSecInMillis = 1000
-        private const val bulkSize = 100
+        private const val bulkSize = 20
         internal const val extrasManual = "manual"
 
         const val syncStop = "com.anod.appwatcher.sync.start"
@@ -161,43 +161,19 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
     private fun doSync(client: DbContentProviderClient, lastUpdatesViewed: Boolean, authToken: String, account: Account, context: ApplicationContext): List<UpdatedApp> {
 
         val apps = client.queryAll(false)
-        if (!apps.moveToFirst()) {
+        if (apps.isEmpty) {
             App.log(context.actual).info("Sync finished: no apps")
             return listOf()
         }
-        apps.moveToPosition(-1)
 
-        val bulkSize = if (apps.count > bulkSize) bulkSize else apps.count
-
-        val localApps = HashMap<String, AppInfo>(bulkSize)
-        var i = 1
         val updatedTitles = mutableListOf<UpdatedApp>()
-        while (apps.moveToNext()) {
 
-            val localApp = apps.appInfo
-            val docId = localApp.appId
-            localApps[docId] = localApp
-
-            if (localApps.size == bulkSize) {
-                val docIds = localApps.map { BulkDocId(it.key, it.value.versionNumber) }
-                val endpoint = createEndpoint(docIds, authToken, account)
-                AppLog.d("Sending bulk #$i... $docIds")
-                try {
-                    endpoint.startSync()
-                } catch (e: VolleyError) {
-                    App.log(context.actual).error("Fetching of bulk updates failed ${e.message ?: ""}")
-                }
-                AppLog.d("Sent ${docIds.size}. Received ${endpoint.documents.size}")
-                updateApps(endpoint.documents, localApps, client, updatedTitles, lastUpdatesViewed)
-                localApps.clear()
-                i++
-            }
-
-        }
-        if (localApps.size > 0) {
+        apps.chunked(bulkSize, {
+            it.associateBy { it.packageName }
+        }).forEach { localApps ->
             val docIds = localApps.map { BulkDocId(it.key, it.value.versionNumber) }
             val endpoint = createEndpoint(docIds, authToken, account)
-            AppLog.d("Sending bulk #$i... $docIds")
+            AppLog.d("Sending chunk... $docIds")
             try {
                 endpoint.startSync()
             } catch (e: VolleyError) {
@@ -205,10 +181,9 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
             }
             AppLog.d("Sent ${docIds.size}. Received ${endpoint.documents.size}")
             updateApps(endpoint.documents, localApps, client, updatedTitles, lastUpdatesViewed)
-            localApps.clear()
         }
-        apps.close()
 
+        apps.close()
         App.log(context.actual).info("Sync finished for ${apps.count} apps")
         return updatedTitles
     }

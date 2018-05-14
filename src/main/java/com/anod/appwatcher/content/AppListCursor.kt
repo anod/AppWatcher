@@ -11,11 +11,7 @@ import info.anodsplace.framework.database.CursorIterator
  */
 class AppListCursor(cursor: Cursor?) : CursorIterator<AppInfo>(cursor) {
 
-    override fun next(): AppInfo {
-        return this.appInfo
-    }
-
-    val appInfo: AppInfo
+    override val current: AppInfo
         get() = AppInfo(
             getInt(AppListTable.Projection._ID),
             getString(AppListTable.Projection.appId),

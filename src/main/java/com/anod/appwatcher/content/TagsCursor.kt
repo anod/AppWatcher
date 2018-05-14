@@ -14,14 +14,10 @@ import info.anodsplace.framework.database.CursorIterator
 
 class TagsCursor(cursor: Cursor?) : CursorIterator<Tag>(cursor) {
 
-    val tag: Tag
+    override val current: Tag
         get() = Tag(
             getInt(TagsTable.Projection._ID),
             getString(TagsTable.Projection.name),
             getInt(TagsTable.Projection.color)
         )
-
-    override fun next(): Tag {
-        return this.tag
-    }
 }

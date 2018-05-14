@@ -27,13 +27,14 @@ class DfeApiImpl(private val queue: RequestQueue, private val apiContext: DfeApi
     override fun details(docIds: List<BulkDocId>, includeDetails: Boolean, listener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener): Request<*> {
         val bulkDetailsRequest = Details.BulkDetailsRequest()
         bulkDetailsRequest.includeDetails = true
-        bulkDetailsRequest.docs = docIds.sorted().map {
-            val doc = Details.BulkDetailsRequestDoc()
-            doc.docid = it.packageName
-            doc.versionCode = it.versionCode
-            doc.properties = Details.BulkDetailsRequestDocProperties()
-            doc
-        }.toTypedArray()
+        bulkDetailsRequest.docid = docIds.map { it.packageName }.sorted().toTypedArray()
+//        bulkDetailsRequest.docs = docIds.sorted().map {
+//            val doc = Details.BulkDetailsRequestDoc()
+//            doc.docid = it.packageName
+//            doc.versionCode = it.versionCode
+//            doc.properties = Details.BulkDetailsRequestDocProperties()
+//            doc
+//        }.toTypedArray()
 
         val dfeRequest = object : ProtoDfeRequest(DfeApi.BULK_DETAILS_URI.toString(), bulkDetailsRequest, apiContext, listener, errorListener) {
             private fun computeDocumentIdHash(): String {

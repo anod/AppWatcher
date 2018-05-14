@@ -11,7 +11,7 @@ import info.anodsplace.framework.database.CursorIterator
  */
 class AppChangeCursor(cursor: Cursor?) : CursorIterator<AppChange>(cursor) {
 
-    private val change: AppChange
+    override val current: AppChange
         get() = AppChange(
                 getString(ChangelogTable.Projection.appId),
                 getInt(ChangelogTable.Projection.versionCode),
@@ -20,7 +20,4 @@ class AppChangeCursor(cursor: Cursor?) : CursorIterator<AppChange>(cursor) {
                 getString(ChangelogTable.Projection.uploadDate)
         )
 
-    override fun next(): AppChange {
-        return this.change
-    }
 }

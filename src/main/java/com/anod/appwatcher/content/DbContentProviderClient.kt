@@ -79,11 +79,7 @@ class DbContentProviderClient(private val contentProviderClient: ContentProvider
     fun queryPackagesMap(includeDeleted: Boolean): SimpleArrayMap<String, Int> {
         val cursor = queryAll(includeDeleted)
         val result = SimpleArrayMap<String, Int>(cursor.count)
-        cursor.moveToPosition(-1)
-        while (cursor.moveToNext()) {
-            val info = cursor.appInfo
-            result.put(info.packageName, info.rowId)
-        }
+        cursor.forEach { result.put(it.packageName, it.rowId) }
         cursor.close()
         return result
     }
@@ -179,29 +175,17 @@ class DbContentProviderClient(private val contentProviderClient: ContentProvider
         val cr = queryApps(null,
                 AppListTable.Columns.packageName + " = ?",
                 arrayOf(packageName))
-        if (cr.count == 0) {
-            return null
-        }
-        cr.moveToPosition(-1)
-        var info: AppInfo? = null
-        if (cr.moveToNext()) {
-            info = cr.appInfo
-        }
+        val info = cr.firstOrNull()
         cr.close()
-
         return info
     }
 
     fun queryAppRow(rowId: Int): AppInfo? {
         val cr = queryApps(null,
                 BaseColumns._ID + " = ?", arrayOf(rowId.toString()))
-        if (cr.count == 0) {
-            return null
-        }
-        cr.moveToNext()
-        val info = cr.appInfo
-        cr.close()
 
+        val info = cr.firstOrNull()
+        cr.close()
         return info
     }
 
