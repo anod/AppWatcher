@@ -1,11 +1,11 @@
 package com.anod.appwatcher.backup
 
-import com.anod.appwatcher.model.Tag
+import com.anod.appwatcher.database.entities.Tag
 import info.anodsplace.framework.json.JsonReader
 import info.anodsplace.framework.json.JsonWriter
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * @date 27/06/2017
  */
 class TagJsonObject(val tag: Tag?) {

@@ -11,7 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import com.android.volley.VolleyError
-import com.anod.appwatcher.App
+import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.AddWatchAppAsyncTask
 import com.anod.appwatcher.model.AppInfo
@@ -25,7 +25,7 @@ import info.anodsplace.playstore.WishlistEndpoint
 import kotlinx.android.synthetic.main.fragment_wishlist.*
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * *
  * @date 16/12/2016.
  */
@@ -93,7 +93,7 @@ class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Li
     }
 
     private fun startLoadingList(account: Account, authSubToken: String, context: Context) {
-        val endpoint = WishlistEndpoint(context, App.provide(context).requestQueue, App.provide(context).deviceInfo, account, true)
+        val endpoint = WishlistEndpoint(context, Application.provide(context).requestQueue, Application.provide(context).deviceInfo, account, true)
         endpoint.authToken = authSubToken
         endpoint.listener = this
 

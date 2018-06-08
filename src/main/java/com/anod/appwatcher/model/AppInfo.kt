@@ -15,13 +15,6 @@ import info.anodsplace.framework.content.getPackageInfo
 import java.text.DateFormat
 import java.util.*
 
-fun PackageManager.packageToApp(rowId: Int, packageName: String): AppInfo {
-    val packageInfo = this.getPackageInfo(packageName, this) ?: return AppInfo.fromLocalPackage(rowId, null, packageName, "", null)
-    val launchComponent = this.getLaunchComponent(packageInfo, this)
-    val appTitle = this.getAppTitle(packageInfo, this)
-    return AppInfo.fromLocalPackage(rowId, packageInfo, packageName, appTitle, launchComponent)
-}
-
 class AppInfo : AppInfoMetadata, Parcelable {
 
     var rowId: Int = 0
@@ -183,30 +176,6 @@ class AppInfo : AppInfoMetadata, Parcelable {
 
         fun createDetailsUrl(packageName: String): String {
             return "details?doc=$packageName"
-        }
-
-        fun fromLocalPackage(rowId: Int, packageInfo: PackageInfo?, packageName: String, appTitle: String, launchComponent: ComponentName?): AppInfo {
-            if (packageInfo == null) {
-                return AppInfo(rowId,
-                        packageName, 0, appTitle,
-                        packageName, "", AppInfoMetadata.STATUS_DELETED, ""
-                )
-            }
-            val iconUrl: String
-            if (launchComponent != null) {
-                iconUrl = Uri.fromParts(PicassoAppIcon.SCHEME, launchComponent.flattenToShortString(), null).toString()
-            } else {
-                iconUrl = Uri.fromParts(PicassoAppIcon.SCHEME, ComponentName(packageName, packageName).flattenToShortString(), null).toString()
-            }
-
-            val dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM)
-            val lastUpdate = dateFormat.format(Date(packageInfo.lastUpdateTime))
-            val versionName = packageInfo.versionName ?: ""
-
-            return AppInfo(rowId,
-                    packageInfo.packageName, packageInfo.versionCode, versionName,
-                    appTitle, iconUrl, AppInfoMetadata.STATUS_NORMAL, lastUpdate
-            )
         }
     }
 }

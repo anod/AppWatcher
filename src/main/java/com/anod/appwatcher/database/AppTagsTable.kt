@@ -1,15 +1,17 @@
-package com.anod.appwatcher.content.schema
+package com.anod.appwatcher.database
 
+import android.arch.persistence.room.Dao
 import android.content.ContentValues
 import android.provider.BaseColumns
-import com.anod.appwatcher.model.AppTag
+import com.anod.appwatcher.database.entities.AppTag
 
 /**
  * @author alex
  * *
  * @date 2015-03-01
  */
-class AppTagsTable {
+@Dao
+interface AppTagsTable {
 
     class Columns : BaseColumns {
         companion object {
@@ -19,9 +21,9 @@ class AppTagsTable {
     }
 
     object TableColumns {
-        const val _ID = AppTagsTable.table + "." + BaseColumns._ID
-        const val appId = AppTagsTable.table + ".app_id"
-        const val tagId = AppTagsTable.table + ".tags_id"
+        const val _ID = table + "." + BaseColumns._ID
+        const val appId = table + ".app_id"
+        const val tagId = table + ".tags_id"
     }
 
     object Projection {
@@ -39,8 +41,8 @@ class AppTagsTable {
         const val sqlCreate =
                 "CREATE TABLE " + table + " (" +
                         BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                        AppTagsTable.Columns.appId + " TEXT not null," +
-                        AppTagsTable.Columns.tagId + " INTEGER" +
+                        Columns.appId + " TEXT not null," +
+                        Columns.tagId + " INTEGER" +
                         ") "
     }
 }

@@ -10,7 +10,7 @@ import android.support.v7.widget.LinearLayoutManager
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
-import com.anod.appwatcher.App
+import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenAsync
 import com.anod.appwatcher.content.DbContentProviderClient
@@ -18,19 +18,16 @@ import com.anod.appwatcher.content.WatchAppList
 import com.anod.appwatcher.utils.Theme
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ToolbarActivity
-import info.anodsplace.framework.content.InstalledApps
-import info.anodsplace.framework.content.PackageWithCode
-import info.anodsplace.framework.content.getAppTitle
-import info.anodsplace.framework.content.getInstalledPackagesCompat
+import info.anodsplace.framework.content.*
 import kotlinx.android.synthetic.main.activity_import_installed.*
 import java.util.*
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * *
  * @date 19/04/2016.
  */
-class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<List<PackageWithCode>>, ImportBulkManager.Listener {
+class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<List<InstalledPackage>>, ImportBulkManager.Listener {
 
     override val themeRes: Int
         get() = Theme(this).themeDialog
@@ -75,9 +72,9 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
             adapter.clearPackageIndex()
             for (idx in 0 until adapter.itemCount) {
                 val installedPackage = adapter.installedPackages[idx]
-                if (dataProvider.isPackageSelected(installedPackage.first)) {
-                    importManager.addPackage(installedPackage.first, installedPackage.second)
-                    adapter.storePackageIndex(installedPackage.first, idx)
+                if (dataProvider.isPackageSelected(installedPackage.packageName)) {
+                    importManager.addPackage(installedPackage.packageName, installedPackage.versionCode)
+                    adapter.storePackageIndex(installedPackage.packageName, idx)
                 }
             }
             if (importManager.isEmpty) {
@@ -92,7 +89,7 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
     }
 
     private fun startImport() {
-        val account = App.provide(this).prefs.account
+        val account = Application.provide(this).prefs.account
         if (account == null) {
             Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
             return
@@ -104,7 +101,7 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
             }
 
             override fun onError(errorMessage: String) {
-                if (App.provide(this@ImportInstalledActivity).networkConnection.isNetworkAvailable) {
+                if (Application.provide(this@ImportInstalledActivity).networkConnection.isNetworkAvailable) {
                     Toast.makeText(this@ImportInstalledActivity, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
                 } else {
                     Toast.makeText(this@ImportInstalledActivity, R.string.check_connection, Toast.LENGTH_SHORT).show()
@@ -114,17 +111,17 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
         })
     }
 
-    override fun onCreateLoader(id: Int, args: Bundle?): Loader<List<PackageWithCode>> {
+    override fun onCreateLoader(id: Int, args: Bundle?): Loader<List<InstalledPackage>> {
         return LocalPackageLoader(this)
     }
 
-    override fun onLoadFinished(loader: Loader<List<PackageWithCode>>, data: List<PackageWithCode>) {
+    override fun onLoadFinished(loader: Loader<List<InstalledPackage>>, data: List<InstalledPackage>) {
         progress.visibility = View.GONE
         val downloadedAdapter = list.adapter as ImportAdapter
         downloadedAdapter.installedPackages = data
     }
 
-    override fun onLoaderReset(loader: Loader<List<PackageWithCode>>) {
+    override fun onLoaderReset(loader: Loader<List<InstalledPackage>>) {
         val downloadedAdapter = list.adapter as ImportAdapter
         downloadedAdapter.installedPackages = emptyList()
     }
@@ -158,15 +155,15 @@ class ImportInstalledActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks
         }
     }
 
-    private class LocalPackageLoader internal constructor(context: Context) : AsyncTaskLoader<List<PackageWithCode>>(context) {
-        override fun loadInBackground(): List<PackageWithCode>? {
+    private class LocalPackageLoader internal constructor(context: Context) : AsyncTaskLoader<List<InstalledPackage>>(context) {
+        override fun loadInBackground(): List<InstalledPackage>? {
             val cr = DbContentProviderClient(context)
             val watchingPackages = cr.queryPackagesMap(false)
             cr.close()
 
             val pm = context.packageManager
-            val list = pm.getInstalledPackagesCompat().filter { !watchingPackages.containsKey(it.first) }
-            Collections.sort(list) { lPackage, rPackage -> pm.getAppTitle(lPackage.first).compareTo(pm.getAppTitle(rPackage.first)) }
+            val list = pm.getInstalledPackages().filter { !watchingPackages.containsKey(it.packageName) }
+            Collections.sort(list, AppTitleComparator(1))
 
             return list
         }

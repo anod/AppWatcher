@@ -5,8 +5,8 @@ import android.net.Uri
 import com.anod.appwatcher.content.AppChangeCursor
 import com.anod.appwatcher.content.CursorAsyncTask
 import com.anod.appwatcher.content.DbContentProvider
-import com.anod.appwatcher.model.AppChange
-import com.anod.appwatcher.content.schema.ChangelogTable
+import com.anod.appwatcher.database.entities.AppChange
+import com.anod.appwatcher.database.ChangelogTable
 import info.anodsplace.framework.app.ApplicationContext
 
 class ChangesAsyncTask(context: ApplicationContext, val appId: String, private val completion: (List<AppChange>) -> Unit)

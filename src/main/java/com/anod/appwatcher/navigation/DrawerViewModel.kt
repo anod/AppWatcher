@@ -7,20 +7,16 @@ import android.arch.lifecycle.MutableLiveData
 import android.database.ContentObserver
 import android.net.Uri
 import android.os.Handler
-import android.text.format.DateUtils
-import android.view.View
-import android.widget.TextView
 import com.anod.appwatcher.AppWatcherApplication
-import com.anod.appwatcher.R
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.TagsContentProviderClient
-import com.anod.appwatcher.model.Tag
+import com.anod.appwatcher.database.entities.Tag
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.os.BackgroundTask
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * @date 18/04/2018
  */
 

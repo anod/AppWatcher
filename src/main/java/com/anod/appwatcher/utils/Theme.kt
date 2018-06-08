@@ -2,12 +2,12 @@ package com.anod.appwatcher.utils
 
 import android.app.Activity
 import android.content.res.Configuration
-import com.anod.appwatcher.App
+import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.preferences.Preferences
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * @date 07/12/2017
  */
 class Theme(private val activity: Activity) {
@@ -15,7 +15,7 @@ class Theme(private val activity: Activity) {
     val theme: Int
         get() {
             if (isNightMode) {
-                if (App.provide(activity).prefs.theme == Preferences.THEME_BLACK) {
+                if (Application.provide(activity).prefs.theme == Preferences.THEME_BLACK) {
                     return R.style.AppTheme_Black
                 }
             }
@@ -25,7 +25,7 @@ class Theme(private val activity: Activity) {
     val themeDialog: Int
         get() {
             if (isNightMode) {
-                if (App.provide(activity).prefs.theme == Preferences.THEME_BLACK) {
+                if (Application.provide(activity).prefs.theme == Preferences.THEME_BLACK) {
                     return R.style.AppTheme_Dialog_Black
                 }
             }
@@ -35,7 +35,7 @@ class Theme(private val activity: Activity) {
     val themeChangelog: Int
         get() {
             if (isNightMode) {
-                if (App.provide(activity).prefs.theme == Preferences.THEME_BLACK) {
+                if (Application.provide(activity).prefs.theme == Preferences.THEME_BLACK) {
                     return R.style.AppTheme_Dialog_Black_Changelog
                 }
             }

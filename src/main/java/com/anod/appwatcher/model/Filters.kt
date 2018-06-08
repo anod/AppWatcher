@@ -7,7 +7,7 @@ package com.anod.appwatcher.model
  */
 object Filters {
     const val TAB_ALL = 0
-    const val TAB_INSTALLED = 1
-    const val TAB_UNINSTALLED = 2
-    const val TAB_UPDATABLE = 3
+    const val INSTALLED = 1
+    const val UNINSTALLED = 2
+    const val UPDATABLE = 3
 }

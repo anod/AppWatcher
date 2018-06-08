@@ -2,13 +2,13 @@ package com.anod.appwatcher.content
 
 import android.content.ContentProviderClient
 import android.content.Context
-import com.anod.appwatcher.model.AppChange
-import com.anod.appwatcher.content.schema.ChangelogTable
+import com.anod.appwatcher.database.entities.AppChange
+import com.anod.appwatcher.database.ChangelogTable
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.content.query
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * *
  * @date 10/03/2017.
  */

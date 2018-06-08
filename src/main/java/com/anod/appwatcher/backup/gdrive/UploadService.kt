@@ -2,7 +2,7 @@ package com.anod.appwatcher.backup.gdrive
 
 import android.content.Context
 import android.os.Bundle
-import com.anod.appwatcher.App
+import com.anod.appwatcher.Application
 import com.firebase.jobdispatcher.*
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -10,7 +10,7 @@ import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.os.BackgroundTask
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * @date 13/06/2017
  */
 class UploadService : JobService() {
@@ -22,7 +22,7 @@ class UploadService : JobService() {
         private const val tag = "GDriveUpload"
 
         fun schedule(context: Context, requiresWifi: Boolean, requiresCharging: Boolean) {
-            val dispatcher = App.provide(context).jobDispatcher
+            val dispatcher = Application.provide(context).jobDispatcher
 
             val constraints = mutableListOf<Int>()
             if (requiresCharging) {
@@ -79,7 +79,7 @@ class UploadService : JobService() {
 
             override fun finished(result: Boolean) {
                 if (result) {
-                    val prefs = App.provide(applicationContext).prefs
+                    val prefs = Application.provide(applicationContext).prefs
                     prefs.lastDriveSyncTime = System.currentTimeMillis()
                 }
                 jobFinished(job, !result)

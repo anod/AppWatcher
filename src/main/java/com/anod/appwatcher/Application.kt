@@ -6,11 +6,11 @@ import com.anod.appwatcher.userLog.UserLogger
 import info.anodsplace.framework.app.ApplicationContext
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * *
  * @date 07/05/2016.
  */
-object App {
+object Application {
 
     fun with(context: Context): AppWatcherApplication {
         return context.applicationContext as AppWatcherApplication

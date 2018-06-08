@@ -2,13 +2,13 @@ package com.anod.appwatcher.sync
 
 import android.content.Context
 import android.os.Bundle
-import com.anod.appwatcher.App
+import com.anod.appwatcher.Application
 import com.firebase.jobdispatcher.Constraint
 import com.firebase.jobdispatcher.Lifetime
 import com.firebase.jobdispatcher.Trigger
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * *
  * @date 27/05/2016.
  */
@@ -29,7 +29,7 @@ object SyncScheduler {
         } else {
             constraints.add(Constraint.ON_ANY_NETWORK)
         }
-        val dispatcher = App.provide(context).jobDispatcher
+        val dispatcher = Application.provide(context).jobDispatcher
         val task = dispatcher.newJobBuilder()
                 .setService(SyncTaskService::class.java)
                 .setTag(tag)
@@ -41,11 +41,11 @@ object SyncScheduler {
                 .setExtras(Bundle())
                 .build()
 
-        App.log(context).info("Schedule sync in ${windowStartSec/3600} hours")
+        Application.log(context).info("Schedule sync in ${windowStartSec/3600} hours")
         dispatcher.mustSchedule(task)
     }
 
     fun cancel(context: Context) {
-        App.provide(context).jobDispatcher.cancel(tag)
+        Application.provide(context).jobDispatcher.cancel(tag)
     }
 }

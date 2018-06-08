@@ -1,13 +1,8 @@
-package com.anod.appwatcher.content
+package com.anod.appwatcher.database
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-
-import com.anod.appwatcher.content.schema.AppListTable
-import com.anod.appwatcher.content.schema.AppTagsTable
-import com.anod.appwatcher.content.schema.ChangelogTable
-import com.anod.appwatcher.content.schema.TagsTable
 
 import info.anodsplace.framework.AppLog
 

@@ -4,10 +4,9 @@ import android.content.Context
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import com.anod.appwatcher.App
+import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.WatchAppList
-import com.squareup.picasso.Picasso
 import finsky.api.model.Document
 import info.anodsplace.framework.app.ThemeCompat
 import info.anodsplace.framework.content.InstalledApps
@@ -31,7 +30,7 @@ abstract class ResultsAdapter(
     val isNotEmpty: Boolean
         get() = this.itemCount > 0
 
-    private val picasso = App.provide(context).picasso
+    private val picasso = Application.provide(context).picasso
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ResultsAppViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.list_item_market_app, parent, false)

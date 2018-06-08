@@ -1,16 +1,18 @@
-package com.anod.appwatcher.content.schema
+package com.anod.appwatcher.database
 
+import android.arch.persistence.room.Dao
 import android.content.ContentValues
 import android.provider.BaseColumns
 
-import com.anod.appwatcher.model.Tag
+import com.anod.appwatcher.database.entities.Tag
 
 /**
  * @author alex
  * *
  * @date 2015-03-01
  */
-class TagsTable {
+@Dao
+interface TagsTable {
 
     class Columns : BaseColumns {
         companion object {
@@ -20,9 +22,9 @@ class TagsTable {
     }
 
     object TableColumns {
-        const val _ID = TagsTable.table + "." + BaseColumns._ID
-        const val name = TagsTable.table + ".name"
-        const val color = TagsTable.table + ".color"
+        const val _ID = table + "." + BaseColumns._ID
+        const val name = table + ".name"
+        const val color = table + ".color"
     }
 
     object Projection {

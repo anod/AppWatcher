@@ -9,7 +9,7 @@ import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.*
 import android.widget.TextView
-import com.anod.appwatcher.App
+import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import info.anodsplace.framework.app.ToolbarActivity
 import kotlinx.android.synthetic.main.activity_user_log.*
@@ -17,7 +17,7 @@ import java.text.SimpleDateFormat
 
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * @date 04/01/2018
  */
 class UserLogActivity: ToolbarActivity() {
@@ -88,7 +88,7 @@ class UserLogActivity: ToolbarActivity() {
         super.onCreate(savedInstanceState)
 
         list.layoutManager = LinearLayoutManager(this)
-        list.adapter = UserLogAdapter(App.log(this), this)
+        list.adapter = UserLogAdapter(Application.log(this), this)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -101,7 +101,7 @@ class UserLogActivity: ToolbarActivity() {
             val sendIntent = Intent()
             sendIntent.action = Intent.ACTION_SEND
             sendIntent.putExtra(Intent.EXTRA_TITLE, "AppWatcher Log")
-            sendIntent.putExtra(Intent.EXTRA_TEXT, App.log(this).content)
+            sendIntent.putExtra(Intent.EXTRA_TEXT, Application.log(this).content)
             sendIntent.type = "text/plain"
             startActivity(sendIntent)
             return true

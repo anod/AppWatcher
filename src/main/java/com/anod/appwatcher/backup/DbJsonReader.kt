@@ -1,8 +1,8 @@
 package com.anod.appwatcher.backup
 
 import com.anod.appwatcher.model.AppInfo
-import com.anod.appwatcher.model.AppTag
-import com.anod.appwatcher.model.Tag
+import com.anod.appwatcher.database.entities.AppTag
+import com.anod.appwatcher.database.entities.Tag
 import info.anodsplace.framework.json.JsonReader
 import info.anodsplace.framework.json.JsonToken
 import java.io.IOException

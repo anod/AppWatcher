@@ -1,17 +1,30 @@
-package com.anod.appwatcher.model
+package com.anod.appwatcher.database.entities
 
+import android.arch.persistence.room.ColumnInfo
+import android.arch.persistence.room.Entity
+import android.arch.persistence.room.Ignore
+import android.arch.persistence.room.PrimaryKey
 import android.graphics.Color
 import android.os.Parcel
 import android.os.Parcelable
+import android.provider.BaseColumns
 import android.support.annotation.ColorInt
+import com.anod.appwatcher.database.TagsTable
 
 /**
- * @author algavris
- * *
- * @date 10/03/2017.
+ * @author Alex Gavrishev
+ * @date 10/03/2017
  */
-
-class Tag(val id: Int, val name: String, @ColorInt val color: Int) : Parcelable {
+@Entity(tableName = TagsTable.table)
+data class Tag(
+        @PrimaryKey
+        @ColumnInfo(name = BaseColumns._ID)
+        val id: Int,
+        @ColumnInfo(name = TagsTable.Columns.name)
+        val name: String,
+        @ColumnInfo(name = TagsTable.Columns.color)
+        @ColorInt
+        val color: Int) : Parcelable {
 
     val darkColor: Int
         get() {
@@ -21,8 +34,10 @@ class Tag(val id: Int, val name: String, @ColorInt val color: Int) : Parcelable 
             return Color.HSVToColor(hsv)
         }
 
+    @Ignore
     constructor(name: String) : this(-1, name, DEFAULT_COLOR)
 
+    @Ignore
     constructor(name: String, @ColorInt color: Int) : this(-1, name, color)
 
     internal constructor(source: Parcel) : this(

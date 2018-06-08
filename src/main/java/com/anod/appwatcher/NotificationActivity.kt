@@ -23,7 +23,7 @@ class NotificationActivity : Activity() {
                 this.startActivitySafely(Intent().forPlayStore(pkg))
             }
             TYPE_MYAPPS -> this.startActivitySafely(Intent().forMyApps(false))
-            TYPE_MYAPPS_UPDATE -> UpdateAll(this, App.provide(this).prefs).withConfirmation()
+            TYPE_MYAPPS_UPDATE -> UpdateAll(this, Application.provide(this).prefs).withConfirmation()
             // TYPE_DISMISS -> nothing
         }
         finish()

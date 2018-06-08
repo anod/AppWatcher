@@ -5,16 +5,16 @@ import android.content.pm.PackageManager
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import com.anod.appwatcher.App
+import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
-import com.anod.appwatcher.model.packageToApp
+import com.anod.appwatcher.database.entities.AppListItem
+import com.anod.appwatcher.database.entities.packageToApp
 import com.anod.appwatcher.utils.PicassoAppIcon
 import com.anod.appwatcher.watchlist.AppViewHolder
 import com.anod.appwatcher.watchlist.AppViewHolderBase
 import com.anod.appwatcher.watchlist.AppViewHolderResourceProvider
+import info.anodsplace.framework.content.InstalledPackage
 import info.anodsplace.framework.content.PackageWithCode
-import info.anodsplace.framework.widget.recyclerview.ArrayAdapter
-import java.util.*
 
 /**
  * @author alex
@@ -28,13 +28,13 @@ open class InstalledAppsAdapter(
         protected val listener: AppViewHolder.OnClickListener?)
     : RecyclerView.Adapter<AppViewHolderBase>() {
 
-    var installedPackages: List<PackageWithCode> = mutableListOf()
+    var installedPackages: List<InstalledPackage> = mutableListOf()
         set(value) {
             field = value
             notifyDataSetChanged()
         }
 
-    internal val iconLoader: PicassoAppIcon = App.provide(context).iconLoader
+    internal val iconLoader: PicassoAppIcon = Application.provide(context).iconLoader
 
     override fun getItemCount(): Int {
         return this.installedPackages.size
@@ -51,8 +51,8 @@ open class InstalledAppsAdapter(
 
     override fun onBindViewHolder(holder: AppViewHolderBase, position: Int) {
         val installedPackage = installedPackages[position]
-        val app = packageManager.packageToApp(-1, installedPackage.first)
-        holder.bindView(position, app)
+        val app = packageManager.packageToApp(-1, installedPackage.packageName)
+        holder.bindView(AppListItem(app, "", false))
     }
 
 }

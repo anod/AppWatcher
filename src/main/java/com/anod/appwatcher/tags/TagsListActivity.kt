@@ -22,8 +22,8 @@ import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.content.TagsContentProviderClient
 import com.anod.appwatcher.content.TagsCursor
 import com.anod.appwatcher.model.AppInfo
-import com.anod.appwatcher.model.Tag
-import com.anod.appwatcher.content.schema.TagsTable
+import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.database.TagsTable
 import com.anod.appwatcher.utils.Theme
 import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.graphics.DrawableTint
@@ -31,7 +31,7 @@ import info.anodsplace.framework.widget.recyclerview.RecyclerViewCursorListAdapt
 import kotlinx.android.synthetic.main.activity_tags_editor.*
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * *
  * @date 10/03/2017.
  */

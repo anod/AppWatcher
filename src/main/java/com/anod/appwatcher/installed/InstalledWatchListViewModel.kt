@@ -1,64 +1,92 @@
 package com.anod.appwatcher.installed
 
-import android.app.Application
-import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.*
 import android.util.SparseArray
-import androidx.core.util.set
-import com.anod.appwatcher.AppWatcherApplication
 import com.anod.appwatcher.model.AppListFilter
-import com.anod.appwatcher.model.Tag
-import com.anod.appwatcher.watchlist.OnDevice
-import com.anod.appwatcher.watchlist.RecentlyInstalled
-import com.anod.appwatcher.watchlist.SectionHeader
-import com.anod.appwatcher.watchlist.WatchListViewModel
-import info.anodsplace.framework.content.PackageWithCode
+import com.anod.appwatcher.watchlist.*
+import info.anodsplace.framework.content.*
+import info.anodsplace.framework.livedata.OneTimeObserver
+import info.anodsplace.framework.os.LiveDataTask
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * @date 14/04/2018
  */
 
-class InstalledWatchListViewModel(application: Application) : WatchListViewModel(application) {
+typealias InstalledPairRow = Pair<String, Int>
+typealias InstalledResult = Pair<List<InstalledPairRow>, List<InstalledPackage>>
 
+private class InstalledResultMediator(
+        private var showRecentlyUpdated: Boolean,
+        private var hasSectionRecent: Boolean,
+        private var hasSectionOnDevice: Boolean,
+        private var filter: AppListFilter
+): MediatorLiveData<LoadResult>() {
+    private var number = 0
+    private var result = InstalledLoadResult(emptyList(), emptyList(), emptyList(), SparseArray())
+
+    fun addAppsList(source: LiveData<AppsList>) {
+        addSource(source, {
+            result = InstalledLoadResult(
+                result.recentlyInstalled,
+                result.installedPackages,
+                it ?: emptyList(),
+                result.sections
+            )
+            update()
+            removeSource(source)
+        })
+    }
+
+    fun addInstalled(source: LiveData<InstalledResult>) {
+        addSource(source, {
+            result = InstalledLoadResult(
+                    it?.first ?: emptyList(),
+                    it?.second ?: emptyList(),
+                    result.appsList,
+                    result.sections
+            )
+            update()
+            removeSource(source)
+        })
+    }
+
+    private fun update() {
+        number++
+        if (number == 2) {
+            val appsList = result.appsList
+            val recentlyInstalled = result.recentlyInstalled
+            val installedPackages = result.installedPackages
+            val sections = SectionHeaderFactory(showRecentlyUpdated, hasSectionRecent, hasSectionOnDevice)
+                    .create(appsList.size, filter.newCount, filter.recentlyUpdatedCount, filter.updatableNewCount, recentlyInstalled.isNotEmpty(), installedPackages.isNotEmpty())
+
+            value = InstalledLoadResult(
+                recentlyInstalled,
+                installedPackages,
+                appsList,
+                sections
+            )
+        }
+    }
+}
+
+class InstalledWatchListViewModel(application: android.app.Application) : WatchListViewModel(application) {
     var hasSectionRecent = false
     var hasSectionOnDevice = false
 
-    val installedPackages: MutableLiveData<List<PackageWithCode>> = MutableLiveData()
-    val recentlyInstalled: MutableLiveData<List<PackageRowPair>> = MutableLiveData()
+    override fun load(): LiveData<LoadResult> {
+        val apps = loadApps()
+        val installed = LiveDataTask(InstalledTaskWorker(context, sortId, titleFilter)).execute()
 
-    override fun load(titleFilter: String, sortId: Int, filter: AppListFilter, tag: Tag?) {
-        val application = getApplication<AppWatcherApplication>()
-        InstalledAsyncTask(application, titleFilter, sortId, filter, tag, {
-            list, listFilter, installedPackages, recent ->
-
-            this.installedPackages.value = installedPackages
-            this.recentlyInstalled.value = recent
-            setValues(list, listFilter)
-        }).execute()
+        val mediator = InstalledResultMediator(
+            showRecentlyUpdated,
+            hasSectionRecent,
+            hasSectionOnDevice,
+            filter
+        )
+        mediator.addAppsList(apps)
+        mediator.addInstalled(installed)
+        return mediator
     }
 
-    override fun createHeader(totalAppsCount: Int, newAppsCount: Int, recentlyUpdatedCount: Int, updatableNewCount: Int): SparseArray<SectionHeader> {
-        val sections = super.createHeader(totalAppsCount, newAppsCount, recentlyUpdatedCount, updatableNewCount)
-        val isRecentVisible = hasSectionRecent && !(this.recentlyInstalled.value?.isEmpty() ?: false)
-        val isOnDeviceVisible = hasSectionOnDevice && !(this.installedPackages.value?.isEmpty() ?: false)
-
-        if (isRecentVisible) {
-            val newSections = SparseArray<SectionHeader>()
-            newSections[0] = RecentlyInstalled()
-            for (i in 0 until sections.size()) {
-                newSections[sections.keyAt(i) + 1] = sections.valueAt(i)
-            }
-
-            if (isOnDeviceVisible) {
-                newSections[totalAppsCount + 1] = OnDevice()
-            }
-            return newSections
-        }
-
-        if (isOnDeviceVisible) {
-            sections[totalAppsCount] = OnDevice()
-        }
-
-        return sections
-    }
 }

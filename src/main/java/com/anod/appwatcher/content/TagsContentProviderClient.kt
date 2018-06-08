@@ -4,13 +4,13 @@ import android.content.ContentProviderClient
 import android.database.Cursor
 import android.os.RemoteException
 import android.util.SparseIntArray
-import com.anod.appwatcher.content.schema.TagsTable
+import com.anod.appwatcher.database.TagsTable
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.database.NullCursor
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * *
  * @date 10/03/2017.
  */

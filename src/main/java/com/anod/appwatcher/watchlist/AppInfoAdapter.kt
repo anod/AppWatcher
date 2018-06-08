@@ -5,14 +5,14 @@ import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import com.anod.appwatcher.App
+import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
-import com.anod.appwatcher.model.AppInfo
+import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.utils.PicassoAppIcon
 import info.anodsplace.framework.content.InstalledApps
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * @date 13/04/2018
  */
 
@@ -21,19 +21,19 @@ class AppInfoAdapter(private val context: Context,
                      private val listener: AppViewHolder.OnClickListener): RecyclerView.Adapter<AppViewHolder>() {
 
     private val itemDataProvider = AppViewHolderResourceProvider(context, installedApps)
-    private var data: List<AppInfo> = emptyList()
+    private var data: List<AppListItem> = emptyList()
 
-    private val itemCallback = object: DiffUtil.ItemCallback<AppInfo>() {
-        override fun areItemsTheSame(oldItem: AppInfo, newItem: AppInfo): Boolean {
-            return oldItem.rowId == newItem.rowId
+    private val itemCallback = object: DiffUtil.ItemCallback<AppListItem>() {
+        override fun areItemsTheSame(oldItem: AppListItem, newItem: AppListItem): Boolean {
+            return oldItem.app.appId == newItem.app.appId
         }
 
-        override fun areContentsTheSame(oldItem: AppInfo, newItem: AppInfo): Boolean {
+        override fun areContentsTheSame(oldItem: AppListItem, newItem: AppListItem): Boolean {
             return oldItem == newItem
         }
     }
 
-    private val appIcon: PicassoAppIcon = App.provide(context).iconLoader
+    private val appIcon: PicassoAppIcon = Application.provide(context).iconLoader
 
     override fun getItemCount(): Int {
         return data.size
@@ -50,7 +50,7 @@ class AppInfoAdapter(private val context: Context,
 
     override fun onBindViewHolder(holder: AppViewHolder, position: Int) {
         val appInfo = data[position]
-        holder.bindView(position, appInfo)
+        holder.bindView(appInfo)
     }
 
     class DiffCallback<OB>(private val oldList: List<OB>, private val newList: List<OB>, private val callback: DiffUtil.ItemCallback<OB>): DiffUtil.Callback() {
@@ -72,7 +72,7 @@ class AppInfoAdapter(private val context: Context,
         }
     }
 
-    fun updateList(list: List<AppInfo>) {
+    fun updateList(list: List<AppListItem>) {
         if (list.isEmpty() || data.isEmpty()) {
             data = list
             notifyDataSetChanged()

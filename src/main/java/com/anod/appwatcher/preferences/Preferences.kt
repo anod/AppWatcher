@@ -143,6 +143,7 @@ class Preferences(context: Context) : DeviceIdStorage {
         private const val SORT_INDEX = "sort_index"
         private const val FILTER_ID = "default_main_filter_id"
 
+        const val SORT_NAME_ASC = 0
         const val SORT_NAME_DESC = 1
         const val SORT_DATE_ASC = 2
         const val SORT_DATE_DESC = 3

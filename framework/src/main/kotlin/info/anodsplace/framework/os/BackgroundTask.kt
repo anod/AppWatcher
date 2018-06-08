@@ -1,5 +1,7 @@
 package info.anodsplace.framework.os
 
+import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MutableLiveData
 import android.os.AsyncTask
 import android.util.LruCache
 import info.anodsplace.framework.app.ApplicationContext
@@ -49,5 +51,25 @@ class BackgroundTask<P, R>(private val worker: Worker<P, R>) : AsyncTask<Void, V
     override fun onPostExecute(result: R) {
         this.worker.finished(result)
     }
+}
 
+class LiveDataTask<P, R>(private val worker: LiveDataTask.Worker<P, R>) : AsyncTask<P, Void, R>() {
+    private val liveData = MutableLiveData<R>()
+
+    abstract class Worker<Param, out Result> protected constructor(internal val param: Param) {
+        abstract fun run(param: Param): Result
+    }
+
+    override fun doInBackground(vararg params: P): R {
+        return this.worker.run(this.worker.param)
+    }
+
+    override fun onPostExecute(result: R) {
+        liveData.value = result
+    }
+
+    fun execute(): LiveData<R> {
+        super.execute()
+        return liveData
+    }
 }

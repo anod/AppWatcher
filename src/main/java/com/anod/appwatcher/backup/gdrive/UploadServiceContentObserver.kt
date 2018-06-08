@@ -5,12 +5,12 @@ import android.content.Context
 import android.database.ContentObserver
 import android.net.Uri
 import android.os.Handler
-import com.anod.appwatcher.App
+import com.anod.appwatcher.Application
 import com.anod.appwatcher.content.DbContentProvider
 import info.anodsplace.framework.AppLog
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * @date 26/06/2017
  */
 
@@ -24,7 +24,7 @@ class UploadServiceContentObserver(val context: Context, contentResolver: Conten
     override fun onChange(selfChange: Boolean, uri: Uri?) {
         super.onChange(selfChange, uri)
 
-        val prefs = App.provide(context).prefs
+        val prefs = Application.provide(context).prefs
         if (!prefs.isDriveSyncEnabled) {
             return
         }

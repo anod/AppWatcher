@@ -1,85 +1,94 @@
 package com.anod.appwatcher.watchlist
 
 import android.app.Application
-import android.arch.lifecycle.AndroidViewModel
-import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.*
 import android.database.ContentObserver
 import android.net.Uri
 import android.os.Handler
 import android.util.SparseArray
-import androidx.core.util.set
 import com.anod.appwatcher.AppWatcherApplication
 import com.anod.appwatcher.content.DbContentProvider
+import com.anod.appwatcher.database.AppListTable
+import com.anod.appwatcher.database.entities.AppListItem
+import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.model.*
+import com.anod.appwatcher.preferences.Preferences
 import info.anodsplace.framework.AppLog
+import info.anodsplace.framework.app.ApplicationContext
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * @date 13/04/2018
  */
+
+typealias AppsList = List<AppListItem>
 
 private class AppsUpdateObserver(private val viewModel: WatchListViewModel) : ContentObserver(Handler()) {
 
     override fun onChange(selfChange: Boolean, uri: Uri?) {
         uri?.let {
             AppLog.d("onChange: $it")
-            viewModel.reload()
+            viewModel.appsDbChanged.value = true
         }
     }
 }
 
+open class LoadResult(val appsList: AppsList, val sections: SparseArray<SectionHeader>)
+
 open class WatchListViewModel(application: Application): AndroidViewModel(application) {
 
-    val appList: MutableLiveData<List<AppInfo>> = MutableLiveData()
-    val sections: MutableLiveData<SparseArray<SectionHeader>> = MutableLiveData()
+    val context: ApplicationContext
+        get() = ApplicationContext(getApplication())
+
+    val appsDbChanged = MutableLiveData<Boolean>()
     var showRecentlyUpdated = false
 
     private val observer = AppsUpdateObserver(this)
     init {
         application.contentResolver.registerContentObserver(DbContentProvider.appsUri, false, observer)
-
     }
 
     override fun onCleared() {
         getApplication<AppWatcherApplication>().contentResolver.unregisterContentObserver(observer)
     }
 
-    private var titleFilter = ""
-    private var sortId = 0
-    private var filter: AppListFilter = AppListFilter.None()
-    private var tag: Tag? = null
+    var titleFilter = ""
+    var sortId = 0
+    var filter: AppListFilter = AppListFilter.None()
+    var tag: Tag? = null
+    val sections: MutableLiveData<SparseArray<SectionHeader>> = MutableLiveData()
 
-    fun reload() {
-        load(titleFilter, sortId, filter, tag)
-    }
-
-    open fun load(titleFilter: String, sortId: Int, filter: AppListFilter, tag: Tag?) {
-        this.titleFilter = titleFilter
+    fun init(sortId: Int, tag: Tag?, listFilter: AppListFilter, prefs: Preferences) {
         this.sortId = sortId
-        this.filter = filter
         this.tag = tag
-
-        AppListAsyncTask(getApplication<AppWatcherApplication>(), titleFilter, sortId, filter, tag, { list, listFilter ->
-            this.setValues(list, listFilter)
-        }).execute()
+        this.filter = listFilter
+        this.showRecentlyUpdated = prefs.showRecentlyUpdated
     }
 
-    fun setValues(list: List<AppInfo>, listFilter: AppListFilter) {
-        appList.value = list
-        sections.value = this.createHeader(list.size, listFilter.newCount, listFilter.recentlyUpdatedCount, listFilter.updatableNewCount)
+    open fun load(): LiveData<LoadResult> {
+        val liveData = loadApps()
+        return Transformations.map(liveData, {
+            val sections = SectionHeaderFactory(showRecentlyUpdated, false, false)
+                    .create(it?.size ?: 0,
+                            filter.newCount,
+                            filter.recentlyUpdatedCount,
+                            filter.updatableNewCount,
+                            false,
+                            false)
+            this@WatchListViewModel.sections.value = sections
+            LoadResult(it ?: emptyList(), sections)
+        })
     }
 
-    protected open fun createHeader(totalAppsCount: Int, newAppsCount: Int, recentlyUpdatedCount: Int, updatableNewCount: Int): SparseArray<SectionHeader> {
-        val sections = SparseArray<SectionHeader>()
-        if (newAppsCount > 0) {
-            sections[0] = New(newAppsCount, updatableNewCount)
-        }
-        val effectiveRecentlyUpdatedCount  = if (showRecentlyUpdated) recentlyUpdatedCount else 0
-        if (effectiveRecentlyUpdatedCount > 0) {
-            sections[newAppsCount] = RecentlyUpdated(effectiveRecentlyUpdatedCount)
-        }
-        sections[effectiveRecentlyUpdatedCount + newAppsCount] = Watching(totalAppsCount - effectiveRecentlyUpdatedCount - newAppsCount)
-        return sections
+    fun loadApps(): LiveData<List<AppListItem>> {
+        val appsTable = com.anod.appwatcher.Application.provide(context).database.apps()
+        val list = AppListTable.Queries.loadAppList(sortId, tag, titleFilter, appsTable)
+        return Transformations.map(list, { allApps ->
+            filter.resetNewCount()
+            val items = allApps ?: emptyList()
+            val filtered = items.filter { appItem -> !filter.filterRecord(appItem) }
+            filtered
+        })
     }
 
 }

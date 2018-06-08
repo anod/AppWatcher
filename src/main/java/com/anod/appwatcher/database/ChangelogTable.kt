@@ -1,15 +1,29 @@
-package com.anod.appwatcher.content.schema
+package com.anod.appwatcher.database
 
+import android.arch.persistence.room.Dao
+import android.arch.persistence.room.Insert
+import android.arch.persistence.room.OnConflictStrategy
+import android.arch.persistence.room.Query
 import android.content.ContentValues
 import android.provider.BaseColumns
-import com.anod.appwatcher.model.AppChange
+import com.anod.appwatcher.database.entities.AppChange
 
 /**
  * @author alex
  * *
  * @date 2015-03-01
  */
-class ChangelogTable {
+@Dao
+interface ChangelogTable {
+
+    @Query("SELECT * FROM $table WHERE ${ChangelogTable.Columns.appId} == :appId")
+    fun ofApp(appId: String): List<AppChange>
+
+    @Query("SELECT * FROM $table WHERE ${ChangelogTable.Columns.appId} == :appId AND ${ChangelogTable.Columns.versionCode} == :versionCode")
+    fun forVersion(appId: String, versionCode: Int): AppChange?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun save(changelog: AppChange)
 
     class Columns : BaseColumns {
         companion object {
@@ -22,12 +36,12 @@ class ChangelogTable {
     }
 
     object TableColumns {
-        const val _ID = ChangelogTable.table + "." + BaseColumns._ID
-        const val appId = ChangelogTable.table + ".app_id"
-        const val versionCode = ChangelogTable.table + ".code"
-        const val versionName = ChangelogTable.table + ".name"
-        const val details = ChangelogTable.table + ".details"
-        const val uploadDate = ChangelogTable.table + ".upload_date"
+        const val _ID = table + "." + BaseColumns._ID
+        const val appId = table + ".app_id"
+        const val versionCode = table + ".code"
+        const val versionName = table + ".name"
+        const val details = table + ".details"
+        const val uploadDate = table + ".upload_date"
     }
 
     object Projection {
@@ -54,12 +68,12 @@ class ChangelogTable {
         const val sqlCreate =
                 "CREATE TABLE " + table + " (" +
                         BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                        ChangelogTable.Columns.appId + " TEXT not null," +
-                        ChangelogTable.Columns.versionCode + " INTEGER," +
-                        ChangelogTable.Columns.versionName + " TEXT not null," +
-                        ChangelogTable.Columns.details + " TEXT not null," +
-                        ChangelogTable.Columns.uploadDate + " TEXT not null," +
-                        "UNIQUE(${ChangelogTable.Columns.appId}, ${ChangelogTable.Columns.versionCode}) ON CONFLICT REPLACE" +
+                        Columns.appId + " TEXT not null," +
+                        Columns.versionCode + " INTEGER," +
+                        Columns.versionName + " TEXT not null," +
+                        Columns.details + " TEXT not null," +
+                        Columns.uploadDate + " TEXT not null," +
+                        "UNIQUE(${Columns.appId}, ${Columns.versionCode}) ON CONFLICT REPLACE" +
                         ") "
 
     }

@@ -8,6 +8,7 @@ import android.util.LruCache
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.NoCache
 import com.anod.appwatcher.backup.gdrive.UploadServiceContentObserver
+import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.userLog.UserLogger
 import com.anod.appwatcher.utils.PicassoAppIcon
@@ -70,4 +71,5 @@ class AppComponent internal constructor(private val app: AppWatcherApplication):
         val queueFile = QueueFile.Builder(file).build()
         UserLogger(queueFile)
     }
+    val database: AppsDatabase by lazy { AppsDatabase.instance(app) }
 }

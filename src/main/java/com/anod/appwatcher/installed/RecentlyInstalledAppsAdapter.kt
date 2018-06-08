@@ -6,9 +6,9 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.anod.appwatcher.App
+import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
-import com.anod.appwatcher.model.packageToApp
+import com.anod.appwatcher.database.entities.packageToApp
 import com.anod.appwatcher.utils.PicassoAppIcon
 import com.anod.appwatcher.watchlist.AppViewHolder
 
@@ -23,12 +23,12 @@ open class RecentlyInstalledAppsAdapter(
         protected val listener: AppViewHolder.OnClickListener?)
     : RecyclerView.Adapter<RecentlyInstalledAppsAdapter.ViewHolder>() {
 
-    var recentlyInstalled: List<PackageRowPair> = mutableListOf()
+    var recentlyInstalled: List<InstalledPairRow> = mutableListOf()
         set(value) {
             field = value
             notifyDataSetChanged()
         }
-    private val iconLoader: PicassoAppIcon = App.provide(context).iconLoader
+    private val iconLoader: PicassoAppIcon = Application.provide(context).iconLoader
 
     override fun getItemCount(): Int {
         return if (recentlyInstalled.isEmpty()) 0 else 1

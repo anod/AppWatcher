@@ -1,7 +1,6 @@
 package com.anod.appwatcher.watchlist
 
 import android.accounts.Account
-import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
@@ -46,11 +45,11 @@ class SyncStopped(val updatesCount: Int): ListState()
 class Updated: ListState()
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * *
  * @date 18/03/2017.
  */
-class WatchListStateViewModel(application: Application) : AndroidViewModel(application) {
+class WatchListStateViewModel(application: android.app.Application) : AndroidViewModel(application) {
     val titleFilter = MutableLiveData<String>()
     val sortId = MutableLiveData<Int>()
     val listState = MutableLiveData<ListState>()
@@ -94,7 +93,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     private lateinit var viewPager: ViewPager
 
     val prefs: Preferences
-        get() = App.provide(this).prefs
+        get() = Application.provide(this).prefs
 
     open val defaultFilterId = Filters.TAB_ALL
 
@@ -200,7 +199,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     fun requestRefresh(): Boolean {
         AppLog.d("Refresh pressed")
         if (!isAuthenticated) {
-            if (App.provide(this).networkConnection.isNetworkAvailable) {
+            if (Application.provide(this).networkConnection.isNetworkAvailable) {
                 this.showAccountsDialogWithCheck()
             } else {
                 Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()

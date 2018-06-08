@@ -10,6 +10,7 @@ import android.widget.ImageView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.DbContentProviderClient
+import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.model.AppInfo
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Picasso.LoadedFrom.DISK
@@ -99,8 +100,21 @@ class PicassoAppIcon(context: Context) {
         }
     }
 
-    fun shutdown() {
-        picasso.shutdown()
+    fun loadAppIntoImageView(app: App, iconView: ImageView, @DrawableRes defaultRes: Int) {
+        if (TextUtils.isEmpty(app.iconUrl)) {
+            if (app.rowId > 0) {
+                val dbImageUri = DbContentProvider.iconsUri.buildUpon().appendPath(app.rowId.toString()).build()
+                this.retrieve(dbImageUri)
+                        .placeholder(defaultRes)
+                        .into(iconView)
+            } else {
+                iconView.setImageResource(defaultRes)
+            }
+        } else {
+            this.retrieve(app.iconUrl)
+                    .placeholder(defaultRes)
+                    .into(iconView)
+        }
     }
 
     companion object {

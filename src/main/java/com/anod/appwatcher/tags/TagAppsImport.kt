@@ -3,8 +3,8 @@ package com.anod.appwatcher.tags
 import android.content.Context
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.DbContentProviderClient
-import com.anod.appwatcher.model.AppTag
-import com.anod.appwatcher.model.Tag
+import com.anod.appwatcher.database.entities.AppTag
+import com.anod.appwatcher.database.entities.Tag
 import info.anodsplace.framework.app.ApplicationContext
 
 internal class TagAppsImport(private val tag: Tag, private val context: ApplicationContext) {

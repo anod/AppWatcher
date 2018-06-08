@@ -1,16 +1,15 @@
 package com.anod.appwatcher.details
 
 import android.accounts.Account
-import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.MutableLiveData
 import com.android.volley.VolleyError
-import com.anod.appwatcher.App
+import com.anod.appwatcher.Application
 import com.anod.appwatcher.content.DbContentProviderClient
-import com.anod.appwatcher.model.AppChange
-import com.anod.appwatcher.model.AppInfo
-import com.anod.appwatcher.model.Tag
-import com.anod.appwatcher.model.packageToApp
+import com.anod.appwatcher.database.entities.App
+import com.anod.appwatcher.database.entities.AppChange
+import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.database.entities.packageToApp
 import finsky.api.model.DfeDetails
 import finsky.api.model.DfeModel
 import finsky.api.model.Document
@@ -27,22 +26,24 @@ class LocalComplete: ChangelogLoadState()
 class RemoteComplete(val error: Boolean): ChangelogLoadState()
 class Complete: ChangelogLoadState()
 
-class DetailsViewModel(application: Application) : AndroidViewModel(application), PlayStoreEndpoint.Listener {
+class DetailsViewModel(application: android.app.Application) : AndroidViewModel(application), PlayStoreEndpoint.Listener {
 
     val context: ApplicationContext
         get() = ApplicationContext(getApplication())
 
     var detailsUrl = ""
     var appId = ""
+    var rowId: Int = -1
     var isNewApp: Boolean = false
-    var app: AppInfo? = null
+
+    val app: MutableLiveData<com.anod.appwatcher.database.entities.App> = MutableLiveData()
 
     val account: Account? by lazy {
-        App.provide(application).prefs.account
+        Application.provide(application).prefs.account
     }
     private val detailsEndpoint: DetailsEndpoint by lazy {
-        val requestQueue = App.provide(application).requestQueue
-        val deviceInfo = App.provide(application).deviceInfo
+        val requestQueue = Application.provide(application).requestQueue
+        val deviceInfo = Application.provide(application).deviceInfo
         val account = this.account ?: Account("empty", "empty")
         DetailsEndpoint(application, requestQueue, deviceInfo, account, detailsUrl)
     }
@@ -60,6 +61,34 @@ class DetailsViewModel(application: Application) : AndroidViewModel(application)
 
     override fun onCleared() {
         detailsEndpoint.listener = null
+    }
+
+    fun loadApp() {
+        if (appId.isEmpty()) {
+            app.value = null
+            return
+        }
+
+        if (rowId == -1) {
+            val localApp = context.packageManager.packageToApp(-1, appId)
+            isNewApp = true
+            Application.log(context).info("Show details for unwatched $appId")
+            app.value = localApp
+        } else {
+            isNewApp = false
+            Application.log(context).info("Show details for watched $appId")
+            BackgroundTask(object : BackgroundTask.Worker<Int, App?>(rowId) {
+                override fun run(param: Int): App? {
+                    val appsTable = Application.provide(context).database.apps()
+                    return appsTable.loadAppRow(rowId)
+                }
+
+                override fun finished(result: App?) {
+                    app.value = result
+                }
+
+            }).execute()
+        }
     }
 
     fun loadLocalChangelog() {
@@ -113,22 +142,8 @@ class DetailsViewModel(application: Application) : AndroidViewModel(application)
     }
 
     override fun onErrorResponse(error: VolleyError) {
-        App.log(context).error("Cannot fetch details for $appId - $error")
+        Application.log(context).error("Cannot fetch details for $appId - $error")
         this.updateChangelogState(RemoteComplete(true))
-    }
-
-    fun loadApp(rowId: Int, appId: String) {
-        if (rowId == -1) {
-            app = context.packageManager.packageToApp(-1, appId)
-            isNewApp = true
-            App.log(context).info("Show details for unwatched $appId")
-        } else {
-            val cr = DbContentProviderClient(context)
-            app = cr.queryAppRow(rowId)
-            cr.close()
-            isNewApp = false
-            App.log(context).info("Show details for watched $appId")
-        }
     }
 
     fun loadTags() {
@@ -145,7 +160,7 @@ class DetailsViewModel(application: Application) : AndroidViewModel(application)
                 BackgroundTask(object : BackgroundTask.Worker<List<Tag>, List<TagMenuItem>>(result) {
                     override fun run(param: List<Tag>): List<TagMenuItem> {
                         val cr = DbContentProviderClient(context)
-                        val appTags = cr.queryAppTags(app!!.rowId)
+                        val appTags = cr.queryAppTags(rowId)
                         cr.close()
                         return param.map { TagMenuItem(it, appTags.contains(it.id)) }
                     }

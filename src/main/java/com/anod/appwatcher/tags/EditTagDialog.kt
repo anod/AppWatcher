@@ -8,14 +8,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import com.anod.appwatcher.R
-import com.anod.appwatcher.model.Tag
+import com.anod.appwatcher.database.entities.Tag
 import info.anodsplace.colorpicker.ColorPickerDialog
 import info.anodsplace.colorpicker.ColorPickerSwatch
 import info.anodsplace.colorpicker.ColorStateDrawable
 import kotlinx.android.synthetic.main.dialog_edit_tag.*
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * *
  * @date 14/04/2017.
  */

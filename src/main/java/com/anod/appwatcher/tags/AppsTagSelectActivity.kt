@@ -2,10 +2,7 @@ package com.anod.appwatcher.tags
 
 import android.app.Activity
 import android.app.Application
-import android.arch.lifecycle.AndroidViewModel
-import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
+import android.arch.lifecycle.*
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
@@ -17,18 +14,23 @@ import android.view.View
 import com.anod.appwatcher.AppWatcherApplication
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.*
-import com.anod.appwatcher.content.schema.AppListTable
+import com.anod.appwatcher.database.AppListTable
+import com.anod.appwatcher.database.entities.AppListItem
+import com.anod.appwatcher.database.entities.AppTag
+import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.Theme
-import com.anod.appwatcher.watchlist.AppListAsyncTask
+import com.anod.appwatcher.watchlist.AppsList
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.content.InstalledApps
+import info.anodsplace.framework.livedata.OneTimeObserver
 import info.anodsplace.framework.os.BackgroundTask
 import info.anodsplace.framework.view.Keyboard
 import kotlinx.android.synthetic.main.activity_tag_select.*
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * *
  * @date 19/04/2016.
  */
@@ -37,7 +39,7 @@ class AppsTagViewModel(application: Application): AndroidViewModel(application) 
     private val context = ApplicationContext(getApplication<AppWatcherApplication>())
     val titleFilter = MutableLiveData<String>()
     lateinit var tag: Tag
-    var appList = MutableLiveData<List<AppInfo>>()
+    var appList = MutableLiveData<List<AppListItem>>()
     var appTags = MutableLiveData<List<AppTag>>()
 
     fun init() {
@@ -53,12 +55,17 @@ class AppsTagViewModel(application: Application): AndroidViewModel(application) 
 
     fun loadApps() {
         val context = ApplicationContext(getApplication<AppWatcherApplication>())
-        val installedApps = InstalledApps.PackageManager(context.packageManager)
 
-        AppListAsyncTask(context, titleFilter.value ?: "", AppListTable.Columns.title + " COLLATE LOCALIZED ASC", AppListFilterInclusion(AppListFilterInclusion.All(), installedApps), {
-            list, _ ->
-            this.appList.value = list
-        }).execute()
+        val appsTable = com.anod.appwatcher.Application.provide(context).database.apps()
+        val mediator = MediatorLiveData<List<AppListItem>>()
+        val list = AppListTable.Queries.loadAppList( Preferences.Companion.SORT_NAME_ASC,titleFilter.value ?: "", appsTable)
+        mediator.addSource(list, { it ->
+            mediator.value = it
+            mediator.removeSource(list)
+        })
+        mediator.observeForever(OneTimeObserver(mediator, Observer {
+            this.appList.value = it
+        }))
     }
 }
 

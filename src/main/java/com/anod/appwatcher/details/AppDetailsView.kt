@@ -5,19 +5,22 @@ import android.text.TextUtils
 import android.view.View
 import android.widget.TextView
 import com.anod.appwatcher.R
-import com.anod.appwatcher.model.AppInfo
+import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.watchlist.AppViewHolderBase
 import info.anodsplace.framework.text.Html
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * @date 14/05/2016.
  */
 class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase.ResourceProvider) {
-    @ColorInt private val textColor: Int
-    @ColorInt private var accentColor: Int
-    @ColorInt private var warningColor: Int
+    @ColorInt
+    private val textColor: Int
+    @ColorInt
+    private var accentColor: Int
+    @ColorInt
+    private var warningColor: Int
 
     private val title: TextView = view.findViewById(android.R.id.title)
     private val creator: TextView? = view.findViewById<TextView?>(R.id.creator)
@@ -31,7 +34,7 @@ class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase
         warningColor = resourceProvider.getColor(R.color.material_amber_800)
     }
 
-    fun fillDetails(app: AppInfo, isLocalApp: Boolean) {
+    fun fillDetails(app: App, recentFlag: Boolean, changeDetails: String, isLocalApp: Boolean) {
         title.text = app.title
         creator?.text = app.creator
         val uploadDate = app.uploadDate
@@ -51,11 +54,12 @@ class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase
             this.price?.text = resourceProvider.formatVersionText(app.versionName, app.versionNumber, 0)
         } else {
             this.creator?.visibility = View.VISIBLE
-            this.fillWatchAppView(app)
+            this.recentChanges?.text = if (changeDetails.isBlank()) resourceProvider.noRecentChangesText else Html.parse(changeDetails)
+            this.fillWatchAppView(app, recentFlag)
         }
     }
 
-    private fun fillWatchAppView(app: AppInfo) {
+    private fun fillWatchAppView(app: App, recentFlag: Boolean) {
         val price = this.price ?: return
 
         // Price field
@@ -74,7 +78,7 @@ class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase
                         price.setTextColor(warningColor)
                         price.text = resourceProvider.formatVersionText(installed.versionName, installed.versionCode, app.versionNumber)
                     }
-                    app.status == AppInfoMetadata.STATUS_UPDATED || app.recentFlag -> {
+                    app.status == AppInfoMetadata.STATUS_UPDATED || recentFlag -> {
                         price.setTextColor(accentColor)
                         price.text = resourceProvider.formatVersionText(installed.versionName, installed.versionCode, 0)
                     }
@@ -86,14 +90,14 @@ class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase
             }
             else -> {
                 price.setCompoundDrawables(null, null, null, null)
-                if (app.priceMicros == 0) {
+                if (app.price.isFree) {
                     price.setText(R.string.free)
                 } else {
-                    price.text = app.priceText
+                    price.text = app.price.text
                 }
 
                 when {
-                    app.status == AppInfoMetadata.STATUS_UPDATED || app.recentFlag -> {
+                    app.status == AppInfoMetadata.STATUS_UPDATED || recentFlag -> {
                         price.setTextColor(accentColor)
                     }
                     else -> {
@@ -105,10 +109,8 @@ class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase
 
         // Recent changes
         when {
-            app.status == AppInfoMetadata.STATUS_UPDATED || app.recentFlag -> {
+            app.status == AppInfoMetadata.STATUS_UPDATED || recentFlag -> {
                 this.recentChanges?.visibility = View.VISIBLE
-                val appChange = resourceProvider.appChangeContentProvider.query(app.appId, app.versionNumber)
-                this.recentChanges?.text = if (appChange?.details?.isBlank() != false) resourceProvider.noRecentChangesText else Html.parse(appChange.details)
             }
             else -> {
                 this.recentChanges?.visibility = View.GONE

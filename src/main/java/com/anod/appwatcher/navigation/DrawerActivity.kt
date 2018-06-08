@@ -4,9 +4,7 @@ import android.accounts.Account
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
-import android.database.ContentObserver
 import android.os.Bundle
-import android.os.Handler
 import android.support.design.widget.NavigationView
 import android.support.v4.content.res.ResourcesCompat
 import android.support.v4.graphics.drawable.DrawableCompat
@@ -21,23 +19,19 @@ import android.widget.Toast
 import com.anod.appwatcher.*
 import com.anod.appwatcher.accounts.AccountSelectionDialog
 import com.anod.appwatcher.accounts.AuthTokenAsync
-import com.anod.appwatcher.content.DbContentProvider
-import com.anod.appwatcher.content.TagsContentProviderClient
 import com.anod.appwatcher.installed.ImportInstalledActivity
-import com.anod.appwatcher.model.Tag
+import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.tags.AppsTagActivity
 import com.anod.appwatcher.utils.Hash
 import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.wishlist.WishlistFragment
 import com.crashlytics.android.Crashlytics
-import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.app.FragmentToolbarActivity
 import info.anodsplace.framework.app.ToolbarActivity
-import info.anodsplace.framework.os.BackgroundTask
 
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * @date 01/12/2017
  */
 abstract class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.SelectionListener  {
@@ -54,7 +48,7 @@ abstract class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.Selecti
         get() = false
 
     val provide: AppComponent
-        get() = App.provide(this)
+        get() = Application.provide(this)
 
     val isAuthenticated: Boolean
         get() = !authToken.isNullOrEmpty()
@@ -65,7 +59,7 @@ abstract class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.Selecti
     }
 
     private val accountSelectionDialog: AccountSelectionDialog by lazy {
-        AccountSelectionDialog(this, App.provide(this).prefs, this)
+        AccountSelectionDialog(this, Application.provide(this).prefs, this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,7 +67,7 @@ abstract class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.Selecti
 
         setupDrawer()
 
-        val account = App.provide(this).prefs.account
+        val account = Application.provide(this).prefs.account
         if (account== null) {
             accountSelectionDialog.show()
         } else {
@@ -187,7 +181,7 @@ abstract class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.Selecti
             }
             R.id.menu_wishlist -> {
                 val args = Bundle()
-                args.putParcelable(WishlistFragment.EXTRA_ACCOUNT, App.provide(this).prefs.account)
+                args.putParcelable(WishlistFragment.EXTRA_ACCOUNT, Application.provide(this).prefs.account)
                 args.putString(WishlistFragment.EXTRA_AUTH_TOKEN, authToken)
                 startActivity(FragmentToolbarActivity.intent(
                         WishlistFragment.TAG,
@@ -230,7 +224,7 @@ abstract class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.Selecti
             override fun onError(errorMessage: String) {
                 this@DrawerActivity.provide.userLogger.error("Error retrieving authentication token: $errorMessage")
                 this@DrawerActivity.authToken = ""
-                if (App.provide(this@DrawerActivity).networkConnection.isNetworkAvailable) {
+                if (Application.provide(this@DrawerActivity).networkConnection.isNetworkAvailable) {
                     Toast.makeText(this@DrawerActivity, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
                 } else {
                     Toast.makeText(this@DrawerActivity, R.string.check_connection, Toast.LENGTH_SHORT).show()
@@ -241,7 +235,7 @@ abstract class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.Selecti
     }
 
     override fun onAccountNotFound(errorMessage: String) {
-        if (App.provide(this@DrawerActivity).networkConnection.isNetworkAvailable) {
+        if (Application.provide(this@DrawerActivity).networkConnection.isNetworkAvailable) {
             if (errorMessage.isNotBlank()) {
                 Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
             } else {

@@ -17,6 +17,7 @@ import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.app.ApplicationInstance
 import info.anodsplace.framework.app.CustomThemeActivity
+import io.fabric.sdk.android.Fabric
 import java.io.IOException
 
 
@@ -30,7 +31,9 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
     override val nightMode: Int
         get() = appComponent.prefs.nightMode
 
-    lateinit var appComponent: AppComponent
+    val appComponent: AppComponent by lazy {
+        AppComponent(this)
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -41,10 +44,12 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
         AppLog.setDebug(true, "AppWatcher")
         AppLog.instance.listener = this
 
-        appComponent = AppComponent(this)
         if (appComponent.prefs.isDriveSyncEnabled) {
             appComponent.uploadServiceContentObserver
         }
+
+        Fabric.with(this, Crashlytics())
+
         AppCompatDelegate.setDefaultNightMode(appComponent.prefs.nightMode)
         SyncNotification(ApplicationContext(this)).createChannels()
         registerActivityLifecycleCallbacks(LifecycleCallbacks(this))

@@ -4,7 +4,7 @@ import com.anod.appwatcher.backup.DbJsonReader
 import com.anod.appwatcher.backup.DbJsonWriter
 import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.model.AppInfo
-import com.anod.appwatcher.model.Tag
+import com.anod.appwatcher.database.entities.Tag
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.drive.Drive
 import com.google.android.gms.drive.DriveContents

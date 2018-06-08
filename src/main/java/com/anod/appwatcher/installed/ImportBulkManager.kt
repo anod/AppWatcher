@@ -5,7 +5,7 @@ import android.content.Context
 import android.os.AsyncTask
 import android.support.v4.util.SimpleArrayMap
 import com.android.volley.VolleyError
-import com.anod.appwatcher.App
+import com.anod.appwatcher.Application
 import com.anod.appwatcher.content.AddWatchAppAsyncTask
 import com.anod.appwatcher.content.WatchAppList
 import finsky.api.BulkDocId
@@ -80,7 +80,7 @@ internal class ImportBulkManager(
 
         val docIds = listsDocIds[currentBulk]
         listener.onImportStart(docIds.map { it.packageName })
-        val endpoint = BulkDetailsEndpoint(context, App.provide(context).requestQueue, App.provide(context).deviceInfo, account, docIds)
+        val endpoint = BulkDetailsEndpoint(context, Application.provide(context).requestQueue, Application.provide(context).deviceInfo, account, docIds)
         endpoint.listener = this
         endpoint.authToken = authSubToken
         endpoint.startAsync()

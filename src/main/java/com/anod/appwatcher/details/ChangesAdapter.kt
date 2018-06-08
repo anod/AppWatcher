@@ -8,7 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.anod.appwatcher.R
-import com.anod.appwatcher.model.AppChange
+import com.anod.appwatcher.database.entities.AppChange
 import info.anodsplace.framework.text.Html
 
 class ChangeView(itemView: View) : RecyclerView.ViewHolder(itemView) {

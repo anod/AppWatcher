@@ -1,9 +1,7 @@
 package com.anod.appwatcher.model
 
-import android.database.Cursor
-import com.anod.appwatcher.content.schema.AppListTable
+import com.anod.appwatcher.database.entities.AppListItem
 import info.anodsplace.framework.content.InstalledApps
-import info.anodsplace.framework.database.FilterCursor
 
 /**
  * @author alex
@@ -19,10 +17,12 @@ interface CountableFilter {
     fun resetNewCount()
 }
 
-interface AppListFilter: FilterCursor.CursorFilter, CountableFilter {
+interface AppListFilter: CountableFilter {
 
-    class None() : AppListFilter {
-        override fun filterRecord(cursor: Cursor): Boolean {
+    fun filterRecord(item: AppListItem): Boolean
+
+    class None : AppListFilter {
+        override fun filterRecord(item: AppListItem): Boolean {
             return false
         }
 
@@ -72,10 +72,10 @@ class AppListFilterInclusion(private val inclusion: Inclusion, private val insta
     override var recentlyUpdatedCount: Int = 0
         private set
 
-    override fun filterRecord(cursor: Cursor): Boolean {
-        val packageName = cursor.getString(AppListTable.Projection.packageName)
-        val status = cursor.getInt(AppListTable.Projection.status)
-        val versionCode = cursor.getInt(AppListTable.Projection.versionNumber)
+    override fun filterRecord(item: AppListItem): Boolean {
+        val packageName = item.app.packageName
+        val status = item.app.status
+        val versionCode = item.app.versionNumber
 
         val installedInfo = installedApps.packageInfo(packageName)
 
@@ -89,8 +89,7 @@ class AppListFilterInclusion(private val inclusion: Inclusion, private val insta
                 updatableNewCount++
             }
         } else if (status == AppInfoMetadata.STATUS_NORMAL) {
-            val isRecent = cursor.getInt(AppListTable.Projection.recentFlag) == 1
-            if (isRecent) {
+            if (item.recentFlag) {
                 recentlyUpdatedCount++
             }
         }

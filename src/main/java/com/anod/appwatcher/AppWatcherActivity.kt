@@ -11,6 +11,10 @@ import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.watchlist.*
 
 import info.anodsplace.framework.AppLog
+import com.crashlytics.android.Crashlytics
+import io.fabric.sdk.android.Fabric
+
+
 
 class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener, SearchView.OnQueryTextListener {
 
@@ -52,17 +56,17 @@ class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener,
                 sectionForAll(prefs),
                 null), title[Filters.TAB_ALL])
         adapter.addFragment(WatchListFragment.newInstance(
-                Filters.TAB_INSTALLED,
+                Filters.INSTALLED,
                 prefs.sortIndex,
-                WatchListFragment.DefaultSection(), null), title[Filters.TAB_INSTALLED])
+                WatchListFragment.DefaultSection(), null), title[Filters.INSTALLED])
         adapter.addFragment(WatchListFragment.newInstance(
-                Filters.TAB_UNINSTALLED,
+                Filters.UNINSTALLED,
                 prefs.sortIndex,
-                WatchListFragment.DefaultSection(), null), title[Filters.TAB_UNINSTALLED])
+                WatchListFragment.DefaultSection(), null), title[Filters.UNINSTALLED])
         adapter.addFragment(WatchListFragment.newInstance(
-                Filters.TAB_UPDATABLE,
+                Filters.UPDATABLE,
                 prefs.sortIndex,
-                WatchListFragment.DefaultSection(), null), title[Filters.TAB_UPDATABLE])
+                WatchListFragment.DefaultSection(), null), title[Filters.UPDATABLE])
         return adapter
     }
 

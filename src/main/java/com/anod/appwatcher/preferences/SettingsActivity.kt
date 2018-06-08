@@ -15,7 +15,7 @@ import com.anod.appwatcher.backup.ExportTask
 import com.anod.appwatcher.backup.ImportTask
 import com.anod.appwatcher.backup.gdrive.GDrive
 import com.anod.appwatcher.backup.gdrive.GDriveSignIn
-import com.anod.appwatcher.content.DbSchemaManager
+import com.anod.appwatcher.database.DbSchemaManager
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.userLog.UserLogActivity
 import info.anodsplace.framework.app.DialogItems
@@ -27,7 +27,6 @@ import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.SettingsActionBarActivity
 import info.anodsplace.framework.content.startActivityForResultSafely
-import info.anodsplace.framework.content.startActivitySafely
 import info.anodsplace.framework.playservices.GooglePlayServices
 import java.io.File
 import java.io.FileInputStream
@@ -52,7 +51,7 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
     private var recreateWatchlistOnBack: Boolean = false
 
     private val prefs: Preferences
-        get() = App.provide(this).prefs
+        get() = Application.provide(this).prefs
 
     override fun onBackPressed() {
         super.onBackPressed()
@@ -360,7 +359,7 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
         syncEnabledItem.enabled = true
         syncNowItem.enabled = true
         prefs.isDriveSyncEnabled = true
-        App.provide(this).uploadServiceContentObserver
+        Application.provide(this).uploadServiceContentObserver
         notifyDataSetChanged()
         isProgressVisible = false
 

@@ -5,16 +5,20 @@ import android.content.ContentUris
 import android.content.ContentValues
 import android.content.UriMatcher
 import android.database.SQLException
+import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteQueryBuilder
 import android.net.Uri
 import android.provider.BaseColumns
+import com.anod.appwatcher.Application
 
 import com.anod.appwatcher.BuildConfig
-import com.anod.appwatcher.model.Tag
-import com.anod.appwatcher.content.schema.AppListTable
-import com.anod.appwatcher.content.schema.AppTagsTable
-import com.anod.appwatcher.content.schema.ChangelogTable
-import com.anod.appwatcher.content.schema.TagsTable
+import com.anod.appwatcher.database.DbDataSource
+import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.database.AppListTable
+import com.anod.appwatcher.database.AppTagsTable
+import com.anod.appwatcher.database.ChangelogTable
+import com.anod.appwatcher.database.TagsTable
+import info.anodsplace.framework.AppLog
 
 open class DbContentProvider : ContentProvider() {
 
@@ -82,7 +86,9 @@ open class DbContentProvider : ContentProvider() {
         }
     }
 
-    private lateinit var dbSchemaManager: DbSchemaManager
+    private val dbSchemaManager: DbDataSource by lazy {
+        DbDataSource(Application.provide(context).database.openHelper)
+    }
 
     private fun matchQuery(uri: Uri): Query? {
         val matched = uriMatcher.match(uri)
@@ -228,7 +234,7 @@ open class DbContentProvider : ContentProvider() {
         }
 
         val db = dbSchemaManager.writableDatabase
-        val rowId = db.insert(query.table, null, values)
+        val rowId = db.insert(query.table, SQLiteDatabase.CONFLICT_REPLACE, values)
         if (rowId > 0 && query.notifyUri != null) {
             val noteUri = ContentUris.withAppendedId(query.notifyUri, rowId)
             context.contentResolver.notifyChange(noteUri, null)
@@ -238,7 +244,7 @@ open class DbContentProvider : ContentProvider() {
     }
 
     override fun onCreate(): Boolean {
-        dbSchemaManager = DbSchemaManager(context)
+        AppLog.d("Initializing ${Application.provide(context).database.openHelper.databaseName}")
         return false
     }
 
@@ -260,7 +266,8 @@ open class DbContentProvider : ContentProvider() {
         }
 
         val db = dbSchemaManager.writableDatabase
-        val cursor = queryBuilder.query(db, proj, sel, selArgs, query.groupBy, null, sortOrder, null) ?: return null
+        val sqlQuery = queryBuilder.buildQuery(proj, sel, query.groupBy, null, sortOrder, null)
+        val cursor = db.query(sqlQuery, selArgs)
 
 // Make sure that potential listeners are getting notified
         cursor.setNotificationUri(context.contentResolver, uri)
@@ -274,7 +281,7 @@ open class DbContentProvider : ContentProvider() {
         }
 
         val db = dbSchemaManager.writableDatabase
-        val count = db.update(query.table, values, query.selection, query.selectionArgs)
+        val count = db.update(query.table, SQLiteDatabase.CONFLICT_REPLACE, values, query.selection, query.selectionArgs)
         if (count > 0 && query.notifyUri != null) {
             context.contentResolver.notifyChange(query.notifyUri!!, null)
         }

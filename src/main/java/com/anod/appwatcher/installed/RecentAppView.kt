@@ -7,7 +7,7 @@ import android.widget.TextView
 import com.anod.appwatcher.R
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * @date 16/07/2017
  */
 class RecentAppView(context: Context, attrs: AttributeSet?, defStyleAttr: Int)

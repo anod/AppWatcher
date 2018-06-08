@@ -1,18 +1,16 @@
 package com.anod.appwatcher.tags
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import com.anod.appwatcher.R
-import com.anod.appwatcher.model.Tag
+import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.watchlist.WatchListFragment
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * *
  * @date 01/04/2017.
  */
@@ -25,11 +23,11 @@ class AppsTagListFragment : WatchListFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        val viewModel = section.viewModel(this)
         view.findViewById<Button>(android.R.id.button1)?.let {
-            it.setBackgroundColor(tag!!.color)
+            it.setBackgroundColor(viewModel.tag!!.color)
             it.setOnClickListener {
-                startActivityForResult(AppsTagSelectActivity.createIntent(tag!!, activity!!), REQUEST_TAGS_SELECT)
+                startActivityForResult(AppsTagSelectActivity.createIntent(viewModel.tag!!, activity!!), REQUEST_TAGS_SELECT)
             }
         }
     }

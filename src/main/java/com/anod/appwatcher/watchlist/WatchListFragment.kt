@@ -10,6 +10,7 @@ import android.support.v4.app.Fragment
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.util.SparseArray
 import android.util.SparseIntArray
 import android.view.LayoutInflater
 import android.view.View
@@ -17,6 +18,8 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.Toast
 import com.anod.appwatcher.*
+import com.anod.appwatcher.database.entities.App
+import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.details.DetailsActivity
 import com.anod.appwatcher.installed.ImportInstalledActivity
 import com.anod.appwatcher.model.*
@@ -29,19 +32,12 @@ import info.anodsplace.framework.widget.recyclerview.MergeRecyclerAdapter
 
 open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
 
-    protected lateinit var installedApps: InstalledApps
-
     private lateinit var listView: RecyclerView
     private lateinit var emptyView: View
     private var swipeLayout: SwipeRefreshLayout? = null
 
     lateinit var progress: ProgressBar
-    private lateinit var section: Section
-
-    protected var tag: Tag? = null
-    private var sortId: Int = 0
-    private var filterId: Int = 0
-    private var titleFilter = ""
+    lateinit var section: Section
 
     private val stateViewModel: WatchListStateViewModel by lazy { ViewModelProviders.of(activity!!).get(WatchListStateViewModel::class.java) }
 
@@ -49,36 +45,32 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         val adapter: MergeRecyclerAdapter
         var adapterIndexMap: SparseIntArray
         fun viewModel(fragment: WatchListFragment): WatchListViewModel
-        fun attach(fragment: WatchListFragment, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener, onLoadFinished: () -> Unit)
+        fun attach(fragment: WatchListFragment, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener)
+        fun onModelLoaded(result: LoadResult)
         val isEmpty: Boolean
     }
 
     private val prefs: Preferences by lazy {
-        App.provide(context!!).prefs
+        Application.provide(context!!).prefs
     }
 
     // Must have empty constructor
     open class DefaultSection: Section {
-        private var showRecentlyUpdated = false
         override var adapterIndexMap = SparseIntArray()
         override val adapter: MergeRecyclerAdapter by lazy { MergeRecyclerAdapter() }
 
-        override fun attach(fragment: WatchListFragment, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener, onLoadFinished: () -> Unit) {
+        override fun attach(fragment: WatchListFragment, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener) {
             val context = fragment.context!!
-            val viewModel = viewModel(fragment)
-            viewModel.showRecentlyUpdated = fragment.prefs.showRecentlyUpdated
             val index = adapter.add(AppInfoAdapter(context, installedApps, clickListener))
             adapterIndexMap.put(ADAPTER_WATCHLIST, index)
-
-            viewModel.appList.observe(fragment, Observer {
-                list ->
-                getInnerAdapter<AppInfoAdapter>(ADAPTER_WATCHLIST).updateList(list ?: emptyList())
-                onLoadFinished()
-            })
         }
 
         override fun viewModel(fragment: WatchListFragment): WatchListViewModel {
             return ViewModelProviders.of(fragment).get(WatchListViewModel::class.java)
+        }
+
+        override fun onModelLoaded(result: LoadResult) {
+            getInnerAdapter<AppInfoAdapter>(ADAPTER_WATCHLIST).updateList(result.appsList)
         }
 
         fun <T : RecyclerView.Adapter<*>> getInnerAdapter(id: Int): T {
@@ -136,24 +128,26 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         
         val metrics = resources.displayMetrics
         swipeLayout?.setDistanceToTriggerSync((16 * metrics.density).toInt())
-
         progress = view.findViewById(R.id.progress)
 
-        installedApps = InstalledApps.PackageManager(activity!!.packageManager)
+        val sortId = arguments!!.getInt(ARG_SORT)
+        val filterId = arguments!!.getInt(ARG_FILTER)
+        val tag: Tag? = arguments!!.getParcelable(ARG_TAG)
+
+        // Setup adapter for the section
+        section = sectionForClassName(arguments!!.getString(ARG_SECTION_PROVIDER))
+        val installedApps = InstalledApps.PackageManager(activity!!.packageManager)
+        section.attach(this, installedApps, this)
+
+        val viewModel = section.viewModel(this)
+        viewModel.init(sortId, tag, createFilter(filterId, installedApps), prefs)
 
         // Setup layout manager
         val layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
         listView.layoutManager = layoutManager
 
-        // Setup adapter for the sеction
-        section = sectionForClassName(arguments!!.getString(ARG_SECTION_PROVIDER))
-        section.attach(this, installedApps, this) {
-            progress.visibility = View.GONE
-            this.isListVisible = true
-        }
         // Setup header decorator
-        listView.addItemDecoration(HeaderItemDecorator(
-                section.viewModel(this).sections,
+        listView.addItemDecoration(HeaderItemDecorator(viewModel.sections,
                 this, context!!))
         listView.adapter = section.adapter
 
@@ -166,10 +160,6 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
 
         // Start out with a progress indicator.
         this.isListVisible = false
-
-        sortId = arguments!!.getInt(ARG_SORT)
-        filterId = arguments!!.getInt(ARG_FILTER)
-        tag = arguments!!.getParcelable(ARG_TAG)
 
         view.findViewById<View>(android.R.id.button1)?.setOnClickListener {
             val searchIntent = Intent(activity, MarketSearchActivity::class.java)
@@ -187,16 +177,14 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
             activity?.startActivitySafely(intent)
         }
 
-        section.viewModel(this).load(titleFilter, sortId, createFilter(filterId), tag)
-
         stateViewModel.sortId.observe(this, Observer {
-            this.sortId = it ?: 0
-            reload()
+            viewModel.sortId = it ?: 0
+            load()
         })
 
         stateViewModel.titleFilter.observe(this, Observer {
-            this.titleFilter = it ?: ""
-            reload()
+            viewModel.titleFilter = it ?: ""
+            load()
         })
 
         stateViewModel.listState.observe(this, Observer {
@@ -204,22 +192,39 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
                 is SyncStarted -> { swipeLayout?.isRefreshing = true }
                 else -> {
                     swipeLayout?.isRefreshing = false
-                    reload()
+                    load()
                 }
             }
         })
+
+        viewModel.appsDbChanged.observe(this, Observer {
+            load()
+        })
+
+        load()
     }
 
-    private fun createFilter(filterId: Int): AppListFilter {
-        when (filterId) {
-            Filters.TAB_INSTALLED -> return AppListFilterInclusion(AppListFilterInclusion.Installed(), installedApps)
-            Filters.TAB_UNINSTALLED -> return AppListFilterInclusion(AppListFilterInclusion.Uninstalled(), installedApps)
-            Filters.TAB_UPDATABLE -> return AppListFilterInclusion(AppListFilterInclusion.Updatable(), installedApps)
-            else -> return AppListFilterInclusion(AppListFilterInclusion.All(), installedApps)
+    private fun load() {
+        val viewModel = section.viewModel(this)
+        viewModel.load().observe(this, Observer {
+            val headers = it?.sections ?: SparseArray()
+            viewModel.sections.value = headers
+            section.onModelLoaded(it ?: LoadResult(emptyList(), headers))
+            progress.visibility = View.GONE
+            isListVisible = true
+        })
+    }
+
+    private fun createFilter(filterId: Int, installedApps: InstalledApps): AppListFilter {
+        return when (filterId) {
+            Filters.INSTALLED -> AppListFilterInclusion(AppListFilterInclusion.Installed(), installedApps)
+            Filters.UNINSTALLED -> AppListFilterInclusion(AppListFilterInclusion.Uninstalled(), installedApps)
+            Filters.UPDATABLE -> AppListFilterInclusion(AppListFilterInclusion.Updatable(), installedApps)
+            else -> AppListFilterInclusion(AppListFilterInclusion.All(), installedApps)
         }
     }
 
-    override fun onItemClick(app: AppInfo) {
+    override fun onItemClick(app: App) {
         val intent = Intent(activity, ChangelogActivity::class.java)
         intent.putExtra(DetailsActivity.EXTRA_APP_ID, app.appId)
         intent.putExtra(DetailsActivity.EXTRA_ROW_ID, app.rowId)
@@ -237,7 +242,7 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_APP_INFO && resultCode == Activity.RESULT_OK) {
             if (data!!.extras != null) {
-                reload()
+                load()
             }
         }
     }
@@ -247,10 +252,6 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         if (!isRefreshing && !(activity as WatchListActivity).requestRefresh()) {
             stateViewModel.listState.value = SyncStarted()
         }
-    }
-
-    internal fun reload() {
-        section.viewModel(this).load(titleFilter, sortId, createFilter(filterId), tag)
     }
 
     companion object {

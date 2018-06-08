@@ -25,13 +25,14 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
-import com.anod.appwatcher.App
+import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenAsync
 import com.anod.appwatcher.content.AddWatchAppAsyncTask
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.content.WatchAppList
+import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.model.*
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.*
@@ -49,20 +50,21 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
 
     override val themeRes: Int
         get() = Theme(this).themeChangelog
+    private var loaded = false
 
     val viewModel: DetailsViewModel by lazy { ViewModelProviders.of(this).get(DetailsViewModel::class.java) }
 
     private var addMenu: MenuItem? = null
     private val titleString: AlphaSpannableString by lazy {
         val span = AlphaForegroundColorSpan(ColorAttribute(android.R.attr.textColor, this, Color.WHITE).value)
-        AlphaSpannableString(viewModel.app!!.title, span)
+        AlphaSpannableString(viewModel.app.value!!.title, span)
     }
     private val subtitleString: AlphaSpannableString by lazy {
         val span = AlphaForegroundColorSpan(ColorAttribute(android.R.attr.textColor, this, Color.WHITE).value)
-        AlphaSpannableString(viewModel.app!!.uploadDate, span)
+        AlphaSpannableString(viewModel.app.value!!.uploadDate, span)
     }
 
-    val iconLoader: PicassoAppIcon by lazy { App.provide(this).iconLoader }
+    val iconLoader: PicassoAppIcon by lazy { Application.provide(this).iconLoader }
     private val dataProvider: AppViewHolderResourceProvider by lazy { AppViewHolderResourceProvider(this, InstalledApps.PackageManager(packageManager)) }
     private val appDetailsView: AppDetailsView by lazy { AppDetailsView(container, dataProvider) }
     val adapter: ChangesAdapter by lazy { ChangesAdapter(this) }
@@ -73,9 +75,9 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val appId = intent.getStringExtra(EXTRA_APP_ID) ?: ""
-        val detailsUrl = intent.getStringExtra(EXTRA_DETAILS_URL) ?: ""
-        val rowId = intent.getIntExtra(EXTRA_ROW_ID, -1)
+        viewModel.appId = intent.getStringExtra(EXTRA_APP_ID) ?: ""
+        viewModel.detailsUrl = intent.getStringExtra(EXTRA_DETAILS_URL) ?: ""
+        viewModel.rowId = intent.getIntExtra(EXTRA_ROW_ID, -1)
 
         progressBar.visibility = View.GONE
         error.visibility = View.GONE
@@ -92,14 +94,11 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
             }, 500)
         }
 
-        viewModel.detailsUrl = detailsUrl
-        viewModel.appId = appId
-        viewModel.loadApp(rowId, appId)
 
-        if (viewModel.app == null) {
-            Toast.makeText(this, getString(R.string.cannot_load_app, appId), Toast.LENGTH_LONG).show()
-            AppLog.e("Cannot loadChangelog app details: '$appId'")
-            App.log(this).error("Cannot loadChangelog details for $appId")
+        if (viewModel.appId.isEmpty()) {
+            Toast.makeText(this, getString(R.string.cannot_load_app, viewModel.appId), Toast.LENGTH_LONG).show()
+            AppLog.e("Cannot loadChangelog app details: '${viewModel.appId}'")
+            Application.log(this).error("Cannot loadChangelog details for ${viewModel.appId}")
             finish()
             return
         }
@@ -126,9 +125,21 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
             }
         })
 
-        setupAppView(viewModel.app!!)
-        list.layoutManager = LinearLayoutManager(this)
-        list.adapter = adapter
+        viewModel.app.observe(this, Observer { app ->
+            if (app == null) {
+                Toast.makeText(this, getString(R.string.cannot_load_app, viewModel.appId), Toast.LENGTH_LONG).show()
+                AppLog.e("Cannot loadChangelog app details: '${viewModel.appId}'")
+                Application.log(this).error("Cannot loadChangelog details for ${viewModel.appId}")
+                finish()
+            } else {
+                loaded = true
+                setupAppView(app)
+                list.layoutManager = LinearLayoutManager(this)
+                list.adapter = adapter
+            }
+        })
+
+        viewModel.loadApp()
     }
 
     override fun onResume() {
@@ -144,17 +155,17 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
                 }
 
                 override fun onError(errorMessage: String) {
-                    App.log(this@DetailsActivity).error(errorMessage)
+                    Application.log(this@DetailsActivity).error(errorMessage)
                     viewModel.loadRemoteChangelog()
                 }
             })
         }
     }
 
-    private fun setupAppView(app: AppInfo) {
+    private fun setupAppView(app: App) {
         playStoreButton.setOnClickListener(this)
 
-        appDetailsView.fillDetails(app, app.rowId == -1)
+        appDetailsView.fillDetails(app, false, "", app.rowId == -1)
         supportActionBar?.title = titleString
 
         if (app.iconUrl.isEmpty()) {
@@ -240,7 +251,7 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
         when (item.itemId) {
             R.id.menu_remove -> {
                 val removeDialog = RemoveDialogFragment.newInstance(
-                        viewModel.app!!.title, viewModel.app!!.rowId
+                        viewModel.app.value!!.title, viewModel.app.value!!.rowId
                 )
                 removeDialog.show(supportFragmentManager, "removeDialog")
                 return true
@@ -295,7 +306,7 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
     }
 
     private fun shareApp() {
-        val appInfo = this.viewModel.app ?: return
+        val appInfo = this.viewModel.app.value ?: return
         val builder = ShareCompat.IntentBuilder.from(this)
 
         val changes = if (viewModel.recentChange.details.isBlank()) "" else "${viewModel.recentChange.details}\n\n"
@@ -312,7 +323,7 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
         error.visibility = View.VISIBLE
         list.visibility = View.GONE
 
-        if (!App.provide(this).networkConnection.isNetworkAvailable) {
+        if (!Application.provide(this).networkConnection.isNetworkAvailable) {
             Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()
         }
     }
@@ -350,7 +361,7 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
     override fun onClick(v: View) {
         val id = v.id
         if (id == R.id.playStoreButton) {
-            val intent = Intent().forPlayStore(viewModel.app!!.packageName)
+            val intent = Intent().forPlayStore(viewModel.app.value!!.packageName)
             this.startActivitySafely(intent)
         }
     }
@@ -375,9 +386,14 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
 
     private val mainHandler = Handler(Looper.getMainLooper())
 
+
     override fun onOffsetChanged(appBarLayout: AppBarLayout, verticalOffset: Int) {
         val totalScrollRange = appBarLayout.totalScrollRange.toFloat()
         val alpha = 1.0f - Math.abs(verticalOffset.toFloat() / totalScrollRange)
+
+        if (!loaded) {
+            return
+        }
 
         header.alpha = alpha
         playStoreButton.alpha = alpha

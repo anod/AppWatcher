@@ -10,7 +10,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import com.android.volley.VolleyError
-import com.anod.appwatcher.App
+import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AccountSelectionDialog
 import com.anod.appwatcher.accounts.AuthTokenAsync
@@ -42,7 +42,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
     private var account: Account? = null
 
     val accountSelectionDialog: AccountSelectionDialog by lazy {
-        AccountSelectionDialog(this, App.provide(this).prefs, this)
+        AccountSelectionDialog(this, Application.provide(this).prefs, this)
     }
     private var searchQuery = ""
     private var hasFocus = false
@@ -65,7 +65,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
 
         initFromIntent(intent)
 
-        val account = App.provide(this).prefs.account
+        val account = Application.provide(this).prefs.account
         if (account== null) {
             accountSelectionDialog.show()
         } else {
@@ -101,8 +101,8 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
         showLoading()
 
         if (searchQuery.isNotEmpty()) {
-            val requestQueue = App.provide(this).requestQueue
-            val deviceInfo = App.provide(this).deviceInfo
+            val requestQueue = Application.provide(this).requestQueue
+            val deviceInfo = Application.provide(this).deviceInfo
             if (isPackageSearch) {
                 val detailsUrl = AppInfo.createDetailsUrl(searchQuery)
                 endpoints.put(DETAILS_ENDPOINT_ID, DetailsEndpoint(this, requestQueue, deviceInfo, account, detailsUrl))
@@ -185,7 +185,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
             }
 
             override fun onError(errorMessage: String) {
-                if (App.provide(this@SearchActivity).networkConnection.isNetworkAvailable) {
+                if (Application.provide(this@SearchActivity).networkConnection.isNetworkAvailable) {
                     Toast.makeText(this@SearchActivity, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
                 } else {
                     Toast.makeText(this@SearchActivity, R.string.check_connection, Toast.LENGTH_SHORT).show()
@@ -196,7 +196,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
     }
 
     override fun onAccountNotFound(errorMessage: String) {
-        if (App.provide(this).networkConnection.isNetworkAvailable) {
+        if (Application.provide(this).networkConnection.isNetworkAvailable) {
             if (errorMessage.isNotBlank()) {
                 Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
             } else {
@@ -295,7 +295,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
     }
 
     override fun onErrorResponse(id: Int, endpoint: PlayStoreEndpointBase, error: VolleyError) {
-        if (!App.provide(this).networkConnection.isNetworkAvailable) {
+        if (!Application.provide(this).networkConnection.isNetworkAvailable) {
             loading.visibility = View.GONE
             showRetryButton()
             Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()

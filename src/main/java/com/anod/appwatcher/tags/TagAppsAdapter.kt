@@ -7,17 +7,19 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckedTextView
 import android.widget.ImageView
-import com.anod.appwatcher.App
+import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
+import com.anod.appwatcher.database.entities.App
+import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.utils.PicassoAppIcon
 
 internal class TagAppsAdapter(private val context: Context, private val tagAppsImport: TagAppsImport)
     : RecyclerView.Adapter<TagAppsAdapter.ItemViewHolder>() {
 
-    private var apps: List<AppInfo> = emptyList()
+    private var apps: List<AppListItem> = emptyList()
 
-    fun setData(apps: List<AppInfo>) {
+    fun setData(apps: List<AppListItem>) {
         this.apps = apps
         notifyDataSetChanged()
     }
@@ -35,7 +37,7 @@ internal class TagAppsAdapter(private val context: Context, private val tagAppsI
         return apps.size
     }
 
-    private val mIconLoader: PicassoAppIcon = App.provide(context).iconLoader
+    private val mIconLoader: PicassoAppIcon = Application.provide(context).iconLoader
 
     internal class ItemViewHolder(
             itemView: View,
@@ -45,14 +47,14 @@ internal class TagAppsAdapter(private val context: Context, private val tagAppsI
         val title: CheckedTextView = itemView.findViewById(android.R.id.title)
         val icon: ImageView = itemView.findViewById(android.R.id.icon)
 
-        private var app: AppInfo? = null
+        private var app: App? = null
 
-        fun bindView(app: AppInfo) {
-            this.app = app
-            this.title.text = app.title
-            this.title.isChecked = tagAppsImport.isSelected(app.appId)
+        fun bindView(item: AppListItem) {
+            this.app = item.app
+            this.title.text = item.app.title
+            this.title.isChecked = tagAppsImport.isSelected(item.app.appId)
             this.itemView.findViewById<View>(android.R.id.content).setOnClickListener(this)
-            mIconLoader.loadAppIntoImageView(app, this.icon, R.drawable.ic_notifications_black_24dp)
+            mIconLoader.loadAppIntoImageView(item.app, this.icon, R.drawable.ic_notifications_black_24dp)
         }
 
         override fun onClick(v: View) {

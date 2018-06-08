@@ -1,5 +1,7 @@
 package info.anodsplace.framework.content
 
+import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MutableLiveData
 import android.content.ComponentName
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
@@ -10,6 +12,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.util.DisplayMetrics
 import info.anodsplace.framework.AppLog
+import info.anodsplace.framework.os.BackgroundTask
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
@@ -22,6 +25,20 @@ import java.util.*
  */
 
 typealias PackageWithCode = Pair<String, Int>
+
+class InstalledPackage(val packageName: String, val versionCode: Int, val title: String, val updateTime: Long)
+
+class AppTitleComparator(private val order: Int) : Comparator<InstalledPackage> {
+    override fun compare(lPackage: InstalledPackage, rPackage: InstalledPackage): Int {
+        return order * lPackage.title.compareTo(rPackage.title)
+    }
+}
+
+class AppUpdateTimeComparator(private val order: Int) : Comparator<InstalledPackage> {
+    override fun compare(lPackage: InstalledPackage, rPackage: InstalledPackage): Int {
+        return order * lPackage.updateTime.compareTo(rPackage.updateTime)
+    }
+}
 
 fun PackageManager.loadIcon(componentName: ComponentName, displayMetrics: DisplayMetrics): Bitmap? {
     var d: Drawable? = null
@@ -91,6 +108,12 @@ fun PackageManager.getInstalledPackagesCompat(): List<PackageWithCode> {
         downloaded.add(Pair(packageInfo.packageName, packageInfo.versionCode))
     }
     return downloaded
+}
+
+fun PackageManager.getInstalledPackages(): List<InstalledPackage> {
+    return getInstalledPackagesCompat().map {
+                InstalledPackage(it.first, it.second, getAppTitle(it.first), getAppUpdateTime(it.first))
+            }
 }
 
 private fun getInstalledPackagesFallback(): List<PackageWithCode> {

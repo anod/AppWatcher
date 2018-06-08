@@ -2,7 +2,7 @@ package com.anod.appwatcher.sync
 
 import android.content.Intent
 import android.os.Bundle
-import com.anod.appwatcher.App
+import com.anod.appwatcher.Application
 import com.anod.appwatcher.content.DbContentProvider
 import com.firebase.jobdispatcher.JobParameters
 import com.firebase.jobdispatcher.JobService
@@ -24,7 +24,7 @@ class SyncTaskService : JobService() {
                 val contentProviderClient = contentResolver.acquireContentProviderClient(DbContentProvider.authority)
 
                 val extras = job.extras ?: Bundle.EMPTY
-                return syncAdapter.perform(extras, contentProviderClient, App.log(applicationContext))
+                return syncAdapter.perform(extras, contentProviderClient, Application.log(applicationContext))
             }
 
             override fun finished(result: Int) {

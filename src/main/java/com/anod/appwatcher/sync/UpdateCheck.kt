@@ -10,18 +10,18 @@ import android.provider.BaseColumns
 import android.text.TextUtils
 import android.text.format.DateUtils
 import com.android.volley.VolleyError
-import com.anod.appwatcher.App
+import com.anod.appwatcher.Application
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.backup.gdrive.GDriveSilentSignIn
 import com.anod.appwatcher.backup.gdrive.SyncConnectedWorker
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.DbContentProviderClient
-import com.anod.appwatcher.model.AppChange
+import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
-import com.anod.appwatcher.content.schema.AppListTable
-import com.anod.appwatcher.content.schema.ChangelogTable
-import com.anod.appwatcher.content.schema.contentValues
+import com.anod.appwatcher.database.AppListTable
+import com.anod.appwatcher.database.ChangelogTable
+import com.anod.appwatcher.database.contentValues
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.userLog.UserLogger
 import com.anod.appwatcher.utils.extractUploadDate
@@ -58,7 +58,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         const val extrasUpdatesCount = "extra_updates_count"
     }
 
-    private val preferences = App.provide(context).prefs
+    private val preferences = Application.provide(context).prefs
     private val installedAppsProvider = InstalledApps.PackageManager(context.packageManager)
 
     fun perform(extras: Bundle, provider: ContentProviderClient, userLogger: UserLogger): Int {
@@ -67,7 +67,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         userLogger.info("Perform ${ if (manualSync) "manual" else "scheduled" } sync")
         // Skip any check if sync requested from application
         if (!manualSync) {
-            if (preferences.isWifiOnly && !App.provide(context).networkConnection.isWifiEnabled) {
+            if (preferences.isWifiOnly && !Application.provide(context).networkConnection.isWifiEnabled) {
                 userLogger.info("Wifi not enabled, skipping update check...")
                 AppLog.d("Wifi not enabled, skipping update check....")
                 return -1
@@ -86,7 +86,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
             return -1
         }
 
-        if (!App.provide(context).networkConnection.isNetworkAvailable) {
+        if (!Application.provide(context).networkConnection.isNetworkAvailable) {
             AppLog.d("Network is not available, skipping sync...")
             userLogger.error("Network is not available, skipping sync...")
             return -1
@@ -162,7 +162,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
 
         val apps = client.queryAll(false)
         if (apps.isEmpty) {
-            App.log(context.actual).info("Sync finished: no apps")
+            Application.log(context.actual).info("Sync finished: no apps")
             return listOf()
         }
 
@@ -177,14 +177,14 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
             try {
                 endpoint.startSync()
             } catch (e: VolleyError) {
-                App.log(context.actual).error("Fetching of bulk updates failed ${e.message ?: ""}")
+                Application.log(context.actual).error("Fetching of bulk updates failed ${e.message ?: ""}")
             }
             AppLog.d("Sent ${docIds.size}. Received ${endpoint.documents.size}")
             updateApps(endpoint.documents, localApps, client, updatedTitles, lastUpdatesViewed)
         }
 
         apps.close()
-        App.log(context.actual).info("Sync finished for ${apps.count} apps")
+        Application.log(context.actual).info("Sync finished for ${apps.count} apps")
         return updatedTitles
     }
 
@@ -268,7 +268,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
             localApp.status = AppInfoMetadata.STATUS_NORMAL
             values.put(AppListTable.Columns.status, AppInfoMetadata.STATUS_NORMAL)
         } else if (localApp.status == AppInfoMetadata.STATUS_UPDATED) {
-            // App was previously updated
+            // Application was previously updated
             val installedInfo = installedAppsProvider.packageInfo(appDetails.packageName)
             val recentChanges = if (updates.isEmpty()) appDetails.recentChangesHtml ?: "" else ""
             updates.add(UpdatedApp(localApp, recentChanges, installedInfo.versionCode,false))
@@ -350,7 +350,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
     }
 
     private fun createEndpoint(docIds: List<BulkDocId>, authToken: String, account: Account): BulkDetailsEndpoint {
-        val endpoint = BulkDetailsEndpoint(context.actual, App.provide(context).requestQueue, App.provide(context).deviceInfo, account, docIds)
+        val endpoint = BulkDetailsEndpoint(context.actual, Application.provide(context).requestQueue, Application.provide(context).deviceInfo, account, docIds)
         endpoint.authToken = authToken
         endpoint.listener = this
         return endpoint

@@ -10,7 +10,7 @@ import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * @date 26/06/2017
  */
 class UploadConnectedWorker(private val context: ApplicationContext, private val googleAccount: GoogleSignInAccount) {
