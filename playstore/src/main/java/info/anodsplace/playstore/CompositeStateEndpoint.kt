@@ -4,7 +4,7 @@ import com.android.volley.VolleyError
 import finsky.api.model.DfeModel
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * *
  * @date 27/08/2016.
  */

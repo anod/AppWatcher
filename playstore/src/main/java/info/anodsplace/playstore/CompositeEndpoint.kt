@@ -3,7 +3,7 @@ package info.anodsplace.playstore
 import android.support.v4.util.SparseArrayCompat
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * *
  * @date 27/08/2016.
  */

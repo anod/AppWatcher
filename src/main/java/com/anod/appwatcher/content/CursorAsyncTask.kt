@@ -11,7 +11,7 @@ import info.anodsplace.framework.database.CursorIterator
 import info.anodsplace.framework.database.NullCursor
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * @date 19/04/2018
  */
 abstract class CursorAsyncTask<R, out CR : CursorIterator<R>>(

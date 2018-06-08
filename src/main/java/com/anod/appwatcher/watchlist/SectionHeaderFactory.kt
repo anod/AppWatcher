@@ -4,7 +4,7 @@ import android.util.SparseArray
 import androidx.core.util.set
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * @date 02/06/2018
  */
 class SectionHeaderFactory(

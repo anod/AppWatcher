@@ -5,7 +5,7 @@ import android.content.Intent
 import android.net.Uri
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * @date 14/02/2018
  */
 object Storeintent {

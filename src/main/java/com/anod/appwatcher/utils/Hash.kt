@@ -3,7 +3,7 @@ package com.anod.appwatcher.utils
 import java.security.MessageDigest
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * @date 20/02/2018
  */
 class Hash(private val source: String, private val type: String) {

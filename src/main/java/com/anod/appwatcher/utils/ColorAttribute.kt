@@ -7,7 +7,7 @@ import android.support.v4.content.ContextCompat
 import android.util.TypedValue
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * @date 09-Mar-18
  */
 class ColorAttribute(@AttrRes private val attributeId: Int, private val context: Context, @ColorInt private val fallbackColor: Int) {

@@ -8,7 +8,7 @@ import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.os.BackgroundTask
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * @date 26/10/2017
  */
 class AuthTokenAsync(private val authTokenBlocking: AuthTokenBlocking) {

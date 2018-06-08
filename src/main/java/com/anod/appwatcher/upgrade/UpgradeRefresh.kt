@@ -14,7 +14,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import info.anodsplace.framework.app.ApplicationContext
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * @date 02-Mar-18
  */
 class UpgradeRefresh(val prefs: Preferences,val activity: Activity) : UpgradeTask {

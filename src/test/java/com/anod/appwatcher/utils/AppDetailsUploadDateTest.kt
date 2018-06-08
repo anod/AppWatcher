@@ -17,7 +17,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.fail
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * *
  * @date 03/03/2017.
  */

@@ -1,7 +1,7 @@
 package com.anod.appwatcher.upgrade
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * @date 02-Mar-18
  */
 interface UpgradeTask {

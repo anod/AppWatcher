@@ -4,7 +4,7 @@ import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.preferences.Preferences
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * *
  * @date 08/10/2016.
  */

@@ -6,7 +6,7 @@ import android.provider.BaseColumns
 import com.anod.appwatcher.database.AppListTable
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * @date 26/05/2018
  */
 data class PackageRowPair(

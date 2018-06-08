@@ -8,7 +8,7 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.model.AppInfo
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * *
  * @date 02/05/2017.
  */

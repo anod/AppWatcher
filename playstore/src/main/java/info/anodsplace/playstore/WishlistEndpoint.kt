@@ -8,7 +8,7 @@ import finsky.api.model.DfeList
 import finsky.api.model.DfeModel
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * *
  * @date 16/12/2016.
  */

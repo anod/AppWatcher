@@ -16,7 +16,7 @@ import com.anod.appwatcher.utils.UpdateAll
 import info.anodsplace.framework.view.MenuItemAnimation
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * @date 03/12/2017
  */
 class WatchListMenu(private var searchListener: SearchView.OnQueryTextListener, private var activity: WatchListActivity): SearchView.OnQueryTextListener {

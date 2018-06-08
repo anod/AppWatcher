@@ -6,7 +6,7 @@ import java.io.IOException
 import java.io.Reader
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * *
  * @date 29/04/2017.
  */

@@ -8,7 +8,7 @@ import info.anodsplace.framework.app.DialogMessage
 import info.anodsplace.framework.content.startActivitySafely
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * @date 10-Mar-18
  */
 class UpdateAll(private val context: Context, private val prefs: Preferences) {

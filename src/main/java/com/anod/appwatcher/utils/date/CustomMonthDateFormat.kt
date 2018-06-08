@@ -6,7 +6,7 @@ import java.text.ParsePosition
 import java.util.*
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * *
  * @date 12/09/2016.
  */

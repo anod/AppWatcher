@@ -10,7 +10,7 @@ import info.anodsplace.framework.app.DialogCustom
 
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * @date 02-Mar-18
  */
 class SetupInterfaceUpgrade(val prefs: Preferences, val context: Context): UpgradeTask {

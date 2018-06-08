@@ -10,7 +10,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * @date 03/01/2018
  */
 

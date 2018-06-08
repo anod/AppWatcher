@@ -8,7 +8,7 @@ import info.anodsplace.framework.AppLog
 import java.util.concurrent.ExecutionException
 
 /**
-* @author algavris
+* @author Alex Gavrishev
 * @date 17-Feb-18
 */
 class DfeSync<out T: DfeRequestModel>(val dfeModel: T): DfeRequestModel() {

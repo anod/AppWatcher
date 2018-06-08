@@ -7,7 +7,7 @@ import finsky.api.model.Document
 import info.anodsplace.playstore.DetailsEndpoint
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * *
  * @date 26/08/2016.
  */

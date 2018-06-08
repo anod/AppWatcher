@@ -8,7 +8,7 @@ import finsky.api.model.Document
 import info.anodsplace.playstore.WishlistEndpoint
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * *
  * @date 16/12/2016.
  */

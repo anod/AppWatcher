@@ -14,7 +14,7 @@ import java.io.IOException
 import java.io.OutputStreamWriter
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * @date 26/06/2017
  */
 class DriveIdFile(private val file: FileDescription, private val driveClient: DriveResourceClient) {

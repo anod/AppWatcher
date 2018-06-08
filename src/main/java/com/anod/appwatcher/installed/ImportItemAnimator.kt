@@ -11,7 +11,7 @@ import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 
 /**
- * @author algavris
+ * @author Alex Gavrishev
  * *
  * @date 24/04/2016.
  */
