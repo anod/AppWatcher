@@ -1,6 +1,8 @@
 package com.anod.appwatcher.database
 
+import android.arch.lifecycle.LiveData
 import android.arch.persistence.room.Dao
+import android.arch.persistence.room.Query
 import android.content.ContentValues
 import android.provider.BaseColumns
 import com.anod.appwatcher.database.entities.AppTag
@@ -13,6 +15,9 @@ import com.anod.appwatcher.database.entities.AppTag
 @Dao
 interface AppTagsTable {
 
+    @Query("SELECT * FROM ${AppTagsTable.table} WHERE ${Columns.tagId} = :tagId")
+    fun load(tagId: Int): LiveData<List<AppTag>>
+
     class Columns : BaseColumns {
         companion object {
             const val appId = "app_id"
@@ -22,8 +27,8 @@ interface AppTagsTable {
 
     object TableColumns {
         const val _ID = table + "." + BaseColumns._ID
-        const val appId = table + ".app_id"
-        const val tagId = table + ".tags_id"
+        const val appId = "$table.app_id"
+        const val tagId = "$table.tags_id"
     }
 
     object Projection {

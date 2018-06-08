@@ -1,7 +1,6 @@
 package com.anod.appwatcher.tags
 
 import android.app.Activity
-import android.app.Application
 import android.arch.lifecycle.*
 import android.content.Context
 import android.content.Intent
@@ -12,19 +11,16 @@ import android.support.v7.widget.SearchView
 import android.view.Menu
 import android.view.View
 import com.anod.appwatcher.AppWatcherApplication
+import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
-import com.anod.appwatcher.model.*
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.database.entities.AppTag
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.Theme
-import com.anod.appwatcher.watchlist.AppsList
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.app.ToolbarActivity
-import info.anodsplace.framework.content.InstalledApps
-import info.anodsplace.framework.livedata.OneTimeObserver
 import info.anodsplace.framework.os.BackgroundTask
 import info.anodsplace.framework.view.Keyboard
 import kotlinx.android.synthetic.main.activity_tag_select.*
@@ -35,37 +31,18 @@ import kotlinx.android.synthetic.main.activity_tag_select.*
  * @date 19/04/2016.
  */
 
-class AppsTagViewModel(application: Application): AndroidViewModel(application) {
+class AppsTagViewModel(application: android.app.Application): AndroidViewModel(application) {
     private val context = ApplicationContext(getApplication<AppWatcherApplication>())
     val titleFilter = MutableLiveData<String>()
     lateinit var tag: Tag
-    var appList = MutableLiveData<List<AppListItem>>()
-    var appTags = MutableLiveData<List<AppTag>>()
 
-    fun init() {
-        loadTags()
-        loadApps()
+    fun loadTags(): LiveData<List<AppTag>> {
+        return Application.provide(context).database.appTags().load(tag.id)
     }
 
-    private fun loadTags() {
-        TagAppsAsyncTask(context, tag, {
-            this.appTags.value = it
-        }).execute()
-    }
-
-    fun loadApps() {
-        val context = ApplicationContext(getApplication<AppWatcherApplication>())
-
-        val appsTable = com.anod.appwatcher.Application.provide(context).database.apps()
-        val mediator = MediatorLiveData<List<AppListItem>>()
-        val list = AppListTable.Queries.loadAppList( Preferences.Companion.SORT_NAME_ASC,titleFilter.value ?: "", appsTable)
-        mediator.addSource(list, { it ->
-            mediator.value = it
-            mediator.removeSource(list)
-        })
-        mediator.observeForever(OneTimeObserver(mediator, Observer {
-            this.appList.value = it
-        }))
+    fun loadApps(): LiveData<List<AppListItem>> {
+        val appsTable = Application.provide(context).database.apps()
+        return AppListTable.Queries.loadAppList( Preferences.SORT_NAME_ASC,titleFilter.value ?: "", appsTable)
     }
 }
 
@@ -115,18 +92,20 @@ class AppsTagSelectActivity : ToolbarActivity() {
             }).execute()
         }
 
-        viewModel.init()
-
         viewModel.titleFilter.observe(this, Observer {
-            viewModel.loadApps()
+            loadApps()
         })
 
-        viewModel.appTags.observe(this, Observer {
+        viewModel.loadTags().observe(this, Observer {
             tagAppsImport.initSelected(it ?: emptyList())
             list.adapter = adapter
         })
 
-        viewModel.appList.observe(this, Observer {
+        loadApps()
+    }
+
+    private fun loadApps() {
+        viewModel.loadApps().observe(this, Observer {
             progress.visibility = View.GONE
             adapter.setData(it ?: emptyList())
         })

@@ -36,20 +36,21 @@ interface AppListTable {
     object Queries {
 
         fun loadAppList(sortId: Int, titleFilter: String, table: AppListTable): LiveData<List<AppListItem>> {
-            return loadAppList(sortId, titleFilter, table)
+            return loadAppList(sortId, null, titleFilter, table)
         }
 
         fun loadAppList(sortId: Int, tag: Tag?, titleFilter: String, table: AppListTable): LiveData<List<AppListItem>> {
+            val tables = if (tag == null) AppListTable.table else AppTagsTable.table + ", " + AppListTable.table
             val selection = createSelection(tag, titleFilter)
 
             val sql = "SELECT ${AppListTable.table}.*, ${ChangelogTable.TableColumns.details}, " +
                     "CASE WHEN ${Columns.updateTimestamp} > $recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
-                    "FROM ${AppListTable.table} " +
+                    "FROM $tables " +
                     "LEFT JOIN ${ChangelogTable.table} ON " +
                     "${TableColumns.appId} == ${ChangelogTable.TableColumns.appId} " +
                     "AND ${TableColumns.versionNumber} == ${ChangelogTable.TableColumns.versionCode} " +
-                    "WHERE ${selection.first}" +
-                    "ORDER BY ${createSortOrder(sortId)}"
+                    "WHERE ${selection.first} " +
+                    "ORDER BY ${createSortOrder(sortId)} "
             return table.loadAppList(SimpleSQLiteQuery(sql, selection.second))
         }
 
