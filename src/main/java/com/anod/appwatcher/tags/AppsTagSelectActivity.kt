@@ -37,7 +37,7 @@ class AppsTagViewModel(application: android.app.Application): AndroidViewModel(a
     lateinit var tag: Tag
 
     fun loadTags(): LiveData<List<AppTag>> {
-        return Application.provide(context).database.appTags().load(tag.id)
+        return Application.provide(context).database.appTags().forTag(tag.id)
     }
 
     fun loadApps(): LiveData<List<AppListItem>> {

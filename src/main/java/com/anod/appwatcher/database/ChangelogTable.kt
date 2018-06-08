@@ -1,5 +1,6 @@
 package com.anod.appwatcher.database
 
+import android.arch.lifecycle.LiveData
 import android.arch.persistence.room.Dao
 import android.arch.persistence.room.Insert
 import android.arch.persistence.room.OnConflictStrategy
@@ -16,10 +17,10 @@ import com.anod.appwatcher.database.entities.AppChange
 @Dao
 interface ChangelogTable {
 
-    @Query("SELECT * FROM $table WHERE ${ChangelogTable.Columns.appId} == :appId")
-    fun ofApp(appId: String): List<AppChange>
+    @Query("SELECT * FROM $table WHERE ${Columns.appId} == :appId ORDER BY ${Columns.versionCode} DESC")
+    fun ofApp(appId: String): LiveData<List<AppChange>>
 
-    @Query("SELECT * FROM $table WHERE ${ChangelogTable.Columns.appId} == :appId AND ${ChangelogTable.Columns.versionCode} == :versionCode")
+    @Query("SELECT * FROM $table WHERE ${Columns.appId} == :appId AND ${Columns.versionCode} == :versionCode")
     fun forVersion(appId: String, versionCode: Int): AppChange?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

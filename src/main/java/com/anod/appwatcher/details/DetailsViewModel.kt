@@ -3,6 +3,7 @@ package com.anod.appwatcher.details
 import android.accounts.Account
 import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.Observer
 import com.android.volley.VolleyError
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.content.DbContentProviderClient
@@ -14,6 +15,7 @@ import finsky.api.model.DfeDetails
 import finsky.api.model.DfeModel
 import finsky.api.model.Document
 import info.anodsplace.framework.app.ApplicationContext
+import info.anodsplace.framework.livedata.OneTimeObserver
 import info.anodsplace.framework.os.BackgroundTask
 import info.anodsplace.framework.os.CachedBackgroundTask
 import info.anodsplace.playstore.DetailsEndpoint
@@ -96,10 +98,11 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
             this.updateChangelogState(LocalComplete())
             return
         }
-        ChangesAsyncTask(ApplicationContext(getApplication()), appId, {
-            this.localChangelog = it
+        val changes = Application.provide(context).database.changelog().ofApp(appId)
+        changes.observeForever(OneTimeObserver(changes, Observer {
+            this.localChangelog = it ?: emptyList()
             this.updateChangelogState(LocalComplete())
-        }).execute()
+        }))
     }
 
     fun loadRemoteChangelog() {

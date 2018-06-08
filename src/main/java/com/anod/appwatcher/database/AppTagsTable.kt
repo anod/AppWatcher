@@ -16,7 +16,7 @@ import com.anod.appwatcher.database.entities.AppTag
 interface AppTagsTable {
 
     @Query("SELECT * FROM ${AppTagsTable.table} WHERE ${Columns.tagId} = :tagId")
-    fun load(tagId: Int): LiveData<List<AppTag>>
+    fun forTag(tagId: Int): LiveData<List<AppTag>>
 
     class Columns : BaseColumns {
         companion object {
