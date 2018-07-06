@@ -123,6 +123,7 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:3.10.0'
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'com.android.support:exifinterface:27.1.1' // picasso
+    implementation 'com.jakewharton:process-phoenix:2.0.0'
 
     // ViewModel and LiveData
     implementation "android.arch.lifecycle:extensions:1.1.1"

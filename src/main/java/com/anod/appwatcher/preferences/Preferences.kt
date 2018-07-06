@@ -1,6 +1,7 @@
 package com.anod.appwatcher.preferences
 
 import android.accounts.Account
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.support.v7.app.AppCompatDelegate
@@ -132,6 +133,11 @@ class Preferences(context: Context) : DeviceIdStorage {
     var enablePullToRefresh: Boolean
         get() = preferences.getBoolean("pull-to-refresh", true)
         set(value) = preferences.edit().putBoolean("pull-to-refresh", value).apply()
+
+    var collectCrashReports: Boolean
+        get() = preferences.getBoolean("crash-reports", true)
+        @SuppressLint("ApplySharedPref")
+        set(value) { preferences.edit().putBoolean("crash-reports", value).commit() }
 
     companion object {
         private const val VIEWED = "viewed"

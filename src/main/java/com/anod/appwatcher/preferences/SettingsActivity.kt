@@ -24,6 +24,7 @@ import com.anod.appwatcher.utils.Theme
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
+import com.jakewharton.processphoenix.ProcessPhoenix
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.SettingsActionBarActivity
 import info.anodsplace.framework.content.startActivityForResultSafely
@@ -117,6 +118,9 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
                 SwitchItem(R.string.pref_show_recently_updated_title, R.string.pref_show_recently_updated_descr, ACTION_SHOW_RECENTLY_UPDATED, prefs.showRecentlyUpdated),
                 TextItem(R.string.pref_default_filter, R.string.pref_default_filter_summary, ACTION_DEFAULT_FILTER),
                 SwitchItem(R.string.pref_pull_to_refresh, 0, ACTION_ENABLE_PULL_TO_REFRESH, prefs.enablePullToRefresh),
+
+                Category(R.string.pref_privacy),
+                SwitchItem(R.string.crash_reports_title, R.string.crash_reports_descr, ACTION_CRASH_REPORTS, prefs.collectCrashReports),
 
                 Category(R.string.pref_header_about),
                 aboutItem,
@@ -310,6 +314,10 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
             }
             ACTION_ENABLE_PULL_TO_REFRESH -> prefs.enablePullToRefresh = this.applyToggle(pref, prefs.enablePullToRefresh)
             ACTION_NOTIFY_INSTALLED -> prefs.isNotifyInstalled = (pref as ToggleItem).checked
+            ACTION_CRASH_REPORTS -> {
+                prefs.collectCrashReports = (pref as ToggleItem).checked
+                ProcessPhoenix.triggerRebirth(this)
+            }
         }
         notifyDataSetChanged()
     }
@@ -422,5 +430,6 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
         private const val ACTION_DEFAULT_FILTER = 19
         private const val ACTION_NOTIFY_INSTALLED = 20
         private const val ACTION_ENABLE_PULL_TO_REFRESH = 21
+        private const val ACTION_CRASH_REPORTS = 22
     }
 }

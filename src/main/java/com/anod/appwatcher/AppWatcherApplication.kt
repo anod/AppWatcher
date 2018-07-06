@@ -40,15 +40,17 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
 
         tryEnableMenuOnDeviceWithHardwareMenuButton()
 
-        AppLog.logger = FirebaseLogger()
-        AppLog.setDebug(true, "AppWatcher")
-        AppLog.instance.listener = this
+        AppLog.setDebug(BuildConfig.DEBUG, "AppWatcher")
 
         if (appComponent.prefs.isDriveSyncEnabled) {
             appComponent.uploadServiceContentObserver
         }
 
-        Fabric.with(this, Crashlytics())
+        if (appComponent.prefs.collectCrashReports) {
+            Fabric.with(this, Crashlytics())
+            AppLog.logger = FirebaseLogger()
+            AppLog.instance.listener = this
+        }
 
         AppCompatDelegate.setDefaultNightMode(appComponent.prefs.nightMode)
         SyncNotification(ApplicationContext(this)).createChannels()

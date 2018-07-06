@@ -160,6 +160,9 @@
     <string name="pref_notify_installed">Installed notifications</string>
     <string name="pref_pull_to_refresh">Pull to refresh</string>
     <string name="app_info">App Info</string>
+    <string name="pref_privacy">Privacy</string>
+    <string name="crash_reports_title">Crash reports</string>
+    <string name="crash_reports_descr">Collect crash reports. Requires restart.</string>
 
     <string-array name="sort_titles">
         <item>By name &#x2193;</item>
