@@ -1,6 +1,6 @@
 package com.anod.appwatcher.watchlist
 
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProviders
 import com.anod.appwatcher.installed.InstalledAppsAdapter
 import com.anod.appwatcher.installed.InstalledLoadResult
 import com.anod.appwatcher.installed.InstalledWatchListViewModel

@@ -1,6 +1,6 @@
 package com.anod.appwatcher.database.entities
 
-import android.arch.persistence.room.*
+import androidx.room.*
 import android.content.ComponentName
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager

@@ -6,7 +6,7 @@
         android:id="@+id/menu_act_search"
         android:icon="@drawable/ic_search_white_24dp"
         android:title="@string/menu_filter"
-        appwatcher:actionViewClass="android.support.v7.widget.SearchView"
+        appwatcher:actionViewClass="androidx.appcompat.widget.SearchView"
         appwatcher:showAsAction="always|collapseActionView" />
 
     <item

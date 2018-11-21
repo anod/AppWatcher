@@ -1,8 +1,8 @@
 package info.anodsplace.framework.graphics
 
-import android.support.annotation.ColorInt
-import android.support.v7.graphics.Palette
-import android.support.v7.graphics.Target
+import androidx.annotation.ColorInt
+import androidx.palette.graphics.Palette
+import androidx.palette.graphics.Target
 
 /**
  * @author Alex Gavrishev

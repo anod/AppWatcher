@@ -1,8 +1,8 @@
 package com.anod.appwatcher.tags
 
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
-import android.support.v4.content.res.ResourcesCompat
+import androidx.fragment.app.DialogFragment
+import androidx.core.content.res.ResourcesCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup

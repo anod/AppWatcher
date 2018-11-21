@@ -74,7 +74,7 @@ abstract class CursorIterator<O>(cursor: Cursor?)
 
     override fun close() {
         if (isClosed) {
-            AppLog.e("Cursor already closed")
+            AppLog.d("Cursor already closed")
         } else {
             super.close()
         }

@@ -1,6 +1,6 @@
 package info.anodsplace.playstore
 
-import android.support.v4.util.SparseArrayCompat
+import androidx.collection.SparseArrayCompat
 
 /**
  * @author Alex Gavrishev
@@ -11,7 +11,7 @@ open class CompositeEndpoint : PlayStoreEndpoint {
     private var endpoints = SparseArrayCompat<PlayStoreEndpoint>()
 
     operator fun get(id: Int): PlayStoreEndpoint {
-        return endpoints.get(id)
+        return endpoints.get(id)!!
     }
 
     open fun put(id: Int, endpoint: PlayStoreEndpoint) {

@@ -3,9 +3,9 @@ package com.anod.appwatcher.installed
 import android.animation.ArgbEvaluator
 import android.animation.ObjectAnimator
 import android.graphics.Color
-import android.support.annotation.ColorInt
-import android.support.v7.widget.DefaultItemAnimator
-import android.support.v7.widget.RecyclerView
+import androidx.annotation.ColorInt
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.RecyclerView
 import android.view.View
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation

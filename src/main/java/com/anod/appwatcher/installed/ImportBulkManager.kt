@@ -3,7 +3,7 @@ package com.anod.appwatcher.installed
 import android.accounts.Account
 import android.content.Context
 import android.os.AsyncTask
-import android.support.v4.util.SimpleArrayMap
+import androidx.collection.SimpleArrayMap
 import com.android.volley.VolleyError
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.content.AddWatchAppAsyncTask

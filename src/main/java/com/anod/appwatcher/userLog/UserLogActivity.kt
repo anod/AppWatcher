@@ -3,9 +3,9 @@ package com.anod.appwatcher.userLog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.util.LruCache
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.collection.LruCache
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.util.Log
 import android.view.*
 import android.widget.TextView
@@ -23,19 +23,10 @@ import java.text.SimpleDateFormat
 class UserLogActivity: ToolbarActivity() {
 
     class UserLogViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
-        val format = SimpleDateFormat.getDateTimeInstance()
-        private val levels = mapOf(
-                Log.INFO to "INFO",
-                Log.ERROR to "ERROR",
-                Log.VERBOSE to "VERBOSE",
-                Log.DEBUG to "DEBUG",
-                Log.ASSERT to "ASSERT",
-                Log.WARN to "WARN"
-        )
 
         fun apply(message: Message) {
             val tv = itemView as TextView
-            tv.text = "${format.format(message.date)} - ${message.message}"
+            tv.text = "${message.timestamp} ${message.message}"
             if (message.level > Log.WARN) {
                 tv.setTextColor(itemView.context.resources.getColor(android.R.color.holo_red_dark))
             } else {
@@ -45,18 +36,6 @@ class UserLogActivity: ToolbarActivity() {
     }
 
     class UserLogAdapter(private val userLogger: UserLogger, val context: Context): RecyclerView.Adapter<UserLogViewHolder>() {
-        val cacheSize = 1 * 1024 * 1024 // 1MiB
-        private val messagesCache = object: LruCache<Int, Message?>(cacheSize) {
-            override fun sizeOf(key: Int?, value: Message?): Int {
-                return value?.asBytes?.size ?: 0
-            }
-        }
-
-        init {
-            userLogger.iterator.asSequence().take(2000).forEachIndexed {
-                index, message -> messagesCache.put(index, message)
-            }
-        }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserLogViewHolder {
             val view = LayoutInflater.from(context).inflate(R.layout.list_item_log, parent, false)
@@ -64,20 +43,11 @@ class UserLogActivity: ToolbarActivity() {
         }
 
         override fun getItemCount(): Int {
-            return userLogger.count
+            return userLogger.messages.size
         }
 
         override fun onBindViewHolder(holder: UserLogViewHolder, position: Int) {
-            val cached = messagesCache[position]
-            if (cached == null) {
-                if (position < userLogger.count) {
-                    val userMessage = userLogger.iterator.asSequence().elementAt(position)
-                    messagesCache.put(position, userMessage)
-                    holder.apply(userMessage)
-                }
-            } else {
-                holder.apply(cached)
-            }
+            holder.apply(userLogger.messages[position])
         }
     }
 
@@ -88,7 +58,7 @@ class UserLogActivity: ToolbarActivity() {
         super.onCreate(savedInstanceState)
 
         list.layoutManager = LinearLayoutManager(this)
-        list.adapter = UserLogAdapter(Application.log(this), this)
+        list.adapter = UserLogAdapter(UserLogger(), this)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -101,7 +71,7 @@ class UserLogActivity: ToolbarActivity() {
             val sendIntent = Intent()
             sendIntent.action = Intent.ACTION_SEND
             sendIntent.putExtra(Intent.EXTRA_TITLE, "AppWatcher Log")
-            sendIntent.putExtra(Intent.EXTRA_TEXT, Application.log(this).content)
+            sendIntent.putExtra(Intent.EXTRA_TEXT, UserLogger().content)
             sendIntent.type = "text/plain"
             startActivity(sendIntent)
             return true

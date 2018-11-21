@@ -1,7 +1,7 @@
 package com.anod.appwatcher.installed
 
 import android.graphics.Color
-import android.support.v4.content.res.ResourcesCompat
+import androidx.core.content.res.ResourcesCompat
 import android.view.View
 import android.widget.CheckedTextView
 import android.widget.ImageView

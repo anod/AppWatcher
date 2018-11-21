@@ -4,7 +4,7 @@ import android.app.Activity
 import android.app.Application
 import android.app.NotificationManager
 import android.os.Bundle
-import android.support.v7.app.AppCompatDelegate
+import androidx.appcompat.app.AppCompatDelegate
 import android.util.LruCache
 import android.view.ViewConfiguration
 import com.android.volley.NetworkError
@@ -18,6 +18,7 @@ import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.app.ApplicationInstance
 import info.anodsplace.framework.app.CustomThemeActivity
 import io.fabric.sdk.android.Fabric
+import java.io.File
 import java.io.IOException
 
 
@@ -55,6 +56,15 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
         AppCompatDelegate.setDefaultNightMode(appComponent.prefs.nightMode)
         SyncNotification(ApplicationContext(this)).createChannels()
         registerActivityLifecycleCallbacks(LifecycleCallbacks(this))
+
+        deleteUserLog()
+    }
+
+    private fun deleteUserLog() {
+        val userLog = File(filesDir, "user-log")
+        if (userLog.exists()) {
+            userLog.delete()
+        }
     }
 
     override fun onLogException(tr: Throwable) {

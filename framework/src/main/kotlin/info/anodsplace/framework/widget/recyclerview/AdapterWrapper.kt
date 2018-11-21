@@ -1,9 +1,10 @@
 package info.anodsplace.framework.widget.recyclerview
 
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.view.ViewGroup
 
-open class AdapterWrapper<VH : RecyclerView.ViewHolder>(protected val adapter: RecyclerView.Adapter<VH>) : RecyclerView.Adapter<VH>() {
+open class AdapterWrapper<VH : RecyclerView.ViewHolder>(
+        protected val adapter: RecyclerView.Adapter<VH>) : RecyclerView.Adapter<VH>() {
 
     init {
         super.setHasStableIds(adapter.hasStableIds())
@@ -34,11 +35,11 @@ open class AdapterWrapper<VH : RecyclerView.ViewHolder>(protected val adapter: R
         adapter.onViewDetachedFromWindow(holder)
     }
 
-    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+    override fun onAttachedToRecyclerView(recyclerView: androidx.recyclerview.widget.RecyclerView) {
         adapter.onAttachedToRecyclerView(recyclerView)
     }
 
-    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+    override fun onDetachedFromRecyclerView(recyclerView: androidx.recyclerview.widget.RecyclerView) {
         adapter.onDetachedFromRecyclerView(recyclerView)
     }
 
@@ -50,7 +51,7 @@ open class AdapterWrapper<VH : RecyclerView.ViewHolder>(protected val adapter: R
         return adapter.itemCount
     }
 
-    private inner class ForwardingDataSetObserver : RecyclerView.AdapterDataObserver() {
+    private inner class ForwardingDataSetObserver : androidx.recyclerview.widget.RecyclerView.AdapterDataObserver() {
 
         override fun onChanged() {
             notifyDataSetChanged()

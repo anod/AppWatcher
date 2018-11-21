@@ -1,8 +1,8 @@
 package com.anod.appwatcher
 
 import android.os.Bundle
-import android.support.annotation.LayoutRes
-import android.support.v7.widget.SearchView
+import androidx.annotation.LayoutRes
+import androidx.appcompat.widget.SearchView
 import android.widget.TextView
 
 import com.anod.appwatcher.model.Filters

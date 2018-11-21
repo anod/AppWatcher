@@ -23,7 +23,6 @@ import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.ChangelogTable
 import com.anod.appwatcher.database.contentValues
 import com.anod.appwatcher.preferences.Preferences
-import com.anod.appwatcher.userLog.UserLogger
 import com.anod.appwatcher.utils.extractUploadDate
 import finsky.api.BulkDocId
 import finsky.api.model.DfeModel
@@ -61,44 +60,38 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
     private val preferences = Application.provide(context).prefs
     private val installedAppsProvider = InstalledApps.PackageManager(context.packageManager)
 
-    fun perform(extras: Bundle, provider: ContentProviderClient, userLogger: UserLogger): Int {
+    fun perform(extras: Bundle, provider: ContentProviderClient): Int {
 
         val manualSync = extras.getBoolean(extrasManual, false)
-        userLogger.info("Perform ${ if (manualSync) "manual" else "scheduled" } sync")
+        AppLog.i("Perform ${ if (manualSync) "manual" else "scheduled" } sync")
         // Skip any check if sync requested from application
         if (!manualSync) {
             if (preferences.isWifiOnly && !Application.provide(context).networkConnection.isWifiEnabled) {
-                userLogger.info("Wifi not enabled, skipping update check...")
-                AppLog.d("Wifi not enabled, skipping update check....")
+                AppLog.i("Wifi not enabled, skipping update check....")
                 return -1
             }
             val updateTime = preferences.lastUpdateTime
             if (updateTime != (-1).toLong() && System.currentTimeMillis() - updateTime < oneSecInMillis) {
-                userLogger.info("Last update less than second, skipping...")
-                AppLog.d("Last update less than second, skipping...")
+                AppLog.i("Last update less than second, skipping...")
                 return -1
             }
         }
         val account = preferences.account
         if (account == null) {
-            AppLog.d("No active account, skipping sync...")
-            userLogger.error("No active account, skipping sync...")
+            AppLog.w("No active account, skipping sync...")
             return -1
         }
 
         if (!Application.provide(context).networkConnection.isNetworkAvailable) {
-            AppLog.d("Network is not available, skipping sync...")
-            userLogger.error("Network is not available, skipping sync...")
+            AppLog.w("Network is not available, skipping sync...")
             return -1
         }
 
-        AppLog.v("Perform synchronization")
-        userLogger.info("Performing synchronization")
+        AppLog.i("Perform synchronization")
 
         val authToken = requestAuthToken(account)
         if (authToken == null) {
-            AppLog.e("Cannot receive token")
-            userLogger.error("Cannot retrieve access token")
+            AppLog.e("Cannot receive access token")
             return -1
         }
 
@@ -114,15 +107,13 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         try {
             updatedApps = doSync(appListProvider, lastUpdatesViewed, authToken, account, context)
         } catch (e: RemoteException) {
-            userLogger.error("Error during synchronization ${e.message}")
-            AppLog.e(e)
+            AppLog.e("Error during synchronization ${e.message}", e)
         }
 
         if (updatedApps.isNotEmpty() && updatedApps.first().app.uploadTime == 0.toLong()) {
             val uploadDate = updatedApps.first().app.uploadDate
             val locale = Locale.getDefault()
-            userLogger.error("Cannot parse date '$uploadDate' for locale '$locale'")
-            AppLog.e("Unparseable date: $uploadDate for locale $locale")
+            AppLog.e("Cannot parse date '$uploadDate' for locale '$locale'")
         }
 
         val now = System.currentTimeMillis()
@@ -135,16 +126,15 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
             preferences.isLastUpdatesViewed = false
         }
 
-        notifyIfNeeded(manualSync, updatedApps, userLogger)
+        notifyIfNeeded(manualSync, updatedApps)
 
         if (!manualSync) {
             if (preferences.isDriveSyncEnabled) {
                 AppLog.d("DriveSyncEnabled = true")
-                performGDriveSync(preferences, now, userLogger)
+                performGDriveSync(preferences, now)
             } else {
                 AppLog.d("DriveSyncEnabled = false, skipping...")
             }
-            cleanUserLog(userLogger)
         }
 
         AppLog.d("Finish::perform()")
@@ -162,29 +152,29 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
 
         val apps = client.queryAll(false)
         if (apps.isEmpty) {
-            Application.log(context.actual).info("Sync finished: no apps")
+            AppLog.i("Sync finished: no apps")
             return listOf()
         }
 
         val updatedTitles = mutableListOf<UpdatedApp>()
 
-        apps.chunked(bulkSize, {
-            it.associateBy { it.packageName }
-        }).forEach { localApps ->
+        apps.chunked(bulkSize) { list ->
+            list.associateBy { it.packageName }
+        }.forEach { localApps ->
             val docIds = localApps.map { BulkDocId(it.key, it.value.versionNumber) }
             val endpoint = createEndpoint(docIds, authToken, account)
             AppLog.d("Sending chunk... $docIds")
             try {
                 endpoint.startSync()
             } catch (e: VolleyError) {
-                Application.log(context.actual).error("Fetching of bulk updates failed ${e.message ?: ""}")
+                AppLog.e("Fetching of bulk updates failed ${e.message ?: ""}")
             }
             AppLog.d("Sent ${docIds.size}. Received ${endpoint.documents.size}")
             updateApps(endpoint.documents, localApps, client, updatedTitles, lastUpdatesViewed)
         }
 
         apps.close()
-        Application.log(context.actual).info("Sync finished for ${apps.count} apps")
+        AppLog.i("Sync finished for ${apps.count} apps")
         return updatedTitles
     }
 
@@ -281,13 +271,13 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         return values
     }
 
-    private fun notifyIfNeeded(manualSync: Boolean, updatedApps: List<UpdatedApp>, userLogger: UserLogger) {
+    private fun notifyIfNeeded(manualSync: Boolean, updatedApps: List<UpdatedApp>) {
         val sn = SyncNotification(context)
         if (manualSync) {
             if (updatedApps.isEmpty()) {
-                userLogger.info("No new updates")
+                AppLog.i("No new updates")
             } else {
-                userLogger.info("Updates: [${updatedApps.joinToString(",") { "${it.app.title} (${it.app.versionNumber})" }}]")
+                AppLog.i("Updates: [${updatedApps.joinToString(",") { "${it.app.title} (${it.app.versionNumber})" }}]")
             }
             sn.cancel()
         } else if (updatedApps.isNotEmpty()) {
@@ -300,40 +290,33 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
                     it.installedVersionCode > 0 && it.app.versionNumber <= it.installedVersionCode
                 }
             }
-            userLogger.info("Notifying about: [${filteredApps.joinToString(",") { "${it.app.title} (${it.app.versionNumber})" }}]")
+            AppLog.i("Notifying about: [${filteredApps.joinToString(",") { "${it.app.title} (${it.app.versionNumber})" }}]")
             if (filteredApps.isNotEmpty()) {
                 sn.show(filteredApps)
             }
         } else {
-            userLogger.info("No new updates")
+            AppLog.i("No new updates")
         }
     }
 
-    private fun performGDriveSync(pref: Preferences, now: Long, userLogger: UserLogger) {
+    private fun performGDriveSync(pref: Preferences, now: Long) {
         val driveSyncTime = pref.lastDriveSyncTime
         if (driveSyncTime == (-1).toLong() || now > DateUtils.DAY_IN_MILLIS + driveSyncTime) {
             AppLog.d("DriveSync perform sync")
             val signIn = GDriveSilentSignIn(context)
 
             try {
-                userLogger.info("Perform Google Drive sync")
+                AppLog.i("Perform Google Drive sync")
                 val googleAccount = signIn.signInLocked()
                 val worker = SyncConnectedWorker(context, googleAccount)
                 worker.doSyncInBackground()
                 pref.lastDriveSyncTime = System.currentTimeMillis()
             } catch (e: Exception) {
                 AppLog.e("Perform Google Drive sync exception: ${e.message ?: "'empty message'"}", e)
-                userLogger.error("Google Drive sync exception: ${e.message ?: "'empty message'"}")
+                AppLog.e("Google Drive sync exception: ${e.message ?: "'empty message'"}")
             }
         } else {
             AppLog.d("DriveSync backup is fresh")
-            userLogger.info("Google Drive backup is fresh")
-        }
-    }
-
-    private fun cleanUserLog(userLogger: UserLogger) {
-        if (userLogger.count > 2000) {
-            userLogger.remove(userLogger.count - 1000)
         }
     }
 

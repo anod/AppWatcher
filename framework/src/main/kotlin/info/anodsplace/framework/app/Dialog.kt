@@ -2,11 +2,11 @@ package info.anodsplace.framework.app
 
 import android.content.Context
 import android.content.DialogInterface
-import android.support.annotation.ArrayRes
-import android.support.annotation.LayoutRes
-import android.support.annotation.StringRes
-import android.support.annotation.StyleRes
-import android.support.v7.app.AlertDialog
+import androidx.annotation.ArrayRes
+import androidx.annotation.LayoutRes
+import androidx.annotation.StringRes
+import androidx.annotation.StyleRes
+import androidx.appcompat.app.AlertDialog
 import android.view.LayoutInflater
 import android.view.View
 

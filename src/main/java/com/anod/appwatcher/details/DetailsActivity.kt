@@ -1,8 +1,8 @@
 package com.anod.appwatcher.details
 
 import android.app.Activity
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -13,14 +13,14 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.support.annotation.ColorInt
-import android.support.design.widget.AppBarLayout
-import android.support.v4.app.ShareCompat
-import android.support.v4.content.ContextCompat
-import android.support.v4.graphics.drawable.DrawableCompat
-import android.support.v4.view.ViewCompat
-import android.support.v7.graphics.Palette
-import android.support.v7.widget.LinearLayoutManager
+import androidx.annotation.ColorInt
+import com.google.android.material.appbar.AppBarLayout
+import androidx.core.app.ShareCompat
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.ViewCompat
+import androidx.palette.graphics.Palette
+import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -98,7 +98,6 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
         if (viewModel.appId.isEmpty()) {
             Toast.makeText(this, getString(R.string.cannot_load_app, viewModel.appId), Toast.LENGTH_LONG).show()
             AppLog.e("Cannot loadChangelog app details: '${viewModel.appId}'")
-            Application.log(this).error("Cannot loadChangelog details for ${viewModel.appId}")
             finish()
             return
         }
@@ -129,7 +128,6 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
             if (app == null) {
                 Toast.makeText(this, getString(R.string.cannot_load_app, viewModel.appId), Toast.LENGTH_LONG).show()
                 AppLog.e("Cannot loadChangelog app details: '${viewModel.appId}'")
-                Application.log(this).error("Cannot loadChangelog details for ${viewModel.appId}")
                 finish()
             } else {
                 loaded = true
@@ -155,7 +153,7 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
                 }
 
                 override fun onError(errorMessage: String) {
-                    Application.log(this@DetailsActivity).error(errorMessage)
+                    AppLog.e(errorMessage)
                     viewModel.loadRemoteChangelog()
                 }
             })
@@ -328,8 +326,9 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
         }
     }
 
-    override fun onGenerated(palette: Palette) {
-        val darkSwatch = palette.chooseDark(ContextCompat.getColor(this, R.color.theme_primary))
+    override fun onGenerated(palette: Palette?) {
+        val defaultColor = ContextCompat.getColor(this, R.color.theme_primary)
+        val darkSwatch = palette?.chooseDark(defaultColor) ?: Palette.Swatch(defaultColor, 0)
         applyColor(darkSwatch.rgb)
         animateBackground()
 
@@ -387,7 +386,7 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
     private val mainHandler = Handler(Looper.getMainLooper())
 
 
-    override fun onOffsetChanged(appBarLayout: AppBarLayout, verticalOffset: Int) {
+    override fun onOffsetChanged(appBarLayout: com.google.android.material.appbar.AppBarLayout, verticalOffset: Int) {
         val totalScrollRange = appBarLayout.totalScrollRange.toFloat()
         val alpha = 1.0f - Math.abs(verticalOffset.toFloat() / totalScrollRange)
 

@@ -1,6 +1,6 @@
 package com.anod.appwatcher.details
 
-import android.support.annotation.ColorInt
+import androidx.annotation.ColorInt
 import android.text.TextUtils
 import android.view.View
 import android.widget.TextView

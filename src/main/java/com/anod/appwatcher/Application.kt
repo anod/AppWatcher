@@ -32,11 +32,4 @@ object Application {
         return (context.actual as AppWatcherApplication).appComponent
     }
 
-    fun log(context: Context): UserLogger {
-        return (context.applicationContext as AppWatcherApplication).appComponent.userLogger
-    }
-
-    fun log(context: ApplicationContext): UserLogger {
-        return (context.actual as AppWatcherApplication).appComponent.userLogger
-    }
 }

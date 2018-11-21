@@ -1,8 +1,8 @@
 package com.anod.appwatcher.watchlist
 
 import android.content.Intent
-import android.support.v4.content.res.ResourcesCompat
-import android.support.v7.widget.SearchView
+import androidx.core.content.res.ResourcesCompat
+import androidx.appcompat.widget.SearchView
 import android.text.TextUtils
 import android.view.Menu
 import android.view.MenuItem

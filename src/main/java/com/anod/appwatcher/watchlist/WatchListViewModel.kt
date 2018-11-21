@@ -1,7 +1,7 @@
 package com.anod.appwatcher.watchlist
 
 import android.app.Application
-import android.arch.lifecycle.*
+import androidx.lifecycle.*
 import android.database.ContentObserver
 import android.net.Uri
 import android.os.Handler

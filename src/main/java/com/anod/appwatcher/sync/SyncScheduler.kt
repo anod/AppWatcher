@@ -6,6 +6,7 @@ import com.anod.appwatcher.Application
 import com.firebase.jobdispatcher.Constraint
 import com.firebase.jobdispatcher.Lifetime
 import com.firebase.jobdispatcher.Trigger
+import info.anodsplace.framework.AppLog
 
 /**
  * @author Alex Gavrishev
@@ -41,7 +42,7 @@ object SyncScheduler {
                 .setExtras(Bundle())
                 .build()
 
-        Application.log(context).info("Schedule sync in ${windowStartSec/3600} hours")
+        AppLog.i("Schedule sync in ${windowStartSec/3600} hours")
         dispatcher.mustSchedule(task)
     }
 

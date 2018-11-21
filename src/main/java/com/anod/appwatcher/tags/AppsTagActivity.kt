@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.support.design.widget.AppBarLayout
+import com.google.android.material.appbar.AppBarLayout
 import android.view.MenuItem
 import android.view.View
 import com.anod.appwatcher.AppWatcherActivity
@@ -40,7 +40,7 @@ class AppsTagActivity : WatchListActivity() {
             return
         }
 
-        val appBarLayout = findViewById<View>(R.id.appbar) as AppBarLayout
+        val appBarLayout = findViewById<AppBarLayout>(R.id.appbar)
         appBarLayout.setBackgroundColor(tag.color)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

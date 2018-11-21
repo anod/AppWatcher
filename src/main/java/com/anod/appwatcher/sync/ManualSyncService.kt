@@ -27,7 +27,7 @@ class ManualSyncService : IntentService("ManualSyncService") {
                 bundle.putBoolean(UpdateCheck.extrasManual, true)
             }
 
-            val updatesCount = syncAdapter.perform(bundle, contentProviderClient, Application.log(this))
+            val updatesCount = syncAdapter.perform(bundle, contentProviderClient)
 
             val finishIntent = Intent(UpdateCheck.syncStop)
             finishIntent.putExtra(UpdateCheck.extrasUpdatesCount, updatesCount)

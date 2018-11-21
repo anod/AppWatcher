@@ -1,15 +1,15 @@
 package com.anod.appwatcher.watchlist
 
 import android.app.Activity
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v4.widget.SwipeRefreshLayout
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.fragment.app.Fragment
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.util.SparseArray
 import android.util.SparseIntArray
 import android.view.LayoutInflater
@@ -143,7 +143,7 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         viewModel.init(sortId, tag, createFilter(filterId, installedApps), prefs)
 
         // Setup layout manager
-        val layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
+        val layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
         listView.layoutManager = layoutManager
 
         // Setup header decorator

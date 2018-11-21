@@ -1,8 +1,8 @@
 package info.anodsplace.framework.widget.recyclerview
 
 import android.content.Context
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.util.AttributeSet
 
 import info.anodsplace.framework.R
@@ -23,10 +23,14 @@ class EndlessRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
             }
             field = value
             if (value) {
-                addOnScrollListener(scrollListener)
+                if (scrollListener != null) {
+                    addOnScrollListener(scrollListener!!)
+                }
                 (adapter as EndlessAdapter).setKeepOnAppending(true)
             } else {
-                removeOnScrollListener(scrollListener)
+                if (scrollListener != null) {
+                    removeOnScrollListener(scrollListener!!)
+                }
                 (adapter as EndlessAdapter).setKeepOnAppending(false)
             }
         }

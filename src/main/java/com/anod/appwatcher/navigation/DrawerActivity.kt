@@ -1,15 +1,15 @@
 package com.anod.appwatcher.navigation
 
 import android.accounts.Account
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Bundle
-import android.support.design.widget.NavigationView
-import android.support.v4.content.res.ResourcesCompat
-import android.support.v4.graphics.drawable.DrawableCompat
-import android.support.v4.view.GravityCompat
-import android.support.v4.widget.DrawerLayout
+import com.google.android.material.navigation.NavigationView
+import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import android.text.format.DateUtils
 import android.view.MenuItem
 import android.view.View
@@ -26,6 +26,7 @@ import com.anod.appwatcher.utils.Hash
 import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.wishlist.WishlistFragment
 import com.crashlytics.android.Crashlytics
+import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.FragmentToolbarActivity
 import info.anodsplace.framework.app.ToolbarActivity
 
@@ -222,7 +223,7 @@ abstract class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.Selecti
             }
 
             override fun onError(errorMessage: String) {
-                this@DrawerActivity.provide.userLogger.error("Error retrieving authentication token: $errorMessage")
+                AppLog.e("Error retrieving authentication token: $errorMessage")
                 this@DrawerActivity.authToken = ""
                 if (Application.provide(this@DrawerActivity).networkConnection.isNetworkAvailable) {
                     Toast.makeText(this@DrawerActivity, R.string.failed_gain_access, Toast.LENGTH_LONG).show()

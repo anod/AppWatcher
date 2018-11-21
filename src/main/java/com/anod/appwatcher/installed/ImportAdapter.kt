@@ -2,9 +2,9 @@ package com.anod.appwatcher.installed
 
 import android.content.Context
 import android.content.pm.PackageManager
-import android.support.v4.util.SimpleArrayMap
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.collection.SimpleArrayMap
 import com.anod.appwatcher.R
 import com.anod.appwatcher.watchlist.AppViewHolderBase
 
@@ -33,6 +33,6 @@ internal class ImportAdapter(
     }
 
     fun notifyPackageStatusChanged(packageName: String) {
-        notifyItemChanged(packageIndex.get(packageName))
+        notifyItemChanged(packageIndex.get(packageName) ?: 0)
     }
 }

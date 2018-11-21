@@ -4,7 +4,7 @@ import android.app.Activity
 import android.app.NotificationChannel
 import android.app.PendingIntent
 import android.content.Intent
-import android.support.v4.app.NotificationCompat
+import androidx.core.app.NotificationCompat
 import com.anod.appwatcher.R
 import com.anod.appwatcher.SettingsActivity
 import com.anod.appwatcher.sync.SyncNotification
@@ -77,7 +77,7 @@ class GDriveSignIn(private val activity: Activity, private val listener: Listene
 
     private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
         try {
-            val account = completedTask.getResult(ApiException::class.java)
+            val account = completedTask.getResult(ApiException::class.java)!!
 
             // Signed in successfully, show authenticated UI.
             listener.onGDriveLoginSuccess(account)

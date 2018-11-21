@@ -137,7 +137,7 @@ abstract class PaginatedList<T, D>(
         }
         val nextPageUrl = this.getNextPageUrl(wrapper)
         if (!nextPageUrl.isNullOrEmpty() && (this.currentOffset == size || this.itemsRemoved)) {
-            this.urlOffsetList.add(UrlOffsetPair(this.items.size, nextPageUrl!!))
+            this.urlOffsetList.add(UrlOffsetPair(this.items.size, nextPageUrl))
         }
         if (this.itemsRemoved) {
             this.itemsRemoved = false

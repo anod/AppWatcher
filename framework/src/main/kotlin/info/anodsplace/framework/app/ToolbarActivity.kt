@@ -1,10 +1,10 @@
 package info.anodsplace.framework.app
 
 import android.os.Bundle
-import android.support.annotation.LayoutRes
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.app.AppCompatDelegate
-import android.support.v7.widget.Toolbar
+import androidx.annotation.LayoutRes
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.widget.Toolbar
 import android.view.MenuItem
 import android.view.View
 import info.anodsplace.framework.R
@@ -41,9 +41,6 @@ abstract class ToolbarActivity : AppCompatActivity(), CustomThemeActivity {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> {
-                //if (!getSupportFragmentManager().popBackStackImmediate()) {
-                //    NavUtils.navigateUpFromSameTask(this);
-                //}
                 onBackPressed()
                 return true
             }
@@ -52,11 +49,6 @@ abstract class ToolbarActivity : AppCompatActivity(), CustomThemeActivity {
     }
 
     protected val intentExtras: Bundle
-        get() {
-            if (intent == null || intent.extras == null) {
-                return Bundle()
-            }
-            return intent.extras
-        }
+        get() = intent?.extras ?: Bundle()
 
 }

@@ -6,6 +6,6 @@
 			android:title="@string/search_action"
 			appwatcher:showAsAction="always"
 			android:icon="@drawable/ic_search_white_24dp"
-			appwatcher:actionViewClass="android.support.v7.widget.SearchView">
+			appwatcher:actionViewClass="androidx.appcompat.widget.SearchView">
 	</item>
 </menu>

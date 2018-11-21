@@ -1,7 +1,7 @@
 package info.anodsplace.colorpicker;
 
 import android.graphics.Color;
-import android.support.annotation.ColorInt;
+import androidx.annotation.ColorInt;
 
 /**
  * @author Alex Gavrishev

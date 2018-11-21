@@ -1,8 +1,8 @@
 package info.anodsplace.framework.widget.recyclerview
 
 import android.content.Context
-import android.support.annotation.LayoutRes
-import android.support.v7.widget.RecyclerView
+import androidx.annotation.LayoutRes
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -79,6 +79,6 @@ class EndlessAdapter(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder>, pri
     class FooterViewHolder(loadMoreView: View) : RecyclerView.ViewHolder(loadMoreView)
 
     companion object {
-        val viewTypeLoadMore = -1
+        const val viewTypeLoadMore = -1
     }
 }

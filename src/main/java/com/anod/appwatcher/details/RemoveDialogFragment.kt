@@ -3,7 +3,7 @@ package com.anod.appwatcher.details
 import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
+import androidx.fragment.app.DialogFragment
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.content.AddWatchAppAsyncTask
@@ -17,7 +17,7 @@ class RemoveDialogFragment : DialogFragment() {
         val rowId = arguments!!.getInt(ARG_ROW_ID)
         val message = getString(R.string.alert_dialog_remove_message, title)
 
-        return DialogMessage(activity!!, R.style.AlertDialog, R.string.alert_dialog_remove_title, message, { builder ->
+        return DialogMessage(activity!!, R.style.AlertDialog, R.string.alert_dialog_remove_title, message) { builder ->
             builder.setPositiveButton(R.string.alert_dialog_remove) { _, _ ->
                 val cl = DbContentProviderClient(activity!!)
                 cl.updateStatus(rowId, AppInfoMetadata.STATUS_DELETED)
@@ -27,7 +27,7 @@ class RemoveDialogFragment : DialogFragment() {
             }
 
             builder.setNegativeButton(R.string.alert_dialog_cancel) { _, _ -> }
-        }).create()
+        }.create()
     }
 
     companion object {

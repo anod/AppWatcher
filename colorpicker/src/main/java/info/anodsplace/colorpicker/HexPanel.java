@@ -3,7 +3,7 @@ package info.anodsplace.colorpicker;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.support.v4.content.res.ResourcesCompat;
+import androidx.core.content.res.ResourcesCompat;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.Spanned;

@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 import com.anod.appwatcher.R
 
 /**
@@ -11,7 +12,7 @@ import com.anod.appwatcher.R
  * @date 16/07/2017
  */
 class RecentAppView(context: Context, attrs: AttributeSet?, defStyleAttr: Int)
-    : android.support.v7.widget.CardView(context, attrs, defStyleAttr)
+    : CardView(context, attrs, defStyleAttr)
 {
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
 

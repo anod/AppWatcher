@@ -1,7 +1,7 @@
 package com.anod.appwatcher.database
 
-import android.arch.persistence.db.SupportSQLiteDatabase
-import android.arch.persistence.db.SupportSQLiteOpenHelper
+import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.sqlite.db.SupportSQLiteOpenHelper
 
 /**
  * @author Alex Gavrishev

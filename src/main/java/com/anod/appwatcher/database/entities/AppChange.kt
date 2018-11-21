@@ -1,6 +1,6 @@
 package com.anod.appwatcher.database.entities
 
-import android.arch.persistence.room.*
+import androidx.room.*
 import android.provider.BaseColumns
 import com.anod.appwatcher.database.ChangelogTable
 

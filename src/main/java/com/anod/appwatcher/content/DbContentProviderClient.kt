@@ -7,7 +7,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.RemoteException
 import android.provider.BaseColumns
-import android.support.v4.util.SimpleArrayMap
+import androidx.collection.SimpleArrayMap
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.database.entities.AppTag

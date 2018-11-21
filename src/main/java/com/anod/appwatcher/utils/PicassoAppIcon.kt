@@ -4,7 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.support.annotation.DrawableRes
+import androidx.annotation.DrawableRes
 import android.text.TextUtils
 import android.widget.ImageView
 import com.anod.appwatcher.R

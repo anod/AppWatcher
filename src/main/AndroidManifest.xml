@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.anod.appwatcher">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.anod.appwatcher">
 
     <uses-sdk/>
     <!-- for google account token -->
@@ -25,7 +26,8 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="false"
-        android:theme="@style/AppTheme.Black">
+        android:theme="@style/AppTheme.Black"
+        tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".ShareRecieverActivity"
             android:label="@string/add_to_appwatcher">

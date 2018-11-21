@@ -1,7 +1,7 @@
 package info.anodsplace.framework.view
 
 import android.content.Context
-import android.support.annotation.AnimRes
+import androidx.annotation.AnimRes
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.animation.Animation

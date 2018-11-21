@@ -1,11 +1,11 @@
 package com.anod.appwatcher.watchlist
 
-import android.arch.lifecycle.LifecycleOwner
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.Observer
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import android.content.Context
 import android.graphics.*
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.util.SparseArray
 import android.view.View
 import com.anod.appwatcher.R
@@ -77,7 +77,7 @@ class HeaderItemDecorator(sections: LiveData<SparseArray<SectionHeader>>, lifecy
         })
     }
 
-    override fun onDraw(c: Canvas, parent: RecyclerView, state: RecyclerView.State?) {
+    override fun onDraw(c: Canvas, parent: RecyclerView, state: RecyclerView.State) {
 
         for (i in 0 until parent.childCount) {
             val child = parent.getChildAt(i)
@@ -114,7 +114,7 @@ class HeaderItemDecorator(sections: LiveData<SparseArray<SectionHeader>>, lifecy
         }
     }
 
-    override fun getItemOffsets(outRect: Rect, view: View?, parent: RecyclerView, state: RecyclerView.State?) {
+    override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
         super.getItemOffsets(outRect, view, parent, state)
 
         val position = parent.getChildAdapterPosition(view)

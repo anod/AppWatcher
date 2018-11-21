@@ -1,9 +1,9 @@
 package com.anod.appwatcher.details
 
 import android.accounts.Account
-import android.arch.lifecycle.AndroidViewModel
-import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Observer
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import com.android.volley.VolleyError
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.content.DbContentProviderClient
@@ -14,6 +14,7 @@ import com.anod.appwatcher.database.entities.packageToApp
 import finsky.api.model.DfeDetails
 import finsky.api.model.DfeModel
 import finsky.api.model.Document
+import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.livedata.OneTimeObserver
 import info.anodsplace.framework.os.BackgroundTask
@@ -74,11 +75,11 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
         if (rowId == -1) {
             val localApp = context.packageManager.packageToApp(-1, appId)
             isNewApp = true
-            Application.log(context).info("Show details for unwatched $appId")
+            AppLog.i("Show details for unwatched $appId")
             app.value = localApp
         } else {
             isNewApp = false
-            Application.log(context).info("Show details for watched $appId")
+            AppLog.i("Show details for watched $appId")
             BackgroundTask(object : BackgroundTask.Worker<Int, App?>(rowId) {
                 override fun run(param: Int): App? {
                     val appsTable = Application.provide(context).database.apps()
@@ -145,7 +146,7 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
     }
 
     override fun onErrorResponse(error: VolleyError) {
-        Application.log(context).error("Cannot fetch details for $appId - $error")
+        AppLog.e("Cannot fetch details for $appId - $error")
         this.updateChangelogState(RemoteComplete(true))
     }
 

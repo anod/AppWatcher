@@ -1,7 +1,7 @@
 package info.anodsplace.framework.livedata
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.Observer
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 
 class OneTimeObserver<T>(private val liveData: LiveData<T>, private val observer: Observer<T>): Observer<T> {
     override fun onChanged(t: T?) {

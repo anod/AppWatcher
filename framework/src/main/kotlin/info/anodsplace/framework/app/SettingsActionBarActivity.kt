@@ -1,8 +1,8 @@
 package info.anodsplace.framework.app
 
 import android.os.Bundle
-import android.support.annotation.LayoutRes
-import android.support.annotation.StringRes
+import androidx.annotation.LayoutRes
+import androidx.annotation.StringRes
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.View

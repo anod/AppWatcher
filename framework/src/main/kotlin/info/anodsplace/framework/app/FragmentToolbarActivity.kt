@@ -3,7 +3,7 @@ package info.anodsplace.framework.app
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.Fragment
+import androidx.fragment.app.Fragment
 import info.anodsplace.framework.R
 
 import info.anodsplace.framework.AppLog

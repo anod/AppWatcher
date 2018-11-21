@@ -4,8 +4,8 @@ import android.accounts.Account
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v7.widget.LinearLayoutManager
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,7 +29,7 @@ import kotlinx.android.synthetic.main.fragment_wishlist.*
  * *
  * @date 16/12/2016.
  */
-class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Listener {
+class WishlistFragment : androidx.fragment.app.Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Listener {
 
     private var endpoint: WishlistEndpoint? = null
     private val watchAppList: WatchAppList by lazy { WatchAppList(this) }
@@ -80,13 +80,13 @@ class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Li
             TagSnackbar.make(activity!!, info, false).show()
         }
         context?.sendBroadcast(Intent(AddWatchAppAsyncTask.listChanged))
-        list.adapter.notifyDataSetChanged()
+        list.adapter!!.notifyDataSetChanged()
     }
 
     override fun onWatchListChangeError(info: AppInfo, error: Int) {
         if (WatchAppList.ERROR_ALREADY_ADDED == error) {
             Toast.makeText(context, R.string.app_already_added, Toast.LENGTH_SHORT).show()
-            list.adapter.notifyDataSetChanged()
+            list.adapter!!.notifyDataSetChanged()
         } else if (error == WatchAppList.ERROR_INSERT) {
             Toast.makeText(context, R.string.error_insert_app, Toast.LENGTH_SHORT).show()
         }
@@ -131,7 +131,7 @@ class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Li
             showNoResults()
         } else {
             showListView()
-            list.adapter.notifyDataSetChanged()
+            list.adapter!!.notifyDataSetChanged()
         }
     }
 

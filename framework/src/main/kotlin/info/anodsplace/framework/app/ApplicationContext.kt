@@ -1,18 +1,18 @@
 package info.anodsplace.framework.app
 
 import android.app.Application
-import android.app.Fragment
 import android.app.NotificationManager
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
-import android.support.annotation.ColorInt
-import android.support.annotation.ColorRes
-import android.support.annotation.StringRes
-import android.support.v4.content.ContextCompat
+import androidx.annotation.ColorInt
+import androidx.annotation.ColorRes
+import androidx.annotation.StringRes
+import androidx.core.content.ContextCompat
 import android.util.LruCache
+import androidx.fragment.app.Fragment
 
 /**
  * @author Alex Gavrishev

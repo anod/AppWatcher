@@ -1,21 +1,21 @@
 package com.anod.appwatcher.watchlist
 
 import android.accounts.Account
-import android.arch.lifecycle.AndroidViewModel
-import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
-import android.support.annotation.MenuRes
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentManager
-import android.support.v4.app.FragmentPagerAdapter
-import android.support.v4.view.ViewPager
-import android.support.v7.widget.SearchView
+import androidx.annotation.MenuRes
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentPagerAdapter
+import androidx.viewpager.widget.ViewPager
+import androidx.appcompat.widget.SearchView
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
@@ -124,7 +124,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
             actionMenu.expandSearch = expandSearch
         }
 
-        viewPager = findViewById<View>(R.id.viewpager) as ViewPager
+        viewPager = findViewById(R.id.viewpager)
         viewPager.adapter = createViewPagerAdapter()
         viewPager.offscreenPageLimit = 0
 
@@ -246,16 +246,16 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         return true
     }
 
-    class Adapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
-        private val fragments = mutableListOf<Fragment>()
+    class Adapter(fm: androidx.fragment.app.FragmentManager) : androidx.fragment.app.FragmentPagerAdapter(fm) {
+        private val fragments = mutableListOf<androidx.fragment.app.Fragment>()
         private val fragmentTitles = mutableListOf<String>()
 
-        fun addFragment(fragment: Fragment, title: String) {
+        fun addFragment(fragment: androidx.fragment.app.Fragment, title: String) {
             fragments.add(fragment)
             fragmentTitles.add(title)
         }
 
-        override fun getItem(position: Int): Fragment {
+        override fun getItem(position: Int): androidx.fragment.app.Fragment {
             return fragments[position]
         }
 

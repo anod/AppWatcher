@@ -56,6 +56,10 @@ class AppLog {
             log(Log.DEBUG, format(msg))
         }
 
+        fun i(msg: String) {
+            log(Log.INFO, format(msg))
+        }
+
         fun d(msg: String, vararg params: Any) {
             log(Log.DEBUG, format(msg, *params))
         }

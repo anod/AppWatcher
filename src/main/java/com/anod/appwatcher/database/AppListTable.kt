@@ -1,11 +1,11 @@
 package com.anod.appwatcher.database
 
-import android.arch.lifecycle.LiveData
-import android.arch.persistence.db.SimpleSQLiteQuery
-import android.arch.persistence.db.SupportSQLiteQuery
-import android.arch.persistence.room.Dao
-import android.arch.persistence.room.Query
-import android.arch.persistence.room.RawQuery
+import androidx.lifecycle.LiveData
+import androidx.sqlite.db.SimpleSQLiteQuery
+import androidx.sqlite.db.SupportSQLiteQuery
+import androidx.room.Dao
+import androidx.room.Query
+import androidx.room.RawQuery
 import android.content.ContentValues
 import android.provider.BaseColumns
 import android.text.TextUtils

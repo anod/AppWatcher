@@ -1,7 +1,7 @@
 package info.anodsplace.framework.content
 
 import android.content.pm.PackageInfo
-import android.support.v4.util.ArrayMap
+import androidx.collection.ArrayMap
 
 /**
  * @author Alex Gavrishev

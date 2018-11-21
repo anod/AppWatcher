@@ -2,10 +2,10 @@ package info.anodsplace.framework.graphics
 
 import android.content.res.Resources
 import android.graphics.drawable.Drawable
-import android.support.annotation.ColorRes
-import android.support.annotation.DrawableRes
-import android.support.v4.content.res.ResourcesCompat
-import android.support.v4.graphics.drawable.DrawableCompat
+import androidx.annotation.ColorRes
+import androidx.annotation.DrawableRes
+import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.drawable.DrawableCompat
 
 /**
  * @author Alex Gavrishev

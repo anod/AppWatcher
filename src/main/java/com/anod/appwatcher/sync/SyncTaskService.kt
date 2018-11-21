@@ -24,7 +24,7 @@ class SyncTaskService : JobService() {
                 val contentProviderClient = contentResolver.acquireContentProviderClient(DbContentProvider.authority)
 
                 val extras = job.extras ?: Bundle.EMPTY
-                return syncAdapter.perform(extras, contentProviderClient, Application.log(applicationContext))
+                return syncAdapter.perform(extras, contentProviderClient)
             }
 
             override fun finished(result: Int) {

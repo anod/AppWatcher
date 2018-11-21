@@ -1,6 +1,6 @@
 package com.anod.appwatcher.installed
 
-import android.arch.lifecycle.*
+import androidx.lifecycle.*
 import android.util.SparseArray
 import com.anod.appwatcher.model.AppListFilter
 import com.anod.appwatcher.watchlist.*

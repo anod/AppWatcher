@@ -16,7 +16,6 @@ import com.firebase.jobdispatcher.FirebaseJobDispatcher
 import com.firebase.jobdispatcher.GooglePlayDriver
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.PicassoProvider
-import com.squareup.tape2.QueueFile
 import info.anodsplace.framework.net.NetworkConnectivity
 import info.anodsplace.playstore.DeviceId
 import info.anodsplace.playstore.DeviceInfoProvider
@@ -66,10 +65,5 @@ class AppComponent internal constructor(private val app: AppWatcherApplication):
     val deviceInfo: DeviceInfoProvider
         get() = this
 
-    val userLogger: UserLogger by lazy {
-        val file = File(app.filesDir, "user-log")
-        val queueFile = QueueFile.Builder(file).build()
-        UserLogger(queueFile)
-    }
     val database: AppsDatabase by lazy { AppsDatabase.instance(app) }
 }

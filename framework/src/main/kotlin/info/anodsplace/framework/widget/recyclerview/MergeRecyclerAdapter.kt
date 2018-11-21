@@ -1,8 +1,8 @@
 package info.anodsplace.framework.widget.recyclerview
 
-import android.support.v4.util.ArrayMap
-import android.support.v7.widget.RecyclerView
+import androidx.collection.ArrayMap
 import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
 
 import java.util.ArrayList
 open class MergeRecyclerAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {

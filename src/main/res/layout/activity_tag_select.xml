@@ -13,14 +13,14 @@
         android:layout_height="wrap_content"
         />
 
-    <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@android:id/list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         tools:listitem="@layout/list_item_import_app"/>
 
-    <android.support.v7.widget.ButtonBarLayout
+    <androidx.appcompat.widget.ButtonBarLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/buttonPanel"
@@ -43,7 +43,7 @@
             android:layout_height="wrap_content"
             android:text="@string/all"/>
 
-        <android.support.v4.widget.Space
+        <androidx.legacy.widget.Space
             android:id="@+id/spacer"
             android:layout_width="0dp"
             android:layout_height="0dp"
@@ -64,6 +64,6 @@
             android:layout_height="wrap_content"
             android:text="@string/tag"/>
 
-    </android.support.v7.widget.ButtonBarLayout>
+    </androidx.appcompat.widget.ButtonBarLayout>
 
 </LinearLayout>

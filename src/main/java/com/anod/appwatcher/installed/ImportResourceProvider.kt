@@ -1,7 +1,7 @@
 package com.anod.appwatcher.installed
 
 import android.content.Context
-import android.support.v4.util.SimpleArrayMap
+import androidx.collection.SimpleArrayMap
 import com.anod.appwatcher.watchlist.AppViewHolderResourceProvider
 import info.anodsplace.framework.content.InstalledApps
 
@@ -23,14 +23,14 @@ internal class ImportResourceProvider(context: Context, installedApps: Installed
 
     fun isPackageSelected(packageName: String): Boolean {
         if (selectedPackages.containsKey(packageName)) {
-            return selectedPackages.get(packageName)
+            return selectedPackages.get(packageName) ?: false
         }
         return defaultSelected
     }
 
     fun getPackageStatus(packageName: String): Int {
         if (processingPackages.containsKey(packageName)) {
-            return processingPackages.get(packageName)
+            return processingPackages.get(packageName) ?: STATUS_DEFAULT
         }
         return STATUS_DEFAULT
     }

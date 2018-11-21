@@ -1,7 +1,7 @@
 package info.anodsplace.framework.content
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import android.content.ComponentName
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo

@@ -1,7 +1,7 @@
 package com.anod.appwatcher.database.entities
 
-import android.arch.persistence.room.ColumnInfo
-import android.arch.persistence.room.Embedded
+import androidx.room.ColumnInfo
+import androidx.room.Embedded
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.ChangelogTable
 

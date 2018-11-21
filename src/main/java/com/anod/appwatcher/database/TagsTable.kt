@@ -1,6 +1,6 @@
 package com.anod.appwatcher.database
 
-import android.arch.persistence.room.Dao
+import androidx.room.Dao
 import android.content.ContentValues
 import android.provider.BaseColumns
 
