@@ -42,13 +42,6 @@ interface AppTagsTable {
         const val table = "app_tags"
 
         val projection = arrayOf(TableColumns._ID, TableColumns.appId, TableColumns.tagId)
-
-        const val sqlCreate =
-                "CREATE TABLE " + table + " (" +
-                        BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                        Columns.appId + " TEXT not null," +
-                        Columns.tagId + " INTEGER" +
-                        ") "
     }
 }
 

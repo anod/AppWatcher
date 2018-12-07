@@ -150,7 +150,7 @@ interface AppListTable {
                 val timestamp = System.currentTimeMillis()
                 // https://stackoverflow.com/questions/13892163/get-timestamp-for-start-of-day
                 // val dayEnd = dayStart + 86399999
-                val dayStart = timestamp - (timestamp%86400000)
+                val dayStart = timestamp - (timestamp % 86400000)
                 return dayStart - TimeUnit.DAYS.toMillis(recentDays)
             }
 
@@ -180,27 +180,6 @@ interface AppListTable {
                             "when ${Columns.updateTimestamp} > $recentTime then 1 " +
                             "else 0 end ${Columns.recentFlag}")
         }
-
-        const val sqlCreate =
-                "CREATE TABLE " + table + " (" +
-                    BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                        Columns.appId + " TEXT not null," +
-                        Columns.packageName + " TEXT not null," +
-                        Columns.versionNumber + " INTEGER," +
-                        Columns.versionName + " TEXT," +
-                        Columns.title + " TEXT not null," +
-                        Columns.creator + " TEXT," +
-                        Columns.status + " INTEGER," +
-                        Columns.uploadTimestamp + " INTEGER," +
-                        Columns.priceText + " TEXT," +
-                        Columns.priceCurrency + " TEXT," +
-                        Columns.priceMicros + " INTEGER," +
-                        Columns.uploadDate + " TEXT," +
-                        Columns.detailsUrl + " TEXT," +
-                        Columns.iconUrl + " TEXT," +
-                        Columns.appType + " TEXT," +
-                        Columns.updateTimestamp + " INTEGER" +
-                    ") "
     }
 }
 

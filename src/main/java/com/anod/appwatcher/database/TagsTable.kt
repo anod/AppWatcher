@@ -23,8 +23,8 @@ interface TagsTable {
 
     object TableColumns {
         const val _ID = table + "." + BaseColumns._ID
-        const val name = table + ".name"
-        const val color = table + ".color"
+        const val name = "$table.name"
+        const val color = "$table.color"
     }
 
     object Projection {
@@ -36,12 +36,6 @@ interface TagsTable {
     companion object {
         const val table = "tags"
         val projection = arrayOf(TableColumns._ID, TableColumns.name, TableColumns.color)
-        const val sqlCreate =
-                "CREATE TABLE " + table + " (" +
-                        BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                        Columns.name + " TEXT not null," +
-                        Columns.color + " INTEGER" +
-                        ") "
     }
 }
 

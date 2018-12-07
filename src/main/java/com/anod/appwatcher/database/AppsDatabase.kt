@@ -29,7 +29,7 @@ abstract class AppsDatabase: RoomDatabase() {
 
     companion object {
         const val version = 14
-        private const val dbName = "app_watcher"
+        const val dbName = "app_watcher"
 
         fun instance(context: Context): AppsDatabase {
             return Room.databaseBuilder(context, AppsDatabase::class.java, dbName)
@@ -39,7 +39,66 @@ abstract class AppsDatabase: RoomDatabase() {
 
         private val MIGRATION_13_14 = object: Migration(13,14) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                AppLog.d("Migrate db from 13 to 14")
+                AppLog.e("Migrate db from 13 to 14")
+
+                database.execSQL("UPDATE app_list SET update_date = 0 WHERE update_date IS NULL")
+                database.execSQL("CREATE TABLE IF NOT EXISTS `app_list_temp` " +
+                        "(`_id` INTEGER NOT NULL, " +
+                        "`app_id` TEXT NOT NULL, " +
+                        "`package` TEXT NOT NULL, " +
+                        "`ver_num` INTEGER NOT NULL, " +
+                        "`ver_name` TEXT NOT NULL, " +
+                        "`title` TEXT NOT NULL, " +
+                        "`creator` TEXT NOT NULL, " +
+                        "`iconUrl` TEXT NOT NULL, " +
+                        "`status` INTEGER NOT NULL, " +
+                        "`upload_date` TEXT NOT NULL, " +
+                        "`details_url` TEXT, " +
+                        "`update_date` INTEGER NOT NULL, " +
+                        "`app_type` TEXT NOT NULL, " +
+                        "`sync_version` INTEGER NOT NULL, " +
+                        "`price_text` TEXT NOT NULL, " +
+                        "`price_currency` TEXT NOT NULL, " +
+                        "`price_micros` INTEGER, PRIMARY KEY(`_id`))")
+                database.execSQL("INSERT INTO app_list_temp (" +
+                        "_id, app_id, package, ver_num, ver_name, title, creator," +
+                        "iconUrl, status, upload_date, details_url, update_date, app_type," +
+                        "sync_version, price_text, price_currency, price_micros) " +
+                        "SELECT _id, app_id, package, ver_num, ver_name, title, creator," +
+                            "iconUrl, status, upload_date, details_url, update_date, app_type," +
+                            "sync_version, price_text, price_currency, price_micros " +
+                        "FROM app_list")
+                database.execSQL("DROP TABLE app_list")
+                database.execSQL("ALTER TABLE app_list_temp RENAME TO app_list")
+
+                database.execSQL("CREATE TABLE IF NOT EXISTS `changelog_temp` (" +
+                        "`_id` INTEGER NOT NULL, " +
+                        "`app_id` TEXT NOT NULL, " +
+                        "`code` INTEGER NOT NULL, " +
+                        "`name` TEXT NOT NULL, " +
+                        "`details` TEXT NOT NULL, " +
+                        "`upload_date` TEXT NOT NULL, PRIMARY KEY(`_id`))");
+                database.execSQL("INSERT INTO changelog_temp (_id, app_id, code, name, details, upload_date)" +
+                        " SELECT _id, app_id, code, name, details, upload_date FROM changelog")
+                database.execSQL("DROP TABLE changelog")
+                database.execSQL("ALTER TABLE changelog_temp RENAME TO changelog")
+                database.execSQL("CREATE UNIQUE INDEX `index_changelog_app_id_code` ON `changelog` (`app_id`, `code`)")
+
+                database.execSQL("CREATE TABLE IF NOT EXISTS `app_tags_temp` (" +
+                        "`_id` INTEGER NOT NULL, " +
+                        "`app_id` TEXT NOT NULL, " +
+                        "`tags_id` INTEGER NOT NULL, PRIMARY KEY(`_id`))")
+                database.execSQL("INSERT INTO app_tags_temp (_id, app_id, tags_id) SELECT _id, app_id, tags_id FROM app_tags")
+                database.execSQL("DROP TABLE app_tags")
+                database.execSQL("ALTER TABLE app_tags_temp RENAME TO app_tags")
+
+                database.execSQL("CREATE TABLE IF NOT EXISTS `tags_temp` (" +
+                        "`_id` INTEGER NOT NULL, " +
+                        "`name` TEXT NOT NULL, " +
+                        "`color` INTEGER NOT NULL, PRIMARY KEY(`_id`))");
+                database.execSQL("INSERT INTO tags_temp (_id, name, color) SELECT _id, name, color FROM tags")
+                database.execSQL("DROP TABLE tags")
+                database.execSQL("ALTER TABLE tags_temp RENAME TO tags")
             }
         }
     }

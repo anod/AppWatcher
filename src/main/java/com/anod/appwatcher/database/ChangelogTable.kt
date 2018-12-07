@@ -38,11 +38,11 @@ interface ChangelogTable {
 
     object TableColumns {
         const val _ID = table + "." + BaseColumns._ID
-        const val appId = table + ".app_id"
-        const val versionCode = table + ".code"
-        const val versionName = table + ".name"
-        const val details = table + ".details"
-        const val uploadDate = table + ".upload_date"
+        const val appId = "$table.app_id"
+        const val versionCode = "$table.code"
+        const val versionName = "$table.name"
+        const val details = "$table.details"
+        const val uploadDate = "$table.upload_date"
     }
 
     object Projection {
@@ -65,18 +65,6 @@ interface ChangelogTable {
                 TableColumns.versionName,
                 TableColumns.details,
                 TableColumns.uploadDate)
-
-        const val sqlCreate =
-                "CREATE TABLE " + table + " (" +
-                        BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                        Columns.appId + " TEXT not null," +
-                        Columns.versionCode + " INTEGER," +
-                        Columns.versionName + " TEXT not null," +
-                        Columns.details + " TEXT not null," +
-                        Columns.uploadDate + " TEXT not null," +
-                        "UNIQUE(${Columns.appId}, ${Columns.versionCode}) ON CONFLICT REPLACE" +
-                        ") "
-
     }
 }
 
