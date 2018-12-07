@@ -22,7 +22,7 @@ class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase
     @ColorInt
     private var warningColor: Int
 
-    private val title: TextView = view.findViewById(android.R.id.title)
+    private val title: TextView = view.findViewById(R.id.title)
     private val creator: TextView? = view.findViewById<TextView?>(R.id.creator)
     private val price: TextView? = view.findViewById<TextView?>(R.id.price)
     private val updateDate: TextView? = view.findViewById<TextView?>(R.id.update_date)

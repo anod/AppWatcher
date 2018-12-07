@@ -34,7 +34,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@android:id/title"
+            android:id="@+id/title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
@@ -50,8 +50,8 @@
             android:id="@+id/creator"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
             android:drawablePadding="4dp"
             android:ellipsize="end"
             android:gravity="left"
@@ -60,7 +60,7 @@
             android:textSize="@dimen/textSize"
             app:layout_constraintEnd_toStartOf="@+id/update_date"
             app:layout_constraintStart_toEndOf="@+id/icon"
-            app:layout_constraintTop_toBottomOf="@android:id/title"
+            app:layout_constraintTop_toBottomOf="@id/title"
             tools:text="Alex Gavrishev" />
 
         <TextView
@@ -76,7 +76,7 @@
             android:maxLines="1"
             android:textColor="@color/theme_accent"
             android:textSize="@dimen/textSize"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/update_date"
             app:layout_constraintStart_toEndOf="@+id/icon"
             app:layout_constraintTop_toBottomOf="@id/creator"
             tools:text="5.6.1609P.1258283" />
@@ -88,7 +88,7 @@
             android:layout_marginRight="8dp"
             android:textSize="@dimen/textSize"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@android:id/title"
+            app:layout_constraintTop_toBottomOf="@id/title"
             tools:text="11 Aug 2017" />
 
         <TextView

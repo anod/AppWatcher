@@ -13,7 +13,7 @@ class DeviceId(private val context: Context,private val storage: DeviceIdStorage
     private val GSERVICES = Uri.parse("content://com.google.android.gsf.gservices")
 
     fun load(): String {
-        var deviceId = storage.deviceId
+        var deviceId = "" //storage.deviceId
         if (deviceId.isNotEmpty()) {
             return deviceId
         }
@@ -28,15 +28,17 @@ class DeviceId(private val context: Context,private val storage: DeviceIdStorage
     }
 
     private fun queryDeviceId(cr: ContentResolver): String {
-        val cursor = cr.query(GSERVICES, null, null, arrayOf("android_id"), null
-        ) ?: return ""
+        val cursor = cr.query(GSERVICES, null, null, arrayOf("android_id"), null) ?: return ""
         if (!cursor.moveToFirst() || cursor.columnCount < 2) {
             cursor.close()
             return ""
         }
         var str = ""
         try {
-            str = java.lang.Long.toHexString(cursor.getString(1).toLong())
+            val androidId = cursor.getString(1) ?: ""
+            if (androidId.isNotEmpty()) {
+                str = java.lang.Long.toHexString(androidId.toLong())
+            }
         } catch (localNumberFormatException: NumberFormatException) { }
 
         cursor.close()

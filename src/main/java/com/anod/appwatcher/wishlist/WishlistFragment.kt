@@ -29,7 +29,7 @@ import kotlinx.android.synthetic.main.fragment_wishlist.*
  * *
  * @date 16/12/2016.
  */
-class WishlistFragment : androidx.fragment.app.Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Listener {
+class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Listener {
 
     private var endpoint: WishlistEndpoint? = null
     private val watchAppList: WatchAppList by lazy { WatchAppList(this) }
@@ -65,7 +65,7 @@ class WishlistFragment : androidx.fragment.app.Fragment(), WatchAppList.Listener
         activity!!.setTitle(R.string.wishlist)
 
         val account = arguments!!.getParcelable<Account>(EXTRA_ACCOUNT)
-        val authToken = arguments!!.getString(EXTRA_AUTH_TOKEN)
+        val authToken = arguments!!.getString(EXTRA_AUTH_TOKEN) ?: ""
 
         if (account == null || authToken.isEmpty() || context == null) {
             Toast.makeText(context, R.string.choose_an_account, Toast.LENGTH_SHORT).show()
