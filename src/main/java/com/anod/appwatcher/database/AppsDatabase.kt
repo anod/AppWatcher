@@ -33,9 +33,27 @@ abstract class AppsDatabase: RoomDatabase() {
 
         fun instance(context: Context): AppsDatabase {
             return Room.databaseBuilder(context, AppsDatabase::class.java, dbName)
-                    .addMigrations(MIGRATION_13_14)
+                    .addMigrations(MIGRATION_9_11, MIGRATION_11_12, MIGRATION_13_14)
                     .build()
         }
+
+        private val MIGRATION_9_11 = object: Migration(9, 11) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("CREATE TABLE IF NOT EXISTS `changelog` (" +
+                        "`_id` INTEGER NOT NULL, " +
+                        "`app_id` TEXT NOT NULL, " +
+                        "`code` INTEGER NOT NULL, " +
+                        "`name` TEXT NOT NULL, " +
+                        "`details` TEXT NOT NULL, " +
+                        "`upload_date` TEXT NOT NULL, PRIMARY KEY(`_id`))")
+            }
+        }
+        private val MIGRATION_11_12 = object: Migration(11, 12) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE " + ChangelogTable.table + " ADD COLUMN " + ChangelogTable.Columns.uploadDate + " TEXT")
+            }
+        }
+
 
         private val MIGRATION_13_14 = object: Migration(13,14) {
             override fun migrate(database: SupportSQLiteDatabase) {
@@ -71,6 +89,7 @@ abstract class AppsDatabase: RoomDatabase() {
                 database.execSQL("DROP TABLE app_list")
                 database.execSQL("ALTER TABLE app_list_temp RENAME TO app_list")
 
+                database.execSQL("UPDATE changelog SET upload_date = '' WHERE upload_date IS NULL")
                 database.execSQL("CREATE TABLE IF NOT EXISTS `changelog_temp` (" +
                         "`_id` INTEGER NOT NULL, " +
                         "`app_id` TEXT NOT NULL, " +
