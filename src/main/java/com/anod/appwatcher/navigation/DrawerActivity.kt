@@ -214,11 +214,13 @@ abstract class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.Selecti
     override fun onAccountSelected(account: Account) {
         val viewModel = ViewModelProviders.of(this).get(DrawerViewModel::class.java)
         viewModel.account.value = account
-
+        val collectReports = provide.prefs.collectCrashReports
         AuthTokenAsync(this).request(this, account, object : AuthTokenAsync.Callback {
             override fun onToken(token: String) {
                 this@DrawerActivity.authToken = token
-                Crashlytics.setUserIdentifier(Hash.sha256(account.name).encoded)
+                if (collectReports) {
+                    Crashlytics.setUserIdentifier(Hash.sha256(account.name).encoded)
+                }
                 updateDrawerAccount(account)
             }
 

@@ -74,7 +74,9 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
             return
         }
 
-        Crashlytics.logException(tr)
+        if (appComponent.prefs.collectCrashReports) {
+            Crashlytics.logException(tr)
+        }
     }
 
     private fun isNetworkError(tr: Throwable): Boolean {
