@@ -34,10 +34,10 @@ class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Li
     private var endpoint: WishlistEndpoint? = null
     private val watchAppList: WatchAppList by lazy { WatchAppList(this) }
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
 
-        watchAppList.attach(context!!)
+        watchAppList.attach(context)
         endpoint?.listener = this
     }
 

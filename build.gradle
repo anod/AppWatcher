@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.3.10'
+    ext.kotlin_version = '1.3.11'
     repositories {
         jcenter()
         mavenCentral()
@@ -103,39 +103,39 @@ configurations.all {
 }
 
 dependencies {
-    implementation 'androidx.recyclerview:recyclerview:1.0.0-beta01'
-    implementation 'com.google.android.material:material:1.0.0-beta01'
-    implementation 'androidx.palette:palette:1.0.0-beta01'
-    implementation 'androidx.cardview:cardview:1.0.0-beta01'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0-alpha01'
+    implementation 'com.google.android.material:material:1.1.0-alpha01'
+    implementation 'androidx.palette:palette:1.0.0'
+    implementation 'androidx.cardview:cardview:1.0.0'
 
     implementation 'com.google.android.gms:play-services-drive:16.0.0'
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0-beta01'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'com.google.android.gms:play-services-oss-licenses:16.0.1'
     implementation 'com.google.android.gms:play-services-identity:16.0.0'
     implementation 'com.google.android.gms:play-services-auth:16.0.1'
 
-    implementation 'com.google.firebase:firebase-core:16.0.5'
-    implementation 'com.crashlytics.sdk.android:crashlytics:2.9.6'
+    implementation 'com.google.firebase:firebase-core:16.0.6'
+    implementation 'com.crashlytics.sdk.android:crashlytics:2.9.7'
 
     implementation 'com.firebase:firebase-jobdispatcher:0.8.5'
 
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
     implementation 'com.squareup.picasso:picasso:2.71828'
-    implementation 'androidx.exifinterface:exifinterface:1.0.0-beta01' // picasso
+    implementation 'androidx.exifinterface:exifinterface:1.0.0' // picasso
     implementation 'com.jakewharton:process-phoenix:2.0.0'
 
     // ViewModel and LiveData
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0-beta01'
-    kapt 'androidx.lifecycle:lifecycle-compiler:2.0.0-beta01'
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
+    kapt 'androidx.lifecycle:lifecycle-compiler:2.0.0'
 
-    implementation 'androidx.room:room-runtime:2.0.0-beta01'
-    kapt 'androidx.room:room-compiler:2.0.0-beta01'
+    implementation 'androidx.room:room-runtime:2.1.0-alpha03'
+    kapt 'androidx.room:room-compiler:2.1.0-alpha03'
 
     testImplementation 'junit:junit:4.12'
 
     implementation 'androidx.core:core-ktx:1.0.1'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.2'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
 
     implementation project(':colorpicker')
     implementation project(':framework')

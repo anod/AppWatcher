@@ -54,7 +54,7 @@ dependencies {
     api 'com.android.volley:volley:1.1.0'
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
 
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0-beta01'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation project(':framework')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }

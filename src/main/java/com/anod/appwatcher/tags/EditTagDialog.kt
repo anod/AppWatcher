@@ -37,7 +37,7 @@ class EditTagDialog : DialogFragment(), ColorPickerSwatch.OnColorSelectedListene
         val colorDrawable = arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.color_picker_swatch, null)!!)
         colorPreview.setImageDrawable(ColorStateDrawable(colorDrawable, tag.color))
         tagName.requestFocus()
-        dialog.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+        dialog?.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
 
         if (tag.id == -1) {
             button3.visibility = View.GONE
@@ -48,7 +48,7 @@ class EditTagDialog : DialogFragment(), ColorPickerSwatch.OnColorSelectedListene
         colorPreview.setOnClickListener {
             val dialog = ColorPickerDialog.newInstance(tag.color, false, activity)
             dialog.setOnColorSelectedListener(this)
-            dialog.show(fragmentManager, "color-picker")
+            dialog.show(fragmentManager!!, "color-picker")
         }
 
         button1.setOnClickListener {
