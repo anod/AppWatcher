@@ -278,23 +278,23 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
             }
             ACTION_NOTIFY_UPTODATE -> prefs.isNotifyInstalledUpToDate = (pref as ToggleItem).checked
             ACTION_THEME -> {
-                DialogItems(this, R.style.AlertDialog, R.string.pref_title_theme, R.array.themes, { _, which ->
-                            if (prefs.nightMode != which) {
-                                prefs.nightMode = which
-                                AppCompatDelegate.setDefaultNightMode(which)
-                                this@SettingsActivity.recreate()
-                                this.recreateWatchlist()
-                            }
-                        }).show()
+                DialogItems(this, R.style.AlertDialog, R.string.pref_title_theme, R.array.themes) { _, which ->
+                    if (prefs.nightMode != which) {
+                        prefs.nightMode = which
+                        AppCompatDelegate.setDefaultNightMode(which)
+                        this@SettingsActivity.recreate()
+                        this.recreateWatchlist()
+                    }
+                }.show()
             }
             ACTION_DARK_THEME -> {
-                DialogItems(this, R.style.AlertDialog, R.string.pref_title_dark_theme, R.array.dark_themes, { _, which ->
-                            if (prefs.theme != which) {
-                                prefs.theme = which
-                                this@SettingsActivity.setResult(android.app.Activity.RESULT_OK, Intent().putExtra("recreateWatchlistOnBack", true))
-                                this.recreateWatchlist()
-                            }
-                        }).show()
+                DialogItems(this, R.style.AlertDialog, R.string.pref_title_dark_theme, R.array.dark_themes) { _, which ->
+                    if (prefs.theme != which) {
+                        prefs.theme = which
+                        this@SettingsActivity.setResult(android.app.Activity.RESULT_OK, Intent().putExtra("recreateWatchlistOnBack", true))
+                        this.recreateWatchlist()
+                    }
+                }.show()
             }
             ACTION_EXPORT_DB -> try {
                 exportDb()
@@ -308,15 +308,15 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
                 startActivity(Intent(this, UserLogActivity::class.java))
             }
             ACTION_DEFAULT_FILTER -> {
-                DialogSingleChoice(this, R.style.AlertDialog, R.string.pref_default_filter, R.array.filter_titles, prefs.defaultMainFilterId, { _, which ->
+                DialogSingleChoice(this, R.style.AlertDialog, R.string.pref_default_filter, R.array.filter_titles, prefs.defaultMainFilterId) { _, which ->
                     prefs.defaultMainFilterId = which
-                }).show()
+                }.show()
             }
             ACTION_ENABLE_PULL_TO_REFRESH -> prefs.enablePullToRefresh = this.applyToggle(pref, prefs.enablePullToRefresh)
             ACTION_NOTIFY_INSTALLED -> prefs.isNotifyInstalled = (pref as ToggleItem).checked
             ACTION_CRASH_REPORTS -> {
                 prefs.collectCrashReports = (pref as ToggleItem).checked
-                ProcessPhoenix.triggerRebirth(this)
+                ProcessPhoenix.triggerRebirth(this, Intent(this, AppWatcherActivity::class.java))
             }
         }
         notifyDataSetChanged()
