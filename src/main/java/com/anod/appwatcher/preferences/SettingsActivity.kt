@@ -148,7 +148,7 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_BACKUP_FILE) {
             if (resultCode == Activity.RESULT_OK) {
-                ImportTask(this, {
+                ImportTask(this) {
                     when (it) {
                         -1 -> isProgressVisible = true
                         else -> {
@@ -156,11 +156,11 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
                             ImportTask.showImportFinishToast(this, it)
                         }
                     }
-                }).execute(data!!.data)
+                }.execute(data!!.data)
             }
         } else if (requestCode == REQUEST_BACKUP_DEST) {
             if (resultCode == Activity.RESULT_OK) {
-                ExportTask(this, {
+                ExportTask(this) {
                     when (it) {
                         -1 -> {
                             AppLog.d("Exporting...")
@@ -176,7 +176,7 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
                             }
                         }
                     }
-                }).execute(data!!.data)
+                }.execute(data!!.data)
             }
         } else {
             gDriveSignIn.onActivityResult(requestCode, resultCode, data)
@@ -201,7 +201,7 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
                 }
             } else {
                 val backupFile = DbBackupManager.generateBackupFile()
-                ExportTask(this, {
+                ExportTask(this) {
                     when (it) {
                         -1 -> {
                             AppLog.d("Exporting...")
@@ -217,7 +217,7 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
                             }
                         }
                     }
-                }).execute(Uri.fromFile(backupFile))
+                }.execute(Uri.fromFile(backupFile))
             }
             ACTION_IMPORT -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
@@ -251,20 +251,20 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
                 DialogSingleChoice(this, R.style.AlertDialog,
                         R.string.pref_title_updates_frequency,
                         R.array.updates_frequency,
-                        values.indexOf(prefs.updatesFrequency), { dialog, which ->
-                            prefs.updatesFrequency = values[which]
-                            val useAutoSync = prefs.useAutoSync
-                            if (useAutoSync) {
-                                SyncScheduler.schedule(this, prefs.isRequiresCharging, prefs.isWifiOnly, prefs.updatesFrequency)
-                            } else {
-                                SyncScheduler.cancel(this)
-                            }
-                            frequencyItem.summary = resources.getStringArray(R.array.updates_frequency)[which]
-                            wifiItem.enabled = useAutoSync
-                            chargingItem.enabled = useAutoSync
-                            dialog.dismiss()
-                            notifyDataSetChanged()
-                        }).show()
+                        values.indexOf(prefs.updatesFrequency)) { dialog, which ->
+                    prefs.updatesFrequency = values[which]
+                    val useAutoSync = prefs.useAutoSync
+                    if (useAutoSync) {
+                        SyncScheduler.schedule(this, prefs.isRequiresCharging, prefs.isWifiOnly, prefs.updatesFrequency)
+                    } else {
+                        SyncScheduler.cancel(this)
+                    }
+                    frequencyItem.summary = resources.getStringArray(R.array.updates_frequency)[which]
+                    wifiItem.enabled = useAutoSync
+                    chargingItem.enabled = useAutoSync
+                    dialog.dismiss()
+                    notifyDataSetChanged()
+                }.show()
             }
             ACTION_WIFI_ONLY -> {
                 val useWifiOnly = (pref as ToggleItem).checked
@@ -339,11 +339,10 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
     @Throws(IOException::class)
     private fun exportDb() {
         val sd = Environment.getExternalStorageDirectory()
-        val dbPath: String
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            dbPath = filesDir.absolutePath.replace("files", "databases") + File.separator
+        val dbPath = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            filesDir.absolutePath.replace("files", "databases") + File.separator
         } else {
-            dbPath = filesDir.path + packageName + "/databases/"
+            filesDir.path + packageName + "/databases/"
         }
         val currentDBPath = AppsDatabase.dbName
         val backupDBPath = "appwatcher.db"

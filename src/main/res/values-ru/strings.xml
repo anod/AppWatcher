@@ -157,5 +157,15 @@
   <string name="setup_interface_section_recently_updated">Отображать раздел с недавно обновленными приложениями за последние нескольких дней</string>
   <string name="already_exist">Уже в списке</string>
   <string name="delete_existing_item">Желаете удалить из списка?</string>
+    <string name="pref_default_filter">Список по умолчанию</string>
+  <string name="pref_default_filter_summary">Выбрать какой фильтр будет показан на первом окне</string>
+  <string name="pref_notify_installed_summary">Показывать уведомления для установленных аппликаций</string>
+  <string name="pref_notify_installed">Установленные</string>
+  <string name="pref_pull_to_refresh">Обновить</string>
+  <string name="app_info">Апп Инфо</string>
+  <string name="crash_reports_title">Отчеты о сбоях</string>
+  <string name="crash_reports_descr">Собирайте отчеты о сбоях. Требуется перезпуск.</string>
+  <string name="tab_updatable">Обновляемые</string>
+  <string name="pref_privacy">Конфиденциальность</string>
 
 </resources>

@@ -54,12 +54,19 @@ abstract class AppsDatabase: RoomDatabase() {
             }
         }
 
-
         private val MIGRATION_13_14 = object: Migration(13,14) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 AppLog.e("Migrate db from 13 to 14")
 
                 database.execSQL("UPDATE app_list SET update_date = 0 WHERE update_date IS NULL")
+                database.execSQL("UPDATE app_list SET ver_name = '' WHERE ver_name IS NULL")
+                database.execSQL("UPDATE app_list SET creator = '' WHERE creator IS NULL")
+                database.execSQL("UPDATE app_list SET title = app_id WHERE title IS NULL")
+                database.execSQL("UPDATE app_list SET iconUrl = '' WHERE iconUrl IS NULL")
+                database.execSQL("UPDATE app_list SET upload_date = '' WHERE upload_date IS NULL")
+                database.execSQL("UPDATE app_list SET app_type = '' WHERE app_type IS NULL")
+                database.execSQL("UPDATE app_list SET price_text = '' WHERE price_text IS NULL")
+                database.execSQL("UPDATE app_list SET price_currency = '' WHERE price_currency IS NULL")
                 database.execSQL("CREATE TABLE IF NOT EXISTS `app_list_temp` " +
                         "(`_id` INTEGER NOT NULL, " +
                         "`app_id` TEXT NOT NULL, " +
