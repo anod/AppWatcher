@@ -102,7 +102,6 @@
       <sourceFolder url="file://$MODULE_DIR$/src/androidTest/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/androidTest/rs" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/androidTest/shaders" isTestSource="true" />
-      <excludeFolder url="file://$MODULE_DIR$/build/.DS_Store" />
       <excludeFolder url="file://$MODULE_DIR$/build/generated/not_namespaced_r_class_sources" />
       <excludeFolder url="file://$MODULE_DIR$/build/generated/source/r" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/annotation_processor_list" />
@@ -242,6 +241,12 @@
     <orderEntry type="library" name="Gradle: androidx.core:core-ktx:1.0.1@aar" level="project" />
     <orderEntry type="library" name="Gradle: com.google.android.gms:play-services-tasks:16.0.1@aar" level="project" />
     <orderEntry type="library" name="Gradle: androidx.lifecycle:lifecycle-process:2.0.0@aar" level="project" />
+    <orderEntry type="module" module-name="playstore" />
+    <orderEntry type="module" module-name="framework" />
+    <orderEntry type="module" module-name="colorpicker" />
+    <orderEntry type="module" module-name="playstore" />
+    <orderEntry type="module" module-name="framework" />
+    <orderEntry type="module" module-name="colorpicker" />
     <orderEntry type="module" module-name="playstore" />
     <orderEntry type="module" module-name="framework" />
     <orderEntry type="module" module-name="colorpicker" />

@@ -43,6 +43,8 @@ sealed class ListState
 class SyncStarted: ListState()
 class SyncStopped(val updatesCount: Int): ListState()
 class Updated: ListState()
+class NoNetwork: ListState()
+class ShowAuthDialog: ListState()
 
 /**
  * @author Alex Gavrishev
@@ -53,7 +55,7 @@ class WatchListStateViewModel(application: android.app.Application) : AndroidVie
     val titleFilter = MutableLiveData<String>()
     val sortId = MutableLiveData<Int>()
     val listState = MutableLiveData<ListState>()
-
+    var isAuthenticated = false
     /**
      * Receive notifications from UpdateCheck
      */
@@ -80,9 +82,26 @@ class WatchListStateViewModel(application: android.app.Application) : AndroidVie
     }
 
     override fun onCleared() {
-        getApplication<AppWatcherApplication>().unregisterReceiver(syncFinishedReceiver)
+        app.unregisterReceiver(syncFinishedReceiver)
     }
 
+    private val app: AppWatcherApplication
+        get() = getApplication()
+
+    fun requestRefresh() {
+        AppLog.d("Refresh requested")
+        if (!isAuthenticated) {
+            if (Application.provide(app).networkConnection.isNetworkAvailable) {
+                this.listState.value = ShowAuthDialog()
+            } else {
+                this.listState.value = NoNetwork()
+            }
+            return
+        }
+
+        ManualSyncService.startActionSync(app)
+        this.listState.value = SyncStarted()
+    }
 }
 
 abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionListener, SearchView.OnQueryTextListener {
@@ -139,7 +158,10 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
 
         stateViewModel.listState.observe(this, Observer {
             when (it) {
-                is SyncStarted -> { actionMenu.startRefresh() }
+                is SyncStarted -> {
+                    actionMenu.startRefresh()
+                    Toast.makeText(this, R.string.refresh_scheduled, Toast.LENGTH_SHORT).show()
+                }
                 is SyncStopped -> {
                     actionMenu.stopRefresh()
                     if (it.updatesCount == 0) {
@@ -147,8 +169,21 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
                     }
                     ViewModelProviders.of(this@WatchListActivity).get(DrawerViewModel::class.java).refreshLastUpdateTime()
                 }
+                is NoNetwork -> {
+                    Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()
+                    actionMenu.stopRefresh()
+                }
+                is ShowAuthDialog -> {
+                    this.showAccountsDialogWithCheck()
+                    actionMenu.stopRefresh()
+                }
             }
         })
+    }
+
+    override fun onAuthToken(authToken: String) {
+        super.onAuthToken(authToken)
+        stateViewModel.isAuthenticated = authToken.isNotEmpty()
     }
 
     protected abstract fun createViewPagerAdapter(): Adapter
@@ -188,28 +223,11 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
 
     fun showSortOptions() {
         val selected = prefs.sortIndex
-        DialogSingleChoice(this, R.style.AlertDialog, R.array.sort_titles, selected, { dialog, index ->
+        DialogSingleChoice(this, R.style.AlertDialog, R.array.sort_titles, selected) { dialog, index ->
             prefs.sortIndex = index
             stateViewModel.sortId.value = index
             dialog.dismiss()
-        })
-        .show()
-    }
-
-    fun requestRefresh(): Boolean {
-        AppLog.d("Refresh pressed")
-        if (!isAuthenticated) {
-            if (Application.provide(this).networkConnection.isNetworkAvailable) {
-                this.showAccountsDialogWithCheck()
-            } else {
-                Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()
-            }
-            return false
-        }
-
-        ManualSyncService.startActionSync(this)
-        Toast.makeText(this, R.string.refresh_scheduled, Toast.LENGTH_SHORT).show()
-        return false
+        }.show()
     }
 
     override fun onAccountSelected(account: Account) {

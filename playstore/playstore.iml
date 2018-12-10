@@ -165,5 +165,7 @@
     <orderEntry type="library" name="Gradle: androidx.concurrent:concurrent-futures:1.0.0-alpha02@jar" level="project" />
     <orderEntry type="library" name="Gradle: androidx.collection:collection:1.0.0@jar" level="project" />
     <orderEntry type="module" module-name="framework" />
+    <orderEntry type="module" module-name="framework" />
+    <orderEntry type="module" module-name="framework" />
   </component>
 </module>

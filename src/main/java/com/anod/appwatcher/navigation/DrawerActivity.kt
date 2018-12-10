@@ -51,9 +51,6 @@ abstract class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.Selecti
     val provide: AppComponent
         get() = Application.provide(this)
 
-    val isAuthenticated: Boolean
-        get() = !authToken.isNullOrEmpty()
-
     fun showAccountsDialogWithCheck() {
         Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
         accountSelectionDialog.show()
@@ -217,7 +214,7 @@ abstract class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.Selecti
         val collectReports = provide.prefs.collectCrashReports
         AuthTokenAsync(this).request(this, account, object : AuthTokenAsync.Callback {
             override fun onToken(token: String) {
-                this@DrawerActivity.authToken = token
+                onAuthToken(token)
                 if (collectReports) {
                     Crashlytics.setUserIdentifier(Hash.sha256(account.name).encoded)
                 }
@@ -226,7 +223,7 @@ abstract class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.Selecti
 
             override fun onError(errorMessage: String) {
                 AppLog.e("Error retrieving authentication token: $errorMessage")
-                this@DrawerActivity.authToken = ""
+                onAuthToken("")
                 if (Application.provide(this@DrawerActivity).networkConnection.isNetworkAvailable) {
                     Toast.makeText(this@DrawerActivity, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
                 } else {
@@ -235,6 +232,10 @@ abstract class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.Selecti
                 return
             }
         })
+    }
+
+    open fun onAuthToken(authToken: String) {
+        this.authToken = authToken
     }
 
     override fun onAccountNotFound(errorMessage: String) {

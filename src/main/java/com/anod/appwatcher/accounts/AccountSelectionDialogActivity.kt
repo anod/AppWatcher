@@ -69,26 +69,27 @@ class AccountSelectionDialogActivity : AppCompatActivity() {
         }
 
         val adapter = AccountsAdapter(this, accounts)
-        adapter.selectedAccount = intent.extras.get("account") as? Account
+        adapter.selectedAccount = intent?.extras?.get("account") as? Account
         list.adapter = adapter
     }
 
-    class AccountsAdapter(context: Context,accounts: Array<Account>): ArrayAdapter<Account>(context, R.layout.list_item_radio, accounts) {
+    class AccountsAdapter(context: Context, accounts: Array<Account>): ArrayAdapter<Account>(context, R.layout.list_item_radio, accounts) {
 
         var selectedAccount: Account? = null
 
-        override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
             val view = super.getView(position, convertView, parent) as RadioButton
 
-            val account = getItem(position)
-            view.tag = position
-            view.text = account.name
-            view.isChecked = account.name == selectedAccount?.name
+            getItem(position)?.let {
+                view.tag = position
+                view.text = it.name
+                view.isChecked = it.name == selectedAccount?.name
 
-            view.setOnClickListener {
-                val radio = it as RadioButton
-                if (radio.isChecked) {
-                    selectedAccount = getItem(it.tag as Int)
+                view.setOnClickListener {
+                    val radio = it as RadioButton
+                    if (radio.isChecked) {
+                        selectedAccount = getItem(it.tag as Int)
+                    }
                 }
             }
 

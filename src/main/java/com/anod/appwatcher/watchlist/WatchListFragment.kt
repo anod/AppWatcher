@@ -135,7 +135,7 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         val tag: Tag? = arguments!!.getParcelable(ARG_TAG)
 
         // Setup adapter for the section
-        section = sectionForClassName(arguments!!.getString(ARG_SECTION_PROVIDER))
+        section = sectionForClassName(arguments!!.getString(ARG_SECTION_PROVIDER)!!)
         val installedApps = InstalledApps.PackageManager(activity!!.packageManager)
         section.attach(this, installedApps, this)
 
@@ -249,8 +249,8 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
 
     override fun onRefresh() {
         val isRefreshing = (stateViewModel.listState.value is SyncStarted)
-        if (!isRefreshing && !(activity as WatchListActivity).requestRefresh()) {
-            stateViewModel.listState.value = SyncStarted()
+        if (!isRefreshing) {
+            stateViewModel.requestRefresh()
         }
     }
 
