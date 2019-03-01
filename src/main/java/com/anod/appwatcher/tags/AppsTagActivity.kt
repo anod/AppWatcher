@@ -52,7 +52,7 @@ class AppsTagActivity : WatchListActivity() {
 
     private fun restoreTag(savedInstanceState: Bundle?): Tag {
         if (intentExtras.containsKey(EXTRA_TAG)){
-            return intentExtras.getParcelable(EXTRA_TAG)
+            return intentExtras.getParcelable(EXTRA_TAG) ?: Tag("")
         } else if (savedInstanceState != null){
             val savedTag = savedInstanceState.getParcelable<Tag?>(EXTRA_TAG)
             if (savedTag != null) {

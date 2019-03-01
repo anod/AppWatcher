@@ -185,6 +185,7 @@ abstract class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.Selecti
                         WishlistFragment.TAG,
                         { WishlistFragment() },
                         themeRes,
+                        themeColors,
                         args,
                         this))
                 return true

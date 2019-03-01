@@ -18,6 +18,8 @@ class FragmentToolbarActivity : ToolbarActivity() {
 
     override val themeRes: Int
         get() = intentExtras.getInt("themeRes", 0)
+    override val themeColors: CustomThemeColors
+        get() = intentExtras.getParcelable<CustomThemeColors?>("themeColors") ?: CustomThemeColors.none
 
     override val layoutResource: Int
         get() = R.layout.activity_fragment
@@ -58,12 +60,13 @@ class FragmentToolbarActivity : ToolbarActivity() {
             fragments[tag] = creator
         }
 
-        fun intent(tag: String, creator: FragmentCreator, themeRes: Int, args: Bundle, context: Context): Intent {
+        fun intent(tag: String, creator: FragmentCreator, themeRes: Int, themeColors: CustomThemeColors, args: Bundle, context: Context): Intent {
             register(tag, creator)
             val intent = Intent(context, FragmentToolbarActivity::class.java)
             intent.putExtra(EXTRA_FRAGMENT, tag)
             intent.putExtra(EXTRA_ARGUMENTS, args)
             intent.putExtra("themeRes", themeRes)
+            intent.putExtra("themeColors", themeColors)
             return intent
         }
     }

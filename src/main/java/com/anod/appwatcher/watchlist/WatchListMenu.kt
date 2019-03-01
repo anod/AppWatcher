@@ -25,6 +25,7 @@ class WatchListMenu(private var searchListener: SearchView.OnQueryTextListener, 
     var searchQuery = ""
         set(value) {
             this.expandSearch = value.isNotBlank()
+            field = value
         }
     var filterId: Int = Filters.TAB_ALL
         set(value) {
@@ -68,9 +69,9 @@ class WatchListMenu(private var searchListener: SearchView.OnQueryTextListener, 
 
     private fun updateFilterItem(filterId: Int) {
         if (filterId == Filters.TAB_ALL) {
-            filterItem?.icon = ResourcesCompat.getDrawable(activity.resources, R.drawable.ic_flash_off_white_24dp, null)
+            filterItem?.icon = activity.resources.getDrawable(R.drawable.ic_flash_off_24dp, activity.theme)
         } else {
-            filterItem?.icon = ResourcesCompat.getDrawable(activity.resources, R.drawable.ic_flash_on_white_24dp, null)
+            filterItem?.icon = activity.resources.getDrawable(R.drawable.ic_flash_on_24dp, activity.theme)
         }
         filterItem?.subMenu?.getItem(filterId)?.isChecked = true
     }
@@ -83,7 +84,7 @@ class WatchListMenu(private var searchListener: SearchView.OnQueryTextListener, 
         refreshMenuAnimation.stop()
     }
 
-    fun collapseSearch() {
+    private fun collapseSearch() {
         searchMenuItem?.collapseActionView()
     }
 

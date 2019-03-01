@@ -69,8 +69,8 @@ class AccountSelectionDialog(
         if (requestCode == ACCOUNT_REQUEST)
         {
             if (resultCode == Activity.RESULT_OK && data != null) {
-                val name = data.extras.getString(AccountManager.KEY_ACCOUNT_NAME, "")
-                val type = data.extras.getString(AccountManager.KEY_ACCOUNT_TYPE, "")
+                val name = data.extras?.getString(AccountManager.KEY_ACCOUNT_NAME, "") ?: ""
+                val type = data.extras?.getString(AccountManager.KEY_ACCOUNT_TYPE, "") ?: ""
                 if (name.isNotBlank() && type.isNotBlank()) {
                     val account = Account(name, type)
                     this.preferences.account = account
@@ -100,7 +100,7 @@ class AccountSelectionDialog(
     }
 
     private fun showPermissionsDialog() {
-        val dialog = DialogMessage(activity, R.style.AlertDialog, R.string.choose_an_account, R.string.failed_gain_access, { builder ->
+        val dialog = DialogMessage(activity, R.style.AlertDialog, R.string.choose_an_account, R.string.failed_gain_access) { builder ->
             builder.setPositiveButton(R.string.allow) { _, _ ->
                 ActivityCompat.requestPermissions(
                         activity,
@@ -113,7 +113,7 @@ class AccountSelectionDialog(
                     listener.onAccountNotFound("")
                 }
             }
-        }).create()
+        }.create()
         dialog.setOnDismissListener {
             if (account == null) {
                 listener.onAccountNotFound("")

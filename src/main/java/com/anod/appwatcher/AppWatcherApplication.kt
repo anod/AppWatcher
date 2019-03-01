@@ -20,7 +20,14 @@ import info.anodsplace.framework.app.CustomThemeActivity
 import io.fabric.sdk.android.Fabric
 import java.io.File
 import java.io.IOException
-
+import android.R
+import android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+import android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
+import android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+import android.view.View
+import android.os.Build
+import androidx.core.content.ContextCompat
+import java.lang.reflect.Field
 
 
 class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstance {
@@ -97,7 +104,7 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
     private fun tryEnableMenuOnDeviceWithHardwareMenuButton() {
         try {
             val config = ViewConfiguration.get(this)
-            val menuKeyField = ViewConfiguration::class.java.getDeclaredField("sHasPermanentMenuKey")
+            val menuKeyField: Field? = ViewConfiguration::class.java.getDeclaredField("sHasPermanentMenuKey")
             if (menuKeyField != null) {
                 menuKeyField.isAccessible = true
                 menuKeyField.setBoolean(config, false)
@@ -134,6 +141,19 @@ class LifecycleCallbacks(private val app: AppWatcherApplication) : Application.A
         if (activity is CustomThemeActivity) {
             val themeRes = activity.themeRes
             if (themeRes > 0) {
+                if (activity.themeColors.available) {
+                    if (activity.themeColors.statusBarLight) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                            activity.window.decorView.systemUiVisibility = FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS or SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+                        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            activity.window.decorView.systemUiVisibility = FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS or SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                        }
+                    } else {
+                        activity.window.decorView.systemUiVisibility = FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
+                    }
+                    activity.window.statusBarColor = ContextCompat.getColor(activity, activity.themeColors.statusBarColor)
+                    activity.window.navigationBarColor = ContextCompat.getColor(activity, activity.themeColors.navigationBarColor)
+                }
                 activity.setTheme(themeRes)
             }
         }

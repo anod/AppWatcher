@@ -16,6 +16,7 @@ import info.anodsplace.framework.R
 abstract class ToolbarActivity : AppCompatActivity(), CustomThemeActivity {
 
     override val themeRes = 0
+    override val themeColors = CustomThemeColors.none
     @get:LayoutRes abstract val layoutResource: Int
 
     override fun onCreate(savedInstanceState: Bundle?) {

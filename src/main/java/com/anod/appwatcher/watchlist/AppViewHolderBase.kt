@@ -43,8 +43,8 @@ open class AppViewHolderResourceProvider(
         override val installedApps: InstalledApps)
     : AppViewHolderBase.ResourceProvider {
 
-    override val installedText = context.resources.getString(R.string.installed)!!
-    override val noRecentChangesText = context.resources.getString(R.string.no_recent_changes)!!
+    override val installedText: String = context.resources.getString(R.string.installed)
+    override val noRecentChangesText: String = context.resources.getString(R.string.no_recent_changes)
 
     override fun getString(@StringRes resId: Int): String {
         return context.getString(resId)

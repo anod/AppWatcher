@@ -25,6 +25,7 @@ import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.database.TagsTable
 import com.anod.appwatcher.utils.Theme
+import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.graphics.DrawableTint
 import info.anodsplace.framework.widget.recyclerview.RecyclerViewCursorListAdapter
@@ -40,6 +41,8 @@ class TagsListActivity : ToolbarActivity(), LoaderManager.LoaderCallbacks<Cursor
 
     override val themeRes: Int
         get() =  Theme(this).theme
+    override val themeColors: CustomThemeColors
+        get() = Theme(this).colors
 
     private var appInfo: AppInfo? = null
 

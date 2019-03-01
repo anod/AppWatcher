@@ -5,6 +5,7 @@ import android.content.res.Configuration
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.preferences.Preferences
+import info.anodsplace.framework.app.CustomThemeColors
 
 /**
  * @author Alex Gavrishev
@@ -21,6 +22,17 @@ class Theme(private val activity: Activity) {
             }
             return R.style.AppTheme_Main
         }
+
+    val colors: CustomThemeColors
+        get() =
+            when (isNightMode){
+                false ->
+                    CustomThemeColors(true, R.color.material_grey_50_, R.color.material_grey_50_)
+                Application.provide(activity).prefs.theme == Preferences.THEME_BLACK ->
+                    CustomThemeColors(false, android.R.color.black, android.R.color.black)
+                else ->
+                    CustomThemeColors(true, R.color.material_grey_900, R.color.material_grey_900)
+            }
 
     val themeDialog: Int
         get() {

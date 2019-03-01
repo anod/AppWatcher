@@ -50,7 +50,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:drawableLeft="@drawable/ic_search_white_24dp"
+            android:drawableLeft="@drawable/ic_search_24dp"
             android:text="@string/search_for_an_app" />
 
         <Button

@@ -4,14 +4,14 @@
 
     <item
         android:id="@+id/menu_act_search"
-        android:icon="@drawable/ic_search_white_24dp"
+        android:icon="@drawable/ic_search_24dp"
         android:title="@string/menu_filter"
         appwatcher:actionViewClass="androidx.appcompat.widget.SearchView"
         appwatcher:showAsAction="always|collapseActionView" />
 
     <item
         android:id="@+id/menu_act_filter"
-        android:icon="@drawable/ic_flash_on_white_24dp"
+        android:icon="@drawable/ic_flash_on_24dp"
         android:title="@string/filter"
         appwatcher:showAsAction="ifRoom">
         <menu>

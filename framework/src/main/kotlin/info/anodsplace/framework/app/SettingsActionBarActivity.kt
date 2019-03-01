@@ -52,7 +52,7 @@ abstract class SettingsActionBarActivity : ToolbarActivity(), AdapterView.OnItem
         private val viewTypeCount = activity.viewTypeCount
 
         override fun getItemViewType(position: Int): Int {
-            return getItem(position).viewType
+            return getItem(position)?.viewType ?: 0
         }
 
         override fun getViewTypeCount(): Int {

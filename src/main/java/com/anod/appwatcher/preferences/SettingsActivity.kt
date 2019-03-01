@@ -26,6 +26,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.jakewharton.processphoenix.ProcessPhoenix
 import info.anodsplace.framework.AppLog
+import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.SettingsActionBarActivity
 import info.anodsplace.framework.content.startActivityForResultSafely
 import info.anodsplace.framework.playservices.GooglePlayServices
@@ -40,6 +41,8 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
 
     override val themeRes: Int
         get() =  Theme(this).theme
+    override val themeColors: CustomThemeColors
+        get() = Theme(this).colors
 
     private val syncEnabledItem: SwitchItem by lazy { SwitchItem(R.string.pref_title_drive_sync_enabled, R.string.pref_descr_drive_sync_enabled, ACTION_SYNC_ENABLE) }
     private val syncNowItem: TextItem by lazy { TextItem(R.string.pref_title_drive_sync_now, 0, ACTION_SYNC_NOW) }

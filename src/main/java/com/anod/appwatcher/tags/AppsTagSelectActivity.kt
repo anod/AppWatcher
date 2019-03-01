@@ -20,6 +20,7 @@ import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.Theme
 import info.anodsplace.framework.app.ApplicationContext
+import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.os.BackgroundTask
 import info.anodsplace.framework.view.Keyboard
@@ -51,6 +52,8 @@ class AppsTagSelectActivity : ToolbarActivity() {
 
     override val themeRes: Int
         get() =  Theme(this).themeDialog
+    override val themeColors: CustomThemeColors
+        get() = Theme(this).colors
 
     private var isAllSelected: Boolean = false
     private val tagAppsImport: TagAppsImport by lazy { TagAppsImport(viewModel.tag, this) }

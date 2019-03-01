@@ -20,6 +20,7 @@ import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.content.WatchAppList
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.Theme
+import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.view.Keyboard
 import info.anodsplace.playstore.CompositeStateEndpoint
@@ -32,6 +33,8 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
 
     override val themeRes: Int
         get() =  Theme(this).theme
+    override val themeColors: CustomThemeColors
+        get() = Theme(this).colors
 
     private var adapter: ResultsAdapter? = null
 

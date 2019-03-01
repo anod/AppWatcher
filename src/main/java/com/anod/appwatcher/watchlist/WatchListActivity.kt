@@ -38,6 +38,7 @@ import com.anod.appwatcher.upgrade.UpgradeRefresh
 import info.anodsplace.framework.app.DialogSingleChoice
 import com.anod.appwatcher.utils.Theme
 import info.anodsplace.framework.AppLog
+import info.anodsplace.framework.app.CustomThemeColors
 
 sealed class ListState
 class SyncStarted: ListState()
@@ -108,6 +109,8 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
 
     override val themeRes: Int
         get() = Theme(this).theme
+    override val themeColors: CustomThemeColors
+        get() = Theme(this).colors
 
     private lateinit var viewPager: ViewPager
 
