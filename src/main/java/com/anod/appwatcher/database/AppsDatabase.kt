@@ -33,7 +33,11 @@ abstract class AppsDatabase: RoomDatabase() {
 
         fun instance(context: Context): AppsDatabase {
             return Room.databaseBuilder(context, AppsDatabase::class.java, dbName)
-                    .addMigrations(MIGRATION_9_11, MIGRATION_11_12, MIGRATION_13_14)
+                    .addMigrations(
+                            MIGRATION_9_11,
+                            MIGRATION_11_12,
+                            MIGRATION_12_13,
+                            MIGRATION_13_14)
                     .build()
         }
 
@@ -54,6 +58,17 @@ abstract class AppsDatabase: RoomDatabase() {
             }
         }
 
+        private val MIGRATION_12_13 = object: Migration(12, 13) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                try
+                {
+                    database.execSQL("ALTER TABLE " + ChangelogTable.table + " ADD COLUMN " + ChangelogTable.Columns.uploadDate + " TEXT")
+                } catch (e: Exception) {
+                    AppLog.e(e)
+                }
+            }
+        }
+
         private val MIGRATION_13_14 = object: Migration(13,14) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 AppLog.e("Migrate db from 13 to 14")
@@ -67,6 +82,7 @@ abstract class AppsDatabase: RoomDatabase() {
                 database.execSQL("UPDATE app_list SET app_type = '' WHERE app_type IS NULL")
                 database.execSQL("UPDATE app_list SET price_text = '' WHERE price_text IS NULL")
                 database.execSQL("UPDATE app_list SET price_currency = '' WHERE price_currency IS NULL")
+                database.execSQL("UPDATE app_list SET price_micros = 0 WHERE price_micros IS NULL")
                 database.execSQL("CREATE TABLE IF NOT EXISTS `app_list_temp` " +
                         "(`_id` INTEGER NOT NULL, " +
                         "`app_id` TEXT NOT NULL, " +

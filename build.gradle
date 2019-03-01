@@ -8,7 +8,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.0-rc02'
+        classpath 'com.android.tools.build:gradle:3.3.0'
         classpath 'com.google.gms:google-services:4.0.1'
         classpath 'com.google.gms:oss-licenses:0.9.2'
         classpath 'io.fabric.tools:gradle:1.25.4'
@@ -39,8 +39,8 @@ android {
         applicationId 'com.anod.appwatcher'
         minSdkVersion 16
         targetSdkVersion 28
-        versionCode 110
-        versionName '1.23'
+        versionCode 111
+        versionName '1.24'
         resValue "string", "content_authority", "com.anod.appwatcher"
 
         vectorDrawables.generatedDensities = ['hdpi','xxhdpi']
