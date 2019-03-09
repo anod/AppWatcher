@@ -7,8 +7,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import androidx.lifecycle.ViewModelProviders
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.utils.Theme
 import info.anodsplace.colorpicker.ColorPickerDialog
 import info.anodsplace.colorpicker.ColorPickerSwatch
 import info.anodsplace.colorpicker.ColorStateDrawable
@@ -23,6 +25,8 @@ import kotlinx.android.synthetic.main.dialog_edit_tag.*
 class EditTagDialog : DialogFragment(), ColorPickerSwatch.OnColorSelectedListener {
 
     private lateinit var tag: Tag
+
+    private val viewModel: TagsListViewModel by lazy { ViewModelProviders.of(this).get(TagsListViewModel::class.java) }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.dialog_edit_tag, container, false)
@@ -47,13 +51,15 @@ class EditTagDialog : DialogFragment(), ColorPickerSwatch.OnColorSelectedListene
 
         colorPreview.setOnClickListener {
             val dialog = ColorPickerDialog.newInstance(tag.color, false, activity)
+            dialog.setStyle(STYLE_NORMAL, Theme(activity!!).themeDialog)
             dialog.setOnColorSelectedListener(this)
             dialog.show(fragmentManager!!, "color-picker")
         }
 
+
         button1.setOnClickListener {
             tag = Tag(tag.id, tagName.text.toString().trim { it <= ' ' }, tag.color)
-            (activity as TagsListActivity).saveTag(tag)
+            viewModel.saveTag(tag)
             dismiss()
         }
 
@@ -62,7 +68,7 @@ class EditTagDialog : DialogFragment(), ColorPickerSwatch.OnColorSelectedListene
         }
 
         button3.setOnClickListener {
-            (activity as TagsListActivity).deleteTag(tag)
+            viewModel.deleteTag(tag)
             dismiss()
         }
     }

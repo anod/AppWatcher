@@ -1,7 +1,7 @@
 package com.anod.appwatcher.watchlist
 
 import android.content.Intent
-import androidx.core.content.res.ResourcesCompat
+import android.os.Bundle
 import androidx.appcompat.widget.SearchView
 import android.text.TextUtils
 import android.view.Menu
@@ -10,10 +10,12 @@ import androidx.lifecycle.ViewModelProviders
 import com.anod.appwatcher.MarketSearchActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.SettingsActivity
-import com.anod.appwatcher.installed.ImportInstalledActivity
+import com.anod.appwatcher.installed.ImportInstalledFragment
 import com.anod.appwatcher.model.Filters
-import com.anod.appwatcher.tags.TagsListActivity
+import com.anod.appwatcher.tags.TagsListFragment
 import com.anod.appwatcher.utils.UpdateAll
+import info.anodsplace.framework.app.CustomThemeActivity
+import info.anodsplace.framework.app.FragmentToolbarActivity
 import info.anodsplace.framework.view.MenuItemAnimation
 
 /**
@@ -121,11 +123,18 @@ class WatchListMenu(private var searchListener: SearchView.OnQueryTextListener, 
                 return true
             }
             R.id.menu_act_import -> {
-                activity.startActivity(Intent(activity, ImportInstalledActivity::class.java))
+                activity.startActivity(ImportInstalledFragment.intent(
+                        activity,
+                        (activity as CustomThemeActivity).themeRes,
+                        (activity as CustomThemeActivity).themeColors))
                 return true
             }
             R.id.menu_act_tags -> {
-                activity.startActivity(Intent(activity, TagsListActivity::class.java))
+                activity.startActivity(TagsListFragment.intent(
+                        activity,
+                        (activity as CustomThemeActivity).themeRes,
+                        (activity as CustomThemeActivity).themeColors,
+                        null))
                 return true
             }
             R.id.menu_act_sort -> {

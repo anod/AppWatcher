@@ -32,7 +32,7 @@ data class AppChange(
         : this(0, appId, versionCode, versionName, details, uploadDate)
 
     override fun equals(other: Any?): Boolean {
-        other as? AppChange ?: return false
+        if (other !is AppChange) return false
         return when {
             appId != other.appId -> false
             versionCode != other.versionCode -> false
@@ -41,6 +41,15 @@ data class AppChange(
             uploadDate != other.uploadDate -> false
             else -> true
         }
+    }
+
+    override fun hashCode(): Int {
+        var result = appId.hashCode()
+        result = 31 * result + versionCode
+        result = 31 * result + versionName.hashCode()
+        result = 31 * result + details.hashCode()
+        result = 31 * result + uploadDate.hashCode()
+        return result
     }
 
     val isEmpty: Boolean

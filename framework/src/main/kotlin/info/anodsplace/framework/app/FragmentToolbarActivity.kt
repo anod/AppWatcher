@@ -62,12 +62,12 @@ class FragmentToolbarActivity : ToolbarActivity() {
 
         fun intent(tag: String, creator: FragmentCreator, themeRes: Int, themeColors: CustomThemeColors, args: Bundle, context: Context): Intent {
             register(tag, creator)
-            val intent = Intent(context, FragmentToolbarActivity::class.java)
-            intent.putExtra(EXTRA_FRAGMENT, tag)
-            intent.putExtra(EXTRA_ARGUMENTS, args)
-            intent.putExtra("themeRes", themeRes)
-            intent.putExtra("themeColors", themeColors)
-            return intent
+            return Intent(context, FragmentToolbarActivity::class.java).apply {
+                putExtra(EXTRA_FRAGMENT, tag)
+                putExtra(EXTRA_ARGUMENTS, args)
+                putExtra("themeRes", themeRes)
+                putExtra("themeColors", themeColors)
+            }
         }
     }
 }

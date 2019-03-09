@@ -121,11 +121,11 @@ class SyncConnectedWorker(private val context: ApplicationContext, private val g
                     }
                 }
 
-                tagApps.forEach({ (tagName, apps) ->
+                tagApps.forEach { (tagName, apps) ->
                     currentTags[tagName]?.let {
                         cr.setAppsToTag(apps, it.id)
                     }
-                })
+                }
             }
         })
     }

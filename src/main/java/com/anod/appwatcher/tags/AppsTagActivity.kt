@@ -11,9 +11,11 @@ import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.watchlist.WatchListActivity
 import com.anod.appwatcher.watchlist.WatchListFragment
 import info.anodsplace.framework.AppLog
+import info.anodsplace.framework.app.CustomThemeColors
 
 /**
  * @author Alex Gavrishev
@@ -29,23 +31,15 @@ class AppsTagActivity : WatchListActivity() {
     override val menuResource: Int
         get() = R.menu.tagslist
 
+    override val themeColors: CustomThemeColors
+        get() = CustomThemeColors(tag.color, Theme(this).colors.navigationBarColor)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         tag = restoreTag(savedInstanceState)
         super.onCreate(savedInstanceState)
 
-        if (tag.id == 0) {
-            AppLog.e("Tag is empty")
-            startActivity(Intent(this, AppWatcherActivity::class.java))
-            finish()
-            return
-        }
-
         val appBarLayout = findViewById<AppBarLayout>(R.id.appbar)
         appBarLayout.setBackgroundColor(tag.color)
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            window.statusBarColor = tag.darkColor
-        }
 
         title = tag.name
     }
@@ -103,10 +97,8 @@ class AppsTagActivity : WatchListActivity() {
     companion object {
         const val EXTRA_TAG = "extra_tag"
 
-        fun createTagIntent(tag: Tag, context: Context): Intent {
-            val intent = Intent(context, AppsTagActivity::class.java)
-            intent.putExtra(EXTRA_TAG, tag)
-            return intent
+        fun createTagIntent(tag: Tag, context: Context) = Intent(context, AppsTagActivity::class.java).apply {
+            putExtra(EXTRA_TAG, tag)
         }
     }
 }

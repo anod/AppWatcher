@@ -1,19 +1,9 @@
 package com.anod.appwatcher.model
 
-import android.content.ComponentName
-import android.content.pm.PackageInfo
-import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Parcel
 import android.os.Parcelable
-import com.anod.appwatcher.utils.PicassoAppIcon
 import com.anod.appwatcher.utils.extractUploadDate
 import finsky.api.model.Document
-import info.anodsplace.framework.content.getAppTitle
-import info.anodsplace.framework.content.getLaunchComponent
-import info.anodsplace.framework.content.getPackageInfo
-import java.text.DateFormat
-import java.util.*
 
 class AppInfo : AppInfoMetadata, Parcelable {
 
@@ -90,23 +80,23 @@ class AppInfo : AppInfoMetadata, Parcelable {
         this.recentFlag = true
     }
 
-     constructor(`in`: Parcel) : super(`in`.readString(), `in`.readInt()) {
+     constructor(`in`: Parcel) : super(`in`.readString()!!, `in`.readInt()) {
         rowId = `in`.readInt()
-        packageName = `in`.readString()
+        packageName = `in`.readString()!!
         versionNumber = `in`.readInt()
-        versionName = `in`.readString()
-        title = `in`.readString()
-        creator = `in`.readString()
-        uploadDate = `in`.readString()
+        versionName = `in`.readString()!!
+        title = `in`.readString()!!
+        creator = `in`.readString()!!
+        uploadDate = `in`.readString()!!
 
-        priceText = `in`.readString()
-        priceCur = `in`.readString()
+        priceText = `in`.readString()!!
+        priceCur = `in`.readString()!!
         priceMicros = `in`.readInt()
         detailsUrl = `in`.readString()
 
-        iconUrl = `in`.readString()
+        iconUrl = `in`.readString()!!
         uploadTime = `in`.readLong()
-        appType = `in`.readString()
+        appType = `in`.readString()!!
         updateTime = `in`.readLong()
         recentFlag = `in`.readInt() == 1
     }
@@ -139,7 +129,7 @@ class AppInfo : AppInfoMetadata, Parcelable {
     }
 
     override fun equals(other: Any?): Boolean {
-        other as? AppInfo ?: return false
+        if (other !is AppInfo) return false
 
         return when {
             appId != other.appId -> false
@@ -159,6 +149,26 @@ class AppInfo : AppInfoMetadata, Parcelable {
             updateTime != other.updateTime -> false
             else -> true
         }
+    }
+
+    override fun hashCode(): Int {
+        var result = appId.hashCode()
+        result = 31 * result + (detailsUrl?.hashCode() ?: 0)
+        result = 31 * result + packageName.hashCode()
+        result = 31 * result + versionNumber
+        result = 31 * result + versionName.hashCode()
+        result = 31 * result + title.hashCode()
+        result = 31 * result + creator.hashCode()
+        result = 31 * result + uploadDate.hashCode()
+        result = 31 * result + priceText.hashCode()
+        result = 31 * result + priceCur.hashCode()
+        result = 31 * result + (priceMicros ?: 0)
+        result = 31 * result + iconUrl.hashCode()
+        result = 31 * result + uploadTime.hashCode()
+        result = 31 * result + appType.hashCode()
+        result = 31 * result + updateTime.hashCode()
+        result = 31 * result + recentFlag.hashCode()
+        return result
     }
 
 

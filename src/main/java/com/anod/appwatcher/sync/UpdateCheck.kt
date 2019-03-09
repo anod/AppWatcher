@@ -105,7 +105,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         var updatedApps: List<UpdatedApp> = emptyList()
         val appListProvider = DbContentProviderClient(provider)
         try {
-            updatedApps = doSync(appListProvider, lastUpdatesViewed, authToken, account, context)
+            updatedApps = doSync(appListProvider, lastUpdatesViewed, authToken, account)
         } catch (e: RemoteException) {
             AppLog.e("Error during synchronization ${e.message}", e)
         }
@@ -148,7 +148,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
     }
 
     @Throws(RemoteException::class)
-    private fun doSync(client: DbContentProviderClient, lastUpdatesViewed: Boolean, authToken: String, account: Account, context: ApplicationContext): List<UpdatedApp> {
+    private fun doSync(client: DbContentProviderClient, lastUpdatesViewed: Boolean, authToken: String, account: Account): List<UpdatedApp> {
 
         val apps = client.queryAll(false)
         if (apps.isEmpty) {

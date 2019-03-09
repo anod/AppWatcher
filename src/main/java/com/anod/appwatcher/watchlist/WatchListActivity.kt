@@ -11,15 +11,11 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
 import androidx.annotation.MenuRes
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.ViewPager
 import androidx.appcompat.widget.SearchView
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import com.anod.appwatcher.*
@@ -41,11 +37,11 @@ import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
 
 sealed class ListState
-class SyncStarted: ListState()
+object SyncStarted : ListState()
 class SyncStopped(val updatesCount: Int): ListState()
-class Updated: ListState()
-class NoNetwork: ListState()
-class ShowAuthDialog: ListState()
+object Updated: ListState()
+object NoNetwork: ListState()
+object ShowAuthDialog: ListState()
 
 /**
  * @author Alex Gavrishev
@@ -64,12 +60,12 @@ class WatchListStateViewModel(application: android.app.Application) : AndroidVie
         override fun onReceive(context: Context, intent: Intent) {
             val action = intent.action
             when (action) {
-                UpdateCheck.syncProgress -> listState.value = SyncStarted()
+                UpdateCheck.syncProgress -> listState.value = SyncStarted
                 UpdateCheck.syncStop -> {
                     val updatesCount = intent.getIntExtra(UpdateCheck.extrasUpdatesCount, 0)
                     listState.value = SyncStopped(updatesCount)
                 }
-                AddWatchAppAsyncTask.listChanged -> listState.value = Updated()
+                AddWatchAppAsyncTask.listChanged -> listState.value = Updated
             }
         }
     }
@@ -93,15 +89,15 @@ class WatchListStateViewModel(application: android.app.Application) : AndroidVie
         AppLog.d("Refresh requested")
         if (!isAuthenticated) {
             if (Application.provide(app).networkConnection.isNetworkAvailable) {
-                this.listState.value = ShowAuthDialog()
+                this.listState.value = ShowAuthDialog
             } else {
-                this.listState.value = NoNetwork()
+                this.listState.value = NoNetwork
             }
             return
         }
 
         ManualSyncService.startActionSync(app)
-        this.listState.value = SyncStarted()
+        this.listState.value = SyncStarted
     }
 }
 

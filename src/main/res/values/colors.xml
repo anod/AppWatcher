@@ -6,7 +6,6 @@
     <color name="material_blue_900">#0D47A1</color>
 
 
-    <color name="material_grey_50_">#eceff1</color>
     <color name="material_grey_500">#9E9E9E</color>
     <color name="material_grey_700">#616161</color>
     <color name="material_grey_800_">#424242</color>
@@ -28,7 +27,7 @@
 
     <color name="theme_primary">@android:color/white</color>
     <color name="theme_on_primary">@color/primary_text</color>
-    <color name="theme_primary_dark">@color/material_grey_50_</color>
+    <color name="theme_primary_dark">@android:color/white</color>
     <color name="theme_accent">#FF03a9f4</color>
 
     <color name="list_header_text">#ffB8B8B8</color>

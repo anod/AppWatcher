@@ -151,8 +151,14 @@ class LifecycleCallbacks(private val app: AppWatcherApplication) : Application.A
                     } else {
                         activity.window.decorView.systemUiVisibility = FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
                     }
-                    activity.window.statusBarColor = ContextCompat.getColor(activity, activity.themeColors.statusBarColor)
-                    activity.window.navigationBarColor = ContextCompat.getColor(activity, activity.themeColors.navigationBarColor)
+
+                    if (activity.themeColors.statusBarColor.available) {
+                        activity.window.statusBarColor = activity.themeColors.statusBarColor.get(activity)
+                    }
+
+                    if (activity.themeColors.navigationBarColor.available) {
+                        activity.window.navigationBarColor = activity.themeColors.navigationBarColor.get(activity)
+                    }
                 }
                 activity.setTheme(themeRes)
             }

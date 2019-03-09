@@ -16,7 +16,7 @@ fun Intent.forUninstall(packageName: String): Intent {
 }
 
 fun Intent.forAppInfo(packageName: String): Intent {
-    this.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS;
+    this.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
     this.data = Uri.fromParts("package", packageName, null)
     return this
 }
@@ -26,7 +26,7 @@ fun Context.startActivitySafely(intent: Intent) {
         this.startActivity(intent)
     } catch (e: Exception) {
         AppLog.e(e)
-        Toast.makeText(this, "Cannot start activity: " + intent.toString(), Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Cannot start activity: $intent", Toast.LENGTH_SHORT).show()
     }
 }
 
@@ -35,6 +35,6 @@ fun Activity.startActivityForResultSafely(intent: Intent, requestCode: Int) {
         this.startActivityForResult(intent, requestCode)
     } catch (e: Exception) {
         AppLog.e(e)
-        Toast.makeText(this, "Cannot start activity: " + intent.toString(), Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Cannot start activity: $intent", Toast.LENGTH_SHORT).show()
     }
 }

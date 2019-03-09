@@ -39,7 +39,7 @@ class Preferences(context: Context) : DeviceIdStorage {
         set(value) = preferences.edit().putLong(LAST_UPDATE_TIME, value).apply()
 
     override var deviceId: String
-        get() = preferences.getString(DEVICE_ID, "")
+        get() = preferences.getString(DEVICE_ID, "")!!
         set(value) {
             val editor = preferences.edit()
             if (value.isEmpty()) {

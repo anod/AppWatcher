@@ -44,7 +44,7 @@ class PicassoAppIcon(context: Context) {
         override fun load(request: Request, networkPolicy: Int): RequestHandler.Result? {
 
             val part = request.uri.schemeSpecificPart
-            val cmp = ComponentName.unflattenFromString(part)
+            val cmp = ComponentName.unflattenFromString(part) ?: return null
 
             val icon = packageManager.loadIcon(cmp, context.resources.displayMetrics) ?: return null
             return RequestHandler.Result(icon, DISK)

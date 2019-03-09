@@ -8,7 +8,9 @@
     android:paddingBottom="4dp"
     android:paddingLeft="8dp"
     android:paddingRight="8dp"
-    android:paddingTop="4dp">
+    android:paddingTop="4dp"
+    android:background="?attr/colorItemBackground"
+    >
 
     <TextView
         android:id="@android:id/text1"
@@ -19,6 +21,7 @@
         android:focusable="false"
         android:gravity="left"
         android:maxLines="1"
+        android:textAllCaps="true"
         android:textColor="@color/list_header_text"
         tools:text="Recently updated" />
 
@@ -28,6 +31,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="right"
+        android:textSize="16sp"
         android:textColor="@color/list_header_text"
         android:text="99+"
         tools:text="6" />

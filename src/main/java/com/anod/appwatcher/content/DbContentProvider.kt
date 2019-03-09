@@ -47,7 +47,6 @@ open class DbContentProvider : ContentProvider() {
         val appsTagCleanUri = Uri.parse("content://$authority/apps/tags/clean")!!
         val tagsUri = Uri.parse("content://$authority/tags")!!
         val tagsAppsUri = Uri.parse("content://$authority/tags/apps")!!
-        val tagsAppsCountUri = Uri.parse("content://$authority/tags/apps/count")!!
         val iconsUri = Uri.parse("content://$authority/icons")!!
         val changelogUri = Uri.parse("content://$authority/changelog")!!
 
@@ -75,15 +74,6 @@ open class DbContentProvider : ContentProvider() {
         fun matchIconUri(uri: Uri): Boolean {
             return uriMatcher.match(uri) == icon
         }
-
-        fun appsContentUri(tag: Tag?): Uri {
-            return if (tag == null)
-                DbContentProvider.appsUri
-            else {
-                val tagId = if (tag.id == -1) 0 else tag.id
-                DbContentProvider.appsTagUri.buildUpon().appendPath(tagId.toString()).build()
-            }
-        }
     }
 
     private val dbSchemaManager: DbDataSource by lazy {
@@ -101,7 +91,7 @@ open class DbContentProvider : ContentProvider() {
         when (matched) {
             app -> {
                 query.table = AppListTable.table
-                rowId = uri.lastPathSegment
+                rowId = uri.lastPathSegment ?: "0"
                 query.selection = BaseColumns._ID + "=?"
                 query.selectionArgs = arrayOf(rowId)
                 query.notifyUri = appsUri.buildUpon().appendPath(rowId).build()
@@ -270,7 +260,7 @@ open class DbContentProvider : ContentProvider() {
         val cursor = db.query(sqlQuery, selArgs)
 
 // Make sure that potential listeners are getting notified
-        cursor.setNotificationUri(context.contentResolver, uri)
+        cursor.setNotificationUri(context?.contentResolver, uri)
         return AppListCursor(cursor)
     }
 
@@ -283,7 +273,7 @@ open class DbContentProvider : ContentProvider() {
         val db = dbSchemaManager.writableDatabase
         val count = db.update(query.table, SQLiteDatabase.CONFLICT_REPLACE, values, query.selection, query.selectionArgs)
         if (count > 0 && query.notifyUri != null) {
-            context.contentResolver.notifyChange(query.notifyUri!!, null)
+            context?.contentResolver?.notifyChange(query.notifyUri!!, null)
         }
         return count
     }

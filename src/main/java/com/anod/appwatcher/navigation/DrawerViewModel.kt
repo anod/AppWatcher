@@ -3,17 +3,13 @@ package com.anod.appwatcher.navigation
 import android.accounts.Account
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import android.database.ContentObserver
-import android.net.Uri
-import android.os.Handler
+import com.anod.appwatcher.AppComponent
 import com.anod.appwatcher.AppWatcherApplication
-import com.anod.appwatcher.content.DbContentProvider
-import com.anod.appwatcher.content.TagsContentProviderClient
 import com.anod.appwatcher.database.entities.Tag
-import info.anodsplace.framework.AppLog
-import info.anodsplace.framework.app.ApplicationContext
-import info.anodsplace.framework.os.BackgroundTask
+import com.anod.appwatcher.utils.combineLatest
+import com.anod.appwatcher.utils.map
 
 /**
  * @author Alex Gavrishev
@@ -22,54 +18,24 @@ import info.anodsplace.framework.os.BackgroundTask
 
 typealias TagCountList = List<Pair<Tag, Int>>
 
-private class TagsUpdateObserver(private val viewModel: DrawerViewModel) : ContentObserver(Handler()) {
-
-    override fun onChange(selfChange: Boolean, uri: Uri?) {
-        uri?.let {
-            AppLog.d("onChange: $it")
-            viewModel.updateTags()
-        }
-    }
-}
-
 class DrawerViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val observer = TagsUpdateObserver(this)
-
-    init {
-        application.contentResolver.registerContentObserver(DbContentProvider.tagsUri, true, observer)
-        application.contentResolver.registerContentObserver(DbContentProvider.appsTagUri, true, observer)
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        getApplication<AppWatcherApplication>().contentResolver.unregisterContentObserver(observer)
-    }
+    private val appComponent: AppComponent
+        get() = getApplication<AppWatcherApplication>().appComponent
 
     val lastUpdateTime =MutableLiveData<Long>()
-    val tags= MutableLiveData<TagCountList>()
+    val tags: LiveData<TagCountList> = appComponent.database.appTags().queryCounts()
+            .combineLatest(appComponent.database.tags().loadAll())
+            .map { value ->
+                val counts: Map<Int, Int> = value.first.associate { Pair(it.tagId, it.count) }
+                val tags = value.second
+                val result: TagCountList = tags.map { Pair(it, counts.get(it.id) ?: 0) }
+                result
+            }
     val account = MutableLiveData<Account>()
 
     fun refreshLastUpdateTime() {
-        val application = getApplication<AppWatcherApplication>()
-        this.lastUpdateTime.value = application.appComponent.prefs.lastUpdateTime
+        this.lastUpdateTime.value = appComponent.prefs.lastUpdateTime
     }
 
-    fun updateTags() {
-        BackgroundTask(object : BackgroundTask.Worker<Application, List<Pair<Tag, Int>>>(getApplication()) {
-            override fun run(param: Application): List<Pair<Tag, Int>> {
-                val tagsClient = TagsContentProviderClient(ApplicationContext(param))
-                val counts = tagsClient.queryTagsAppsCounts()
-                val cr = tagsClient.queryAll()
-                val result: List<Pair<Tag, Int>> = cr.map { Pair(it, counts.get(it.id)) }
-                cr.close()
-                tagsClient.close()
-                return result
-            }
-
-            override fun finished(result: List<Pair<Tag, Int>>) {
-                this@DrawerViewModel.tags.value = result
-            }
-        }).execute()
-    }
 }

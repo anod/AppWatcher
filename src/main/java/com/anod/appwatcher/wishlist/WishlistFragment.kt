@@ -19,6 +19,8 @@ import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.content.WatchAppList
 import com.anod.appwatcher.tags.TagSnackbar
 import finsky.api.model.DfeModel
+import info.anodsplace.framework.app.CustomThemeColors
+import info.anodsplace.framework.app.FragmentToolbarActivity
 import info.anodsplace.playstore.PlayStoreEndpoint
 import info.anodsplace.playstore.WishlistEndpoint
 
@@ -141,8 +143,19 @@ class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Li
     }
 
     companion object {
-        const val TAG = "wishlist"
+        private const val TAG = "wishlist"
         const val EXTRA_ACCOUNT = "extra_account"
         const val EXTRA_AUTH_TOKEN = "extra_auth_token"
+
+        fun intent(context: Context, themeRes: Int, themeColors: CustomThemeColors, account: Account?, authToken: String?) = FragmentToolbarActivity.intent(
+                TAG,
+                { WishlistFragment() },
+                themeRes,
+                themeColors,
+                Bundle().apply {
+                    putParcelable(WishlistFragment.EXTRA_ACCOUNT, account)
+                    putString(WishlistFragment.EXTRA_AUTH_TOKEN, authToken)
+                },
+                context)
     }
 }

@@ -25,13 +25,13 @@ class Theme(private val activity: Activity) {
 
     val colors: CustomThemeColors
         get() =
-            when (isNightMode){
+            when (isNightMode) {
                 false ->
-                    CustomThemeColors(true, R.color.material_grey_50_, R.color.material_grey_50_)
+                    CustomThemeColors(true, android.R.color.white,android.R.color.white)
                 Application.provide(activity).prefs.theme == Preferences.THEME_BLACK ->
                     CustomThemeColors(false, android.R.color.black, android.R.color.black)
                 else ->
-                    CustomThemeColors(true, R.color.material_grey_900, R.color.material_grey_900)
+                    CustomThemeColors(false, R.color.material_grey_900, R.color.material_grey_900)
             }
 
     val themeDialog: Int

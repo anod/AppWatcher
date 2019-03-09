@@ -33,7 +33,7 @@ class DbBackupManager(private val context: ApplicationContext) {
         }
 
     internal fun doExport(destUri: Uri): Int {
-        val outputStream: OutputStream
+        val outputStream: OutputStream?
         try {
             outputStream = context.contentResolver.openOutputStream(destUri)
         } catch (e: FileNotFoundException) {
@@ -47,7 +47,7 @@ class DbBackupManager(private val context: ApplicationContext) {
     }
 
     internal fun writeDb(outputStream: OutputStream): Boolean {
-        AppLog.d("Write into: " + outputStream.toString())
+        AppLog.d("Write into: $outputStream")
         val writer = DbJsonWriter()
         val client = DbContentProviderClient(context)
         try {
@@ -76,7 +76,7 @@ class DbBackupManager(private val context: ApplicationContext) {
             return ERROR_FILE_READ
         }
         val reader = DbJsonReader()
-        var container: DbJsonReader.Container? = null
+        var container: DbJsonReader.Container?
         try {
             synchronized(DbBackupManager.sDataLock) {
                 val buf = BufferedReader(InputStreamReader(inputStream))

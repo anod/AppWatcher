@@ -21,11 +21,14 @@ import com.anod.appwatcher.*
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.details.DetailsActivity
-import com.anod.appwatcher.installed.ImportInstalledActivity
+import com.anod.appwatcher.installed.ImportInstalledFragment
 import com.anod.appwatcher.model.*
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.search.SearchActivity
+import com.anod.appwatcher.wishlist.WishlistFragment
 import info.anodsplace.framework.AppLog
+import info.anodsplace.framework.app.CustomThemeActivity
+import info.anodsplace.framework.app.FragmentToolbarActivity
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.startActivitySafely
 import info.anodsplace.framework.widget.recyclerview.MergeRecyclerAdapter
@@ -169,7 +172,10 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         }
 
         view.findViewById<View>(android.R.id.button2)?.setOnClickListener {
-            startActivity(Intent(activity, ImportInstalledActivity::class.java))
+            startActivity(ImportInstalledFragment.intent(
+                    context!!,
+                    (activity as CustomThemeActivity).themeRes,
+                    (activity as CustomThemeActivity).themeColors))
         }
 
         view.findViewById<View>(android.R.id.button3)?.setOnClickListener {

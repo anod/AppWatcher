@@ -6,6 +6,7 @@ import android.view.View
 
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.AppInfo
+import com.anod.appwatcher.utils.Theme
 
 /**
  * @author Alex Gavrishev
@@ -31,10 +32,9 @@ object TagSnackbar {
 
     internal class TagAction(private val activity: Activity, private val app: AppInfo) : View.OnClickListener {
         override fun onClick(v: View) {
-            this.activity.startActivity(TagsListActivity.intent(activity, app))
+            this.activity.startActivity(TagsListFragment.intent(activity, Theme(activity).theme, Theme(activity).colors, app))
         }
     }
-
 
     private class TagCallback internal constructor(private val activity: Activity, private val finishActivity: Boolean) : Snackbar.Callback() {
 

@@ -11,6 +11,7 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import android.text.format.DateUtils
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.LinearLayout
@@ -19,15 +20,14 @@ import android.widget.Toast
 import com.anod.appwatcher.*
 import com.anod.appwatcher.accounts.AccountSelectionDialog
 import com.anod.appwatcher.accounts.AuthTokenAsync
-import com.anod.appwatcher.installed.ImportInstalledActivity
 import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.installed.ImportInstalledFragment
 import com.anod.appwatcher.tags.AppsTagActivity
 import com.anod.appwatcher.utils.Hash
 import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.wishlist.WishlistFragment
 import com.crashlytics.android.Crashlytics
 import info.anodsplace.framework.AppLog
-import info.anodsplace.framework.app.FragmentToolbarActivity
 import info.anodsplace.framework.app.ToolbarActivity
 
 
@@ -76,19 +76,9 @@ abstract class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.Selecti
     private fun setupDrawer() {
         this.navigationView ?: return
 
-        this.drawerLayout?.addDrawerListener(object: DrawerLayout.SimpleDrawerListener() {
-                override fun onDrawerOpened(drawerView: View) {
-                    super.onDrawerOpened(drawerView)
-                    drawerView.postDelayed({
-                        ViewModelProviders.of(this@DrawerActivity).get(DrawerViewModel::class.java).updateTags()
-                    }, 300L)
-                }
-            })
-
         val viewModel = ViewModelProviders.of(this).get(DrawerViewModel::class.java)
         setupHeader(viewModel)
         viewModel.refreshLastUpdateTime()
-        viewModel.updateTags()
     }
 
     private fun setupHeader(viewModel: DrawerViewModel) {
@@ -142,7 +132,7 @@ abstract class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.Selecti
         val menu = this.navigationView?.menu ?: return
         menu.removeGroup(1)
         result.forEach { (tag, count) ->
-            val item = menu.add(1, tag.id, tag.id, tag.name)
+            val item = menu.add(1, tag.id, Menu.NONE, tag.name)
             item.setActionView(R.layout.drawer_tag_indicator)
             val tagIndicator = item.actionView.findViewById<View>(android.R.id.text1) as TextView
             val d = ResourcesCompat.getDrawable(resources, R.drawable.circular_color, null)
@@ -174,20 +164,18 @@ abstract class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.Selecti
                 return true
             }
             R.id.menu_act_import -> {
-                startActivity(Intent(this, ImportInstalledActivity::class.java))
+                startActivity(ImportInstalledFragment.intent(
+                        this,
+                        themeRes,
+                        themeColors))
                 return true
             }
             R.id.menu_wishlist -> {
-                val args = Bundle()
-                args.putParcelable(WishlistFragment.EXTRA_ACCOUNT, Application.provide(this).prefs.account)
-                args.putString(WishlistFragment.EXTRA_AUTH_TOKEN, authToken)
-                startActivity(FragmentToolbarActivity.intent(
-                        WishlistFragment.TAG,
-                        { WishlistFragment() },
-                        themeRes,
-                        themeColors,
-                        args,
-                        this))
+                val account = Application.provide(this).prefs.account
+                startActivity(WishlistFragment.intent(
+                        this,
+                        themeRes, themeColors,
+                        account, authToken))
                 return true
             }
         }

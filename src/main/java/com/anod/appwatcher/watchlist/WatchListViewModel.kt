@@ -67,7 +67,7 @@ open class WatchListViewModel(application: Application): AndroidViewModel(applic
 
     open fun load(): LiveData<LoadResult> {
         val liveData = loadApps()
-        return Transformations.map(liveData, {
+        return Transformations.map(liveData) {
             val sections = SectionHeaderFactory(showRecentlyUpdated, false, false)
                     .create(it?.size ?: 0,
                             filter.newCount,
@@ -77,18 +77,18 @@ open class WatchListViewModel(application: Application): AndroidViewModel(applic
                             false)
             this@WatchListViewModel.sections.value = sections
             LoadResult(it ?: emptyList(), sections)
-        })
+        }
     }
 
     fun loadApps(): LiveData<List<AppListItem>> {
         val appsTable = com.anod.appwatcher.Application.provide(context).database.apps()
         val list = AppListTable.Queries.loadAppList(sortId, tag, titleFilter, appsTable)
-        return Transformations.map(list, { allApps ->
+        return Transformations.map(list) { allApps ->
             filter.resetNewCount()
             val items = allApps ?: emptyList()
             val filtered = items.filter { appItem -> !filter.filterRecord(appItem) }
             filtered
-        })
+        }
     }
 
 }

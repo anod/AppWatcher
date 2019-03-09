@@ -100,7 +100,7 @@ internal class CustomMonthDateFormat(private val monthNames: Array<String>) : Da
                 return -1
             }
             try {
-                return Integer.valueOf(text)!!
+                return Integer.valueOf(text)
             } catch (ignored: NumberFormatException) {
             }
 

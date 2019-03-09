@@ -30,6 +30,10 @@ interface AppListTable {
     fun loadAppRow(rowId: Int): App?
 
     @Query("SELECT ${BaseColumns._ID}, ${Columns.packageName} FROM $table WHERE " +
+            "${Columns.status} != ${AppInfoMetadata.STATUS_DELETED}")
+    fun observePackages(): LiveData<List<PackageRowPair>>
+
+    @Query("SELECT ${BaseColumns._ID}, ${Columns.packageName} FROM $table WHERE " +
             "CASE :includeDeleted WHEN 'true' THEN ${Columns.status} != ${AppInfoMetadata.STATUS_DELETED} END ")
     fun loadPackages(includeDeleted: Boolean): List<PackageRowPair>
 

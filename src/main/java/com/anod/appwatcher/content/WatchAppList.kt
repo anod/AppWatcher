@@ -104,10 +104,10 @@ class WatchAppList(private val listener: Listener?) {
     private fun insertApp(info: AppInfo) {
         val uri = contentProvider?.insert(info)
 
-        if (uri == null) {
+        if (uri?.lastPathSegment == null) {
             listener?.onWatchListChangeError(info, ERROR_INSERT)
         } else {
-            val rowId = Integer.parseInt(uri.lastPathSegment)
+            val rowId = Integer.parseInt(uri.lastPathSegment!!)
             info.rowId = rowId
             addedApps.put(info.appId, -1)
             listener?.onWatchListChangeSuccess(info, AppInfoMetadata.STATUS_NORMAL)

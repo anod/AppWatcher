@@ -1,10 +1,14 @@
 package com.anod.appwatcher.database
 
-import androidx.room.Dao
 import android.content.ContentValues
+import android.database.sqlite.SQLiteDatabase
 import android.provider.BaseColumns
+import androidx.lifecycle.LiveData
 
 import com.anod.appwatcher.database.entities.Tag
+import androidx.room.*
+import androidx.sqlite.db.SimpleSQLiteQuery
+import androidx.sqlite.db.SupportSQLiteQuery
 
 /**
  * @author alex
@@ -13,6 +17,34 @@ import com.anod.appwatcher.database.entities.Tag
  */
 @Dao
 interface TagsTable {
+
+    @Query("SELECT * FROM $table ORDER BY ${Columns.name} COLLATE LOCALIZED ASC")
+    fun loadAll(): LiveData<List<Tag>>
+
+    @Delete
+    fun delete(tag: Tag)
+
+    @Update(onConflict = OnConflictStrategy.REPLACE)
+    fun update(tag: Tag)
+
+    object Queries {
+        fun insert(tag: Tag, db: AppsDatabase): Long {
+            // Skip id to apply autoincrement
+            val values = ContentValues().apply {
+                put(TagsTable.Columns.name, tag.name)
+                put(TagsTable.Columns.color, tag.color)
+            }
+            var rowId = 0L
+            db.beginTransaction()
+            try {
+                rowId= db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, values)
+                db.setTransactionSuccessful()
+            } finally {
+                db.endTransaction()
+            }
+            return rowId
+        }
+    }
 
     class Columns : BaseColumns {
         companion object {

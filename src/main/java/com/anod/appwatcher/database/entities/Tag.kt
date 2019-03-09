@@ -35,19 +35,19 @@ data class Tag(
         }
 
     @Ignore
-    constructor(name: String) : this(-1, name, DEFAULT_COLOR)
+    constructor(name: String) : this(0, name, DEFAULT_COLOR)
 
     @Ignore
-    constructor(name: String, @ColorInt color: Int) : this(-1, name, color)
+    constructor(name: String, @ColorInt color: Int) : this(0, name, color)
 
     internal constructor(source: Parcel) : this(
             source.readInt(),
-            source.readString(),
+            source.readString()!!,
             source.readInt()
     )
 
     override fun equals(other: Any?): Boolean {
-        other as? Tag ?: return false
+        if (other !is Tag) return false
         return when {
             id != other.id -> false
             name != other.name -> false
@@ -64,6 +64,12 @@ data class Tag(
         dest.writeInt(this.id)
         dest.writeString(this.name)
         dest.writeInt(this.color)
+    }
+
+    override fun hashCode(): Int {
+        var result = name.hashCode()
+        result = 31 * result + color
+        return result
     }
 
     companion object {
