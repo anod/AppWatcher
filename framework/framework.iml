@@ -33,6 +33,8 @@
           <option name="moduleName" value="framework_release" />
           <option name="addCompilerBuiltIns" value="true" />
           <option name="loadBuiltInsFromDependencies" value="true" />
+          <option name="languageVersion" value="1.3" />
+          <option name="apiVersion" value="1.3" />
           <option name="pluginOptions">
             <array />
           </option>
