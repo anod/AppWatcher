@@ -7,7 +7,6 @@ import com.android.volley.toolbox.BasicNetwork
 import com.android.volley.toolbox.ByteArrayPool
 import com.android.volley.toolbox.HttpResponse
 import okhttp3.OkHttpClient
-import java.util.concurrent.TimeUnit
 
 /**
  * @author alex

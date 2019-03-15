@@ -1,17 +1,16 @@
 package com.anod.appwatcher.tags
 
 import android.content.Context
-import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckedTextView
 import android.widget.ImageView
+import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppListItem
-import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.utils.PicassoAppIcon
 
 internal class TagAppsAdapter(private val context: Context, private val tagAppsImport: TagAppsImport)

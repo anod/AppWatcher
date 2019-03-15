@@ -1,11 +1,14 @@
 package com.anod.appwatcher.installed
 
-import androidx.lifecycle.*
 import android.util.SparseArray
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import com.anod.appwatcher.model.AppListFilter
-import com.anod.appwatcher.watchlist.*
-import info.anodsplace.framework.content.*
-import info.anodsplace.framework.livedata.OneTimeObserver
+import com.anod.appwatcher.watchlist.AppsList
+import com.anod.appwatcher.watchlist.LoadResult
+import com.anod.appwatcher.watchlist.SectionHeaderFactory
+import com.anod.appwatcher.watchlist.WatchListViewModel
+import info.anodsplace.framework.content.InstalledPackage
 import info.anodsplace.framework.os.LiveDataTask
 
 /**

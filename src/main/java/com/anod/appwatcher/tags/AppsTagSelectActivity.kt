@@ -51,7 +51,7 @@ class AppsTagViewModel(application: android.app.Application): AndroidViewModel(a
 class AppsTagSelectActivity : ToolbarActivity() {
 
     override val themeRes: Int
-        get() =  Theme(this).themeDialog
+        get() =  Theme(this).themeDialogNoActionBar
     override val themeColors: CustomThemeColors
         get() = Theme(this).colors
 

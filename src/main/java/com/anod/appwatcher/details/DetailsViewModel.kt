@@ -25,9 +25,9 @@ import info.anodsplace.playstore.PlayStoreEndpoint
 typealias TagMenuItem = Pair<Tag,Boolean>
 
 sealed class ChangelogLoadState
-class LocalComplete: ChangelogLoadState()
+object LocalComplete : ChangelogLoadState()
 class RemoteComplete(val error: Boolean): ChangelogLoadState()
-class Complete: ChangelogLoadState()
+object Complete : ChangelogLoadState()
 
 class DetailsViewModel(application: android.app.Application) : AndroidViewModel(application), PlayStoreEndpoint.Listener {
 
@@ -96,13 +96,13 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
 
     fun loadLocalChangelog() {
         if (appId.isBlank()) {
-            this.updateChangelogState(LocalComplete())
+            this.updateChangelogState(LocalComplete)
             return
         }
         val changes = Application.provide(context).database.changelog().ofApp(appId)
         changes.observeForever(OneTimeObserver(changes, Observer {
             this.localChangelog = it ?: emptyList()
-            this.updateChangelogState(LocalComplete())
+            this.updateChangelogState(LocalComplete)
         }))
     }
 
@@ -130,14 +130,14 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
         when (state) {
             is LocalComplete -> {
                 if (this.changelogState.value is RemoteComplete || this.changelogState.value is Complete) {
-                    this.changelogState.value = Complete()
+                    this.changelogState.value = Complete
                 } else {
                     this.changelogState.value = state
                 }
             }
             is RemoteComplete -> {
                 if (this.changelogState.value is LocalComplete || this.changelogState.value is Complete) {
-                    this.changelogState.value = Complete()
+                    this.changelogState.value = Complete
                 } else {
                     this.changelogState.value = state
                 }

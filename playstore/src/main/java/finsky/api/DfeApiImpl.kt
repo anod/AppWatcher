@@ -6,8 +6,6 @@ import com.android.volley.Response
 import finsky.protos.nano.Messages
 import finsky.protos.nano.Messages.Details
 
-import java.util.Collections
-
 /**
  * @author alex
  * @date 2015-02-15
@@ -54,7 +52,7 @@ class DfeApiImpl(private val queue: RequestQueue, private val apiContext: DfeApi
     }
 
     override fun createLibraryUrl(c: Int, libraryId: String, dt: Int, serverToken: ByteArray?): String {
-        val appendQueryParameter = DfeApi.Companion.LIBRARY_URI.buildUpon()
+        val appendQueryParameter = DfeApi.LIBRARY_URI.buildUpon()
                 .appendQueryParameter("c", Integer.toString(c))
                 .appendQueryParameter("dt", Integer.toString(dt))
                 .appendQueryParameter("libid", libraryId)

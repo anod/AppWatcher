@@ -10,14 +10,8 @@ import android.database.sqlite.SQLiteQueryBuilder
 import android.net.Uri
 import android.provider.BaseColumns
 import com.anod.appwatcher.Application
-
 import com.anod.appwatcher.BuildConfig
-import com.anod.appwatcher.database.DbDataSource
-import com.anod.appwatcher.database.entities.Tag
-import com.anod.appwatcher.database.AppListTable
-import com.anod.appwatcher.database.AppTagsTable
-import com.anod.appwatcher.database.ChangelogTable
-import com.anod.appwatcher.database.TagsTable
+import com.anod.appwatcher.database.*
 import info.anodsplace.framework.AppLog
 
 open class DbContentProvider : ContentProvider() {

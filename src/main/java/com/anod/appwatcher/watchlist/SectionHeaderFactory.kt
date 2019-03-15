@@ -34,19 +34,19 @@ class SectionHeaderFactory(
 
         if (isRecentVisible) {
             val newSections = SparseArray<SectionHeader>()
-            newSections[0] = RecentlyInstalled()
+            newSections[0] = RecentlyInstalled
             for (i in 0 until sections.size()) {
                 newSections[sections.keyAt(i) + 1] = sections.valueAt(i)
             }
 
             if (isOnDeviceVisible) {
-                newSections[totalAppsCount + 1] = OnDevice()
+                newSections[totalAppsCount + 1] = OnDevice
             }
             return newSections
         }
 
         if (isOnDeviceVisible) {
-            sections[totalAppsCount] = OnDevice()
+            sections[totalAppsCount] = OnDevice
         }
 
         return sections

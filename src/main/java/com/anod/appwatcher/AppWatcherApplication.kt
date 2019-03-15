@@ -20,13 +20,10 @@ import info.anodsplace.framework.app.CustomThemeActivity
 import io.fabric.sdk.android.Fabric
 import java.io.File
 import java.io.IOException
-import android.R
 import android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
 import android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
 import android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-import android.view.View
 import android.os.Build
-import androidx.core.content.ContextCompat
 import java.lang.reflect.Field
 
 
@@ -62,7 +59,7 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
 
         AppCompatDelegate.setDefaultNightMode(appComponent.prefs.nightMode)
         SyncNotification(ApplicationContext(this)).createChannels()
-        registerActivityLifecycleCallbacks(LifecycleCallbacks(this))
+        registerActivityLifecycleCallbacks(LifecycleCallbacks())
 
         deleteUserLog()
     }
@@ -116,24 +113,13 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
 
 }
 
-class LifecycleCallbacks(private val app: AppWatcherApplication) : Application.ActivityLifecycleCallbacks {
-    override fun onActivityPaused(activity: Activity?) {
-    }
-
-    override fun onActivityResumed(activity: Activity?) {
-    }
-
-    override fun onActivityStarted(activity: Activity?) {
-    }
-
-    override fun onActivityDestroyed(activity: Activity?) {
-    }
-
-    override fun onActivitySaveInstanceState(activity: Activity?, outState: Bundle?) {
-    }
-
-    override fun onActivityStopped(activity: Activity?) {
-    }
+class LifecycleCallbacks : Application.ActivityLifecycleCallbacks {
+    override fun onActivityPaused(activity: Activity?) {}
+    override fun onActivityResumed(activity: Activity?) {}
+    override fun onActivityStarted(activity: Activity?) {}
+    override fun onActivityDestroyed(activity: Activity?) {}
+    override fun onActivitySaveInstanceState(activity: Activity?, outState: Bundle?) {}
+    override fun onActivityStopped(activity: Activity?) {}
 
     override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) {
         if (activity == null) return

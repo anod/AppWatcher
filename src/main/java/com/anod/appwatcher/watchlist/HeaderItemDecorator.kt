@@ -1,27 +1,27 @@
 package com.anod.appwatcher.watchlist
 
+import android.content.Context
+import android.graphics.Canvas
+import android.graphics.Rect
+import android.util.SparseArray
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
+import androidx.core.graphics.withTranslation
+import androidx.core.util.containsKey
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
-import android.content.Context
-import android.graphics.*
 import androidx.recyclerview.widget.RecyclerView
-import android.util.SparseArray
-import android.view.View
 import com.anod.appwatcher.R
-import android.widget.TextView
-import android.view.LayoutInflater
-import androidx.core.util.containsKey
-import android.view.ViewGroup
-import android.widget.Button
-import androidx.core.graphics.withTranslation
 
 sealed class SectionHeader
 class New(val count: Int, val updatable: Int) : SectionHeader()
 class RecentlyUpdated(val count: Int) : SectionHeader()
 class Watching(val count: Int) : SectionHeader()
-class RecentlyInstalled: SectionHeader()
-class OnDevice: SectionHeader()
+object RecentlyInstalled : SectionHeader()
+object OnDevice : SectionHeader()
 
 private fun View.requestMeasure(parent: ViewGroup) {
     if (this.layoutParams == null) {

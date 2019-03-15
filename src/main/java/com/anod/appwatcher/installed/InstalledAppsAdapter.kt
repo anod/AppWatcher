@@ -2,9 +2,9 @@ package com.anod.appwatcher.installed
 
 import android.content.Context
 import android.content.pm.PackageManager
-import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.AppListItem
@@ -14,7 +14,6 @@ import com.anod.appwatcher.watchlist.AppViewHolder
 import com.anod.appwatcher.watchlist.AppViewHolderBase
 import com.anod.appwatcher.watchlist.AppViewHolderResourceProvider
 import info.anodsplace.framework.content.InstalledPackage
-import info.anodsplace.framework.content.PackageWithCode
 
 /**
  * @author alex

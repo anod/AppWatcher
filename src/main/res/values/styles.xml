@@ -11,8 +11,12 @@
     <style name="AppTheme.Dialog" parent="@style/Theme.MaterialComponents.DayNight.Dialog">
         <!-- Set AppCompat’s color theming attrs -->
         <item name="colorPrimary">@color/material_blue_800</item>
-        <item name="colorPrimaryDark">@color/material_blue_900</item>
+        <item name="colorSecondary">@color/material_blue_800</item>
+        <item name="colorOnPrimary">@color/theme_accent</item>
+        <item name="colorPrimaryDark">@color/theme_primary_dark</item>
         <item name="colorAccent">@color/theme_accent</item>
+
+        <item name="android:windowBackground">@color/theme_primary_dark</item>
 
         <item name="android:windowFrame">@null</item>
         <item name="android:windowIsFloating">true</item>
@@ -23,11 +27,42 @@
         <item name="fontFamily">@font/rubik</item>
     </style>
 
-    <style name="AppTheme.Dialog.Changelog" parent="@style/Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="AppTheme.Dialog.Black" parent="AppTheme.Dialog">
+        <item name="android:colorBackground">@android:color/black</item>
+        <item name="android:colorBackgroundCacheHint">@android:color/black</item>
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="colorItemBackground">@android:color/black</item>
+        <item name="colorItemLine">@android:color/transparent</item>
+    </style>
+
+    <style name="AppTheme.Dialog.NoActionBar" parent="@style/Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Set AppCompat’s color theming attrs -->
-        <item name="colorPrimary">@color/material_blue_800</item>
-        <item name="colorPrimaryDark">@color/material_blue_900</item>
+        <item name="colorPrimary">@color/theme_primary</item>
+        <item name="colorSecondary">@color/material_blue_800</item>
+        <item name="colorOnPrimary">@color/theme_on_primary</item> // Affects icons in action bar
+        <item name="colorPrimaryDark">@color/theme_primary_dark</item>
         <item name="colorAccent">@color/theme_accent</item>
+
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowCloseOnTouchOutside">true</item>
+        <item name="android:fontFamily">@font/rubik</item>
+        <item name="fontFamily">@font/rubik</item>
+
+        <item name="android:windowMinWidthMajor">@dimen/dialog_min_width_major</item>
+        <item name="android:windowMinWidthMinor">@dimen/dialog_min_width_major</item>
+    </style>
+
+    <style name="AppTheme.Dialog.NoActionBar.Black" parent="@style/Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/black_theme_primary</item>
+        <item name="colorPrimaryDark">@color/black_theme_primary_dark</item>
+        <item name="android:colorBackground">@android:color/black</item>
+        <item name="android:colorBackgroundCacheHint">@android:color/black</item>
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="colorItemBackground">@android:color/black</item>
+        <item name="colorItemLine">@android:color/transparent</item>
 
         <item name="android:windowFrame">@null</item>
         <item name="android:windowIsFloating">true</item>
@@ -72,17 +107,6 @@
         <item name="android:statusBarColor">@color/theme_primary_dark</item>
     </style>
 
-    <style name="AppTheme.Neutral" parent="AppTheme.Base">
-        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:statusBarColor">@color/neutral_theme_primary_dark</item>
-
-        <item name="colorPrimary">@color/neutral_theme_primary</item>
-        <item name="colorOnPrimary">@android:color/white</item>
-        <item name="colorPrimaryDark">@color/neutral_theme_primary_dark</item>
-        <item name="colorSecondary">@color/neutral_theme_primary</item>
-        <item name="colorAccent">@color/neutral_theme_accent</item>
-    </style>
-
     <style name="AppTheme.Black" parent="AppTheme.Base">
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@color/black_theme_primary</item>
@@ -97,21 +121,6 @@
         <item name="colorItemBackground">@android:color/black</item>
         <item name="colorPreferenceBackground">@android:color/black</item>
         <item name="colorItemLine">@color/material_grey_800_</item>
-    </style>
-
-    <style name="AppTheme.Dialog.Black" parent="AppTheme.Dialog">
-        <item name="colorPrimary">@color/black_theme_primary</item>
-        <item name="colorPrimaryDark">@color/black_theme_primary_dark</item>
-        <item name="android:colorBackground">@android:color/black</item>
-        <item name="android:colorBackgroundCacheHint">@android:color/black</item>
-        <item name="android:windowBackground">@android:color/black</item>
-        <item name="colorItemBackground">@android:color/black</item>
-        <item name="colorItemLine">@android:color/transparent</item>
-    </style>
-
-    <style name="AppTheme.Dialog.Black.Changelog" parent="AppTheme.Dialog.Black">
-        <item name="android:windowMinWidthMajor">@dimen/dialog_min_width_major</item>
-        <item name="android:windowMinWidthMinor">@dimen/dialog_min_width_major</item>
     </style>
 
     <style name="AppTheme.Splash" parent="AppTheme.Base">

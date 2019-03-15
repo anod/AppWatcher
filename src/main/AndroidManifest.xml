@@ -44,13 +44,12 @@
         <activity
             android:name=".ChangelogActivity"
             android:label=""
-            android:theme="@style/AppTheme.Dialog.Changelog"/>
+            android:theme="@style/AppTheme.Dialog.NoActionBar"/>
         <activity
             android:name=".MarketSearchActivity"
             android:label="@string/activity_market"/>
         <activity android:name=".userLog.UserLogActivity"
-            android:label="@string/log"
-            android:theme="@style/AppTheme.Black"/>
+            android:label="@string/log"/>
         <activity
             android:name=".AppWatcherActivity"
             android:clearTaskOnLaunch="true"
@@ -68,10 +67,6 @@
             android:name=".tags.AppsTagActivity"/>
         <activity
             android:name=".tags.AppsTagSelectActivity"
-            android:theme="@style/AppTheme.Dialog"/>
-        <activity
-            android:name=".ListExportActivity"
-            android:label="@string/import_export"
             android:theme="@style/AppTheme.Dialog"/>
         <activity
             android:name=".accounts.AccountSelectionDialogActivity"

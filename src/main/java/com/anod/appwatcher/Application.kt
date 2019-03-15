@@ -2,7 +2,6 @@ package com.anod.appwatcher
 
 import android.app.Application
 import android.content.Context
-import com.anod.appwatcher.userLog.UserLogger
 import info.anodsplace.framework.app.ApplicationContext
 
 /**

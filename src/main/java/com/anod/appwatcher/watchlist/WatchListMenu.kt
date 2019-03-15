@@ -1,11 +1,10 @@
 package com.anod.appwatcher.watchlist
 
 import android.content.Intent
-import android.os.Bundle
-import androidx.appcompat.widget.SearchView
 import android.text.TextUtils
 import android.view.Menu
 import android.view.MenuItem
+import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.ViewModelProviders
 import com.anod.appwatcher.MarketSearchActivity
 import com.anod.appwatcher.R
@@ -15,7 +14,6 @@ import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.tags.TagsListFragment
 import com.anod.appwatcher.utils.UpdateAll
 import info.anodsplace.framework.app.CustomThemeActivity
-import info.anodsplace.framework.app.FragmentToolbarActivity
 import info.anodsplace.framework.view.MenuItemAnimation
 
 /**

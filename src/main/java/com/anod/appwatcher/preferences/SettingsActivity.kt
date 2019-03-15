@@ -2,9 +2,9 @@ package com.anod.appwatcher.preferences
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.UiModeManager.*
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Environment
 import androidx.appcompat.app.AppCompatDelegate
 import android.text.format.DateUtils
@@ -16,6 +16,8 @@ import com.anod.appwatcher.backup.ImportTask
 import com.anod.appwatcher.backup.gdrive.GDrive
 import com.anod.appwatcher.backup.gdrive.GDriveSignIn
 import com.anod.appwatcher.database.AppsDatabase
+import com.anod.appwatcher.preferences.Preferences.Companion.THEME_BLACK
+import com.anod.appwatcher.preferences.Preferences.Companion.THEME_DEFAULT
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.userLog.UserLogActivity
 import info.anodsplace.framework.app.DialogItems
@@ -115,7 +117,6 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
 
                 Category(R.string.pref_header_interface),
                 TextItem(R.string.pref_title_theme, R.string.pref_descr_theme, ACTION_THEME),
-                TextItem(R.string.pref_title_dark_theme, R.string.pref_descr_dark_theme, ACTION_DARK_THEME),
                 SwitchItem(R.string.pref_show_recent_title, R.string.pref_show_recent_descr, ACTION_SHOW_RECENT, prefs.showRecent),
                 SwitchItem(R.string.pref_show_ondevice_title, R.string.pref_show_ondevice_descr, ACTION_SHOW_ONDEVICE, prefs.showOnDevice),
                 SwitchItem(R.string.pref_show_recently_updated_title, R.string.pref_show_recently_updated_descr, ACTION_SHOW_RECENTLY_UPDATED, prefs.showRecentlyUpdated),
@@ -190,48 +191,22 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
 
     override fun onPreferenceItemClick(action: Int, pref: Item) {
         when (action) {
-            ACTION_EXPORT -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
-                val uri = Uri.parse(DbBackupManager.defaultBackupDir.absolutePath)
-                intent.setDataAndType(uri, "application/json")
-                intent.putExtra(Intent.EXTRA_TITLE, "appwatcher-" + DbBackupManager.generateFileName())
-
+            ACTION_EXPORT -> {
                 try {
-                    startActivityForResult(intent, REQUEST_BACKUP_DEST)
+                    startActivityForResult(Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                        setDataAndType(Uri.parse(DbBackupManager.defaultBackupDir.absolutePath), "application/json")
+                        putExtra(Intent.EXTRA_TITLE, "appwatcher-" + DbBackupManager.generateFileName())
+                    }, REQUEST_BACKUP_DEST)
                 } catch (e: Exception) {
                     AppLog.e(e)
-                    Toast.makeText(this, "Cannot start activity: " + intent.toString(), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Cannot start activity: $intent", Toast.LENGTH_SHORT).show()
                 }
-            } else {
-                val backupFile = DbBackupManager.generateBackupFile()
-                ExportTask(this) {
-                    when (it) {
-                        -1 -> {
-                            AppLog.d("Exporting...")
-                            isProgressVisible = true
-                        }
-                        else -> {
-                            AppLog.d("Code: $it")
-                            isProgressVisible = false
-                            when (it) {
-                                DbBackupManager.RESULT_OK -> Toast.makeText(this, resources.getString(R.string.export_done), Toast.LENGTH_SHORT).show()
-                                DbBackupManager.ERROR_STORAGE_NOT_AVAILABLE -> Toast.makeText(this, resources.getString(R.string.external_storage_not_available), Toast.LENGTH_SHORT).show()
-                                DbBackupManager.ERROR_FILE_WRITE -> Toast.makeText(this, resources.getString(R.string.failed_to_write_file), Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    }
-                }.execute(Uri.fromFile(backupFile))
             }
-            ACTION_IMPORT -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
-                intent.addCategory(Intent.CATEGORY_OPENABLE)
-                intent.type = "*/*"
-                val mimeTypes = arrayOf("application/json", "text/plain", "*/*")
-                intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
-                startActivityForResultSafely(intent, REQUEST_BACKUP_FILE)
-            } else {
-                startActivity(Intent(this, ListExportActivity::class.java))
-            }
+            ACTION_IMPORT -> startActivityForResultSafely(Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                    type = "*/*"
+                    putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("application/json", "text/plain", "*/*"))
+                }, REQUEST_BACKUP_FILE)
             ACTION_LICENSES -> startActivity(Intent(this, OssLicensesMenuActivity::class.java))
             ACTION_SYNC_ENABLE -> {
                 syncNowItem.enabled = false // disable temporary sync now
@@ -281,20 +256,25 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
             }
             ACTION_NOTIFY_UPTODATE -> prefs.isNotifyInstalledUpToDate = (pref as ToggleItem).checked
             ACTION_THEME -> {
+                val nightModes = arrayOf(
+                        MODE_NIGHT_AUTO, MODE_NIGHT_AUTO, MODE_NIGHT_NO, MODE_NIGHT_YES, MODE_NIGHT_YES
+                )
+                val themes = arrayOf(THEME_DEFAULT, THEME_BLACK, THEME_DEFAULT, THEME_BLACK)
                 DialogItems(this, R.style.AlertDialog, R.string.pref_title_theme, R.array.themes) { _, which ->
-                    if (prefs.nightMode != which) {
-                        prefs.nightMode = which
-                        AppCompatDelegate.setDefaultNightMode(which)
+                    var recreate = false
+                    if (prefs.theme != themes[which]) {
+                        prefs.theme = themes[which]
+                        recreate = true
+                    }
+                    if (prefs.nightMode != nightModes[which]) {
+                        prefs.nightMode = nightModes[which]
+                        recreate = true
+                    }
+                    if (recreate) {
+                        AppCompatDelegate.setDefaultNightMode(nightModes[which])
+                        this@SettingsActivity.setResult(android.app.Activity.RESULT_OK, Intent().putExtra("recreateWatchlistOnBack", true))
                         this@SettingsActivity.recreate()
                         this.recreateWatchlist()
-                    }
-                }.show()
-            }
-            ACTION_DARK_THEME -> {
-                DialogItems(this, R.style.AlertDialog, R.string.pref_title_dark_theme, R.array.dark_themes) { _, which ->
-                    if (prefs.theme != which) {
-                        prefs.theme = which
-                        this@SettingsActivity.setResult(android.app.Activity.RESULT_OK, Intent().putExtra("recreateWatchlistOnBack", true))
                         this.recreateWatchlist()
                     }
                 }.show()
@@ -342,11 +322,7 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
     @Throws(IOException::class)
     private fun exportDb() {
         val sd = Environment.getExternalStorageDirectory()
-        val dbPath = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            filesDir.absolutePath.replace("files", "databases") + File.separator
-        } else {
-            filesDir.path + packageName + "/databases/"
-        }
+        val dbPath = filesDir.absolutePath.replace("files", "databases") + File.separator
         val currentDBPath = AppsDatabase.dbName
         val backupDBPath = "appwatcher.db"
         val currentDB = File(dbPath, currentDBPath)
@@ -424,7 +400,6 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
         private const val ACTION_NOTIFY_UPTODATE = 10
         private const val ACTION_THEME = 11
         private const val ACTION_EXPORT_DB = 12
-        private const val ACTION_DARK_THEME = 14
         private const val ACTION_SHOW_RECENT = 15
         private const val ACTION_SHOW_ONDEVICE = 16
         private const val ACTION_USER_LOG = 17

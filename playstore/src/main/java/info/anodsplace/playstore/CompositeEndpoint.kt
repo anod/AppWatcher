@@ -27,6 +27,7 @@ open class CompositeEndpoint : PlayStoreEndpoint {
 
     override var listener: PlayStoreEndpoint.Listener? = null
         set(listener) {
+            field = listener
             (0 until endpoints.size()).map { endpoints.valueAt(it) }.forEach { it.listener = listener }
         }
 

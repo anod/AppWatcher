@@ -49,7 +49,7 @@ import kotlinx.android.synthetic.main.view_changelog_header.*
 abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, View.OnClickListener, WatchAppList.Listener, AppBarLayout.OnOffsetChangedListener {
 
     override val themeRes: Int
-        get() = Theme(this).themeChangelog
+        get() = Theme(this).themeDialogNoActionBar
     private var loaded = false
 
     val viewModel: DetailsViewModel by lazy { ViewModelProviders.of(this).get(DetailsViewModel::class.java) }

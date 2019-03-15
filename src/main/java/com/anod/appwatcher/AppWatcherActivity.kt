@@ -1,19 +1,14 @@
 package com.anod.appwatcher
 
 import android.os.Bundle
+import android.widget.TextView
 import androidx.annotation.LayoutRes
 import androidx.appcompat.widget.SearchView
-import android.widget.TextView
-
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.watchlist.*
-
 import info.anodsplace.framework.AppLog
-import com.crashlytics.android.Crashlytics
-import io.fabric.sdk.android.Fabric
-
 
 
 class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener, SearchView.OnQueryTextListener {

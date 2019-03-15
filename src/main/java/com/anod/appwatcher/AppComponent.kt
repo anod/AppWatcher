@@ -2,7 +2,6 @@ package com.anod.appwatcher
 
 import android.app.NotificationManager
 import android.content.Context
-import android.net.ConnectivityManager
 import android.telephony.TelephonyManager
 import android.util.LruCache
 import com.android.volley.RequestQueue
@@ -10,18 +9,15 @@ import com.android.volley.toolbox.NoCache
 import com.anod.appwatcher.backup.gdrive.UploadServiceContentObserver
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.preferences.Preferences
-import com.anod.appwatcher.userLog.UserLogger
 import com.anod.appwatcher.utils.PicassoAppIcon
 import com.firebase.jobdispatcher.FirebaseJobDispatcher
 import com.firebase.jobdispatcher.GooglePlayDriver
 import com.squareup.picasso.Picasso
-import com.squareup.picasso.PicassoProvider
 import info.anodsplace.framework.net.NetworkConnectivity
 import info.anodsplace.playstore.DeviceId
 import info.anodsplace.playstore.DeviceInfoProvider
 import info.anodsplace.playstore.Network
 import info.anodsplace.playstore.OnlineNetwork
-import java.io.File
 
 /**
  * @author alex

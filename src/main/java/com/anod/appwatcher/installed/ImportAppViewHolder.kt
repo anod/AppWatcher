@@ -1,13 +1,12 @@
 package com.anod.appwatcher.installed
 
 import android.graphics.Color
-import androidx.core.content.res.ResourcesCompat
 import android.view.View
 import android.widget.CheckedTextView
 import android.widget.ImageView
+import androidx.core.content.res.ResourcesCompat
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.AppListItem
-import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.utils.PicassoAppIcon
 import com.anod.appwatcher.watchlist.AppViewHolderBase
 

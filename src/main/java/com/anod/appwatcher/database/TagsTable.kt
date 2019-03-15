@@ -4,11 +4,8 @@ import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.provider.BaseColumns
 import androidx.lifecycle.LiveData
-
-import com.anod.appwatcher.database.entities.Tag
 import androidx.room.*
-import androidx.sqlite.db.SimpleSQLiteQuery
-import androidx.sqlite.db.SupportSQLiteQuery
+import com.anod.appwatcher.database.entities.Tag
 
 /**
  * @author alex

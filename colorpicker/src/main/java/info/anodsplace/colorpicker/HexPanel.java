@@ -46,8 +46,8 @@ public class HexPanel extends LinearLayout {
 
         LayoutInflater.from(context).inflate(R.layout.color_picker_hex_panel, this);
 
-        mHexEdit = (EditText) findViewById(R.id.hex_edit);
-        mPreview = (ImageView) findViewById(R.id.hex_preview);
+        mHexEdit = findViewById(R.id.hex_edit);
+        mPreview = findViewById(R.id.hex_preview);
         if (isInEditMode()) {
             setPreviewColor(Color.RED);
         }

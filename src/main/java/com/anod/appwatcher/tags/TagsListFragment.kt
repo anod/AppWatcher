@@ -16,7 +16,7 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.model.AppInfo
-import info.anodsplace.framework.app.CustomThemeActivity
+import com.anod.appwatcher.utils.Theme
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.FragmentToolbarActivity
 import info.anodsplace.framework.graphics.DrawableTint
@@ -62,7 +62,7 @@ class TagsListFragment : Fragment(), View.OnClickListener {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.add_tag) {
-            val dialog = EditTagDialog.newInstance(null)
+            val dialog = EditTagDialog.newInstance(null, Theme(requireActivity()))
             dialog.show(fragmentManager!!, "edit-tag-dialog")
             return true
         }
@@ -72,7 +72,7 @@ class TagsListFragment : Fragment(), View.OnClickListener {
     override fun onClick(v: View) {
         val holder = v.tag as TagHolder
         if (appInfo == null) {
-            val dialog = EditTagDialog.newInstance(holder.tag)
+            val dialog = EditTagDialog.newInstance(holder.tag, Theme(requireActivity()))
             dialog.show(fragmentManager!!, "edit-tag-dialog")
         } else {
             val client = DbContentProviderClient(context!!)

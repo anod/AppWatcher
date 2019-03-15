@@ -3,26 +3,28 @@ package com.anod.appwatcher.installed
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
-import androidx.collection.SimpleArrayMap
-import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.collection.SimpleArrayMap
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.*
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.anod.appwatcher.AppComponent
 import com.anod.appwatcher.AppWatcherApplication
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenAsync
 import com.anod.appwatcher.content.WatchAppList
-import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.utils.map
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.FragmentToolbarActivity
-import info.anodsplace.framework.content.*
+import info.anodsplace.framework.content.AppTitleComparator
+import info.anodsplace.framework.content.InstalledApps
+import info.anodsplace.framework.content.getInstalledPackages
 import kotlinx.android.synthetic.main.fragment_import_installed.*
 
 /**

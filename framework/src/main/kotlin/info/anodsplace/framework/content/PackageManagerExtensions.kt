@@ -1,7 +1,5 @@
 package info.anodsplace.framework.content
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import android.content.ComponentName
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
@@ -12,7 +10,6 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.util.DisplayMetrics
 import info.anodsplace.framework.AppLog
-import info.anodsplace.framework.os.BackgroundTask
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader

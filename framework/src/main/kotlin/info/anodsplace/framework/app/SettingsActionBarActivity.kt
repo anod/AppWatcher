@@ -129,6 +129,7 @@ abstract class SettingsActionBarActivity : ToolbarActivity(), AdapterView.OnItem
 
     var isProgressVisible: Boolean = false
         set(value) {
+            field = value
             if (value) {
                 refreshAnim.start()
             } else {

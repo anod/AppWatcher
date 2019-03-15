@@ -1,18 +1,12 @@
 package finsky.api
 
 import android.accounts.Account
-import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.text.TextUtils
-
-import com.android.volley.AuthFailureError
 import finsky.utils.NetworkType
-import java.net.URI
-
-import java.util.HashMap
-import java.util.Locale
+import java.util.*
 
 class DfeApiContext private constructor(internal val context: Context, val account: Account, private val lastAuthToken: String, deviceId: String,
                                         locale: Locale, mccmnc: String,

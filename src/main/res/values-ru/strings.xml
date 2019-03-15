@@ -29,7 +29,7 @@
     <string name="notification_click">Нажмите для деталей</string>
     <string name="no_updates_found">Обновления не найдены.</string>
     <string name="dialog_about_title">%1$s вер. %2$s</string>
-    <string name="dialog_about_text">Автор: Alex Gavrishev&lt;br/&gt;&lt;a href="https://play.google.com/store/apps/developer?id=Alex+Gavrishev\">Google Play Store /&lt;</string>
+    <string name="dialog_about_text">"Автор: Alex Gavrishev&lt;br/&gt;&lt;a href=https://play.google.com/store/apps/developer?id=Alex+Gavrishev\"/&lt;Google Play Store&lt;/a&gt; "</string>
     <string name="share">Поделиться</string>
     <string name="app_stored">"%s\" добавлен в список для наблюдения</string>
     <string name="rate_app">Оценить в маркете</string>
@@ -128,11 +128,12 @@
 
     <string-array name="themes">
         <item>Авто (Темная с 22 до 6)</item> <!-- MODE_NIGHT_AUTO = 0; -->
+        <item>Авто (Черная с 22 до 6)</item>
         <item>Светлая</item> <!-- MODE_NIGHT_NO = 1; -->
         <item>Темная</item> <!-- MODE_NIGHT_YES = 2; -->
+        <item>Черная</item> <!-- MODE_NIGHT_YES = 2; -->
     </string-array>
-    <string name="pref_title_dark_theme">Темная тема</string>
-  <string name="pref_descr_dark_theme">Выбор между темной и AMOLED черной темой</string>
+
   <string name="pref_title_updates_frequency">Переодичность проверки</string>
   <string name="share_subject">%s версия %s</string>
   <string name="new_updates">Новые обновления</string>

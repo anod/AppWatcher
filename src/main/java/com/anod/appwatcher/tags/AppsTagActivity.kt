@@ -2,20 +2,16 @@ package com.anod.appwatcher.tags
 
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
-import com.google.android.material.appbar.AppBarLayout
 import android.view.MenuItem
-import android.view.View
-import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.watchlist.WatchListActivity
 import com.anod.appwatcher.watchlist.WatchListFragment
-import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
+import kotlinx.android.synthetic.main.activity_app_changelog.*
 
 /**
  * @author Alex Gavrishev
@@ -38,9 +34,7 @@ class AppsTagActivity : WatchListActivity() {
         tag = restoreTag(savedInstanceState)
         super.onCreate(savedInstanceState)
 
-        val appBarLayout = findViewById<AppBarLayout>(R.id.appbar)
-        appBarLayout.setBackgroundColor(tag.color)
-
+        toolbar.setBackgroundColor(tag.color)
         title = tag.name
     }
 

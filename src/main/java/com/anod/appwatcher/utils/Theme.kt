@@ -44,14 +44,14 @@ class Theme(private val activity: Activity) {
             return R.style.AppTheme_Dialog
         }
 
-    val themeChangelog: Int
+    val themeDialogNoActionBar: Int
         get() {
             if (isNightMode) {
                 if (Application.provide(activity).prefs.theme == Preferences.THEME_BLACK) {
-                    return R.style.AppTheme_Dialog_Black_Changelog
+                    return R.style.AppTheme_Dialog_NoActionBar_Black
                 }
             }
-            return R.style.AppTheme_Dialog_Changelog
+            return R.style.AppTheme_Dialog_NoActionBar
         }
 
     val isNightTheme: Boolean

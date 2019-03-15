@@ -3,8 +3,6 @@ package info.anodsplace.playstore
 import android.accounts.Account
 import android.content.Context
 import com.android.volley.RequestQueue
-
-import finsky.api.DfeUtils
 import finsky.api.model.DfeModel
 import finsky.api.model.DfeSearch
 

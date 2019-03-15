@@ -119,7 +119,7 @@ abstract class AppsDatabase: RoomDatabase() {
                         "`code` INTEGER NOT NULL, " +
                         "`name` TEXT NOT NULL, " +
                         "`details` TEXT NOT NULL, " +
-                        "`upload_date` TEXT NOT NULL, PRIMARY KEY(`_id`))");
+                        "`upload_date` TEXT NOT NULL, PRIMARY KEY(`_id`))")
                 database.execSQL("INSERT INTO changelog_temp (_id, app_id, code, name, details, upload_date)" +
                         " SELECT _id, app_id, code, name, details, upload_date FROM changelog")
                 database.execSQL("DROP TABLE changelog")
@@ -137,7 +137,7 @@ abstract class AppsDatabase: RoomDatabase() {
                 database.execSQL("CREATE TABLE IF NOT EXISTS `tags_temp` (" +
                         "`_id` INTEGER NOT NULL, " +
                         "`name` TEXT NOT NULL, " +
-                        "`color` INTEGER NOT NULL, PRIMARY KEY(`_id`))");
+                        "`color` INTEGER NOT NULL, PRIMARY KEY(`_id`))")
                 database.execSQL("INSERT INTO tags_temp (_id, name, color) SELECT _id, name, color FROM tags")
                 database.execSQL("DROP TABLE tags")
                 database.execSQL("ALTER TABLE tags_temp RENAME TO tags")

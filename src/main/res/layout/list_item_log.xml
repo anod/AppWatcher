@@ -7,4 +7,5 @@
     android:textSize="@dimen/log_message_size"
     xmlns:tools="http://schemas.android.com/tools"
     tools:text="Log message"
+    android:textColor="?attr/colorOnPrimary"
 />

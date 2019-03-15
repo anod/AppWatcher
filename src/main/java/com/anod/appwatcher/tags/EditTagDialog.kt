@@ -51,7 +51,7 @@ class EditTagDialog : DialogFragment(), ColorPickerSwatch.OnColorSelectedListene
 
         colorPreview.setOnClickListener {
             val dialog = ColorPickerDialog.newInstance(tag.color, false, activity)
-            dialog.setStyle(STYLE_NORMAL, Theme(activity!!).themeDialog)
+            dialog.setStyle(STYLE_NORMAL, Theme(activity!!).themeDialogNoActionBar)
             dialog.setOnColorSelectedListener(this)
             dialog.show(fragmentManager!!, "color-picker")
         }
@@ -81,15 +81,13 @@ class EditTagDialog : DialogFragment(), ColorPickerSwatch.OnColorSelectedListene
     }
 
     companion object {
-        fun newInstance(tag: Tag?): EditTagDialog {
-            val frag = EditTagDialog()
-            val args = Bundle()
-            if (tag != null) {
-                args.putParcelable("tag", tag)
+        fun newInstance(tag: Tag?, theme: Theme) = EditTagDialog().apply {
+            arguments = Bundle().apply {
+                if (tag != null) {
+                    putParcelable("tag", tag)
+                }
             }
-            frag.arguments = args
-            frag.setStyle(DialogFragment.STYLE_NO_TITLE, R.style.AppTheme_Dialog)
-            return frag
+            setStyle(STYLE_NO_TITLE, theme.themeDialog)
         }
     }
 }

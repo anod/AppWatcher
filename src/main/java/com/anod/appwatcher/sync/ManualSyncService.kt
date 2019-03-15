@@ -4,7 +4,6 @@ import android.app.IntentService
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import com.anod.appwatcher.Application
 import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.content.DbContentProvider
 import info.anodsplace.framework.app.ApplicationContext

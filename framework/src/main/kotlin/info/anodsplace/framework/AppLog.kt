@@ -45,10 +45,10 @@ class AppLog {
 
         fun setDebug(buildConfigDebug: Boolean, loggableTag: String) {
             val isDebug = buildConfigDebug || Log.isLoggable(loggableTag, Log.DEBUG)
-            if (isDebug) {
-                level = Log.DEBUG
+            level = if (isDebug) {
+                Log.DEBUG
             } else {
-                level = Log.INFO
+                Log.INFO
             }
         }
 

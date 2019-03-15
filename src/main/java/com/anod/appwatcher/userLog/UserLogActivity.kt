@@ -3,17 +3,17 @@ package com.anod.appwatcher.userLog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.collection.LruCache
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import android.util.Log
 import android.view.*
 import android.widget.TextView
-import com.anod.appwatcher.Application
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.R
+import com.anod.appwatcher.utils.Theme
+import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.ToolbarActivity
 import kotlinx.android.synthetic.main.activity_user_log.*
-import java.text.SimpleDateFormat
 
 
 /**
@@ -23,14 +23,19 @@ import java.text.SimpleDateFormat
 class UserLogActivity: ToolbarActivity() {
 
     class UserLogViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
-
+        private var textColor: Int? = null
         fun apply(message: Message) {
             val tv = itemView as TextView
             tv.text = "${message.timestamp} ${message.message}"
+
+            if (textColor == null) {
+                textColor = tv.textColors.defaultColor
+            }
+
             if (message.level > Log.WARN) {
-                tv.setTextColor(itemView.context.resources.getColor(android.R.color.holo_red_dark))
+                tv.setTextColor(ContextCompat.getColor(tv.context, android.R.color.holo_red_dark))
             } else {
-                tv.setTextColor(itemView.context.resources.getColor(android.R.color.white))
+                tv.setTextColor(textColor!!)
             }
         }
     }
@@ -53,6 +58,10 @@ class UserLogActivity: ToolbarActivity() {
 
     override val layoutResource: Int
         get() = R.layout.activity_user_log
+    override val themeRes: Int
+        get() = Theme(this).theme
+    override val themeColors: CustomThemeColors
+        get() = Theme(this).colors
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -4,11 +4,8 @@ import android.view.View
 import android.widget.ImageView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.App
-import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.details.AppDetailsView
-import com.anod.appwatcher.model.AppInfo
-import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.utils.PicassoAppIcon
 
 open class AppViewHolder(
