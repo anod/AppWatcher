@@ -259,7 +259,9 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
                 val nightModes = arrayOf(
                         MODE_NIGHT_AUTO, MODE_NIGHT_AUTO, MODE_NIGHT_NO, MODE_NIGHT_YES, MODE_NIGHT_YES
                 )
-                val themes = arrayOf(THEME_DEFAULT, THEME_BLACK, THEME_DEFAULT, THEME_BLACK)
+                val themes = arrayOf(
+                        THEME_DEFAULT, THEME_BLACK, THEME_DEFAULT, THEME_DEFAULT, THEME_BLACK
+                )
                 DialogItems(this, R.style.AlertDialog, R.string.pref_title_theme, R.array.themes) { _, which ->
                     var recreate = false
                     if (prefs.theme != themes[which]) {
@@ -274,7 +276,6 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
                         AppCompatDelegate.setDefaultNightMode(nightModes[which])
                         this@SettingsActivity.setResult(android.app.Activity.RESULT_OK, Intent().putExtra("recreateWatchlistOnBack", true))
                         this@SettingsActivity.recreate()
-                        this.recreateWatchlist()
                         this.recreateWatchlist()
                     }
                 }.show()

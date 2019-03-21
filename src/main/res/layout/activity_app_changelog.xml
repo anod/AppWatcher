@@ -33,13 +33,13 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+                android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar"
+                app:popupTheme="@style/Widget.MaterialComponents.PopupMenu"
                 app:titleTextAppearance="@style/ChangelogTitle"
                 app:subtitleTextAppearance="@style/ChangelogSubtitle"
                 app:titleMarginStart="16dp"
                 app:layout_collapseMode="pin"
-                app:contentInsetStartWithNavigation="0dp"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+                app:contentInsetStartWithNavigation="0dp" />
 
             <include layout="@layout/view_changelog_header"
                 android:id="@+id/header"

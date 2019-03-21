@@ -2,9 +2,12 @@ package com.anod.appwatcher.utils
 
 import android.app.Activity
 import android.content.res.Configuration
+import android.graphics.Color
+import androidx.appcompat.app.AppCompatDelegate
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.preferences.Preferences
+import info.anodsplace.framework.app.CustomThemeColor
 import info.anodsplace.framework.app.CustomThemeColors
 
 /**
@@ -27,11 +30,11 @@ class Theme(private val activity: Activity) {
         get() =
             when (isNightMode) {
                 false ->
-                    CustomThemeColors(true, android.R.color.white,android.R.color.white)
+                    CustomThemeColors(CustomThemeColor.white, CustomThemeColor.white)
                 Application.provide(activity).prefs.theme == Preferences.THEME_BLACK ->
-                    CustomThemeColors(false, android.R.color.black, android.R.color.black)
+                    CustomThemeColors( CustomThemeColor.black, CustomThemeColor.black)
                 else ->
-                    CustomThemeColors(false, R.color.material_grey_900, R.color.material_grey_900)
+                    CustomThemeColors(CustomThemeColor(0, R.color.material_grey_900, false), CustomThemeColor(0, R.color.material_grey_900, false))
             }
 
     val themeDialog: Int

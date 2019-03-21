@@ -1,5 +1,6 @@
 package info.anodsplace.framework.net
 
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -16,9 +17,11 @@ class NetworkConnectivity(private val context: Context) {
     private val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
     val isNetworkAvailable: Boolean
+        @SuppressLint("MissingPermission")
         get() = connectivityManager.activeNetworkInfo?.isConnected == true
 
     val isWifiEnabled: Boolean
+        @SuppressLint("MissingPermission")
         get() = connectivityManager.activeNetworkInfo?.type == ConnectivityManager.TYPE_WIFI
 
     fun register(broadcastReceiver: NetworkConnectivityChange) {
@@ -35,6 +38,7 @@ class NetworkConnectivity(private val context: Context) {
             fun onNetworkConnectivity(available: Boolean)
         }
 
+        @SuppressLint("MissingPermission")
         override fun onReceive(context: Context, intent: Intent?) {
             val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             listener.onNetworkConnectivity(connectivityManager.activeNetworkInfo?.isConnected == true)

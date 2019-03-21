@@ -3,6 +3,7 @@ package com.anod.appwatcher
 import android.app.Activity
 import android.app.Application
 import android.app.NotificationManager
+import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatDelegate
 import android.util.LruCache
@@ -24,6 +25,7 @@ import android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
 import android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
 import android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
 import android.os.Build
+import info.anodsplace.framework.app.WindowCustomTheme
 import java.lang.reflect.Field
 
 
@@ -128,28 +130,10 @@ class LifecycleCallbacks : Application.ActivityLifecycleCallbacks {
             val themeRes = activity.themeRes
             if (themeRes > 0) {
                 if (activity.themeColors.available) {
-                    if (activity.themeColors.statusBarLight) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-                            activity.window.decorView.systemUiVisibility = FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS or SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-                        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            activity.window.decorView.systemUiVisibility = FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS or SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                        }
-                    } else {
-                        activity.window.decorView.systemUiVisibility = FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
-                    }
-
-                    if (activity.themeColors.statusBarColor.available) {
-                        activity.window.statusBarColor = activity.themeColors.statusBarColor.get(activity)
-                    }
-
-                    if (activity.themeColors.navigationBarColor.available) {
-                        activity.window.navigationBarColor = activity.themeColors.navigationBarColor.get(activity)
-                    }
+                    WindowCustomTheme.apply(activity.themeColors, activity.window, activity)
                 }
                 activity.setTheme(themeRes)
             }
         }
     }
-
-
 }

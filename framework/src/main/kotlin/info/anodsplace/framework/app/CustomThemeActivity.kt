@@ -17,43 +17,58 @@ interface CustomThemeActivity {
     val themeColors: CustomThemeColors
 }
 
-class CustomThemeColor(val available: Boolean, @ColorInt val colorInt: Int, @ColorRes val colorRes: Int) {
+class CustomThemeColor(
+        val available: Boolean,
+        @ColorInt val colorInt: Int,
+        @ColorRes val colorRes: Int,
+        val isLight: Boolean){
+
+    constructor(@ColorInt colorInt: Int,
+                @ColorRes colorRes: Int,
+                isLight: Boolean) : this(true, colorInt, colorRes, isLight)
+
     companion object {
-        val none = CustomThemeColor(false, 0, 0)
+        val none = CustomThemeColor(false, 0, 0, false)
+        val white = CustomThemeColor(true, Color.WHITE, 0, true)
+        val black = CustomThemeColor(true, Color.BLACK, 0, false)
     }
 
     fun get(activity: Activity): Int {
-        if (colorRes > 0) {
+        if (colorRes != 0) {
             return ContextCompat.getColor(activity, colorRes)
         }
         return colorInt
     }
-
 }
 
 class CustomThemeColors(
         val available: Boolean,
-        val statusBarLight: Boolean,
         val statusBarColor: CustomThemeColor,
         val navigationBarColor: CustomThemeColor) : Parcelable {
 
     constructor(parcel: Parcel) : this(
             parcel.readByte() != 0.toByte(),
-            parcel.readByte() != 0.toByte(),
-            CustomThemeColor(parcel.readByte() != 0.toByte(), parcel.readInt(), parcel.readInt()),
-            CustomThemeColor(parcel.readByte() != 0.toByte(), parcel.readInt(), parcel.readInt())
+            CustomThemeColor(parcel.readByte() != 0.toByte(), parcel.readInt(), parcel.readInt(), parcel.readByte() != 0.toByte()),
+            CustomThemeColor(parcel.readByte() != 0.toByte(), parcel.readInt(), parcel.readInt(), parcel.readByte() != 0.toByte())
     )
 
     constructor(statusBarLight: Boolean,
                 @ColorRes statusBarColor: Int,
-                @ColorRes navigationBarColor: Int) : this(true, statusBarLight, CustomThemeColor(true, 0, statusBarColor), CustomThemeColor(true, 0, navigationBarColor))
+                isMavBarLight: Boolean,
+                @ColorRes navigationBarColor: Int)
+            : this(true, CustomThemeColor(true, 0, statusBarColor, statusBarLight), CustomThemeColor(true, 0, navigationBarColor, isMavBarLight))
 
     constructor(@ColorInt statusBarColor: Int,
-                navigationBarColor: CustomThemeColor) : this(true, isStatusBarLight(statusBarColor), CustomThemeColor(true, statusBarColor, 0), navigationBarColor)
+                navigationBarColor: CustomThemeColor)
+            : this(true, CustomThemeColor(true, statusBarColor, 0, isStatusBarLight(statusBarColor)), navigationBarColor)
+
+    constructor(statusBarColor: CustomThemeColor,
+                navigationBarColor: CustomThemeColor)
+            : this(true, statusBarColor, navigationBarColor)
+
 
     companion object {
-        val none = CustomThemeColors(false, false, CustomThemeColor.none, CustomThemeColor.none)
-
+        val none = CustomThemeColors(false, CustomThemeColor.none, CustomThemeColor.none)
 
         fun isStatusBarLight(@ColorInt statusBarColor: Int): Boolean {
             val r = Color.red(statusBarColor)
@@ -76,13 +91,14 @@ class CustomThemeColors(
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeByte(if (available) 1 else 0)
-        parcel.writeByte(if (statusBarLight) 1 else 0)
         parcel.writeInt(if (statusBarColor.available) 1 else 0)
         parcel.writeInt(statusBarColor.colorInt)
         parcel.writeInt(statusBarColor.colorRes)
+        parcel.writeByte(if (statusBarColor.isLight) 1 else 0)
         parcel.writeInt(if (navigationBarColor.available) 1 else 0)
         parcel.writeInt(navigationBarColor.colorInt)
         parcel.writeInt(navigationBarColor.colorRes)
+        parcel.writeByte(if (navigationBarColor.isLight) 1 else 0)
     }
 
     override fun describeContents(): Int {

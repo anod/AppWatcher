@@ -19,6 +19,9 @@ interface AppTagsTable {
     @Query("SELECT * FROM ${AppTagsTable.table} WHERE ${Columns.tagId} = :tagId")
     fun forTag(tagId: Int): LiveData<List<AppTag>>
 
+    @Query("SELECT * FROM ${AppTagsTable.table} WHERE ${Columns.appId} = :appRowId")
+    fun forAppRow(appRowId: Int): LiveData<List<AppTag>>
+
     @Query("SELECT ${Columns.tagId}, count() as count FROM ${AppTagsTable.table} GROUP BY ${Columns.tagId}")
     fun queryCounts(): LiveData<List<TagAppsCount>>
 

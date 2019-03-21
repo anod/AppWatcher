@@ -1,16 +1,17 @@
 package com.anod.appwatcher.details
 
 import android.accounts.Account
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
+import androidx.lifecycle.*
 import com.android.volley.VolleyError
+import com.anod.appwatcher.AppComponent
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.database.entities.packageToApp
+import com.anod.appwatcher.utils.map
+import com.anod.appwatcher.utils.switchMap
 import finsky.api.model.DfeDetails
 import finsky.api.model.DfeModel
 import finsky.api.model.Document
@@ -34,6 +35,9 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
     val context: ApplicationContext
         get() = ApplicationContext(getApplication())
 
+    val provide: AppComponent
+        get() = Application.provide(context)
+
     var detailsUrl = ""
     var appId = ""
     var rowId: Int = -1
@@ -45,15 +49,18 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
         Application.provide(application).prefs.account
     }
     private val detailsEndpoint: DetailsEndpoint by lazy {
-        val requestQueue = Application.provide(application).requestQueue
-        val deviceInfo = Application.provide(application).deviceInfo
         val account = this.account ?: Account("empty", "empty")
-        DetailsEndpoint(application, requestQueue, deviceInfo, account, detailsUrl)
+        DetailsEndpoint(application, provide.requestQueue, provide.deviceInfo, account, detailsUrl)
     }
     var authToken = ""
     var localChangelog: List<AppChange> = emptyList()
     val tags = MutableLiveData<List<Tag>>()
-    val tagsMenuItems = MutableLiveData<List<TagMenuItem>>()
+    val tagsMenuItems = provide.database.tags().loadAll().switchMap { tags ->
+        return@switchMap provide.database.appTags().forAppRow(rowId).map { appTags ->
+            val appTagsList = appTags.map { it.tagId }
+            tags.map { TagMenuItem(it, appTagsList.contains(it.id)) }
+        }
+    }
 
     val changelogState = MutableLiveData<ChangelogLoadState>()
 
@@ -148,32 +155,5 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
     override fun onErrorResponse(error: VolleyError) {
         AppLog.e("Cannot fetch details for $appId - $error")
         this.updateChangelogState(RemoteComplete(true))
-    }
-
-    fun loadTags() {
-        CachedBackgroundTask("tags", object : BackgroundTask.Worker<Void?, List<Tag>>(null) {
-            override fun run(param: Void?): List<Tag> {
-                val cr = DbContentProviderClient(context)
-                val tags = cr.queryTags()
-                cr.close()
-                return tags.toList()
-            }
-
-            override fun finished(result: List<Tag>) {
-                this@DetailsViewModel.tags.value = result
-                BackgroundTask(object : BackgroundTask.Worker<List<Tag>, List<TagMenuItem>>(result) {
-                    override fun run(param: List<Tag>): List<TagMenuItem> {
-                        val cr = DbContentProviderClient(context)
-                        val appTags = cr.queryAppTags(rowId)
-                        cr.close()
-                        return param.map { TagMenuItem(it, appTags.contains(it.id)) }
-                    }
-
-                    override fun finished(result: List<TagMenuItem>) {
-                        this@DetailsViewModel.tagsMenuItems.value = result
-                    }
-                }).execute()
-            }
-        }, context).execute()
     }
 }

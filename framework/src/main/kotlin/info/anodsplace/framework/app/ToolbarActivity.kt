@@ -25,6 +25,9 @@ abstract class ToolbarActivity : AppCompatActivity(), CustomThemeActivity {
         if (this.themeRes > 0) {
             this.setTheme(this.themeRes)
         }
+        if (themeColors.available) {
+            WindowCustomTheme.apply(themeColors, window, this)
+        }
         super.onCreate(savedInstanceState)
         setContentView(layoutResource)
         setupToolbar()

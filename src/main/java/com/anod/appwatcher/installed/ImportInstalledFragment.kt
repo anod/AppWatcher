@@ -149,11 +149,10 @@ class ImportInstalledFragment : Fragment(), ImportBulkManager.Listener {
         val adapter = list.adapter as ImportAdapter
         for (packageName in docIds) {
             val resultCode = result.get(packageName)
-            val status: Int
-            if (resultCode == null) {
-                status = ImportResourceProvider.STATUS_ERROR
+            val status = if (resultCode == null) {
+                ImportResourceProvider.STATUS_ERROR
             } else {
-                status = if (resultCode == WatchAppList.RESULT_OK) ImportResourceProvider.STATUS_DONE else ImportResourceProvider.STATUS_ERROR
+                if (resultCode == WatchAppList.RESULT_OK) ImportResourceProvider.STATUS_DONE else ImportResourceProvider.STATUS_ERROR
             }
             dataProvider.setPackageStatus(packageName, status)
             adapter.notifyPackageStatusChanged(packageName)

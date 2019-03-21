@@ -241,7 +241,6 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
             }
             tagSubMenu.setGroupCheckable(R.id.menu_group_tags, true, false)
         })
-        viewModel.loadTags()
     }
 
 

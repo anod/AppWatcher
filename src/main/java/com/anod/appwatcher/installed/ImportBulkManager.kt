@@ -23,7 +23,7 @@ internal class ImportBulkManager(
     : PlayStoreEndpoint.Listener, AddWatchAppAsyncTask.Listener {
 
     private val watchAppList = WatchAppList(null)
-    private var listsDocIds: MutableList<MutableList<BulkDocId>> = ArrayList()
+    private var listsDocIds: MutableList<MutableList<BulkDocId>?> = mutableListOf()
     private var currentBulk: Int = 0
     private var asyncTask: AsyncTask<Document, Void, SimpleArrayMap<String, Int>>? = null
 
@@ -37,7 +37,7 @@ internal class ImportBulkManager(
     }
 
     fun init() {
-        listsDocIds = ArrayList()
+        listsDocIds = mutableListOf()
         currentBulk = 0
     }
 
@@ -78,7 +78,11 @@ internal class ImportBulkManager(
     private fun nextBulk() {
         val account = this.account ?: return
 
-        val docIds = listsDocIds[currentBulk]
+        val docIds = listsDocIds[currentBulk] ?: emptyList<BulkDocId>()
+        if (docIds.isEmpty()) {
+            listener.onImportFinish()
+            return
+        }
         listener.onImportStart(docIds.map { it.packageName })
         val endpoint = BulkDetailsEndpoint(context, Application.provide(context).requestQueue, Application.provide(context).deviceInfo, account, docIds)
         endpoint.listener = this
@@ -92,7 +96,7 @@ internal class ImportBulkManager(
     }
 
     override fun onErrorResponse(error: VolleyError) {
-        val docIds = listsDocIds[currentBulk]
+        val docIds = listsDocIds[currentBulk] ?: emptyList<BulkDocId>()
         listener.onImportProgress(docIds.map { it.packageName }, SimpleArrayMap())
         currentBulk++
         if (currentBulk == listsDocIds.size) {
@@ -103,7 +107,7 @@ internal class ImportBulkManager(
     }
 
     override fun onAddAppTaskFinish(result: SimpleArrayMap<String, Int>) {
-        val docIds = listsDocIds[currentBulk]
+        val docIds = listsDocIds[currentBulk] ?: emptyList<BulkDocId>()
         listener.onImportProgress(docIds.map { it.packageName }, result)
         currentBulk++
         if (currentBulk == listsDocIds.size) {
