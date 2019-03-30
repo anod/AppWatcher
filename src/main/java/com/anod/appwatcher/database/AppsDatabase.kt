@@ -54,7 +54,12 @@ abstract class AppsDatabase: RoomDatabase() {
         }
         private val MIGRATION_11_12 = object: Migration(11, 12) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                database.execSQL("ALTER TABLE " + ChangelogTable.table + " ADD COLUMN " + ChangelogTable.Columns.uploadDate + " TEXT")
+                try
+                {
+                    database.execSQL("ALTER TABLE " + ChangelogTable.table + " ADD COLUMN " + ChangelogTable.Columns.uploadDate + " TEXT")
+                } catch (e: Exception) {
+                    AppLog.e(e)
+                }
             }
         }
 

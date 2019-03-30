@@ -34,7 +34,7 @@ class Theme(private val activity: Activity) {
                 Application.provide(activity).prefs.theme == Preferences.THEME_BLACK ->
                     CustomThemeColors( CustomThemeColor.black, CustomThemeColor.black)
                 else ->
-                    CustomThemeColors(CustomThemeColor(0, R.color.material_grey_900, false), CustomThemeColor(0, R.color.material_grey_900, false))
+                    CustomThemeColors(CustomThemeColor(0, R.color.material_grey_800, false), CustomThemeColor(0, R.color.material_grey_800, false))
             }
 
     val themeDialog: Int

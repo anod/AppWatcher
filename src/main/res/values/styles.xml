@@ -46,6 +46,7 @@
         <item name="android:backgroundDimEnabled">true</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowCloseOnTouchOutside">true</item>
+        <item name="android:windowBackground">@color/theme_primary_dark</item>
 
         <item name="android:windowMinWidthMajor">@dimen/dialog_min_width_major</item>
         <item name="android:windowMinWidthMinor">@dimen/dialog_min_width_major</item>
@@ -87,6 +88,7 @@
         <item name="colorItemLine">@android:color/transparent</item>
 
         <item name="android:navigationBarColor">@color/theme_primary_dark</item>
+        <item name="android:windowBackground">?attr/colorItemBackground</item>
     </style>
 
     <style name="BrandButtonStyle" parent="Widget.MaterialComponents.Button">
