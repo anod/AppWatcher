@@ -7,6 +7,7 @@ import android.view.Window
 import android.view.WindowManager
 
 object WindowCustomTheme {
+    private const val DEVICE_SAMSUNG = "samsung"
 
     fun apply(themeColors: CustomThemeColors, window: Window, activity: Activity) {
         var systemUiVisibility = WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
@@ -18,7 +19,7 @@ object WindowCustomTheme {
                         systemUiVisibility = systemUiVisibility or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
                     }
                 }
-                if (themeColors.navigationBarColor.available) {
+                if (navBarAvailable(themeColors.navigationBarColor)) {
                     window.navigationBarColor = themeColors.navigationBarColor.get(activity)
                     if (themeColors.navigationBarColor.isLight) {
                         systemUiVisibility = systemUiVisibility or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
@@ -36,5 +37,12 @@ object WindowCustomTheme {
                 window.decorView.systemUiVisibility = systemUiVisibility
             }
         }
+    }
+
+    private fun navBarAvailable(navigationBarColor: CustomThemeColor): Boolean {
+        if (Build.MANUFACTURER == DEVICE_SAMSUNG && Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+            return false
+        }
+        return navigationBarColor.available
     }
 }

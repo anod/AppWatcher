@@ -42,7 +42,7 @@ class DfeApiContext private constructor(internal val context: Context, val accou
     internal fun createHeaders(): MutableMap<String, String> {
         synchronized(this) {
             val hashMap = this.headers.toMutableMap()
-            hashMap["X-DFE-Network-Type"] = NetworkType.get(context).toString()
+            hashMap["X-DFE-Network-Type"] = NetworkType(context).value.toString()
             hashMap["Authorization"] = "GoogleLogin auth=$lastAuthToken"
             return hashMap
         }

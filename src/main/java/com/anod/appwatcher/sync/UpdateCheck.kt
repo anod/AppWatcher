@@ -1,19 +1,19 @@
 package com.anod.appwatcher.sync
 
 import android.accounts.Account
-import android.content.ContentProviderClient
 import android.content.ContentValues
 import android.content.Intent
-import android.os.Bundle
 import android.os.RemoteException
 import android.provider.BaseColumns
 import android.text.TextUtils
 import android.text.format.DateUtils
+import androidx.work.Data
 import com.android.volley.VolleyError
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.backup.gdrive.GDriveSilentSignIn
 import com.anod.appwatcher.backup.gdrive.SyncConnectedWorker
+import com.anod.appwatcher.content.AppListCursor
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.database.entities.AppChange
@@ -60,7 +60,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
     private val preferences = Application.provide(context).prefs
     private val installedAppsProvider = InstalledApps.PackageManager(context.packageManager)
 
-    fun perform(extras: Bundle, provider: ContentProviderClient): Int {
+    fun perform(extras: Data): Int {
 
         val manualSync = extras.getBoolean(extrasManual, false)
         AppLog.i("Perform ${ if (manualSync) "manual" else "scheduled" } sync")
@@ -103,9 +103,8 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         AppLog.d("Last update viewed: $lastUpdatesViewed")
 
         var updatedApps: List<UpdatedApp> = emptyList()
-        val appListProvider = DbContentProviderClient(provider)
         try {
-            updatedApps = doSync(appListProvider, lastUpdatesViewed, authToken, account)
+            updatedApps = doSync(lastUpdatesViewed, authToken, account)
         } catch (e: RemoteException) {
             AppLog.e("Error during synchronization ${e.message}", e)
         }
@@ -148,18 +147,20 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
     }
 
     @Throws(RemoteException::class)
-    private fun doSync(client: DbContentProviderClient, lastUpdatesViewed: Boolean, authToken: String, account: Account): List<UpdatedApp> {
+    private fun doSync(lastUpdatesViewed: Boolean, authToken: String, account: Account): List<UpdatedApp> {
 
-        val apps = client.queryAll(false)
+        val cursor = AppListTable.Queries.loadAll(false, Application.provide(context).database.apps())
+        val apps = AppListCursor(cursor)
         if (apps.isEmpty) {
             AppLog.i("Sync finished: no apps")
             return listOf()
         }
 
         val updatedTitles = mutableListOf<UpdatedApp>()
+        val client = DbContentProviderClient(context)
 
-        apps.chunked(bulkSize) { list ->
-            list.associateBy { it.packageName }
+        apps.chunked(bulkSize) {
+            list -> list.associateBy { it.packageName }
         }.forEach { localApps ->
             val docIds = localApps.map { BulkDocId(it.key, it.value.versionNumber) }
             val endpoint = createEndpoint(docIds, authToken, account)
@@ -174,6 +175,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         }
 
         apps.close()
+        client.close()
         AppLog.i("Sync finished for ${apps.count} apps")
         return updatedTitles
     }
@@ -217,7 +219,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         // Reset not fetched app statuses
         if (lastUpdatesViewed && fetched.size < localApps.size) {
             val statusBatch = mutableListOf<ContentValues>()
-            localApps.values.forEach({
+            localApps.values.forEach {
                 if (fetched[it.appId] == null) {
                     if (it.status == AppInfoMetadata.STATUS_UPDATED) {
                         it.status = AppInfoMetadata.STATUS_NORMAL
@@ -228,7 +230,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
                         statusBatch.add(values)
                     }
                 }
-            })
+            }
             if (statusBatch.isNotEmpty()) {
                 client.applyBatchUpdates(statusBatch) {
                     val rowId = it.getAsString(BaseColumns._ID)

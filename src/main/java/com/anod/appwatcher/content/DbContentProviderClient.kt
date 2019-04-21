@@ -41,7 +41,7 @@ class DbContentProviderClient(private val contentProviderClient: ContentProvider
         return queryAll(includeDeleted, defaultAppsSortOrder)
     }
 
-    fun queryAll(includeDeleted: Boolean): AppListCursor {
+    private fun queryAll(includeDeleted: Boolean): AppListCursor {
         return queryAll(includeDeleted, null)
     }
 
@@ -180,15 +180,6 @@ class DbContentProviderClient(private val contentProviderClient: ContentProvider
         return info
     }
 
-    fun queryAppRow(rowId: Int): AppInfo? {
-        val cr = queryApps(null,
-                BaseColumns._ID + " = ?", arrayOf(rowId.toString()))
-
-        val info = cr.firstOrNull()
-        cr.close()
-        return info
-    }
-
     fun queryAppIcon(uri: Uri): Bitmap? {
         val cr: Cursor?
         try {
@@ -258,29 +249,6 @@ class DbContentProviderClient(private val contentProviderClient: ContentProvider
         }
 
         return null
-    }
-
-    fun saveTag(tag: Tag): Int {
-        val updateUri = DbContentProvider.tagsUri.buildUpon().appendPath(tag.id.toString()).build()
-        val values = tag.contentValues
-        try {
-            return contentProviderClient.update(updateUri, values)
-        } catch (e: RemoteException) {
-            AppLog.e(e)
-        }
-
-        return 0
-    }
-
-    fun deleteTag(tag: Tag) {
-        val tagDeleteUri = DbContentProvider.tagsUri.buildUpon().appendPath(tag.id.toString()).build()
-        val appsTagDeleteUri = DbContentProvider.tagsUri.buildUpon().appendPath(tag.id.toString()).appendPath("apps").build()
-        try {
-            contentProviderClient.delete(tagDeleteUri)
-            contentProviderClient.delete(appsTagDeleteUri)
-        } catch (e: RemoteException) {
-            AppLog.e(e)
-        }
     }
 
     fun queryAppTags(): AppTagCursor {
@@ -354,7 +322,6 @@ class DbContentProviderClient(private val contentProviderClient: ContentProvider
 
         return false
     }
-
 
     fun deleteAppTags(appId: String): Int {
         try {

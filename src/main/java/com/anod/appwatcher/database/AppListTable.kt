@@ -7,6 +7,7 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.RawQuery
 import android.content.ContentValues
+import android.database.Cursor
 import android.provider.BaseColumns
 import android.text.TextUtils
 import com.anod.appwatcher.database.entities.*
@@ -34,10 +35,20 @@ interface AppListTable {
     fun observePackages(): LiveData<List<PackageRowPair>>
 
     @Query("SELECT ${BaseColumns._ID}, ${Columns.packageName} FROM $table WHERE " +
-            "CASE :includeDeleted WHEN 'true' THEN ${Columns.status} != ${AppInfoMetadata.STATUS_DELETED} END ")
+            "CASE :includeDeleted WHEN 'false' THEN ${Columns.status} != ${AppInfoMetadata.STATUS_DELETED} ELSE ${Columns.status} >= ${AppInfoMetadata.STATUS_NORMAL} END")
     fun loadPackages(includeDeleted: Boolean): List<PackageRowPair>
 
+    @Query("SELECT $table.*, " +
+            "CASE WHEN ${Columns.updateTimestamp} > :recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
+            "FROM $table WHERE " +
+            "CASE :includeDeleted WHEN 'false' THEN ${Columns.status} != ${AppInfoMetadata.STATUS_DELETED} ELSE ${Columns.status} >= ${AppInfoMetadata.STATUS_NORMAL} END ")
+    fun loadAll(includeDeleted: Boolean, recentTime: Long): Cursor
+
     object Queries {
+
+        fun loadAll(includeDeleted: Boolean, table: AppListTable): Cursor {
+            return table.loadAll(includeDeleted, recentTime)
+        }
 
         fun loadAppList(sortId: Int, titleFilter: String, table: AppListTable): LiveData<List<AppListItem>> {
             return loadAppList(sortId, null, titleFilter, table)
@@ -60,13 +71,13 @@ interface AppListTable {
 
         private fun createSortOrder(sortId: Int): String {
             val filter = ArrayList<String>()
-            filter.add(AppListTable.Columns.status + " DESC")
-            filter.add(AppListTable.Columns.recentFlag + " DESC")
+            filter.add(Columns.status + " DESC")
+            filter.add(Columns.recentFlag + " DESC")
             when (sortId) {
-                Preferences.SORT_NAME_DESC -> filter.add(AppListTable.Columns.title + " COLLATE NOCASE DESC")
-                Preferences.SORT_DATE_ASC -> filter.add(AppListTable.Columns.uploadTimestamp + " ASC")
-                Preferences.SORT_DATE_DESC -> filter.add(AppListTable.Columns.uploadTimestamp + " DESC")
-                else -> filter.add(AppListTable.Columns.title + " COLLATE NOCASE ASC")
+                Preferences.SORT_NAME_DESC -> filter.add(Columns.title + " COLLATE NOCASE DESC")
+                Preferences.SORT_DATE_ASC -> filter.add(Columns.uploadTimestamp + " ASC")
+                Preferences.SORT_DATE_DESC -> filter.add(Columns.uploadTimestamp + " DESC")
+                else -> filter.add(Columns.title + " COLLATE NOCASE ASC")
             }
             return TextUtils.join(", ", filter)
         }
@@ -75,7 +86,7 @@ interface AppListTable {
             val selc = ArrayList<String>(3)
             val args = ArrayList<String>(3)
 
-            selc.add(AppListTable.Columns.status + " != ?")
+            selc.add(Columns.status + " != ?")
             args.add(AppInfoMetadata.STATUS_DELETED.toString())
 
             if (tag != null) {
@@ -85,7 +96,7 @@ interface AppListTable {
             }
 
             if (!TextUtils.isEmpty(titleFilter)) {
-                selc.add(AppListTable.Columns.title + " LIKE ?")
+                selc.add(Columns.title + " LIKE ?")
                 args.add("%$titleFilter%")
             }
 

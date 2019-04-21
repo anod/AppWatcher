@@ -10,8 +10,6 @@ import com.anod.appwatcher.backup.gdrive.UploadServiceContentObserver
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.PicassoAppIcon
-import com.firebase.jobdispatcher.FirebaseJobDispatcher
-import com.firebase.jobdispatcher.GooglePlayDriver
 import com.squareup.picasso.Picasso
 import info.anodsplace.framework.net.NetworkConnectivity
 import info.anodsplace.playstore.DeviceId
@@ -43,7 +41,6 @@ class AppComponent internal constructor(private val app: AppWatcherApplication):
     val networkConnection: NetworkConnectivity by lazy {
         NetworkConnectivity(app)
     }
-    val jobDispatcher: FirebaseJobDispatcher by lazy { FirebaseJobDispatcher(GooglePlayDriver(app)) }
     val memoryCache: LruCache<String, Any?> by lazy {
         val maxMemory = (Runtime.getRuntime().maxMemory() / 1024)
         // Use 1/8th of the available memory for this memory cache.

@@ -36,6 +36,7 @@ android {
 
     buildTypes {
         release {
+            matchingFallbacks = ['', '']
             postprocessing {
                 removeUnusedCode false
                 removeUnusedResources false
@@ -50,9 +51,9 @@ android {
 dependencies {
     implementation files('libs/keyczar-0.71g-090613.jar')
 
-    api group: 'com.google.protobuf.nano', name: 'protobuf-javanano', version: '3.1.0'
+    api group: 'com.google.protobuf.nano', name: 'protobuf-javanano', version: '3.2.0rc2'
     api 'com.android.volley:volley:1.1.0'
-    implementation 'com.squareup.okhttp3:okhttp:3.11.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.14.1'
 
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation project(':framework')

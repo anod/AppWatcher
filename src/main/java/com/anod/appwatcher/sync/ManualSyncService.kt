@@ -4,8 +4,8 @@ import android.app.IntentService
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.work.workDataOf
 import com.anod.appwatcher.BuildConfig
-import com.anod.appwatcher.content.DbContentProvider
 import info.anodsplace.framework.app.ApplicationContext
 
 /**
@@ -19,15 +19,11 @@ class ManualSyncService : IntentService("ManualSyncService") {
     override fun onHandleIntent(intent: Intent?) {
         if (intent != null) {
             val syncAdapter = UpdateCheck(ApplicationContext(applicationContext))
-            val contentProviderClient = contentResolver.acquireContentProviderClient(DbContentProvider.authority)
 
-            val bundle = Bundle()
-            if (!BuildConfig.DEBUG) {
-                bundle.putBoolean(UpdateCheck.extrasManual, true)
-            }
-
-            val updatesCount = syncAdapter.perform(bundle, contentProviderClient)
-
+            val data = workDataOf(
+                UpdateCheck.extrasManual to !BuildConfig.DEBUG
+            )
+            val updatesCount = syncAdapter.perform(data)
             val finishIntent = Intent(UpdateCheck.syncStop)
             finishIntent.putExtra(UpdateCheck.extrasUpdatesCount, updatesCount)
             sendBroadcast(finishIntent)
