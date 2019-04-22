@@ -1,8 +1,12 @@
 package com.anod.appwatcher.backup.gdrive
 
+import com.anod.appwatcher.Application
 import com.anod.appwatcher.backup.DbJsonReader
 import com.anod.appwatcher.backup.DbJsonWriter
-import com.anod.appwatcher.content.DbContentProviderClient
+import com.anod.appwatcher.database.AppListTable
+import com.anod.appwatcher.database.AppTagsTable
+import com.anod.appwatcher.database.AppsDatabase
+import com.anod.appwatcher.database.TagsTable
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.database.entities.Tag
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -25,18 +29,16 @@ class SyncConnectedWorker(private val context: ApplicationContext, private val g
 
     fun doSyncInBackground() {
         synchronized(sLock) {
-            val cr = DbContentProviderClient(context)
+            val db = Application.provide(context).database
             try {
-                doSyncLocked(cr)
+                doSyncLocked(db)
             } catch (e: Exception) {
                 throw Exception(e)
-            } finally {
-                cr.close()
             }
         }
     }
 
-    private fun doSyncLocked(cr: DbContentProviderClient) {
+    private fun doSyncLocked(db: AppsDatabase) {
         Tasks.await(Drive.getDriveClient(context.actual, googleAccount).requestSync())
 
         val driveClient = Drive.getDriveResourceClient(context.actual, googleAccount)
@@ -46,20 +48,21 @@ class SyncConnectedWorker(private val context: ApplicationContext, private val g
         val driveId = file.driveId
         // There is as file exist, create driveFileReader
         if (driveId != null) {
-            insertRemoteItems(driveId, cr)
+            insertRemoteItems(driveId, db)
         }
 
         if (driveId == null) {
-            if (cr.getCount(false) > 0) {
+            if (db.apps().count(false) > 0) {
                 file.create()
             }
         }
 
-        file.write(DbJsonWriter(), cr)
+        file.write(DbJsonWriter(), db)
 
         AppLog.d("[GDrive] Clean locally deleted apps ")
         // Clean deleted
-        val numRows = cr.cleanDeleted()
+        val numRows = db.apps().cleanDeleted()
+        db.appTags().clean()
         AppLog.d("[GDrive] Cleaned $numRows rows")
 
         Tasks.await(Drive.getDriveClient(context.actual, googleAccount).requestSync())
@@ -71,7 +74,7 @@ class SyncConnectedWorker(private val context: ApplicationContext, private val g
     }
 
     @Throws(Exception::class)
-    private fun insertRemoteItems(driveId: DriveId, cr: DbContentProviderClient) {
+    private fun insertRemoteItems(driveId: DriveId, db: AppsDatabase) {
         val file = driveId.asDriveFile()
 
         val driveClient = Drive.getDriveResourceClient(context.actual, googleAccount)
@@ -86,8 +89,8 @@ class SyncConnectedWorker(private val context: ApplicationContext, private val g
         val driveBufferedReader = BufferedReader(driveFileReader)
         val jsonReader = DbJsonReader()
 
-        val currentIds = cr.queryPackagesMap(true)
-        val currentTags = cr.queryTags().associate { it.name to it }.toMutableMap()
+        val currentIds = db.apps().loadPackages(true).associate { it.packageName to it.rowId }
+        val currentTags = db.tags().load().associate { it.name to it }.toMutableMap()
 
         val tagList = mutableListOf<Tag>()
         val tagApps = mutableMapOf<String, MutableList<String>>()
@@ -96,7 +99,7 @@ class SyncConnectedWorker(private val context: ApplicationContext, private val g
             override fun onAppRead(app: AppInfo, tags: List<String>) {
                 AppLog.d("[GDrive] Read app: " + app.packageName)
                 if (!currentIds.containsKey(app.packageName)) {
-                    cr.insert(app)
+                    AppListTable.Queries.insert(app, db)
                 }
                 tags.forEach {
                     if (tagApps[it] == null) { tagApps[it] = mutableListOf() }
@@ -115,15 +118,16 @@ class SyncConnectedWorker(private val context: ApplicationContext, private val g
                 // Add missing tags
                 tagList.forEach { tag ->
                     if (!currentTags.containsKey(tag.name)) {
-                        cr.createTag(Tag(tag.name, tag.color))?.lastPathSegment?.toInt()?.let {
-                            currentTags[tag.name] = Tag(it, tag.name, tag.color)
+                        val rowId = TagsTable.Queries.insert(Tag(tag.name, tag.color), db).toInt()
+                        if (rowId > 0) {
+                            currentTags[tag.name] = Tag(rowId, tag.name, tag.color)
                         }
                     }
                 }
 
                 tagApps.forEach { (tagName, apps) ->
-                    currentTags[tagName]?.let {
-                        cr.setAppsToTag(apps, it.id)
+                    currentTags[tagName]?.let { tag ->
+                        AppTagsTable.Queries.insert(tag, apps, db)
                     }
                 }
             }

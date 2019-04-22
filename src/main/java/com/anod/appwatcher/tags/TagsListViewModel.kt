@@ -13,7 +13,7 @@ class TagsListViewModel(application: Application): AndroidViewModel(application)
     private val appComponent: AppComponent
         get() = getApplication<AppWatcherApplication>().appComponent
 
-    val tags = appComponent.database.tags().loadAll()
+    val tags = appComponent.database.tags().observe()
 
     fun saveTag(tag: Tag) {
         BackgroundTask(object : BackgroundTask.Worker<Tag, Int>(tag) {

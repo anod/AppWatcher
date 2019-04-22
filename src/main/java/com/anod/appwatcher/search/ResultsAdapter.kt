@@ -4,9 +4,10 @@ import android.content.Context
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.lifecycle.LiveData
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
-import com.anod.appwatcher.content.WatchAppList
+import com.anod.appwatcher.model.AppInfo
 import finsky.api.model.Document
 import info.anodsplace.framework.app.ThemeCompat
 import info.anodsplace.framework.content.InstalledApps
@@ -16,9 +17,15 @@ import info.anodsplace.framework.content.InstalledApps
  *  @date 6/3/2017
  */
 
+interface ResultsViewModel {
+    val packages: LiveData<List<String>>
+    fun delete(info: AppInfo)
+    fun add(info: AppInfo)
+}
+
 abstract class ResultsAdapter(
         private val context: Context,
-        private val watchAppList: WatchAppList): RecyclerView.Adapter<ResultsAppViewHolder>() {
+        private val viewModel: ResultsViewModel): RecyclerView.Adapter<ResultsAppViewHolder>() {
 
     private val colorBgDisabled = ThemeCompat.getColor(context, R.attr.inactiveRow)
     private val colorBgNormal = ThemeCompat.getColor(context, R.attr.colorItemBackground)
@@ -27,14 +34,11 @@ abstract class ResultsAdapter(
     val isEmpty: Boolean
         get() = this.itemCount == 0
 
-    val isNotEmpty: Boolean
-        get() = this.itemCount > 0
-
     private val picasso = Application.provide(context).picasso
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ResultsAppViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.list_item_market_app, parent, false)
-        return ResultsAppViewHolder(view, watchAppList)
+        return ResultsAppViewHolder(view, viewModel)
     }
 
     abstract fun document(position: Int): Document
@@ -51,7 +55,8 @@ abstract class ResultsAdapter(
         holder.creator.text = doc.creator
         holder.updated.text = uploadDate
 
-        if (watchAppList.contains(packageName)) {
+        val packages = viewModel.packages.value ?: emptyList()
+        if (packages.contains(packageName)) {
             holder.row.setBackgroundColor(colorBgDisabled)
         } else {
             holder.row.setBackgroundColor(colorBgNormal)

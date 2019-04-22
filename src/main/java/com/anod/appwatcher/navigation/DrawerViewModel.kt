@@ -25,7 +25,7 @@ class DrawerViewModel(application: Application) : AndroidViewModel(application) 
 
     val lastUpdateTime =MutableLiveData<Long>()
     val tags: LiveData<TagCountList> = appComponent.database.appTags().queryCounts()
-            .combineLatest(appComponent.database.tags().loadAll())
+            .combineLatest(appComponent.database.tags().observe())
             .map { value ->
                 val counts: Map<Int, Int> = value.first.associate { Pair(it.tagId, it.count) }
                 val tags = value.second

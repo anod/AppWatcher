@@ -10,7 +10,7 @@ import com.anod.appwatcher.content.WatchAppList
 import info.anodsplace.framework.app.DialogMessage
 import finsky.api.model.Document
 
-class ResultsAppViewHolder(itemView: View, private val watchAppList: WatchAppList)
+class ResultsAppViewHolder(itemView: View, private val viewModel: ResultsViewModel)
     : RecyclerView.ViewHolder(itemView), View.OnClickListener {
     var doc: Document? = null
 
@@ -28,18 +28,18 @@ class ResultsAppViewHolder(itemView: View, private val watchAppList: WatchAppLis
     override fun onClick(v: View) {
         val info = AppInfo(doc!!)
 
-        if (watchAppList.contains(info.packageName)) {
-            DialogMessage(itemView.context, R.style.AlertDialog, R.string.already_exist, R.string.delete_existing_item, {
-                builder ->
-                builder.setPositiveButton(R.string.delete, { _, _ ->
-                    watchAppList.delete(info)
-                })
-                builder.setNegativeButton(android.R.string.cancel, { _, _ ->
+        val pacakges = viewModel.packages.value ?: emptyList()
+        if (pacakges.contains(info.packageName)) {
+            DialogMessage(itemView.context, R.style.AlertDialog, R.string.already_exist, R.string.delete_existing_item) { builder ->
+                builder.setPositiveButton(R.string.delete) { _, _ ->
+                    viewModel.delete(info)
+                }
+                builder.setNegativeButton(android.R.string.cancel) { _, _ ->
 
-                })
-            }).show()
+                }
+            }.show()
         } else {
-            watchAppList.add(info)
+            viewModel.add(info)
         }
     }
 }

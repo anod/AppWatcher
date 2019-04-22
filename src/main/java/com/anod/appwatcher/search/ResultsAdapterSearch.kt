@@ -1,7 +1,6 @@
 package com.anod.appwatcher.search
 
 import android.content.Context
-import com.anod.appwatcher.content.WatchAppList
 import finsky.api.model.Document
 import info.anodsplace.playstore.SearchEndpoint
 
@@ -11,8 +10,10 @@ import info.anodsplace.playstore.SearchEndpoint
  * @date 26/08/2016.
  */
 
-class ResultsAdapterSearch(context: Context, private val endpoint: SearchEndpoint, watchAppList: WatchAppList)
-    : ResultsAdapter(context, watchAppList) {
+class ResultsAdapterSearch(context: Context, viewModel: SearchViewModel)
+    : ResultsAdapter(context, viewModel) {
+
+    private val endpoint = viewModel.endpointSearch
 
     override fun document(position: Int): Document {
         val isLastPosition = endpoint.count - 1 == position

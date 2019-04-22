@@ -5,7 +5,6 @@ import androidx.lifecycle.*
 import com.android.volley.VolleyError
 import com.anod.appwatcher.AppComponent
 import com.anod.appwatcher.Application
-import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.database.entities.Tag
@@ -19,7 +18,6 @@ import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.livedata.OneTimeObserver
 import info.anodsplace.framework.os.BackgroundTask
-import info.anodsplace.framework.os.CachedBackgroundTask
 import info.anodsplace.playstore.DetailsEndpoint
 import info.anodsplace.playstore.PlayStoreEndpoint
 
@@ -55,7 +53,7 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
     var authToken = ""
     var localChangelog: List<AppChange> = emptyList()
     val tags = MutableLiveData<List<Tag>>()
-    val tagsMenuItems = provide.database.tags().loadAll().switchMap { tags ->
+    val tagsMenuItems = provide.database.tags().observe().switchMap { tags ->
         return@switchMap provide.database.appTags().forAppRow(rowId).map { appTags ->
             val appTagsList = appTags.map { it.tagId }
             tags.map { TagMenuItem(it, appTagsList.contains(it.id)) }

@@ -2,9 +2,7 @@ package com.anod.appwatcher.search
 
 import android.content.Context
 
-import com.anod.appwatcher.content.WatchAppList
 import finsky.api.model.Document
-import info.anodsplace.playstore.DetailsEndpoint
 
 /**
  * @author Alex Gavrishev
@@ -12,8 +10,10 @@ import info.anodsplace.playstore.DetailsEndpoint
  * @date 26/08/2016.
  */
 
-class ResultsAdapterDetails(context: Context, private val endpoint: DetailsEndpoint, watchAppList: WatchAppList)
-    : ResultsAdapter(context, watchAppList) {
+class ResultsAdapterDetails(context: Context, viewModel: SearchViewModel)
+    : ResultsAdapter(context, viewModel) {
+
+    private val endpoint = viewModel.endpointDetails
 
     override fun document(position: Int): Document {
         return endpoint.document!!

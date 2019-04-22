@@ -149,7 +149,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
     @Throws(RemoteException::class)
     private fun doSync(lastUpdatesViewed: Boolean, authToken: String, account: Account): List<UpdatedApp> {
 
-        val cursor = AppListTable.Queries.loadAll(false, Application.provide(context).database.apps())
+        val cursor = AppListTable.Queries.load(false, Application.provide(context).database.apps())
         val apps = AppListCursor(cursor)
         if (apps.isEmpty) {
             AppLog.i("Sync finished: no apps")

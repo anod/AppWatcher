@@ -10,13 +10,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.android.volley.VolleyError
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.content.AddWatchAppAsyncTask
-import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
-import com.anod.appwatcher.content.WatchAppList
 import com.anod.appwatcher.tags.TagSnackbar
 import finsky.api.model.DfeModel
 import info.anodsplace.framework.app.CustomThemeColors
@@ -31,22 +31,22 @@ import kotlinx.android.synthetic.main.fragment_wishlist.*
  * *
  * @date 16/12/2016.
  */
-class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Listener {
+class WishlistFragment : Fragment(), PlayStoreEndpoint.Listener {
 
     private var endpoint: WishlistEndpoint? = null
-    private val watchAppList: WatchAppList by lazy { WatchAppList(this) }
+
+    private val viewModel: WishlistViewModel by lazy {
+        ViewModelProviders.of(this).get(WishlistViewModel::class.java)
+    }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-
-        watchAppList.attach(context)
         endpoint?.listener = this
     }
 
     override fun onDetach() {
         super.onDetach()
         endpoint?.listener = null
-        watchAppList.detach()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -75,23 +75,15 @@ class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Li
         } else {
             startLoadingList(account, authToken, context!!)
         }
-    }
 
-    override fun onWatchListChangeSuccess(info: AppInfo, newStatus: Int) {
-        if (newStatus == AppInfoMetadata.STATUS_NORMAL) {
-            TagSnackbar.make(activity!!, info, false).show()
-        }
-        context?.sendBroadcast(Intent(AddWatchAppAsyncTask.listChanged))
-        list.adapter!!.notifyDataSetChanged()
-    }
-
-    override fun onWatchListChangeError(info: AppInfo, error: Int) {
-        if (WatchAppList.ERROR_ALREADY_ADDED == error) {
-            Toast.makeText(context, R.string.app_already_added, Toast.LENGTH_SHORT).show()
-            list.adapter!!.notifyDataSetChanged()
-        } else if (error == WatchAppList.ERROR_INSERT) {
-            Toast.makeText(context, R.string.error_insert_app, Toast.LENGTH_SHORT).show()
-        }
+        viewModel.appStatusChange.observe(this, Observer {
+            val newStatus = it.first
+            if (newStatus == AppInfoMetadata.STATUS_NORMAL) {
+                TagSnackbar.make(activity!!, it.second!!, false).show()
+                context?.sendBroadcast(Intent(AddWatchAppAsyncTask.listChanged))
+                list.adapter!!.notifyDataSetChanged()
+            }
+        })
     }
 
     private fun startLoadingList(account: Account, authSubToken: String, context: Context) {
@@ -99,7 +91,7 @@ class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Li
         endpoint.authToken = authSubToken
         endpoint.listener = this
 
-        val adapter = ResultsAdapterWishList(context, endpoint, watchAppList)
+        val adapter = ResultsAdapterWishList(context, endpoint, viewModel)
         list.adapter = adapter
 
         this.endpoint = endpoint
@@ -153,8 +145,8 @@ class WishlistFragment : Fragment(), WatchAppList.Listener, PlayStoreEndpoint.Li
                 themeRes,
                 themeColors,
                 Bundle().apply {
-                    putParcelable(WishlistFragment.EXTRA_ACCOUNT, account)
-                    putString(WishlistFragment.EXTRA_AUTH_TOKEN, authToken)
+                    putParcelable(EXTRA_ACCOUNT, account)
+                    putString(EXTRA_AUTH_TOKEN, authToken)
                 },
                 context)
     }

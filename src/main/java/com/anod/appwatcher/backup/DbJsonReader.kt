@@ -35,8 +35,7 @@ class DbJsonReader {
 
         jsonReader.beginObject()
         while (jsonReader.hasNext()) {
-            val name = jsonReader.nextName()
-            when (name) {
+            when (jsonReader.nextName()) {
                 "apps" -> readApps(jsonReader, listener)
                 "tags" -> readTags(jsonReader, listener)
                 else -> jsonReader.skipValue()
@@ -59,7 +58,7 @@ class DbJsonReader {
         val listener = object : OnReadListener {
             override fun onAppRead(app: AppInfo, tags: List<String>) {
                 apps.add(app)
-                appsTags.put(app.appId, tags)
+                appsTags[app.appId] = tags
             }
 
             override fun onTagRead(tag: Tag) {
@@ -80,8 +79,7 @@ class DbJsonReader {
 
         jsonReader.beginObject()
         while (jsonReader.hasNext()) {
-            val name = jsonReader.nextName()
-            when (name) {
+            when (jsonReader.nextName()) {
                 "apps" -> readApps(jsonReader, listener)
                 "tags" -> readTags(jsonReader, listener)
                 else -> jsonReader.skipValue()
@@ -94,11 +92,11 @@ class DbJsonReader {
 
         val namedTags = tagList.associate { it.name to it }
         val appTagList = mutableListOf<AppTag>()
-        appsTags.forEach({ (appId, tags) ->
-            tags.forEach {
-                namedTags[it]?.let { appTagList.add(AppTag(appId, it.id)) }
+        appsTags.forEach { (appId, tags) ->
+            tags.forEach { tag ->
+                namedTags[tag]?.let { appTagList.add(AppTag(appId, it.id)) }
             }
-        })
+        }
 
         return Container(apps, tagList, appTagList)
     }

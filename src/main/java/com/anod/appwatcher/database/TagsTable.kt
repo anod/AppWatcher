@@ -16,7 +16,10 @@ import com.anod.appwatcher.database.entities.Tag
 interface TagsTable {
 
     @Query("SELECT * FROM $table ORDER BY ${Columns.name} COLLATE LOCALIZED ASC")
-    fun loadAll(): LiveData<List<Tag>>
+    fun observe(): LiveData<List<Tag>>
+
+    @Query("SELECT * FROM $table ORDER BY ${Columns.name} COLLATE LOCALIZED ASC")
+    fun load(): List<Tag>
 
     @Delete
     fun delete(tag: Tag)
@@ -24,22 +27,31 @@ interface TagsTable {
     @Update(onConflict = OnConflictStrategy.REPLACE)
     fun update(tag: Tag)
 
+    @Query("DELETE FROM ${AppListTable.table}")
+    fun delete()
+
     object Queries {
         fun insert(tag: Tag, db: AppsDatabase): Long {
             // Skip id to apply autoincrement
             val values = ContentValues().apply {
-                put(TagsTable.Columns.name, tag.name)
-                put(TagsTable.Columns.color, tag.color)
+                put(Columns.name, tag.name)
+                put(Columns.color, tag.color)
             }
             var rowId = 0L
-            db.beginTransaction()
-            try {
-                rowId= db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, values)
-                db.setTransactionSuccessful()
-            } finally {
-                db.endTransaction()
+            db.runInTransaction {
+                rowId = db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, values)
             }
             return rowId
+        }
+
+        fun insert(tags: List<Tag>, db: AppsDatabase) {
+            tags.forEach { tag ->
+                val values = ContentValues().apply {
+                    put(Columns.name, tag.name)
+                    put(Columns.color, tag.color)
+                }
+                db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, values)
+            }
         }
     }
 

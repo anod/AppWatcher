@@ -32,8 +32,7 @@ class TagJsonObject(val tag: Tag?) {
 
             reader.beginObject()
             while (reader.hasNext()) {
-                val key = reader.nextName()
-                when (key) {
+                when (reader.nextName()) {
                     "id" -> id = reader.nextInt()
                     "name" -> name = reader.nextString()
                     "color" -> color = reader.nextInt()

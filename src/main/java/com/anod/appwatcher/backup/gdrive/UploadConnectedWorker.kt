@@ -1,8 +1,10 @@
 package com.anod.appwatcher.backup.gdrive
 
 import android.content.Context
+import com.anod.appwatcher.Application
 import com.anod.appwatcher.backup.DbJsonWriter
 import com.anod.appwatcher.content.DbContentProviderClient
+import com.anod.appwatcher.database.AppsDatabase
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.drive.Drive
 import com.google.android.gms.tasks.Tasks
@@ -21,19 +23,17 @@ class UploadConnectedWorker(private val context: ApplicationContext, private val
     @Throws(Exception::class)
     fun doUploadInBackground() {
         synchronized(sLock) {
-            val cr = DbContentProviderClient(context)
+            val db = Application.provide(context).database
             try {
-                doUploadLocked(cr)
+                doUploadLocked(db)
             } catch (e: Exception) {
                 throw Exception(e)
-            } finally {
-                cr.close()
             }
         }
     }
 
     @Throws(Exception::class)
-    private fun doUploadLocked(cr: DbContentProviderClient) {
+    private fun doUploadLocked(db: AppsDatabase) {
         Tasks.await(Drive.getDriveClient(context.actual, googleAccount).requestSync())
 
         val driveClient = Drive.getDriveResourceClient(context.actual, googleAccount)
@@ -43,11 +43,12 @@ class UploadConnectedWorker(private val context: ApplicationContext, private val
             file.create()
         }
 
-        file.write(DbJsonWriter(), cr)
+        file.write(DbJsonWriter(), db)
 
         AppLog.d("[GDrive] Clean locally deleted apps ")
         // Clean deleted
-        val numRows = cr.cleanDeleted()
+        val numRows = db.apps().cleanDeleted()
+        db.appTags().clean()
         AppLog.d("[GDrive] Cleaned $numRows rows")
 
         Tasks.await(Drive.getDriveClient(context.actual, googleAccount).requestSync())

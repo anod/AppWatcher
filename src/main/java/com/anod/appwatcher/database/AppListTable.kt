@@ -8,8 +8,10 @@ import androidx.room.Query
 import androidx.room.RawQuery
 import android.content.ContentValues
 import android.database.Cursor
+import android.database.sqlite.SQLiteDatabase
 import android.provider.BaseColumns
 import android.text.TextUtils
+import androidx.room.Insert
 import com.anod.appwatcher.database.entities.*
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
@@ -22,7 +24,7 @@ import java.util.concurrent.TimeUnit
 interface AppListTable {
 
     @RawQuery(observedEntities = [(App::class),(AppChange::class)])
-    fun loadAppList(query: SupportSQLiteQuery): LiveData<List<AppListItem>>
+    fun observe(query: SupportSQLiteQuery): LiveData<List<AppListItem>>
 
     @Query("SELECT * FROM $table WHERE ${Columns.appId} == :appId")
     fun loadApp(appId: String): App?
@@ -42,12 +44,23 @@ interface AppListTable {
             "CASE WHEN ${Columns.updateTimestamp} > :recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
             "FROM $table WHERE " +
             "CASE :includeDeleted WHEN 'false' THEN ${Columns.status} != ${AppInfoMetadata.STATUS_DELETED} ELSE ${Columns.status} >= ${AppInfoMetadata.STATUS_NORMAL} END ")
-    fun loadAll(includeDeleted: Boolean, recentTime: Long): Cursor
+    fun load(includeDeleted: Boolean, recentTime: Long): Cursor
+
+    @Query("SELECT COUNT(${BaseColumns._ID}) " +
+            "FROM $table WHERE " +
+            "CASE :includeDeleted WHEN 'false' THEN ${Columns.status} != ${AppInfoMetadata.STATUS_DELETED} ELSE ${Columns.status} >= ${AppInfoMetadata.STATUS_NORMAL} END ")
+    fun count(includeDeleted: Boolean): Int
+
+    @Query("DELETE FROM $table WHERE ${Columns.status} == ${AppInfoMetadata.STATUS_DELETED}")
+    fun cleanDeleted(): Int
+
+    @Query("DELETE FROM $table")
+    fun delete()
 
     object Queries {
 
-        fun loadAll(includeDeleted: Boolean, table: AppListTable): Cursor {
-            return table.loadAll(includeDeleted, recentTime)
+        fun load(includeDeleted: Boolean, table: AppListTable): Cursor {
+            return table.load(includeDeleted, recentTime)
         }
 
         fun loadAppList(sortId: Int, titleFilter: String, table: AppListTable): LiveData<List<AppListItem>> {
@@ -66,7 +79,26 @@ interface AppListTable {
                     "AND ${TableColumns.versionNumber} == ${ChangelogTable.TableColumns.versionCode} " +
                     "WHERE ${selection.first} " +
                     "ORDER BY ${createSortOrder(sortId)} "
-            return table.loadAppList(SimpleSQLiteQuery(sql, selection.second))
+            return table.observe(SimpleSQLiteQuery(sql, selection.second))
+        }
+
+        fun insert(app: AppInfo, db: AppsDatabase): Long {
+            // Skip id to apply autoincrement
+            var rowId = 0L
+            db.runInTransaction {
+                rowId = db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, app.contentValues)
+            }
+            return rowId
+        }
+
+        fun insert(apps: List<AppInfo>, db: AppsDatabase) {
+            apps.forEach {
+                db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, it.contentValues)
+            }
+        }
+
+        fun delete(appId: String, db: AppsDatabase) {
+            db.openHelper.writableDatabase.delete(table, "${Columns.appId} = ?", arrayOf(appId))
         }
 
         private fun createSortOrder(sortId: Int): String {
@@ -102,6 +134,7 @@ interface AppListTable {
 
             return Pair(TextUtils.join(" AND ", selc), args.toTypedArray())
         }
+
     }
 
 

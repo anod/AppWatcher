@@ -3,7 +3,12 @@ package com.anod.appwatcher.backup
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
+import com.anod.appwatcher.Application
 import com.anod.appwatcher.content.DbContentProviderClient
+import com.anod.appwatcher.database.AppListTable
+import com.anod.appwatcher.database.AppTagsTable
+import com.anod.appwatcher.database.AppsDatabase
+import com.anod.appwatcher.database.TagsTable
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.json.MalformedJsonException
@@ -19,18 +24,6 @@ import java.util.*
 class DbBackupManager(private val context: ApplicationContext) {
 
     constructor(context: Context): this(ApplicationContext(context))
-    /**
-     * List of files in the backup directory
-     */
-    val fileList: Array<File>?
-        get() {
-            val saveDir = defaultBackupDir
-            if (!saveDir.isDirectory) {
-                return null
-            }
-            val filter = FilenameFilter { _, filename -> filename.endsWith(FILE_EXT_DAT) }
-            return saveDir.listFiles(filter)
-        }
 
     internal fun doExport(destUri: Uri): Int {
         val outputStream: OutputStream?
@@ -46,20 +39,17 @@ class DbBackupManager(private val context: ApplicationContext) {
         return RESULT_OK
     }
 
-    internal fun writeDb(outputStream: OutputStream): Boolean {
+    private fun writeDb(outputStream: OutputStream): Boolean {
         AppLog.d("Write into: $outputStream")
         val writer = DbJsonWriter()
-        val client = DbContentProviderClient(context)
         try {
-            synchronized(DbBackupManager.sDataLock) {
+            synchronized(sDataLock) {
                 val buf = BufferedWriter(OutputStreamWriter(outputStream))
-                writer.write(buf, client)
+                writer.write(buf, Application.provide(context).database)
             }
         } catch (e: IOException) {
             AppLog.e(e)
             return false
-        } finally {
-            client.close()
         }
         return true
     }
@@ -78,7 +68,7 @@ class DbBackupManager(private val context: ApplicationContext) {
         val reader = DbJsonReader()
         var container: DbJsonReader.Container?
         try {
-            synchronized(DbBackupManager.sDataLock) {
+            synchronized(sDataLock) {
                 val buf = BufferedReader(InputStreamReader(inputStream))
                 container = reader.read(buf)
             }
@@ -91,14 +81,19 @@ class DbBackupManager(private val context: ApplicationContext) {
         }
 
         container?.let {
-            val cr = DbContentProviderClient(context)
+            val db = Application.provide(context).database
             if (it.apps.isNotEmpty()) {
-                cr.discardAll()
-                cr.addApps(it.apps)
-                cr.addTags(it.tags)
-                cr.addAppTags(it.appTags)
+                db.runInTransaction {
+                    db.apps().delete()
+                    db.tags().delete()
+                    db.appTags().delete()
+
+                    AppListTable.Queries.insert(it.apps, db)
+                    TagsTable.Queries.insert(it.tags, db)
+                    AppTagsTable.Queries.insert(it.appTags, db)
+                }
+
             }
-            cr.close()
         }
         return RESULT_OK
     }
@@ -106,7 +101,7 @@ class DbBackupManager(private val context: ApplicationContext) {
     companion object {
         private const val DIR_BACKUP = "/data/com.anod.appwatcher/backup"
 
-        const val FILE_EXT_DAT = ".json"
+        private const val FILE_EXT_DAT = ".json"
         const val RESULT_OK = 0
         const val ERROR_STORAGE_NOT_AVAILABLE = 1
         const val ERROR_FILE_NOT_EXIST = 2
@@ -127,7 +122,7 @@ class DbBackupManager(private val context: ApplicationContext) {
          * merely allocating an Object, and can still be synchronized on.
          */
         internal val sDataLock = arrayOfNulls<Any>(0)
-        const val DATE_FORMAT_FILENAME = "yyyyMMdd_HHmmss"
+        private const val DATE_FORMAT_FILENAME = "yyyyMMdd_HHmmss"
 
         /**
          * @return Full path to Backup dir
@@ -139,16 +134,8 @@ class DbBackupManager(private val context: ApplicationContext) {
             }
 
         fun generateFileName(): String {
-            val sdf = SimpleDateFormat(DbBackupManager.DATE_FORMAT_FILENAME, Locale.US)
+            val sdf = SimpleDateFormat(DATE_FORMAT_FILENAME, Locale.US)
             return sdf.format(Date(System.currentTimeMillis())) + FILE_EXT_DAT
-        }
-
-        fun generateBackupFile(): File {
-            return File(defaultBackupDir, generateFileName())
-        }
-
-        fun getBackupFile(filename: String): File {
-            return File(defaultBackupDir, filename + FILE_EXT_DAT)
         }
     }
 }

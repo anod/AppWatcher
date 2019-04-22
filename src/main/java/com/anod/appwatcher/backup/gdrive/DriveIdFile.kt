@@ -2,6 +2,7 @@ package com.anod.appwatcher.backup.gdrive
 
 import com.anod.appwatcher.backup.DbJsonWriter
 import com.anod.appwatcher.content.DbContentProviderClient
+import com.anod.appwatcher.database.AppsDatabase
 import com.google.android.gms.drive.DriveFile
 import com.google.android.gms.drive.DriveId
 import com.google.android.gms.drive.DriveResourceClient
@@ -75,7 +76,7 @@ class DriveIdFile(private val file: FileDescription, private val driveClient: Dr
         _driveId = driveFile.driveId
     }
 
-    internal fun write(writer: DbJsonWriter, cr: DbContentProviderClient) {
+    internal fun write(writer: DbJsonWriter, db: AppsDatabase) {
 
         if (this._driveId == null)
         {
@@ -93,7 +94,7 @@ class DriveIdFile(private val file: FileDescription, private val driveClient: Dr
         val outputStream = driveContents.outputStream
         val outWriter = BufferedWriter(OutputStreamWriter(outputStream))
         try {
-            writer.write(outWriter, cr)
+            writer.write(outWriter, db)
         } catch (e: IOException) {
             AppLog.e(e)
         } finally {

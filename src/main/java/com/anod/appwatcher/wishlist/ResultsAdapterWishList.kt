@@ -13,7 +13,7 @@ import info.anodsplace.playstore.WishlistEndpoint
  * @date 16/12/2016.
  */
 
-internal class ResultsAdapterWishList(context: Context, private val endpoint: WishlistEndpoint, newAppHandler: WatchAppList) : ResultsAdapter(context, newAppHandler) {
+internal class ResultsAdapterWishList(context: Context, private val endpoint: WishlistEndpoint, viewModel: WishlistViewModel) : ResultsAdapter(context, viewModel) {
 
     override fun document(position: Int): Document {
         val isLastPosition = endpoint.count - 1 == position

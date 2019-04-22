@@ -1,6 +1,7 @@
 package com.anod.appwatcher.search
 
 import android.accounts.Account
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -9,27 +10,23 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
-import com.android.volley.VolleyError
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AccountSelectionDialog
 import com.anod.appwatcher.accounts.AuthTokenAsync
 import com.anod.appwatcher.content.AddWatchAppAsyncTask
-import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
-import com.anod.appwatcher.content.WatchAppList
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.Theme
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.view.Keyboard
-import info.anodsplace.playstore.CompositeStateEndpoint
-import info.anodsplace.playstore.DetailsEndpoint
-import info.anodsplace.playstore.PlayStoreEndpointBase
-import info.anodsplace.playstore.SearchEndpoint
 import kotlinx.android.synthetic.main.activity_market_search.*
 
-open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionListener, WatchAppList.Listener, CompositeStateEndpoint.Listener {
+@SuppressLint("Registered")
+open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionListener {
 
     override val themeRes: Int
         get() =  Theme(this).theme
@@ -37,21 +34,15 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
         get() = Theme(this).colors
 
     private var adapter: ResultsAdapter? = null
-
     lateinit var searchView: SearchView
 
-    private var initiateSearch = false
-    private var isShareSource = false
-    private var account: Account? = null
-
-    val accountSelectionDialog: AccountSelectionDialog by lazy {
+    private val accountSelectionDialog: AccountSelectionDialog by lazy {
         AccountSelectionDialog(this, Application.provide(this).prefs, this)
     }
-    private var searchQuery = ""
-    private var hasFocus = false
-    private var isPackageSearch = false
-    private val endpoints: CompositeStateEndpoint by lazy { CompositeStateEndpoint(this) }
-    private val watchAppList: WatchAppList by lazy { WatchAppList(this) }
+
+    private val viewModel: SearchViewModel by lazy {
+        ViewModelProviders.of(this).get(SearchViewModel::class.java)
+    }
 
     override val layoutResource: Int
         get() = R.layout.activity_market_search
@@ -66,65 +57,74 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
         loading.visibility = View.VISIBLE
         retryBox.visibility = View.GONE
 
-        initFromIntent(intent)
+        viewModel.initFromIntent(intent)
 
-        val account = Application.provide(this).prefs.account
-        if (account== null) {
+        viewModel.account = Application.provide(this).prefs.account
+        if (viewModel.account == null) {
             accountSelectionDialog.show()
         } else {
-            onAccountSelected(account)
+            onAccountSelected(viewModel.account!!)
         }
-    }
 
-    private fun initFromIntent(i: Intent?) {
-        if (i == null) {
-            return
-        }
-        val keyword = i.getStringExtra(EXTRA_KEYWORD)
-        if (keyword != null) {
-            searchQuery = keyword
-        }
-        isPackageSearch = i.getBooleanExtra(EXTRA_PACKAGE, false)
-        initiateSearch = i.getBooleanExtra(EXTRA_EXACT, false)
-        isShareSource = i.getBooleanExtra(EXTRA_SHARE, false)
-        hasFocus = i.getBooleanExtra(EXTRA_FOCUS, false)
-    }
-
-    override fun onPause() {
-        watchAppList.detach()
-        super.onPause()
-    }
-
-    override fun onResume() {
-        watchAppList.attach(this)
-        super.onResume()
-    }
-
-    private fun searchResults(account: Account) {
-        showLoading()
-
-        if (searchQuery.isNotEmpty()) {
-            val requestQueue = Application.provide(this).requestQueue
-            val deviceInfo = Application.provide(this).deviceInfo
-            if (isPackageSearch) {
-                val detailsUrl = AppInfo.createDetailsUrl(searchQuery)
-                endpoints.put(DETAILS_ENDPOINT_ID, DetailsEndpoint(this, requestQueue, deviceInfo, account, detailsUrl))
+        viewModel.status.observe(this, Observer {
+            when (it) {
+                is Loading -> {
+                    showLoading()
+                    if (it.isPackageSearch) {
+                        adapter = ResultsAdapterDetails(this, viewModel)
+                    } else {
+                        adapter = ResultsAdapterSearch(this, viewModel)
+                    }
+                    list.adapter = adapter
+                }
+                is Available -> {
+                    showListView()
+                    adapter?.notifyDataSetChanged()
+                }
+                is NoNetwork -> {
+                    loading.visibility = View.GONE
+                    showRetryButton()
+                    Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()
+                }
+                is FreeTextRequest -> {
+                    showLoading()
+                    adapter = ResultsAdapterSearch(this, viewModel)
+                    list.adapter = adapter
+                }
+                is Error -> {
+                    loading.visibility = View.GONE
+                    showRetryButton()
+                }
+                is NoResults -> {
+                    showNoResults(viewModel.searchQuery.value ?: "")
+                }
             }
-            endpoints.put(SEARCH_ENDPOINT_ID, SearchEndpoint(this, requestQueue, deviceInfo, account, searchQuery, true))
+        })
 
-            if (isPackageSearch) {
-                endpoints.activeId = DETAILS_ENDPOINT_ID
-                adapter = ResultsAdapterDetails(this, endpoints[DETAILS_ENDPOINT_ID] as DetailsEndpoint, watchAppList)
+        viewModel.searchQueryAuthenticated.observe(this, Observer {
+            val query = it.first
+            val authToken = it.second
+            if (query.isBlank()) {
+                showNoResults("")
             } else {
-                endpoints.activeId = SEARCH_ENDPOINT_ID
-                adapter = ResultsAdapterSearch(this, endpoints[SEARCH_ENDPOINT_ID] as SearchEndpoint, watchAppList)
+                viewModel.search(query, authToken)
             }
-            list.adapter = adapter
-            endpoints.reset()
-            endpoints.active.startAsync()
-        } else {
-            showNoResults("")
-        }
+        })
+
+        viewModel.appStatusChange.observe(this, Observer {
+            val newStatus = it.first
+            if (newStatus == AppInfoMetadata.STATUS_NORMAL) {
+                TagSnackbar.make(this, it.second!!, viewModel.isShareSource).show()
+                sendBroadcast(Intent(AddWatchAppAsyncTask.listChanged))
+                adapter?.notifyDataSetChanged()
+            }
+//        if (WatchAppList.ERROR_ALREADY_ADDED == error) {
+//            Toast.makeText(this, R.string.app_already_added, Toast.LENGTH_SHORT).show()
+//            adapter?.notifyDataSetChanged()
+//        } else if (error == WatchAppList.ERROR_INSERT) {
+//            Toast.makeText(this, R.string.error_insert_app, Toast.LENGTH_SHORT).show()
+//        }
+        })
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -136,8 +136,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
 
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
-                searchQuery = query
-                searchResultsDelayed()
+                viewModel.searchQuery.value = query
                 Keyboard.hide(searchView, this@SearchActivity)
                 return false
             }
@@ -147,8 +146,9 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
             }
         })
 
+        val searchQuery = viewModel.searchQuery.value ?: ""
         searchView.setQuery(searchQuery, true)
-        if (hasFocus) {
+        if (viewModel.hasFocus) {
             searchView.post { searchView.requestFocus() }
         } else {
             Keyboard.hide(searchView, this)
@@ -156,35 +156,20 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
         return true
     }
 
-    private fun searchResultsDelayed() {
-        val account = this.account
-        if (endpoints.authToken.isEmpty() || account == null) {
-            initiateSearch = true
-        } else {
-            searchResults(account)
-        }
-    }
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
+        return when (item.itemId) {
             R.id.menu_search -> {
-                searchResultsDelayed()
-                return true
+                true
             }
-            else -> return super.onOptionsItemSelected(item)
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
     override fun onAccountSelected(account: Account) {
-        this.account = account
+        viewModel.account = account
         AuthTokenAsync(this).request(this, account, object : AuthTokenAsync.Callback {
             override fun onToken(token: String) {
-                endpoints.authToken = token
-                if (initiateSearch && searchQuery.isNotEmpty()) {
-                    searchResults(account)
-                } else {
-                    showNoResults("")
-                }
+                viewModel.authToken.value = token
             }
 
             override fun onError(errorMessage: String) {
@@ -252,65 +237,20 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
     }
 
     private fun retrySearchResult() {
-        if (adapter?.isNotEmpty == true) {
-            endpoints.active.startAsync()
+        val query = viewModel.searchQuery.value ?: ""
+        if (query.isBlank()) {
+            showNoResults("")
         } else {
-            searchResultsDelayed()
-        }
-    }
-
-    override fun onWatchListChangeSuccess(info: AppInfo, newStatus: Int) {
-        adapter?.notifyDataSetChanged()
-        sendBroadcast(Intent(AddWatchAppAsyncTask.listChanged))
-        if (newStatus == AppInfoMetadata.STATUS_NORMAL) {
-            TagSnackbar.make(this, info, isShareSource).show()
-        }
-    }
-
-    override fun onWatchListChangeError(info: AppInfo, error: Int) {
-        if (WatchAppList.ERROR_ALREADY_ADDED == error) {
-            Toast.makeText(this, R.string.app_already_added, Toast.LENGTH_SHORT).show()
-            adapter?.notifyDataSetChanged()
-        } else if (error == WatchAppList.ERROR_INSERT) {
-            Toast.makeText(this, R.string.error_insert_app, Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    override fun onDataChanged(id: Int, endpoint: PlayStoreEndpointBase) {
-        if (id == DETAILS_ENDPOINT_ID) {
-            if ((endpoint as DetailsEndpoint).document != null) {
-                showListView()
-                adapter?.notifyDataSetChanged()
+            val authToken = viewModel.authToken.value ?: ""
+            if (authToken.isEmpty()) {
+                if (viewModel.account == null) {
+                    accountSelectionDialog.show()
+                } else {
+                    onAccountSelected(viewModel.account!!)
+                }
             } else {
-                adapter = ResultsAdapterSearch(this, endpoints[SEARCH_ENDPOINT_ID] as SearchEndpoint, watchAppList)
-                list.adapter = adapter
-                endpoints.activate(SEARCH_ENDPOINT_ID).startAsync()
+                viewModel.search(query, authToken)
             }
-        } else {
-            val searchEndpoint = endpoint as SearchEndpoint
-            if (searchEndpoint.count == 0) {
-                showNoResults(searchEndpoint.query)
-            } else {
-                showListView()
-                adapter?.notifyDataSetChanged()
-            }
-        }
-    }
-
-    override fun onErrorResponse(id: Int, endpoint: PlayStoreEndpointBase, error: VolleyError) {
-        if (!Application.provide(this).networkConnection.isNetworkAvailable) {
-            loading.visibility = View.GONE
-            showRetryButton()
-            Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()
-            return
-        }
-        if (id == DETAILS_ENDPOINT_ID) {
-            adapter = ResultsAdapterSearch(this, endpoints[SEARCH_ENDPOINT_ID] as SearchEndpoint, watchAppList)
-            list.adapter = adapter
-            endpoints.activate(SEARCH_ENDPOINT_ID).startAsync()
-        } else {
-            loading.visibility = View.GONE
-            showRetryButton()
         }
     }
 
@@ -320,8 +260,5 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
         const val EXTRA_SHARE = "share"
         const val EXTRA_FOCUS = "focus"
         const val EXTRA_PACKAGE = "package"
-
-        private const val DETAILS_ENDPOINT_ID = 0
-        private const val SEARCH_ENDPOINT_ID = 1
     }
 }
