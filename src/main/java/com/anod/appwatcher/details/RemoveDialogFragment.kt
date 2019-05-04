@@ -24,7 +24,6 @@ class RemoveDialogFragment : DialogFragment() {
             builder.setPositiveButton(R.string.alert_dialog_remove) { _, _ ->
                 BackgroundTask(object : BackgroundTask.Worker<Int, Int>(rowId) {
                     override fun finished(result: Int) {
-                        activity?.sendBroadcast(Intent(AddWatchAppAsyncTask.listChanged))
                         activity?.finish()
                     }
 

@@ -80,7 +80,6 @@ class WishlistFragment : Fragment(), PlayStoreEndpoint.Listener {
             val newStatus = it.first
             if (newStatus == AppInfoMetadata.STATUS_NORMAL) {
                 TagSnackbar.make(activity!!, it.second!!, false).show()
-                context?.sendBroadcast(Intent(AddWatchAppAsyncTask.listChanged))
                 list.adapter!!.notifyDataSetChanged()
             }
         })

@@ -64,7 +64,7 @@ class WatchListStateViewModel(application: android.app.Application) : AndroidVie
                     val updatesCount = intent.getIntExtra(UpdateCheck.extrasUpdatesCount, 0)
                     listState.value = SyncStopped(updatesCount)
                 }
-                AddWatchAppAsyncTask.listChanged -> listState.value = Updated
+                listChangedEvent -> listState.value = Updated
             }
         }
     }
@@ -73,7 +73,7 @@ class WatchListStateViewModel(application: android.app.Application) : AndroidVie
         val filter = IntentFilter()
         filter.addAction(UpdateCheck.syncProgress)
         filter.addAction(UpdateCheck.syncStop)
-        filter.addAction(AddWatchAppAsyncTask.listChanged)
+        filter.addAction(listChangedEvent)
         application.registerReceiver(syncFinishedReceiver, filter)
     }
 
@@ -97,6 +97,10 @@ class WatchListStateViewModel(application: android.app.Application) : AndroidVie
 
         ManualSyncService.startActionSync(app)
         this.listState.value = SyncStarted
+    }
+
+    companion object {
+        const val listChangedEvent = "com.anod.appwatcher.list.changed"
     }
 }
 

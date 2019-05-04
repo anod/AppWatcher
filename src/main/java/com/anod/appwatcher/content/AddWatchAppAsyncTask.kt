@@ -64,7 +64,6 @@ class AddWatchAppAsyncTask(
 
     override fun onPostExecute(result: SimpleArrayMap<String, Int>) {
         listener.onAddAppTaskFinish(result)
-        context.sendBroadcast(Intent(listChanged))
     }
 
     companion object {
@@ -72,6 +71,5 @@ class AddWatchAppAsyncTask(
         const val ERROR_INSERT = 1
         const val ERROR_ALREADY_ADDED = 2
 
-        const val listChanged = "com.anod.appwatcher.list.changed"
     }
 }

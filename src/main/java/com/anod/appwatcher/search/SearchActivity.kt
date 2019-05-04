@@ -115,7 +115,6 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
             val newStatus = it.first
             if (newStatus == AppInfoMetadata.STATUS_NORMAL) {
                 TagSnackbar.make(this, it.second!!, viewModel.isShareSource).show()
-                sendBroadcast(Intent(AddWatchAppAsyncTask.listChanged))
                 adapter?.notifyDataSetChanged()
             }
 //        if (WatchAppList.ERROR_ALREADY_ADDED == error) {

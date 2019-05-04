@@ -134,13 +134,15 @@ class SearchViewModel(application: Application): AndroidViewModel(application), 
     }
 
     override fun add(info: AppInfo) {
-        BackgroundTask(object : BackgroundTask.Worker<AppInfo, Long>(info) {
-            override fun finished(result: Long) {
-                appStatusChange.value = Pair(AppInfoMetadata.STATUS_NORMAL, info)
+        BackgroundTask(object : BackgroundTask.Worker<AppInfo, Int>(info) {
+            override fun finished(result: Int) {
+                if (result != AppListTable.ERROR_INSERT) {
+                    appStatusChange.value = Pair(AppInfoMetadata.STATUS_NORMAL, info)
+                }
             }
 
-            override fun run(param: AppInfo): Long {
-                return AppListTable.Queries.insert(param, provide.database)
+            override fun run(param: AppInfo): Int {
+                return AppListTable.Queries.insertSafetly(param, provide.database)
             }
         }).execute()
     }

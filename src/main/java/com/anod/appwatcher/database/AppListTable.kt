@@ -149,6 +149,11 @@ interface AppListTable {
                 } else {
                     ERROR_INSERT
                 }
+            } else {
+                if (found.status == AppInfoMetadata.STATUS_DELETED) {
+                    db.apps().updateStatus(found.rowId, AppInfoMetadata.STATUS_NORMAL)
+                    return found.rowId
+                }
             }
             return ERROR_ALREADY_ADDED
         }
