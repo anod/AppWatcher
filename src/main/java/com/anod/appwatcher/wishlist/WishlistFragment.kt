@@ -83,6 +83,10 @@ class WishlistFragment : Fragment(), PlayStoreEndpoint.Listener {
                 list.adapter!!.notifyDataSetChanged()
             }
         })
+
+        viewModel.packages.observe(this, Observer {
+            list.adapter?.notifyDataSetChanged()
+        })
     }
 
     private fun startLoadingList(account: Account, authSubToken: String, context: Context) {

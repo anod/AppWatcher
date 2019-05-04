@@ -115,7 +115,6 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
             val newStatus = it.first
             if (newStatus == AppInfoMetadata.STATUS_NORMAL) {
                 TagSnackbar.make(this, it.second!!, viewModel.isShareSource).show()
-                adapter?.notifyDataSetChanged()
             }
 //        if (WatchAppList.ERROR_ALREADY_ADDED == error) {
 //            Toast.makeText(this, R.string.app_already_added, Toast.LENGTH_SHORT).show()
@@ -123,6 +122,10 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
 //        } else if (error == WatchAppList.ERROR_INSERT) {
 //            Toast.makeText(this, R.string.error_insert_app, Toast.LENGTH_SHORT).show()
 //        }
+        })
+
+        viewModel.packages.observe(this, Observer {
+            adapter?.notifyDataSetChanged()
         })
     }
 

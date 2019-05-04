@@ -126,9 +126,9 @@ class TagsListFragment : Fragment(), View.OnClickListener {
 
             if (checked) {
                 name.isSelected = true
-                val d = DrawableTint(itemView.resources, R.drawable.ic_check_black_24dp, itemView.context.theme)
+                val checkmark = DrawableTint(itemView.resources, R.drawable.ic_check_black_24dp, itemView.context.theme)
                         .apply(R.color.primary_text)
-                name.setCompoundDrawablesWithIntrinsicBounds(null, null, d, null)
+                name.setCompoundDrawablesWithIntrinsicBounds(null, null, checkmark, null)
             } else {
                 name.isSelected = false
                 name.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
