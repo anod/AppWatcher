@@ -58,8 +58,7 @@ class WatchListStateViewModel(application: android.app.Application) : AndroidVie
      */
     private val syncFinishedReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            val action = intent.action
-            when (action) {
+            when (intent.action) {
                 UpdateCheck.syncProgress -> listState.value = SyncStarted
                 UpdateCheck.syncStop -> {
                     val updatesCount = intent.getIntExtra(UpdateCheck.extrasUpdatesCount, 0)

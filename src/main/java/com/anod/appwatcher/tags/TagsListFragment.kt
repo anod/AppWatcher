@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.R
-import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.utils.Theme
@@ -41,14 +40,17 @@ class TagsListFragment : Fragment(), View.OnClickListener {
 
         setHasOptionsMenu(true)
         if (arguments!!.containsKey(EXTRA_APP)) {
-            viewModel.appInfo = arguments!!.getParcelable(EXTRA_APP)
-            activity!!.title = getString(R.string.tag_app, viewModel.appInfo!!.title)
+            viewModel.appInfo.value = arguments!!.getParcelable(EXTRA_APP)
+            activity!!.title = getString(R.string.tag_app, viewModel.appInfo.value!!.title)
+        } else {
+            viewModel.appInfo.value = null
+            activity!!.title = getString(R.string.tags)
         }
         list.layoutManager = LinearLayoutManager(context!!)
         list.adapter = TagAdapter(context!!, this)
         list.addItemDecoration(DividerItemDecoration(context!!, DividerItemDecoration.HORIZONTAL))
 
-        viewModel.tags.observe(this, Observer {
+        viewModel.tagsAppItems.observe(this, Observer {
             (list.adapter as TagAdapter).update(it)
         })
     }
@@ -69,19 +71,14 @@ class TagsListFragment : Fragment(), View.OnClickListener {
 
     override fun onClick(v: View) {
         val holder = v.tag as TagHolder
-        if (viewModel.appInfo == null) {
+        if (viewModel.appInfo.value == null) {
             val dialog = EditTagDialog.newInstance(holder.tag, Theme(requireActivity()))
             dialog.show(fragmentManager!!, "edit-tag-dialog")
         } else {
-            if (viewModel.appHasTag(holder.tag)) {
+            if (holder.name.isSelected) {
                 viewModel.removeAppTag(holder.tag)
-                holder.name.isSelected = false
-                holder.name.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
             } else {
                 viewModel.addAppTag(holder.tag)
-                holder.name.isSelected = true
-                val d = DrawableTint(resources, R.drawable.ic_check_black_24dp, activity!!.theme).apply(R.color.control_tint)
-                holder.name.setCompoundDrawablesWithIntrinsicBounds(null, null, d, null)
             }
         }
     }
@@ -90,10 +87,10 @@ class TagsListFragment : Fragment(), View.OnClickListener {
             private val context: Context,
             private val listener: View.OnClickListener) : RecyclerView.Adapter<TagHolder>() {
 
-        private var tags: List<Tag> = emptyList()
+        private var items: List<TagAppItem> = emptyList()
 
-        fun update(tags: List<Tag>) {
-            this.tags = tags
+        fun update(tags: List<TagAppItem>) {
+            items = tags
             notifyDataSetChanged()
         }
 
@@ -102,10 +99,10 @@ class TagsListFragment : Fragment(), View.OnClickListener {
             return TagHolder(itemView, listener)
         }
 
-        override fun getItemCount(): Int = tags.size
+        override fun getItemCount(): Int = items.size
 
         override fun onBindViewHolder(holder: TagHolder, position: Int) {
-            holder.bindView(tags[position])
+            holder.bindView(items[position].first, items[position].second)
         }
     }
 
@@ -120,12 +117,22 @@ class TagsListFragment : Fragment(), View.OnClickListener {
             itemView.setOnClickListener(listener)
         }
 
-        fun bindView(tag: Tag) {
+        fun bindView(tag: Tag, checked: Boolean) {
             this.tag = tag
             name.text = tag.name
             val d = color.drawable.mutate()
             DrawableCompat.setTint(DrawableCompat.wrap(d), tag.color)
             color.setImageDrawable(d)
+
+            if (checked) {
+                name.isSelected = true
+                val d = DrawableTint(itemView.resources, R.drawable.ic_check_black_24dp, itemView.context.theme)
+                        .apply(R.color.primary_text)
+                name.setCompoundDrawablesWithIntrinsicBounds(null, null, d, null)
+            } else {
+                name.isSelected = false
+                name.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
+            }
         }
     }
 

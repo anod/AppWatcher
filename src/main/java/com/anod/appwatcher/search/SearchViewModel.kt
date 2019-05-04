@@ -59,12 +59,10 @@ class SearchViewModel(application: Application): AndroidViewModel(application), 
 
     fun initFromIntent(intent: Intent?) {
         if (intent == null) {
+            searchQuery.value = ""
             return
         }
-        val keyword = intent.getStringExtra(SearchActivity.EXTRA_KEYWORD)
-        if (keyword != null) {
-            searchQuery.value = keyword
-        }
+        searchQuery.value = intent.getStringExtra(SearchActivity.EXTRA_KEYWORD) ?: ""
         isPackageSearch = intent.getBooleanExtra(SearchActivity.EXTRA_PACKAGE, false)
         initiateSearch = intent.getBooleanExtra(SearchActivity.EXTRA_EXACT, false)
         isShareSource = intent.getBooleanExtra(SearchActivity.EXTRA_SHARE, false)

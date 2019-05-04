@@ -79,6 +79,8 @@ class ImportInstalledFragment : Fragment(), ImportBulkManager.Listener {
         list.adapter = ImportAdapter(context!!, context!!.packageManager, dataProvider)
         list.itemAnimator = ImportItemAnimator()
 
+        activity?.title = getString(R.string.import_installed)
+
         button3.setOnClickListener {
             val importAdapter = list.adapter as ImportAdapter
             allSelected = !allSelected
