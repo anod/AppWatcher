@@ -134,12 +134,20 @@
         <item name="android:textColor">@color/theme_accent</item>
     </style>
 
-    <style name="ChangelogTitle" parent="@style/TextAppearance.Widget.AppCompat.Toolbar.Title">
+    <style name="Changelog" />
+    <style name="Changelog.Title" parent="@style/TextAppearance.Widget.AppCompat.Toolbar.Title">
         <item name="android:textSize">14sp</item>
         <!-- include other attributes you want to change: textColor, textStyle, etc -->
     </style>
 
-    <style name="ChangelogSubtitle" parent="@style/TextAppearance.Widget.AppCompat.Toolbar.Subtitle">
+    <style name="Changelog.Subtitle" parent="@style/TextAppearance.Widget.AppCompat.Toolbar.Subtitle">
         <item name="android:textSize">10sp</item>
     </style>
+
+    <style name="Changelog.ActionBar" parent="@style/ThemeOverlay.MaterialComponents.ActionBar.Primary">
+        <item name="colorControlNormal">@android:color/white</item>
+        <item name="popupTheme">@style/ThemeOverlay.AppCompat.DayNight</item>
+    </style>
+
+
 </resources>

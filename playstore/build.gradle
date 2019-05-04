@@ -1,16 +1,3 @@
-buildscript {
-    repositories {
-        jcenter()
-        mavenCentral()
-        maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
-        google()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.0'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
-}
-
 repositories {
     mavenCentral()
     jcenter()
@@ -27,7 +14,7 @@ android {
     compileSdkVersion 28
 
     defaultConfig {
-        minSdkVersion 16
+        minSdkVersion 21
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
@@ -46,16 +33,20 @@ android {
             }
         }
     }
+    compileOptions {
+        sourceCompatibility = '1.8'
+        targetCompatibility = '1.8'
+    }
 }
 
 dependencies {
     implementation files('libs/keyczar-0.71g-090613.jar')
-
+    implementation "androidx.collection:collection:1.1.0-beta01"
+    implementation "androidx.collection:collection-ktx:1.1.0-beta01"
     api group: 'com.google.protobuf.nano', name: 'protobuf-javanano', version: '3.2.0rc2'
     api 'com.android.volley:volley:1.1.0'
     implementation 'com.squareup.okhttp3:okhttp:3.14.1'
 
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation project(':framework')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }

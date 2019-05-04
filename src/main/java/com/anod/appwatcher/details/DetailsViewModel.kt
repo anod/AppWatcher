@@ -1,10 +1,12 @@
 package com.anod.appwatcher.details
 
 import android.accounts.Account
+import android.os.AsyncTask
 import androidx.lifecycle.*
 import com.android.volley.VolleyError
 import com.anod.appwatcher.AppComponent
 import com.anod.appwatcher.Application
+import com.anod.appwatcher.database.AppTagsTable
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.database.entities.Tag
@@ -37,11 +39,11 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
         get() = Application.provide(context)
 
     var detailsUrl = ""
-    var appId = ""
+    var appId = MutableLiveData<String>("")
     var rowId: Int = -1
     var isNewApp: Boolean = false
 
-    val app: MutableLiveData<com.anod.appwatcher.database.entities.App> = MutableLiveData()
+    val app: MutableLiveData<App> = MutableLiveData()
 
     val account: Account? by lazy {
         Application.provide(application).prefs.account
@@ -52,11 +54,15 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
     }
     var authToken = ""
     var localChangelog: List<AppChange> = emptyList()
-    val tags = MutableLiveData<List<Tag>>()
-    val tagsMenuItems = provide.database.tags().observe().switchMap { tags ->
-        return@switchMap provide.database.appTags().forAppRow(rowId).map { appTags ->
-            val appTagsList = appTags.map { it.tagId }
-            tags.map { TagMenuItem(it, appTagsList.contains(it.id)) }
+    val tagsMenuItems: LiveData<List<TagMenuItem>> = appId.switchMap { appId ->
+        if (appId.isEmpty()) {
+            return@switchMap MutableLiveData(emptyList<TagMenuItem>())
+        }
+        return@switchMap provide.database.tags().observe().switchMap { tags ->
+            return@switchMap provide.database.appTags().forApp(appId).map { appTags ->
+                val appTagsList = appTags.map { it.tagId }
+                tags.map { TagMenuItem(it, appTagsList.contains(it.id)) }
+            }
         }
     }
 
@@ -65,20 +71,20 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
     val document: Document?
         get() = detailsEndpoint.document
 
-    var recentChange = AppChange(appId, 0, "", "", "")
+    var recentChange = AppChange(appId.value!!, 0, "", "", "")
 
     override fun onCleared() {
         detailsEndpoint.listener = null
     }
 
     fun loadApp() {
-        if (appId.isEmpty()) {
+        if (appId.value!!.isEmpty()) {
             app.value = null
             return
         }
 
         if (rowId == -1) {
-            val localApp = context.packageManager.packageToApp(-1, appId)
+            val localApp = context.packageManager.packageToApp(-1, appId.value!!)
             isNewApp = true
             AppLog.i("Show details for unwatched $appId")
             app.value = localApp
@@ -100,11 +106,11 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
     }
 
     fun loadLocalChangelog() {
-        if (appId.isBlank()) {
+        if (appId.value!!.isBlank()) {
             this.updateChangelogState(LocalComplete)
             return
         }
-        val changes = Application.provide(context).database.changelog().ofApp(appId)
+        val changes = Application.provide(context).database.changelog().ofApp(appId.value!!)
         changes.observeForever(OneTimeObserver(changes, Observer {
             this.localChangelog = it ?: emptyList()
             this.updateChangelogState(LocalComplete)
@@ -125,7 +131,7 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
         val details = data as DfeDetails
         val appDetails = details.document?.appDetails
         if (appDetails != null) {
-            recentChange = AppChange(appId, appDetails.versionCode, appDetails.versionString, appDetails.recentChangesHtml
+            recentChange = AppChange(appId.value!!, appDetails.versionCode, appDetails.versionString, appDetails.recentChangesHtml
                     ?: "", appDetails.uploadDate)
         }
         this.updateChangelogState(RemoteComplete(false))
@@ -153,5 +159,21 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
     override fun onErrorResponse(error: VolleyError) {
         AppLog.e("Cannot fetch details for $appId - $error")
         this.updateChangelogState(RemoteComplete(true))
+    }
+
+    fun changeTag(tagId: Int, checked: Boolean)  {
+        BackgroundTask(object : BackgroundTask.Worker<Boolean, Boolean>(checked) {
+            override fun run(param: Boolean): Boolean {
+                if (checked) {
+                    return provide.database.appTags().delete(tagId, appId.value!!) > 0
+                }
+
+                return AppTagsTable.Queries.insert(tagId, appId.value!!, provide.database) != -1L
+            }
+
+            override fun finished(result: Boolean) {
+
+            }
+        }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
     }
 }

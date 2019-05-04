@@ -1,15 +1,11 @@
 package com.anod.appwatcher.backup.gdrive
 
-import android.app.job.JobParameters
+import android.annotation.SuppressLint
 import android.content.Context
-import android.os.Bundle
-import androidx.constraintlayout.widget.ConstraintSet
 import androidx.work.*
 import com.anod.appwatcher.Application
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import info.anodsplace.framework.AppLog
-import info.anodsplace.framework.os.BackgroundTask
 import java.util.concurrent.TimeUnit
 
 /**
@@ -22,7 +18,7 @@ class UploadService(appContext: Context, params: WorkerParameters) : Worker(appC
         private const val windowStartDelaySeconds = 60L
         private const val tag = "GDriveUpload"
 
-        fun schedule(requiresWifi: Boolean, requiresCharging: Boolean) {
+        fun schedule(requiresWifi: Boolean, requiresCharging: Boolean, context: Context) {
 
             val constraints: Constraints = Constraints.Builder().apply {
                 setRequiresCharging(requiresCharging)
@@ -40,7 +36,7 @@ class UploadService(appContext: Context, params: WorkerParameters) : Worker(appC
                             .setInitialDelay(windowStartDelaySeconds, TimeUnit.SECONDS)
                             .build()
 
-            WorkManager.getInstance().enqueueUniqueWork(tag, ExistingWorkPolicy.REPLACE, request)
+            WorkManager.getInstance(context).enqueueUniqueWork(tag, ExistingWorkPolicy.REPLACE, request)
         }
     }
 

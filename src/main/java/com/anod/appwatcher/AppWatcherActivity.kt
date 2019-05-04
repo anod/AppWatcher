@@ -30,7 +30,7 @@ class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener,
         supportActionBar!!.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp)
 
         if (prefs.useAutoSync) {
-            SyncScheduler.schedule(prefs.isRequiresCharging, prefs.isWifiOnly, prefs.updatesFrequency.toLong())
+            SyncScheduler(this).schedule(prefs.isRequiresCharging, prefs.isWifiOnly, prefs.updatesFrequency.toLong())
         }
     }
 

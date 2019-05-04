@@ -159,6 +159,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.menu_search -> {
+                retrySearchResult()
                 true
             }
             else -> super.onOptionsItemSelected(item)

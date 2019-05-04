@@ -9,6 +9,7 @@ import androidx.room.RawQuery
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
+import android.net.Uri
 import android.provider.BaseColumns
 import android.text.TextUtils
 import androidx.room.Insert
@@ -56,6 +57,9 @@ interface AppListTable {
 
     @Query("DELETE FROM $table")
     fun delete()
+
+    @Query("UPDATE $table SET ${Columns.status} = :status WHERE ${BaseColumns._ID} = :rowId")
+    fun updateStatus(rowId: Int, status: Int): Int
 
     object Queries {
 
@@ -124,7 +128,7 @@ interface AppListTable {
             if (tag != null) {
                 selc.add(AppTagsTable.TableColumns.tagId + " = ?")
                 args.add(tag.id.toString())
-                selc.add(AppTagsTable.TableColumns.appId + " = " + AppListTable.TableColumns.appId)
+                selc.add(AppTagsTable.TableColumns.appId + " = " + TableColumns.appId)
             }
 
             if (!TextUtils.isEmpty(titleFilter)) {
@@ -135,6 +139,18 @@ interface AppListTable {
             return Pair(TextUtils.join(" AND ", selc), args.toTypedArray())
         }
 
+        fun insertSafetly(app: AppInfo, db: AppsDatabase): Int {
+            val found = db.apps().loadApp(app.appId)
+            if (found == null) {
+                val rowId = insert(app, db)
+                return if (rowId > 0) {
+                    rowId.toInt()
+                } else {
+                    ERROR_INSERT
+                }
+            }
+            return ERROR_ALREADY_ADDED
+        }
     }
 
 
@@ -189,6 +205,9 @@ interface AppListTable {
     }
 
     companion object {
+
+        const val ERROR_ALREADY_ADDED = -1
+        const val ERROR_INSERT = -2
 
         const val table = "app_list"
         private const val recentDays: Long = 3

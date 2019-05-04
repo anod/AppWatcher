@@ -1,8 +1,10 @@
 package com.anod.appwatcher.tags
 
 import android.content.Context
+import com.anod.appwatcher.Application
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.DbContentProviderClient
+import com.anod.appwatcher.database.AppTagsTable
 import com.anod.appwatcher.database.entities.AppTag
 import com.anod.appwatcher.database.entities.Tag
 import info.anodsplace.framework.app.ApplicationContext
@@ -40,12 +42,11 @@ internal class TagAppsImport(private val tag: Tag, private val context: Applicat
     fun run(): Boolean {
         val appIds = apps.filter { it.value }.keys.toList()
 
-        val cr = DbContentProviderClient(context)
-        val result = cr.setAppsToTag(appIds, tag.id)
-        cr.close()
+        val db = Application.provide(context).database
+        AppTagsTable.Queries.assignAppsToTag(appIds, tag.id, db)
 
         context.contentResolver.notifyChange(DbContentProvider.appsTagUri, null)
         context.contentResolver.notifyChange(DbContentProvider.appsUri, null)
-        return result
+        return true
     }
 }

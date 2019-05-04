@@ -33,10 +33,9 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar"
-                app:popupTheme="@style/Widget.MaterialComponents.PopupMenu"
-                app:titleTextAppearance="@style/ChangelogTitle"
-                app:subtitleTextAppearance="@style/ChangelogSubtitle"
+                android:theme="@style/Changelog.ActionBar"
+                app:titleTextAppearance="@style/Changelog.Title"
+                app:subtitleTextAppearance="@style/Changelog.Subtitle"
                 app:titleMarginStart="16dp"
                 app:layout_collapseMode="pin"
                 app:contentInsetStartWithNavigation="0dp" />

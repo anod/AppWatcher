@@ -28,7 +28,6 @@ import info.anodsplace.framework.graphics.BitmapByteArray
 class DbContentProviderClient(private val contentProviderClient: ContentProviderClient) {
 
     constructor(context: Context) : this(ApplicationContext(context))
-    constructor(application: Application) : this(application.contentResolver.acquireContentProviderClient(DbContentProvider.authority))
     constructor(context: ApplicationContext) : this(context.contentResolver.acquireContentProviderClient(DbContentProvider.authority))
 
     fun insert(app: AppInfo): Uri? {
@@ -82,55 +81,8 @@ class DbContentProviderClient(private val contentProviderClient: ContentProvider
         return 0
     }
 
-    fun updateStatus(rowId: Int, status: Int): Int {
-        val updateUri = DbContentProvider.appsUri.buildUpon().appendPath(rowId.toString()).build()
-        val values = ContentValues()
-        values.put(AppListTable.Columns.status, status)
-        try {
-            return contentProviderClient.update(updateUri, values)
-        } catch (e: RemoteException) {
-            AppLog.e(e)
-        }
-        return 0
-    }
-
     fun close() {
         contentProviderClient.release()
-    }
-
-    fun queryAppIcon(uri: Uri): Bitmap? {
-        val cr: Cursor?
-        try {
-            cr = contentProviderClient.query(uri, arrayOf(BaseColumns._ID, AppListTable.Columns.iconCache))
-        } catch (e: RemoteException) {
-            AppLog.e(e)
-            return null
-        }
-        cr.moveToPosition(-1)
-        var icon: Bitmap? = null
-        if (cr.moveToNext()) {
-            val iconData = cr.getBlob(1)
-            icon = BitmapByteArray.unflatten(iconData)
-        }
-        cr.close()
-
-        return icon
-    }
-
-    fun setAppsToTag(appIds: List<String>, tagId: Int): Boolean {
-        try {
-            val appsTagUri = DbContentProvider.tagsUri.buildUpon().appendPath(tagId.toString()).appendPath("apps").build()
-            contentProviderClient.delete(appsTagUri)
-            for (appId in appIds) {
-                val values = AppTag(appId, tagId).contentValues
-                contentProviderClient.insert(appsTagUri, values)
-            }
-            return true
-        } catch (e: RemoteException) {
-            AppLog.e(e)
-        }
-
-        return false
     }
 
     fun queryAppTags(rowId: Int): List<Int> {

@@ -29,9 +29,7 @@ import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenAsync
 import com.anod.appwatcher.content.AddWatchAppAsyncTask
-import com.anod.appwatcher.content.DbContentProvider
-import com.anod.appwatcher.content.DbContentProviderClient
-import com.anod.appwatcher.content.WatchAppList
+import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.model.*
 import com.anod.appwatcher.tags.TagSnackbar
@@ -46,7 +44,7 @@ import info.anodsplace.framework.graphics.chooseDark
 import kotlinx.android.synthetic.main.activity_app_changelog.*
 import kotlinx.android.synthetic.main.view_changelog_header.*
 
-abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, View.OnClickListener, WatchAppList.Listener, AppBarLayout.OnOffsetChangedListener {
+abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, View.OnClickListener, AppBarLayout.OnOffsetChangedListener {
 
     override val themeRes: Int
         get() = Theme(this).themeDialogNoActionBar
@@ -75,7 +73,7 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel.appId = intent.getStringExtra(EXTRA_APP_ID) ?: ""
+        viewModel.appId.value = intent.getStringExtra(EXTRA_APP_ID) ?: ""
         viewModel.detailsUrl = intent.getStringExtra(EXTRA_DETAILS_URL) ?: ""
         viewModel.rowId = intent.getIntExtra(EXTRA_ROW_ID, -1)
 
@@ -95,7 +93,7 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
         }
 
 
-        if (viewModel.appId.isEmpty()) {
+        if (viewModel.appId.value!!.isEmpty()) {
             Toast.makeText(this, getString(R.string.cannot_load_app, viewModel.appId), Toast.LENGTH_LONG).show()
             AppLog.e("Cannot loadChangelog app details: '${viewModel.appId}'")
             finish()
@@ -167,12 +165,7 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
         supportActionBar?.title = titleString
 
         if (app.iconUrl.isEmpty()) {
-            if (app.rowId > 0) {
-                val dbImageUri = DbContentProvider.iconsUri.buildUpon().appendPath(app.rowId.toString()).build()
-                iconLoader.retrieve(dbImageUri).into(iconLoadTarget)
-            } else {
-                setDefaultIcon()
-            }
+            setDefaultIcon()
         } else {
             iconLoader.retrieve(app.iconUrl).into(iconLoadTarget)
         }
@@ -215,7 +208,7 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
             val tagMenu = menu.findItem(R.id.menu_tag_app)
             loadTagSubmenu(tagMenu)
         }
-        if (!dataProvider.installedApps.packageInfo(viewModel.appId).isInstalled) {
+        if (!dataProvider.installedApps.packageInfo(viewModel.appId.value!!).isInstalled) {
             menu.findItem(R.id.menu_uninstall).isVisible = false
             menu.findItem(R.id.menu_open).isVisible = false
             menu.findItem(R.id.menu_app_info).isVisible = false
@@ -226,16 +219,11 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
 
     private fun loadTagSubmenu(tagMenu: MenuItem) {
         tagMenu.isVisible = false
-        viewModel.tags.observe(this, Observer {
-            val result = it ?: emptyList()
-            if (result.isEmpty()) {
-                tagMenu.isVisible = false
-            }
-            tagMenu.isVisible = true
-        })
         viewModel.tagsMenuItems.observe(this, Observer {
             val result = it ?: emptyList()
+            tagMenu.isVisible = result.isNotEmpty()
             val tagSubMenu = tagMenu.subMenu
+            tagSubMenu.removeGroup(R.id.menu_group_tags)
             for (item in result) {
                 tagSubMenu.add(R.id.menu_group_tags, item.first.id, 0, item.first.name).isChecked = item.second
             }
@@ -257,18 +245,25 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
                 val doc = viewModel.document
                 if (doc != null) {
                     val info = AppInfo(doc)
-                    val appList = WatchAppList(this)
-                    appList.attach(this)
-                    appList.add(info)
-                    appList.detach()
+                    when (AppListTable.Queries.insertSafetly(info, Application.provide(this).database)) {
+                        AppListTable.ERROR_ALREADY_ADDED -> Toast.makeText(this, R.string.app_already_added, Toast.LENGTH_SHORT).show()
+                        AppListTable.ERROR_INSERT -> Toast.makeText(this, R.string.error_insert_app, Toast.LENGTH_SHORT).show()
+                        else -> {
+                            val data = Intent()
+                            data.putExtra(EXTRA_ADD_APP_PACKAGE, info.packageName)
+                            setResult(Activity.RESULT_OK, data)
+                            sendBroadcast(Intent(AddWatchAppAsyncTask.listChanged))
+                            TagSnackbar.make(this, info, true).show()
+                        }
+                    }
                 }
                 return true
             }
             R.id.menu_uninstall -> {
                 val data = Intent()
-                data.putExtra(EXTRA_UNINSTALL_APP_PACKAGE, viewModel.appId)
+                data.putExtra(EXTRA_UNINSTALL_APP_PACKAGE, viewModel.appId.value!!)
                 setResult(Activity.RESULT_OK, data)
-                val uninstallIntent = Intent().forUninstall(viewModel.appId)
+                val uninstallIntent = Intent().forUninstall(viewModel.appId.value!!)
                 startActivity(uninstallIntent)
                 return true
             }
@@ -277,29 +272,19 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
                 return true
             }
             R.id.menu_open -> {
-                val launchIntent = packageManager.getLaunchIntentForPackage(viewModel.appId)
+                val launchIntent = packageManager.getLaunchIntentForPackage(viewModel.appId.value!!)
                 if (launchIntent != null) {
                     this.startActivitySafely(launchIntent)
                 }
             }
             R.id.menu_app_info -> {
-                startActivity(Intent().forAppInfo(viewModel.appId))
+                startActivity(Intent().forAppInfo(viewModel.appId.value!!))
             }
         }
         if (item.groupId == R.id.menu_group_tags) {
-            if (changeTag(item.itemId, item.isChecked)) {
-                item.isChecked = !item.isChecked
-            }
+            viewModel.changeTag(item.itemId, item.isChecked)
         }
         return super.onOptionsItemSelected(item)
-    }
-
-    private fun changeTag(tagId: Int, checked: Boolean): Boolean {
-        val cr = DbContentProviderClient(this)
-        if (checked) {
-            return cr.removeAppFromTag(viewModel.appId, tagId)
-        }
-        return cr.addAppToTag(viewModel.appId, tagId)
     }
 
     private fun shareApp() {
@@ -364,28 +349,10 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
         }
     }
 
-    override fun onWatchListChangeSuccess(info: AppInfo, newStatus: Int) {
-        val data = Intent()
-        data.putExtra(EXTRA_ADD_APP_PACKAGE, info.packageName)
-        setResult(Activity.RESULT_OK, data)
-
-        sendBroadcast(Intent(AddWatchAppAsyncTask.listChanged))
-
-        TagSnackbar.make(this, info, true).show()
-    }
-
-    override fun onWatchListChangeError(info: AppInfo, error: Int) {
-        if (WatchAppList.ERROR_ALREADY_ADDED == error) {
-            Toast.makeText(this, R.string.app_already_added, Toast.LENGTH_SHORT).show()
-        } else if (error == WatchAppList.ERROR_INSERT) {
-            Toast.makeText(this, R.string.error_insert_app, Toast.LENGTH_SHORT).show()
-        }
-    }
-
     private val mainHandler = Handler(Looper.getMainLooper())
 
 
-    override fun onOffsetChanged(appBarLayout: com.google.android.material.appbar.AppBarLayout, verticalOffset: Int) {
+    override fun onOffsetChanged(appBarLayout: AppBarLayout, verticalOffset: Int) {
         val totalScrollRange = appBarLayout.totalScrollRange.toFloat()
         val alpha = 1.0f - Math.abs(verticalOffset.toFloat() / totalScrollRange)
 
@@ -401,11 +368,11 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
         toolbar.logo?.alpha = (inverseAlpha * 255).toInt()
         titleString.alpha = inverseAlpha
         subtitleString.alpha = inverseAlpha
-        mainHandler.post({
+        mainHandler.post {
             supportActionBar?.title = titleString
             toolbar.subtitle = subtitleString
             playStoreButton.translationY = verticalOffset.toFloat()
-        })
+        }
     }
 
 

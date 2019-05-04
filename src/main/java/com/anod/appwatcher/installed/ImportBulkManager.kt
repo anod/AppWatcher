@@ -7,7 +7,6 @@ import androidx.collection.SimpleArrayMap
 import com.android.volley.VolleyError
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.content.AddWatchAppAsyncTask
-import com.anod.appwatcher.content.WatchAppList
 import finsky.api.BulkDocId
 import finsky.api.model.DfeBulkDetails
 import finsky.api.model.DfeModel
@@ -19,10 +18,9 @@ import java.util.*
 
 internal class ImportBulkManager(
         private val context: Context,
-        private val listener: ImportBulkManager.Listener)
+        private val listener: Listener)
     : PlayStoreEndpoint.Listener, AddWatchAppAsyncTask.Listener {
 
-    private val watchAppList = WatchAppList(null)
     private var listsDocIds: MutableList<MutableList<BulkDocId>?> = mutableListOf()
     private var currentBulk: Int = 0
     private var asyncTask: AsyncTask<Document, Void, SimpleArrayMap<String, Int>>? = null
@@ -92,7 +90,7 @@ internal class ImportBulkManager(
 
     override fun onDataChanged(data: DfeModel) {
         val docs = (data as DfeBulkDetails).documents.toTypedArray()
-        asyncTask = AddWatchAppAsyncTask(ApplicationContext(context), watchAppList, this).execute(*docs)
+        asyncTask = AddWatchAppAsyncTask(ApplicationContext(context), this).execute(*docs)
     }
 
     override fun onErrorResponse(error: VolleyError) {

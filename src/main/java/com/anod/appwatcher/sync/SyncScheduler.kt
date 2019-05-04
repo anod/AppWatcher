@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.work.*
 import com.anod.appwatcher.Application
 import info.anodsplace.framework.AppLog
+import info.anodsplace.framework.app.ApplicationContext
 import java.util.concurrent.TimeUnit
 
 /**
@@ -12,8 +13,8 @@ import java.util.concurrent.TimeUnit
  * @date 27/05/2016.
  */
 
-object SyncScheduler {
-    private const val tag = "AppRefresh"
+class SyncScheduler(private val context: ApplicationContext) {
+    constructor(context: Context) : this(ApplicationContext(context))
 
     fun schedule(requiresCharging: Boolean, requiresWifi: Boolean, windowStartSec: Long) {
 
@@ -33,10 +34,14 @@ object SyncScheduler {
                         .build()
 
         AppLog.i("Schedule sync in ${windowStartSec/3600} hours")
-        WorkManager.getInstance().enqueueUniquePeriodicWork(tag, ExistingPeriodicWorkPolicy.REPLACE, request)
+        WorkManager.getInstance(context.actual).enqueueUniquePeriodicWork(Companion.tag, ExistingPeriodicWorkPolicy.REPLACE, request)
     }
 
     fun cancel() {
-        WorkManager.getInstance().cancelUniqueWork(tag)
+        WorkManager.getInstance(context.actual).cancelUniqueWork(Companion.tag)
+    }
+
+    companion object {
+        private const val tag = "AppRefresh"
     }
 }

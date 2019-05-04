@@ -36,7 +36,7 @@ class AppsTagListFragment : WatchListFragment() {
         private const val REQUEST_TAGS_SELECT = 2
         fun newInstance(filterId: Int, sortId: Int, section: WatchListFragment.Section, tag: Tag?): AppsTagListFragment {
             val frag = AppsTagListFragment()
-            frag.arguments = WatchListFragment.createArguments(filterId, sortId, section, tag)
+            frag.arguments = createArguments(filterId, sortId, section, tag)
             return frag
         }
     }

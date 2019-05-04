@@ -17,7 +17,7 @@ import com.anod.appwatcher.AppWatcherApplication
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenAsync
-import com.anod.appwatcher.content.WatchAppList
+import com.anod.appwatcher.content.AddWatchAppAsyncTask
 import com.anod.appwatcher.utils.map
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
@@ -152,7 +152,7 @@ class ImportInstalledFragment : Fragment(), ImportBulkManager.Listener {
             val status = if (resultCode == null) {
                 ImportResourceProvider.STATUS_ERROR
             } else {
-                if (resultCode == WatchAppList.RESULT_OK) ImportResourceProvider.STATUS_DONE else ImportResourceProvider.STATUS_ERROR
+                if (resultCode == AddWatchAppAsyncTask.RESULT_OK) ImportResourceProvider.STATUS_DONE else ImportResourceProvider.STATUS_ERROR
             }
             dataProvider.setPackageStatus(packageName, status)
             adapter.notifyPackageStatusChanged(packageName)

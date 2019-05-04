@@ -91,11 +91,10 @@ data class App(
                         packageName, "", AppInfoMetadata.STATUS_DELETED, ""
                 )
             }
-            val iconUrl: String
-            if (launchComponent != null) {
-                iconUrl = Uri.fromParts(PicassoAppIcon.SCHEME, launchComponent.flattenToShortString(), null).toString()
+            val iconUrl: String = if (launchComponent != null) {
+                Uri.fromParts(PicassoAppIcon.SCHEME, launchComponent.flattenToShortString(), null).toString()
             } else {
-                iconUrl = Uri.fromParts(PicassoAppIcon.SCHEME, ComponentName(packageName, packageName).flattenToShortString(), null).toString()
+                Uri.fromParts(PicassoAppIcon.SCHEME, ComponentName(packageName, packageName).flattenToShortString(), null).toString()
             }
 
             val dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM)

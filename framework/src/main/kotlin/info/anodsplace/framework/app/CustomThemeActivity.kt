@@ -75,7 +75,7 @@ class CustomThemeColors(
             val g = Color.green(statusBarColor)
             val b = Color.blue(statusBarColor)
             val brightness = r * 0.299 + g * 0.587 + b * 0.144
-            return brightness <= 186
+            return brightness <= 125
         }
 
         @JvmField

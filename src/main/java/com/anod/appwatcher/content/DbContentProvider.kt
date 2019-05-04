@@ -38,9 +38,7 @@ open class DbContentProvider : ContentProvider() {
 
         val appsUri = Uri.parse("content://$authority/apps")!!
         val appsTagUri = Uri.parse("content://$authority/apps/tags")!!
-        val appsTagCleanUri = Uri.parse("content://$authority/apps/tags/clean")!!
         val tagsUri = Uri.parse("content://$authority/tags")!!
-        val tagsAppsUri = Uri.parse("content://$authority/tags/apps")!!
         val iconsUri = Uri.parse("content://$authority/icons")!!
         val changelogUri = Uri.parse("content://$authority/changelog")!!
 

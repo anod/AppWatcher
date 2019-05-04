@@ -53,7 +53,7 @@ class BackgroundTask<P, R>(private val worker: Worker<P, R>) : AsyncTask<Void, V
     }
 }
 
-class LiveDataTask<P, R>(private val worker: LiveDataTask.Worker<P, R>) : AsyncTask<P, Void, R>() {
+class LiveDataTask<P, R>(private val worker: Worker<P, R>) : AsyncTask<P, Void, R>() {
     private val liveData = MutableLiveData<R>()
 
     abstract class Worker<Param, out Result> protected constructor(internal val param: Param) {

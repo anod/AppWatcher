@@ -63,8 +63,8 @@ class AppsTagActivity : WatchListActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    override fun createViewPagerAdapter(): WatchListActivity.Adapter {
-        val adapter = WatchListActivity.Adapter(supportFragmentManager)
+    override fun createViewPagerAdapter(): Adapter {
+        val adapter = Adapter(supportFragmentManager)
         adapter.addFragment(AppsTagListFragment.newInstance(
                 Filters.TAB_ALL,
                 prefs.sortIndex,
