@@ -18,13 +18,14 @@ import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.preferences.Preferences
 import java.util.ArrayList
+import java.util.concurrent.Callable
 import java.util.concurrent.TimeUnit
 
 
 @Dao
 interface AppListTable {
 
-    @RawQuery(observedEntities = [(App::class),(AppChange::class)])
+    @RawQuery(observedEntities = [(App::class),(AppChange::class),(AppTag::class)])
     fun observe(query: SupportSQLiteQuery): LiveData<List<AppListItem>>
 
     @Query("SELECT * FROM $table WHERE ${Columns.appId} == :appId")
@@ -88,11 +89,9 @@ interface AppListTable {
 
         fun insert(app: AppInfo, db: AppsDatabase): Long {
             // Skip id to apply autoincrement
-            var rowId = 0L
-            db.runInTransaction {
-                rowId = db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, app.contentValues)
-            }
-            return rowId
+            return db.runInTransaction(Callable<Long> {
+                db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, app.contentValues)
+            })
         }
 
         fun insert(apps: List<AppInfo>, db: AppsDatabase) {
@@ -101,8 +100,10 @@ interface AppListTable {
             }
         }
 
-        fun delete(appId: String, db: AppsDatabase) {
-            db.openHelper.writableDatabase.delete(table, "${Columns.appId} = ?", arrayOf(appId))
+        fun delete(appId: String, db: AppsDatabase): Int {
+            return db.runInTransaction(Callable<Int> {
+                db.openHelper.writableDatabase.delete(table, "${Columns.appId} = ?", arrayOf(appId))
+            })
         }
 
         private fun createSortOrder(sortId: Int): String {

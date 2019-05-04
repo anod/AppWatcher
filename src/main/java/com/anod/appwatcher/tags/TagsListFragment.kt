@@ -30,8 +30,6 @@ import kotlinx.android.synthetic.main.activity_tags_editor.*
 
 class TagsListFragment : Fragment(), View.OnClickListener {
 
-    private var appInfo: AppInfo? = null
-
     private val viewModel: TagsListViewModel by lazy { ViewModelProviders.of(this).get(TagsListViewModel::class.java) }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -43,8 +41,8 @@ class TagsListFragment : Fragment(), View.OnClickListener {
 
         setHasOptionsMenu(true)
         if (arguments!!.containsKey(EXTRA_APP)) {
-            appInfo = arguments!!.getParcelable(EXTRA_APP)
-            activity!!.title = getString(R.string.tag_app, appInfo!!.title)
+            viewModel.appInfo = arguments!!.getParcelable(EXTRA_APP)
+            activity!!.title = getString(R.string.tag_app, viewModel.appInfo!!.title)
         }
         list.layoutManager = LinearLayoutManager(context!!)
         list.adapter = TagAdapter(context!!, this)
@@ -71,25 +69,20 @@ class TagsListFragment : Fragment(), View.OnClickListener {
 
     override fun onClick(v: View) {
         val holder = v.tag as TagHolder
-        if (appInfo == null) {
+        if (viewModel.appInfo == null) {
             val dialog = EditTagDialog.newInstance(holder.tag, Theme(requireActivity()))
             dialog.show(fragmentManager!!, "edit-tag-dialog")
         } else {
-            val client = DbContentProviderClient(context!!)
-            val tags = client.queryAppTags(appInfo!!.rowId)
-            if (tags.contains(holder.tag.id)) {
-                if (client.removeAppFromTag(appInfo!!.appId, holder.tag.id)) {
-                    holder.name.isSelected = false
-                    holder.name.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
-                }
+            if (viewModel.appHasTag(holder.tag)) {
+                viewModel.removeAppTag(holder.tag)
+                holder.name.isSelected = false
+                holder.name.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
             } else {
-                if (client.addAppToTag(appInfo!!.appId, holder.tag.id)) {
-                    holder.name.isSelected = true
-                    val d = DrawableTint(resources, R.drawable.ic_check_black_24dp, activity!!.theme).apply(R.color.control_tint)
-                    holder.name.setCompoundDrawablesWithIntrinsicBounds(null, null, d, null)
-                }
+                viewModel.addAppTag(holder.tag)
+                holder.name.isSelected = true
+                val d = DrawableTint(resources, R.drawable.ic_check_black_24dp, activity!!.theme).apply(R.color.control_tint)
+                holder.name.setCompoundDrawablesWithIntrinsicBounds(null, null, d, null)
             }
-            client.close()
         }
     }
 

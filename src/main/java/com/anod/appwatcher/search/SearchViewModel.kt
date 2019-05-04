@@ -14,6 +14,7 @@ import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.utils.combineLatest
 import com.anod.appwatcher.utils.map
+import info.anodsplace.framework.os.BackgroundTask
 import info.anodsplace.playstore.*
 
 sealed class SearchStatus
@@ -123,13 +124,27 @@ class SearchViewModel(application: Application): AndroidViewModel(application), 
     }
 
     override fun delete(info: AppInfo) {
-        AppListTable.Queries.delete(info.appId, provide.database)
-        appStatusChange.value = Pair(AppInfoMetadata.STATUS_DELETED, info)
+        BackgroundTask(object : BackgroundTask.Worker<AppInfo, Int>(info) {
+            override fun finished(result: Int) {
+                appStatusChange.value = Pair(AppInfoMetadata.STATUS_DELETED, info)
+            }
+
+            override fun run(param: AppInfo): Int {
+                return AppListTable.Queries.delete(param.appId, provide.database)
+            }
+        }).execute()
     }
 
     override fun add(info: AppInfo) {
-        AppListTable.Queries.insert(info, provide.database)
-        appStatusChange.value = Pair(AppInfoMetadata.STATUS_NORMAL, info)
+        BackgroundTask(object : BackgroundTask.Worker<AppInfo, Long>(info) {
+            override fun finished(result: Long) {
+                appStatusChange.value = Pair(AppInfoMetadata.STATUS_NORMAL, info)
+            }
+
+            override fun run(param: AppInfo): Long {
+                return AppListTable.Queries.insert(param, provide.database)
+            }
+        }).execute()
     }
 
     companion object {

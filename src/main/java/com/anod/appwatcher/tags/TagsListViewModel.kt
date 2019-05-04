@@ -4,11 +4,15 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import com.anod.appwatcher.AppComponent
 import com.anod.appwatcher.AppWatcherApplication
+import com.anod.appwatcher.database.AppTagsTable
 import com.anod.appwatcher.database.TagsTable
 import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.model.AppInfo
 import info.anodsplace.framework.os.BackgroundTask
 
 class TagsListViewModel(application: Application): AndroidViewModel(application) {
+
+    var appInfo: AppInfo? = null
 
     private val appComponent: AppComponent
         get() = getApplication<AppWatcherApplication>().appComponent
@@ -19,12 +23,12 @@ class TagsListViewModel(application: Application): AndroidViewModel(application)
         BackgroundTask(object : BackgroundTask.Worker<Tag, Int>(tag) {
             override fun finished(result: Int) {}
 
-            override fun run(tag: Tag): Int {
-                if (tag.id > 0) {
-                    appComponent.database.tags().update(tag)
-                    return tag.id
+            override fun run(param: Tag): Int {
+                if (param.id > 0) {
+                    appComponent.database.tags().update(param)
+                    return param.id
                 }
-                return TagsTable.Queries.insert(tag, appComponent.database).toInt()
+                return TagsTable.Queries.insert(param, appComponent.database).toInt()
             }
         }).execute()
     }
@@ -36,6 +40,33 @@ class TagsListViewModel(application: Application): AndroidViewModel(application)
             override fun run(param: Tag): Boolean {
                 appComponent.database.tags().delete(tag)
                 return true
+            }
+        }).execute()
+    }
+
+    fun appHasTag(tag: Tag): Boolean {
+        val app = appInfo ?: return false
+        return appComponent.database.appTags().appWithTag(app.appId, tag.id) != null
+    }
+
+    fun removeAppTag(tag: Tag) {
+        val app = appInfo ?: return
+        BackgroundTask(object : BackgroundTask.Worker<Tag, Int>(tag) {
+            override fun finished(result: Int) {}
+
+            override fun run(param: Tag): Int {
+                return appComponent.database.appTags().delete(param.id, app.appId)
+            }
+        }).execute()
+    }
+
+    fun addAppTag(tag: Tag) {
+        val app = appInfo ?: return
+        BackgroundTask(object : BackgroundTask.Worker<Tag, Long>(tag) {
+            override fun finished(result: Long) {}
+
+            override fun run(param: Tag): Long {
+                return AppTagsTable.Queries.insert(tag.id, app.appId, appComponent.database)
             }
         }).execute()
     }

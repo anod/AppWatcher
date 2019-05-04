@@ -1,24 +1,8 @@
 package com.anod.appwatcher.content
 
-import android.app.Application
 import android.content.*
-import android.database.Cursor
-import android.graphics.Bitmap
 import android.net.Uri
-import android.os.RemoteException
-import android.provider.BaseColumns
-import com.anod.appwatcher.model.AppInfo
-import com.anod.appwatcher.model.AppInfoMetadata
-import com.anod.appwatcher.database.entities.AppTag
-import com.anod.appwatcher.database.AppListTable
-import com.anod.appwatcher.database.AppTagsTable
-import com.anod.appwatcher.database.contentValues
-import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
-import info.anodsplace.framework.content.delete
-import info.anodsplace.framework.content.query
-import info.anodsplace.framework.content.update
-import info.anodsplace.framework.graphics.BitmapByteArray
 
 /**
  * Wrapper above ContentResolver to simplify access to AppInfo
@@ -27,24 +11,7 @@ import info.anodsplace.framework.graphics.BitmapByteArray
  */
 class DbContentProviderClient(private val contentProviderClient: ContentProviderClient) {
 
-    constructor(context: Context) : this(ApplicationContext(context))
     constructor(context: ApplicationContext) : this(context.contentResolver.acquireContentProviderClient(DbContentProvider.authority))
-
-    fun insert(app: AppInfo): Uri? {
-        val values = app.contentValues
-        try {
-            return contentProviderClient.insert(DbContentProvider.appsUri, values)
-        } catch (e: RemoteException) {
-            AppLog.e(e)
-        }
-        return null
-    }
-
-    fun update(app: AppInfo): Int {
-        val rowId = app.rowId
-        val values = app.contentValues
-        return update(rowId, values)
-    }
 
     fun applyBatchUpdates(values: List<ContentValues>, uriMapper: (ContentValues) -> Uri): Array<ContentProviderResult> {
 
@@ -70,76 +37,7 @@ class DbContentProviderClient(private val contentProviderClient: ContentProvider
         return contentProviderClient.applyBatch(ArrayList(operations))
     }
 
-
-    fun update(rowId: Int, values: ContentValues): Int {
-        val updateUri = DbContentProvider.appsUri.buildUpon().appendPath(rowId.toString()).build()
-        try {
-            return contentProviderClient.update(updateUri, values)
-        } catch (e: RemoteException) {
-            AppLog.e(e)
-        }
-        return 0
-    }
-
     fun close() {
         contentProviderClient.release()
-    }
-
-    fun queryAppTags(rowId: Int): List<Int> {
-        val appTagsUri = DbContentProvider.appsUri.buildUpon()
-                .appendPath(rowId.toString())
-                .appendPath("tags")
-                .build()
-
-        val tagIds = ArrayList<Int>()
-        try {
-            val cr = contentProviderClient.query(appTagsUri, AppTagsTable.projection)
-            if (cr.count == 0) {
-                return tagIds
-            }
-            cr.moveToPosition(-1)
-            while (cr.moveToNext()) {
-                val tagId = cr.getInt(AppTagsTable.Projection.tagId)
-                tagIds.add(tagId)
-            }
-            cr.close()
-        } catch (e: RemoteException) {
-            AppLog.e(e)
-        }
-
-        return tagIds
-    }
-
-    fun addAppToTag(appId: String, tagId: Int): Boolean {
-        try {
-            val appsTagUri = DbContentProvider.tagsUri
-                    .buildUpon()
-                    .appendPath(tagId.toString())
-                    .appendPath("apps")
-                    .build()
-            val values = AppTag(appId, tagId).contentValues
-            contentProviderClient.insert(appsTagUri, values)
-            return true
-        } catch (e: RemoteException) {
-            AppLog.e(e)
-        }
-
-        return false
-    }
-
-    fun removeAppFromTag(appId: String, tagId: Int): Boolean {
-        try {
-            val appsTagUri = DbContentProvider.tagsUri
-                    .buildUpon()
-                    .appendPath(tagId.toString())
-                    .appendPath("apps")
-                    .build()
-            contentProviderClient.delete(appsTagUri, AppTagsTable.Columns.appId + "=?", arrayOf(appId))
-            return true
-        } catch (e: RemoteException) {
-            AppLog.e(e)
-        }
-
-        return false
     }
 }
