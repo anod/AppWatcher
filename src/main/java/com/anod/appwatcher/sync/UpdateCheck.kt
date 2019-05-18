@@ -12,7 +12,7 @@ import com.android.volley.VolleyError
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.backup.gdrive.GDriveSilentSignIn
-import com.anod.appwatcher.backup.gdrive.SyncConnectedWorker
+import com.anod.appwatcher.backup.gdrive.GDriveSync
 import com.anod.appwatcher.content.AppListCursor
 import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.content.DbContentProviderClient
@@ -32,6 +32,10 @@ import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.playstore.BulkDetailsEndpoint
 import info.anodsplace.playstore.PlayStoreEndpoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 
 /**
@@ -60,7 +64,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
     private val preferences = Application.provide(context).prefs
     private val installedAppsProvider = InstalledApps.PackageManager(context.packageManager)
 
-    fun perform(extras: Data): Int {
+    suspend fun perform(extras: Data): Int = withContext(Dispatchers.Default) {
 
         val manualSync = extras.getBoolean(extrasManual, false)
         AppLog.i("Perform ${ if (manualSync) "manual" else "scheduled" } sync")
@@ -68,23 +72,23 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         if (!manualSync) {
             if (preferences.isWifiOnly && !Application.provide(context).networkConnection.isWifiEnabled) {
                 AppLog.i("Wifi not enabled, skipping update check....")
-                return -1
+                return@withContext -1
             }
             val updateTime = preferences.lastUpdateTime
             if (updateTime != (-1).toLong() && System.currentTimeMillis() - updateTime < oneSecInMillis) {
                 AppLog.i("Last update less than second, skipping...")
-                return -1
+                return@withContext -1
             }
         }
         val account = preferences.account
         if (account == null) {
             AppLog.w("No active account, skipping sync...")
-            return -1
+            return@withContext -1
         }
 
         if (!Application.provide(context).networkConnection.isNetworkAvailable) {
             AppLog.w("Network is not available, skipping sync...")
-            return -1
+            return@withContext -1
         }
 
         AppLog.i("Perform synchronization")
@@ -92,7 +96,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         val authToken = requestAuthToken(account)
         if (authToken == null) {
             AppLog.e("Cannot receive access token")
-            return -1
+            return@withContext -1
         }
 
         //Broadcast progress intent
@@ -137,7 +141,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         }
 
         AppLog.d("Finish::perform()")
-        return updatedApps.size
+        return@withContext updatedApps.size
     }
 
     override fun onDataChanged(data: DfeModel) {
@@ -147,7 +151,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
     }
 
     @Throws(RemoteException::class)
-    private fun doSync(lastUpdatesViewed: Boolean, authToken: String, account: Account): List<UpdatedApp> {
+    private suspend fun doSync(lastUpdatesViewed: Boolean, authToken: String, account: Account): List<UpdatedApp> {
 
         val cursor = AppListTable.Queries.load(false, Application.provide(context).database.apps())
         val apps = AppListCursor(cursor)
@@ -180,7 +184,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         return updatedTitles
     }
 
-    private fun updateApps(documents: List<Document>, localApps: Map<String, AppInfo>, client: DbContentProviderClient, updatedTitles: MutableList<UpdatedApp>, lastUpdatesViewed: Boolean) {
+    private suspend fun updateApps(documents: List<Document>, localApps: Map<String, AppInfo>, client: DbContentProviderClient, updatedTitles: MutableList<UpdatedApp>, lastUpdatesViewed: Boolean) {
         val fetched = mutableMapOf<String, Boolean>()
         val batch = mutableListOf<ContentValues>()
         val changelog = mutableListOf<ContentValues>()
@@ -301,7 +305,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         }
     }
 
-    private fun performGDriveSync(pref: Preferences, now: Long) {
+    private suspend fun performGDriveSync(pref: Preferences, now: Long) {
         val driveSyncTime = pref.lastDriveSyncTime
         if (driveSyncTime == (-1).toLong() || now > DateUtils.DAY_IN_MILLIS + driveSyncTime) {
             AppLog.d("DriveSync perform sync")
@@ -310,8 +314,8 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
             try {
                 AppLog.i("Perform Google Drive sync")
                 val googleAccount = signIn.signInLocked()
-                val worker = SyncConnectedWorker(context, googleAccount)
-                worker.doSyncInBackground()
+                val worker = GDriveSync(context, googleAccount)
+                worker.doSync()
                 pref.lastDriveSyncTime = System.currentTimeMillis()
             } catch (e: Exception) {
                 AppLog.e("Perform Google Drive sync exception: ${e.message ?: "'empty message'"}", e)

@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit
  * @author Alex Gavrishev
  * @date 13/06/2017
  */
-class UploadService(appContext: Context, params: WorkerParameters) : Worker(appContext, params) {
+class UploadService(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
 
     companion object {
         private const val windowStartDelaySeconds = 60L
@@ -39,7 +39,7 @@ class UploadService(appContext: Context, params: WorkerParameters) : Worker(appC
         }
     }
 
-    override fun doWork(): Result {
+    override suspend fun doWork(): Result {
         AppLog.d("Scheduled call executed. Id: $id")
         AppLog.d("DriveSync perform upload")
 
@@ -49,7 +49,7 @@ class UploadService(appContext: Context, params: WorkerParameters) : Worker(appC
             return Result.failure()
         }
 
-        val worker = UploadConnectedWorker(applicationContext, googleAccount)
+        val worker = GDriveUpload(applicationContext, googleAccount)
         try {
             worker.doUploadInBackground()
         } catch (e: Exception) {

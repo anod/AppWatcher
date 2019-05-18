@@ -11,6 +11,9 @@ import com.anod.appwatcher.content.AddWatchAppAsyncTask
 import com.anod.appwatcher.model.AppInfoMetadata
 import info.anodsplace.framework.app.DialogMessage
 import info.anodsplace.framework.os.BackgroundTask
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class RemoveDialogFragment : DialogFragment() {
 
@@ -22,15 +25,10 @@ class RemoveDialogFragment : DialogFragment() {
         return DialogMessage(activity!!, R.style.AlertDialog, R.string.alert_dialog_remove_title, message) { builder ->
             val db = Application.provide(activity!!).database
             builder.setPositiveButton(R.string.alert_dialog_remove) { _, _ ->
-                BackgroundTask(object : BackgroundTask.Worker<Int, Int>(rowId) {
-                    override fun finished(result: Int) {
-                        activity?.finish()
-                    }
-
-                    override fun run(param: Int): Int {
-                        return db.apps().updateStatus(param, AppInfoMetadata.STATUS_DELETED)
-                    }
-                }).execute()
+                GlobalScope.launch(Dispatchers.Main) {
+                    db.apps().updateStatus(rowId, AppInfoMetadata.STATUS_DELETED)
+                    activity?.finish()
+                }
             }
 
             builder.setNegativeButton(R.string.alert_dialog_cancel) { _, _ -> }

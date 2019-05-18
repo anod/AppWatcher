@@ -2,11 +2,10 @@ package com.anod.appwatcher.backup.gdrive
 
 import android.content.Context
 import android.widget.Toast
-import com.anod.appwatcher.content.DbContentProvider
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
-import info.anodsplace.framework.os.BackgroundTask
+import kotlinx.coroutines.*
 
 
 /**
@@ -16,8 +15,10 @@ import info.anodsplace.framework.os.BackgroundTask
  */
 class GDrive(private val context: ApplicationContext, private val googleAccount: GoogleSignInAccount, private var listener: Listener? = null) {
 
+    private val coroutineScope = CoroutineScope(Dispatchers.Main)
+
     constructor(context: Context, googleAccount: GoogleSignInAccount, listener: Listener? = null)
-        : this(ApplicationContext(context), googleAccount, listener)
+            : this(ApplicationContext(context), googleAccount, listener)
 
 
     interface Listener {
@@ -28,28 +29,18 @@ class GDrive(private val context: ApplicationContext, private val googleAccount:
     }
 
     fun sync() {
-        listener?.onGDriveSyncStart()
-        BackgroundTask(object : BackgroundTask.Worker<GoogleSignInAccount, ApiClientAsyncTask.Result>(googleAccount) {
-            override fun run(param: GoogleSignInAccount): ApiClientAsyncTask.Result {
-                val worker = SyncConnectedWorker(context, param)
-                try {
-                    worker.doSyncInBackground()
-                } catch (e: Exception) {
-                    AppLog.e(e)
-                    return ApiClientAsyncTask.Result(false, e)
-                }
-
-                return ApiClientAsyncTask.Result(true, null)
+        coroutineScope.launch {
+            listener?.onGDriveSyncStart()
+            val worker = GDriveSync(context, googleAccount)
+            val result = try {
+                worker.doSync()
+                listener?.onGDriveSyncFinish()
+            } catch (e: Exception) {
+                AppLog.e(e)
+                Toast.makeText(context.actual, e.message
+                        ?: "Error", Toast.LENGTH_SHORT).show()
+                listener?.onGDriveError()
             }
-
-            override fun finished(result: ApiClientAsyncTask.Result) {
-                if (result.status) {
-                    listener?.onGDriveSyncFinish()
-                } else {
-                    Toast.makeText(context.actual, result.ex?.message ?: "Error", Toast.LENGTH_SHORT).show()
-                    listener?.onGDriveError()
-                }
-            }
-        }).execute()
+        }
     }
 }

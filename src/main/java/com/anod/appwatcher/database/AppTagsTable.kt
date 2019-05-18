@@ -6,6 +6,7 @@ import androidx.room.Query
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.provider.BaseColumns
+import androidx.room.withTransaction
 import com.anod.appwatcher.database.entities.AppTag
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.database.entities.TagAppsCount
@@ -30,20 +31,20 @@ interface AppTagsTable {
     @Query("SELECT ${Columns.tagId}, count() as count FROM $table GROUP BY ${Columns.tagId}")
     fun queryCounts(): LiveData<List<TagAppsCount>>
 
-    @Query("SELECT * FROM $table WHERE ${Columns.appId} = :appId AND ${Columns.tagId} = :tagId")
-    fun appWithTag(appId: String, tagId: Int): AppTag?
+//    @Query("SELECT * FROM $table WHERE ${Columns.appId} = :appId AND ${Columns.tagId} = :tagId")
+//    fun appWithTag(appId: String, tagId: Int): AppTag?
 
     @Query("SELECT * FROM $table")
-    fun load(): List<AppTag>
+    suspend fun load(): List<AppTag>
 
     @Query("DELETE FROM $table WHERE ${TableColumns.appId} NOT IN (SELECT ${AppListTable.TableColumns.appId} FROM ${AppListTable.table})")
-    fun clean(): Int
+    suspend fun clean(): Int
 
     @Query("DELETE FROM $table")
-    fun delete()
+    suspend fun delete()
 
     @Query("DELETE FROM $table WHERE ${Columns.tagId} = :tagId")
-    fun delete(tagId: Int)
+    suspend fun delete(tagId: Int)
 
     @Query("DELETE FROM $table WHERE ${Columns.tagId} = :tagId AND ${Columns.appId} = :appId")
     suspend fun delete(tagId: Int, appId: String): Int
@@ -74,36 +75,29 @@ interface AppTagsTable {
 
     object Queries {
         suspend fun insert(tag: Tag, apps: List<String>, db: AppsDatabase) {
-            withContext(Dispatchers.IO) {
-                db.runInTransaction {
-                    for (appId in apps) {
-                        val values = AppTag(appId, tag.id).contentValues
-                        db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, values)
-                    }
+            db.withTransaction {
+                for (appId in apps) {
+                    val values = AppTag(appId, tag.id).contentValues
+                    db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, values)
                 }
             }
         }
 
         // Executed in transaction
-        fun insert(appTags: List<AppTag>, db: AppsDatabase) {
+        suspend fun insert(appTags: List<AppTag>, db: AppsDatabase) = withContext(Dispatchers.IO) {
             appTags.forEach { appTag ->
                 db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, appTag.contentValues)
             }
         }
 
         suspend fun insert(tagId: Int, appId: String, db: AppsDatabase): Long {
-            var rowId: Long = -1
-            withContext(Dispatchers.IO) {
-                db.invalidationTracker.refreshVersionsAsync()
-                rowId = db.runInTransaction(Callable<Long> {
-                    db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, AppTag(appId, tagId).contentValues)
-                })
+            return db.withTransaction {
+                return@withTransaction db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, AppTag(appId, tagId).contentValues)
             }
-            return rowId
         }
 
-        fun assignAppsToTag(appIds: List<String>, tagId: Int, db: AppsDatabase) {
-            db.runInTransaction {
+        suspend fun assignAppsToTag(appIds: List<String>, tagId: Int, db: AppsDatabase) {
+            db.withTransaction {
                 db.appTags().delete(tagId)
                 for (appId in appIds) {
                     val values = AppTag(appId, tagId).contentValues

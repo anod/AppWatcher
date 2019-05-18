@@ -28,7 +28,6 @@ import android.widget.Toast
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenAsync
-import com.anod.appwatcher.content.AddWatchAppAsyncTask
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.model.*
@@ -242,18 +241,15 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
                 return true
             }
             R.id.menu_add -> {
-                val doc = viewModel.document
-                if (doc != null) {
-                    val info = AppInfo(doc)
-                    when (AppListTable.Queries.insertSafetly(info, Application.provide(this).database)) {
-                        AppListTable.ERROR_ALREADY_ADDED -> Toast.makeText(this, R.string.app_already_added, Toast.LENGTH_SHORT).show()
-                        AppListTable.ERROR_INSERT -> Toast.makeText(this, R.string.error_insert_app, Toast.LENGTH_SHORT).show()
-                        else -> {
-                            val data = Intent()
-                            data.putExtra(EXTRA_ADD_APP_PACKAGE, info.packageName)
-                            setResult(Activity.RESULT_OK, data)
-                            TagSnackbar.make(this, info, true).show()
-                        }
+                when (viewModel.watch()) {
+                    AppListTable.ERROR_ALREADY_ADDED -> Toast.makeText(this, R.string.app_already_added, Toast.LENGTH_SHORT).show()
+                    AppListTable.ERROR_INSERT -> Toast.makeText(this, R.string.error_insert_app, Toast.LENGTH_SHORT).show()
+                    else -> {
+                        val data = Intent()
+                        val info = AppInfo(viewModel.document!!)
+                        data.putExtra(EXTRA_ADD_APP_PACKAGE, info.packageName)
+                        setResult(Activity.RESULT_OK, data)
+                        TagSnackbar.make(this, info, true).show()
                     }
                 }
                 return true

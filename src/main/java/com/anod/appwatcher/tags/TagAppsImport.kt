@@ -1,17 +1,12 @@
 package com.anod.appwatcher.tags
 
-import android.content.Context
 import com.anod.appwatcher.Application
-import com.anod.appwatcher.content.DbContentProvider
-import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.database.AppTagsTable
 import com.anod.appwatcher.database.entities.AppTag
 import com.anod.appwatcher.database.entities.Tag
 import info.anodsplace.framework.app.ApplicationContext
 
 internal class TagAppsImport(private val tag: Tag, private val context: ApplicationContext) {
-
-    constructor(tag: Tag, context: Context): this(tag, ApplicationContext(context))
 
     private var apps = mutableMapOf<String, Boolean>()
     private var defaultSelected: Boolean = false
@@ -39,7 +34,7 @@ internal class TagAppsImport(private val tag: Tag, private val context: Applicat
         this.apps = list.map { it.appId to true }.toMap().toMutableMap()
     }
 
-    fun run(): Boolean {
+    suspend fun run(): Boolean {
         val appIds = apps.filter { it.value }.keys.toList()
 
         val db = Application.provide(context).database

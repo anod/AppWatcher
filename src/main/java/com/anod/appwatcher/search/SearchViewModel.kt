@@ -7,6 +7,7 @@ import android.content.Intent
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.map
+import androidx.lifecycle.viewModelScope
 import com.android.volley.VolleyError
 import com.anod.appwatcher.AppComponent
 import com.anod.appwatcher.AppWatcherApplication
@@ -16,6 +17,7 @@ import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.utils.combineLatest
 import info.anodsplace.framework.os.BackgroundTask
 import info.anodsplace.playstore.*
+import kotlinx.coroutines.launch
 
 sealed class SearchStatus
 class Loading(val isPackageSearch: Boolean) : SearchStatus()
@@ -122,29 +124,19 @@ class SearchViewModel(application: Application): AndroidViewModel(application), 
     }
 
     override fun delete(info: AppInfo) {
-        BackgroundTask(object : BackgroundTask.Worker<AppInfo, Int>(info) {
-            override fun finished(result: Int) {
-                appStatusChange.value = Pair(AppInfoMetadata.STATUS_DELETED, info)
-            }
-
-            override fun run(param: AppInfo): Int {
-                return AppListTable.Queries.delete(param.appId, provide.database)
-            }
-        }).execute()
+        viewModelScope.launch {
+            AppListTable.Queries.delete(info.appId, provide.database)
+            appStatusChange.value = Pair(AppInfoMetadata.STATUS_DELETED, info)
+        }
     }
 
     override fun add(info: AppInfo) {
-        BackgroundTask(object : BackgroundTask.Worker<AppInfo, Int>(info) {
-            override fun finished(result: Int) {
-                if (result != AppListTable.ERROR_INSERT) {
-                    appStatusChange.value = Pair(AppInfoMetadata.STATUS_NORMAL, info)
-                }
+        viewModelScope.launch {
+            val result = AppListTable.Queries.insertSafetly(info, provide.database)
+            if (result != AppListTable.ERROR_INSERT) {
+                appStatusChange.value = Pair(AppInfoMetadata.STATUS_NORMAL, info)
             }
-
-            override fun run(param: AppInfo): Int {
-                return AppListTable.Queries.insertSafetly(param, provide.database)
-            }
-        }).execute()
+        }
     }
 
     companion object {

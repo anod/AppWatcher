@@ -9,9 +9,10 @@ import android.os.Environment
 import androidx.appcompat.app.AppCompatDelegate
 import android.text.format.DateUtils
 import android.widget.Toast
+import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.observe
 import com.anod.appwatcher.*
 import com.anod.appwatcher.backup.DbBackupManager
-import com.anod.appwatcher.backup.ExportTask
 import com.anod.appwatcher.backup.ImportTask
 import com.anod.appwatcher.backup.gdrive.GDrive
 import com.anod.appwatcher.backup.gdrive.GDriveSignIn
@@ -55,6 +56,7 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
     private val gDriveSignIn: GDriveSignIn by lazy { GDriveSignIn(this, this) }
 
     private var recreateWatchlistOnBack: Boolean = false
+    private val viewModel: SettingsViewModel by lazy { ViewModelProviders.of(this).get(SettingsViewModel::class.java) }
 
     private val prefs: Preferences
         get() = Application.provide(this).prefs
@@ -152,7 +154,8 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_BACKUP_FILE) {
             if (resultCode == Activity.RESULT_OK) {
-                ImportTask(this) {
+                val uri = data!!.data ?: return
+                viewModel.import(uri).observe(this) {
                     when (it) {
                         -1 -> isProgressVisible = true
                         else -> {
@@ -160,11 +163,13 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
                             ImportTask.showImportFinishToast(this, it)
                         }
                     }
-                }.execute(data!!.data)
+                }
+
             }
         } else if (requestCode == REQUEST_BACKUP_DEST) {
             if (resultCode == Activity.RESULT_OK) {
-                ExportTask(this) {
+                val uri = data!!.data ?: return
+                viewModel.export(uri).observe(this) {
                     when (it) {
                         -1 -> {
                             AppLog.d("Exporting...")
@@ -180,7 +185,7 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
                             }
                         }
                     }
-                }.execute(data!!.data)
+                }
             }
         } else {
             gDriveSignIn.onActivityResult(requestCode, resultCode, data)
@@ -274,7 +279,7 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
                     }
                     if (recreate) {
                         AppCompatDelegate.setDefaultNightMode(nightModes[which])
-                        this@SettingsActivity.setResult(android.app.Activity.RESULT_OK, Intent().putExtra("recreateWatchlistOnBack", true))
+                        this@SettingsActivity.setResult(Activity.RESULT_OK, Intent().putExtra("recreateWatchlistOnBack", true))
                         this@SettingsActivity.recreate()
                         this.recreateWatchlist()
                     }

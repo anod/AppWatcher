@@ -14,33 +14,22 @@ import finsky.api.model.Document
 import info.anodsplace.framework.app.ApplicationContext
 
 
-class AddWatchAppAsyncTask(
-        context: ApplicationContext,
-        private val listener: Listener) : AsyncTask<Document, Void, SimpleArrayMap<String, Int>>() {
+class AddWatchAppAsyncTask(context: ApplicationContext) {
 
-    @SuppressLint("StaticFieldLeak")
-    private val context = context.actual
+    private val database = Application.provide(context).database
 
-    interface Listener {
-        fun onAddAppTaskFinish(result: SimpleArrayMap<String, Int>)
-    }
-
-    override fun doInBackground(vararg documents: Document): SimpleArrayMap<String, Int> {
+    suspend fun execute(vararg documents: Document): SimpleArrayMap<String, Int> {
         val result = SimpleArrayMap<String, Int>()
-        val db = Application.provide(context).database
-        val packages = db.apps().loadPackages(false).map { it.packageName }
+        val packages = database.apps().loadPackages(false).map { it.packageName }
         for (doc in documents) {
-            if (isCancelled) {
-                return result
-            }
             val info = AppInfo(doc)
-            val status = addSync(info, packages, db.apps(), db)
+            val status = addSync(info, packages, database.apps(), database)
             result.put(info.packageName, status)
         }
         return result
     }
 
-    private fun addSync(info: AppInfo, packages: List<String>, apps: AppListTable, db: AppsDatabase): Int {
+    private suspend fun addSync(info: AppInfo, packages: List<String>, apps: AppListTable, db: AppsDatabase): Int {
         if (packages.contains(info.packageName)) {
             return RESULT_OK
         }
@@ -62,14 +51,9 @@ class AddWatchAppAsyncTask(
         return if (rowId > 0) RESULT_OK else ERROR_INSERT
     }
 
-    override fun onPostExecute(result: SimpleArrayMap<String, Int>) {
-        listener.onAddAppTaskFinish(result)
-    }
-
     companion object {
         const val RESULT_OK = 0
         const val ERROR_INSERT = 1
         const val ERROR_ALREADY_ADDED = 2
-
     }
 }

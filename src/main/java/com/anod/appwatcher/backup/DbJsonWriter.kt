@@ -7,6 +7,8 @@ import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.watchlist.AppsList
 import info.anodsplace.framework.json.JsonWriter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.io.Writer
 
@@ -18,7 +20,7 @@ import java.io.Writer
 class DbJsonWriter {
 
     @Throws(IOException::class)
-    fun write(file: Writer, db: AppsDatabase) {
+    suspend fun write(file: Writer, db: AppsDatabase) = withContext(Dispatchers.IO) {
         val writer = JsonWriter(file)
         writer.beginObject()
 

@@ -3,6 +3,7 @@ package com.anod.appwatcher.backup
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
+import androidx.room.withTransaction
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.database.AppListTable
@@ -12,6 +13,10 @@ import com.anod.appwatcher.database.TagsTable
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.json.MalformedJsonException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -25,25 +30,24 @@ class DbBackupManager(private val context: ApplicationContext) {
 
     constructor(context: Context): this(ApplicationContext(context))
 
-    internal fun doExport(destUri: Uri): Int {
+    internal suspend fun doExport(destUri: Uri): Int = withContext(Dispatchers.IO) {
         val outputStream: OutputStream?
         try {
-            outputStream = context.contentResolver.openOutputStream(destUri) ?: return ERROR_FILE_WRITE
+            outputStream = context.contentResolver.openOutputStream(destUri) ?: return@withContext ERROR_FILE_WRITE
+            if (!writeDb(outputStream)) {
+                return@withContext ERROR_FILE_WRITE
+            }
         } catch (e: FileNotFoundException) {
-            return ERROR_FILE_WRITE
+            return@withContext ERROR_FILE_WRITE
         }
-
-        if (!writeDb(outputStream)) {
-            return ERROR_FILE_WRITE
-        }
-        return RESULT_OK
+        return@withContext RESULT_OK
     }
 
-    private fun writeDb(outputStream: OutputStream): Boolean {
+    private suspend fun writeDb(outputStream: OutputStream): Boolean {
         AppLog.d("Write into: $outputStream")
         val writer = DbJsonWriter()
         try {
-            synchronized(sDataLock) {
+            sDataLock.withLock {
                 val buf = BufferedWriter(OutputStreamWriter(outputStream))
                 writer.write(buf, Application.provide(context).database)
             }
@@ -54,48 +58,47 @@ class DbBackupManager(private val context: ApplicationContext) {
         return true
     }
 
-    internal fun doImport(uri: Uri): Int {
+    internal suspend fun doImport(uri: Uri): Int = withContext(Dispatchers.IO) {
         val inputStream: InputStream?
         try {
             inputStream = context.contentResolver.openInputStream(uri)
         } catch (e: FileNotFoundException) {
-            return ERROR_FILE_READ
+            return@withContext ERROR_FILE_READ
         }
 
         if (inputStream == null) {
-            return ERROR_FILE_READ
+            return@withContext ERROR_FILE_READ
         }
         val reader = DbJsonReader()
-        var container: DbJsonReader.Container?
+        var container: DbJsonReader.Container? = null
         try {
-            synchronized(sDataLock) {
-                val buf = BufferedReader(InputStreamReader(inputStream))
+            val buf = BufferedReader(InputStreamReader(inputStream))
+            sDataLock.withLock {
                 container = reader.read(buf)
             }
         } catch (e: MalformedJsonException) {
             AppLog.e(e)
-            return ERROR_DESERIALIZE
+            return@withContext ERROR_DESERIALIZE
         } catch (e: IOException) {
             AppLog.e(e)
-            return ERROR_FILE_READ
+            return@withContext ERROR_FILE_READ
         }
 
-        container?.let {
-            val db = Application.provide(context).database
-            if (it.apps.isNotEmpty()) {
-                db.runInTransaction {
-                    db.apps().delete()
-                    db.tags().delete()
-                    db.appTags().delete()
+        val result = container ?: return@withContext ERROR_FILE_READ
 
-                    AppListTable.Queries.insert(it.apps, db)
-                    TagsTable.Queries.insert(it.tags, db)
-                    AppTagsTable.Queries.insert(it.appTags, db)
-                }
+        val db = Application.provide(context).database
+        if (result.apps.isNotEmpty()) {
+            db.withTransaction {
+                db.apps().delete()
+                db.tags().delete()
+                db.appTags().delete()
 
+                AppListTable.Queries.insert(result.apps, db)
+                TagsTable.Queries.insert(result.tags, db)
+                AppTagsTable.Queries.insert(result.appTags, db)
             }
         }
-        return RESULT_OK
+        return@withContext RESULT_OK
     }
 
     companion object {
@@ -121,7 +124,7 @@ class DbBackupManager(private val context: ApplicationContext) {
          * Curious but true: a zero-length array is slightly lighter-weight than
          * merely allocating an Object, and can still be synchronized on.
          */
-        internal val sDataLock = arrayOfNulls<Any>(0)
+        internal val sDataLock = Mutex()
         private const val DATE_FORMAT_FILENAME = "yyyyMMdd_HHmmss"
 
         /**

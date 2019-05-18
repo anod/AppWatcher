@@ -3,35 +3,26 @@ package com.anod.appwatcher.backup
 import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
-import android.os.AsyncTask
 import android.os.Environment
 import android.widget.Toast
 
 import com.anod.appwatcher.R
-import com.anod.appwatcher.content.DbContentProvider
 import info.anodsplace.framework.app.ApplicationContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 import java.io.File
 
-class ImportTask(private val context: ApplicationContext, private val listener: (code: Int) -> Unit) : AsyncTask<Uri, Void, Int>() {
+class ImportTask(private val context: ApplicationContext) {
 
-    constructor(context: Context, listener: (code: Int) -> Unit): this(ApplicationContext(context), listener)
-
-
-    override fun onPreExecute() {
-        listener(-1)
-    }
-
-    override fun doInBackground(vararg sources: Uri): Int? {
-        val srcUri = sources[0]
-
+    suspend fun execute(srcUri: Uri): Int = withContext(Dispatchers.IO) {
         if (srcUri.scheme == ContentResolver.SCHEME_FILE) {
             val res = validateFileDestination(srcUri)
             if (res != DbBackupManager.RESULT_OK) {
-                return res
+                return@withContext res
             }
         }
-        return DbBackupManager(context.actual).doImport(srcUri)
+        return@withContext DbBackupManager(context.actual).doImport(srcUri)
     }
 
     private fun validateFileDestination(destUri: Uri): Int {
@@ -60,10 +51,6 @@ class ImportTask(private val context: ApplicationContext, private val listener: 
             return false
         }
         return true
-    }
-
-    override fun onPostExecute(result: Int?) {
-        listener(result!!)
     }
 
     companion object {

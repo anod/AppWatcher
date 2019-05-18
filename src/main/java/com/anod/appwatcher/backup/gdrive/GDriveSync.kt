@@ -18,6 +18,8 @@ import com.google.android.gms.tasks.Tasks
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -26,21 +28,20 @@ import java.io.InputStreamReader
  * *
  * @date 2014-11-15
  */
-class SyncConnectedWorker(private val context: ApplicationContext, private val googleAccount: GoogleSignInAccount) {
-    internal val job = Job()
+class GDriveSync(private val context: ApplicationContext, private val googleAccount: GoogleSignInAccount) {
 
-    fun doSyncInBackground() {
-        synchronized(sLock) {
-            val db = Application.provide(context).database
+    suspend fun doSync() = withContext(Dispatchers.IO) {
+        val db = Application.provide(context).database
+        sLock.withLock {
             try {
-                doSyncLocked(db)
+                return@withContext doSyncLocked(db)
             } catch (e: Exception) {
                 throw Exception(e)
             }
         }
     }
 
-    private fun doSyncLocked(db: AppsDatabase) {
+    private suspend fun doSyncLocked(db: AppsDatabase) {
         Tasks.await(Drive.getDriveClient(context.actual, googleAccount).requestSync())
 
         val driveClient = Drive.getDriveResourceClient(context.actual, googleAccount)
@@ -76,7 +77,7 @@ class SyncConnectedWorker(private val context: ApplicationContext, private val g
     }
 
     @Throws(Exception::class)
-    private fun insertRemoteItems(driveId: DriveId, db: AppsDatabase) {
+    private suspend fun insertRemoteItems(driveId: DriveId, db: AppsDatabase) {
         val file = driveId.asDriveFile()
 
         val driveClient = Drive.getDriveResourceClient(context.actual, googleAccount)
@@ -96,7 +97,7 @@ class SyncConnectedWorker(private val context: ApplicationContext, private val g
         val tagApps = mutableMapOf<String, MutableList<String>>()
 
         jsonReader.read(driveBufferedReader, object : DbJsonReader.OnReadListener {
-            override fun onAppRead(app: AppInfo, tags: List<String>) {
+            override suspend fun onAppRead(app: AppInfo, tags: List<String>) {
                 AppLog.d("[GDrive] Read app: " + app.packageName)
                 if (!currentIds.containsKey(app.packageName)) {
                     AppListTable.Queries.insert(app, db)
@@ -107,30 +108,27 @@ class SyncConnectedWorker(private val context: ApplicationContext, private val g
                 }
             }
 
-            override fun onTagRead(tag: Tag) {
+            override suspend fun onTagRead(tag: Tag) {
                 tagList.add(tag)
             }
 
-            override fun onFinish() {
+            override suspend fun onFinish() {
                 driveFileReader.close()
                 driveClient.discardContents(driveContents)
 
-                val coroutineScope = CoroutineScope(Dispatchers.IO + job)
-                coroutineScope.launch {
-                    // Add missing tags
-                    tagList.forEach { tag ->
-                        if (!currentTags.containsKey(tag.name)) {
-                            val rowId = TagsTable.Queries.insert(Tag(tag.name, tag.color), db).toInt()
-                            if (rowId > 0) {
-                                currentTags[tag.name] = Tag(rowId, tag.name, tag.color)
-                            }
+                // Add missing tags
+                tagList.forEach { tag ->
+                    if (!currentTags.containsKey(tag.name)) {
+                        val rowId = TagsTable.Queries.insert(Tag(tag.name, tag.color), db).toInt()
+                        if (rowId > 0) {
+                            currentTags[tag.name] = Tag(rowId, tag.name, tag.color)
                         }
                     }
+                }
 
-                    tagApps.forEach { (tagName, apps) ->
-                        currentTags[tagName]?.let { tag ->
-                            AppTagsTable.Queries.insert(tag, apps, db)
-                        }
+                tagApps.forEach { (tagName, apps) ->
+                    currentTags[tagName]?.let { tag ->
+                        AppTagsTable.Queries.insert(tag, apps, db)
                     }
                 }
             }
@@ -141,7 +139,7 @@ class SyncConnectedWorker(private val context: ApplicationContext, private val g
         /**
          * Lock used when maintaining queue of requested updates.
          */
-        private val sLock = Any()
+        private val sLock = Mutex()
     }
 
 }

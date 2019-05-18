@@ -20,11 +20,11 @@ interface ChangelogTable {
     @Query("SELECT * FROM $table WHERE ${Columns.appId} == :appId ORDER BY ${Columns.versionCode} DESC")
     fun ofApp(appId: String): LiveData<List<AppChange>>
 
-    @Query("SELECT * FROM $table WHERE ${Columns.appId} == :appId AND ${Columns.versionCode} == :versionCode")
-    fun forVersion(appId: String, versionCode: Int): AppChange?
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun save(changelog: AppChange)
+//    @Query("SELECT * FROM $table WHERE ${Columns.appId} == :appId AND ${Columns.versionCode} == :versionCode")
+//    fun forVersion(appId: String, versionCode: Int): AppChange?
+//
+//    @Insert(onConflict = OnConflictStrategy.REPLACE)
+//    fun save(changelog: AppChange)
 
     class Columns : BaseColumns {
         companion object {

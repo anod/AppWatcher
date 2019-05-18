@@ -76,7 +76,7 @@ class DriveIdFile(private val file: FileDescription, private val driveClient: Dr
         _driveId = driveFile.driveId
     }
 
-    internal fun write(writer: DbJsonWriter, db: AppsDatabase) {
+    internal suspend fun write(writer: DbJsonWriter, db: AppsDatabase) {
 
         if (this._driveId == null)
         {

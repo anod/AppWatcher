@@ -3,6 +3,8 @@ package com.anod.appwatcher.content
 import android.content.*
 import android.net.Uri
 import info.anodsplace.framework.app.ApplicationContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * Wrapper above ContentResolver to simplify access to AppInfo
@@ -13,7 +15,7 @@ class DbContentProviderClient(private val contentProviderClient: ContentProvider
 
     constructor(context: ApplicationContext) : this(context.contentResolver.acquireContentProviderClient(DbContentProvider.authority)!!)
 
-    fun applyBatchUpdates(values: List<ContentValues>, uriMapper: (ContentValues) -> Uri): Array<ContentProviderResult> {
+    suspend fun applyBatchUpdates(values: List<ContentValues>, uriMapper: (ContentValues) -> Uri): Array<ContentProviderResult> = withContext(Dispatchers.IO) {
 
         val operations = values.map {
             val updateUri = uriMapper(it)
@@ -22,10 +24,10 @@ class DbContentProviderClient(private val contentProviderClient: ContentProvider
                     .build()
         }
 
-        return contentProviderClient.applyBatch(ArrayList(operations))
+        return@withContext contentProviderClient.applyBatch(ArrayList(operations))
     }
 
-    fun applyBatchInsert(values: List<ContentValues>, uriMapper: (ContentValues) -> Uri): Array<ContentProviderResult> {
+    suspend fun applyBatchInsert(values: List<ContentValues>, uriMapper: (ContentValues) -> Uri): Array<ContentProviderResult> = withContext(Dispatchers.IO) {
 
         val operations = values.map {
             val insertUri = uriMapper(it)
@@ -34,7 +36,7 @@ class DbContentProviderClient(private val contentProviderClient: ContentProvider
                     .build()
         }
 
-        return contentProviderClient.applyBatch(ArrayList(operations))
+        return@withContext contentProviderClient.applyBatch(ArrayList(operations))
     }
 
     fun close() {

@@ -1,15 +1,23 @@
 package com.anod.appwatcher.details
 
 import android.accounts.Account
+import android.app.Activity
+import android.content.Intent
+import android.widget.Toast
 import androidx.lifecycle.*
 import com.android.volley.VolleyError
 import com.anod.appwatcher.AppComponent
 import com.anod.appwatcher.Application
+import com.anod.appwatcher.R
+import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppTagsTable
+import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.database.entities.packageToApp
+import com.anod.appwatcher.model.AppInfo
+import com.anod.appwatcher.tags.TagSnackbar
 import finsky.api.model.DfeDetails
 import finsky.api.model.DfeModel
 import finsky.api.model.Document
@@ -35,6 +43,9 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
     val provide: AppComponent
         get() = Application.provide(context)
 
+    val database: AppsDatabase
+        get() = provide.database
+
     var detailsUrl = ""
     var appId = MutableLiveData<String>("")
     var rowId: Int = -1
@@ -45,6 +56,7 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
     val account: Account? by lazy {
         Application.provide(application).prefs.account
     }
+
     private val detailsEndpoint: DetailsEndpoint by lazy {
         val account = this.account ?: Account("empty", "empty")
         DetailsEndpoint(application, provide.requestQueue, provide.deviceInfo, account, detailsUrl)
@@ -55,8 +67,8 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
         if (appId.isEmpty()) {
             return@tagsMenu MutableLiveData(emptyList<TagMenuItem>())
         }
-        return@tagsMenu provide.database.tags().observe().switchMap { tags ->
-            return@switchMap provide.database.appTags().forApp(appId).map { appTags ->
+        return@tagsMenu database.tags().observe().switchMap { tags ->
+            return@switchMap database.appTags().forApp(appId).map { appTags ->
                 val appTagsList = appTags.map { it.tagId }
                 tags.map { TagMenuItem(it, appTagsList.contains(it.id)) }
             }
@@ -89,7 +101,7 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
             isNewApp = false
             AppLog.i("Show details for watched $appId")
 
-            val appsTable = Application.provide(context).database.apps()
+            val appsTable = database.apps()
             viewModelScope.launch {
                 app.value = appsTable.loadAppRow(rowId)
             }
@@ -101,7 +113,7 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
             this.updateChangelogState(LocalComplete)
             return
         }
-        val changes = Application.provide(context).database.changelog().ofApp(appId.value!!)
+        val changes = database.changelog().ofApp(appId.value!!)
         changes.observeForever(OneTimeObserver(changes, Observer {
             this.localChangelog = it ?: emptyList()
             this.updateChangelogState(LocalComplete)
@@ -160,5 +172,15 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
                 AppTagsTable.Queries.insert(tagId, appId.value!!, provide.database)
             }
         }
+    }
+
+    fun watch(): Int {
+        val document = this.document ?: return AppListTable.ERROR_INSERT
+        val info = AppInfo(document)
+        var result = AppListTable.ERROR_INSERT
+        viewModelScope.launch {
+            result = AppListTable.Queries.insertSafetly(info, database)
+        }
+        return result
     }
 }

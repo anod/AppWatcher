@@ -3,20 +3,19 @@ package com.anod.appwatcher.database
 import androidx.lifecycle.LiveData
 import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
-import androidx.room.Dao
-import androidx.room.Query
-import androidx.room.RawQuery
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.net.Uri
 import android.provider.BaseColumns
 import android.text.TextUtils
-import androidx.room.Insert
+import androidx.room.*
 import com.anod.appwatcher.database.entities.*
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.preferences.Preferences
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.util.ArrayList
 import java.util.concurrent.Callable
 import java.util.concurrent.TimeUnit
@@ -29,7 +28,7 @@ interface AppListTable {
     fun observe(query: SupportSQLiteQuery): LiveData<List<AppListItem>>
 
     @Query("SELECT * FROM $table WHERE ${Columns.appId} == :appId")
-    fun loadApp(appId: String): App?
+    suspend fun loadApp(appId: String): App?
 
     @Query("SELECT * FROM $table WHERE ${BaseColumns._ID} == :rowId")
     suspend fun loadAppRow(rowId: Int): App?
@@ -40,7 +39,7 @@ interface AppListTable {
 
     @Query("SELECT ${BaseColumns._ID}, ${Columns.packageName} FROM $table WHERE " +
             "CASE :includeDeleted WHEN 'false' THEN ${Columns.status} != ${AppInfoMetadata.STATUS_DELETED} ELSE ${Columns.status} >= ${AppInfoMetadata.STATUS_NORMAL} END")
-    fun loadPackages(includeDeleted: Boolean): List<PackageRowPair>
+    suspend fun loadPackages(includeDeleted: Boolean): List<PackageRowPair>
 
     @Query("SELECT $table.*, " +
             "CASE WHEN ${Columns.updateTimestamp} > :recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
@@ -51,21 +50,21 @@ interface AppListTable {
     @Query("SELECT COUNT(${BaseColumns._ID}) " +
             "FROM $table WHERE " +
             "CASE :includeDeleted WHEN 'false' THEN ${Columns.status} != ${AppInfoMetadata.STATUS_DELETED} ELSE ${Columns.status} >= ${AppInfoMetadata.STATUS_NORMAL} END ")
-    fun count(includeDeleted: Boolean): Int
+    suspend fun count(includeDeleted: Boolean): Int
 
     @Query("DELETE FROM $table WHERE ${Columns.status} == ${AppInfoMetadata.STATUS_DELETED}")
-    fun cleanDeleted(): Int
+    suspend fun cleanDeleted(): Int
 
     @Query("DELETE FROM $table")
-    fun delete()
+    suspend fun delete()
 
     @Query("UPDATE $table SET ${Columns.status} = :status WHERE ${BaseColumns._ID} = :rowId")
-    fun updateStatus(rowId: Int, status: Int): Int
+    suspend fun updateStatus(rowId: Int, status: Int): Int
 
     object Queries {
 
-        fun load(includeDeleted: Boolean, table: AppListTable): Cursor {
-            return table.load(includeDeleted, recentTime)
+        suspend fun load(includeDeleted: Boolean, table: AppListTable): Cursor = withContext(Dispatchers.IO) {
+            return@withContext table.load(includeDeleted, recentTime)
         }
 
         fun loadAppList(sortId: Int, titleFilter: String, table: AppListTable): LiveData<List<AppListItem>> {
@@ -87,23 +86,27 @@ interface AppListTable {
             return table.observe(SimpleSQLiteQuery(sql, selection.second))
         }
 
-        fun insert(app: AppInfo, db: AppsDatabase): Long {
-            // Skip id to apply autoincrement
-            return db.runInTransaction(Callable<Long> {
-                db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, app.contentValues)
-            })
+        suspend fun insert(app: AppInfo, db: AppsDatabase): Long {
+            var rowId: Long = -1
+            withContext(Dispatchers.IO) {
+                // Skip id to apply autoincrement
+                rowId = db.runInTransaction(Callable<Long> {
+                    db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, app.contentValues)
+                })
+            }
+            return rowId
         }
 
-        fun insert(apps: List<AppInfo>, db: AppsDatabase) {
+        suspend fun insert(apps: List<AppInfo>, db: AppsDatabase) = withContext(Dispatchers.IO) {
             apps.forEach {
                 db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, it.contentValues)
             }
         }
 
-        fun delete(appId: String, db: AppsDatabase): Int {
-            return db.runInTransaction(Callable<Int> {
-                db.openHelper.writableDatabase.delete(table, "${Columns.appId} = ?", arrayOf(appId))
-            })
+        suspend fun delete(appId: String, db: AppsDatabase): Int {
+            return db.withTransaction {
+                return@withTransaction db.openHelper.writableDatabase.delete(table, "${Columns.appId} = ?", arrayOf(appId))
+            }
         }
 
         private fun createSortOrder(sortId: Int): String {
@@ -140,7 +143,7 @@ interface AppListTable {
             return Pair(TextUtils.join(" AND ", selc), args.toTypedArray())
         }
 
-        fun insertSafetly(app: AppInfo, db: AppsDatabase): Int {
+        suspend fun insertSafetly(app: AppInfo, db: AppsDatabase): Int {
             val found = db.apps().loadApp(app.appId)
             if (found == null) {
                 val rowId = insert(app, db)

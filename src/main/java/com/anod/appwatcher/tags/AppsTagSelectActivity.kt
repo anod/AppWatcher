@@ -14,6 +14,7 @@ import com.anod.appwatcher.AppWatcherApplication
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.AppListTable
+import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.database.entities.AppTag
 import com.anod.appwatcher.database.entities.Tag
@@ -25,6 +26,9 @@ import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.os.BackgroundTask
 import info.anodsplace.framework.view.Keyboard
 import kotlinx.android.synthetic.main.activity_tag_select.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 /**
  * @author Alex Gavrishev
@@ -34,16 +38,25 @@ import kotlinx.android.synthetic.main.activity_tag_select.*
 
 class AppsTagViewModel(application: android.app.Application): AndroidViewModel(application) {
     private val context = ApplicationContext(getApplication<AppWatcherApplication>())
-    val titleFilter = MutableLiveData<String>()
-    lateinit var tag: Tag
+    val titleFilter = MutableLiveData("")
+    var tag = MutableLiveData<Tag>()
 
-    fun loadTags(): LiveData<List<AppTag>> {
-        return Application.provide(context).database.appTags().forTag(tag.id)
+    private val database: AppsDatabase
+        get() = Application.provide(context).database
+
+    internal lateinit var tagAppsImport: TagAppsImport
+
+    val apps = titleFilter.switchMap { titleFilter ->
+        val appsTable = database.apps()
+        AppListTable.Queries.loadAppList( Preferences.SORT_NAME_ASC,titleFilter, appsTable)
     }
 
-    fun loadApps(): LiveData<List<AppListItem>> {
-        val appsTable = Application.provide(context).database.apps()
-        return AppListTable.Queries.loadAppList( Preferences.SORT_NAME_ASC,titleFilter.value ?: "", appsTable)
+    val tags = tag.switchMap { database.appTags().forTag(it.id) }
+
+    fun import() {
+        viewModelScope.launch {
+            tagAppsImport.run()
+        }
     }
 }
 
@@ -56,18 +69,19 @@ class AppsTagSelectActivity : ToolbarActivity() {
         get() = Theme(this).colors
 
     private var isAllSelected: Boolean = false
-    private val tagAppsImport: TagAppsImport by lazy { TagAppsImport(viewModel.tag, this) }
     private val viewModel: AppsTagViewModel by lazy { ViewModelProviders.of(this).get(AppsTagViewModel::class.java) }
-    private val adapter: TagAppsAdapter by lazy { TagAppsAdapter(this, tagAppsImport) }
+    private val adapter: TagAppsAdapter by lazy { TagAppsAdapter(this, viewModel.tagAppsImport) }
     override val layoutResource: Int
         get() = R.layout.activity_tag_select
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel.tag = intentExtras.getParcelable(EXTRA_TAG)!!
+        val tag: Tag = intentExtras.getParcelable(EXTRA_TAG)!!
+        viewModel.tagAppsImport = TagAppsImport(tag, ApplicationContext(this))
+        viewModel.tag.value = tag
 
-        supportActionBar!!.setBackgroundDrawable(ColorDrawable(viewModel.tag.color))
+        supportActionBar!!.setBackgroundDrawable(ColorDrawable(tag.color))
 
         list.layoutManager = LinearLayoutManager(this)
 
@@ -83,35 +97,23 @@ class AppsTagSelectActivity : ToolbarActivity() {
         }
 
         findViewById<View>(android.R.id.button1).setOnClickListener {
-            BackgroundTask(object : BackgroundTask.Worker<TagAppsImport, Boolean>(tagAppsImport) {
-                override fun finished(result: Boolean) {
-                    setResult(Activity.RESULT_OK)
-                    finish()
-                }
+            viewModel.import()
+            GlobalScope.launch(Dispatchers.Main) {
 
-                override fun run(param: TagAppsImport): Boolean {
-                    return param.run()
-                }
-            }).execute()
+                setResult(Activity.RESULT_OK)
+                finish()
+            }
         }
 
-        viewModel.titleFilter.observe(this, Observer {
-            loadApps()
-        })
-
-        viewModel.loadTags().observe(this, Observer {
-            tagAppsImport.initSelected(it ?: emptyList())
+        viewModel.tags.observe(this) {
+            viewModel.tagAppsImport.initSelected(it)
             list.adapter = adapter
-        })
+        }
 
-        loadApps()
-    }
-
-    private fun loadApps() {
-        viewModel.loadApps().observe(this, Observer {
+        viewModel.apps.observe(this) {
             progress.visibility = View.GONE
-            adapter.setData(it ?: emptyList())
-        })
+            adapter.setData(it)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

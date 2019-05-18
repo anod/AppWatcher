@@ -5,6 +5,8 @@ import com.anod.appwatcher.database.entities.AppTag
 import com.anod.appwatcher.database.entities.Tag
 import info.anodsplace.framework.json.JsonReader
 import info.anodsplace.framework.json.JsonToken
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.io.Reader
 
@@ -18,19 +20,19 @@ class DbJsonReader {
     internal class Container(val apps: List<AppInfo>, val tags: List<Tag>, val appTags: List<AppTag>)
 
     interface OnReadListener {
-        fun onAppRead(app: AppInfo, tags: List<String>)
-        fun onTagRead(tag: Tag)
-        fun onFinish()
+        suspend fun onAppRead(app: AppInfo, tags: List<String>)
+        suspend fun onTagRead(tag: Tag)
+        suspend fun onFinish()
     }
 
     @Throws(IOException::class)
-    fun read(reader: Reader, listener: OnReadListener) {
+    suspend fun read(reader: Reader, listener: OnReadListener) = withContext(Dispatchers.IO) {
         val jsonReader = JsonReader(reader)
 
         if (jsonReader.peek() == JsonToken.BEGIN_ARRAY) {
             readApps(jsonReader, listener)
             reader.close()
-            return
+            return@withContext
         }
 
         jsonReader.beginObject()
@@ -48,7 +50,7 @@ class DbJsonReader {
     }
 
     @Throws(IOException::class)
-    internal fun read(reader: Reader): Container {
+    internal suspend fun read(reader: Reader): Container = withContext(Dispatchers.IO) {
         val jsonReader = JsonReader(reader)
 
         val apps = mutableListOf<AppInfo>()
@@ -56,16 +58,16 @@ class DbJsonReader {
         val appsTags = mutableMapOf<String, List<String>>()
 
         val listener = object : OnReadListener {
-            override fun onAppRead(app: AppInfo, tags: List<String>) {
+            override suspend fun onAppRead(app: AppInfo, tags: List<String>) {
                 apps.add(app)
                 appsTags[app.appId] = tags
             }
 
-            override fun onTagRead(tag: Tag) {
+            override suspend fun onTagRead(tag: Tag) {
                 tagList.add(tag)
             }
 
-            override fun onFinish() { }
+            override suspend fun onFinish() { }
         }
 
         // Old format
@@ -74,7 +76,7 @@ class DbJsonReader {
             reader.close()
             listener.onFinish()
 
-            return Container(apps, tagList, listOf())
+            return@withContext Container(apps, tagList, listOf())
         }
 
         jsonReader.beginObject()
@@ -98,11 +100,11 @@ class DbJsonReader {
             }
         }
 
-        return Container(apps, tagList, appTagList)
+        return@withContext Container(apps, tagList, appTagList)
     }
 
     @Throws(IOException::class)
-    private fun readTags(jsonReader: JsonReader, listener: OnReadListener) {
+    private suspend fun readTags(jsonReader: JsonReader, listener: OnReadListener) {
         jsonReader.beginArray()
         while (jsonReader.hasNext()) {
             val tag = TagJsonObject(jsonReader).tag
@@ -115,7 +117,7 @@ class DbJsonReader {
 
 
     @Throws(IOException::class)
-    private fun readApps(jsonReader: JsonReader, listener: OnReadListener) {
+    private suspend fun readApps(jsonReader: JsonReader, listener: OnReadListener) {
         jsonReader.beginArray()
         while (jsonReader.hasNext()) {
             val json = AppJsonObject(jsonReader)

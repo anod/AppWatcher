@@ -7,6 +7,9 @@ import android.os.Bundle
 import androidx.work.workDataOf
 import com.anod.appwatcher.BuildConfig
 import info.anodsplace.framework.app.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * An [IntentService] subclass for handling asynchronous task requests in
@@ -16,6 +19,8 @@ import info.anodsplace.framework.app.ApplicationContext
  */
 class ManualSyncService : IntentService("ManualSyncService") {
 
+    private val coroutineScope = CoroutineScope(Dispatchers.Default)
+
     override fun onHandleIntent(intent: Intent?) {
         if (intent != null) {
             val syncAdapter = UpdateCheck(ApplicationContext(applicationContext))
@@ -23,10 +28,12 @@ class ManualSyncService : IntentService("ManualSyncService") {
             val data = workDataOf(
                 UpdateCheck.extrasManual to !BuildConfig.DEBUG
             )
-            val updatesCount = syncAdapter.perform(data)
-            val finishIntent = Intent(UpdateCheck.syncStop)
-            finishIntent.putExtra(UpdateCheck.extrasUpdatesCount, updatesCount)
-            sendBroadcast(finishIntent)
+            coroutineScope.launch {
+                val updatesCount = syncAdapter.perform(data)
+                val finishIntent = Intent(UpdateCheck.syncStop)
+                finishIntent.putExtra(UpdateCheck.extrasUpdatesCount, updatesCount)
+                sendBroadcast(finishIntent)
+            }
         }
     }
 

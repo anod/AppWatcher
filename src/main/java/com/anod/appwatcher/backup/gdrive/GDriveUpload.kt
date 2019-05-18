@@ -10,20 +10,24 @@ import com.google.android.gms.drive.Drive
 import com.google.android.gms.tasks.Tasks
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 
 /**
  * @author Alex Gavrishev
  * @date 26/06/2017
  */
-class UploadConnectedWorker(private val context: ApplicationContext, private val googleAccount: GoogleSignInAccount) {
+class GDriveUpload(private val context: ApplicationContext, private val googleAccount: GoogleSignInAccount) {
 
     constructor(context: Context, googleAccount: GoogleSignInAccount)
         : this(ApplicationContext(context), googleAccount)
 
     @Throws(Exception::class)
-    fun doUploadInBackground() {
-        synchronized(sLock) {
-            val db = Application.provide(context).database
+    suspend fun doUploadInBackground() {
+        val db = Application.provide(context).database
+        sLock.withLock {
             try {
                 doUploadLocked(db)
             } catch (e: Exception) {
@@ -33,7 +37,7 @@ class UploadConnectedWorker(private val context: ApplicationContext, private val
     }
 
     @Throws(Exception::class)
-    private fun doUploadLocked(db: AppsDatabase) {
+    private suspend fun doUploadLocked(db: AppsDatabase) = withContext(Dispatchers.IO) {
         Tasks.await(Drive.getDriveClient(context.actual, googleAccount).requestSync())
 
         val driveClient = Drive.getDriveResourceClient(context.actual, googleAccount)
@@ -58,6 +62,6 @@ class UploadConnectedWorker(private val context: ApplicationContext, private val
         /**
          * Lock used when maintaining queue of requested updates.
          */
-        private val sLock = Any()
+        private val sLock = Mutex()
     }
 }

@@ -21,16 +21,16 @@ interface TagsTable {
     fun observe(): LiveData<List<Tag>>
 
     @Query("SELECT * FROM $table ORDER BY ${Columns.name} COLLATE LOCALIZED ASC")
-    fun load(): List<Tag>
+    suspend fun load(): List<Tag>
 
     @Delete
-    fun delete(tag: Tag)
+    suspend fun delete(tag: Tag)
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
     suspend fun update(tag: Tag)
 
     @Query("DELETE FROM ${AppListTable.table}")
-    fun delete()
+    suspend fun delete()
 
     object Queries {
         suspend fun insert(tag: Tag, db: AppsDatabase): Long {
@@ -48,13 +48,13 @@ interface TagsTable {
             return rowId
         }
 
-        fun insert(tags: List<Tag>, db: AppsDatabase) {
+        suspend fun insert(tags: List<Tag>, db: AppsDatabase) = withContext(Dispatchers.IO) {
             tags.forEach { tag ->
                 val values = ContentValues().apply {
                     put(Columns.name, tag.name)
                     put(Columns.color, tag.color)
                 }
-                db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, tag.contentValues)
+                db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, values)
             }
         }
     }
@@ -83,15 +83,3 @@ interface TagsTable {
         val projection = arrayOf(TableColumns._ID, TableColumns.name, TableColumns.color)
     }
 }
-
-
-val Tag.contentValues: ContentValues
-    get() {
-        val values = ContentValues()
-        if (id > 0) {
-            values.put(BaseColumns._ID, id)
-        }
-        values.put(TagsTable.Columns.name, name)
-        values.put(TagsTable.Columns.color, color)
-        return values
-    }
