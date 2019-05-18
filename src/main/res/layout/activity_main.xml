@@ -6,13 +6,13 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="false">
 
-    <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/activity_frame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingTop="0dp">
 
-        <com.google.android.material.appbar.AppBarLayout
+        <info.anodsplace.framework.view.ThemableAppBarLayout
             android:id="@+id/appbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -21,7 +21,7 @@
 
             <include layout="@layout/toolbar" />
 
-        </com.google.android.material.appbar.AppBarLayout>
+        </info.anodsplace.framework.view.ThemableAppBarLayout>
 
         <androidx.viewpager.widget.ViewPager
             android:id="@+id/viewpager"

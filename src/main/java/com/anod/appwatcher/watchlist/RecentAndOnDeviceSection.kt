@@ -53,7 +53,7 @@ class OnDeviceSection : WatchListFragment.DefaultSection() {
 
     override fun attach(fragment: WatchListFragment, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener) {
         super.attach(fragment, installedApps, clickListener)
-        OnDeviceSection.attach(fragment, installedApps, clickListener, this)
+        attach(fragment, installedApps, clickListener, this)
     }
 
     override fun viewModel(fragment: WatchListFragment): WatchListViewModel {

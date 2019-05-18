@@ -1,14 +1,11 @@
 package com.anod.appwatcher.database.entities
 
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.Ignore
-import androidx.room.PrimaryKey
 import android.graphics.Color
 import android.os.Parcel
 import android.os.Parcelable
 import android.provider.BaseColumns
 import androidx.annotation.ColorInt
+import androidx.room.*
 import com.anod.appwatcher.database.TagsTable
 
 /**

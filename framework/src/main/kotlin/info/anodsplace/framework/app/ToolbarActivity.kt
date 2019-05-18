@@ -8,6 +8,7 @@ import androidx.appcompat.widget.Toolbar
 import android.view.MenuItem
 import android.view.View
 import info.anodsplace.framework.R
+import info.anodsplace.framework.view.ThemableAppBarLayout
 
 /**
  * @author Alex Gavrishev
@@ -28,6 +29,7 @@ abstract class ToolbarActivity : AppCompatActivity(), CustomThemeActivity {
         if (themeColors.available) {
             WindowCustomTheme.apply(themeColors, window, this)
         }
+        ThemableAppBarLayout.forceNightMode = !themeColors.statusBarColor.isLight
         super.onCreate(savedInstanceState)
         setContentView(layoutResource)
         setupToolbar()

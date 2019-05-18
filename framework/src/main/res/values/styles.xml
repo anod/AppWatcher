@@ -4,4 +4,9 @@
 
     <style name="ActionButton" parent="Widget.AppCompat.ActionButton" />
 
+    <style name="ActionBarNight" parent="ThemeOverlay.MaterialComponents.ActionBar">
+        <item name="android:textColorPrimary">@android:color/white</item>
+        <item name="colorControlNormal">@android:color/white</item>
+        <item name="colorOnPrimary">@android:color/white</item>
+    </style>
 </resources>

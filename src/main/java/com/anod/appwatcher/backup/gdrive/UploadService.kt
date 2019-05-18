@@ -1,6 +1,5 @@
 package com.anod.appwatcher.backup.gdrive
 
-import android.annotation.SuppressLint
 import android.content.Context
 import androidx.work.*
 import com.anod.appwatcher.Application

@@ -1,10 +1,6 @@
 package com.anod.appwatcher.watchlist
 
 import android.accounts.Account
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -18,8 +14,10 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.TextView
 import android.widget.Toast
+import androidx.fragment.app.FragmentPagerAdapter
+import androidx.lifecycle.*
 import com.anod.appwatcher.*
-import com.anod.appwatcher.content.AddWatchAppAsyncTask
+import com.anod.appwatcher.R
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.navigation.DrawerActivity
 import com.anod.appwatcher.navigation.DrawerViewModel
@@ -119,7 +117,6 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     open val defaultFilterId = Filters.TAB_ALL
 
     private val actionMenu by lazy { WatchListMenu(this, this) }
-
     private val stateViewModel: WatchListStateViewModel by lazy { ViewModelProviders.of(this).get(WatchListStateViewModel::class.java) }
 
     @get:MenuRes protected abstract val menuResource: Int
@@ -158,7 +155,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
             }
         })
 
-        stateViewModel.listState.observe(this, Observer {
+        stateViewModel.listState.observe(this) {
             when (it) {
                 is SyncStarted -> {
                     actionMenu.startRefresh()
@@ -180,7 +177,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
                     actionMenu.stopRefresh()
                 }
             }
-        })
+        }
     }
 
     override fun onAuthToken(authToken: String) {
@@ -266,7 +263,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         return true
     }
 
-    class Adapter(fm: androidx.fragment.app.FragmentManager) : androidx.fragment.app.FragmentPagerAdapter(fm) {
+    class Adapter(fm: androidx.fragment.app.FragmentManager) : FragmentPagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
         private val fragments = mutableListOf<androidx.fragment.app.Fragment>()
         private val fragmentTitles = mutableListOf<String>()
 

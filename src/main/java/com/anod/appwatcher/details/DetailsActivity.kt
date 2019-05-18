@@ -350,7 +350,6 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
 
     private val mainHandler = Handler(Looper.getMainLooper())
 
-
     override fun onOffsetChanged(appBarLayout: AppBarLayout, verticalOffset: Int) {
         val totalScrollRange = appBarLayout.totalScrollRange.toFloat()
         val alpha = 1.0f - Math.abs(verticalOffset.toFloat() / totalScrollRange)

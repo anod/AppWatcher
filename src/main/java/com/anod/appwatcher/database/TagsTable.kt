@@ -6,6 +6,8 @@ import android.provider.BaseColumns
 import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.anod.appwatcher.database.entities.Tag
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * @author alex
@@ -25,21 +27,23 @@ interface TagsTable {
     fun delete(tag: Tag)
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
-    fun update(tag: Tag)
+    suspend fun update(tag: Tag)
 
     @Query("DELETE FROM ${AppListTable.table}")
     fun delete()
 
     object Queries {
-        fun insert(tag: Tag, db: AppsDatabase): Long {
+        suspend fun insert(tag: Tag, db: AppsDatabase): Long {
             // Skip id to apply autoincrement
             val values = ContentValues().apply {
                 put(Columns.name, tag.name)
                 put(Columns.color, tag.color)
             }
             var rowId = 0L
-            db.runInTransaction {
-                rowId = db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, values)
+            withContext(Dispatchers.IO) {
+                db.runInTransaction {
+                    rowId = db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, values)
+                }
             }
             return rowId
         }
@@ -50,7 +54,7 @@ interface TagsTable {
                     put(Columns.name, tag.name)
                     put(Columns.color, tag.color)
                 }
-                db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, values)
+                db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, tag.contentValues)
             }
         }
     }

@@ -28,7 +28,7 @@ class DbBackupManager(private val context: ApplicationContext) {
     internal fun doExport(destUri: Uri): Int {
         val outputStream: OutputStream?
         try {
-            outputStream = context.contentResolver.openOutputStream(destUri)
+            outputStream = context.contentResolver.openOutputStream(destUri) ?: return ERROR_FILE_WRITE
         } catch (e: FileNotFoundException) {
             return ERROR_FILE_WRITE
         }

@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.map
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.anod.appwatcher.AppComponent
 import com.anod.appwatcher.AppWatcherApplication
@@ -18,7 +19,6 @@ import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenAsync
 import com.anod.appwatcher.content.AddWatchAppAsyncTask
-import com.anod.appwatcher.utils.map
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.FragmentToolbarActivity

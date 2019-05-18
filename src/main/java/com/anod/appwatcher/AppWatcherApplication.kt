@@ -50,7 +50,7 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
         AppLog.setDebug(BuildConfig.DEBUG, "AppWatcher")
 
         if (appComponent.prefs.isDriveSyncEnabled) {
-            appComponent.uploadServiceContentObserver
+            appComponent.database.invalidationTracker.addObserver(appComponent.uploadServiceContentObserver)
         }
 
         if (appComponent.prefs.collectCrashReports) {

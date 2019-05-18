@@ -2,15 +2,6 @@ package com.anod.appwatcher.utils
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.Transformations
-
-fun <X, Y> LiveData<X>.map(func: (X) -> Y): LiveData<Y> {
-    return Transformations.map(this, func)
-}
-
-fun <X, Y> LiveData<X>.switchMap(func: (X) -> LiveData<Y>): LiveData<Y> {
-    return Transformations.switchMap(this, func)
-}
 
 fun <A, B> LiveData<A>.combineLatest(b: LiveData<B>): LiveData<Pair<A, B>> {
     return MediatorLiveData<Pair<A, B>>().apply {
@@ -30,3 +21,30 @@ fun <A, B> LiveData<A>.combineLatest(b: LiveData<B>): LiveData<Pair<A, B>> {
         }
     }
 }
+
+fun <A, B, C> LiveData<A>.combineLatest(b: LiveData<B>, c: LiveData<C>): LiveData<Triple<A, B, C>> {
+    return MediatorLiveData<Triple<A, B, C>>().apply {
+        var lastA: A? = null
+        var lastB: B? = null
+        var lastC: C? = null
+
+        addSource(this@combineLatest) {
+            if (it == null && value != null) value = null
+            lastA = it
+            if (lastA != null && lastB != null && lastC != null) value = Triple(lastA!!, lastB!!, lastC!!)
+        }
+
+        addSource(b) {
+            if (it == null && value != null) value = null
+            lastB = it
+            if (lastA != null && lastB != null && lastC != null) value = Triple(lastA!!, lastB!!, lastC!!)
+        }
+
+        addSource(c) {
+            if (it == null && value != null) value = null
+            lastC = it
+            if (lastA != null && lastB != null && lastC != null) value = Triple(lastA!!, lastB!!, lastC!!)
+        }
+    }
+}
+

@@ -9,6 +9,8 @@ import android.provider.BaseColumns
 import com.anod.appwatcher.database.entities.AppTag
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.database.entities.TagAppsCount
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.util.concurrent.Callable
 
 /**
@@ -44,7 +46,7 @@ interface AppTagsTable {
     fun delete(tagId: Int)
 
     @Query("DELETE FROM $table WHERE ${Columns.tagId} = :tagId AND ${Columns.appId} = :appId")
-    fun delete(tagId: Int, appId: String): Int
+    suspend fun delete(tagId: Int, appId: String): Int
 
     class Columns : BaseColumns {
         companion object {
@@ -71,14 +73,15 @@ interface AppTagsTable {
     }
 
     object Queries {
-        fun insert(tag: Tag, apps: List<String>, db: AppsDatabase) {
-            db.runInTransaction {
-                for (appId in apps) {
-                    val values = AppTag(appId, tag.id).contentValues
-                    db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, values)
+        suspend fun insert(tag: Tag, apps: List<String>, db: AppsDatabase) {
+            withContext(Dispatchers.IO) {
+                db.runInTransaction {
+                    for (appId in apps) {
+                        val values = AppTag(appId, tag.id).contentValues
+                        db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, values)
+                    }
                 }
             }
-            return
         }
 
         // Executed in transaction
@@ -88,11 +91,15 @@ interface AppTagsTable {
             }
         }
 
-        fun insert(tagId: Int, appId: String, db: AppsDatabase): Long {
-            db.invalidationTracker.refreshVersionsAsync()
-            return db.runInTransaction(Callable<Long> {
-                db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, AppTag(appId, tagId).contentValues)
-            })
+        suspend fun insert(tagId: Int, appId: String, db: AppsDatabase): Long {
+            var rowId: Long = -1
+            withContext(Dispatchers.IO) {
+                db.invalidationTracker.refreshVersionsAsync()
+                rowId = db.runInTransaction(Callable<Long> {
+                    db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, AppTag(appId, tagId).contentValues)
+                })
+            }
+            return rowId
         }
 
         fun assignAppsToTag(appIds: List<String>, tagId: Int, db: AppsDatabase) {

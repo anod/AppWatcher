@@ -28,7 +28,7 @@ abstract class AppsDatabase: RoomDatabase() {
     abstract fun appTags(): AppTagsTable
 
     companion object {
-        const val version = 14
+        const val version = 15
         const val dbName = "app_watcher"
 
         fun instance(context: Context): AppsDatabase {
@@ -37,8 +37,19 @@ abstract class AppsDatabase: RoomDatabase() {
                             MIGRATION_9_11,
                             MIGRATION_11_12,
                             MIGRATION_12_13,
-                            MIGRATION_13_14)
+                            MIGRATION_13_14,
+                            MIGRATION_14_15)
                     .build()
+        }
+
+        private val MIGRATION_14_15 = object: Migration(14, 15) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("DELETE FROM app_tags WHERE _ID NOT IN ( " +
+                        "SELECT MAX(_ID) " +
+                        "FROM app_tags " +
+                        "GROUP BY app_id, tags_id)")
+                database.execSQL("CREATE UNIQUE INDEX `index_app_tags_app_id_tags_id` ON `app_tags` (`app_id`, `tags_id`)")
+            }
         }
 
         private val MIGRATION_9_11 = object: Migration(9, 11) {

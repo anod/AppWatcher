@@ -1,7 +1,6 @@
 package com.anod.appwatcher.details
 
 import android.accounts.Account
-import android.os.AsyncTask
 import androidx.lifecycle.*
 import com.android.volley.VolleyError
 import com.anod.appwatcher.AppComponent
@@ -11,17 +10,15 @@ import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.database.entities.packageToApp
-import com.anod.appwatcher.utils.map
-import com.anod.appwatcher.utils.switchMap
 import finsky.api.model.DfeDetails
 import finsky.api.model.DfeModel
 import finsky.api.model.Document
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.livedata.OneTimeObserver
-import info.anodsplace.framework.os.BackgroundTask
 import info.anodsplace.playstore.DetailsEndpoint
 import info.anodsplace.playstore.PlayStoreEndpoint
+import kotlinx.coroutines.launch
 
 typealias TagMenuItem = Pair<Tag,Boolean>
 
@@ -54,11 +51,11 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
     }
     var authToken = ""
     var localChangelog: List<AppChange> = emptyList()
-    val tagsMenuItems: LiveData<List<TagMenuItem>> = appId.switchMap { appId ->
+    val tagsMenuItems: LiveData<List<TagMenuItem>> = appId.switchMap tagsMenu@ { appId ->
         if (appId.isEmpty()) {
-            return@switchMap MutableLiveData(emptyList<TagMenuItem>())
+            return@tagsMenu MutableLiveData(emptyList<TagMenuItem>())
         }
-        return@switchMap provide.database.tags().observe().switchMap { tags ->
+        return@tagsMenu provide.database.tags().observe().switchMap { tags ->
             return@switchMap provide.database.appTags().forApp(appId).map { appTags ->
                 val appTagsList = appTags.map { it.tagId }
                 tags.map { TagMenuItem(it, appTagsList.contains(it.id)) }
@@ -91,17 +88,11 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
         } else {
             isNewApp = false
             AppLog.i("Show details for watched $appId")
-            BackgroundTask(object : BackgroundTask.Worker<Int, App?>(rowId) {
-                override fun run(param: Int): App? {
-                    val appsTable = Application.provide(context).database.apps()
-                    return appsTable.loadAppRow(rowId)
-                }
 
-                override fun finished(result: App?) {
-                    app.value = result
-                }
-
-            }).execute()
+            val appsTable = Application.provide(context).database.apps()
+            viewModelScope.launch {
+                app.value = appsTable.loadAppRow(rowId)
+            }
         }
     }
 
@@ -162,18 +153,12 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
     }
 
     fun changeTag(tagId: Int, checked: Boolean)  {
-        BackgroundTask(object : BackgroundTask.Worker<Boolean, Boolean>(checked) {
-            override fun run(param: Boolean): Boolean {
-                if (checked) {
-                    return provide.database.appTags().delete(tagId, appId.value!!) > 0
-                }
-
-                return AppTagsTable.Queries.insert(tagId, appId.value!!, provide.database) != -1L
+        viewModelScope.launch {
+            if (checked) {
+                provide.database.appTags().delete(tagId, appId.value!!) > 0
+            } else {
+                AppTagsTable.Queries.insert(tagId, appId.value!!, provide.database)
             }
-
-            override fun finished(result: Boolean) {
-
-            }
-        }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
+        }
     }
 }

@@ -1,18 +1,14 @@
 package com.anod.appwatcher.tags
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.*
 import com.anod.appwatcher.AppComponent
 import com.anod.appwatcher.AppWatcherApplication
 import com.anod.appwatcher.database.AppTagsTable
 import com.anod.appwatcher.database.TagsTable
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.model.AppInfo
-import com.anod.appwatcher.utils.map
-import com.anod.appwatcher.utils.switchMap
-import info.anodsplace.framework.os.BackgroundTask
+import kotlinx.coroutines.launch
 
 typealias TagAppItem = Pair<Tag,Boolean>
 
@@ -23,8 +19,8 @@ class TagsListViewModel(application: Application): AndroidViewModel(application)
     private val provide: AppComponent
         get() = getApplication<AppWatcherApplication>().appComponent
 
-    val tagsAppItems: LiveData<List<TagAppItem>> = appInfo.switchMap { info ->
-        return@switchMap provide.database.tags().observe().switchMap { tags ->
+    val tagsAppItems: LiveData<List<TagAppItem>> = appInfo.switchMap tagsApp@ { info ->
+        return@tagsApp provide.database.tags().observe().switchMap { tags ->
             if (info == null || info.appId.isEmpty()) {
                 return@switchMap MutableLiveData(tags.map { TagAppItem(it, false) })
             }
@@ -36,49 +32,32 @@ class TagsListViewModel(application: Application): AndroidViewModel(application)
     }
 
     fun saveTag(tag: Tag) {
-        BackgroundTask(object : BackgroundTask.Worker<Tag, Int>(tag) {
-            override fun finished(result: Int) {}
-
-            override fun run(param: Tag): Int {
-                if (param.id > 0) {
-                    provide.database.tags().update(param)
-                    return param.id
-                }
-                return TagsTable.Queries.insert(param, provide.database).toInt()
+        viewModelScope.launch {
+            if (tag.id > 0) {
+                provide.database.tags().update(tag)
+            } else {
+                TagsTable.Queries.insert(tag, provide.database).toInt()
             }
-        }).execute()
+        }
     }
 
     fun deleteTag(tag: Tag) {
-        BackgroundTask(object : BackgroundTask.Worker<Tag, Boolean>(tag) {
-            override fun finished(result: Boolean) {}
-
-            override fun run(param: Tag): Boolean {
-                provide.database.tags().delete(tag)
-                return true
-            }
-        }).execute()
+        viewModelScope.launch {
+            provide.database.tags().delete(tag)
+        }
     }
 
     fun removeAppTag(tag: Tag) {
         val app = appInfo.value ?: return
-        BackgroundTask(object : BackgroundTask.Worker<Tag, Int>(tag) {
-            override fun finished(result: Int) {}
-
-            override fun run(param: Tag): Int {
-                return provide.database.appTags().delete(param.id, app.appId)
-            }
-        }).execute()
+        viewModelScope.launch {
+            provide.database.appTags().delete(tag.id, app.appId)
+        }
     }
 
     fun addAppTag(tag: Tag) {
         val app = appInfo.value ?: return
-        BackgroundTask(object : BackgroundTask.Worker<Tag, Long>(tag) {
-            override fun finished(result: Long) {}
-
-            override fun run(param: Tag): Long {
-                return AppTagsTable.Queries.insert(tag.id, app.appId, provide.database)
-            }
-        }).execute()
+        viewModelScope.launch {
+            AppTagsTable.Queries.insert(tag.id, app.appId, provide.database)
+        }
     }
 }

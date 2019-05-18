@@ -32,7 +32,7 @@ interface AppListTable {
     fun loadApp(appId: String): App?
 
     @Query("SELECT * FROM $table WHERE ${BaseColumns._ID} == :rowId")
-    fun loadAppRow(rowId: Int): App?
+    suspend fun loadAppRow(rowId: Int): App?
 
     @Query("SELECT ${BaseColumns._ID}, ${Columns.packageName} FROM $table WHERE " +
             "${Columns.status} != ${AppInfoMetadata.STATUS_DELETED}")

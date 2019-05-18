@@ -63,7 +63,6 @@ class ImportTask(private val context: ApplicationContext, private val listener: 
     }
 
     override fun onPostExecute(result: Int?) {
-        context.contentResolver.notifyChange(DbContentProvider.appsUri, null)
         listener(result!!)
     }
 

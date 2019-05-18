@@ -1,10 +1,8 @@
 package com.anod.appwatcher.watchlist
 
-import android.app.Activity
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
-import android.util.SparseArray
 import android.util.SparseIntArray
 import android.view.LayoutInflater
 import android.view.View
@@ -12,8 +10,8 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -183,42 +181,32 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
             activity?.startActivitySafely(intent)
         }
 
-        stateViewModel.sortId.observe(this, Observer {
+        stateViewModel.sortId.observe(this) {
             viewModel.sortId = it ?: 0
-            load()
-        })
+            viewModel.reload.value = true
+        }
 
-        stateViewModel.titleFilter.observe(this, Observer {
+        stateViewModel.titleFilter.observe(this) {
             viewModel.titleFilter = it ?: ""
-            load()
-        })
+            viewModel.reload.value = true
+        }
 
-        stateViewModel.listState.observe(this, Observer {
+        stateViewModel.listState.observe(this) {
             when (it) {
                 is SyncStarted -> { swipeLayout?.isRefreshing = true }
                 else -> {
                     swipeLayout?.isRefreshing = false
-                    load()
                 }
             }
-        })
+        }
 
-        viewModel.appsDbChanged.observe(this, Observer {
-            load()
-        })
-
-        load()
-    }
-
-    private fun load() {
-        val viewModel = section.viewModel(this)
-        viewModel.load().observe(this, Observer {
-            val headers = it?.sections ?: SparseArray()
+        viewModel.result.observe(this) {
+            val headers = it.sections
             viewModel.sections.value = headers
-            section.onModelLoaded(it ?: LoadResult(emptyList(), headers))
+            section.onModelLoaded(it)
             progress.visibility = View.GONE
             isListVisible = true
-        })
+        }
     }
 
     private fun createFilter(filterId: Int, installedApps: InstalledApps): AppListFilter {
@@ -242,15 +230,6 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
             Toast.makeText(activity, app.packageName, Toast.LENGTH_SHORT).show()
         }
 
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_APP_INFO && resultCode == Activity.RESULT_OK) {
-            if (data!!.extras != null) {
-                load()
-            }
-        }
     }
 
     override fun onRefresh() {

@@ -7,6 +7,7 @@ import android.os.Parcelable
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.ColorUtils
 
 /**
  * @author Alex Gavrishev
@@ -71,11 +72,8 @@ class CustomThemeColors(
         val none = CustomThemeColors(false, CustomThemeColor.none, CustomThemeColor.none)
 
         fun isStatusBarLight(@ColorInt statusBarColor: Int): Boolean {
-            val r = Color.red(statusBarColor)
-            val g = Color.green(statusBarColor)
-            val b = Color.blue(statusBarColor)
-            val brightness = r * 0.299 + g * 0.587 + b * 0.144
-            return brightness <= 125
+            val lum =  ColorUtils.calculateLuminance(statusBarColor)
+            return lum > 0.5
         }
 
         @JvmField

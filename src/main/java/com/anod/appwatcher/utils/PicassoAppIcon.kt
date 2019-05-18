@@ -3,12 +3,9 @@ package com.anod.appwatcher.utils
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
-import android.net.Uri
 import androidx.annotation.DrawableRes
-import android.text.TextUtils
 import android.widget.ImageView
 import com.anod.appwatcher.R
-import com.anod.appwatcher.content.DbContentProvider
 import com.anod.appwatcher.database.entities.App
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Picasso.LoadedFrom.DISK
@@ -48,13 +45,6 @@ class PicassoAppIcon(context: Context) {
         }
     }
 
-    fun retrieve(uri: Uri): RequestCreator {
-        return picasso.load(uri)
-                .resize(iconSize, iconSize)
-                .centerInside()
-                .onlyScaleDown()
-    }
-
     fun retrieve(imageUrl: String): RequestCreator {
         return picasso.load(imageUrl)
                 .resize(iconSize, iconSize)
@@ -63,20 +53,9 @@ class PicassoAppIcon(context: Context) {
     }
 
     fun loadAppIntoImageView(app: App, iconView: ImageView, @DrawableRes defaultRes: Int) {
-        if (TextUtils.isEmpty(app.iconUrl)) {
-            if (app.rowId > 0) {
-                val dbImageUri = DbContentProvider.iconsUri.buildUpon().appendPath(app.rowId.toString()).build()
-                this.retrieve(dbImageUri)
-                        .placeholder(defaultRes)
-                        .into(iconView)
-            } else {
-                iconView.setImageResource(defaultRes)
-            }
-        } else {
-            this.retrieve(app.iconUrl)
-                    .placeholder(defaultRes)
-                    .into(iconView)
-        }
+        this.retrieve(app.iconUrl)
+                .placeholder(defaultRes)
+                .into(iconView)
     }
 
     companion object {

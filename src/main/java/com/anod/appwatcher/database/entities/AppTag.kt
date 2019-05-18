@@ -1,10 +1,7 @@
 package com.anod.appwatcher.database.entities
 
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.Ignore
-import androidx.room.PrimaryKey
 import android.provider.BaseColumns
+import androidx.room.*
 import com.anod.appwatcher.database.AppTagsTable
 
 /**
@@ -12,7 +9,10 @@ import com.anod.appwatcher.database.AppTagsTable
  * *
  * @date 27/04/2017.
  */
-@Entity(tableName = AppTagsTable.table)
+@Entity(
+        tableName = AppTagsTable.table,
+        indices = [Index(value = ["app_id", "tags_id"], unique = true)]
+)
 data class AppTag(
         @PrimaryKey
         @ColumnInfo(name = BaseColumns._ID)

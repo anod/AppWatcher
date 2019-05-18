@@ -1,15 +1,13 @@
 package com.anod.appwatcher.installed
 
-import android.util.SparseArray
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
-import com.anod.appwatcher.model.AppListFilter
-import com.anod.appwatcher.watchlist.AppsList
+import androidx.lifecycle.liveData
+import androidx.lifecycle.map
+import com.anod.appwatcher.utils.combineLatest
 import com.anod.appwatcher.watchlist.LoadResult
 import com.anod.appwatcher.watchlist.SectionHeaderFactory
 import com.anod.appwatcher.watchlist.WatchListViewModel
 import info.anodsplace.framework.content.InstalledPackage
-import info.anodsplace.framework.os.LiveDataTask
 
 /**
  * @author Alex Gavrishev
@@ -19,77 +17,28 @@ import info.anodsplace.framework.os.LiveDataTask
 typealias InstalledPairRow = Pair<String, Int>
 typealias InstalledResult = Pair<List<InstalledPairRow>, List<InstalledPackage>>
 
-private class InstalledResultMediator(
-        private var showRecentlyUpdated: Boolean,
-        private var hasSectionRecent: Boolean,
-        private var hasSectionOnDevice: Boolean,
-        private var filter: AppListFilter
-): MediatorLiveData<LoadResult>() {
-    private var number = 0
-    private var result = InstalledLoadResult(emptyList(), emptyList(), emptyList(), SparseArray())
-
-    fun addAppsList(source: LiveData<AppsList>) {
-        addSource(source, {
-            result = InstalledLoadResult(
-                result.recentlyInstalled,
-                result.installedPackages,
-                it ?: emptyList(),
-                result.sections
-            )
-            update()
-            removeSource(source)
-        })
-    }
-
-    fun addInstalled(source: LiveData<InstalledResult>) {
-        addSource(source, {
-            result = InstalledLoadResult(
-                    it?.first ?: emptyList(),
-                    it?.second ?: emptyList(),
-                    result.appsList,
-                    result.sections
-            )
-            update()
-            removeSource(source)
-        })
-    }
-
-    private fun update() {
-        number++
-        if (number == 2) {
-            val appsList = result.appsList
-            val recentlyInstalled = result.recentlyInstalled
-            val installedPackages = result.installedPackages
-            val sections = SectionHeaderFactory(showRecentlyUpdated, hasSectionRecent, hasSectionOnDevice)
-                    .create(appsList.size, filter.newCount, filter.recentlyUpdatedCount, filter.updatableNewCount, recentlyInstalled.isNotEmpty(), installedPackages.isNotEmpty())
-
-            value = InstalledLoadResult(
-                recentlyInstalled,
-                installedPackages,
-                appsList,
-                sections
-            )
-        }
-    }
-}
-
 class InstalledWatchListViewModel(application: android.app.Application) : WatchListViewModel(application) {
     var hasSectionRecent = false
     var hasSectionOnDevice = false
 
-    override fun load(): LiveData<LoadResult> {
-        val apps = loadApps()
-        val installed = LiveDataTask(InstalledTaskWorker(context, sortId, titleFilter)).execute()
-
-        val mediator = InstalledResultMediator(
-            showRecentlyUpdated,
-            hasSectionRecent,
-            hasSectionOnDevice,
-            filter
-        )
-        mediator.addAppsList(apps)
-        mediator.addInstalled(installed)
-        return mediator
+    val installed: LiveData<InstalledResult> = liveData {
+        emit(InstalledTaskWorker(context, sortId, titleFilter).run())
     }
 
+    override var result: LiveData<LoadResult> = appsList.combineLatest(installed).map { pair ->
+        val appsList = pair.first
+        val installed = pair.second
+        val recentlyInstalled = installed.first
+        val installedPackages = installed.second
+
+        val sections = SectionHeaderFactory(showRecentlyUpdated, hasSectionRecent, hasSectionOnDevice)
+                .create(appsList.size, filter.newCount, filter.recentlyUpdatedCount, filter.updatableNewCount, recentlyInstalled.isNotEmpty(), installedPackages.isNotEmpty())
+
+        InstalledLoadResult(
+                recentlyInstalled,
+                installedPackages,
+                appsList,
+                sections
+        )
+    }
 }

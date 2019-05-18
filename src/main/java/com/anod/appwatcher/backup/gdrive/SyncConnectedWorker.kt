@@ -17,6 +17,7 @@ import com.google.android.gms.drive.DriveId
 import com.google.android.gms.tasks.Tasks
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
+import kotlinx.coroutines.*
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -26,6 +27,7 @@ import java.io.InputStreamReader
  * @date 2014-11-15
  */
 class SyncConnectedWorker(private val context: ApplicationContext, private val googleAccount: GoogleSignInAccount) {
+    internal val job = Job()
 
     fun doSyncInBackground() {
         synchronized(sLock) {
@@ -78,9 +80,7 @@ class SyncConnectedWorker(private val context: ApplicationContext, private val g
         val file = driveId.asDriveFile()
 
         val driveClient = Drive.getDriveResourceClient(context.actual, googleAccount)
-
         val driveContents = Tasks.await(driveClient.openFile(file, DriveFile.MODE_READ_ONLY))
-
         val driveFileReader = getFileInputStream(driveContents)
 
         AppLog.d("[GDrive] Sync remote list " + AppListFile.fileName)
@@ -115,19 +115,22 @@ class SyncConnectedWorker(private val context: ApplicationContext, private val g
                 driveFileReader.close()
                 driveClient.discardContents(driveContents)
 
-                // Add missing tags
-                tagList.forEach { tag ->
-                    if (!currentTags.containsKey(tag.name)) {
-                        val rowId = TagsTable.Queries.insert(Tag(tag.name, tag.color), db).toInt()
-                        if (rowId > 0) {
-                            currentTags[tag.name] = Tag(rowId, tag.name, tag.color)
+                val coroutineScope = CoroutineScope(Dispatchers.IO + job)
+                coroutineScope.launch {
+                    // Add missing tags
+                    tagList.forEach { tag ->
+                        if (!currentTags.containsKey(tag.name)) {
+                            val rowId = TagsTable.Queries.insert(Tag(tag.name, tag.color), db).toInt()
+                            if (rowId > 0) {
+                                currentTags[tag.name] = Tag(rowId, tag.name, tag.color)
+                            }
                         }
                     }
-                }
 
-                tagApps.forEach { (tagName, apps) ->
-                    currentTags[tagName]?.let { tag ->
-                        AppTagsTable.Queries.insert(tag, apps, db)
+                    tagApps.forEach { (tagName, apps) ->
+                        currentTags[tagName]?.let { tag ->
+                            AppTagsTable.Queries.insert(tag, apps, db)
+                        }
                     }
                 }
             }

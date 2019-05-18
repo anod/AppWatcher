@@ -1,12 +1,10 @@
 package com.anod.appwatcher.backup.gdrive
 
-import android.content.ContentResolver
 import android.content.Context
-import android.database.ContentObserver
-import android.net.Uri
-import android.os.Handler
+import androidx.room.InvalidationTracker
 import com.anod.appwatcher.Application
-import com.anod.appwatcher.content.DbContentProvider
+import com.anod.appwatcher.database.AppListTable
+import com.anod.appwatcher.database.TagsTable
 import info.anodsplace.framework.AppLog
 
 /**
@@ -14,22 +12,16 @@ import info.anodsplace.framework.AppLog
  * @date 26/06/2017
  */
 
-class UploadServiceContentObserver(val context: Context, contentResolver: ContentResolver) : ContentObserver(Handler()) {
+class UploadServiceContentObserver(val context: Context) : InvalidationTracker.Observer(AppListTable.table, TagsTable.table) {
 
-    init {
-        contentResolver.registerContentObserver(DbContentProvider.appsUri, true, this)
-        contentResolver.registerContentObserver(DbContentProvider.tagsUri, true, this)
-    }
-
-    override fun onChange(selfChange: Boolean, uri: Uri?) {
-        super.onChange(selfChange, uri)
-
+    override fun onInvalidated(tables: MutableSet<String>) {
         val prefs = Application.provide(context).prefs
         if (!prefs.isDriveSyncEnabled) {
             return
         }
 
-        AppLog.d("Schedule GDrive upload for ${uri.toString()}")
+        AppLog.d("Schedule GDrive upload for $tables")
         UploadService.schedule(prefs.isWifiOnly, prefs.isRequiresCharging, context)
     }
+
 }

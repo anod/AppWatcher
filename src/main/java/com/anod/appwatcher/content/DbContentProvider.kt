@@ -21,25 +21,9 @@ open class DbContentProvider : ContentProvider() {
 
         private const val apps = 10
         private const val app = 20
-        private const val appTags = 100
-        private const val appsTags = 60
-        private const val appsTagsClean = 110
-
-        private const val tags = 30
-        private const val tag = 40
-        private const val tagApps = 50
-        private const val tagsApps = 80
-        private const val tagsAppsCount = 90
-
         private const val changelogVersion = 200
-        private const val changelogApp = 201
-
-        private const val icon = 70
 
         val appsUri = Uri.parse("content://$authority/apps")!!
-        val appsTagUri = Uri.parse("content://$authority/apps/tags")!!
-        val tagsUri = Uri.parse("content://$authority/tags")!!
-        val iconsUri = Uri.parse("content://$authority/icons")!!
         val changelogUri = Uri.parse("content://$authority/changelog")!!
 
         private val uriMatcher = UriMatcher(UriMatcher.NO_MATCH)
@@ -47,29 +31,13 @@ open class DbContentProvider : ContentProvider() {
         init {
             uriMatcher.addURI(authority, "apps", apps)
             uriMatcher.addURI(authority, "apps/#", app)
-            uriMatcher.addURI(authority, "apps/tags/#", appsTags)
-            uriMatcher.addURI(authority, "apps/tags/clean", appsTagsClean)
-            uriMatcher.addURI(authority, "apps/#/tags", appTags)
 
-            uriMatcher.addURI(authority, "tags", tags)
-            uriMatcher.addURI(authority, "tags/#", tag)
-            uriMatcher.addURI(authority, "tags/#/apps", tagApps)
-            uriMatcher.addURI(authority, "tags/apps", tagsApps)
-            uriMatcher.addURI(authority, "tags/apps/count", tagsAppsCount)
-
-            uriMatcher.addURI(authority, "icons/#", icon)
-
-            uriMatcher.addURI(authority, "changelog/apps/*", changelogApp)
             uriMatcher.addURI(authority, "changelog/apps/*/v/#", changelogVersion)
-        }
-
-        fun matchIconUri(uri: Uri): Boolean {
-            return uriMatcher.match(uri) == icon
         }
     }
 
     private val dbSchemaManager: DbDataSource by lazy {
-        DbDataSource(Application.provide(context).database.openHelper)
+        DbDataSource(Application.provide(context!!).database.openHelper)
     }
 
     private fun matchQuery(uri: Uri): Query? {
@@ -89,87 +57,12 @@ open class DbContentProvider : ContentProvider() {
                 query.notifyUri = appsUri.buildUpon().appendPath(rowId).build()
                 return query
             }
-            apps -> {
-                query.table = AppListTable.table
-                query.notifyUri = appsUri
-                return query
-            }
-            appsTags -> {
-                query.table = AppTagsTable.table + ", " + AppListTable.table
-                val tagId = uri.lastPathSegment
-                query.selection = AppTagsTable.TableColumns.tagId + "=?"
-                query.selectionArgs = arrayOf(tagId)
-                query.notifyUri = appsUri
-                return query
-            }
-            appTags -> {
-                query.table = AppTagsTable.table + ", " + AppListTable.table
-                rowId = uri.pathSegments[uri.pathSegments.size - 2]
-                query.selection = AppListTable.TableColumns._ID + "=? AND " + AppListTable.TableColumns.appId + "=" + AppTagsTable.TableColumns.appId
-                query.selectionArgs = arrayOf(rowId)
-                query.notifyUri = appsTagUri
-                return query
-            }
-            appsTagsClean -> {
-                query.table = AppTagsTable.table
-                query.selection = AppTagsTable.TableColumns.appId +" NOT IN (SELECT " + AppTagsTable.TableColumns.appId + " FROM " + AppTagsTable.table + ")"
-                query.notifyUri = appsTagUri
-                return query
-            }
-            tags -> {
-                query.table = TagsTable.table
-                query.notifyUri = tagsUri
-                return query
-            }
-            tag -> {
-                query.table = TagsTable.table
-                rowId = uri.lastPathSegment
-                query.selection = BaseColumns._ID + "=?"
-                query.selectionArgs = arrayOf(rowId)
-                query.notifyUri = tagsUri
-                return query
-            }
-            tagApps -> {
-                query.table = AppTagsTable.table
-                val tagId = uri.pathSegments[uri.pathSegments.size - 2]
-                query.selection = AppTagsTable.Columns.tagId + "=?"
-                query.selectionArgs = arrayOf(tagId)
-                query.notifyUri = appsTagUri
-                return query
-            }
-            tagsApps -> {
-                query.table = AppTagsTable.table
-                query.notifyUri = appsTagUri
-                return query
-            }
-            tagsAppsCount -> {
-                query.table = AppTagsTable.table
-                query.notifyUri = appsTagUri
-                query.projection = arrayOf(AppTagsTable.Columns.tagId, "count() as count")
-                query.groupBy = AppTagsTable.Columns.tagId
-                return query
-            }
-            icon -> {
-                query.table = AppListTable.table
-                rowId = uri.lastPathSegment
-                query.selection = BaseColumns._ID + "=?"
-                query.selectionArgs = arrayOf(rowId)
-                query.notifyUri = iconsUri
-                return query
-            }
-            changelogApp -> {
-                query.table = ChangelogTable.table
-                query.selection = ChangelogTable.Columns.appId + "=?"
-                query.selectionArgs = arrayOf(uri.lastPathSegment)
-                query.notifyUri = changelogUri
-                return query
-            }
             changelogVersion -> {
                 query.table = ChangelogTable.table
                 query.selection = ChangelogTable.Columns.appId + "=? AND " + ChangelogTable.Columns.versionCode + "=?"
                 query.selectionArgs = arrayOf(
                         uri.pathSegments[uri.pathSegments.size - 3],
-                        uri.lastPathSegment
+                        uri.lastPathSegment ?: "-1"
                 )
                 query.notifyUri = changelogUri
                 return query
@@ -189,21 +82,8 @@ open class DbContentProvider : ContentProvider() {
     }
 
     override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int {
-        val query = matchQuery(uri) ?: throw IllegalArgumentException("Unknown URI $uri")
-
-        val db = dbSchemaManager.writableDatabase
-        val count: Int
-        if (selection != null) {
-            count = db.delete(query.table, selection, selectionArgs)
-        } else {
-            count = db.delete(query.table, query.selection, query.selectionArgs)
-        }
-        if (count > 0 && query.notifyUri != null) {
-            context.contentResolver.notifyChange(query.notifyUri!!, null)
-        }
-        return count
+        throw IllegalArgumentException("Unknown URI $uri")
     }
-
 
     override fun getType(uri: Uri): String? {
         return null
@@ -219,14 +99,14 @@ open class DbContentProvider : ContentProvider() {
         val rowId = db.insert(query.table, SQLiteDatabase.CONFLICT_REPLACE, values)
         if (rowId > 0 && query.notifyUri != null) {
             val noteUri = ContentUris.withAppendedId(query.notifyUri, rowId)
-            context.contentResolver.notifyChange(noteUri, null)
+            context!!.contentResolver.notifyChange(noteUri, null)
             return noteUri
         }
         throw SQLException("Failed to insert row into $uri")
     }
 
     override fun onCreate(): Boolean {
-        AppLog.d("Initializing ${Application.provide(context).database.openHelper.databaseName}")
+        AppLog.d("Initializing ${Application.provide(context!!).database.openHelper.databaseName}")
         return false
     }
 

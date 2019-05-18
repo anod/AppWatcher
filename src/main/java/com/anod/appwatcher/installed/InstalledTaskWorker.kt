@@ -11,7 +11,8 @@ import info.anodsplace.framework.content.AppTitleComparator
 import info.anodsplace.framework.content.AppUpdateTimeComparator
 import info.anodsplace.framework.content.InstalledPackage
 import info.anodsplace.framework.content.getInstalledPackages
-import info.anodsplace.framework.os.LiveDataTask
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.util.*
 
 
@@ -24,9 +25,9 @@ class InstalledLoadResult(
 class InstalledTaskWorker(
         private val context: ApplicationContext,
         private val sortId: Int,
-        private val titleFilter: String) : LiveDataTask.Worker<Void?, InstalledResult>(null) {
+        private val titleFilter: String) {
 
-    override fun run(param: Void?): InstalledResult {
+    suspend fun run(): InstalledResult = withContext(Dispatchers.IO) {
         val appsTable = Application.provide(context).database.apps()
         val watchingPackages = appsTable.loadPackages(false).associateBy { it.packageName }
         val installedPackages = context.packageManager.getInstalledPackages()
@@ -54,9 +55,9 @@ class InstalledTaskWorker(
                     filtered.add(installedPackage)
                 }
             }
-            return Pair(recentlyInstalled, filtered)
+            Pair(recentlyInstalled, filtered)
         } else {
-            return Pair(recentlyInstalled, list)
+            Pair(recentlyInstalled, list)
         }
     }
 }

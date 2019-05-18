@@ -11,7 +11,7 @@ import info.anodsplace.framework.app.ApplicationContext
  */
 class DbContentProviderClient(private val contentProviderClient: ContentProviderClient) {
 
-    constructor(context: ApplicationContext) : this(context.contentResolver.acquireContentProviderClient(DbContentProvider.authority))
+    constructor(context: ApplicationContext) : this(context.contentResolver.acquireContentProviderClient(DbContentProvider.authority)!!)
 
     fun applyBatchUpdates(values: List<ContentValues>, uriMapper: (ContentValues) -> Uri): Array<ContentProviderResult> {
 

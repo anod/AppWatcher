@@ -30,7 +30,7 @@ class AppComponent internal constructor(private val app: AppWatcherApplication):
 
     val prefs = Preferences(app)
 
-    val uploadServiceContentObserver: UploadServiceContentObserver by lazy { UploadServiceContentObserver(app, app.contentResolver) }
+    val uploadServiceContentObserver: UploadServiceContentObserver by lazy { UploadServiceContentObserver(app) }
 
     val requestQueue: RequestQueue by lazy {
        val requestQueue = RequestQueue(NoCache(), OnlineNetwork(networkConnection, Network()), 2)

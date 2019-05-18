@@ -5,11 +5,11 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.map
 import com.anod.appwatcher.AppComponent
 import com.anod.appwatcher.AppWatcherApplication
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.utils.combineLatest
-import com.anod.appwatcher.utils.map
 
 /**
  * @author Alex Gavrishev

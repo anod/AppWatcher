@@ -19,7 +19,7 @@ class NotificationActivity : Activity() {
         val type = intent.getIntExtra(EXTRA_TYPE, 0)
         when (type) {
             TYPE_PLAY -> {
-                val pkg = intent.getStringExtra(EXTRA_PKG)
+                val pkg = intent.getStringExtra(EXTRA_PKG) ?: ""
                 this.startActivitySafely(Intent().forPlayStore(pkg))
             }
             TYPE_MYAPPS -> this.startActivitySafely(Intent().forMyApps(false))
