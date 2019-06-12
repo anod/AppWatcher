@@ -26,7 +26,8 @@ class InstalledWatchListViewModel(application: android.app.Application) : WatchL
     }
 
     override var result: LiveData<LoadResult> = appsList.combineLatest(installed).map { pair ->
-        val appsList = pair.first
+        val appsList = pair.first.first
+        val filter = pair.first.second
         val installed = pair.second
         val recentlyInstalled = installed.first
         val installedPackages = installed.second

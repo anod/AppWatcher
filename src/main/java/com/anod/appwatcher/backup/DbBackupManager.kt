@@ -5,10 +5,8 @@ import android.net.Uri
 import android.os.Environment
 import androidx.room.withTransaction
 import com.anod.appwatcher.Application
-import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppTagsTable
-import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.TagsTable
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext

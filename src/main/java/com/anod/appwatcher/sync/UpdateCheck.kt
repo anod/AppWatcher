@@ -1,12 +1,14 @@
 package com.anod.appwatcher.sync
 
 import android.accounts.Account
+import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Intent
 import android.os.RemoteException
 import android.provider.BaseColumns
 import android.text.TextUtils
 import android.text.format.DateUtils
+import androidx.core.content.contentValuesOf
 import androidx.work.Data
 import com.android.volley.VolleyError
 import com.anod.appwatcher.Application
@@ -15,11 +17,11 @@ import com.anod.appwatcher.backup.gdrive.GDriveSilentSignIn
 import com.anod.appwatcher.backup.gdrive.GDriveSync
 import com.anod.appwatcher.content.AppListCursor
 import com.anod.appwatcher.content.DbContentProvider
-import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.database.AppListTable
+import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.ChangelogTable
 import com.anod.appwatcher.database.contentValues
 import com.anod.appwatcher.preferences.Preferences
@@ -151,7 +153,9 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
     @Throws(RemoteException::class)
     private suspend fun doSync(lastUpdatesViewed: Boolean, authToken: String, account: Account): List<UpdatedApp> {
 
-        val cursor = AppListTable.Queries.load(false, Application.provide(context).database.apps())
+        val database = Application.provide(context).database
+
+        val cursor = AppListTable.Queries.load(false, database.apps())
         val apps = AppListCursor(cursor)
         if (apps.isEmpty) {
             AppLog.i("Sync finished: no apps")
@@ -159,7 +163,6 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         }
 
         val updatedTitles = mutableListOf<UpdatedApp>()
-        val client = DbContentProviderClient(context)
 
         apps.chunked(bulkSize) {
             list -> list.associateBy { it.packageName }
@@ -173,16 +176,15 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
                 AppLog.e("Fetching of bulk updates failed ${e.message ?: ""}")
             }
             AppLog.d("Sent ${docIds.size}. Received ${endpoint.documents.size}")
-            updateApps(endpoint.documents, localApps, client, updatedTitles, lastUpdatesViewed)
+            updateApps(endpoint.documents, localApps, updatedTitles, lastUpdatesViewed, context.contentResolver, database)
         }
 
         apps.close()
-        client.close()
         AppLog.i("Sync finished for ${apps.count} apps")
         return updatedTitles
     }
 
-    private suspend fun updateApps(documents: List<Document>, localApps: Map<String, AppInfo>, client: DbContentProviderClient, updatedTitles: MutableList<UpdatedApp>, lastUpdatesViewed: Boolean) {
+    private suspend fun updateApps(documents: List<Document>, localApps: Map<String, AppInfo>, updatedTitles: MutableList<UpdatedApp>, lastUpdatesViewed: Boolean, contentResolver: ContentResolver, db: AppsDatabase) {
         val fetched = mutableMapOf<String, Boolean>()
         val batch = mutableListOf<ContentValues>()
         val changelog = mutableListOf<ContentValues>()
@@ -200,14 +202,14 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         }
 
         if (batch.isNotEmpty()) {
-            client.applyBatchUpdates(batch) {
+            db.applyBatchUpdates(contentResolver, batch) {
                 val rowId = it.getAsString(BaseColumns._ID)
                 DbContentProvider.appsUri.buildUpon().appendPath(rowId).build()
             }
         }
 
         if (changelog.isNotEmpty()) {
-            client.applyBatchInsert(changelog) {
+            db.applyBatchInsert(contentResolver, changelog) {
                 DbContentProvider.changelogUri
                         .buildUpon()
                         .appendPath("apps")
@@ -226,15 +228,15 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
                     if (it.status == AppInfoMetadata.STATUS_UPDATED) {
                         it.status = AppInfoMetadata.STATUS_NORMAL
                         AppLog.d("Set not fetched app as viewed")
-                        val values = ContentValues()
-                        values.put(BaseColumns._ID, it.rowId)
-                        values.put(AppListTable.Columns.status, AppInfoMetadata.STATUS_NORMAL)
-                        statusBatch.add(values)
+                        statusBatch.add(contentValuesOf(
+                            BaseColumns._ID to it.rowId,
+                            AppListTable.Columns.status to AppInfoMetadata.STATUS_NORMAL
+                        ))
                     }
                 }
             }
             if (statusBatch.isNotEmpty()) {
-                client.applyBatchUpdates(statusBatch) {
+                db.applyBatchUpdates(contentResolver, statusBatch) {
                     val rowId = it.getAsString(BaseColumns._ID)
                     DbContentProvider.appsUri.buildUpon().appendPath(rowId).build()
                 }

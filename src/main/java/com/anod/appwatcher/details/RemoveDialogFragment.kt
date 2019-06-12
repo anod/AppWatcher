@@ -1,16 +1,12 @@
 package com.anod.appwatcher.details
 
 import android.app.Dialog
-import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
-import com.anod.appwatcher.content.DbContentProviderClient
-import com.anod.appwatcher.content.AddWatchAppAsyncTask
 import com.anod.appwatcher.model.AppInfoMetadata
 import info.anodsplace.framework.app.DialogMessage
-import info.anodsplace.framework.os.BackgroundTask
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

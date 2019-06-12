@@ -1,16 +1,23 @@
 package com.anod.appwatcher.database
 
+import android.content.*
+import android.net.Uri
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
-import android.content.Context
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.database.entities.AppTag
 import com.anod.appwatcher.database.entities.Tag
 import info.anodsplace.framework.AppLog
+import com.anod.appwatcher.content.DbContentProvider
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.util.ArrayList
+import java.util.concurrent.Callable
+
 
 /**
  * @author Alex Gavrishev
@@ -26,6 +33,28 @@ abstract class AppsDatabase: RoomDatabase() {
     abstract fun changelog(): ChangelogTable
     abstract fun tags(): TagsTable
     abstract fun appTags(): AppTagsTable
+
+    suspend fun applyBatchUpdates(contentResolver: ContentResolver, values: List<ContentValues>, uriMapper: (ContentValues) -> Uri): Array<ContentProviderResult> {
+        val operations = values.map {
+            ContentProviderOperation.newUpdate(uriMapper(it)).withValues(it).build()
+        }
+
+        return applyBatch(contentResolver, operations)
+    }
+
+    suspend fun applyBatchInsert(contentResolver: ContentResolver, values: List<ContentValues>, uriMapper: (ContentValues) -> Uri): Array<ContentProviderResult> {
+        val operations = values.map {
+            ContentProviderOperation.newInsert(uriMapper(it)).withValues(it).build()
+        }
+
+        return applyBatch(contentResolver, operations)
+    }
+
+    private suspend fun applyBatch(contentResolver: ContentResolver, operations: List<ContentProviderOperation>): Array<ContentProviderResult> = withContext(Dispatchers.IO) {
+        return@withContext runInTransaction(Callable<Array<ContentProviderResult>> {
+            contentResolver.applyBatch(DbContentProvider.authority, ArrayList(operations))
+        })
+    }
 
     companion object {
         const val version = 15

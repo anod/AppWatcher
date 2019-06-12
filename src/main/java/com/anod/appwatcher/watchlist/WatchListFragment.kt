@@ -137,11 +137,10 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
 
         // Setup adapter for the section
         section = sectionForClassName(arguments!!.getString(ARG_SECTION_PROVIDER)!!)
-        val installedApps = InstalledApps.PackageManager(activity!!.packageManager)
-        section.attach(this, installedApps, this)
-
         val viewModel = section.viewModel(this)
-        viewModel.init(sortId, tag, createFilter(filterId, installedApps), prefs)
+        section.attach(this, viewModel.installedApps, this)
+
+        viewModel.init(sortId, tag, filterId, prefs)
 
         // Setup layout manager
         val layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
@@ -206,15 +205,6 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
             section.onModelLoaded(it)
             progress.visibility = View.GONE
             isListVisible = true
-        }
-    }
-
-    private fun createFilter(filterId: Int, installedApps: InstalledApps): AppListFilter {
-        return when (filterId) {
-            Filters.INSTALLED -> AppListFilterInclusion(AppListFilterInclusion.Installed(), installedApps)
-            Filters.UNINSTALLED -> AppListFilterInclusion(AppListFilterInclusion.Uninstalled(), installedApps)
-            Filters.UPDATABLE -> AppListFilterInclusion(AppListFilterInclusion.Updatable(), installedApps)
-            else -> AppListFilterInclusion(AppListFilterInclusion.All(), installedApps)
         }
     }
 

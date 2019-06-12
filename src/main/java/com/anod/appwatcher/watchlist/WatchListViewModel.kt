@@ -12,6 +12,7 @@ import com.anod.appwatcher.model.*
 import com.anod.appwatcher.preferences.Preferences
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
+import info.anodsplace.framework.content.InstalledApps
 
 /**
  * @author Alex Gavrishev
@@ -27,40 +28,53 @@ open class WatchListViewModel(application: Application): AndroidViewModel(applic
     val context: ApplicationContext
         get() = ApplicationContext(getApplication())
 
+    val installedApps = InstalledApps.PackageManager(context.packageManager)
     var showRecentlyUpdated = false
     val database: AppsDatabase
         get() = com.anod.appwatcher.Application.provide(context).database
 
     var titleFilter = ""
     var sortId = 0
-    var filter: AppListFilter = AppListFilter.None()
     var tag: Tag? = null
     val sections: MutableLiveData<SparseArray<SectionHeader>> = MutableLiveData()
     val reload = MutableLiveData(false)
+
+    private var filterId = 0
+
     internal val appsList = reload.switchMap {
         AppListTable.Queries.loadAppList(sortId, tag, titleFilter, database.apps()).map { allApps ->
-            filter.resetNewCount()
+            val filter = createFilter(filterId, installedApps)
             val filtered = allApps.filter { appItem -> !filter.filterRecord(appItem) }
-            filtered
+            Pair(filtered, filter)
         }
     }
-    open val result = appsList.map {
+    open val result = appsList.map { list ->
         val sections = SectionHeaderFactory(showRecentlyUpdated, hasSectionRecent = false, hasSectionOnDevice = false)
-                .create(it.size,
-                        filter.newCount,
-                        filter.recentlyUpdatedCount,
-                        filter.updatableNewCount,
+                .create(list.first.size,
+                        list.second.newCount,
+                        list.second.recentlyUpdatedCount,
+                        list.second.updatableNewCount,
                         hasRecentlyInstalled = false,
                         hasInstalledPackages = false)
         this@WatchListViewModel.sections.value = sections
-        LoadResult(it, sections)
+        LoadResult(list.first, sections)
     }
 
-    fun init(sortId: Int, tag: Tag?, listFilter: AppListFilter, prefs: Preferences) {
+    fun init(sortId: Int, tag: Tag?, filterId: Int, prefs: Preferences) {
         this.sortId = sortId
         this.tag = tag
-        this.filter = listFilter
+        this.filterId = filterId
         this.showRecentlyUpdated = prefs.showRecentlyUpdated
         this.reload.value = true
+    }
+
+
+    private fun createFilter(filterId: Int, installedApps: InstalledApps): AppListFilter {
+        return when (filterId) {
+            Filters.INSTALLED -> AppListFilterInclusion(AppListFilterInclusion.Installed(), installedApps)
+            Filters.UNINSTALLED -> AppListFilterInclusion(AppListFilterInclusion.Uninstalled(), installedApps)
+            Filters.UPDATABLE -> AppListFilterInclusion(AppListFilterInclusion.Updatable(), installedApps)
+            else -> AppListFilterInclusion(AppListFilterInclusion.All(), installedApps)
+        }
     }
 }

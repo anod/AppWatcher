@@ -13,8 +13,6 @@ interface CountableFilter {
     val newCount: Int
     val updatableNewCount: Int
     val recentlyUpdatedCount: Int
-
-    fun resetNewCount()
 }
 
 interface AppListFilter: CountableFilter {
@@ -24,9 +22,6 @@ interface AppListFilter: CountableFilter {
     class None : AppListFilter {
         override fun filterRecord(item: AppListItem): Boolean {
             return false
-        }
-
-        override fun resetNewCount() {
         }
 
         override val newCount: Int = 0
@@ -94,11 +89,5 @@ class AppListFilterInclusion(private val inclusion: Inclusion, private val insta
             }
         }
         return false
-    }
-
-    override fun resetNewCount() {
-        newCount = 0
-        updatableNewCount = 0
-        recentlyUpdatedCount = 0
     }
 }

@@ -1,7 +1,6 @@
 package com.anod.appwatcher.backup.gdrive
 
 import com.anod.appwatcher.backup.DbJsonWriter
-import com.anod.appwatcher.content.DbContentProviderClient
 import com.anod.appwatcher.database.AppsDatabase
 import com.google.android.gms.drive.DriveFile
 import com.google.android.gms.drive.DriveId
