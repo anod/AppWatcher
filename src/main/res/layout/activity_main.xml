@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         android:paddingTop="0dp">
 
-        <info.anodsplace.framework.view.ThemableAppBarLayout
+        <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/appbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -21,7 +21,7 @@
 
             <include layout="@layout/toolbar" />
 
-        </info.anodsplace.framework.view.ThemableAppBarLayout>
+        </com.google.android.material.appbar.AppBarLayout>
 
         <androidx.viewpager.widget.ViewPager
             android:id="@+id/viewpager"

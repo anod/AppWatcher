@@ -17,6 +17,9 @@ import java.io.Writer
  * *
  * @date 2015-02-27
  */
+
+typealias TagId = Int
+
 class DbJsonWriter {
 
     @Throws(IOException::class)
@@ -25,7 +28,7 @@ class DbJsonWriter {
         writer.beginObject()
 
         val tags = db.tags().load().associate { it.id to it }
-        val appsTags = mutableMapOf<String, MutableList<Int>>()
+        val appsTags = mutableMapOf<String, MutableList<TagId>>()
         db.appTags().load().forEach {
             if (appsTags[it.appId] == null) {
                 appsTags[it.appId] = mutableListOf()
@@ -37,7 +40,9 @@ class DbJsonWriter {
         val appList = writer.name("apps")
         appList.beginArray()
         appsCursor.forEach { appInfo ->
-            val appTags = appsTags[appInfo.appId]?.map { tags.getValue(it) } ?: listOf()
+            val appTags = appsTags[appInfo.appId]?.mapNotNull {
+                tags[it]
+            } ?: listOf()
             AppJsonObject(appInfo, appTags, appList)
         }
         appList.endArray()

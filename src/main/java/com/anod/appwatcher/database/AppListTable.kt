@@ -6,7 +6,6 @@ import androidx.sqlite.db.SupportSQLiteQuery
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
-import android.net.Uri
 import android.provider.BaseColumns
 import android.text.TextUtils
 import androidx.room.*
@@ -14,6 +13,7 @@ import com.anod.appwatcher.database.entities.*
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.preferences.Preferences
+import info.anodsplace.framework.AppLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.ArrayList
@@ -98,8 +98,11 @@ interface AppListTable {
         }
 
         suspend fun insert(apps: List<AppInfo>, db: AppsDatabase) = withContext(Dispatchers.IO) {
+            AppLog.d("insert " + apps.size)
             apps.forEach {
-                db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, it.contentValues)
+                AppLog.d("insert " + it.appId)
+                val rowId = db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, it.contentValues)
+                AppLog.d("insert result $rowId")
             }
         }
 

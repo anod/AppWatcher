@@ -1,5 +1,9 @@
 package info.anodsplace.framework.app
 
+import android.content.res.ColorStateList
+import android.graphics.Color
+import android.graphics.PorterDuff
+import android.os.Build
 import android.os.Bundle
 import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
@@ -8,7 +12,6 @@ import androidx.appcompat.widget.Toolbar
 import android.view.MenuItem
 import android.view.View
 import info.anodsplace.framework.R
-import info.anodsplace.framework.view.ThemableAppBarLayout
 
 /**
  * @author Alex Gavrishev
@@ -29,7 +32,6 @@ abstract class ToolbarActivity : AppCompatActivity(), CustomThemeActivity {
         if (themeColors.available) {
             WindowCustomTheme.apply(themeColors, window, this)
         }
-        ThemableAppBarLayout.forceNightMode = !themeColors.statusBarColor.isLight
         super.onCreate(savedInstanceState)
         setContentView(layoutResource)
         setupToolbar()
@@ -37,6 +39,16 @@ abstract class ToolbarActivity : AppCompatActivity(), CustomThemeActivity {
 
     private fun setupToolbar() {
         val toolbar = findViewById<View>(R.id.toolbar) as Toolbar
+        if (!themeColors.statusBarColor.isLight) {
+            toolbar.setTitleTextColor(Color.WHITE)
+            toolbar.setSubtitleTextColor(Color.WHITE)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                for (i in 0 until toolbar.menu.size()) {
+                    toolbar.menu.getItem(i).iconTintList = ColorStateList.valueOf(Color.WHITE)
+                    toolbar.menu.getItem(i).iconTintMode = PorterDuff.Mode.SRC_IN
+                }
+            }
+        }
         //set the Toolbar as ActionBar
         setSupportActionBar(toolbar)
 

@@ -86,19 +86,21 @@ class DbBackupManager(private val context: ApplicationContext) {
 
         val result = container ?: return@withContext ERROR_FILE_READ
 
-        val db = Application.provide(context).database
-        if (result.apps.isNotEmpty()) {
-            db.withTransaction {
-                db.apps().delete()
-                db.tags().delete()
-                db.appTags().delete()
-
-                AppListTable.Queries.insert(result.apps, db)
-                TagsTable.Queries.insert(result.tags, db)
-                AppTagsTable.Queries.insert(result.appTags, db)
-            }
+        if (result.apps.isEmpty()) {
+            return@withContext RESULT_OK
         }
-        return@withContext RESULT_OK
+
+        val db = Application.provide(context).database
+        return@withContext db.withTransaction {
+            db.apps().delete()
+            db.tags().delete()
+            db.appTags().delete()
+
+            AppListTable.Queries.insert(result.apps, db)
+            TagsTable.Queries.insert(result.tags, db)
+            AppTagsTable.Queries.insert(result.appTags, db)
+            return@withTransaction RESULT_OK
+        }
     }
 
     companion object {

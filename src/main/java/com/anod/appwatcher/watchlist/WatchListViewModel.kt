@@ -37,7 +37,7 @@ open class WatchListViewModel(application: Application): AndroidViewModel(applic
     var tag: Tag? = null
     val sections: MutableLiveData<SparseArray<SectionHeader>> = MutableLiveData()
     val reload = MutableLiveData(false)
-    val appsList = reload.switchMap {
+    internal val appsList = reload.switchMap {
         AppListTable.Queries.loadAppList(sortId, tag, titleFilter, database.apps()).map { allApps ->
             filter.resetNewCount()
             val filtered = allApps.filter { appItem -> !filter.filterRecord(appItem) }

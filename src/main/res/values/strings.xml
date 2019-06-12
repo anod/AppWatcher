@@ -171,9 +171,11 @@
         <item>By date &#x2193;</item>
     </string-array>
 
+    <string name="theme_system_dark">Set by Battery Saver (Dark)</string>
+    <string name="theme_system_black">Set by Battery Saver (Black)</string>
     <string-array name="themes">
-        <item>Auto (Dark from 10pm till 6am)</item> <!-- MODE_NIGHT_AUTO = 0; -->
-        <item>Auto (Black from 10pm till 6am)</item> <!-- MODE_NIGHT_AUTO = 0; -->
+        <item>@string/theme_system_dark</item> <!-- MODE_NIGHT_AUTO_BATTERY = 0; -->
+        <item>@string/theme_system_black</item> <!-- MODE_NIGHT_AUTO_BATTERY = 0; -->
         <item>Light</item> <!-- MODE_NIGHT_NO = 1; -->
         <item>Dark</item> <!-- MODE_NIGHT_YES = 2; -->
         <item>Black</item> <!-- MODE_NIGHT_YES = 2; -->

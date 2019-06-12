@@ -15,6 +15,7 @@ class SettingsViewModel(application: Application): AndroidViewModel(application)
         return liveData {
             emit(-1)
             emit(ImportTask(ApplicationContext(getApplication())).execute(srcUri))
+            emit(-1)
         }
     }
 

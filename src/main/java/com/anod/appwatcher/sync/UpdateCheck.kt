@@ -32,9 +32,7 @@ import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.playstore.BulkDetailsEndpoint
 import info.anodsplace.playstore.PlayStoreEndpoint
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
 

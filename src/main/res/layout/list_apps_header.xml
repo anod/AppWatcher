@@ -23,6 +23,7 @@
         android:maxLines="1"
         android:textAllCaps="true"
         android:textColor="@color/list_header_text"
+        android:textStyle="bold"
         tools:text="Recently updated" />
 
     <TextView
