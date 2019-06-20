@@ -40,7 +40,11 @@ open class RecentSection : WatchListFragment.DefaultSection() {
         super.onModelLoaded(result)
         val value = result as InstalledLoadResult
         val adapter = getInnerAdapter<RecentlyInstalledAppsAdapter>(ADAPTER_RECENT)
-        adapter.recentlyInstalled = value.recentlyInstalled
+        val watchingPackages = value.appsList.associate { Pair(it.app.packageName, it.app.rowId) }
+        adapter.recentlyInstalled = value.recentlyInstalled.map {
+            val rowId = watchingPackages[it] ?: -1
+            Pair(it, rowId)
+        }
     }
 
     companion object {
@@ -64,7 +68,10 @@ class OnDeviceSection : WatchListFragment.DefaultSection() {
         super.onModelLoaded(result)
         val value = result as InstalledLoadResult
         val adapter = getInnerAdapter<InstalledAppsAdapter>(ADAPTER_INSTALLED)
-        adapter.installedPackages = value.installedPackages
+        val watchingPackages = value.appsList.map { it.app.packageName }.associate { Pair(it, true) }
+        adapter.installedPackages = value.installedPackages.filter {
+            !watchingPackages.contains(it.packageName)
+        }
     }
 
     companion object {

@@ -15,7 +15,7 @@ import info.anodsplace.framework.content.InstalledPackage
  */
 
 typealias InstalledPairRow = Pair<String, Int>
-typealias InstalledResult = Pair<List<InstalledPairRow>, List<InstalledPackage>>
+typealias InstalledResult = Pair<List<String>, List<InstalledPackage>>
 
 class InstalledWatchListViewModel(application: android.app.Application) : WatchListViewModel(application) {
     var hasSectionRecent = false

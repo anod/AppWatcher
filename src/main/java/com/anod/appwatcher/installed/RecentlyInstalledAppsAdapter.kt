@@ -38,12 +38,12 @@ open class RecentlyInstalledAppsAdapter(
         return 0
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecentlyInstalledAppsAdapter.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.list_item_recently_installed, parent, false)
         return ViewHolder(view, iconLoader, packageManager, listener)
     }
 
-    override fun onBindViewHolder(holder: RecentlyInstalledAppsAdapter.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(recentlyInstalled)
     }
 

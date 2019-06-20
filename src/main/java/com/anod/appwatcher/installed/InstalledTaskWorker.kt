@@ -17,7 +17,7 @@ import java.util.*
 
 
 class InstalledLoadResult(
-        val recentlyInstalled: List<InstalledPairRow>,
+        val recentlyInstalled: List<String>,
         val installedPackages: List<InstalledPackage>,
         appsList: AppsList,
         sections: SparseArray<SectionHeader>): LoadResult(appsList, sections)
@@ -28,36 +28,31 @@ class InstalledTaskWorker(
         private val titleFilter: String) {
 
     suspend fun run(): InstalledResult = withContext(Dispatchers.IO) {
-        val appsTable = Application.provide(context).database.apps()
-        val watchingPackages = appsTable.loadPackages(false).associateBy { it.packageName }
         val installedPackages = context.packageManager.getInstalledPackages()
 
         val recentlyInstalled = installedPackages.sortedWith(AppUpdateTimeComparator(-1))
                 .take(10)
-                .map {
-                    val rowId = watchingPackages[it.packageName]?.rowId ?: -1
-                    Pair(it.packageName, rowId)
-                }
+                .map {it.packageName }
 
-        val list = installedPackages.filter { !watchingPackages.containsKey(it.packageName) }
         when (sortId) {
-            Preferences.SORT_NAME_DESC -> Collections.sort(list, AppTitleComparator(-1))
-            Preferences.SORT_DATE_ASC -> Collections.sort(list, AppUpdateTimeComparator(1))
-            Preferences.SORT_DATE_DESC -> Collections.sort(list, AppUpdateTimeComparator(-1))
-            else -> Collections.sort(list, AppTitleComparator(1))
+            Preferences.SORT_NAME_DESC -> Collections.sort(installedPackages, AppTitleComparator(-1))
+            Preferences.SORT_DATE_ASC -> Collections.sort(installedPackages, AppUpdateTimeComparator(1))
+            Preferences.SORT_DATE_DESC -> Collections.sort(installedPackages, AppUpdateTimeComparator(-1))
+            else -> Collections.sort(installedPackages, AppTitleComparator(1))
         }
 
         if (titleFilter.isNotEmpty()) {
-            val filtered = ArrayList<InstalledPackage>(list.size)
-            val lcFilter = titleFilter.toLowerCase()
-            for (installedPackage in list) {
-                if (installedPackage.title.toLowerCase().contains(lcFilter)) {
+            val filtered = ArrayList<InstalledPackage>(installedPackages.size)
+            val locale = Locale.getDefault()
+            val lcFilter = titleFilter.toLowerCase(locale)
+            for (installedPackage in installedPackages) {
+                if (installedPackage.title.toLowerCase(locale).contains(lcFilter)) {
                     filtered.add(installedPackage)
                 }
             }
             Pair(recentlyInstalled, filtered)
         } else {
-            Pair(recentlyInstalled, list)
+            Pair(recentlyInstalled, installedPackages)
         }
     }
 }
