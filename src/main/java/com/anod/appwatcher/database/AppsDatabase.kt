@@ -62,6 +62,7 @@ abstract class AppsDatabase: RoomDatabase() {
 
         fun instance(context: Context): AppsDatabase {
             return Room.databaseBuilder(context, AppsDatabase::class.java, dbName)
+                    .enableMultiInstanceInvalidation()
                     .addMigrations(
                             MIGRATION_9_11,
                             MIGRATION_11_12,

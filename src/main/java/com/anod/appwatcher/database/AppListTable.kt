@@ -86,15 +86,11 @@ interface AppListTable {
             return table.observe(SimpleSQLiteQuery(sql, selection.second))
         }
 
-        suspend fun insert(app: AppInfo, db: AppsDatabase): Long {
-            var rowId: Long = -1
-            withContext(Dispatchers.IO) {
-                // Skip id to apply autoincrement
-                rowId = db.runInTransaction(Callable<Long> {
-                    db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, app.contentValues)
-                })
-            }
-            return rowId
+        suspend fun insert(app: AppInfo, db: AppsDatabase): Long = withContext(Dispatchers.IO) {
+            // Skip id to apply autoincrement
+            return@withContext db.runInTransaction(Callable<Long> {
+                db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, app.contentValues)
+            })
         }
 
         suspend fun insert(apps: List<AppInfo>, db: AppsDatabase) = withContext(Dispatchers.IO) {
@@ -195,27 +191,6 @@ interface AppListTable {
         const val versionNumber = "$table.ver_num"
     }
 
-    object Projection {
-        const val _ID = 0
-        const val appId = 1
-        const val packageName = 2
-        const val versionNumber = 3
-        const val versionName = 4
-        const val title = 5
-        const val creator = 6
-        const val status = 7
-        const val uploadTime = 8
-        const val priceText = 9
-        const val priceCurrency = 10
-        const val priceMicros = 11
-        const val uploadDate = 12
-        const val detailsUrl = 13
-        const val iconUrl = 14
-        const val appType = 15
-        const val refreshTime = 16
-        const val recentFlag = 17
-    }
-
     companion object {
 
         const val ERROR_ALREADY_ADDED = -1
@@ -289,5 +264,6 @@ val AppInfo.contentValues: ContentValues
 
         values.put(AppListTable.Columns.appType, appType)
         values.put(AppListTable.Columns.updateTimestamp, updateTime)
+        AppLog.d("Values: $values")
         return values
     }

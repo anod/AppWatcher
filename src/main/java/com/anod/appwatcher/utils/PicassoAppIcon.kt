@@ -46,7 +46,7 @@ class PicassoAppIcon(context: Context) {
     }
 
     fun retrieve(imageUrl: String): RequestCreator {
-        return picasso.load(imageUrl)
+        return picasso.load(if (imageUrl.isEmpty()) null else imageUrl)
                 .resize(iconSize, iconSize)
                 .centerInside()
                 .onlyScaleDown()
