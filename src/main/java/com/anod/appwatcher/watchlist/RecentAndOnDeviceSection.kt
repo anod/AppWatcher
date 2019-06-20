@@ -66,16 +66,12 @@ class OnDeviceSection : WatchListFragment.DefaultSection() {
 
     override fun onModelLoaded(result: LoadResult) {
         super.onModelLoaded(result)
-        val value = result as InstalledLoadResult
         val adapter = getInnerAdapter<InstalledAppsAdapter>(ADAPTER_INSTALLED)
-        val watchingPackages = value.appsList.map { it.app.packageName }.associate { Pair(it, true) }
-        adapter.installedPackages = value.installedPackages.filter {
-            !watchingPackages.contains(it.packageName)
-        }
+        onModelLoaded(result, adapter)
     }
 
     companion object {
-        private const val ADAPTER_INSTALLED = 1
+        const val ADAPTER_INSTALLED = 1
 
         fun attach(fragment: WatchListFragment, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener, section: WatchListFragment.DefaultSection) {
             val context = fragment.context!!
@@ -85,6 +81,14 @@ class OnDeviceSection : WatchListFragment.DefaultSection() {
             section.adapterIndexMap.put(ADAPTER_INSTALLED, index)
             val viewModel = ViewModelProviders.of(fragment).get(InstalledWatchListViewModel::class.java)
             viewModel.hasSectionOnDevice = true
+        }
+
+        fun onModelLoaded(result: LoadResult, adapter: InstalledAppsAdapter) {
+            val value = result as InstalledLoadResult
+            val watchingPackages = value.appsList.map { it.app.packageName }.associate { Pair(it, true) }
+            adapter.installedPackages = value.installedPackages.filter {
+                !watchingPackages.contains(it.packageName)
+            }
         }
     }
 }
@@ -98,5 +102,11 @@ class RecentAndOnDeviceSection : RecentSection() {
 
     override fun viewModel(fragment: WatchListFragment): WatchListViewModel {
         return ViewModelProviders.of(fragment).get(InstalledWatchListViewModel::class.java)
+    }
+
+    override fun onModelLoaded(result: LoadResult) {
+        super.onModelLoaded(result)
+        val adapter = getInnerAdapter<InstalledAppsAdapter>(OnDeviceSection.ADAPTER_INSTALLED)
+        OnDeviceSection.onModelLoaded(result, adapter)
     }
 }
