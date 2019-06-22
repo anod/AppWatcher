@@ -3,6 +3,7 @@ package com.anod.appwatcher.tags
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
 import android.view.MenuItem
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.Filters
@@ -11,7 +12,7 @@ import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.watchlist.WatchListActivity
 import com.anod.appwatcher.watchlist.WatchListFragment
 import info.anodsplace.framework.app.CustomThemeColors
-import kotlinx.android.synthetic.main.activity_app_changelog.*
+import kotlinx.android.synthetic.main.activity_main.*
 
 /**
  * @author Alex Gavrishev
@@ -26,6 +27,11 @@ class AppsTagActivity : WatchListActivity() {
         get() = R.layout.activity_main
     override val menuResource: Int
         get() = R.menu.tagslist
+    override val themeRes: Int
+        get() = if (themeColors.statusBarColor.isLight)
+            Theme(this).theme
+        else
+            Theme(this).themeDarkActionBar
 
     override val themeColors: CustomThemeColors
         get() = CustomThemeColors(tag.color, Theme(this).colors.navigationBarColor)

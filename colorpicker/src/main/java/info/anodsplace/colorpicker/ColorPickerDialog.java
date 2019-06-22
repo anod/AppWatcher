@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StyleRes;
 import androidx.fragment.app.DialogFragment;
 import androidx.appcompat.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -38,17 +39,26 @@ public class ColorPickerDialog extends ColorPickerDialogSystem {
 
     private Button mHexButton;
 
+    private final int mTheme;
 
-    public static ColorPickerDialog newInstance(int selectedColor, boolean alphaSliderVisible, Context context) {
-        ColorPickerDialog ret = new ColorPickerDialog();
+    public static ColorPickerDialog newInstance(int selectedColor, boolean alphaSliderVisible, Context context, @StyleRes int theme) {
+        ColorPickerDialog ret = new ColorPickerDialog(theme);
         ret.initialize(ColorChoice.create(context, R.array.color_picker_values), selectedColor,
                 alphaSliderVisible);
         return ret;
     }
 
-    public void initialize(int[] colors, int selectedColor, boolean alphaSliderVisible) {
+    private void initialize(int[] colors, int selectedColor, boolean alphaSliderVisible) {
         super.initialize(R.string.color_picker_default_title, colors, selectedColor, 5, ColorPickerDialog.SIZE_SMALL);
         getArguments().putBoolean(KEY_ALPHA, alphaSliderVisible);
+    }
+
+    ColorPickerDialog(@StyleRes int theme) {
+        mTheme = theme;
+    }
+
+    ColorPickerDialog() {
+        this(R.style.Theme_AppCompat_Dialog);
     }
 
     @Override
@@ -69,8 +79,8 @@ public class ColorPickerDialog extends ColorPickerDialogSystem {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        // Do not use AlertBuilder, itcause requestFeature exception
-        return new Dialog(getActivity(), R.style.Theme_AppCompat_Dialog);
+        // Do not use AlertBuilder, it cause requestFeature exception
+        return new Dialog(requireActivity(), mTheme);
     }
 
     @Nullable

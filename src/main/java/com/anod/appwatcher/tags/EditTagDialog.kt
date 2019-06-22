@@ -50,7 +50,7 @@ class EditTagDialog : DialogFragment(), ColorPickerSwatch.OnColorSelectedListene
         }
 
         colorPreview.setOnClickListener {
-            val dialog = ColorPickerDialog.newInstance(tag.color, false, activity)
+            val dialog = ColorPickerDialog.newInstance(tag.color, false, activity, Theme(requireActivity()).themeDialog)
             dialog.setStyle(STYLE_NORMAL, Theme(activity!!).themeDialogNoActionBar)
             dialog.setOnColorSelectedListener(this)
             dialog.show(fragmentManager!!, "color-picker")

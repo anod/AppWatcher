@@ -3,7 +3,8 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical"
-    android:background="@color/background_floating_material_dark"
+    android:paddingLeft="12dp"
+    android:paddingRight="12dp"
     xmlns:tools="http://schemas.android.com/tools"
     >
 
@@ -15,14 +16,14 @@
 
         <Button
             android:id="@+id/hex_switch"
-            style="?attr/actionButtonStyle"
+            style="?attr/buttonBarPositiveButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
             tools:text="#000000" />
     </androidx.appcompat.widget.Toolbar>
 
-    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    <ScrollView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -84,8 +85,6 @@
         android:layout_height="wrap_content"
         android:layoutDirection="locale"
         android:orientation="horizontal"
-        android:paddingLeft="12dp"
-        android:paddingRight="12dp"
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
         android:gravity="bottom">

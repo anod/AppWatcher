@@ -1,38 +1,35 @@
 package com.anod.appwatcher.watchlist
 
 import android.accounts.Account
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
-import androidx.annotation.MenuRes
-import androidx.viewpager.widget.ViewPager
-import androidx.appcompat.widget.SearchView
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.MenuRes
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.FragmentPagerAdapter
-import androidx.lifecycle.*
-import com.anod.appwatcher.*
+import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.observe
+import androidx.viewpager.widget.ViewPager
+import com.anod.appwatcher.Application
+import com.anod.appwatcher.MarketSearchActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.navigation.DrawerActivity
 import com.anod.appwatcher.navigation.DrawerViewModel
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.search.SearchActivity
-import com.anod.appwatcher.sync.ManualSyncService
-import com.anod.appwatcher.sync.UpdateCheck
 import com.anod.appwatcher.upgrade.SettingsUpgrade
 import com.anod.appwatcher.upgrade.SetupInterfaceUpgrade
 import com.anod.appwatcher.upgrade.UpgradeCheck
 import com.anod.appwatcher.upgrade.UpgradeRefresh
-import info.anodsplace.framework.app.DialogSingleChoice
 import com.anod.appwatcher.utils.Theme
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
+import info.anodsplace.framework.app.DialogSingleChoice
 
 sealed class ListState
 object SyncStarted : ListState()
@@ -40,67 +37,6 @@ class SyncStopped(val updatesCount: Int): ListState()
 object Updated: ListState()
 object NoNetwork: ListState()
 object ShowAuthDialog: ListState()
-
-/**
- * @author Alex Gavrishev
- * *
- * @date 18/03/2017.
- */
-class WatchListStateViewModel(application: android.app.Application) : AndroidViewModel(application) {
-    val titleFilter = MutableLiveData<String>()
-    val sortId = MutableLiveData<Int>()
-    val listState = MutableLiveData<ListState>()
-    var isAuthenticated = false
-    /**
-     * Receive notifications from UpdateCheck
-     */
-    private val syncFinishedReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            when (intent.action) {
-                UpdateCheck.syncProgress -> listState.value = SyncStarted
-                UpdateCheck.syncStop -> {
-                    val updatesCount = intent.getIntExtra(UpdateCheck.extrasUpdatesCount, 0)
-                    listState.value = SyncStopped(updatesCount)
-                }
-                listChangedEvent -> listState.value = Updated
-            }
-        }
-    }
-
-    init {
-        val filter = IntentFilter()
-        filter.addAction(UpdateCheck.syncProgress)
-        filter.addAction(UpdateCheck.syncStop)
-        filter.addAction(listChangedEvent)
-        application.registerReceiver(syncFinishedReceiver, filter)
-    }
-
-    override fun onCleared() {
-        app.unregisterReceiver(syncFinishedReceiver)
-    }
-
-    private val app: AppWatcherApplication
-        get() = getApplication()
-
-    fun requestRefresh() {
-        AppLog.d("Refresh requested")
-        if (!isAuthenticated) {
-            if (Application.provide(app).networkConnection.isNetworkAvailable) {
-                this.listState.value = ShowAuthDialog
-            } else {
-                this.listState.value = NoNetwork
-            }
-            return
-        }
-
-        ManualSyncService.startActionSync(app)
-        this.listState.value = SyncStarted
-    }
-
-    companion object {
-        const val listChangedEvent = "com.anod.appwatcher.list.changed"
-    }
-}
 
 abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionListener, SearchView.OnQueryTextListener {
 

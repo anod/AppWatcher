@@ -5,12 +5,14 @@ import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Build
 import android.os.Bundle
+import android.view.Menu
 import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
 import android.view.MenuItem
 import android.view.View
+import androidx.core.graphics.drawable.DrawableCompat
 import info.anodsplace.framework.R
 
 /**
@@ -39,21 +41,29 @@ abstract class ToolbarActivity : AppCompatActivity(), CustomThemeActivity {
 
     private fun setupToolbar() {
         val toolbar = findViewById<View>(R.id.toolbar) as Toolbar
-        if (!themeColors.statusBarColor.isLight) {
-            toolbar.setTitleTextColor(Color.WHITE)
-            toolbar.setSubtitleTextColor(Color.WHITE)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                for (i in 0 until toolbar.menu.size()) {
-                    toolbar.menu.getItem(i).iconTintList = ColorStateList.valueOf(Color.WHITE)
-                    toolbar.menu.getItem(i).iconTintMode = PorterDuff.Mode.SRC_IN
-                }
-            }
-        }
         //set the Toolbar as ActionBar
         setSupportActionBar(toolbar)
 
-        val ab = supportActionBar
-        ab?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        val result = super.onCreateOptionsMenu(menu)
+        if (!themeColors.statusBarColor.isLight) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                for (i in 0 until menu.size()) {
+                    menu.getItem(i).iconTintList = ColorStateList.valueOf(Color.WHITE)
+                    menu.getItem(i).iconTintMode = PorterDuff.Mode.SRC_IN
+                }
+            } else {
+                for (i in 0 until menu.size()) {
+                    val icon = DrawableCompat.wrap( menu.getItem(i).icon)
+                    DrawableCompat.setTint(icon, Color.WHITE)
+                    menu.getItem(i).icon = icon
+                }
+            }
+        }
+        return result
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
