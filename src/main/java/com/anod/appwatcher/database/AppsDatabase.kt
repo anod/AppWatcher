@@ -129,6 +129,7 @@ abstract class AppsDatabase: RoomDatabase() {
                 database.execSQL("UPDATE app_list SET price_text = '' WHERE price_text IS NULL")
                 database.execSQL("UPDATE app_list SET price_currency = '' WHERE price_currency IS NULL")
                 database.execSQL("UPDATE app_list SET price_micros = 0 WHERE price_micros IS NULL")
+                database.execSQL("UPDATE app_list SET sync_version = 0 WHERE sync_version IS NULL")
                 database.execSQL("CREATE TABLE IF NOT EXISTS `app_list_temp` " +
                         "(`_id` INTEGER NOT NULL, " +
                         "`app_id` TEXT NOT NULL, " +

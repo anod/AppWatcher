@@ -57,9 +57,11 @@ abstract class ToolbarActivity : AppCompatActivity(), CustomThemeActivity {
                 }
             } else {
                 for (i in 0 until menu.size()) {
-                    val icon = DrawableCompat.wrap( menu.getItem(i).icon)
-                    DrawableCompat.setTint(icon, Color.WHITE)
-                    menu.getItem(i).icon = icon
+                    menu.getItem(i).icon?.let {
+                        val icon = DrawableCompat.wrap(it)
+                        DrawableCompat.setTint(icon, Color.WHITE)
+                        menu.getItem(i).icon = icon
+                    }
                 }
             }
         }

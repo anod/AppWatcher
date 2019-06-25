@@ -28,17 +28,17 @@ class SyncScheduler(private val context: ApplicationContext) {
         }.build()
 
         val request: PeriodicWorkRequest =
-                PeriodicWorkRequestBuilder<SyncWorker>(windowStartSec, TimeUnit.SECONDS)
+                PeriodicWorkRequestBuilder<SyncWorker>(windowStartSec, TimeUnit.SECONDS, PeriodicWorkRequest.MIN_PERIODIC_FLEX_MILLIS, TimeUnit.MILLISECONDS)
                         .setInputData(workDataOf())
                         .setConstraints(constraints)
                         .build()
 
         AppLog.i("Schedule sync in ${windowStartSec/3600} hours")
-        WorkManager.getInstance(context.actual).enqueueUniquePeriodicWork(Companion.tag, ExistingPeriodicWorkPolicy.REPLACE, request)
+        WorkManager.getInstance(context.actual).enqueueUniquePeriodicWork(tag, ExistingPeriodicWorkPolicy.REPLACE, request)
     }
 
     fun cancel() {
-        WorkManager.getInstance(context.actual).cancelUniqueWork(Companion.tag)
+        WorkManager.getInstance(context.actual).cancelUniqueWork(tag)
     }
 
     companion object {
