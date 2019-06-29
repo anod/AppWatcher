@@ -21,6 +21,7 @@ import com.anod.appwatcher.accounts.AuthTokenAsync
 import com.anod.appwatcher.content.AddWatchAppAsyncTask
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
+import info.anodsplace.framework.app.FragmentFactory
 import info.anodsplace.framework.app.FragmentToolbarActivity
 import info.anodsplace.framework.content.AppTitleComparator
 import info.anodsplace.framework.content.InstalledApps
@@ -50,22 +51,23 @@ class ImportInstalledViewModel(application: android.app.Application) : AndroidVi
 class ImportInstalledFragment : Fragment(), ImportBulkManager.Listener {
 
     companion object {
-        private const val TAG = "import_installed"
+        private class Factory : FragmentFactory("import_installed") {
+            override fun create() = ImportInstalledFragment()
+        }
 
         fun intent(context: Context, themeRes: Int, themeColors: CustomThemeColors) = FragmentToolbarActivity.intent(
-                TAG,
-                { ImportInstalledFragment() },
+                Factory(),
+                Bundle.EMPTY,
                 themeRes,
                 themeColors,
-                Bundle(),
                 context)
     }
 
     private var allSelected: Boolean = false
     private val dataProvider: ImportResourceProvider by lazy { ImportResourceProvider(context!!, InstalledApps.MemoryCache(InstalledApps.PackageManager(context!!.packageManager))) }
     private val importManager: ImportBulkManager by lazy { ImportBulkManager(context!!, this) }
-    private val appComponent: AppComponent
-        get() = Application.provide(context!!)
+    private val appComponent: AppComponent?
+        get() = if (context == null) null else Application.provide(context!!)
     private val viewModel: ImportInstalledViewModel by lazy { ViewModelProviders.of(this).get(ImportInstalledViewModel::class.java) }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -125,7 +127,7 @@ class ImportInstalledFragment : Fragment(), ImportBulkManager.Listener {
     }
 
     private fun startImport() {
-        val account = appComponent.prefs.account
+        val account = appComponent?.prefs?.account
         if (account == null) {
             Toast.makeText(context, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
             return
@@ -137,7 +139,7 @@ class ImportInstalledFragment : Fragment(), ImportBulkManager.Listener {
             }
 
             override fun onError(errorMessage: String) {
-                if (appComponent.networkConnection.isNetworkAvailable) {
+                if (appComponent?.networkConnection?.isNetworkAvailable == true) {
                     Toast.makeText(context, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
                 } else {
                     Toast.makeText(context, R.string.check_connection, Toast.LENGTH_SHORT).show()
@@ -166,6 +168,9 @@ class ImportInstalledFragment : Fragment(), ImportBulkManager.Listener {
     }
 
     override fun onImportStart(docIds: List<String>) {
+        if (isDetached) {
+            return
+        }
         val adapter = list.adapter as ImportAdapter
         dataProvider.isImportStarted = true
         for (packageName in docIds) {

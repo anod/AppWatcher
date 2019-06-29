@@ -29,7 +29,7 @@ class AppsTagActivity : WatchListActivity() {
         get() = R.menu.tagslist
     override val themeRes: Int
         get() = if (themeColors.statusBarColor.isLight)
-            Theme(this).theme
+            Theme(this).themeLightActionBar
         else
             Theme(this).themeDarkActionBar
 

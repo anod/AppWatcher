@@ -3,6 +3,7 @@ package com.anod.appwatcher.sync
 import android.content.Context
 import androidx.work.*
 import com.anod.appwatcher.Application
+import com.anod.appwatcher.BuildConfig
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import java.util.concurrent.TimeUnit
@@ -35,6 +36,21 @@ class SyncScheduler(private val context: ApplicationContext) {
 
         AppLog.i("Schedule sync in ${windowStartSec/3600} hours")
         WorkManager.getInstance(context.actual).enqueueUniquePeriodicWork(tag, ExistingPeriodicWorkPolicy.REPLACE, request)
+    }
+
+    fun execute() {
+        val constraints: Constraints = Constraints.Builder().apply {
+            setRequiresCharging(false)
+            setRequiredNetworkType(NetworkType.CONNECTED)
+            setRequiresDeviceIdle(false)
+        }.build()
+
+        val request: OneTimeWorkRequest = OneTimeWorkRequestBuilder<SyncWorker>()
+                .setInputData(workDataOf(UpdateCheck.extrasManual to !BuildConfig.DEBUG))
+                .setConstraints(constraints)
+                .build()
+
+        WorkManager.getInstance(context.actual).enqueue(request)
     }
 
     fun cancel() {

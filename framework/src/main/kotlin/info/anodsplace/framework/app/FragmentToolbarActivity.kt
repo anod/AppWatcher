@@ -7,12 +7,18 @@ import androidx.fragment.app.Fragment
 import info.anodsplace.framework.R
 
 import info.anodsplace.framework.AppLog
+import java.io.Serializable
 
 /**
  * @author Alex Gavrishev
  * @date 16/12/2016.
  */
-typealias FragmentCreator = () -> Fragment
+open class FragmentFactory(val tag: String): Serializable {
+
+    open fun create(): Fragment? {
+        return null
+    }
+}
 
 class FragmentToolbarActivity : ToolbarActivity() {
 
@@ -28,43 +34,29 @@ class FragmentToolbarActivity : ToolbarActivity() {
         super.onCreate(savedInstanceState)
 
         if (savedInstanceState == null) {
-            val fragmentTag = intent.getStringExtra(EXTRA_FRAGMENT)
-            val f = createFragment(fragmentTag)
+            val factory: FragmentFactory = intent.getSerializableExtra(EXTRA_FACTORY) as FragmentFactory
+            val f = factory.create()
             if (f == null) {
-                AppLog.e("Missing fragment for tag: $fragmentTag")
+                AppLog.e("Missing fragment for tag: ${factory.tag}")
                 finish()
                 return
             }
             f.arguments = intent.getBundleExtra(EXTRA_ARGUMENTS)
 
             supportFragmentManager.beginTransaction()
-                    .add(R.id.activity_content, f, fragmentTag)
+                    .add(R.id.activity_content, f, factory.tag)
                     .commit()
         }
     }
 
-    private fun createFragment(fragmentTag: String): Fragment? {
-        val creator = fragments[fragmentTag]
-        if (creator != null) {
-            return creator()
-        }
-        return null
-    }
-
     companion object {
-        private const val EXTRA_FRAGMENT = "extra_fragment"
+        private const val EXTRA_FACTORY = "extra_factory"
         private const val EXTRA_ARGUMENTS = "extra_arguments"
-        private var fragments: MutableMap<String, FragmentCreator> = mutableMapOf()
 
-        fun register(tag: String, creator: FragmentCreator) {
-            fragments[tag] = creator
-        }
-
-        fun intent(tag: String, creator: FragmentCreator, themeRes: Int, themeColors: CustomThemeColors, args: Bundle, context: Context): Intent {
-            register(tag, creator)
+        fun intent(factory: FragmentFactory, arguments: Bundle, themeRes: Int, themeColors: CustomThemeColors, context: Context): Intent {
             return Intent(context, FragmentToolbarActivity::class.java).apply {
-                putExtra(EXTRA_FRAGMENT, tag)
-                putExtra(EXTRA_ARGUMENTS, args)
+                putExtra(EXTRA_FACTORY, factory)
+                putExtra(EXTRA_ARGUMENTS, arguments)
                 putExtra("themeRes", themeRes)
                 putExtra("themeColors", themeColors)
             }

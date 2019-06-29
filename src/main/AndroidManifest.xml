@@ -96,10 +96,6 @@
             android:label="@string/app_name"
             android:syncable="true"/>
 
-        <service
-            android:name=".sync.ManualSyncService"
-            android:exported="false"/>
-
         <meta-data
             android:name="com.google.android.backup.api_key"
             android:value="AEdPqrEAAAAIWapJJclZH281aXWN3VunYCHInRkwJag2VkVSIw"/>

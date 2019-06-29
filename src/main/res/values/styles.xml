@@ -102,9 +102,14 @@
         <item name="android:statusBarColor">@color/theme_primary_dark</item>
     </style>
 
+    <style name="AppTheme.Main.LightActionBar" parent="AppTheme.Main">
+        <item name="colorOnPrimary">@color/black_theme_primary</item>
+        <item name="android:actionBarTheme">@style/AppTheme.ActionBar.LightBackground</item>
+    </style>
+
     <style name="AppTheme.Main.DarkActionBar" parent="AppTheme.Main">
         <item name="colorOnPrimary">@color/black_theme_primary</item>
-        <item name="android:actionBarTheme">@style/AppTheme.ActionBar.White</item>
+        <item name="android:actionBarTheme">@style/AppTheme.ActionBar.DarkBackground</item>
     </style>
 
     <style name="AppTheme.Black" parent="AppTheme.Base">
@@ -123,8 +128,13 @@
         <item name="colorItemLine">@color/material_grey_800_</item>
     </style>
 
+    <style name="AppTheme.Black.LightActionBar" parent="AppTheme.Black">
+        <item name="colorOnPrimary">@color/black_theme_primary</item>
+        <item name="android:actionBarTheme">@style/AppTheme.ActionBar.LightBackground</item>
+    </style>
+
     <style name="AppTheme.Black.DarkActionBar" parent="AppTheme.Black">
-        <item name="android:actionBarTheme">@style/AppTheme.ActionBar.White</item>
+        <item name="android:actionBarTheme">@style/AppTheme.ActionBar.DarkBackground</item>
     </style>
 
     <style name="AppTheme.Splash" parent="AppTheme.Base">
@@ -159,16 +169,28 @@
         <item name="popupTheme">@style/ThemeOverlay.AppCompat.DayNight</item>
     </style>
 
-    <style name="AppTheme.ActionBar" parent="@style/ThemeOverlay.MaterialComponents.ActionBar.Primary" />
-    <style name="AppTheme.ActionBar.White" parent="@style/ThemeOverlay.MaterialComponents.ActionBar">
+    <style name="AppTheme.ActionBar" parent="@style/ThemeOverlay.MaterialComponents.ActionBar.Primary">
+        <item name="popupTheme">@style/ThemeOverlay.AppCompat.DayNight</item>
+    </style>
+    <style name="AppTheme.ActionBar.LightBackground" parent="@style/ThemeOverlay.MaterialComponents.ActionBar.Primary">
+        <item name="android:textColorPrimary">@color/black_theme_primary</item>
+        <item name="popupTheme">@style/ThemeOverlay.AppCompat.DayNight</item>
+    </style>
+    <style name="AppTheme.ActionBar.DarkBackground" parent="@style/ThemeOverlay.MaterialComponents.ActionBar.Primary">
         <item name="android:textColorPrimary">@android:color/white</item>
         <item name="android:textColorSecondary">@android:color/white</item>
         <item name="actionMenuTextColor">@android:color/white</item>
         <item name="colorControlNormal">@android:color/white</item>
         <!-- Counteracts the effect of setting textColorPrimary for popup menus. -->
-        <item name="popupTheme">@style/ThemeOverlay.AppCompat.Dark</item>
+        <item name="popupTheme">@style/ThemeOverlay.AppCompat.DayNight</item>
         <!-- Used to tint the ActionMode background and preserve the underline. -->
         <item name="android:colorBackground">@android:color/white</item>
     </style>
+
+<!--    <style name="AppTheme.ActionBar.OverflowMenu" parent="@style/Widget.MaterialComponents.PopupMenu.Overflow" />-->
+<!--    <style name="AppTheme.ActionBar.OverflowMenu.White" parent="@style/Widget.MaterialComponents.PopupMenu.Overflow">-->
+<!--        <item name="android:textColorPrimary">@android:color/black</item>-->
+<!--        <item name="android:textColorSecondary">@android:color/black</item>-->
+<!--    </style>-->
 
 </resources>

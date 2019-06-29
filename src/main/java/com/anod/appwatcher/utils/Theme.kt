@@ -26,6 +26,16 @@ class Theme(private val activity: Activity) {
             return R.style.AppTheme_Main
         }
 
+    val themeLightActionBar: Int
+        get() {
+            if (isNightMode) {
+                if (Application.provide(activity).prefs.theme == Preferences.THEME_BLACK) {
+                    return R.style.AppTheme_Black_LightActionBar
+                }
+            }
+            return R.style.AppTheme_Main_LightActionBar
+        }
+
     val themeDarkActionBar: Int
         get() {
             if (isNightMode) {

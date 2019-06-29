@@ -8,7 +8,7 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.SettingsActivity
 import com.anod.appwatcher.backup.gdrive.GDriveSignIn
 import com.anod.appwatcher.preferences.Preferences
-import com.anod.appwatcher.sync.ManualSyncService
+import com.anod.appwatcher.sync.SyncScheduler
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import info.anodsplace.framework.app.ApplicationContext
@@ -41,6 +41,6 @@ class UpgradeRefresh(val prefs: Preferences,val activity: Activity) : UpgradeTas
     }
 
     private fun requestRefresh() {
-        ManualSyncService.startActionSync(activity)
+        SyncScheduler(activity).execute()
     }
 }

@@ -8,7 +8,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.anod.appwatcher.AppWatcherApplication
 import com.anod.appwatcher.Application
-import com.anod.appwatcher.sync.ManualSyncService
+import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.sync.UpdateCheck
 import info.anodsplace.framework.AppLog
 
@@ -64,7 +64,7 @@ class WatchListStateViewModel(application: android.app.Application) : AndroidVie
             return
         }
 
-        ManualSyncService.startActionSync(app)
+        SyncScheduler(app).execute()
         this.listState.value = SyncStarted
     }
 

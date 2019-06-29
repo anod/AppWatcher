@@ -20,6 +20,7 @@ import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.tags.TagSnackbar
 import finsky.api.model.DfeModel
 import info.anodsplace.framework.app.CustomThemeColors
+import info.anodsplace.framework.app.FragmentFactory
 import info.anodsplace.framework.app.FragmentToolbarActivity
 import info.anodsplace.playstore.PlayStoreEndpoint
 import info.anodsplace.playstore.WishlistEndpoint
@@ -138,19 +139,21 @@ class WishlistFragment : Fragment(), PlayStoreEndpoint.Listener {
     }
 
     companion object {
-        private const val TAG = "wishlist"
         const val EXTRA_ACCOUNT = "extra_account"
         const val EXTRA_AUTH_TOKEN = "extra_auth_token"
 
+        private class Factory: FragmentFactory("wishlist") {
+            override fun create() = WishlistFragment()
+        }
+
         fun intent(context: Context, themeRes: Int, themeColors: CustomThemeColors, account: Account?, authToken: String?) = FragmentToolbarActivity.intent(
-                TAG,
-                { WishlistFragment() },
-                themeRes,
-                themeColors,
+                Factory(),
                 Bundle().apply {
                     putParcelable(EXTRA_ACCOUNT, account)
                     putString(EXTRA_AUTH_TOKEN, authToken)
                 },
+                themeRes,
+                themeColors,
                 context)
     }
 }

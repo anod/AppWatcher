@@ -17,6 +17,7 @@ import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.utils.Theme
 import info.anodsplace.framework.app.CustomThemeColors
+import info.anodsplace.framework.app.FragmentFactory
 import info.anodsplace.framework.app.FragmentToolbarActivity
 import info.anodsplace.framework.graphics.DrawableTint
 import kotlinx.android.synthetic.main.activity_tags_editor.*
@@ -137,15 +138,17 @@ class TagsListFragment : Fragment(), View.OnClickListener {
     }
 
     companion object {
-        private const val TAG = "tags_list"
         const val EXTRA_APP = "app"
 
+        class Factory : FragmentFactory("tags_list") {
+            override fun create() = TagsListFragment()
+        }
+
         fun intent(context: Context, themeRes: Int, themeColors: CustomThemeColors, app: AppInfo?) = FragmentToolbarActivity.intent(
-                TAG,
-                { TagsListFragment() },
+                Factory(),
+                Bundle().apply { if (app != null) { putParcelable(EXTRA_APP, app) } },
                 themeRes,
                 themeColors,
-                Bundle().apply { if (app != null) { putParcelable(EXTRA_APP, app) } },
                 context)
     }
 }
