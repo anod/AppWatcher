@@ -68,10 +68,10 @@ interface AppListTable {
         }
 
         fun loadAppList(sortId: Int, titleFilter: String, table: AppListTable): LiveData<List<AppListItem>> {
-            return loadAppList(sortId, null, titleFilter, table)
+            return loadAppList(sortId, false, null, titleFilter, table)
         }
 
-        fun loadAppList(sortId: Int, tag: Tag?, titleFilter: String, table: AppListTable): LiveData<List<AppListItem>> {
+        fun loadAppList(sortId: Int, orederByRecentlyUpdated: Boolean, tag: Tag?, titleFilter: String, table: AppListTable): LiveData<List<AppListItem>> {
             val tables = if (tag == null) AppListTable.table else AppTagsTable.table + ", " + AppListTable.table
             val selection = createSelection(tag, titleFilter)
 
@@ -82,7 +82,7 @@ interface AppListTable {
                     "${TableColumns.appId} == ${ChangelogTable.TableColumns.appId} " +
                     "AND ${TableColumns.versionNumber} == ${ChangelogTable.TableColumns.versionCode} " +
                     "WHERE ${selection.first} " +
-                    "ORDER BY ${createSortOrder(sortId)} "
+                    "ORDER BY ${createSortOrder(sortId, orederByRecentlyUpdated)} "
             return table.observe(SimpleSQLiteQuery(sql, selection.second))
         }
 
@@ -108,17 +108,20 @@ interface AppListTable {
             }
         }
 
-        private fun createSortOrder(sortId: Int): String {
-            val filter = ArrayList<String>()
-            filter.add(Columns.status + " DESC")
-            filter.add(Columns.recentFlag + " DESC")
+        private fun createSortOrder(sortId: Int, orederByRecentlyUpdated: Boolean): String {
+            val filter = mutableListOf(
+                    Columns.status + " DESC"
+            )
+            if (orederByRecentlyUpdated) {
+                filter.add(Columns.recentFlag + " DESC")
+            }
             when (sortId) {
                 Preferences.SORT_NAME_DESC -> filter.add(Columns.title + " COLLATE NOCASE DESC")
                 Preferences.SORT_DATE_ASC -> filter.add(Columns.uploadTimestamp + " ASC")
                 Preferences.SORT_DATE_DESC -> filter.add(Columns.uploadTimestamp + " DESC")
                 else -> filter.add(Columns.title + " COLLATE NOCASE ASC")
             }
-            return TextUtils.join(", ", filter)
+            return filter.joinToString(", ")
         }
 
         private fun createSelection(tag: Tag?, titleFilter: String): Pair<String, Array<String>> {
@@ -139,7 +142,7 @@ interface AppListTable {
                 args.add("%$titleFilter%")
             }
 
-            return Pair(TextUtils.join(" AND ", selc), args.toTypedArray())
+            return Pair(selc.joinToString(" AND "), args.toTypedArray())
         }
 
         suspend fun insertSafetly(app: AppInfo, db: AppsDatabase): Int {

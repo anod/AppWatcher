@@ -42,7 +42,8 @@ open class WatchListViewModel(application: Application): AndroidViewModel(applic
     private var filterId = 0
 
     internal val appsList = reload.switchMap {
-        AppListTable.Queries.loadAppList(sortId, tag, titleFilter, database.apps()).map { allApps ->
+
+        AppListTable.Queries.loadAppList(sortId, showRecentlyUpdated, tag, titleFilter, database.apps()).map { allApps ->
             val filter = createFilter(filterId, installedApps)
             val filtered = allApps.filter { appItem -> !filter.filterRecord(appItem) }
             Pair(filtered, filter)
