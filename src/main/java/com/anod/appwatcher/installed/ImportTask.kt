@@ -1,8 +1,5 @@
-package com.anod.appwatcher.content
+package com.anod.appwatcher.installed
 
-import android.annotation.SuppressLint
-import android.content.Intent
-import android.os.AsyncTask
 import androidx.collection.SimpleArrayMap
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.database.AppListTable
@@ -13,8 +10,7 @@ import com.anod.appwatcher.model.AppInfoMetadata
 import finsky.api.model.Document
 import info.anodsplace.framework.app.ApplicationContext
 
-
-class AddWatchAppAsyncTask(context: ApplicationContext) {
+class ImportTask(context: ApplicationContext) {
 
     private val database = Application.provide(context).database
 

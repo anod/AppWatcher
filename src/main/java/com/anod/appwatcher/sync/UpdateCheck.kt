@@ -15,15 +15,10 @@ import com.anod.appwatcher.Application
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.backup.gdrive.GDriveSilentSignIn
 import com.anod.appwatcher.backup.gdrive.GDriveSync
-import com.anod.appwatcher.content.AppListCursor
-import com.anod.appwatcher.content.DbContentProvider
+import com.anod.appwatcher.database.*
 import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
-import com.anod.appwatcher.database.AppListTable
-import com.anod.appwatcher.database.AppsDatabase
-import com.anod.appwatcher.database.ChangelogTable
-import com.anod.appwatcher.database.contentValues
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.extractUploadDate
 import finsky.api.BulkDocId
@@ -155,9 +150,9 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
 
         val database = Application.provide(context).database
 
-        val cursor = AppListTable.Queries.load(false, database.apps())
-        val apps = AppListCursor(cursor)
+        val apps = AppListTable.Queries.load(false, database.apps())
         if (apps.isEmpty) {
+            apps.close()
             AppLog.i("Sync finished: no apps")
             return listOf()
         }
@@ -326,7 +321,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         }
     }
 
-    private fun requestAuthToken(account: Account): String? {
+    private suspend fun requestAuthToken(account: Account): String? {
         val tokenHelper = AuthTokenBlocking(context)
         var authToken: String? = null
         try {

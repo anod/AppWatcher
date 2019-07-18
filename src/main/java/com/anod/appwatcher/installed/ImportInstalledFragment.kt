@@ -18,7 +18,6 @@ import com.anod.appwatcher.AppWatcherApplication
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenAsync
-import com.anod.appwatcher.content.AddWatchAppAsyncTask
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.FragmentFactory
@@ -133,12 +132,10 @@ class ImportInstalledFragment : Fragment(), ImportBulkManager.Listener {
             return
         }
 
-        AuthTokenAsync(context!!).request(activity, account, object : AuthTokenAsync.Callback {
-            override fun onToken(token: String) {
+        AuthTokenAsync(context!!).request(activity, account) { token ->
+            if (token.isNotBlank()) {
                 importManager.start(account, token)
-            }
-
-            override fun onError(errorMessage: String) {
+            } else {
                 if (appComponent?.networkConnection?.isNetworkAvailable == true) {
                     Toast.makeText(context, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
                 } else {
@@ -146,7 +143,7 @@ class ImportInstalledFragment : Fragment(), ImportBulkManager.Listener {
                 }
                 activity?.finish()
             }
-        })
+        }
     }
 
     override fun onImportProgress(docIds: List<String>, result: SimpleArrayMap<String, Int>) {
@@ -156,7 +153,7 @@ class ImportInstalledFragment : Fragment(), ImportBulkManager.Listener {
             val status = if (resultCode == null) {
                 ImportResourceProvider.STATUS_ERROR
             } else {
-                if (resultCode == AddWatchAppAsyncTask.RESULT_OK) ImportResourceProvider.STATUS_DONE else ImportResourceProvider.STATUS_ERROR
+                if (resultCode == ImportTask.RESULT_OK) ImportResourceProvider.STATUS_DONE else ImportResourceProvider.STATUS_ERROR
             }
             dataProvider.setPackageStatus(packageName, status)
             adapter.notifyPackageStatusChanged(packageName)

@@ -4,19 +4,18 @@ import android.accounts.Account
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.appcompat.widget.SearchView
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AccountSelectionDialog
 import com.anod.appwatcher.accounts.AuthTokenAsync
-import com.anod.appwatcher.content.AddWatchAppAsyncTask
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.Theme
@@ -170,12 +169,10 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
 
     override fun onAccountSelected(account: Account) {
         viewModel.account = account
-        AuthTokenAsync(this).request(this, account, object : AuthTokenAsync.Callback {
-            override fun onToken(token: String) {
+        AuthTokenAsync(this).request(this, account) { token ->
+            if (token.isNotBlank()) {
                 viewModel.authToken.value = token
-            }
-
-            override fun onError(errorMessage: String) {
+            } else {
                 if (Application.provide(this@SearchActivity).networkConnection.isNetworkAvailable) {
                     Toast.makeText(this@SearchActivity, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
                 } else {
@@ -183,7 +180,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
                 }
                 finish()
             }
-        })
+        }
     }
 
     override fun onAccountNotFound(errorMessage: String) {

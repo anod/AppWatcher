@@ -5,12 +5,14 @@ import android.app.Activity
 import android.os.Bundle
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.IOException
 
 class AuthTokenBlocking(context: ApplicationContext) {
     private val accountManager: AccountManager = AccountManager.get(context.actual)
 
-    fun request(activity: Activity?, acc: Account): String {
+    suspend fun request(activity: Activity?, acc: Account): String = withContext(Dispatchers.IO) {
         var token = ""
         try {
             token = getAuthToken(activity, acc)
@@ -27,7 +29,7 @@ class AuthTokenBlocking(context: ApplicationContext) {
         } catch (e: Exception) {
             AppLog.e(e)
         }
-        return token
+        return@withContext token
     }
 
     @Throws(AuthenticatorException::class, OperationCanceledException::class, IOException::class)

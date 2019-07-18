@@ -1,14 +1,10 @@
 package com.anod.appwatcher.details
 
 import android.accounts.Account
-import android.app.Activity
-import android.content.Intent
-import android.widget.Toast
 import androidx.lifecycle.*
 import com.android.volley.VolleyError
 import com.anod.appwatcher.AppComponent
 import com.anod.appwatcher.Application
-import com.anod.appwatcher.R
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppTagsTable
 import com.anod.appwatcher.database.AppsDatabase
@@ -17,7 +13,6 @@ import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.database.entities.packageToApp
 import com.anod.appwatcher.model.AppInfo
-import com.anod.appwatcher.tags.TagSnackbar
 import finsky.api.model.DfeDetails
 import finsky.api.model.DfeModel
 import finsky.api.model.Document
@@ -95,11 +90,11 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
         if (rowId == -1) {
             val localApp = context.packageManager.packageToApp(-1, appId.value!!)
             isNewApp = true
-            AppLog.i("Show details for unwatched $appId")
+            AppLog.i("Show details for unwatched ${appId.value}")
             app.value = localApp
         } else {
             isNewApp = false
-            AppLog.i("Show details for watched $appId")
+            AppLog.i("Show details for watched ${appId.value}")
 
             val appsTable = database.apps()
             viewModelScope.launch {
@@ -121,7 +116,7 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
     }
 
     fun loadRemoteChangelog() {
-        if (this.authToken.isEmpty()) {
+        if (this.authToken.isBlank()) {
             this.updateChangelogState(RemoteComplete(true))
         } else {
             detailsEndpoint.authToken = this.authToken

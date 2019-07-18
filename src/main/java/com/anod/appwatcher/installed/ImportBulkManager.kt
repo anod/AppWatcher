@@ -1,3 +1,4 @@
+// Copyright (c) 2019. Alex Gavrishev
 package com.anod.appwatcher.installed
 
 import android.accounts.Account
@@ -5,7 +6,6 @@ import android.content.Context
 import androidx.collection.SimpleArrayMap
 import com.android.volley.VolleyError
 import com.anod.appwatcher.Application
-import com.anod.appwatcher.content.AddWatchAppAsyncTask
 import finsky.api.BulkDocId
 import finsky.api.model.DfeBulkDetails
 import finsky.api.model.DfeModel
@@ -25,7 +25,6 @@ internal class ImportBulkManager(
 
     private var listsDocIds: MutableList<MutableList<BulkDocId>?> = mutableListOf()
     private var currentBulk: Int = 0
-    //private var asyncTask: AsyncTask<Document, Void, SimpleArrayMap<String, Int>>? = null
 
     private var account: Account? = null
     private var authSubToken: String = ""
@@ -90,7 +89,7 @@ internal class ImportBulkManager(
 
     override fun onDataChanged(data: DfeModel) {
         val docs = (data as DfeBulkDetails).documents.toTypedArray()
-        val task = AddWatchAppAsyncTask(ApplicationContext(context))
+        val task = ImportTask(ApplicationContext(context))
         var result = SimpleArrayMap<String, Int>()
 
         coroutineScope.launch {

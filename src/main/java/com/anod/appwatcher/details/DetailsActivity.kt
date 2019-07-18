@@ -1,11 +1,8 @@
 package com.anod.appwatcher.details
 
 import android.app.Activity
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.drawable.BitmapDrawable
@@ -13,32 +10,37 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import androidx.annotation.ColorInt
-import com.google.android.material.appbar.AppBarLayout
-import androidx.core.app.ShareCompat
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.DrawableCompat
-import androidx.core.view.ViewCompat
-import androidx.palette.graphics.Palette
-import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import androidx.annotation.ColorInt
+import androidx.core.app.ShareCompat
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.ViewCompat
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
+import androidx.palette.graphics.Palette
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenAsync
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.entities.App
-import com.anod.appwatcher.model.*
+import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.*
 import com.anod.appwatcher.watchlist.AppViewHolderResourceProvider
+import com.google.android.material.appbar.AppBarLayout
 import com.squareup.picasso.Picasso
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.anim.RevealAnimatorCompat
 import info.anodsplace.framework.app.ToolbarActivity
-import info.anodsplace.framework.content.*
+import info.anodsplace.framework.content.InstalledApps
+import info.anodsplace.framework.content.forAppInfo
+import info.anodsplace.framework.content.forUninstall
+import info.anodsplace.framework.content.startActivitySafely
 import info.anodsplace.framework.graphics.chooseDark
 import kotlinx.android.synthetic.main.activity_app_changelog.*
 import kotlinx.android.synthetic.main.view_changelog_header.*
@@ -143,17 +145,15 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
 
         viewModel.loadLocalChangelog()
         viewModel.account?.let { account ->
-            AuthTokenAsync(this).request(this, account, object : AuthTokenAsync.Callback {
-                override fun onToken(token: String) {
+            AuthTokenAsync(this).request(this, account) { token ->
+                if (token.isNotBlank()) {
                     viewModel.authToken = token
                     viewModel.loadRemoteChangelog()
-                }
-
-                override fun onError(errorMessage: String) {
-                    AppLog.e(errorMessage)
+                } else {
+                    AppLog.e("Error retrieving token")
                     viewModel.loadRemoteChangelog()
                 }
-            })
+            }
         }
     }
 
@@ -189,10 +189,9 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
     }
 
     private fun setDefaultIcon() {
-        val defaultIcon = BitmapFactory.decodeResource(resources, R.drawable.ic_notifications_black_24dp)
         background.visibility = View.VISIBLE
-        applyColor(ContextCompat.getColor(this, R.color.theme_primary))
-        icon.setImageBitmap(defaultIcon)
+        applyColor(ContextCompat.getColor(this, R.color.theme_accent))
+        icon.setImageResource(R.drawable.ic_notifications_black_24dp)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

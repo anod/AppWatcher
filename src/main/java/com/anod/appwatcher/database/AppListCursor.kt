@@ -1,11 +1,10 @@
-package com.anod.appwatcher.content
+package com.anod.appwatcher.database
 
 import android.database.Cursor
 import android.provider.BaseColumns
 import androidx.room.util.CursorUtil
 
 import com.anod.appwatcher.model.AppInfo
-import com.anod.appwatcher.database.AppListTable
 import info.anodsplace.framework.database.CursorIterator
 
 /**

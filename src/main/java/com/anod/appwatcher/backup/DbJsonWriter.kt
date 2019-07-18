@@ -1,11 +1,7 @@
 package com.anod.appwatcher.backup
 
-import com.anod.appwatcher.content.AppListCursor
 import com.anod.appwatcher.database.AppListTable
-import com.anod.appwatcher.database.AppTagsTable
 import com.anod.appwatcher.database.AppsDatabase
-import com.anod.appwatcher.database.entities.Tag
-import com.anod.appwatcher.watchlist.AppsList
 import info.anodsplace.framework.json.JsonWriter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -36,7 +32,7 @@ class DbJsonWriter {
             appsTags[it.appId]!!.add(it.tagId)
         }
 
-        val appsCursor = AppListCursor(AppListTable.Queries.load(true, db.apps()))
+        val appsCursor = AppListTable.Queries.load(true, db.apps())
         val appList = writer.name("apps")
         appList.beginArray()
         appsCursor.forEach { appInfo ->

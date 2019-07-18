@@ -1,15 +1,8 @@
 package com.anod.appwatcher.navigation
 
 import android.accounts.Account
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Bundle
-import com.google.android.material.navigation.NavigationView
-import androidx.core.content.res.ResourcesCompat
-import androidx.core.graphics.drawable.DrawableCompat
-import androidx.core.view.GravityCompat
-import androidx.drawerlayout.widget.DrawerLayout
 import android.text.format.DateUtils
 import android.view.Menu
 import android.view.MenuItem
@@ -17,6 +10,12 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.anod.appwatcher.*
 import com.anod.appwatcher.accounts.AccountSelectionDialog
 import com.anod.appwatcher.accounts.AuthTokenAsync
@@ -27,9 +26,9 @@ import com.anod.appwatcher.utils.Hash
 import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.wishlist.WishlistFragment
 import com.crashlytics.android.Crashlytics
+import com.google.android.material.navigation.NavigationView
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ToolbarActivity
-
 
 /**
  * @author Alex Gavrishev
@@ -201,26 +200,23 @@ abstract class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.Selecti
         val viewModel = ViewModelProviders.of(this).get(DrawerViewModel::class.java)
         viewModel.account.value = account
         val collectReports = provide.prefs.collectCrashReports
-        AuthTokenAsync(this).request(this, account, object : AuthTokenAsync.Callback {
-            override fun onToken(token: String) {
+        AuthTokenAsync(this).request(this, account) { token ->
+            if (token.isNotBlank()) {
                 onAuthToken(token)
                 if (collectReports) {
                     Crashlytics.setUserIdentifier(Hash.sha256(account.name).encoded)
                 }
                 updateDrawerAccount(account)
-            }
-
-            override fun onError(errorMessage: String) {
-                AppLog.e("Error retrieving authentication token: $errorMessage")
+            } else {
+                AppLog.e("Error retrieving authentication token")
                 onAuthToken("")
                 if (Application.provide(this@DrawerActivity).networkConnection.isNetworkAvailable) {
                     Toast.makeText(this@DrawerActivity, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
                 } else {
                     Toast.makeText(this@DrawerActivity, R.string.check_connection, Toast.LENGTH_SHORT).show()
                 }
-                return
             }
-        })
+        }
     }
 
     open fun onAuthToken(authToken: String) {

@@ -15,8 +15,10 @@ import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.utils.combineLatest
-import info.anodsplace.framework.os.BackgroundTask
-import info.anodsplace.playstore.*
+import info.anodsplace.playstore.CompositeStateEndpoint
+import info.anodsplace.playstore.DetailsEndpoint
+import info.anodsplace.playstore.PlayStoreEndpointBase
+import info.anodsplace.playstore.SearchEndpoint
 import kotlinx.coroutines.launch
 
 sealed class SearchStatus
@@ -115,7 +117,7 @@ class SearchViewModel(application: Application): AndroidViewModel(application), 
             status.value = NoNetwork
             return
         }
-        if (id == DETAILS_ENDPOINT_ID) {
+        if (id == DETAILS_ENDPOINT_ID && endpoints != null) {
             status.value = FreeTextRequest
             endpoints!!.activate(SEARCH_ENDPOINT_ID).startAsync()
         } else {

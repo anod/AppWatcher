@@ -24,19 +24,19 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = "1.7"
-        targetCompatibility = "1.7"
+        sourceCompatibility = '1.8'
+        targetCompatibility = '1.8'
     }
 }
 
 dependencies {
-    implementation 'androidx.recyclerview:recyclerview:1.1.0-alpha06'
-    implementation 'com.google.android.material:material:1.1.0-alpha07'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0-beta01'
+    implementation 'com.google.android.material:material:1.1.0-alpha08'
     implementation 'androidx.palette:palette:1.0.0'
     implementation 'androidx.cardview:cardview:1.0.0'
 
-    implementation 'com.google.android.gms:play-services-identity:16.0.0'
-    implementation 'com.google.android.gms:play-services-auth:16.0.1'
+    implementation 'com.google.android.gms:play-services-identity:17.0.0'
+    implementation 'com.google.android.gms:play-services-auth:17.0.0'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }

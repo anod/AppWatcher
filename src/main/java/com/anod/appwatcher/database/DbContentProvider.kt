@@ -1,5 +1,6 @@
-package com.anod.appwatcher.content
+package com.anod.appwatcher.database
 
+import android.annotation.SuppressLint
 import android.content.ContentProvider
 import android.content.ContentUris
 import android.content.ContentValues
@@ -11,9 +12,9 @@ import android.net.Uri
 import android.provider.BaseColumns
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.BuildConfig
-import com.anod.appwatcher.database.*
 import info.anodsplace.framework.AppLog
 
+@SuppressLint("Registered")
 open class DbContentProvider : ContentProvider() {
 
     companion object {
@@ -149,5 +150,4 @@ open class DbContentProvider : ContentProvider() {
         }
         return count
     }
-
 }

@@ -5,8 +5,9 @@ import android.widget.Toast
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
-import kotlinx.coroutines.*
-
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * @author alex
@@ -32,7 +33,7 @@ class GDrive(private val context: ApplicationContext, private val googleAccount:
         coroutineScope.launch {
             listener?.onGDriveSyncStart()
             val worker = GDriveSync(context, googleAccount)
-            val result = try {
+            try {
                 worker.doSync()
                 listener?.onGDriveSyncFinish()
             } catch (e: Exception) {

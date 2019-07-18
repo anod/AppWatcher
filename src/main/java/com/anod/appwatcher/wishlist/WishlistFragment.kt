@@ -2,20 +2,18 @@ package com.anod.appwatcher.wishlist
 
 import android.accounts.Account
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.android.volley.VolleyError
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
-import com.anod.appwatcher.content.AddWatchAppAsyncTask
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.tags.TagSnackbar
 import finsky.api.model.DfeModel
@@ -24,7 +22,6 @@ import info.anodsplace.framework.app.FragmentFactory
 import info.anodsplace.framework.app.FragmentToolbarActivity
 import info.anodsplace.playstore.PlayStoreEndpoint
 import info.anodsplace.playstore.WishlistEndpoint
-
 import kotlinx.android.synthetic.main.fragment_wishlist.*
 
 /**

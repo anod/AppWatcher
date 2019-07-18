@@ -6,7 +6,10 @@ import com.android.volley.toolbox.BaseHttpStack
 import com.android.volley.toolbox.BasicNetwork
 import com.android.volley.toolbox.ByteArrayPool
 import com.android.volley.toolbox.HttpResponse
+import okhttp3.Headers.Companion.toHeaders
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
+import okhttp3.RequestBody.Companion.toRequestBody
 
 /**
  * @author alex
@@ -33,13 +36,13 @@ private class OkHttpStack @JvmOverloads constructor(client: OkHttpClient? = OkHt
 
     override fun executeRequest(request: Request<*>, additionalHeaders: MutableMap<String, String>): HttpResponse {
 
-        val method = methods[request.method]!!
+        val method = methods[request.method] ?: "GET"
         val body: okhttp3.RequestBody? = if (method == "POST") {
-            val mediaType = okhttp3.MediaType.parse(request.bodyContentType)
-            okhttp3.RequestBody.create(mediaType, request.body)
+            val mediaType = request.bodyContentType.toMediaTypeOrNull()
+            request.body.toRequestBody(mediaType, 0, request.body.size)
         } else null
 
-        val headers = okhttp3.Headers.of(request.headers + additionalHeaders)
+        val headers = (request.headers + additionalHeaders).toHeaders()
 
         val okRequest = okhttp3.Request.Builder()
                 .url(request.url)
@@ -50,13 +53,13 @@ private class OkHttpStack @JvmOverloads constructor(client: OkHttpClient? = OkHt
         val response = client.newCall(okRequest).execute()
 
         val responseHeaders = mutableListOf<Header>()
-        response.headers().names().forEach {
-            val value = response.headers().get(it) ?: ""
+        response.headers.names().forEach {
+            val value = response.headers[it] ?: ""
             responseHeaders.add(Header(it, value))
         }
 
-        val responseBody = response.body()
-        return HttpResponse(response.code(), responseHeaders, responseBody?.contentLength()?.toInt() ?: -1, responseBody?.byteStream())
+        val responseBody = response.body
+        return HttpResponse(response.code, responseHeaders, responseBody?.contentLength()?.toInt() ?: -1, responseBody?.byteStream())
     }
 }
 

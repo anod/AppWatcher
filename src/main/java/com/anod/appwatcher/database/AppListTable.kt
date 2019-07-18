@@ -1,14 +1,17 @@
 package com.anod.appwatcher.database
 
-import androidx.lifecycle.LiveData
-import androidx.sqlite.db.SimpleSQLiteQuery
-import androidx.sqlite.db.SupportSQLiteQuery
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.provider.BaseColumns
 import android.text.TextUtils
-import androidx.room.*
+import androidx.lifecycle.LiveData
+import androidx.room.Dao
+import androidx.room.Query
+import androidx.room.RawQuery
+import androidx.room.withTransaction
+import androidx.sqlite.db.SimpleSQLiteQuery
+import androidx.sqlite.db.SupportSQLiteQuery
 import com.anod.appwatcher.database.entities.*
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
@@ -16,10 +19,9 @@ import com.anod.appwatcher.preferences.Preferences
 import info.anodsplace.framework.AppLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.util.ArrayList
+import java.util.*
 import java.util.concurrent.Callable
 import java.util.concurrent.TimeUnit
-
 
 @Dao
 interface AppListTable {
@@ -63,8 +65,9 @@ interface AppListTable {
 
     object Queries {
 
-        suspend fun load(includeDeleted: Boolean, table: AppListTable): Cursor = withContext(Dispatchers.IO) {
-            return@withContext table.load(includeDeleted, recentTime)
+        suspend fun load(includeDeleted: Boolean, table: AppListTable): AppListCursor = withContext(Dispatchers.IO) {
+            val cursor = table.load(includeDeleted, recentTime)
+            return@withContext AppListCursor(cursor)
         }
 
         fun loadAppList(sortId: Int, titleFilter: String, table: AppListTable): LiveData<List<AppListItem>> {

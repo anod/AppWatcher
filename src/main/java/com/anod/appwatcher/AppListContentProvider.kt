@@ -1,5 +1,5 @@
 package com.anod.appwatcher
 
-import com.anod.appwatcher.content.DbContentProvider
+import com.anod.appwatcher.database.DbContentProvider
 
 class AppListContentProvider : DbContentProvider()
