@@ -29,8 +29,8 @@ class SyncScheduler(private val context: ApplicationContext) {
         }.build()
 
         val request: PeriodicWorkRequest =
-                PeriodicWorkRequestBuilder<SyncWorker>(windowStartSec, TimeUnit.SECONDS, PeriodicWorkRequest.MIN_PERIODIC_FLEX_MILLIS, TimeUnit.MILLISECONDS)
-                        .setInputData(workDataOf())
+                PeriodicWorkRequest.Builder(SyncWorker::class.java, windowStartSec, TimeUnit.SECONDS, PeriodicWorkRequest.MIN_PERIODIC_FLEX_MILLIS, TimeUnit.MILLISECONDS)
+                        .setInputData(Data.EMPTY)
                         .setConstraints(constraints)
                         .build()
 
@@ -45,8 +45,10 @@ class SyncScheduler(private val context: ApplicationContext) {
             if (Build.VERSION.SDK_INT >= 23) setRequiresDeviceIdle(false)
         }.build()
 
-        val request: OneTimeWorkRequest = OneTimeWorkRequestBuilder<SyncWorker>()
-                .setInputData(workDataOf(UpdateCheck.extrasManual to !BuildConfig.DEBUG))
+        val request: OneTimeWorkRequest = OneTimeWorkRequest.Builder(SyncWorker::class.java)
+                .setInputData(Data.Builder()
+                        .putBoolean(UpdateCheck.extrasManual, !BuildConfig.DEBUG)
+                        .build())
                 .setConstraints(constraints)
                 .build()
 

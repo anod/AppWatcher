@@ -29,8 +29,8 @@ class UploadService(appContext: Context, params: WorkerParameters) : CoroutineWo
             }.build()
 
             val request: OneTimeWorkRequest =
-                    OneTimeWorkRequestBuilder<UploadService>()
-                            .setInputData(workDataOf())
+                    OneTimeWorkRequest.Builder(UploadService::class.java)
+                            .setInputData(Data.EMPTY)
                             .setConstraints(constraints)
                             .setInitialDelay(windowStartDelaySeconds, TimeUnit.SECONDS)
                             .build()
