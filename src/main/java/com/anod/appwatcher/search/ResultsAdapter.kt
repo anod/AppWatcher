@@ -8,6 +8,7 @@ import androidx.lifecycle.LiveData
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.AppInfo
+import com.anod.appwatcher.utils.AdaptiveIconTransformation
 import finsky.api.model.Document
 import info.anodsplace.framework.app.ThemeCompat
 import info.anodsplace.framework.content.InstalledApps
@@ -34,7 +35,7 @@ abstract class ResultsAdapter(
     val isEmpty: Boolean
         get() = this.itemCount == 0
 
-    private val picasso = Application.provide(context).picasso
+    private val iconLoader = Application.provide(context).iconLoader
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ResultsAppViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.list_item_market_app, parent, false)
@@ -62,7 +63,7 @@ abstract class ResultsAdapter(
             holder.row.setBackgroundColor(colorBgNormal)
         }
 
-        picasso.load(doc.iconUrl)
+        iconLoader.retrieve(doc.iconUrl ?: "")
                 .placeholder(R.drawable.ic_notifications_black_24dp)
                 .into(holder.icon)
 

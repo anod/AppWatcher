@@ -53,8 +53,6 @@ class AppComponent internal constructor(private val app: AppWatcherApplication):
     private val telephonyManager: TelephonyManager
         get() = app.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
 
-    val picasso: Picasso by lazy { Picasso.Builder(app).build(); }
-
     val deviceInfo: DeviceInfoProvider
         get() = this
 

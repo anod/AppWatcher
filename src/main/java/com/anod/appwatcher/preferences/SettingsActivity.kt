@@ -124,6 +124,7 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
                 SwitchItem(R.string.pref_show_recently_updated_title, R.string.pref_show_recently_updated_descr, ACTION_SHOW_RECENTLY_UPDATED, prefs.showRecentlyUpdated),
                 TextItem(R.string.pref_default_filter, R.string.pref_default_filter_summary, ACTION_DEFAULT_FILTER),
                 SwitchItem(R.string.pref_pull_to_refresh, 0, ACTION_ENABLE_PULL_TO_REFRESH, prefs.enablePullToRefresh),
+                TextItem(R.string.adaptive_icon_style, R.string.adaptive_icon_style_summary, ACTION_ICON_STYLE),
 
                 Category(R.string.pref_privacy),
                 SwitchItem(R.string.crash_reports_title, R.string.crash_reports_descr, ACTION_CRASH_REPORTS, prefs.collectCrashReports),
@@ -307,6 +308,18 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
                 prefs.collectCrashReports = (pref as ToggleItem).checked
                 ProcessPhoenix.triggerRebirth(this, Intent(this, AppWatcherActivity::class.java))
             }
+            ACTION_ICON_STYLE -> {
+                val values = resources.getStringArray(R.array.adaptive_icon_style_paths_values)
+                DialogSingleChoice(this, R.style.AlertDialog,
+                        R.string.adaptive_icon_style,
+                        R.array.adaptive_icon_style_names,
+                        values.indexOf(prefs.iconShape)) { dialog, which ->
+                    prefs.iconShape = values[which]
+                    Application.provide(this).iconLoader.setIconShape(values[which] ?: "")
+                    this.recreateWatchlist()
+                    dialog.dismiss()
+                }.show()
+            }
         }
         notifyDataSetChanged()
     }
@@ -414,5 +427,6 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
         private const val ACTION_NOTIFY_INSTALLED = 20
         private const val ACTION_ENABLE_PULL_TO_REFRESH = 21
         private const val ACTION_CRASH_REPORTS = 22
+        private const val ACTION_ICON_STYLE = 23
     }
 }

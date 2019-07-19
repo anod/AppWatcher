@@ -29,7 +29,7 @@
     <string name="notification_click">Нажмите для деталей</string>
     <string name="no_updates_found">Обновления не найдены.</string>
     <string name="dialog_about_title">%1$s вер. %2$s</string>
-    <string name="dialog_about_text">"Автор: Alex Gavrishev&lt;br/&gt;&lt;a href=https://play.google.com/store/apps/developer?id=Alex+Gavrishev\"/&lt;Google Play Store&lt;/a&gt; "</string>
+    <string name="dialog_about_text">Автор: Alex Gavrishev&lt;br/&gt;&lt;a href=https://play.google.com/store/apps/developer?id=Alex+Gavrishev /&lt;Google Play Store&lt;/a&gt;</string>
     <string name="share">Поделиться</string>
     <string name="app_stored">"%s\" добавлен в список для наблюдения</string>
     <string name="rate_app">Оценить в маркете</string>
@@ -168,5 +168,9 @@
   <string name="crash_reports_descr">Собирайте отчеты о сбоях. Требуется перезпуск.</string>
   <string name="tab_updatable">Обновляемые</string>
   <string name="pref_privacy">Конфиденциальность</string>
+    <string name="adaptive_icon_style">Форма иконки</string>
+  <string name="adaptive_icon_style_summary">Применить форму к квадратным не прозрачным иконкам</string>
+  <string name="theme_system_black">Как система  (Черная)</string>
+  <string name="theme_system_dark">Как система (Темная)</string>
 
 </resources>

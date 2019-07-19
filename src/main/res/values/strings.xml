@@ -189,4 +189,14 @@
         <item>Every 12 hours</item>
     </string-array>
 
+    <string name="adaptive_icon_style">Apply icon shape</string>
+    <string name="adaptive_icon_style_summary">Apply a shape for square, non transparent icons</string>
+    <array name="adaptive_icon_style_names">
+        <item>None</item>
+        <item>Square</item>
+        <item>Rounded square</item>
+        <item>Squircle</item>
+        <item>Circle</item>
+        <item>Teardrop</item>
+    </array>
 </resources>

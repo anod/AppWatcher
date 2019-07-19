@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
 import com.anod.appwatcher.model.Filters
+import com.anod.appwatcher.utils.AdaptiveIconTransformation
 import info.anodsplace.playstore.DeviceIdStorage
 
 class Preferences(context: Context) : DeviceIdStorage {
@@ -138,6 +139,10 @@ class Preferences(context: Context) : DeviceIdStorage {
         get() = preferences.getBoolean("crash-reports", true)
         @SuppressLint("ApplySharedPref")
         set(value) { preferences.edit().putBoolean("crash-reports", value).commit() }
+
+    var iconShape: String
+        get() = preferences.getString("adaptive-icon-shape", AdaptiveIconTransformation.getSystemDefaultMask())!!
+        set(value) = preferences.edit().putString("adaptive-icon-shape", value).apply()
 
     companion object {
         private const val VIEWED = "viewed"

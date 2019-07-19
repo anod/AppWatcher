@@ -3,8 +3,10 @@ package com.anod.appwatcher.utils
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Path
 import androidx.annotation.DrawableRes
 import android.widget.ImageView
+import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.App
 import com.squareup.picasso.Picasso
@@ -17,6 +19,7 @@ import java.io.IOException
 
 class PicassoAppIcon(context: Context) {
     private val context: Context = context.applicationContext
+    private var iconPath: Path = AdaptiveIconTransformation.maskToPath(Application.provide(context).prefs.iconShape)
     private val picasso: Picasso by lazy {
         Picasso.Builder(this.context)
             .addRequestHandler(PackageIconRequestHandler(this.context))
@@ -47,6 +50,7 @@ class PicassoAppIcon(context: Context) {
 
     fun retrieve(imageUrl: String): RequestCreator {
         return picasso.load(if (imageUrl.isEmpty()) null else imageUrl)
+                .transform(AdaptiveIconTransformation(context, iconPath, iconSize, imageUrl))
                 .resize(iconSize, iconSize)
                 .centerInside()
                 .onlyScaleDown()
@@ -54,8 +58,14 @@ class PicassoAppIcon(context: Context) {
 
     fun loadAppIntoImageView(app: App, iconView: ImageView, @DrawableRes defaultRes: Int) {
         this.retrieve(app.iconUrl)
+                .transform(AdaptiveIconTransformation(context, iconPath, iconSize, app.iconUrl))
+                .resize(iconSize, iconSize)
                 .placeholder(defaultRes)
                 .into(iconView)
+    }
+
+    fun setIconShape(mask: String) {
+        this.iconPath = AdaptiveIconTransformation.maskToPath(mask)
     }
 
     companion object {
