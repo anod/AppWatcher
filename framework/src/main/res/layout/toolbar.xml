@@ -5,6 +5,8 @@
     android:layout_height="?attr/actionBarSize"
     android:background="?attr/colorPrimary"
     android:theme="?android:attr/actionBarTheme"
+    app:subtitleTextAppearance="?attr/textAppearanceOverline"
+    app:titleTextAppearance="?attr/textAppearanceHeadline6"
     app:layout_scrollFlags="scroll|enterAlways"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"/>
