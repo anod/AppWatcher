@@ -7,11 +7,13 @@ import android.util.SparseIntArray
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -147,8 +149,8 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         listView.layoutManager = layoutManager
 
         // Setup header decorator
-        listView.addItemDecoration(HeaderItemDecorator(viewModel.sections,
-                this, context!!))
+        listView.addItemDecoration(HeaderItemDecorator(viewModel.sections, this, context!!))
+//        listView.addItemDecoration(DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL))
         listView.adapter = section.adapter
 
         listView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
