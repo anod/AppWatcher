@@ -136,6 +136,10 @@ class ImportInstalledFragment : Fragment(), ImportBulkManager.Listener {
             if (token.isNotBlank()) {
                 importManager.start(account, token)
             } else {
+                if (context == null) {
+                    activity?.finish()
+                    return@request
+                }
                 if (appComponent?.networkConnection?.isNetworkAvailable == true) {
                     Toast.makeText(context, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
                 } else {
@@ -147,6 +151,9 @@ class ImportInstalledFragment : Fragment(), ImportBulkManager.Listener {
     }
 
     override fun onImportProgress(docIds: List<String>, result: SimpleArrayMap<String, Int>) {
+        if (list == null) {
+            return
+        }
         val adapter = list.adapter as ImportAdapter
         for (packageName in docIds) {
             val resultCode = result.get(packageName)

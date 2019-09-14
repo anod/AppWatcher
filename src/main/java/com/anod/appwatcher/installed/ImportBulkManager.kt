@@ -12,10 +12,8 @@ import finsky.api.model.DfeModel
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.playstore.BulkDetailsEndpoint
 import info.anodsplace.playstore.PlayStoreEndpoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers.Main
 import java.util.*
 
 internal class ImportBulkManager(
@@ -90,12 +88,10 @@ internal class ImportBulkManager(
     override fun onDataChanged(data: DfeModel) {
         val docs = (data as DfeBulkDetails).documents.toTypedArray()
         val task = ImportTask(ApplicationContext(context))
-        var result = SimpleArrayMap<String, Int>()
-
         coroutineScope.launch {
-            result = task.execute(*docs)
+            val result = task.execute(*docs)
+            onAddAppTaskFinish(result)
         }
-        onAddAppTaskFinish(result)
     }
 
     override fun onErrorResponse(error: VolleyError) {
@@ -109,7 +105,7 @@ internal class ImportBulkManager(
         }
     }
 
-    private fun onAddAppTaskFinish(result: SimpleArrayMap<String, Int>) {
+    private suspend fun onAddAppTaskFinish(result: SimpleArrayMap<String, Int>) = withContext(Main) {
         val docIds = listsDocIds[currentBulk] ?: emptyList<BulkDocId>()
         listener.onImportProgress(docIds.map { it.packageName }, result)
         currentBulk++

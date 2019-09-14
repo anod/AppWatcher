@@ -1,108 +1,108 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/content"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="1dp"
-    app:cardBackgroundColor="?attr/colorItemBackground"
-    app:cardCornerRadius="1dp"
-    app:cardElevation="1dp">
+    android:background="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingTop="8dp"
+    android:focusable="true">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@android:id/content"
-        android:layout_width="match_parent"
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="@dimen/icon_size"
+        android:layout_height="@dimen/icon_size"
+        android:layout_marginStart="8dp"
+        android:contentDescription="@string/application_icon"
+        android:src="@drawable/ic_notifications_black_24dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="?android:attr/selectableItemBackground"
-        android:clickable="true"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingBottom="8dp"
-        android:paddingTop="8dp">
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textSize="@dimen/textSizeTitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/icon"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Car Widget Pro" />
 
-        <ImageView
-            android:id="@+id/icon"
-            android:layout_width="@dimen/icon_size"
-            android:layout_height="@dimen/icon_size"
-            android:layout_marginLeft="8dp"
-            android:contentDescription="@string/application_icon"
-            android:src="@drawable/ic_notifications_black_24dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+    <TextView
+        android:id="@+id/creator"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:drawablePadding="4dp"
+        android:ellipsize="end"
+        android:gravity="left"
+        android:maxLines="1"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textSize="@dimen/textSize"
+        app:layout_constraintEnd_toStartOf="@+id/update_date"
+        app:layout_constraintStart_toEndOf="@+id/icon"
+        app:layout_constraintTop_toBottomOf="@id/title"
+        tools:text="Alex Gavrishev" />
 
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textSize="@dimen/textSizeTitle"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/icon"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="Car Widget Pro" />
+    <TextView
+        android:id="@+id/price"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:drawableStart="@drawable/ic_stat_communication_stay_primary_portrait"
+        android:drawablePadding="4dp"
+        android:ellipsize="end"
+        android:gravity="left"
+        android:maxLines="1"
+        android:textColor="@color/theme_accent"
+        android:textSize="@dimen/textSize"
+        app:layout_constraintEnd_toStartOf="@id/update_date"
+        app:layout_constraintStart_toEndOf="@+id/icon"
+        app:layout_constraintTop_toBottomOf="@id/creator"
+        tools:text="5.6.1609P.1258283" />
 
-        <TextView
-            android:id="@+id/creator"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:drawablePadding="4dp"
-            android:ellipsize="end"
-            android:gravity="left"
-            android:maxLines="1"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textSize="@dimen/textSize"
-            app:layout_constraintEnd_toStartOf="@+id/update_date"
-            app:layout_constraintStart_toEndOf="@+id/icon"
-            app:layout_constraintTop_toBottomOf="@id/title"
-            tools:text="Alex Gavrishev" />
+    <TextView
+        android:id="@+id/update_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:textSize="@dimen/textSize"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/title"
+        tools:text="11 Aug 2017" />
 
-        <TextView
-            android:id="@+id/price"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:drawableLeft="@drawable/ic_stat_communication_stay_primary_portrait"
-            android:drawablePadding="4dp"
-            android:ellipsize="end"
-            android:gravity="left"
-            android:maxLines="1"
-            android:textColor="@color/theme_accent"
-            android:textSize="@dimen/textSize"
-            app:layout_constraintEnd_toStartOf="@id/update_date"
-            app:layout_constraintStart_toEndOf="@+id/icon"
-            app:layout_constraintTop_toBottomOf="@id/creator"
-            tools:text="5.6.1609P.1258283" />
+    <TextView
+        android:id="@+id/recent_changes"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginRight="8dp"
+        android:ellipsize="end"
+        android:maxLines="2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/icon"
+        app:layout_constraintTop_toBottomOf="@id/price"
+        tools:text="1.9.1 beta3Fix search results Fix import installed Add open app menu item" />
 
-        <TextView
-            android:id="@+id/update_date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="8dp"
-            android:textSize="@dimen/textSize"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/title"
-            tools:text="11 Aug 2017" />
+    <View
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:background="?attr/colorItemLine"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/title"
+        app:layout_constraintTop_toBottomOf="@+id/recent_changes" />
 
-        <TextView
-            android:id="@+id/recent_changes"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="4dp"
-            android:layout_marginRight="8dp"
-            android:ellipsize="end"
-            android:maxLines="2"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/icon"
-            app:layout_constraintTop_toBottomOf="@id/price"
-            tools:text="1.9.1 beta3Fix search results Fix import installed Add open app menu item"/>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-</androidx.cardview.widget.CardView>
+</androidx.constraintlayout.widget.ConstraintLayout>
 

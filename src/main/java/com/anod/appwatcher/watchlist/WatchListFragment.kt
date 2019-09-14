@@ -7,13 +7,11 @@ import android.util.SparseIntArray
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
-import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -22,9 +20,6 @@ import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.details.DetailsActivity
 import com.anod.appwatcher.installed.ImportInstalledFragment
-import com.anod.appwatcher.model.AppListFilter
-import com.anod.appwatcher.model.AppListFilterInclusion
-import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.search.SearchActivity
 import info.anodsplace.framework.AppLog
@@ -32,17 +27,13 @@ import info.anodsplace.framework.app.CustomThemeActivity
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.startActivitySafely
 import info.anodsplace.framework.widget.recyclerview.MergeRecyclerAdapter
+import kotlinx.android.synthetic.main.fragment_applist.*
 
 open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
 
-    private lateinit var listView: RecyclerView
-    private lateinit var emptyView: View
-    private var swipeLayout: SwipeRefreshLayout? = null
-
-    lateinit var progress: ProgressBar
     lateinit var section: Section
 
-    private val stateViewModel: WatchListStateViewModel by lazy { ViewModelProviders.of(activity!!).get(WatchListStateViewModel::class.java) }
+    private val stateViewModel: WatchListStateViewModel by activityViewModels()
 
     interface Section {
         val adapter: MergeRecyclerAdapter
@@ -58,7 +49,7 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
     }
 
     // Must have empty constructor
-    open class DefaultSection: Section {
+    open class DefaultSection : Section {
         override var adapterIndexMap = SparseIntArray()
         override val adapter: MergeRecyclerAdapter by lazy { MergeRecyclerAdapter() }
 
@@ -69,7 +60,7 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         }
 
         override fun viewModel(fragment: WatchListFragment): WatchListViewModel {
-            return ViewModelProviders.of(fragment).get(WatchListViewModel::class.java)
+            return ViewModelProvider(fragment).get(WatchListViewModel::class.java)
         }
 
         override fun onModelLoaded(result: LoadResult) {
@@ -118,20 +109,14 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        listView = view.findViewById(android.R.id.list)
-        emptyView = view.findViewById(android.R.id.empty)
-        swipeLayout = view.findViewById(R.id.swipe_layout)
-        
         if (prefs.enablePullToRefresh) {
-            swipeLayout?.setOnRefreshListener(this)
+            swipeLayout.setOnRefreshListener(this)
         } else {
-            swipeLayout?.isEnabled = false
-            swipeLayout = null
+            swipeLayout.isEnabled = false
         }
-        
+
         val metrics = resources.displayMetrics
-        swipeLayout?.setDistanceToTriggerSync((16 * metrics.density).toInt())
-        progress = view.findViewById(R.id.progress)
+        swipeLayout.setDistanceToTriggerSync((16 * metrics.density).toInt())
 
         val sortId = arguments!!.getInt(ARG_SORT)
         val filterId = arguments!!.getInt(ARG_FILTER)
@@ -150,13 +135,12 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
 
         // Setup header decorator
         listView.addItemDecoration(HeaderItemDecorator(viewModel.sections, this, context!!))
-//        listView.addItemDecoration(DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL))
         listView.adapter = section.adapter
 
         listView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 val isOnTop = !recyclerView.canScrollVertically(-1)
-                swipeLayout?.isEnabled = isOnTop
+                swipeLayout.isEnabled = isOnTop
             }
         })
 
@@ -194,9 +178,11 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
 
         stateViewModel.listState.observe(this) {
             when (it) {
-                is SyncStarted -> { swipeLayout?.isRefreshing = true }
+                is SyncStarted -> {
+                    swipeLayout.isRefreshing = true
+                }
                 else -> {
-                    swipeLayout?.isRefreshing = false
+                    swipeLayout.isRefreshing = false
                 }
             }
         }

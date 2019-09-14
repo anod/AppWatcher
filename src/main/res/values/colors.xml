@@ -6,6 +6,7 @@
     <color name="material_blue_900">#0D47A1</color>
 
 
+    <color name="material_grey_200">#eeeeee</color>
     <color name="material_grey_500">#9E9E9E</color>
     <color name="material_grey_700">#616161</color>
     <color name="material_grey_800_">#424242</color>
@@ -43,6 +44,8 @@
     <color name="fab_tint">@android:color/white</color>
     <color name="control_tint">@color/theme_primary_dark</color>
     <color name="fastscroll_thumb">#64616161</color>
+    <color name="color_item_line">@color/material_grey_200</color>
+
 
 </resources>
 

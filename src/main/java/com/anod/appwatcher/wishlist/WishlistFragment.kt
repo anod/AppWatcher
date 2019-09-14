@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -33,9 +34,7 @@ class WishlistFragment : Fragment(), PlayStoreEndpoint.Listener {
 
     private var endpoint: WishlistEndpoint? = null
 
-    private val viewModel: WishlistViewModel by lazy {
-        ViewModelProviders.of(this).get(WishlistViewModel::class.java)
-    }
+    private val viewModel: WishlistViewModel by viewModels()
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -117,7 +116,7 @@ class WishlistFragment : Fragment(), PlayStoreEndpoint.Listener {
         loading.visibility = View.GONE
         list.visibility = View.GONE
         retryView.visibility = View.GONE
-        empty.setText(R.string.no_result_found)
+        empty.setText(R.string.no_result_wishlist)
         empty.visibility = View.VISIBLE
     }
 

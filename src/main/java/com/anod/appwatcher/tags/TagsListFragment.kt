@@ -110,8 +110,8 @@ class TagsListFragment : Fragment(), View.OnClickListener {
     internal class TagHolder(itemView: View, listener: View.OnClickListener) : RecyclerView.ViewHolder(itemView) {
         lateinit var tag: Tag
 
-        val name: TextView = itemView.findViewById(android.R.id.text1)
-        val color: ImageView = itemView.findViewById(android.R.id.icon)
+        val name: TextView = itemView.findViewById(R.id.tagName)
+        val color: ImageView = itemView.findViewById(R.id.icon)
 
         init {
             itemView.tag = this
@@ -146,7 +146,11 @@ class TagsListFragment : Fragment(), View.OnClickListener {
 
         fun intent(context: Context, themeRes: Int, themeColors: CustomThemeColors, app: AppInfo?) = FragmentToolbarActivity.intent(
                 Factory(),
-                Bundle().apply { if (app != null) { putParcelable(EXTRA_APP, app) } },
+                Bundle().apply {
+                    if (app != null) {
+                        putParcelable(EXTRA_APP, app)
+                    }
+                },
                 themeRes,
                 themeColors,
                 context)

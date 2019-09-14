@@ -23,8 +23,8 @@ internal class ImportAppViewHolder(
 
     private val importDataProvider = dataProvider
     private var item: AppListItem? = null
-    private val title: CheckedTextView = itemView.findViewById(android.R.id.title)
-    private val icon: ImageView = itemView.findViewById(android.R.id.icon)
+    private val title: CheckedTextView = itemView.findViewById(R.id.title)
+    private val icon: ImageView = itemView.findViewById(R.id.icon)
 
     val themeAccent: Int = ResourcesCompat.getColor(itemView.resources, R.color.theme_accent, null)
     val materialRed: Int = ResourcesCompat.getColor(itemView.resources, R.color.material_red_800, null)
@@ -36,7 +36,7 @@ internal class ImportAppViewHolder(
         this.title.isChecked = checked
         title.isEnabled = !importDataProvider.isImportStarted
 
-        itemView.findViewById<View>(android.R.id.content).setOnClickListener(this)
+        itemView.findViewById<View>(R.id.content).setOnClickListener(this)
 
         iconLoader.loadAppIntoImageView(item.app, this.icon, R.drawable.ic_notifications_black_24dp)
 

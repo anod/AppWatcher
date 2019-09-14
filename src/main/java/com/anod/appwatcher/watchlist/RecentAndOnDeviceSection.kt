@@ -1,5 +1,6 @@
 package com.anod.appwatcher.watchlist
 
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import com.anod.appwatcher.installed.InstalledAppsAdapter
 import com.anod.appwatcher.installed.InstalledLoadResult
@@ -101,7 +102,7 @@ class RecentAndOnDeviceSection : RecentSection() {
     }
 
     override fun viewModel(fragment: WatchListFragment): WatchListViewModel {
-        return ViewModelProviders.of(fragment).get(InstalledWatchListViewModel::class.java)
+        return ViewModelProvider(fragment).get(InstalledWatchListViewModel::class.java)
     }
 
     override fun onModelLoaded(result: LoadResult) {

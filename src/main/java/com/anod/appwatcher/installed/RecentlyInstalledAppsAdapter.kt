@@ -2,10 +2,10 @@ package com.anod.appwatcher.installed
 
 import android.content.Context
 import android.content.pm.PackageManager
-import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.packageToApp
@@ -66,7 +66,7 @@ open class RecentlyInstalledAppsAdapter(
                     view.title.text = app.title
                     view.visibility = View.VISIBLE
                     view.watched.visibility = if (packages[index].second > 0) View.VISIBLE else View.INVISIBLE
-                    view.findViewById<View>(android.R.id.content).setOnClickListener {
+                    view.findViewById<View>(R.id.content).setOnClickListener {
                         listener?.onItemClick(app)
                     }
                 }

@@ -37,7 +37,8 @@
         <!-- Set AppCompat’s color theming attrs -->
         <item name="colorPrimary">@color/theme_primary</item>
         <item name="colorSecondary">@color/material_blue_800</item>
-        <item name="colorOnPrimary">@color/theme_on_primary</item> // Affects icons in action bar
+        <item name="colorOnPrimary">@color/theme_on_primary</item>
+        // Affects icons in action bar
         <item name="colorPrimaryDark">@color/theme_primary_dark</item>
         <item name="colorAccent">@color/theme_accent</item>
 
@@ -85,7 +86,7 @@
         <item name="inactiveRow">@color/row_inactive</item>
         <item name="colorItemBackground">@color/item_background</item>
         <item name="colorPreferenceBackground">@color/preference_background</item>
-        <item name="colorItemLine">@android:color/transparent</item>
+        <item name="colorItemLine">@color/color_item_line</item>
 
         <item name="android:navigationBarColor">@color/theme_primary_dark</item>
         <item name="android:windowBackground">?attr/colorItemBackground</item>
@@ -148,6 +149,7 @@
     </style>
 
     <style name="Changelog" />
+
     <style name="Changelog.Title" parent="@style/TextAppearance.Widget.AppCompat.Toolbar.Title">
         <item name="android:textSize">14sp</item>
         <!-- include other attributes you want to change: textColor, textStyle, etc -->
@@ -165,10 +167,12 @@
     <style name="AppTheme.ActionBar" parent="@style/ThemeOverlay.MaterialComponents.ActionBar.Primary">
         <item name="popupTheme">@style/ThemeOverlay.AppCompat.DayNight</item>
     </style>
+
     <style name="AppTheme.ActionBar.LightBackground" parent="@style/ThemeOverlay.MaterialComponents.ActionBar.Primary">
         <item name="android:textColorPrimary">@color/black_theme_primary</item>
         <item name="popupTheme">@style/ThemeOverlay.AppCompat.DayNight</item>
     </style>
+
     <style name="AppTheme.ActionBar.DarkBackground" parent="@style/ThemeOverlay.MaterialComponents.ActionBar.Primary">
         <item name="android:textColorPrimary">@android:color/white</item>
         <item name="android:textColorSecondary">@android:color/white</item>
@@ -180,10 +184,10 @@
         <item name="android:colorBackground">@android:color/white</item>
     </style>
 
-<!--    <style name="AppTheme.ActionBar.OverflowMenu" parent="@style/Widget.MaterialComponents.PopupMenu.Overflow" />-->
-<!--    <style name="AppTheme.ActionBar.OverflowMenu.White" parent="@style/Widget.MaterialComponents.PopupMenu.Overflow">-->
-<!--        <item name="android:textColorPrimary">@android:color/black</item>-->
-<!--        <item name="android:textColorSecondary">@android:color/black</item>-->
-<!--    </style>-->
+    <!--    <style name="AppTheme.ActionBar.OverflowMenu" parent="@style/Widget.MaterialComponents.PopupMenu.Overflow" />-->
+    <!--    <style name="AppTheme.ActionBar.OverflowMenu.White" parent="@style/Widget.MaterialComponents.PopupMenu.Overflow">-->
+    <!--        <item name="android:textColorPrimary">@android:color/black</item>-->
+    <!--        <item name="android:textColorSecondary">@android:color/black</item>-->
+    <!--    </style>-->
 
 </resources>

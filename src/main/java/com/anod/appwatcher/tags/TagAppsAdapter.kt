@@ -43,8 +43,8 @@ internal class TagAppsAdapter(private val context: Context, private val tagAppsI
             private val mIconLoader: PicassoAppIcon,
             private val tagAppsImport: TagAppsImport) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
 
-        val title: CheckedTextView = itemView.findViewById(android.R.id.title)
-        val icon: ImageView = itemView.findViewById(android.R.id.icon)
+        val title: CheckedTextView = itemView.findViewById(R.id.title)
+        val icon: ImageView = itemView.findViewById(R.id.icon)
 
         private var app: App? = null
 
@@ -52,7 +52,7 @@ internal class TagAppsAdapter(private val context: Context, private val tagAppsI
             this.app = item.app
             this.title.text = item.app.title
             this.title.isChecked = tagAppsImport.isSelected(item.app.appId)
-            this.itemView.findViewById<View>(android.R.id.content).setOnClickListener(this)
+            this.itemView.findViewById<View>(R.id.content).setOnClickListener(this)
             mIconLoader.loadAppIntoImageView(item.app, this.icon, R.drawable.ic_notifications_black_24dp)
         }
 

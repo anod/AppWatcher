@@ -39,11 +39,11 @@ fun extractUploadDate(uploadDate: String, locale: Locale): Date? {
         }
     }
 
-    if (date == null) {
-        AppLog.e("Cannot parse '$uploadDate' for '$locale'", Throwable("Cannot parse '$locale'", parseException) )
-        return null
+    return if (date == null) {
+        AppLog.e("Cannot parse '$uploadDate' for '$locale'", Throwable("Cannot parse '$locale'", parseException))
+        null
     } else {
-        return date
+        date
     }
 }
 

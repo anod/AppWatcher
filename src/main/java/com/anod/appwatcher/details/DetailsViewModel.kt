@@ -22,6 +22,7 @@ import info.anodsplace.framework.livedata.OneTimeObserver
 import info.anodsplace.playstore.DetailsEndpoint
 import info.anodsplace.playstore.PlayStoreEndpoint
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 typealias TagMenuItem = Pair<Tag,Boolean>
 
@@ -47,6 +48,7 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
     var isNewApp: Boolean = false
 
     val app: MutableLiveData<App> = MutableLiveData()
+    val watchStateChange: MutableLiveData<Int> = MutableLiveData()
 
     val account: Account? by lazy {
         Application.provide(application).prefs.account
@@ -169,13 +171,19 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
         }
     }
 
-    fun watch(): Int {
-        val document = this.document ?: return AppListTable.ERROR_INSERT
-        val info = AppInfo(document)
-        var result = AppListTable.ERROR_INSERT
-        viewModelScope.launch {
-            result = AppListTable.Queries.insertSafetly(info, database)
+    fun watch() {
+        val document = this@DetailsViewModel.document
+        if (document == null) {
+            isNewApp = true
+            watchStateChange.value = AppListTable.ERROR_INSERT
+            return
         }
-        return result
+        val info = AppInfo(document)
+        viewModelScope.launch {
+            val result = AppListTable.Queries.insertSafetly(info, database)
+            isNewApp = result == AppListTable.ERROR_INSERT
+            watchStateChange.value = result
+        }
+
     }
 }

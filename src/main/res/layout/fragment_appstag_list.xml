@@ -7,12 +7,12 @@
     android:layout_height="match_parent">
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swipe_layout"
+        android:id="@+id/swipeLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@android:id/list"
+            android:id="@+id/listView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:fastScrollEnabled="true"
@@ -24,7 +24,7 @@
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <LinearLayout
-        android:id="@android:id/empty"
+        android:id="@+id/emptyView"
         android:layout_width="240dp"
         android:layout_height="wrap_content"
         android:layout_gravity="top|center_horizontal"
@@ -50,7 +50,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:drawableLeft="@drawable/ic_add_circle_white_24dp"
+            android:drawableStart="@drawable/ic_add_circle_white_24dp"
             android:foreground="?android:attr/selectableItemBackground"
             android:text="@string/add_apps" />
 

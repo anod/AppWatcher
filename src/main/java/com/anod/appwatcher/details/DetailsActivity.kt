@@ -21,6 +21,7 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.observe
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.anod.appwatcher.Application
@@ -136,6 +137,21 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
             }
         })
 
+        viewModel.watchStateChange.observe(this) {result ->
+            invalidateOptionsMenu()
+            when (result) {
+                AppListTable.ERROR_ALREADY_ADDED -> Toast.makeText(this, R.string.app_already_added, Toast.LENGTH_SHORT).show()
+                AppListTable.ERROR_INSERT -> Toast.makeText(this, R.string.error_insert_app, Toast.LENGTH_SHORT).show()
+                else -> {
+                    val data = Intent()
+                    val info = AppInfo(viewModel.document!!)
+                    data.putExtra(EXTRA_ADD_APP_PACKAGE, info.packageName)
+                    setResult(Activity.RESULT_OK, data)
+                    TagSnackbar.make(this, info, true).show()
+                }
+            }
+        }
+
         viewModel.loadApp()
     }
 
@@ -240,17 +256,7 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
                 return true
             }
             R.id.menu_add -> {
-                when (viewModel.watch()) {
-                    AppListTable.ERROR_ALREADY_ADDED -> Toast.makeText(this, R.string.app_already_added, Toast.LENGTH_SHORT).show()
-                    AppListTable.ERROR_INSERT -> Toast.makeText(this, R.string.error_insert_app, Toast.LENGTH_SHORT).show()
-                    else -> {
-                        val data = Intent()
-                        val info = AppInfo(viewModel.document!!)
-                        data.putExtra(EXTRA_ADD_APP_PACKAGE, info.packageName)
-                        setResult(Activity.RESULT_OK, data)
-                        TagSnackbar.make(this, info, true).show()
-                    }
-                }
+                viewModel.watch()
                 return true
             }
             R.id.menu_uninstall -> {

@@ -8,9 +8,9 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
@@ -28,7 +28,7 @@ import kotlinx.android.synthetic.main.activity_market_search.*
 open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionListener {
 
     override val themeRes: Int
-        get() =  Theme(this).theme
+        get() = Theme(this).theme
     override val themeColors: CustomThemeColors
         get() = Theme(this).colors
 
@@ -39,9 +39,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
         AccountSelectionDialog(this, Application.provide(this).prefs, this)
     }
 
-    private val viewModel: SearchViewModel by lazy {
-        ViewModelProviders.of(this).get(SearchViewModel::class.java)
-    }
+    private val viewModel: SearchViewModel by viewModels()
 
     override val layoutResource: Int
         get() = R.layout.activity_market_search

@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.annotation.MenuRes
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.FragmentPagerAdapter
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
 import androidx.viewpager.widget.ViewPager
@@ -33,10 +34,10 @@ import info.anodsplace.framework.app.DialogSingleChoice
 
 sealed class ListState
 object SyncStarted : ListState()
-class SyncStopped(val updatesCount: Int): ListState()
-object Updated: ListState()
-object NoNetwork: ListState()
-object ShowAuthDialog: ListState()
+class SyncStopped(val updatesCount: Int) : ListState()
+object Updated : ListState()
+object NoNetwork : ListState()
+object ShowAuthDialog : ListState()
 
 abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionListener, SearchView.OnQueryTextListener {
 
@@ -55,7 +56,8 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     private val actionMenu by lazy { WatchListMenu(this, this) }
     private val stateViewModel: WatchListStateViewModel by lazy { ViewModelProviders.of(this).get(WatchListStateViewModel::class.java) }
 
-    @get:MenuRes protected abstract val menuResource: Int
+    @get:MenuRes
+    protected abstract val menuResource: Int
 
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putInt("tab_id", viewPager.currentItem)
@@ -85,7 +87,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         viewPager.currentItem = filterId
         actionMenu.filterId = filterId
         updateSubtitle(filterId)
-        viewPager.addOnPageChangeListener(object: ViewPager.SimpleOnPageChangeListener() {
+        viewPager.addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {
             override fun onPageSelected(position: Int) {
                 onFilterSelected(position)
             }
@@ -102,7 +104,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
                     if (it.updatesCount == 0) {
                         Toast.makeText(this@WatchListActivity, R.string.no_updates_found, Toast.LENGTH_SHORT).show()
                     }
-                    ViewModelProviders.of(this@WatchListActivity).get(DrawerViewModel::class.java).refreshLastUpdateTime()
+                    ViewModelProvider(this@WatchListActivity).get(DrawerViewModel::class.java).refreshLastUpdateTime()
                 }
                 is NoNetwork -> {
                     Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()

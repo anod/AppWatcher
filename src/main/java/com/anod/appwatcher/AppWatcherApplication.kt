@@ -3,11 +3,10 @@ package com.anod.appwatcher
 import android.app.Activity
 import android.app.Application
 import android.app.NotificationManager
-import android.graphics.Color
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatDelegate
 import android.util.LruCache
 import android.view.ViewConfiguration
+import androidx.appcompat.app.AppCompatDelegate
 import com.android.volley.NetworkError
 import com.android.volley.NoConnectionError
 import com.android.volley.TimeoutError
@@ -18,14 +17,10 @@ import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.app.ApplicationInstance
 import info.anodsplace.framework.app.CustomThemeActivity
+import info.anodsplace.framework.app.WindowCustomTheme
 import io.fabric.sdk.android.Fabric
 import java.io.File
 import java.io.IOException
-import android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-import android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
-import android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-import android.os.Build
-import info.anodsplace.framework.app.WindowCustomTheme
 import java.lang.reflect.Field
 
 

@@ -32,7 +32,7 @@ class InstalledTaskWorker(
 
         val recentlyInstalled = installedPackages.sortedWith(AppUpdateTimeComparator(-1))
                 .take(10)
-                .map {it.packageName }
+                .map { it.packageName }
 
         when (sortId) {
             Preferences.SORT_NAME_DESC -> Collections.sort(installedPackages, AppTitleComparator(-1))

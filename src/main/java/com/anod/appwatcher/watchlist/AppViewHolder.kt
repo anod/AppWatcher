@@ -27,7 +27,7 @@ open class AppViewHolder(
     }
 
     init {
-        itemView.findViewById<View>(android.R.id.content).setOnClickListener(this)
+        itemView.findViewById<View>(R.id.content).setOnClickListener(this)
     }
 
     override fun onClick(v: View) {
@@ -37,7 +37,8 @@ open class AppViewHolder(
     override fun bindView(item: AppListItem) {
         this.item = item
 
-        this.detailsView.fillDetails(item.app, item.recentFlag, item.changeDetails ?: "", isLocalApp)
+        this.detailsView.fillDetails(item.app, item.recentFlag, item.changeDetails
+                ?: "", isLocalApp)
         iconLoader.loadAppIntoImageView(item.app, this.icon, R.drawable.ic_notifications_black_24dp)
     }
 }

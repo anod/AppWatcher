@@ -1,8 +1,11 @@
 package com.anod.appwatcher.installed
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.liveData
-import androidx.lifecycle.map
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import androidx.lifecycle.*
+import com.anod.appwatcher.AppWatcherApplication
 import com.anod.appwatcher.utils.combineLatest
 import com.anod.appwatcher.watchlist.LoadResult
 import com.anod.appwatcher.watchlist.SectionHeaderFactory
@@ -15,20 +18,45 @@ import info.anodsplace.framework.content.InstalledPackage
  */
 
 typealias InstalledPairRow = Pair<String, Int>
+
 typealias InstalledResult = Pair<List<String>, List<InstalledPackage>>
 
 class InstalledWatchListViewModel(application: android.app.Application) : WatchListViewModel(application) {
     var hasSectionRecent = false
     var hasSectionOnDevice = false
 
-    val installed: LiveData<InstalledResult> = liveData {
-        emit(InstalledTaskWorker(context, sortId, titleFilter).run())
+    private val onPackageUninstalled = MutableLiveData(false)
+
+    private val packageRemovedReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            onPackageUninstalled.value = true
+        }
+    }
+
+    init {
+        getApplication<AppWatcherApplication>().registerReceiver(packageRemovedReceiver, IntentFilter().apply {
+            addAction(Intent.ACTION_PACKAGE_REMOVED)
+            addAction(Intent.ACTION_PACKAGE_ADDED)
+            addAction(Intent.ACTION_PACKAGE_FULLY_REMOVED)
+            addAction(Intent.ACTION_PACKAGE_CHANGED)
+        })
+    }
+
+    val installed: LiveData<InstalledResult> = onPackageUninstalled.switchMap {
+        liveData {
+            emit(InstalledTaskWorker(context, sortId, titleFilter).run())
+        }
+    }
+
+    override fun onCleared() {
+        getApplication<AppWatcherApplication>().unregisterReceiver(packageRemovedReceiver)
+        super.onCleared()
     }
 
     override var result: LiveData<LoadResult> = appsList.combineLatest(installed).map { pair ->
+        val installed = pair.second
         val appsList = pair.first.first
         val filter = pair.first.second
-        val installed = pair.second
         val recentlyInstalled = installed.first
         val installedPackages = installed.second
 

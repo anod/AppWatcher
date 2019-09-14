@@ -5,13 +5,13 @@
     android:layout_height="match_parent"
     android:layout_marginTop="2dp"
     android:layout_marginBottom="2dp"
-    android:layout_marginLeft="2dp"
+    android:layout_marginStart="4dp"
     card_view:cardBackgroundColor="?attr/colorItemBackground"
     card_view:cardCornerRadius="1dp"
     card_view:cardElevation="1dp">
 
     <LinearLayout
-        android:id="@android:id/content"
+        android:id="@+id/content"
         android:layout_width="96dp"
         android:layout_height="match_parent"
         android:clickable="true"
@@ -24,7 +24,7 @@
 
         <ImageView
             android:layout_marginTop="8dp"
-            android:id="@android:id/icon"
+            android:id="@+id/icon"
             android:layout_width="@dimen/icon_size_big"
             android:layout_height="@dimen/icon_size_big"
             android:layout_gravity="center_horizontal"
@@ -32,7 +32,7 @@
             android:src="@drawable/ic_notifications_black_24dp" />
 
         <TextView
-            android:id="@android:id/title"
+            android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -52,10 +52,5 @@
             android:layout_gravity="bottom|left"
             android:tint="@color/material_grey_500" />
     </LinearLayout>
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?attr/colorItemLine"
-        android:layout_gravity="bottom"
-        />
+
 </com.anod.appwatcher.installed.RecentAppView>

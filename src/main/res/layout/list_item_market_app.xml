@@ -1,89 +1,90 @@
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/content"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="1dp"
     android:clickable="true"
-    card_view:cardBackgroundColor="?attr/colorItemBackground"
-    card_view:cardCornerRadius="1dp"
-    card_view:cardElevation="1dp"
-    >
+    android:background="?android:attr/selectableItemBackground"
+    android:focusable="true">
 
-    <LinearLayout
-        android:id="@android:id/content"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:background="?android:attr/selectableItemBackground"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:clickable="true"
-        >
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="@dimen/icon_size"
+        android:layout_height="@dimen/icon_size"
+        android:layout_gravity="center_vertical"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="8dp"
+        android:contentDescription="@string/application_icon"
+        android:src="@drawable/ic_notifications_black_24dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
-            android:id="@android:id/icon"
-            android:layout_width="@dimen/icon_size"
-            android:layout_height="@dimen/icon_size"
-            android:layout_gravity="center_vertical"
-            android:layout_marginLeft="8dip"
-            android:contentDescription="@string/application_icon"
-            android:src="@drawable/ic_notifications_black_24dp" />
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:text="@string/app_name"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/icon"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Car Widget Pro"
+        android:textSize="@dimen/textSizeTitle" />
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="8dp"
-            android:gravity="center_vertical|clip_vertical"
-            android:orientation="vertical">
+    <TextView
+        android:id="@+id/creator"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:drawablePadding="4dp"
+        android:text="@string/app_name"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/icon"
+        app:layout_constraintTop_toBottomOf="@+id/title"
+        android:textSize="@dimen/textSize" />
 
-            <TextView
-                android:id="@android:id/title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="true"
-                android:text="@string/app_name"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textSize="@dimen/textSizeTitle" />
+    <TextView
+        android:id="@+id/updated"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/creator"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/app_name"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textSize="@dimen/textSize"
+        app:layout_constraintEnd_toStartOf="@+id/price"
+        app:layout_constraintStart_toEndOf="@+id/icon"
+        app:layout_constraintTop_toBottomOf="@id/creator" />
 
-            <TextView
-                android:id="@+id/creator"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_below="@android:id/title"
-                android:text="@string/app_name"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textSize="@dimen/textSize" />
+    <TextView
+        android:id="@+id/price"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="@string/free"
+        android:textColor="@color/theme_accent"
+        android:textSize="@dimen/textSize"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/updated"
+        app:layout_constraintTop_toBottomOf="@id/creator" />
 
-            <TextView
-                android:id="@+id/updated"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_below="@+id/creator"
-                android:text="@string/app_name"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textSize="@dimen/textSize" />
-
-            <TextView
-                android:id="@+id/price"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentRight="true"
-                android:text="@string/installed"
-                android:textColor="@color/theme_accent"
-                android:textSize="@dimen/textSize" />
-
-        </RelativeLayout>
-    </LinearLayout>
     <View
-        android:layout_width="match_parent"
+        android:id="@+id/view"
+        android:layout_width="0dp"
         android:layout_height="1dp"
+        android:layout_marginTop="8dp"
         android:background="?attr/colorItemLine"
-        android:layout_gravity="bottom"
-        />
-</androidx.cardview.widget.CardView>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/updated"
+        app:layout_constraintTop_toBottomOf="@+id/updated" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -50,7 +50,7 @@ interface SectionHeaderView {
     val count: TextView
 }
 
-class CountHeaderView(parent: ViewGroup): SectionHeaderView {
+class CountHeaderView(parent: ViewGroup) : SectionHeaderView {
     override val height = parent.context.resources.getDimension(R.dimen.list_apps_header_height).toInt()
     override val view: View = LayoutInflater.from(parent.context).inflate(R.layout.list_apps_header, parent, false)
     override val title: TextView by lazy { view.findViewById<TextView>(android.R.id.text1) }
@@ -82,7 +82,6 @@ class HeaderItemDecorator(sections: LiveData<SparseArray<SectionHeader>>, lifecy
         for (i in 0 until parent.childCount) {
             val child = parent.getChildAt(i)
             val position = parent.getChildAdapterPosition(child)
-
             if (values.containsKey(position)) {
                 val section = values[position]
                 val header = header(parent)

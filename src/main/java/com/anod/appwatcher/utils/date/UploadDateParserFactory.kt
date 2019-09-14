@@ -19,7 +19,7 @@ object UploadDateParserFactory {
 
     private val ru_ALL = Locale("ru", "")
     private val sv_ALL = Locale("sv", "")
-    private val es_ES  = Locale("es", "ES")
+    private val es_ES = Locale("es", "ES")
     private val es_US = Locale("es", "US")
     private val fr_CA = Locale("fr", "CA")
     private val de_ALL = Locale("de", "")
@@ -27,6 +27,7 @@ object UploadDateParserFactory {
     private val en_IN = Locale("en", "IN")
     private val en_CA = Locale("en", "CA")
     private val pt_BR = Locale("pt", "BR")
+    private val es_UY = Locale("es", "UY")
 
     fun create(locale: Locale): List<DateFormat> {
         val lang = locale.language
@@ -42,7 +43,7 @@ object UploadDateParserFactory {
             return listOf(CustomMonthDateFormat(ES_SHORT_MONTHS))
         }
 
-        if (locale == es_US) {
+        if (locale == es_US || locale == es_UY) {
             return listOf(CustomMonthDateFormat(ES_US_SHORT_MONTHS))
         }
 

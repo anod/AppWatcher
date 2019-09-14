@@ -12,14 +12,13 @@ class SectionHeaderFactory(
         private var hasSectionRecent: Boolean,
         private var hasSectionOnDevice: Boolean
 ) {
-
-
+    
     private fun create(totalAppsCount: Int, newAppsCount: Int, recentlyUpdatedCount: Int, updatableNewCount: Int): SparseArray<SectionHeader> {
         val sections = SparseArray<SectionHeader>()
         if (newAppsCount > 0) {
             sections[0] = New(newAppsCount, updatableNewCount)
         }
-        val effectiveRecentlyUpdatedCount  = if (showRecentlyUpdated) recentlyUpdatedCount else 0
+        val effectiveRecentlyUpdatedCount = if (showRecentlyUpdated) recentlyUpdatedCount else 0
         if (effectiveRecentlyUpdatedCount > 0) {
             sections[newAppsCount] = RecentlyUpdated(effectiveRecentlyUpdatedCount)
         }
