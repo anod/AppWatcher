@@ -4,6 +4,7 @@ package com.anod.appwatcher.installed
 import android.accounts.Account
 import android.content.Context
 import androidx.collection.SimpleArrayMap
+import androidx.lifecycle.MutableLiveData
 import com.android.volley.VolleyError
 import com.anod.appwatcher.Application
 import finsky.api.BulkDocId
@@ -12,13 +13,20 @@ import finsky.api.model.DfeModel
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.playstore.BulkDetailsEndpoint
 import info.anodsplace.playstore.PlayStoreEndpoint
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
+
+sealed class ImportStatus
+class ImportStarted(val docIds: List<String>) : ImportStatus()
+class ImportProgress(val docIds: List<String>, val result: SimpleArrayMap<String, Int>) : ImportStatus()
+object ImportFinished : ImportStatus()
 
 internal class ImportBulkManager(
         private val context: Context,
-        private val listener: Listener)
+        private val coroutineScope: CoroutineScope)
     : PlayStoreEndpoint.Listener {
 
     private var listsDocIds: MutableList<MutableList<BulkDocId>?> = mutableListOf()
@@ -26,22 +34,12 @@ internal class ImportBulkManager(
 
     private var account: Account? = null
     private var authSubToken: String = ""
-    private val job = Job()
-    private val coroutineScope = CoroutineScope(Dispatchers.IO + job)
 
-    interface Listener {
-        fun onImportProgress(docIds: List<String>, result: SimpleArrayMap<String, Int>)
-        fun onImportFinish()
-        fun onImportStart(docIds: List<String>)
-    }
+    val status = MutableLiveData<ImportStatus>()
 
-    fun init() {
+    fun reset() {
         listsDocIds = mutableListOf()
         currentBulk = 0
-    }
-
-    fun stop() {
-        job.cancel()
     }
 
     fun addPackage(packageName: String, versionNumber: Int) {
@@ -75,10 +73,10 @@ internal class ImportBulkManager(
 
         val docIds = listsDocIds[currentBulk] ?: emptyList<BulkDocId>()
         if (docIds.isEmpty()) {
-            listener.onImportFinish()
+            status.value = ImportFinished
             return
         }
-        listener.onImportStart(docIds.map { it.packageName })
+        status.value = ImportStarted(docIds.map { it.packageName })
         val endpoint = BulkDetailsEndpoint(context, Application.provide(context).requestQueue, Application.provide(context).deviceInfo, account, docIds)
         endpoint.listener = this
         endpoint.authToken = authSubToken
@@ -96,10 +94,10 @@ internal class ImportBulkManager(
 
     override fun onErrorResponse(error: VolleyError) {
         val docIds = listsDocIds[currentBulk] ?: emptyList<BulkDocId>()
-        listener.onImportProgress(docIds.map { it.packageName }, SimpleArrayMap())
+        status.value = ImportProgress(docIds.map { it.packageName }, SimpleArrayMap())
         currentBulk++
         if (currentBulk == listsDocIds.size) {
-            listener.onImportFinish()
+            status.value = ImportFinished
         } else {
             nextBulk()
         }
@@ -107,10 +105,10 @@ internal class ImportBulkManager(
 
     private suspend fun onAddAppTaskFinish(result: SimpleArrayMap<String, Int>) = withContext(Main) {
         val docIds = listsDocIds[currentBulk] ?: emptyList<BulkDocId>()
-        listener.onImportProgress(docIds.map { it.packageName }, result)
+        status.value = ImportProgress(docIds.map { it.packageName }, result)
         currentBulk++
         if (currentBulk == listsDocIds.size) {
-            listener.onImportFinish()
+            status.value = ImportFinished
         } else {
             nextBulk()
         }

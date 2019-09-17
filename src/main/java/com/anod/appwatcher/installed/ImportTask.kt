@@ -9,12 +9,14 @@ import com.anod.appwatcher.model.AppInfoMetadata
 
 import finsky.api.model.Document
 import info.anodsplace.framework.app.ApplicationContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class ImportTask(context: ApplicationContext) {
 
     private val database = Application.provide(context).database
 
-    suspend fun execute(vararg documents: Document): SimpleArrayMap<String, Int> {
+    suspend fun execute(vararg documents: Document): SimpleArrayMap<String, Int> = withContext(Dispatchers.IO) {
         val result = SimpleArrayMap<String, Int>()
         val packages = database.apps().loadPackages(false).map { it.packageName }
         for (doc in documents) {
@@ -22,29 +24,29 @@ class ImportTask(context: ApplicationContext) {
             val status = addSync(info, packages, database.apps(), database)
             result.put(info.packageName, status)
         }
-        return result
+        return@withContext result
     }
 
-    private suspend fun addSync(info: AppInfo, packages: List<String>, apps: AppListTable, db: AppsDatabase): Int {
+    private suspend fun addSync(info: AppInfo, packages: List<String>, apps: AppListTable, db: AppsDatabase): Int = withContext(Dispatchers.IO) {
         if (packages.contains(info.packageName)) {
-            return RESULT_OK
+            return@withContext RESULT_OK
         }
 
         val existingApp = apps.loadApp(info.packageName)
         if (existingApp != null) {
             if (existingApp.status == AppInfoMetadata.STATUS_DELETED) {
                 val success = apps.updateStatus(existingApp.rowId, AppInfoMetadata.STATUS_NORMAL)
-                return if (success > 0) {
+                return@withContext if (success > 0) {
                     RESULT_OK
                 } else {
                     ERROR_INSERT
                 }
             }
-            return ERROR_ALREADY_ADDED
+            return@withContext ERROR_ALREADY_ADDED
         }
 
         val rowId = AppListTable.Queries.insert(info, db)
-        return if (rowId > 0) RESULT_OK else ERROR_INSERT
+        return@withContext if (rowId > 0) RESULT_OK else ERROR_INSERT
     }
 
     companion object {

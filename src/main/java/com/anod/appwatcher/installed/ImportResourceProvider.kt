@@ -2,6 +2,7 @@ package com.anod.appwatcher.installed
 
 import android.content.Context
 import androidx.collection.SimpleArrayMap
+import androidx.lifecycle.MutableLiveData
 import com.anod.appwatcher.watchlist.AppViewHolderResourceProvider
 import info.anodsplace.framework.content.InstalledApps
 
@@ -11,6 +12,7 @@ internal class ImportResourceProvider(context: Context, installedApps: Installed
     private var defaultSelected: Boolean = false
     private val processingPackages = SimpleArrayMap<String, Int>()
     var isImportStarted: Boolean = false
+    val packageStatus = MutableLiveData<Pair<String, Int>>()
 
     fun selectAllPackages(select: Boolean) {
         selectedPackages.clear()
