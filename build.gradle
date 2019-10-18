@@ -1,178 +1,18 @@
 buildscript {
-    ext.kotlin_version = '1.3.50'
+    ext.kotlin_version = "1.3.50"
     repositories {
         jcenter()
         mavenCentral()
-        maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
-        maven { url 'https://maven.fabric.io/public' }
+        maven { url = "https://oss.sonatype.org/content/repositories/snapshots/" }
+        maven { url = "https://maven.fabric.io/public" }
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.0'
-        classpath 'com.google.gms:google-services:4.3.2'
-        classpath 'com.google.gms:oss-licenses:0.9.2'
-        classpath 'io.fabric.tools:gradle:1.25.4'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.0'
+        classpath("com.android.tools.build:gradle:3.5.1")
+        classpath("com.google.gms:google-services:4.3.2")
+        classpath("com.google.gms:oss-licenses:0.9.2")
+        classpath("io.fabric.tools:gradle:1.25.4")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
+        classpath("com.github.dcendents:android-maven-gradle-plugin:2.0")
     }
 }
-
-repositories {
-    mavenCentral()
-    jcenter()
-    maven { url "https://jitpack.io" }
-    maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
-    google()
-}
-
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
-apply plugin: 'kotlin-kapt'
-apply plugin: 'com.google.gms.oss.licenses.plugin'
-apply plugin: 'io.fabric'
-
-android {
-    compileSdkVersion 29
-
-    defaultConfig {
-        applicationId 'com.anod.appwatcher'
-        minSdkVersion 21
-        targetSdkVersion 29
-        versionCode 122
-        versionName '1.27'
-        resValue "string", "content_authority", "com.anod.appwatcher"
-
-        vectorDrawables.generatedDensities = ['hdpi', 'xxhdpi']
-    }
-
-    signingConfigs {
-        debug {
-            storeFile file("debug.keystore")
-        }
-
-        release {
-            storeFile file(APPWATCHER_KEYSTORE_FILE)
-            storePassword APPWATCHER_KEYSTORE_PASSWORD
-            keyAlias APPWATCHER_KEY_ALIAS
-            keyPassword APPWATCHER_KEY_PASSWORD
-        }
-    }
-
-    buildTypes {
-        debug {
-            minifyEnabled false
-            shrinkResources false
-            applicationIdSuffix ".debug"
-            versionNameSuffix "-debug"
-            proguardFile 'proguard-project.txt'
-            proguardFile getDefaultProguardFile('proguard-android.txt')
-
-            resValue "string", "content_authority", "com.anod.appwatcher.debug"
-        }
-        release {
-            minifyEnabled true
-            shrinkResources true
-            proguardFile 'proguard-project.txt'
-            proguardFile getDefaultProguardFile('proguard-android.txt')
-            signingConfig signingConfigs.release
-        }
-    }
-
-    lintOptions {
-        disable 'InvalidPackage', 'MissingTranslation'
-        checkReleaseBuilds true
-        // Or, if you prefer, you can continue to check for errors in close builds,
-        // but continue the build even when errors are found:
-        abortOnError true
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-
-    androidExtensions {
-        experimental = true
-    }
-//    task genSource(type: Exec) {
-//        println "Executing " + АPPWATCHER_BOOTSTRAP_FILE
-//        commandLine АPPWATCHER_BOOTSTRAP_FILE
-//    }
-//
-//    preBuild.dependsOn genSource
-}
-
-configurations.all {
-    // classpath 'com.google.gms:google-services:3.2.0' includes 26.1.0 version
-    // force to use 27.1.0
-    // resolutionStrategy.force 'com.android.support:support-media-compat::28.0.0'
-}
-
-dependencies {
-    // AndroidX
-    implementation 'androidx.recyclerview:recyclerview:1.1.0-beta04'
-    implementation 'androidx.palette:palette:1.0.0'
-    implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta2'
-    implementation 'androidx.exifinterface:exifinterface:1.1.0-beta01' // picasso
-    implementation 'androidx.work:work-runtime:2.2.0'
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-
-    // Google
-    implementation 'com.google.android.material:material:1.1.0-alpha10'
-    implementation 'com.google.android.gms:play-services-drive:17.0.0'
-    implementation 'com.google.android.gms:play-services-oss-licenses:17.0.0'
-    implementation 'com.google.android.gms:play-services-identity:17.0.0'
-    implementation 'com.google.android.gms:play-services-auth:17.0.0'
-    implementation 'com.google.firebase:firebase-core:17.2.0'
-
-    // 3rd party
-    implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
-    implementation 'com.squareup.okhttp3:okhttp:4.2.0'
-    implementation 'com.squareup.picasso:picasso:2.71828'
-    implementation 'com.jakewharton:process-phoenix:2.0.0'
-
-    // ViewModel and LiveData
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0-alpha04'
-    kapt 'androidx.lifecycle:lifecycle-compiler:2.2.0-alpha04'
-
-    implementation 'androidx.room:room-runtime:2.2.0-rc01'
-    kapt 'androidx.room:room-compiler:2.2.0-rc01'
-
-    // KTX
-    implementation 'androidx.core:core-ktx:1.2.0-alpha04'
-    implementation 'androidx.work:work-runtime-ktx:2.2.0'
-    implementation 'androidx.fragment:fragment-ktx:1.2.0-alpha03'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0-alpha04'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.2.0-alpha04'
-    implementation 'androidx.room:room-ktx:2.2.0-rc01'
-
-    // Kotlin
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.1'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.1'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-
-    testImplementation 'junit:junit:4.13-beta-3'
-
-    implementation project(':colorpicker')
-    implementation project(':framework')
-    implementation project(path: ':playstore')
-}
-
-apply plugin: 'idea'
-idea {
-    module {
-        downloadJavadoc = true
-        downloadSources = true
-//        sourceDirs += file("E:\\Android\\sdk\\extras\\android\\support\\v4\\src\\")
-//        sourceDirs += file("E:\\Android\\sources\\platform_frameworks_support\\v7\\appcompat\\src")
-    }
-}
-
-// ADD THIS AT THE BOTTOM
-apply plugin: 'com.google.gms.google-services'
