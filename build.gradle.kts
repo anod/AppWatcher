@@ -1,10 +1,10 @@
+
 buildscript {
-    ext.kotlin_version = "1.3.50"
     repositories {
         jcenter()
         mavenCentral()
-        maven { url = "https://oss.sonatype.org/content/repositories/snapshots/" }
-        maven { url = "https://maven.fabric.io/public" }
+        maven(url = "https://oss.sonatype.org/content/repositories/snapshots/")
+        maven(url = "https://maven.fabric.io/public")
         google()
     }
     dependencies {
@@ -12,7 +12,7 @@ buildscript {
         classpath("com.google.gms:google-services:4.3.2")
         classpath("com.google.gms:oss-licenses:0.9.2")
         classpath("io.fabric.tools:gradle:1.25.4")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
+        classpath(kotlin("gradle-plugin", version = "1.3.50"))
         classpath("com.github.dcendents:android-maven-gradle-plugin:2.0")
     }
 }

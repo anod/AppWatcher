@@ -1,0 +1,42 @@
+import org.jetbrains.kotlin.config.KotlinCompilerVersion
+
+plugins {
+    id("com.android.library")
+    kotlin("android")
+}
+
+repositories {
+    jcenter()
+    maven( url = "https://maven.google.com")
+}
+
+android {
+    compileSdkVersion(29)
+
+    defaultConfig {
+        minSdkVersion(21)
+        targetSdkVersion(29)
+        versionCode = 200
+        versionName = "2.0.0"
+    }
+
+    sourceSets {
+        getByName("main").java.srcDirs("src/main/kotlin")
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation("androidx.recyclerview:recyclerview:1.1.0-beta05")
+    implementation("com.google.android.material:material:1.1.0-beta01")
+    implementation("androidx.palette:palette:1.0.0")
+    implementation("androidx.cardview:cardview:1.0.0")
+
+    implementation("com.google.android.gms:play-services-identity:17.0.0")
+    implementation("com.google.android.gms:play-services-auth:17.0.0")
+
+    implementation(kotlin("stdlib-jdk7", KotlinCompilerVersion.VERSION))
+}
