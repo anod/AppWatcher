@@ -16,8 +16,7 @@ class NotificationActivity : Activity() {
         super.onCreate(savedInstanceState)
         val sn = SyncNotification(ApplicationContext(this))
         sn.cancel()
-        val type = intent.getIntExtra(EXTRA_TYPE, 0)
-        when (type) {
+        when (intent.getIntExtra(EXTRA_TYPE, 0)) {
             TYPE_PLAY -> {
                 val pkg = intent.getStringExtra(EXTRA_PKG) ?: ""
                 this.startActivitySafely(Intent().forPlayStore(pkg))

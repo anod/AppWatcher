@@ -53,7 +53,7 @@ class AppInfo : AppInfoMetadata, Parcelable {
         this.recentFlag = recentFlag
     }
 
-    constructor(doc: Document) : this(0, AppInfoMetadata.STATUS_NORMAL, doc)
+    constructor(doc: Document) : this(0, STATUS_NORMAL, doc)
 
     constructor(rowId: Int, status: Int, doc: Document) : super(doc.docId, status)
     {

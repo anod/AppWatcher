@@ -26,7 +26,7 @@ import info.anodsplace.framework.app.ActivityListener
 class AccountSelectionDialog(
         private val activity: AppCompatActivity,
         private val preferences: Preferences,
-        private val listener: AccountSelectionDialog.SelectionListener): ActivityListener.ResultListener {
+        private val listener: SelectionListener): ActivityListener.ResultListener {
 
     companion object {
         const val PERMISSION_REQUEST_GET_ACCOUNTS = 123

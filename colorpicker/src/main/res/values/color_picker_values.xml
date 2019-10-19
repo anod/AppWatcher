@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <string-array name="color_picker_values" translatable="false">
         <item>#F44336</item>
         <item>#E91E63</item>

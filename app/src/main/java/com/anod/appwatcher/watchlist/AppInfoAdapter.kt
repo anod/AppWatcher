@@ -53,6 +53,11 @@ class AppInfoAdapter(private val context: Context,
         holder.bindView(appInfo)
     }
 
+    override fun onViewRecycled(holder: AppViewHolder) {
+        holder.recycle()
+        super.onViewRecycled(holder)
+    }
+
     class DiffCallback<OB>(private val oldList: List<OB>, private val newList: List<OB>, private val callback: DiffUtil.ItemCallback<OB>): DiffUtil.Callback() {
 
         override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {

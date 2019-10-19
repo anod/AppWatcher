@@ -25,7 +25,7 @@ object TagSnackbar {
         val msg = activity.getString(R.string.app_stored, info.title)
         val tagText = activity.getString(R.string.action_tag, GREEN_BOOK)
 
-        return Snackbar.make(parentView, msg, com.google.android.material.snackbar.Snackbar.LENGTH_LONG)
+        return Snackbar.make(parentView, msg, Snackbar.LENGTH_LONG)
                 .setAction(tagText, TagAction(activity, info))
                 .addCallback(TagCallback(activity, finishActivity))
     }

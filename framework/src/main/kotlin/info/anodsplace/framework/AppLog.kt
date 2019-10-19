@@ -2,8 +2,7 @@ package info.anodsplace.framework
 
 import android.os.Looper
 import android.util.Log
-import java.util.IllegalFormatException
-import java.util.Locale
+import java.util.*
 
 /**
  * @author alex
@@ -107,14 +106,14 @@ class AppLog {
 
         private fun format(msg: String, vararg array: Any): String {
             var formatted: String
-            if (array.isEmpty()) {
-                formatted = msg
+            formatted = if (array.isEmpty()) {
+                msg
             } else {
                 try {
-                    formatted = String.format(Locale.US, msg, *array)
+                    String.format(Locale.US, msg, *array)
                 } catch (ex: IllegalFormatException) {
                     e("IllegalFormatException: formatString='%s' numArgs=%d", msg, array.size)
-                    formatted = msg + " (An error occurred while formatting the message.)"
+                    "$msg (An error occurred while formatting the message.)"
                 }
             }
             val stackTrace = Throwable().fillInStackTrace().stackTrace

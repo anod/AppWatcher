@@ -41,8 +41,8 @@ class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener,
         prefs.isLastUpdatesViewed = true
     }
 
-    override fun createViewPagerAdapter(): WatchListActivity.Adapter {
-        val adapter = WatchListActivity.Adapter(supportFragmentManager)
+    override fun createViewPagerAdapter(): Adapter {
+        val adapter = Adapter(supportFragmentManager)
         val title = resources.getStringArray(R.array.filter_titles)
 
         adapter.addFragment(WatchListFragment.newInstance(

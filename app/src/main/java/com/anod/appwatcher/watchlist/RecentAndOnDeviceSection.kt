@@ -86,7 +86,7 @@ class OnDeviceSection : WatchListFragment.DefaultSection() {
 
         fun onModelLoaded(result: LoadResult, adapter: InstalledAppsAdapter) {
             val value = result as InstalledLoadResult
-            val watchingPackages = value.appsList.map { it.app.packageName }.associate { Pair(it, true) }
+            val watchingPackages = value.appsList.map { it.app.packageName }.associateWith { true }
             adapter.installedPackages = value.installedPackages.filter {
                 !watchingPackages.contains(it.packageName)
             }

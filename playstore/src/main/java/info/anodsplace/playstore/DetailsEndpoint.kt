@@ -18,7 +18,7 @@ import finsky.protos.nano.Messages.AppDetails
 class DetailsEndpoint(context: Context, requestQueue: RequestQueue, deviceInfoProvider: DeviceInfoProvider, account: Account, private val detailsUrl: String)
     : PlayStoreEndpointBase(context, requestQueue, deviceInfoProvider, account) {
 
-    var detailsData: DfeDetails?
+    private var detailsData: DfeDetails?
         get() = data as? DfeDetails
         set(value) {
             super.data = value

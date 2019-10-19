@@ -40,7 +40,7 @@ class DfeApiImpl(private val queue: RequestQueue, private val apiContext: DfeApi
                 for (item in (this.request as Details.BulkDetailsRequest).docid) {
                     n = 31L * n + item.hashCode()
                 }
-                return java.lang.Long.toString(n)
+                return n.toString()
             }
 
             override fun getCacheKey(): String {
@@ -53,8 +53,8 @@ class DfeApiImpl(private val queue: RequestQueue, private val apiContext: DfeApi
 
     override fun createLibraryUrl(c: Int, libraryId: String, dt: Int, serverToken: ByteArray?): String {
         val appendQueryParameter = DfeApi.LIBRARY_URI.buildUpon()
-                .appendQueryParameter("c", Integer.toString(c))
-                .appendQueryParameter("dt", Integer.toString(dt))
+                .appendQueryParameter("c", c.toString())
+                .appendQueryParameter("dt", dt.toString())
                 .appendQueryParameter("libid", libraryId)
 
         if (serverToken != null) {

@@ -30,6 +30,10 @@ open class AppViewHolder(
         itemView.findViewById<View>(R.id.content).setOnClickListener(this)
     }
 
+    override fun recycle() {
+        itemView.findViewById<View>(R.id.content).setOnClickListener(null)
+    }
+
     override fun onClick(v: View) {
         onClickListener?.onItemClick(this.item!!.app)
     }
@@ -41,4 +45,5 @@ open class AppViewHolder(
                 ?: "", isLocalApp)
         iconLoader.loadAppIntoImageView(item.app, this.icon, R.drawable.ic_notifications_black_24dp)
     }
+
 }

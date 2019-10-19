@@ -10,7 +10,7 @@ internal open class ProtoDfeRequest(
         val request: MessageNano,
         dfeApiContext: DfeApiContext,
         listener: Response.Listener<Messages.Response.ResponseWrapper>,
-        errorListener: Response.ErrorListener) : DfeRequest(Request.Method.POST, url, dfeApiContext, listener, errorListener) {
+        errorListener: Response.ErrorListener) : DfeRequest(Method.POST, url, dfeApiContext, listener, errorListener) {
 
     init {
         this.setShouldCache(false)

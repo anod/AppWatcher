@@ -92,7 +92,7 @@ class DbJsonReader {
         reader.close()
         listener.onFinish()
 
-        val namedTags = tagList.associate { it.name to it }
+        val namedTags = tagList.associateBy { it.name }
         val appTagList = mutableListOf<AppTag>()
         appsTags.forEach { (appId, tags) ->
             tags.forEach { tag ->

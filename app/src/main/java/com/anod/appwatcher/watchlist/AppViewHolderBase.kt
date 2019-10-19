@@ -35,6 +35,7 @@ abstract class AppViewHolderBase(
     }
 
     abstract fun bindView(item: AppListItem)
+    open fun recycle() { }
 }
 
 

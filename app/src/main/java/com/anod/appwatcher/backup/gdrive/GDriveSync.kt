@@ -91,7 +91,7 @@ class GDriveSync(private val context: ApplicationContext, private val googleAcco
         val jsonReader = DbJsonReader()
 
         val currentIds = db.apps().loadPackages(true).associate { it.packageName to it.rowId }
-        val currentTags = db.tags().load().associate { it.name to it }.toMutableMap()
+        val currentTags = db.tags().load().associateBy { it.name }.toMutableMap()
 
         val tagList = mutableListOf<Tag>()
         val tagApps = mutableMapOf<String, MutableList<String>>()

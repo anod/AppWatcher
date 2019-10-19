@@ -1,12 +1,10 @@
 package com.anod.appwatcher.database
 
-import androidx.lifecycle.LiveData
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
 import android.content.ContentValues
 import android.provider.BaseColumns
+import androidx.lifecycle.LiveData
+import androidx.room.Dao
+import androidx.room.Query
 import com.anod.appwatcher.database.entities.AppChange
 
 /**

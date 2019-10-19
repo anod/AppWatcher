@@ -6,12 +6,12 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.RadioButton
+import androidx.appcompat.app.AppCompatActivity
 import com.anod.appwatcher.R
 import kotlinx.android.synthetic.main.activity_choose_account.*
 
@@ -30,7 +30,7 @@ class AccountSelectionDialogActivity : AppCompatActivity() {
         }
     }
 
-    val accountManager: AccountManager by lazy {
+    private val accountManager: AccountManager by lazy {
         AccountManager.get(this@AccountSelectionDialogActivity)
     }
 
@@ -80,15 +80,15 @@ class AccountSelectionDialogActivity : AppCompatActivity() {
         override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
             val view = super.getView(position, convertView, parent) as RadioButton
 
-            getItem(position)?.let {
+            getItem(position)?.let { item ->
                 view.tag = position
-                view.text = it.name
-                view.isChecked = it.name == selectedAccount?.name
+                view.text = item.name
+                view.isChecked = item.name == selectedAccount?.name
 
-                view.setOnClickListener {
-                    val radio = it as RadioButton
+                view.setOnClickListener { button ->
+                    val radio = button as RadioButton
                     if (radio.isChecked) {
-                        selectedAccount = getItem(it.tag as Int)
+                        selectedAccount = getItem(button.tag as Int)
                     }
                 }
             }

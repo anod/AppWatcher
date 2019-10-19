@@ -3,7 +3,6 @@ package finsky.api
 import android.net.Uri
 import android.text.TextUtils
 import android.util.Log
-
 import com.android.volley.Cache
 import com.android.volley.NetworkResponse
 import com.android.volley.ParseError
@@ -11,16 +10,15 @@ import com.android.volley.Request
 import com.android.volley.ServerError
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.HttpHeaderParser
-import finsky.protos.nano.Messages.Response
-import finsky.utils.Utils
 import com.google.protobuf.nano.InvalidProtocolBufferNanoException
 import com.google.protobuf.nano.MessageNanoPrinter
-
+import finsky.protos.nano.Messages.Response
+import finsky.utils.Utils
+import info.anodsplace.framework.AppLog
 import java.io.ByteArrayInputStream
 import java.io.IOException
 import java.util.zip.GZIPInputStream
-
-import info.anodsplace.framework.AppLog
+import kotlin.math.max
 
 internal open class DfeRequest(
         method: Int,
@@ -35,7 +33,7 @@ internal open class DfeRequest(
     }
 
     constructor(url: String, dfeApiContext: DfeApiContext, listener: com.android.volley.Response.Listener<Response.ResponseWrapper>, errorListener: com.android.volley.Response.ErrorListener)
-            : this(Request.Method.GET, url, dfeApiContext, listener, errorListener)
+            : this(Method.GET, url, dfeApiContext, listener, errorListener)
 
     private fun getSignatureResponse(networkResponse: NetworkResponse): String {
         return networkResponse.headers["X-DFE-Signature-Response"] ?: ""
@@ -78,11 +76,11 @@ internal open class DfeRequest(
 
     private fun parseWrapperAndVerifySignature(networkResponse: NetworkResponse, gzip: Boolean): Response.ResponseWrapper? {
         try {
-            if (gzip) {
+            return if (gzip) {
                 val bytes = Utils.readBytes(GZIPInputStream(ByteArrayInputStream(networkResponse.data)))
-                return Response.ResponseWrapper.parseFrom(bytes)
+                Response.ResponseWrapper.parseFrom(bytes)
             } else {
-                return Response.ResponseWrapper.parseFrom(networkResponse.data)
+                Response.ResponseWrapper.parseFrom(networkResponse.data)
             }
         } catch (ex: InvalidProtocolBufferNanoException) {
             AppLog.e("Cannot parse response as ResponseWrapper proto.", ex)
@@ -137,7 +135,7 @@ internal open class DfeRequest(
         if (wrapperAndVerifySignature == null) {
             response = com.android.volley.Response.error<Response.ResponseWrapper>(ParseError(networkResponse))
         } else {
-            if (DfeRequest.PROTO_DEBUG) {
+            if (PROTO_DEBUG) {
                 this.logProtoResponse(wrapperAndVerifySignature)
             }
             response = this.handleServerCommands(wrapperAndVerifySignature)
@@ -170,7 +168,7 @@ internal open class DfeRequest(
                 if (s2 != null) {
                     cacheHeaders.ttl = currentTimeMillis + java.lang.Long.parseLong(s2)
                 }
-                cacheHeaders.ttl = Math.max(cacheHeaders.ttl, cacheHeaders.softTtl)
+                cacheHeaders.ttl = max(cacheHeaders.ttl, cacheHeaders.softTtl)
             } catch (ex: NumberFormatException) {
                 AppLog.d("Invalid TTL: %s", networkResponse.headers)
                 cacheHeaders.softTtl = 0L

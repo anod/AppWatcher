@@ -1,18 +1,17 @@
 package com.anod.appwatcher.database
 
-import androidx.lifecycle.LiveData
-import androidx.room.Dao
-import androidx.room.Query
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.provider.BaseColumns
+import androidx.lifecycle.LiveData
+import androidx.room.Dao
+import androidx.room.Query
 import androidx.room.withTransaction
 import com.anod.appwatcher.database.entities.AppTag
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.database.entities.TagAppsCount
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.util.concurrent.Callable
 
 /**
  * @author alex

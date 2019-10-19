@@ -12,9 +12,9 @@ import com.anod.appwatcher.watchlist.AppViewHolderBase
  */
 internal class InstalledAppViewHolder(
         itemView: View,
-        resourceProvider: AppViewHolderBase.ResourceProvider,
+        resourceProvider: ResourceProvider,
         iconLoader: PicassoAppIcon,
-        listener: AppViewHolder.OnClickListener?)
+        listener: OnClickListener?)
     : AppViewHolder(itemView, resourceProvider, iconLoader, listener) {
 
     override val isLocalApp: Boolean

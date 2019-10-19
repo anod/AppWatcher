@@ -22,7 +22,6 @@ import info.anodsplace.framework.livedata.OneTimeObserver
 import info.anodsplace.playstore.DetailsEndpoint
 import info.anodsplace.playstore.PlayStoreEndpoint
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 typealias TagMenuItem = Pair<Tag,Boolean>
 

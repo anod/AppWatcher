@@ -5,11 +5,9 @@ import android.content.Context
 import android.content.res.Resources
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
-import android.util.TypedValue
 import com.squareup.picasso.Transformation
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.graphics.PathParser
-import kotlin.math.roundToInt
 
 class AdaptiveIconTransformation(
         private val context: Context,

@@ -3,12 +3,12 @@ package com.anod.appwatcher.installed
 import android.animation.ArgbEvaluator
 import android.animation.ObjectAnimator
 import android.graphics.Color
-import androidx.annotation.ColorInt
-import androidx.recyclerview.widget.DefaultItemAnimator
-import androidx.recyclerview.widget.RecyclerView
 import android.view.View
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
+import androidx.annotation.ColorInt
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.RecyclerView
 
 /**
  * @author Alex Gavrishev
@@ -22,8 +22,7 @@ internal class ImportItemAnimator : DefaultItemAnimator() {
         newHolder.itemView.clearAnimation()
 
         if (newHolder is ImportAppViewHolder) {
-            val status = newHolder.status()
-            when (status) {
+            when (newHolder.status()) {
                 ImportResourceProvider.STATUS_IMPORTING -> {
                     val anim = AlphaAnimation(0.2f, 1.0f)
                     anim.duration = 500

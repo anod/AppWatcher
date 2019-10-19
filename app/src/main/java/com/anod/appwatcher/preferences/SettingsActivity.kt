@@ -143,10 +143,10 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
 
     private fun renderDriveSyncTime(): String {
         val time = prefs.lastDriveSyncTime
-        if (time == (-1).toLong()) {
-            return getString(R.string.pref_descr_drive_sync_now, getString(R.string.never))
+        return if (time == (-1).toLong()) {
+            getString(R.string.pref_descr_drive_sync_now, getString(R.string.never))
         } else {
-            return getString(R.string.pref_descr_drive_sync_now,
+            getString(R.string.pref_descr_drive_sync_now,
                     DateUtils.getRelativeDateTimeString(this, time, 0, DateUtils.WEEK_IN_MILLIS, DateUtils.FORMAT_ABBREV_ALL)
             )
         }

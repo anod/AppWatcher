@@ -3,11 +3,10 @@ package com.anod.appwatcher.tags
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.Menu
 import android.view.MenuItem
 import com.anod.appwatcher.R
-import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.watchlist.WatchListActivity
 import com.anod.appwatcher.watchlist.WatchListFragment

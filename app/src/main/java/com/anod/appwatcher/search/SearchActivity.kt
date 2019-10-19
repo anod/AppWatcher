@@ -67,10 +67,10 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
             when (it) {
                 is Loading -> {
                     showLoading()
-                    if (it.isPackageSearch) {
-                        adapter = ResultsAdapterDetails(this, viewModel)
+                    adapter = if (it.isPackageSearch) {
+                        ResultsAdapterDetails(this, viewModel)
                     } else {
-                        adapter = ResultsAdapterSearch(this, viewModel)
+                        ResultsAdapterSearch(this, viewModel)
                     }
                     list.adapter = adapter
                 }

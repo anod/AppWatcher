@@ -7,7 +7,7 @@ abstract class EndlessOnScrollListener(private val linearLayoutManager: LinearLa
 
     private var lastCall: Int = 0
 
-    override fun onScrolled(recyclerView: androidx.recyclerview.widget.RecyclerView, dx: Int, dy: Int) {
+    override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
         super.onScrolled(recyclerView, dx, dy)
 
         val totalItemCount = recyclerView.adapter?.itemCount ?: 0

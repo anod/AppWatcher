@@ -162,10 +162,10 @@ class SyncNotification(private val context: ApplicationContext) {
     private fun renderTitle(apps: List<UpdateCheck.UpdatedApp>): String {
         val title: String
         val count = apps.size
-        if (count == 1) {
-            title = context.getString(R.string.notification_one_updated, apps[0].title)
+        title = if (count == 1) {
+            context.getString(R.string.notification_one_updated, apps[0].title)
         } else {
-            title = context.getString(R.string.notification_many_updates, count)
+            context.getString(R.string.notification_many_updates, count)
         }
         return title
     }

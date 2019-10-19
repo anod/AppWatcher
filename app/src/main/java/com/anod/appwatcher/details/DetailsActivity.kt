@@ -45,6 +45,7 @@ import info.anodsplace.framework.content.startActivitySafely
 import info.anodsplace.framework.graphics.chooseDark
 import kotlinx.android.synthetic.main.activity_app_changelog.*
 import kotlinx.android.synthetic.main.view_changelog_header.*
+import kotlin.math.abs
 
 abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, View.OnClickListener, AppBarLayout.OnOffsetChangedListener {
 
@@ -353,7 +354,7 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
 
     override fun onOffsetChanged(appBarLayout: AppBarLayout, verticalOffset: Int) {
         val totalScrollRange = appBarLayout.totalScrollRange.toFloat()
-        val alpha = 1.0f - Math.abs(verticalOffset.toFloat() / totalScrollRange)
+        val alpha = 1.0f - abs(verticalOffset.toFloat() / totalScrollRange)
 
         if (!loaded) {
             return

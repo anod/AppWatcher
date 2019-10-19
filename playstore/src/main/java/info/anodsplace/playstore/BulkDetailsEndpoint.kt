@@ -1,10 +1,9 @@
 package info.anodsplace.playstore
 
+import android.accounts.Account
 import android.content.Context
 import com.android.volley.RequestQueue
-import android.accounts.Account
 import finsky.api.BulkDocId
-
 import finsky.api.model.DfeBulkDetails
 import finsky.api.model.DfeModel
 import finsky.api.model.DfeSync
@@ -18,7 +17,7 @@ import finsky.api.model.Document
 class BulkDetailsEndpoint(context: Context, requestQueue: RequestQueue, deviceInfoProvider: DeviceInfoProvider, account: Account, private var docIds: List<BulkDocId>)
     : PlayStoreEndpointBase(context, requestQueue, deviceInfoProvider, account) {
 
-    var bulkData: DfeBulkDetails?
+    private var bulkData: DfeBulkDetails?
         get() = data as? DfeBulkDetails
         set(value) {
             data = value

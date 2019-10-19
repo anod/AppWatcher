@@ -11,7 +11,7 @@ import java.util.concurrent.ExecutionException
 * @author Alex Gavrishev
 * @date 17-Feb-18
 */
-class DfeSync<out T: DfeRequestModel>(val dfeModel: T): DfeRequestModel() {
+class DfeSync<out T: DfeRequestModel>(private val dfeModel: T): DfeRequestModel() {
     override fun execute(responseListener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener) {
         dfeModel.execute(responseListener, errorListener)
     }

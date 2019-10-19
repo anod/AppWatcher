@@ -13,14 +13,14 @@ object BitmapByteArray {
         // to avoid unnecessary allocations/copies during the write.
         val size = bitmap.width * bitmap.height * 4
         val out = ByteArrayOutputStream(size)
-        try {
+        return try {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
             out.flush()
             out.close()
-            return out.toByteArray()
+            out.toByteArray()
         } catch (e: IOException) {
             Log.w("Favorite", "Could not write icon")
-            return null
+            null
         }
     }
 

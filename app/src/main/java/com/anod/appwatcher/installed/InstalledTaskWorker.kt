@@ -1,7 +1,6 @@
 package com.anod.appwatcher.installed
 
 import android.util.SparseArray
-import com.anod.appwatcher.Application
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.watchlist.AppsList
 import com.anod.appwatcher.watchlist.LoadResult

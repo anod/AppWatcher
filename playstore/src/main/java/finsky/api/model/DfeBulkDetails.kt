@@ -25,10 +25,10 @@ class DfeBulkDetails(private val api: DfeApi,private val filter: FilterPredicate
                 }
             }
 
-            if (list.isEmpty()) {
-                return list
+            return if (list.isEmpty()) {
+                list
             } else {
-                return list.filter(filter)
+                list.filter(filter)
             }
         }
 

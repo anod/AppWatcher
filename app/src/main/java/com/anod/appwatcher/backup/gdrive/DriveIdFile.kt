@@ -50,13 +50,13 @@ class DriveIdFile(private val file: FileDescription, private val driveClient: Dr
 
         val appFolder = Tasks.await(driveClient.appFolder)
         val metadataBuffer = Tasks.await(driveClient.queryChildren(appFolder, query))
-        if (metadataBuffer.count == 0) {
+        return if (metadataBuffer.count == 0) {
             AppLog.d("[GDrive] File NOT found " + file.fileName)
-            return null
+            null
         } else {
             val metadata = metadataBuffer.get(0)
             AppLog.d("[GDrive] File found " + file.fileName)
-            return metadata.driveId
+            metadata.driveId
         }
 
     }

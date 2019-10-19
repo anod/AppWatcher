@@ -135,7 +135,18 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
 
         // Setup header decorator
         listView.addItemDecoration(HeaderItemDecorator(viewModel.sections, this, context!!))
-        listView.adapter = section.adapter
+        val adapter = section.adapter
+        listView.adapter = adapter
+
+        // When an item inserted into top there is no indication and list maintains previous position
+        // Request to scroll to the top in this case
+        adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                if (positionStart == 0 && (listView.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition() == 0) {
+                    listView.scrollToPosition(0)
+                }
+            }
+        })
 
         if (prefs.enablePullToRefresh) {
             listView.addOnScrollListener(object : RecyclerView.OnScrollListener() {

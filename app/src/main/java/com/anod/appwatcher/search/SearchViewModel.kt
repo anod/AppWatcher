@@ -36,10 +36,10 @@ class SearchViewModel(application: Application): AndroidViewModel(application), 
         get() =  com.anod.appwatcher.Application.provide(context)
 
     var account: Account? = null
-    var initiateSearch = false
+    private var initiateSearch = false
     var isShareSource = false
     var hasFocus = false
-    var isPackageSearch = false
+    private var isPackageSearch = false
     var searchQuery = MutableLiveData<String>()
     var status = MutableLiveData<SearchStatus>()
     var authToken = MutableLiveData<String>()

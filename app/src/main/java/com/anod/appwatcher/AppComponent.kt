@@ -10,7 +10,6 @@ import com.anod.appwatcher.backup.gdrive.UploadServiceContentObserver
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.PicassoAppIcon
-import com.squareup.picasso.Picasso
 import info.anodsplace.framework.net.NetworkConnectivity
 import info.anodsplace.playstore.DeviceId
 import info.anodsplace.playstore.DeviceInfoProvider

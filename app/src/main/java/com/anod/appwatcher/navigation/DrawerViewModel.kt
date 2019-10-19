@@ -29,7 +29,7 @@ class DrawerViewModel(application: Application) : AndroidViewModel(application) 
             .map { value ->
                 val counts: Map<Int, Int> = value.first.associate { Pair(it.tagId, it.count) }
                 val tags = value.second
-                val result: TagCountList = tags.map { Pair(it, counts.get(it.id) ?: 0) }
+                val result: TagCountList = tags.map { Pair(it, counts[it.id] ?: 0) }
                 result
             }
     val account = MutableLiveData<Account>()

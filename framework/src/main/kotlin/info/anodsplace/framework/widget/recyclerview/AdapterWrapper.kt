@@ -1,7 +1,7 @@
 package info.anodsplace.framework.widget.recyclerview
 
-import androidx.recyclerview.widget.RecyclerView
 import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
 
 open class AdapterWrapper<VH : RecyclerView.ViewHolder>(
         protected val adapter: RecyclerView.Adapter<VH>) : RecyclerView.Adapter<VH>() {
@@ -35,11 +35,11 @@ open class AdapterWrapper<VH : RecyclerView.ViewHolder>(
         adapter.onViewDetachedFromWindow(holder)
     }
 
-    override fun onAttachedToRecyclerView(recyclerView: androidx.recyclerview.widget.RecyclerView) {
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         adapter.onAttachedToRecyclerView(recyclerView)
     }
 
-    override fun onDetachedFromRecyclerView(recyclerView: androidx.recyclerview.widget.RecyclerView) {
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         adapter.onDetachedFromRecyclerView(recyclerView)
     }
 
@@ -51,7 +51,7 @@ open class AdapterWrapper<VH : RecyclerView.ViewHolder>(
         return adapter.itemCount
     }
 
-    private inner class ForwardingDataSetObserver : androidx.recyclerview.widget.RecyclerView.AdapterDataObserver() {
+    private inner class ForwardingDataSetObserver : RecyclerView.AdapterDataObserver() {
 
         override fun onChanged() {
             notifyDataSetChanged()

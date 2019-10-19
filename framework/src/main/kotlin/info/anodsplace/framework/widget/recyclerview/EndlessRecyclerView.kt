@@ -35,7 +35,7 @@ class EndlessRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
             }
         }
 
-    fun init(layout: LinearLayoutManager, adapter: RecyclerView.Adapter<RecyclerView.ViewHolder>, scrollLimit: Int) {
+    fun init(layout: LinearLayoutManager, adapter: Adapter<ViewHolder>, scrollLimit: Int) {
         super.setLayoutManager(layout)
 
         val endlessAdapter = EndlessAdapter(adapter, context, R.layout.list_item_loadmore)

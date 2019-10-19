@@ -92,9 +92,7 @@ open class DbContentProvider : ContentProvider() {
 
     override fun insert(uri: Uri, values: ContentValues?): Uri? {
         val query = matchQuery(uri) ?: throw IllegalArgumentException("Unknown URI $uri")
-        if (values == null || values.size() == 0) {
-            throw IllegalArgumentException("Values cannot be empty")
-        }
+        require(!(values == null || values.size() == 0)) { "Values cannot be empty" }
 
         val db = dbSchemaManager.writableDatabase
         val rowId = db.insert(query.table, SQLiteDatabase.CONFLICT_REPLACE, values)
@@ -139,9 +137,7 @@ open class DbContentProvider : ContentProvider() {
 
     override fun update(uri: Uri, values: ContentValues?, selection: String?, selectionArgs: Array<String>?): Int {
         val query = matchQuery(uri) ?: throw IllegalArgumentException("Unknown URI $uri")
-        if (values == null || values.size() == 0) {
-            throw IllegalArgumentException("Values cannot be empty")
-        }
+        require(!(values == null || values.size() == 0)) { "Values cannot be empty" }
 
         val db = dbSchemaManager.writableDatabase
         val count = db.update(query.table, SQLiteDatabase.CONFLICT_REPLACE, values, query.selection, query.selectionArgs)

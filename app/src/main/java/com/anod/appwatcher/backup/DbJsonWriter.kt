@@ -23,7 +23,7 @@ class DbJsonWriter {
         val writer = JsonWriter(file)
         writer.beginObject()
 
-        val tags = db.tags().load().associate { it.id to it }
+        val tags = db.tags().load().associateBy { it.id }
         val appsTags = mutableMapOf<String, MutableList<TagId>>()
         db.appTags().load().forEach {
             if (appsTags[it.appId] == null) {

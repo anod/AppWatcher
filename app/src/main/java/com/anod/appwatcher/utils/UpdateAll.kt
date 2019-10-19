@@ -20,18 +20,16 @@ class UpdateAll(private val context: Context, private val prefs: Preferences) {
             return
         }
 
-        DialogMessage(context,R.style.AlertDialog, R.string.update_all, R.string.update_all_warning,{
+        DialogMessage(context,R.style.AlertDialog, R.string.update_all, R.string.update_all_warning) {
             builder ->
 
-            builder.setPositiveButton(R.string.i_understand, {
-                _, _ ->
+            builder.setPositiveButton(R.string.i_understand) { _, _ ->
                 prefs.updateAllConfirmed = true
                 context.startActivitySafely(Intent().forMyApps(true))
-            })
+            }
 
-            builder.setNegativeButton(android.R.string.cancel, {
-                _, _ ->
-            })
-        }).show()
+            builder.setNegativeButton(android.R.string.cancel) { _, _ ->
+            }
+        }.show()
     }
 }

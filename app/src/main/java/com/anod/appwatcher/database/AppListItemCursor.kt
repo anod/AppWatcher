@@ -6,8 +6,6 @@ import androidx.room.util.CursorUtil
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.database.entities.Price
-
-import com.anod.appwatcher.model.AppInfo
 import info.anodsplace.framework.database.CursorIterator
 
 /**

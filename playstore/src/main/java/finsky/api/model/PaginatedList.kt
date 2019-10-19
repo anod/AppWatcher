@@ -3,8 +3,8 @@ package finsky.api.model
 import com.android.volley.Request
 import com.android.volley.VolleyError
 import finsky.protos.nano.Messages
-
-import java.util.ArrayList
+import java.util.*
+import kotlin.math.max
 
 class UrlOffsetPair(val offset: Int, val url: String)
 
@@ -43,7 +43,7 @@ abstract class PaginatedList<T, D>(
             this.itemsUntilEndCount = 4
             return
         }
-        this.itemsUntilEndCount = Math.max(1, n / 4)
+        this.itemsUntilEndCount = max(1, n / 4)
     }
 
     private fun clearTransientState() {
@@ -57,9 +57,7 @@ abstract class PaginatedList<T, D>(
         if (isLastPosition) {
             this.lastPositionRequested = pos
         }
-        if (pos < 0) {
-            throw IllegalArgumentException("Can't return an item with a negative index: " + pos)
-        }
+        require(pos >= 0) { "Can't return an item with a negative index: $pos" }
         val count = this.count
         var value: D? = null
         if (pos < count) {
@@ -68,7 +66,7 @@ abstract class PaginatedList<T, D>(
                 if (this.itemsRemoved) {
                     for (i in this.urlOffsetList.indices) {
                         if (this.urlOffsetList[i].offset > this.items.size) {
-                            while (this.urlOffsetList.size > Math.max(1, i)) {
+                            while (this.urlOffsetList.size > max(1, i)) {
                                 this.urlOffsetList.removeAt(-1 + this.urlOffsetList.size)
                             }
                             val urlOffsetPair = this.urlOffsetList[-1 + this.urlOffsetList.size]
