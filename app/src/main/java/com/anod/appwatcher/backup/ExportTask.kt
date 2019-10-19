@@ -27,9 +27,9 @@ class ExportTask(private val context: ApplicationContext) {
             return DbBackupManager.ERROR_STORAGE_NOT_AVAILABLE
         }
 
-        val destFile = File(destUri.path)
-        if (!destFile.parentFile.exists()) {
-            destFile.parentFile.mkdirs()
+        val destFile = File(destUri.path!!)
+        if (destFile.parentFile?.exists() == false) {
+            destFile.parentFile?.mkdirs()
         }
 
         return DbBackupManager.RESULT_OK

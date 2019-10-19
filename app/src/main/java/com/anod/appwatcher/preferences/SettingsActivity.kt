@@ -9,7 +9,7 @@ import android.os.Environment
 import androidx.appcompat.app.AppCompatDelegate
 import android.text.format.DateUtils
 import android.widget.Toast
-import androidx.lifecycle.ViewModelProviders
+import androidx.activity.viewModels
 import androidx.lifecycle.observe
 import com.anod.appwatcher.*
 import com.anod.appwatcher.backup.DbBackupManager
@@ -56,7 +56,7 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
     private val gDriveSignIn: GDriveSignIn by lazy { GDriveSignIn(this, this) }
 
     private var recreateWatchlistOnBack: Boolean = false
-    private val viewModel: SettingsViewModel by lazy { ViewModelProviders.of(this).get(SettingsViewModel::class.java) }
+    private val viewModel: SettingsViewModel by viewModels()
 
     private val prefs: Preferences
         get() = Application.provide(this).prefs

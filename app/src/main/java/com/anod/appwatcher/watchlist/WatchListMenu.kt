@@ -5,7 +5,7 @@ import android.text.TextUtils
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.widget.SearchView
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.anod.appwatcher.MarketSearchActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.SettingsActivity
@@ -112,7 +112,7 @@ class WatchListMenu(private var searchListener: SearchView.OnQueryTextListener, 
                 return true
             }
             R.id.menu_act_refresh -> {
-                ViewModelProviders.of(activity).get(WatchListStateViewModel::class.java).requestRefresh()
+                ViewModelProvider(activity).get(WatchListStateViewModel::class.java).requestRefresh()
                 return true
             }
             R.id.menu_settings -> {

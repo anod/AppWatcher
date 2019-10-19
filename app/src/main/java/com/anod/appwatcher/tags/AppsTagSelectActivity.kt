@@ -7,6 +7,7 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.Menu
 import android.view.View
+import androidx.activity.viewModels
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.*
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -66,7 +67,7 @@ class AppsTagSelectActivity : ToolbarActivity() {
         get() = Theme(this).colors
 
     private var isAllSelected: Boolean = false
-    private val viewModel: AppsTagViewModel by lazy { ViewModelProviders.of(this).get(AppsTagViewModel::class.java) }
+    private val viewModel: AppsTagViewModel by viewModels()
     private val adapter: TagAppsAdapter by lazy { TagAppsAdapter(this, viewModel.tagAppsImport) }
     override val layoutResource: Int
         get() = R.layout.activity_tag_select

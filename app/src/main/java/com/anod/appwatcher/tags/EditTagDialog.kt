@@ -7,7 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import androidx.lifecycle.ViewModelProviders
+import androidx.fragment.app.viewModels
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.utils.Theme
@@ -26,7 +26,7 @@ class EditTagDialog : DialogFragment(), ColorPickerSwatch.OnColorSelectedListene
 
     private lateinit var tag: Tag
 
-    private val viewModel: TagsListViewModel by lazy { ViewModelProviders.of(this).get(TagsListViewModel::class.java) }
+    private val viewModel: TagsListViewModel by viewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.dialog_edit_tag, container, false)

@@ -8,11 +8,11 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.annotation.MenuRes
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
 import androidx.viewpager.widget.ViewPager
 import com.anod.appwatcher.Application
@@ -54,7 +54,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     open val defaultFilterId = Filters.TAB_ALL
 
     private val actionMenu by lazy { WatchListMenu(this, this) }
-    private val stateViewModel: WatchListStateViewModel by lazy { ViewModelProviders.of(this).get(WatchListStateViewModel::class.java) }
+    private val stateViewModel: WatchListStateViewModel by viewModels()
 
     @get:MenuRes
     protected abstract val menuResource: Int

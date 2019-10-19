@@ -10,12 +10,12 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import com.anod.appwatcher.*
 import com.anod.appwatcher.accounts.AccountSelectionDialog
 import com.anod.appwatcher.accounts.AuthTokenAsync
@@ -43,6 +43,7 @@ abstract class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.Selecti
     private val drawerLayout: DrawerLayout? by lazy { findViewById<DrawerLayout?>(R.id.drawer_layout) }
     private val navigationView: NavigationView? by lazy { findViewById<NavigationView?>(R.id.nav_view) }
     private val accountNameView: TextView? by lazy { navigationView?.getHeaderView(0)?.findViewById<TextView>(R.id.account_name) }
+    private val drawerViewModel: DrawerViewModel by viewModels()
 
     open val isHomeAsMenu: Boolean
         get() = false
@@ -75,9 +76,8 @@ abstract class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.Selecti
     private fun setupDrawer() {
         this.navigationView ?: return
 
-        val viewModel = ViewModelProviders.of(this).get(DrawerViewModel::class.java)
-        setupHeader(viewModel)
-        viewModel.refreshLastUpdateTime()
+        setupHeader(drawerViewModel)
+        drawerViewModel.refreshLastUpdateTime()
     }
 
     private fun setupHeader(viewModel: DrawerViewModel) {
@@ -197,8 +197,7 @@ abstract class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.Selecti
     }
 
     override fun onAccountSelected(account: Account) {
-        val viewModel = ViewModelProviders.of(this).get(DrawerViewModel::class.java)
-        viewModel.account.value = account
+        drawerViewModel.account.value = account
         val collectReports = provide.prefs.collectCrashReports
         AuthTokenAsync(this).request(this, account) { token ->
             if (token.isNotBlank()) {

@@ -30,7 +30,7 @@ class ImportTask(private val context: ApplicationContext) {
             return DbBackupManager.ERROR_STORAGE_NOT_AVAILABLE
         }
 
-        val dataFile = File(destUri.path)
+        val dataFile = File(destUri.path!!)
         if (!dataFile.exists()) {
             return DbBackupManager.ERROR_FILE_NOT_EXIST
         }

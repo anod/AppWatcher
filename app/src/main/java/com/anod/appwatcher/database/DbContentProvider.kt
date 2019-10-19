@@ -97,7 +97,7 @@ open class DbContentProvider : ContentProvider() {
         val db = dbSchemaManager.writableDatabase
         val rowId = db.insert(query.table, SQLiteDatabase.CONFLICT_REPLACE, values)
         if (rowId > 0 && query.notifyUri != null) {
-            val noteUri = ContentUris.withAppendedId(query.notifyUri, rowId)
+            val noteUri = ContentUris.withAppendedId(query.notifyUri!!, rowId)
             context!!.contentResolver.notifyChange(noteUri, null)
             return noteUri
         }

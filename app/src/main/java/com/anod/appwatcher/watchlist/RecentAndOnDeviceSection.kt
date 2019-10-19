@@ -1,7 +1,6 @@
 package com.anod.appwatcher.watchlist
 
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import com.anod.appwatcher.installed.InstalledAppsAdapter
 import com.anod.appwatcher.installed.InstalledLoadResult
 import com.anod.appwatcher.installed.InstalledWatchListViewModel
@@ -29,12 +28,12 @@ open class RecentSection : WatchListFragment.DefaultSection() {
         //
         super.attach(fragment, installedApps, clickListener)
 
-        val viewModel = ViewModelProviders.of(fragment).get(InstalledWatchListViewModel::class.java)
+        val viewModel = ViewModelProvider(fragment).get(InstalledWatchListViewModel::class.java)
         viewModel.hasSectionRecent = true
     }
 
     override fun viewModel(fragment: WatchListFragment): WatchListViewModel {
-        return ViewModelProviders.of(fragment).get(InstalledWatchListViewModel::class.java)
+        return ViewModelProvider(fragment).get(InstalledWatchListViewModel::class.java)
     }
 
     override fun onModelLoaded(result: LoadResult) {
@@ -62,7 +61,7 @@ class OnDeviceSection : WatchListFragment.DefaultSection() {
     }
 
     override fun viewModel(fragment: WatchListFragment): WatchListViewModel {
-        return ViewModelProviders.of(fragment).get(InstalledWatchListViewModel::class.java)
+        return ViewModelProvider(fragment).get(InstalledWatchListViewModel::class.java)
     }
 
     override fun onModelLoaded(result: LoadResult) {
@@ -80,7 +79,7 @@ class OnDeviceSection : WatchListFragment.DefaultSection() {
             val index = section.adapter.add(InstalledAppsAdapter(context, context.packageManager, dataProvider, clickListener))
 
             section.adapterIndexMap.put(ADAPTER_INSTALLED, index)
-            val viewModel = ViewModelProviders.of(fragment).get(InstalledWatchListViewModel::class.java)
+            val viewModel = ViewModelProvider(fragment).get(InstalledWatchListViewModel::class.java)
             viewModel.hasSectionOnDevice = true
         }
 
