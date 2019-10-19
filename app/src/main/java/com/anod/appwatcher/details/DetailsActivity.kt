@@ -14,13 +14,13 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.annotation.ColorInt
 import androidx.core.app.ShareCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -52,7 +52,7 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
         get() = Theme(this).themeDialogNoActionBar
     private var loaded = false
 
-    val viewModel: DetailsViewModel by lazy { ViewModelProviders.of(this).get(DetailsViewModel::class.java) }
+    val viewModel: DetailsViewModel by viewModels()
 
     private var addMenu: MenuItem? = null
     private val titleString: AlphaSpannableString by lazy {

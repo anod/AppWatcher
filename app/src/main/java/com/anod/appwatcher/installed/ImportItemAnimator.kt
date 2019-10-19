@@ -32,7 +32,7 @@ internal class ImportItemAnimator : DefaultItemAnimator() {
                     newHolder.itemView.startAnimation(anim)
                 }
                 ImportResourceProvider.STATUS_DONE -> animateColor(newHolder.itemView, Color.TRANSPARENT, newHolder.themeAccent)
-                ImportResourceProvider.STATUS_ERROR -> animateColor(newHolder.itemView, Color.TRANSPARENT, newHolder.materialRed)
+                ImportResourceProvider.STATUS_ERROR -> animateColor(newHolder.itemView, Color.TRANSPARENT, newHolder.rowError)
             }
         }
 

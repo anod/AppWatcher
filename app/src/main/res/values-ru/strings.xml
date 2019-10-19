@@ -127,15 +127,15 @@
     </string-array>
 
     <string-array name="themes">
-        <item>Авто (Темная с 22 до 6)</item> <!-- MODE_NIGHT_AUTO = 0; -->
-        <item>Авто (Черная с 22 до 6)</item>
+        <item>Авто - Темная</item> <!-- MODE_NIGHT_AUTO = 0; -->
+        <item>Авто - Черная</item>
         <item>Светлая</item> <!-- MODE_NIGHT_NO = 1; -->
         <item>Темная</item> <!-- MODE_NIGHT_YES = 2; -->
         <item>Черная</item> <!-- MODE_NIGHT_YES = 2; -->
     </string-array>
 
   <string name="pref_title_updates_frequency">Переодичность проверки</string>
-  <string name="share_subject">%s версия %s</string>
+  <string name="share_subject">%1$s версия %2$s</string>
   <string name="new_updates">Новые обновления</string>
   <string name="shortcut_updates">Обновляемые</string>
   <string name="updates_not_available">Информация об обновлениях не доступна</string>

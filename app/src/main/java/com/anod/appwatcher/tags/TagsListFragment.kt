@@ -7,8 +7,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -30,7 +30,7 @@ import kotlinx.android.synthetic.main.activity_tags_editor.*
 
 class TagsListFragment : Fragment(), View.OnClickListener {
 
-    private val viewModel: TagsListViewModel by lazy { ViewModelProviders.of(this).get(TagsListViewModel::class.java) }
+    private val viewModel: TagsListViewModel by viewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.activity_tags_editor, container, false)
@@ -64,7 +64,7 @@ class TagsListFragment : Fragment(), View.OnClickListener {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.add_tag) {
             val dialog = EditTagDialog.newInstance(null, Theme(requireActivity()))
-            dialog.show(fragmentManager!!, "edit-tag-dialog")
+            dialog.show(parentFragmentManager, "edit-tag-dialog")
             return true
         }
         return super.onOptionsItemSelected(item)
@@ -74,7 +74,7 @@ class TagsListFragment : Fragment(), View.OnClickListener {
         val holder = v.tag as TagHolder
         if (viewModel.appInfo.value == null) {
             val dialog = EditTagDialog.newInstance(holder.tag, Theme(requireActivity()))
-            dialog.show(fragmentManager!!, "edit-tag-dialog")
+            dialog.show(parentFragmentManager, "edit-tag-dialog")
         } else {
             if (holder.name.isSelected) {
                 viewModel.removeAppTag(holder.tag)

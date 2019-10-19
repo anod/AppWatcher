@@ -27,7 +27,7 @@ internal class ImportAppViewHolder(
     private val icon: ImageView = itemView.findViewById(R.id.icon)
 
     val themeAccent: Int = ResourcesCompat.getColor(itemView.resources, R.color.theme_accent, null)
-    val materialRed: Int = ResourcesCompat.getColor(itemView.resources, R.color.material_red_800, null)
+    val rowError: Int = ResourcesCompat.getColor(itemView.resources, R.color.row_error_red, null)
 
     override fun bindView(item: AppListItem) {
         this.item = item
@@ -42,7 +42,7 @@ internal class ImportAppViewHolder(
 
         when {
             status() == ImportResourceProvider.STATUS_DONE -> itemView.setBackgroundColor(themeAccent)
-            status() == ImportResourceProvider.STATUS_ERROR -> itemView.setBackgroundColor(materialRed)
+            status() == ImportResourceProvider.STATUS_ERROR -> itemView.setBackgroundColor(rowError)
             else -> itemView.setBackgroundColor(Color.TRANSPARENT)
         }
     }

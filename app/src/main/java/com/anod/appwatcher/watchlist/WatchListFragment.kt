@@ -137,12 +137,14 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         listView.addItemDecoration(HeaderItemDecorator(viewModel.sections, this, context!!))
         listView.adapter = section.adapter
 
-        listView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                val isOnTop = !recyclerView.canScrollVertically(-1)
-                swipeLayout.isEnabled = isOnTop
-            }
-        })
+        if (prefs.enablePullToRefresh) {
+            listView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    val isOnTop = !recyclerView.canScrollVertically(-1)
+                    swipeLayout.isEnabled = isOnTop
+                }
+            })
+        }
 
         // Start out with a progress indicator.
         this.isListVisible = false
