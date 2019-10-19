@@ -33,6 +33,7 @@ interface ChangelogTable {
             const val versionName = "name"
             const val details = "details"
             const val uploadDate = "upload_date"
+            const val noNewDetails = "no_new_details"
         }
     }
 
@@ -43,28 +44,11 @@ interface ChangelogTable {
         const val versionName = "$table.name"
         const val details = "$table.details"
         const val uploadDate = "$table.upload_date"
-    }
-
-    object Projection {
-        const val _ID = 0
-        const val appId = 1
-        const val versionCode = 2
-        const val versionName = 3
-        const val details = 4
-        const val uploadDate = 5
+        const val noNewDetails = "$table.no_new_details"
     }
 
     companion object {
-
         const val table = "changelog"
-
-        val projection = arrayOf(
-                TableColumns._ID,
-                TableColumns.appId,
-                TableColumns.versionCode,
-                TableColumns.versionName,
-                TableColumns.details,
-                TableColumns.uploadDate)
     }
 }
 

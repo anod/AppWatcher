@@ -25,11 +25,13 @@ data class AppChange(
         @ColumnInfo(name = ChangelogTable.Columns.details)
         val details: String,
         @ColumnInfo(name = ChangelogTable.Columns.uploadDate)
-        val uploadDate: String) {
+        val uploadDate: String,
+        @ColumnInfo(name = ChangelogTable.Columns.noNewDetails)
+        val noNewDetails: Boolean) {
 
     @Ignore
-    constructor(appId: String, versionCode: Int, versionName: String, details: String, uploadDate: String)
-        : this(0, appId, versionCode, versionName, details, uploadDate)
+    constructor(appId: String, versionCode: Int, versionName: String, details: String, uploadDate: String, noNewDetails: Boolean)
+        : this(0, appId, versionCode, versionName, details, uploadDate, noNewDetails)
 
     override fun equals(other: Any?): Boolean {
         if (other !is AppChange) return false
@@ -39,6 +41,7 @@ data class AppChange(
             versionName != other.versionName -> false
             details != other.details -> false
             uploadDate != other.uploadDate -> false
+            noNewDetails != other.noNewDetails -> false
             else -> true
         }
     }
@@ -49,6 +52,7 @@ data class AppChange(
         result = 31 * result + versionName.hashCode()
         result = 31 * result + details.hashCode()
         result = 31 * result + uploadDate.hashCode()
+        result = 31 * result + noNewDetails.hashCode()
         return result
     }
 

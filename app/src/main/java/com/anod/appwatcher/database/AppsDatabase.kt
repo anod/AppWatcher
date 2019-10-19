@@ -55,7 +55,7 @@ abstract class AppsDatabase: RoomDatabase() {
     }
 
     companion object {
-        const val version = 15
+        const val version = 16
         const val dbName = "app_watcher"
 
         fun instance(context: Context): AppsDatabase {
@@ -66,8 +66,14 @@ abstract class AppsDatabase: RoomDatabase() {
                             MIGRATION_11_12,
                             MIGRATION_12_13,
                             MIGRATION_13_14,
-                            MIGRATION_14_15)
+                            MIGRATION_15_16)
                     .build()
+        }
+
+        private val MIGRATION_15_16 = object: Migration(15, 16) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE " + ChangelogTable.table + " ADD COLUMN " + ChangelogTable.Columns.noNewDetails + " INTEGER NOT NULL DEFAULT 0")
+            }
         }
 
         private val MIGRATION_14_15 = object: Migration(14, 15) {

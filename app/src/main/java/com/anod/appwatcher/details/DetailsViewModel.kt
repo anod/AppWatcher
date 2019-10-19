@@ -77,7 +77,7 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
     val document: Document?
         get() = detailsEndpoint.document
 
-    var recentChange = AppChange(appId.value!!, 0, "", "", "")
+    var recentChange = AppChange(appId.value!!, 0, "", "", "", false)
 
     override fun onCleared() {
         detailsEndpoint.listener = null
@@ -132,7 +132,7 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
         val appDetails = details.document?.appDetails
         if (appDetails != null) {
             recentChange = AppChange(appId.value!!, appDetails.versionCode, appDetails.versionString, appDetails.recentChangesHtml
-                    ?: "", appDetails.uploadDate)
+                    ?: "", appDetails.uploadDate, false)
         }
         this.updateChangelogState(RemoteComplete(false))
     }

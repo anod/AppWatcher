@@ -49,6 +49,14 @@ interface AppListTable {
             "CASE :includeDeleted WHEN 'false' THEN ${Columns.status} != ${AppInfoMetadata.STATUS_DELETED} ELSE ${Columns.status} >= ${AppInfoMetadata.STATUS_NORMAL} END ")
     fun load(includeDeleted: Boolean, recentTime: Long): Cursor
 
+    @Query("SELECT $table.*, ${ChangelogTable.TableColumns.details}, " +
+            "CASE WHEN ${Columns.updateTimestamp} > :recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
+            "FROM $table " +
+            "LEFT JOIN ${ChangelogTable.table} ON " +
+            "${TableColumns.appId} == ${ChangelogTable.TableColumns.appId} " +
+            "AND ${TableColumns.versionNumber} == ${ChangelogTable.TableColumns.versionCode} ")
+    fun loadAppList(recentTime: Long): Cursor
+
     @Query("SELECT COUNT(${BaseColumns._ID}) " +
             "FROM $table WHERE " +
             "CASE :includeDeleted WHEN 'false' THEN ${Columns.status} != ${AppInfoMetadata.STATUS_DELETED} ELSE ${Columns.status} >= ${AppInfoMetadata.STATUS_NORMAL} END ")
@@ -68,6 +76,11 @@ interface AppListTable {
         suspend fun load(includeDeleted: Boolean, table: AppListTable): AppListCursor = withContext(Dispatchers.IO) {
             val cursor = table.load(includeDeleted, recentTime)
             return@withContext AppListCursor(cursor)
+        }
+
+        suspend fun loadAppList(table: AppListTable): AppListItemCursor = withContext(Dispatchers.IO) {
+            val cursor = table.loadAppList(recentTime)
+            return@withContext AppListItemCursor(cursor)
         }
 
         fun loadAppList(sortId: Int, titleFilter: String, table: AppListTable): LiveData<List<AppListItem>> {
@@ -244,32 +257,28 @@ interface AppListTable {
 }
 
 val AppInfo.contentValues: ContentValues
-    get() {
-        val values = ContentValues()
-
+    get() = ContentValues().apply {
         if (rowId > 0) {
-            values.put(BaseColumns._ID, rowId)
+            put(BaseColumns._ID, rowId)
         }
-        values.put(AppListTable.Columns.appId, appId)
-        values.put(AppListTable.Columns.packageName, packageName)
-        values.put(AppListTable.Columns.title, title)
-        values.put(AppListTable.Columns.versionNumber, versionNumber)
-        values.put(AppListTable.Columns.versionName, versionName)
-        values.put(AppListTable.Columns.creator, creator)
-        values.put(AppListTable.Columns.status, status)
-        values.put(AppListTable.Columns.uploadDate, uploadDate)
+        put(AppListTable.Columns.appId, appId)
+        put(AppListTable.Columns.packageName, packageName)
+        put(AppListTable.Columns.title, title)
+        put(AppListTable.Columns.versionNumber, versionNumber)
+        put(AppListTable.Columns.versionName, versionName)
+        put(AppListTable.Columns.creator, creator)
+        put(AppListTable.Columns.status, status)
+        put(AppListTable.Columns.uploadDate, uploadDate)
 
-        values.put(AppListTable.Columns.priceText, priceText)
-        values.put(AppListTable.Columns.priceCurrency, priceCur)
-        values.put(AppListTable.Columns.priceMicros, priceMicros)
+        put(AppListTable.Columns.priceText, priceText)
+        put(AppListTable.Columns.priceCurrency, priceCur)
+        put(AppListTable.Columns.priceMicros, priceMicros)
 
-        values.put(AppListTable.Columns.detailsUrl, detailsUrl)
+        put(AppListTable.Columns.detailsUrl, detailsUrl)
 
-        values.put(AppListTable.Columns.iconUrl, iconUrl)
-        values.put(AppListTable.Columns.uploadTimestamp, uploadTime)
+        put(AppListTable.Columns.iconUrl, iconUrl)
+        put(AppListTable.Columns.uploadTimestamp, uploadTime)
 
-        values.put(AppListTable.Columns.appType, appType)
-        values.put(AppListTable.Columns.updateTimestamp, updateTime)
-        AppLog.d("Values: $values")
-        return values
+        put(AppListTable.Columns.appType, appType)
+        put(AppListTable.Columns.updateTimestamp, updateTime)
     }

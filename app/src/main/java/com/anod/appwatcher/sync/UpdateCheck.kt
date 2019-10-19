@@ -16,7 +16,9 @@ import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.backup.gdrive.GDriveSilentSignIn
 import com.anod.appwatcher.backup.gdrive.GDriveSync
 import com.anod.appwatcher.database.*
+import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppChange
+import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.preferences.Preferences
@@ -41,10 +43,21 @@ import java.util.*
 class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Listener {
 
     class UpdatedApp(
-        val app: AppInfo,
-        val recentChanges: String,
-        val installedVersionCode: Int,
-        val isNewUpdate: Boolean)
+            val packageName: String,
+            val versionNumber: Int,
+            val title: String,
+            val uploadTime: Long,
+            val uploadDate: String,
+            val recentChanges: String,
+            val installedVersionCode: Int,
+            val isNewUpdate: Boolean) {
+
+        constructor(appInfo: AppInfo, recentChanges: String, installedVersionCode: Int, isNewUpdate: Boolean)
+            : this(appInfo.packageName, appInfo.versionNumber, appInfo.title, appInfo.uploadTime, appInfo.uploadDate, recentChanges, installedVersionCode, isNewUpdate)
+
+        constructor(app: App, recentChanges: String, installedVersionCode: Int, isNewUpdate: Boolean)
+            : this(app.packageName, app.versionNumber, app.title, app.uploadTime, app.uploadDate, recentChanges, installedVersionCode, isNewUpdate)
+    }
 
     companion object {
         private const val oneSecInMillis = 1000
@@ -108,8 +121,8 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
             AppLog.e("Error during synchronization ${e.message}", e)
         }
 
-        if (updatedApps.isNotEmpty() && updatedApps.first().app.uploadTime == 0.toLong()) {
-            val uploadDate = updatedApps.first().app.uploadDate
+        if (updatedApps.isNotEmpty() && updatedApps.first().uploadTime == 0.toLong()) {
+            val uploadDate = updatedApps.first().uploadDate
             val locale = Locale.getDefault()
             AppLog.e("Cannot parse date '$uploadDate' for locale '$locale'")
         }
@@ -150,7 +163,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
 
         val database = Application.provide(context).database
 
-        val apps = AppListTable.Queries.load(false, database.apps())
+        val apps = AppListTable.Queries.loadAppList(database.apps())
         if (apps.isEmpty) {
             apps.close()
             AppLog.i("Sync finished: no apps")
@@ -160,9 +173,9 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         val updatedTitles = mutableListOf<UpdatedApp>()
 
         apps.chunked(bulkSize) {
-            list -> list.associateBy { it.packageName }
+            list -> list.associateBy { it.app.packageName }
         }.forEach { localApps ->
-            val docIds = localApps.map { BulkDocId(it.key, it.value.versionNumber) }
+            val docIds = localApps.map { BulkDocId(it.key, it.value.app.versionNumber) }
             val endpoint = createEndpoint(docIds, authToken, account)
             AppLog.d("Sending chunk... $docIds")
             try {
@@ -179,20 +192,27 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         return updatedTitles
     }
 
-    private suspend fun updateApps(documents: List<Document>, localApps: Map<String, AppInfo>, updatedTitles: MutableList<UpdatedApp>, lastUpdatesViewed: Boolean, contentResolver: ContentResolver, db: AppsDatabase) {
+    private suspend fun updateApps(documents: List<Document>, localApps: Map<String, AppListItem>, updatedTitles: MutableList<UpdatedApp>, lastUpdatesViewed: Boolean, contentResolver: ContentResolver, db: AppsDatabase) {
         val fetched = mutableMapOf<String, Boolean>()
         val batch = mutableListOf<ContentValues>()
         val changelog = mutableListOf<ContentValues>()
         for (marketApp in documents) {
             val docId = marketApp.docId
-            localApps[docId]?.let {
+            localApps[docId]?.let { localItem ->
                 fetched[docId] = true
-                val values = updateApp(marketApp, it, updatedTitles, lastUpdatesViewed)
+                val values = updateApp(marketApp, localItem, updatedTitles, lastUpdatesViewed)
                 if (values.size() > 0) {
                     batch.add(values)
                 }
-                val recentChanges = marketApp.appDetails.recentChangesHtml ?: ""
-                changelog.add(AppChange(docId, marketApp.appDetails.versionCode, marketApp.appDetails.versionString, recentChanges, marketApp.appDetails.uploadDate).contentValues)
+                val recentChanges = marketApp.appDetails.recentChangesHtml?.trim() ?: ""
+                val noNewChange = recentChanges == localItem.changeDetails
+                changelog.add(AppChange(
+                        docId,
+                        marketApp.appDetails.versionCode,
+                        marketApp.appDetails.versionString,
+                        recentChanges,
+                        marketApp.appDetails.uploadDate,
+                        noNewChange).contentValues)
             }
         }
 
@@ -219,12 +239,12 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         if (lastUpdatesViewed && fetched.size < localApps.size) {
             val statusBatch = mutableListOf<ContentValues>()
             localApps.values.forEach {
-                if (fetched[it.appId] == null) {
-                    if (it.status == AppInfoMetadata.STATUS_UPDATED) {
-                        it.status = AppInfoMetadata.STATUS_NORMAL
+                val app = it.app
+                if (fetched[app.appId] == null) {
+                    if (app.status == AppInfoMetadata.STATUS_UPDATED) {
                         AppLog.d("Set not fetched app as viewed")
                         statusBatch.add(contentValuesOf(
-                            BaseColumns._ID to it.rowId,
+                            BaseColumns._ID to app.rowId,
                             AppListTable.Columns.status to AppInfoMetadata.STATUS_NORMAL
                         ))
                     }
@@ -239,15 +259,16 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         }
     }
 
-    private fun updateApp(marketApp: Document, localApp: AppInfo, updates: MutableList<UpdatedApp>, lastUpdatesViewed: Boolean): ContentValues {
+    private fun updateApp(marketApp: Document, localItem: AppListItem, updates: MutableList<UpdatedApp>, lastUpdatesViewed: Boolean): ContentValues {
         val appDetails = marketApp.appDetails
+        val localApp = localItem.app
 
         if (appDetails.versionCode > localApp.versionNumber) {
             AppLog.d("New version found [" + appDetails.versionCode + "]")
             val newApp = AppInfo(localApp.rowId, AppInfoMetadata.STATUS_UPDATED, marketApp)
             val installedInfo = installedAppsProvider.packageInfo(appDetails.packageName)
             val recentChanges = if (updates.isEmpty()) appDetails.recentChangesHtml ?: "" else ""
-            updates.add(UpdatedApp(newApp, recentChanges, installedInfo.versionCode,true ))
+            updates.add(UpdatedApp(newApp, recentChanges, installedInfo.versionCode, true ))
             return newApp.contentValues
         }
 
@@ -256,13 +277,12 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         //Mark updated app as normal
         if (localApp.status == AppInfoMetadata.STATUS_UPDATED && lastUpdatesViewed) {
             AppLog.d("Set ${localApp.appId} update as viewed")
-            localApp.status = AppInfoMetadata.STATUS_NORMAL
             values.put(AppListTable.Columns.status, AppInfoMetadata.STATUS_NORMAL)
         } else if (localApp.status == AppInfoMetadata.STATUS_UPDATED) {
             // Application was previously updated
             val installedInfo = installedAppsProvider.packageInfo(appDetails.packageName)
             val recentChanges = if (updates.isEmpty()) appDetails.recentChangesHtml ?: "" else ""
-            updates.add(UpdatedApp(localApp, recentChanges, installedInfo.versionCode,false))
+            updates.add(UpdatedApp(localApp, recentChanges, installedInfo.versionCode, false))
         }
         //Refresh app icon if it wasn't fetched previously
         fillMissingData(marketApp, localApp, values)
@@ -278,7 +298,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
             if (updatedApps.isEmpty()) {
                 AppLog.i("No new updates")
             } else {
-                AppLog.i("Updates: [${updatedApps.joinToString(",") { "${it.app.title} (${it.app.versionNumber})" }}]")
+                AppLog.i("Updates: [${updatedApps.joinToString(",") { "${it.title} (${it.versionNumber})" }}]")
             }
             sn.cancel()
         } else if (updatedApps.isNotEmpty()) {
@@ -288,10 +308,10 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
                 filteredApps = updatedApps.filter { it.installedVersionCode > 0 }
             } else if (!preferences.isNotifyInstalledUpToDate) {
                 filteredApps = updatedApps.filter {
-                    it.installedVersionCode > 0 && it.app.versionNumber <= it.installedVersionCode
+                    it.installedVersionCode > 0 && it.versionNumber <= it.installedVersionCode
                 }
             }
-            AppLog.i("Notifying about: [${filteredApps.joinToString(",") { "${it.app.title} (${it.app.versionNumber})" }}]")
+            AppLog.i("Notifying about: [${filteredApps.joinToString(",") { "${it.title} (${it.versionNumber})" }}]")
             if (filteredApps.isNotEmpty()) {
                 sn.show(filteredApps)
             }
@@ -340,7 +360,7 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         return endpoint
     }
 
-    private fun fillMissingData(marketApp: Document, localApp: AppInfo, values: ContentValues) {
+    private fun fillMissingData(marketApp: Document, localApp: App, values: ContentValues) {
         val refreshTime = marketApp.extractUploadDate()
         values.put(AppListTable.Columns.uploadTimestamp, refreshTime)
         values.put(AppListTable.Columns.uploadDate, marketApp.appDetails.uploadDate)
@@ -353,13 +373,13 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
         }
 
         val offer = marketApp.offer
-        if (offer.currencyCode != localApp.priceCur) {
+        if (offer.currencyCode != localApp.price.cur) {
             values.put(AppListTable.Columns.priceCurrency, offer.currencyCode)
         }
-        if (offer.formattedAmount != localApp.priceText) {
+        if (offer.formattedAmount != localApp.price.text) {
             values.put(AppListTable.Columns.priceText, offer.formattedAmount)
         }
-        if (localApp.priceMicros != offer.micros.toInt()) {
+        if (localApp.price.micros != offer.micros.toInt()) {
             values.put(AppListTable.Columns.priceMicros, offer.micros)
         }
 
