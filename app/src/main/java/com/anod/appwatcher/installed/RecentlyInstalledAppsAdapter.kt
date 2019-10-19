@@ -53,8 +53,24 @@ open class RecentlyInstalledAppsAdapter(
             private val packageManager: PackageManager,
             private val listener: AppViewHolder.OnClickListener?) : RecyclerView.ViewHolder(itemView) {
 
-        private val appViews: List<RecentAppView> = arrayListOf(R.id.app1, R.id.app2, R.id.app3, R.id.app4, R.id.app5, R.id.app6, R.id.app7, R.id.app8)
-                .map { itemView.findViewById<RecentAppView>(it) }
+        private val appViews: List<RecentAppView> = arrayListOf(
+                R.id.app1,
+                R.id.app2,
+                R.id.app3,
+                R.id.app4,
+                R.id.app5,
+                R.id.app6,
+                R.id.app7,
+                R.id.app8,
+                R.id.app9,
+                R.id.app10,
+                R.id.app11,
+                R.id.app12,
+                R.id.app13,
+                R.id.app14,
+                R.id.app15,
+                R.id.app16
+        ).map { itemView.findViewById<RecentAppView>(it) }
 
         fun bind(packages: List<Pair<String, Int>>) {
             appViews.forEachIndexed { index, view ->

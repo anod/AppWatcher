@@ -52,6 +52,37 @@
                 android:id="@+id/app8"
                 layout="@layout/list_item_recently_installed_app" />
 
+            <include
+                android:id="@+id/app9"
+                layout="@layout/list_item_recently_installed_app" />
+
+            <include
+                android:id="@+id/app10"
+                layout="@layout/list_item_recently_installed_app" />
+
+            <include
+                android:id="@+id/app11"
+                layout="@layout/list_item_recently_installed_app" />
+
+            <include
+                android:id="@+id/app12"
+                layout="@layout/list_item_recently_installed_app" />
+
+            <include
+                android:id="@+id/app13"
+                layout="@layout/list_item_recently_installed_app" />
+
+            <include
+                android:id="@+id/app14"
+                layout="@layout/list_item_recently_installed_app" />
+
+            <include
+                android:id="@+id/app15"
+                layout="@layout/list_item_recently_installed_app" />
+
+            <include
+                android:id="@+id/app16"
+                layout="@layout/list_item_recently_installed_app" />
         </LinearLayout>
     </HorizontalScrollView>
 </LinearLayout>
