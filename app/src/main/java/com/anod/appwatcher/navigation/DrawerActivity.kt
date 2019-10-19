@@ -233,5 +233,4 @@ abstract class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.Selecti
             Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()
         }
     }
-
 }
