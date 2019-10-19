@@ -42,6 +42,7 @@
     <color name="control_tint">@color/theme_primary_dark</color>
     <color name="fastscroll_thumb">#64616161</color>
     <color name="color_item_line">@color/material_grey_200</color>
+    <color name="shortcut_icon_background">#F5F5F5</color>
 
 </resources>
 
