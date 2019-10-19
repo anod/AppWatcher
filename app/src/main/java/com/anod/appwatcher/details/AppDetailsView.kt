@@ -1,9 +1,9 @@
 package com.anod.appwatcher.details
 
-import androidx.annotation.ColorInt
 import android.text.TextUtils
 import android.view.View
 import android.widget.TextView
+import androidx.annotation.ColorInt
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.model.AppInfoMetadata
@@ -34,7 +34,7 @@ class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase
         warningColor = resourceProvider.getColor(R.color.material_amber_800)
     }
 
-    fun fillDetails(app: App, recentFlag: Boolean, changeDetails: String, isLocalApp: Boolean) {
+    fun fillDetails(app: App, recentFlag: Boolean, changeDetails: String, noNewChanges: Boolean, isLocalApp: Boolean) {
         title.text = app.title
         creator?.text = app.creator
         val uploadDate = app.uploadDate
@@ -54,7 +54,13 @@ class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase
             this.price?.text = resourceProvider.formatVersionText(app.versionName, app.versionNumber, 0)
         } else {
             this.creator?.visibility = View.VISIBLE
-            this.recentChanges?.text = if (changeDetails.isBlank()) resourceProvider.noRecentChangesText else Html.parse(changeDetails)
+            if (changeDetails.isBlank()) {
+                this.recentChanges?.alpha = 0.4f
+                this.recentChanges?.text = resourceProvider.noRecentChangesText
+            } else {
+                this.recentChanges?.alpha = if (noNewChanges) 0.4f else 1.0f
+                this.recentChanges?.text = Html.parse(changeDetails)
+            }
             this.fillWatchAppView(app, recentFlag)
         }
     }

@@ -177,7 +177,7 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
     private fun setupAppView(app: App) {
         playStoreButton.setOnClickListener(this)
 
-        appDetailsView.fillDetails(app, false, "", app.rowId == -1)
+        appDetailsView.fillDetails(app, false, "", false, app.rowId == -1)
         supportActionBar?.title = titleString
 
         if (app.iconUrl.isEmpty()) {

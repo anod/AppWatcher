@@ -32,7 +32,8 @@ class AppListItemCursor(cursor: Cursor?) : CursorIterator<AppListItem>(cursor) {
         var appType = 15
         var refreshTime = 16
         var changeDetails = 17
-        var recentFlag = 18
+        var newNewDetails = 18
+        var recentFlag = 19
     }
 
     private val projection = Projection()
@@ -57,36 +58,36 @@ class AppListItemCursor(cursor: Cursor?) : CursorIterator<AppListItem>(cursor) {
             projection.priceCurrency = CursorUtil.getColumnIndexOrThrow(cursor, AppListTable.Columns.priceCurrency)
             projection.priceMicros = CursorUtil.getColumnIndexOrThrow(cursor, AppListTable.Columns.priceMicros)
             projection.changeDetails = CursorUtil.getColumnIndexOrThrow(cursor, ChangelogTable.Columns.details)
+            projection.newNewDetails = CursorUtil.getColumnIndexOrThrow(cursor, ChangelogTable.Columns.noNewDetails)
             projection.recentFlag = CursorUtil.getColumnIndexOrThrow(cursor, AppListTable.Columns.recentFlag)
         }
     }
 
-
     override val current: AppListItem
-        get() =
-            AppListItem(
-                app = App(
-                    rowId = getInt(projection.rowId),
-                    appId = getString(projection.appId),
-                    packageName = getString(projection.packageName),
-                    versionNumber = getInt(projection.versionNumber),
-                    versionName = getString(projection.versionName),
-                    title = getString(projection.title),
-                    creator = getString(projection.creator),
-                    iconUrl = getString(projection.iconUrl),
-                    status = getInt(projection.status),
-                    uploadDate = getString(projection.uploadDate),
-                    price = Price(
-                        getString(projection.priceText),
-                        getString(projection.priceCurrency),
-                        getInt(projection.priceMicros)
-                    ),
-                    detailsUrl = getString(projection.detailsUrl),
-                    uploadTime = getLong(projection.uploadTime),
-                    appType = getString(projection.appType),
-                    updateTime = getLong(projection.refreshTime)
+        get() = AppListItem(
+            app = App(
+                rowId = getInt(projection.rowId),
+                appId = getString(projection.appId),
+                packageName = getString(projection.packageName),
+                versionNumber = getInt(projection.versionNumber),
+                versionName = getString(projection.versionName),
+                title = getString(projection.title),
+                creator = getString(projection.creator),
+                iconUrl = getString(projection.iconUrl),
+                status = getInt(projection.status),
+                uploadDate = getString(projection.uploadDate),
+                price = Price(
+                    getString(projection.priceText),
+                    getString(projection.priceCurrency),
+                    getInt(projection.priceMicros)
                 ),
-                changeDetails = "",
-                recentFlag = getInt(projection.recentFlag) == 1
-            )
+                detailsUrl = getString(projection.detailsUrl),
+                uploadTime = getLong(projection.uploadTime),
+                appType = getString(projection.appType),
+                updateTime = getLong(projection.refreshTime)
+            ),
+            changeDetails = getString(projection.changeDetails),
+            noNewDetails = getInt(projection.newNewDetails) == 1,
+            recentFlag = getInt(projection.recentFlag) == 1
+        )
 }

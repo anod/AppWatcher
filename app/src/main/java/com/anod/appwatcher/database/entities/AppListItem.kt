@@ -16,6 +16,9 @@ data class AppListItem(
     @ColumnInfo(name = ChangelogTable.Columns.details)
     val changeDetails: String?,
 
+    @ColumnInfo(name = ChangelogTable.Columns.noNewDetails)
+    val noNewDetails: Boolean,
+
     @ColumnInfo(name = AppListTable.Columns.recentFlag)
     val recentFlag: Boolean
 )

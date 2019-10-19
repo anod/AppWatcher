@@ -41,8 +41,7 @@ open class AppViewHolder(
     override fun bindView(item: AppListItem) {
         this.item = item
 
-        this.detailsView.fillDetails(item.app, item.recentFlag, item.changeDetails
-                ?: "", isLocalApp)
+        this.detailsView.fillDetails(item.app, item.recentFlag, item.changeDetails ?: "", false, isLocalApp)
         iconLoader.loadAppIntoImageView(item.app, this.icon, R.drawable.ic_notifications_black_24dp)
     }
 

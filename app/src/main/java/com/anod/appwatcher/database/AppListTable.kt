@@ -49,7 +49,7 @@ interface AppListTable {
             "CASE :includeDeleted WHEN 'false' THEN ${Columns.status} != ${AppInfoMetadata.STATUS_DELETED} ELSE ${Columns.status} >= ${AppInfoMetadata.STATUS_NORMAL} END ")
     fun load(includeDeleted: Boolean, recentTime: Long): Cursor
 
-    @Query("SELECT $table.*, ${ChangelogTable.TableColumns.details}, " +
+    @Query("SELECT $table.*, ${ChangelogTable.TableColumns.details}, ${ChangelogTable.TableColumns.noNewDetails}, " +
             "CASE WHEN ${Columns.updateTimestamp} > :recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
             "FROM $table " +
             "LEFT JOIN ${ChangelogTable.table} ON " +
@@ -91,7 +91,7 @@ interface AppListTable {
             val tables = if (tag == null) AppListTable.table else AppTagsTable.table + ", " + AppListTable.table
             val selection = createSelection(tag, titleFilter)
 
-            val sql = "SELECT ${AppListTable.table}.*, ${ChangelogTable.TableColumns.details}, " +
+            val sql = "SELECT ${AppListTable.table}.*, ${ChangelogTable.TableColumns.details}, ${ChangelogTable.TableColumns.noNewDetails}, " +
                     "CASE WHEN ${Columns.updateTimestamp} > $recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
                     "FROM $tables " +
                     "LEFT JOIN ${ChangelogTable.table} ON " +

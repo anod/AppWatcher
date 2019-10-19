@@ -51,7 +51,7 @@ open class InstalledAppsAdapter(
     override fun onBindViewHolder(holder: AppViewHolderBase, position: Int) {
         val installedPackage = installedPackages[position]
         val app = packageManager.packageToApp(-1, installedPackage.packageName)
-        holder.bindView(AppListItem(app, "", false))
+        holder.bindView(AppListItem(app, "", false, false))
     }
 
 }
