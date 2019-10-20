@@ -6,6 +6,7 @@ import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
@@ -47,11 +48,19 @@ class TagsListFragment : Fragment(), View.OnClickListener {
             viewModel.appInfo.value = null
             activity!!.title = getString(R.string.tags)
         }
+        emptyView.isVisible = false
         list.layoutManager = LinearLayoutManager(context!!)
         list.adapter = TagAdapter(context!!, this)
         list.addItemDecoration(DividerItemDecoration(context!!, DividerItemDecoration.HORIZONTAL))
 
         viewModel.tagsAppItems.observe(this, Observer {
+            if (it.isEmpty()) {
+                emptyView.isVisible = true
+                list.isVisible = false
+            } else {
+                emptyView.isVisible = false
+                list.isVisible = true
+            }
             (list.adapter as TagAdapter).update(it)
         })
     }

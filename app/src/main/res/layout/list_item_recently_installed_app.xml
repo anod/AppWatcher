@@ -28,7 +28,7 @@
             android:layout_width="@dimen/icon_size_big"
             android:layout_height="@dimen/icon_size_big"
             android:layout_gravity="center_horizontal"
-            android:contentDescription="@string/application_icon"
+            android:contentDescription="@null"
             android:src="@drawable/ic_notifications_black_24dp" />
 
         <TextView
@@ -50,6 +50,7 @@
             android:layout_height="16dp"
             android:src="@drawable/ic_visibility_black_24px"
             android:layout_gravity="bottom|left"
+            android:contentDescription="@string/whatched"
             android:tint="@color/material_grey_500" />
     </LinearLayout>
 

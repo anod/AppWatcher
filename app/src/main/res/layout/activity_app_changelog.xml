@@ -124,6 +124,7 @@
         android:layout_marginRight="16dp"
         android:layout_marginTop="116dp"
         android:src="@drawable/ic_play_arrow_black_48dp"
+        android:contentDescription="@string/open_play_store"
         app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed"
         app:backgroundTint="@color/fab_tint"
         app:elevation="1dp"

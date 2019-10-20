@@ -14,6 +14,7 @@ import com.anod.appwatcher.model.AppListFilter
 import com.anod.appwatcher.model.AppListFilterInclusion
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
+import com.anod.appwatcher.utils.debounce
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.content.InstalledApps
 
@@ -45,12 +46,13 @@ open class WatchListViewModel(application: Application): AndroidViewModel(applic
     private var filterId = 0
 
     internal val appsList = reload.switchMap {
-
-        AppListTable.Queries.loadAppList(sortId, showRecentlyUpdated, tag, titleFilter, database.apps()).map { allApps ->
-            val filter = createFilter(filterId, installedApps)
-            val filtered = allApps.filter { appItem -> !filter.filterRecord(appItem) }
-            Pair(filtered, filter)
-        }
+        AppListTable.Queries.loadAppList(sortId, showRecentlyUpdated, tag, titleFilter, database.apps())
+                .debounce(600L)
+                .map { allApps ->
+                    val filter = createFilter(filterId, installedApps)
+                    val filtered = allApps.filter { appItem -> !filter.filterRecord(appItem) }
+                    Pair(filtered, filter)
+                }
     }
     open val result = appsList.map { list ->
         val sections = SectionHeaderFactory(showRecentlyUpdated, hasSectionRecent = false, hasSectionOnDevice = false)

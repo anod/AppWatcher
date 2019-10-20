@@ -3,9 +3,10 @@ package com.anod.appwatcher
 import android.app.Activity
 import android.app.Application
 import android.app.NotificationManager
+import android.os.Build
 import android.os.Bundle
+import android.os.StrictMode
 import android.util.LruCache
-import android.view.ViewConfiguration
 import androidx.appcompat.app.AppCompatDelegate
 import com.android.volley.NetworkError
 import com.android.volley.NoConnectionError
@@ -21,7 +22,8 @@ import info.anodsplace.framework.app.WindowCustomTheme
 import io.fabric.sdk.android.Fabric
 import java.io.File
 import java.io.IOException
-import java.lang.reflect.Field
+
+
 
 
 class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstance {
@@ -40,7 +42,14 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
     override fun onCreate() {
         super.onCreate()
 
-        tryEnableMenuOnDeviceWithHardwareMenuButton()
+        if (BuildConfig.DEBUG && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            StrictMode.setVmPolicy(StrictMode.VmPolicy.Builder()
+                    .detectActivityLeaks()
+                    .detectAll()
+                    .detectNonSdkApiUsage()
+                    .penaltyLog()
+                    .build())
+        }
 
         AppLog.setDebug(BuildConfig.DEBUG, "AppWatcher")
 
@@ -94,20 +103,6 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
             Crashlytics.log(priority, tag, msg)
         }
     }
-
-    private fun tryEnableMenuOnDeviceWithHardwareMenuButton() {
-        try {
-            val config = ViewConfiguration.get(this)
-            val menuKeyField: Field? = ViewConfiguration::class.java.getDeclaredField("sHasPermanentMenuKey")
-            if (menuKeyField != null) {
-                menuKeyField.isAccessible = true
-                menuKeyField.setBoolean(config, false)
-            }
-        } catch (ex: Exception) {
-            // Ignore
-        }
-    }
-
 }
 
 class LifecycleCallbacks : Application.ActivityLifecycleCallbacks {

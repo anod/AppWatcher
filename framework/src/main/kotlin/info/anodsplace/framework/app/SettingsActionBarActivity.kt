@@ -1,15 +1,15 @@
 package info.anodsplace.framework.app
 
 import android.os.Bundle
-import androidx.annotation.LayoutRes
-import androidx.annotation.StringRes
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import info.anodsplace.framework.view.MenuItemAnimation
+import androidx.annotation.LayoutRes
+import androidx.annotation.StringRes
 import info.anodsplace.framework.R
+import info.anodsplace.framework.view.MenuItemAnimation
 
 abstract class SettingsActionBarActivity : ToolbarActivity(), AdapterView.OnItemClickListener {
     private val listView: ListView by lazy { findViewById<View>(android.R.id.list) as ListView }
@@ -65,9 +65,11 @@ abstract class SettingsActionBarActivity : ToolbarActivity(), AdapterView.OnItem
             val view: View = convertView ?: LayoutInflater.from(parent.context).inflate(pref!!.layout, parent, false)
 
             val title = view.findViewById<View>(android.R.id.title) as TextView
-            title.setText(pref!!.title)
-
-            if (pref is Item) {
+            val titleText = parent.context.getString(pref!!.title)
+            title.setText(titleText)
+            if (pref is Category) {
+                title.contentDescription = "$titleText section"
+            } else if (pref is Item) {
                 val icon = view.findViewById<View>(android.R.id.icon)
                 if (icon != null) {
                     icon.visibility = View.GONE
@@ -101,9 +103,6 @@ abstract class SettingsActionBarActivity : ToolbarActivity(), AdapterView.OnItem
 
         override fun isEnabled(position: Int): Boolean {
             val pref = getItem(position)
-            if (pref is Category) {
-                return false
-            }
             if (pref is Item) {
                 return pref.enabled
             }
