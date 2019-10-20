@@ -15,6 +15,12 @@ import info.anodsplace.playstore.DeviceId
 import info.anodsplace.playstore.DeviceInfoProvider
 import info.anodsplace.playstore.Network
 import info.anodsplace.playstore.OnlineNetwork
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import java.io.Closeable
+import kotlin.coroutines.CoroutineContext
 
 /**
  * @author alex
@@ -56,4 +62,6 @@ class AppComponent internal constructor(private val app: AppWatcherApplication):
         get() = this
 
     val database: AppsDatabase by lazy { AppsDatabase.instance(app) }
+
+    val appScope: CoroutineScope by lazy { CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate) }
 }

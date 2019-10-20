@@ -1,11 +1,14 @@
 package com.anod.appwatcher.database
 
 import android.content.ContentValues
+import android.database.Cursor
 import android.provider.BaseColumns
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Query
 import com.anod.appwatcher.database.entities.AppChange
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * @author alex
@@ -18,6 +21,26 @@ interface ChangelogTable {
     @Query("SELECT * FROM $table WHERE ${Columns.appId} == :appId ORDER BY ${Columns.versionCode} DESC")
     fun ofApp(appId: String): LiveData<List<AppChange>>
 
+    @Query("SELECT * FROM $table ORDER BY ${Columns._ID} DESC")
+    fun all(): Cursor
+
+    @Query("SELECT * FROM $table " +
+            "WHERE ${Columns.versionCode} = (" +
+               "SELECT MAX(${Columns.versionCode}) FROM $table WHERE ${Columns.versionCode} < :versionCode AND ${Columns.appId} == :appId" +
+            ") LIMIT 1")
+    suspend fun findPrevious(versionCode: Int, appId: String): AppChange?
+
+    @Query("UPDATE $table SET ${Columns.noNewDetails} = 0")
+    suspend fun resetNoNewDetails(): Int
+
+    object Queries {
+
+        suspend fun all(table: ChangelogTable): AppChangeCursor = withContext(Dispatchers.IO) {
+            val cursor = table.all()
+            return@withContext AppChangeCursor(cursor)
+        }
+    }
+
 //    @Query("SELECT * FROM $table WHERE ${Columns.appId} == :appId AND ${Columns.versionCode} == :versionCode")
 //    fun forVersion(appId: String, versionCode: Int): AppChange?
 //
@@ -26,6 +49,7 @@ interface ChangelogTable {
 
     class Columns : BaseColumns {
         companion object {
+            const val _ID = BaseColumns._ID
             const val appId = "app_id"
             const val versionCode = "code"
             const val versionName = "name"
@@ -51,12 +75,11 @@ interface ChangelogTable {
 }
 
 val AppChange.contentValues: ContentValues
-    get() {
-        val values = ContentValues()
-        values.put(ChangelogTable.Columns.appId, appId)
-        values.put(ChangelogTable.Columns.versionCode, versionCode)
-        values.put(ChangelogTable.Columns.versionName, versionName)
-        values.put(ChangelogTable.Columns.details, details)
-        values.put(ChangelogTable.Columns.uploadDate, uploadDate)
-        return values
+    get() = ContentValues().apply {
+        put(ChangelogTable.Columns.appId, appId)
+        put(ChangelogTable.Columns.versionCode, versionCode)
+        put(ChangelogTable.Columns.versionName, versionName)
+        put(ChangelogTable.Columns.details, details)
+        put(ChangelogTable.Columns.uploadDate, uploadDate)
+        put(ChangelogTable.Columns.noNewDetails, noNewDetails)
     }

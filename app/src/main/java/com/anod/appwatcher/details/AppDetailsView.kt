@@ -27,6 +27,7 @@ class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase
     private val price: TextView? = view.findViewById<TextView?>(R.id.price)
     private val updateDate: TextView? = view.findViewById<TextView?>(R.id.update_date)
     private val recentChanges = view.findViewById<TextView?>(R.id.recent_changes)
+    private val newLineRegex = Regex("\n+")
 
     init {
         accentColor = resourceProvider.getColor(R.color.theme_accent)
@@ -60,6 +61,10 @@ class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase
             } else {
                 this.recentChanges?.alpha = if (noNewChanges) 0.4f else 1.0f
                 this.recentChanges?.text = Html.parse(changeDetails)
+                        .toString()
+                        .replace(newLineRegex, "\n")
+                        .removePrefix(app.versionName + "\n")
+                        .removePrefix(app.versionName + ":\n")
             }
             this.fillWatchAppView(app, recentFlag)
         }

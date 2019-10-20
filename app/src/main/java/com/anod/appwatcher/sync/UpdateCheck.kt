@@ -204,15 +204,17 @@ class UpdateCheck(private val context: ApplicationContext): PlayStoreEndpoint.Li
                 if (values.size() > 0) {
                     batch.add(values)
                 }
+                val isNewVersion = marketApp.appDetails.versionCode > localItem.app.versionNumber
                 val recentChanges = marketApp.appDetails.recentChangesHtml?.trim() ?: ""
-                val noNewChange = recentChanges == localItem.changeDetails
+                val noNewDetails = if (isNewVersion) recentChanges == (localItem.changeDetails?.trim() ?: "")
+                    else localItem.noNewDetails
                 changelog.add(AppChange(
                         docId,
                         marketApp.appDetails.versionCode,
                         marketApp.appDetails.versionString,
                         recentChanges,
                         marketApp.appDetails.uploadDate,
-                        noNewChange).contentValues)
+                        noNewDetails).contentValues)
             }
         }
 
