@@ -2,7 +2,6 @@
 -keepattributes SourceFile,LineNumberTable
 -keepattributes Signature
 -keepattributes *Annotation*
-
 -keep public class * extends java.lang.Exception
 
 ## Google Play Services 4.3.23 specific rules ##

@@ -25,7 +25,7 @@ android {
         applicationId = "com.anod.appwatcher"
         minSdkVersion(21)
         targetSdkVersion(29)
-        versionCode = 132
+        versionCode = 133
         versionName = "1.3"
         resValue("string", "content_authority", "com.anod.appwatcher")
 
@@ -67,6 +67,7 @@ android {
             isMinifyEnabled  = true
             isShrinkResources = true
             proguardFile(getDefaultProguardFile("proguard-android.txt"))
+            proguardFile("../proguard-project.txt")
             signingConfig = signingConfigs.getByName("release")
         }
     }
