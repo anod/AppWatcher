@@ -25,5 +25,4 @@ class UploadServiceContentObserver(val context: Context)
         AppLog.d("Schedule GDrive upload for $tables")
         UploadService.schedule(prefs.isWifiOnly, prefs.isRequiresCharging, context)
     }
-
 }

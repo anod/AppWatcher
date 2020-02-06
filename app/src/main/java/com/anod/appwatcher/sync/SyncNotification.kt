@@ -27,6 +27,7 @@ class SyncNotification(private val context: ApplicationContext) {
         internal const val gpsNotificationId = 2
         const val updatesChannelId = "versions_updates"
         const val pricesChannelId = "prices_change"
+        const val authenticationId = "authentication"
     }
 
     fun createChannels() {
@@ -40,7 +41,11 @@ class SyncNotification(private val context: ApplicationContext) {
         val prices = NotificationChannel(pricesChannelId, context.getString(R.string.channel_prices), NotificationManager.IMPORTANCE_DEFAULT)
         prices.description = context.getString(R.string.channel_prices_description)
         prices.setShowBadge(true)
-        context.notificationManager.createNotificationChannels(listOf(updates, prices))
+
+        val authentication = NotificationChannel(authenticationId, context.getString(R.string.channel_authentication), NotificationManager.IMPORTANCE_DEFAULT)
+        prices.description = context.getString(R.string.channel_authentication_description)
+        prices.setShowBadge(true)
+        context.notificationManager.createNotificationChannels(listOf(updates, prices, authentication))
     }
 
     fun show(updatedApps: List<UpdateCheck.UpdatedApp>) {

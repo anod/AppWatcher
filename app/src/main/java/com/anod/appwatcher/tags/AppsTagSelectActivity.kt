@@ -34,7 +34,7 @@ import kotlinx.coroutines.launch
  * @date 19/04/2016.
  */
 
-class AppsTagViewModel(application: android.app.Application): AndroidViewModel(application) {
+class AppsTagViewModel(application: android.app.Application) : AndroidViewModel(application) {
     private val context = ApplicationContext(getApplication<AppWatcherApplication>())
     val titleFilter = MutableLiveData("")
     var tag = MutableLiveData<Tag>()
@@ -46,7 +46,7 @@ class AppsTagViewModel(application: android.app.Application): AndroidViewModel(a
 
     val apps = titleFilter.switchMap { titleFilter ->
         val appsTable = database.apps()
-        AppListTable.Queries.loadAppList( Preferences.SORT_NAME_ASC,titleFilter, appsTable)
+        AppListTable.Queries.loadAppList(Preferences.SORT_NAME_ASC, titleFilter, appsTable)
     }
 
     val tags = tag.switchMap { database.appTags().forTag(it.id) }
@@ -62,7 +62,7 @@ class AppsTagViewModel(application: android.app.Application): AndroidViewModel(a
 class AppsTagSelectActivity : ToolbarActivity() {
 
     override val themeRes: Int
-        get() =  Theme(this).themeDialogNoActionBar
+        get() = Theme(this).themeDialogNoActionBar
     override val themeColors: CustomThemeColors
         get() = Theme(this).colors
 

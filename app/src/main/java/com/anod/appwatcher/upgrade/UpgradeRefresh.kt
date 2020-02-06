@@ -17,13 +17,12 @@ import info.anodsplace.framework.app.ApplicationContext
  * @author Alex Gavrishev
  * @date 02-Mar-18
  */
-class UpgradeRefresh(val prefs: Preferences,val activity: Activity) : UpgradeTask {
+class UpgradeRefresh(val prefs: Preferences, val activity: Activity) : UpgradeTask {
     override fun onUpgrade(upgrade: UpgradeCheck.Result) {
 
         val googleAccount = GoogleSignIn.getLastSignedInAccount(activity)
-        if (prefs.isDriveSyncEnabled && googleAccount == null) {
-            Toast.makeText(activity, activity.getString(R.string.refresh_gdrive_mesage), Toast.LENGTH_LONG).show()
-            GDriveSignIn(activity, object : GDriveSignIn.Listener {
+        if (prefs.isDriveSyncEnabled) {
+            val gDrive = GDriveSignIn(activity, object : GDriveSignIn.Listener {
                 override fun onGDriveLoginSuccess(googleSignInAccount: GoogleSignInAccount) {
                     requestRefresh()
                 }
@@ -34,7 +33,18 @@ class UpgradeRefresh(val prefs: Preferences,val activity: Activity) : UpgradeTas
                     GDriveSignIn.showResolutionNotification(
                             PendingIntent.getActivity(activity, 0, settingActivity, 0), ApplicationContext(activity))
                 }
-            }).signIn()
+            })
+            when {
+                googleAccount == null -> {
+                    Toast.makeText(activity, activity.getString(R.string.refresh_gdrive_mesage), Toast.LENGTH_LONG).show()
+                    gDrive.signIn()
+                }
+                googleAccount.account == null -> {
+                    Toast.makeText(activity, activity.getString(R.string.refresh_gdrive_mesage), Toast.LENGTH_LONG).show()
+                    gDrive.requestEmail(googleAccount)
+                }
+                else -> requestRefresh()
+            }
         } else {
             requestRefresh()
         }

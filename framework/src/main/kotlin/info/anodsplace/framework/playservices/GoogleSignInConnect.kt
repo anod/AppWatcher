@@ -16,10 +16,9 @@ import java.util.concurrent.ExecutionException
  */
 class GoogleSignInConnect(private val context: ApplicationContext, private val signInOptions: GoogleSignInOptions) {
 
-    constructor(context: Context, signInOptions: GoogleSignInOptions): this(ApplicationContext(context), signInOptions)
+    constructor(context: Context, signInOptions: GoogleSignInOptions) : this(ApplicationContext(context), signInOptions)
 
     private fun createGoogleApiSignInClient(): GoogleSignInClient {
-
         return GoogleSignIn.getClient(context.actual, signInOptions)
     }
 

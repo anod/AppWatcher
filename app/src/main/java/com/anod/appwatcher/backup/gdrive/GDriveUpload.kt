@@ -5,8 +5,6 @@ import com.anod.appwatcher.Application
 import com.anod.appwatcher.backup.DbJsonWriter
 import com.anod.appwatcher.database.AppsDatabase
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.drive.Drive
-import com.google.android.gms.tasks.Tasks
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -21,7 +19,7 @@ import kotlinx.coroutines.withContext
 class GDriveUpload(private val context: ApplicationContext, private val googleAccount: GoogleSignInAccount) {
 
     constructor(context: Context, googleAccount: GoogleSignInAccount)
-        : this(ApplicationContext(context), googleAccount)
+            : this(ApplicationContext(context), googleAccount)
 
     @Throws(Exception::class)
     suspend fun doUploadInBackground() {
@@ -37,24 +35,19 @@ class GDriveUpload(private val context: ApplicationContext, private val googleAc
 
     @Throws(Exception::class)
     private suspend fun doUploadLocked(db: AppsDatabase) = withContext(Dispatchers.IO) {
-        Tasks.await(Drive.getDriveClient(context.actual, googleAccount).requestSync())
+        val driveClient = DriveService(createCredentials(context.actual, googleAccount), "AppWatcher")
+        val file = DriveIdFile(AppListFile, driveClient, context.actual)
 
-        val driveClient = Drive.getDriveResourceClient(context.actual, googleAccount)
-        val file = DriveIdFile(AppListFile, driveClient)
-
-        if (file.driveId == null) {
+        if (file.getId() == null) {
             file.create()
         }
 
         file.write(DbJsonWriter(), db)
-
         AppLog.d("[GDrive] Clean locally deleted apps ")
         // Clean deleted
         val numRows = db.apps().cleanDeleted()
         db.appTags().clean()
         AppLog.d("[GDrive] Cleaned $numRows rows")
-
-        Tasks.await(Drive.getDriveClient(context.actual, googleAccount).requestSync())
     }
 
     companion object {

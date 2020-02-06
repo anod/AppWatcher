@@ -21,7 +21,6 @@ class GDrive(private val context: ApplicationContext, private val googleAccount:
     constructor(context: Context, googleAccount: GoogleSignInAccount, listener: Listener? = null)
             : this(ApplicationContext(context), googleAccount, listener)
 
-
     interface Listener {
         fun onGDriveSyncProgress()
         fun onGDriveSyncStart()
@@ -38,8 +37,7 @@ class GDrive(private val context: ApplicationContext, private val googleAccount:
                 listener?.onGDriveSyncFinish()
             } catch (e: Exception) {
                 AppLog.e(e)
-                Toast.makeText(context.actual, e.message
-                        ?: "Error", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context.actual, e.message ?: "Error", Toast.LENGTH_SHORT).show()
                 listener?.onGDriveError()
             }
         }

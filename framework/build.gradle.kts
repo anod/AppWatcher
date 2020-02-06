@@ -30,8 +30,8 @@ android {
 }
 
 dependencies {
-    implementation("androidx.recyclerview:recyclerview:1.1.0-beta05")
-    implementation("com.google.android.material:material:1.1.0-beta01")
+    implementation("androidx.recyclerview:recyclerview:1.2.0-alpha01")
+    implementation("com.google.android.material:material:1.2.0-alpha04")
     implementation("androidx.palette:palette:1.0.0")
     implementation("androidx.cardview:cardview:1.0.0")
 

@@ -30,7 +30,7 @@ build
 *.iml
 /captures
 
-google-services.json
+app/google-services.json
 /firebase-crashreporting.json
 /src/main/res/raw/third_party_license_metadata
 /src/main/res/raw/third_party_licenses

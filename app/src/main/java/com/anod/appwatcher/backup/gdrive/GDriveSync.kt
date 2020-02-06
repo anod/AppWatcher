@@ -7,21 +7,16 @@ import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppTagsTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.TagsTable
-import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.model.AppInfo
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.drive.Drive
-import com.google.android.gms.drive.DriveContents
-import com.google.android.gms.drive.DriveFile
-import com.google.android.gms.drive.DriveId
-import com.google.android.gms.tasks.Tasks
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import java.io.BufferedReader
-import java.io.InputStreamReader
 
 /**
  * @author alex
@@ -33,25 +28,20 @@ class GDriveSync(private val context: ApplicationContext, private val googleAcco
     suspend fun doSync() = withContext(Dispatchers.IO) {
         val db = Application.provide(context).database
         sLock.withLock {
-            try {
-                return@withContext doSyncLocked(db)
-            } catch (e: Exception) {
-                throw Exception(e)
-            }
+            return@withContext doSyncLocked(db)
         }
     }
 
-    private suspend fun doSyncLocked(db: AppsDatabase) {
-        Tasks.await(Drive.getDriveClient(context.actual, googleAccount).requestSync())
+    private suspend fun doSyncLocked(db: AppsDatabase) = withContext(Dispatchers.IO) {
 
-        val driveClient = Drive.getDriveResourceClient(context.actual, googleAccount)
+        val driveClient = DriveService(createCredentials(context.actual, googleAccount), "AppWatcher")
+        val file = DriveIdFile(AppListFile, driveClient, context.actual)
 
-        val file = DriveIdFile(AppListFile, driveClient)
+        val driveId = file.getId()
 
-        val driveId = file.driveId
         // There is as file exist, create driveFileReader
         if (driveId != null) {
-            insertRemoteItems(driveId, db)
+            insertRemoteItems(file, db)
         }
 
         if (driveId == null) {
@@ -67,27 +57,15 @@ class GDriveSync(private val context: ApplicationContext, private val googleAcco
         val numRows = db.apps().cleanDeleted()
         db.appTags().clean()
         AppLog.d("[GDrive] Cleaned $numRows rows")
-
-        Tasks.await(Drive.getDriveClient(context.actual, googleAccount).requestSync())
-    }
-
-    private fun getFileInputStream(contents: DriveContents): InputStreamReader {
-        val inputStream = contents.inputStream ?: throw Exception("Empty input stream ")
-        return InputStreamReader(inputStream, "UTF-8")
     }
 
     @Throws(Exception::class)
-    private suspend fun insertRemoteItems(driveId: DriveId, db: AppsDatabase) {
-        val file = driveId.asDriveFile()
-
-        val driveClient = Drive.getDriveResourceClient(context.actual, googleAccount)
-        val driveContents = Tasks.await(driveClient.openFile(file, DriveFile.MODE_READ_ONLY))
-        val driveFileReader = getFileInputStream(driveContents)
-
+    private suspend fun insertRemoteItems(file: DriveIdFile, db: AppsDatabase) = withContext(Dispatchers.IO) {
         AppLog.d("[GDrive] Sync remote list " + AppListFile.fileName)
+        val reader = file.read() ?: throw IllegalStateException("Cannot read file")
 
         // Add missing remote entries
-        val driveBufferedReader = BufferedReader(driveFileReader)
+        val driveBufferedReader = BufferedReader(reader)
         val jsonReader = DbJsonReader()
 
         val currentIds = db.apps().loadPackages(true).associate { it.packageName to it.rowId }
@@ -103,7 +81,9 @@ class GDriveSync(private val context: ApplicationContext, private val googleAcco
                     AppListTable.Queries.insert(app, db)
                 }
                 tags.forEach {
-                    if (tagApps[it] == null) { tagApps[it] = mutableListOf() }
+                    if (tagApps[it] == null) {
+                        tagApps[it] = mutableListOf()
+                    }
                     tagApps[it]!!.add(app.appId)
                 }
             }
@@ -113,9 +93,7 @@ class GDriveSync(private val context: ApplicationContext, private val googleAcco
             }
 
             override suspend fun onFinish() {
-                driveFileReader.close()
-                driveClient.discardContents(driveContents)
-
+                reader.close()
                 // Add missing tags
                 tagList.forEach { tag ->
                     if (!currentTags.containsKey(tag.name)) {
@@ -141,5 +119,4 @@ class GDriveSync(private val context: ApplicationContext, private val googleAcco
          */
         private val sLock = Mutex()
     }
-
 }

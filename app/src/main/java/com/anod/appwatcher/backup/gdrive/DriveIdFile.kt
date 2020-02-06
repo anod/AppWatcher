@@ -1,110 +1,98 @@
 package com.anod.appwatcher.backup.gdrive
 
+import android.content.Context
 import com.anod.appwatcher.backup.DbJsonWriter
 import com.anod.appwatcher.database.AppsDatabase
-import com.google.android.gms.drive.DriveFile
-import com.google.android.gms.drive.DriveId
-import com.google.android.gms.drive.DriveResourceClient
-import com.google.android.gms.drive.MetadataChangeSet
-import com.google.android.gms.drive.query.*
-import com.google.android.gms.tasks.Tasks
 import info.anodsplace.framework.AppLog
-import java.io.BufferedWriter
-import java.io.IOException
-import java.io.OutputStreamWriter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.*
 
 /**
  * @author Alex Gavrishev
  * @date 26/06/2017
  */
-class DriveIdFile(private val file: FileDescription, private val driveClient: DriveResourceClient) {
+class DriveIdFile(
+        private val file: FileDescription,
+        private val driveClient: DriveService,
+        private val tempDir: File) {
+
+    constructor(file: FileDescription, driveClient: DriveService, context: Context)
+            : this(file, driveClient, context.cacheDir)
 
     interface FileDescription {
         val fileName: String
         val mimeType: String
     }
 
-    private var _driveId: DriveId? = null
-    val driveId: DriveId?
-        get() {
-            if (_driveId == null) {
-                _driveId = retrieve()
-            }
-            return _driveId
+    private var driveId: String? = null
+
+    suspend fun getId(): String? = withContext(Dispatchers.Main) {
+        if (driveId != null) {
+            return@withContext driveId
         }
 
-    private fun retrieve(): DriveId? {
-
-        val order = SortOrder.Builder()
-                .addSortDescending(SortableField.QUOTA_USED)
-                .build()
-
-        val query = Query.Builder()
-                .addFilter(Filters.and(
-                        Filters.eq(SearchableField.MIME_TYPE, file.mimeType),
-                        Filters.eq(SearchableField.TITLE, file.fileName)
-                ))
-                .setSortOrder(order)
-                .build()
-
-
-        val appFolder = Tasks.await(driveClient.appFolder)
-        val metadataBuffer = Tasks.await(driveClient.queryChildren(appFolder, query))
-        return if (metadataBuffer.count == 0) {
+        val list = driveClient.queryAppDataFiles(
+                orderBy = "quotaBytesUsed desc",
+                mimeType = file.mimeType,
+                name = file.fileName,
+                space = AppData
+        )
+        if (list.isEmpty()) {
             AppLog.d("[GDrive] File NOT found " + file.fileName)
-            null
-        } else {
-            val metadata = metadataBuffer.get(0)
-            AppLog.d("[GDrive] File found " + file.fileName)
-            metadata.driveId
+            return@withContext null
         }
-
+        driveId = list.files[0].id
+        return@withContext driveId
     }
 
-    fun create() {
-        val appFolder = Tasks.await(driveClient.appFolder)
-        val driveContents = Tasks.await(driveClient.createContents())
+    suspend fun create() = withContext(Dispatchers.Main) {
         AppLog.d("[GDrive] Create new file ")
 
-        val changeSet = MetadataChangeSet.Builder()
-                .setTitle(file.fileName)
-                .setMimeType(file.mimeType)
-                .build()
-
-        val driveFile = Tasks.await(driveClient.createFile(appFolder, changeSet, driveContents))
-        _driveId = driveFile.driveId
+        driveId = driveClient.createFile(
+                name = file.fileName,
+                mimeType = file.mimeType,
+                space = AppData)
     }
 
-    internal suspend fun write(writer: DbJsonWriter, db: AppsDatabase) {
+    suspend fun write(writer: DbJsonWriter, db: AppsDatabase) = withContext(Dispatchers.IO) {
+        val driveId = withContext(Dispatchers.Main) {
+            if (driveId == null) {
+                AppLog.e("[GDrive] Drive Id is not initialized")
+            }
+            driveId
+        } ?: return@withContext
 
-        if (this._driveId == null)
-        {
-            AppLog.e("[GDrive] Drive Id is not initialized")
-        }
-
-        val driveId = this._driveId ?: return
-
-        AppLog.d("[GDrive] Write full list to remote ")
-
-        val target = driveId.asDriveFile()
-
-        val driveContents = Tasks.await(driveClient.openFile(target, DriveFile.MODE_WRITE_ONLY))
-
-        val outputStream = driveContents.outputStream
-        val outWriter = BufferedWriter(OutputStreamWriter(outputStream))
         try {
-            writer.write(outWriter, db)
+            AppLog.d("[GDrive] Write full list to temp ")
+            val tempFile = File.createTempFile(file.fileName, ".json", tempDir)
+            val file = FileWriter(tempFile)
+            writer.write(file, db)
+            val inputStream = BufferedInputStream(FileInputStream(tempFile))
+            AppLog.d("[GDrive] Write temp to remote")
+            driveClient.saveFile(driveId, "application/json", inputStream)
         } catch (e: IOException) {
             AppLog.e(e)
-        } finally {
-            try {
-                outputStream.close()
-            } catch (e: IOException) {
-                AppLog.e(e)
-            }
-
         }
+    }
 
-        Tasks.await(driveClient.commitContents(driveContents, null))
+    suspend fun read(): Reader? = withContext(Dispatchers.IO) {
+        val driveId = withContext(Dispatchers.Main) {
+            if (driveId == null) {
+                AppLog.e("[GDrive] Drive Id is not initialized")
+            }
+            driveId
+        } ?: return@withContext null
+
+        try {
+            val tempFile = File.createTempFile(file.fileName, ".json", tempDir)
+            AppLog.d("[GDrive] Read into temp $tempFile")
+            val fileStream = FileOutputStream(tempFile)
+            driveClient.readFile(driveId, fileStream)
+            return@withContext FileReader(tempFile)
+        } catch (e: IOException) {
+            AppLog.e(e)
+        }
+        return@withContext null
     }
 }

@@ -3,11 +3,10 @@ package com.anod.appwatcher.backup
 import android.content.ContentResolver
 import android.net.Uri
 import android.os.Environment
+import androidx.core.net.toFile
 import info.anodsplace.framework.app.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-
-import java.io.File
 
 class ExportTask(private val context: ApplicationContext) {
 
@@ -27,9 +26,9 @@ class ExportTask(private val context: ApplicationContext) {
             return DbBackupManager.ERROR_STORAGE_NOT_AVAILABLE
         }
 
-        val destFile = File(destUri.path!!)
+        val destFile = destUri.toFile()
         if (destFile.parentFile?.exists() == false) {
-            destFile.parentFile?.mkdirs()
+            destFile.parentFile!!.mkdirs()
         }
 
         return DbBackupManager.RESULT_OK

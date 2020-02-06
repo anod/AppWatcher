@@ -53,14 +53,7 @@ class TagsListFragment : Fragment(), View.OnClickListener {
         list.adapter = TagAdapter(context!!, this)
         list.addItemDecoration(DividerItemDecoration(context!!, DividerItemDecoration.HORIZONTAL))
 
-        viewModel.tagsAppItems.observe(this, Observer {
-            if (it.isEmpty()) {
-                emptyView.isVisible = true
-                list.isVisible = false
-            } else {
-                emptyView.isVisible = false
-                list.isVisible = true
-            }
+        viewModel.tagsAppItems.observe(viewLifecycleOwner, Observer {
             (list.adapter as TagAdapter).update(it)
         })
     }

@@ -5,13 +5,11 @@ import android.content.Context
 import android.net.Uri
 import android.os.Environment
 import android.widget.Toast
-
+import androidx.core.net.toFile
 import com.anod.appwatcher.R
 import info.anodsplace.framework.app.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-
-import java.io.File
 
 class ImportTask(private val context: ApplicationContext) {
 
@@ -30,7 +28,7 @@ class ImportTask(private val context: ApplicationContext) {
             return DbBackupManager.ERROR_STORAGE_NOT_AVAILABLE
         }
 
-        val dataFile = File(destUri.path!!)
+        val dataFile = destUri.toFile()
         if (!dataFile.exists()) {
             return DbBackupManager.ERROR_FILE_NOT_EXIST
         }

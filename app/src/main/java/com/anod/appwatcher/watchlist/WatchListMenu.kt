@@ -20,7 +20,7 @@ import info.anodsplace.framework.view.MenuItemAnimation
  * @author Alex Gavrishev
  * @date 03/12/2017
  */
-class WatchListMenu(private var searchListener: SearchView.OnQueryTextListener, private var activity: WatchListActivity): SearchView.OnQueryTextListener {
+class WatchListMenu(private var searchListener: SearchView.OnQueryTextListener, private var activity: WatchListActivity) : SearchView.OnQueryTextListener {
     var expandSearch = false
     var searchQuery = ""
         set(value) {

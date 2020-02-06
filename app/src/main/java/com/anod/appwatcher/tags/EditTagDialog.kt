@@ -1,12 +1,12 @@
 package com.anod.appwatcher.tags
 
 import android.os.Bundle
-import androidx.fragment.app.DialogFragment
-import androidx.core.content.res.ResourcesCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import androidx.core.content.res.ResourcesCompat
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.Tag

@@ -34,7 +34,7 @@ import info.anodsplace.framework.app.ToolbarActivity
  * @author Alex Gavrishev
  * @date 01/12/2017
  */
-abstract class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.SelectionListener  {
+abstract class DrawerActivity : ToolbarActivity(), AccountSelectionDialog.SelectionListener {
 
     override val themeRes: Int
         get() = Theme(this).theme
@@ -66,7 +66,7 @@ abstract class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.Selecti
         setupDrawer()
 
         val account = Application.provide(this).prefs.account
-        if (account== null) {
+        if (account == null) {
             accountSelectionDialog.show()
         } else {
             onAccountSelected(account)
@@ -195,7 +195,7 @@ abstract class DrawerActivity: ToolbarActivity(), AccountSelectionDialog.Selecti
         super.onActivityResult(requestCode, resultCode, data)
         accountSelectionDialog.onActivityResult(requestCode, resultCode, data)
     }
-
+    
     override fun onAccountSelected(account: Account) {
         drawerViewModel.account.value = account
         val collectReports = provide.prefs.collectCrashReports

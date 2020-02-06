@@ -6,12 +6,15 @@ import android.app.UiModeManager.*
 import android.content.Intent
 import android.net.Uri
 import android.os.Environment
-import androidx.appcompat.app.AppCompatDelegate
 import android.text.format.DateUtils
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.observe
-import com.anod.appwatcher.*
+import com.anod.appwatcher.AppWatcherActivity
+import com.anod.appwatcher.Application
+import com.anod.appwatcher.BuildConfig
+import com.anod.appwatcher.R
 import com.anod.appwatcher.backup.DbBackupManager
 import com.anod.appwatcher.backup.ImportTask
 import com.anod.appwatcher.backup.gdrive.GDrive
@@ -21,8 +24,6 @@ import com.anod.appwatcher.preferences.Preferences.Companion.THEME_BLACK
 import com.anod.appwatcher.preferences.Preferences.Companion.THEME_DEFAULT
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.userLog.UserLogActivity
-import info.anodsplace.framework.app.DialogItems
-import info.anodsplace.framework.app.DialogSingleChoice
 import com.anod.appwatcher.utils.Theme
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -30,6 +31,8 @@ import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.jakewharton.processphoenix.ProcessPhoenix
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
+import info.anodsplace.framework.app.DialogItems
+import info.anodsplace.framework.app.DialogSingleChoice
 import info.anodsplace.framework.app.SettingsActionBarActivity
 import info.anodsplace.framework.content.startActivityForResultSafely
 import info.anodsplace.framework.playservices.GooglePlayServices
@@ -43,7 +46,7 @@ import java.util.*
 open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDriveSignIn.Listener {
 
     override val themeRes: Int
-        get() =  Theme(this).theme
+        get() = Theme(this).theme
     override val themeColors: CustomThemeColors
         get() = Theme(this).colors
 
@@ -209,10 +212,10 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
                 }
             }
             ACTION_IMPORT -> startActivityForResultSafely(Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                    addCategory(Intent.CATEGORY_OPENABLE)
-                    type = "*/*"
-                    putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("application/json", "text/plain", "*/*"))
-                }, REQUEST_BACKUP_FILE)
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "*/*"
+                putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("application/json", "text/plain", "*/*"))
+            }, REQUEST_BACKUP_FILE)
             ACTION_LICENSES -> startActivity(Intent(this, OssLicensesMenuActivity::class.java))
             ACTION_SYNC_ENABLE -> {
                 syncNowItem.enabled = false // disable temporary sync now

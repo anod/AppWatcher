@@ -72,7 +72,7 @@ class WishlistFragment : Fragment(), PlayStoreEndpoint.Listener {
             startLoadingList(account, authToken, context!!)
         }
 
-        viewModel.appStatusChange.observe(this, Observer {
+        viewModel.appStatusChange.observe(viewLifecycleOwner, Observer {
             val newStatus = it.first
             if (newStatus == AppInfoMetadata.STATUS_NORMAL) {
                 TagSnackbar.make(activity!!, it.second!!, false).show()
@@ -80,7 +80,7 @@ class WishlistFragment : Fragment(), PlayStoreEndpoint.Listener {
             }
         })
 
-        viewModel.packages.observe(this, Observer {
+        viewModel.packages.observe(viewLifecycleOwner, Observer {
             list.adapter?.notifyDataSetChanged()
         })
     }
@@ -137,7 +137,7 @@ class WishlistFragment : Fragment(), PlayStoreEndpoint.Listener {
         const val EXTRA_ACCOUNT = "extra_account"
         const val EXTRA_AUTH_TOKEN = "extra_auth_token"
 
-        private class Factory: FragmentFactory("wishlist") {
+        private class Factory : FragmentFactory("wishlist") {
             override fun create() = WishlistFragment()
         }
 

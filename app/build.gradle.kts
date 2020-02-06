@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.config.KotlinCompilerVersion
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
 
 plugins {
     id("com.android.application")
@@ -86,32 +85,47 @@ android {
     }
 
     kotlinOptions {
-        (this as KotlinJvmOptions).let {
-            it.jvmTarget = "1.8"
-        }
+        jvmTarget = "1.8"
     }
 
     androidExtensions {
         isExperimental = true
     }
+
+    packagingOptions {
+        exclude("META-INF/DEPENDENCIES")
+        exclude("META-INF/LICENSE*")
+        exclude("META-INF/license*")
+        exclude("META-INF/NOTICE*")
+        exclude("META-INF/notice*")
+        exclude("META-INF/ASL2.0")
+        exclude("META-INF/*.kotlin_module")
+    }
 }
 
 dependencies {
     // AndroidX
-    implementation("androidx.recyclerview:recyclerview:1.1.0-beta05")
+    implementation("androidx.recyclerview:recyclerview:1.1.0")
     implementation("androidx.palette:palette:1.0.0")
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("androidx.constraintlayout:constraintlayout:2.0.0-beta4")
     implementation("androidx.work:work-runtime:2.3.0")
-    implementation("androidx.legacy:legacy-support-v4:1.0.0")
+    implementation("androidx.core:core:1.2.0-rc01")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.0.0")
 
     // Google
-    implementation("com.google.android.material:material:1.1.0-beta01")
-    implementation("com.google.android.gms:play-services-drive:17.0.0")
+    implementation("com.google.android.material:material:1.2.0-alpha04")
     implementation("com.google.android.gms:play-services-oss-licenses:17.0.0")
     implementation("com.google.android.gms:play-services-identity:17.0.0")
     implementation("com.google.android.gms:play-services-auth:17.0.0")
     implementation("com.google.firebase:firebase-core:17.2.2")
+
+    implementation("com.google.apis:google-api-services-drive:v3-rev20191108-1.30.3") {
+        exclude(group = "org.apache.httpcomponents")
+    }
+
+    implementation("com.google.api-client:google-api-client:1.30.8")
+    implementation("com.google.api-client:google-api-client-android:1.30.8")
 
     // 3rd party
     implementation("com.crashlytics.sdk.android:crashlytics:2.10.1")
@@ -128,6 +142,13 @@ dependencies {
 
     // KTX
     implementation("androidx.core:core-ktx:1.2.0-beta01")
+    implementation("androidx.work:work-runtime-ktx:2.2.0")
+    implementation("androidx.fragment:fragment-ktx:1.2.0-beta02")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0-beta01")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.2.0-beta01")
+    implementation("androidx.room:room-ktx:2.2.0")
+    implementation("androidx.core:core-ktx:1.2.0-beta01")
+    implementation("androidx.core:core-ktx:1.2.0-rc01")
     implementation("androidx.work:work-runtime-ktx:2.3.0")
     implementation("androidx.fragment:fragment-ktx:1.2.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0")
