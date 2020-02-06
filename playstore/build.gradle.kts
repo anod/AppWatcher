@@ -50,7 +50,7 @@ dependencies {
     implementation("androidx.collection:collection-ktx:1.1.0")
     api(group = "com.google.protobuf.nano", name = "protobuf-javanano", version = "3.2.0rc2")
     api("com.android.volley:volley:1.1.0")
-    implementation("com.squareup.okhttp3:okhttp:4.2.2")
+    implementation("com.squareup.okhttp3:okhttp:4.3.1")
 
     implementation(project(":framework"))
     implementation(kotlin("stdlib-jdk7", KotlinCompilerVersion.VERSION))
