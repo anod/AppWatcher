@@ -7,8 +7,7 @@ abstract class ContainerList<T> constructor(
         url: String,
         autoLoadNextPage: Boolean,
         private val filter: FilterPredicate?
-    ) : PaginatedList<T, Document>(url, autoLoadNextPage) {
-
+) : PaginatedList<T, Document>(url, autoLoadNextPage) {
 
     override fun getItemsFromResponse(wrapper: Messages.Response.ResponseWrapper): Array<Document> {
         val payload = payload(wrapper)

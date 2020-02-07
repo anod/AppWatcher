@@ -3,25 +3,20 @@ package com.anod.appwatcher.wishlist
 import android.accounts.Account
 import android.content.Context
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.Toast
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.android.volley.VolleyError
-import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.tags.TagSnackbar
-import finsky.api.model.DfeModel
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.FragmentFactory
 import info.anodsplace.framework.app.FragmentToolbarActivity
-import info.anodsplace.playstore.PlayStoreEndpoint
-import info.anodsplace.playstore.WishlistEndpoint
+import info.anodsplace.framework.view.Keyboard
 import kotlinx.android.synthetic.main.fragment_wishlist.*
 
 /**
@@ -29,31 +24,45 @@ import kotlinx.android.synthetic.main.fragment_wishlist.*
  * *
  * @date 16/12/2016.
  */
-class WishlistFragment : Fragment(), PlayStoreEndpoint.Listener {
+class WishListFragment : Fragment() {
 
-    private var endpoint: WishlistEndpoint? = null
+    private val viewModel: WishListViewModel by viewModels()
+    lateinit var searchView: SearchView
+    private lateinit var adapter: WishListAdapter
 
-    private val viewModel: WishlistViewModel by viewModels()
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        endpoint?.listener = this
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-        endpoint?.listener = null
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_wishlist, container, false)
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.searchbox, menu)
+        val searchItem = menu.findItem(R.id.menu_search)
+        searchView = searchItem.actionView as SearchView
+
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                viewModel.filter(query)
+                Keyboard.hide(searchView, requireContext())
+                return false
+            }
+
+            override fun onQueryTextChange(query: String): Boolean {
+                return false
+            }
+        })
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         list.layoutManager = LinearLayoutManager(context)
-        retryButton.setOnClickListener { endpoint?.startAsync() }
+        retryButton.setOnClickListener { viewModel.retry() }
 
         list.visibility = View.GONE
         empty.visibility = View.GONE
@@ -68,8 +77,11 @@ class WishlistFragment : Fragment(), PlayStoreEndpoint.Listener {
         if (account == null || authToken.isEmpty() || context == null) {
             Toast.makeText(context, R.string.choose_an_account, Toast.LENGTH_SHORT).show()
             activity!!.finish()
+            return
         } else {
-            startLoadingList(account, authToken, context!!)
+            viewModel.init(account, authToken)
+            this.adapter = WishListAdapter(requireContext(), viewModel)
+            list.adapter = this.adapter
         }
 
         viewModel.appStatusChange.observe(viewLifecycleOwner, Observer {
@@ -83,18 +95,24 @@ class WishlistFragment : Fragment(), PlayStoreEndpoint.Listener {
         viewModel.packages.observe(viewLifecycleOwner, Observer {
             list.adapter?.notifyDataSetChanged()
         })
-    }
 
-    private fun startLoadingList(account: Account, authSubToken: String, context: Context) {
-        val endpoint = WishlistEndpoint(context, Application.provide(context).requestQueue, Application.provide(context).deviceInfo, account, true)
-        endpoint.authToken = authSubToken
-        endpoint.listener = this
+        viewModel.listData.observe(viewLifecycleOwner, Observer {
+            adapter.listData = it
+            if (it.count == 0) {
+                showNoResults()
+            } else {
+                showListView()
+            }
+        })
 
-        val adapter = ResultsAdapterWishList(context, endpoint, viewModel)
-        list.adapter = adapter
-
-        this.endpoint = endpoint
-        endpoint.startAsync()
+        viewModel.loading.observe(viewLifecycleOwner, Observer { isError ->
+            if (isError) {
+                loading.visibility = View.GONE
+                showRetryButton()
+            } else {
+                loading.visibility = View.VISIBLE
+            }
+        })
     }
 
     private fun showRetryButton() {
@@ -119,26 +137,12 @@ class WishlistFragment : Fragment(), PlayStoreEndpoint.Listener {
         empty.visibility = View.VISIBLE
     }
 
-    override fun onDataChanged(data: DfeModel) {
-        if (endpoint!!.count == 0) {
-            showNoResults()
-        } else {
-            showListView()
-            list.adapter!!.notifyDataSetChanged()
-        }
-    }
-
-    override fun onErrorResponse(error: VolleyError) {
-        loading.visibility = View.GONE
-        showRetryButton()
-    }
-
     companion object {
         const val EXTRA_ACCOUNT = "extra_account"
         const val EXTRA_AUTH_TOKEN = "extra_auth_token"
 
         private class Factory : FragmentFactory("wishlist") {
-            override fun create() = WishlistFragment()
+            override fun create() = WishListFragment()
         }
 
         fun intent(context: Context, themeRes: Int, themeColors: CustomThemeColors, account: Account?, authToken: String?) = FragmentToolbarActivity.intent(

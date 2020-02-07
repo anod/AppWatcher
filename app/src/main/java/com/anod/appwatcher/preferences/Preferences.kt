@@ -103,6 +103,10 @@ class Preferences(context: Context) : DeviceIdStorage {
         get() = preferences.getBoolean("notify-installed", true)
         set(notify) = preferences.edit().putBoolean("notify-installed", notify).apply()
 
+    var isNotifyNoChanges: Boolean
+        get() = preferences.getBoolean("notify-no-changes", true)
+        set(notify) = preferences.edit().putBoolean("notify-no-changes", notify).apply()
+
     var showRecent: Boolean
         get() = preferences.getBoolean("show-recent", false)
         set(value) = preferences.edit().putBoolean("show-recent", value).apply()
@@ -138,7 +142,9 @@ class Preferences(context: Context) : DeviceIdStorage {
     var collectCrashReports: Boolean
         get() = preferences.getBoolean("crash-reports", true)
         @SuppressLint("ApplySharedPref")
-        set(value) { preferences.edit().putBoolean("crash-reports", value).commit() }
+        set(value) {
+            preferences.edit().putBoolean("crash-reports", value).commit()
+        }
 
     var iconShape: String
         get() = preferences.getString("adaptive-icon-shape", AdaptiveIconTransformation.getSystemDefaultMask())!!

@@ -34,7 +34,7 @@ class SyncScheduler(private val context: ApplicationContext) {
                         .setConstraints(constraints)
                         .build()
 
-        AppLog.i("Schedule sync in ${windowStartSec/3600} hours")
+        AppLog.i("Schedule sync in ${windowStartSec / 3600} hours")
         WorkManager.getInstance(context.actual).enqueueUniquePeriodicWork(tag, ExistingPeriodicWorkPolicy.KEEP, request)
     }
 
@@ -52,10 +52,12 @@ class SyncScheduler(private val context: ApplicationContext) {
                 .setConstraints(constraints)
                 .build()
 
+        AppLog.i("Enqueue update check")
         WorkManager.getInstance(context.actual).enqueue(request)
     }
 
     fun cancel() {
+        AppLog.i("Cancel scheduled sync")
         WorkManager.getInstance(context.actual).cancelUniqueWork(tag)
     }
 

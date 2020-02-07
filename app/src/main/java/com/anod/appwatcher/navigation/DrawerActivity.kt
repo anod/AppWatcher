@@ -24,7 +24,7 @@ import com.anod.appwatcher.installed.ImportInstalledFragment
 import com.anod.appwatcher.tags.AppsTagActivity
 import com.anod.appwatcher.utils.Hash
 import com.anod.appwatcher.utils.Theme
-import com.anod.appwatcher.wishlist.WishlistFragment
+import com.anod.appwatcher.wishlist.WishListFragment
 import com.crashlytics.android.Crashlytics
 import com.google.android.material.navigation.NavigationView
 import info.anodsplace.framework.AppLog
@@ -171,7 +171,7 @@ abstract class DrawerActivity : ToolbarActivity(), AccountSelectionDialog.Select
             }
             R.id.menu_wishlist -> {
                 val account = Application.provide(this).prefs.account
-                startActivity(WishlistFragment.intent(
+                startActivity(WishListFragment.intent(
                         this,
                         themeRes, themeColors,
                         account, authToken))
@@ -195,7 +195,7 @@ abstract class DrawerActivity : ToolbarActivity(), AccountSelectionDialog.Select
         super.onActivityResult(requestCode, resultCode, data)
         accountSelectionDialog.onActivityResult(requestCode, resultCode, data)
     }
-    
+
     override fun onAccountSelected(account: Account) {
         drawerViewModel.account.value = account
         val collectReports = provide.prefs.collectCrashReports

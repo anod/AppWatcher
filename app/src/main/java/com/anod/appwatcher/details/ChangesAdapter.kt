@@ -1,24 +1,22 @@
 package com.anod.appwatcher.details
 
 import android.content.Context
-import androidx.recyclerview.widget.RecyclerView
 import android.text.util.Linkify
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.AppChange
 import info.anodsplace.framework.text.Html
 
 class ChangeView(itemView: View) : RecyclerView.ViewHolder(itemView) {
-    val changelog: TextView by lazy {
-        val view = itemView.findViewById<TextView>(R.id.changelog)
-        view.autoLinkMask = Linkify.ALL
-        view
+    val changelog: TextView = itemView.findViewById<TextView>(R.id.changelog).apply {
+        autoLinkMask = Linkify.ALL
     }
-    val version: TextView by lazy { itemView.findViewById<TextView>(R.id.version) }
-    val uploadDate: TextView  by lazy { itemView.findViewById<TextView>(R.id.upload_date) }
+    val version: TextView = itemView.findViewById(R.id.version)
+    val uploadDate: TextView = itemView.findViewById(R.id.upload_date)
 
     fun bindView(change: AppChange) {
         version.text = "${change.versionName} (${change.versionCode})"
@@ -31,13 +29,14 @@ class ChangeView(itemView: View) : RecyclerView.ViewHolder(itemView) {
     }
 }
 
-class ChangesAdapter(private val context: Context): RecyclerView.Adapter<ChangeView>()  {
+class ChangesAdapter(private val context: Context) : RecyclerView.Adapter<ChangeView>() {
 
     private var localChanges = emptyList<AppChange>()
 
-    override fun getItemCount(): Int {
-        return localChanges.size
-    }
+    val isEmpty: Boolean
+        get() = itemCount == 0
+
+    override fun getItemCount() = localChanges.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChangeView {
         val v = LayoutInflater.from(context).inflate(R.layout.list_item_change, parent, false)
@@ -47,9 +46,6 @@ class ChangesAdapter(private val context: Context): RecyclerView.Adapter<ChangeV
     override fun onBindViewHolder(holder: ChangeView, position: Int) {
         holder.bindView(localChanges[position])
     }
-
-    val isEmpty: Boolean
-        get() = itemCount == 0
 
     fun setData(localChanges: List<AppChange>, recentChange: AppChange) {
         when {

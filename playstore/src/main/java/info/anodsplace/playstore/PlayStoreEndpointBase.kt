@@ -30,12 +30,10 @@ abstract class PlayStoreEndpointBase(
         private val requestQueue: RequestQueue,
         private val deviceInfoProvider: DeviceInfoProvider,
         private val account: Account) : PlayStoreEndpoint, Response.ErrorListener, OnDataChangedListener {
+
     protected val context: Context = context.applicationContext
-
     override var authToken = ""
-
     override var listener: PlayStoreEndpoint.Listener? = null
-
     var data: DfeModel? = null
         internal set
     val dfeApi: DfeApi by lazy {

@@ -18,16 +18,15 @@ import finsky.api.model.DfeModel
 import finsky.api.model.Document
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
-import info.anodsplace.framework.livedata.OneTimeObserver
 import info.anodsplace.playstore.DetailsEndpoint
 import info.anodsplace.playstore.PlayStoreEndpoint
 import kotlinx.coroutines.launch
 
-typealias TagMenuItem = Pair<Tag,Boolean>
+typealias TagMenuItem = Pair<Tag, Boolean>
 
 sealed class ChangelogLoadState
 object LocalComplete : ChangelogLoadState()
-class RemoteComplete(val error: Boolean): ChangelogLoadState()
+class RemoteComplete(val error: Boolean) : ChangelogLoadState()
 object Complete : ChangelogLoadState()
 
 class DetailsViewModel(application: android.app.Application) : AndroidViewModel(application), PlayStoreEndpoint.Listener {
@@ -59,7 +58,7 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
     }
     var authToken = ""
     var localChangelog: List<AppChange> = emptyList()
-    val tagsMenuItems: LiveData<List<TagMenuItem>> = appId.switchMap tagsMenu@ { appId ->
+    val tagsMenuItems: LiveData<List<TagMenuItem>> = appId.switchMap tagsMenu@{ appId ->
         if (appId.isEmpty()) {
             return@tagsMenu MutableLiveData(emptyList<TagMenuItem>())
         }
@@ -109,11 +108,10 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
             this.updateChangelogState(LocalComplete)
             return
         }
-        val changes = database.changelog().ofApp(appId.value!!)
-        changes.observeForever(OneTimeObserver(changes, Observer {
-            this.localChangelog = it ?: emptyList()
-            this.updateChangelogState(LocalComplete)
-        }))
+        viewModelScope.launch {
+            localChangelog = database.changelog().ofApp(appId.value!!)
+            updateChangelogState(LocalComplete)
+        }
     }
 
     fun loadRemoteChangelog() {
@@ -160,7 +158,7 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
         this.updateChangelogState(RemoteComplete(true))
     }
 
-    fun changeTag(tagId: Int, checked: Boolean)  {
+    fun changeTag(tagId: Int, checked: Boolean) {
         viewModelScope.launch {
             if (checked) {
                 provide.database.appTags().delete(tagId, appId.value!!) > 0

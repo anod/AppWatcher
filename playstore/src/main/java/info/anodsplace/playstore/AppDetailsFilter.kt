@@ -13,3 +13,9 @@ internal object AppDetailsFilter {
         it?.appDetails?.packageName?.isNotEmpty() ?: false
     }
 }
+
+class AppNameFilter(private val query: String) {
+    val predicate: FilterPredicate = {
+        it?.title?.contains(query, true) ?: false
+    }
+}

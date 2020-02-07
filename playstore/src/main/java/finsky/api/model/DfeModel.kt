@@ -3,8 +3,7 @@ package finsky.api.model
 import com.android.volley.Response
 import com.android.volley.VolleyError
 import finsky.protos.nano.Messages
-
-import java.util.HashSet
+import java.util.*
 
 interface OnDataChangedListener {
     fun onDataChanged()
@@ -12,10 +11,22 @@ interface OnDataChangedListener {
 
 typealias FilterPredicate = ((Document?) -> Boolean)
 
-abstract class DfeRequestModel: DfeModel() {
+class FilterComposite(private val predicates: List<FilterPredicate>) {
+    val predicate: FilterPredicate = ret@{ doc ->
+        for (p in predicates) {
+            if (!p(doc)) {
+                return@ret false
+            }
+        }
+        return@ret true
+    }
+}
+
+abstract class DfeRequestModel : DfeModel() {
     open fun execute() {
         execute(this, this)
     }
+
     abstract fun execute(responseListener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener)
 }
 

@@ -95,7 +95,6 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
             }, 500)
         }
 
-
         if (viewModel.appId.value!!.isEmpty()) {
             Toast.makeText(this, getString(R.string.cannot_load_app, viewModel.appId), Toast.LENGTH_LONG).show()
             AppLog.e("Cannot loadChangelog app details: '${viewModel.appId}'")

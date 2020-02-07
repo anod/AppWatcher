@@ -3,7 +3,6 @@ package com.anod.appwatcher.database
 import android.content.ContentValues
 import android.database.Cursor
 import android.provider.BaseColumns
-import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Query
 import com.anod.appwatcher.database.entities.AppChange
@@ -19,14 +18,14 @@ import kotlinx.coroutines.withContext
 interface ChangelogTable {
 
     @Query("SELECT * FROM $table WHERE ${Columns.appId} == :appId ORDER BY ${Columns.versionCode} DESC")
-    fun ofApp(appId: String): LiveData<List<AppChange>>
+    suspend fun ofApp(appId: String): List<AppChange>
 
     @Query("SELECT * FROM $table ORDER BY ${Columns._ID} DESC")
     fun all(): Cursor
 
     @Query("SELECT * FROM $table " +
             "WHERE ${Columns.versionCode} = (" +
-               "SELECT MAX(${Columns.versionCode}) FROM $table WHERE ${Columns.versionCode} < :versionCode AND ${Columns.appId} == :appId" +
+            "SELECT MAX(${Columns.versionCode}) FROM $table WHERE ${Columns.versionCode} < :versionCode AND ${Columns.appId} == :appId" +
             ") LIMIT 1")
     suspend fun findPrevious(versionCode: Int, appId: String): AppChange?
 
@@ -34,7 +33,6 @@ interface ChangelogTable {
     suspend fun resetNoNewDetails(): Int
 
     object Queries {
-
         suspend fun all(table: ChangelogTable): AppChangeCursor = withContext(Dispatchers.IO) {
             val cursor = table.all()
             return@withContext AppChangeCursor(cursor)

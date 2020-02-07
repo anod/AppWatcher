@@ -106,11 +106,11 @@
     <string name="sort">Sort</string>
     <string name="allow">Allow</string>
     <string name="settings_notifications">Notifications</string>
-    <string name="uptodate_summary">Show notification if the app is already updated.</string>
+    <string name="uptodate_summary">Notify when app was already updated</string>
     <string name="uptodate_title">Updated notifications</string>
     <string name="noti_action_update">Update</string>
     <string name="update_all">Update All</string>
-    <string name="navdrawer_item_wishlist">Wishlist</string>
+    <string name="navdrawer_item_wishlist">Wish list</string>
     <string name="wishlist">Wishlist</string>
     <string name="add_new_tag">Enter tag name…</string>
     <string name="tags">Tags</string>
@@ -158,8 +158,10 @@
     <string name="delete_existing_item">Do you want to delete?</string>
     <string name="pref_default_filter">Default list</string>
     <string name="pref_default_filter_summary">Choose which filter will be applied when app is opened</string>
-    <string name="pref_notify_installed_summary">Show notifications for installed apps</string>
+    <string name="pref_notify_installed_summary">Notify about installed apps</string>
     <string name="pref_notify_installed">Installed notifications</string>
+    <string name="pref_notify_no_changes_summary">Notify when there is update in changelog</string>
+    <string name="pref_notify_no_changes">No changes notifications</string>
     <string name="pref_pull_to_refresh">Pull to refresh</string>
     <string name="app_info">App Info</string>
     <string name="pref_privacy">Privacy</string>

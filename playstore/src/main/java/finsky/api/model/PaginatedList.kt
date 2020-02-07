@@ -109,7 +109,6 @@ abstract class PaginatedList<T, D>(
     protected abstract fun getNextPageUrl(wrapper: Messages.Response.ResponseWrapper): String?
     protected abstract fun getItemsFromResponse(wrapper: Messages.Response.ResponseWrapper): Array<D>
 
-
     override val isReady: Boolean
         get() = this.lastResponse != null || this.items.size > 0
 
@@ -162,5 +161,4 @@ abstract class PaginatedList<T, D>(
             this.requestMoreItemsIfNoRequestExists(this.urlOffsetList[0])
         }
     }
-
 }
