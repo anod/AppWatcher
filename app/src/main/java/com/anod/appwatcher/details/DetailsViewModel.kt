@@ -90,11 +90,11 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
         if (rowId == -1) {
             val localApp = context.packageManager.packageToApp(-1, appId.value!!)
             isNewApp = true
-            AppLog.i("Show details for unwatched ${appId.value}")
+            AppLog.i("Show details for unwatched ${appId.value}", "DetailsView")
             app.value = localApp
         } else {
             isNewApp = false
-            AppLog.i("Show details for watched ${appId.value}")
+            AppLog.i("Show details for watched ${appId.value}", "DetailsView")
 
             val appsTable = database.apps()
             viewModelScope.launch {

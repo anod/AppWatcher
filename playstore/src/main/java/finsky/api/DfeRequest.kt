@@ -47,7 +47,7 @@ internal open class DfeRequest(
         if (responseWrapper.commands != null) {
             val commands = responseWrapper.commands
             if (!TextUtils.isEmpty(commands.logErrorStacktrace)) {
-                AppLog.d("%s", commands.logErrorStacktrace)
+                AppLog.d(commands.logErrorStacktrace)
             }
             if (!TextUtils.isEmpty(commands.displayErrorMessage)) {
                 return com.android.volley.Response.error(DfeServerError(commands.displayErrorMessage))
@@ -146,7 +146,7 @@ internal open class DfeRequest(
                 }
                 val cacheHeaders = parseCacheHeaders(networkResponse)
                 val success = com.android.volley.Response.success(wrapperAndVerifySignature, cacheHeaders)
-                AppLog.d("DFE response %s", this.url)
+                AppLog.d("DFE response ${this.url}")
                 return success
             }
         }
@@ -170,7 +170,7 @@ internal open class DfeRequest(
                 }
                 cacheHeaders.ttl = max(cacheHeaders.ttl, cacheHeaders.softTtl)
             } catch (ex: NumberFormatException) {
-                AppLog.d("Invalid TTL: %s", networkResponse.headers)
+                AppLog.e("Invalid TTL: ${networkResponse.headers}")
                 cacheHeaders.softTtl = 0L
                 cacheHeaders.ttl = 0L
             }

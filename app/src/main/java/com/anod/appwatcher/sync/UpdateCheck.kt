@@ -77,31 +77,31 @@ class UpdateCheck(private val context: ApplicationContext) : PlayStoreEndpoint.L
     suspend fun perform(extras: Data): Int = withContext(Dispatchers.Default) {
 
         val manualSync = extras.getBoolean(extrasManual, false)
-        AppLog.i("Perform ${if (manualSync) "manual" else "scheduled"} sync")
+        AppLog.i("Perform ${if (manualSync) "manual" else "scheduled"} sync", "UpdateCheck")
         // Skip any check if sync requested from application
         if (!manualSync) {
             if (preferences.isWifiOnly && !Application.provide(context).networkConnection.isWifiEnabled) {
-                AppLog.i("Wifi not enabled, skipping update check....")
+                AppLog.i("Wifi not enabled, skipping update check....", "UpdateCheck")
                 return@withContext -1
             }
             val updateTime = preferences.lastUpdateTime
             if (updateTime != (-1).toLong() && System.currentTimeMillis() - updateTime < oneSecInMillis) {
-                AppLog.i("Last update less than second, skipping...")
+                AppLog.i("Last update less than second, skipping...", "UpdateCheck")
                 return@withContext -1
             }
         }
         val account = preferences.account
         if (account == null) {
-            AppLog.w("No active account, skipping sync...")
+            AppLog.w("No active account, skipping sync...", "UpdateCheck")
             return@withContext -1
         }
 
         if (!Application.provide(context).networkConnection.isNetworkAvailable) {
-            AppLog.w("Network is not available, skipping sync...")
+            AppLog.w("Network is not available, skipping sync...", "UpdateCheck")
             return@withContext -1
         }
 
-        AppLog.i("Perform synchronization")
+        AppLog.i("Perform synchronization", "UpdateCheck")
 
         val authToken = requestAuthToken(account)
         if (authToken == null) {
@@ -168,7 +168,7 @@ class UpdateCheck(private val context: ApplicationContext) : PlayStoreEndpoint.L
         val apps = AppListTable.Queries.loadAppList(database.apps())
         if (apps.isEmpty) {
             apps.close()
-            AppLog.i("Sync finished: no apps")
+            AppLog.i("Sync finished: no apps", "UpdateCheck")
             return listOf()
         }
 
@@ -183,14 +183,14 @@ class UpdateCheck(private val context: ApplicationContext) : PlayStoreEndpoint.L
             try {
                 endpoint.startSync()
             } catch (e: VolleyError) {
-                AppLog.e("Fetching of bulk updates failed ${e.message ?: ""}")
+                AppLog.e("Fetching of bulk updates failed ${e.message ?: ""}", "UpdateCheck")
             }
-            AppLog.i("Sent ${docIds.size}. Received ${endpoint.documents.size}")
+            AppLog.i("Sent ${docIds.size}, received ${endpoint.documents.size}", "UpdateCheck")
             updateApps(endpoint.documents, localApps, updatedApps, lastUpdatesViewed, context.contentResolver, database)
         }
 
         apps.close()
-        AppLog.i("Sync finished for ${apps.count} apps")
+        AppLog.i("Sync finished for ${apps.count} apps", "UpdateCheck")
         return updatedApps
     }
 
@@ -305,9 +305,9 @@ class UpdateCheck(private val context: ApplicationContext) : PlayStoreEndpoint.L
         val sn = SyncNotification(context)
         if (manualSync) {
             if (updatedApps.isEmpty()) {
-                AppLog.i("No new updates")
+                AppLog.i("No new updates", "UpdateCheck")
             } else {
-                AppLog.i("Updates: [${updatedApps.joinToString(",") { "${it.title} (${it.versionNumber})" }}]")
+                AppLog.i("Updates: [${updatedApps.joinToString(",") { "${it.title} (${it.versionNumber})" }}]", "UpdateCheck")
             }
             sn.cancel()
         } else if (updatedApps.isNotEmpty()) {
@@ -334,12 +334,12 @@ class UpdateCheck(private val context: ApplicationContext) : PlayStoreEndpoint.L
             } else {
                 updatedApps
             }
-            AppLog.i("Notifying about: [${filteredApps.joinToString(",") { "${it.title} (${it.versionNumber})" }}]")
+            AppLog.i("Notifying about: [${filteredApps.joinToString(",") { "${it.title} (${it.versionNumber})" }}]", "UpdateCheck")
             if (filteredApps.isNotEmpty()) {
                 sn.show(filteredApps)
             }
         } else {
-            AppLog.i("No new updates")
+            AppLog.i("No new updates", "UpdateCheck")
         }
     }
 
@@ -350,7 +350,7 @@ class UpdateCheck(private val context: ApplicationContext) : PlayStoreEndpoint.L
             val signIn = GDriveSilentSignIn(context)
 
             try {
-                AppLog.i("Perform Google Drive sync")
+                AppLog.i("Perform Google Drive sync", "UpdateCheck")
                 val googleAccount = signIn.signInLocked()
                 val worker = GDriveSync(context, googleAccount)
                 worker.doSync()

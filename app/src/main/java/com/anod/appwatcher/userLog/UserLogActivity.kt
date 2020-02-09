@@ -15,44 +15,44 @@ import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.ToolbarActivity
 import kotlinx.android.synthetic.main.activity_user_log.*
 
-
 /**
  * @author Alex Gavrishev
  * @date 04/01/2018
  */
-class UserLogActivity: ToolbarActivity() {
+class UserLogActivity : ToolbarActivity() {
 
-    class UserLogViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
+    class UserLogViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val lineNumber: TextView = itemView.findViewById(R.id.lineNumber)
+        private val messageView: TextView = itemView.findViewById(R.id.messageView)
+
         private var textColor: Int? = null
-        fun apply(message: Message) {
-            val tv = itemView as TextView
-            tv.text = "${message.timestamp} ${message.message}"
+        fun apply(position: Int, message: Message) {
+            lineNumber.text = "$position"
+            messageView.text = "${message.timestamp} ${message.message}"
 
             if (textColor == null) {
-                textColor = tv.textColors.defaultColor
+                textColor = messageView.textColors.defaultColor
             }
 
             if (message.level > Log.WARN) {
-                tv.setTextColor(ContextCompat.getColor(tv.context, android.R.color.holo_red_dark))
+                messageView.setTextColor(ContextCompat.getColor(messageView.context, android.R.color.holo_red_dark))
             } else {
-                tv.setTextColor(textColor!!)
+                messageView.setTextColor(textColor!!)
             }
         }
     }
 
-    class UserLogAdapter(private val userLogger: UserLogger, val context: Context): RecyclerView.Adapter<UserLogViewHolder>() {
+    class UserLogAdapter(private val userLogger: UserLogger, val context: Context) : RecyclerView.Adapter<UserLogViewHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserLogViewHolder {
             val view = LayoutInflater.from(context).inflate(R.layout.list_item_log, parent, false)
             return UserLogViewHolder(view)
         }
 
-        override fun getItemCount(): Int {
-            return userLogger.messages.size
-        }
+        override fun getItemCount() = userLogger.messages.size
 
         override fun onBindViewHolder(holder: UserLogViewHolder, position: Int) {
-            holder.apply(userLogger.messages[position])
+            holder.apply(itemCount - position, userLogger.messages[position])
         }
     }
 
@@ -65,7 +65,6 @@ class UserLogActivity: ToolbarActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         list.layoutManager = LinearLayoutManager(this)
         list.adapter = UserLogAdapter(UserLogger(), this)
     }

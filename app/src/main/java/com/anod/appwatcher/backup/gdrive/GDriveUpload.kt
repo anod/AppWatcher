@@ -1,6 +1,7 @@
 package com.anod.appwatcher.backup.gdrive
 
 import android.content.Context
+import android.text.format.Formatter
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.backup.DbJsonWriter
 import com.anod.appwatcher.database.AppsDatabase
@@ -35,6 +36,8 @@ class GDriveUpload(private val context: ApplicationContext, private val googleAc
 
     @Throws(Exception::class)
     private suspend fun doUploadLocked(db: AppsDatabase) = withContext(Dispatchers.IO) {
+        AppLog.i("Upload to remote " + AppListFile.fileName, "GDriveUpload")
+
         val driveClient = DriveService(createCredentials(context.actual, googleAccount), "AppWatcher")
         val file = DriveIdFile(AppListFile, driveClient, context.actual)
 
@@ -42,12 +45,14 @@ class GDriveUpload(private val context: ApplicationContext, private val googleAc
             file.create()
         }
 
-        file.write(DbJsonWriter(), db)
+        val bytes = file.write(DbJsonWriter(), db)
+        AppLog.i("Uploaded ${Formatter.formatShortFileSize(context.actual, bytes)}", "GDriveUpload")
+
         AppLog.d("[GDrive] Clean locally deleted apps ")
         // Clean deleted
         val numRows = db.apps().cleanDeleted()
         db.appTags().clean()
-        AppLog.d("[GDrive] Cleaned $numRows rows")
+        AppLog.i("Cleaned $numRows locally deleted apps", "GDriveUpload")
     }
 
     companion object {

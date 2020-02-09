@@ -23,9 +23,6 @@ import io.fabric.sdk.android.Fabric
 import java.io.File
 import java.io.IOException
 
-
-
-
 class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstance {
 
     override val notificationManager: NotificationManager

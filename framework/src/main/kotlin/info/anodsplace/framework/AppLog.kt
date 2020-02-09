@@ -52,27 +52,28 @@ class AppLog {
         }
 
         fun d(msg: String) {
-            log(Log.DEBUG, format(msg))
+            log(Log.DEBUG, format(msg, null))
         }
 
-        fun i(msg: String) {
-            log(Log.INFO, format(msg))
-        }
-
-        fun d(msg: String, vararg params: Any) {
-            log(Log.DEBUG, format(msg, *params))
+        fun i(msg: String, tag: String?) {
+            log(Log.INFO, format(msg, tag))
         }
 
         fun v(msg: String) {
-            log(Log.VERBOSE, format(msg))
+            log(Log.VERBOSE, format(msg, null))
         }
 
-        fun e(msg: String) {
-            loge(format(msg), null)
+        fun e(msg: String, tag: String?) {
+            loge(format(msg, tag), null)
+        }
+
+        fun e(msg: String, tag: String, tr: Throwable) {
+            loge(format(msg, tag), tr)
+            instance.listener?.onLogException(tr)
         }
 
         fun e(msg: String, tr: Throwable) {
-            loge(format(msg), tr)
+            loge(format(msg, null), tr)
             instance.listener?.onLogException(tr)
         }
 
@@ -81,16 +82,20 @@ class AppLog {
             e(message, tr)
         }
 
-        fun e(msg: String, vararg params: Any) {
-            loge(format(msg, *params), null)
+        fun e(msg: String, tag: String, vararg params: Any) {
+            loge(format(msg, tag, *params), null)
         }
 
-        fun w(msg: String) {
-            log(Log.VERBOSE, format(msg))
+        fun e(msg: String, vararg params: Any) {
+            loge(format(msg, null, *params), null)
+        }
+
+        fun w(msg: String, tag: String?) {
+            log(Log.VERBOSE, format(msg, tag))
         }
 
         fun v(msg: String, vararg params: Any) {
-            log(Log.VERBOSE, format(msg, *params))
+            log(Log.VERBOSE, format(msg, null, *params))
         }
 
         private fun log(priority: Int, msg: String) {
@@ -104,9 +109,8 @@ class AppLog {
             logger.println(Log.ERROR, tag, message + '\n'.toString() + trace)
         }
 
-        private fun format(msg: String, vararg array: Any): String {
-            var formatted: String
-            formatted = if (array.isEmpty()) {
+        private fun format(msg: String, method: String?, vararg array: Any): String {
+            val formatted: String = if (array.isEmpty()) {
                 msg
             } else {
                 try {
@@ -117,17 +121,26 @@ class AppLog {
                 }
             }
             val stackTrace = Throwable().fillInStackTrace().stackTrace
-            var string = "<unknown>"
-            for (i in 2 until stackTrace.size) {
-                val className = stackTrace[i].className
-                if (className != AppLog::class.java.name) {
-                    val substring = className.substring(1 + className.lastIndexOf(46.toChar()))
-                    string = substring.substring(1 + substring.lastIndexOf(36.toChar())) + "." + stackTrace[i].methodName
-                    break
+            val tag = if (method == null) {
+                var methodFromTrace = "<unknown>"
+                for (i in 2 until stackTrace.size) {
+                    val className = stackTrace[i].className
+                    if (className != AppLog::class.java.name) {
+                        val substring = className.substring(1 + className.lastIndexOf(46.toChar()))
+                        methodFromTrace = substring.substring(1 + substring.lastIndexOf(36.toChar())) + "." + stackTrace[i].methodName
+                        break
+                    }
                 }
+                methodFromTrace
+            } else {
+                method
             }
             val isMain = Looper.myLooper() == Looper.getMainLooper()
-            return String.format(Locale.US, "[%s%d] %s: %s", if (isMain) "MAIN:" else "", Thread.currentThread().id, string, formatted)
+            return String.format(Locale.US, "[%s%d] %s: %s",
+                    if (isMain) "MAIN:" else "",
+                    Thread.currentThread().id,
+                    tag,
+                    formatted)
         }
     }
 }

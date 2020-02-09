@@ -1,5 +1,6 @@
 package com.anod.appwatcher.backup.gdrive
 
+import android.text.format.Formatter
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.backup.DbJsonReader
 import com.anod.appwatcher.backup.DbJsonWriter
@@ -33,7 +34,7 @@ class GDriveSync(private val context: ApplicationContext, private val googleAcco
     }
 
     private suspend fun doSyncLocked(db: AppsDatabase) = withContext(Dispatchers.IO) {
-
+        AppLog.i("Sync to remote " + AppListFile.fileName, "GDriveSync")
         val driveClient = DriveService(createCredentials(context.actual, googleAccount), "AppWatcher")
         val file = DriveIdFile(AppListFile, driveClient, context.actual)
 
@@ -50,18 +51,18 @@ class GDriveSync(private val context: ApplicationContext, private val googleAcco
             }
         }
 
-        file.write(DbJsonWriter(), db)
+        val bytes = file.write(DbJsonWriter(), db)
+        AppLog.i("Uploaded ${Formatter.formatShortFileSize(context.actual, bytes)}", "GDriveSync")
 
-        AppLog.d("[GDrive] Clean locally deleted apps ")
+        AppLog.d("Clean locally deleted apps")
         // Clean deleted
         val numRows = db.apps().cleanDeleted()
         db.appTags().clean()
-        AppLog.d("[GDrive] Cleaned $numRows rows")
+        AppLog.i("Cleaned $numRows locally deleted apps", "GDriveSync")
     }
 
     @Throws(Exception::class)
     private suspend fun insertRemoteItems(file: DriveIdFile, db: AppsDatabase) = withContext(Dispatchers.IO) {
-        AppLog.d("[GDrive] Sync remote list " + AppListFile.fileName)
         val reader = file.read() ?: throw IllegalStateException("Cannot read file")
 
         // Add missing remote entries
@@ -92,8 +93,9 @@ class GDriveSync(private val context: ApplicationContext, private val googleAcco
                 tagList.add(tag)
             }
 
-            override suspend fun onFinish() {
+            override suspend fun onFinish(appsRead: Int, tagsRead: Int) {
                 reader.close()
+                AppLog.i("Read from remote $appsRead apps, $tagsRead tags", "GDriveSync")
                 // Add missing tags
                 tagList.forEach { tag ->
                     if (!currentTags.containsKey(tag.name)) {

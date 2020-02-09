@@ -35,16 +35,16 @@ class SyncScheduler(private val context: ApplicationContext) {
                         .setConstraints(constraints)
                         .build()
 
-        AppLog.i("Schedule sync in ${windowStartSec / 3600} hours")
+        AppLog.i("Schedule sync in ${windowStartSec / 3600} hours", "PeriodicWork")
         return WorkManager
                 .getInstance(context.actual)
                 .enqueueUniquePeriodicWork(tag, ExistingPeriodicWorkPolicy.KEEP, request)
                 .state
                 .map {
                     when (it) {
-                        is Operation.State.SUCCESS -> AppLog.i("Operation scheduled")
-                        is Operation.State.IN_PROGRESS -> AppLog.i("Operation schedule in progress")
-                        is Operation.State.FAILURE -> AppLog.e("Operation schedule error", it.throwable)
+                        is Operation.State.SUCCESS -> AppLog.i("Sync scheduled", "PeriodicWork")
+                        is Operation.State.IN_PROGRESS -> AppLog.i("Sync schedule in progress", "PeriodicWork")
+                        is Operation.State.FAILURE -> AppLog.e("Sync schedule error", "PeriodicWork", it.throwable)
                     }
                     it
                 }
@@ -64,32 +64,32 @@ class SyncScheduler(private val context: ApplicationContext) {
                 .setConstraints(constraints)
                 .build()
 
-        AppLog.i("Enqueue update check")
+        AppLog.i("Enqueue update check", "OneTimeWork")
         return WorkManager
                 .getInstance(context.actual)
                 .enqueue(request)
                 .state
                 .map {
                     when (it) {
-                        is Operation.State.SUCCESS -> AppLog.i("Operation scheduled")
-                        is Operation.State.IN_PROGRESS -> AppLog.i("Operation schedule in progress")
-                        is Operation.State.FAILURE -> AppLog.e("Operation schedule error", it.throwable)
+                        is Operation.State.SUCCESS -> AppLog.i("Update scheduled", "OneTimeWork")
+                        is Operation.State.IN_PROGRESS -> AppLog.i("Update schedule in progress", "OneTimeWork")
+                        is Operation.State.FAILURE -> AppLog.e("Update schedule error", "OneTimeWork", it.throwable)
                     }
                     it
                 }
     }
 
     fun cancel(): LiveData<Operation.State> {
-        AppLog.i("Cancel scheduled sync")
+        AppLog.i("Cancel scheduled sync", "SyncSchedule")
         return WorkManager
                 .getInstance(context.actual)
                 .cancelUniqueWork(tag)
                 .state
                 .map {
                     when (it) {
-                        is Operation.State.SUCCESS -> AppLog.i("Operation canceled")
-                        is Operation.State.IN_PROGRESS -> AppLog.i("Operation cancel in progress")
-                        is Operation.State.FAILURE -> AppLog.e("Operation cancel error", it.throwable)
+                        is Operation.State.SUCCESS -> AppLog.i("Sync canceled", "PeriodicWork")
+                        is Operation.State.IN_PROGRESS -> AppLog.i("Sync cancel in progress", "PeriodicWork")
+                        is Operation.State.FAILURE -> AppLog.e("Sync cancel error", "PeriodicWork", it.throwable)
                     }
                     it
                 }

@@ -55,13 +55,14 @@ class DriveIdFile(
                 space = AppData)
     }
 
-    suspend fun write(writer: DbJsonWriter, db: AppsDatabase) = withContext(Dispatchers.IO) {
+    suspend fun write(writer: DbJsonWriter, db: AppsDatabase): Long = withContext(Dispatchers.IO) {
+        var bytes = 0L
         val driveId = withContext(Dispatchers.Main) {
             if (driveId == null) {
-                AppLog.e("[GDrive] Drive Id is not initialized")
+                AppLog.e("Drive Id is not initialized", "GDrive")
             }
             driveId
-        } ?: return@withContext
+        } ?: return@withContext bytes
 
         try {
             AppLog.d("[GDrive] Write full list to temp ")
@@ -69,17 +70,18 @@ class DriveIdFile(
             val file = FileWriter(tempFile)
             writer.write(file, db)
             val inputStream = BufferedInputStream(FileInputStream(tempFile))
-            AppLog.d("[GDrive] Write temp to remote")
             driveClient.saveFile(driveId, "application/json", inputStream)
+            bytes = tempFile.length()
         } catch (e: IOException) {
             AppLog.e(e)
         }
+        return@withContext bytes
     }
 
     suspend fun read(): Reader? = withContext(Dispatchers.IO) {
         val driveId = withContext(Dispatchers.Main) {
             if (driveId == null) {
-                AppLog.e("[GDrive] Drive Id is not initialized")
+                AppLog.e("Drive Id is not initialized", "GDrive")
             }
             driveId
         } ?: return@withContext null

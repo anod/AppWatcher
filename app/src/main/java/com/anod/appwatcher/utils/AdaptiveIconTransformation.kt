@@ -13,7 +13,7 @@ class AdaptiveIconTransformation(
         private val context: Context,
         private val mask: Path,
         private val layerSize: Int,
-        private val cacheKey: String): Transformation {
+        private val cacheKey: String) : Transformation {
 
 //    constructor(context: Context, mask: Path, cacheKey: String):
 //            this(context, mask, TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 105f, context.resources.displayMetrics).roundToInt(), cacheKey)
@@ -85,12 +85,12 @@ class AdaptiveIconTransformation(
             val configResId = Resources.getSystem().getIdentifier("config_icon_mask", "string", "android")
 
             if (configResId == 0) {
-                AppLog.i("No config_icon_mask")
+                AppLog.d("No config_icon_mask")
                 return circlePath
             }
 
             val configMask = Resources.getSystem().getString(configResId)
-            AppLog.i("No configMask value: $configMask")
+            AppLog.d("No configMask value: $configMask")
 
             if (configMask.isEmpty()) {
                 return circlePath
@@ -106,12 +106,11 @@ class AdaptiveIconTransformation(
 
             val path = PathParser.createPathFromPathData(mask)
             if (path == null) {
-                AppLog.i("cannot parse configMask: $mask")
+                AppLog.e("cannot parse configMask: $mask", "AdaptiveIcon")
                 return PathParser.createPathFromPathData(circlePath)
             }
 
             return path
-
         }
     }
 }
