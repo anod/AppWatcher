@@ -4,6 +4,8 @@ import android.app.Activity
 import android.app.PendingIntent
 import android.content.Intent
 import android.widget.Toast
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
 import com.anod.appwatcher.R
 import com.anod.appwatcher.SettingsActivity
 import com.anod.appwatcher.backup.gdrive.GDriveSignIn
@@ -17,9 +19,8 @@ import info.anodsplace.framework.app.ApplicationContext
  * @author Alex Gavrishev
  * @date 02-Mar-18
  */
-class UpgradeRefresh(val prefs: Preferences, val activity: Activity) : UpgradeTask {
+class UpgradeRefresh(val prefs: Preferences, val activity: Activity, val lifecycleOwner: LifecycleOwner) : UpgradeTask {
     override fun onUpgrade(upgrade: UpgradeCheck.Result) {
-
         val googleAccount = GoogleSignIn.getLastSignedInAccount(activity)
         if (prefs.isDriveSyncEnabled) {
             val gDrive = GDriveSignIn(activity, object : GDriveSignIn.Listener {
@@ -51,6 +52,6 @@ class UpgradeRefresh(val prefs: Preferences, val activity: Activity) : UpgradeTa
     }
 
     private fun requestRefresh() {
-        SyncScheduler(activity).execute()
+        SyncScheduler(activity).execute().observe(lifecycleOwner, Observer { })
     }
 }

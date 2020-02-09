@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.widget.TextView
 import androidx.annotation.LayoutRes
 import androidx.appcompat.widget.SearchView
+import androidx.lifecycle.Observer
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.sync.SyncScheduler
@@ -30,7 +31,9 @@ class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener,
         supportActionBar!!.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp)
 
         if (prefs.useAutoSync) {
-            SyncScheduler(this).schedule(prefs.isRequiresCharging, prefs.isWifiOnly, prefs.updatesFrequency.toLong())
+            SyncScheduler(this)
+                    .schedule(prefs.isRequiresCharging, prefs.isWifiOnly, prefs.updatesFrequency.toLong())
+                    .observe(this, Observer { })
         }
     }
 

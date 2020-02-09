@@ -292,7 +292,7 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
         val builder = ShareCompat.IntentBuilder.from(this)
 
         val changes = if (viewModel.recentChange.details.isBlank()) "" else "${viewModel.recentChange.details}\n\n"
-        val text = getString(R.string.share_text, changes, String.format(Storeintent.URL_WEB_PLAY_STORE, appInfo.packageName))
+        val text = getString(R.string.share_text, changes, String.format(StoreIntent.URL_WEB_PLAY_STORE, appInfo.packageName))
 
         builder.setSubject(getString(R.string.share_subject, appInfo.title, appInfo.versionName))
         builder.setText(text)

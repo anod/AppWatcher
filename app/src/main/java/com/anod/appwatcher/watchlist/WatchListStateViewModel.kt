@@ -5,7 +5,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.work.Operation
 import com.anod.appwatcher.AppWatcherApplication
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.sync.SyncScheduler
@@ -53,7 +55,7 @@ class WatchListStateViewModel(application: android.app.Application) : AndroidVie
     private val app: AppWatcherApplication
         get() = getApplication()
 
-    fun requestRefresh() {
+    fun requestRefresh(): LiveData<Operation.State> {
         AppLog.d("Refresh requested")
         if (!isAuthenticated) {
             if (Application.provide(app).networkConnection.isNetworkAvailable) {
@@ -61,11 +63,11 @@ class WatchListStateViewModel(application: android.app.Application) : AndroidVie
             } else {
                 this.listState.value = NoNetwork
             }
-            return
+            return MutableLiveData()
         }
 
-        SyncScheduler(app).execute()
         this.listState.value = SyncStarted
+        return SyncScheduler(app).execute()
     }
 
     companion object {

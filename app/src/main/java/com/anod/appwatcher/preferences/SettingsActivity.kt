@@ -10,6 +10,7 @@ import android.text.format.DateUtils
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.lifecycle.Observer
 import androidx.lifecycle.observe
 import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.Application
@@ -243,9 +244,13 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
                     prefs.updatesFrequency = values[which]
                     val useAutoSync = prefs.useAutoSync
                     if (useAutoSync) {
-                        SyncScheduler(this).schedule(prefs.isRequiresCharging, prefs.isWifiOnly, prefs.updatesFrequency.toLong())
+                        SyncScheduler(this)
+                                .schedule(prefs.isRequiresCharging, prefs.isWifiOnly, prefs.updatesFrequency.toLong())
+                                .observe(this, Observer { })
                     } else {
-                        SyncScheduler(this).cancel()
+                        SyncScheduler(this)
+                                .cancel()
+                                .observe(this, Observer { })
                     }
                     frequencyItem.summary = resources.getStringArray(R.array.updates_frequency)[which]
                     wifiItem.enabled = useAutoSync
@@ -257,12 +262,16 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
             ACTION_WIFI_ONLY -> {
                 val useWifiOnly = (pref as ToggleItem).checked
                 prefs.isWifiOnly = useWifiOnly
-                SyncScheduler(this).schedule(prefs.isRequiresCharging, useWifiOnly, prefs.updatesFrequency.toLong())
+                SyncScheduler(this)
+                        .schedule(prefs.isRequiresCharging, useWifiOnly, prefs.updatesFrequency.toLong())
+                        .observe(this, Observer { })
             }
             ACTION_REQUIRES_CHARGING -> {
                 val requiresCharging = (pref as ToggleItem).checked
                 prefs.isRequiresCharging = requiresCharging
-                SyncScheduler(this).schedule(requiresCharging, prefs.isWifiOnly, prefs.updatesFrequency.toLong())
+                SyncScheduler(this)
+                        .schedule(requiresCharging, prefs.isWifiOnly, prefs.updatesFrequency.toLong())
+                        .observe(this, Observer { })
             }
             ACTION_NOTIFY_UPTODATE -> prefs.isNotifyInstalledUpToDate = (pref as ToggleItem).checked
             ACTION_THEME -> {

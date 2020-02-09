@@ -2,6 +2,8 @@ package com.anod.appwatcher.sync
 
 import android.content.Context
 import android.os.Build
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.map
 import androidx.work.*
 import com.anod.appwatcher.BuildConfig
 import info.anodsplace.framework.AppLog
@@ -17,8 +19,7 @@ import java.util.concurrent.TimeUnit
 class SyncScheduler(private val context: ApplicationContext) {
     constructor(context: Context) : this(ApplicationContext(context))
 
-    fun schedule(requiresCharging: Boolean, requiresWifi: Boolean, windowStartSec: Long) {
-
+    fun schedule(requiresCharging: Boolean, requiresWifi: Boolean, windowStartSec: Long): LiveData<Operation.State> {
         val constraints: Constraints = Constraints.Builder().apply {
             setRequiresCharging(requiresCharging)
             if (requiresWifi) {
@@ -35,10 +36,21 @@ class SyncScheduler(private val context: ApplicationContext) {
                         .build()
 
         AppLog.i("Schedule sync in ${windowStartSec / 3600} hours")
-        WorkManager.getInstance(context.actual).enqueueUniquePeriodicWork(tag, ExistingPeriodicWorkPolicy.KEEP, request)
+        return WorkManager
+                .getInstance(context.actual)
+                .enqueueUniquePeriodicWork(tag, ExistingPeriodicWorkPolicy.KEEP, request)
+                .state
+                .map {
+                    when (it) {
+                        is Operation.State.SUCCESS -> AppLog.i("Operation scheduled")
+                        is Operation.State.IN_PROGRESS -> AppLog.i("Operation schedule in progress")
+                        is Operation.State.FAILURE -> AppLog.e("Operation schedule error", it.throwable)
+                    }
+                    it
+                }
     }
 
-    fun execute() {
+    fun execute(): LiveData<Operation.State> {
         val constraints: Constraints = Constraints.Builder().apply {
             setRequiresCharging(false)
             setRequiredNetworkType(NetworkType.CONNECTED)
@@ -53,12 +65,34 @@ class SyncScheduler(private val context: ApplicationContext) {
                 .build()
 
         AppLog.i("Enqueue update check")
-        WorkManager.getInstance(context.actual).enqueue(request)
+        return WorkManager
+                .getInstance(context.actual)
+                .enqueue(request)
+                .state
+                .map {
+                    when (it) {
+                        is Operation.State.SUCCESS -> AppLog.i("Operation scheduled")
+                        is Operation.State.IN_PROGRESS -> AppLog.i("Operation schedule in progress")
+                        is Operation.State.FAILURE -> AppLog.e("Operation schedule error", it.throwable)
+                    }
+                    it
+                }
     }
 
-    fun cancel() {
+    fun cancel(): LiveData<Operation.State> {
         AppLog.i("Cancel scheduled sync")
-        WorkManager.getInstance(context.actual).cancelUniqueWork(tag)
+        return WorkManager
+                .getInstance(context.actual)
+                .cancelUniqueWork(tag)
+                .state
+                .map {
+                    when (it) {
+                        is Operation.State.SUCCESS -> AppLog.i("Operation canceled")
+                        is Operation.State.IN_PROGRESS -> AppLog.i("Operation cancel in progress")
+                        is Operation.State.FAILURE -> AppLog.e("Operation cancel error", it.throwable)
+                    }
+                    it
+                }
     }
 
     companion object {

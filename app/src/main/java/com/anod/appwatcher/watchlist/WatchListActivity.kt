@@ -174,7 +174,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         }
 
         // SetupInterfaceUpgrade(prefs, this).onUpgrade(upgrade)
-        UpgradeRefresh(prefs, this).onUpgrade(upgrade)
+        UpgradeRefresh(prefs, this, this).onUpgrade(upgrade)
         // SettingsUpgrade(prefs, this).onUpgrade(upgrade)
     }
 

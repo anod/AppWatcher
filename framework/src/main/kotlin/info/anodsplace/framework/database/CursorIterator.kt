@@ -14,7 +14,7 @@ import info.anodsplace.framework.AppLog
 abstract class CursorIterator<O>(cursor: Cursor?)
     : CursorWrapper(cursor ?: NullCursor()), CrossProcessCursor, Iterable<O>, Iterator<O> {
 
-    class Default(cursor: Cursor?): CursorIterator<Cursor>(cursor) {
+    class Default(cursor: Cursor?) : CursorIterator<Cursor>(cursor) {
         override val current = cursor ?: NullCursor()
     }
 
@@ -70,6 +70,10 @@ abstract class CursorIterator<O>(cursor: Cursor?)
             return ""
         }
         return value
+    }
+
+    fun getString(columnIndex: Int, defaultValue: String): String {
+        return super.getString(columnIndex) ?: return defaultValue
     }
 
     override fun close() {
