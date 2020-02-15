@@ -4,13 +4,13 @@ package com.anod.appwatcher.installed
 import android.accounts.Account
 import android.content.Context
 import androidx.collection.SimpleArrayMap
-import androidx.lifecycle.MutableLiveData
 import com.anod.appwatcher.Application
 import finsky.api.BulkDocId
-import finsky.api.model.DfeBulkDetails
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.playstore.BulkDetailsEndpoint
 import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import java.util.*
 
@@ -26,9 +26,7 @@ internal class ImportBulkManager(private val context: Context) {
 
     private var account: Account? = null
     private var authSubToken: String = ""
-
-    val status = MutableLiveData<ImportStatus>()
-
+    
     fun reset() {
         listsDocIds = mutableListOf()
         currentBulk = 0
@@ -53,58 +51,40 @@ internal class ImportBulkManager(private val context: Context) {
     val isEmpty: Boolean
         get() = listsDocIds.isEmpty()
 
-    suspend fun start(account: Account, authSubToken: String): Unit = withContext(Main) {
+    suspend fun start(account: Account, authSubToken: String): Flow<ImportStatus> = withContext(Main) {
         this@ImportBulkManager.account = account
         this@ImportBulkManager.authSubToken = authSubToken
         currentBulk = 0
-        nextBulk()
+        return@withContext flow {
+            for (items in listsDocIds) {
+                val docIds = items ?: continue
+                if (docIds.isNotEmpty()) {
+                    emit(ImportStarted(docIds.map { it.packageName }))
+                    val result = importDetails(docIds)
+                    emit(ImportProgress(docIds.map { it.packageName }, result))
+                }
+            }
+            emit(ImportFinished)
+        }
     }
 
-    private suspend fun nextBulk(): Unit = withContext(Main) {
-        val account = account ?: return@withContext
-
-        val docIds = listsDocIds[currentBulk] ?: emptyList<BulkDocId>()
-        if (docIds.isEmpty()) {
-            status.value = ImportFinished
-            return@withContext
+    private suspend fun importDetails(docIds: List<BulkDocId>): SimpleArrayMap<String, Int> = withContext(Main) {
+        val endpoint = BulkDetailsEndpoint(
+                context,
+                Application.provide(context).requestQueue,
+                Application.provide(context).deviceInfo,
+                account!!,
+                docIds
+        ).also {
+            it.authToken = authSubToken
         }
-        status.value = ImportStarted(docIds.map { it.packageName })
-        val endpoint = BulkDetailsEndpoint(context, Application.provide(context).requestQueue, Application.provide(context).deviceInfo, account, docIds)
-        endpoint.authToken = authSubToken
         try {
-            val data = endpoint.start()
-            onDataResponse(data)
+            val model = endpoint.start()
+            val docs = model.documents.toTypedArray()
+            val task = ImportTask(ApplicationContext(context))
+            return@withContext task.execute(*docs)
         } catch (e: Exception) {
-            onErrorResponse(e)
-        }
-    }
-
-    private suspend fun onDataResponse(data: DfeBulkDetails): Unit = withContext(Main) {
-        val docs = data.documents.toTypedArray()
-        val task = ImportTask(ApplicationContext(context))
-        val result = task.execute(*docs)
-        onAddAppTaskFinish(result)
-    }
-
-    private suspend fun onErrorResponse(error: Exception): Unit = withContext(Main) {
-        val docIds = listsDocIds[currentBulk] ?: emptyList<BulkDocId>()
-        status.value = ImportProgress(docIds.map { it.packageName }, SimpleArrayMap())
-        currentBulk++
-        if (currentBulk == listsDocIds.size) {
-            status.value = ImportFinished
-        } else {
-            nextBulk()
-        }
-    }
-
-    private suspend fun onAddAppTaskFinish(result: SimpleArrayMap<String, Int>): Unit = withContext(Main) {
-        val docIds = listsDocIds[currentBulk] ?: emptyList<BulkDocId>()
-        status.value = ImportProgress(docIds.map { it.packageName }, result)
-        currentBulk++
-        if (currentBulk == listsDocIds.size) {
-            status.value = ImportFinished
-        } else {
-            nextBulk()
+            return@withContext SimpleArrayMap<String, Int>()
         }
     }
 

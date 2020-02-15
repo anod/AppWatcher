@@ -2,14 +2,18 @@
 package com.anod.appwatcher.installed
 
 import android.accounts.Account
-import androidx.lifecycle.*
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.map
+import androidx.lifecycle.viewModelScope
 import com.anod.appwatcher.AppComponent
 import com.anod.appwatcher.AppWatcherApplication
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.getInstalledPackages
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-class ImportInstalledViewModel(application: android.app.Application) : AndroidViewModel(application), Observer<ImportStatus> {
+class ImportInstalledViewModel(application: android.app.Application) : AndroidViewModel(application) {
 
     val isEmpty: Boolean
         get() = importManager!!.isEmpty
@@ -22,8 +26,7 @@ class ImportInstalledViewModel(application: android.app.Application) : AndroidVi
                 }
             }
 
-    val progress: MutableLiveData<ImportStatus>
-        get() = importManager!!.status
+    val progress = MutableLiveData<ImportStatus>()
 
     private val appComponent: AppComponent
         get() = getApplication<AppWatcherApplication>().appComponent
@@ -31,12 +34,7 @@ class ImportInstalledViewModel(application: android.app.Application) : AndroidVi
     private var importManager: ImportBulkManager? = ImportBulkManager(application)
     internal val dataProvider: ImportResourceProvider by lazy { ImportResourceProvider(application, InstalledApps.MemoryCache(InstalledApps.PackageManager(application.packageManager))) }
 
-    init {
-        importManager!!.status.observeForever(this)
-    }
-
     override fun onCleared() {
-        importManager!!.status.removeObserver(this)
         importManager = null
     }
 
@@ -50,7 +48,10 @@ class ImportInstalledViewModel(application: android.app.Application) : AndroidVi
 
     fun import(account: Account, token: String) {
         viewModelScope.launch {
-            importManager!!.start(account, token)
+            importManager!!.start(account, token).collect { status ->
+                progress.value = status
+                onChanged(status)
+            }
         }
     }
 
@@ -62,7 +63,7 @@ class ImportInstalledViewModel(application: android.app.Application) : AndroidVi
         return false
     }
 
-    override fun onChanged(status: ImportStatus) {
+    private fun onChanged(status: ImportStatus) {
         when (status) {
             is ImportStarted -> {
                 dataProvider.isImportStarted = true
