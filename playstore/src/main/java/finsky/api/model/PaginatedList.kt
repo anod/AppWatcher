@@ -1,6 +1,7 @@
 package finsky.api.model
 
 import com.android.volley.Request
+import com.android.volley.Response
 import com.android.volley.VolleyError
 import finsky.protos.nano.Messages
 import java.util.*
@@ -10,7 +11,7 @@ class UrlOffsetPair(val offset: Int, val url: String)
 
 abstract class PaginatedList<T, D>(
         private val urlOffsetList: MutableList<UrlOffsetPair>,
-        private val autoLoadNextPage: Boolean = true) : DfeModel() {
+        private val autoLoadNextPage: Boolean = true) : DfeModel(), Response.ErrorListener, Response.Listener<Messages.Response.ResponseWrapper> {
     private var currentOffset: Int = 0
     private var currentRequest: Request<*>? = null
     private val items = mutableListOf<D>()
@@ -34,7 +35,7 @@ abstract class PaginatedList<T, D>(
                 this.currentRequest!!.cancel()
             }
             this.currentOffset = urlOffsetPair!!.offset
-            this.currentRequest = this.makeRequest(urlOffsetPair.url)
+            this.currentRequest = this.makeRequest(urlOffsetPair.url, this, this)
         }
     }
 
@@ -112,18 +113,15 @@ abstract class PaginatedList<T, D>(
     override val isReady: Boolean
         get() = this.lastResponse != null || this.items.size > 0
 
-    protected abstract fun makeRequest(url: String): Request<*>
-
     override fun onErrorResponse(error: VolleyError) {
         this.isInErrorState = true
         this.clearTransientState()
-        super.onErrorResponse(error)
     }
 
-    override fun onResponse(wrapper: Messages.Response.ResponseWrapper) {
-        this.lastResponse = wrapper
+    override fun onResponse(responseWrapper: Messages.Response.ResponseWrapper) {
+        this.lastResponse = responseWrapper
         val size = this.items.size
-        val itemsFromResponse = this.getItemsFromResponse(wrapper)
+        val itemsFromResponse = this.getItemsFromResponse(responseWrapper)
         this.updateItemsUntilEndCount(itemsFromResponse.size)
         for (i in itemsFromResponse.indices) {
             if (i + this.currentOffset < this.items.size) {
@@ -132,7 +130,7 @@ abstract class PaginatedList<T, D>(
                 this.items.add(itemsFromResponse[i])
             }
         }
-        val nextPageUrl = this.getNextPageUrl(wrapper)
+        val nextPageUrl = this.getNextPageUrl(responseWrapper)
         if (!nextPageUrl.isNullOrEmpty() && (this.currentOffset == size || this.itemsRemoved)) {
             this.urlOffsetList.add(UrlOffsetPair(this.items.size, nextPageUrl))
         }
@@ -146,13 +144,11 @@ abstract class PaginatedList<T, D>(
         }
         this.isMoreAvailable = moreAvailable && autoLoadNextPage
         this.clearTransientState()
-        this.notifyDataSetChanged()
     }
 
     fun resetItems() {
         this.isMoreAvailable = true
         this.items.clear()
-        this.notifyDataSetChanged()
     }
 
     fun startLoadItems() {

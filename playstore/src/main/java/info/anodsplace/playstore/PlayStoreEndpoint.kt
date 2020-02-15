@@ -1,6 +1,5 @@
 package info.anodsplace.playstore
 
-import com.android.volley.VolleyError
 import finsky.api.model.DfeModel
 
 /**
@@ -9,15 +8,8 @@ import finsky.api.model.DfeModel
  * @date 27/08/2016.
  */
 interface PlayStoreEndpoint {
-    var listener: Listener?
     var authToken: String
 
-    fun startAsync()
-    fun startSync()
+    suspend fun start(): DfeModel
     fun reset()
-
-    interface Listener {
-        fun onDataChanged(data: DfeModel)
-        fun onErrorResponse(error: VolleyError)
-    }
 }

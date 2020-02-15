@@ -8,16 +8,17 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
-import com.android.volley.VolleyError
 import com.anod.appwatcher.AppComponent
 import com.anod.appwatcher.AppWatcherApplication
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.utils.combineLatest
+import finsky.api.model.DfeDetails
+import finsky.api.model.DfeModel
+import finsky.api.model.DfeSearch
 import info.anodsplace.playstore.CompositeStateEndpoint
 import info.anodsplace.playstore.DetailsEndpoint
-import info.anodsplace.playstore.PlayStoreEndpointBase
 import info.anodsplace.playstore.SearchEndpoint
 import kotlinx.coroutines.launch
 
@@ -29,11 +30,11 @@ object NoNetwork : SearchStatus()
 object Error : SearchStatus()
 object FreeTextRequest : SearchStatus()
 
-class SearchViewModel(application: Application): AndroidViewModel(application), CompositeStateEndpoint.Listener, ResultsViewModel {
+class SearchViewModel(application: Application) : AndroidViewModel(application), ResultsViewModel {
     private val context: Context
         get() = getApplication<AppWatcherApplication>()
     private val provide: AppComponent
-        get() =  com.anod.appwatcher.Application.provide(context)
+        get() = com.anod.appwatcher.Application.provide(context)
 
     var account: Account? = null
     private var initiateSearch = false
@@ -49,13 +50,13 @@ class SearchViewModel(application: Application): AndroidViewModel(application), 
     }
     var appStatusChange = MutableLiveData<Pair<Int, AppInfo?>>()
 
-    private var endpoints: CompositeStateEndpoint? = CompositeStateEndpoint(this)
+    private var endpoints: CompositeStateEndpoint? = CompositeStateEndpoint()
 
     val endpointDetails: DetailsEndpoint
-        get() =  endpoints!![DETAILS_ENDPOINT_ID] as DetailsEndpoint
+        get() = endpoints!![DETAILS_ENDPOINT_ID] as DetailsEndpoint
 
     val endpointSearch: SearchEndpoint
-        get() =  endpoints!![SEARCH_ENDPOINT_ID] as SearchEndpoint
+        get() = endpoints!![SEARCH_ENDPOINT_ID] as SearchEndpoint
 
     override fun onCleared() {
         endpoints = null
@@ -76,34 +77,44 @@ class SearchViewModel(application: Application): AndroidViewModel(application), 
     fun search(query: String, authToken: String) {
         val requestQueue = provide.requestQueue
         val deviceInfo = provide.deviceInfo
+        val endpoints = endpoints!!
         if (isPackageSearch) {
             val detailsUrl = AppInfo.createDetailsUrl(query)
-            endpoints!!.put(DETAILS_ENDPOINT_ID, DetailsEndpoint(context, requestQueue, deviceInfo, account!!, detailsUrl))
+            endpoints.put(DETAILS_ENDPOINT_ID, DetailsEndpoint(context, requestQueue, deviceInfo, account!!, detailsUrl))
         }
-        endpoints!!.put(SEARCH_ENDPOINT_ID, SearchEndpoint(context, requestQueue, deviceInfo, account!!, query, true))
+        endpoints.put(SEARCH_ENDPOINT_ID, SearchEndpoint(context, requestQueue, deviceInfo, account!!, query, true))
 
         if (isPackageSearch) {
-            endpoints!!.activeId = DETAILS_ENDPOINT_ID
+            endpoints.activeId = DETAILS_ENDPOINT_ID
         } else {
-            endpoints!!.activeId = SEARCH_ENDPOINT_ID
+            endpoints.activeId = SEARCH_ENDPOINT_ID
         }
         status.value = Loading(isPackageSearch)
-        endpoints!!.authToken = authToken
-        endpoints!!.reset()
-        endpoints!!.active.startAsync()
+        endpoints.authToken = authToken
+        endpoints.reset()
+        viewModelScope.launch {
+            try {
+                val model = endpoints.active.start()
+                onDataChanged(model)
+            } catch (e: Exception) {
+                onErrorResponse(endpoints.activeId, e)
+            }
+        }
     }
 
-    override fun onDataChanged(id: Int, endpoint: PlayStoreEndpointBase) {
-        if (id == DETAILS_ENDPOINT_ID) {
-            if ((endpoint as DetailsEndpoint).document != null) {
+    private fun onDataChanged(model: DfeModel) {
+        if (model is DfeDetails) {
+            if (model.document != null) {
                 status.value = Available
             } else {
                 status.value = FreeTextRequest
-                endpoints!!.activate(SEARCH_ENDPOINT_ID).startAsync()
+                viewModelScope.launch {
+                    endpoints!!.activate(SEARCH_ENDPOINT_ID).start()
+                }
             }
         } else {
-            val searchEndpoint = endpoint as SearchEndpoint
-            if (searchEndpoint.count == 0) {
+            val dfeSearch = model as DfeSearch
+            if (dfeSearch.count == 0) {
                 status.value = NoResults
             } else {
                 status.value = Available
@@ -112,14 +123,16 @@ class SearchViewModel(application: Application): AndroidViewModel(application), 
         isPackageSearch = false
     }
 
-    override fun onErrorResponse(id: Int, endpoint: PlayStoreEndpointBase, error: VolleyError) {
+    private fun onErrorResponse(id: Int, error: Exception) {
         if (!provide.networkConnection.isNetworkAvailable) {
             status.value = NoNetwork
             return
         }
         if (id == DETAILS_ENDPOINT_ID && endpoints != null) {
             status.value = FreeTextRequest
-            endpoints!!.activate(SEARCH_ENDPOINT_ID).startAsync()
+            viewModelScope.launch {
+                endpoints!!.activate(SEARCH_ENDPOINT_ID).start()
+            }
         } else {
             status.value = Error
         }

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:gravity="center_vertical"
-              android:paddingTop="16dp"
-              android:orientation="vertical">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_vertical"
+    android:paddingTop="16dp"
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -16,15 +16,15 @@
         android:paddingTop="8dp">
 
         <ImageView
+            android:contentDescription="@string/tag_color"
             android:id="@+id/colorPreview"
             android:layout_width="40dp"
-            android:layout_height="40dp"
-            />
+            android:layout_height="40dp" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp">
+            android:layout_marginStart="8dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/tagName"
@@ -32,7 +32,7 @@
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:hint="@string/tag_name"
-                android:inputType="textCapWords"/>
+                android:inputType="textCapWords" />
 
         </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
@@ -55,27 +55,27 @@
             style="?attr/buttonBarNeutralButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/delete"/>
+            android:text="@string/delete" />
 
-        <androidx.legacy.widget.Space
+        <android.widget.Space
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:visibility="invisible"/>
+            android:visibility="invisible" />
 
         <Button
             android:id="@android:id/button2"
             style="?attr/buttonBarNegativeButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@android:string/cancel"/>
+            android:text="@android:string/cancel" />
 
         <Button
             android:id="@android:id/button1"
             style="?attr/buttonBarPositiveButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/save"/>
+            android:text="@string/save" />
     </LinearLayout>
 </LinearLayout>
 

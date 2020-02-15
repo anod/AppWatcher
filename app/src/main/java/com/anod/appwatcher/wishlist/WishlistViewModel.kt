@@ -7,7 +7,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
-import com.android.volley.VolleyError
 import com.anod.appwatcher.AppComponent
 import com.anod.appwatcher.AppWatcherApplication
 import com.anod.appwatcher.database.AppListTable
@@ -15,12 +14,10 @@ import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.search.ResultsViewModel
 import finsky.api.model.DfeList
-import finsky.api.model.DfeModel
-import info.anodsplace.playstore.PlayStoreEndpoint
 import info.anodsplace.playstore.WishListEndpoint
 import kotlinx.coroutines.launch
 
-class WishListViewModel(application: Application) : AndroidViewModel(application), ResultsViewModel, PlayStoreEndpoint.Listener {
+class WishListViewModel(application: Application) : AndroidViewModel(application), ResultsViewModel {
     private val context: Context
         get() = getApplication<AppWatcherApplication>()
     private val provide: AppComponent
@@ -32,22 +29,15 @@ class WishListViewModel(application: Application) : AndroidViewModel(application
 
     private var endpoint: WishListEndpoint? = null
 
-    override fun onCleared() {
-        endpoint?.listener = null
-        super.onCleared()
-    }
-
     override val packages = provide.database.apps().observePackages().map { list ->
         list.map { it.packageName }
     }
 
     fun init(account: Account, authToken: String) {
-        loading.value = false
         endpoint = WishListEndpoint(context, provide.requestQueue, provide.deviceInfo, account, true).also {
             it.authToken = authToken
-            it.listener = this
-            it.startAsync()
         }
+        run()
     }
 
     override fun delete(info: AppInfo) {
@@ -64,22 +54,24 @@ class WishListViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    override fun onDataChanged(data: DfeModel) {
-        listData.value = endpoint!!.listData
-    }
-
-    override fun onErrorResponse(error: VolleyError) {
-        loading.value = true
-    }
-
     fun retry() {
-        loading.value = false
-        endpoint?.startAsync()
+        run()
     }
 
     fun filter(query: String) {
-        loading.value = false
         endpoint!!.nameFilter = query
-        endpoint!!.startAsync()
+        run()
+    }
+
+    private fun run() {
+        loading.value = false
+        viewModelScope.launch {
+            try {
+                val model = endpoint!!.start()
+                listData.value = model
+            } catch (e: Exception) {
+                loading.value = true
+            }
+        }
     }
 }

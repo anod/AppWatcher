@@ -1,7 +1,9 @@
 package finsky.api.model
 
 import com.android.volley.Request
+import com.android.volley.Response
 import finsky.api.DfeApi
+import finsky.protos.nano.Messages
 import finsky.protos.nano.Messages.ListResponse
 
 
@@ -11,8 +13,11 @@ class DfeList(private val dfeApi: DfeApi,
               filter: ((Document?) -> Boolean))
     : ContainerList<ListResponse>(initialListUrl, autoLoadNextPage, filter) {
 
-    override fun makeRequest(url: String): Request<*> {
-        return this.dfeApi.list(url, this, this)
+    override val url: String
+        get() = ""
+
+    override fun makeRequest(url: String, responseListener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener): Request<*> {
+        return this.dfeApi.list(url, responseListener, errorListener)
     }
 
 }

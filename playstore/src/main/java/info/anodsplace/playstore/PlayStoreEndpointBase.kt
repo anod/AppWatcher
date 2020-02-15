@@ -3,17 +3,11 @@ package info.anodsplace.playstore
 import android.accounts.Account
 import android.content.Context
 import com.android.volley.RequestQueue
-
-import com.android.volley.Response
-import com.android.volley.VolleyError
 import finsky.api.DfeApi
-import finsky.api.DfeApiContext
 import finsky.api.DfeApiImpl
 import finsky.api.model.DfeModel
-import finsky.api.model.OnDataChangedListener
-import finsky.config.ContentLevel
-
-import info.anodsplace.framework.AppLog
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * @author alex
@@ -25,63 +19,42 @@ interface DeviceInfoProvider {
     val simOperator: String
 }
 
-abstract class PlayStoreEndpointBase(
+abstract class PlayStoreEndpointBase<D : DfeModel>(
         context: Context,
         private val requestQueue: RequestQueue,
         private val deviceInfoProvider: DeviceInfoProvider,
-        private val account: Account) : PlayStoreEndpoint, Response.ErrorListener, OnDataChangedListener {
+        private val account: Account) : PlayStoreEndpoint {
 
     protected val context: Context = context.applicationContext
     override var authToken = ""
-    override var listener: PlayStoreEndpoint.Listener? = null
-    var data: DfeModel? = null
+    var data: D? = null
         internal set
+
     val dfeApi: DfeApi by lazy {
-        val deviceId = deviceInfoProvider.deviceId
-        val simOperator = deviceInfoProvider.simOperator
-        val dfeApiContext = DfeApiContext(context, account, authToken, deviceId, simOperator, ContentLevel().dfeValue)
-        DfeApiImpl(requestQueue, dfeApiContext)
+        DfeApiImpl(requestQueue, context, account, authToken, deviceInfoProvider)
     }
 
-    override fun startAsync() {
+    override suspend fun start(): D = withContext(Dispatchers.Main) {
         init()
-        executeAsync()
+        beforeRequest(data!!)
+        data!!.execute()
+        return@withContext data!!
     }
 
-    override fun startSync() {
-        init()
-        executeSync()
-    }
+    protected abstract fun createDfeModel(): D
+    abstract fun beforeRequest(data: D)
 
-    protected abstract fun executeAsync()
-    protected abstract fun executeSync()
-
-    private fun init() {
+    internal fun init() {
         if (this.authToken.isBlank()) {
-            AppLog.e("Authentication token is empty")
+            throw IllegalStateException("Auth token is empty")
         }
         if (data == null) {
             data = createDfeModel()
-            data!!.addDataChangedListener(this)
-            data!!.addErrorListener(this)
         }
     }
 
     override fun reset() {
-        data?.unregisterAll()
         data = null
     }
 
-    protected abstract fun createDfeModel(): DfeModel
-
-    override fun onDataChanged() {
-        if (data!!.isReady) {
-            listener?.onDataChanged(data!!)
-        }
-    }
-
-    override fun onErrorResponse(error: VolleyError) {
-        AppLog.e("ErrorResponse: " + error.message, error)
-        listener?.onErrorResponse(error)
-    }
 }

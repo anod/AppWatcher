@@ -1,6 +1,6 @@
 package info.anodsplace.playstore
 
-import com.android.volley.VolleyError
+import android.util.SparseArray
 import finsky.api.model.DfeModel
 
 /**
@@ -9,18 +9,23 @@ import finsky.api.model.DfeModel
  * @date 27/08/2016.
  */
 
-class CompositeStateEndpoint(private val compositeListener: Listener) : CompositeEndpoint(), PlayStoreEndpoint.Listener {
+class CompositeStateEndpoint() : PlayStoreEndpoint {
 
-    override fun put(id: Int, endpoint: PlayStoreEndpoint) {
-        super.put(id, endpoint)
+    private val endpoints = SparseArray<PlayStoreEndpoint>()
+
+    fun put(id: Int, endpoint: PlayStoreEndpoint) {
+        endpoints.put(id, endpoint)
         if (activeId == -1) {
             activeId = id
         }
-        endpoint.listener = this
     }
 
-    val active: PlayStoreEndpointBase
-        get() = get(activeId) as PlayStoreEndpointBase
+    operator fun get(id: Int): PlayStoreEndpoint {
+        return endpoints.get(id)!!
+    }
+
+    val active: PlayStoreEndpoint
+        get() = endpoints[activeId]
 
     var activeId = -1
 
@@ -29,24 +34,19 @@ class CompositeStateEndpoint(private val compositeListener: Listener) : Composit
         return this
     }
 
-    override fun onDataChanged(data: DfeModel) {
-        compositeListener.onDataChanged(activeId, active)
+    override var authToken: String = ""
+        set(value) {
+            field = value
+            (0 until endpoints.size()).map { endpoints.valueAt(it) }.forEach { it.authToken = authToken }
+        }
+
+    override suspend fun start(): DfeModel {
+        return active.start()
     }
 
-    override fun onErrorResponse(error: VolleyError) {
-        compositeListener.onErrorResponse(activeId, active, error)
-    }
-
-    override fun startAsync() {
-        active.startAsync()
-    }
-
-    override fun startSync() {
-        active.startSync()
-    }
-
-    interface Listener {
-        fun onDataChanged(id: Int, endpoint: PlayStoreEndpointBase)
-        fun onErrorResponse(id: Int, endpoint: PlayStoreEndpointBase, error: VolleyError)
+    override fun reset() {
+        (0 until endpoints.size())
+                .map { endpoints.valueAt(it) }
+                .forEach { it.reset() }
     }
 }

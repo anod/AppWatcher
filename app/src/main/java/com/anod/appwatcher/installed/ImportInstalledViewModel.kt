@@ -7,7 +7,7 @@ import com.anod.appwatcher.AppComponent
 import com.anod.appwatcher.AppWatcherApplication
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.getInstalledPackages
-
+import kotlinx.coroutines.launch
 
 class ImportInstalledViewModel(application: android.app.Application) : AndroidViewModel(application), Observer<ImportStatus> {
 
@@ -28,7 +28,7 @@ class ImportInstalledViewModel(application: android.app.Application) : AndroidVi
     private val appComponent: AppComponent
         get() = getApplication<AppWatcherApplication>().appComponent
 
-    private var importManager: ImportBulkManager? = ImportBulkManager(application, viewModelScope)
+    private var importManager: ImportBulkManager? = ImportBulkManager(application)
     internal val dataProvider: ImportResourceProvider by lazy { ImportResourceProvider(application, InstalledApps.MemoryCache(InstalledApps.PackageManager(application.packageManager))) }
 
     init {
@@ -49,7 +49,9 @@ class ImportInstalledViewModel(application: android.app.Application) : AndroidVi
     }
 
     fun import(account: Account, token: String) {
-        importManager!!.start(account, token)
+        viewModelScope.launch {
+            importManager!!.start(account, token)
+        }
     }
 
     fun addPackage(packageName: String, versionCode: Int): Boolean {

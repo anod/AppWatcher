@@ -3,6 +3,8 @@ package info.anodsplace.playstore
 import android.accounts.Account
 import android.content.Context
 import com.android.volley.RequestQueue
+import finsky.api.DfeApi
+import finsky.api.DfeApiImpl
 import finsky.api.model.DfeModel
 import finsky.api.model.DfeSearch
 
@@ -11,32 +13,35 @@ import finsky.api.model.DfeSearch
  * *
  * @date 2015-02-21
  */
-class SearchEndpoint(context: Context, requestQueue: RequestQueue, deviceInfoProvider: DeviceInfoProvider, account: Account, val query: String, private val autoLoadNextPage: Boolean)
-        : PlayStoreEndpointBase(context, requestQueue, deviceInfoProvider, account) {
+class SearchEndpoint(
+        context: Context,
+        requestQueue: RequestQueue,
+        deviceInfoProvider: DeviceInfoProvider,
+        account: Account,
+        val query: String,
+        private val autoLoadNextPage: Boolean
+) : PlayStoreEndpoint {
+    override var authToken = ""
 
-    var searchData: DfeSearch?
-        get() = data as? DfeSearch
-        set(value) {
-            this.data = value
-        }
+    var data: DfeSearch? = null
+        internal set
+
+    private val dfeApi: DfeApi by lazy {
+        DfeApiImpl(requestQueue, context, account, authToken, deviceInfoProvider)
+    }
 
     override fun reset() {
-        searchData?.resetItems()
-        super.reset()
+        data?.resetItems()
+        data = null
     }
 
     val count: Int
-        get() = searchData?.count ?: 0
+        get() = data?.count ?: 0
 
-    override fun executeAsync() {
-        searchData?.startLoadItems()
-    }
-
-    override fun executeSync() {
-        throw UnsupportedOperationException("Not implemented")
-    }
-
-    override fun createDfeModel(): DfeModel {
-        return DfeSearch(dfeApi, query, autoLoadNextPage, AppDetailsFilter.predicate)
+    override suspend fun start(): DfeModel {
+        data = DfeSearch(dfeApi, query, autoLoadNextPage, AppDetailsFilter.predicate).also {
+            it.startLoadItems()
+        }
+        return data!!
     }
 }

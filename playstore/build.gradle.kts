@@ -2,15 +2,15 @@ import org.jetbrains.kotlin.config.KotlinCompilerVersion
 
 plugins {
     id("com.android.library")
-    kotlin("android" )
+    kotlin("android")
 }
 
 repositories {
     mavenCentral()
     jcenter()
-    maven( url = "https://jitpack.io" )
-    maven( url = "https://oss.sonatype.org/content/repositories/snapshots/" )
-    maven( url = "https://maven.google.com" )
+    maven(url = "https://jitpack.io")
+    maven(url = "https://oss.sonatype.org/content/repositories/snapshots/")
+    maven(url = "https://maven.google.com")
     google()
 }
 
@@ -53,5 +53,7 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.3.1")
 
     implementation(project(":framework"))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.3")
     implementation(kotlin("stdlib-jdk7", KotlinCompilerVersion.VERSION))
 }

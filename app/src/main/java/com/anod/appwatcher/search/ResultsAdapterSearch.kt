@@ -16,11 +16,10 @@ class ResultsAdapterSearch(context: Context, viewModel: SearchViewModel)
 
     override fun document(position: Int): Document {
         val isLastPosition = endpoint.count - 1 == position
-        return endpoint.searchData!!.getItem(position, isLastPosition)!!
+        return endpoint.data!!.getItem(position, isLastPosition)!!
     }
 
     override fun getItemCount(): Int {
         return endpoint.count
     }
-
 }

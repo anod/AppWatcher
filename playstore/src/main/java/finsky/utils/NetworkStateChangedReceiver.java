@@ -27,7 +27,8 @@ public final class NetworkStateChangedReceiver extends BroadcastReceiver {
 
     private static void updateCachedNetworkInfo(Context context) {
         synchronized (sLock) {
-            sCachedNetworkInfo = ((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
+            sCachedNetworkInfo = ((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE))
+                    .getActiveNetworkInfo();
         }
     }
 

@@ -24,13 +24,11 @@ import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.extractUploadDate
 import finsky.api.BulkDocId
-import finsky.api.model.DfeModel
 import finsky.api.model.Document
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.playstore.BulkDetailsEndpoint
-import info.anodsplace.playstore.PlayStoreEndpoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.*
@@ -40,7 +38,7 @@ import java.util.*
  *  @date 6/3/2017
  */
 
-class UpdateCheck(private val context: ApplicationContext) : PlayStoreEndpoint.Listener {
+class UpdateCheck(private val context: ApplicationContext) {
 
     class UpdatedApp(
             val packageName: String,
@@ -154,12 +152,6 @@ class UpdateCheck(private val context: ApplicationContext) : PlayStoreEndpoint.L
         return@withContext updatedApps.size
     }
 
-    override fun onDataChanged(data: DfeModel) {
-    }
-
-    override fun onErrorResponse(error: VolleyError) {
-    }
-
     @Throws(RemoteException::class)
     private suspend fun doSync(lastUpdatesViewed: Boolean, authToken: String, account: Account): List<UpdatedApp> {
 
@@ -178,10 +170,12 @@ class UpdateCheck(private val context: ApplicationContext) : PlayStoreEndpoint.L
             list.associateBy { it.app.packageName }
         }.forEach { localApps ->
             val docIds = localApps.map { BulkDocId(it.key, it.value.app.versionNumber) }
-            val endpoint = createEndpoint(docIds, authToken, account)
+            val endpoint = BulkDetailsEndpoint(context.actual, Application.provide(context).requestQueue, Application.provide(context).deviceInfo, account, docIds).also {
+                it.authToken = authToken
+            }
             AppLog.d("Sending chunk... $docIds")
             try {
-                endpoint.startSync()
+                endpoint.start()
             } catch (e: VolleyError) {
                 AppLog.e("Fetching of bulk updates failed ${e.message ?: ""}", "UpdateCheck")
             }
@@ -373,15 +367,7 @@ class UpdateCheck(private val context: ApplicationContext) : PlayStoreEndpoint.L
         } catch (e: Throwable) {
             AppLog.e("AuthTokenBlocking request exception: " + e.message, e)
         }
-
         return authToken
-    }
-
-    private fun createEndpoint(docIds: List<BulkDocId>, authToken: String, account: Account): BulkDetailsEndpoint {
-        val endpoint = BulkDetailsEndpoint(context.actual, Application.provide(context).requestQueue, Application.provide(context).deviceInfo, account, docIds)
-        endpoint.authToken = authToken
-        endpoint.listener = this
-        return endpoint
     }
 
     private fun fillMissingData(marketApp: Document, localApp: App, values: ContentValues) {

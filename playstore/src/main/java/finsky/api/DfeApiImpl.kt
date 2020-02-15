@@ -1,10 +1,13 @@
 package finsky.api
 
+import android.accounts.Account
+import android.content.Context
 import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.Response
 import finsky.protos.nano.Messages
 import finsky.protos.nano.Messages.Details
+import info.anodsplace.playstore.DeviceInfoProvider
 
 /**
  * @author alex
@@ -12,6 +15,9 @@ import finsky.protos.nano.Messages.Details
  */
 class DfeApiImpl(private val queue: RequestQueue, private val apiContext: DfeApiContext) : DfeApi {
 
+    constructor(queue: RequestQueue, context: Context, account: Account, authToken: String, deviceInfo: DeviceInfoProvider)
+            : this(queue, DfeApiContext(context, account, authToken, deviceInfo))
+    
     override fun search(url: String, responseListener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener): Request<*> {
         val dfeRequest = DfeRequest(url, this.apiContext, responseListener, errorListener)
         return this.queue.add(dfeRequest)

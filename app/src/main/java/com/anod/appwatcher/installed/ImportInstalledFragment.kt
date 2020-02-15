@@ -88,7 +88,6 @@ class ImportInstalledFragment : Fragment() {
                 activity?.finish()
             } else {
                 startImport()
-
             }
         }
 

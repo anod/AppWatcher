@@ -1,17 +1,20 @@
 package finsky.api.model
 
+import com.android.volley.Request
 import com.android.volley.Response
 import finsky.api.BulkDocId
 import finsky.api.DfeApi
 import finsky.protos.nano.Messages
 import finsky.protos.nano.Messages.Details
 
-class DfeBulkDetails(private val api: DfeApi,private val filter: FilterPredicate) : DfeRequestModel() {
+class DfeBulkDetails(private val api: DfeApi, private val filter: FilterPredicate) : DfeModel() {
     private var bulkDetailsResponse: Details.BulkDetailsResponse? = null
     var docIds: List<BulkDocId> = listOf()
+    override val url: String
+        get() = ""
 
-    override fun execute(responseListener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener) {
-        api.details(docIds, true, responseListener, errorListener)
+    override fun makeRequest(url: String, responseListener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener): Request<*> {
+        return api.details(docIds, true, responseListener, errorListener)
     }
 
     val documents: List<Document>
@@ -37,7 +40,5 @@ class DfeBulkDetails(private val api: DfeApi,private val filter: FilterPredicate
 
     override fun onResponse(responseWrapper: Messages.Response.ResponseWrapper) {
         this.bulkDetailsResponse = responseWrapper.payload.bulkDetailsResponse
-        this.notifyDataSetChanged()
     }
-
 }

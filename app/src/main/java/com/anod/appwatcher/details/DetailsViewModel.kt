@@ -2,7 +2,6 @@ package com.anod.appwatcher.details
 
 import android.accounts.Account
 import androidx.lifecycle.*
-import com.android.volley.VolleyError
 import com.anod.appwatcher.AppComponent
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.database.AppListTable
@@ -19,7 +18,6 @@ import finsky.api.model.Document
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.playstore.DetailsEndpoint
-import info.anodsplace.playstore.PlayStoreEndpoint
 import kotlinx.coroutines.launch
 
 typealias TagMenuItem = Pair<Tag, Boolean>
@@ -29,7 +27,7 @@ object LocalComplete : ChangelogLoadState()
 class RemoteComplete(val error: Boolean) : ChangelogLoadState()
 object Complete : ChangelogLoadState()
 
-class DetailsViewModel(application: android.app.Application) : AndroidViewModel(application), PlayStoreEndpoint.Listener {
+class DetailsViewModel(application: android.app.Application) : AndroidViewModel(application) {
 
     val context: ApplicationContext
         get() = ApplicationContext(getApplication())
@@ -78,7 +76,7 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
     var recentChange = AppChange(appId.value!!, 0, "", "", "", false)
 
     override fun onCleared() {
-        detailsEndpoint.listener = null
+
     }
 
     fun loadApp() {
@@ -119,12 +117,18 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
             this.updateChangelogState(RemoteComplete(true))
         } else {
             detailsEndpoint.authToken = this.authToken
-            detailsEndpoint.listener = this
-            detailsEndpoint.startAsync()
+            viewModelScope.launch {
+                try {
+                    val model = detailsEndpoint.start()
+                    onDataChanged(model)
+                } catch (e: Exception) {
+                    onErrorResponse(e)
+                }
+            }
         }
     }
 
-    override fun onDataChanged(data: DfeModel) {
+    private fun onDataChanged(data: DfeModel) {
         val details = data as DfeDetails
         val appDetails = details.document?.appDetails
         if (appDetails != null) {
@@ -153,7 +157,7 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
         }
     }
 
-    override fun onErrorResponse(error: VolleyError) {
+    private fun onErrorResponse(error: Exception) {
         AppLog.e("Cannot fetch details for $appId - $error")
         this.updateChangelogState(RemoteComplete(true))
     }

@@ -3,37 +3,43 @@ package info.anodsplace.playstore
 import android.accounts.Account
 import android.content.Context
 import com.android.volley.RequestQueue
+import finsky.api.DfeApi
+import finsky.api.DfeApiImpl
 import finsky.api.model.DfeList
-import finsky.api.model.DfeModel
 import finsky.api.model.FilterComposite
 import finsky.api.model.FilterPredicate
 
 /**
  * @author Alex Gavrishev
- * *
  * @date 16/12/2016.
  */
-class WishListEndpoint(context: Context, requestQueue: RequestQueue, deviceInfoProvider: DeviceInfoProvider, account: Account, private val autoloadNext: Boolean)
-    : PlayStoreEndpointBase(context, requestQueue, deviceInfoProvider, account) {
+class WishListEndpoint(
+        context: Context,
+        requestQueue: RequestQueue,
+        deviceInfoProvider: DeviceInfoProvider,
+        account: Account,
+        private val autoloadNext: Boolean) : PlayStoreEndpoint {
+    override var authToken = ""
 
-    var listData: DfeList?
-        get() = data as? DfeList
-        set(value) {
-            super.data = value
-        }
+    private val dfeApi: DfeApi by lazy {
+        DfeApiImpl(requestQueue, context, account, authToken, deviceInfoProvider)
+    }
+
+    var data: DfeList? = null
+        internal set
 
     override fun reset() {
-        listData?.resetItems()
-        super.reset()
+        data?.resetItems()
+        data = null
     }
 
     val count: Int
-        get() = listData?.count ?: 0
+        get() = data?.count ?: 0
 
     var nameFilter = ""
         set(value) {
             field = value
-            listData = null
+            data = null
             reset()
         }
 
@@ -48,16 +54,11 @@ class WishListEndpoint(context: Context, requestQueue: RequestQueue, deviceInfoP
             )).predicate
         }
 
-    override fun executeAsync() {
-        listData?.startLoadItems()
-    }
-
-    override fun executeSync() {
-        throw UnsupportedOperationException("Not implemented")
-    }
-
-    override fun createDfeModel(): DfeModel {
-        return DfeList(dfeApi, dfeApi.createLibraryUrl(backendId, libraryId, 7, null), autoloadNext, predicate)
+    override suspend fun start(): DfeList {
+        data = DfeList(dfeApi, dfeApi.createLibraryUrl(backendId, libraryId, 7, null), autoloadNext, predicate).also {
+            it.startLoadItems()
+        }
+        return data!!
     }
 
     companion object {

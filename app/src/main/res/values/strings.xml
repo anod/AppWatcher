@@ -198,6 +198,7 @@
     <string name="open_play_store">Open play store</string>
     <string name="tags_list_is_empty">Tags list is empty</string>
     <string name="whatched">Whatched</string>
+    <string name="tag_color">Tag color</string>
     <array name="adaptive_icon_style_names">
         <item>None</item>
         <item>Square</item>
