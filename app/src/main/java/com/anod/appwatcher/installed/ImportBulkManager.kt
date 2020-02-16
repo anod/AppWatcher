@@ -26,7 +26,7 @@ internal class ImportBulkManager(private val context: Context) {
 
     private var account: Account? = null
     private var authSubToken: String = ""
-    
+
     fun reset() {
         listsDocIds = mutableListOf()
         currentBulk = 0
@@ -40,7 +40,7 @@ internal class ImportBulkManager(private val context: Context) {
         if (currentList == null) {
             currentList = ArrayList()
             listsDocIds.add(currentList)
-        } else if (currentList.size > BULK_SIZE) {
+        } else if (currentList.size >= BULK_SIZE) {
             currentBulk++
             currentList = ArrayList()
             listsDocIds.add(currentList)

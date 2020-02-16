@@ -91,14 +91,19 @@ class ImportInstalledFragment : Fragment() {
             }
         }
 
-        viewModel.installedPackages.observe(this, Observer { data ->
+        viewModel.installedPackages.observe(viewLifecycleOwner, Observer { data ->
             progressBar.visibility = View.GONE
             val downloadedAdapter = list.adapter as ImportAdapter
             downloadedAdapter.installedPackages = data.sortedWith(AppTitleComparator(1))
         })
 
-        viewModel.progress.observe(this) {
-            when (it) {
+        viewModel.progress.observe(viewLifecycleOwner) { status ->
+            when (status) {
+                is ImportProgress -> {
+                    (list.adapter as? ImportAdapter)?.let { adapter ->
+                        adapter.notifyDataSetChanged()
+                    }
+                }
                 is ImportFinished -> button2.setText(android.R.string.ok)
             }
         }

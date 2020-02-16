@@ -91,6 +91,7 @@
     <string name="cannot_load_app">Cannot load app details: \'%s\'</string>
     <string name="uninstall">Uninstall</string>
     <string name="watch_list_is_empty">Watch list is empty</string>
+    <string name="wish_list_is_empty">Wish list is empty</string>
     <string name="search_for_an_app">Search for an app</string>
     <string name="import_installed">Import installed</string>
     <string name="share_from_play_store">Share from Play Store</string>

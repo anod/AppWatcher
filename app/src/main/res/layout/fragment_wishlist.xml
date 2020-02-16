@@ -1,45 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:tools="http://schemas.android.com/tools"
-             android:id="@+id/activity_frame"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             android:paddingTop="8dp"
-             android:paddingBottom="4dp">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_frame"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingTop="8dp"
+    android:paddingBottom="4dp">
 
     <info.anodsplace.framework.widget.recyclerview.EndlessRecyclerView
-        android:id="@android:id/list"
+        android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:listitem="@layout/list_item_market_app"
-        />
+        tools:listitem="@layout/list_item_market_app" />
 
     <TextView
-        android:id="@android:id/empty"
+        android:id="@+id/empty"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_margin="25dip"
         android:gravity="center_horizontal"
-        android:text="@string/search_for_app" />
+        android:text="@string/wish_list_is_empty" />
 
-    <LinearLayout
+    <ProgressBar
         android:id="@+id/loading"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:gravity="center_vertical"
-        android:orientation="horizontal">
-
-        <ProgressBar
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/loading" />
-    </LinearLayout>
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
     <LinearLayout
         android:id="@+id/retryView"

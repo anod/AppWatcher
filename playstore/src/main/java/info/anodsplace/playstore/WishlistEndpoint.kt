@@ -8,6 +8,9 @@ import finsky.api.DfeApiImpl
 import finsky.api.model.DfeList
 import finsky.api.model.FilterComposite
 import finsky.api.model.FilterPredicate
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 /**
  * @author Alex Gavrishev
@@ -54,11 +57,17 @@ class WishListEndpoint(
             )).predicate
         }
 
-    override suspend fun start(): DfeList {
+    override suspend fun start(): DfeList = suspendCancellableCoroutine { continuation ->
         data = DfeList(dfeApi, dfeApi.createLibraryUrl(backendId, libraryId, 7, null), autoloadNext, predicate).also {
+            it.onFirstResponse = { error ->
+                if (error == null) {
+                    continuation.resume(it)
+                } else {
+                    continuation.resumeWithException(error)
+                }
+            }
             it.startLoadItems()
         }
-        return data!!
     }
 
     companion object {

@@ -22,6 +22,7 @@ abstract class PaginatedList<T, D>(
     private var isMoreAvailable: Boolean = true
     private val windowDistance: Int = 12
     private var isInErrorState = false
+    var onFirstResponse: ((error: VolleyError?) -> Unit)? = null
 
     constructor(url: String, autoLoadNextPage: Boolean)
             : this(mutableListOf(UrlOffsetPair(0, url)), autoLoadNextPage)
@@ -116,6 +117,10 @@ abstract class PaginatedList<T, D>(
     override fun onErrorResponse(error: VolleyError) {
         this.isInErrorState = true
         this.clearTransientState()
+        onFirstResponse?.let {
+            it.invoke(error)
+            onFirstResponse = null
+        }
     }
 
     override fun onResponse(responseWrapper: Messages.Response.ResponseWrapper) {
@@ -144,6 +149,10 @@ abstract class PaginatedList<T, D>(
         }
         this.isMoreAvailable = moreAvailable && autoLoadNextPage
         this.clearTransientState()
+        onFirstResponse?.let {
+            it.invoke(null)
+            onFirstResponse = null
+        }
     }
 
     fun resetItems() {

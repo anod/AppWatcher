@@ -4,16 +4,15 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
-import info.anodsplace.framework.R
-
 import info.anodsplace.framework.AppLog
+import info.anodsplace.framework.R
 import java.io.Serializable
 
 /**
  * @author Alex Gavrishev
  * @date 16/12/2016.
  */
-open class FragmentFactory(val tag: String): Serializable {
+open class FragmentFactory(val tag: String) : Serializable {
 
     open fun create(): Fragment? {
         return null
@@ -25,7 +24,8 @@ class FragmentToolbarActivity : ToolbarActivity() {
     override val themeRes: Int
         get() = intentExtras.getInt("themeRes", 0)
     override val themeColors: CustomThemeColors
-        get() = intentExtras.getParcelable<CustomThemeColors?>("themeColors") ?: CustomThemeColors.none
+        get() = intentExtras.getParcelable<CustomThemeColors?>("themeColors")
+                ?: CustomThemeColors.none
 
     override val layoutResource: Int
         get() = R.layout.activity_fragment
@@ -44,7 +44,7 @@ class FragmentToolbarActivity : ToolbarActivity() {
             f.arguments = intent.getBundleExtra(EXTRA_ARGUMENTS)
 
             supportFragmentManager.beginTransaction()
-                    .add(R.id.activity_content, f, factory.tag)
+                    .replace(R.id.activity_content, f, factory.tag)
                     .commit()
         }
     }
