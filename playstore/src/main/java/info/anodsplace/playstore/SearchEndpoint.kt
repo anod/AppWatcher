@@ -7,9 +7,11 @@ import finsky.api.DfeApi
 import finsky.api.DfeApiImpl
 import finsky.api.model.DfeModel
 import finsky.api.model.DfeSearch
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
+import finsky.api.model.ListAvailable
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.withContext
 
 /**
  * @author alex
@@ -36,21 +38,25 @@ class SearchEndpoint(
     override fun reset() {
         data?.resetItems()
         data = null
+        _updates = null
     }
 
     val count: Int
         get() = data?.count ?: 0
 
-    override suspend fun start(): DfeModel = suspendCancellableCoroutine { continuation ->
-        data = DfeSearch(dfeApi, query, autoLoadNextPage, AppDetailsFilter.predicate).also {
-            it.onFirstResponse = { error ->
-                if (error == null) {
-                    continuation.resume(it)
-                } else {
-                    continuation.resumeWithException(error)
-                }
+    private var _updates: Flow<ListAvailable>? = null
+    val updates: Flow<ListAvailable>
+        get() {
+            if (_updates == null) {
+                _updates = data!!.updates.consumeAsFlow()
             }
+            return _updates!!
+        }
+
+    override suspend fun start(): DfeModel = withContext(Dispatchers.Main) {
+        data = DfeSearch(dfeApi, query, autoLoadNextPage, AppDetailsFilter.predicate).also {
             it.startLoadItems()
         }
+        return@withContext data!!
     }
 }

@@ -15,6 +15,7 @@ import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.search.ResultsViewModel
 import finsky.api.model.DfeList
 import info.anodsplace.playstore.WishListEndpoint
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class WishListViewModel(application: Application) : AndroidViewModel(application), ResultsViewModel {
@@ -68,7 +69,13 @@ class WishListViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             try {
                 val model = endpoint!!.start()
-                listData.value = model
+                endpoint!!.updates.collect {
+                    if (it.error == null) {
+                        listData.value = model
+                    } else {
+                        loading.value = true
+                    }
+                }
             } catch (e: Exception) {
                 loading.value = true
             }

@@ -1,15 +1,12 @@
 package finsky.api.model
 
 import android.util.SparseArray
-
-import finsky.protos.nano.Messages.AppDetails
-import finsky.protos.nano.Messages.Common
-import finsky.protos.nano.Messages.DocV2
+import finsky.protos.Messages.*
 
 class Document(private val doc: DocV2) {
 
     val appDetails: AppDetails
-        get() = this.doc.details?.appDetails ?: AppDetails()
+        get() = this.doc.details.appDetails
 
     val title: String
         get() = this.doc.title
@@ -29,11 +26,11 @@ class Document(private val doc: DocV2) {
     // Type 1 ?
     val offer: Common.Offer
         get() {
-            var offer = this.doc.offer.firstOrNull { it.offerType == Common.Offer.TYPE_1 }
+            var offer = this.doc.offerList.firstOrNull { it.offerType == Common.Offer.TYPE.TYPE_1_VALUE }
             if (offer == null) {
-                offer = Common.Offer()
+                offer = Common.Offer.getDefaultInstance()
             }
-            return offer
+            return offer!!
         }
 
     val iconUrl: String?
@@ -45,14 +42,14 @@ class Document(private val doc: DocV2) {
         }
 
     private val imageTypeMap: SparseArray<MutableList<Common.Image>> by lazy {
-            val typeMap = SparseArray<MutableList<Common.Image>>()
-            for (image2 in this.doc.image) {
-                val imageType = image2.imageType
-                if (typeMap.get(imageType) == null) {
-                    typeMap.put(imageType, mutableListOf())
-                }
-                typeMap.get(imageType).add(image2)
+        val typeMap = SparseArray<MutableList<Common.Image>>()
+        for (image2 in this.doc.imageList) {
+            val imageType = image2.imageType
+            if (typeMap.get(imageType) == null) {
+                typeMap.put(imageType, mutableListOf())
             }
-            typeMap
+            typeMap.get(imageType).add(image2)
         }
+        typeMap
+    }
 }

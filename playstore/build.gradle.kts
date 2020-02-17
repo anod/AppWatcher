@@ -48,7 +48,7 @@ dependencies {
     implementation(files("libs/keyczar-0.71g-090613.jar"))
     implementation("androidx.collection:collection:1.1.0")
     implementation("androidx.collection:collection-ktx:1.1.0")
-    api(group = "com.google.protobuf.nano", name = "protobuf-javanano", version = "3.2.0rc2")
+    api(group = "com.google.protobuf", name = "protobuf-javalite", version = "3.9.1")
     api("com.android.volley:volley:1.1.0")
     implementation("com.squareup.okhttp3:okhttp:4.3.1")
 

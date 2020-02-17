@@ -2,7 +2,7 @@ package finsky.api
 
 import android.util.Base64
 
-import finsky.protos.nano.Messages
+import finsky.protos.Messages
 
 object DfeUtils {
 
@@ -14,10 +14,10 @@ object DfeUtils {
         if (null == payload) {
             return null
         }
-        if (payload.searchResponse != null && payload.searchResponse.doc.isNotEmpty()) {
-            return getRootDoc(payload.searchResponse.doc[0])
-        } else if (payload.listResponse != null && payload.listResponse.doc.isNotEmpty()) {
-            return getRootDoc(payload.listResponse.doc[0])
+        if (payload.searchResponse.docList.isNotEmpty()) {
+            return getRootDoc(payload.searchResponse.getDoc(0))
+        } else if (payload.listResponse != null && payload.listResponse.docList.isNotEmpty()) {
+            return getRootDoc(payload.listResponse.getDoc(0))
         }
         return null
     }
@@ -26,7 +26,7 @@ object DfeUtils {
         if (isRootDoc(doc)) {
             return doc
         }
-        for (child in doc.child) {
+        for (child in doc.childList) {
             val root = getRootDoc(child)
             if (null != root) {
                 return root
@@ -36,6 +36,6 @@ object DfeUtils {
     }
 
     private fun isRootDoc(doc: Messages.DocV2): Boolean {
-        return doc.child.isNotEmpty() && doc.child[0].backendId == 3 && doc.child[0].docType == 1
+        return doc.childList.isNotEmpty() && doc.getChild(0).backendId == 3 && doc.getChild(0).docType == 1
     }
 }

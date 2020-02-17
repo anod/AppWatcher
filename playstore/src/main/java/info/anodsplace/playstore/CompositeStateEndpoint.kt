@@ -2,6 +2,8 @@ package info.anodsplace.playstore
 
 import android.util.SparseArray
 import finsky.api.model.DfeModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * @author Alex Gavrishev
@@ -12,6 +14,7 @@ import finsky.api.model.DfeModel
 class CompositeStateEndpoint() : PlayStoreEndpoint {
 
     private val endpoints = SparseArray<PlayStoreEndpoint>()
+    var onStart: ((Int, PlayStoreEndpoint) -> Unit)? = null
 
     fun put(id: Int, endpoint: PlayStoreEndpoint) {
         endpoints.put(id, endpoint)
@@ -24,7 +27,7 @@ class CompositeStateEndpoint() : PlayStoreEndpoint {
         return endpoints.get(id)!!
     }
 
-    val active: PlayStoreEndpoint
+    private val active: PlayStoreEndpoint
         get() = endpoints[activeId]
 
     var activeId = -1
@@ -40,8 +43,10 @@ class CompositeStateEndpoint() : PlayStoreEndpoint {
             (0 until endpoints.size()).map { endpoints.valueAt(it) }.forEach { it.authToken = authToken }
         }
 
-    override suspend fun start(): DfeModel {
-        return active.start()
+    override suspend fun start(): DfeModel = withContext(Dispatchers.Main) {
+        val model = active.start()
+        onStart?.invoke(activeId, active)
+        return@withContext model
     }
 
     override fun reset() {

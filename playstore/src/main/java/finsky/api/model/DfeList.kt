@@ -3,8 +3,8 @@ package finsky.api.model
 import com.android.volley.Request
 import com.android.volley.Response
 import finsky.api.DfeApi
-import finsky.protos.nano.Messages
-import finsky.protos.nano.Messages.ListResponse
+import finsky.protos.Messages
+import finsky.protos.Messages.ListResponse
 
 
 class DfeList(private val dfeApi: DfeApi,

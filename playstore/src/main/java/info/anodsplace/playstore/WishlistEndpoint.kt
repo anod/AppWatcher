@@ -8,9 +8,11 @@ import finsky.api.DfeApiImpl
 import finsky.api.model.DfeList
 import finsky.api.model.FilterComposite
 import finsky.api.model.FilterPredicate
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
+import finsky.api.model.ListAvailable
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.withContext
 
 /**
  * @author Alex Gavrishev
@@ -33,6 +35,7 @@ class WishListEndpoint(
 
     override fun reset() {
         data?.resetItems()
+        _updates = null
         data = null
     }
 
@@ -57,17 +60,20 @@ class WishListEndpoint(
             )).predicate
         }
 
-    override suspend fun start(): DfeList = suspendCancellableCoroutine { continuation ->
-        data = DfeList(dfeApi, dfeApi.createLibraryUrl(backendId, libraryId, 7, null), autoloadNext, predicate).also {
-            it.onFirstResponse = { error ->
-                if (error == null) {
-                    continuation.resume(it)
-                } else {
-                    continuation.resumeWithException(error)
-                }
+    private var _updates: Flow<ListAvailable>? = null
+    val updates: Flow<ListAvailable>
+        get() {
+            if (_updates == null) {
+                _updates = data!!.updates.consumeAsFlow()
             }
+            return _updates!!
+        }
+
+    override suspend fun start(): DfeList = withContext(Dispatchers.Main) {
+        data = DfeList(dfeApi, dfeApi.createLibraryUrl(backendId, libraryId, 7, null), autoloadNext, predicate).also {
             it.startLoadItems()
         }
+        return@withContext data!!
     }
 
     companion object {

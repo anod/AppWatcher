@@ -3,8 +3,8 @@ package finsky.api.model
 import com.android.volley.Request
 import com.android.volley.Response
 import finsky.api.DfeApi
-import finsky.protos.nano.Messages
-import finsky.protos.nano.Messages.Details
+import finsky.protos.Messages
+import finsky.protos.Messages.Details
 
 class DfeDetails(private val api: DfeApi) : DfeModel() {
     private var detailsResponse: Details.DetailsResponse? = null

@@ -5,8 +5,8 @@ import android.content.Context
 import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.Response
-import finsky.protos.nano.Messages
-import finsky.protos.nano.Messages.Details
+import finsky.protos.Messages
+import finsky.protos.Messages.Details
 import info.anodsplace.playstore.DeviceInfoProvider
 
 /**
@@ -17,7 +17,7 @@ class DfeApiImpl(private val queue: RequestQueue, private val apiContext: DfeApi
 
     constructor(queue: RequestQueue, context: Context, account: Account, authToken: String, deviceInfo: DeviceInfoProvider)
             : this(queue, DfeApiContext(context, account, authToken, deviceInfo))
-    
+
     override fun search(url: String, responseListener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener): Request<*> {
         val dfeRequest = DfeRequest(url, this.apiContext, responseListener, errorListener)
         return this.queue.add(dfeRequest)
@@ -29,9 +29,10 @@ class DfeApiImpl(private val queue: RequestQueue, private val apiContext: DfeApi
     }
 
     override fun details(docIds: List<BulkDocId>, includeDetails: Boolean, listener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener): Request<*> {
-        val bulkDetailsRequest = Details.BulkDetailsRequest()
-        bulkDetailsRequest.includeDetails = true
-        bulkDetailsRequest.docid = docIds.map { it.packageName }.sorted().toTypedArray()
+        val bulkDetailsRequest = Details.BulkDetailsRequest.newBuilder()
+                .setIncludeDetails(true)
+                .addAllDocid(docIds.map { it.packageName }.sorted())
+                .build()
 //        bulkDetailsRequest.docs = docIds.sorted().map {
 //            val doc = Details.BulkDetailsRequestDoc()
 //            doc.docid = it.packageName
@@ -43,7 +44,7 @@ class DfeApiImpl(private val queue: RequestQueue, private val apiContext: DfeApi
         val dfeRequest = object : ProtoDfeRequest(DfeApi.BULK_DETAILS_URI.toString(), bulkDetailsRequest, apiContext, listener, errorListener) {
             private fun computeDocumentIdHash(): String {
                 var n = 0L
-                for (item in (this.request as Details.BulkDetailsRequest).docid) {
+                for (item in (this.request as Details.BulkDetailsRequest).docidList) {
                     n = 31L * n + item.hashCode()
                 }
                 return n.toString()
@@ -73,5 +74,4 @@ class DfeApiImpl(private val queue: RequestQueue, private val apiContext: DfeApi
         val dfeRequest = DfeRequest(url, this.apiContext, listener, errorListener)
         return this.queue.add<Messages.Response.ResponseWrapper>(dfeRequest)
     }
-
 }

@@ -4,8 +4,8 @@ import android.net.Uri
 import com.android.volley.Request
 import com.android.volley.Response
 import finsky.api.DfeApi
-import finsky.protos.nano.Messages
-import finsky.protos.nano.Messages.Search
+import finsky.protos.Messages
+import finsky.protos.Messages.Search
 
 class DfeSearch(
         private val dfeApi: DfeApi,

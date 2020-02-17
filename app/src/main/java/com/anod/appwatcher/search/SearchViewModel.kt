@@ -20,6 +20,7 @@ import finsky.api.model.DfeSearch
 import info.anodsplace.playstore.CompositeStateEndpoint
 import info.anodsplace.playstore.DetailsEndpoint
 import info.anodsplace.playstore.SearchEndpoint
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 sealed class SearchStatus
@@ -50,7 +51,22 @@ class SearchViewModel(application: Application) : AndroidViewModel(application),
     }
     var appStatusChange = MutableLiveData<Pair<Int, AppInfo?>>()
 
-    private var endpoints: CompositeStateEndpoint? = CompositeStateEndpoint()
+    private var endpoints: CompositeStateEndpoint? = CompositeStateEndpoint().also { composite ->
+        composite.onStart = { id, active ->
+            if (id == SEARCH_ENDPOINT_ID) {
+                val search = (active as SearchEndpoint)
+                viewModelScope.launch {
+                    search.updates.collect {
+                        if (it.error == null) {
+                            onDataChanged(search.data!!)
+                        } else {
+                            onErrorResponse(id, it.error!!)
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     val endpointDetails: DetailsEndpoint
         get() = endpoints!![DETAILS_ENDPOINT_ID] as DetailsEndpoint
@@ -94,7 +110,7 @@ class SearchViewModel(application: Application) : AndroidViewModel(application),
         endpoints.reset()
         viewModelScope.launch {
             try {
-                val model = endpoints.active.start()
+                val model = endpoints.start()
                 onDataChanged(model)
             } catch (e: Exception) {
                 onErrorResponse(endpoints.activeId, e)
@@ -114,10 +130,12 @@ class SearchViewModel(application: Application) : AndroidViewModel(application),
             }
         } else {
             val dfeSearch = model as DfeSearch
-            if (dfeSearch.count == 0) {
-                status.value = NoResults
-            } else {
-                status.value = Available
+            if (dfeSearch.isReady) {
+                if (dfeSearch.count == 0) {
+                    status.value = NoResults
+                } else {
+                    status.value = Available
+                }
             }
         }
         isPackageSearch = false

@@ -3,11 +3,14 @@ package finsky.api.model
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.VolleyError
-import finsky.protos.nano.Messages
+import finsky.protos.Messages
+import kotlinx.coroutines.channels.Channel
 import java.util.*
 import kotlin.math.max
 
 class UrlOffsetPair(val offset: Int, val url: String)
+
+class ListAvailable(val isFirst: Boolean, val error: VolleyError?)
 
 abstract class PaginatedList<T, D>(
         private val urlOffsetList: MutableList<UrlOffsetPair>,
@@ -22,7 +25,8 @@ abstract class PaginatedList<T, D>(
     private var isMoreAvailable: Boolean = true
     private val windowDistance: Int = 12
     private var isInErrorState = false
-    var onFirstResponse: ((error: VolleyError?) -> Unit)? = null
+
+    val updates = Channel<ListAvailable>(Channel.CONFLATED)
 
     constructor(url: String, autoLoadNextPage: Boolean)
             : this(mutableListOf(UrlOffsetPair(0, url)), autoLoadNextPage)
@@ -117,10 +121,8 @@ abstract class PaginatedList<T, D>(
     override fun onErrorResponse(error: VolleyError) {
         this.isInErrorState = true
         this.clearTransientState()
-        onFirstResponse?.let {
-            it.invoke(error)
-            onFirstResponse = null
-        }
+        val isFirst = this.urlOffsetList.size == 1
+        updates.offer(ListAvailable(isFirst, error))
     }
 
     override fun onResponse(responseWrapper: Messages.Response.ResponseWrapper) {
@@ -128,6 +130,7 @@ abstract class PaginatedList<T, D>(
         val size = this.items.size
         val itemsFromResponse = this.getItemsFromResponse(responseWrapper)
         this.updateItemsUntilEndCount(itemsFromResponse.size)
+        val isFirst = this.urlOffsetList.size == 1
         for (i in itemsFromResponse.indices) {
             if (i + this.currentOffset < this.items.size) {
                 this.items[i + this.currentOffset] = itemsFromResponse[i]
@@ -149,15 +152,14 @@ abstract class PaginatedList<T, D>(
         }
         this.isMoreAvailable = moreAvailable && autoLoadNextPage
         this.clearTransientState()
-        onFirstResponse?.let {
-            it.invoke(null)
-            onFirstResponse = null
-        }
+        updates.offer(ListAvailable(isFirst, null))
     }
 
     fun resetItems() {
         this.isMoreAvailable = true
         this.items.clear()
+        val isFirst = this.urlOffsetList.size == 1
+        updates.offer(ListAvailable(isFirst, null))
     }
 
     fun startLoadItems() {

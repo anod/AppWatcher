@@ -2,7 +2,6 @@ package finsky.api
 
 import android.net.Uri
 import android.text.TextUtils
-import android.util.Log
 import com.android.volley.Cache
 import com.android.volley.NetworkResponse
 import com.android.volley.ParseError
@@ -10,9 +9,8 @@ import com.android.volley.Request
 import com.android.volley.ServerError
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.HttpHeaderParser
-import com.google.protobuf.nano.InvalidProtocolBufferNanoException
-import com.google.protobuf.nano.MessageNanoPrinter
-import finsky.protos.nano.Messages.Response
+import com.google.protobuf.InvalidProtocolBufferException
+import finsky.protos.Messages.Response
 import finsky.utils.Utils
 import info.anodsplace.framework.AppLog
 import java.io.ByteArrayInputStream
@@ -56,20 +54,6 @@ internal open class DfeRequest(
         return null
     }
 
-    private fun logProtoResponse(responseWrapper: Response.ResponseWrapper) {
-        synchronized(MessageNanoPrinter::class.java) {
-            Log.v("DfeProto", "{ response: \"$url\".\n")
-            val split = MessageNanoPrinter.print<Response.ResponseWrapper>(responseWrapper).split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-            val length = split.size
-            var i = 0
-            while (i < length) {
-                Log.v("DfeProto", split[i])
-                ++i
-            }
-            Log.v("DfeProto", "}")
-        }
-    }
-
     private fun makeCacheKey(s: String): String {
         return StringBuilder(256).append(s).append("/account=").append(this.apiContext.accountName).toString()
     }
@@ -82,7 +66,7 @@ internal open class DfeRequest(
             } else {
                 Response.ResponseWrapper.parseFrom(networkResponse.data)
             }
-        } catch (ex: InvalidProtocolBufferNanoException) {
+        } catch (ex: InvalidProtocolBufferException) {
             AppLog.e("Cannot parse response as ResponseWrapper proto.", ex)
         } catch (ex: IOException) {
             AppLog.e("IOException while manually unzipping request.", ex)
@@ -94,8 +78,8 @@ internal open class DfeRequest(
         var payload: Response.Payload? = wrapper.payload
         try {
             if (payload!!.searchResponse != null || payload.listResponse != null) {
-                if (wrapper.preFetch.isNotEmpty()) {
-                    payload = wrapper.preFetch[0].response.payload
+                if (wrapper.preFetchList.isNotEmpty()) {
+                    payload = wrapper.getPreFetch(0).response.payload
                 }
             }
         } catch (ex: Exception) {
@@ -135,9 +119,6 @@ internal open class DfeRequest(
         if (wrapperAndVerifySignature == null) {
             response = com.android.volley.Response.error<Response.ResponseWrapper>(ParseError(networkResponse))
         } else {
-            if (PROTO_DEBUG) {
-                this.logProtoResponse(wrapperAndVerifySignature)
-            }
             response = this.handleServerCommands(wrapperAndVerifySignature)
             if (response == null) {
                 if (wrapperAndVerifySignature.serverMetadata != null) {
@@ -154,7 +135,6 @@ internal open class DfeRequest(
     }
 
     companion object {
-        private val PROTO_DEBUG: Boolean = Log.isLoggable("AppWatcher.DfeProto", Log.VERBOSE)
 
         fun parseCacheHeaders(networkResponse: NetworkResponse): Cache.Entry? {
             val cacheHeaders = HttpHeaderParser.parseCacheHeaders(networkResponse) ?: return null

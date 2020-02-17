@@ -1,7 +1,7 @@
 package finsky.api.model
 
 import finsky.api.DfeUtils
-import finsky.protos.nano.Messages
+import finsky.protos.Messages
 
 abstract class ContainerList<T> constructor(
         url: String,
@@ -13,7 +13,7 @@ abstract class ContainerList<T> constructor(
         val payload = payload(wrapper)
         val doc = DfeUtils.getRootDoc(payload) ?: return arrayOf()
 
-        val docs = doc.child?.map { Document(it) } ?: listOf()
+        val docs = doc.childList?.map { Document(it) } ?: listOf()
         if (filter == null) {
             return docs.toTypedArray()
         }
@@ -36,8 +36,9 @@ abstract class ContainerList<T> constructor(
 
     private fun payload(wrapper: Messages.Response.ResponseWrapper): Messages.Response.Payload {
         val payload = wrapper.payload
-        return if (wrapper.preFetch.isNotEmpty() && (payload.searchResponse != null && payload.searchResponse.doc.isEmpty() || payload.listResponse != null && payload.listResponse.doc.isEmpty())) {
-            wrapper.preFetch[0].response.payload
+        return if (wrapper.preFetchList.isNotEmpty()
+                && (payload.searchResponse.docList.isEmpty() || payload.listResponse.docList.isEmpty())) {
+            wrapper.getPreFetch(0).response.payload
         } else payload
     }
 

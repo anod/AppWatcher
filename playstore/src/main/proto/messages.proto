@@ -102,7 +102,14 @@ message AppDetails
     optional bool unstable = 21;
     optional string containsAds = 30;
     optional Dependencies dependencies = 34;
+    optional TestingProgramInfo testingProgramInfo = 35;
     optional EarlyAccessInfo earlyAccessInfo = 36;
+}
+
+message TestingProgramInfo {
+  optional bool subscribed = 2;
+  optional bool subscribed1 = 3;
+  optional string testingProgramEmail = 5;
 }
 
 message EarlyAccessInfo {
@@ -136,6 +143,41 @@ message DocDetails
 //    optional TvEpisodeDetails tvEpisodeDetails = 11;
 }
 
+message RelatedLink {
+  optional string label = 1;
+  optional string url1 = 2;
+  optional string url2 = 3;
+}
+
+message RelatedLinksUnknown2 {
+  optional string homeUrl = 2;
+  optional string nextPageUrl = 3;
+}
+
+message RelatedLinksUnknown1 {
+  optional RelatedLinksUnknown2 unknown2 = 2;
+}
+
+message Rated {
+  optional string label = 1;
+  optional Image image = 2;
+  optional string learnMoreHtmlLink = 4;
+}
+
+message CategoryInfo {
+  optional string appType = 1;
+  optional string appCategory = 2;
+}
+
+message RelatedLinks {
+  optional RelatedLinksUnknown1 unknown1 = 10;
+  optional string privacyPolicyUrl = 18;
+  optional RelatedLink youMightAlsoLike = 24;
+  optional Rated rated = 29;
+  repeated RelatedLink relatedLinks = 34;
+  optional CategoryInfo categoryInfo = 53;
+}
+
 message DocV2
 {
     optional string docid = 1;
@@ -146,13 +188,13 @@ message DocV2
     optional string creator = 6;
     optional string descriptionHtml = 7;
     repeated Common.Offer offer = 8;
-    //optional Availability availability = 9;
+    // optional Availability availability = 9;
     repeated Common.Image image = 10;
     repeated DocV2 child = 11;
     optional Containers.ContainerMetadata containerMetadata = 12;
     optional DocDetails details = 13;
     //optional AggregateRating aggregateRating = 14;
-    //optional RelatedLinks relatedLinks = 15;
+    optional RelatedLinks relatedLinks = 15;
     optional string detailsUrl = 16;
     optional string shareUrl = 17;
     optional string reviewsUrl = 18;
@@ -161,8 +203,10 @@ message DocV2
     optional bool detailsReusable = 21;
     optional string subtitle = 22;
     //optional Unknown25 unknown25 = 25;
+    optional string descriptionShort = 27;
+    optional string reviewSnippetsUrl = 31;
+    optional string reviewQuestionsUrl = 34;
 }
-
 
 message Details
 {
@@ -327,9 +371,7 @@ message Response
         // repeated Notification notification = 4;
         optional ResponseMessages.ServerMetadata serverMetadata = 5;
     }
-
 }
-
 
 message EncodedTargets {
     optional int32 version = 1;
@@ -337,3 +379,21 @@ message EncodedTargets {
     repeated int64 otherTarget = 3;
 }
 
+message Image {
+  optional int32 imageType = 1;
+  optional group Dimension = 2 {
+    optional int32 width = 3;
+    optional int32 height = 4;
+  }
+  optional string imageUrl = 5;
+  optional string altTextLocalized = 6;
+  optional string secureUrl = 7;
+  optional int32 positionInSequence = 8;
+  optional bool supportsFifeUrlOptions = 9;
+  optional group Citation = 10 {
+    optional string titleLocalized = 11;
+    optional string url = 12;
+  }
+  optional string color = 15;
+  optional int32 screenshotSetNumber = 21;
+}

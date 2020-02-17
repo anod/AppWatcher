@@ -5,7 +5,7 @@ import android.content.Context
 import com.android.volley.RequestQueue
 import finsky.api.model.DfeDetails
 import finsky.api.model.Document
-import finsky.protos.nano.Messages.AppDetails
+import finsky.protos.Messages.AppDetails
 
 /**
  * @author alex

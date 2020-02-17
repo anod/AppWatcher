@@ -4,8 +4,8 @@ import com.android.volley.Request
 import com.android.volley.Response
 import finsky.api.BulkDocId
 import finsky.api.DfeApi
-import finsky.protos.nano.Messages
-import finsky.protos.nano.Messages.Details
+import finsky.protos.Messages
+import finsky.protos.Messages.Details
 
 class DfeBulkDetails(private val api: DfeApi, private val filter: FilterPredicate) : DfeModel() {
     private var bulkDetailsResponse: Details.BulkDetailsResponse? = null
@@ -22,8 +22,8 @@ class DfeBulkDetails(private val api: DfeApi, private val filter: FilterPredicat
             val response = this.bulkDetailsResponse ?: return emptyList()
 
             val list = mutableListOf<Document>()
-            for (i in response.entry.indices) {
-                response.entry[i].doc?.let {
+            for (i in response.entryList.indices) {
+                response.getEntry(i).doc?.let {
                     list.add(Document(it))
                 }
             }

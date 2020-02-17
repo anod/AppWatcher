@@ -4,7 +4,7 @@ import android.net.Uri
 
 import com.android.volley.Request
 import com.android.volley.Response
-import finsky.protos.nano.Messages
+import finsky.protos.Messages
 
 class BulkDocId(val packageName: String, val versionCode: Int) : Comparable<BulkDocId> {
     override fun compareTo(other: BulkDocId): Int {
