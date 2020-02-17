@@ -24,14 +24,19 @@ abstract class ContainerList<T> constructor(
 
     override fun getNextPageUrl(wrapper: Messages.Response.ResponseWrapper): String? {
         val payload = payload(wrapper)
-        val doc = DfeUtils.getRootDoc(payload) ?: return null
+        val rootDoc = DfeUtils.getRootDoc(payload) ?: return null
 
-        val containerMetadata = doc.containerMetadata
-        var nextPageUrl: String? = null
-        if (containerMetadata != null) {
-            nextPageUrl = doc.containerMetadata.nextPageUrl
+        if (rootDoc.containerMetadata.hasNextPageUrl()) {
+            return rootDoc.containerMetadata.nextPageUrl
         }
-        return nextPageUrl
+        if (rootDoc.hasRelatedLinks()
+                && rootDoc.relatedLinks.hasUnknown1()
+                && rootDoc.relatedLinks.unknown1.hasUnknown2()
+                && rootDoc.relatedLinks.unknown1.unknown2.hasNextPageUrl()
+        ) {
+            return rootDoc.relatedLinks.unknown1.unknown2.nextPageUrl;
+        }
+        return null
     }
 
     private fun payload(wrapper: Messages.Response.ResponseWrapper): Messages.Response.Payload {
