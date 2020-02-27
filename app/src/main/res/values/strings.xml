@@ -188,6 +188,7 @@
 
     <string-array name="updates_frequency">
         <item>Manually</item>
+        <item>Every hour</item>
         <item>Every 2 hours</item>
         <item>Every 3 hours</item>
         <item>Every 6 hours</item>
@@ -208,4 +209,5 @@
         <item>Circle</item>
         <item>Teardrop</item>
     </array>
+    <string name="beta">β</string>
 </resources>

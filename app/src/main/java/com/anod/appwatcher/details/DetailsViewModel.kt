@@ -13,7 +13,6 @@ import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.database.entities.packageToApp
 import com.anod.appwatcher.model.AppInfo
 import finsky.api.model.DfeDetails
-import finsky.api.model.DfeModel
 import finsky.api.model.Document
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
@@ -128,12 +127,16 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
         }
     }
 
-    private fun onDataChanged(data: DfeModel) {
-        val details = data as DfeDetails
+    private fun onDataChanged(details: DfeDetails) {
         val appDetails = details.document?.appDetails
         if (appDetails != null) {
             recentChange = AppChange(appId.value!!, appDetails.versionCode, appDetails.versionString, appDetails.recentChangesHtml
                     ?: "", appDetails.uploadDate, false)
+            app.value!!.testing = when {
+                appDetails.testingProgramInfo.subscribed -> 1
+                appDetails.testingProgramInfo.subscribed1 -> 2
+                else -> 0
+            }
         }
         this.updateChangelogState(RemoteComplete(false))
     }

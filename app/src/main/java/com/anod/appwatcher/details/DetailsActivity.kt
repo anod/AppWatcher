@@ -29,6 +29,7 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenAsync
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.entities.App
+import com.anod.appwatcher.database.entities.generateTitle
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.*
@@ -56,10 +57,12 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
     val viewModel: DetailsViewModel by viewModels()
 
     private var addMenu: MenuItem? = null
-    private val titleString: AlphaSpannableString by lazy {
-        val span = AlphaForegroundColorSpan(ColorAttribute(android.R.attr.textColor, this, Color.WHITE).value)
-        AlphaSpannableString(viewModel.app.value!!.title, span)
-    }
+    private val titleString: AlphaSpannableString
+        get() {
+            val span = AlphaForegroundColorSpan(ColorAttribute(android.R.attr.textColor, this, Color.WHITE).value)
+            return AlphaSpannableString(viewModel.app.value!!.generateTitle(resources), span)
+        }
+
     private val subtitleString: AlphaSpannableString by lazy {
         val span = AlphaForegroundColorSpan(ColorAttribute(android.R.attr.textColor, this, Color.WHITE).value)
         AlphaSpannableString(viewModel.app.value!!.uploadDate, span)
@@ -106,6 +109,9 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
             when (it) {
                 is Complete -> {
                     addMenu?.isEnabled = true
+                    viewModel.app.value?.let { app ->
+                        appDetailsView.title.text = app.generateTitle(resources)
+                    }
                     adapter.setData(viewModel.localChangelog, viewModel.recentChange)
                     if (adapter.isEmpty) {
                         showRetryMessage()
@@ -143,10 +149,10 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
                 AppListTable.ERROR_ALREADY_ADDED -> Toast.makeText(this, R.string.app_already_added, Toast.LENGTH_SHORT).show()
                 AppListTable.ERROR_INSERT -> Toast.makeText(this, R.string.error_insert_app, Toast.LENGTH_SHORT).show()
                 else -> {
-                    val data = Intent()
                     val info = AppInfo(viewModel.document!!)
-                    data.putExtra(EXTRA_ADD_APP_PACKAGE, info.packageName)
-                    setResult(Activity.RESULT_OK, data)
+                    setResult(Activity.RESULT_OK, Intent().apply {
+                        putExtra(EXTRA_ADD_APP_PACKAGE, info.packageName)
+                    })
                     TagSnackbar.make(this, info, true).show()
                 }
             }

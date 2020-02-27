@@ -6,6 +6,7 @@ import android.widget.TextView
 import androidx.annotation.ColorInt
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.App
+import com.anod.appwatcher.database.entities.generateTitle
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.watchlist.AppViewHolderBase
 import info.anodsplace.framework.text.Html
@@ -22,12 +23,13 @@ class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase
     @ColorInt
     private var warningColor: Int
 
-    private val title: TextView = view.findViewById(R.id.title)
+    val title: TextView = view.findViewById(R.id.title)
     private val creator: TextView? = view.findViewById<TextView?>(R.id.creator)
     private val price: TextView? = view.findViewById<TextView?>(R.id.price)
     private val updateDate: TextView? = view.findViewById<TextView?>(R.id.update_date)
     private val recentChanges = view.findViewById<TextView?>(R.id.recent_changes)
     private val newLineRegex = Regex("\n+")
+    private val resources = view.resources
 
     init {
         accentColor = resourceProvider.getColor(R.color.theme_accent)
@@ -36,7 +38,7 @@ class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase
     }
 
     fun fillDetails(app: App, recentFlag: Boolean, changeDetails: String, noNewChanges: Boolean, isLocalApp: Boolean) {
-        title.text = app.title
+        title.text = app.generateTitle(resources)
         creator?.text = app.creator
         val uploadDate = app.uploadDate
 

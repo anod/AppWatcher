@@ -2,7 +2,6 @@ package com.anod.appwatcher.search
 
 import android.content.Context
 import finsky.api.model.Document
-import info.anodsplace.framework.AppLog
 
 /**
  * @author Alex Gavrishev
@@ -21,7 +20,6 @@ class ResultsAdapterSearch(context: Context, viewModel: SearchViewModel)
     }
 
     override fun getItemCount(): Int {
-        AppLog.d("Count : ${endpoint.count}")
         return endpoint.count
     }
 }

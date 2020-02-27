@@ -1,11 +1,13 @@
 package com.anod.appwatcher.database.entities
 
-import androidx.room.*
 import android.content.ComponentName
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.content.res.Resources
 import android.net.Uri
 import android.provider.BaseColumns
+import androidx.room.*
+import com.anod.appwatcher.R
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.utils.PicassoAppIcon
@@ -20,9 +22,9 @@ import java.util.*
  * @date 21/05/2018
  */
 
-
 fun PackageManager.packageToApp(rowId: Int, packageName: String): App {
-    val packageInfo = this.getPackageInfo(packageName, this) ?: return App.fromLocalPackage(rowId, null, packageName, "", null)
+    val packageInfo = this.getPackageInfo(packageName, this)
+            ?: return App.fromLocalPackage(rowId, null, packageName, "", null)
     val launchComponent = this.getLaunchComponent(packageInfo, this)
     val appTitle = this.getAppTitle(packageInfo, this)
     return App.fromLocalPackage(rowId, packageInfo, packageName, appTitle, launchComponent)
@@ -31,53 +33,54 @@ fun PackageManager.packageToApp(rowId: Int, packageName: String): App {
 @Entity(tableName = AppListTable.table)
 data class App(
 
-    @PrimaryKey
-    @ColumnInfo(name = BaseColumns._ID)
-    val rowId: Int,
+        @PrimaryKey
+        @ColumnInfo(name = BaseColumns._ID)
+        val rowId: Int,
 
-    @ColumnInfo(name = AppListTable.Columns.appId)
-    val appId: String,
+        @ColumnInfo(name = AppListTable.Columns.appId)
+        val appId: String,
 
-    @ColumnInfo(name = AppListTable.Columns.packageName)
-    val packageName: String,
+        @ColumnInfo(name = AppListTable.Columns.packageName)
+        val packageName: String,
 
-    @ColumnInfo(name = AppListTable.Columns.versionNumber)
-    val versionNumber: Int,
+        @ColumnInfo(name = AppListTable.Columns.versionNumber)
+        val versionNumber: Int,
 
-    @ColumnInfo(name = AppListTable.Columns.versionName)
-    val versionName: String,
+        @ColumnInfo(name = AppListTable.Columns.versionName)
+        val versionName: String,
 
-    @ColumnInfo(name = AppListTable.Columns.title)
-    val title: String,
+        @ColumnInfo(name = AppListTable.Columns.title)
+        val title: String,
 
-    @ColumnInfo(name = AppListTable.Columns.creator)
-    val creator: String,
+        @ColumnInfo(name = AppListTable.Columns.creator)
+        val creator: String,
 
-    @ColumnInfo(name = AppListTable.Columns.iconUrl)
-    val iconUrl: String,
+        @ColumnInfo(name = AppListTable.Columns.iconUrl)
+        val iconUrl: String,
 
-    @ColumnInfo(name = AppListTable.Columns.status)
-    val status: Int,
+        @ColumnInfo(name = AppListTable.Columns.status)
+        val status: Int,
 
-    @ColumnInfo(name = AppListTable.Columns.uploadDate)
-    val uploadDate: String,
+        @ColumnInfo(name = AppListTable.Columns.uploadDate)
+        val uploadDate: String,
 
-    @Embedded
-    val price: Price,
+        @Embedded
+        val price: Price,
 
-    @ColumnInfo(name = AppListTable.Columns.detailsUrl)
-    val detailsUrl: String?,
+        @ColumnInfo(name = AppListTable.Columns.detailsUrl)
+        val detailsUrl: String?,
 
-    @ColumnInfo(name = AppListTable.Columns.uploadTimestamp)
-    val uploadTime: Long,
+        @ColumnInfo(name = AppListTable.Columns.uploadTimestamp)
+        val uploadTime: Long,
 
-    @ColumnInfo(name = AppListTable.Columns.appType)
-    val appType: String,
+        @ColumnInfo(name = AppListTable.Columns.appType)
+        val appType: String,
 
-    @ColumnInfo(name = AppListTable.Columns.updateTimestamp)
-    val updateTime: Long
-
+        @ColumnInfo(name = AppListTable.Columns.updateTimestamp)
+        val updateTime: Long
 ) {
+    @Ignore
+    var testing: Int = 0
 
     private constructor(rowId: Int, packageName: String, versionCode: Int, versionName: String, title: String, iconUrl: String, status: Int, uploadDate: String)
             : this(rowId, packageName, packageName, versionCode, versionName, title, "", iconUrl, status,
@@ -111,5 +114,12 @@ data class App(
             return "details?doc=$packageName"
         }
     }
+}
 
+fun App.generateTitle(resources: Resources): CharSequence {
+    var generated = title
+    if (testing != 0) {
+        generated += " (" + resources.getString(R.string.beta) + ")"
+    }
+    return generated
 }

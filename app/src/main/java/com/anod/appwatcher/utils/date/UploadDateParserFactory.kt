@@ -31,53 +31,30 @@ object UploadDateParserFactory {
 
     fun create(locale: Locale): List<DateFormat> {
         val lang = locale.language
-        if (lang == ru_ALL.language) {
-            return listOf(CustomMonthDateFormat(RU_SHORT_MONTHS))
+        return when {
+            lang == ru_ALL.language -> listOf(CustomMonthDateFormat(RU_SHORT_MONTHS))
+            lang == sv_ALL.language -> listOf(CustomMonthDateFormat(SV_SHORT_MONTHS))
+            locale == es_ES -> listOf(CustomMonthDateFormat(ES_SHORT_MONTHS))
+            locale == es_US || locale == es_UY -> listOf(CustomMonthDateFormat(ES_US_SHORT_MONTHS))
+            locale == fr_CA -> listOf(CustomMonthDateFormat(FR_CA_SHORT_MONTHS))
+            lang == de_ALL.language -> listOf(SimpleDateFormat("dd.M.yyyy", locale))
+            lang == hu_ALL.language -> listOf(SimpleDateFormat("yyyy. MMM d.", locale))
+            locale == en_IN -> listOf(SimpleDateFormat("dd-MMM-yyyy", locale))
+            locale == en_CA -> listOf(
+                    SimpleDateFormat("MMM dd, yyyy", locale),
+                    SimpleDateFormat("MMM. dd, yyyy", locale)
+            )
+            locale == pt_BR -> listOf(
+                    SimpleDateFormat("dd 'de' MMM. 'de' yyyy", locale),
+                    SimpleDateFormat("dd 'de' MMM 'de' yyyy", locale)
+            )
+            locale == Locale("hi", "IN") -> listOf(SimpleDateFormat("dd/MM/yyyy", locale))
+            else -> listOf(
+                    SimpleDateFormat("d MMM. yyyy", locale),
+                    SimpleDateFormat("d MMM yyyy", locale),
+                    DateFormat.getDateInstance(DateFormat.MEDIUM, locale)
+            )
         }
 
-        if (lang == sv_ALL.language) {
-            return listOf(CustomMonthDateFormat(SV_SHORT_MONTHS))
-        }
-
-        if (locale == es_ES) {
-            return listOf(CustomMonthDateFormat(ES_SHORT_MONTHS))
-        }
-
-        if (locale == es_US || locale == es_UY) {
-            return listOf(CustomMonthDateFormat(ES_US_SHORT_MONTHS))
-        }
-
-        if (locale == fr_CA) {
-            return listOf(CustomMonthDateFormat(FR_CA_SHORT_MONTHS))
-        }
-
-        if (lang == de_ALL.language) {
-            return listOf(SimpleDateFormat("dd.M.yyyy", locale))
-        }
-
-        if (lang == hu_ALL.language) {
-            return listOf(SimpleDateFormat("yyyy. MMM d.", locale))
-        }
-
-        if (locale == en_IN) {
-            return listOf(SimpleDateFormat("dd-MMM-yyyy", locale))
-        }
-
-        if (locale == en_CA) {
-            return listOf(SimpleDateFormat("MMM dd, yyyy", locale),
-                    SimpleDateFormat("MMM. dd, yyyy", locale))
-        }
-
-        if (locale == pt_BR) {
-            return listOf(SimpleDateFormat("dd 'de' MMM 'de' yyyy", locale))
-        }
-
-        if (locale == Locale("hi", "IN")) {
-            return listOf(SimpleDateFormat("dd/MM/yyyy", locale))
-        }
-
-        return listOf(SimpleDateFormat("d MMM. yyyy", locale),
-                SimpleDateFormat("d MMM yyyy", locale),
-                DateFormat.getDateInstance(DateFormat.MEDIUM, locale))
     }
 }
