@@ -111,7 +111,7 @@
     <string name="uptodate_title">Updated notifications</string>
     <string name="noti_action_update">Update</string>
     <string name="update_all">Update All</string>
-    <string name="navdrawer_item_wishlist">Wish list</string>
+    <string name="navdrawer_item_wishlist">Wishlist</string>
     <string name="wishlist">Wishlist</string>
     <string name="add_new_tag">Enter tag name…</string>
     <string name="tags">Tags</string>
@@ -161,7 +161,7 @@
     <string name="pref_default_filter_summary">Choose which filter will be applied when app is opened</string>
     <string name="pref_notify_installed_summary">Notify about installed apps</string>
     <string name="pref_notify_installed">Installed notifications</string>
-    <string name="pref_notify_no_changes_summary">Notify when there is update in changelog</string>
+    <string name="pref_notify_no_changes_summary">Notify when there is an update in changelog</string>
     <string name="pref_notify_no_changes">No changes notifications</string>
     <string name="pref_pull_to_refresh">Pull to refresh</string>
     <string name="app_info">App Info</string>
@@ -199,7 +199,7 @@
     <string name="adaptive_icon_style_summary">Apply a shape for square, non transparent icons</string>
     <string name="open_play_store">Open play store</string>
     <string name="tags_list_is_empty">Tags list is empty</string>
-    <string name="whatched">Whatched</string>
+    <string name="watched">Watched</string>
     <string name="tag_color">Tag color</string>
     <array name="adaptive_icon_style_names">
         <item>None</item>

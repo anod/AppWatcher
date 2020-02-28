@@ -50,7 +50,7 @@
             android:layout_height="16dp"
             android:src="@drawable/ic_visibility_black_24px"
             android:layout_gravity="bottom|left"
-            android:contentDescription="@string/whatched"
+            android:contentDescription="@string/watched"
             android:tint="@color/material_grey_500" />
     </LinearLayout>
 

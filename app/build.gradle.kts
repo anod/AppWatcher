@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.config.KotlinCompilerVersion
-
 plugins {
     id("com.android.application")
     kotlin("android")
@@ -110,7 +108,7 @@ dependencies {
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("androidx.constraintlayout:constraintlayout:2.0.0-beta4")
     implementation("androidx.work:work-runtime:2.3.2")
-    implementation("androidx.core:core:1.2.0-rc01")
+    implementation("androidx.core:core:1.2.0")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.0.0")
 
     // Google
@@ -141,13 +139,11 @@ dependencies {
     kapt("androidx.room:room-compiler:2.2.4")
 
     // KTX
-    implementation("androidx.core:core-ktx:1.2.0-beta01")
     implementation("androidx.work:work-runtime-ktx:2.3.2")
     implementation("androidx.fragment:fragment-ktx:1.2.2")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.2.0")
     implementation("androidx.room:room-ktx:2.2.4")
-    implementation("androidx.core:core-ktx:1.2.0-beta01")
     implementation("androidx.core:core-ktx:1.2.0-rc01")
     implementation("androidx.work:work-runtime-ktx:2.3.2")
     implementation("androidx.fragment:fragment-ktx:1.2.2")
@@ -158,7 +154,7 @@ dependencies {
     // Kotlin
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.3")
-    implementation(kotlin("stdlib-jdk7", KotlinCompilerVersion.VERSION))
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.61")
 
     testImplementation("junit:junit:4.13")
 
