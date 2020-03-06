@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.os.StrictMode
 import android.util.LruCache
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.work.Configuration
 import com.android.volley.NetworkError
 import com.android.volley.NoConnectionError
 import com.android.volley.TimeoutError
@@ -23,7 +24,7 @@ import io.fabric.sdk.android.Fabric
 import java.io.File
 import java.io.IOException
 
-class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstance {
+class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstance, Configuration.Provider {
 
     override val notificationManager: NotificationManager
         get() = appComponent.notificationManager
@@ -100,6 +101,10 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
             Crashlytics.log(priority, tag, msg)
         }
     }
+
+    override fun getWorkManagerConfiguration() = Configuration.Builder().apply {
+        setMinimumLoggingLevel(android.util.Log.DEBUG)
+    }.build()
 }
 
 class LifecycleCallbacks : Application.ActivityLifecycleCallbacks {

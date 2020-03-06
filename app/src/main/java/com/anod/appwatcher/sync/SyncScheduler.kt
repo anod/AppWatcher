@@ -49,7 +49,7 @@ class SyncScheduler(private val context: ApplicationContext) {
                     it
                 }
     }
-
+    
     fun execute(): LiveData<Operation.State> {
         val constraints: Constraints = Constraints.Builder().apply {
             setRequiresCharging(false)

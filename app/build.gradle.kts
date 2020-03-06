@@ -107,7 +107,7 @@ dependencies {
     implementation("androidx.palette:palette:1.0.0")
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("androidx.constraintlayout:constraintlayout:2.0.0-beta4")
-    implementation("androidx.work:work-runtime:2.3.2")
+    implementation("androidx.work:work-runtime:2.3.3")
     implementation("androidx.core:core:1.2.0")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.0.0")
 
@@ -116,14 +116,14 @@ dependencies {
     implementation("com.google.android.gms:play-services-oss-licenses:17.0.0")
     implementation("com.google.android.gms:play-services-identity:17.0.0")
     implementation("com.google.android.gms:play-services-auth:17.0.0")
-    implementation("com.google.firebase:firebase-core:17.2.2")
+    implementation("com.google.firebase:firebase-core:17.2.3")
 
-    implementation("com.google.apis:google-api-services-drive:v3-rev20191108-1.30.3") {
+    implementation("com.google.apis:google-api-services-drive:v3-rev20191108-1.30.9") {
         exclude(group = "org.apache.httpcomponents")
     }
 
-    implementation("com.google.api-client:google-api-client:1.30.8")
-    implementation("com.google.api-client:google-api-client-android:1.30.8")
+    implementation("com.google.api-client:google-api-client:1.30.9")
+    implementation("com.google.api-client:google-api-client-android:1.30.9")
 
     // 3rd party
     implementation("com.crashlytics.sdk.android:crashlytics:2.10.1")
@@ -139,22 +139,22 @@ dependencies {
     kapt("androidx.room:room-compiler:2.2.4")
 
     // KTX
-    implementation("androidx.work:work-runtime-ktx:2.3.2")
+    implementation("androidx.work:work-runtime-ktx:2.3.3")
     implementation("androidx.fragment:fragment-ktx:1.2.2")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.2.0")
     implementation("androidx.room:room-ktx:2.2.4")
     implementation("androidx.core:core-ktx:1.2.0-rc01")
-    implementation("androidx.work:work-runtime-ktx:2.3.2")
+    implementation("androidx.work:work-runtime-ktx:2.3.3")
     implementation("androidx.fragment:fragment-ktx:1.2.2")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.2.0")
     implementation("androidx.room:room-ktx:2.2.4")
 
     // Kotlin
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.3")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.61")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.4")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.4")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.70")
 
     testImplementation("junit:junit:4.13")
 

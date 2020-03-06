@@ -19,6 +19,7 @@ import com.anod.appwatcher.database.*
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.database.entities.AppListItem
+import com.anod.appwatcher.database.entities.Schedule
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.preferences.Preferences
@@ -39,6 +40,14 @@ import java.util.*
  */
 
 class UpdateCheck(private val context: ApplicationContext) {
+    val database = Application.provide(context).database
+
+    class SyncResult(
+            val success: Boolean,
+            val updates: List<UpdatedApp>,
+            val checked: Int,
+            val unavailable: Int
+    )
 
     class UpdatedApp(
             val packageName: String,
@@ -73,36 +82,37 @@ class UpdateCheck(private val context: ApplicationContext) {
     private val installedAppsProvider = InstalledApps.PackageManager(context.packageManager)
 
     suspend fun perform(extras: Data): Int = withContext(Dispatchers.Default) {
-
         val manualSync = extras.getBoolean(extrasManual, false)
         AppLog.i("Perform ${if (manualSync) "manual" else "scheduled"} sync", "UpdateCheck")
+        val schedule = Schedule(manualSync)
+
+        val account = preferences.account
+        if (account == null) {
+            AppLog.w("No active account, skipping sync...", "UpdateCheck")
+            database.schedules().save(schedule.finish(Schedule.statusFailedNoAccount))
+            return@withContext -1
+        }
+
         // Skip any check if sync requested from application
         if (!manualSync) {
             if (preferences.isWifiOnly && !Application.provide(context).networkConnection.isWifiEnabled) {
                 AppLog.i("Wifi not enabled, skipping update check....", "UpdateCheck")
+                database.schedules().save(schedule.finish(Schedule.statusSkippedNoWifi))
                 return@withContext -1
             }
             val updateTime = preferences.lastUpdateTime
             if (updateTime != (-1).toLong() && System.currentTimeMillis() - updateTime < oneSecInMillis) {
+                database.schedules().save(schedule.finish(Schedule.statusSkippedMinTime))
                 AppLog.i("Last update less than second, skipping...", "UpdateCheck")
                 return@withContext -1
             }
-        }
-        val account = preferences.account
-        if (account == null) {
-            AppLog.w("No active account, skipping sync...", "UpdateCheck")
-            return@withContext -1
-        }
-
-        if (!Application.provide(context).networkConnection.isNetworkAvailable) {
-            AppLog.w("Network is not available, skipping sync...", "UpdateCheck")
-            return@withContext -1
         }
 
         AppLog.i("Perform synchronization", "UpdateCheck")
 
         val authToken = requestAuthToken(account)
         if (authToken == null) {
+            database.schedules().save(schedule.finish(Schedule.statusFailedNoToken))
             AppLog.e("Cannot receive access token")
             return@withContext -1
         }
@@ -113,14 +123,22 @@ class UpdateCheck(private val context: ApplicationContext) {
 
         val lastUpdatesViewed = preferences.isLastUpdatesViewed
         AppLog.d("Last update viewed: $lastUpdatesViewed")
+        database.schedules().save(schedule)
 
-        var updatedApps: List<UpdatedApp> = emptyList()
-        try {
-            updatedApps = doSync(lastUpdatesViewed, authToken, account)
+        val syncResult = try {
+            doSync(lastUpdatesViewed, authToken, account)
         } catch (e: RemoteException) {
             AppLog.e("Error during synchronization ${e.message}", e)
+            SyncResult(false, listOf(), 0, 0)
         }
 
+        if (syncResult.success) {
+            database.schedules().save(schedule.finish(Schedule.statusSuccess, syncResult.checked, syncResult.updates.size, syncResult.unavailable))
+        } else {
+            database.schedules().save(schedule.finish(Schedule.statusFailed))
+        }
+
+        val updatedApps: List<UpdatedApp> = syncResult.updates
         if (updatedApps.isNotEmpty() && updatedApps.first().uploadTime == 0.toLong()) {
             val uploadDate = updatedApps.first().uploadDate
             val locale = Locale.getDefault()
@@ -153,19 +171,17 @@ class UpdateCheck(private val context: ApplicationContext) {
     }
 
     @Throws(RemoteException::class)
-    private suspend fun doSync(lastUpdatesViewed: Boolean, authToken: String, account: Account): List<UpdatedApp> {
-
-        val database = Application.provide(context).database
+    private suspend fun doSync(lastUpdatesViewed: Boolean, authToken: String, account: Account): SyncResult {
 
         val apps = AppListTable.Queries.loadAppList(database.apps())
         if (apps.isEmpty) {
             apps.close()
             AppLog.i("Sync finished: no apps", "UpdateCheck")
-            return listOf()
+            return SyncResult(true, listOf(), 0, 0)
         }
 
         val updatedApps = mutableListOf<UpdatedApp>()
-
+        var unavailable = 0
         apps.chunked(bulkSize) { list ->
             list.associateBy { it.app.packageName }
         }.forEach { localApps ->
@@ -179,13 +195,14 @@ class UpdateCheck(private val context: ApplicationContext) {
             } catch (e: VolleyError) {
                 AppLog.e("Fetching of bulk updates failed ${e.message ?: ""}", "UpdateCheck")
             }
+            unavailable += docIds.size - endpoint.documents.size
             AppLog.i("Sent ${docIds.size}, received ${endpoint.documents.size}", "UpdateCheck")
             updateApps(endpoint.documents, localApps, updatedApps, lastUpdatesViewed, context.contentResolver, database)
         }
 
         apps.close()
         AppLog.i("Sync finished for ${apps.count} apps", "UpdateCheck")
-        return updatedApps
+        return SyncResult(true, updatedApps, apps.count, unavailable)
     }
 
     private suspend fun updateApps(documents: List<Document>, localApps: Map<String, AppListItem>, updatedApps: MutableList<UpdatedApp>, lastUpdatesViewed: Boolean, contentResolver: ContentResolver, db: AppsDatabase) {

@@ -53,7 +53,7 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.3.1")
 
     implementation(project(":framework"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.3")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.61")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.4")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.4")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.70")
 }

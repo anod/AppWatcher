@@ -109,5 +109,9 @@
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
 
+        <provider
+            android:name="androidx.work.impl.WorkManagerInitializer"
+            android:authorities="${applicationId}.workmanager-init"
+            tools:node="remove" />
     </application>
 </manifest>
