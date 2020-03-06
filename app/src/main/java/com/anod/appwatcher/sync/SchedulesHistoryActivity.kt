@@ -70,7 +70,7 @@ class SchedulesHistoryActivity : ToolbarActivity() {
             itemView.found.text = "${schedule.found} updates"
             itemView.found.isVisible = result is Success
             itemView.unavailable.text = "${schedule.unavailable} not available"
-            itemView.unavailable.isVisible = result is Success
+            itemView.unavailable.isVisible = result is Success && schedule.unavailable > 0
 
             itemView.description.isVisible = when (result) {
                 is Failed -> true
