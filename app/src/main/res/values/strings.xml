@@ -210,4 +210,5 @@
         <item>Teardrop</item>
     </array>
     <string name="beta">β</string>
+    <string name="check_history">Check history</string>
 </resources>

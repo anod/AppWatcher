@@ -51,6 +51,11 @@
         <activity
             android:name=".userLog.UserLogActivity"
             android:label="@string/log" />
+
+        <activity
+            android:name=".sync.SchedulesHistoryActivity"
+            android:label="@string/check_history" />
+
         <activity
             android:name=".AppWatcherActivity"
             android:clearTaskOnLaunch="true"

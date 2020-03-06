@@ -89,7 +89,7 @@ class UpdateCheck(private val context: ApplicationContext) {
         val account = preferences.account
         if (account == null) {
             AppLog.w("No active account, skipping sync...", "UpdateCheck")
-            database.schedules().save(schedule.finish(Schedule.statusFailedNoAccount))
+            SchedulesTable.Queries.save(schedule.finish(Schedule.statusFailedNoAccount), database)
             return@withContext -1
         }
 
@@ -97,12 +97,12 @@ class UpdateCheck(private val context: ApplicationContext) {
         if (!manualSync) {
             if (preferences.isWifiOnly && !Application.provide(context).networkConnection.isWifiEnabled) {
                 AppLog.i("Wifi not enabled, skipping update check....", "UpdateCheck")
-                database.schedules().save(schedule.finish(Schedule.statusSkippedNoWifi))
+                SchedulesTable.Queries.save(schedule.finish(Schedule.statusSkippedNoWifi), database)
                 return@withContext -1
             }
             val updateTime = preferences.lastUpdateTime
             if (updateTime != (-1).toLong() && System.currentTimeMillis() - updateTime < oneSecInMillis) {
-                database.schedules().save(schedule.finish(Schedule.statusSkippedMinTime))
+                SchedulesTable.Queries.save(schedule.finish(Schedule.statusSkippedMinTime), database)
                 AppLog.i("Last update less than second, skipping...", "UpdateCheck")
                 return@withContext -1
             }
@@ -112,7 +112,7 @@ class UpdateCheck(private val context: ApplicationContext) {
 
         val authToken = requestAuthToken(account)
         if (authToken == null) {
-            database.schedules().save(schedule.finish(Schedule.statusFailedNoToken))
+            SchedulesTable.Queries.save(schedule.finish(Schedule.statusFailedNoToken), database)
             AppLog.e("Cannot receive access token")
             return@withContext -1
         }
@@ -123,7 +123,7 @@ class UpdateCheck(private val context: ApplicationContext) {
 
         val lastUpdatesViewed = preferences.isLastUpdatesViewed
         AppLog.d("Last update viewed: $lastUpdatesViewed")
-        database.schedules().save(schedule)
+        SchedulesTable.Queries.save(schedule, database)
 
         val syncResult = try {
             doSync(lastUpdatesViewed, authToken, account)
@@ -133,9 +133,9 @@ class UpdateCheck(private val context: ApplicationContext) {
         }
 
         if (syncResult.success) {
-            database.schedules().save(schedule.finish(Schedule.statusSuccess, syncResult.checked, syncResult.updates.size, syncResult.unavailable))
+            SchedulesTable.Queries.save(schedule.finish(Schedule.statusSuccess, syncResult.checked, syncResult.updates.size, syncResult.unavailable), database)
         } else {
-            database.schedules().save(schedule.finish(Schedule.statusFailed))
+            SchedulesTable.Queries.save(schedule.finish(Schedule.statusFailed), database)
         }
 
         val updatedApps: List<UpdatedApp> = syncResult.updates
@@ -197,7 +197,7 @@ class UpdateCheck(private val context: ApplicationContext) {
             } catch (e: VolleyError) {
                 AppLog.e("Fetching of bulk updates failed ${e.message ?: ""}", "UpdateCheck")
             }
-            unavailable += docIds.size - endpoint.documents.size
+            unavailable += (docIds.size - endpoint.documents.size)
             AppLog.i("Sent ${docIds.size}, received ${endpoint.documents.size}", "UpdateCheck")
             updateApps(endpoint.documents, localApps, updatedApps, lastUpdatesViewed, context.contentResolver, database)
         }

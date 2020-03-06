@@ -1,18 +1,21 @@
 // Copyright (c) 2020. Alex Gavrishev
 package com.anod.appwatcher.database
 
+import android.content.ContentValues
+import android.database.sqlite.SQLiteDatabase
 import android.provider.BaseColumns
+import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.anod.appwatcher.database.entities.Schedule
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.util.concurrent.Callable
 
 @Dao
 interface SchedulesTable {
 
     @Query("SELECT * FROM $table ORDER BY ${Columns.start} DESC")
-    suspend fun load(): List<Schedule>
-
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insert(schedule: Schedule): Long
+    fun load(): LiveData<List<Schedule>>
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
     suspend fun update(schedule: Schedule)
@@ -20,14 +23,24 @@ interface SchedulesTable {
     @Query("DELETE FROM $table WHERE ${Columns.start} > :time")
     suspend fun clean(time: Long)
 
-    @Transaction
-    suspend fun save(schedule: Schedule) {
-        if (schedule.id == -1L) {
-            schedule.id = insert(schedule)
-        } else {
-            update(schedule)
+    object Queries {
+        @Transaction
+        suspend fun save(schedule: Schedule, db: AppsDatabase) {
+            if (schedule.id == -1L) {
+                schedule.id = insert(schedule, db)
+            } else {
+                db.schedules().update(schedule)
+            }
+        }
+
+        suspend fun insert(schedule: Schedule, db: AppsDatabase): Long = withContext(Dispatchers.IO) {
+            // Skip id to apply autoincrement
+            return@withContext db.runInTransaction(Callable {
+                db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, schedule.contentValues)
+            })
         }
     }
+
 
     class Columns : BaseColumns {
         companion object {
@@ -46,3 +59,17 @@ interface SchedulesTable {
         val projection = arrayOf(TagsTable.TableColumns._ID, TagsTable.TableColumns.name, TagsTable.TableColumns.color)
     }
 }
+
+val Schedule.contentValues: ContentValues
+    get() = ContentValues().apply {
+        if (id > -1) {
+            put(BaseColumns._ID, id)
+        }
+        put(SchedulesTable.Columns.start, start)
+        put(SchedulesTable.Columns.finish, finish)
+        put(SchedulesTable.Columns.result, result)
+        put(SchedulesTable.Columns.reason, reason)
+        put(SchedulesTable.Columns.checked, checked)
+        put(SchedulesTable.Columns.found, found)
+        put(SchedulesTable.Columns.unavailable, unavailable)
+    }

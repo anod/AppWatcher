@@ -23,6 +23,7 @@ import com.anod.appwatcher.backup.gdrive.GDriveSignIn
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.preferences.Preferences.Companion.THEME_BLACK
 import com.anod.appwatcher.preferences.Preferences.Companion.THEME_DEFAULT
+import com.anod.appwatcher.sync.SchedulesHistoryActivity
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.userLog.UserLogActivity
 import com.anod.appwatcher.utils.Theme
@@ -137,7 +138,8 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
                 Category(R.string.pref_header_about),
                 aboutItem,
                 TextItem(R.string.pref_title_opensource, R.string.pref_descr_opensource, ACTION_LICENSES),
-                TextItem(R.string.user_log, 0, ACTION_USER_LOG)
+                TextItem(R.string.user_log, 0, ACTION_USER_LOG),
+                TextItem(R.string.check_history, 0, ACTION_USER_CHECK_HISTORY)
         )
 
         if (BuildConfig.DEBUG) {
@@ -310,6 +312,9 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
             ACTION_USER_LOG -> {
                 startActivity(Intent(this, UserLogActivity::class.java))
             }
+            ACTION_USER_CHECK_HISTORY -> {
+                startActivity(Intent(this, SchedulesHistoryActivity::class.java))
+            }
             ACTION_DEFAULT_FILTER -> {
                 DialogSingleChoice(this, R.style.AlertDialog, R.string.pref_default_filter, R.array.filter_titles, prefs.defaultMainFilterId) { _, which ->
                     prefs.defaultMainFilterId = which
@@ -443,5 +448,6 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
         private const val ACTION_CRASH_REPORTS = 22
         private const val ACTION_ICON_STYLE = 23
         private const val ACTION_NOTIFY_NO_CHANGES = 24
+        private const val ACTION_USER_CHECK_HISTORY = 25
     }
 }

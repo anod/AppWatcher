@@ -5,7 +5,6 @@ import android.os.Build
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
 import androidx.work.*
-import com.anod.appwatcher.BuildConfig
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import java.util.concurrent.TimeUnit
@@ -49,7 +48,7 @@ class SyncScheduler(private val context: ApplicationContext) {
                     it
                 }
     }
-    
+
     fun execute(): LiveData<Operation.State> {
         val constraints: Constraints = Constraints.Builder().apply {
             setRequiresCharging(false)
@@ -59,7 +58,7 @@ class SyncScheduler(private val context: ApplicationContext) {
 
         val request: OneTimeWorkRequest = OneTimeWorkRequest.Builder(SyncWorker::class.java)
                 .setInputData(Data.Builder()
-                        .putBoolean(UpdateCheck.extrasManual, !BuildConfig.DEBUG)
+                        .putBoolean(UpdateCheck.extrasManual, true)
                         .build())
                 .setConstraints(constraints)
                 .build()

@@ -8,6 +8,12 @@ import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.anod.appwatcher.database.SchedulesTable
 
+sealed class ScheduleResult
+object New : ScheduleResult()
+object Success : ScheduleResult()
+class Skipped(val reason: Int) : ScheduleResult()
+class Failed(val reason: Int) : ScheduleResult()
+
 @Entity(tableName = SchedulesTable.table)
 data class Schedule(
         @PrimaryKey
@@ -45,12 +51,23 @@ data class Schedule(
         )
     }
 
+    fun result(): ScheduleResult = when (result) {
+        statusSuccess -> Success
+        statusNew -> New
+        statusSkippedMinTime -> Skipped(result)
+        statusSkippedNoWifi -> Skipped(result)
+        statusFailed -> Failed(result)
+        statusFailedNoAccount -> Failed(result)
+        statusFailedNoToken -> Failed(result)
+        else -> New
+    }
+
     companion object {
         const val statusNew = 0
         const val statusSuccess = 1
-        const val statusFailed = 2
         const val statusSkippedNoWifi = 3
         const val statusSkippedMinTime = 4
+        const val statusFailed = 2
         const val statusFailedNoAccount = 5
         const val statusFailedNoToken = 6
 
