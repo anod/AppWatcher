@@ -67,6 +67,10 @@ class Preferences(context: Context) : DeviceIdStorage {
         get() = preferences.getLong(DRIVE_SYNC_TIME, -1)
         set(value) = preferences.edit().putLong(DRIVE_SYNC_TIME, value).apply()
 
+    var lastCleanupTime: Long
+        get() = preferences.getLong("cleanup-time", -1)
+        set(value) = preferences.edit().putLong("cleanup-time", value).apply()
+
     val useAutoSync: Boolean
         get() = this.updatesFrequency > 0
 
