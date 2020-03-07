@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit
 @Dao
 interface AppListTable {
 
-    @RawQuery(observedEntities = [(App::class),(AppChange::class),(AppTag::class)])
+    @RawQuery(observedEntities = [(App::class), (AppChange::class), (AppTag::class)])
     fun observe(query: SupportSQLiteQuery): LiveData<List<AppListItem>>
 
     @Query("SELECT * FROM $table WHERE ${Columns.appId} == :appId")
@@ -40,13 +40,13 @@ interface AppListTable {
     fun observePackages(): LiveData<List<PackageRowPair>>
 
     @Query("SELECT ${BaseColumns._ID}, ${Columns.packageName} FROM $table WHERE " +
-            "CASE :includeDeleted WHEN 'false' THEN ${Columns.status} != ${AppInfoMetadata.STATUS_DELETED} ELSE ${Columns.status} >= ${AppInfoMetadata.STATUS_NORMAL} END")
+            "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${AppInfoMetadata.STATUS_DELETED} ELSE ${Columns.status} >= ${AppInfoMetadata.STATUS_NORMAL} END")
     suspend fun loadPackages(includeDeleted: Boolean): List<PackageRowPair>
 
     @Query("SELECT $table.*, " +
             "CASE WHEN ${Columns.updateTimestamp} > :recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
             "FROM $table WHERE " +
-            "CASE :includeDeleted WHEN 'false' THEN ${Columns.status} != ${AppInfoMetadata.STATUS_DELETED} ELSE ${Columns.status} >= ${AppInfoMetadata.STATUS_NORMAL} END ")
+            "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${AppInfoMetadata.STATUS_DELETED} ELSE ${Columns.status} >= ${AppInfoMetadata.STATUS_NORMAL} END ")
     fun load(includeDeleted: Boolean, recentTime: Long): Cursor
 
     @Query("SELECT $table.*, ${ChangelogTable.TableColumns.details}, ${ChangelogTable.TableColumns.noNewDetails}, " +
@@ -54,12 +54,14 @@ interface AppListTable {
             "FROM $table " +
             "LEFT JOIN ${ChangelogTable.table} ON " +
             "${TableColumns.appId} == ${ChangelogTable.TableColumns.appId} " +
-            "AND ${TableColumns.versionNumber} == ${ChangelogTable.TableColumns.versionCode} ")
-    fun loadAppList(recentTime: Long): Cursor
+            "AND ${TableColumns.versionNumber} == ${ChangelogTable.TableColumns.versionCode} " +
+            "WHERE " +
+            "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${AppInfoMetadata.STATUS_DELETED} ELSE ${Columns.status} >= ${AppInfoMetadata.STATUS_NORMAL} END ")
+    fun loadAppList(includeDeleted: Boolean, recentTime: Long): Cursor
 
     @Query("SELECT COUNT(${BaseColumns._ID}) " +
             "FROM $table WHERE " +
-            "CASE :includeDeleted WHEN 'false' THEN ${Columns.status} != ${AppInfoMetadata.STATUS_DELETED} ELSE ${Columns.status} >= ${AppInfoMetadata.STATUS_NORMAL} END ")
+            "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${AppInfoMetadata.STATUS_DELETED} ELSE ${Columns.status} >= ${AppInfoMetadata.STATUS_NORMAL} END ")
     suspend fun count(includeDeleted: Boolean): Int
 
     @Query("DELETE FROM $table WHERE ${Columns.status} == ${AppInfoMetadata.STATUS_DELETED}")
@@ -78,8 +80,8 @@ interface AppListTable {
             return@withContext AppListCursor(cursor)
         }
 
-        suspend fun loadAppList(table: AppListTable): AppListItemCursor = withContext(Dispatchers.IO) {
-            val cursor = table.loadAppList(recentTime)
+        suspend fun loadAppList(includeDeleted: Boolean, table: AppListTable): AppListItemCursor = withContext(Dispatchers.IO) {
+            val cursor = table.loadAppList(includeDeleted, recentTime)
             return@withContext AppListItemCursor(cursor)
         }
 
