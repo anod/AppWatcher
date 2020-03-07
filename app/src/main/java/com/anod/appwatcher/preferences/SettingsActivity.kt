@@ -247,7 +247,7 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
                     val useAutoSync = prefs.useAutoSync
                     if (useAutoSync) {
                         SyncScheduler(this)
-                                .schedule(prefs.isRequiresCharging, prefs.isWifiOnly, prefs.updatesFrequency.toLong())
+                                .schedule(prefs.isRequiresCharging, prefs.isWifiOnly, prefs.updatesFrequency.toLong(), true)
                                 .observe(this, Observer { })
                     } else {
                         SyncScheduler(this)
@@ -265,14 +265,14 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
                 val useWifiOnly = (pref as ToggleItem).checked
                 prefs.isWifiOnly = useWifiOnly
                 SyncScheduler(this)
-                        .schedule(prefs.isRequiresCharging, useWifiOnly, prefs.updatesFrequency.toLong())
+                        .schedule(prefs.isRequiresCharging, useWifiOnly, prefs.updatesFrequency.toLong(), true)
                         .observe(this, Observer { })
             }
             ACTION_REQUIRES_CHARGING -> {
                 val requiresCharging = (pref as ToggleItem).checked
                 prefs.isRequiresCharging = requiresCharging
                 SyncScheduler(this)
-                        .schedule(requiresCharging, prefs.isWifiOnly, prefs.updatesFrequency.toLong())
+                        .schedule(requiresCharging, prefs.isWifiOnly, prefs.updatesFrequency.toLong(), true)
                         .observe(this, Observer { })
             }
             ACTION_NOTIFY_UPTODATE -> prefs.isNotifyInstalledUpToDate = (pref as ToggleItem).checked

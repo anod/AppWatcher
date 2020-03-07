@@ -19,7 +19,7 @@ import info.anodsplace.framework.app.ApplicationContext
  * @author Alex Gavrishev
  * @date 02-Mar-18
  */
-class UpgradeRefresh(val prefs: Preferences, val activity: Activity, val lifecycleOwner: LifecycleOwner) : UpgradeTask {
+class UpgradeRefresh(val prefs: Preferences, val activity: Activity, private val lifecycleOwner: LifecycleOwner) : UpgradeTask {
     override fun onUpgrade(upgrade: UpgradeCheck.Result) {
         val googleAccount = GoogleSignIn.getLastSignedInAccount(activity)
         if (prefs.isDriveSyncEnabled) {
@@ -52,6 +52,12 @@ class UpgradeRefresh(val prefs: Preferences, val activity: Activity, val lifecyc
     }
 
     private fun requestRefresh() {
-        SyncScheduler(activity).execute().observe(lifecycleOwner, Observer { })
+        val scheduler = SyncScheduler(activity)
+        scheduler.execute().observe(lifecycleOwner, Observer { })
+        if (prefs.useAutoSync) {
+            scheduler
+                    .schedule(prefs.isRequiresCharging, prefs.isWifiOnly, prefs.updatesFrequency.toLong(), true)
+                    .observe(lifecycleOwner, Observer { })
+        }
     }
 }

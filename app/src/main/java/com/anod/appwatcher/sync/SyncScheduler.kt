@@ -16,9 +16,12 @@ import java.util.concurrent.TimeUnit
  */
 
 class SyncScheduler(private val context: ApplicationContext) {
+    private val wm: WorkManager
+        get() = WorkManager.getInstance(context.actual)
+
     constructor(context: Context) : this(ApplicationContext(context))
 
-    fun schedule(requiresCharging: Boolean, requiresWifi: Boolean, windowStartSec: Long): LiveData<Operation.State> {
+    fun schedule(requiresCharging: Boolean, requiresWifi: Boolean, windowStartSec: Long, replace: Boolean): LiveData<Operation.State> {
         val constraints: Constraints = Constraints.Builder().apply {
             setRequiresCharging(requiresCharging)
             if (requiresWifi) {
@@ -34,10 +37,12 @@ class SyncScheduler(private val context: ApplicationContext) {
                         .setConstraints(constraints)
                         .build()
 
-        AppLog.i("Schedule sync in ${windowStartSec / 3600} hours", "PeriodicWork")
-        return WorkManager
-                .getInstance(context.actual)
-                .enqueueUniquePeriodicWork(tag, ExistingPeriodicWorkPolicy.KEEP, request)
+        val policy = if (replace)
+            ExistingPeriodicWorkPolicy.REPLACE
+        else
+            ExistingPeriodicWorkPolicy.KEEP
+        AppLog.i("Schedule sync in ${windowStartSec / 3600} hours (${if (replace) "Replace" else "Keep existing"})", "PeriodicWork")
+        return wm.enqueueUniquePeriodicWork(tag, policy, request)
                 .state
                 .map {
                     when (it) {
@@ -64,9 +69,7 @@ class SyncScheduler(private val context: ApplicationContext) {
                 .build()
 
         AppLog.i("Enqueue update check", "OneTimeWork")
-        return WorkManager
-                .getInstance(context.actual)
-                .enqueue(request)
+        return wm.enqueue(request)
                 .state
                 .map {
                     when (it) {
@@ -80,9 +83,7 @@ class SyncScheduler(private val context: ApplicationContext) {
 
     fun cancel(): LiveData<Operation.State> {
         AppLog.i("Cancel scheduled sync", "SyncSchedule")
-        return WorkManager
-                .getInstance(context.actual)
-                .cancelUniqueWork(tag)
+        return wm.cancelUniqueWork(tag)
                 .state
                 .map {
                     when (it) {

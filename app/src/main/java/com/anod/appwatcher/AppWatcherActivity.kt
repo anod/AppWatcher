@@ -32,7 +32,7 @@ class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener,
 
         if (prefs.useAutoSync) {
             SyncScheduler(this)
-                    .schedule(prefs.isRequiresCharging, prefs.isWifiOnly, prefs.updatesFrequency.toLong())
+                    .schedule(prefs.isRequiresCharging, prefs.isWifiOnly, prefs.updatesFrequency.toLong(), false)
                     .observe(this, Observer { })
         }
     }

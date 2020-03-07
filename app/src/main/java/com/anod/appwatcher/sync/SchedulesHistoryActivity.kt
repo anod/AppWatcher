@@ -1,6 +1,7 @@
 // Copyright (c) 2020. Alex Gavrishev
 package com.anod.appwatcher.sync
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -30,24 +31,26 @@ import java.util.*
 class SchedulesHistoryActivity : ToolbarActivity() {
 
     class ScheduleViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val sdf = SimpleDateFormat("MMM d, hh:mm:ss", Locale.getDefault())
+        private val sdf = SimpleDateFormat("MMM d, HH:mm:ss", Locale.getDefault())
         private val context: Context
             get() = itemView.context
         private var textColor: Int? = null
+
+        @SuppressLint("SetTextI18n")
         fun apply(position: Int, schedule: Schedule) {
             val range = if (schedule.finish > 0) {
                 val duration = ((schedule.finish - schedule.start) / 1000.0).toInt()
                 "${sdf.format(Date(schedule.start))} - ${sdf.format(Date(schedule.finish))} (${duration}s)"
             } else {
-                "${sdf.format(Date(schedule.start))}"
+                sdf.format(Date(schedule.start))
             }
             itemView.time.text = range
             val result = schedule.result()
             itemView.status.text = when (result) {
-                is New -> "New"
-                is Success -> "Success"
-                is Failed -> "Failed"
-                is Skipped -> "Skipped"
+                is New -> context.getString(R.string.schedule_status_new)
+                is Success -> context.getString(R.string.schedule_status_success)
+                is Failed -> context.getString(R.string.schedule_status_failed)
+                is Skipped -> context.getString(R.string.schedule_status_skipped)
             }
             itemView.status.chipBackgroundColor = when (result) {
                 is New -> colorStateListOf(context, R.color.chip_blue)
@@ -56,8 +59,8 @@ class SchedulesHistoryActivity : ToolbarActivity() {
                 is Skipped -> colorStateListOf(context, R.color.chip_gray)
             }
             itemView.reason.text = when (schedule.reason) {
-                Schedule.reasonSchedule -> "Schedule"
-                Schedule.reasonManual -> "Manual"
+                Schedule.reasonSchedule -> context.getString(R.string.schedule_reason_schedule)
+                Schedule.reasonManual -> context.getString(R.string.schedule_status_manual)
                 else -> "Unknown"
             }
             itemView.reason.chipBackgroundColor = when (schedule.reason) {
@@ -65,11 +68,11 @@ class SchedulesHistoryActivity : ToolbarActivity() {
                 Schedule.reasonManual -> colorStateListOf(context, R.color.chip_yellow)
                 else -> colorStateListOf(context, R.color.chip_blue)
             }
-            itemView.checked.text = "${schedule.checked} synced"
+            itemView.checked.text = context.getString(R.string.schedule_chip_checked, schedule.checked)
             itemView.checked.isVisible = result is Success
-            itemView.found.text = "${schedule.found} updates"
+            itemView.found.text = context.getString(R.string.schedule_chip_found, schedule.found)
             itemView.found.isVisible = result is Success
-            itemView.unavailable.text = "${schedule.unavailable} not available"
+            itemView.unavailable.text = context.getString(R.string.schedule_chip_unavailable, schedule.unavailable)
             itemView.unavailable.isVisible = result is Success && schedule.unavailable > 0
 
             itemView.description.isVisible = when (result) {
