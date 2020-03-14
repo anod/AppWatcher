@@ -27,5 +27,8 @@ jobs:
       run: ./gradlew testDebugUnitTest
       continue-on-error: true # Allow steps to continue even with test failures
 
-    - name: Report
-      uses: asadmansr/android-test-report-action@master
+    - name: Publish test result
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: TestResults
+        path: app/build/reports/tests/testDebugUnitTest/index.html
