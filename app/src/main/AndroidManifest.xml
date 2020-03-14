@@ -54,7 +54,7 @@
 
         <activity
             android:name=".sync.SchedulesHistoryActivity"
-            android:label="@string/check_history" />
+            android:label="@string/refresh_history" />
 
         <activity
             android:name=".AppWatcherActivity"

@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import com.anod.appwatcher.sync.SyncNotification
-import com.anod.appwatcher.utils.UpdateAll
 import com.anod.appwatcher.utils.forMyApps
 import com.anod.appwatcher.utils.forPlayStore
 import info.anodsplace.framework.app.ApplicationContext
@@ -19,11 +18,9 @@ class NotificationActivity : Activity() {
         when (intent.getIntExtra(EXTRA_TYPE, 0)) {
             TYPE_PLAY -> {
                 val pkg = intent.getStringExtra(EXTRA_PKG) ?: ""
-                this.startActivitySafely(Intent().forPlayStore(pkg))
+                startActivitySafely(Intent().forPlayStore(pkg))
             }
-            TYPE_MYAPPS -> this.startActivitySafely(Intent().forMyApps(false))
-            TYPE_MYAPPS_UPDATE -> UpdateAll(this, Application.provide(this).prefs).withConfirmation()
-            // TYPE_DISMISS -> nothing
+            TYPE_MYAPPS -> startActivitySafely(Intent().forMyApps(false))
         }
         finish()
     }
@@ -35,6 +32,5 @@ class NotificationActivity : Activity() {
         const val TYPE_PLAY = 1
         const val TYPE_DISMISS = 2
         const val TYPE_MYAPPS = 3
-        const val TYPE_MYAPPS_UPDATE = 4
     }
 }

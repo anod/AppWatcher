@@ -11,6 +11,7 @@ import androidx.core.app.NotificationCompat
 import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.NotificationActivity
 import com.anod.appwatcher.R
+import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.watchlist.WatchListActivity
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.text.Html
@@ -28,6 +29,38 @@ class SyncNotification(private val context: ApplicationContext) {
         const val updatesChannelId = "versions_updates"
         const val pricesChannelId = "prices_change"
         const val authenticationId = "authentication"
+    }
+
+    class Filter(
+            private val filterInstalled: Boolean,
+            private val filterInstalledUpToDate: Boolean,
+            private val filterNoChanges: Boolean) {
+
+        constructor(prefs: Preferences)
+                : this(!prefs.isNotifyInstalled, !prefs.isNotifyInstalledUpToDate, !prefs.isNotifyNoChanges)
+
+        val hasFilters: Boolean
+            get() = (filterInstalled || filterInstalledUpToDate || filterNoChanges)
+
+        fun apply(updatedApps: List<UpdatedApp>): List<UpdatedApp> {
+            return updatedApps.filter append@{
+                if (filterInstalled) {
+                    if (it.installedVersionCode > 0) {
+                        return@append false
+                    }
+                } else if (filterInstalledUpToDate) {
+                    if (it.installedVersionCode > 0 && it.versionNumber <= it.installedVersionCode) {
+                        return@append false
+                    }
+                }
+                if (filterNoChanges) {
+                    if (it.noNewDetails) {
+                        return@append false
+                    }
+                }
+                true
+            }
+        }
     }
 
     fun createChannels() {
@@ -48,7 +81,7 @@ class SyncNotification(private val context: ApplicationContext) {
         context.notificationManager.createNotificationChannels(listOf(updates, prices, authentication))
     }
 
-    fun show(updatedApps: List<UpdateCheck.UpdatedApp>) {
+    fun show(updatedApps: List<UpdatedApp>) {
 
         val sorted = updatedApps.sortedWith(compareBy({ it.isNewUpdate }, { it.title }))
 
@@ -62,7 +95,7 @@ class SyncNotification(private val context: ApplicationContext) {
         notificationManager.cancel(syncNotificationId)
     }
 
-    private fun create(updatedApps: List<UpdateCheck.UpdatedApp>): Notification {
+    private fun create(updatedApps: List<UpdatedApp>): Notification {
         val notificationIntent = Intent(context.actual, AppWatcherActivity::class.java)
         notificationIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
         val data = Uri.parse("com.anod.appwatcher://notification")
@@ -93,14 +126,14 @@ class SyncNotification(private val context: ApplicationContext) {
         return builder.build()
     }
 
-    private fun addMultipleExtraInfo(updatedApps: List<UpdateCheck.UpdatedApp>, builder: NotificationCompat.Builder) {
+    private fun addMultipleExtraInfo(updatedApps: List<UpdatedApp>, builder: NotificationCompat.Builder) {
         updatedApps.firstOrNull { it.installedVersionCode > 0 && it.versionNumber > it.installedVersionCode }
                 ?: return
 
         val bigText = updatedApps.joinToString(",\n") { it.title }
         builder.setStyle(NotificationCompat.BigTextStyle().bigText(bigText))
 
-        val updateIntent = createActionIntent(Uri.parse("com.anod.appwatcher://play/myapps/1"), NotificationActivity.TYPE_MYAPPS_UPDATE)
+        val updateIntent = createActionIntent(Uri.parse("com.anod.appwatcher://play/myapps/1"), NotificationActivity.TYPE_MYAPPS)
         builder.addAction(R.drawable.ic_system_update_alt_white_24dp, context.getString(R.string.noti_action_update),
                 PendingIntent.getActivity(context.actual, 0, updateIntent, 0)
         )
@@ -111,7 +144,7 @@ class SyncNotification(private val context: ApplicationContext) {
         )
     }
 
-    private fun addExtraInfo(update: UpdateCheck.UpdatedApp, builder: NotificationCompat.Builder) {
+    private fun addExtraInfo(update: UpdatedApp, builder: NotificationCompat.Builder) {
 
         val changes = if (update.recentChanges.isBlank()) context.getString(R.string.no_recent_changes) else update.recentChanges
 
@@ -126,7 +159,7 @@ class SyncNotification(private val context: ApplicationContext) {
         )
 
         if (update.installedVersionCode > 0) {
-            val updateIntent = createActionIntent(Uri.parse("com.anod.appwatcher://play/myapps/1"), NotificationActivity.TYPE_MYAPPS_UPDATE)
+            val updateIntent = createActionIntent(Uri.parse("com.anod.appwatcher://play/myapps/1"), NotificationActivity.TYPE_MYAPPS)
             builder.addAction(R.drawable.ic_system_update_alt_white_24dp, context.getString(R.string.noti_action_update),
                     PendingIntent.getActivity(context.actual, 0, updateIntent, 0)
             )
@@ -146,7 +179,7 @@ class SyncNotification(private val context: ApplicationContext) {
         return intent
     }
 
-    private fun renderText(apps: List<UpdateCheck.UpdatedApp>): String {
+    private fun renderText(apps: List<UpdatedApp>): String {
         val count = apps.size
         if (count == 1) {
             return context.getString(R.string.notification_click)
@@ -164,7 +197,7 @@ class SyncNotification(private val context: ApplicationContext) {
         )
     }
 
-    private fun renderTitle(apps: List<UpdateCheck.UpdatedApp>): String {
+    private fun renderTitle(apps: List<UpdatedApp>): String {
         val title: String
         val count = apps.size
         title = if (count == 1) {

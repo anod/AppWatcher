@@ -51,7 +51,7 @@ abstract class AppsDatabase : RoomDatabase() {
     }
 
     companion object {
-        const val version = 17
+        const val version = 18
         const val dbName = "app_watcher"
 
         fun instance(context: Context): AppsDatabase {
@@ -64,13 +64,20 @@ abstract class AppsDatabase : RoomDatabase() {
                             MIGRATION_13_14,
                             MIGRATION_14_15,
                             MIGRATION_15_16,
-                            MIGRATION_16_17)
+                            MIGRATION_16_17,
+                            MIGRATION_17_18)
                     .build()
+        }
+
+        private val MIGRATION_17_18 = object : Migration(17, 18) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE ${SchedulesTable.table} ADD COLUMN ${SchedulesTable.Columns.notified} INTEGER NOT NULL DEFAULT 0")
+            }
         }
 
         private val MIGRATION_16_17 = object : Migration(16, 17) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                database.execSQL("CREATE TABLE IF NOT EXISTS `schedules` (" +
+                database.execSQL("CREATE TABLE IF NOT EXISTS `${SchedulesTable.table}` (" +
                         "`_id` INTEGER NOT NULL, " +
                         "`start` INTEGER NOT NULL, " +
                         "`finish` INTEGER NOT NULL, " +

@@ -49,25 +49,6 @@ class UpdateCheck(private val context: ApplicationContext) {
             val unavailable: Int
     )
 
-    class UpdatedApp(
-            val packageName: String,
-            val versionNumber: Int,
-            val title: String,
-            val uploadTime: Long,
-            val uploadDate: String,
-            val recentChanges: String,
-            val installedVersionCode: Int,
-            val isNewUpdate: Boolean) {
-
-        var noNewDetails = false
-
-        constructor(appInfo: AppInfo, recentChanges: String, installedVersionCode: Int, isNewUpdate: Boolean)
-                : this(appInfo.packageName, appInfo.versionNumber, appInfo.title, appInfo.uploadTime, appInfo.uploadDate, recentChanges, installedVersionCode, isNewUpdate)
-
-        constructor(app: App, recentChanges: String, installedVersionCode: Int, isNewUpdate: Boolean)
-                : this(app.packageName, app.versionNumber, app.title, app.uploadTime, app.uploadDate, recentChanges, installedVersionCode, isNewUpdate)
-    }
-
     companion object {
         private const val oneSecInMillis = 1000
         private const val bulkSize = 20
@@ -155,7 +136,7 @@ class UpdateCheck(private val context: ApplicationContext) {
             preferences.isLastUpdatesViewed = false
         }
 
-        notifyIfNeeded(manualSync, updatedApps)
+        notifyIfNeeded(manualSync, updatedApps, schedule)
 
         if (!manualSync) {
             if (preferences.isDriveSyncEnabled) {
@@ -314,7 +295,7 @@ class UpdateCheck(private val context: ApplicationContext) {
         return Pair(values, updatedApp)
     }
 
-    private fun notifyIfNeeded(manualSync: Boolean, updatedApps: List<UpdatedApp>) {
+    private suspend fun notifyIfNeeded(manualSync: Boolean, updatedApps: List<UpdatedApp>, schedule: Schedule) {
         val sn = SyncNotification(context)
         if (manualSync) {
             if (updatedApps.isEmpty()) {
@@ -324,30 +305,14 @@ class UpdateCheck(private val context: ApplicationContext) {
             }
             sn.cancel()
         } else if (updatedApps.isNotEmpty()) {
-            val hasFilters = (!preferences.isNotifyInstalled)
-                    || (!preferences.isNotifyInstalledUpToDate)
-            val filteredApps = if (hasFilters) {
-                updatedApps.filter append@{
-                    if (!preferences.isNotifyInstalled) {
-                        if (it.installedVersionCode <= 0) {
-                            return@append false
-                        }
-                    } else if (!preferences.isNotifyInstalledUpToDate) {
-                        if (!(it.installedVersionCode > 0 && it.versionNumber <= it.installedVersionCode)) {
-                            return@append false
-                        }
-                    }
-                    if (!preferences.isNotifyNoChanges) {
-                        if (it.noNewDetails) {
-                            return@append false
-                        }
-                    }
-                    true
-                }
+            val filter = SyncNotification.Filter(preferences)
+            val filteredApps = if (filter.hasFilters) {
+                filter.apply(updatedApps)
             } else {
                 updatedApps
             }
             AppLog.i("Notifying about: [${filteredApps.joinToString(",") { "${it.title} (${it.versionNumber})" }}]", "UpdateCheck")
+            database.schedules().updateNotified(schedule.id, filteredApps.size)
             if (filteredApps.isNotEmpty()) {
                 sn.show(filteredApps)
             }

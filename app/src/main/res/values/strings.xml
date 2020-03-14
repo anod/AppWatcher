@@ -110,7 +110,7 @@
     <string name="uptodate_summary">Notify when app was already updated</string>
     <string name="uptodate_title">Updated notifications</string>
     <string name="noti_action_update">Update</string>
-    <string name="update_all">Update All</string>
+    <string name="play_store_my_apps">Play Store: My Apps</string>
     <string name="navdrawer_item_wishlist">Wishlist</string>
     <string name="wishlist">Wishlist</string>
     <string name="add_new_tag">Enter tag name…</string>
@@ -153,7 +153,6 @@
     <string name="setup_interface_section_ondevice">Show installed on device apps section under the watch list</string>
     <string name="setup_interface_section_recent">Show section with recently installed apps on the top</string>
     <string name="setup_interface_section_recently_updated">Show recently updated apps section</string>
-    <string name="update_all_warning">This triggers update for ANY available update in Play Store</string>
     <string name="i_understand">I understand</string>
     <string name="already_exist">Already watched</string>
     <string name="delete_existing_item">Do you want to delete?</string>
@@ -210,7 +209,7 @@
         <item>Teardrop</item>
     </array>
     <string name="beta">β</string>
-    <string name="check_history">Check history</string>
+    <string name="refresh_history">Refresh history</string>
     <string name="schedule_status_new">New</string>
     <string name="schedule_status_success">Success</string>
     <string name="schedule_status_failed">Failed</string>
@@ -220,4 +219,5 @@
     <string name="schedule_chip_checked">%d synced</string>
     <string name="schedule_chip_found">%d updates</string>
     <string name="schedule_chip_unavailable">%d not available</string>
+    <string name="schedule_chip_notified">%d notified</string>
 </resources>

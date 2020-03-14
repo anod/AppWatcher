@@ -135,10 +135,6 @@ class Preferences(context: Context) : DeviceIdStorage {
         get() = preferences.getInt(FILTER_ID, Filters.TAB_ALL)
         set(filterId) = preferences.edit().putInt(FILTER_ID, filterId).apply()
 
-    var updateAllConfirmed: Boolean
-        get() = preferences.getBoolean("update-all-confirmed", false)
-        set(value) = preferences.edit().putBoolean("update-all-confirmed", value).apply()
-
     var enablePullToRefresh: Boolean
         get() = preferences.getBoolean("pull-to-refresh", true)
         set(value) = preferences.edit().putBoolean("pull-to-refresh", value).apply()

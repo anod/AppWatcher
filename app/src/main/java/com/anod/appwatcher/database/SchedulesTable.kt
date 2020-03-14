@@ -20,8 +20,11 @@ interface SchedulesTable {
     @Update(onConflict = OnConflictStrategy.REPLACE)
     suspend fun update(schedule: Schedule)
 
-    @Query("DELETE FROM $table WHERE ${Columns.start} > :time")
+    @Query("DELETE FROM $table WHERE ${Columns.start} < :time")
     suspend fun clean(time: Long)
+
+    @Query("UPDATE $table SET ${Columns.notified} = :notified WHERE ${BaseColumns._ID} = :id")
+    suspend fun updateNotified(id: Long, notified: Int)
 
     object Queries {
         @Transaction
@@ -51,6 +54,7 @@ interface SchedulesTable {
             const val checked = "checked"
             const val found = "found"
             const val unavailable = "unavailable"
+            const val notified = "notified"
         }
     }
 
@@ -72,4 +76,5 @@ val Schedule.contentValues: ContentValues
         put(SchedulesTable.Columns.checked, checked)
         put(SchedulesTable.Columns.found, found)
         put(SchedulesTable.Columns.unavailable, unavailable)
+        put(SchedulesTable.Columns.notified, notified)
     }

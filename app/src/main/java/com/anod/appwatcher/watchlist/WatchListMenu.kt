@@ -12,8 +12,9 @@ import com.anod.appwatcher.SettingsActivity
 import com.anod.appwatcher.installed.ImportInstalledFragment
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.tags.TagsListFragment
-import com.anod.appwatcher.utils.UpdateAll
+import com.anod.appwatcher.utils.forMyApps
 import info.anodsplace.framework.app.CustomThemeActivity
+import info.anodsplace.framework.content.startActivitySafely
 import info.anodsplace.framework.view.MenuItemAnimation
 
 /**
@@ -146,8 +147,8 @@ class WatchListMenu(private var searchListener: SearchView.OnQueryTextListener, 
                 activity.applyFilter(item.order)
                 return true
             }
-            R.id.menu_update_all -> {
-                UpdateAll(activity, activity.prefs).withConfirmation()
+            R.id.menu_my_apps -> {
+                activity.startActivitySafely(Intent().forMyApps(true))
                 return true
             }
         }

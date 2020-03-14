@@ -51,6 +51,7 @@
     <color name="chip_blue">#64B5F6</color>
     <color name="chip_blue_dark">#1976D2</color>
     <color name="chip_orange">#F57C00</color>
+    <color name="chip_purple">#ff5bff</color>
 
 </resources>
 

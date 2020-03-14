@@ -52,8 +52,8 @@
         appwatcher:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/menu_update_all"
-        android:title="@string/update_all"
+        android:id="@+id/menu_my_apps"
+        android:title="@string/play_store_my_apps"
         appwatcher:showAsAction="never" />
 
 </menu>

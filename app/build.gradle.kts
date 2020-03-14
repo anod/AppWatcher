@@ -144,7 +144,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.2.0")
     implementation("androidx.room:room-ktx:2.2.4")
-    implementation("androidx.core:core-ktx:1.2.0-rc01")
+    implementation("androidx.core:core-ktx:1.2.0")
     implementation("androidx.work:work-runtime-ktx:2.3.3")
     implementation("androidx.fragment:fragment-ktx:1.2.2")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0")

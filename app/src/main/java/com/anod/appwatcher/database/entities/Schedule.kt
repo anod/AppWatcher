@@ -32,11 +32,13 @@ data class Schedule(
         @ColumnInfo(name = SchedulesTable.Columns.found)
         val found: Int,
         @ColumnInfo(name = SchedulesTable.Columns.unavailable)
-        val unavailable: Int
+        val unavailable: Int,
+        @ColumnInfo(name = SchedulesTable.Columns.notified)
+        val notified: Int
 ) {
     @Ignore
     constructor(isManual: Boolean)
-            : this(-1L, System.currentTimeMillis(), 0, if (isManual) reasonManual else reasonSchedule, statusNew, 0, 0, 0)
+            : this(-1L, System.currentTimeMillis(), 0, if (isManual) reasonManual else reasonSchedule, statusNew, 0, 0, 0, 0)
 
     fun finish(status: Int, checked: Int = 0, found: Int = 0, unavailable: Int = 0): Schedule {
         return Schedule(
@@ -47,7 +49,8 @@ data class Schedule(
                 status,
                 checked,
                 found,
-                unavailable
+                unavailable,
+                0
         )
     }
 

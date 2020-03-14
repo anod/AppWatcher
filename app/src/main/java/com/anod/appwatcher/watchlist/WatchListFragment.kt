@@ -46,7 +46,7 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
     }
 
     private val prefs: Preferences by lazy {
-        Application.provide(context!!).prefs
+        Application.provide(requireContext()).prefs
     }
 
     // Must have empty constructor
@@ -55,7 +55,7 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         override val adapter: MergeRecyclerAdapter by lazy { MergeRecyclerAdapter() }
 
         override fun attach(fragment: WatchListFragment, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener) {
-            val context = fragment.context!!
+            val context = fragment.requireContext()
             val index = adapter.add(AppInfoAdapter(context, installedApps, clickListener))
             adapterIndexMap.put(ADAPTER_WATCHLIST, index)
         }
@@ -119,12 +119,13 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         val metrics = resources.displayMetrics
         swipeLayout.setDistanceToTriggerSync((16 * metrics.density).toInt())
 
-        val sortId = arguments!!.getInt(ARG_SORT)
-        val filterId = arguments!!.getInt(ARG_FILTER)
-        val tag: Tag? = arguments!!.getParcelable(ARG_TAG)
+        val args = requireArguments()
+        val sortId = args.getInt(ARG_SORT)
+        val filterId = args.getInt(ARG_FILTER)
+        val tag: Tag? = args.getParcelable(ARG_TAG)
 
         // Setup adapter for the section
-        section = sectionForClassName(arguments!!.getString(ARG_SECTION_PROVIDER)!!)
+        section = sectionForClassName(args.getString(ARG_SECTION_PROVIDER)!!)
         val viewModel = section.viewModel(this)
         section.attach(this, viewModel.installedApps, this)
 
@@ -135,7 +136,7 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         listView.layoutManager = layoutManager
 
         // Setup header decorator
-        listView.addItemDecoration(HeaderItemDecorator(viewModel.sections, this, context!!))
+        listView.addItemDecoration(HeaderItemDecorator(viewModel.sections, this, requireContext()))
         val adapter = section.adapter
         listView.adapter = adapter
 
@@ -170,7 +171,7 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
 
         view.findViewById<View>(android.R.id.button2)?.setOnClickListener {
             startActivity(ImportInstalledFragment.intent(
-                    context!!,
+                    requireContext(),
                     (activity as CustomThemeActivity).themeRes,
                     (activity as CustomThemeActivity).themeColors))
         }
@@ -180,17 +181,17 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
             activity?.startActivitySafely(intent)
         }
 
-        stateViewModel.sortId.observe(this) {
+        stateViewModel.sortId.observe(viewLifecycleOwner) {
             viewModel.sortId = it ?: 0
             viewModel.reload.value = true
         }
 
-        stateViewModel.titleFilter.observe(this) {
+        stateViewModel.titleFilter.observe(viewLifecycleOwner) {
             viewModel.titleFilter = it ?: ""
             viewModel.reload.value = true
         }
 
-        stateViewModel.listState.observe(this) {
+        stateViewModel.listState.observe(viewLifecycleOwner) {
             when (it) {
                 is SyncStarted -> {
                     swipeLayout.isRefreshing = true
@@ -201,7 +202,7 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
             }
         }
 
-        viewModel.result.observe(this) {
+        viewModel.result.observe(viewLifecycleOwner) {
             val headers = it.sections
             viewModel.sections.value = headers
             section.onModelLoaded(it)

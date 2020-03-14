@@ -68,6 +68,13 @@
             app:chipBackgroundColor="@color/chip_gray"
             tools:text="15 updates" />
 
+        <com.google.android.material.chip.Chip
+            android:id="@+id/notified"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:chipCornerRadius="4dp"
+            app:chipBackgroundColor="@color/chip_purple"
+            tools:text="0 notified" />
     </com.google.android.material.chip.ChipGroup>
 
     <TextView

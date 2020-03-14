@@ -1,7 +1,6 @@
 // Copyright (c) 2020. Alex Gavrishev
 package com.anod.appwatcher.sync
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -36,7 +35,6 @@ class SchedulesHistoryActivity : ToolbarActivity() {
             get() = itemView.context
         private var textColor: Int? = null
 
-        @SuppressLint("SetTextI18n")
         fun apply(position: Int, schedule: Schedule) {
             val range = if (schedule.finish > 0) {
                 val duration = ((schedule.finish - schedule.start) / 1000.0).toInt()
@@ -68,12 +66,15 @@ class SchedulesHistoryActivity : ToolbarActivity() {
                 Schedule.reasonManual -> colorStateListOf(context, R.color.chip_yellow)
                 else -> colorStateListOf(context, R.color.chip_blue)
             }
+            
             itemView.checked.text = context.getString(R.string.schedule_chip_checked, schedule.checked)
             itemView.checked.isVisible = result is Success
             itemView.found.text = context.getString(R.string.schedule_chip_found, schedule.found)
             itemView.found.isVisible = result is Success
             itemView.unavailable.text = context.getString(R.string.schedule_chip_unavailable, schedule.unavailable)
             itemView.unavailable.isVisible = result is Success && schedule.unavailable > 0
+            itemView.notified.text = context.getString(R.string.schedule_chip_notified, schedule.notified)
+            itemView.notified.isVisible = result is Success
 
             itemView.description.isVisible = when (result) {
                 is Failed -> true

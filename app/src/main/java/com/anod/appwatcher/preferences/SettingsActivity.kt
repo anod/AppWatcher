@@ -139,7 +139,7 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
                 aboutItem,
                 TextItem(R.string.pref_title_opensource, R.string.pref_descr_opensource, ACTION_LICENSES),
                 TextItem(R.string.user_log, 0, ACTION_USER_LOG),
-                TextItem(R.string.check_history, 0, ACTION_USER_CHECK_HISTORY)
+                TextItem(R.string.refresh_history, 0, ACTION_USER_CHECK_HISTORY)
         )
 
         if (BuildConfig.DEBUG) {
