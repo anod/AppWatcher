@@ -42,10 +42,10 @@ android {
         }
 
         create("release") {
-            storeFile = file(property("APPWATCHER_KEYSTORE_FILE")!!)
-            storePassword = property("APPWATCHER_KEYSTORE_PASSWORD") as String
-            keyAlias = property("APPWATCHER_KEY_ALIAS") as String
-            keyPassword = property("APPWATCHER_KEY_PASSWORD") as String
+            storeFile = file(findProperty("APPWATCHER_KEYSTORE_FILE") ?: ".")
+            storePassword = findProperty("APPWATCHER_KEYSTORE_PASSWORD") as? String
+            keyAlias = findProperty("APPWATCHER_KEY_ALIAS") as? String
+            keyPassword = findProperty("APPWATCHER_KEY_PASSWORD") as? String
         }
     }
 

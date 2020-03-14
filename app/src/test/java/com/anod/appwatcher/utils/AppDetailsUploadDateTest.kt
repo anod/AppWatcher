@@ -2,19 +2,14 @@ package com.anod.appwatcher.utils
 
 
 import android.util.Log
-
 import com.anod.appwatcher.utils.date.UploadDateParserFactory
-
-import org.junit.Test
-
-import java.text.ParseException
-import java.text.SimpleDateFormat
-import java.util.Locale
-
 import info.anodsplace.framework.AppLog
-
 import org.junit.Assert.assertEquals
 import org.junit.Assert.fail
+import org.junit.Test
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * @author Alex Gavrishev
@@ -83,10 +78,10 @@ class AppDetailsUploadDateTest {
         val sdf = SimpleDateFormat("YYYY-MM-dd", Locale.US)
         for (date in dates) {
             try {
-                val actualDate = extractUploadDate(date.date, date.locale)
+                val actualDate = extractUploadDate(date.date, date.locale)!!
                 assertEquals(date.locale.toString(), date.expected, sdf.format(actualDate))
             } catch (e: Exception) {
-                val expected = SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(date.expected)
+                val expected = SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(date.expected)!!
                 val formatted = UploadDateParserFactory.create(date.locale).joinToString(",") { it.format(expected) }
 
                 fail("[${date.locale}] Expected: $formatted, source: " + date.date)
