@@ -1,6 +1,8 @@
 App Watcher for Android
 =======================
 
+![Android CI](https://github.com/anod/AppWatcher/workflows/Android%20CI/badge.svg)
+
 App Watcher notifies you about updates of applications from Play Store even the app is not installed currently on your device and provides quick access to the "What's new" section.
 
 With App Watcher you can follow changes of apps you love, know about new features, bug fixes and new levels update for games.
@@ -23,15 +25,12 @@ Features:
 ## Implementation highlights
 
 * SQLite database - store the data
-* ContentProvider - access to the data
+* Room - access to the data
 * AccountManager - access to 3rd party account on device
 * Android's backup service
 * SyncAdapter & AccountAuthenticator - create android account for synchronization
 * Fragments
-* LoadManager
-* ActionBar
-* NotificationCompat
-* ShareCompat
+* Coroutines
 * GoogleDrive integration
 * Protocol Buffers
 
