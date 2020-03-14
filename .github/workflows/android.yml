@@ -18,6 +18,12 @@ jobs:
       with:
         java-version: 1.8
 
+    - name: Required files
+      run: |
+        echo $GOOGLE_SERVICES_JSON > app/google-services.json
+        ls -all app/google-services.json
+      working-directory: $GITHUB_WORKSPACE
+
     - name: Unit Test
       run: ./gradlew testDebugUnitTest
       continue-on-error: true # Allow steps to continue even with test failures
