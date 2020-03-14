@@ -21,12 +21,9 @@ jobs:
     - name: Required files
       run: echo $GOOGLE_SERVICES_JSON > app/google-services.json
       
-    - name: List files
-      run: ls -all app/
-      
-#     - name: Unit Test
-#       run: ./gradlew testDebugUnitTest
-#       continue-on-error: true # Allow steps to continue even with test failures
+    - name: Unit Test
+      run: ./gradlew testDebugUnitTest
+      continue-on-error: true # Allow steps to continue even with test failures
 
-#     - name: Report
-#       uses: asadmansr/android-test-report-action@master
+    - name: Report
+      uses: asadmansr/android-test-report-action@master
