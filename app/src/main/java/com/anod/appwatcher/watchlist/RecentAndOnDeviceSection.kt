@@ -21,7 +21,7 @@ import info.anodsplace.framework.content.InstalledApps
 open class RecentSection : WatchListFragment.DefaultSection() {
 
     override fun attach(fragment: WatchListFragment, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener) {
-        val context = fragment.context!!
+        val context = fragment.requireContext()
         val recentIndex = adapter.add(RecentlyInstalledAppsAdapter(context, context.packageManager, clickListener))
         adapterIndexMap.put(ADAPTER_RECENT, recentIndex)
 
@@ -74,7 +74,7 @@ class OnDeviceSection : WatchListFragment.DefaultSection() {
         const val ADAPTER_INSTALLED = 1
 
         fun attach(fragment: WatchListFragment, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener, section: WatchListFragment.DefaultSection) {
-            val context = fragment.context!!
+            val context = fragment.requireContext()
             val dataProvider = AppViewHolderResourceProvider(context, installedApps)
             val index = section.adapter.add(InstalledAppsAdapter(context, context.packageManager, dataProvider, clickListener))
 

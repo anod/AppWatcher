@@ -38,7 +38,7 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
         get() = provide.database
 
     var detailsUrl = ""
-    var appId = MutableLiveData<String>("")
+    var appId = MutableLiveData("")
     var rowId: Int = -1
     var isNewApp: Boolean = false
 

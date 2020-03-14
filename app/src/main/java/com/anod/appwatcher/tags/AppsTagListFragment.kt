@@ -27,7 +27,7 @@ class AppsTagListFragment : WatchListFragment() {
         view.findViewById<Button>(android.R.id.button1)?.let {
             it.setBackgroundColor(viewModel.tag!!.color)
             it.setOnClickListener {
-                startActivityForResult(AppsTagSelectActivity.createIntent(viewModel.tag!!, activity!!), REQUEST_TAGS_SELECT)
+                startActivityForResult(AppsTagSelectActivity.createIntent(viewModel.tag!!, requireActivity()), REQUEST_TAGS_SELECT)
             }
         }
     }

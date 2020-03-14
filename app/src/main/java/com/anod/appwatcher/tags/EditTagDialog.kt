@@ -35,7 +35,7 @@ class EditTagDialog : DialogFragment(), ColorPickerSwatch.OnColorSelectedListene
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        tag = arguments!!.getParcelable("tag") ?: Tag("")
+        tag = requireArguments().getParcelable("tag") ?: Tag("")
 
         tagName.setText(tag.name)
         val colorDrawable = arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.color_picker_swatch, null)!!)
@@ -51,7 +51,7 @@ class EditTagDialog : DialogFragment(), ColorPickerSwatch.OnColorSelectedListene
 
         colorPreview.setOnClickListener {
             val dialog = ColorPickerDialog.newInstance(tag.color, false, activity, Theme(requireActivity()).themeDialog)
-            dialog.setStyle(STYLE_NORMAL, Theme(activity!!).themeDialogNoActionBar)
+            dialog.setStyle(STYLE_NORMAL, Theme(requireActivity()).themeDialogNoActionBar)
             dialog.setOnColorSelectedListener(this)
             dialog.show(parentFragmentManager, "color-picker")
         }

@@ -44,7 +44,7 @@ class ImportInstalledFragment : Fragment() {
 
     private var allSelected: Boolean = false
     private val appComponent: AppComponent?
-        get() = if (context == null) null else Application.provide(context!!)
+        get() = if (context == null) null else Application.provide(requireContext())
     private val viewModel: ImportInstalledViewModel by viewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -54,8 +54,8 @@ class ImportInstalledFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        list.layoutManager = LinearLayoutManager(context!!)
-        list.adapter = ImportAdapter(context!!, context!!.packageManager, viewModel.dataProvider, this)
+        list.layoutManager = LinearLayoutManager(requireContext())
+        list.adapter = ImportAdapter(requireContext(), requireContext().packageManager, viewModel.dataProvider, this)
         list.itemAnimator = ImportItemAnimator()
 
         activity?.title = getString(R.string.import_installed)
@@ -100,9 +100,7 @@ class ImportInstalledFragment : Fragment() {
         viewModel.progress.observe(viewLifecycleOwner) { status ->
             when (status) {
                 is ImportProgress -> {
-                    (list.adapter as? ImportAdapter)?.let { adapter ->
-                        adapter.notifyDataSetChanged()
-                    }
+                    (list.adapter as? ImportAdapter)?.notifyDataSetChanged()
                 }
                 is ImportFinished -> button2.setText(android.R.string.ok)
             }
@@ -116,7 +114,7 @@ class ImportInstalledFragment : Fragment() {
             return
         }
 
-        AuthTokenAsync(context!!).request(activity, account) { token ->
+        AuthTokenAsync(requireContext()).request(activity, account) { token ->
             if (token.isNotBlank()) {
                 viewModel.import(account, token)
             } else {

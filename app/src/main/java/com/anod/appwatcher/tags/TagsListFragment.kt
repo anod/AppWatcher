@@ -41,17 +41,17 @@ class TagsListFragment : Fragment(), View.OnClickListener {
         super.onViewCreated(view, savedInstanceState)
 
         setHasOptionsMenu(true)
-        if (arguments!!.containsKey(EXTRA_APP)) {
-            viewModel.appInfo.value = arguments!!.getParcelable(EXTRA_APP)
-            activity!!.title = getString(R.string.tag_app, viewModel.appInfo.value!!.title)
+        if (requireArguments().containsKey(EXTRA_APP)) {
+            viewModel.appInfo.value = requireArguments().getParcelable(EXTRA_APP)
+            requireActivity().title = getString(R.string.tag_app, viewModel.appInfo.value!!.title)
         } else {
             viewModel.appInfo.value = null
-            activity!!.title = getString(R.string.tags)
+            requireActivity().title = getString(R.string.tags)
         }
         emptyView.isVisible = false
-        list.layoutManager = LinearLayoutManager(context!!)
-        list.adapter = TagAdapter(context!!, this)
-        list.addItemDecoration(DividerItemDecoration(context!!, DividerItemDecoration.HORIZONTAL))
+        list.layoutManager = LinearLayoutManager(requireContext())
+        list.adapter = TagAdapter(requireContext(), this)
+        list.addItemDecoration(DividerItemDecoration(requireContext(), DividerItemDecoration.HORIZONTAL))
 
         viewModel.tagsAppItems.observe(viewLifecycleOwner, Observer {
             (list.adapter as TagAdapter).update(it)

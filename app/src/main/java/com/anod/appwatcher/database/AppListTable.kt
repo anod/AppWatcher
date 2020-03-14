@@ -106,7 +106,7 @@ interface AppListTable {
 
         suspend fun insert(app: AppInfo, db: AppsDatabase): Long = withContext(Dispatchers.IO) {
             // Skip id to apply autoincrement
-            return@withContext db.runInTransaction(Callable<Long> {
+            return@withContext db.runInTransaction(Callable {
                 db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, app.contentValues)
             })
         }

@@ -69,14 +69,14 @@ class WishListFragment : Fragment() {
         loading.visibility = View.VISIBLE
         retryView.visibility = View.GONE
 
-        activity!!.setTitle(R.string.wishlist)
+        requireActivity().setTitle(R.string.wishlist)
 
-        val account = arguments!!.getParcelable<Account>(EXTRA_ACCOUNT)
-        val authToken = arguments!!.getString(EXTRA_AUTH_TOKEN) ?: ""
+        val account = requireArguments().getParcelable<Account>(EXTRA_ACCOUNT)
+        val authToken = requireArguments().getString(EXTRA_AUTH_TOKEN) ?: ""
 
         if (account == null || authToken.isEmpty() || context == null) {
             Toast.makeText(context, R.string.choose_an_account, Toast.LENGTH_SHORT).show()
-            activity!!.finish()
+            requireActivity().finish()
             return
         } else {
             viewModel.init(account, authToken)
@@ -87,7 +87,7 @@ class WishListFragment : Fragment() {
         viewModel.appStatusChange.observe(viewLifecycleOwner, Observer {
             val newStatus = it.first
             if (newStatus == AppInfoMetadata.STATUS_NORMAL) {
-                TagSnackbar.make(activity!!, it.second!!, false).show()
+                TagSnackbar.make(requireActivity(), it.second!!, false).show()
                 list.adapter!!.notifyDataSetChanged()
             }
         })

@@ -14,12 +14,12 @@ import kotlinx.coroutines.launch
 class RemoveDialogFragment : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val title = arguments!!.getString(ARG_TITLE)
-        val rowId = arguments!!.getInt(ARG_ROW_ID)
+        val title = requireArguments().getString(ARG_TITLE)
+        val rowId = requireArguments().getInt(ARG_ROW_ID)
         val message = getString(R.string.alert_dialog_remove_message, title)
 
-        return DialogMessage(activity!!, R.style.AlertDialog, R.string.alert_dialog_remove_title, message) { builder ->
-            val db = Application.provide(activity!!).database
+        return DialogMessage(requireActivity(), R.style.AlertDialog, R.string.alert_dialog_remove_title, message) { builder ->
+            val db = Application.provide(requireContext()).database
             builder.setPositiveButton(R.string.alert_dialog_remove) { _, _ ->
                 GlobalScope.launch(Dispatchers.Main) {
                     db.apps().updateStatus(rowId, AppInfoMetadata.STATUS_DELETED)

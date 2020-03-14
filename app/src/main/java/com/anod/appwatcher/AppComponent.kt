@@ -18,16 +18,13 @@ import info.anodsplace.playstore.OnlineNetwork
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import java.io.Closeable
-import kotlin.coroutines.CoroutineContext
 
 /**
  * @author alex
  * *
  * @date 2015-02-22
  */
-class AppComponent internal constructor(private val app: AppWatcherApplication): DeviceInfoProvider {
+class AppComponent internal constructor(private val app: AppWatcherApplication) : DeviceInfoProvider {
 
     override val deviceId: String by lazy { DeviceId(this.app, prefs).load() }
     override val simOperator: String
@@ -38,7 +35,7 @@ class AppComponent internal constructor(private val app: AppWatcherApplication):
     val uploadServiceContentObserver: UploadServiceContentObserver by lazy { UploadServiceContentObserver(app) }
 
     val requestQueue: RequestQueue by lazy {
-       val requestQueue = RequestQueue(NoCache(), OnlineNetwork(networkConnection, Network()), 2)
+        val requestQueue = RequestQueue(NoCache(), OnlineNetwork(networkConnection, Network()), 2)
         requestQueue.start()
         requestQueue
     }

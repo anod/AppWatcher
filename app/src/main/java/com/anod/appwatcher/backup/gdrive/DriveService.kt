@@ -38,6 +38,7 @@ class DriveService(private val service: Drive) {
     }
 
     private val dispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+
     /**
      * Creates a text file in the user's My Drive folder and returns its file ID.
      */
@@ -72,7 +73,7 @@ class DriveService(private val service: Drive) {
     /**
      * Updates the file identified by `fileId` with the given `name` and `content`.
      */
-    suspend fun saveFile(fileId: String, contentType: String, content: InputStream) = withContext(dispatcher) {
+    suspend fun saveFile(fileId: String, contentType: String, content: InputStream): Any? = withContext(dispatcher) {
         service.files()
                 .update(fileId, File(), InputStreamContent(contentType, content))
                 .execute()
