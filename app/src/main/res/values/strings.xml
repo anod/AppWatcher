@@ -220,4 +220,6 @@
     <string name="schedule_chip_found">%d updates</string>
     <string name="schedule_chip_unavailable">%d not available</string>
     <string name="schedule_chip_notified">%d notified</string>
+    <string name="delete_tag">Delete</string>
+    <string name="delete_tag_message">You are going to delete tag \'%s\'</string>
 </resources>

@@ -14,6 +14,7 @@ import com.anod.appwatcher.utils.Theme
 import info.anodsplace.colorpicker.ColorPickerDialog
 import info.anodsplace.colorpicker.ColorPickerSwatch
 import info.anodsplace.colorpicker.ColorStateDrawable
+import info.anodsplace.framework.app.DialogMessage
 import kotlinx.android.synthetic.main.dialog_edit_tag.*
 
 /**
@@ -68,8 +69,18 @@ class EditTagDialog : DialogFragment(), ColorPickerSwatch.OnColorSelectedListene
         }
 
         button3.setOnClickListener {
-            viewModel.deleteTag(tag)
-            dismiss()
+            DialogMessage(
+                    requireContext(),
+                    R.style.AlertDialog,
+                    R.string.delete_tag,
+                    getString(R.string.delete_tag_message, tag.name)
+            ) {
+                it.setPositiveButton(android.R.string.ok) { _, _ ->
+                    viewModel.deleteTag(tag)
+                    dismiss()
+                }
+                it.setNegativeButton(android.R.string.cancel) { _, _ -> }
+            }.show()
         }
     }
 
