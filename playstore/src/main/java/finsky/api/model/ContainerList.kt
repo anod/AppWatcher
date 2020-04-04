@@ -9,17 +9,17 @@ abstract class ContainerList<T> constructor(
         private val filter: FilterPredicate?
 ) : PaginatedList<T, Document>(url, autoLoadNextPage) {
 
-    override fun getItemsFromResponse(wrapper: Messages.Response.ResponseWrapper): Array<Document> {
+    override fun getItemsFromResponse(wrapper: Messages.Response.ResponseWrapper): FilteredDocumentList<Document> {
         val payload = payload(wrapper)
-        val doc = DfeUtils.getRootDoc(payload) ?: return arrayOf()
+        val doc = DfeUtils.getRootDoc(payload) ?: return FilteredDocumentList(arrayOf(), 0)
 
         val docs = doc.childList?.map { Document(it) } ?: listOf()
         if (filter == null) {
-            return docs.toTypedArray()
+            return Pair(docs.toTypedArray(), docs.size)
         }
 
         val list = docs.filter(filter)
-        return list.toTypedArray()
+        return Pair(list.toTypedArray(), docs.size)
     }
 
     override fun getNextPageUrl(wrapper: Messages.Response.ResponseWrapper): String? {

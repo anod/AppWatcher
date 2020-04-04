@@ -71,7 +71,9 @@ class WishListViewModel(application: Application) : AndroidViewModel(application
                 val model = endpoint!!.start()
                 endpoint!!.updates.collect {
                     if (it.error == null) {
-                        listData.value = model
+                        if (model.count > 0 || (model.count == 0 && !it.requestedMoreItems)) {
+                            listData.value = model
+                        }
                     } else {
                         loading.value = true
                     }

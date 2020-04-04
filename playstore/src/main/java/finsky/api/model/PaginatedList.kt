@@ -10,7 +10,9 @@ import kotlin.math.max
 
 class UrlOffsetPair(val offset: Int, val url: String)
 
-class ListAvailable(val isFirst: Boolean, val error: VolleyError?)
+class ListAvailable(val isFirst: Boolean, val requestedMoreItems: Boolean, val error: VolleyError?)
+
+typealias FilteredDocumentList<D> = Pair<Array<D>, Int>
 
 abstract class PaginatedList<T, D>(
         private val urlOffsetList: MutableList<UrlOffsetPair>,
@@ -113,7 +115,7 @@ abstract class PaginatedList<T, D>(
         }
 
     protected abstract fun getNextPageUrl(wrapper: Messages.Response.ResponseWrapper): String?
-    protected abstract fun getItemsFromResponse(wrapper: Messages.Response.ResponseWrapper): Array<D>
+    protected abstract fun getItemsFromResponse(wrapper: Messages.Response.ResponseWrapper): FilteredDocumentList<D>
 
     override val isReady: Boolean
         get() = this.lastResponse != null || this.items.size > 0
@@ -122,25 +124,27 @@ abstract class PaginatedList<T, D>(
         this.isInErrorState = true
         this.clearTransientState()
         val isFirst = this.urlOffsetList.size == 1
-        updates.offer(ListAvailable(isFirst, error))
+        updates.offer(ListAvailable(isFirst, false, error))
     }
 
     override fun onResponse(responseWrapper: Messages.Response.ResponseWrapper) {
         this.lastResponse = responseWrapper
         val size = this.items.size
         val itemsFromResponse = this.getItemsFromResponse(responseWrapper)
-        this.updateItemsUntilEndCount(itemsFromResponse.size)
+        this.updateItemsUntilEndCount(itemsFromResponse.first.size)
         val isFirst = this.urlOffsetList.size == 1
-        for (i in itemsFromResponse.indices) {
+        for (i in itemsFromResponse.first.indices) {
             if (i + this.currentOffset < this.items.size) {
-                this.items[i + this.currentOffset] = itemsFromResponse[i]
+                this.items[i + this.currentOffset] = itemsFromResponse.first[i]
             } else {
-                this.items.add(itemsFromResponse[i])
+                this.items.add(itemsFromResponse.first[i])
             }
         }
         val nextPageUrl = this.getNextPageUrl(responseWrapper)
+        var urlOffsetPair2: UrlOffsetPair? = null
         if (!nextPageUrl.isNullOrEmpty() && (this.currentOffset == size || this.itemsRemoved)) {
-            this.urlOffsetList.add(UrlOffsetPair(this.items.size, nextPageUrl))
+            urlOffsetPair2 = UrlOffsetPair(this.items.size, nextPageUrl)
+            this.urlOffsetList.add(urlOffsetPair2)
         }
         if (this.itemsRemoved) {
             this.itemsRemoved = false
@@ -148,18 +152,22 @@ abstract class PaginatedList<T, D>(
         val offset = this.urlOffsetList[-1 + this.urlOffsetList.size].offset
         var moreAvailable = false
         if (items.size == offset) {
-            moreAvailable = itemsFromResponse.isNotEmpty()
+            moreAvailable = itemsFromResponse.second > 0
         }
         this.isMoreAvailable = moreAvailable && autoLoadNextPage
         this.clearTransientState()
-        updates.offer(ListAvailable(isFirst, null))
+        val requestMoreItems = moreAvailable && urlOffsetPair2 != null
+        if (requestMoreItems) {
+            this.requestMoreItemsIfNoRequestExists(urlOffsetPair2)
+        }
+        updates.offer(ListAvailable(isFirst, requestMoreItems, null))
     }
 
     fun resetItems() {
         this.isMoreAvailable = true
         this.items.clear()
         val isFirst = this.urlOffsetList.size == 1
-        updates.offer(ListAvailable(isFirst, null))
+        updates.offer(ListAvailable(isFirst, false, null))
     }
 
     fun startLoadItems() {
