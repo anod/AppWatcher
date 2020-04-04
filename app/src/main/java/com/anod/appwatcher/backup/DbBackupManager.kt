@@ -5,9 +5,6 @@ import android.net.Uri
 import android.os.Environment
 import androidx.room.withTransaction
 import com.anod.appwatcher.Application
-import com.anod.appwatcher.database.AppListTable
-import com.anod.appwatcher.database.AppTagsTable
-import com.anod.appwatcher.database.TagsTable
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.json.MalformedJsonException
@@ -26,12 +23,13 @@ import java.util.*
  */
 class DbBackupManager(private val context: ApplicationContext) {
 
-    constructor(context: Context): this(ApplicationContext(context))
+    constructor(context: Context) : this(ApplicationContext(context))
 
     internal suspend fun doExport(destUri: Uri): Int = withContext(Dispatchers.IO) {
         val outputStream: OutputStream?
         try {
-            outputStream = context.contentResolver.openOutputStream(destUri) ?: return@withContext ERROR_FILE_WRITE
+            outputStream = context.contentResolver.openOutputStream(destUri)
+                    ?: return@withContext ERROR_FILE_WRITE
             if (!writeDb(outputStream)) {
                 return@withContext ERROR_FILE_WRITE
             }
@@ -94,9 +92,22 @@ class DbBackupManager(private val context: ApplicationContext) {
             db.tags().delete()
             db.appTags().delete()
 
-            AppListTable.Queries.insert(result.apps, db)
-            TagsTable.Queries.insert(result.tags, db)
-            AppTagsTable.Queries.insert(result.appTags, db)
+            result.apps.forEach { app ->
+                db.apps().insert(
+                        app.appId, app.packageName, app.versionNumber, app.versionName, app.title,
+                        app.creator, app.iconUrl, app.status, app.uploadDate,
+                        app.priceText, app.priceCur, app.priceMicros,
+                        app.detailsUrl, app.uploadTime, app.appType, app.updateTime
+                )
+            }
+
+            result.tags.forEach { tag ->
+                db.tags().insert(tag.name, tag.color)
+            }
+
+            result.appTags.forEach { appTag ->
+                db.appTags().insert(appTag.appId, appTag.tagId)
+            }
             return@withTransaction RESULT_OK
         }
     }

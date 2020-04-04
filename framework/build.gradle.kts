@@ -30,7 +30,7 @@ android {
 }
 
 dependencies {
-    implementation("androidx.recyclerview:recyclerview:1.2.0-alpha01")
+    implementation("androidx.recyclerview:recyclerview:1.2.0-alpha02")
     implementation("com.google.android.material:material:1.2.0-alpha05")
     implementation("androidx.palette:palette:1.0.0")
     implementation("androidx.cardview:cardview:1.0.0")
@@ -38,5 +38,5 @@ dependencies {
     implementation("com.google.android.gms:play-services-identity:17.0.0")
     implementation("com.google.android.gms:play-services-auth:17.0.0")
 
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.70")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.71")
 }

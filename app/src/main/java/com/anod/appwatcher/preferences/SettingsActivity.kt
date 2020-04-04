@@ -165,8 +165,12 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
                 val uri = data!!.data ?: return
                 viewModel.import(uri).observe(this) {
                     when (it) {
-                        -1 -> isProgressVisible = true
+                        -1 -> {
+                            AppLog.d("Importing...")
+                            isProgressVisible = true
+                        }
                         else -> {
+                            AppLog.d("Import finished with code: $it")
                             isProgressVisible = false
                             ImportTask.showImportFinishToast(this, it)
                         }
@@ -184,7 +188,7 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
                             isProgressVisible = true
                         }
                         else -> {
-                            AppLog.d("Code: $it")
+                            AppLog.d("Export finished with code: $it")
                             isProgressVisible = false
                             when (it) {
                                 DbBackupManager.RESULT_OK -> Toast.makeText(this, resources.getString(R.string.export_done), Toast.LENGTH_SHORT).show()

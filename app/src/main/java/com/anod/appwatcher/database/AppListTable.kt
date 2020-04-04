@@ -16,7 +16,6 @@ import com.anod.appwatcher.database.entities.*
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.preferences.Preferences
-import info.anodsplace.framework.AppLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.*
@@ -73,6 +72,38 @@ interface AppListTable {
     @Query("UPDATE $table SET ${Columns.status} = :status WHERE ${BaseColumns._ID} = :rowId")
     suspend fun updateStatus(rowId: Int, status: Int): Int
 
+    @Query("INSERT INTO $table (" +
+            "${Columns.appId}," +
+            "${Columns.packageName}," +
+            "${Columns.versionNumber}," +
+            "${Columns.versionName}," +
+            "${Columns.title}," +
+            "${Columns.creator}," +
+            "${Columns.iconUrl}," +
+            "${Columns.status}," +
+            "${Columns.uploadDate}," +
+
+            "${Columns.priceText}," +
+            "${Columns.priceCurrency}," +
+            "${Columns.priceMicros}," +
+
+            "${Columns.detailsUrl}," +
+            "${Columns.uploadTimestamp}," +
+            "${Columns.appType}," +
+            "${Columns.updateTimestamp}) VALUES (" +
+            ":appId, :packageName, :versionNumber, :versionName, :title, " +
+            ":creator, :iconUrl, :status, :uploadDate, " +
+            ":priceText, :priceCurrency, :priceMicros, " +
+            ":detailsUrl, :uploadTime, :appType, :updateTime" +
+            ")")
+
+    suspend fun insert(
+            appId: String, packageName: String, versionNumber: Int, versionName: String, title: String,
+            creator: String, iconUrl: String, status: Int, uploadDate: String,
+            priceText: String, priceCurrency: String, priceMicros: Int?,
+            detailsUrl: String?, uploadTime: Long, appType: String, updateTime: Long
+    ): Long
+
     object Queries {
 
         suspend fun load(includeDeleted: Boolean, table: AppListTable): AppListCursor = withContext(Dispatchers.IO) {
@@ -109,15 +140,6 @@ interface AppListTable {
             return@withContext db.runInTransaction(Callable {
                 db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, app.contentValues)
             })
-        }
-
-        suspend fun insert(apps: List<AppInfo>, db: AppsDatabase) = withContext(Dispatchers.IO) {
-            AppLog.d("insert " + apps.size)
-            apps.forEach {
-                AppLog.d("insert " + it.appId)
-                val rowId = db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, it.contentValues)
-                AppLog.d("insert result $rowId")
-            }
         }
 
         suspend fun delete(appId: String, db: AppsDatabase): Int {

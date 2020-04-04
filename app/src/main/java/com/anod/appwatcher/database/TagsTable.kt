@@ -29,8 +29,11 @@ interface TagsTable {
     @Update(onConflict = OnConflictStrategy.REPLACE)
     suspend fun update(tag: Tag)
 
-    @Query("DELETE FROM ${AppListTable.table}")
+    @Query("DELETE FROM $table")
     suspend fun delete()
+
+    @Query("INSERT INTO $table (${Columns.name}, ${Columns.color}) VALUES (:name, :color)")
+    suspend fun insert(name: String, color: Int): Long
 
     object Queries {
         suspend fun insert(tag: Tag, db: AppsDatabase): Long {
@@ -46,16 +49,6 @@ interface TagsTable {
                 }
             }
             return rowId
-        }
-
-        suspend fun insert(tags: List<Tag>, db: AppsDatabase) = withContext(Dispatchers.IO) {
-            tags.forEach { tag ->
-                val values = ContentValues().apply {
-                    put(Columns.name, tag.name)
-                    put(Columns.color, tag.color)
-                }
-                db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, values)
-            }
         }
     }
 

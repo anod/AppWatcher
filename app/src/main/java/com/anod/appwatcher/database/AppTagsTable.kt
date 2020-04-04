@@ -48,6 +48,9 @@ interface AppTagsTable {
     @Query("DELETE FROM $table WHERE ${Columns.tagId} = :tagId AND ${Columns.appId} = :appId")
     suspend fun delete(tagId: Int, appId: String): Int
 
+    @Query("INSERT INTO $table (${Columns.appId}, ${Columns.tagId}) VALUES (:appId, :tagId)")
+    suspend fun insert(appId: String, tagId: Int): Long
+    
     class Columns : BaseColumns {
         companion object {
             const val appId = "app_id"
