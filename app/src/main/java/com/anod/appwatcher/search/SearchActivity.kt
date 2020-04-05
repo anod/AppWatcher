@@ -11,11 +11,12 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AccountSelectionDialog
-import com.anod.appwatcher.accounts.AuthTokenAsync
+import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.Theme
@@ -23,6 +24,7 @@ import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.view.Keyboard
 import kotlinx.android.synthetic.main.activity_market_search.*
+import kotlinx.coroutines.launch
 
 @SuppressLint("Registered")
 open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionListener {
@@ -167,7 +169,8 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
 
     override fun onAccountSelected(account: Account) {
         viewModel.account = account
-        AuthTokenAsync(this).request(this, account) { token ->
+        lifecycleScope.launch {
+            val token = AuthTokenBlocking(applicationContext).retrieve(this@SearchActivity, account)
             if (token.isNotBlank()) {
                 viewModel.authToken.value = token
             } else {

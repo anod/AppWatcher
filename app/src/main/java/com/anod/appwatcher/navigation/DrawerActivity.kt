@@ -16,9 +16,10 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import com.anod.appwatcher.*
 import com.anod.appwatcher.accounts.AccountSelectionDialog
-import com.anod.appwatcher.accounts.AuthTokenAsync
+import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.installed.ImportInstalledFragment
 import com.anod.appwatcher.tags.AppsTagActivity
@@ -29,6 +30,7 @@ import com.crashlytics.android.Crashlytics
 import com.google.android.material.navigation.NavigationView
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ToolbarActivity
+import kotlinx.coroutines.launch
 
 /**
  * @author Alex Gavrishev
@@ -199,7 +201,8 @@ abstract class DrawerActivity : ToolbarActivity(), AccountSelectionDialog.Select
     override fun onAccountSelected(account: Account) {
         drawerViewModel.account.value = account
         val collectReports = provide.prefs.collectCrashReports
-        AuthTokenAsync(this).request(this, account) { token ->
+        lifecycleScope.launch {
+            val token = AuthTokenBlocking(applicationContext).retrieve(this@DrawerActivity, account)
             if (token.isNotBlank()) {
                 onAuthToken(token)
                 if (collectReports) {

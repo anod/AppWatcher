@@ -21,12 +21,13 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.observe
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
-import com.anod.appwatcher.accounts.AuthTokenAsync
+import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.generateTitle
@@ -46,6 +47,7 @@ import info.anodsplace.framework.content.startActivitySafely
 import info.anodsplace.framework.graphics.chooseDark
 import kotlinx.android.synthetic.main.activity_app_changelog.*
 import kotlinx.android.synthetic.main.view_changelog_header.*
+import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener, View.OnClickListener, AppBarLayout.OnOffsetChangedListener {
@@ -167,7 +169,8 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
 
         viewModel.loadLocalChangelog()
         viewModel.account?.let { account ->
-            AuthTokenAsync(this).request(this, account) { token ->
+            lifecycleScope.launch {
+                val token = AuthTokenBlocking(applicationContext).retrieve(this@DetailsActivity, account)
                 if (token.isNotBlank()) {
                     viewModel.authToken = token
                     viewModel.loadRemoteChangelog()

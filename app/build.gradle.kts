@@ -115,8 +115,7 @@ dependencies {
     implementation("com.google.android.material:material:1.2.0-alpha05")
     implementation("com.google.android.gms:play-services-oss-licenses:17.0.0")
     implementation("com.google.android.gms:play-services-identity:17.0.0")
-    implementation("com.google.android.gms:play-services-auth:17.0.0")
-    implementation("com.google.firebase:firebase-core:17.2.3")
+    implementation("com.google.android.gms:play-services-auth:18.0.0")
 
     implementation("com.google.apis:google-api-services-drive:v3-rev20191108-1.30.9") {
         exclude(group = "org.apache.httpcomponents")
@@ -161,6 +160,8 @@ dependencies {
     implementation(project(":colorpicker"))
     implementation(project(":framework"))
     implementation(project(":playstore"))
+
+    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.2")
 }
 
 // ADD THIS AT THE BOTTOM

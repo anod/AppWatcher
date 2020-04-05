@@ -112,7 +112,7 @@ class Preferences(context: Context) : DeviceIdStorage {
         set(notify) = preferences.edit().putBoolean("notify-no-changes", notify).apply()
 
     var showRecent: Boolean
-        get() = preferences.getBoolean("show-recent", false)
+        get() = preferences.getBoolean("show-recent", true)
         set(value) = preferences.edit().putBoolean("show-recent", value).apply()
 
     var showOnDevice: Boolean

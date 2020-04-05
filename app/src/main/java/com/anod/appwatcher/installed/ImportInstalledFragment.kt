@@ -9,17 +9,19 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.anod.appwatcher.AppComponent
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
-import com.anod.appwatcher.accounts.AuthTokenAsync
+import com.anod.appwatcher.accounts.AuthTokenBlocking
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.FragmentFactory
 import info.anodsplace.framework.app.FragmentToolbarActivity
 import info.anodsplace.framework.content.AppTitleComparator
 import kotlinx.android.synthetic.main.fragment_import_installed.*
+import kotlinx.coroutines.launch
 
 
 /**
@@ -114,13 +116,14 @@ class ImportInstalledFragment : Fragment() {
             return
         }
 
-        AuthTokenAsync(requireContext()).request(activity, account) { token ->
+        lifecycleScope.launch {
+            val token = AuthTokenBlocking(requireContext()).retrieve(activity, account)
             if (token.isNotBlank()) {
                 viewModel.import(account, token)
             } else {
                 if (context == null) {
                     activity?.finish()
-                    return@request
+                    return@launch
                 }
                 if (appComponent?.networkConnection?.isNetworkAvailable == true) {
                     Toast.makeText(context, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
