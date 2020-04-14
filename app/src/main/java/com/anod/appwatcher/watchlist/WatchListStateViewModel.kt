@@ -24,6 +24,8 @@ class WatchListStateViewModel(application: android.app.Application) : AndroidVie
     val sortId = MutableLiveData<Int>()
     val listState = MutableLiveData<ListState>()
     var isAuthenticated = false
+    var isWideLayout = false
+
     /**
      * Receive notifications from UpdateCheck
      */

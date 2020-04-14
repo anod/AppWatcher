@@ -29,6 +29,7 @@ import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.search.SearchActivity
 import com.anod.appwatcher.upgrade.UpgradeCheck
 import com.anod.appwatcher.upgrade.UpgradeRefresh
+import com.anod.appwatcher.utils.DuoDevice
 import com.anod.appwatcher.utils.Theme
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
@@ -52,6 +53,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     override val layoutResource: Int
         @LayoutRes get() = R.layout.activity_main
 
+    private lateinit var duoDevice: DuoDevice
 
     val prefs: Preferences
         get() = Application.provide(this).prefs
@@ -72,6 +74,9 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        duoDevice = DuoDevice.create(this)
+        updateWideLayout()
 
         val filterId: Int
         if (savedInstanceState != null) {
@@ -120,6 +125,17 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
                 }
             }
         }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        updateWideLayout()
+    }
+
+    private fun updateWideLayout() {
+        stateViewModel.isWideLayout = resources.getBoolean(R.bool.wide_layout)
+        details.isVisible = stateViewModel.isWideLayout
+        hinge.isVisible = stateViewModel.isWideLayout && duoDevice.hinge.width() > 0
     }
 
     override fun onAuthToken(authToken: String) {
