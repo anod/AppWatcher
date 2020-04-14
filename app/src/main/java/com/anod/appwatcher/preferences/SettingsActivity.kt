@@ -230,6 +230,8 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
                 if (syncEnabledItem.checked) {
                     isProgressVisible = true
                     gDriveSignIn.signIn()
+                } else {
+                    prefs.isDriveSyncEnabled = false
                 }
             }
             ACTION_SYNC_NOW -> if (syncNowItem.enabled) {
