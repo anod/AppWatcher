@@ -2,6 +2,7 @@ package com.anod.appwatcher
 
 import android.app.Application
 import android.content.Context
+import androidx.fragment.app.Fragment
 import info.anodsplace.framework.app.ApplicationContext
 
 /**
@@ -31,4 +32,7 @@ object Application {
         return (context.actual as AppWatcherApplication).appComponent
     }
 
+    fun provide(fragment: Fragment): AppComponent {
+        return (fragment.requireContext().applicationContext as AppWatcherApplication).appComponent
+    }
 }

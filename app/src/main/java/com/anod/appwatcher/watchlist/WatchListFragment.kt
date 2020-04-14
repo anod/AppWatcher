@@ -14,10 +14,12 @@ import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.anod.appwatcher.*
+import com.anod.appwatcher.Application
+import com.anod.appwatcher.BuildConfig
+import com.anod.appwatcher.MarketSearchActivity
+import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Tag
-import com.anod.appwatcher.details.DetailsActivity
 import com.anod.appwatcher.installed.ImportInstalledFragment
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.search.SearchActivity
@@ -168,17 +170,12 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
     }
 
     override fun onItemClick(app: App) {
-        val intent = Intent(activity, ChangelogActivity::class.java)
-        intent.putExtra(DetailsActivity.EXTRA_APP_ID, app.appId)
-        intent.putExtra(DetailsActivity.EXTRA_ROW_ID, app.rowId)
-        intent.putExtra(DetailsActivity.EXTRA_DETAILS_URL, app.detailsUrl)
-        startActivityForResult(intent, REQUEST_APP_INFO)
-
         if (BuildConfig.DEBUG) {
             AppLog.d(app.packageName)
             Toast.makeText(activity, app.packageName, Toast.LENGTH_SHORT).show()
         }
 
+        (requireActivity() as WatchListActivity).openAppDetails(app.appId, app.rowId, app.detailsUrl)
     }
 
     override fun onRefresh() {
@@ -212,6 +209,5 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         internal const val ARG_SORT = "sort"
         internal const val ARG_TAG = "tag"
         internal const val ARG_SECTION_PROVIDER = "section"
-        private const val REQUEST_APP_INFO = 1
     }
 }

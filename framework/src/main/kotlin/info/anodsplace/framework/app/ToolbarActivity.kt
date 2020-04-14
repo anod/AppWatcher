@@ -6,12 +6,11 @@ import android.graphics.PorterDuff
 import android.os.Build
 import android.os.Bundle
 import android.view.Menu
+import android.view.MenuItem
 import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
-import android.view.MenuItem
-import android.view.View
 import androidx.core.graphics.drawable.DrawableCompat
 import info.anodsplace.framework.R
 
@@ -23,7 +22,8 @@ abstract class ToolbarActivity : AppCompatActivity(), CustomThemeActivity {
 
     override val themeRes = 0
     override val themeColors = CustomThemeColors.none
-    @get:LayoutRes abstract val layoutResource: Int
+    @get:LayoutRes
+    abstract val layoutResource: Int
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val app = ApplicationContext(this)
@@ -40,11 +40,13 @@ abstract class ToolbarActivity : AppCompatActivity(), CustomThemeActivity {
     }
 
     private fun setupToolbar() {
-        val toolbar = findViewById<View>(R.id.toolbar) as Toolbar
-        //set the Toolbar as ActionBar
-        setSupportActionBar(toolbar)
+        val toolbar = findViewById<Toolbar?>(R.id.toolbar)
+        if (toolbar != null) {
+            //set the Toolbar as ActionBar
+            setSupportActionBar(toolbar)
 
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+            supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

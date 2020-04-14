@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 import android.widget.Toast
+import androidx.fragment.app.Fragment
 
 import info.anodsplace.framework.AppLog
 
@@ -28,6 +29,15 @@ fun Context.startActivitySafely(intent: Intent) {
     } catch (e: Exception) {
         AppLog.e(e)
         Toast.makeText(this, "Cannot start activity: $intent", Toast.LENGTH_SHORT).show()
+    }
+}
+
+fun Fragment.startActivitySafely(intent: Intent) {
+    try {
+        requireActivity().startActivity(intent)
+    } catch (e: Exception) {
+        AppLog.e(e)
+        Toast.makeText(requireContext(), "Cannot start activity: $intent", Toast.LENGTH_SHORT).show()
     }
 }
 

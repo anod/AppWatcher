@@ -15,15 +15,19 @@ import androidx.annotation.MenuRes
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import androidx.viewpager.widget.ViewPager
 import com.anod.appwatcher.Application
+import com.anod.appwatcher.ChangelogActivity
 import com.anod.appwatcher.MarketSearchActivity
 import com.anod.appwatcher.R
+import com.anod.appwatcher.details.DetailsActivity
 import com.anod.appwatcher.details.DetailsEmptyView
+import com.anod.appwatcher.details.DetailsFragment
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.navigation.DrawerActivity
 import com.anod.appwatcher.navigation.DrawerViewModel
@@ -229,6 +233,31 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         }
 
         return true
+    }
+
+    fun openAppDetails(appId: String, rowId: Int, detailsUrl: String?) {
+        if (stateViewModel.isWideLayout) {
+            supportFragmentManager.commit {
+                add(R.id.details, DetailsFragment.newInstance(appId, detailsUrl
+                        ?: "", rowId), DetailsFragment.tag)
+                addToBackStack(DetailsFragment.tag)
+            }
+        } else {
+            val intent = Intent(this, ChangelogActivity::class.java).apply {
+                putExtra(DetailsActivity.EXTRA_APP_ID, appId)
+                putExtra(DetailsActivity.EXTRA_ROW_ID, rowId)
+                putExtra(DetailsActivity.EXTRA_DETAILS_URL, detailsUrl)
+            }
+            startActivity(intent)
+        }
+    }
+
+    override fun onBackPressed() {
+        if (stateViewModel.isWideLayout && supportFragmentManager.findFragmentByTag(DetailsFragment.tag) != null) {
+            supportFragmentManager.popBackStack(DetailsFragment.tag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+        } else {
+            super.onBackPressed()
+        }
     }
 
     class Adapter(activity: WatchListActivity) : FragmentPagerAdapter(activity.supportFragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
