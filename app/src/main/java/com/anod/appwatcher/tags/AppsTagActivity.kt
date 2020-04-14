@@ -22,10 +22,9 @@ import kotlinx.android.synthetic.main.activity_main.*
 class AppsTagActivity : WatchListActivity() {
     private var tag: Tag = Tag("")
 
-    override val layoutResource: Int
-        get() = R.layout.activity_main
     override val menuResource: Int
         get() = R.menu.tagslist
+    
     override val themeRes: Int
         get() = if (themeColors.statusBarColor.isLight)
             Theme(this).themeLightActionBar
@@ -44,9 +43,9 @@ class AppsTagActivity : WatchListActivity() {
     }
 
     private fun restoreTag(savedInstanceState: Bundle?): Tag {
-        if (intentExtras.containsKey(EXTRA_TAG)){
+        if (intentExtras.containsKey(EXTRA_TAG)) {
             return intentExtras.getParcelable(EXTRA_TAG) ?: Tag("")
-        } else if (savedInstanceState != null){
+        } else if (savedInstanceState != null) {
             val savedTag = savedInstanceState.getParcelable<Tag?>(EXTRA_TAG)
             if (savedTag != null) {
                 return savedTag

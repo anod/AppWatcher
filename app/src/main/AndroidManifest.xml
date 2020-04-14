@@ -47,6 +47,8 @@
             android:theme="@style/AppTheme.Dialog.NoActionBar" />
         <activity
             android:name=".MarketSearchActivity"
+            android:resizeableActivity="true"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:label="@string/activity_market" />
         <activity
             android:name=".userLog.UserLogActivity"
@@ -59,7 +61,9 @@
         <activity
             android:name=".AppWatcherActivity"
             android:clearTaskOnLaunch="true"
+            android:resizeableActivity="true"
             android:label="@string/app_name"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:theme="@style/AppTheme.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -85,6 +89,8 @@
             android:theme="@style/InvisibleTheme" />
         <activity
             android:name=".SettingsActivity"
+            android:resizeableActivity="true"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:label="@string/preferences" />
         <activity android:name="info.anodsplace.framework.app.FragmentToolbarActivity" />
 
@@ -118,5 +124,10 @@
             android:name="androidx.work.impl.WorkManagerInitializer"
             android:authorities="${applicationId}.workmanager-init"
             tools:node="remove" />
+
+        <!-- Version < 3.0. DeX Mode and Screen Mirroring support -->
+        <meta-data
+            android:name="com.samsung.android.keepalive.density"
+            android:value="true" />
     </application>
 </manifest>

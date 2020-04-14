@@ -12,6 +12,7 @@ repositories {
     jcenter()
     maven(url = "https://jitpack.io")
     maven(url = "https://oss.sonatype.org/content/repositories/snapshots/")
+    maven(url = "https://pkgs.dev.azure.com/MicrosoftDeviceSDK/DuoSDK-Public/_packaging/Duo-SDK-Feed/maven/v1")
     google()
 }
 
@@ -126,7 +127,7 @@ dependencies {
 
     // 3rd party
     implementation("com.crashlytics.sdk.android:crashlytics:2.10.1")
-    implementation("com.squareup.okhttp3:okhttp:4.3.1")
+    implementation("com.squareup.okhttp3:okhttp:4.5.0")
     implementation("com.squareup.picasso:picasso:2.71828")
     implementation("com.jakewharton:process-phoenix:2.0.0")
 
@@ -154,6 +155,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.4")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.71")
+
+    // Dual screen support
+    implementation("com.microsoft.device.display:display-mask:0.3.0")
 
     testImplementation("junit:junit:4.13")
 

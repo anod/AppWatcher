@@ -16,6 +16,7 @@ import com.anod.appwatcher.AppComponent
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenBlocking
+import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.FragmentFactory
 import info.anodsplace.framework.app.FragmentToolbarActivity
@@ -117,19 +118,24 @@ class ImportInstalledFragment : Fragment() {
         }
 
         lifecycleScope.launch {
-            val token = AuthTokenBlocking(requireContext()).retrieve(activity, account)
-            if (token.isNotBlank()) {
-                viewModel.import(account, token)
-            } else {
-                if (context == null) {
-                    activity?.finish()
-                    return@launch
-                }
-                if (appComponent?.networkConnection?.isNetworkAvailable == true) {
-                    Toast.makeText(context, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
+            try {
+                val token = AuthTokenBlocking(requireContext()).retrieve(account)
+                if (token.isNotBlank()) {
+                    viewModel.import(account, token)
                 } else {
-                    Toast.makeText(context, R.string.check_connection, Toast.LENGTH_SHORT).show()
+                    if (context == null) {
+                        activity?.finish()
+                        return@launch
+                    }
+                    if (appComponent?.networkConnection?.isNetworkAvailable == true) {
+                        Toast.makeText(context, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
+                    } else {
+                        Toast.makeText(context, R.string.check_connection, Toast.LENGTH_SHORT).show()
+                    }
+                    activity?.finish()
                 }
+            } catch (e: AuthTokenStartIntent) {
+                startActivity(e.intent)
                 activity?.finish()
             }
         }

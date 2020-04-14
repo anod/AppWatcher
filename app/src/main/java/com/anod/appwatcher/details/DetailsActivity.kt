@@ -28,6 +28,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenBlocking
+import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.generateTitle
@@ -170,13 +171,18 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
         viewModel.loadLocalChangelog()
         viewModel.account?.let { account ->
             lifecycleScope.launch {
-                val token = AuthTokenBlocking(applicationContext).retrieve(this@DetailsActivity, account)
-                if (token.isNotBlank()) {
-                    viewModel.authToken = token
-                    viewModel.loadRemoteChangelog()
-                } else {
-                    AppLog.e("Error retrieving token")
-                    viewModel.loadRemoteChangelog()
+                try {
+                    val token = AuthTokenBlocking(applicationContext).retrieve(account)
+                    if (token.isNotBlank()) {
+                        viewModel.authToken = token
+                        viewModel.loadRemoteChangelog()
+                    } else {
+                        AppLog.e("Error retrieving token")
+                        viewModel.loadRemoteChangelog()
+                    }
+                } catch (e: AuthTokenStartIntent) {
+                    startActivity(e.intent)
+                    finish()
                 }
             }
         }
@@ -283,6 +289,7 @@ abstract class DetailsActivity : ToolbarActivity(), Palette.PaletteAsyncListener
             R.id.menu_open -> {
                 val launchIntent = packageManager.getLaunchIntentForPackage(viewModel.appId.value!!)
                 if (launchIntent != null) {
+                    launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT)
                     this.startActivitySafely(launchIntent)
                 }
             }

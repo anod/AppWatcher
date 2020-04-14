@@ -2,7 +2,6 @@ package com.anod.appwatcher
 
 import android.os.Bundle
 import android.widget.TextView
-import androidx.annotation.LayoutRes
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.Observer
 import com.anod.appwatcher.model.Filters
@@ -20,8 +19,6 @@ class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener,
     override val defaultFilterId: Int
         get() = prefs.defaultMainFilterId
 
-    override val layoutResource: Int
-        @LayoutRes get() = R.layout.activity_main
 
     override val menuResource: Int
         get() = R.menu.watchlist

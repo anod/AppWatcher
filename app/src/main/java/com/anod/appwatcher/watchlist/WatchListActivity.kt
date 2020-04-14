@@ -43,6 +43,8 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         get() = Theme(this).theme
     override val themeColors: CustomThemeColors
         get() = Theme(this).colors
+    override val layoutResource: Int
+        @LayoutRes get() = R.layout.activity_main
 
     private lateinit var viewPager: ViewPager
 
@@ -183,10 +185,10 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     }
 
     override fun onQueryTextSubmit(query: String): Boolean {
-        val searchIntent = Intent(this, MarketSearchActivity::class.java)
-        searchIntent.putExtra(SearchActivity.EXTRA_KEYWORD, query)
-        searchIntent.putExtra(SearchActivity.EXTRA_EXACT, true)
-        startActivity(searchIntent)
+        startActivity(Intent(this, MarketSearchActivity::class.java).apply {
+            putExtra(SearchActivity.EXTRA_KEYWORD, query)
+            putExtra(SearchActivity.EXTRA_EXACT, true)
+        })
         return true
     }
 

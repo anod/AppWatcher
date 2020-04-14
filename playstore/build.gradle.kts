@@ -50,7 +50,7 @@ dependencies {
     implementation("androidx.collection:collection-ktx:1.1.0")
     api(group = "com.google.protobuf", name = "protobuf-javalite", version = "3.11.4")
     api("com.android.volley:volley:1.1.0")
-    implementation("com.squareup.okhttp3:okhttp:4.3.1")
+    implementation("com.squareup.okhttp3:okhttp:4.5.0")
 
     implementation(project(":framework"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.4")

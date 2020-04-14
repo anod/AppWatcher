@@ -356,7 +356,7 @@ class UpdateCheck(private val context: ApplicationContext) {
         val tokenHelper = AuthTokenBlocking(context)
         var authToken: String? = null
         try {
-            authToken = tokenHelper.retrieve(null, account)
+            authToken = tokenHelper.retrieve(account)
         } catch (e: Throwable) {
             AppLog.e("AuthTokenBlocking request exception: " + e.message, e)
         }

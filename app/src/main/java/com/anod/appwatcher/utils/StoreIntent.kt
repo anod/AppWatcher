@@ -17,7 +17,7 @@ fun Intent.forPlayStore(pkg: String): Intent {
     val url = String.format(StoreIntent.URL_PLAY_STORE, pkg)
     this.action = Intent.ACTION_VIEW
     this.data = Uri.parse(url)
-    this.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET)
+    this.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT)
     return this
 }
 
@@ -28,5 +28,6 @@ fun Intent.forMyApps(update: Boolean): Intent {
     if (update) {
         this.putExtra("trigger_update_all", true)
     }
+    this.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT)
     return this
 }

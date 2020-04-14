@@ -1,24 +1,28 @@
 package com.anod.appwatcher.accounts
 
-import android.accounts.*
-import android.app.Activity
+import android.accounts.Account
+import android.accounts.AccountManager
+import android.accounts.AuthenticatorException
+import android.accounts.OperationCanceledException
 import android.content.Context
-import android.os.Bundle
+import android.content.Intent
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.IOException
 
+class AuthTokenStartIntent(val intent: Intent) : RuntimeException("Auth Token Intent: $intent")
+
 class AuthTokenBlocking(context: ApplicationContext) {
     constructor(context: Context) : this(ApplicationContext(context))
 
     private val accountManager: AccountManager = AccountManager.get(context.actual)
 
-    suspend fun retrieve(activity: Activity?, acc: Account): String = withContext(Dispatchers.IO) {
+    suspend fun retrieve(acc: Account): String = withContext(Dispatchers.IO) {
         var token = ""
         try {
-            token = getAuthToken(activity, acc)
+            token = getAuthToken(acc)
         } catch (e: Exception) {
             AppLog.e(e)
         }
@@ -28,28 +32,28 @@ class AuthTokenBlocking(context: ApplicationContext) {
         }
 
         try {
-            token = getAuthToken(activity, acc)
+            token = getAuthToken(acc)
         } catch (e: Exception) {
             AppLog.e(e)
+            if (e is AuthTokenStartIntent) {
+                throw e
+            }
         }
         return@withContext token
     }
 
     @Throws(AuthenticatorException::class, OperationCanceledException::class, IOException::class)
-    private fun getAuthToken(activity: Activity?, acc: Account?): String {
-        if (acc == null) {
-            return ""
+    private fun getAuthToken(acc: Account): String {
+        val bundle = accountManager.getAuthToken(acc, AUTH_TOKEN_TYPE, null, false, null, null).result
+        val token = bundle.getString(AccountManager.KEY_AUTHTOKEN) ?: ""
+
+        if (token.isEmpty()) {
+            bundle.getParcelable<Intent?>(AccountManager.KEY_INTENT)?.let {
+                throw AuthTokenStartIntent(it)
+            }
         }
 
-        if (activity == null) {
-            val future = accountManager.getAuthToken(acc, AUTH_TOKEN_TYPE, null, false, null, null)
-            return future.result.getString(AccountManager.KEY_AUTHTOKEN) ?: ""
-        }
-
-        val future: AccountManagerFuture<Bundle> = accountManager.getAuthToken(
-                acc, AUTH_TOKEN_TYPE, null, activity, null, null
-        )
-        return future.result.getString(AccountManager.KEY_AUTHTOKEN) ?: ""
+        return token
     }
 
     companion object {

@@ -18,6 +18,7 @@ fun Intent.forUninstall(packageName: String): Intent {
 fun Intent.forAppInfo(packageName: String): Intent {
     this.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
     this.data = Uri.fromParts("package", packageName, null)
+    this.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT)
     return this
 }
 

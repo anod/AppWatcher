@@ -17,6 +17,7 @@ import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AccountSelectionDialog
 import com.anod.appwatcher.accounts.AuthTokenBlocking
+import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.Theme
@@ -170,17 +171,23 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
     override fun onAccountSelected(account: Account) {
         viewModel.account = account
         lifecycleScope.launch {
-            val token = AuthTokenBlocking(applicationContext).retrieve(this@SearchActivity, account)
-            if (token.isNotBlank()) {
-                viewModel.authToken.value = token
-            } else {
-                if (Application.provide(this@SearchActivity).networkConnection.isNetworkAvailable) {
-                    Toast.makeText(this@SearchActivity, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
+            try {
+                val token = AuthTokenBlocking(applicationContext).retrieve(account)
+                if (token.isNotBlank()) {
+                    viewModel.authToken.value = token
                 } else {
-                    Toast.makeText(this@SearchActivity, R.string.check_connection, Toast.LENGTH_SHORT).show()
+                    if (Application.provide(this@SearchActivity).networkConnection.isNetworkAvailable) {
+                        Toast.makeText(this@SearchActivity, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
+                    } else {
+                        Toast.makeText(this@SearchActivity, R.string.check_connection, Toast.LENGTH_SHORT).show()
+                    }
+                    finish()
                 }
+            } catch (e: AuthTokenStartIntent) {
+                startActivity(e.intent)
                 finish()
             }
+
         }
     }
 

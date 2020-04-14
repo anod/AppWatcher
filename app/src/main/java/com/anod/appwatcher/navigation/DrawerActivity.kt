@@ -20,6 +20,7 @@ import androidx.lifecycle.lifecycleScope
 import com.anod.appwatcher.*
 import com.anod.appwatcher.accounts.AccountSelectionDialog
 import com.anod.appwatcher.accounts.AuthTokenBlocking
+import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.installed.ImportInstalledFragment
 import com.anod.appwatcher.tags.AppsTagActivity
@@ -202,21 +203,25 @@ abstract class DrawerActivity : ToolbarActivity(), AccountSelectionDialog.Select
         drawerViewModel.account.value = account
         val collectReports = provide.prefs.collectCrashReports
         lifecycleScope.launch {
-            val token = AuthTokenBlocking(applicationContext).retrieve(this@DrawerActivity, account)
-            if (token.isNotBlank()) {
-                onAuthToken(token)
-                if (collectReports) {
-                    Crashlytics.setUserIdentifier(Hash.sha256(account.name).encoded)
-                }
-                updateDrawerAccount(account)
-            } else {
-                AppLog.e("Error retrieving authentication token")
-                onAuthToken("")
-                if (Application.provide(this@DrawerActivity).networkConnection.isNetworkAvailable) {
-                    Toast.makeText(this@DrawerActivity, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
+            try {
+                val token = AuthTokenBlocking(applicationContext).retrieve(account)
+                if (token.isNotBlank()) {
+                    onAuthToken(token)
+                    if (collectReports) {
+                        Crashlytics.setUserIdentifier(Hash.sha256(account.name).encoded)
+                    }
+                    updateDrawerAccount(account)
                 } else {
-                    Toast.makeText(this@DrawerActivity, R.string.check_connection, Toast.LENGTH_SHORT).show()
+                    AppLog.e("Error retrieving authentication token")
+                    onAuthToken("")
+                    if (Application.provide(this@DrawerActivity).networkConnection.isNetworkAvailable) {
+                        Toast.makeText(this@DrawerActivity, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
+                    } else {
+                        Toast.makeText(this@DrawerActivity, R.string.check_connection, Toast.LENGTH_SHORT).show()
+                    }
                 }
+            } catch (e: AuthTokenStartIntent) {
+                startActivity(e.intent)
             }
         }
     }
