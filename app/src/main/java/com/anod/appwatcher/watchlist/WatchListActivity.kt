@@ -16,12 +16,14 @@ import androidx.appcompat.widget.SearchView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentPagerAdapter
+import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import androidx.viewpager.widget.ViewPager
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.MarketSearchActivity
 import com.anod.appwatcher.R
+import com.anod.appwatcher.details.DetailsEmptyView
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.navigation.DrawerActivity
 import com.anod.appwatcher.navigation.DrawerViewModel
@@ -136,6 +138,13 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         stateViewModel.isWideLayout = resources.getBoolean(R.bool.wide_layout)
         details.isVisible = stateViewModel.isWideLayout
         hinge.isVisible = stateViewModel.isWideLayout && duoDevice.hinge.width() > 0
+        if (stateViewModel.isWideLayout) {
+            if (supportFragmentManager.findFragmentByTag(DetailsEmptyView.tag) == null) {
+                supportFragmentManager.commit {
+                    replace(R.id.details, DetailsEmptyView(), DetailsEmptyView.tag)
+                }
+            }
+        }
     }
 
     override fun onAuthToken(authToken: String) {
