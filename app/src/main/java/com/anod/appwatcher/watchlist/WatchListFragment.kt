@@ -3,7 +3,6 @@ package com.anod.appwatcher.watchlist
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
-import android.util.SparseIntArray
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,7 +10,6 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -25,9 +23,8 @@ import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.search.SearchActivity
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.CustomThemeActivity
-import info.anodsplace.framework.content.InstalledApps
+import info.anodsplace.framework.app.FragmentFactory
 import info.anodsplace.framework.content.startActivitySafely
-import info.anodsplace.framework.widget.recyclerview.MergeRecyclerAdapter
 import kotlinx.android.synthetic.main.fragment_applist.*
 
 open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
@@ -36,49 +33,8 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
 
     private val stateViewModel: WatchListStateViewModel by activityViewModels()
 
-    interface Section {
-        val adapter: MergeRecyclerAdapter
-        var adapterIndexMap: SparseIntArray
-        fun viewModel(fragment: WatchListFragment): WatchListViewModel
-        fun attach(fragment: WatchListFragment, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener)
-        fun onModelLoaded(result: LoadResult)
-        val isEmpty: Boolean
-    }
-
     private val prefs: Preferences by lazy {
         Application.provide(requireContext()).prefs
-    }
-
-    // Must have empty constructor
-    open class DefaultSection : Section {
-        override var adapterIndexMap = SparseIntArray()
-        override val adapter: MergeRecyclerAdapter by lazy { MergeRecyclerAdapter() }
-
-        override fun attach(fragment: WatchListFragment, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener) {
-            val context = fragment.requireContext()
-            val index = adapter.add(AppInfoAdapter(context, installedApps, clickListener))
-            adapterIndexMap.put(ADAPTER_WATCHLIST, index)
-        }
-
-        override fun viewModel(fragment: WatchListFragment): WatchListViewModel {
-            return ViewModelProvider(fragment).get(WatchListViewModel::class.java)
-        }
-
-        override fun onModelLoaded(result: LoadResult) {
-            getInnerAdapter<AppInfoAdapter>(ADAPTER_WATCHLIST).updateList(result.appsList)
-        }
-
-        fun <T : RecyclerView.Adapter<*>> getInnerAdapter(id: Int): T {
-            val index = adapterIndexMap.get(id)
-            return adapter[index] as T
-        }
-
-        override val isEmpty: Boolean
-            get() = getInnerAdapter<AppInfoAdapter>(ADAPTER_WATCHLIST).itemCount == 0
-
-        companion object {
-            const val ADAPTER_WATCHLIST = 0
-        }
     }
 
     private var isListVisible: Boolean
@@ -232,29 +188,30 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         }
     }
 
+    class Factory(
+            private val filterId: Int,
+            private val sortId: Int,
+            private val sectionClass: Class<Section>,
+            private val tag: Tag?
+    ) : FragmentFactory("wish-list-$filterId-$sortId-${sectionClass.name}-${tag?.hashCode()}") {
+
+        override fun create(): Fragment? = WatchListFragment().also {
+            it.arguments = Bundle().apply {
+                putInt(ARG_FILTER, filterId)
+                putInt(ARG_SORT, sortId)
+                putString(ARG_SECTION_PROVIDER, sectionClass.name)
+                tag?.let { tag ->
+                    putParcelable(ARG_TAG, tag)
+                }
+            }
+        }
+    }
+
     companion object {
         internal const val ARG_FILTER = "filter"
         internal const val ARG_SORT = "sort"
         internal const val ARG_TAG = "tag"
         internal const val ARG_SECTION_PROVIDER = "section"
-
         private const val REQUEST_APP_INFO = 1
-
-        fun newInstance(filterId: Int, sortId: Int, section: Section, tag: Tag?): WatchListFragment {
-            val frag = WatchListFragment()
-            frag.arguments = createArguments(filterId, sortId, section, tag)
-            return frag
-        }
-
-        fun createArguments(filterId: Int, sortId: Int, section: Section, tag: Tag?): Bundle {
-            val args = Bundle()
-            args.putInt(ARG_FILTER, filterId)
-            args.putInt(ARG_SORT, sortId)
-            args.putString(ARG_SECTION_PROVIDER, section.javaClass.name)
-            if (tag != null) {
-                args.putParcelable(ARG_TAG, tag)
-            }
-            return args
-        }
     }
 }

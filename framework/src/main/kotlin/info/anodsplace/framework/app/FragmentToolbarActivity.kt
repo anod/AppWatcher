@@ -12,7 +12,7 @@ import java.io.Serializable
  * @author Alex Gavrishev
  * @date 16/12/2016.
  */
-open class FragmentFactory(val tag: String) : Serializable {
+open class FragmentFactory(val fragmentTag: String) : Serializable {
 
     open fun create(): Fragment? {
         return null
@@ -37,14 +37,14 @@ class FragmentToolbarActivity : ToolbarActivity() {
             val factory: FragmentFactory = intent.getSerializableExtra(EXTRA_FACTORY) as FragmentFactory
             val f = factory.create()
             if (f == null) {
-                AppLog.e("Missing fragment for tag: ${factory.tag}")
+                AppLog.e("Missing fragment for tag: ${factory.fragmentTag}")
                 finish()
                 return
             }
             f.arguments = intent.getBundleExtra(EXTRA_ARGUMENTS)
 
             supportFragmentManager.beginTransaction()
-                    .replace(R.id.activity_content, f, factory.tag)
+                    .replace(R.id.activity_content, f, factory.fragmentTag)
                     .commit()
         }
     }

@@ -2,6 +2,7 @@ package com.anod.appwatcher.watchlist
 
 import android.accounts.Account
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.Menu
@@ -9,8 +10,11 @@ import android.view.MenuItem
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.annotation.LayoutRes
 import androidx.annotation.MenuRes
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
@@ -29,6 +33,8 @@ import com.anod.appwatcher.utils.Theme
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.DialogSingleChoice
+import info.anodsplace.framework.app.FragmentFactory
+import kotlinx.android.synthetic.main.activity_main.*
 
 sealed class ListState
 object SyncStarted : ListState()
@@ -46,7 +52,6 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     override val layoutResource: Int
         @LayoutRes get() = R.layout.activity_main
 
-    private lateinit var viewPager: ViewPager
 
     val prefs: Preferences
         get() = Application.provide(this).prefs
@@ -80,9 +85,8 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
             actionMenu.expandSearch = expandSearch
         }
 
-        viewPager = findViewById(R.id.viewpager)
-        viewPager.adapter = createViewPagerAdapter()
         viewPager.offscreenPageLimit = 0
+        viewPager.adapter = createViewPagerAdapter()
 
         viewPager.currentItem = filterId
         actionMenu.filterId = filterId
@@ -138,7 +142,8 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         if (filterId == 0) {
             supportActionBar?.subtitle = ""
         } else {
-            supportActionBar?.subtitle = viewPager.adapter?.getPageTitle(filterId) ?: ""
+            supportActionBar?.subtitle = (viewPager.adapter as? Adapter)?.getPageTitle(filterId)
+                    ?: ""
         }
     }
 
@@ -201,22 +206,18 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         return true
     }
 
-    class Adapter(fm: androidx.fragment.app.FragmentManager) : FragmentPagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
-        private val fragments = mutableListOf<androidx.fragment.app.Fragment>()
+    class Adapter(activity: WatchListActivity) : FragmentPagerAdapter(activity.supportFragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
+        private val fragments = mutableListOf<Fragment>()
         private val fragmentTitles = mutableListOf<String>()
 
-        fun addFragment(fragment: androidx.fragment.app.Fragment, title: String) {
-            fragments.add(fragment)
+        fun addFragment(fragmentFactory: FragmentFactory, title: String) {
+            fragments.add(fragmentFactory.create()!!)
             fragmentTitles.add(title)
         }
 
-        override fun getItem(position: Int): androidx.fragment.app.Fragment {
-            return fragments[position]
-        }
+        override fun getItem(position: Int) = fragments[position]
 
-        override fun getCount(): Int {
-            return fragments.size
-        }
+        override fun getCount() = fragments.size
 
         override fun getPageTitle(position: Int): CharSequence {
             return fragmentTitles[position]

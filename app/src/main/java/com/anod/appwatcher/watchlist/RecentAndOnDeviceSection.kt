@@ -18,7 +18,7 @@ import info.anodsplace.framework.content.InstalledApps
  * @date 01/04/2017.
  */
 
-open class RecentSection : WatchListFragment.DefaultSection() {
+open class RecentSection : DefaultSection() {
 
     override fun attach(fragment: WatchListFragment, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener) {
         val context = fragment.requireContext()
@@ -50,10 +50,9 @@ open class RecentSection : WatchListFragment.DefaultSection() {
     companion object {
         const val ADAPTER_RECENT = 2
     }
-
 }
 
-class OnDeviceSection : WatchListFragment.DefaultSection() {
+class OnDeviceSection : DefaultSection() {
 
     override fun attach(fragment: WatchListFragment, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener) {
         super.attach(fragment, installedApps, clickListener)
@@ -73,7 +72,7 @@ class OnDeviceSection : WatchListFragment.DefaultSection() {
     companion object {
         const val ADAPTER_INSTALLED = 1
 
-        fun attach(fragment: WatchListFragment, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener, section: WatchListFragment.DefaultSection) {
+        fun attach(fragment: WatchListFragment, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener, section: DefaultSection) {
             val context = fragment.requireContext()
             val dataProvider = AppViewHolderResourceProvider(context, installedApps)
             val index = section.adapter.add(InstalledAppsAdapter(context, context.packageManager, dataProvider, clickListener))
@@ -109,4 +108,5 @@ class RecentAndOnDeviceSection : RecentSection() {
         val adapter = getInnerAdapter<InstalledAppsAdapter>(OnDeviceSection.ADAPTER_INSTALLED)
         OnDeviceSection.onModelLoaded(result, adapter)
     }
+
 }

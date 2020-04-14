@@ -42,39 +42,40 @@ class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener,
     }
 
     override fun createViewPagerAdapter(): Adapter {
-        val adapter = Adapter(supportFragmentManager)
+        val adapter = Adapter(this)
         val title = resources.getStringArray(R.array.filter_titles)
 
-        adapter.addFragment(WatchListFragment.newInstance(
+        val sectionClass: Class<Section> = DefaultSection().javaClass
+        adapter.addFragment(WatchListFragment.Factory(
                 Filters.TAB_ALL,
                 prefs.sortIndex,
                 sectionForAll(prefs),
                 null), title[Filters.TAB_ALL])
-        adapter.addFragment(WatchListFragment.newInstance(
+        adapter.addFragment(WatchListFragment.Factory(
                 Filters.INSTALLED,
                 prefs.sortIndex,
-                WatchListFragment.DefaultSection(), null), title[Filters.INSTALLED])
-        adapter.addFragment(WatchListFragment.newInstance(
+                sectionClass, null), title[Filters.INSTALLED])
+        adapter.addFragment(WatchListFragment.Factory(
                 Filters.UNINSTALLED,
                 prefs.sortIndex,
-                WatchListFragment.DefaultSection(), null), title[Filters.UNINSTALLED])
-        adapter.addFragment(WatchListFragment.newInstance(
+                sectionClass, null), title[Filters.UNINSTALLED])
+        adapter.addFragment(WatchListFragment.Factory(
                 Filters.UPDATABLE,
                 prefs.sortIndex,
-                WatchListFragment.DefaultSection(), null), title[Filters.UPDATABLE])
+                sectionClass, null), title[Filters.UPDATABLE])
         return adapter
     }
 
-    private fun sectionForAll(prefs: Preferences): WatchListFragment.Section {
+    private fun sectionForAll(prefs: Preferences): Class<Section> {
         if (prefs.showRecent && prefs.showOnDevice) {
-            return RecentAndOnDeviceSection()
+            return RecentAndOnDeviceSection().javaClass
         }
         if (prefs.showRecent) {
-            return RecentSection()
+            return RecentSection().javaClass
         }
         if (prefs.showOnDevice) {
-            return OnDeviceSection()
+            return OnDeviceSection().javaClass
         }
-        return WatchListFragment.DefaultSection()
+        return DefaultSection().javaClass
     }
 }

@@ -8,8 +8,9 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.utils.Theme
+import com.anod.appwatcher.watchlist.DefaultSection
+import com.anod.appwatcher.watchlist.Section
 import com.anod.appwatcher.watchlist.WatchListActivity
-import com.anod.appwatcher.watchlist.WatchListFragment
 import info.anodsplace.framework.app.CustomThemeColors
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -24,7 +25,7 @@ class AppsTagActivity : WatchListActivity() {
 
     override val menuResource: Int
         get() = R.menu.tagslist
-    
+
     override val themeRes: Int
         get() = if (themeColors.statusBarColor.isLight)
             Theme(this).themeLightActionBar
@@ -68,26 +69,28 @@ class AppsTagActivity : WatchListActivity() {
     }
 
     override fun createViewPagerAdapter(): Adapter {
-        val adapter = Adapter(supportFragmentManager)
-        adapter.addFragment(AppsTagListFragment.newInstance(
+        val adapter = Adapter(this)
+
+        val sectionClass: Class<Section> = DefaultSection().javaClass
+        adapter.addFragment(AppsTagListFragment.Factory(
                 Filters.TAB_ALL,
                 prefs.sortIndex,
-                WatchListFragment.DefaultSection(),
+                sectionClass,
                 tag), getString(R.string.tab_all))
-        adapter.addFragment(AppsTagListFragment.newInstance(
+        adapter.addFragment(AppsTagListFragment.Factory(
                 Filters.INSTALLED,
                 prefs.sortIndex,
-                WatchListFragment.DefaultSection(),
+                sectionClass,
                 tag), getString(R.string.tab_installed))
-        adapter.addFragment(AppsTagListFragment.newInstance(
+        adapter.addFragment(AppsTagListFragment.Factory(
                 Filters.UNINSTALLED,
                 prefs.sortIndex,
-                WatchListFragment.DefaultSection(),
+                sectionClass,
                 tag), getString(R.string.tab_not_installed))
-        adapter.addFragment(AppsTagListFragment.newInstance(
+        adapter.addFragment(AppsTagListFragment.Factory(
                 Filters.UPDATABLE,
                 prefs.sortIndex,
-                WatchListFragment.DefaultSection(),
+                sectionClass,
                 tag), getString(R.string.tab_updatable))
         return adapter
     }
