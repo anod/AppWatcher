@@ -332,7 +332,8 @@ class DetailsFragment : Fragment(), Palette.PaletteAsyncListener, View.OnClickLi
     }
 
     override fun onGenerated(palette: Palette?) {
-        val defaultColor = ContextCompat.getColor(requireContext(), R.color.theme_primary)
+        val context = context ?: return
+        val defaultColor = ContextCompat.getColor(context, R.color.theme_primary)
         val darkSwatch = palette?.chooseDark(defaultColor) ?: Palette.Swatch(defaultColor, 0)
         applyColor(darkSwatch.rgb)
         animateBackground()

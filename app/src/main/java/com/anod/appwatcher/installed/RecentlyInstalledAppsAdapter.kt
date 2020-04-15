@@ -11,6 +11,7 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.packageToApp
 import com.anod.appwatcher.utils.PicassoAppIcon
 import com.anod.appwatcher.watchlist.AppViewHolder
+import info.anodsplace.framework.view.setOnSafeClickListener
 
 /**
  * @author alex
@@ -82,7 +83,7 @@ open class RecentlyInstalledAppsAdapter(
                     view.title.text = app.title
                     view.visibility = View.VISIBLE
                     view.watched.visibility = if (packages[index].second > 0) View.VISIBLE else View.INVISIBLE
-                    view.findViewById<View>(R.id.content).setOnClickListener {
+                    view.findViewById<View>(R.id.content).setOnSafeClickListener {
                         listener?.onItemClick(app)
                     }
                 }

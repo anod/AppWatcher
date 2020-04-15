@@ -7,13 +7,14 @@ import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.details.AppDetailsView
 import com.anod.appwatcher.utils.PicassoAppIcon
+import info.anodsplace.framework.view.setOnSafeClickListener
 
 open class AppViewHolder(
         itemView: View,
         resourceProvider: ResourceProvider,
         iconLoader: PicassoAppIcon,
         private val onClickListener: OnClickListener?)
-    : AppViewHolderBase(itemView, resourceProvider, iconLoader), View.OnClickListener {
+    : AppViewHolderBase(itemView, resourceProvider, iconLoader) {
 
     private var item: AppListItem? = null
     private val icon: ImageView = itemView.findViewById(R.id.icon)
@@ -27,21 +28,20 @@ open class AppViewHolder(
     }
 
     init {
-        itemView.findViewById<View>(R.id.content).setOnClickListener(this)
+        itemView.findViewById<View>(R.id.content).setOnSafeClickListener {
+            onClickListener?.onItemClick(this.item!!.app)
+        }
     }
 
     override fun recycle() {
         itemView.findViewById<View>(R.id.content).setOnClickListener(null)
     }
 
-    override fun onClick(v: View) {
-        onClickListener?.onItemClick(this.item!!.app)
-    }
-
     override fun bindView(item: AppListItem) {
         this.item = item
 
-        this.detailsView.fillDetails(item.app, item.recentFlag, item.changeDetails ?: "", item.noNewDetails, isLocalApp)
+        this.detailsView.fillDetails(item.app, item.recentFlag, item.changeDetails
+                ?: "", item.noNewDetails, isLocalApp)
         iconLoader.loadAppIntoImageView(item.app, this.icon, R.drawable.ic_notifications_black_24dp)
     }
 

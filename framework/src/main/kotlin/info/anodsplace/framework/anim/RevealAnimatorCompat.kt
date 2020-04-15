@@ -13,14 +13,14 @@ import kotlin.math.max
  * @date 2015-05-25
  */
 object RevealAnimatorCompat {
-    private const val duration = 300
+    private const val duration = 150L
 
     fun show(viewRoot: View, x: Int, y: Int, delay: Int): Animator {
         val anim: Animator
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             val finalRadius = max(viewRoot.width, viewRoot.height)
             anim = ViewAnimationUtils.createCircularReveal(viewRoot, x, y, 0f, finalRadius.toFloat())
-            anim.duration = duration.toLong()
+            anim.duration = duration
         } else {
             // Kitkat compatibility
             anim = ValueAnimator.ofInt(0, 1)

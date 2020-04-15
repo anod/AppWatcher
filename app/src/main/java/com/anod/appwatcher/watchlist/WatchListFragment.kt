@@ -27,6 +27,7 @@ import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.CustomThemeActivity
 import info.anodsplace.framework.app.FragmentFactory
 import info.anodsplace.framework.content.startActivitySafely
+import info.anodsplace.framework.view.setOnSafeClickListener
 import kotlinx.android.synthetic.main.fragment_applist.*
 
 open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
@@ -120,21 +121,21 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         // Start out with a progress indicator.
         this.isListVisible = false
 
-        view.findViewById<View>(android.R.id.button1)?.setOnClickListener {
+        view.findViewById<View>(android.R.id.button1)?.setOnSafeClickListener {
             val searchIntent = Intent(activity, MarketSearchActivity::class.java)
             searchIntent.putExtra(SearchActivity.EXTRA_KEYWORD, "")
             searchIntent.putExtra(SearchActivity.EXTRA_FOCUS, true)
             startActivity(searchIntent)
         }
 
-        view.findViewById<View>(android.R.id.button2)?.setOnClickListener {
+        view.findViewById<View>(android.R.id.button2)?.setOnSafeClickListener {
             startActivity(ImportInstalledFragment.intent(
                     requireContext(),
                     (activity as CustomThemeActivity).themeRes,
                     (activity as CustomThemeActivity).themeColors))
         }
 
-        view.findViewById<View>(android.R.id.button3)?.setOnClickListener {
+        view.findViewById<View>(android.R.id.button3)?.setOnSafeClickListener {
             val intent = Intent.makeMainActivity(ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity"))
             activity?.startActivitySafely(intent)
         }

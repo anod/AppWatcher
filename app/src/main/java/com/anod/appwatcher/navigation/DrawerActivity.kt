@@ -142,6 +142,9 @@ abstract class DrawerActivity : ToolbarActivity(), AccountSelectionDialog.Select
             tagIndicator.setBackgroundDrawable(d)
             tagIndicator.text = if (count > 99) "99+" else "" + count
             item.intent = AppsTagActivity.createTagIntent(tag, this@DrawerActivity)
+                    .apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT or Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT)
+                    }
         }
         provide.memoryCache.put("tags", result.map { it.first })
     }
