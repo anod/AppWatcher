@@ -142,6 +142,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         stateViewModel.isWideLayout = resources.getBoolean(R.bool.wide_layout)
         details.isVisible = stateViewModel.isWideLayout
         hinge.isVisible = stateViewModel.isWideLayout && duoDevice.hinge.width() > 0
+        hinge.layoutParams.width = duoDevice.hinge.width()
         if (stateViewModel.isWideLayout) {
             if (supportFragmentManager.findFragmentByTag(DetailsEmptyView.tag) == null) {
                 supportFragmentManager.commit {
