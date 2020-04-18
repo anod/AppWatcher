@@ -15,7 +15,7 @@ val Context.isMultiWindow: Boolean
 fun Intent.addMultiWindowFlags(context: Context): Intent {
     if (context.isMultiWindow) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            addFlags(Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT or Intent.FLAG_ACTIVITY_NEW_DOCUMENT) // or Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
+            addFlags(Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT or Intent.FLAG_ACTIVITY_NEW_TASK) // or Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
         }
     }
     return this
