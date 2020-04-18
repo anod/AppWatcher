@@ -23,6 +23,7 @@ import com.anod.appwatcher.database.entities.Schedule
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.preferences.Preferences
+import com.anod.appwatcher.utils.compareLettersAndDigits
 import com.anod.appwatcher.utils.extractUploadDate
 import finsky.api.BulkDocId
 import finsky.api.model.Document
@@ -203,7 +204,7 @@ class UpdateCheck(private val context: ApplicationContext) {
                 val isNewVersion = marketApp.appDetails.versionCode > localItem.app.versionNumber
                 val recentChanges = marketApp.appDetails.recentChangesHtml?.trim() ?: ""
                 val noNewDetails = if (isNewVersion)
-                    recentChanges == (localItem.changeDetails?.trim() ?: "")
+                    recentChanges.compareLettersAndDigits(localItem.changeDetails)
                 else
                     localItem.noNewDetails
                 changelog.add(AppChange(
