@@ -72,6 +72,7 @@ android {
 
     lintOptions {
         disable("InvalidPackage", "MissingTranslation")
+        informational("DuplicatePlatformClasses")
         isCheckReleaseBuilds = true
         // Or, if you prefer, you can continue to check for errors in close builds,
         // but continue the build even when errors are found:
@@ -120,6 +121,7 @@ dependencies {
 
     implementation("com.google.apis:google-api-services-drive:v3-rev20191108-1.30.9") {
         exclude(group = "org.apache.httpcomponents")
+        exclude(group = "commons-logging")
     }
 
     implementation("com.google.api-client:google-api-client:1.30.9")
@@ -154,7 +156,7 @@ dependencies {
     // Kotlin
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.4")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.71")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.72")
 
     // Dual screen support
     implementation("com.microsoft.device.display:display-mask:0.3.0")

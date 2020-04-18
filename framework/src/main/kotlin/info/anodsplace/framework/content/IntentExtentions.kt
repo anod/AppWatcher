@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 
 import info.anodsplace.framework.AppLog
+import info.anodsplace.framework.app.addMultiWindowFlags
 
 fun Intent.forUninstall(packageName: String): Intent {
     this.action = Intent.ACTION_UNINSTALL_PACKAGE
@@ -16,10 +17,10 @@ fun Intent.forUninstall(packageName: String): Intent {
     return this
 }
 
-fun Intent.forAppInfo(packageName: String): Intent {
+fun Intent.forAppInfo(packageName: String, context: Context): Intent {
     this.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
     this.data = Uri.fromParts("package", packageName, null)
-    this.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT)
+    addMultiWindowFlags(context)
     return this
 }
 

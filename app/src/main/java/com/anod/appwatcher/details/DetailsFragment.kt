@@ -41,6 +41,7 @@ import com.google.android.material.appbar.AppBarLayout
 import com.squareup.picasso.Picasso
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.anim.RevealAnimatorCompat
+import info.anodsplace.framework.app.addMultiWindowFlags
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.forAppInfo
 import info.anodsplace.framework.content.forUninstall
@@ -293,12 +294,12 @@ class DetailsFragment : Fragment(), Palette.PaletteAsyncListener, View.OnClickLi
             R.id.menu_open -> {
                 val launchIntent = requireContext().packageManager.getLaunchIntentForPackage(viewModel.appId.value!!)
                 if (launchIntent != null) {
-                    launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT)
+                    launchIntent.addMultiWindowFlags(requireContext())
                     startActivitySafely(launchIntent)
                 }
             }
             R.id.menu_app_info -> {
-                startActivity(Intent().forAppInfo(viewModel.appId.value!!))
+                startActivity(Intent().forAppInfo(viewModel.appId.value!!, requireContext()))
             }
         }
         if (item.groupId == R.id.menu_group_tags) {
@@ -366,7 +367,7 @@ class DetailsFragment : Fragment(), Palette.PaletteAsyncListener, View.OnClickLi
     override fun onClick(v: View) {
         val id = v.id
         if (id == R.id.playStoreButton) {
-            val intent = Intent().forPlayStore(viewModel.app.value!!.packageName)
+            val intent = Intent().forPlayStore(viewModel.app.value!!.packageName, requireContext())
             this.startActivitySafely(intent)
         }
     }

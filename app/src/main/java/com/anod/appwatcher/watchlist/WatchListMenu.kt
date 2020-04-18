@@ -148,7 +148,7 @@ class WatchListMenu(private var searchListener: SearchView.OnQueryTextListener, 
                 return true
             }
             R.id.menu_my_apps -> {
-                activity.startActivitySafely(Intent().forMyApps(true))
+                activity.startActivitySafely(Intent().forMyApps(true, activity))
                 return true
             }
         }

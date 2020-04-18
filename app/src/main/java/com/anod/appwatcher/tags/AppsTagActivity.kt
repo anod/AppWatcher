@@ -12,6 +12,7 @@ import com.anod.appwatcher.watchlist.DefaultSection
 import com.anod.appwatcher.watchlist.Section
 import com.anod.appwatcher.watchlist.WatchListActivity
 import info.anodsplace.framework.app.CustomThemeColors
+import info.anodsplace.framework.app.addMultiWindowFlags
 import kotlinx.android.synthetic.main.activity_main.*
 
 /**
@@ -100,6 +101,7 @@ class AppsTagActivity : WatchListActivity() {
 
         fun createTagIntent(tag: Tag, context: Context) = Intent(context, AppsTagActivity::class.java).apply {
             putExtra(EXTRA_TAG, tag)
+            addMultiWindowFlags(context)
         }
     }
 }
