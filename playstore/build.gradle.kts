@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.config.KotlinCompilerVersion
-
 plugins {
     id("com.android.library")
     kotlin("android")
@@ -27,7 +25,8 @@ android {
 
     buildTypes {
         getByName("release") {
-            matchingFallbacks = listOf("", "")
+            matchingFallbacks
+//            matchingFallbacks = listOf("", "")
             postprocessing {
                 isRemoveUnusedCode = false
                 isRemoveUnusedResources = false
@@ -48,12 +47,13 @@ dependencies {
     implementation(files("libs/keyczar-0.71g-090613.jar"))
     implementation("androidx.collection:collection:1.1.0")
     implementation("androidx.collection:collection-ktx:1.1.0")
+    // Update from 3.11.4 breaks parsing, may be needs to be regerated
     api(group = "com.google.protobuf", name = "protobuf-javalite", version = "3.11.4")
     api("com.android.volley:volley:1.1.0")
-    implementation("com.squareup.okhttp3:okhttp:4.5.0")
+    implementation("com.squareup.okhttp3:okhttp:4.8.0")
 
     implementation(project(":framework"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.4")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.4")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.8")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.8")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.72")
 }

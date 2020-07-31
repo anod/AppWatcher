@@ -4,7 +4,6 @@ plugins {
     kotlin("android.extensions")
     kotlin("kapt")
     id("com.google.gms.oss.licenses.plugin")
-    id("io.fabric")
 }
 
 repositories {
@@ -23,7 +22,7 @@ android {
         applicationId = "com.anod.appwatcher"
         minSdkVersion(21)
         targetSdkVersion(29)
-        versionCode = 14501
+        versionCode = 14502
         versionName = "1.4.5"
         resValue("string", "content_authority", "com.anod.appwatcher")
 
@@ -31,7 +30,7 @@ android {
 
         javaCompileOptions {
             annotationProcessorOptions {
-                arguments = mapOf("room.incremental" to "true")
+                argument("room.incremental", "true")
             }
         }
     }
@@ -108,28 +107,31 @@ dependencies {
     implementation("androidx.recyclerview:recyclerview:1.1.0")
     implementation("androidx.palette:palette:1.0.0")
     implementation("androidx.cardview:cardview:1.0.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.0.0-beta4")
-    implementation("androidx.work:work-runtime:2.3.4")
-    implementation("androidx.core:core:1.2.0")
-    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.0.0")
-
+    implementation("androidx.constraintlayout:constraintlayout:2.0.0-rc1")
+    implementation("androidx.work:work-runtime:2.4.0")
+    implementation("androidx.core:core:1.3.1")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    implementation("androidx.window:window:1.0.0-alpha01")
+    implementation("androidx.paging:paging-runtime:3.0.0-alpha03")
     // Google
-    implementation("com.google.android.material:material:1.2.0-alpha05")
+    implementation("com.google.android.material:material:1.3.0-alpha02")
     implementation("com.google.android.gms:play-services-oss-licenses:17.0.0")
     implementation("com.google.android.gms:play-services-identity:17.0.0")
-    implementation("com.google.android.gms:play-services-auth:18.0.0")
+    implementation("com.google.android.gms:play-services-auth:18.1.0")
 
-    implementation("com.google.apis:google-api-services-drive:v3-rev20191108-1.30.9") {
+    implementation("com.google.apis:google-api-services-drive:v3-rev20200706-1.30.10") {
         exclude(group = "org.apache.httpcomponents")
         exclude(group = "commons-logging")
     }
 
-    implementation("com.google.api-client:google-api-client:1.30.9")
-    implementation("com.google.api-client:google-api-client-android:1.30.9")
+    implementation("com.google.api-client:google-api-client:1.30.10")
+    implementation("com.google.api-client:google-api-client-android:1.30.10")
+
+    implementation("com.google.firebase:firebase-analytics:17.4.4")
+    implementation("com.google.firebase:firebase-crashlytics:17.1.1")
 
     // 3rd party
-    implementation("com.crashlytics.sdk.android:crashlytics:2.10.1")
-    implementation("com.squareup.okhttp3:okhttp:4.5.0")
+    implementation("com.squareup.okhttp3:okhttp:4.8.0")
     implementation("com.squareup.picasso:picasso:2.71828")
     implementation("com.jakewharton:process-phoenix:2.0.0")
 
@@ -141,25 +143,22 @@ dependencies {
     kapt("androidx.room:room-compiler:2.2.5")
 
     // KTX
-    implementation("androidx.work:work-runtime-ktx:2.3.4")
-    implementation("androidx.fragment:fragment-ktx:1.2.4")
+    implementation("androidx.work:work-runtime-ktx:2.4.0")
+    implementation("androidx.fragment:fragment-ktx:1.2.5")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.2.0")
     implementation("androidx.room:room-ktx:2.2.5")
-    implementation("androidx.core:core-ktx:1.2.0")
-    implementation("androidx.work:work-runtime-ktx:2.3.4")
-    implementation("androidx.fragment:fragment-ktx:1.2.4")
+    implementation("androidx.core:core-ktx:1.3.1")
+    implementation("androidx.work:work-runtime-ktx:2.4.0")
+    implementation("androidx.fragment:fragment-ktx:1.2.5")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.2.0")
     implementation("androidx.room:room-ktx:2.2.5")
 
     // Kotlin
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.4")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.4")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.8")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.8")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.72")
-
-    // Dual screen support
-    implementation("com.microsoft.device.display:display-mask:0.3.0")
 
     testImplementation("junit:junit:4.13")
 
@@ -167,8 +166,9 @@ dependencies {
     implementation(project(":framework"))
     implementation(project(":playstore"))
 
-    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.2")
+    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.4")
 }
 
 // ADD THIS AT THE BOTTOM
 apply(plugin = "com.google.gms.google-services")
+apply(plugin = "com.google.firebase.crashlytics")

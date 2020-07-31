@@ -14,13 +14,12 @@ import com.android.volley.NoConnectionError
 import com.android.volley.TimeoutError
 import com.android.volley.VolleyError
 import com.anod.appwatcher.sync.SyncNotification
-import com.crashlytics.android.Crashlytics
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.app.ApplicationInstance
 import info.anodsplace.framework.app.CustomThemeActivity
 import info.anodsplace.framework.app.WindowCustomTheme
-import io.fabric.sdk.android.Fabric
 import java.io.File
 import java.io.IOException
 
@@ -56,7 +55,7 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
         }
 
         if (appComponent.prefs.collectCrashReports) {
-            Fabric.with(this, Crashlytics())
+            FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)
             AppLog.logger = FirebaseLogger()
             AppLog.instance.listener = this
         }
@@ -83,7 +82,7 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
         }
 
         if (appComponent.prefs.collectCrashReports) {
-            Crashlytics.logException(tr)
+            FirebaseCrashlytics.getInstance().recordException(tr)
         }
     }
 
@@ -98,7 +97,7 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
 
     private inner class FirebaseLogger : AppLog.Logger {
         override fun println(priority: Int, tag: String, msg: String) {
-            Crashlytics.log(priority, tag, msg)
+            FirebaseCrashlytics.getInstance().log("$priority/$tag: $msg")
         }
     }
 

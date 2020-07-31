@@ -35,7 +35,7 @@ import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.search.SearchActivity
 import com.anod.appwatcher.upgrade.UpgradeCheck
 import com.anod.appwatcher.upgrade.UpgradeRefresh
-import com.anod.appwatcher.utils.DuoDevice
+import com.anod.appwatcher.utils.HingeDevice
 import com.anod.appwatcher.utils.Theme
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
@@ -59,7 +59,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     override val layoutResource: Int
         @LayoutRes get() = R.layout.activity_main
 
-    private lateinit var duoDevice: DuoDevice
+    private lateinit var duoDevice: HingeDevice
 
     val prefs: Preferences
         get() = Application.provide(this).prefs
@@ -81,7 +81,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        duoDevice = DuoDevice.create(this)
+        duoDevice = HingeDevice.create(this)
         updateWideLayout()
 
         val filterId: Int

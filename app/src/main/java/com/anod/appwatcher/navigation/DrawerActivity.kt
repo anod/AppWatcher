@@ -27,8 +27,8 @@ import com.anod.appwatcher.tags.AppsTagActivity
 import com.anod.appwatcher.utils.Hash
 import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.wishlist.WishListFragment
-import com.crashlytics.android.Crashlytics
 import com.google.android.material.navigation.NavigationView
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ToolbarActivity
 import kotlinx.coroutines.launch
@@ -208,7 +208,7 @@ abstract class DrawerActivity : ToolbarActivity(), AccountSelectionDialog.Select
                 if (token.isNotBlank()) {
                     onAuthToken(token)
                     if (collectReports) {
-                        Crashlytics.setUserIdentifier(Hash.sha256(account.name).encoded)
+                        FirebaseCrashlytics.getInstance().setUserId(Hash.sha256(account.name).encoded)
                     }
                     updateDrawerAccount(account)
                 } else {
