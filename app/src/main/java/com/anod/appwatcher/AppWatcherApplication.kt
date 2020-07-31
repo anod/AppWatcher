@@ -95,8 +95,9 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
                 || appComponent.networkConnection.isNetworkException(tr)
     }
 
-    private inner class FirebaseLogger : AppLog.Logger {
+    private inner class FirebaseLogger : AppLog.Logger.Android() {
         override fun println(priority: Int, tag: String, msg: String) {
+            super.println(priority, tag, msg)
             FirebaseCrashlytics.getInstance().log("$priority/$tag: $msg")
         }
     }
