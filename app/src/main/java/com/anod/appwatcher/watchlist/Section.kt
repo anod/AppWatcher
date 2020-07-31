@@ -1,19 +1,22 @@
 // Copyright (c) 2020. Alex Gavrishev
 package com.anod.appwatcher.watchlist
 
+import android.content.Context
 import android.util.SparseIntArray
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.widget.recyclerview.MergeRecyclerAdapter
 
-
 interface Section {
+    val emptyAdapter: EmptyAdapter
     val adapter: MergeRecyclerAdapter
     var adapterIndexMap: SparseIntArray
     fun viewModel(fragment: WatchListFragment): WatchListViewModel
     fun attach(fragment: WatchListFragment, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener)
     fun onModelLoaded(result: LoadResult)
+    fun addEmptySection(context: Context)
+
     val isEmpty: Boolean
 }
 
@@ -21,12 +24,19 @@ interface Section {
 open class DefaultSection : Section {
 
     override var adapterIndexMap = SparseIntArray()
+    override val emptyAdapter: EmptyAdapter
+        get() = getInnerAdapter(AdapterViewType.empty)
     override val adapter: MergeRecyclerAdapter by lazy { MergeRecyclerAdapter() }
 
     override fun attach(fragment: WatchListFragment, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener) {
         val context = fragment.requireContext()
-        val index = adapter.add(AppInfoAdapter(context, installedApps, clickListener))
-        adapterIndexMap.put(ADAPTER_WATCHLIST, index)
+        val index = adapter.add(AppInfoAdapter(AdapterViewType.apps, context, installedApps, clickListener))
+        adapterIndexMap.put(AdapterViewType.apps, index)
+    }
+
+    override fun addEmptySection(context: Context) {
+        val index = adapter.add(EmptyAdapter(AdapterViewType.empty, context))
+        adapterIndexMap.put(AdapterViewType.empty, index)
     }
 
     override fun viewModel(fragment: WatchListFragment): WatchListViewModel {
@@ -34,7 +44,7 @@ open class DefaultSection : Section {
     }
 
     override fun onModelLoaded(result: LoadResult) {
-        getInnerAdapter<AppInfoAdapter>(ADAPTER_WATCHLIST).updateList(result.appsList)
+        getInnerAdapter<AppInfoAdapter>(AdapterViewType.apps).updateList(result.appsList)
     }
 
     fun <T : RecyclerView.Adapter<*>> getInnerAdapter(id: Int): T {
@@ -43,9 +53,6 @@ open class DefaultSection : Section {
     }
 
     override val isEmpty: Boolean
-        get() = getInnerAdapter<AppInfoAdapter>(ADAPTER_WATCHLIST).itemCount == 0
+        get() = getInnerAdapter<AppInfoAdapter>(AdapterViewType.apps).itemCount == 0
 
-    companion object {
-        const val ADAPTER_WATCHLIST = 0
-    }
 }

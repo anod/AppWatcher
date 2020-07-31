@@ -22,8 +22,8 @@ open class RecentSection : DefaultSection() {
 
     override fun attach(fragment: WatchListFragment, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener) {
         val context = fragment.requireContext()
-        val recentIndex = adapter.add(RecentlyInstalledAppsAdapter(context, context.packageManager, clickListener))
-        adapterIndexMap.put(ADAPTER_RECENT, recentIndex)
+        val recentIndex = adapter.add(RecentlyInstalledAppsAdapter(AdapterViewType.recent, context, context.packageManager, clickListener))
+        adapterIndexMap.put(AdapterViewType.recent, recentIndex)
 
         //
         super.attach(fragment, installedApps, clickListener)
@@ -39,16 +39,12 @@ open class RecentSection : DefaultSection() {
     override fun onModelLoaded(result: LoadResult) {
         super.onModelLoaded(result)
         val value = result as InstalledLoadResult
-        val adapter = getInnerAdapter<RecentlyInstalledAppsAdapter>(ADAPTER_RECENT)
+        val adapter = getInnerAdapter<RecentlyInstalledAppsAdapter>(AdapterViewType.recent)
         val watchingPackages = value.appsList.associate { Pair(it.app.packageName, it.app.rowId) }
         adapter.recentlyInstalled = value.recentlyInstalled.map {
             val rowId = watchingPackages[it] ?: -1
             Pair(it, rowId)
         }
-    }
-
-    companion object {
-        const val ADAPTER_RECENT = 2
     }
 }
 
@@ -65,19 +61,18 @@ class OnDeviceSection : DefaultSection() {
 
     override fun onModelLoaded(result: LoadResult) {
         super.onModelLoaded(result)
-        val adapter = getInnerAdapter<InstalledAppsAdapter>(ADAPTER_INSTALLED)
+        val adapter = getInnerAdapter<InstalledAppsAdapter>(AdapterViewType.installed)
         onModelLoaded(result, adapter)
     }
 
     companion object {
-        const val ADAPTER_INSTALLED = 1
 
         fun attach(fragment: WatchListFragment, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener, section: DefaultSection) {
             val context = fragment.requireContext()
             val dataProvider = AppViewHolderResourceProvider(context, installedApps)
-            val index = section.adapter.add(InstalledAppsAdapter(context, context.packageManager, dataProvider, clickListener))
+            val index = section.adapter.add(InstalledAppsAdapter(AdapterViewType.installed, context, context.packageManager, dataProvider, clickListener))
 
-            section.adapterIndexMap.put(ADAPTER_INSTALLED, index)
+            section.adapterIndexMap.put(AdapterViewType.installed, index)
             val viewModel = ViewModelProvider(fragment).get(InstalledWatchListViewModel::class.java)
             viewModel.hasSectionOnDevice = true
         }
@@ -105,7 +100,7 @@ class RecentAndOnDeviceSection : RecentSection() {
 
     override fun onModelLoaded(result: LoadResult) {
         super.onModelLoaded(result)
-        val adapter = getInnerAdapter<InstalledAppsAdapter>(OnDeviceSection.ADAPTER_INSTALLED)
+        val adapter = getInnerAdapter<InstalledAppsAdapter>(AdapterViewType.installed)
         OnDeviceSection.onModelLoaded(result, adapter)
     }
 

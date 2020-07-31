@@ -8,6 +8,7 @@ import androidx.collection.SimpleArrayMap
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.observe
 import com.anod.appwatcher.R
+import com.anod.appwatcher.watchlist.AdapterViewType
 import com.anod.appwatcher.watchlist.AppViewHolderBase
 
 internal class ImportAdapter(
@@ -15,7 +16,7 @@ internal class ImportAdapter(
         pm: PackageManager,
         private val dataProvider: ImportResourceProvider,
         lifecycleOwner: LifecycleOwner)
-    : InstalledAppsAdapter(context, pm, dataProvider, null) {
+    : InstalledAppsAdapter(AdapterViewType.installed, context, pm, dataProvider, null) {
 
     private var packageIndex: SimpleArrayMap<String, Int> = SimpleArrayMap()
 

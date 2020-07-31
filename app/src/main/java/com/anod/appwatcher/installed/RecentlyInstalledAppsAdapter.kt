@@ -19,6 +19,7 @@ import info.anodsplace.framework.view.setOnSafeClickListener
  * @date 2015-08-30
  */
 open class RecentlyInstalledAppsAdapter(
+        private val itemViewType: Int,
         protected val context: Context,
         private val packageManager: PackageManager,
         protected val listener: AppViewHolder.OnClickListener?)
@@ -35,9 +36,7 @@ open class RecentlyInstalledAppsAdapter(
         return if (recentlyInstalled.isEmpty()) 0 else 1
     }
 
-    override fun getItemViewType(position: Int): Int {
-        return 0
-    }
+    override fun getItemViewType(position: Int) = itemViewType
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.list_item_recently_installed, parent, false)

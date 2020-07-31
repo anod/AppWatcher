@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
@@ -41,20 +42,9 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
     }
 
     private var isListVisible: Boolean
-        get() = listView.visibility == View.VISIBLE
+        get() = listView.isVisible
         set(visible) {
-            if (visible) {
-                if (section.isEmpty) {
-                    emptyView.visibility = View.VISIBLE
-                    listView.visibility = View.INVISIBLE
-                } else {
-                    emptyView.visibility = View.GONE
-                    listView.visibility = View.VISIBLE
-                }
-            } else {
-                listView.visibility = View.INVISIBLE
-                emptyView.visibility = View.GONE
-            }
+            listView.isVisible = visible
         }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -87,6 +77,7 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         section = sectionForClassName(args.getString(ARG_SECTION_PROVIDER)!!)
         val viewModel = section.viewModel(this)
         section.attach(this, viewModel.installedApps, this)
+        section.addEmptySection(requireContext())
 
         viewModel.init(sortId, tag, filterId, prefs)
 
@@ -165,6 +156,7 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
             val headers = it.sections
             viewModel.sections.value = headers
             section.onModelLoaded(it)
+            section.emptyAdapter.isVisible = section.isEmpty
             progress.visibility = View.GONE
             isListVisible = true
         }

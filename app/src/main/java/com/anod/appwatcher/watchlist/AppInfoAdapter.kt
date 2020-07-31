@@ -1,10 +1,10 @@
 package com.anod.appwatcher.watchlist
 
 import android.content.Context
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.AppListItem
@@ -16,14 +16,16 @@ import info.anodsplace.framework.content.InstalledApps
  * @date 13/04/2018
  */
 
-class AppInfoAdapter(private val context: Context,
-                     installedApps: InstalledApps,
-                     private val listener: AppViewHolder.OnClickListener): RecyclerView.Adapter<AppViewHolder>() {
+class AppInfoAdapter(
+        private val itemViewType: Int,
+        private val context: Context,
+        installedApps: InstalledApps,
+        private val listener: AppViewHolder.OnClickListener) : RecyclerView.Adapter<AppViewHolder>() {
 
     private val itemDataProvider = AppViewHolderResourceProvider(context, installedApps)
     private var data: List<AppListItem> = emptyList()
 
-    private val itemCallback = object: DiffUtil.ItemCallback<AppListItem>() {
+    private val itemCallback = object : DiffUtil.ItemCallback<AppListItem>() {
         override fun areItemsTheSame(oldItem: AppListItem, newItem: AppListItem): Boolean {
             return oldItem.app.appId == newItem.app.appId
         }
@@ -39,9 +41,7 @@ class AppInfoAdapter(private val context: Context,
         return data.size
     }
 
-    override fun getItemViewType(position: Int): Int {
-        return 1
-    }
+    override fun getItemViewType(position: Int) = itemViewType
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppViewHolder {
         val itemView = LayoutInflater.from(context).inflate(R.layout.list_item_app, parent, false)
@@ -58,7 +58,7 @@ class AppInfoAdapter(private val context: Context,
         super.onViewRecycled(holder)
     }
 
-    class DiffCallback<OB>(private val oldList: List<OB>, private val newList: List<OB>, private val callback: DiffUtil.ItemCallback<OB>): DiffUtil.Callback() {
+    class DiffCallback<OB>(private val oldList: List<OB>, private val newList: List<OB>, private val callback: DiffUtil.ItemCallback<OB>) : DiffUtil.Callback() {
 
         override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
             return callback.areItemsTheSame(oldList[oldItemPosition], newList[newItemPosition])

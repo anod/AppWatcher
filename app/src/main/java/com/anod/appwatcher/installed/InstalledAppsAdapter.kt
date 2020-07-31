@@ -21,6 +21,7 @@ import info.anodsplace.framework.content.InstalledPackage
  * @date 2015-08-30
  */
 open class InstalledAppsAdapter(
+        private val itemViewType: Int,
         protected val context: Context,
         private val packageManager: PackageManager,
         private val dataProvider: AppViewHolderResourceProvider,
@@ -39,9 +40,7 @@ open class InstalledAppsAdapter(
         return this.installedPackages.size
     }
 
-    override fun getItemViewType(position: Int): Int {
-        return 2
-    }
+    override fun getItemViewType(position: Int) = itemViewType
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppViewHolderBase {
         val v = LayoutInflater.from(context).inflate(R.layout.list_item_app, parent, false)
