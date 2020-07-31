@@ -106,7 +106,7 @@ data class App(
 
             return App(rowId,
                     packageInfo.packageName, packageInfo.versionCode, versionName,
-                    appTitle, iconUrl, AppInfoMetadata.STATUS_NORMAL, lastUpdate
+                    appTitle, iconUrl, AppInfoMetadata.STATUS_DELETED, lastUpdate
             )
         }
 

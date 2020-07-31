@@ -2,6 +2,7 @@ package com.anod.appwatcher.details
 
 import android.app.Dialog
 import android.os.Bundle
+import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
@@ -23,7 +24,6 @@ class RemoveDialogFragment : DialogFragment() {
             builder.setPositiveButton(R.string.alert_dialog_remove) { _, _ ->
                 GlobalScope.launch(Dispatchers.Main) {
                     db.apps().updateStatus(rowId, AppInfoMetadata.STATUS_DELETED)
-                    activity?.finish()
                 }
             }
 
@@ -35,13 +35,11 @@ class RemoveDialogFragment : DialogFragment() {
         private const val ARG_ROW_ID = "rowId"
         private const val ARG_TITLE = "title"
 
-        fun newInstance(title: String, rowId: Int): RemoveDialogFragment {
-            val frag = RemoveDialogFragment()
-            val args = Bundle()
-            args.putString(ARG_TITLE, title)
-            args.putInt(ARG_ROW_ID, rowId)
-            frag.arguments = args
-            return frag
+        fun newInstance(title: String, rowId: Int) = RemoveDialogFragment().apply {
+            arguments = bundleOf(
+                    ARG_TITLE to title,
+                    ARG_ROW_ID to rowId
+            )
         }
     }
 }

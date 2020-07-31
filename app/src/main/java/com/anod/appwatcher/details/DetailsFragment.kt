@@ -15,6 +15,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.ColorInt
 import androidx.appcompat.widget.Toolbar
+import androidx.core.app.ActivityCompat
 import androidx.core.app.ShareCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
@@ -34,6 +35,7 @@ import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.generateTitle
 import com.anod.appwatcher.model.AppInfo
+import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.*
 import com.anod.appwatcher.watchlist.AppViewHolderResourceProvider
@@ -56,7 +58,7 @@ class DetailsFragment : Fragment(), Palette.PaletteAsyncListener, View.OnClickLi
 
     private var loaded = false
     private val viewModel: DetailsViewModel by viewModels()
-    private var addMenu: MenuItem? = null
+    private var toggleMenu: MenuItem? = null
     private val titleString: AlphaSpannableString
         get() {
             val span = AlphaForegroundColorSpan(ColorAttribute(android.R.attr.textColor, requireContext(), Color.WHITE).value)
@@ -86,9 +88,9 @@ class DetailsFragment : Fragment(), Palette.PaletteAsyncListener, View.OnClickLi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.appId.value = requireArguments().getString(DetailsActivity.EXTRA_APP_ID) ?: ""
         viewModel.detailsUrl = requireArguments().getString(DetailsActivity.EXTRA_DETAILS_URL) ?: ""
         viewModel.rowId = requireArguments().getInt(DetailsActivity.EXTRA_ROW_ID, -1)
+        viewModel.appId.value = requireArguments().getString(DetailsActivity.EXTRA_APP_ID) ?: ""
 
         setupToolbar()
         progressBar.visibility = View.GONE
@@ -117,7 +119,7 @@ class DetailsFragment : Fragment(), Palette.PaletteAsyncListener, View.OnClickLi
         viewModel.changelogState.observe(viewLifecycleOwner, Observer {
             when (it) {
                 is Complete -> {
-                    addMenu?.isEnabled = true
+                    toggleMenu?.isEnabled = true
                     viewModel.app.value?.let { app ->
                         appDetailsView.title.text = app.generateTitle(resources)
                     }
@@ -146,10 +148,17 @@ class DetailsFragment : Fragment(), Palette.PaletteAsyncListener, View.OnClickLi
                 progressBar.visibility = View.GONE
                 error.visibility = View.VISIBLE
             } else {
-                loaded = true
-                setupAppView(app)
-                list.layoutManager = LinearLayoutManager(requireContext())
-                list.adapter = adapter
+                if (!loaded) {
+                    loaded = true
+                    setupAppView(app)
+                    list.layoutManager = LinearLayoutManager(requireContext())
+                    list.adapter = adapter
+                }
+                val isWatched = app.status != AppInfoMetadata.STATUS_DELETED
+                toggleMenu?.isChecked = isWatched
+                if (!isWatched) {
+                    toggleMenu?.isEnabled = true
+                }
             }
         })
 
@@ -159,13 +168,10 @@ class DetailsFragment : Fragment(), Palette.PaletteAsyncListener, View.OnClickLi
                 AppListTable.ERROR_INSERT -> Toast.makeText(requireContext(), R.string.error_insert_app, Toast.LENGTH_SHORT).show()
                 else -> {
                     val info = AppInfo(viewModel.document!!)
-                    val finishActivity = activity is DetailsActivity
-                    TagSnackbar.make(requireActivity(), info, finishActivity).show()
+                    TagSnackbar.make(requireActivity(), info, false).show()
                 }
             }
         }
-
-        viewModel.loadApp()
     }
 
     override fun onResume() {
@@ -231,16 +237,10 @@ class DetailsFragment : Fragment(), Palette.PaletteAsyncListener, View.OnClickLi
     private fun setupToolbar() {
         toolbar.inflateMenu(R.menu.changelog)
         val menu = toolbar.menu
-        addMenu = menu.findItem(R.id.menu_add)
-        addMenu?.isEnabled = false
-        if (viewModel.isNewApp) {
-            menu.findItem(R.id.menu_remove).isVisible = false
-            menu.findItem(R.id.menu_tag_app).isVisible = false
-        } else {
-            menu.findItem(R.id.menu_add).isVisible = false
-            val tagMenu = menu.findItem(R.id.menu_tag_app)
-            loadTagSubmenu(tagMenu)
-        }
+        toggleMenu = menu.findItem(R.id.menu_watch_toggle).wrapCheckStateIcon()
+        toggleMenu?.isEnabled = false
+        val tagMenu = menu.findItem(R.id.menu_tag_app)
+        loadTagSubmenu(tagMenu)
         if (!dataProvider.installedApps.packageInfo(viewModel.appId.value!!).isInstalled) {
             menu.findItem(R.id.menu_uninstall).isVisible = false
             menu.findItem(R.id.menu_open).isVisible = false
@@ -271,15 +271,18 @@ class DetailsFragment : Fragment(), Palette.PaletteAsyncListener, View.OnClickLi
 
     override fun onMenuItemClick(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.menu_remove -> {
-                val removeDialog = RemoveDialogFragment.newInstance(
-                        viewModel.app.value!!.title, viewModel.app.value!!.rowId
-                )
-                removeDialog.show(childFragmentManager, "removeDialog")
+            R.id.menu_watch_toggle -> {
+                if (item.isChecked) {
+                    val removeDialog = RemoveDialogFragment.newInstance(
+                            viewModel.app.value!!.title, viewModel.app.value!!.rowId
+                    )
+                    removeDialog.show(childFragmentManager, "removeDialog")
+                } else {
+                    viewModel.watch()
+                }
                 return true
             }
             R.id.menu_add -> {
-                viewModel.watch()
                 return true
             }
             R.id.menu_uninstall -> {

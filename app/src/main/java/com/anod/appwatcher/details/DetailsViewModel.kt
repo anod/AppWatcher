@@ -40,9 +40,23 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
     var detailsUrl = ""
     var appId = MutableLiveData("")
     var rowId: Int = -1
-    var isNewApp: Boolean = false
 
-    val app: MutableLiveData<App> = MutableLiveData()
+    val app: LiveData<App> = appId.switchMap app@{ appId ->
+        if (appId.isEmpty()) {
+            return@app MutableLiveData<App>(null)
+        }
+
+        return@app database.apps().observeApp(appId).map {
+            if (it == null && rowId == -1) {
+                AppLog.i("Show details for unwatched $appId", "DetailsView")
+                context.packageManager.packageToApp(-1, appId)
+            } else {
+                AppLog.i("Show details for watched $appId", "DetailsView")
+                it
+            }
+        }
+    }
+
     val watchStateChange: MutableLiveData<Int> = MutableLiveData()
 
     val account: Account? by lazy {
@@ -68,37 +82,9 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
     }
 
     val changelogState = MutableLiveData<ChangelogLoadState>()
-
     val document: Document?
         get() = detailsEndpoint.document
-
     var recentChange = AppChange(appId.value!!, 0, "", "", "", false)
-
-    override fun onCleared() {
-
-    }
-
-    fun loadApp() {
-        if (appId.value!!.isEmpty()) {
-            app.value = null
-            return
-        }
-
-        if (rowId == -1) {
-            val localApp = context.packageManager.packageToApp(-1, appId.value!!)
-            isNewApp = true
-            AppLog.i("Show details for unwatched ${appId.value}", "DetailsView")
-            app.value = localApp
-        } else {
-            isNewApp = false
-            AppLog.i("Show details for watched ${appId.value}", "DetailsView")
-
-            val appsTable = database.apps()
-            viewModelScope.launch {
-                app.value = appsTable.loadAppRow(rowId)
-            }
-        }
-    }
 
     fun loadLocalChangelog() {
         if (appId.value!!.isBlank()) {
@@ -157,6 +143,7 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
                     this.changelogState.value = state
                 }
             }
+            Complete -> { }
         }
     }
 
@@ -178,16 +165,13 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
     fun watch() {
         val document = this@DetailsViewModel.document
         if (document == null) {
-            isNewApp = true
             watchStateChange.value = AppListTable.ERROR_INSERT
             return
         }
         val info = AppInfo(document)
         viewModelScope.launch {
             val result = AppListTable.Queries.insertSafetly(info, database)
-            isNewApp = result == AppListTable.ERROR_INSERT
             watchStateChange.value = result
         }
-
     }
 }

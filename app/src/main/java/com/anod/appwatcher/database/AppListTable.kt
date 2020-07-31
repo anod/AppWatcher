@@ -29,6 +29,9 @@ interface AppListTable {
     fun observe(query: SupportSQLiteQuery): LiveData<List<AppListItem>>
 
     @Query("SELECT * FROM $table WHERE ${Columns.appId} == :appId")
+    fun observeApp(appId: String): LiveData<App?>
+
+    @Query("SELECT * FROM $table WHERE ${Columns.appId} == :appId")
     suspend fun loadApp(appId: String): App?
 
     @Query("SELECT * FROM $table WHERE ${BaseColumns._ID} == :rowId")
