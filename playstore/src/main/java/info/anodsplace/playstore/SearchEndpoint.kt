@@ -4,14 +4,8 @@ import android.accounts.Account
 import android.content.Context
 import com.android.volley.RequestQueue
 import finsky.api.DfeApi
-import finsky.api.DfeApiImpl
-import finsky.api.model.DfeModel
+import finsky.api.model.DfeList
 import finsky.api.model.DfeSearch
-import finsky.api.model.ListAvailable
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.consumeAsFlow
-import kotlinx.coroutines.withContext
 
 /**
  * @author alex
@@ -23,40 +17,15 @@ class SearchEndpoint(
         requestQueue: RequestQueue,
         deviceInfoProvider: DeviceInfoProvider,
         account: Account,
-        val query: String,
-        private val autoLoadNextPage: Boolean
-) : PlayStoreEndpoint {
-    override var authToken = ""
+        private val initialQuery: String
+) : ListEndpoint(context, requestQueue, deviceInfoProvider, account) {
 
-    var data: DfeSearch? = null
-        internal set
-
-    private val dfeApi: DfeApi by lazy {
-        DfeApiImpl(requestQueue, context, account, authToken, deviceInfoProvider)
+    override fun createDfeList(dfeApi: DfeApi, url: String): DfeList {
+        return DfeSearch(dfeApi, url)
     }
 
-    override fun reset() {
-        data?.resetItems()
-        data = null
-        _updates = null
+    override fun createInitialUrl(dfeApi: DfeApi): String {
+        return DfeSearch.createSearchUrl(initialQuery)
     }
 
-    val count: Int
-        get() = data?.count ?: 0
-
-    private var _updates: Flow<ListAvailable>? = null
-    val updates: Flow<ListAvailable>
-        get() {
-            if (_updates == null) {
-                _updates = data!!.updates.consumeAsFlow()
-            }
-            return _updates!!
-        }
-
-    override suspend fun start(): DfeModel = withContext(Dispatchers.Main) {
-        data = DfeSearch(dfeApi, query, autoLoadNextPage, AppDetailsFilter.predicate).also {
-            it.startLoadItems()
-        }
-        return@withContext data!!
-    }
 }

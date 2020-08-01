@@ -8,30 +8,38 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
+import androidx.paging.*
 import com.anod.appwatcher.AppComponent
 import com.anod.appwatcher.AppWatcherApplication
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.utils.combineLatest
-import finsky.api.model.DfeDetails
-import finsky.api.model.DfeModel
-import finsky.api.model.DfeSearch
-import info.anodsplace.playstore.CompositeStateEndpoint
+import finsky.api.model.Document
+import info.anodsplace.playstore.AppDetailsFilter
 import info.anodsplace.playstore.DetailsEndpoint
 import info.anodsplace.playstore.SearchEndpoint
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 sealed class SearchStatus
-class Loading(val isPackageSearch: Boolean) : SearchStatus()
-object Available : SearchStatus()
+object Loading : SearchStatus()
+class DetailsAvailable(val document: Document) : SearchStatus()
 object NoResults : SearchStatus()
 object NoNetwork : SearchStatus()
 object Error : SearchStatus()
-object FreeTextRequest : SearchStatus()
+class SearchPage(val pagingData: PagingData<Document>) : SearchStatus()
 
-class SearchViewModel(application: Application) : AndroidViewModel(application), ResultsViewModel {
+sealed class ResultAction
+class Delete(val info: AppInfo) : ResultAction()
+class Add(val info: AppInfo) : ResultAction()
+
+@ExperimentalCoroutinesApi
+class SearchViewModel(application: Application) : AndroidViewModel(application) {
     private val context: Context
         get() = getApplication<AppWatcherApplication>()
     private val provide: AppComponent
@@ -43,39 +51,19 @@ class SearchViewModel(application: Application) : AndroidViewModel(application),
     var hasFocus = false
     private var isPackageSearch = false
     var searchQuery = MutableLiveData<String>()
-    var status = MutableLiveData<SearchStatus>()
     var authToken = MutableLiveData<String>()
     val searchQueryAuthenticated = searchQuery.combineLatest(authToken)
-    override val packages = provide.database.apps().observePackages().map { list ->
+    val packages = provide.database.apps().observePackages().map { list ->
         list.map { it.packageName }
     }
     var appStatusChange = MutableLiveData<Pair<Int, AppInfo?>>()
 
-    private var endpoints: CompositeStateEndpoint? = CompositeStateEndpoint().also { composite ->
-        composite.onStart = { id, active ->
-            if (id == SEARCH_ENDPOINT_ID) {
-                val search = (active as SearchEndpoint)
-                viewModelScope.launch {
-                    search.updates.collect {
-                        if (it.error == null) {
-                            onDataChanged(search.data!!)
-                        } else {
-                            onErrorResponse(id, it.error!!)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    val endpointDetails: DetailsEndpoint
-        get() = endpoints!![DETAILS_ENDPOINT_ID] as DetailsEndpoint
-
-    val endpointSearch: SearchEndpoint
-        get() = endpoints!![SEARCH_ENDPOINT_ID] as SearchEndpoint
+    private var endpointDetails: DetailsEndpoint? = null
+    private var endpointSearch: SearchEndpoint? = null
 
     override fun onCleared() {
-        endpoints = null
+        endpointDetails = null
+        endpointSearch = null
     }
 
     fun initFromIntent(intent: Intent?) {
@@ -90,90 +78,60 @@ class SearchViewModel(application: Application) : AndroidViewModel(application),
         hasFocus = intent.getBooleanExtra(SearchActivity.EXTRA_FOCUS, false)
     }
 
-    fun search(query: String, authToken: String) {
+    fun search(query: String, authToken: String): Flow<SearchStatus> = flow {
         val requestQueue = provide.requestQueue
         val deviceInfo = provide.deviceInfo
-        val endpoints = endpoints!!
+        endpointSearch = SearchEndpoint(context, requestQueue, deviceInfo, account!!, query).also {
+            it.authToken = authToken
+        }
         if (isPackageSearch) {
             val detailsUrl = AppInfo.createDetailsUrl(query)
-            endpoints.put(DETAILS_ENDPOINT_ID, DetailsEndpoint(context, requestQueue, deviceInfo, account!!, detailsUrl))
+            endpointDetails = DetailsEndpoint(context, requestQueue, deviceInfo, account!!, detailsUrl).also {
+                it.authToken = authToken
+            }
         }
-        endpoints.put(SEARCH_ENDPOINT_ID, SearchEndpoint(context, requestQueue, deviceInfo, account!!, query, true))
-
-        if (isPackageSearch) {
-            endpoints.activeId = DETAILS_ENDPOINT_ID
+        emit(Loading)
+        if (endpointDetails == null) {
+            emitAll(createPager(endpointSearch!!))
         } else {
-            endpoints.activeId = SEARCH_ENDPOINT_ID
-        }
-        status.value = Loading(isPackageSearch)
-        endpoints.authToken = authToken
-        endpoints.reset()
-        viewModelScope.launch {
             try {
-                val model = endpoints.start()
-                onDataChanged(model)
-            } catch (e: Exception) {
-                onErrorResponse(endpoints.activeId, e)
-            }
-        }
-    }
-
-    private fun onDataChanged(model: DfeModel) {
-        if (model is DfeDetails) {
-            if (model.document != null) {
-                status.value = Available
-            } else {
-                status.value = FreeTextRequest
-                viewModelScope.launch {
-                    endpoints!!.activate(SEARCH_ENDPOINT_ID).start()
-                }
-            }
-        } else {
-            val dfeSearch = model as DfeSearch
-            if (dfeSearch.isReady) {
-                if (dfeSearch.count == 0) {
-                    status.value = NoResults
+                val model = endpointDetails!!.start()
+                if (model.document != null) {
+                    emit(DetailsAvailable(model.document!!))
                 } else {
-                    status.value = Available
+                    emitAll(createPager(endpointSearch!!))
+                }
+            } catch (e: Exception) {
+                if (!provide.networkConnection.isNetworkAvailable) {
+                    emit(NoNetwork)
+                } else {
+                    emitAll(createPager(endpointSearch!!))
                 }
             }
         }
-        isPackageSearch = false
     }
 
-    private fun onErrorResponse(id: Int, error: Exception) {
-        if (!provide.networkConnection.isNetworkAvailable) {
-            status.value = NoNetwork
-            return
-        }
-        if (id == DETAILS_ENDPOINT_ID && endpoints != null) {
-            status.value = FreeTextRequest
-            viewModelScope.launch {
-                endpoints!!.activate(SEARCH_ENDPOINT_ID).start()
+    private fun createPager(endpointSearch: SearchEndpoint) = Pager(PagingConfig(pageSize = 10)) { ListPagingSource(endpointSearch) }
+            .flow
+            .cachedIn(viewModelScope)
+            .map {
+                val filtered = it.filter { d -> AppDetailsFilter.predicate(d) }
+                SearchPage(filtered)
             }
-        } else {
-            status.value = Error
-        }
-    }
 
-    override fun delete(info: AppInfo) {
+    fun delete(info: AppInfo) {
         viewModelScope.launch {
             AppListTable.Queries.delete(info.appId, provide.database)
             appStatusChange.value = Pair(AppInfoMetadata.STATUS_DELETED, info)
         }
     }
 
-    override fun add(info: AppInfo) {
+    fun add(info: AppInfo) {
         viewModelScope.launch {
             val result = AppListTable.Queries.insertSafetly(info, provide.database)
             if (result != AppListTable.ERROR_INSERT) {
                 appStatusChange.value = Pair(AppInfoMetadata.STATUS_NORMAL, info)
             }
         }
-    }
-
-    companion object {
-        private const val DETAILS_ENDPOINT_ID = 0
-        private const val SEARCH_ENDPOINT_ID = 1
     }
 }

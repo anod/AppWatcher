@@ -10,9 +10,12 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
+import androidx.paging.ExperimentalPagingApi
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AccountSelectionDialog
@@ -20,22 +23,29 @@ import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.tags.TagSnackbar
+import com.anod.appwatcher.utils.SingleLiveEvent
 import com.anod.appwatcher.utils.Theme
+import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.view.Keyboard
 import kotlinx.android.synthetic.main.activity_market_search.*
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collectLatest
 
+@ExperimentalPagingApi
+@ExperimentalCoroutinesApi
 @SuppressLint("Registered")
 open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionListener {
 
+    private var searchJob: Job? = null
     override val themeRes: Int
         get() = Theme(this).theme
     override val themeColors: CustomThemeColors
         get() = Theme(this).colors
 
-    private var adapter: ResultsAdapter? = null
+    private var adapter: RecyclerView.Adapter<ResultsAppViewHolder>? = null
+    private val action = SingleLiveEvent<ResultAction>()
     lateinit var searchView: SearchView
 
     private val accountSelectionDialog: AccountSelectionDialog by lazy {
@@ -66,48 +76,13 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
             onAccountSelected(viewModel.account!!)
         }
 
-        viewModel.status.observe(this, Observer {
-            when (it) {
-                is Loading -> {
-                    showLoading()
-                    adapter = if (it.isPackageSearch) {
-                        ResultsAdapterDetails(this, viewModel)
-                    } else {
-                        ResultsAdapterSearch(this, viewModel)
-                    }
-                    list.adapter = adapter
-                }
-                is Available -> {
-                    showListView()
-                    adapter?.notifyDataSetChanged()
-                }
-                is NoNetwork -> {
-                    loading.visibility = View.GONE
-                    showRetryButton()
-                    Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()
-                }
-                is FreeTextRequest -> {
-                    showLoading()
-                    adapter = ResultsAdapterSearch(this, viewModel)
-                    list.adapter = adapter
-                }
-                is Error -> {
-                    loading.visibility = View.GONE
-                    showRetryButton()
-                }
-                is NoResults -> {
-                    showNoResults(viewModel.searchQuery.value ?: "")
-                }
-            }
-        })
-
         viewModel.searchQueryAuthenticated.observe(this, Observer {
             val query = it.first
             val authToken = it.second
             if (query.isBlank()) {
                 showNoResults("")
             } else {
-                viewModel.search(query, authToken)
+                search(query, authToken)
             }
         })
 
@@ -116,17 +91,68 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
             if (newStatus == AppInfoMetadata.STATUS_NORMAL) {
                 TagSnackbar.make(this, it.second!!, viewModel.isShareSource).show()
             }
-//        if (WatchAppList.ERROR_ALREADY_ADDED == error) {
-//            Toast.makeText(this, R.string.app_already_added, Toast.LENGTH_SHORT).show()
-//            adapter?.notifyDataSetChanged()
-//        } else if (error == WatchAppList.ERROR_INSERT) {
-//            Toast.makeText(this, R.string.error_insert_app, Toast.LENGTH_SHORT).show()
-//        }
         })
 
         viewModel.packages.observe(this, Observer {
             adapter?.notifyDataSetChanged()
         })
+
+        action.observe(this, Observer {
+            when (it) {
+                is Delete -> viewModel.delete(it.info)
+                is Add -> viewModel.add(it.info)
+            }
+        })
+    }
+
+    private fun search(query: String, authToken: String) {
+        searchJob?.cancel()
+        searchJob = lifecycleScope.launch {
+            viewModel.search(query, authToken).collectLatest { status ->
+                AppLog.d("Search status changed: $status")
+                onSearchStatusChange(status)
+            }
+        }
+    }
+
+    @ExperimentalPagingApi
+    private suspend fun onSearchStatusChange(status: SearchStatus) = withContext(Dispatchers.Main) {
+        val context = this@SearchActivity
+        when (status) {
+            is Loading -> showLoading()
+            is DetailsAvailable -> {
+                showListView()
+                adapter = ResultsAdapterSingle(context, action, viewModel.packages, status.document)
+                list.adapter = adapter
+            }
+            is NoNetwork -> {
+                loading.isVisible = false
+                showRetryButton()
+                Toast.makeText(context, R.string.check_connection, Toast.LENGTH_SHORT).show()
+            }
+            is Error -> {
+                loading.isVisible = false
+                showRetryButton()
+            }
+            is NoResults -> {
+                showNoResults(viewModel.searchQuery.value ?: "")
+            }
+            is SearchPage -> {
+                if (adapter !is ResultsAdapterList) {
+                    adapter = ResultsAdapterList(context, action, viewModel.packages).apply {
+                        addDataRefreshListener { isEmpty ->
+                            if (isEmpty) {
+                                showNoResults(viewModel.searchQuery.value ?: "")
+                            } else {
+                                showListView()
+                            }
+                        }
+                    }
+                    list.adapter = adapter
+                }
+                (adapter as ResultsAdapterList).submitData(status.pagingData)
+            }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -257,7 +283,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
                     onAccountSelected(viewModel.account!!)
                 }
             } else {
-                viewModel.search(query, authToken)
+                search(query, authToken)
             }
         }
     }

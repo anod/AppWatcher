@@ -8,7 +8,7 @@ import finsky.api.model.FilterPredicate
  * @date 03/03/2017.
  */
 
-internal object AppDetailsFilter {
+object AppDetailsFilter {
     val predicate: FilterPredicate = {
         it?.appDetails?.packageName?.isNotEmpty() ?: false
     }

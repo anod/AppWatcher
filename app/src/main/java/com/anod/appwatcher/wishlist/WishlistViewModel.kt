@@ -7,80 +7,80 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.cachedIn
+import androidx.paging.filter
 import com.anod.appwatcher.AppComponent
 import com.anod.appwatcher.AppWatcherApplication
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
-import com.anod.appwatcher.search.ResultsViewModel
-import finsky.api.model.DfeList
+import com.anod.appwatcher.search.ListPagingSource
+import finsky.api.model.FilterComposite
+import finsky.api.model.FilterPredicate
+import info.anodsplace.playstore.AppDetailsFilter
+import info.anodsplace.playstore.AppNameFilter
 import info.anodsplace.playstore.WishListEndpoint
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-class WishListViewModel(application: Application) : AndroidViewModel(application), ResultsViewModel {
+@FlowPreview
+@ExperimentalCoroutinesApi
+class WishListViewModel(application: Application) : AndroidViewModel(application) {
     private val context: Context
         get() = getApplication<AppWatcherApplication>()
     private val provide: AppComponent
         get() = com.anod.appwatcher.Application.provide(context)
 
     var appStatusChange = MutableLiveData<Pair<Int, AppInfo?>>()
-    val listData = MutableLiveData<DfeList>()
-    val loading = MutableLiveData<Boolean>()
 
     private var endpoint: WishListEndpoint? = null
 
-    override val packages = provide.database.apps().observePackages().map { list ->
+    val packages = provide.database.apps().observePackages().map { list ->
         list.map { it.packageName }
     }
 
     fun init(account: Account, authToken: String) {
-        endpoint = WishListEndpoint(context, provide.requestQueue, provide.deviceInfo, account, true).also {
+        endpoint = WishListEndpoint(context, provide.requestQueue, provide.deviceInfo, account).also {
             it.authToken = authToken
         }
-        run()
     }
 
-    override fun delete(info: AppInfo) {
+    var nameFilter = ""
+
+    private fun predicate(nameFilter: String): FilterPredicate {
+        if (nameFilter.isBlank()) {
+            return AppDetailsFilter.predicate
+        }
+        return FilterComposite(listOf(
+                AppDetailsFilter.predicate,
+                AppNameFilter(nameFilter).predicate
+        )).predicate
+    }
+
+    fun delete(info: AppInfo) {
         viewModelScope.launch {
             AppListTable.Queries.delete(info.appId, provide.database)
             appStatusChange.value = Pair(AppInfoMetadata.STATUS_DELETED, info)
         }
     }
 
-    override fun add(info: AppInfo) {
+    fun add(info: AppInfo) {
         viewModelScope.launch {
             AppListTable.Queries.insert(info, provide.database)
             appStatusChange.value = Pair(AppInfoMetadata.STATUS_NORMAL, info)
         }
     }
 
-    fun retry() {
-        run()
-    }
-
-    fun filter(query: String) {
-        endpoint!!.nameFilter = query
-        run()
-    }
-
-    private fun run() {
-        loading.value = false
-        viewModelScope.launch {
-            try {
-                val model = endpoint!!.start()
-                endpoint!!.updates.collect {
-                    if (it.error == null) {
-                        if (model.count > 0 || (model.count == 0 && !it.requestedMoreItems)) {
-                            listData.value = model
-                        }
-                    } else {
-                        loading.value = true
-                    }
-                }
-            } catch (e: Exception) {
-                loading.value = true
+    fun load() = Pager(PagingConfig(pageSize = 10)) { ListPagingSource(endpoint!!) }
+            .flow
+            .map { pageData ->
+                val predicate = predicate(nameFilter)
+                pageData.filter { d -> predicate(d) }
             }
-        }
-    }
+            .cachedIn(viewModelScope)
+
 }

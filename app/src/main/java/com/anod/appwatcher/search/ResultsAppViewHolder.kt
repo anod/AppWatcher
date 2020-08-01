@@ -3,20 +3,32 @@ package com.anod.appwatcher.search
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.AppInfo
+import com.anod.appwatcher.utils.PicassoAppIcon
+import com.anod.appwatcher.utils.SingleLiveEvent
 import finsky.api.model.Document
 import info.anodsplace.framework.app.DialogMessage
+import info.anodsplace.framework.content.InstalledApps
 
-class ResultsAppViewHolder(itemView: View, private val viewModel: ResultsViewModel)
+class ResultsAppViewHolder(
+        itemView: View,
+        private val iconLoader: PicassoAppIcon,
+        private val action: SingleLiveEvent<ResultAction>,
+        private val packages: LiveData<List<String>>,
+        private val colorBgDisabled: Int,
+        private val colorBgNormal: Int,
+        private val installedApps: InstalledApps.MemoryCache)
     : RecyclerView.ViewHolder(itemView), View.OnClickListener {
+
     var doc: Document? = null
 
-    val row: View = itemView.findViewById(R.id.content)
+    private val row: View = itemView.findViewById(R.id.content)
+    private val updated: TextView = itemView.findViewById(R.id.updated)
     val title: TextView = itemView.findViewById(R.id.title)
     val creator: TextView = itemView.findViewById(R.id.creator)
-    val updated: TextView = itemView.findViewById(R.id.updated)
     val price: TextView = itemView.findViewById(R.id.price)
     val icon: ImageView = itemView.findViewById(R.id.icon)
 
@@ -25,20 +37,67 @@ class ResultsAppViewHolder(itemView: View, private val viewModel: ResultsViewMod
     }
 
     override fun onClick(v: View) {
+        if (doc == null) {
+            return
+        }
         val info = AppInfo(doc!!)
 
-        val pacakges = viewModel.packages.value ?: emptyList()
-        if (pacakges.contains(info.packageName)) {
+        val packages = packages.value ?: emptyList()
+        if (packages.contains(info.packageName)) {
             DialogMessage(itemView.context, R.style.AlertDialog, R.string.already_exist, R.string.delete_existing_item) { builder ->
                 builder.setPositiveButton(R.string.delete) { _, _ ->
-                    viewModel.delete(info)
+                    action.value = Delete(info)
                 }
                 builder.setNegativeButton(android.R.string.cancel) { _, _ ->
 
                 }
             }.show()
         } else {
-            viewModel.add(info)
+            action.value = Add(info)
+        }
+    }
+
+    fun placeholder() {
+        title.text = ""
+        creator.text = ""
+        updated.text = ""
+        price.text = ""
+        row.setBackgroundColor(colorBgDisabled)
+        this.doc = null
+        icon.setImageResource(R.drawable.ic_notifications_black_24dp)
+    }
+
+    fun bind(doc: Document) {
+        val app = doc.appDetails
+        val uploadDate = app.uploadDate
+        val packageName = app.packageName
+
+        this.doc = doc
+        title.text = doc.title
+        creator.text = doc.creator
+        updated.text = uploadDate
+
+        val packages = packages.value ?: emptyList()
+        if (packages.contains(packageName)) {
+            row.setBackgroundColor(colorBgDisabled)
+        } else {
+            row.setBackgroundColor(colorBgNormal)
+        }
+
+        iconLoader.retrieve(doc.iconUrl ?: "")
+                .placeholder(R.drawable.ic_notifications_black_24dp)
+                .into(icon)
+
+        val isInstalled = installedApps.packageInfo(packageName).isInstalled
+        if (isInstalled) {
+            price.setText(R.string.installed)
+        } else {
+            val offer = doc.offer
+            when {
+                offer.offerType == 0 -> price.text = ""
+                offer.micros.toInt() == 0 -> price.setText(R.string.free)
+                else -> price.text = offer.formattedAmount
+            }
         }
     }
 }

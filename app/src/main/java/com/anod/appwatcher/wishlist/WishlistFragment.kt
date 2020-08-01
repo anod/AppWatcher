@@ -6,29 +6,44 @@ import android.os.Bundle
 import android.view.*
 import android.widget.Toast
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
+import androidx.paging.ExperimentalPagingApi
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.AppInfoMetadata
+import com.anod.appwatcher.search.ResultAction
+import com.anod.appwatcher.search.ResultsAdapterList
 import com.anod.appwatcher.tags.TagSnackbar
+import com.anod.appwatcher.utils.SingleLiveEvent
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.FragmentFactory
 import info.anodsplace.framework.app.FragmentToolbarActivity
 import info.anodsplace.framework.view.Keyboard
 import kotlinx.android.synthetic.main.fragment_wishlist.*
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collectLatest
 
 /**
  * @author Alex Gavrishev
  * *
  * @date 16/12/2016.
  */
+@ExperimentalPagingApi
+@ExperimentalCoroutinesApi
+@FlowPreview
+@InternalCoroutinesApi
 class WishListFragment : Fragment() {
 
+    private var loadJob: Job? = null
     private val viewModel: WishListViewModel by viewModels()
     lateinit var searchView: SearchView
-    private lateinit var adapter: WishListAdapter
+    lateinit var adapter: ResultsAdapterList
+    private val action = SingleLiveEvent<ResultAction>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,8 +61,9 @@ class WishListFragment : Fragment() {
 
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
-                viewModel.filter(query)
+                viewModel.nameFilter = query
                 Keyboard.hide(searchView, requireContext())
+                load()
                 return false
             }
 
@@ -62,7 +78,9 @@ class WishListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         list.layoutManager = LinearLayoutManager(context)
-        retryButton.setOnClickListener { viewModel.retry() }
+        retryButton.setOnClickListener {
+            load()
+        }
 
         list.visibility = View.GONE
         empty.visibility = View.GONE
@@ -80,7 +98,7 @@ class WishListFragment : Fragment() {
             return
         } else {
             viewModel.init(account, authToken)
-            this.adapter = WishListAdapter(requireContext(), viewModel)
+            this.adapter = ResultsAdapterList(requireContext(), action, viewModel.packages)
             list.adapter = this.adapter
         }
 
@@ -96,23 +114,40 @@ class WishListFragment : Fragment() {
             list.adapter?.notifyDataSetChanged()
         })
 
-        viewModel.listData.observe(viewLifecycleOwner, Observer {
-            adapter.listData = it
-            if (it.count == 0) {
+        adapter.addDataRefreshListener { isEmpty ->
+            if (isEmpty) {
                 showNoResults()
             } else {
                 showListView()
             }
-        })
+        }
 
-        viewModel.loading.observe(viewLifecycleOwner, Observer { isError ->
-            if (isError) {
-                loading.visibility = View.GONE
-                showRetryButton()
-            } else {
-                loading.visibility = View.VISIBLE
+        adapter.addLoadStateListener { loadStates ->
+            when (loadStates.refresh) {
+                is LoadState.Loading -> {
+                    loading.isVisible = true
+                }
+                is LoadState.NotLoading -> {
+                    loading.isVisible = false
+                    showListView()
+                }
+                is LoadState.Error -> {
+                    loading.isVisible = false
+                    showRetryButton()
+                }
             }
-        })
+        }
+
+        load()
+    }
+
+    private fun load() {
+        loadJob?.cancel()
+        loadJob = lifecycleScope.launch {
+            viewModel.load().collectLatest {
+                adapter.submitData(it)
+            }
+        }
     }
 
     private fun showRetryButton() {
