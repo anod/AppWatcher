@@ -3,8 +3,10 @@ package com.anod.appwatcher.watchlist
 
 import android.content.Context
 import android.util.SparseIntArray
+import android.view.View
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
+import com.anod.appwatcher.utils.SingleLiveEvent
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.widget.recyclerview.MergeRecyclerAdapter
 
@@ -15,7 +17,7 @@ interface Section {
     fun viewModel(fragment: WatchListFragment): WatchListViewModel
     fun attach(fragment: WatchListFragment, installedApps: InstalledApps, clickListener: AppViewHolder.OnClickListener)
     fun onModelLoaded(result: LoadResult)
-    fun addEmptySection(context: Context)
+    fun addEmptySection(context: Context, action: SingleLiveEvent<WishListAction>, configure: (emptyView: View, action: SingleLiveEvent<WishListAction>) -> Unit)
 
     val isEmpty: Boolean
 }
@@ -34,8 +36,8 @@ open class DefaultSection : Section {
         adapterIndexMap.put(AdapterViewType.apps, index)
     }
 
-    override fun addEmptySection(context: Context) {
-        val index = adapter.add(EmptyAdapter(AdapterViewType.empty, context))
+    override fun addEmptySection(context: Context, action: SingleLiveEvent<WishListAction>, configure: (emptyView: View, action: SingleLiveEvent<WishListAction>) -> Unit) {
+        val index = adapter.add(EmptyAdapter(AdapterViewType.empty, action, configure, context))
         adapterIndexMap.put(AdapterViewType.empty, index)
     }
 

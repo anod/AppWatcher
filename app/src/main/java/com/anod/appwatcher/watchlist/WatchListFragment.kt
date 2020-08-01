@@ -6,12 +6,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.observe
+import androidx.paging.ExperimentalPagingApi
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -23,20 +25,30 @@ import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.installed.ImportInstalledFragment
 import com.anod.appwatcher.preferences.Preferences
-import com.anod.appwatcher.search.SearchActivity
+import com.anod.appwatcher.tags.AppsTagSelectActivity
+import com.anod.appwatcher.utils.SingleLiveEvent
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.CustomThemeActivity
 import info.anodsplace.framework.app.FragmentFactory
 import info.anodsplace.framework.content.startActivitySafely
 import info.anodsplace.framework.view.setOnSafeClickListener
 import kotlinx.android.synthetic.main.fragment_applist.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
+sealed class WishListAction
+object SearchInStore : WishListAction()
+object ImportInstalled : WishListAction()
+object ShareFromStore : WishListAction()
+class AddAppToTag(val tag: Tag) : WishListAction()
+
+@ExperimentalCoroutinesApi
+@ExperimentalPagingApi
 open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
 
     lateinit var section: Section
 
     private val stateViewModel: WatchListStateViewModel by activityViewModels()
-
+    private val action = SingleLiveEvent<WishListAction>()
     private val prefs: Preferences by lazy {
         Application.provide(requireContext()).prefs
     }
@@ -56,6 +68,7 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         return sectionClass.newInstance() as Section
     }
 
+    @ExperimentalPagingApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -77,7 +90,7 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         section = sectionForClassName(args.getString(ARG_SECTION_PROVIDER)!!)
         val viewModel = section.viewModel(this)
         section.attach(this, viewModel.installedApps, this)
-        section.addEmptySection(requireContext())
+        section.addEmptySection(requireContext(), action) { emptyView, action -> configureEmptyView(emptyView, action) }
 
         viewModel.init(sortId, tag, filterId, prefs)
 
@@ -112,24 +125,17 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         // Start out with a progress indicator.
         this.isListVisible = false
 
-        view.findViewById<View>(android.R.id.button1)?.setOnSafeClickListener {
-            val searchIntent = Intent(activity, MarketSearchActivity::class.java)
-            searchIntent.putExtra(SearchActivity.EXTRA_KEYWORD, "")
-            searchIntent.putExtra(SearchActivity.EXTRA_FOCUS, true)
-            startActivity(searchIntent)
-        }
-
-        view.findViewById<View>(android.R.id.button2)?.setOnSafeClickListener {
-            startActivity(ImportInstalledFragment.intent(
-                    requireContext(),
-                    (activity as CustomThemeActivity).themeRes,
-                    (activity as CustomThemeActivity).themeColors))
-        }
-
-        view.findViewById<View>(android.R.id.button3)?.setOnSafeClickListener {
-            val intent = Intent.makeMainActivity(ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity"))
-            activity?.startActivitySafely(intent)
-        }
+        action.observe(this, Observer {
+            when (it) {
+                is SearchInStore -> startActivity(MarketSearchActivity.intent(requireContext(), "", true))
+                is ImportInstalled -> startActivity(ImportInstalledFragment.intent(
+                        requireContext(),
+                        (activity as CustomThemeActivity).themeRes,
+                        (activity as CustomThemeActivity).themeColors))
+                is ShareFromStore -> activity?.startActivitySafely(Intent.makeMainActivity(ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity")))
+                is AddAppToTag -> startActivity(AppsTagSelectActivity.createIntent(viewModel.tag!!, requireActivity()))
+            }
+        })
 
         stateViewModel.sortId.observe(viewLifecycleOwner) {
             viewModel.sortId = it ?: 0
@@ -159,6 +165,18 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
             section.emptyAdapter.isVisible = section.isEmpty
             progress.visibility = View.GONE
             isListVisible = true
+        }
+    }
+
+    protected open fun configureEmptyView(emptyView: View, action: SingleLiveEvent<WishListAction>) {
+        emptyView.findViewById<Button>(R.id.button1).setOnSafeClickListener {
+            action.value = SearchInStore
+        }
+        emptyView.findViewById<Button>(R.id.button2).setOnSafeClickListener {
+            action.value = ImportInstalled
+        }
+        emptyView.findViewById<Button>(R.id.button3).setOnSafeClickListener {
+            action.value = ShareFromStore
         }
     }
 

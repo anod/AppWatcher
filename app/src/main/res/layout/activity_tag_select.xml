@@ -19,8 +19,7 @@
         android:layout_weight="1"
         tools:listitem="@layout/list_item_import_app" />
 
-    <androidx.appcompat.widget.ButtonBarLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+    <LinearLayout xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/buttonPanel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -31,12 +30,11 @@
         android:paddingTop="4dp"
         android:paddingBottom="4dp"
         android:gravity="bottom"
-        app:allowStacking="false"
-        style="?attr/buttonBarStyle">
+        app:allowStacking="false">
 
         <Button
             android:id="@android:id/button3"
-            style="?attr/buttonBarNeutralButtonStyle"
+            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/all" />
@@ -50,18 +48,18 @@
 
         <Button
             android:id="@android:id/button2"
-            style="?attr/buttonBarNegativeButtonStyle"
+            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@android:string/cancel" />
 
         <Button
             android:id="@android:id/button1"
-            style="?attr/buttonBarPositiveButtonStyle"
+            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/tag" />
 
-    </androidx.appcompat.widget.ButtonBarLayout>
+    </LinearLayout>
 
 </LinearLayout>

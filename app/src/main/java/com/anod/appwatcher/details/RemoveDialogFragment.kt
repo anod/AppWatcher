@@ -19,7 +19,7 @@ class RemoveDialogFragment : DialogFragment() {
         val rowId = requireArguments().getInt(ARG_ROW_ID)
         val message = getString(R.string.alert_dialog_remove_message, title)
 
-        return DialogMessage(requireActivity(), R.style.AlertDialog, R.string.alert_dialog_remove_title, message) { builder ->
+        return DialogMessage(requireActivity(), R.style.AppTheme_Dialog, R.string.alert_dialog_remove_title, message) { builder ->
             val db = Application.provide(requireContext()).database
             builder.setPositiveButton(R.string.alert_dialog_remove) { _, _ ->
                 GlobalScope.launch(Dispatchers.Main) {

@@ -5,12 +5,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.paging.ExperimentalPagingApi
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.utils.SingleLiveEvent
+import com.anod.appwatcher.watchlist.AddAppToTag
 import com.anod.appwatcher.watchlist.Section
 import com.anod.appwatcher.watchlist.WatchListFragment
+import com.anod.appwatcher.watchlist.WishListAction
 import info.anodsplace.framework.app.FragmentFactory
+import info.anodsplace.framework.view.setOnSafeClickListener
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * @author Alex Gavrishev
@@ -18,21 +26,25 @@ import info.anodsplace.framework.app.FragmentFactory
  * @date 01/04/2017.
  */
 
+@ExperimentalCoroutinesApi
+@ExperimentalPagingApi
 class AppsTagListFragment : WatchListFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_appstag_list, container, false)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        val viewModel = section.viewModel(this)
-        view.findViewById<Button>(android.R.id.button1)?.let {
-            it.setBackgroundColor(viewModel.tag!!.color)
-            it.setOnClickListener {
-                startActivityForResult(AppsTagSelectActivity.createIntent(viewModel.tag!!, requireActivity()), REQUEST_TAGS_SELECT)
+    override fun configureEmptyView(emptyView: View, action: SingleLiveEvent<WishListAction>) {
+        val tag = section.viewModel(this).tag!!
+        emptyView.findViewById<TextView>(R.id.emptyText).setText(R.string.tags_list_is_empty)
+        emptyView.findViewById<Button>(R.id.button1)?.let {
+            it.setBackgroundColor(tag.color)
+            it.setOnSafeClickListener {
+                action.value = AddAppToTag(tag)
             }
         }
+        emptyView.findViewById<Button>(R.id.button2).isVisible = false
+        emptyView.findViewById<Button>(R.id.button3).isVisible = false
     }
 
     class Factory(
@@ -54,7 +66,4 @@ class AppsTagListFragment : WatchListFragment() {
         }
     }
 
-    companion object {
-        private const val REQUEST_TAGS_SELECT = 2
-    }
 }

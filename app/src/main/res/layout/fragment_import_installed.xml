@@ -26,8 +26,7 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:listitem="@layout/list_item_import_app" />
 
-    <androidx.appcompat.widget.ButtonBarLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+    <LinearLayout
         android:id="@+id/buttonPanel"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -39,7 +38,6 @@
         android:paddingRight="12dp"
         android:paddingBottom="4dp"
         app:allowStacking="false"
-        style="?attr/buttonBarStyle"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -47,12 +45,12 @@
 
         <Button
             android:id="@android:id/button3"
-            style="?attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
             android:text="@string/all" />
 
-        <android.widget.Space
+        <Space
             android:id="@+id/spacer"
             android:layout_width="0dp"
             android:layout_weight="1"
@@ -61,18 +59,18 @@
 
         <Button
             android:id="@android:id/button2"
-            style="?attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
             android:text="@android:string/cancel" />
 
         <Button
             android:id="@android:id/button1"
-            style="?attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
             android:text="@string/import_action" />
 
-    </androidx.appcompat.widget.ButtonBarLayout>
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

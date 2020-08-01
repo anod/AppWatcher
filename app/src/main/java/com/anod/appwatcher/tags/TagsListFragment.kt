@@ -55,6 +55,9 @@ class TagsListFragment : Fragment(), View.OnClickListener {
 
         viewModel.tagsAppItems.observe(viewLifecycleOwner, Observer {
             (list.adapter as TagAdapter).update(it)
+            if (it.isEmpty()) {
+                emptyView.isVisible = true
+            }
         })
     }
 

@@ -23,39 +23,6 @@
             tools:listitem="@layout/list_item_app" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    <LinearLayout
-        android:id="@+id/emptyView"
-        android:layout_width="240dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|center_horizontal"
-        android:layout_marginTop="88dp"
-        android:orientation="vertical">
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_empty_box" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:gravity="center"
-            android:text="@string/no_apps_with_this_tag"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        <Button
-            android:id="@android:id/button1"
-            style="@style/BrandButtonStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:drawableStart="@drawable/ic_add_circle_white_24dp"
-            android:foreground="?android:attr/selectableItemBackground"
-            android:text="@string/add_apps" />
-
-    </LinearLayout>
-
     <ProgressBar
         android:id="@+id/progress"
         style="?android:attr/progressBarStyleLarge"
