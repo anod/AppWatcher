@@ -9,7 +9,10 @@ import android.view.Menu
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.widget.SearchView
-import androidx.lifecycle.*
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.observe
+import androidx.lifecycle.switchMap
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.anod.appwatcher.AppWatcherApplication
 import com.anod.appwatcher.Application
@@ -51,10 +54,8 @@ class AppsTagViewModel(application: android.app.Application) : AndroidViewModel(
 
     val tags = tag.switchMap { database.appTags().forTag(it.id) }
 
-    fun import() {
-        viewModelScope.launch {
-            tagAppsImport.run()
-        }
+    suspend fun import() {
+        tagAppsImport.run()
     }
 }
 
@@ -95,9 +96,8 @@ class AppsTagSelectActivity : ToolbarActivity() {
         }
 
         findViewById<View>(android.R.id.button1).setOnClickListener {
-            viewModel.import()
             GlobalScope.launch(Dispatchers.Main) {
-
+                viewModel.import()
                 setResult(Activity.RESULT_OK)
                 finish()
             }

@@ -16,6 +16,8 @@ import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.AppInfoMetadata
+import com.anod.appwatcher.search.Add
+import com.anod.appwatcher.search.Delete
 import com.anod.appwatcher.search.ResultAction
 import com.anod.appwatcher.search.ResultsAdapterList
 import com.anod.appwatcher.tags.TagSnackbar
@@ -112,6 +114,13 @@ class WishListFragment : Fragment() {
 
         viewModel.packages.observe(viewLifecycleOwner, Observer {
             list.adapter?.notifyDataSetChanged()
+        })
+
+        action.observe(this, Observer {
+            when (it) {
+                is Delete -> viewModel.delete(it.info)
+                is Add -> viewModel.add(it.info)
+            }
         })
 
         adapter.addDataRefreshListener { isEmpty ->
