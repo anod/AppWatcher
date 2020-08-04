@@ -8,6 +8,7 @@ import android.graphics.PorterDuff
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -15,7 +16,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.ColorInt
 import androidx.appcompat.widget.Toolbar
-import androidx.core.app.ActivityCompat
 import androidx.core.app.ShareCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
@@ -59,11 +59,10 @@ class DetailsFragment : Fragment(), Palette.PaletteAsyncListener, View.OnClickLi
     private var loaded = false
     private val viewModel: DetailsViewModel by viewModels()
     private var toggleMenu: MenuItem? = null
-    private val titleString: AlphaSpannableString
-        get() {
-            val span = AlphaForegroundColorSpan(ColorAttribute(android.R.attr.textColor, requireContext(), Color.WHITE).value)
-            return AlphaSpannableString(viewModel.app.value!!.generateTitle(resources), span)
-        }
+    private val titleString: AlphaSpannableString by lazy {
+        val span = AlphaForegroundColorSpan(ColorAttribute(android.R.attr.textColor, requireContext(), Color.WHITE).value)
+        AlphaSpannableString(viewModel.app.value!!.generateTitle(resources), span)
+    }
 
     private val subtitleString: AlphaSpannableString by lazy {
         val span = AlphaForegroundColorSpan(ColorAttribute(android.R.attr.textColor, requireContext(), Color.WHITE).value)
@@ -388,6 +387,8 @@ class DetailsFragment : Fragment(), Palette.PaletteAsyncListener, View.OnClickLi
         playStoreButton.isEnabled = alpha > 0.8f
 
         val inverseAlpha = (1.0f - alpha)
+        Log.d("inverseAlpha", inverseAlpha.toString());
+
         toolbar.logo?.alpha = (inverseAlpha * 255).toInt()
         titleString.alpha = inverseAlpha
         subtitleString.alpha = inverseAlpha

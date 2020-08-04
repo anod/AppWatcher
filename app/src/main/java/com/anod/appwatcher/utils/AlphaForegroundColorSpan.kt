@@ -16,7 +16,6 @@ class AlphaSpannableString(val source: CharSequence, private val span: AlphaFore
         get() = span.alpha
         set(value) {
             span.alpha = value
-            setSpan(span, 0, length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
         }
 }
 
