@@ -118,7 +118,7 @@ class SyncNotification(private val context: ApplicationContext) {
 
         if (updatedApps.size == 1) {
             val app = updatedApps[0]
-            addExtraInfo(app, builder)
+            addSingleExtraInfo(app, builder)
         } else {
             addMultipleExtraInfo(updatedApps, builder)
         }
@@ -133,50 +133,59 @@ class SyncNotification(private val context: ApplicationContext) {
         val bigText = updatedApps.joinToString(",\n") { it.title }
         builder.setStyle(NotificationCompat.BigTextStyle().bigText(bigText))
 
-        val updateIntent = createActionIntent(Uri.parse("com.anod.appwatcher://play/myapps/1"), NotificationActivity.TYPE_MYAPPS)
+        val updateIntent = NotificationActivity.intent(
+                Uri.parse("com.anod.appwatcher://play/myapps/1"),
+                NotificationActivity.actionMyApps,
+                context.actual)
         builder.addAction(R.drawable.ic_system_update_alt_white_24dp, context.getString(R.string.noti_action_update),
                 PendingIntent.getActivity(context.actual, 0, updateIntent, 0)
         )
 
-        val readIntent = createActionIntent(Uri.parse("com.anod.appwatcher://dismiss/"), NotificationActivity.TYPE_DISMISS)
+        val readIntent = NotificationActivity.intent(
+                Uri.parse("com.anod.appwatcher://dismiss/"),
+                NotificationActivity.actionDismiss,
+                context.actual
+        )
         builder.addAction(R.drawable.ic_clear_white_24dp, context.getString(R.string.dismiss),
                 PendingIntent.getActivity(context.actual, 0, readIntent, 0)
         )
     }
 
-    private fun addExtraInfo(update: UpdatedApp, builder: NotificationCompat.Builder) {
+    private fun addSingleExtraInfo(update: UpdatedApp, builder: NotificationCompat.Builder) {
 
         val changes = if (update.recentChanges.isBlank()) context.getString(R.string.no_recent_changes) else update.recentChanges
 
         builder.setContentText(Html.parse(changes))
         builder.setStyle(NotificationCompat.BigTextStyle().bigText(Html.parse(changes)))
 
-        val playIntent = createActionIntent(Uri.parse("com.anod.appwatcher://play/" + update.packageName), NotificationActivity.TYPE_PLAY)
-        playIntent.putExtra(NotificationActivity.EXTRA_PKG, update.packageName)
-
+        val playIntent = NotificationActivity.intent(
+                Uri.parse("com.anod.appwatcher://play/" + update.packageName),
+                NotificationActivity.actionPlayStore,
+                context.actual).also {
+            it.putExtra(NotificationActivity.extraPackage, update.packageName)
+        }
+        
         builder.addAction(R.drawable.ic_play_arrow_white_24dp, context.getString(R.string.store),
                 PendingIntent.getActivity(context.actual, 0, playIntent, 0)
         )
 
         if (update.installedVersionCode > 0) {
-            val updateIntent = createActionIntent(Uri.parse("com.anod.appwatcher://play/myapps/1"), NotificationActivity.TYPE_MYAPPS)
+            val updateIntent = NotificationActivity.intent(
+                    Uri.parse("com.anod.appwatcher://play/myapps/1"),
+                    NotificationActivity.actionMyApps,
+                    context.actual)
             builder.addAction(R.drawable.ic_system_update_alt_white_24dp, context.getString(R.string.noti_action_update),
                     PendingIntent.getActivity(context.actual, 0, updateIntent, 0)
             )
         }
 
-        val readIntent = createActionIntent(Uri.parse("com.anod.appwatcher://dismiss/"), NotificationActivity.TYPE_DISMISS)
+        val readIntent = NotificationActivity.intent(
+                Uri.parse("com.anod.appwatcher://viewed/"),
+                NotificationActivity.actionMarkViewed,
+                context.actual)
         builder.addAction(R.drawable.ic_clear_white_24dp, context.getString(R.string.dismiss),
                 PendingIntent.getActivity(context.actual, 0, readIntent, 0)
         )
-    }
-
-    private fun createActionIntent(uri: Uri, type: Int): Intent {
-        val intent = Intent(context.actual, NotificationActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        intent.data = uri
-        intent.putExtra(NotificationActivity.EXTRA_TYPE, type)
-        return intent
     }
 
     private fun renderText(apps: List<UpdatedApp>): String {

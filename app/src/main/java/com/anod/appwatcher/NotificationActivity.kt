@@ -1,7 +1,9 @@
 package com.anod.appwatcher
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import com.anod.appwatcher.sync.SyncNotification
 import com.anod.appwatcher.utils.forMyApps
@@ -15,22 +17,33 @@ class NotificationActivity : Activity() {
         super.onCreate(savedInstanceState)
         val sn = SyncNotification(ApplicationContext(this))
         sn.cancel()
-        when (intent.getIntExtra(EXTRA_TYPE, 0)) {
-            TYPE_PLAY -> {
-                val pkg = intent.getStringExtra(EXTRA_PKG) ?: ""
+        when (intent.getIntExtra(extraActionType, 0)) {
+            actionPlayStore -> {
+                val pkg = intent.getStringExtra(extraPackage) ?: ""
                 startActivitySafely(Intent().forPlayStore(pkg, this))
             }
-            TYPE_MYAPPS -> startActivitySafely(Intent().forMyApps(false, this))
+            actionMyApps -> startActivitySafely(Intent().forMyApps(false, this))
+            actionMarkViewed -> {
+                Application.provide(this).prefs.isLastUpdatesViewed = true
+            }
         }
         finish()
     }
 
     companion object {
-        const val EXTRA_TYPE = "type"
-        const val EXTRA_PKG = "pkg"
+        private const val extraActionType = "type"
+        const val extraPackage = "pkg"
 
-        const val TYPE_PLAY = 1
-        const val TYPE_DISMISS = 2
-        const val TYPE_MYAPPS = 3
+        const val actionPlayStore = 1
+        const val actionDismiss = 2
+        const val actionMyApps = 3
+        const val actionMarkViewed = 4
+
+        fun intent(uri: Uri, type: Int, context: Context) = Intent(context, NotificationActivity::class.java)
+                .apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    data = uri
+                    putExtra(extraActionType, type)
+                }
     }
 }
