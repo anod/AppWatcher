@@ -51,10 +51,12 @@ import info.anodsplace.framework.content.startActivitySafely
 import info.anodsplace.framework.graphics.chooseDark
 import kotlinx.android.synthetic.main.fragment_app_changelog.*
 import kotlinx.android.synthetic.main.view_changelog_header.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.math.abs
 
-class DetailsFragment : Fragment(), Palette.PaletteAsyncListener, View.OnClickListener, AppBarLayout.OnOffsetChangedListener, Toolbar.OnMenuItemClickListener {
+class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetChangedListener, Toolbar.OnMenuItemClickListener {
 
     private var loaded = false
     private val viewModel: DetailsViewModel by viewModels()
@@ -103,7 +105,11 @@ class DetailsFragment : Fragment(), Palette.PaletteAsyncListener, View.OnClickLi
             error.visibility = View.GONE
             list.visibility = View.GONE
             retryButton.postDelayed({
-                viewModel.loadRemoteChangelog()
+                try {
+                    viewModel.loadLocalChangelog()
+                } catch (e: Exception) {
+                    AppLog.e("retryButton", e)
+                }
             }, 500)
         }
 
@@ -177,7 +183,11 @@ class DetailsFragment : Fragment(), Palette.PaletteAsyncListener, View.OnClickLi
         super.onResume()
         progressBar.visibility = View.VISIBLE
 
-        viewModel.loadLocalChangelog()
+        try {
+            viewModel.loadLocalChangelog()
+        } catch (e: Exception) {
+            AppLog.e("onResume", e)
+        }
         viewModel.account?.let { account ->
             lifecycleScope.launch {
                 try {
@@ -191,6 +201,8 @@ class DetailsFragment : Fragment(), Palette.PaletteAsyncListener, View.OnClickLi
                     }
                 } catch (e: AuthTokenStartIntent) {
                     startActivity(e.intent)
+                } catch (e: Exception) {
+                    AppLog.e("onResume", e)
                 }
             }
         }
@@ -211,10 +223,17 @@ class DetailsFragment : Fragment(), Palette.PaletteAsyncListener, View.OnClickLi
 
     private val iconLoadTarget = object : com.squareup.picasso.Target {
         override fun onBitmapLoaded(bitmap: Bitmap, from: Picasso.LoadedFrom) {
-            Palette.from(bitmap).generate(this@DetailsFragment)
-            icon.setImageBitmap(bitmap)
-            toolbar.logo = BitmapDrawable(resources, bitmap)
-            toolbar.logo.alpha = 0
+            lifecycleScope.launchWhenCreated {
+                try {
+                    val palette = withContext(Dispatchers.Default) { Palette.from(bitmap).generate() }
+                    icon.setImageBitmap(bitmap)
+                    toolbar.logo = BitmapDrawable(resources, bitmap)
+                    toolbar.logo.alpha = 0
+                    onPaletteGenerated(palette)
+                } catch (e: Exception) {
+                    AppLog.e(e)
+                }
+            }
         }
 
         override fun onBitmapFailed(e: Exception, errorDrawable: Drawable?) {
@@ -334,7 +353,7 @@ class DetailsFragment : Fragment(), Palette.PaletteAsyncListener, View.OnClickLi
         }
     }
 
-    override fun onGenerated(palette: Palette?) {
+    private fun onPaletteGenerated(palette: Palette?) {
         val context = context ?: return
         val defaultColor = ContextCompat.getColor(context, R.color.theme_primary)
         val darkSwatch = palette?.chooseDark(defaultColor) ?: Palette.Swatch(defaultColor, 0)

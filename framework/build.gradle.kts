@@ -36,5 +36,5 @@ dependencies {
     implementation("com.google.android.gms:play-services-identity:17.0.0")
     implementation("com.google.android.gms:play-services-auth:18.1.0")
 
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.72")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4.0")
 }

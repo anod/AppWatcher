@@ -112,7 +112,7 @@ dependencies {
     implementation("androidx.core:core:1.3.1")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("androidx.window:window:1.0.0-alpha01")
-    implementation("androidx.paging:paging-runtime:3.0.0-alpha03")
+    implementation("androidx.paging:paging-runtime:3.0.0-alpha04")
     // Google
     implementation("com.google.android.material:material:1.3.0-alpha02")
     implementation("com.google.android.gms:play-services-oss-licenses:17.0.0")
@@ -127,11 +127,11 @@ dependencies {
     implementation("com.google.api-client:google-api-client:1.30.10")
     implementation("com.google.api-client:google-api-client-android:1.30.10")
 
-    implementation("com.google.firebase:firebase-analytics:17.4.4")
-    implementation("com.google.firebase:firebase-crashlytics:17.1.1")
+    implementation("com.google.firebase:firebase-analytics:17.5.0")
+    implementation("com.google.firebase:firebase-crashlytics:17.2.1")
 
     // 3rd party
-    implementation("com.squareup.okhttp3:okhttp:4.8.0")
+    implementation("com.squareup.okhttp3:okhttp:4.8.1")
     implementation("com.squareup.picasso:picasso:2.71828")
     implementation("com.jakewharton:process-phoenix:2.0.0")
 
@@ -156,9 +156,9 @@ dependencies {
     implementation("androidx.room:room-ktx:2.2.5")
 
     // Kotlin
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.8")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.8")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.72")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4.0")
 
     testImplementation("junit:junit:4.13")
 

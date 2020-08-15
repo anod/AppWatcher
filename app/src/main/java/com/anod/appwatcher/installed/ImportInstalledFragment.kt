@@ -21,6 +21,7 @@ import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.FragmentFactory
 import info.anodsplace.framework.app.FragmentToolbarActivity
 import info.anodsplace.framework.content.AppTitleComparator
+import info.anodsplace.framework.content.startActivitySafely
 import kotlinx.android.synthetic.main.fragment_import_installed.*
 import kotlinx.coroutines.launch
 
@@ -135,7 +136,7 @@ class ImportInstalledFragment : Fragment() {
                     activity?.finish()
                 }
             } catch (e: AuthTokenStartIntent) {
-                startActivity(e.intent)
+                startActivitySafely(e.intent)
                 activity?.finish()
             }
         }

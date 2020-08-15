@@ -25,5 +25,5 @@ android {
 }
 
 dependencies {
-    implementation("androidx.appcompat:appcompat:1.1.0")
+    implementation("androidx.appcompat:appcompat:1.2.0")
 }
