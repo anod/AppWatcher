@@ -8,7 +8,7 @@ import finsky.protos.Messages
 class DfeSearch(
         private val dfeApi: DfeApi,
         url: String)
-    : DfeList(dfeApi, url) {
+    : DfeList(dfeApi, url, SEARCH) {
 
     override fun makeRequest(url: String, responseListener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener): Request<*> {
         return this.dfeApi.search(url, responseListener, errorListener)
@@ -18,10 +18,6 @@ class DfeSearch(
         private const val backendId = 3
 
         fun createSearchUrl(query: String): String {
-//            var queryBackendId = backendId
-//            if (queryBackendId == 9) {
-//                queryBackendId = 0
-//            }
             return DfeApi.SEARCH_CHANNEL_URI
                     .buildUpon()
                     .appendQueryParameter("c", backendId.toString())
