@@ -8,6 +8,7 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.room.withTransaction
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.database.entities.*
 import info.anodsplace.framework.AppLog
 import kotlinx.coroutines.Dispatchers
@@ -52,7 +53,7 @@ abstract class AppsDatabase : RoomDatabase() {
 
     companion object {
         const val version = 18
-        const val dbName = "app_watcher"
+        val dbName = if (BuildConfig.DEBUG) "app_watcher.db" else "app_watcher"
 
         fun instance(context: Context): AppsDatabase {
             return Room.databaseBuilder(context, AppsDatabase::class.java, dbName)

@@ -8,6 +8,7 @@ import androidx.collection.SimpleArrayMap
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.observe
 import com.anod.appwatcher.R
+import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.watchlist.AdapterViewType
 import com.anod.appwatcher.watchlist.AppViewHolderBase
 
@@ -26,7 +27,7 @@ internal class ImportAdapter(
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppViewHolderBase {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppViewHolderBase<AppListItem> {
         val v = LayoutInflater.from(context).inflate(R.layout.list_item_import_app, parent, false)
         v.isClickable = true
         v.isFocusable = true

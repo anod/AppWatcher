@@ -9,85 +9,44 @@ import info.anodsplace.framework.content.InstalledApps
  * @date 8/4/14.
  */
 
-interface CountableFilter {
-    val newCount: Int
-    val updatableNewCount: Int
-    val recentlyUpdatedCount: Int
-}
-
-interface AppListFilter: CountableFilter {
-
+interface AppListFilter {
+    val filterId: Int
     fun filterRecord(item: AppListItem): Boolean
 
-    class None : AppListFilter {
+    class All() : AppListFilter {
+        override val filterId = Filters.TAB_ALL
         override fun filterRecord(item: AppListItem): Boolean {
             return false
         }
-
-        override val newCount: Int = 0
-        override val updatableNewCount: Int = 0
-        override val recentlyUpdatedCount: Int = 0
-    }
-}
-
-class AppListFilterInclusion(private val inclusion: Inclusion, private val installedApps: InstalledApps) : AppListFilter {
-
-    interface Inclusion {
-        fun include(versionCode: Int, installedInfo: InstalledApps.Info): Boolean
     }
 
-    class All : Inclusion {
-        override fun include(versionCode: Int, installedInfo: InstalledApps.Info): Boolean {
-            return true
-        }
-    }
-
-    class Installed : Inclusion {
-        override fun include(versionCode: Int, installedInfo: InstalledApps.Info): Boolean {
-            return installedInfo.isInstalled
-        }
-    }
-
-    class Uninstalled : Inclusion {
-        override fun include(versionCode: Int, installedInfo: InstalledApps.Info): Boolean {
+    class Installed(private val installedApps: InstalledApps) : AppListFilter {
+        override val filterId = Filters.INSTALLED
+        override fun filterRecord(item: AppListItem): Boolean {
+            val packageName = item.app.packageName
+            val installedInfo = installedApps.packageInfo(packageName)
             return !installedInfo.isInstalled
         }
     }
 
-    class Updatable : Inclusion {
-        override fun include(versionCode: Int, installedInfo: InstalledApps.Info): Boolean {
-            return installedInfo.isInstalled && installedInfo.isUpdatable(versionCode)
+    class Uninstalled(private val installedApps: InstalledApps) : AppListFilter {
+        override val filterId = Filters.UNINSTALLED
+        override fun filterRecord(item: AppListItem): Boolean {
+            val packageName = item.app.packageName
+            val installedInfo = installedApps.packageInfo(packageName)
+            return installedInfo.isInstalled
         }
     }
 
-    override var newCount: Int = 0
-        private set
-    override var updatableNewCount: Int = 0
-        private set
-    override var recentlyUpdatedCount: Int = 0
-        private set
-
-    override fun filterRecord(item: AppListItem): Boolean {
-        val packageName = item.app.packageName
-        val status = item.app.status
-        val versionCode = item.app.versionNumber
-
-        val installedInfo = installedApps.packageInfo(packageName)
-
-        if (!inclusion.include(versionCode, installedInfo)) {
-            return true
+    class Updatable(private val installedApps: InstalledApps) : AppListFilter {
+        override val filterId = Filters.UPDATABLE
+        override fun filterRecord(item: AppListItem): Boolean {
+            val packageName = item.app.packageName
+            val installedInfo = installedApps.packageInfo(packageName)
+            val versionCode = item.app.versionNumber
+            val updatable = installedInfo.isInstalled && installedInfo.isUpdatable(versionCode)
+            return !updatable
         }
-
-        if (status == AppInfoMetadata.STATUS_UPDATED) {
-            newCount++
-            if (installedInfo.isUpdatable(versionCode)) {
-                updatableNewCount++
-            }
-        } else if (status == AppInfoMetadata.STATUS_NORMAL) {
-            if (item.recentFlag) {
-                recentlyUpdatedCount++
-            }
-        }
-        return false
     }
+
 }

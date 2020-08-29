@@ -26,7 +26,7 @@ open class InstalledAppsAdapter(
         private val packageManager: PackageManager,
         private val dataProvider: AppViewHolderResourceProvider,
         protected val listener: AppViewHolder.OnClickListener?)
-    : RecyclerView.Adapter<AppViewHolderBase>() {
+    : RecyclerView.Adapter<AppViewHolderBase<AppListItem>>() {
 
     var installedPackages: List<InstalledPackage> = mutableListOf()
         set(value) {
@@ -42,15 +42,15 @@ open class InstalledAppsAdapter(
 
     override fun getItemViewType(position: Int) = itemViewType
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppViewHolderBase {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppViewHolderBase<AppListItem> {
         val v = LayoutInflater.from(context).inflate(R.layout.list_item_app, parent, false)
         return InstalledAppViewHolder(v, dataProvider, iconLoader, listener)
     }
 
-    override fun onBindViewHolder(holder: AppViewHolderBase, position: Int) {
+    override fun onBindViewHolder(holder: AppViewHolderBase<AppListItem>, position: Int) {
         val installedPackage = installedPackages[position]
         val app = packageManager.packageToApp(-1, installedPackage.packageName)
-        holder.bindView(AppListItem(app, "", false, false))
+        holder.bind(AppListItem(app, "", false, false))
     }
 
 }

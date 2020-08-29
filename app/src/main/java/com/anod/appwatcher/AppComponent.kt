@@ -2,6 +2,7 @@ package com.anod.appwatcher
 
 import android.app.NotificationManager
 import android.content.Context
+import android.content.pm.PackageManager
 import android.telephony.TelephonyManager
 import android.util.LruCache
 import com.android.volley.RequestQueue
@@ -57,6 +58,9 @@ class AppComponent internal constructor(private val app: AppWatcherApplication) 
 
     val deviceInfo: DeviceInfoProvider
         get() = this
+
+    val packageManager: PackageManager
+        get() = app.packageManager
 
     val database: AppsDatabase by lazy { AppsDatabase.instance(app) }
 

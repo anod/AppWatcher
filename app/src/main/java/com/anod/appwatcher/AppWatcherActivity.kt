@@ -5,9 +5,9 @@ import android.widget.TextView
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.Observer
 import com.anod.appwatcher.model.Filters
-import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.sync.SyncScheduler
-import com.anod.appwatcher.watchlist.*
+import com.anod.appwatcher.watchlist.WatchListActivity
+import com.anod.appwatcher.watchlist.WatchListFragment
 import info.anodsplace.framework.AppLog
 
 
@@ -45,37 +45,22 @@ class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener,
         val adapter = Adapter(this)
         val title = resources.getStringArray(R.array.filter_titles)
 
-        val sectionClass: Class<Section> = DefaultSection().javaClass
         adapter.addFragment(WatchListFragment.Factory(
                 Filters.TAB_ALL,
                 prefs.sortIndex,
-                sectionForAll(prefs),
                 null), title[Filters.TAB_ALL])
         adapter.addFragment(WatchListFragment.Factory(
                 Filters.INSTALLED,
                 prefs.sortIndex,
-                sectionClass, null), title[Filters.INSTALLED])
+                null), title[Filters.INSTALLED])
         adapter.addFragment(WatchListFragment.Factory(
                 Filters.UNINSTALLED,
                 prefs.sortIndex,
-                sectionClass, null), title[Filters.UNINSTALLED])
+                null), title[Filters.UNINSTALLED])
         adapter.addFragment(WatchListFragment.Factory(
                 Filters.UPDATABLE,
                 prefs.sortIndex,
-                sectionClass, null), title[Filters.UPDATABLE])
+                null), title[Filters.UPDATABLE])
         return adapter
-    }
-
-    private fun sectionForAll(prefs: Preferences): Class<Section> {
-        if (prefs.showRecent && prefs.showOnDevice) {
-            return RecentAndOnDeviceSection().javaClass
-        }
-        if (prefs.showRecent) {
-            return RecentSection().javaClass
-        }
-        if (prefs.showOnDevice) {
-            return OnDeviceSection().javaClass
-        }
-        return DefaultSection().javaClass
     }
 }

@@ -1,15 +1,13 @@
 package com.anod.appwatcher.watchlist
 
 import android.content.Context
+import android.view.View
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import android.view.View
 import com.anod.appwatcher.R
-import com.anod.appwatcher.database.entities.AppListItem
-
 import com.anod.appwatcher.utils.PicassoAppIcon
 import info.anodsplace.framework.content.InstalledApps
 
@@ -19,10 +17,15 @@ import info.anodsplace.framework.content.InstalledApps
  * @date 22/05/2016.
  */
 
-abstract class AppViewHolderBase(
+interface BindableViewHolder<T> {
+    fun bind(item: T)
+    fun placeholder()
+}
+
+abstract class AppViewHolderBase<T>(
         itemView: View,
         protected val resourceProvider: ResourceProvider,
-        protected val iconLoader: PicassoAppIcon) : RecyclerView.ViewHolder(itemView) {
+        protected val iconLoader: PicassoAppIcon) : RecyclerView.ViewHolder(itemView), BindableViewHolder<T> {
 
     interface ResourceProvider {
         val installedText: String
@@ -30,12 +33,12 @@ abstract class AppViewHolderBase(
         val installedApps: InstalledApps
         fun formatVersionText(versionName: String, versionNumber: Int, newVersionNumber: Int): String
         fun getString(@StringRes resId: Int): String
+
         @ColorInt
         fun getColor(@ColorRes colorRes: Int): Int
     }
 
-    abstract fun bindView(item: AppListItem)
-    open fun recycle() { }
+    open fun recycle() {}
 }
 
 

@@ -14,7 +14,7 @@ open class AppViewHolder(
         resourceProvider: ResourceProvider,
         iconLoader: PicassoAppIcon,
         private val onClickListener: OnClickListener?)
-    : AppViewHolderBase(itemView, resourceProvider, iconLoader) {
+    : AppViewHolderBase<AppListItem>(itemView, resourceProvider, iconLoader) {
 
     private var item: AppListItem? = null
     private val icon: ImageView = itemView.findViewById(R.id.icon)
@@ -37,12 +37,16 @@ open class AppViewHolder(
         itemView.findViewById<View>(R.id.content).setOnClickListener(null)
     }
 
-    override fun bindView(item: AppListItem) {
+    override fun bind(item: AppListItem) {
         this.item = item
 
         this.detailsView.fillDetails(item.app, item.recentFlag, item.changeDetails
                 ?: "", item.noNewDetails, isLocalApp)
         iconLoader.loadAppIntoImageView(item.app, this.icon, R.drawable.ic_notifications_black_24dp)
+    }
+
+    override fun placeholder() {
+        // TODO
     }
 
 }

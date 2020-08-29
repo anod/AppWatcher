@@ -22,11 +22,16 @@ import java.util.*
 import java.util.concurrent.Callable
 import java.util.concurrent.TimeUnit
 
+class SqlOffset(val offset: Int, val limit: Int)
+
 @Dao
 interface AppListTable {
 
     @RawQuery(observedEntities = [(App::class), (AppChange::class), (AppTag::class)])
     fun observe(query: SupportSQLiteQuery): LiveData<List<AppListItem>>
+
+    @RawQuery(observedEntities = [(App::class), (AppChange::class), (AppTag::class)])
+    suspend fun load(query: SupportSQLiteQuery): List<AppListItem>
 
     @Query("SELECT * FROM $table WHERE ${Columns.appId} == :appId")
     fun observeApp(appId: String): LiveData<App?>
@@ -36,6 +41,10 @@ interface AppListTable {
 
     @Query("SELECT * FROM $table WHERE ${BaseColumns._ID} == :rowId")
     suspend fun loadAppRow(rowId: Int): App?
+
+    @Query("SELECT ${BaseColumns._ID}, ${Columns.packageName} FROM $table " +
+            "WHERE ${Columns.packageName} IN (:packageNames) AND ${Columns.status} != ${AppInfoMetadata.STATUS_DELETED}")
+    suspend fun loadRowIds(packageNames: List<String>): List<PackageRowPair>
 
     @Query("SELECT ${BaseColumns._ID}, ${Columns.packageName} FROM $table WHERE " +
             "${Columns.status} != ${AppInfoMetadata.STATUS_DELETED}")
@@ -123,19 +132,30 @@ interface AppListTable {
             return loadAppList(sortId, false, null, titleFilter, table)
         }
 
-        fun loadAppList(sortId: Int, orederByRecentlyUpdated: Boolean, tag: Tag?, titleFilter: String, table: AppListTable): LiveData<List<AppListItem>> {
-            val tables = if (tag == null) AppListTable.table else AppTagsTable.table + ", " + AppListTable.table
-            val selection = createSelection(tag, titleFilter)
+        fun loadAppList(sortId: Int, orderByRecentlyUpdated: Boolean, tag: Tag?, titleFilter: String, table: AppListTable): LiveData<List<AppListItem>> {
+            val query = createAppsListQuery(sortId, orderByRecentlyUpdated, tag, titleFilter, null)
+            return table.observe(SimpleSQLiteQuery(query.first, query.second))
+        }
 
-            val sql = "SELECT ${AppListTable.table}.*, ${ChangelogTable.TableColumns.details}, ${ChangelogTable.TableColumns.noNewDetails}, " +
+        suspend fun loadAppList(sortId: Int, orderByRecentlyUpdated: Boolean, tag: Tag?, titleFilter: String, offset: SqlOffset, table: AppListTable): List<AppListItem> {
+            val query = createAppsListQuery(sortId, orderByRecentlyUpdated, tag, titleFilter, offset)
+            return table.load(SimpleSQLiteQuery(query.first, query.second))
+        }
+
+        private fun createAppsListQuery(sortId: Int, orderByRecentlyUpdated: Boolean, tag: Tag?, titleFilter: String, offset: SqlOffset?): Pair<String, Array<String>> {
+            val tables = if (tag == null) table else AppTagsTable.table + ", " + table
+            val rangeSql = if (offset == null) "" else " LIMIT ? OFFSET ? "
+            val selection = createSelection(tag, titleFilter, offset)
+
+            val sql = "SELECT $table.*, ${ChangelogTable.TableColumns.details}, ${ChangelogTable.TableColumns.noNewDetails}, " +
                     "CASE WHEN ${Columns.updateTimestamp} > $recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
                     "FROM $tables " +
                     "LEFT JOIN ${ChangelogTable.table} ON " +
                     "${TableColumns.appId} == ${ChangelogTable.TableColumns.appId} " +
                     "AND ${TableColumns.versionNumber} == ${ChangelogTable.TableColumns.versionCode} " +
                     "WHERE ${selection.first} " +
-                    "ORDER BY ${createSortOrder(sortId, orederByRecentlyUpdated)} "
-            return table.observe(SimpleSQLiteQuery(sql, selection.second))
+                    "ORDER BY ${createSortOrder(sortId, orderByRecentlyUpdated)} $rangeSql"
+            return Pair(sql, selection.second)
         }
 
         suspend fun insert(app: AppInfo, db: AppsDatabase): Long = withContext(Dispatchers.IO) {
@@ -167,9 +187,9 @@ interface AppListTable {
             return filter.joinToString(", ")
         }
 
-        private fun createSelection(tag: Tag?, titleFilter: String): Pair<String, Array<String>> {
+        private fun createSelection(tag: Tag?, titleFilter: String, offset: SqlOffset?): Pair<String, Array<String>> {
             val selc = ArrayList<String>(3)
-            val args = ArrayList<String>(3)
+            val args = ArrayList<String>(5)
 
             selc.add(Columns.status + " != ?")
             args.add(AppInfoMetadata.STATUS_DELETED.toString())
@@ -183,6 +203,11 @@ interface AppListTable {
             if (!TextUtils.isEmpty(titleFilter)) {
                 selc.add(Columns.title + " LIKE ?")
                 args.add("%$titleFilter%")
+            }
+
+            if (offset != null) {
+                args.add(offset.limit.toString())
+                args.add(offset.offset.toString())
             }
 
             return Pair(selc.joinToString(" AND "), args.toTypedArray())

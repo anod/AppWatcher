@@ -11,9 +11,10 @@ import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.observe
-import androidx.paging.ExperimentalPagingApi
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -33,7 +34,9 @@ import info.anodsplace.framework.app.FragmentFactory
 import info.anodsplace.framework.content.startActivitySafely
 import info.anodsplace.framework.view.setOnSafeClickListener
 import kotlinx.android.synthetic.main.fragment_applist.*
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 sealed class WishListAction
 object SearchInStore : WishListAction()
@@ -41,13 +44,14 @@ object ImportInstalled : WishListAction()
 object ShareFromStore : WishListAction()
 class AddAppToTag(val tag: Tag) : WishListAction()
 
-@ExperimentalCoroutinesApi
-@ExperimentalPagingApi
 open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
 
-    lateinit var section: Section
+    private var loadJob: Job? = null
 
     private val stateViewModel: WatchListStateViewModel by activityViewModels()
+    internal val viewModel: WatchListViewModel by viewModels()
+    private lateinit var adapter: WatchListPagingAdapter
+
     private val action = SingleLiveEvent<WishListAction>()
     private val prefs: Preferences by lazy {
         Application.provide(requireContext()).prefs
@@ -57,18 +61,13 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         get() = listView.isVisible
         set(visible) {
             listView.isVisible = visible
+            progress.isVisible = false
         }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_applist, container, false)
     }
 
-    private fun sectionForClassName(sectionClassName: String): Section {
-        val sectionClass = Class.forName(sectionClassName)
-        return sectionClass.newInstance() as Section
-    }
-
-    @ExperimentalPagingApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -82,25 +81,20 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         swipeLayout.setDistanceToTriggerSync((16 * metrics.density).toInt())
 
         val args = requireArguments()
-        val sortId = args.getInt(ARG_SORT)
-        val filterId = args.getInt(ARG_FILTER)
-        val tag: Tag? = args.getParcelable(ARG_TAG)
-
-        // Setup adapter for the section
-        section = sectionForClassName(args.getString(ARG_SECTION_PROVIDER)!!)
-        val viewModel = section.viewModel(this)
-        section.attach(this, viewModel.installedApps, this)
-        section.addEmptySection(requireContext(), action) { emptyView, action -> configureEmptyView(emptyView, action) }
-
-        viewModel.init(sortId, tag, filterId, prefs)
+        viewModel.sortId = args.getInt(ARG_SORT)
+        viewModel.filterId = args.getInt(ARG_FILTER)
+        viewModel.tag = args.getParcelable(ARG_TAG)
 
         // Setup layout manager
         val layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
         listView.layoutManager = layoutManager
 
         // Setup header decorator
-        listView.addItemDecoration(HeaderItemDecorator(viewModel.sections, this, requireContext()))
-        val adapter = section.adapter
+        adapter = WatchListPagingAdapter(
+                AdapterViewType.apps,
+                viewModel.installedApps,
+                this, requireContext()
+        )
         listView.adapter = adapter
 
         // When an item inserted into top there is no indication and list maintains previous position
@@ -122,9 +116,6 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
             })
         }
 
-        // Start out with a progress indicator.
-        this.isListVisible = false
-
         action.observe(this, Observer {
             when (it) {
                 is SearchInStore -> startActivity(MarketSearchActivity.intent(requireContext(), "", true))
@@ -139,12 +130,12 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
 
         stateViewModel.sortId.observe(viewLifecycleOwner) {
             viewModel.sortId = it ?: 0
-            viewModel.reload.value = true
+            reload()
         }
 
         stateViewModel.titleFilter.observe(viewLifecycleOwner) {
             viewModel.titleFilter = it ?: ""
-            viewModel.reload.value = true
+            reload()
         }
 
         stateViewModel.listState.observe(viewLifecycleOwner) {
@@ -158,13 +149,18 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
             }
         }
 
-        viewModel.result.observe(viewLifecycleOwner) {
-            val headers = it.sections
-            viewModel.sections.value = headers
-            section.onModelLoaded(it)
-            section.emptyAdapter.isVisible = section.isEmpty
-            progress.visibility = View.GONE
-            isListVisible = true
+        reload()
+    }
+
+    private fun reload() {
+        isListVisible = false
+        loadJob?.cancel()
+        loadJob = lifecycleScope.launch {
+            viewModel.load().collectLatest { result ->
+                isListVisible = true
+                AppLog.d("Load status changed: $result")
+                adapter.submitData(result)
+            }
         }
     }
 
@@ -199,15 +195,13 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
     class Factory(
             private val filterId: Int,
             private val sortId: Int,
-            private val sectionClass: Class<Section>,
             private val tag: Tag?
-    ) : FragmentFactory("wish-list-$filterId-$sortId-${sectionClass.name}-${tag?.hashCode()}") {
+    ) : FragmentFactory("wish-list-$filterId-$sortId-${tag?.hashCode()}") {
 
         override fun create(): Fragment? = WatchListFragment().also {
             it.arguments = Bundle().apply {
                 putInt(ARG_FILTER, filterId)
                 putInt(ARG_SORT, sortId)
-                putString(ARG_SECTION_PROVIDER, sectionClass.name)
                 tag?.let { tag ->
                     putParcelable(ARG_TAG, tag)
                 }
@@ -219,6 +213,5 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         internal const val ARG_FILTER = "filter"
         internal const val ARG_SORT = "sort"
         internal const val ARG_TAG = "tag"
-        internal const val ARG_SECTION_PROVIDER = "section"
     }
 }

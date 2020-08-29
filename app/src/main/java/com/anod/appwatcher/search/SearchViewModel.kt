@@ -19,7 +19,6 @@ import finsky.api.model.Document
 import info.anodsplace.playstore.AppDetailsFilter
 import info.anodsplace.playstore.DetailsEndpoint
 import info.anodsplace.playstore.SearchEndpoint
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
@@ -38,7 +37,6 @@ sealed class ResultAction
 class Delete(val info: AppInfo) : ResultAction()
 class Add(val info: AppInfo) : ResultAction()
 
-@ExperimentalCoroutinesApi
 class SearchViewModel(application: Application) : AndroidViewModel(application) {
     private val context: Context
         get() = getApplication<AppWatcherApplication>()
@@ -111,7 +109,7 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    private fun createPager(endpointSearch: SearchEndpoint) = Pager(PagingConfig(pageSize = 10)) { ListPagingSource(endpointSearch) }
+    private fun createPager(endpointSearch: SearchEndpoint) = Pager(PagingConfig(pageSize = 10)) { ListEndpointPagingSource(endpointSearch) }
             .flow
             .cachedIn(viewModelScope)
             .map {

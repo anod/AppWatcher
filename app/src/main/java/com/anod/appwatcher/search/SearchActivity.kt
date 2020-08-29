@@ -13,7 +13,7 @@ import androidx.appcompat.widget.SearchView
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
-import androidx.paging.ExperimentalPagingApi
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.Application
@@ -30,11 +30,12 @@ import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.view.Keyboard
 import kotlinx.android.synthetic.main.activity_market_search.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-@ExperimentalPagingApi
-@ExperimentalCoroutinesApi
 @SuppressLint("Registered")
 open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionListener {
 
@@ -115,7 +116,6 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
         }
     }
 
-    @ExperimentalPagingApi
     private suspend fun onSearchStatusChange(status: SearchStatus) = withContext(Dispatchers.Main) {
         val context = this@SearchActivity
         when (status) {
@@ -140,11 +140,13 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
             is SearchPage -> {
                 if (adapter !is ResultsAdapterList) {
                     adapter = ResultsAdapterList(context, action, viewModel.packages).apply {
-                        addDataRefreshListener { isEmpty ->
-                            if (isEmpty) {
-                                showNoResults(viewModel.searchQuery.value ?: "")
-                            } else {
-                                showListView()
+                        addLoadStateListener { loadState ->
+                            if (loadState.refresh is LoadState.NotLoading) {
+                                if (itemCount > 0) {
+                                    showListView()
+                                } else {
+                                    showNoResults(viewModel.searchQuery.value ?: "")
+                                }
                             }
                         }
                     }

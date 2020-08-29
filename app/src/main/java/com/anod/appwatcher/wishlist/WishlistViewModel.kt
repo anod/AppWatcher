@@ -16,7 +16,7 @@ import com.anod.appwatcher.AppWatcherApplication
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
-import com.anod.appwatcher.search.ListPagingSource
+import com.anod.appwatcher.search.ListEndpointPagingSource
 import finsky.api.model.FilterComposite
 import finsky.api.model.FilterPredicate
 import info.anodsplace.playstore.AppDetailsFilter
@@ -75,7 +75,7 @@ class WishListViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun load() = Pager(PagingConfig(pageSize = 10)) { ListPagingSource(endpoint!!) }
+    fun load() = Pager(PagingConfig(pageSize = 10)) { ListEndpointPagingSource(endpoint!!) }
             .flow
             .map { pageData ->
                 val predicate = predicate(nameFilter)

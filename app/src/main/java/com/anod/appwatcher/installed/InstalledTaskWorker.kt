@@ -1,10 +1,6 @@
 package com.anod.appwatcher.installed
 
-import android.util.SparseArray
 import com.anod.appwatcher.preferences.Preferences
-import com.anod.appwatcher.watchlist.AppsList
-import com.anod.appwatcher.watchlist.LoadResult
-import com.anod.appwatcher.watchlist.SectionHeader
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.content.AppTitleComparator
 import info.anodsplace.framework.content.AppUpdateTimeComparator
@@ -14,12 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.*
 
-
-class InstalledLoadResult(
-        val recentlyInstalled: List<String>,
-        val installedPackages: List<InstalledPackage>,
-        appsList: AppsList,
-        sections: SparseArray<SectionHeader>): LoadResult(appsList, sections)
+typealias InstalledResult = Pair<List<String>, List<InstalledPackage>>
 
 class InstalledTaskWorker(
         private val context: ApplicationContext,

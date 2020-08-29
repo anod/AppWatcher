@@ -19,7 +19,7 @@ internal class ImportAppViewHolder(
         itemView: View,
         dataProvider: ImportResourceProvider,
         iconLoader: PicassoAppIcon)
-    : AppViewHolderBase(itemView, dataProvider, iconLoader), View.OnClickListener {
+    : AppViewHolderBase<AppListItem>(itemView, dataProvider, iconLoader), View.OnClickListener {
 
     private val importDataProvider = dataProvider
     private var item: AppListItem? = null
@@ -29,7 +29,7 @@ internal class ImportAppViewHolder(
     val themeAccent: Int = ResourcesCompat.getColor(itemView.resources, R.color.theme_accent, null)
     val rowError: Int = ResourcesCompat.getColor(itemView.resources, R.color.row_error_red, null)
 
-    override fun bindView(item: AppListItem) {
+    override fun bind(item: AppListItem) {
         this.item = item
         this.title.text = item.app.title
         val checked = importDataProvider.isPackageSelected(item.app.packageName)
@@ -45,6 +45,10 @@ internal class ImportAppViewHolder(
             status() == ImportResourceProvider.STATUS_ERROR -> itemView.setBackgroundColor(rowError)
             else -> itemView.setBackgroundColor(Color.TRANSPARENT)
         }
+    }
+
+    override fun placeholder() {
+        TODO("Not yet implemented")
     }
 
     fun status(): Int {

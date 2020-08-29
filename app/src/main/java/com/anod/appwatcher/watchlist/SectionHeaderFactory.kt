@@ -1,53 +1,83 @@
 package com.anod.appwatcher.watchlist
 
-import android.util.SparseArray
-import androidx.core.util.set
+import com.anod.appwatcher.model.AppInfoMetadata
 
 /**
  * @author Alex Gavrishev
  * @date 02/06/2018
  */
 class SectionHeaderFactory(
-        private var showRecentlyUpdated: Boolean,
-        private var hasSectionRecent: Boolean,
-        private var hasSectionOnDevice: Boolean
+        private var showRecentlyUpdated: Boolean
 ) {
-    
-    private fun create(totalAppsCount: Int, newAppsCount: Int, recentlyUpdatedCount: Int, updatableNewCount: Int): SparseArray<SectionHeader> {
-        val sections = SparseArray<SectionHeader>()
-        if (newAppsCount > 0) {
-            sections[0] = New(newAppsCount, updatableNewCount)
-        }
-        val effectiveRecentlyUpdatedCount = if (showRecentlyUpdated) recentlyUpdatedCount else 0
-        if (effectiveRecentlyUpdatedCount > 0) {
-            sections[newAppsCount] = RecentlyUpdated(effectiveRecentlyUpdatedCount)
-        }
-        sections[effectiveRecentlyUpdatedCount + newAppsCount] = Watching(totalAppsCount - effectiveRecentlyUpdatedCount - newAppsCount)
-        return sections
-    }
 
-    fun create(totalAppsCount: Int, newAppsCount: Int, recentlyUpdatedCount: Int, updatableNewCount: Int, hasRecentlyInstalled: Boolean, hasInstalledPackages: Boolean): SparseArray<SectionHeader> {
-        val sections = create(totalAppsCount, newAppsCount, recentlyUpdatedCount, updatableNewCount)
-        val isRecentVisible = hasSectionRecent && hasRecentlyInstalled
-        val isOnDeviceVisible = hasSectionOnDevice && hasInstalledPackages
+    fun insertSeparator(before: SectionItem?, after: SectionItem?): Header? {
+        if (after == null) {
+            // we're at the end of the list
+            return null
+        }
 
-        if (isRecentVisible) {
-            val newSections = SparseArray<SectionHeader>()
-            newSections[0] = RecentlyInstalled
-            for (i in 0 until sections.size()) {
-                newSections[sections.keyAt(i) + 1] = sections.valueAt(i)
+        if (before == null) {
+            when (after) {
+                is RecentItem -> return Header(RecentlyInstalled)
+                is OnDeviceItem -> return Header(OnDevice)
+                is AppItem -> {
+                    val appListItem = after.appListItem
+                    val status = appListItem.app.status
+                    if (status == AppInfoMetadata.STATUS_UPDATED) {
+                        return Header(New(0, 0))
+                    }
+                    if (showRecentlyUpdated && appListItem.recentFlag) {
+                        return Header(RecentlyUpdated(0))
+                    }
+                    return Header(Watching(0))
+                }
             }
+        }
 
-            if (isOnDeviceVisible) {
-                newSections[totalAppsCount + 1] = OnDevice
+        if (before is RecentItem) {
+            when (after) {
+                is OnDeviceItem -> return Header(OnDevice)
+                is AppItem -> {
+                    val appListItem = after.appListItem
+                    val status = appListItem.app.status
+                    if (status == AppInfoMetadata.STATUS_UPDATED) {
+                        return Header(New(0, 0))
+                    }
+                    if (showRecentlyUpdated && appListItem.recentFlag) {
+                        return Header(RecentlyUpdated(0))
+                    }
+                    return Header(Watching(0))
+                }
             }
-            return newSections
         }
 
-        if (isOnDeviceVisible) {
-            sections[totalAppsCount] = OnDevice
+        if (before is AppItem) {
+            when (after) {
+                is OnDeviceItem -> return Header(OnDevice)
+                is AppItem -> {
+                    val beforeItem = before.appListItem
+                    val afterItem = after.appListItem
+                    if (
+                            beforeItem.app.status == AppInfoMetadata.STATUS_UPDATED
+                            && afterItem.app.status == AppInfoMetadata.STATUS_NORMAL
+                    ) {
+                        if (showRecentlyUpdated && afterItem.recentFlag) {
+                            return Header(RecentlyUpdated(0))
+                        }
+                        return Header(Watching(0))
+                    } else if (
+                            showRecentlyUpdated
+                            && beforeItem.app.status == AppInfoMetadata.STATUS_NORMAL
+                            && afterItem.app.status == AppInfoMetadata.STATUS_NORMAL
+                    ) {
+                        if (beforeItem.recentFlag && !afterItem.recentFlag) {
+                            return Header(Watching(0))
+                        }
+                    }
+                }
+            }
         }
 
-        return sections
+        return null
     }
 }

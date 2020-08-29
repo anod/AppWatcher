@@ -6,7 +6,7 @@ import finsky.api.model.Document
 import info.anodsplace.framework.AppLog
 import info.anodsplace.playstore.ListEndpoint
 
-class ListPagingSource(
+class ListEndpointPagingSource(
         private val endpoint: ListEndpoint
 ) : PagingSource<String, Document>() {
 

@@ -1,86 +1,81 @@
 package com.anod.appwatcher.watchlist
 
 import android.app.Application
-import android.util.SparseArray
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.map
-import androidx.lifecycle.switchMap
-import com.anod.appwatcher.database.AppListTable
+import androidx.lifecycle.viewModelScope
+import androidx.paging.*
 import com.anod.appwatcher.database.AppsDatabase
-import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.model.AppListFilter
-import com.anod.appwatcher.model.AppListFilterInclusion
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
-import com.anod.appwatcher.utils.debounce
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.content.InstalledApps
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 /**
  * @author Alex Gavrishev
  * @date 13/04/2018
  */
 
-typealias AppsList = List<AppListItem>
-
-open class LoadResult(val appsList: AppsList, val sections: SparseArray<SectionHeader>)
-
-open class WatchListViewModel(application: Application): AndroidViewModel(application) {
+class WatchListViewModel(application: Application) : AndroidViewModel(application) {
 
     val context: ApplicationContext
         get() = ApplicationContext(getApplication())
-
-    val installedApps = InstalledApps.PackageManager(context.packageManager)
-    var showRecentlyUpdated = false
     val database: AppsDatabase
         get() = com.anod.appwatcher.Application.provide(context).database
+    val prefs: Preferences
+        get() = com.anod.appwatcher.Application.provide(context).prefs
 
+    val installedApps = InstalledApps.PackageManager(context.packageManager)
     var titleFilter = ""
     var sortId = 0
     var tag: Tag? = null
-    val sections: MutableLiveData<SparseArray<SectionHeader>> = MutableLiveData()
-    val reload = MutableLiveData(false)
+    var filterId: Int = Filters.TAB_ALL
+        get() = this.filter.filterId
+        set(value) {
+            field = value
+            this.filter = createFilter(value, installedApps)
+        }
 
-    private var filterId = 0
+    private lateinit var headerFactory: SectionHeaderFactory
+    private var filter: AppListFilter = AppListFilter.All()
 
-    internal val appsList = reload.switchMap {
-        AppListTable.Queries.loadAppList(sortId, showRecentlyUpdated, tag, titleFilter, database.apps())
-                .debounce(600L)
-                .map { allApps ->
-                    val filter = createFilter(filterId, installedApps)
-                    val filtered = allApps.filter { appItem -> !filter.filterRecord(appItem) }
-                    Pair(filtered, filter)
-                }
+    fun load(): Flow<PagingData<SectionItem>> {
+        val showRecentlyUpdated = prefs.showRecentlyUpdated
+        headerFactory = SectionHeaderFactory(showRecentlyUpdated)
+
+        return Pager(PagingConfig(pageSize = 20)) {
+            WatchListPagingSource(
+                    sortId = sortId,
+                    showRecentlyUpdated = showRecentlyUpdated,
+                    showOnDevice = filterId == Filters.TAB_ALL && prefs.showOnDevice,
+                    showRecentlyInstalled = filterId == Filters.TAB_ALL && prefs.showRecent,
+                    titleFilter = titleFilter,
+                    tag = tag,
+                    appContext = context
+            )
+        }.flow.map { pagingData: PagingData<SectionItem> ->
+            pagingData
+                    .filterSync { item ->
+                        if (item is AppItem) {
+                            !filter.filterRecord(item.appListItem)
+                        } else true
+                    }
+                    .insertSeparators { before, after ->
+                        headerFactory.insertSeparator(before, after)
+                    }
+        }.cachedIn(viewModelScope)
     }
-    open val result = appsList.map { list ->
-        val sections = SectionHeaderFactory(showRecentlyUpdated, hasSectionRecent = false, hasSectionOnDevice = false)
-                .create(list.first.size,
-                        list.second.newCount,
-                        list.second.recentlyUpdatedCount,
-                        list.second.updatableNewCount,
-                        hasRecentlyInstalled = false,
-                        hasInstalledPackages = false)
-        this@WatchListViewModel.sections.value = sections
-        LoadResult(list.first, sections)
-    }
-
-    fun init(sortId: Int, tag: Tag?, filterId: Int, prefs: Preferences) {
-        this.sortId = sortId
-        this.tag = tag
-        this.filterId = filterId
-        this.showRecentlyUpdated = prefs.showRecentlyUpdated
-        this.reload.value = true
-    }
-
 
     private fun createFilter(filterId: Int, installedApps: InstalledApps): AppListFilter {
         return when (filterId) {
-            Filters.INSTALLED -> AppListFilterInclusion(AppListFilterInclusion.Installed(), installedApps)
-            Filters.UNINSTALLED -> AppListFilterInclusion(AppListFilterInclusion.Uninstalled(), installedApps)
-            Filters.UPDATABLE -> AppListFilterInclusion(AppListFilterInclusion.Updatable(), installedApps)
-            else -> AppListFilterInclusion(AppListFilterInclusion.All(), installedApps)
+            Filters.INSTALLED -> AppListFilter.Installed(installedApps)
+            Filters.UNINSTALLED -> AppListFilter.Uninstalled(installedApps)
+            Filters.UPDATABLE -> AppListFilter.Updatable(installedApps)
+            else -> AppListFilter.All()
         }
     }
+
 }

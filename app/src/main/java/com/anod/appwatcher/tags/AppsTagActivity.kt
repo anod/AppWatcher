@@ -8,8 +8,6 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.utils.Theme
-import com.anod.appwatcher.watchlist.DefaultSection
-import com.anod.appwatcher.watchlist.Section
 import com.anod.appwatcher.watchlist.WatchListActivity
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.addMultiWindowFlags
@@ -72,26 +70,21 @@ class AppsTagActivity : WatchListActivity() {
     override fun createViewPagerAdapter(): Adapter {
         val adapter = Adapter(this)
 
-        val sectionClass: Class<Section> = DefaultSection().javaClass
         adapter.addFragment(AppsTagListFragment.Factory(
                 Filters.TAB_ALL,
                 prefs.sortIndex,
-                sectionClass,
                 tag), getString(R.string.tab_all))
         adapter.addFragment(AppsTagListFragment.Factory(
                 Filters.INSTALLED,
                 prefs.sortIndex,
-                sectionClass,
                 tag), getString(R.string.tab_installed))
         adapter.addFragment(AppsTagListFragment.Factory(
                 Filters.UNINSTALLED,
                 prefs.sortIndex,
-                sectionClass,
                 tag), getString(R.string.tab_not_installed))
         adapter.addFragment(AppsTagListFragment.Factory(
                 Filters.UPDATABLE,
                 prefs.sortIndex,
-                sectionClass,
                 tag), getString(R.string.tab_updatable))
         return adapter
     }

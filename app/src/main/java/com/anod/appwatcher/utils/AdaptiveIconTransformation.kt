@@ -27,7 +27,7 @@ class AdaptiveIconTransformation(
             return source
         }
 
-        AppLog.d("${source.width}x${source.height} [${source.hasAlpha()}] $cacheKey")
+        // AppLog.d("${source.width}x${source.height} [${source.hasAlpha()}] $cacheKey")
 
         val isTransparent = arrayOf(
                 source.getPixel(0, 0) == Color.TRANSPARENT,
