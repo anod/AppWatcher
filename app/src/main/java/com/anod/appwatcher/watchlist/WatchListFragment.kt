@@ -25,6 +25,7 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.installed.ImportInstalledFragment
+import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.tags.AppsTagSelectActivity
 import com.anod.appwatcher.utils.SingleLiveEvent
@@ -55,7 +56,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
 
     private val action = SingleLiveEvent<WishListAction>()
 
-    private val prefs: Preferences by lazy {
+    protected val prefs: Preferences by lazy {
         Application.provide(requireContext()).prefs
     }
 
@@ -164,11 +165,17 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
         reload()
     }
 
+    protected open fun config(filterId: Int) = WatchListPagingSource.Config(
+            showRecentlyUpdated = prefs.showRecentlyUpdated,
+            showOnDevice = filterId == Filters.TAB_ALL && prefs.showOnDevice,
+            showRecentlyInstalled = filterId == Filters.TAB_ALL && prefs.showRecent
+    )
+
     private fun reload() {
         isListVisible = false
         loadJob?.cancel()
         loadJob = lifecycleScope.launch {
-            viewModel.load().collectLatest { result ->
+            viewModel.load(config(viewModel.filterId)).collectLatest { result ->
                 isListVisible = true
                 AppLog.d("Load status changed: $result")
                 adapter.submitData(result)
@@ -176,7 +183,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
         }
     }
 
-    protected open fun createEmptyViewHolder(emptyView: View, action: SingleLiveEvent<WishListAction>) = EmptyViewHolder(emptyView, action)
+    protected open fun createEmptyViewHolder(emptyView: View, action: SingleLiveEvent<WishListAction>) = EmptyViewHolder(emptyView, !prefs.showRecent, action)
 
     protected open fun mapEmptyAction(it: WishListAction): WishListAction {
         if (it is EmptyButton) {

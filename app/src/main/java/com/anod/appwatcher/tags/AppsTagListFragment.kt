@@ -39,11 +39,17 @@ class AppsTagListFragment : WatchListFragment() {
         return it
     }
 
+    override fun config(filterId: Int) = WatchListPagingSource.Config(
+            showRecentlyUpdated = prefs.showRecentlyUpdated,
+            showOnDevice = false,
+            showRecentlyInstalled = false
+    )
+
     override fun createEmptyViewHolder(emptyView: View, action: SingleLiveEvent<WishListAction>): EmptyViewHolder {
         emptyView.findViewById<TextView>(R.id.emptyText).setText(R.string.tags_list_is_empty)
         emptyView.findViewById<Button>(R.id.button2).isVisible = false
         emptyView.findViewById<Button>(R.id.button3).isVisible = false
-        return EmptyViewHolder(emptyView, action)
+        return EmptyViewHolder(emptyView, true, action)
     }
 
     class Factory(

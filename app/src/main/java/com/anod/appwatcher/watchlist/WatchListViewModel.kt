@@ -2,13 +2,16 @@ package com.anod.appwatcher.watchlist
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import androidx.paging.*
+import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.model.AppListFilter
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
+import com.anod.appwatcher.utils.debounce
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.content.InstalledApps
 import kotlinx.coroutines.flow.Flow
@@ -21,11 +24,11 @@ import kotlinx.coroutines.flow.map
 
 class WatchListViewModel(application: Application) : AndroidViewModel(application) {
 
-    val context: ApplicationContext
+    private val context: ApplicationContext
         get() = ApplicationContext(getApplication())
-    val database: AppsDatabase
+    private val database: AppsDatabase
         get() = com.anod.appwatcher.Application.provide(context).database
-    val prefs: Preferences
+    private val prefs: Preferences
         get() = com.anod.appwatcher.Application.provide(context).prefs
 
     val installedApps = InstalledApps.PackageManager(context.packageManager)
@@ -39,24 +42,38 @@ class WatchListViewModel(application: Application) : AndroidViewModel(applicatio
             this.filter = createFilter(value, installedApps)
         }
 
+    var pagingSource: WatchListPagingSource? = null
+        private set
+
+    private var hasData = false
+    val changes = AppListTable.Queries.changes(database.apps())
+            .debounce(600)
+            .map {
+                if (hasData) {
+                    hasData = false
+                    pagingSource?.invalidate()
+                }
+                true
+            }
+
     private lateinit var headerFactory: SectionHeaderFactory
     private var filter: AppListFilter = AppListFilter.All()
 
-    fun load(): Flow<PagingData<SectionItem>> {
-        val showRecentlyUpdated = prefs.showRecentlyUpdated
-        headerFactory = SectionHeaderFactory(showRecentlyUpdated)
+    fun load(config: WatchListPagingSource.Config): Flow<PagingData<SectionItem>> {
+        headerFactory = SectionHeaderFactory(config.showRecentlyUpdated)
+        hasData = false
 
         return Pager(PagingConfig(pageSize = 10)) {
-            WatchListPagingSource(
+            pagingSource = WatchListPagingSource(
                     sortId = sortId,
-                    showRecentlyUpdated = showRecentlyUpdated,
-                    showOnDevice = filterId == Filters.TAB_ALL && prefs.showOnDevice,
-                    showRecentlyInstalled = filterId == Filters.TAB_ALL && prefs.showRecent,
                     titleFilter = titleFilter,
+                    config = config,
                     tag = tag,
                     appContext = context
             )
+            pagingSource!!
         }.flow.map { pagingData: PagingData<SectionItem> ->
+            hasData = true
             pagingData
                     .filterSync { item ->
                         if (item is AppItem) {

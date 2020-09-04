@@ -17,13 +17,17 @@ import kotlin.math.max
 
 class WatchListPagingSource(
         private val sortId: Int,
-        private val showRecentlyUpdated: Boolean,
-        private val showOnDevice: Boolean,
-        private val showRecentlyInstalled: Boolean,
         private val titleFilter: String,
+        private val config: Config,
         private val tag: Tag? = null,
         private val appContext: ApplicationContext
 ) : PagingSource<Int, SectionItem>() {
+
+    class Config(
+            val showRecentlyUpdated: Boolean,
+            val showOnDevice: Boolean,
+            val showRecentlyInstalled: Boolean
+    )
 
     private val database: AppsDatabase = Application.provide(appContext).database
 
@@ -35,7 +39,7 @@ class WatchListPagingSource(
         val items = mutableListOf<SectionItem>()
         var installed: InstalledResult? = null
         if (params.key == null) {
-            if (showRecentlyInstalled) {
+            if (config.showRecentlyInstalled) {
                 limit = max(0, limit - 1)
                 installed = InstalledTaskWorker(appContext, sortId, titleFilter).run()
                 if (installed.first.isNotEmpty()) {
@@ -48,12 +52,12 @@ class WatchListPagingSource(
         }
 
         val data = AppListTable.Queries.loadAppList(
-                sortId, showRecentlyUpdated, tag, titleFilter, SqlOffset(offset, limit), database.apps()
+                sortId, config.showRecentlyUpdated, tag, titleFilter, SqlOffset(offset, limit), database.apps()
         )
         items.addAll(data.map { AppItem(it) })
 
         if (data.isEmpty()) {
-            if (params.key != null && showOnDevice) {
+            if (params.key != null && config.showOnDevice) {
                 if (installed == null) {
                     installed = InstalledTaskWorker(appContext, sortId, titleFilter).run()
                 }

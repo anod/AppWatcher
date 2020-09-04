@@ -5,6 +5,44 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+    <View
+        android:id="@+id/topMargin"
+        android:layout_width="wrap_content"
+        android:layout_height="120dp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/emptyImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="16dp"
+        android:contentDescription="@string/no_result_found"
+        android:src="@drawable/ic_empty_box"
+
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/topMargin" />
+
+    <TextView
+        android:id="@+id/emptyText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="16dp"
+        android:gravity="center"
+        android:text="@string/watch_list_is_empty"
+        android:minWidth="288dp"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/emptyImage" />
+
     <Button
         android:id="@+id/button1"
         style="@style/BrandButtonStyle"
@@ -48,34 +86,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/button2" />
-
-    <ImageView
-        android:id="@+id/emptyImage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="32dp"
-        android:layout_marginEnd="16dp"
-        android:contentDescription="@string/no_result_found"
-        android:src="@drawable/ic_empty_box"
-
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/emptyText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="16dp"
-        android:gravity="center"
-        android:text="@string/watch_list_is_empty"
-        android:minWidth="288dp"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/emptyImage" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
