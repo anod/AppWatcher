@@ -4,11 +4,11 @@ package com.anod.appwatcher.watchlist
 import com.anod.appwatcher.database.entities.AppListItem
 
 sealed class SectionHeader
-object New : SectionHeader()
-object RecentlyUpdated : SectionHeader()
-object Watching : SectionHeader()
-object RecentlyInstalled : SectionHeader()
-object OnDevice : SectionHeader()
+object NewHeader : SectionHeader()
+object RecentlyUpdatedHeader : SectionHeader()
+object WatchingHeader : SectionHeader()
+object RecentlyInstalledHeader : SectionHeader()
+object OnDeviceHeader : SectionHeader()
 
 sealed class SectionItem
 object Empty : SectionItem()

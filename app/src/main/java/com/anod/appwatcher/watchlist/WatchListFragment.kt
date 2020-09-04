@@ -11,16 +11,11 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.map
-import androidx.lifecycle.observe
+import androidx.lifecycle.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.anod.appwatcher.Application
-import com.anod.appwatcher.BuildConfig
-import com.anod.appwatcher.MarketSearchActivity
+import com.anod.appwatcher.*
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Tag
@@ -45,27 +40,34 @@ object ShareFromStore : WishListAction()
 class AddAppToTag(val tag: Tag) : WishListAction()
 class EmptyButton(val idx: Int) : WishListAction()
 class ItemClick(val app: App) : WishListAction()
+object RecentlyInstalled : WishListAction()
 
 open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
-
-    private var loadJob: Job? = null
-
-    private val stateViewModel: WatchListStateViewModel by activityViewModels()
-    internal val viewModel: WatchListViewModel by viewModels()
-    private lateinit var adapter: WatchListPagingAdapter
-
-    private val action = SingleLiveEvent<WishListAction>()
-
+    private val application: AppWatcherApplication
+        get() = requireContext().applicationContext as AppWatcherApplication
     protected val prefs: Preferences by lazy {
         Application.provide(requireContext()).prefs
     }
 
+    private var loadJob: Job? = null
+    private lateinit var adapter: WatchListPagingAdapter
+    private val action = SingleLiveEvent<WishListAction>()
+    
     private var isListVisible: Boolean
         get() = listView.isVisible
         set(visible) {
             listView.isVisible = visible
             progress.isVisible = false
         }
+
+    private val stateViewModel: WatchListStateViewModel by activityViewModels()
+    internal val viewModel: WatchListViewModel by viewModels { viewModelFactory() }
+
+    private fun viewModelFactory(): ViewModelProvider.Factory {
+        return object : ViewModelProvider.Factory {
+            override fun <T : ViewModel?> create(modelClass: Class<T>): T = AppsWatchListViewModel(application) as T
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_applist, container, false)
@@ -208,7 +210,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
             private val filterId: Int,
             private val sortId: Int,
             private val tag: Tag?
-    ) : FragmentFactory("wish-list-$filterId-$sortId-${tag?.hashCode()}") {
+    ) : FragmentFactory("watch-list-$filterId-$sortId-${tag?.hashCode()}") {
 
         override fun create(): Fragment? = WatchListFragment().also {
             it.arguments = Bundle().apply {

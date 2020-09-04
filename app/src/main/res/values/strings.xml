@@ -222,4 +222,5 @@
     <string name="schedule_chip_notified">%d notified</string>
     <string name="delete_tag">Delete</string>
     <string name="delete_tag_message">You are going to delete tag \'%s\'</string>
+    <string name="more">More</string>
 </resources>

@@ -118,7 +118,7 @@
     </LinearLayout>
 
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton xmlns:app="http://schemas.android.com/apk/res-auto"
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/playStoreButton"
         android:layout_width="40dp"
         android:layout_height="40dp"

@@ -22,30 +22,25 @@ import kotlinx.coroutines.flow.map
  * @date 13/04/2018
  */
 
-class WatchListViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val context: ApplicationContext
+abstract class WatchListViewModel(application: Application) : AndroidViewModel(application) {
+    val context: ApplicationContext
         get() = ApplicationContext(getApplication())
-    private val database: AppsDatabase
+    val database: AppsDatabase
         get() = com.anod.appwatcher.Application.provide(context).database
-    private val prefs: Preferences
+    val prefs: Preferences
         get() = com.anod.appwatcher.Application.provide(context).prefs
-
-    val installedApps = InstalledApps.PackageManager(context.packageManager)
     var titleFilter = ""
     var sortId = 0
     var tag: Tag? = null
+    val installedApps = InstalledApps.PackageManager(context.packageManager)
     var filterId: Int = Filters.TAB_ALL
         get() = this.filter.filterId
         set(value) {
             field = value
             this.filter = createFilter(value, installedApps)
         }
-
-    var pagingSource: WatchListPagingSource? = null
+    var filter: AppListFilter = AppListFilter.All()
         private set
-
-    private var hasData = false
     val changes = AppListTable.Queries.changes(database.apps())
             .debounce(600)
             .map {
@@ -55,22 +50,19 @@ class WatchListViewModel(application: Application) : AndroidViewModel(applicatio
                 }
                 true
             }
-
+    var pagingSource: PagingSource<Int, SectionItem>? = null
+        private set
+    private var hasData = false
     private lateinit var headerFactory: SectionHeaderFactory
-    private var filter: AppListFilter = AppListFilter.All()
+
+    abstract fun createPagingSource(config: WatchListPagingSource.Config): PagingSource<Int, SectionItem>
 
     fun load(config: WatchListPagingSource.Config): Flow<PagingData<SectionItem>> {
         headerFactory = SectionHeaderFactory(config.showRecentlyUpdated)
         hasData = false
 
         return Pager(PagingConfig(pageSize = 10)) {
-            pagingSource = WatchListPagingSource(
-                    sortId = sortId,
-                    titleFilter = titleFilter,
-                    config = config,
-                    tag = tag,
-                    appContext = context
-            )
+            pagingSource = createPagingSource(config)
             pagingSource!!
         }.flow.map { pagingData: PagingData<SectionItem> ->
             hasData = true
@@ -94,5 +86,15 @@ class WatchListViewModel(application: Application) : AndroidViewModel(applicatio
             else -> AppListFilter.All()
         }
     }
+}
 
+class AppsWatchListViewModel(application: Application) : WatchListViewModel(application) {
+
+    override fun createPagingSource(config: WatchListPagingSource.Config) = WatchListPagingSource(
+            sortId = sortId,
+            titleFilter = titleFilter,
+            config = config,
+            tag = tag,
+            appContext = context
+    )
 }

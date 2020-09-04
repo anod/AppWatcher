@@ -2,10 +2,12 @@ package com.anod.appwatcher.watchlist
 
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.R
-
+import com.anod.appwatcher.utils.SingleLiveEvent
 
 private fun View.requestMeasure(parent: ViewGroup) {
     if (this.layoutParams == null) {
@@ -27,26 +29,35 @@ private fun View.requestMeasure(parent: ViewGroup) {
     this.layout(0, 0, this.measuredWidth, this.measuredHeight)
 }
 
-class SectionHeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), BindableViewHolder<SectionHeader> {
-    val title: TextView by lazy { itemView.findViewById<TextView>(android.R.id.text1) }
-    val count: TextView by lazy { itemView.findViewById<TextView>(android.R.id.text2) }
+class SectionHeaderViewHolder(itemView: View, private val action: SingleLiveEvent<WishListAction>) : RecyclerView.ViewHolder(itemView), BindableViewHolder<SectionHeader> {
+    val title: TextView by lazy { itemView.findViewById<TextView>(R.id.sectionTitle) }
+    val button: Button by lazy { itemView.findViewById<Button>(R.id.sectionButton) }
 
     override fun bind(item: SectionHeader) {
-        count.text = ""
+        button.setOnClickListener(null)
         when (item) {
-            is New -> {
+            is NewHeader -> {
+                button.isVisible = false
                 title.setText(R.string.new_updates)
             }
-            is RecentlyUpdated -> {
+            is RecentlyUpdatedHeader -> {
+                button.isVisible = false
                 title.setText(R.string.recently_updated)
             }
-            is Watching -> {
+            is WatchingHeader -> {
+                button.isVisible = false
                 title.setText(R.string.watching)
             }
-            is RecentlyInstalled -> {
+            is RecentlyInstalledHeader -> {
+                button.setOnClickListener {
+                    action.value = RecentlyInstalled
+                }
+                button.isVisible = true
                 title.setText(R.string.recently_installed)
             }
-            is OnDevice -> {
+            is OnDeviceHeader
+            -> {
+                button.isVisible = false
                 title.setText(R.string.downloaded)
             }
         }
@@ -54,6 +65,5 @@ class SectionHeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView
 
     override fun placeholder() {
         title.text = ""
-        count.text = ""
     }
 }
