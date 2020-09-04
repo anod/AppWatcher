@@ -9,36 +9,28 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
-import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.utils.PicassoAppIcon
 import info.anodsplace.framework.content.InstalledApps
 
-class AppListItemDiffCallback : DiffUtil.ItemCallback<AppListItem>() {
-    override fun areItemsTheSame(oldItem: AppListItem, newItem: AppListItem): Boolean {
-        return oldItem.app.appId == newItem.app.appId
-    }
-
-    override fun areContentsTheSame(oldItem: AppListItem, newItem: AppListItem): Boolean {
-        return oldItem == newItem
-    }
-}
-
 class SectionItemDiffCallback : DiffUtil.ItemCallback<SectionItem>() {
     override fun areItemsTheSame(oldItem: SectionItem, newItem: SectionItem) = when (oldItem) {
-        is Header -> newItem is Header && oldItem.type.javaClass == newItem.type.javaClass
+        is Header -> newItem is Header && oldItem.type::class == newItem.type::class
         is RecentItem -> newItem is RecentItem
         is AppItem -> newItem is AppItem && oldItem.appListItem.app.appId == newItem.appListItem.app.appId
-        is OnDeviceItem -> newItem is OnDeviceItem && oldItem.installedPackage.packageName == newItem.installedPackage.packageName
+        is OnDeviceItem -> newItem is OnDeviceItem && oldItem.appListItem.app.appId == newItem.appListItem.app.appId
         is Empty -> newItem is Empty
     }
 
-    override fun areContentsTheSame(oldItem: SectionItem, newItem: SectionItem): Boolean {
-        return oldItem == newItem
+    override fun areContentsTheSame(oldItem: SectionItem, newItem: SectionItem) = when (oldItem) {
+        is Header -> newItem is Header && oldItem.type::class == newItem.type::class
+        is RecentItem -> newItem is RecentItem && oldItem.packageNames == newItem.packageNames
+        is AppItem -> newItem is AppItem && oldItem.appListItem.app == newItem.appListItem.app
+        is OnDeviceItem -> newItem is OnDeviceItem && oldItem.appListItem.app == newItem.appListItem.app
+        is Empty -> newItem is Empty
     }
 }
 
 class WatchListPagingAdapter(
-        private val itemViewType: Int,
         installedApps: InstalledApps,
         private val listener: AppViewHolder.OnClickListener,
         private val context: Context
@@ -66,7 +58,8 @@ class WatchListPagingAdapter(
             is AppItem -> (holder as AppViewHolder).bind(item.appListItem)
             is RecentItem -> (holder as RecentlyInstalledViewHolder).bind(item.packageNames)
             is Empty -> (holder as EmptyViewHolder).bind(null)
-            else -> holder.placeholder()
+            is OnDeviceItem -> (holder as AppViewHolder).bind(item.appListItem)
+            null -> holder.placeholder()
         }
     }
 

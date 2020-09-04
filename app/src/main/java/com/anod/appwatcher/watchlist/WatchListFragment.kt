@@ -90,11 +90,7 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         listView.layoutManager = layoutManager
 
         // Setup header decorator
-        adapter = WatchListPagingAdapter(
-                AdapterViewType.apps,
-                viewModel.installedApps,
-                this, requireContext()
-        )
+        adapter = WatchListPagingAdapter(viewModel.installedApps, this, requireContext())
         listView.adapter = adapter
 
         // When an item inserted into top there is no indication and list maintains previous position

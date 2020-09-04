@@ -6,7 +6,9 @@ import com.anod.appwatcher.Application
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.SqlOffset
+import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.database.entities.packageToApp
 import com.anod.appwatcher.installed.InstalledResult
 import com.anod.appwatcher.installed.InstalledTaskWorker
 import info.anodsplace.framework.AppLog
@@ -54,9 +56,15 @@ class WatchListPagingSource(
             if (installed == null) {
                 installed = InstalledTaskWorker(appContext, sortId, titleFilter).run()
             }
-            installed.second.forEach {
-                items.add(OnDeviceItem(it))
-            }
+            val allInstalledPackageNames = installed.second.map { it.packageName }
+            val watchingPackages = database.apps().loadRowIds(allInstalledPackageNames).associateBy({ it.packageName }, { it.rowId })
+            allInstalledPackageNames
+                    .asSequence()
+                    .filterNot { watchingPackages.containsKey(it) }
+                    .map { appContext.packageManager.packageToApp(-1, it) }
+                    .forEach { app ->
+                        items.add(OnDeviceItem(AppListItem(app, "", noNewDetails = false, recentFlag = false)))
+                    }
         }
 
         return LoadResult.Page(

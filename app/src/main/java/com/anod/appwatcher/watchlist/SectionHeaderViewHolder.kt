@@ -32,22 +32,19 @@ class SectionHeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView
     val count: TextView by lazy { itemView.findViewById<TextView>(android.R.id.text2) }
 
     override fun bind(item: SectionHeader) {
+        count.text = ""
         when (item) {
             is New -> {
                 title.setText(R.string.new_updates)
-                count.text = item.count.toString()
             }
             is RecentlyUpdated -> {
                 title.setText(R.string.recently_updated)
-                count.text = item.count.toString()
             }
             is Watching -> {
                 title.setText(R.string.watching)
-                count.text = item.count.toString()
             }
             is RecentlyInstalled -> {
                 title.setText(R.string.recently_installed)
-                count.text = ""
             }
             is OnDevice -> {
                 title.setText(R.string.downloaded)

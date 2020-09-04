@@ -133,6 +133,16 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         }
     }
 
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        duoDevice.attachedToWindow = true
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        duoDevice.attachedToWindow = false
+    }
+
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         updateWideLayout()

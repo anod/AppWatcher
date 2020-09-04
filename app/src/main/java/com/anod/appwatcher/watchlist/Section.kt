@@ -2,12 +2,11 @@
 package com.anod.appwatcher.watchlist
 
 import com.anod.appwatcher.database.entities.AppListItem
-import info.anodsplace.framework.content.InstalledPackage
 
 sealed class SectionHeader
-class New(val count: Int, val updatable: Int) : SectionHeader()
-class RecentlyUpdated(val count: Int) : SectionHeader()
-class Watching(val count: Int) : SectionHeader()
+object New : SectionHeader()
+object RecentlyUpdated : SectionHeader()
+object Watching : SectionHeader()
 object RecentlyInstalled : SectionHeader()
 object OnDevice : SectionHeader()
 
@@ -16,4 +15,4 @@ object Empty : SectionItem()
 class Header(val type: SectionHeader) : SectionItem()
 class RecentItem(val packageNames: List<Pair<String, Int>>) : SectionItem()
 class AppItem(val appListItem: AppListItem) : SectionItem()
-class OnDeviceItem(val installedPackage: InstalledPackage) : SectionItem()
+class OnDeviceItem(val appListItem: AppListItem) : SectionItem()

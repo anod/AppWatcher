@@ -24,12 +24,12 @@ class SectionHeaderFactory(
                     val appListItem = after.appListItem
                     val status = appListItem.app.status
                     if (status == AppInfoMetadata.STATUS_UPDATED) {
-                        return Header(New(0, 0))
+                        return Header(New)
                     }
                     if (showRecentlyUpdated && appListItem.recentFlag) {
-                        return Header(RecentlyUpdated(0))
+                        return Header(RecentlyUpdated)
                     }
-                    return Header(Watching(0))
+                    return Header(Watching)
                 }
             }
         }
@@ -41,12 +41,12 @@ class SectionHeaderFactory(
                     val appListItem = after.appListItem
                     val status = appListItem.app.status
                     if (status == AppInfoMetadata.STATUS_UPDATED) {
-                        return Header(New(0, 0))
+                        return Header(New)
                     }
                     if (showRecentlyUpdated && appListItem.recentFlag) {
-                        return Header(RecentlyUpdated(0))
+                        return Header(RecentlyUpdated)
                     }
-                    return Header(Watching(0))
+                    return Header(Watching)
                 }
             }
         }
@@ -62,16 +62,16 @@ class SectionHeaderFactory(
                             && afterItem.app.status == AppInfoMetadata.STATUS_NORMAL
                     ) {
                         if (showRecentlyUpdated && afterItem.recentFlag) {
-                            return Header(RecentlyUpdated(0))
+                            return Header(RecentlyUpdated)
                         }
-                        return Header(Watching(0))
+                        return Header(Watching)
                     } else if (
                             showRecentlyUpdated
                             && beforeItem.app.status == AppInfoMetadata.STATUS_NORMAL
                             && afterItem.app.status == AppInfoMetadata.STATUS_NORMAL
                     ) {
                         if (beforeItem.recentFlag && !afterItem.recentFlag) {
-                            return Header(Watching(0))
+                            return Header(Watching)
                         }
                     }
                 }

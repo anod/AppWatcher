@@ -46,7 +46,7 @@ class WatchListViewModel(application: Application) : AndroidViewModel(applicatio
         val showRecentlyUpdated = prefs.showRecentlyUpdated
         headerFactory = SectionHeaderFactory(showRecentlyUpdated)
 
-        return Pager(PagingConfig(pageSize = 20)) {
+        return Pager(PagingConfig(pageSize = 10)) {
             WatchListPagingSource(
                     sortId = sortId,
                     showRecentlyUpdated = showRecentlyUpdated,

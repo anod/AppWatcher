@@ -17,7 +17,7 @@ class InstalledTaskWorker(
         private val sortId: Int,
         private val titleFilter: String) {
 
-    suspend fun run(): InstalledResult = withContext(Dispatchers.IO) {
+    suspend fun run(): InstalledResult = withContext(Dispatchers.Default) {
         val installedPackages = context.packageManager.getInstalledPackages()
 
         val recentlyInstalled = installedPackages.sortedWith(AppUpdateTimeComparator(-1))

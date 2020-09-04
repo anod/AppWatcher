@@ -11,8 +11,10 @@ import info.anodsplace.framework.AppLog
 
 interface HingeDevice {
     val hinge: Rect
+    var attachedToWindow: Boolean
 
     class NoOp : HingeDevice {
+        override var attachedToWindow = false
         override val hinge = Rect()
     }
 
@@ -23,6 +25,8 @@ interface HingeDevice {
 }
 
 class HingeDeviceReal(activity: Activity) : HingeDevice {
+    override var attachedToWindow = false
+
     private val xWindowManager: WindowManager? = try {
         WindowManager(activity, null)
     } catch (e: Exception) {
@@ -31,6 +35,9 @@ class HingeDeviceReal(activity: Activity) : HingeDevice {
 
     override val hinge: Rect
         get() {
+            if (!attachedToWindow) {
+                return Rect()
+            }
             val wm = xWindowManager ?: return Rect()
             try {
                 val hinge = wm.windowLayoutInfo.displayFeatures.firstOrNull { it.type == DisplayFeature.TYPE_HINGE }
