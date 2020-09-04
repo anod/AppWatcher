@@ -3,6 +3,7 @@ package com.anod.appwatcher.watchlist
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
@@ -10,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.utils.PicassoAppIcon
+import com.anod.appwatcher.utils.SingleLiveEvent
 import info.anodsplace.framework.content.InstalledApps
 
 class SectionItemDiffCallback : DiffUtil.ItemCallback<SectionItem>() {
@@ -32,7 +34,8 @@ class SectionItemDiffCallback : DiffUtil.ItemCallback<SectionItem>() {
 
 class WatchListPagingAdapter(
         installedApps: InstalledApps,
-        private val listener: AppViewHolder.OnClickListener,
+        private val action: SingleLiveEvent<WishListAction>,
+        private val emptyViewHolderFactory: (itemView: View) -> EmptyViewHolder,
         private val context: Context
 ) : PagingDataAdapter<SectionItem, RecyclerView.ViewHolder>(SectionItemDiffCallback()) {
 
@@ -46,6 +49,7 @@ class WatchListPagingAdapter(
             is AppItem -> R.layout.list_item_app
             is RecentItem -> R.layout.list_item_recently_installed
             is OnDeviceItem -> R.layout.list_item_app
+            is Empty -> R.layout.list_item_empty
             else -> throw UnsupportedOperationException("Unknown view")
         }
     }
@@ -71,15 +75,15 @@ class WatchListPagingAdapter(
             }
             R.layout.list_item_recently_installed -> {
                 val view = LayoutInflater.from(context).inflate(R.layout.list_item_recently_installed, parent, false)
-                return RecentlyInstalledViewHolder(view, appIcon, packageManager, listener)
+                return RecentlyInstalledViewHolder(view, appIcon, packageManager, action)
             }
             R.layout.list_item_app -> {
                 val itemView = LayoutInflater.from(context).inflate(R.layout.list_item_app, parent, false)
-                AppViewHolder(itemView, itemDataProvider, appIcon, listener)
+                AppViewHolder(itemView, itemDataProvider, appIcon, action)
             }
             R.layout.list_item_empty -> {
                 val itemView = LayoutInflater.from(context).inflate(R.layout.list_item_empty, parent, false)
-                return EmptyViewHolder(itemView)
+                return emptyViewHolderFactory(itemView)
             }
             else -> throw UnsupportedOperationException("Unknown view")
         }

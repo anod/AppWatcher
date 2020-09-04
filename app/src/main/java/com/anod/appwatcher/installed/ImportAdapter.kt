@@ -9,6 +9,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.observe
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.AppListItem
+import com.anod.appwatcher.utils.SingleLiveEvent
 import com.anod.appwatcher.watchlist.AdapterViewType
 import com.anod.appwatcher.watchlist.AppViewHolderBase
 
@@ -17,7 +18,7 @@ internal class ImportAdapter(
         pm: PackageManager,
         private val dataProvider: ImportResourceProvider,
         lifecycleOwner: LifecycleOwner)
-    : InstalledAppsAdapter(AdapterViewType.installed, context, pm, dataProvider, null) {
+    : InstalledAppsAdapter(AdapterViewType.installed, context, pm, dataProvider, SingleLiveEvent()) {
 
     private var packageIndex: SimpleArrayMap<String, Int> = SimpleArrayMap()
 

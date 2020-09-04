@@ -52,19 +52,23 @@ class WatchListPagingSource(
         )
         items.addAll(data.map { AppItem(it) })
 
-        if (data.isEmpty() && showOnDevice) {
-            if (installed == null) {
-                installed = InstalledTaskWorker(appContext, sortId, titleFilter).run()
+        if (data.isEmpty()) {
+            if (showOnDevice) {
+                if (installed == null) {
+                    installed = InstalledTaskWorker(appContext, sortId, titleFilter).run()
+                }
+                val allInstalledPackageNames = installed.second.map { it.packageName }
+                val watchingPackages = database.apps().loadRowIds(allInstalledPackageNames).associateBy({ it.packageName }, { it.rowId })
+                allInstalledPackageNames
+                        .asSequence()
+                        .filterNot { watchingPackages.containsKey(it) }
+                        .map { appContext.packageManager.packageToApp(-1, it) }
+                        .forEach { app ->
+                            items.add(OnDeviceItem(AppListItem(app, "", noNewDetails = false, recentFlag = false)))
+                        }
+            } else {
+                items.add(Empty)
             }
-            val allInstalledPackageNames = installed.second.map { it.packageName }
-            val watchingPackages = database.apps().loadRowIds(allInstalledPackageNames).associateBy({ it.packageName }, { it.rowId })
-            allInstalledPackageNames
-                    .asSequence()
-                    .filterNot { watchingPackages.containsKey(it) }
-                    .map { appContext.packageManager.packageToApp(-1, it) }
-                    .forEach { app ->
-                        items.add(OnDeviceItem(AppListItem(app, "", noNewDetails = false, recentFlag = false)))
-                    }
         }
 
         return LoadResult.Page(

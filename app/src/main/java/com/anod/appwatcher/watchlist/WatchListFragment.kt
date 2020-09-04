@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -14,6 +13,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.map
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -32,7 +32,6 @@ import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.CustomThemeActivity
 import info.anodsplace.framework.app.FragmentFactory
 import info.anodsplace.framework.content.startActivitySafely
-import info.anodsplace.framework.view.setOnSafeClickListener
 import kotlinx.android.synthetic.main.fragment_applist.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
@@ -43,8 +42,10 @@ object SearchInStore : WishListAction()
 object ImportInstalled : WishListAction()
 object ShareFromStore : WishListAction()
 class AddAppToTag(val tag: Tag) : WishListAction()
+class EmptyButton(val idx: Int) : WishListAction()
+class ItemClick(val app: App) : WishListAction()
 
-open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
+open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private var loadJob: Job? = null
 
@@ -53,6 +54,7 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
     private lateinit var adapter: WatchListPagingAdapter
 
     private val action = SingleLiveEvent<WishListAction>()
+
     private val prefs: Preferences by lazy {
         Application.provide(requireContext()).prefs
     }
@@ -90,7 +92,11 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         listView.layoutManager = layoutManager
 
         // Setup header decorator
-        adapter = WatchListPagingAdapter(viewModel.installedApps, this, requireContext())
+        adapter = WatchListPagingAdapter(
+                viewModel.installedApps,
+                action,
+                { emptyView -> createEmptyViewHolder(emptyView, action) },
+                requireContext())
         listView.adapter = adapter
 
         // When an item inserted into top there is no indication and list maintains previous position
@@ -112,7 +118,7 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
             })
         }
 
-        action.observe(this, Observer {
+        action.map { mapEmptyAction(it) }.observe(viewLifecycleOwner, Observer {
             when (it) {
                 is SearchInStore -> startActivity(MarketSearchActivity.intent(requireContext(), "", true))
                 is ImportInstalled -> startActivity(ImportInstalledFragment.intent(
@@ -121,6 +127,14 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
                         (activity as CustomThemeActivity).themeColors))
                 is ShareFromStore -> activity?.startActivitySafely(Intent.makeMainActivity(ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity")))
                 is AddAppToTag -> startActivity(AppsTagSelectActivity.createIntent(viewModel.tag!!, requireActivity()))
+                is ItemClick -> {
+                    val app = it.app
+                    if (BuildConfig.DEBUG) {
+                        AppLog.d(app.packageName)
+                        Toast.makeText(activity, app.packageName, Toast.LENGTH_SHORT).show()
+                    }
+                    (requireActivity() as WatchListActivity).openAppDetails(app.appId, app.rowId, app.detailsUrl)
+                }
             }
         })
 
@@ -160,25 +174,18 @@ open class WatchListFragment : Fragment(), AppViewHolder.OnClickListener, SwipeR
         }
     }
 
-    protected open fun configureEmptyView(emptyView: View, action: SingleLiveEvent<WishListAction>) {
-        emptyView.findViewById<Button>(R.id.button1).setOnSafeClickListener {
-            action.value = SearchInStore
-        }
-        emptyView.findViewById<Button>(R.id.button2).setOnSafeClickListener {
-            action.value = ImportInstalled
-        }
-        emptyView.findViewById<Button>(R.id.button3).setOnSafeClickListener {
-            action.value = ShareFromStore
-        }
-    }
+    protected open fun createEmptyViewHolder(emptyView: View, action: SingleLiveEvent<WishListAction>) = EmptyViewHolder(emptyView, action)
 
-    override fun onItemClick(app: App) {
-        if (BuildConfig.DEBUG) {
-            AppLog.d(app.packageName)
-            Toast.makeText(activity, app.packageName, Toast.LENGTH_SHORT).show()
+    protected open fun mapEmptyAction(it: WishListAction): WishListAction {
+        if (it is EmptyButton) {
+            return when (it.idx) {
+                1 -> SearchInStore
+                2 -> ImportInstalled
+                3 -> ShareFromStore
+                else -> throw IllegalArgumentException("Unknown Idx")
+            }
         }
-
-        (requireActivity() as WatchListActivity).openAppDetails(app.appId, app.rowId, app.detailsUrl)
+        return it
     }
 
     override fun onRefresh() {

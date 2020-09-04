@@ -3,17 +3,17 @@ package com.anod.appwatcher.watchlist
 import android.view.View
 import android.widget.ImageView
 import com.anod.appwatcher.R
-import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.details.AppDetailsView
 import com.anod.appwatcher.utils.PicassoAppIcon
+import com.anod.appwatcher.utils.SingleLiveEvent
 import info.anodsplace.framework.view.setOnSafeClickListener
 
 open class AppViewHolder(
         itemView: View,
         resourceProvider: ResourceProvider,
         iconLoader: PicassoAppIcon,
-        private val onClickListener: OnClickListener?)
+        private val action: SingleLiveEvent<WishListAction>)
     : AppViewHolderBase<AppListItem>(itemView, resourceProvider, iconLoader) {
 
     private var item: AppListItem? = null
@@ -23,13 +23,9 @@ open class AppViewHolder(
     open val isLocalApp: Boolean
         get() = false
 
-    interface OnClickListener {
-        fun onItemClick(app: App)
-    }
-
     init {
         itemView.findViewById<View>(R.id.content).setOnSafeClickListener {
-            onClickListener?.onItemClick(this.item!!.app)
+            action.value = ItemClick(this.item!!.app)
         }
     }
 

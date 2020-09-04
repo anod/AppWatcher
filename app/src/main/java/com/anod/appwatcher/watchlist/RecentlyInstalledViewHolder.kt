@@ -8,13 +8,14 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.packageToApp
 import com.anod.appwatcher.installed.RecentAppView
 import com.anod.appwatcher.utils.PicassoAppIcon
+import com.anod.appwatcher.utils.SingleLiveEvent
 import info.anodsplace.framework.view.setOnSafeClickListener
 
 class RecentlyInstalledViewHolder(
         itemView: View,
         private val iconLoader: PicassoAppIcon,
         private val packageManager: PackageManager,
-        private val listener: AppViewHolder.OnClickListener?) : RecyclerView.ViewHolder(itemView), BindableViewHolder<List<Pair<String, Int>>> {
+        private val action: SingleLiveEvent<WishListAction>) : RecyclerView.ViewHolder(itemView), BindableViewHolder<List<Pair<String, Int>>> {
 
     private val appViews: List<RecentAppView> = arrayListOf(
             R.id.app1,
@@ -46,7 +47,7 @@ class RecentlyInstalledViewHolder(
                 view.visibility = View.VISIBLE
                 view.watched.visibility = if (item[index].second > 0) View.VISIBLE else View.INVISIBLE
                 view.findViewById<View>(R.id.content).setOnSafeClickListener {
-                    listener?.onItemClick(app)
+                    action.value = ItemClick(app)
                 }
             }
         }

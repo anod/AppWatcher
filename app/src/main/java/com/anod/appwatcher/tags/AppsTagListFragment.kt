@@ -11,11 +11,8 @@ import androidx.fragment.app.Fragment
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.utils.SingleLiveEvent
-import com.anod.appwatcher.watchlist.AddAppToTag
-import com.anod.appwatcher.watchlist.WatchListFragment
-import com.anod.appwatcher.watchlist.WishListAction
+import com.anod.appwatcher.watchlist.*
 import info.anodsplace.framework.app.FragmentFactory
-import info.anodsplace.framework.view.setOnSafeClickListener
 
 /**
  * @author Alex Gavrishev
@@ -29,17 +26,24 @@ class AppsTagListFragment : WatchListFragment() {
         return inflater.inflate(R.layout.fragment_appstag_list, container, false)
     }
 
-    override fun configureEmptyView(emptyView: View, action: SingleLiveEvent<WishListAction>) {
-        val tag = viewModel.tag!!
-        emptyView.findViewById<TextView>(R.id.emptyText).setText(R.string.tags_list_is_empty)
-        emptyView.findViewById<Button>(R.id.button1)?.let {
-            it.setBackgroundColor(tag.color)
-            it.setOnSafeClickListener {
-                action.value = AddAppToTag(tag)
+    override fun mapEmptyAction(it: WishListAction): WishListAction {
+        if (it is EmptyButton) {
+            return when (it.idx) {
+                1 -> {
+                    val tag = viewModel.tag!!
+                    AddAppToTag(tag)
+                }
+                else -> throw IllegalArgumentException("Unknown Idx")
             }
         }
+        return it
+    }
+
+    override fun createEmptyViewHolder(emptyView: View, action: SingleLiveEvent<WishListAction>): EmptyViewHolder {
+        emptyView.findViewById<TextView>(R.id.emptyText).setText(R.string.tags_list_is_empty)
         emptyView.findViewById<Button>(R.id.button2).isVisible = false
         emptyView.findViewById<Button>(R.id.button3).isVisible = false
+        return EmptyViewHolder(emptyView, action)
     }
 
     class Factory(
