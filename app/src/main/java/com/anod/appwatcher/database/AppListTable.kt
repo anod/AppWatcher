@@ -28,6 +28,9 @@ class SqlOffset(val offset: Int, val limit: Int)
 interface AppListTable {
 
     @RawQuery(observedEntities = [(App::class), (AppChange::class), (AppTag::class)])
+    fun observeRows(query: SupportSQLiteQuery): LiveData<List<Int>>
+
+    @RawQuery(observedEntities = [(App::class), (AppChange::class), (AppTag::class)])
     fun observe(query: SupportSQLiteQuery): LiveData<List<AppListItem>>
 
     @RawQuery(observedEntities = [(App::class), (AppChange::class), (AppTag::class)])
@@ -132,7 +135,11 @@ interface AppListTable {
             return loadAppList(sortId, false, null, titleFilter, table)
         }
 
-        fun loadAppList(sortId: Int, orderByRecentlyUpdated: Boolean, tag: Tag?, titleFilter: String, table: AppListTable): LiveData<List<AppListItem>> {
+        fun changes(table: AppListTable): LiveData<List<Int>> {
+            return table.observeRows(SimpleSQLiteQuery("SELECT ${BaseColumns._ID} FROM ${AppListTable.table} LIMIT 1", emptyArray()))
+        }
+
+        private fun loadAppList(sortId: Int, orderByRecentlyUpdated: Boolean, tag: Tag?, titleFilter: String, table: AppListTable): LiveData<List<AppListItem>> {
             val query = createAppsListQuery(sortId, orderByRecentlyUpdated, tag, titleFilter, null)
             return table.observe(SimpleSQLiteQuery(query.first, query.second))
         }

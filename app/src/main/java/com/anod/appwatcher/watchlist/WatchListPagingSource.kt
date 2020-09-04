@@ -53,7 +53,7 @@ class WatchListPagingSource(
         items.addAll(data.map { AppItem(it) })
 
         if (data.isEmpty()) {
-            if (showOnDevice) {
+            if (params.key != null && showOnDevice) {
                 if (installed == null) {
                     installed = InstalledTaskWorker(appContext, sortId, titleFilter).run()
                 }
@@ -66,7 +66,7 @@ class WatchListPagingSource(
                         .forEach { app ->
                             items.add(OnDeviceItem(AppListItem(app, "", noNewDetails = false, recentFlag = false)))
                         }
-            } else {
+            } else if (params.key == null) {
                 items.add(Empty)
             }
         }

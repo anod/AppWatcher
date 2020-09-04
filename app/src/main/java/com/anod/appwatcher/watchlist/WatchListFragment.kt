@@ -159,6 +159,8 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
             }
         }
 
+        viewModel.changes.observe(viewLifecycleOwner) { }
+
         reload()
     }
 
