@@ -40,7 +40,6 @@ object ShareFromStore : WishListAction()
 class AddAppToTag(val tag: Tag) : WishListAction()
 class EmptyButton(val idx: Int) : WishListAction()
 class ItemClick(val app: App) : WishListAction()
-object RecentlyInstalled : WishListAction()
 
 open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private val application: AppWatcherApplication
@@ -52,7 +51,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
     private var loadJob: Job? = null
     private lateinit var adapter: WatchListPagingAdapter
     private val action = SingleLiveEvent<WishListAction>()
-    
+
     private var isListVisible: Boolean
         get() = listView.isVisible
         set(visible) {

@@ -11,7 +11,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
-import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.anod.appwatcher.R
@@ -27,18 +26,15 @@ import info.anodsplace.framework.app.FragmentFactory
 import info.anodsplace.framework.app.FragmentToolbarActivity
 import info.anodsplace.framework.view.Keyboard
 import kotlinx.android.synthetic.main.fragment_wishlist.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 /**
  * @author Alex Gavrishev
  * *
  * @date 16/12/2016.
  */
-@ExperimentalPagingApi
-@ExperimentalCoroutinesApi
-@FlowPreview
-@InternalCoroutinesApi
 class WishListFragment : Fragment() {
 
     private var loadJob: Job? = null

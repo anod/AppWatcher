@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="?attr/colorSecondary"
@@ -9,19 +10,20 @@
     android:paddingBottom="16dp"
     android:theme="@style/ThemeOverlay.MaterialComponents.Dark">
 
-    <ImageView
+    <TextView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="48dp"
-        android:src="@drawable/ic_drawer_header" />
+        android:layout_height="40dp"
+        android:text="@string/app_name"
+        android:singleLine="true"
+        android:textSize="24sp" />
 
     <LinearLayout
         android:id="@+id/account_change"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="40dp"
         android:layout_marginTop="44dp"
         android:background="?attr/selectableItemBackgroundBorderless"
+        android:focusable="true"
         android:clickable="true"
         android:orientation="vertical">
 
@@ -29,7 +31,7 @@
             android:id="@+id/account_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableRight="@drawable/ic_drawer_accounts_expand"
+            app:drawableEndCompat="@drawable/ic_drawer_accounts_expand"
             android:gravity="center_vertical"
             android:text="@string/choose_an_account"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
