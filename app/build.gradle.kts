@@ -111,8 +111,7 @@ dependencies {
     implementation("androidx.work:work-runtime:2.4.0")
     implementation("androidx.core:core:1.3.1")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
-    implementation("androidx.window:window:1.0.0-alpha01")
-    implementation("androidx.paging:paging-runtime:3.0.0-alpha05")
+    implementation("androidx.paging:paging-runtime:3.0.0-alpha06")
     // Google
     implementation("com.google.android.material:material:1.3.0-alpha02")
     implementation("com.google.android.gms:play-services-oss-licenses:17.0.0")
@@ -148,7 +147,6 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.2.0")
     implementation("androidx.room:room-ktx:2.2.5")
-    implementation("androidx.core:core-ktx:1.3.1")
     implementation("androidx.work:work-runtime-ktx:2.4.0")
     implementation("androidx.fragment:fragment-ktx:1.2.5")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0")

@@ -5,7 +5,7 @@ plugins {
 
 repositories {
     jcenter()
-    maven( url = "https://maven.google.com")
+    maven(url = "https://maven.google.com")
 }
 
 android {
@@ -21,6 +21,11 @@ android {
     sourceSets {
         getByName("main").java.srcDirs("src/main/kotlin")
     }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -32,6 +37,8 @@ dependencies {
     implementation("com.google.android.material:material:1.3.0-alpha02")
     implementation("androidx.palette:palette:1.0.0")
     implementation("androidx.cardview:cardview:1.0.0")
+    implementation("androidx.window:window:1.0.0-alpha01")
+    implementation("androidx.core:core-ktx:1.3.1")
 
     implementation("com.google.android.gms:play-services-identity:17.0.0")
     implementation("com.google.android.gms:play-services-auth:18.1.0")

@@ -19,7 +19,7 @@ import com.anod.appwatcher.*
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Tag
-import com.anod.appwatcher.installed.ImportInstalledFragment
+import com.anod.appwatcher.installed.InstalledFragment
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.tags.AppsTagSelectActivity
@@ -42,7 +42,7 @@ class EmptyButton(val idx: Int) : WishListAction()
 class ItemClick(val app: App) : WishListAction()
 
 open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
-    private val application: AppWatcherApplication
+    protected val application: AppWatcherApplication
         get() = requireContext().applicationContext as AppWatcherApplication
     protected val prefs: Preferences by lazy {
         Application.provide(requireContext()).prefs
@@ -62,7 +62,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
     private val stateViewModel: WatchListStateViewModel by activityViewModels()
     internal val viewModel: WatchListViewModel by viewModels { viewModelFactory() }
 
-    private fun viewModelFactory(): ViewModelProvider.Factory {
+    protected open fun viewModelFactory(): ViewModelProvider.Factory {
         return object : ViewModelProvider.Factory {
             override fun <T : ViewModel?> create(modelClass: Class<T>): T = AppsWatchListViewModel(application) as T
         }
@@ -123,7 +123,8 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
         action.map { mapEmptyAction(it) }.observe(viewLifecycleOwner, Observer {
             when (it) {
                 is SearchInStore -> startActivity(MarketSearchActivity.intent(requireContext(), "", true))
-                is ImportInstalled -> startActivity(ImportInstalledFragment.intent(
+                is ImportInstalled -> startActivity(InstalledFragment.intent(
+                        Preferences.SORT_DATE_DESC,
                         requireContext(),
                         (activity as CustomThemeActivity).themeRes,
                         (activity as CustomThemeActivity).themeColors))
@@ -135,7 +136,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
                         AppLog.d(app.packageName)
                         Toast.makeText(activity, app.packageName, Toast.LENGTH_SHORT).show()
                     }
-                    (requireActivity() as WatchListActivity).openAppDetails(app.appId, app.rowId, app.detailsUrl)
+                    openAppDetails(app)
                 }
             }
         })
@@ -164,6 +165,10 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
         viewModel.changes.observe(viewLifecycleOwner) { }
 
         reload()
+    }
+
+    protected open fun openAppDetails(app: App) {
+        (requireActivity() as WatchListActivity).openAppDetails(app.appId, app.rowId, app.detailsUrl)
     }
 
     protected open fun config(filterId: Int) = WatchListPagingSource.Config(

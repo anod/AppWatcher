@@ -1,7 +1,5 @@
-//------------------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation. All rights reserved.
-//------------------------------------------------------------------------------
-package com.anod.appwatcher.utils
+// Copyright (c) 2020. Alex Gavrishev
+package info.anodsplace.framework.app
 
 import android.app.Activity
 import android.graphics.Rect

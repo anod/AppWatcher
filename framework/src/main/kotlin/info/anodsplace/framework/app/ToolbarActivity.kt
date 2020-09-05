@@ -1,17 +1,21 @@
 package info.anodsplace.framework.app
 
 import android.content.res.ColorStateList
+import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import androidx.annotation.IdRes
 import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.isVisible
 import info.anodsplace.framework.R
 
 /**
@@ -22,8 +26,20 @@ abstract class ToolbarActivity : AppCompatActivity(), CustomThemeActivity {
 
     override val themeRes = 0
     override val themeColors = CustomThemeColors.none
+
     @get:LayoutRes
     abstract val layoutResource: Int
+
+    @get:IdRes
+    open val detailsLayoutId = 0
+
+    @get:IdRes
+    open val hingLayoutId = 0
+
+    private lateinit var duoDevice: HingeDevice
+
+    private var hinge: View? = null
+    private var details: View? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val app = ApplicationContext(this)
@@ -34,9 +50,42 @@ abstract class ToolbarActivity : AppCompatActivity(), CustomThemeActivity {
         if (themeColors.available) {
             WindowCustomTheme.apply(themeColors, window, this)
         }
+        duoDevice = HingeDevice.create(this)
         super.onCreate(savedInstanceState)
         setContentView(layoutResource)
         setupToolbar()
+        updateWideLayout(resources.getBoolean(R.bool.wide_layout), duoDevice)
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        duoDevice.attachedToWindow = true
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        duoDevice.attachedToWindow = false
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        updateWideLayout(resources.getBoolean(R.bool.wide_layout), duoDevice)
+    }
+
+    protected open fun updateWideLayout(isWideLayout: Boolean, duoDevice: HingeDevice) {
+        if (hingLayoutId != 0) {
+            if (hinge == null) {
+                hinge = findViewById(hingLayoutId)
+            }
+            hinge!!.isVisible = isWideLayout && duoDevice.hinge.width() > 0
+            hinge!!.layoutParams.width = duoDevice.hinge.width()
+        }
+        if (detailsLayoutId != 0) {
+            if (details == null) {
+                details = findViewById(detailsLayoutId)
+            }
+            details!!.isVisible = isWideLayout
+        }
     }
 
     private fun setupToolbar() {

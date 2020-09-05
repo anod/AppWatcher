@@ -2,7 +2,6 @@ package com.anod.appwatcher.watchlist
 
 import android.accounts.Account
 import android.content.Intent
-import android.content.res.Configuration
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.Menu
@@ -10,10 +9,10 @@ import android.view.MenuItem
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.annotation.IdRes
 import androidx.annotation.LayoutRes
 import androidx.annotation.MenuRes
 import androidx.appcompat.widget.SearchView
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
@@ -35,12 +34,12 @@ import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.search.SearchActivity
 import com.anod.appwatcher.upgrade.UpgradeCheck
 import com.anod.appwatcher.upgrade.UpgradeRefresh
-import com.anod.appwatcher.utils.HingeDevice
 import com.anod.appwatcher.utils.Theme
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.DialogSingleChoice
 import info.anodsplace.framework.app.FragmentFactory
+import info.anodsplace.framework.app.HingeDevice
 import kotlinx.android.synthetic.main.activity_main.*
 
 sealed class ListState
@@ -56,15 +55,20 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         get() = Theme(this).theme
     override val themeColors: CustomThemeColors
         get() = Theme(this).colors
-    override val layoutResource: Int
-        @LayoutRes get() = R.layout.activity_main
 
-    private lateinit var duoDevice: HingeDevice
+    open val defaultFilterId = Filters.TAB_ALL
+
+    @get:LayoutRes
+    override val layoutResource = R.layout.activity_main
+
+    @get:IdRes
+    override val detailsLayoutId = R.id.details
+
+    @get:IdRes
+    override val hingLayoutId = R.id.hinge
 
     val prefs: Preferences
         get() = Application.provide(this).prefs
-
-    open val defaultFilterId = Filters.TAB_ALL
 
     private val actionMenu by lazy { WatchListMenu(this, this) }
     private val stateViewModel: WatchListStateViewModel by viewModels()
@@ -80,9 +84,6 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        duoDevice = HingeDevice.create(this)
-        updateWideLayout()
 
         val filterId: Int
         if (savedInstanceState != null) {
@@ -133,26 +134,9 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         }
     }
 
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-        duoDevice.attachedToWindow = true
-    }
-
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        duoDevice.attachedToWindow = false
-    }
-
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        updateWideLayout()
-    }
-
-    private fun updateWideLayout() {
-        stateViewModel.isWideLayout = resources.getBoolean(R.bool.wide_layout)
-        details.isVisible = stateViewModel.isWideLayout
-        hinge.isVisible = stateViewModel.isWideLayout && duoDevice.hinge.width() > 0
-        hinge.layoutParams.width = duoDevice.hinge.width()
+    override fun updateWideLayout(isWideLayout: Boolean, duoDevice: HingeDevice) {
+        super.updateWideLayout(isWideLayout, duoDevice)
+        stateViewModel.isWideLayout = isWideLayout
         if (stateViewModel.isWideLayout) {
             if (supportFragmentManager.findFragmentByTag(DetailsEmptyView.tag) == null) {
                 supportFragmentManager.commit {
