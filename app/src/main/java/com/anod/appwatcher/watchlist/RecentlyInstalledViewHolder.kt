@@ -36,6 +36,12 @@ class RecentlyInstalledViewHolder(
             R.id.app16
     ).map { itemView.findViewById<RecentAppView>(it) }
 
+    init {
+        itemView.findViewById<View>(R.id.more).setOnClickListener {
+            action.value = ImportInstalled
+        }
+    }
+
     override fun bind(item: List<Pair<String, Int>>) {
         appViews.forEachIndexed { index, view ->
             if (index >= item.size) {

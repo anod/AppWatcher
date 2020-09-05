@@ -1,14 +1,14 @@
 <com.anod.appwatcher.installed.RecentAppView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="96dp"
     android:layout_height="match_parent"
     android:layout_marginTop="2dp"
     android:layout_marginBottom="2dp"
     android:layout_marginStart="4dp"
-    card_view:cardBackgroundColor="?attr/colorItemBackground"
-    card_view:cardCornerRadius="1dp"
-    card_view:cardElevation="1dp">
+    app:cardBackgroundColor="?attr/colorItemBackground"
+    app:cardCornerRadius="1dp"
+    app:cardElevation="1dp">
 
     <LinearLayout
         android:id="@+id/content"
@@ -51,7 +51,7 @@
             android:src="@drawable/ic_visibility_black_24px"
             android:layout_gravity="bottom|left"
             android:contentDescription="@string/watched"
-            android:tint="@color/material_grey_500" />
+            app:tint="@color/material_grey_500" />
     </LinearLayout>
 
 </com.anod.appwatcher.installed.RecentAppView>

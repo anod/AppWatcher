@@ -1,48 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/sec_header"
+    android:id="@+id/sectionTitle"
+    style="?attr/textAppearanceOverline"
     android:layout_width="match_parent"
     android:layout_height="@dimen/list_apps_header_height"
+    android:layout_weight="1"
+    android:ellipsize="end"
+    android:focusable="false"
+    android:gravity="start|center_vertical"
+    android:letterSpacing="0"
+    android:maxLines="1"
+    android:textAllCaps="true"
+    android:textColor="@color/list_header_text"
+    android:textSize="14sp"
+    android:textStyle="bold"
     android:background="?attr/colorItemBackground"
-    android:orientation="horizontal"
     android:paddingLeft="8dp"
-    android:paddingTop="4dp"
     android:paddingRight="8dp"
-    android:paddingBottom="4dp">
-
-    <TextView
-        android:id="@+id/sectionTitle"
-        style="?attr/textAppearanceOverline"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:layout_marginTop="10dp"
-        android:ellipsize="end"
-        android:focusable="false"
-        android:gravity="start"
-        android:letterSpacing="0"
-        android:maxLines="1"
-        android:textAllCaps="true"
-        android:textColor="@color/list_header_text"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        tools:text="Recently updated" />
-
-    <Button
-        android:id="@+id/sectionButton"
-        android:layout_gravity="end"
-        android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:padding="0dp"
-        android:layout_marginStart="2dp"
-        android:layout_marginEnd="2dp"
-        android:letterSpacing="0"
-        android:textSize="14sp"
-        style="@style/Widget.MaterialComponents.Button.TextButton"
-        android:textColor="?attr/colorAccent"
-        app:rippleColor="@color/material_grey_700"
-        android:text="@string/more" />
-</LinearLayout>
+    tools:text="Recently updated" />

@@ -2,12 +2,9 @@ package com.anod.appwatcher.watchlist
 
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.TextView
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.R
-import com.anod.appwatcher.utils.SingleLiveEvent
 
 private fun View.requestMeasure(parent: ViewGroup) {
     if (this.layoutParams == null) {
@@ -29,35 +26,24 @@ private fun View.requestMeasure(parent: ViewGroup) {
     this.layout(0, 0, this.measuredWidth, this.measuredHeight)
 }
 
-class SectionHeaderViewHolder(itemView: View, private val action: SingleLiveEvent<WishListAction>) : RecyclerView.ViewHolder(itemView), BindableViewHolder<SectionHeader> {
-    val title: TextView by lazy { itemView.findViewById<TextView>(R.id.sectionTitle) }
-    val button: Button by lazy { itemView.findViewById<Button>(R.id.sectionButton) }
+class SectionHeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), BindableViewHolder<SectionHeader> {
+    val title: TextView = itemView as TextView
 
     override fun bind(item: SectionHeader) {
-        button.setOnClickListener(null)
         when (item) {
             is NewHeader -> {
-                button.isVisible = false
                 title.setText(R.string.new_updates)
             }
             is RecentlyUpdatedHeader -> {
-                button.isVisible = false
                 title.setText(R.string.recently_updated)
             }
             is WatchingHeader -> {
-                button.isVisible = false
                 title.setText(R.string.watching)
             }
             is RecentlyInstalledHeader -> {
-                button.setOnClickListener {
-                    action.value = RecentlyInstalled
-                }
-                button.isVisible = true
                 title.setText(R.string.recently_installed)
             }
-            is OnDeviceHeader
-            -> {
-                button.isVisible = false
+            is OnDeviceHeader -> {
                 title.setText(R.string.downloaded)
             }
         }

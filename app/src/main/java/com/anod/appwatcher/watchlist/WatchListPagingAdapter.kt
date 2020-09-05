@@ -71,7 +71,7 @@ class WatchListPagingAdapter(
         return when (viewType) {
             R.layout.list_apps_header -> {
                 val itemView = LayoutInflater.from(context).inflate(R.layout.list_apps_header, parent, false)
-                SectionHeaderViewHolder(itemView, action)
+                SectionHeaderViewHolder(itemView)
             }
             R.layout.list_item_recently_installed -> {
                 val view = LayoutInflater.from(context).inflate(R.layout.list_item_recently_installed, parent, false)
