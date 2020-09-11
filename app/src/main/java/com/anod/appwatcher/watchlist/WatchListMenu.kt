@@ -4,6 +4,7 @@ import android.content.Intent
 import android.text.TextUtils
 import android.view.Menu
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.ViewModelProvider
 import com.anod.appwatcher.MarketSearchActivity
@@ -12,17 +13,28 @@ import com.anod.appwatcher.SettingsActivity
 import com.anod.appwatcher.installed.InstalledFragment
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
+import com.anod.appwatcher.provide
 import com.anod.appwatcher.tags.TagsListFragment
+import com.anod.appwatcher.utils.SingleLiveEvent
 import com.anod.appwatcher.utils.forMyApps
 import info.anodsplace.framework.app.CustomThemeActivity
+import info.anodsplace.framework.app.DialogSingleChoice
 import info.anodsplace.framework.content.startActivitySafely
 import info.anodsplace.framework.view.MenuItemAnimation
+
+sealed class MenuAction
+class SortMenuAction(val sortId: Int) : MenuAction()
+class FilterMenuAction(val filterId: Int) : MenuAction()
 
 /**
  * @author Alex Gavrishev
  * @date 03/12/2017
  */
-class WatchListMenu(private var searchListener: SearchView.OnQueryTextListener, private var activity: WatchListActivity) : SearchView.OnQueryTextListener {
+class WatchListMenu(
+        private val searchListener: SearchView.OnQueryTextListener,
+        private val action: SingleLiveEvent<MenuAction>,
+        private val activity: AppCompatActivity
+) : SearchView.OnQueryTextListener {
     var expandSearch = false
     var searchQuery = ""
         set(value) {
@@ -140,14 +152,20 @@ class WatchListMenu(private var searchListener: SearchView.OnQueryTextListener, 
                 return true
             }
             R.id.menu_act_sort -> {
-                activity.showSortOptions()
+                val prefs = activity.provide.prefs
+                val selected = prefs.sortIndex
+                DialogSingleChoice(activity, R.style.AlertDialog, R.array.sort_titles, selected) { dialog, index ->
+                    prefs.sortIndex = index
+                    action.value = SortMenuAction(index)
+                    dialog.dismiss()
+                }.show()
                 return true
             }
             R.id.menu_filter_all,
             R.id.menu_filter_installed,
             R.id.menu_filter_not_installed,
             R.id.menu_filter_updatable -> {
-                activity.applyFilter(item.order)
+                action.value = FilterMenuAction(item.order)
                 return true
             }
             R.id.menu_my_apps -> {

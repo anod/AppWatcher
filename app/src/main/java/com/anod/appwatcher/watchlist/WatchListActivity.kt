@@ -34,10 +34,10 @@ import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.search.SearchActivity
 import com.anod.appwatcher.upgrade.UpgradeCheck
 import com.anod.appwatcher.upgrade.UpgradeRefresh
+import com.anod.appwatcher.utils.SingleLiveEvent
 import com.anod.appwatcher.utils.Theme
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
-import info.anodsplace.framework.app.DialogSingleChoice
 import info.anodsplace.framework.app.FragmentFactory
 import info.anodsplace.framework.app.HingeDevice
 import kotlinx.android.synthetic.main.activity_main.*
@@ -70,7 +70,8 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     val prefs: Preferences
         get() = Application.provide(this).prefs
 
-    private val actionMenu by lazy { WatchListMenu(this, this) }
+    private val menuAction = SingleLiveEvent<MenuAction>()
+    private val actionMenu by lazy { WatchListMenu(this, menuAction, this) }
     private val stateViewModel: WatchListStateViewModel by viewModels()
 
     @get:MenuRes
@@ -108,6 +109,13 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
                 onFilterSelected(position)
             }
         })
+
+        menuAction.observe(this) {
+            when (it) {
+                is FilterMenuAction -> viewPager.currentItem = it.filterId
+                is SortMenuAction -> stateViewModel.sortId.value = it.sortId
+            }
+        }
 
         stateViewModel.listState.observe(this) {
             when (it) {
@@ -153,10 +161,6 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
 
     protected abstract fun createViewPagerAdapter(): Adapter
 
-    fun applyFilter(filterId: Int) {
-        viewPager.currentItem = filterId
-    }
-
     open fun onFilterSelected(filterId: Int) {
         actionMenu.filterId = filterId
         updateSubtitle(filterId)
@@ -185,15 +189,6 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
             return true
         }
         return super.onOptionsItemSelected(item)
-    }
-
-    fun showSortOptions() {
-        val selected = prefs.sortIndex
-        DialogSingleChoice(this, R.style.AlertDialog, R.array.sort_titles, selected) { dialog, index ->
-            prefs.sortIndex = index
-            stateViewModel.sortId.value = index
-            dialog.dismiss()
-        }.show()
     }
 
     override fun onAccountSelected(account: Account) {
