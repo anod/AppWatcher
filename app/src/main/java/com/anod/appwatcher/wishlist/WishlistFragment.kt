@@ -119,14 +119,6 @@ class WishListFragment : Fragment() {
             }
         })
 
-        adapter.addDataRefreshListener { isEmpty ->
-            if (isEmpty) {
-                showNoResults()
-            } else {
-                showListView()
-            }
-        }
-
         adapter.addLoadStateListener { loadStates ->
             when (loadStates.refresh) {
                 is LoadState.Loading -> {
@@ -134,7 +126,11 @@ class WishListFragment : Fragment() {
                 }
                 is LoadState.NotLoading -> {
                     loading.isVisible = false
-                    showListView()
+                    if (adapter.itemCount == 0) {
+                        showNoResults()
+                    } else {
+                        showListView()
+                    }
                 }
                 is LoadState.Error -> {
                     loading.isVisible = false
