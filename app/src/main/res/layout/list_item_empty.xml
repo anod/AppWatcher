@@ -65,7 +65,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="4dp"
         android:layout_marginEnd="16dp"
-        android:text="@string/import_installed"
+        android:text="@string/installed"
         android:minWidth="288dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

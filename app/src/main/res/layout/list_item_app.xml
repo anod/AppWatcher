@@ -12,6 +12,20 @@
     android:paddingTop="8dp"
     android:focusable="true">
 
+    <CheckBox
+        android:id="@+id/checkBox"
+        style="@android:style/Widget.Material.CompoundButton.CheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="16dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:text="@null"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <ImageView
         android:id="@+id/icon"
         android:layout_width="@dimen/icon_size"
@@ -19,7 +33,7 @@
         android:layout_marginStart="8dp"
         android:contentDescription="@null"
         android:src="@drawable/ic_app_icon_placeholder"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/checkBox"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView

@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.utils.PicassoAppIcon
 import info.anodsplace.framework.content.InstalledApps
+import java.util.*
 
 /**
  * @author Alex Gavrishev
@@ -17,15 +18,14 @@ import info.anodsplace.framework.content.InstalledApps
  * @date 22/05/2016.
  */
 
-interface BindableViewHolder<T> {
-    fun bind(item: T)
+interface PlaceholderViewHolder {
     fun placeholder()
 }
 
 abstract class AppViewHolderBase<T>(
         itemView: View,
         protected val resourceProvider: ResourceProvider,
-        protected val iconLoader: PicassoAppIcon) : RecyclerView.ViewHolder(itemView), BindableViewHolder<T> {
+        protected val iconLoader: PicassoAppIcon) : RecyclerView.ViewHolder(itemView), PlaceholderViewHolder {
 
     interface ResourceProvider {
         val installedText: String
@@ -38,7 +38,7 @@ abstract class AppViewHolderBase<T>(
         fun getColor(@ColorRes colorRes: Int): Int
     }
 
-    open fun recycle() {}
+    override fun placeholder() {}
 }
 
 
@@ -47,7 +47,9 @@ open class AppViewHolderResourceProvider(
         override val installedApps: InstalledApps)
     : AppViewHolderBase.ResourceProvider {
 
-    override val installedText: String = context.resources.getString(R.string.installed)
+    override val installedText: String = context.resources.getString(R.string.installed).apply {
+        toUpperCase(Locale.getDefault())
+    }
     override val noRecentChangesText: String = context.resources.getString(R.string.no_recent_changes)
 
     override fun getString(@StringRes resId: Int): String {

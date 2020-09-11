@@ -56,9 +56,10 @@ abstract class WatchListViewModel(application: Application) : AndroidViewModel(a
     private lateinit var headerFactory: SectionHeaderFactory
 
     abstract fun createPagingSource(config: WatchListPagingSource.Config): PagingSource<Int, SectionItem>
+    abstract fun createSectionHeaderFactory(config: WatchListPagingSource.Config): SectionHeaderFactory
 
     fun load(config: WatchListPagingSource.Config): Flow<PagingData<SectionItem>> {
-        headerFactory = SectionHeaderFactory(config.showRecentlyUpdated)
+        headerFactory = createSectionHeaderFactory(config)
         hasData = false
 
         return Pager(PagingConfig(pageSize = 10)) {
@@ -97,4 +98,6 @@ class AppsWatchListViewModel(application: Application) : WatchListViewModel(appl
             tag = tag,
             appContext = context
     )
+
+    override fun createSectionHeaderFactory(config: WatchListPagingSource.Config) = DefaultSectionHeaderFactory(config.showRecentlyUpdated)
 }

@@ -1,7 +1,7 @@
 package com.anod.appwatcher.details
 
-import android.text.TextUtils
 import android.view.View
+import android.widget.CheckBox
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import com.anod.appwatcher.R
@@ -18,8 +18,10 @@ import info.anodsplace.framework.text.Html
 class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase.ResourceProvider) {
     @ColorInt
     private val textColor: Int
+
     @ColorInt
     private var accentColor: Int
+
     @ColorInt
     private var warningColor: Int
 
@@ -30,6 +32,7 @@ class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase
     private val recentChanges = view.findViewById<TextView?>(R.id.recent_changes)
     private val newLineRegex = Regex("\n+")
     private val resources = view.resources
+    val checkBox: CheckBox? by lazy { view.findViewById<CheckBox?>(R.id.checkBox) }
 
     init {
         accentColor = resourceProvider.getColor(R.color.theme_accent)
@@ -42,7 +45,7 @@ class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase
         creator?.text = app.creator
         val uploadDate = app.uploadDate
 
-        if (TextUtils.isEmpty(uploadDate)) {
+        if (uploadDate.isEmpty()) {
             updateDate?.visibility = View.GONE
         } else {
             updateDate?.text = uploadDate
@@ -134,5 +137,10 @@ class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase
     fun updateAccentColor(@ColorInt color: Int) {
         accentColor = color
         price!!.setTextColor(accentColor)
+    }
+
+    fun placeholder() {
+        title.text = ""
+        creator?.text = ""
     }
 }

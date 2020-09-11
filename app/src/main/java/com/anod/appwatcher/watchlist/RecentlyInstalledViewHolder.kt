@@ -27,7 +27,7 @@ class RecentlyInstalledViewHolder(
         private val lifecycleScope: LifecycleCoroutineScope,
         private val iconLoader: PicassoAppIcon,
         private val packageManager: PackageManager,
-        private val action: SingleLiveEvent<WishListAction>) : RecyclerView.ViewHolder(itemView), BindableViewHolder<RecentItem> {
+        private val action: SingleLiveEvent<WishListAction>) : RecyclerView.ViewHolder(itemView), PlaceholderViewHolder {
 
     private var loadJob: Job? = null
 
@@ -53,7 +53,7 @@ class RecentlyInstalledViewHolder(
 
     init {
         moreButton.setOnClickListener {
-            action.value = ImportInstalled
+            action.value = RecentlyInstalled
         }
     }
 
@@ -77,7 +77,7 @@ class RecentlyInstalledViewHolder(
         }
     }
 
-    override fun bind(item: RecentItem) {
+    fun bind(item: RecentItem) {
         placeholder()
         loadJob = lifecycleScope.launch {
             val packages = loadRecentPackages()

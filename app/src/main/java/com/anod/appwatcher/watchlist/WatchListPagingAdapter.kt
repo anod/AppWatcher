@@ -58,13 +58,13 @@ class WatchListPagingAdapter(
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val item = getItem(position)
-        holder as? BindableViewHolder<*> ?: throw UnsupportedOperationException("Unknown view")
+        holder as? PlaceholderViewHolder ?: throw UnsupportedOperationException("Unknown view")
         when (item) {
             is Header -> (holder as SectionHeaderViewHolder).bind(item.type)
-            is AppItem -> (holder as AppViewHolder).bind(item.appListItem)
+            is AppItem -> (holder as AppViewHolder).bind(item.appListItem, item.isLocal)
             is RecentItem -> (holder as RecentlyInstalledViewHolder).bind(item)
-            is Empty -> (holder as EmptyViewHolder).bind(null)
-            is OnDeviceItem -> (holder as AppViewHolder).bind(item.appListItem)
+            is Empty -> (holder as EmptyViewHolder).bind()
+            is OnDeviceItem -> (holder as AppViewHolder).bind(item.appListItem, true)
             null -> holder.placeholder()
         }
     }

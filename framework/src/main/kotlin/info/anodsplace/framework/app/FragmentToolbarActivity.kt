@@ -41,7 +41,16 @@ class FragmentToolbarActivity : ToolbarActivity() {
                 finish()
                 return
             }
-            f.arguments = intent.getBundleExtra(EXTRA_ARGUMENTS)
+            if (intent.hasExtra(EXTRA_ARGUMENTS)) {
+                val extra = intent.getBundleExtra(EXTRA_ARGUMENTS)!!
+                if (f.arguments == null) {
+                    f.arguments = extra
+                } else {
+                    if (!extra.isEmpty) {
+                        f.arguments!!.putAll(extra)
+                    }
+                }
+            }
 
             supportFragmentManager.beginTransaction()
                     .replace(R.id.activity_content, f, factory.fragmentTag)

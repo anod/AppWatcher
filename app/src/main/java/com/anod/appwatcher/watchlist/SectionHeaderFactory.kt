@@ -6,11 +6,20 @@ import com.anod.appwatcher.model.AppInfoMetadata
  * @author Alex Gavrishev
  * @date 02/06/2018
  */
-class SectionHeaderFactory(
-        private var showRecentlyUpdated: Boolean
-) {
 
-    fun insertSeparator(before: SectionItem?, after: SectionItem?): Header? {
+interface SectionHeaderFactory {
+    fun insertSeparator(before: SectionItem?, after: SectionItem?): Header?
+
+    class Empty : SectionHeaderFactory {
+        override fun insertSeparator(before: SectionItem?, after: SectionItem?): Header? = null
+    }
+}
+
+class DefaultSectionHeaderFactory(
+        private var showRecentlyUpdated: Boolean
+) : SectionHeaderFactory {
+
+    override fun insertSeparator(before: SectionItem?, after: SectionItem?): Header? {
         if (after == null) {
             // we're at the end of the list
             return null

@@ -34,7 +34,7 @@
     <string name="share_text" translatable="false">%1$s %2$s</string>
     <string name="app_stored">\"%s\" was added</string>
     <string name="rate_app">Rate this app</string>
-    <string name="installed">INSTALLED</string>
+    <string name="installed">Installed</string>
     <string name="no_recent_changes">No information about recent changes was provided.</string>
     <string name="last_update">Updated %1$s</string>
     <string name="no_files_found">No files found</string>
@@ -93,7 +93,6 @@
     <string name="watch_list_is_empty">Watch list is empty</string>
     <string name="wish_list_is_empty">Wish list is empty</string>
     <string name="search_for_an_app">Search for an app</string>
-    <string name="import_installed">Import installed</string>
     <string name="share_from_play_store">Share from Play Store</string>
     <string name="search">Search…</string>
     <string name="preferences">Settings</string>
@@ -223,4 +222,5 @@
     <string name="delete_tag">Delete</string>
     <string name="delete_tag_message">You are going to delete tag \'%s\'</string>
     <string name="more">More apps</string>
+    <string name="import_mode">Import mode</string>
 </resources>

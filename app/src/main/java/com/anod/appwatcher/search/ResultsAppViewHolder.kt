@@ -12,6 +12,7 @@ import com.anod.appwatcher.utils.SingleLiveEvent
 import finsky.api.model.Document
 import info.anodsplace.framework.app.DialogMessage
 import info.anodsplace.framework.content.InstalledApps
+import java.util.*
 
 class ResultsAppViewHolder(
         itemView: View,
@@ -31,6 +32,10 @@ class ResultsAppViewHolder(
     val creator: TextView = itemView.findViewById(R.id.creator)
     val price: TextView = itemView.findViewById(R.id.price)
     val icon: ImageView = itemView.findViewById(R.id.icon)
+
+    private val installedText = itemView.resources.getString(R.string.installed).apply {
+        toUpperCase(Locale.getDefault())
+    }
 
     init {
         this.row.setOnClickListener(this)
@@ -90,7 +95,7 @@ class ResultsAppViewHolder(
 
         val isInstalled = installedApps.packageInfo(packageName).isInstalled
         if (isInstalled) {
-            price.setText(R.string.installed)
+            price.text = installedText
         } else {
             val offer = doc.offer
             when {

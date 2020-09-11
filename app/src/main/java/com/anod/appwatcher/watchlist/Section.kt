@@ -14,5 +14,5 @@ sealed class SectionItem
 object Empty : SectionItem()
 class Header(val type: SectionHeader) : SectionItem()
 object RecentItem : SectionItem()
-class AppItem(val appListItem: AppListItem) : SectionItem()
+class AppItem(val appListItem: AppListItem, val isLocal: Boolean) : SectionItem()
 class OnDeviceItem(val appListItem: AppListItem) : SectionItem()

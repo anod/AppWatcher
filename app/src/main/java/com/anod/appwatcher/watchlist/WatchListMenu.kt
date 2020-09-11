@@ -9,8 +9,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.anod.appwatcher.MarketSearchActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.SettingsActivity
-import com.anod.appwatcher.installed.ImportInstalledFragment
+import com.anod.appwatcher.installed.InstalledFragment
 import com.anod.appwatcher.model.Filters
+import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.tags.TagsListFragment
 import com.anod.appwatcher.utils.forMyApps
 import info.anodsplace.framework.app.CustomThemeActivity
@@ -121,8 +122,10 @@ class WatchListMenu(private var searchListener: SearchView.OnQueryTextListener, 
                 activity.startActivity(settingsActivity)
                 return true
             }
-            R.id.menu_act_import -> {
-                activity.startActivity(ImportInstalledFragment.intent(
+            R.id.menu_act_installed -> {
+                activity.startActivity(InstalledFragment.intent(
+                        Preferences.SORT_NAME_ASC,
+                        true,
                         activity,
                         (activity as CustomThemeActivity).themeRes,
                         (activity as CustomThemeActivity).themeColors))

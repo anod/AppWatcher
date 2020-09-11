@@ -46,7 +46,7 @@ class WatchListPagingSource(
         val data = AppListTable.Queries.loadAppList(
                 sortId, config.showRecentlyUpdated, tag, titleFilter, SqlOffset(offset, limit), database.apps()
         )
-        items.addAll(data.map { AppItem(it) })
+        items.addAll(data.map { AppItem(it, false) })
 
         if (data.isEmpty()) {
             if (params.key != null && config.showOnDevice) {

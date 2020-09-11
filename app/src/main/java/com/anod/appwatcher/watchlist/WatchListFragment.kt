@@ -35,7 +35,7 @@ import kotlinx.coroutines.launch
 
 sealed class WishListAction
 object SearchInStore : WishListAction()
-object ImportInstalled : WishListAction()
+object RecentlyInstalled : WishListAction()
 object ShareFromStore : WishListAction()
 class AddAppToTag(val tag: Tag) : WishListAction()
 class EmptyButton(val idx: Int) : WishListAction()
@@ -124,8 +124,9 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
         action.map { mapEmptyAction(it) }.observe(viewLifecycleOwner, Observer {
             when (it) {
                 is SearchInStore -> startActivity(MarketSearchActivity.intent(requireContext(), "", true))
-                is ImportInstalled -> startActivity(InstalledFragment.intent(
+                is RecentlyInstalled -> startActivity(InstalledFragment.intent(
                         Preferences.SORT_DATE_DESC,
+                        false,
                         requireContext(),
                         (activity as CustomThemeActivity).themeRes,
                         (activity as CustomThemeActivity).themeColors))
@@ -196,7 +197,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
         if (it is EmptyButton) {
             return when (it.idx) {
                 1 -> SearchInStore
-                2 -> ImportInstalled
+                2 -> RecentlyInstalled
                 3 -> ShareFromStore
                 else -> throw IllegalArgumentException("Unknown Idx")
             }
@@ -232,5 +233,6 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
         internal const val ARG_FILTER = "filter"
         internal const val ARG_SORT = "sort"
         internal const val ARG_TAG = "tag"
+        internal const val ARG_SHOW_ACTION = "showAction"
     }
 }

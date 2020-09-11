@@ -3,11 +3,15 @@ package com.anod.appwatcher.installed
 
 import android.content.Context
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.paging.PagingSource
 import com.anod.appwatcher.Application
+import com.anod.appwatcher.R
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.database.entities.packageToApp
@@ -50,9 +54,19 @@ class RecentlyInstalledViewModel(application: android.app.Application) : WatchLi
         return InstalledPagingSource(sortId, titleFilter, context)
     }
 
+    override fun createSectionHeaderFactory(config: WatchListPagingSource.Config) = SectionHeaderFactory.Empty()
 }
 
 class InstalledFragment : WatchListFragment() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.installed, menu)
+    }
 
     override fun viewModelFactory(): ViewModelProvider.Factory {
         return object : ViewModelProvider.Factory {
@@ -60,21 +74,28 @@ class InstalledFragment : WatchListFragment() {
         }
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        activity?.title = getString(R.string.installed)
+    }
+
     class Factory(
-            private val sortId: Int
-    ) : FragmentFactory("recently-installed-$sortId") {
+            private val sortId: Int,
+            private val showImportAction: Boolean
+    ) : FragmentFactory("recently-installed-$sortId-$showImportAction") {
 
         override fun create(): Fragment? = InstalledFragment().also {
             it.arguments = Bundle().apply {
                 putInt(ARG_FILTER, Filters.TAB_ALL)
                 putInt(ARG_SORT, sortId)
+                putBoolean(ARG_SHOW_ACTION, showImportAction)
             }
         }
     }
 
     companion object {
-        fun intent(sortId: Int, context: Context, themeRes: Int, themeColors: CustomThemeColors) = FragmentToolbarActivity.intent(
-                Factory(sortId),
+        fun intent(sortId: Int, showImportAction: Boolean, context: Context, themeRes: Int, themeColors: CustomThemeColors) = FragmentToolbarActivity.intent(
+                Factory(sortId, showImportAction),
                 Bundle.EMPTY,
                 themeRes,
                 themeColors,

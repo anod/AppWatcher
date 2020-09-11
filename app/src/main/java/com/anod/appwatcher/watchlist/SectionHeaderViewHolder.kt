@@ -26,10 +26,10 @@ private fun View.requestMeasure(parent: ViewGroup) {
     this.layout(0, 0, this.measuredWidth, this.measuredHeight)
 }
 
-class SectionHeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), BindableViewHolder<SectionHeader> {
+class SectionHeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), PlaceholderViewHolder {
     val title: TextView = itemView as TextView
 
-    override fun bind(item: SectionHeader) {
+    fun bind(item: SectionHeader) {
         when (item) {
             is NewHeader -> {
                 title.setText(R.string.new_updates)
