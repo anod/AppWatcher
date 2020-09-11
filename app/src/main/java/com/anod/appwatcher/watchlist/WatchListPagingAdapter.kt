@@ -26,7 +26,7 @@ class SectionItemDiffCallback : DiffUtil.ItemCallback<SectionItem>() {
 
     override fun areContentsTheSame(oldItem: SectionItem, newItem: SectionItem) = when (oldItem) {
         is Header -> newItem is Header && oldItem.type::class == newItem.type::class
-        is RecentItem -> newItem is RecentItem && oldItem.sortId == newItem.sortId && oldItem.titleFilter == oldItem.titleFilter
+        is RecentItem -> newItem is RecentItem
         is AppItem -> newItem is AppItem && oldItem.appListItem.app == newItem.appListItem.app
         is OnDeviceItem -> newItem is OnDeviceItem && oldItem.appListItem.app == newItem.appListItem.app
         is Empty -> newItem is Empty

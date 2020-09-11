@@ -2,6 +2,7 @@ package com.anod.appwatcher.installed
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
@@ -20,4 +21,5 @@ class RecentAppView(context: Context, attrs: AttributeSet?, defStyleAttr: Int)
     val icon: ImageView by lazy { findViewById<ImageView>(R.id.icon) }
     val title: TextView by lazy { findViewById<TextView>(R.id.title) }
     val watched: ImageView by lazy { findViewById<ImageView>(R.id.watched) }
+    val content: View by lazy { findViewById<View>(R.id.content) }
 }

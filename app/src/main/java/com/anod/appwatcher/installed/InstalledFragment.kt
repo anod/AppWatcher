@@ -27,7 +27,7 @@ class InstalledPagingSource(
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, SectionItem> {
         val installed = InstalledTaskWorker(appContext, sortId, titleFilter).run()
-        val allInstalledPackageNames = installed.second.map { it.packageName }
+        val allInstalledPackageNames = installed.map { it.packageName }
         val watchingPackages = database.apps().loadRowIds(allInstalledPackageNames).associateBy({ it.packageName }, { it.rowId })
         val items: List<SectionItem> = allInstalledPackageNames
                 .asSequence()

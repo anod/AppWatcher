@@ -38,7 +38,7 @@ class WatchListPagingSource(
         val items = mutableListOf<SectionItem>()
         if (params.key == null) {
             if (config.showRecentlyInstalled) {
-                items.add(RecentItem(sortId, titleFilter))
+                items.add(RecentItem)
                 limit = max(0, limit - 1)
             }
         }
@@ -51,7 +51,7 @@ class WatchListPagingSource(
         if (data.isEmpty()) {
             if (params.key != null && config.showOnDevice) {
                 val installed = InstalledTaskWorker(appContext, sortId, titleFilter).run()
-                val allInstalledPackageNames = installed.second.map { it.packageName }
+                val allInstalledPackageNames = installed.map { it.packageName }
                 val watchingPackages = database.apps().loadRowIds(allInstalledPackageNames).associateBy({ it.packageName }, { it.rowId })
                 allInstalledPackageNames
                         .asSequence()

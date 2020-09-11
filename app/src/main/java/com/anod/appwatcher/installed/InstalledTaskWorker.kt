@@ -10,19 +10,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.*
 
-typealias InstalledResult = Pair<List<String>, List<InstalledPackage>>
-
 class InstalledTaskWorker(
         private val context: ApplicationContext,
         private val sortId: Int,
         private val titleFilter: String) {
 
-    suspend fun run(): InstalledResult = withContext(Dispatchers.Default) {
+    suspend fun run(): List<InstalledPackage> = withContext(Dispatchers.Default) {
         val installedPackages = context.packageManager.getInstalledPackages()
-
-        val recentlyInstalled = installedPackages.sortedWith(AppUpdateTimeComparator(-1))
-                .take(10)
-                .map { it.packageName }
 
         when (sortId) {
             Preferences.SORT_NAME_DESC -> Collections.sort(installedPackages, AppTitleComparator(-1))
@@ -40,9 +34,9 @@ class InstalledTaskWorker(
                     filtered.add(installedPackage)
                 }
             }
-            Pair(recentlyInstalled, filtered)
+            filtered
         } else {
-            Pair(recentlyInstalled, installedPackages)
+            installedPackages
         }
     }
 }

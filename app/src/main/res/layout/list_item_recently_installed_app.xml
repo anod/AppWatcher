@@ -38,7 +38,7 @@
             android:layout_weight="1"
             android:ellipsize="end"
             android:gravity="center_horizontal"
-            android:maxLines="2"
+            android:lines="2"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textSize="@dimen/textSizeTitle"
             tools:text="Nova Launcher Pro Prime" />

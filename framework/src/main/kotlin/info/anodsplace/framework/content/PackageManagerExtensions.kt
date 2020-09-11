@@ -109,8 +109,14 @@ fun PackageManager.getInstalledPackagesCompat(): List<PackageWithCode> {
 
 fun PackageManager.getInstalledPackages(): List<InstalledPackage> {
     return getInstalledPackagesCompat().map {
-                InstalledPackage(it.first, it.second, getAppTitle(it.first), getAppUpdateTime(it.first))
-            }
+        InstalledPackage(it.first, it.second, getAppTitle(it.first), getAppUpdateTime(it.first))
+    }
+}
+
+fun PackageManager.getRecentlyInstalled(): List<String> {
+    return getInstalledPackages()
+            .sortedWith(AppUpdateTimeComparator(-1))
+            .map { it.packageName }
 }
 
 private fun getInstalledPackagesFallback(): List<PackageWithCode> {
