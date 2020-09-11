@@ -64,7 +64,7 @@ class ResultsAppViewHolder(
         price.text = ""
         row.setBackgroundColor(colorBgDisabled)
         this.doc = null
-        icon.setImageResource(R.drawable.ic_notifications_black_24dp)
+        icon.setImageResource(R.drawable.ic_app_icon_placeholder)
     }
 
     fun bind(doc: Document) {
@@ -85,7 +85,7 @@ class ResultsAppViewHolder(
         }
 
         iconLoader.retrieve(doc.iconUrl ?: "")
-                .placeholder(R.drawable.ic_notifications_black_24dp)
+                .placeholder(R.drawable.ic_app_icon_placeholder)
                 .into(icon)
 
         val isInstalled = installedApps.packageInfo(packageName).isInstalled

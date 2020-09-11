@@ -29,7 +29,7 @@
             android:layout_height="@dimen/icon_size_big"
             android:layout_gravity="center_horizontal"
             android:contentDescription="@null"
-            android:src="@drawable/ic_notifications_black_24dp" />
+            android:src="@drawable/ic_app_icon_placeholder" />
 
         <TextView
             android:id="@+id/title"

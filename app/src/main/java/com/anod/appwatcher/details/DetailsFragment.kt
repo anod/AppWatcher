@@ -249,7 +249,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
     private fun setDefaultIcon() {
         background.visibility = View.VISIBLE
         applyColor(ContextCompat.getColor(requireContext(), R.color.theme_accent))
-        icon.setImageResource(R.drawable.ic_notifications_black_24dp)
+        icon.setImageResource(R.drawable.ic_app_icon_placeholder)
     }
 
     private fun setupToolbar() {

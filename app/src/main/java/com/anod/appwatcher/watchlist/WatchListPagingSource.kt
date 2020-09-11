@@ -9,7 +9,6 @@ import com.anod.appwatcher.database.SqlOffset
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.database.entities.packageToApp
-import com.anod.appwatcher.installed.InstalledResult
 import com.anod.appwatcher.installed.InstalledTaskWorker
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
@@ -37,17 +36,10 @@ class WatchListPagingSource(
         var limit = params.loadSize
         val offset = page * params.loadSize
         val items = mutableListOf<SectionItem>()
-        var installed: InstalledResult? = null
         if (params.key == null) {
             if (config.showRecentlyInstalled) {
+                items.add(RecentItem(sortId, titleFilter))
                 limit = max(0, limit - 1)
-                installed = InstalledTaskWorker(appContext, sortId, titleFilter).run()
-                if (installed.first.isNotEmpty()) {
-                    val watchingPackages = database.apps().loadRowIds(installed.first).associateBy({ it.packageName }, { it.rowId })
-                    items.add(RecentItem(installed.first.map {
-                        Pair(it, watchingPackages[it] ?: -1)
-                    }))
-                }
             }
         }
 
@@ -58,9 +50,7 @@ class WatchListPagingSource(
 
         if (data.isEmpty()) {
             if (params.key != null && config.showOnDevice) {
-                if (installed == null) {
-                    installed = InstalledTaskWorker(appContext, sortId, titleFilter).run()
-                }
+                val installed = InstalledTaskWorker(appContext, sortId, titleFilter).run()
                 val allInstalledPackageNames = installed.second.map { it.packageName }
                 val watchingPackages = database.apps().loadRowIds(allInstalledPackageNames).associateBy({ it.packageName }, { it.rowId })
                 allInstalledPackageNames

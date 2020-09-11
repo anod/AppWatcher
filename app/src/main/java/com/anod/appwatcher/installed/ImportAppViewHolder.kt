@@ -38,7 +38,7 @@ internal class ImportAppViewHolder(
 
         itemView.findViewById<View>(R.id.content).setOnClickListener(this)
 
-        iconLoader.loadAppIntoImageView(item.app, this.icon, R.drawable.ic_notifications_black_24dp)
+        iconLoader.loadAppIntoImageView(item.app, this.icon, R.drawable.ic_app_icon_placeholder)
 
         when {
             status() == ImportResourceProvider.STATUS_DONE -> itemView.setBackgroundColor(themeAccent)

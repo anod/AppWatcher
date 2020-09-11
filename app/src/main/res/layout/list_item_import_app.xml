@@ -14,7 +14,7 @@
         android:layout_height="@dimen/icon_size"
         android:layout_gravity="center_vertical"
         android:contentDescription="@string/application_icon"
-        android:src="@drawable/ic_notifications_black_24dp" />
+        android:src="@drawable/ic_app_icon_placeholder" />
 
     <CheckedTextView
         android:id="@+id/title"

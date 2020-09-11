@@ -18,7 +18,7 @@
         android:layout_height="@dimen/icon_size"
         android:layout_marginStart="8dp"
         android:contentDescription="@null"
-        android:src="@drawable/ic_notifications_black_24dp"
+        android:src="@drawable/ic_app_icon_placeholder"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

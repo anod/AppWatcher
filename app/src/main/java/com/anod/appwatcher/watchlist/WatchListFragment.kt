@@ -96,6 +96,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
         // Setup header decorator
         adapter = WatchListPagingAdapter(
                 viewModel.installedApps,
+                viewLifecycleOwner.lifecycleScope,
                 action,
                 { emptyView -> createEmptyViewHolder(emptyView, action) },
                 requireContext())

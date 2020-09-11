@@ -38,7 +38,7 @@ open class AppViewHolder(
 
         this.detailsView.fillDetails(item.app, item.recentFlag, item.changeDetails
                 ?: "", item.noNewDetails, isLocalApp)
-        iconLoader.loadAppIntoImageView(item.app, this.icon, R.drawable.ic_notifications_black_24dp)
+        iconLoader.loadAppIntoImageView(item.app, this.icon, R.drawable.ic_app_icon_placeholder)
     }
 
     override fun placeholder() {

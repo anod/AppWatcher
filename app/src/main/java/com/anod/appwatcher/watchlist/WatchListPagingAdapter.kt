@@ -5,6 +5,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -25,7 +26,7 @@ class SectionItemDiffCallback : DiffUtil.ItemCallback<SectionItem>() {
 
     override fun areContentsTheSame(oldItem: SectionItem, newItem: SectionItem) = when (oldItem) {
         is Header -> newItem is Header && oldItem.type::class == newItem.type::class
-        is RecentItem -> newItem is RecentItem && oldItem.packageNames == newItem.packageNames
+        is RecentItem -> newItem is RecentItem && oldItem.sortId == newItem.sortId && oldItem.titleFilter == oldItem.titleFilter
         is AppItem -> newItem is AppItem && oldItem.appListItem.app == newItem.appListItem.app
         is OnDeviceItem -> newItem is OnDeviceItem && oldItem.appListItem.app == newItem.appListItem.app
         is Empty -> newItem is Empty
@@ -34,6 +35,7 @@ class SectionItemDiffCallback : DiffUtil.ItemCallback<SectionItem>() {
 
 class WatchListPagingAdapter(
         installedApps: InstalledApps,
+        private val lifecycleScope: LifecycleCoroutineScope,
         private val action: SingleLiveEvent<WishListAction>,
         private val emptyViewHolderFactory: (itemView: View) -> EmptyViewHolder,
         private val context: Context
@@ -60,7 +62,7 @@ class WatchListPagingAdapter(
         when (item) {
             is Header -> (holder as SectionHeaderViewHolder).bind(item.type)
             is AppItem -> (holder as AppViewHolder).bind(item.appListItem)
-            is RecentItem -> (holder as RecentlyInstalledViewHolder).bind(item.packageNames)
+            is RecentItem -> (holder as RecentlyInstalledViewHolder).bind(item)
             is Empty -> (holder as EmptyViewHolder).bind(null)
             is OnDeviceItem -> (holder as AppViewHolder).bind(item.appListItem)
             null -> holder.placeholder()
@@ -75,7 +77,7 @@ class WatchListPagingAdapter(
             }
             R.layout.list_item_recently_installed -> {
                 val view = LayoutInflater.from(context).inflate(R.layout.list_item_recently_installed, parent, false)
-                return RecentlyInstalledViewHolder(view, appIcon, packageManager, action)
+                return RecentlyInstalledViewHolder(view, lifecycleScope, appIcon, packageManager, action)
             }
             R.layout.list_item_app -> {
                 val itemView = LayoutInflater.from(context).inflate(R.layout.list_item_app, parent, false)

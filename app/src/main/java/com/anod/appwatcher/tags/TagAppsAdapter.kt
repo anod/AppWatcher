@@ -53,7 +53,7 @@ internal class TagAppsAdapter(private val context: Context, private val tagAppsI
             this.title.text = item.app.title
             this.title.isChecked = tagAppsImport.isSelected(item.app.appId)
             this.itemView.findViewById<View>(R.id.content).setOnClickListener(this)
-            mIconLoader.loadAppIntoImageView(item.app, this.icon, R.drawable.ic_notifications_black_24dp)
+            mIconLoader.loadAppIntoImageView(item.app, this.icon, R.drawable.ic_app_icon_placeholder)
         }
 
         override fun onClick(v: View) {

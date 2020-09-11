@@ -36,3 +36,12 @@ object Application {
         return (fragment.requireContext().applicationContext as AppWatcherApplication).appComponent
     }
 }
+
+val ApplicationContext.provide: AppComponent
+    get() = com.anod.appwatcher.Application.provide(this)
+
+val Fragment.provide: AppComponent
+    get() = com.anod.appwatcher.Application.provide(this)
+
+val Context.provide: AppComponent
+    get() = com.anod.appwatcher.Application.provide(this)
