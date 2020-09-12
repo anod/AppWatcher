@@ -148,7 +148,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
             reload()
         }
 
-        stateViewModel.titleFilter.observe(viewLifecycleOwner) {
+        stateViewModel.titleFilter.distinctUntilChanged().observe(viewLifecycleOwner) {
             viewModel.titleFilter = it ?: ""
             reload()
         }
@@ -179,7 +179,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
             showRecentlyInstalled = filterId == Filters.TAB_ALL && prefs.showRecent
     )
 
-    private fun reload() {
+    fun reload() {
         isListVisible = false
         loadJob?.cancel()
         loadJob = lifecycleScope.launch {

@@ -1,7 +1,7 @@
 package com.anod.appwatcher.watchlist
 
+import android.content.Context
 import android.content.Intent
-import android.text.TextUtils
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
@@ -25,36 +25,23 @@ import info.anodsplace.framework.view.MenuItemAnimation
 sealed class MenuAction
 class SortMenuAction(val sortId: Int) : MenuAction()
 class FilterMenuAction(val filterId: Int) : MenuAction()
+class SearchQueryAction(val query: String, val submit: Boolean) : MenuAction()
 
-/**
- * @author Alex Gavrishev
- * @date 03/12/2017
- */
-class WatchListMenu(
-        private val searchListener: SearchView.OnQueryTextListener,
-        private val action: SingleLiveEvent<MenuAction>,
-        private val activity: AppCompatActivity
+class SearchMenu(
+        private val action: SingleLiveEvent<MenuAction>
 ) : SearchView.OnQueryTextListener {
-    var expandSearch = false
-    var searchQuery = ""
+    private var menuItem: MenuItem? = null
+
+    var expand = false
+    var query = ""
         set(value) {
-            this.expandSearch = value.isNotBlank()
-            field = value
-        }
-    var filterId: Int = Filters.TAB_ALL
-        set(value) {
-            updateFilterItem(value)
+            this.expand = value.isNotBlank()
             field = value
         }
 
-    private var searchMenuItem: MenuItem? = null
-    private val refreshMenuAnimation = MenuItemAnimation(activity, R.anim.rotate)
-
-    private var filterItem: MenuItem? = null
-
-    fun init(menu: Menu) {
-        searchMenuItem = menu.findItem(R.id.menu_act_search)
-        searchMenuItem?.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+    fun init(searchMenuItem: MenuItem, context: Context) {
+        menuItem = searchMenuItem
+        menuItem?.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
             override fun onMenuItemActionExpand(menuItem: MenuItem): Boolean {
                 return true
             }
@@ -65,18 +52,62 @@ class WatchListMenu(
             }
         })
 
-        val searchView = searchMenuItem?.actionView as SearchView
+        val searchView = menuItem?.actionView as SearchView
         searchView.setOnQueryTextListener(this)
         searchView.isSubmitButtonEnabled = true
-        searchView.queryHint = activity.getString(R.string.search)
+        searchView.queryHint = context.getString(R.string.search)
 
-        if (expandSearch) {
-            searchMenuItem?.expandActionView()
-            searchView.setQuery(searchQuery, false)
+        if (expand) {
+            menuItem?.expandActionView()
+            searchView.setQuery(query, false)
+        }
+    }
+
+    private fun collapseSearch() {
+        menuItem?.collapseActionView()
+    }
+
+    override fun onQueryTextSubmit(query: String): Boolean {
+        this.query = ""
+        if (query.isEmpty()) {
+            collapseSearch()
+        } else {
+            onQueryTextChange("")
+            collapseSearch()
+        }
+        action.value = SearchQueryAction(query, true)
+        return true
+    }
+
+    override fun onQueryTextChange(newText: String): Boolean {
+        query = newText
+        action.value = SearchQueryAction(newText, true)
+        return true
+    }
+}
+
+/**
+ * @author Alex Gavrishev
+ * @date 03/12/2017
+ */
+class WatchListMenu(
+        private val action: SingleLiveEvent<MenuAction>,
+        private val activity: AppCompatActivity
+) {
+    val search = SearchMenu(action)
+    var filterId: Int = Filters.TAB_ALL
+        set(value) {
+            updateFilterItem(value)
+            field = value
         }
 
-        refreshMenuAnimation.menuItem = menu.findItem(R.id.menu_act_refresh)
+    private val refreshMenuAnimation = MenuItemAnimation(activity, R.anim.rotate)
 
+    private var filterItem: MenuItem? = null
+
+    fun init(menu: Menu) {
+        search.init(menu.findItem(R.id.menu_act_search), activity)
+        refreshMenuAnimation.menuItem = menu.findItem(R.id.menu_act_refresh)
         filterItem = menu.findItem(R.id.menu_act_filter)
         updateFilterItem(filterId)
     }
@@ -96,26 +127,6 @@ class WatchListMenu(
 
     fun stopRefresh() {
         refreshMenuAnimation.stop()
-    }
-
-    private fun collapseSearch() {
-        searchMenuItem?.collapseActionView()
-    }
-
-    override fun onQueryTextSubmit(query: String): Boolean {
-        searchQuery = ""
-        if (TextUtils.isEmpty(query)) {
-            collapseSearch()
-        } else {
-            onQueryTextChange("")
-            collapseSearch()
-        }
-        return searchListener.onQueryTextSubmit(query)
-    }
-
-    override fun onQueryTextChange(newText: String): Boolean {
-        searchQuery = newText
-        return searchListener.onQueryTextChange(newText)
     }
 
     fun onItemSelected(item: MenuItem): Boolean {

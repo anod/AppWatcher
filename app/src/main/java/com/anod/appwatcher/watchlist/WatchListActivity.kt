@@ -12,7 +12,6 @@ import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.annotation.LayoutRes
 import androidx.annotation.MenuRes
-import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
@@ -49,7 +48,7 @@ object Updated : ListState()
 object NoNetwork : ListState()
 object ShowAuthDialog : ListState()
 
-abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionListener, SearchView.OnQueryTextListener {
+abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionListener {
 
     override val themeRes: Int
         get() = Theme(this).theme
@@ -71,7 +70,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         get() = Application.provide(this).prefs
 
     private val menuAction = SingleLiveEvent<MenuAction>()
-    private val actionMenu by lazy { WatchListMenu(this, menuAction, this) }
+    private val actionMenu by lazy { WatchListMenu(menuAction, this) }
     private val stateViewModel: WatchListStateViewModel by viewModels()
 
     @get:MenuRes
@@ -79,7 +78,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
 
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putInt("tab_id", viewPager.currentItem)
-        outState.putString("filter", actionMenu.searchQuery)
+        outState.putString("filter", actionMenu.search.query)
         super.onSaveInstanceState(outState)
     }
 
@@ -89,13 +88,13 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         val filterId: Int
         if (savedInstanceState != null) {
             filterId = savedInstanceState.getInt("tab_id", defaultFilterId)
-            actionMenu.searchQuery = savedInstanceState.getString("filter") ?: ""
+            actionMenu.search.query = savedInstanceState.getString("filter") ?: ""
             AppLog.d("Restore tab: $filterId")
         } else {
             val fromNotification = intentExtras.getBoolean(EXTRA_FROM_NOTIFICATION, false)
             val expandSearch = intentExtras.getBoolean(EXTRA_EXPAND_SEARCH)
             filterId = if (fromNotification || expandSearch) defaultFilterId else intentExtras.getInt("tab_id", defaultFilterId)
-            actionMenu.expandSearch = expandSearch
+            actionMenu.search.expand = expandSearch
         }
 
         viewPager.offscreenPageLimit = 0
@@ -114,6 +113,16 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
             when (it) {
                 is FilterMenuAction -> viewPager.currentItem = it.filterId
                 is SortMenuAction -> stateViewModel.sortId.value = it.sortId
+                is SearchQueryAction -> {
+                    if (it.submit) {
+                        startActivity(Intent(this, MarketSearchActivity::class.java).apply {
+                            putExtra(SearchActivity.EXTRA_KEYWORD, it.query)
+                            putExtra(SearchActivity.EXTRA_EXACT, true)
+                        })
+                    } else {
+                        stateViewModel.titleFilter.value = it.query
+                    }
+                }
             }
         }
 
@@ -206,23 +215,6 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
 
     override fun onEditorAction(textView: TextView, i: Int, keyEvent: KeyEvent): Boolean {
         return false
-    }
-
-    override fun onQueryTextSubmit(query: String): Boolean {
-        startActivity(Intent(this, MarketSearchActivity::class.java).apply {
-            putExtra(SearchActivity.EXTRA_KEYWORD, query)
-            putExtra(SearchActivity.EXTRA_EXACT, true)
-        })
-        return true
-    }
-
-    override fun onQueryTextChange(newText: String): Boolean {
-
-        if (newText != stateViewModel.titleFilter.value) {
-            stateViewModel.titleFilter.value = newText
-        }
-
-        return true
     }
 
     fun openAppDetails(appId: String, rowId: Int, detailsUrl: String?) {

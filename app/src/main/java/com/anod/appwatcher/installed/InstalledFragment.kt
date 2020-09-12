@@ -5,10 +5,12 @@ import android.content.Context
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.observe
 import androidx.paging.PagingSource
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
@@ -16,11 +18,9 @@ import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.database.entities.packageToApp
 import com.anod.appwatcher.model.Filters
+import com.anod.appwatcher.utils.SingleLiveEvent
 import com.anod.appwatcher.watchlist.*
-import info.anodsplace.framework.app.ApplicationContext
-import info.anodsplace.framework.app.CustomThemeColors
-import info.anodsplace.framework.app.FragmentFactory
-import info.anodsplace.framework.app.FragmentToolbarActivity
+import info.anodsplace.framework.app.*
 
 class InstalledPagingSource(
         private val sortId: Int,
@@ -58,14 +58,43 @@ class RecentlyInstalledViewModel(application: android.app.Application) : WatchLi
 }
 
 class InstalledFragment : WatchListFragment() {
+    private val menuAction = SingleLiveEvent<MenuAction>()
+    private val search = SearchMenu(menuAction)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
+
+        menuAction.observe(this) {
+            when (it) {
+                is SearchQueryAction -> {
+                    viewModel.titleFilter = it.query
+                    reload()
+                }
+                is SortMenuAction -> {
+                    viewModel.sortId = it.sortId
+                    reload()
+                }
+            }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.installed, menu)
+        search.init(menu.findItem(R.id.menu_act_search), requireContext())
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.menu_act_sort -> {
+                DialogSingleChoice(requireContext(), R.style.AlertDialog, R.array.sort_titles, viewModel.sortId) { dialog, index ->
+                    menuAction.value = SortMenuAction(index)
+                    dialog.dismiss()
+                }.show()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     override fun viewModelFactory(): ViewModelProvider.Factory {

@@ -2,7 +2,6 @@ package com.anod.appwatcher
 
 import android.os.Bundle
 import android.widget.TextView
-import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.Observer
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.sync.SyncScheduler
@@ -11,7 +10,7 @@ import com.anod.appwatcher.watchlist.WatchListFragment
 import info.anodsplace.framework.AppLog
 
 
-class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener, SearchView.OnQueryTextListener {
+class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener {
 
     override val isHomeAsMenu: Boolean
         get() = true
