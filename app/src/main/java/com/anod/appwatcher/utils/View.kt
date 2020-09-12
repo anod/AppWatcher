@@ -17,3 +17,18 @@ fun View.reveal(animate: Boolean, startDelay: Long = 0L, duration: Long = 200L) 
         visibility = View.VISIBLE
     }
 }
+
+fun View.hide(animate: Boolean, startDelay: Long = 0L, duration: Long = 200L) {
+    if (animate) {
+        alpha = 1f
+        visibility = View.VISIBLE
+        animate()
+                .setStartDelay(startDelay)
+                .alpha(0f)
+                .setDuration(duration)
+                .setListener(null)
+    } else {
+        alpha = 1f
+        visibility = View.GONE
+    }
+}

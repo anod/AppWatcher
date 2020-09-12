@@ -4,50 +4,62 @@ package com.anod.appwatcher.installed
 import android.accounts.Account
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
-import com.anod.appwatcher.AppComponent
-import com.anod.appwatcher.AppWatcherApplication
-import info.anodsplace.framework.content.InstalledApps
+import com.anod.appwatcher.provide
+import com.anod.appwatcher.utils.SelectionState
+import com.anod.appwatcher.watchlist.AppViewHolder
 import info.anodsplace.framework.content.getInstalledPackages
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class ImportInstalledViewModel(application: android.app.Application) : AndroidViewModel(application) {
+
+    private var isImportStarted = false
+    var selectionMode = false
 
     val isEmpty: Boolean
         get() = importManager!!.isEmpty
 
-    val installedPackages = appComponent.database.apps().observePackages()
-            .map { watchingPackages ->
-                val map = watchingPackages.associateBy { it.packageName }
-                application.packageManager.getInstalledPackages().filter {
-                    !map.containsKey(it.packageName)
-                }
-            }
+    val hasSelection: Boolean
+        get() = selectionState.hasSelection
 
     val progress = MutableLiveData<ImportStatus>()
 
-    private val appComponent: AppComponent
-        get() = getApplication<AppWatcherApplication>().appComponent
+    val selectionChange = MutableLiveData<Boolean>()
 
     private var importManager: ImportBulkManager? = ImportBulkManager(application)
-    internal val dataProvider: ImportResourceProvider by lazy { ImportResourceProvider(application, InstalledApps.MemoryCache(InstalledApps.PackageManager(application.packageManager))) }
+    private val selectionState = SelectionState()
 
     override fun onCleared() {
         importManager = null
     }
 
-    fun selectAllPackages(allSelected: Boolean) {
-        dataProvider.selectAllPackages(allSelected)
+    fun selectAll(allSelected: Boolean) {
+        selectionState.selectAll(allSelected)
+        selectionChange.value = selectionState.hasSelection
     }
 
-    fun reset() {
-        importManager!!.reset()
+    fun toggle(packageName: String) {
+        selectionState.selectKey(packageName, true)
+        selectionChange.value = selectionState.hasSelection
     }
 
     fun import(account: Account, token: String) {
+        importManager!!.reset()
         viewModelScope.launch {
+            val packages = withContext(Dispatchers.Default) {
+                provide.packageManager.getInstalledPackages()
+                        .associateBy({ it -> it.packageName }) { it -> it.versionCode }
+            }
+
+            val size = selectionState.selectedKeys.size()
+            for (i in 0 until size) {
+                val packageName = selectionState.selectedKeys.keyAt(i)
+                importManager!!.addPackage(packageName, packages[packageName] ?: 0)
+            }
+
             importManager!!.start(account, token).collect { status ->
                 progress.value = status
                 onChanged(status)
@@ -55,33 +67,37 @@ class ImportInstalledViewModel(application: android.app.Application) : AndroidVi
         }
     }
 
-    fun addPackage(packageName: String, versionCode: Int): Boolean {
-        if (dataProvider.isPackageSelected(packageName)) {
-            importManager!!.addPackage(packageName, versionCode)
-            return true
-        }
-        return false
+    fun getPackageSelection(packageName: String): AppViewHolder.Selection {
+        return if (selectionMode) {
+            if (selectionState.isSelected(packageName))
+                AppViewHolder.Selection.Selected else AppViewHolder.Selection.NotSelected
+        } else AppViewHolder.Selection.None
     }
 
     private fun onChanged(status: ImportStatus) {
         when (status) {
             is ImportStarted -> {
-                dataProvider.isImportStarted = true
+                isImportStarted = true
                 status.docIds.forEach { packageName ->
-                    dataProvider.setPackageStatus(packageName, ImportResourceProvider.STATUS_IMPORTING)
+                    selectionState.setStatus(packageName, importStatusProgress)
                 }
             }
             is ImportProgress -> {
                 status.docIds.forEach { packageName ->
                     val resultCode = status.result.get(packageName)
-                    val packageStatus = if (resultCode == null) {
-                        ImportResourceProvider.STATUS_ERROR
-                    } else {
-                        if (resultCode == ImportTask.RESULT_OK) ImportResourceProvider.STATUS_DONE else ImportResourceProvider.STATUS_ERROR
-                    }
-                    dataProvider.setPackageStatus(packageName, packageStatus)
+                    val packageStatus = if (resultCode == ImportTask.RESULT_OK) importStatusDone else importStatusError
+                    selectionState.setStatus(packageName, packageStatus)
                 }
             }
+            is ImportFinished -> {
+                isImportStarted = false
+            }
         }
+    }
+
+    companion object {
+        const val importStatusError = 1
+        const val importStatusDone = 2
+        const val importStatusProgress = 3
     }
 }

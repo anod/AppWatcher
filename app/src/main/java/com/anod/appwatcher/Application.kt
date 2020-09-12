@@ -3,6 +3,7 @@ package com.anod.appwatcher
 import android.app.Application
 import android.content.Context
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.AndroidViewModel
 import info.anodsplace.framework.app.ApplicationContext
 
 /**
@@ -45,3 +46,6 @@ val Fragment.provide: AppComponent
 
 val Context.provide: AppComponent
     get() = com.anod.appwatcher.Application.provide(this)
+
+val AndroidViewModel.provide: AppComponent
+    get() = com.anod.appwatcher.Application.provide(getApplication<AppWatcherApplication>())

@@ -100,4 +100,5 @@ class AppsWatchListViewModel(application: Application) : WatchListViewModel(appl
     )
 
     override fun createSectionHeaderFactory(config: WatchListPagingSource.Config) = DefaultSectionHeaderFactory(config.showRecentlyUpdated)
+
 }

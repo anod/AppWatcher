@@ -1,7 +1,6 @@
 package com.anod.appwatcher.details
 
 import android.view.View
-import android.widget.CheckBox
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import com.anod.appwatcher.R
@@ -32,7 +31,6 @@ class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase
     private val recentChanges = view.findViewById<TextView?>(R.id.recent_changes)
     private val newLineRegex = Regex("\n+")
     private val resources = view.resources
-    val checkBox: CheckBox? by lazy { view.findViewById<CheckBox?>(R.id.checkBox) }
 
     init {
         accentColor = resourceProvider.getColor(R.color.theme_accent)

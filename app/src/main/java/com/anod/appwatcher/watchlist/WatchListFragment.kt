@@ -18,6 +18,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.anod.appwatcher.*
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.App
+import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.installed.InstalledFragment
 import com.anod.appwatcher.model.Filters
@@ -39,7 +40,8 @@ object RecentlyInstalled : WishListAction()
 object ShareFromStore : WishListAction()
 class AddAppToTag(val tag: Tag) : WishListAction()
 class EmptyButton(val idx: Int) : WishListAction()
-class ItemClick(val app: App) : WishListAction()
+class ItemClick(val app: App, val isChecked: Boolean) : WishListAction()
+class ItemLongClick(val app: App) : WishListAction()
 
 open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     protected val application: AppWatcherApplication
@@ -99,6 +101,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
                 viewLifecycleOwner.lifecycleScope,
                 action,
                 { emptyView -> createEmptyViewHolder(emptyView, action) },
+                { appItem -> getItemSelection(appItem) },
                 requireContext())
         listView.adapter = adapter
 
@@ -121,26 +124,8 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
             })
         }
 
-        action.map { mapEmptyAction(it) }.observe(viewLifecycleOwner, Observer {
-            when (it) {
-                is SearchInStore -> startActivity(MarketSearchActivity.intent(requireContext(), "", true))
-                is RecentlyInstalled -> startActivity(InstalledFragment.intent(
-                        Preferences.SORT_DATE_DESC,
-                        false,
-                        requireContext(),
-                        (activity as CustomThemeActivity).themeRes,
-                        (activity as CustomThemeActivity).themeColors))
-                is ShareFromStore -> activity?.startActivitySafely(Intent.makeMainActivity(ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity")))
-                is AddAppToTag -> startActivity(AppsTagSelectActivity.createIntent(viewModel.tag!!, requireActivity()))
-                is ItemClick -> {
-                    val app = it.app
-                    if (BuildConfig.DEBUG) {
-                        AppLog.d(app.packageName)
-                        Toast.makeText(activity, app.packageName, Toast.LENGTH_SHORT).show()
-                    }
-                    openAppDetails(app)
-                }
-            }
+        action.map { mapAction(it) }.observe(viewLifecycleOwner, Observer {
+            onListAction(it)
         })
 
         stateViewModel.sortId.observe(viewLifecycleOwner) {
@@ -169,6 +154,30 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
         reload()
     }
 
+    protected open fun onListAction(action: WishListAction) {
+        when (action) {
+            is SearchInStore -> startActivity(MarketSearchActivity.intent(requireContext(), "", true))
+            is RecentlyInstalled -> startActivity(InstalledFragment.intent(
+                    Preferences.SORT_DATE_DESC,
+                    false,
+                    requireContext(),
+                    (activity as CustomThemeActivity).themeRes,
+                    (activity as CustomThemeActivity).themeColors))
+            is ShareFromStore -> activity?.startActivitySafely(Intent.makeMainActivity(ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity")))
+            is AddAppToTag -> startActivity(AppsTagSelectActivity.createIntent(viewModel.tag!!, requireActivity()))
+            is ItemClick -> {
+                val app = action.app
+                if (BuildConfig.DEBUG) {
+                    AppLog.d(app.packageName)
+                    Toast.makeText(activity, app.packageName, Toast.LENGTH_SHORT).show()
+                }
+                openAppDetails(app)
+            }
+        }
+    }
+
+    protected open fun getItemSelection(appItem: AppListItem): AppViewHolder.Selection = AppViewHolder.Selection.None
+
     protected open fun openAppDetails(app: App) {
         (requireActivity() as WatchListActivity).openAppDetails(app.appId, app.rowId, app.detailsUrl)
     }
@@ -193,7 +202,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
 
     protected open fun createEmptyViewHolder(emptyView: View, action: SingleLiveEvent<WishListAction>) = EmptyViewHolder(emptyView, !prefs.showRecent, action)
 
-    protected open fun mapEmptyAction(it: WishListAction): WishListAction {
+    protected open fun mapAction(it: WishListAction): WishListAction {
         if (it is EmptyButton) {
             return when (it.idx) {
                 1 -> SearchInStore

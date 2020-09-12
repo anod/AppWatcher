@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
+import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.utils.PicassoAppIcon
 import com.anod.appwatcher.utils.SingleLiveEvent
 import info.anodsplace.framework.content.InstalledApps
@@ -27,8 +28,8 @@ class SectionItemDiffCallback : DiffUtil.ItemCallback<SectionItem>() {
     override fun areContentsTheSame(oldItem: SectionItem, newItem: SectionItem) = when (oldItem) {
         is Header -> newItem is Header && oldItem.type::class == newItem.type::class
         is RecentItem -> newItem is RecentItem
-        is AppItem -> newItem is AppItem && oldItem.appListItem.app == newItem.appListItem.app
-        is OnDeviceItem -> newItem is OnDeviceItem && oldItem.appListItem.app == newItem.appListItem.app
+        is AppItem -> newItem is AppItem && oldItem == newItem
+        is OnDeviceItem -> newItem is OnDeviceItem && oldItem == newItem
         is Empty -> newItem is Empty
     }
 }
@@ -38,6 +39,7 @@ class WatchListPagingAdapter(
         private val lifecycleScope: LifecycleCoroutineScope,
         private val action: SingleLiveEvent<WishListAction>,
         private val emptyViewHolderFactory: (itemView: View) -> EmptyViewHolder,
+        private val calcSelection: (appItem: AppListItem) -> AppViewHolder.Selection,
         private val context: Context
 ) : PagingDataAdapter<SectionItem, RecyclerView.ViewHolder>(SectionItemDiffCallback()) {
 
@@ -61,10 +63,10 @@ class WatchListPagingAdapter(
         holder as? PlaceholderViewHolder ?: throw UnsupportedOperationException("Unknown view")
         when (item) {
             is Header -> (holder as SectionHeaderViewHolder).bind(item.type)
-            is AppItem -> (holder as AppViewHolder).bind(item.appListItem, item.isLocal)
+            is AppItem -> (holder as AppViewHolder).bind(item.appListItem, item.isLocal, calcSelection(item.appListItem))
             is RecentItem -> (holder as RecentlyInstalledViewHolder).bind(item)
             is Empty -> (holder as EmptyViewHolder).bind()
-            is OnDeviceItem -> (holder as AppViewHolder).bind(item.appListItem, true)
+            is OnDeviceItem -> (holder as AppViewHolder).bind(item.appListItem, true, calcSelection(item.appListItem))
             null -> holder.placeholder()
         }
     }

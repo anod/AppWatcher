@@ -68,12 +68,12 @@ class RecentlyInstalledViewHolder(
             if (index > 0) {
                 view.isVisible = false
             } else {
-                view.isVisible = true
-                view.icon.setImageResource(R.drawable.ic_app_icon_placeholder)
-                view.title.text = ""
-                view.watched.isInvisible = true
-                view.content.setOnClickListener(null)
+                view.isInvisible = true
             }
+            view.icon.setImageResource(R.drawable.ic_app_icon_placeholder)
+            view.title.text = ""
+            view.watched.isInvisible = true
+            view.content.setOnClickListener(null)
         }
     }
 
@@ -110,7 +110,7 @@ class RecentlyInstalledViewHolder(
         appView.title.text = app.title
         appView.watched.visibility = if (rowId > 0) View.VISIBLE else View.INVISIBLE
         appView.content.setOnSafeClickListener {
-            action.value = ItemClick(app)
+            action.value = ItemClick(app, false)
         }
         appView.reveal(animate, startDelay = index * 50L, duration = shortAnimationDuration)
     }

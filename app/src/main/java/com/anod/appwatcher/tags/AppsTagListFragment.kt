@@ -26,7 +26,7 @@ class AppsTagListFragment : WatchListFragment() {
         return inflater.inflate(R.layout.fragment_appstag_list, container, false)
     }
 
-    override fun mapEmptyAction(it: WishListAction): WishListAction {
+    override fun mapAction(it: WishListAction): WishListAction {
         if (it is EmptyButton) {
             return when (it.idx) {
                 1 -> {

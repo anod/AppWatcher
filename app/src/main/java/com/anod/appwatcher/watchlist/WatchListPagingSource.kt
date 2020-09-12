@@ -58,7 +58,7 @@ class WatchListPagingSource(
                         .filterNot { watchingPackages.containsKey(it) }
                         .map { appContext.packageManager.packageToApp(-1, it) }
                         .forEach { app ->
-                            items.add(OnDeviceItem(AppListItem(app, "", noNewDetails = false, recentFlag = false)))
+                            items.add(OnDeviceItem(AppListItem(app, "", noNewDetails = false, recentFlag = false), false))
                         }
             } else if (params.key == null) {
                 items.add(Empty)
