@@ -72,6 +72,12 @@
         <item name="android:windowMinWidthMinor">@dimen/dialog_min_width_major</item>
     </style>
 
+    <style name="Widget.App.ActionMode" parent="Widget.AppCompat.ActionMode">
+        <item name="titleTextStyle">?attr/textAppearanceHeadline6</item>
+        <item name="subtitleTextStyle">?attr/textAppearanceSubtitle1</item>
+        <item name="background">?attr/colorPrimary</item>
+    </style>
+
     <style name="AppTheme.Base" parent="@style/Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Set AppCompat’s color theming attrs -->
         <item name="colorPrimary">@color/theme_primary</item>
@@ -92,9 +98,23 @@
         <item name="android:navigationBarColor">@color/theme_primary_dark</item>
         <item name="android:windowBackground">?attr/colorItemBackground</item>
         <item name="android:actionBarTheme">@style/AppTheme.ActionBar</item>
-
+        <!--Material type attributes-->
+        <item name="textAppearanceHeadline1">@style/TextAppearance.AppTheme.Headline1</item>
+        <item name="textAppearanceHeadline2">@style/TextAppearance.AppTheme.Headline2</item>
+        <item name="textAppearanceHeadline3">@style/TextAppearance.AppTheme.Headline3</item>
+        <item name="textAppearanceHeadline4">@style/TextAppearance.AppTheme.Headline4</item>
+        <item name="textAppearanceHeadline5">@style/TextAppearance.AppTheme.Headline5</item>
+        <item name="textAppearanceHeadline6">@style/TextAppearance.AppTheme.Headline6</item>
+        <item name="textAppearanceSubtitle1">@style/TextAppearance.AppTheme.Subtitle1</item>
+        <item name="textAppearanceSubtitle2">@style/TextAppearance.AppTheme.Subtitle2</item>
+        <item name="textAppearanceBody1">@style/TextAppearance.AppTheme.Body1</item>
+        <item name="textAppearanceBody2">@style/TextAppearance.AppTheme.Body2</item>
+        <item name="textAppearanceButton">@style/TextAppearance.AppTheme.Button</item>
+        <item name="textAppearanceCaption">@style/TextAppearance.AppTheme.Caption</item>
+        <item name="textAppearanceOverline">@style/TextAppearance.AppTheme.Overline</item>
+        <!-- ActionMode -->
         <item name="windowActionModeOverlay">true</item>
-        <item name="actionModeStyle">@style/Widget.AppCompat.ActionMode</item>
+        <item name="actionModeStyle">@style/Widget.App.ActionMode</item>
         <item name="actionModeCloseDrawable">@drawable/ic_baseline_close_24</item>
         <item name="actionBarTheme">@style/ThemeOverlay.MaterialComponents.Dark.ActionBar</item>
     </style>
@@ -190,10 +210,55 @@
         <item name="android:colorBackground">@android:color/white</item>
     </style>
 
-    <!--    <style name="AppTheme.ActionBar.OverflowMenu" parent="@style/Widget.MaterialComponents.PopupMenu.Overflow" />-->
-    <!--    <style name="AppTheme.ActionBar.OverflowMenu.White" parent="@style/Widget.MaterialComponents.PopupMenu.Overflow">-->
-    <!--        <item name="android:textColorPrimary">@android:color/black</item>-->
-    <!--        <item name="android:textColorSecondary">@android:color/black</item>-->
-    <!--    </style>-->
+    <style name="TextAppearance.AppTheme.Headline1" parent="TextAppearance.MaterialComponents.Headline1">
+        <!--Your custom type style here-->
+    </style>
 
+    <style name="TextAppearance.AppTheme.Headline2" parent="TextAppearance.MaterialComponents.Headline2">
+        <!--Your custom type style here-->
+    </style>
+
+    <style name="TextAppearance.AppTheme.Headline3" parent="TextAppearance.MaterialComponents.Headline3">
+        <!--Your custom type style here-->
+    </style>
+
+    <style name="TextAppearance.AppTheme.Headline4" parent="TextAppearance.MaterialComponents.Headline4">
+        <!--Your custom type style here-->
+    </style>
+
+    <style name="TextAppearance.AppTheme.Headline5" parent="TextAppearance.MaterialComponents.Headline5">
+        <!--Your custom type style here-->
+    </style>
+
+    <style name="TextAppearance.AppTheme.Headline6" parent="TextAppearance.MaterialComponents.Headline6">
+        <item name="android:textColor">?attr/colorOnPrimary</item>
+    </style>
+
+    <style name="TextAppearance.AppTheme.Subtitle1" parent="TextAppearance.MaterialComponents.Subtitle1">
+        <item name="android:textColor">?attr/colorOnPrimary</item>
+    </style>
+
+    <style name="TextAppearance.AppTheme.Subtitle2" parent="TextAppearance.MaterialComponents.Subtitle2">
+        <item name="android:textColor">?attr/colorOnPrimary</item>
+    </style>
+
+    <style name="TextAppearance.AppTheme.Body1" parent="TextAppearance.MaterialComponents.Body1">
+        <!--Your custom type style here-->
+    </style>
+
+    <style name="TextAppearance.AppTheme.Body2" parent="TextAppearance.MaterialComponents.Body2">
+        <!--Your custom type style here-->
+    </style>
+
+    <style name="TextAppearance.AppTheme.Button" parent="TextAppearance.MaterialComponents.Button">
+        <!--Your custom type style here-->
+    </style>
+
+    <style name="TextAppearance.AppTheme.Caption" parent="TextAppearance.MaterialComponents.Caption">
+        <!--Your custom type style here-->
+    </style>
+
+    <style name="TextAppearance.AppTheme.Overline" parent="TextAppearance.MaterialComponents.Overline">
+        <!--Your custom type style here-->
+    </style>
 </resources>

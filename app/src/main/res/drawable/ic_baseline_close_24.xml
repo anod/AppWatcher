@@ -1,6 +1,6 @@
 <!-- Copyright (c) 2020. Alex Gavrishev -->
 <vector android:height="24dp"
-    android:tint="#FFFFFF"
+    android:tint="?attr/colorOnPrimary"
     android:viewportHeight="24"
     android:viewportWidth="24"
     android:width="24dp"
