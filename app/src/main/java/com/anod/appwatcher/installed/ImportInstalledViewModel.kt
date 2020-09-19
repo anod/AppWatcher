@@ -3,6 +3,7 @@ package com.anod.appwatcher.installed
 
 import android.accounts.Account
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.anod.appwatcher.provide
@@ -17,6 +18,12 @@ import kotlinx.coroutines.withContext
 class ImportInstalledViewModel(application: android.app.Application) : AndroidViewModel(application) {
 
     private var isImportStarted = false
+    private var importManager: ImportBulkManager? = ImportBulkManager(application)
+    private val selectionState = SelectionState()
+
+    val selectedCount: Int
+        get() = selectionState.count
+
     var selectionMode = false
 
     val isEmpty: Boolean
@@ -26,11 +33,7 @@ class ImportInstalledViewModel(application: android.app.Application) : AndroidVi
         get() = selectionState.hasSelection
 
     val progress = MutableLiveData<ImportStatus>()
-
-    val selectionChange = MutableLiveData<Boolean>()
-
-    private var importManager: ImportBulkManager? = ImportBulkManager(application)
-    private val selectionState = SelectionState()
+    val selectionChange: LiveData<SelectionState.Change> = selectionState.selectionChange
 
     override fun onCleared() {
         importManager = null
@@ -38,12 +41,10 @@ class ImportInstalledViewModel(application: android.app.Application) : AndroidVi
 
     fun selectAll(allSelected: Boolean) {
         selectionState.selectAll(allSelected)
-        selectionChange.value = selectionState.hasSelection
     }
 
     fun toggle(packageName: String) {
-        selectionState.selectKey(packageName, true)
-        selectionChange.value = selectionState.hasSelection
+        selectionState.toggleKey(packageName)
     }
 
     fun import(account: Account, token: String) {

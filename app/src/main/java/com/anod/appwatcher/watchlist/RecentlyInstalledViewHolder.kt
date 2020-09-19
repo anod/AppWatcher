@@ -19,6 +19,9 @@ import info.anodsplace.framework.content.getRecentlyInstalled
 import info.anodsplace.framework.view.setOnSafeClickListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -41,13 +44,7 @@ class RecentlyInstalledViewHolder(
             R.id.app7,
             R.id.app8,
             R.id.app9,
-            R.id.app10,
-            R.id.app11,
-            R.id.app12,
-            R.id.app13,
-            R.id.app14,
-            R.id.app15,
-            R.id.app16
+            R.id.app10
     ).map { itemView.findViewById<RecentAppView>(it) }
     private val moreButton: View = itemView.findViewById<View>(R.id.more)
 
@@ -77,31 +74,44 @@ class RecentlyInstalledViewHolder(
         }
     }
 
-    fun bind(item: RecentItem) {
-        placeholder()
-        loadJob = lifecycleScope.launch {
-            val packages = loadRecentPackages()
-            if (packages.isEmpty()) {
-                return@launch
-            }
+    private var cache: List<Pair<String, Int>> = emptyList()
+    private val packages: Flow<List<Pair<String, Int>>> = flow {
+        if (cache.isNotEmpty()) {
+            emit(cache)
+        }
+        val packages = withContext(Dispatchers.Default) {
+            appContext.packageManager.getRecentlyInstalled().take(appViews.size)
+        }
+        if (packages.isNotEmpty()) {
             val database = appContext.provide.database
             val watchingPackages = database.apps().loadRowIds(packages).associateBy({ it.packageName }, { it.rowId })
-            appViews.forEachIndexed { index, appView ->
-                if (index >= packages.size) {
-                    appView.visibility = View.GONE
-                } else {
-                    val packageName = packages[index]
-                    bindPackage(animate, index, appView, packageName, watchingPackages[packageName]
-                            ?: -1)
-                }
+            val result: List<Pair<String, Int>> = withContext(Dispatchers.Default) {
+                packages.map { Pair(it, watchingPackages[it] ?: -1) }
             }
-            moreButton.reveal(animate, startDelay = packages.size * 50L, duration = shortAnimationDuration)
-            animate = false
+            cache = result
+            emit(result)
+        } else {
+            cache = emptyList()
+            emit(emptyList())
         }
     }
 
-    private suspend fun loadRecentPackages() = withContext(Dispatchers.Default) {
-        return@withContext appContext.packageManager.getRecentlyInstalled().take(appViews.size)
+    fun bind(item: RecentItem) {
+        placeholder()
+        loadJob = lifecycleScope.launch {
+            packages.collect { packages ->
+                appViews.forEachIndexed { index, appView ->
+                    if (index >= packages.size) {
+                        appView.visibility = View.GONE
+                    } else {
+                        val pair = packages[index]
+                        bindPackage(animate, index, appView, pair.first, pair.second)
+                    }
+                }
+                moreButton.reveal(animate, startDelay = packages.size * 50L, duration = shortAnimationDuration)
+                animate = false
+            }
+        }
     }
 
     private fun bindPackage(animate: Boolean, index: Int, appView: RecentAppView, packageName: String, rowId: Int) {
@@ -110,7 +120,7 @@ class RecentlyInstalledViewHolder(
         appView.title.text = app.title
         appView.watched.visibility = if (rowId > 0) View.VISIBLE else View.INVISIBLE
         appView.content.setOnSafeClickListener {
-            action.value = ItemClick(app, false)
+            action.value = ItemClick(app)
         }
         appView.reveal(animate, startDelay = index * 50L, duration = shortAnimationDuration)
     }

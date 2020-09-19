@@ -35,6 +35,7 @@
     <string name="app_stored">\"%s\" was added</string>
     <string name="rate_app">Rate this app</string>
     <string name="installed">Installed</string>
+    <string name="import_installed">Import installed</string>
     <string name="no_recent_changes">No information about recent changes was provided.</string>
     <string name="last_update">Updated %1$s</string>
     <string name="no_files_found">No files found</string>
@@ -223,4 +224,6 @@
     <string name="delete_tag_message">You are going to delete tag \'%s\'</string>
     <string name="more">More apps</string>
     <string name="import_mode">Import mode</string>
+    <string name="none">None</string>
+    <string name="number_selected">%d selected</string>
 </resources>

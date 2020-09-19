@@ -5,7 +5,9 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.lifecycleScope
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -36,10 +38,11 @@ class SectionItemDiffCallback : DiffUtil.ItemCallback<SectionItem>() {
 
 class WatchListPagingAdapter(
         installedApps: InstalledApps,
-        private val lifecycleScope: LifecycleCoroutineScope,
+        private val lifecycleOwner: LifecycleOwner,
         private val action: SingleLiveEvent<WishListAction>,
         private val emptyViewHolderFactory: (itemView: View) -> EmptyViewHolder,
         private val calcSelection: (appItem: AppListItem) -> AppViewHolder.Selection,
+        private val selection: LiveData<Pair<String?, AppViewHolder.Selection>>,
         private val context: Context
 ) : PagingDataAdapter<SectionItem, RecyclerView.ViewHolder>(SectionItemDiffCallback()) {
 
@@ -79,11 +82,11 @@ class WatchListPagingAdapter(
             }
             R.layout.list_item_recently_installed -> {
                 val view = LayoutInflater.from(context).inflate(R.layout.list_item_recently_installed, parent, false)
-                return RecentlyInstalledViewHolder(view, lifecycleScope, appIcon, packageManager, action)
+                return RecentlyInstalledViewHolder(view, lifecycleOwner.lifecycleScope, appIcon, packageManager, action)
             }
             R.layout.list_item_app -> {
                 val itemView = LayoutInflater.from(context).inflate(R.layout.list_item_app, parent, false)
-                AppViewHolder(itemView, itemDataProvider, appIcon, action)
+                AppViewHolder(itemView, itemDataProvider, appIcon, lifecycleOwner, selection, action)
             }
             R.layout.list_item_empty -> {
                 val itemView = LayoutInflater.from(context).inflate(R.layout.list_item_empty, parent, false)

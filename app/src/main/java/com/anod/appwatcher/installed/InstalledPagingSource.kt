@@ -8,12 +8,13 @@ import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.database.entities.packageToApp
 import com.anod.appwatcher.watchlist.OnDeviceItem
 import com.anod.appwatcher.watchlist.SectionItem
+import com.anod.appwatcher.watchlist.WatchListPagingSource
 import info.anodsplace.framework.app.ApplicationContext
 
 class InstalledPagingSource(
         private val sortId: Int,
         private val titleFilter: String,
-        private val showSelection: Boolean,
+        private val config: WatchListPagingSource.Config,
         private val appContext: ApplicationContext
 ) : PagingSource<Int, SectionItem>() {
     private val database: AppsDatabase = Application.provide(appContext).database
@@ -24,8 +25,14 @@ class InstalledPagingSource(
         val watchingPackages = database.apps().loadRowIds(allInstalledPackageNames).associateBy({ it.packageName }, { it.rowId })
         val items: List<SectionItem> = allInstalledPackageNames
                 .asSequence()
-                .map { appContext.packageManager.packageToApp(watchingPackages[it] ?: -1, it) }
-                .map { app -> OnDeviceItem(AppListItem(app, "", noNewDetails = false, recentFlag = false), showSelection) }
+                .mapNotNull {
+                    val rowId = watchingPackages[it] ?: -1
+                    if (config.selectionMode && rowId >= 0)
+                        null
+                    else
+                        appContext.packageManager.packageToApp(watchingPackages[it] ?: -1, it)
+                }
+                .map { app -> OnDeviceItem(AppListItem(app, "", noNewDetails = false, recentFlag = false), config.selectionMode) }
                 .toList()
 
         return LoadResult.Page(

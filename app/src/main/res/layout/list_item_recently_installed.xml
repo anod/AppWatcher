@@ -61,30 +61,6 @@
                 android:id="@+id/app10"
                 layout="@layout/list_item_recently_installed_app" />
 
-            <include
-                android:id="@+id/app11"
-                layout="@layout/list_item_recently_installed_app" />
-
-            <include
-                android:id="@+id/app12"
-                layout="@layout/list_item_recently_installed_app" />
-
-            <include
-                android:id="@+id/app13"
-                layout="@layout/list_item_recently_installed_app" />
-
-            <include
-                android:id="@+id/app14"
-                layout="@layout/list_item_recently_installed_app" />
-
-            <include
-                android:id="@+id/app15"
-                layout="@layout/list_item_recently_installed_app" />
-
-            <include
-                android:id="@+id/app16"
-                layout="@layout/list_item_recently_installed_app" />
-
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/more"
                 android:layout_width="96dp"

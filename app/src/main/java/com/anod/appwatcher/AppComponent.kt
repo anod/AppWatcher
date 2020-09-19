@@ -12,6 +12,7 @@ import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.PicassoAppIcon
 import info.anodsplace.framework.net.NetworkConnectivity
+import info.anodsplace.framework.util.createLruCache
 import info.anodsplace.playstore.DeviceId
 import info.anodsplace.playstore.DeviceInfoProvider
 import info.anodsplace.playstore.Network
@@ -45,10 +46,7 @@ class AppComponent internal constructor(private val app: AppWatcherApplication) 
         NetworkConnectivity(app)
     }
     val memoryCache: LruCache<String, Any?> by lazy {
-        val maxMemory = (Runtime.getRuntime().maxMemory() / 1024)
-        // Use 1/8th of the available memory for this memory cache.
-        val cacheSize = maxMemory / 8
-        LruCache<String, Any?>(cacheSize.toInt())
+        createLruCache<String, Any?>()
     }
     val notificationManager: NotificationManager
         get() = app.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

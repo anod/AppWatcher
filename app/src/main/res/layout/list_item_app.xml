@@ -9,6 +9,7 @@
     android:clickable="true"
     android:gravity="center_vertical"
     android:orientation="horizontal"
+    android:minHeight="68dp"
     android:paddingTop="8dp"
     android:focusable="true">
 
@@ -70,13 +71,28 @@
         app:layout_constraintTop_toBottomOf="@id/title"
         tools:text="Alex Gavrishev" />
 
+    <ImageView
+        android:layout_marginBottom="2dp"
+        android:id="@+id/watched"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:src="@drawable/ic_visibility_black_24px"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintStart_toEndOf="@+id/icon"
+        app:layout_constraintTop_toBottomOf="@id/creator"
+        android:contentDescription="@string/watched"
+        app:tint="@color/material_grey_500" />
+
     <TextView
         android:id="@+id/price"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:drawableStart="@drawable/ic_stat_communication_stay_primary_portrait"
+        app:drawableStartCompat="@drawable/ic_stat_communication_stay_primary_portrait"
         android:drawablePadding="4dp"
         android:ellipsize="end"
         android:gravity="left"
@@ -84,7 +100,7 @@
         android:textColor="@color/theme_accent"
         android:textSize="@dimen/textSize"
         app:layout_constraintEnd_toStartOf="@id/update_date"
-        app:layout_constraintStart_toEndOf="@+id/icon"
+        app:layout_constraintStart_toEndOf="@+id/watched"
         app:layout_constraintTop_toBottomOf="@id/creator"
         tools:text="5.6.1609P.1258283" />
 

@@ -4,10 +4,7 @@ package com.anod.appwatcher.installed
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
-import android.view.View
+import android.view.*
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -27,18 +24,16 @@ import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.provide
 import com.anod.appwatcher.utils.SingleLiveEvent
 import com.anod.appwatcher.watchlist.*
-import info.anodsplace.framework.app.CustomThemeColors
-import info.anodsplace.framework.app.DialogSingleChoice
-import info.anodsplace.framework.app.FragmentFactory
-import info.anodsplace.framework.app.FragmentToolbarActivity
+import info.anodsplace.framework.app.*
 import info.anodsplace.framework.content.startActivitySafely
 import kotlinx.android.synthetic.main.fragment_applist.*
 import kotlinx.coroutines.launch
 
-class InstalledFragment : WatchListFragment() {
+class InstalledFragment : WatchListFragment(), ActionMode.Callback {
     private val menuAction = SingleLiveEvent<MenuAction>()
     private val search = SearchMenu(menuAction)
     private val importViewModel: ImportInstalledViewModel by viewModels()
+    private var actionMode: ActionMode? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,7 +56,6 @@ class InstalledFragment : WatchListFragment() {
 
     private fun toggleImportMode(animated: Boolean) {
         importViewModel.selectionMode = !importViewModel.selectionMode
-        (viewModel as InstalledViewModel).showSelection = importViewModel.selectionMode
         if (importViewModel.selectionMode) {
             if (animated) {
                 actionButton.show()
@@ -69,8 +63,19 @@ class InstalledFragment : WatchListFragment() {
                 actionButton.isVisible = true
             }
             actionButton.isEnabled = importViewModel.hasSelection
+            actionMode = (activity as? ToolbarActivity)?.startActionMode(this)
+            updateTitle()
         } else {
             actionButton.hide()
+        }
+    }
+
+    private fun updateTitle() {
+        val selectedCount = importViewModel.selectedCount
+        if (selectedCount == -1) {
+            actionMode?.title = getString(R.string.number_selected, adapter.itemCount)
+        } else {
+            actionMode?.title = getString(R.string.number_selected, importViewModel.selectedCount)
         }
     }
 
@@ -122,8 +127,14 @@ class InstalledFragment : WatchListFragment() {
             startImport()
         }
 
-        importViewModel.selectionChange.observe(viewLifecycleOwner) { hasSelection ->
-            actionButton.isEnabled = hasSelection
+        importViewModel.selectionChange.observe(viewLifecycleOwner) { change ->
+            actionButton.isEnabled = change.hasSelection
+            updateTitle()
+            if (change.key == null) {
+                viewModel.selection.value = Pair(null, if (change.defaultSelected) AppViewHolder.Selection.Selected else AppViewHolder.Selection.NotSelected)
+            } else {
+                viewModel.selection.value = Pair(change.key, importViewModel.getPackageSelection(change.key))
+            }
         }
     }
 
@@ -197,6 +208,13 @@ class InstalledFragment : WatchListFragment() {
         startActivity(intent)
     }
 
+    override fun config(filterId: Int) = WatchListPagingSource.Config(
+            showRecentlyUpdated = false,
+            showOnDevice = true,
+            showRecentlyInstalled = false,
+            selectionMode = importViewModel.selectionMode
+    )
+
     class Factory(
             private val sortId: Int,
             private val showImportAction: Boolean
@@ -218,5 +236,32 @@ class InstalledFragment : WatchListFragment() {
                 themeRes,
                 themeColors,
                 context)
+    }
+
+    override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
+        (activity as? ToolbarActivity)?.menuInflater?.inflate(R.menu.selection, menu)
+        return true
+    }
+
+    override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {
+        return false
+    }
+
+    override fun onActionItemClicked(mode: ActionMode?, item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.menu_act_select_all -> {
+                importViewModel.selectAll(true)
+                return true
+            }
+            R.id.menu_act_select_none -> {
+                importViewModel.selectAll(false)
+                return true
+            }
+            else -> false
+        }
+    }
+
+    override fun onDestroyActionMode(mode: ActionMode?) {
+
     }
 }

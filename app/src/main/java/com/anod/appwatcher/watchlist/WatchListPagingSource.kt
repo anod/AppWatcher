@@ -25,7 +25,8 @@ class WatchListPagingSource(
     class Config(
             val showRecentlyUpdated: Boolean,
             val showOnDevice: Boolean,
-            val showRecentlyInstalled: Boolean
+            val showRecentlyInstalled: Boolean,
+            val selectionMode: Boolean = false
     )
 
     private val database: AppsDatabase = Application.provide(appContext).database

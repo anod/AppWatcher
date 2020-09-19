@@ -8,10 +8,9 @@ import com.anod.appwatcher.watchlist.WatchListPagingSource
 import com.anod.appwatcher.watchlist.WatchListViewModel
 
 class InstalledViewModel(application: android.app.Application) : WatchListViewModel(application) {
-    var showSelection = false
 
     override fun createPagingSource(config: WatchListPagingSource.Config): PagingSource<Int, SectionItem> {
-        return InstalledPagingSource(sortId, titleFilter, showSelection, context)
+        return InstalledPagingSource(sortId, titleFilter, config, context)
     }
 
     override fun createSectionHeaderFactory(config: WatchListPagingSource.Config) = SectionHeaderFactory.Empty()

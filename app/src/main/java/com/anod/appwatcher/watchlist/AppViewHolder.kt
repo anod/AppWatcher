@@ -4,6 +4,9 @@ import android.view.View
 import android.widget.CheckBox
 import android.widget.ImageView
 import androidx.core.view.isVisible
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppListItem
@@ -16,6 +19,8 @@ class AppViewHolder(
         itemView: View,
         resourceProvider: ResourceProvider,
         iconLoader: PicassoAppIcon,
+        lifecycleOwner: LifecycleOwner,
+        selection: LiveData<Pair<String?, Selection>>,
         private val action: SingleLiveEvent<WishListAction>)
     : AppViewHolderBase<AppItem>(itemView, resourceProvider, iconLoader) {
 
@@ -26,33 +31,41 @@ class AppViewHolder(
             get() = this != None && this != Disabled
     }
 
-    private var selectionMode = false
     private var app: App? = null
     private val icon: ImageView = itemView.findViewById(R.id.icon)
     private val detailsView: AppDetailsView = AppDetailsView(itemView, resourceProvider)
     private val checkBox: CheckBox = itemView.findViewById(R.id.checkBox)
+    private val watched: ImageView = itemView.findViewById(R.id.watched)
 
     init {
         val content = itemView.findViewById<View>(R.id.content)
         content.setOnSafeClickListener {
-            if (selectionMode) {
-                this.checkBox.isChecked = !this.checkBox.isChecked
-            }
-            action.value = ItemClick(this.app!!, this.checkBox.isChecked)
+            action.value = ItemClick(this.app!!)
         }
 
         content.setOnLongClickListener {
             action.value = ItemLongClick(this.app!!)
             true
         }
+
+        selection.observe(lifecycleOwner, Observer {
+            if (it.first == null) {
+                this.updateSelection(it.second)
+            } else if (it.first == app?.packageName) {
+                this.updateSelection(it.second)
+            }
+        })
+    }
+
+    private fun updateSelection(selection: Selection) {
+        this.checkBox.isVisible = selection != Selection.None
+        this.checkBox.isChecked = selection.enabled && selection == Selection.Selected
     }
 
     fun bind(item: AppListItem, isLocal: Boolean, selection: Selection) {
         this.app = item.app
-        this.selectionMode = selection.enabled
-        this.checkBox.isVisible = selection != Selection.None
-        this.checkBox.isEnabled = selection != Selection.Disabled
-        this.checkBox.isChecked = selection.enabled && selection == Selection.Selected
+        this.watched.isVisible = isLocal && item.app.rowId >= 0
+        this.updateSelection(selection)
 
         this.detailsView.fillDetails(
                 item.app, item.recentFlag, item.changeDetails ?: "",
@@ -61,6 +74,7 @@ class AppViewHolder(
     }
 
     override fun placeholder() {
+        app = null
         this.checkBox.isVisible = false
         this.detailsView.placeholder()
         icon.setImageResource(R.drawable.ic_app_icon_placeholder)
