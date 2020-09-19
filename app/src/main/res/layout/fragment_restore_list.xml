@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:text="@string/export_path"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:textAppearance="?attr/textAppearanceCaption" />
 
     <ListView
         android:id="@android:id/list"

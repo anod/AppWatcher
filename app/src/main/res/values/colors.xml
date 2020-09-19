@@ -25,6 +25,7 @@
 
     <color name="theme_primary">@android:color/white</color>
     <color name="theme_on_primary">@color/primary_text</color>
+    <color name="theme_on_secondary">@android:color/white</color>
     <color name="theme_primary_dark">@android:color/white</color>
     <color name="theme_accent">#FF03a9f4</color>
 

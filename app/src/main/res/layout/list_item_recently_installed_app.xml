@@ -39,8 +39,7 @@
             android:ellipsize="end"
             android:gravity="center_horizontal"
             android:lines="2"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textSize="@dimen/textSizeTitle"
+            android:textAppearance="?attr/textAppearanceBody2"
             tools:text="Nova Launcher Pro Prime" />
 
         <ImageView

@@ -48,7 +48,7 @@
         android:layout_margin="16dp"
         android:contentDescription="@string/import_action"
         android:text="@string/import_action"
-        android:textColor="?attr/colorPrimaryDark"
+        android:textColor="?attr/colorOnSecondary"
         android:visibility="gone"
         tools:enabled="true"
         app:layout_constraintBottom_toBottomOf="parent"

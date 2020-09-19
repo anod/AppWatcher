@@ -262,6 +262,7 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
     }
 
     override fun onDestroyActionMode(mode: ActionMode?) {
-
+        toggleImportMode(true)
+        reload()
     }
 }

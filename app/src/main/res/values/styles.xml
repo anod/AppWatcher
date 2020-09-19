@@ -84,6 +84,7 @@
         <item name="colorSecondary">@color/material_blue_800</item>
         <item name="colorOnPrimary">@color/theme_on_primary</item>
         <item name="colorPrimaryDark">@color/theme_primary_dark</item>
+        <item name="colorOnSecondary">@color/theme_on_secondary</item>
         <item name="colorAccent">@color/theme_accent</item>
         <!-- Override color for Material.Small -->
         <item name="android:textColorTertiary">@color/primary_text</item>
@@ -210,25 +211,15 @@
         <item name="android:colorBackground">@android:color/white</item>
     </style>
 
-    <style name="TextAppearance.AppTheme.Headline1" parent="TextAppearance.MaterialComponents.Headline1">
-        <!--Your custom type style here-->
-    </style>
+    <style name="TextAppearance.AppTheme.Headline1" parent="TextAppearance.MaterialComponents.Headline1" />
 
-    <style name="TextAppearance.AppTheme.Headline2" parent="TextAppearance.MaterialComponents.Headline2">
-        <!--Your custom type style here-->
-    </style>
+    <style name="TextAppearance.AppTheme.Headline2" parent="TextAppearance.MaterialComponents.Headline2" />
 
-    <style name="TextAppearance.AppTheme.Headline3" parent="TextAppearance.MaterialComponents.Headline3">
-        <!--Your custom type style here-->
-    </style>
+    <style name="TextAppearance.AppTheme.Headline3" parent="TextAppearance.MaterialComponents.Headline3" />
 
-    <style name="TextAppearance.AppTheme.Headline4" parent="TextAppearance.MaterialComponents.Headline4">
-        <!--Your custom type style here-->
-    </style>
+    <style name="TextAppearance.AppTheme.Headline4" parent="TextAppearance.MaterialComponents.Headline4" />
 
-    <style name="TextAppearance.AppTheme.Headline5" parent="TextAppearance.MaterialComponents.Headline5">
-        <!--Your custom type style here-->
-    </style>
+    <style name="TextAppearance.AppTheme.Headline5" parent="TextAppearance.MaterialComponents.Headline5" />
 
     <style name="TextAppearance.AppTheme.Headline6" parent="TextAppearance.MaterialComponents.Headline6">
         <item name="android:textColor">?attr/colorOnPrimary</item>
@@ -242,23 +233,13 @@
         <item name="android:textColor">?attr/colorOnPrimary</item>
     </style>
 
-    <style name="TextAppearance.AppTheme.Body1" parent="TextAppearance.MaterialComponents.Body1">
-        <!--Your custom type style here-->
-    </style>
+    <style name="TextAppearance.AppTheme.Body1" parent="TextAppearance.MaterialComponents.Body1" />
 
-    <style name="TextAppearance.AppTheme.Body2" parent="TextAppearance.MaterialComponents.Body2">
-        <!--Your custom type style here-->
-    </style>
+    <style name="TextAppearance.AppTheme.Body2" parent="TextAppearance.MaterialComponents.Body2" />
 
-    <style name="TextAppearance.AppTheme.Button" parent="TextAppearance.MaterialComponents.Button">
-        <!--Your custom type style here-->
-    </style>
+    <style name="TextAppearance.AppTheme.Button" parent="TextAppearance.MaterialComponents.Button" />
 
-    <style name="TextAppearance.AppTheme.Caption" parent="TextAppearance.MaterialComponents.Caption">
-        <!--Your custom type style here-->
-    </style>
+    <style name="TextAppearance.AppTheme.Caption" parent="TextAppearance.MaterialComponents.Caption" />
 
-    <style name="TextAppearance.AppTheme.Overline" parent="TextAppearance.MaterialComponents.Overline">
-        <!--Your custom type style here-->
-    </style>
+    <style name="TextAppearance.AppTheme.Overline" parent="TextAppearance.MaterialComponents.Overline" />
 </resources>

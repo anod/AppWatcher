@@ -29,12 +29,11 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:text="@string/app_name"
-        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textAppearance="?attr/textAppearanceBody2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/icon"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="Car Widget Pro"
-        android:textSize="@dimen/textSizeTitle" />
+        tools:text="Car Widget Pro" />
 
     <TextView
         android:id="@+id/creator"
@@ -44,7 +43,7 @@
         android:layout_marginEnd="8dp"
         android:drawablePadding="4dp"
         android:text="@string/app_name"
-        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textAppearance="?attr/textAppearanceCaption"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/icon"
         app:layout_constraintTop_toBottomOf="@+id/title"
@@ -58,7 +57,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:text="@string/app_name"
-        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textAppearance="?attr/textAppearanceCaption"
         android:textSize="@dimen/textSize"
         app:layout_constraintEnd_toStartOf="@+id/price"
         app:layout_constraintStart_toEndOf="@+id/icon"
