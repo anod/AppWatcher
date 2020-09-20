@@ -9,10 +9,7 @@ import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.observe
+import androidx.lifecycle.*
 import com.anod.appwatcher.ChangelogActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenBlocking
@@ -52,6 +49,18 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
             }
         }
 
+        importViewModel.progress.observe(this, Observer { status ->
+            when (status) {
+                is ImportStarted -> {
+                    actionButton.isEnabled = false
+                }
+                is ImportProgress -> {
+                }
+                is ImportFinished -> {
+                    actionButton.isEnabled = true
+                }
+            }
+        })
     }
 
     private fun toggleImportMode(animated: Boolean) {

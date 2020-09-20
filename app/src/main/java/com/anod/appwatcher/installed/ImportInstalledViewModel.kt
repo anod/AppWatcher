@@ -22,7 +22,7 @@ class ImportInstalledViewModel(application: android.app.Application) : AndroidVi
     private val selectionState = SelectionState()
 
     val selectedCount: Int
-        get() = selectionState.count
+        get() = selectionState.size
 
     var selectionMode = false
 
@@ -30,7 +30,7 @@ class ImportInstalledViewModel(application: android.app.Application) : AndroidVi
         get() = importManager!!.isEmpty
 
     val hasSelection: Boolean
-        get() = selectionState.hasSelection
+        get() = selectionState.isNotEmpty()
 
     val progress = MutableLiveData<ImportStatus>()
     val selectionChange: LiveData<SelectionState.Change> = selectionState.selectionChange
@@ -52,25 +52,25 @@ class ImportInstalledViewModel(application: android.app.Application) : AndroidVi
         viewModelScope.launch {
             val packages = withContext(Dispatchers.Default) {
                 provide.packageManager.getInstalledPackages()
-                        .associateBy({ it -> it.packageName }) { it -> it.versionCode }
+                        .associateBy({ it.packageName }) { it.versionCode }
             }
 
-            val size = selectionState.selectedKeys.size()
-            for (i in 0 until size) {
-                val packageName = selectionState.selectedKeys.keyAt(i)
-                importManager!!.addPackage(packageName, packages[packageName] ?: 0)
+            packages.forEach { (packageName, versionCode) ->
+                if (selectionState.contains(packageName)) {
+                    importManager!!.addPackage(packageName, versionCode)
+                }
             }
 
             importManager!!.start(account, token).collect { status ->
-                progress.value = status
                 onChanged(status)
+                progress.value = status
             }
         }
     }
 
     fun getPackageSelection(packageName: String): AppViewHolder.Selection {
         return if (selectionMode) {
-            if (selectionState.isSelected(packageName))
+            if (selectionState.contains(packageName))
                 AppViewHolder.Selection.Selected else AppViewHolder.Selection.NotSelected
         } else AppViewHolder.Selection.None
     }

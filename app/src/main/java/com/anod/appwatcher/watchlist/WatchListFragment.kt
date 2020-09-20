@@ -55,13 +55,6 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
 
     private var loadJob: Job? = null
     private val action = SingleLiveEvent<WishListAction>()
-    private var isListVisible: Boolean
-        get() = listView.isVisible
-        set(visible) {
-            listView.isVisible = visible
-            progress.isVisible = false
-        }
-
     private val stateViewModel: WatchListStateViewModel by activityViewModels()
 
     protected open fun viewModelFactory(): ViewModelProvider.Factory {
@@ -83,6 +76,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
             swipeLayout.isEnabled = false
         }
 
+        progress.isVisible = true
         val metrics = resources.displayMetrics
         swipeLayout.setDistanceToTriggerSync((16 * metrics.density).toInt())
 
@@ -190,11 +184,12 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
     )
 
     fun reload() {
-        isListVisible = false
+        listView.isVisible = false
         loadJob?.cancel()
         loadJob = lifecycleScope.launch {
             viewModel.load(config(viewModel.filterId)).collectLatest { result ->
-                isListVisible = true
+                listView.isVisible = true
+                progress.isVisible = false
                 AppLog.d("Load status changed: $result")
                 adapter.submitData(result)
             }

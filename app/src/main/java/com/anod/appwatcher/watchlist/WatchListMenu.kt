@@ -81,7 +81,7 @@ class SearchMenu(
 
     override fun onQueryTextChange(newText: String): Boolean {
         query = newText
-        action.value = SearchQueryAction(newText, true)
+        action.value = SearchQueryAction(newText, false)
         return true
     }
 }
@@ -147,8 +147,8 @@ class WatchListMenu(
             }
             R.id.menu_act_installed -> {
                 activity.startActivity(InstalledFragment.intent(
-                        Preferences.SORT_NAME_ASC,
-                        true,
+                        Preferences.SORT_DATE_DESC,
+                        false,
                         activity,
                         (activity as CustomThemeActivity).themeRes,
                         (activity as CustomThemeActivity).themeColors))

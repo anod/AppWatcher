@@ -168,8 +168,8 @@ abstract class DrawerActivity : ToolbarActivity(), AccountSelectionDialog.Select
             }
             R.id.menu_act_installed -> {
                 startActivity(InstalledFragment.intent(
-                        Preferences.SORT_NAME_DESC,
-                        true,
+                        Preferences.SORT_DATE_DESC,
+                        false,
                         this,
                         themeRes,
                         themeColors))
