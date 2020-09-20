@@ -5,8 +5,6 @@ import android.widget.CheckBox
 import android.widget.ImageView
 import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppListItem
@@ -20,7 +18,6 @@ class AppViewHolder(
         resourceProvider: ResourceProvider,
         iconLoader: PicassoAppIcon,
         lifecycleOwner: LifecycleOwner,
-        selection: LiveData<Pair<String?, Selection>>,
         private val action: SingleLiveEvent<WishListAction>)
     : AppViewHolderBase<AppItem>(itemView, resourceProvider, iconLoader) {
 
@@ -31,6 +28,7 @@ class AppViewHolder(
             get() = this != None && this != Disabled
     }
 
+    private var index = -1
     private var app: App? = null
     private val icon: ImageView = itemView.findViewById(R.id.icon)
     private val detailsView: AppDetailsView = AppDetailsView(itemView, resourceProvider)
@@ -40,21 +38,13 @@ class AppViewHolder(
     init {
         val content = itemView.findViewById<View>(R.id.content)
         content.setOnSafeClickListener {
-            action.value = ItemClick(this.app!!)
+            action.value = ItemClick(this.app!!, index)
         }
 
         content.setOnLongClickListener {
-            action.value = ItemLongClick(this.app!!)
+            action.value = ItemLongClick(this.app!!, index)
             true
         }
-
-        selection.observe(lifecycleOwner, Observer {
-            if (it.first == null) {
-                this.updateSelection(it.second)
-            } else if (it.first == app?.packageName) {
-                this.updateSelection(it.second)
-            }
-        })
     }
 
     private fun updateSelection(selection: Selection) {
@@ -62,7 +52,8 @@ class AppViewHolder(
         this.checkBox.isChecked = selection.enabled && selection == Selection.Selected
     }
 
-    fun bind(item: AppListItem, isLocal: Boolean, selection: Selection) {
+    fun bind(index: Int, item: AppListItem, isLocal: Boolean, selection: Selection) {
+        this.index = index
         this.app = item.app
         this.watched.isVisible = isLocal && item.app.rowId >= 0
         this.updateSelection(selection)

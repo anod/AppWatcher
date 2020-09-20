@@ -137,12 +137,13 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
         }
 
         importViewModel.selectionChange.observe(viewLifecycleOwner) { change ->
-            actionButton.isEnabled = change.hasSelection
+            actionButton.isEnabled = change.extras.getBoolean("hasSelection")
+            val index = change.extras.getInt("index", -1)
             updateTitle()
             if (change.key == null) {
-                viewModel.selection.value = Pair(null, if (change.defaultSelected) AppViewHolder.Selection.Selected else AppViewHolder.Selection.NotSelected)
+                viewModel.selection.value = Pair(index, if (change.defaultSelected) AppViewHolder.Selection.Selected else AppViewHolder.Selection.NotSelected)
             } else {
-                viewModel.selection.value = Pair(change.key, importViewModel.getPackageSelection(change.key))
+                viewModel.selection.value = Pair(index, importViewModel.getPackageSelection(change.key))
             }
         }
     }
@@ -185,7 +186,7 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
             is ItemClick -> {
                 val app = action.app
                 if (importViewModel.selectionMode) {
-                    selectPackage(app)
+                    selectPackage(app, action.index)
                 } else {
                     openAppDetails(app)
                 }
@@ -193,16 +194,16 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
             is ItemLongClick -> {
                 if (!importViewModel.selectionMode) {
                     toggleImportMode(true)
-                    selectPackage(action.app)
+                    selectPackage(action.app, action.index)
                     reload()
                 }
             }
         }
     }
 
-    private fun selectPackage(app: App) {
+    private fun selectPackage(app: App, index: Int) {
         if (app.rowId < 0) {
-            importViewModel.toggle(app.packageName)
+            importViewModel.toggle(app.packageName, index)
         } else {
             Toast.makeText(activity, R.string.app_already_added, Toast.LENGTH_SHORT).show()
         }

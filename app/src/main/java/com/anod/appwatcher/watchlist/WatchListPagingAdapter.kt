@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
@@ -42,13 +43,23 @@ class WatchListPagingAdapter(
         private val action: SingleLiveEvent<WishListAction>,
         private val emptyViewHolderFactory: (itemView: View) -> EmptyViewHolder,
         private val calcSelection: (appItem: AppListItem) -> AppViewHolder.Selection,
-        private val selection: LiveData<Pair<String?, AppViewHolder.Selection>>,
+        selection: LiveData<Pair<Int, AppViewHolder.Selection>>,
         private val context: Context
 ) : PagingDataAdapter<SectionItem, RecyclerView.ViewHolder>(SectionItemDiffCallback()) {
 
     private val itemDataProvider = AppViewHolderResourceProvider(context, installedApps)
     private val appIcon: PicassoAppIcon = Application.provide(context).iconLoader
     private val packageManager = Application.provide(context).packageManager
+
+    init {
+        selection.observe(lifecycleOwner, Observer {
+            if (it.first >= 0) {
+                notifyItemChanged(it.first)
+            } else {
+                notifyDataSetChanged()
+            }
+        })
+    }
 
     override fun getItemViewType(position: Int): Int {
         return when (getItem(position)) {
@@ -66,10 +77,10 @@ class WatchListPagingAdapter(
         holder as? PlaceholderViewHolder ?: throw UnsupportedOperationException("Unknown view")
         when (item) {
             is Header -> (holder as SectionHeaderViewHolder).bind(item.type)
-            is AppItem -> (holder as AppViewHolder).bind(item.appListItem, item.isLocal, calcSelection(item.appListItem))
+            is AppItem -> (holder as AppViewHolder).bind(position, item.appListItem, item.isLocal, calcSelection(item.appListItem))
             is RecentItem -> (holder as RecentlyInstalledViewHolder).bind(item)
             is Empty -> (holder as EmptyViewHolder).bind()
-            is OnDeviceItem -> (holder as AppViewHolder).bind(item.appListItem, true, calcSelection(item.appListItem))
+            is OnDeviceItem -> (holder as AppViewHolder).bind(position, item.appListItem, true, calcSelection(item.appListItem))
             null -> holder.placeholder()
         }
     }
@@ -86,7 +97,7 @@ class WatchListPagingAdapter(
             }
             R.layout.list_item_app -> {
                 val itemView = LayoutInflater.from(context).inflate(R.layout.list_item_app, parent, false)
-                AppViewHolder(itemView, itemDataProvider, appIcon, lifecycleOwner, selection, action)
+                AppViewHolder(itemView, itemDataProvider, appIcon, lifecycleOwner, action)
             }
             R.layout.list_item_empty -> {
                 val itemView = LayoutInflater.from(context).inflate(R.layout.list_item_empty, parent, false)

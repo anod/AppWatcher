@@ -40,8 +40,8 @@ object RecentlyInstalled : WishListAction()
 object ShareFromStore : WishListAction()
 class AddAppToTag(val tag: Tag) : WishListAction()
 class EmptyButton(val idx: Int) : WishListAction()
-class ItemClick(val app: App) : WishListAction()
-class ItemLongClick(val app: App) : WishListAction()
+class ItemClick(val app: App, val index: Int) : WishListAction()
+class ItemLongClick(val app: App, val index: Int) : WishListAction()
 
 open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     protected val application: AppWatcherApplication

@@ -2,6 +2,7 @@
 package com.anod.appwatcher.installed
 
 import android.accounts.Account
+import androidx.core.os.bundleOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -43,8 +44,8 @@ class ImportInstalledViewModel(application: android.app.Application) : AndroidVi
         selectionState.selectAll(allSelected)
     }
 
-    fun toggle(packageName: String) {
-        selectionState.toggleKey(packageName)
+    fun toggle(packageName: String, index: Int) {
+        selectionState.toggleKey(packageName, bundleOf("index" to index))
     }
 
     fun import(account: Account, token: String) {
@@ -80,14 +81,14 @@ class ImportInstalledViewModel(application: android.app.Application) : AndroidVi
             is ImportStarted -> {
                 isImportStarted = true
                 status.docIds.forEach { packageName ->
-                    selectionState.setStatus(packageName, importStatusProgress)
+                    selectionState.setExtra(packageName, bundleOf("status" to importStatusProgress))
                 }
             }
             is ImportProgress -> {
                 status.docIds.forEach { packageName ->
                     val resultCode = status.result.get(packageName)
                     val packageStatus = if (resultCode == ImportTask.RESULT_OK) importStatusDone else importStatusError
-                    selectionState.setStatus(packageName, packageStatus)
+                    selectionState.setExtra(packageName, bundleOf("status" to packageStatus))
                 }
             }
             is ImportFinished -> {

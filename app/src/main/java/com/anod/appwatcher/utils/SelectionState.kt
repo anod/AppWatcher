@@ -1,7 +1,9 @@
 // Copyright (c) 2020. Alex Gavrishev
 package com.anod.appwatcher.utils
 
+import android.os.Bundle
 import androidx.collection.SimpleArrayMap
+import androidx.core.os.bundleOf
 import androidx.lifecycle.MutableLiveData
 
 class SelectionState : Collection<String> {
@@ -10,53 +12,57 @@ class SelectionState : Collection<String> {
             val defaultSelected: Boolean,
             val key: String?,
             val selected: Boolean,
-            val status: Int,
-            val hasSelection: Boolean
+            val extras: Bundle
     )
 
     val selectionChange = MutableLiveData<Change>()
 
     private var defaultSelected: Boolean = false
-    private val keysStatus = SimpleArrayMap<String, Int>()
+    private val extras = SimpleArrayMap<String, Bundle>()
     private val selectedKeys = SimpleArrayMap<String, Boolean>()
+    private var selectedCount = 0
 
     fun selectAll(select: Boolean) {
         selectedKeys.clear()
         defaultSelected = select
-        selectionChange.value = Change(select, null, select, STATUS_DEFAULT, isNotEmpty())
+        selectionChange.value = Change(select, null, select, bundleOf("hasSelection" to isNotEmpty()))
     }
 
-    fun selectKey(key: String, select: Boolean) {
+    fun selectKey(key: String, select: Boolean, selectExtra: Bundle = Bundle.EMPTY) {
+        val allExtras = bundleOf(
+                "hasSelection" to isNotEmpty()
+        )
+        allExtras.putAll(getExtra(key))
+        allExtras.putAll(selectExtra)
         if (select) {
-            selectedKeys.put(key, select)
-            selectionChange.value = Change(defaultSelected, key, true, getStatus(key), isNotEmpty())
+            selectedCount += 1
         } else {
-            selectedKeys.remove(key)
-            selectionChange.value = Change(defaultSelected, key, false, getStatus(key), isNotEmpty())
+            selectedCount -= 1
+            if (selectedCount < 0) {
+                selectedCount = 0
+            }
         }
+        selectedKeys.put(key, select)
+        selectionChange.value = Change(defaultSelected, key, true, allExtras)
     }
 
-    fun toggleKey(key: String) {
+    fun toggleKey(key: String, selectExtra: Bundle) {
         if (selectedKeys.containsKey(key)) {
-            selectKey(key, !selectedKeys[key]!!)
+            selectKey(key, !selectedKeys[key]!!, selectExtra)
         } else {
-            selectKey(key, true)
+            selectKey(key, !defaultSelected, selectExtra)
         }
     }
 
-    fun getStatus(key: String): Int {
-        if (keysStatus.containsKey(key)) {
-            return keysStatus.get(key) ?: STATUS_DEFAULT
+    fun getExtra(key: String): Bundle {
+        if (extras.containsKey(key)) {
+            return extras.get(key) ?: Bundle.EMPTY
         }
-        return STATUS_DEFAULT
+        return Bundle.EMPTY
     }
 
-    fun setStatus(key: String, status: Int) {
-        keysStatus.put(key, status)
-    }
-
-    companion object {
-        const val STATUS_DEFAULT = 0
+    fun setExtra(key: String, extra: Bundle) {
+        extras.put(key, extra)
     }
 
     override val size: Int
@@ -78,7 +84,12 @@ class SelectionState : Collection<String> {
         return true
     }
 
-    override fun isEmpty() = !defaultSelected && selectedKeys.isEmpty
+    override fun isEmpty(): Boolean {
+        if (defaultSelected) {
+            return false
+        }
+        return selectedCount == 0
+    }
 
     override fun iterator(): Iterator<String> {
         val size = selectedKeys.size()

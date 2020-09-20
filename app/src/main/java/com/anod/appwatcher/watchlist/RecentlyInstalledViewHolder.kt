@@ -120,7 +120,7 @@ class RecentlyInstalledViewHolder(
         appView.title.text = app.title
         appView.watched.visibility = if (rowId > 0) View.VISIBLE else View.INVISIBLE
         appView.content.setOnSafeClickListener {
-            action.value = ItemClick(app)
+            action.value = ItemClick(app, index)
         }
         appView.reveal(animate, startDelay = index * 50L, duration = shortAnimationDuration)
     }

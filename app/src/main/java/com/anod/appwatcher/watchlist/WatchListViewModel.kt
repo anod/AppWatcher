@@ -55,7 +55,7 @@ abstract class WatchListViewModel(application: Application) : AndroidViewModel(a
         private set
     private var hasData = false
     private lateinit var headerFactory: SectionHeaderFactory
-    val selection = MutableLiveData<Pair<String?, AppViewHolder.Selection>>()
+    val selection = MutableLiveData<Pair<Int, AppViewHolder.Selection>>()
 
     abstract fun createPagingSource(config: WatchListPagingSource.Config): PagingSource<Int, SectionItem>
     abstract fun createSectionHeaderFactory(config: WatchListPagingSource.Config): SectionHeaderFactory
