@@ -97,7 +97,7 @@ class WatchListPagingAdapter(
             }
             R.layout.list_item_app -> {
                 val itemView = LayoutInflater.from(context).inflate(R.layout.list_item_app, parent, false)
-                AppViewHolder(itemView, itemDataProvider, appIcon, lifecycleOwner, action)
+                AppViewHolder(itemView, itemDataProvider, appIcon, action)
             }
             R.layout.list_item_empty -> {
                 val itemView = LayoutInflater.from(context).inflate(R.layout.list_item_empty, parent, false)

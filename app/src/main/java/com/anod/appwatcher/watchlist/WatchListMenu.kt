@@ -12,7 +12,6 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.SettingsActivity
 import com.anod.appwatcher.installed.InstalledFragment
 import com.anod.appwatcher.model.Filters
-import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.provide
 import com.anod.appwatcher.tags.TagsListFragment
 import com.anod.appwatcher.utils.SingleLiveEvent
@@ -147,7 +146,6 @@ class WatchListMenu(
             }
             R.id.menu_act_installed -> {
                 activity.startActivity(InstalledFragment.intent(
-                        Preferences.SORT_DATE_DESC,
                         false,
                         activity,
                         (activity as CustomThemeActivity).themeRes,

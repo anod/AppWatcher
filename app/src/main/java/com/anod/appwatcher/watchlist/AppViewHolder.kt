@@ -4,7 +4,6 @@ import android.view.View
 import android.widget.CheckBox
 import android.widget.ImageView
 import androidx.core.view.isVisible
-import androidx.lifecycle.LifecycleOwner
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppListItem
@@ -17,7 +16,6 @@ class AppViewHolder(
         itemView: View,
         resourceProvider: ResourceProvider,
         iconLoader: PicassoAppIcon,
-        lifecycleOwner: LifecycleOwner,
         private val action: SingleLiveEvent<WishListAction>)
     : AppViewHolderBase<AppItem>(itemView, resourceProvider, iconLoader) {
 

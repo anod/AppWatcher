@@ -3,9 +3,9 @@ package com.anod.appwatcher.utils
 
 import android.view.View
 
-fun View.reveal(animate: Boolean, startDelay: Long = 0L, duration: Long = 200L) {
+fun View.reveal(animate: Boolean, startDelay: Long = 0L, duration: Long = 200L, fromAlpha: Float = 0f) {
     if (animate) {
-        alpha = 0f
+        alpha = fromAlpha
         visibility = View.VISIBLE
         animate()
                 .setStartDelay(startDelay)

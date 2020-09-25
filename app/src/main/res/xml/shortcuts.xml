@@ -10,7 +10,9 @@
             android:action="android.intent.action.VIEW"
             android:targetPackage="com.anod.appwatcher"
             android:targetClass="com.anod.appwatcher.AppWatcherActivity">
-            <extra android:name="tab_id" android:value="3" />
+            <extra
+                android:name="tab_id"
+                android:value="3" />
         </intent>
     </shortcut>
     <shortcut
@@ -23,7 +25,24 @@
             android:action="android.intent.action.VIEW"
             android:targetPackage="com.anod.appwatcher"
             android:targetClass="com.anod.appwatcher.AppWatcherActivity">
-            <extra android:name="expand_search" android:value="true" />
+            <extra
+                android:name="expand_search"
+                android:value="true" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:shortcutId="recently_installed"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_recent"
+        android:shortcutShortLabel="@string/shortcut_recently_installed"
+        android:shortcutLongLabel="@string/shortcut_recently_installed">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.anod.appwatcher"
+            android:targetClass="com.anod.appwatcher.AppWatcherActivity">
+            <extra
+                android:name="open_recently_installed"
+                android:value="true" />
         </intent>
     </shortcut>
 </shortcuts>

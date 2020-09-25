@@ -10,18 +10,20 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.*
-import com.anod.appwatcher.ChangelogActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppListItem
-import com.anod.appwatcher.details.DetailsActivity
 import com.anod.appwatcher.model.Filters
+import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.provide
 import com.anod.appwatcher.utils.SingleLiveEvent
 import com.anod.appwatcher.watchlist.*
-import info.anodsplace.framework.app.*
+import info.anodsplace.framework.app.CustomThemeColors
+import info.anodsplace.framework.app.DialogSingleChoice
+import info.anodsplace.framework.app.FragmentFactory
+import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.content.startActivitySafely
 import kotlinx.android.synthetic.main.fragment_applist.*
 import kotlinx.coroutines.launch
@@ -57,14 +59,16 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
                 is ImportProgress -> {
                 }
                 is ImportFinished -> {
-                    actionButton.isEnabled = true
+                    Toast.makeText(context, R.string.import_done, Toast.LENGTH_LONG).show()
+                    importViewModel.clearSelection()
+                    reload()
                 }
             }
         })
     }
 
-    private fun toggleImportMode(animated: Boolean) {
-        importViewModel.selectionMode = !importViewModel.selectionMode
+    private fun switchImportMode(selectionMode: Boolean, animated: Boolean) {
+        importViewModel.selectionMode = selectionMode
         if (importViewModel.selectionMode) {
             if (animated) {
                 actionButton.show()
@@ -103,7 +107,7 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
                 return true
             }
             R.id.menu_act_select -> {
-                toggleImportMode(true)
+                switchImportMode(!importViewModel.selectionMode, animated = true)
                 reload()
             }
         }
@@ -129,7 +133,7 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
 
         val showImportAction = requireArguments().getBoolean(ARG_SHOW_ACTION)
         if (showImportAction) {
-            toggleImportMode(false)
+            switchImportMode(!importViewModel.selectionMode, animated = false)
         }
 
         actionButton.setOnClickListener {
@@ -193,7 +197,7 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
             }
             is ItemLongClick -> {
                 if (!importViewModel.selectionMode) {
-                    toggleImportMode(true)
+                    switchImportMode(true, animated = true)
                     selectPackage(action.app, action.index)
                     reload()
                 }
@@ -207,15 +211,6 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
         } else {
             Toast.makeText(activity, R.string.app_already_added, Toast.LENGTH_SHORT).show()
         }
-    }
-
-    override fun openAppDetails(app: App) {
-        val intent = Intent(requireContext(), ChangelogActivity::class.java).apply {
-            putExtra(DetailsActivity.EXTRA_APP_ID, app.appId)
-            putExtra(DetailsActivity.EXTRA_ROW_ID, app.rowId)
-            putExtra(DetailsActivity.EXTRA_DETAILS_URL, app.detailsUrl)
-        }
-        startActivity(intent)
     }
 
     override fun config(filterId: Int) = WatchListPagingSource.Config(
@@ -240,7 +235,15 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
     }
 
     companion object {
-        fun intent(sortId: Int, showImportAction: Boolean, context: Context, themeRes: Int, themeColors: CustomThemeColors) = FragmentToolbarActivity.intent(
+        fun intent(importMode: Boolean, context: Context, themeRes: Int, themeColors: CustomThemeColors): Intent {
+            return intent(
+                    if (importMode) Preferences.SORT_NAME_ASC else Preferences.SORT_DATE_DESC,
+                    importMode,
+                    context, themeRes, themeColors
+            )
+        }
+
+        private fun intent(sortId: Int, showImportAction: Boolean, context: Context, themeRes: Int, themeColors: CustomThemeColors) = InstalledActivity.intent(
                 Factory(sortId, showImportAction),
                 Bundle.EMPTY,
                 themeRes,
@@ -272,7 +275,7 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
     }
 
     override fun onDestroyActionMode(mode: ActionMode?) {
-        toggleImportMode(true)
+        switchImportMode(false, animated = true)
         reload()
     }
 }

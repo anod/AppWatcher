@@ -48,6 +48,11 @@ class ImportInstalledViewModel(application: android.app.Application) : AndroidVi
         selectionState.toggleKey(packageName, bundleOf("index" to index))
     }
 
+    fun clearSelection() {
+        importManager!!.reset()
+        selectionState.clear()
+    }
+
     fun import(account: Account, token: String) {
         importManager!!.reset()
         viewModelScope.launch {
@@ -96,6 +101,7 @@ class ImportInstalledViewModel(application: android.app.Application) : AndroidVi
             }
         }
     }
+
 
     companion object {
         const val importStatusError = 1

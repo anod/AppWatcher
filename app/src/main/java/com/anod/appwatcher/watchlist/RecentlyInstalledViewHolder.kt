@@ -50,23 +50,21 @@ class RecentlyInstalledViewHolder(
 
     init {
         moreButton.setOnClickListener {
-            action.value = RecentlyInstalled
+            action.value = Installed(false)
         }
     }
 
     private val shortAnimationDuration = itemView.resources.getInteger(android.R.integer.config_shortAnimTime).toLong()
+    private val initialAlpha = 0.3f
     private val appContext: ApplicationContext = ApplicationContext(itemView.context.applicationContext)
     private var animate = true
 
     override fun placeholder() {
         loadJob?.cancel()
         moreButton.isVisible = false
-        appViews.forEachIndexed { index, view ->
-            if (index > 0) {
-                view.isVisible = false
-            } else {
-                view.isInvisible = true
-            }
+        appViews.forEach { view ->
+            view.isVisible = true
+            view.alpha = initialAlpha
             view.icon.setImageResource(R.drawable.ic_app_icon_placeholder)
             view.title.text = ""
             view.watched.isInvisible = true
@@ -122,7 +120,7 @@ class RecentlyInstalledViewHolder(
         appView.content.setOnSafeClickListener {
             action.value = ItemClick(app, index)
         }
-        appView.reveal(animate, startDelay = index * 50L, duration = shortAnimationDuration)
+        appView.reveal(animate, startDelay = index * 50L, duration = shortAnimationDuration, fromAlpha = initialAlpha)
     }
 
 }

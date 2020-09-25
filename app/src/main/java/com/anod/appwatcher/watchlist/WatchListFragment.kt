@@ -36,7 +36,7 @@ import kotlinx.coroutines.launch
 
 sealed class WishListAction
 object SearchInStore : WishListAction()
-object RecentlyInstalled : WishListAction()
+class Installed(val importMode: Boolean) : WishListAction()
 object ShareFromStore : WishListAction()
 class AddAppToTag(val tag: Tag) : WishListAction()
 class EmptyButton(val idx: Int) : WishListAction()
@@ -152,9 +152,8 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
     protected open fun onListAction(action: WishListAction) {
         when (action) {
             is SearchInStore -> startActivity(MarketSearchActivity.intent(requireContext(), "", true))
-            is RecentlyInstalled -> startActivity(InstalledFragment.intent(
-                    Preferences.SORT_DATE_DESC,
-                    false,
+            is Installed -> startActivity(InstalledFragment.intent(
+                    action.importMode,
                     requireContext(),
                     (activity as CustomThemeActivity).themeRes,
                     (activity as CustomThemeActivity).themeColors))
@@ -173,8 +172,8 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
 
     protected open fun getItemSelection(appItem: AppListItem): AppViewHolder.Selection = AppViewHolder.Selection.None
 
-    protected open fun openAppDetails(app: App) {
-        (requireActivity() as WatchListActivity).openAppDetails(app.appId, app.rowId, app.detailsUrl)
+    protected fun openAppDetails(app: App) {
+        (requireActivity() as AppDetailsRouter).openAppDetails(app.appId, app.rowId, app.detailsUrl)
     }
 
     protected open fun config(filterId: Int) = WatchListPagingSource.Config(
@@ -202,7 +201,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
         if (it is EmptyButton) {
             return when (it.idx) {
                 1 -> SearchInStore
-                2 -> RecentlyInstalled
+                2 -> Installed(true)
                 3 -> ShareFromStore
                 else -> throw IllegalArgumentException("Unknown Idx")
             }

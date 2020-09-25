@@ -3,6 +3,7 @@ package com.anod.appwatcher
 import android.os.Bundle
 import android.widget.TextView
 import androidx.lifecycle.Observer
+import com.anod.appwatcher.installed.InstalledFragment
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.watchlist.WatchListActivity
@@ -30,6 +31,16 @@ class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener 
             SyncScheduler(this)
                     .schedule(prefs.isRequiresCharging, prefs.isWifiOnly, prefs.updatesFrequency.toLong(), false)
                     .observe(this, Observer { })
+        }
+
+        if (intentExtras.containsKey("open_recently_installed")) {
+            intent!!.extras!!.remove("open_recently_installed")
+            startActivity(InstalledFragment.intent(
+                    false,
+                    this,
+                    themeRes,
+                    themeColors
+            ))
         }
     }
 

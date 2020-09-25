@@ -130,6 +130,7 @@
     <string name="recently_installed">Recently installed</string>
     <string name="shortcut_search">Search</string>
     <string name="shortcut_updates">Updatable</string>
+    <string name="shortcut_recently_installed">@string/recently_installed</string>
     <string name="open">Open</string>
     <string name="channel_app_updates">Apps updates</string>
     <string name="channel_updates_description">Notifications about new versions of watching apps</string>

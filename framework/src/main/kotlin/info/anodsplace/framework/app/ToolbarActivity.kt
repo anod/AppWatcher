@@ -34,7 +34,7 @@ abstract class ToolbarActivity : AppCompatActivity(), CustomThemeActivity {
     open val detailsLayoutId = 0
 
     @get:IdRes
-    open val hingLayoutId = 0
+    open val hingeLayoutId = 0
 
     private lateinit var duoDevice: HingeDevice
 
@@ -73,9 +73,9 @@ abstract class ToolbarActivity : AppCompatActivity(), CustomThemeActivity {
     }
 
     protected open fun updateWideLayout(isWideLayout: Boolean, duoDevice: HingeDevice) {
-        if (hingLayoutId != 0) {
+        if (hingeLayoutId != 0) {
             if (hinge == null) {
-                hinge = findViewById(hingLayoutId)
+                hinge = findViewById(hingeLayoutId)
             }
             hinge!!.isVisible = isWideLayout && duoDevice.hinge.width() > 0
             hinge!!.layoutParams.width = duoDevice.hinge.width()

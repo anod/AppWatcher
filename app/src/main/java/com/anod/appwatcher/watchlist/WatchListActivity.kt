@@ -48,7 +48,11 @@ object Updated : ListState()
 object NoNetwork : ListState()
 object ShowAuthDialog : ListState()
 
-abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionListener {
+interface AppDetailsRouter {
+    fun openAppDetails(appId: String, rowId: Int, detailsUrl: String?)
+}
+
+abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionListener, AppDetailsRouter {
 
     override val themeRes: Int
         get() = Theme(this).theme
@@ -64,7 +68,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     override val detailsLayoutId = R.id.details
 
     @get:IdRes
-    override val hingLayoutId = R.id.hinge
+    override val hingeLayoutId = R.id.hinge
 
     val prefs: Preferences
         get() = Application.provide(this).prefs
@@ -217,7 +221,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         return false
     }
 
-    fun openAppDetails(appId: String, rowId: Int, detailsUrl: String?) {
+    override fun openAppDetails(appId: String, rowId: Int, detailsUrl: String?) {
         if (stateViewModel.isWideLayout) {
             supportFragmentManager.commit {
                 add(R.id.details, DetailsFragment.newInstance(appId, detailsUrl

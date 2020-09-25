@@ -95,6 +95,11 @@
         <activity android:name="info.anodsplace.framework.app.FragmentToolbarActivity" />
 
         <activity
+            android:name=".installed.InstalledActivity"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:resizeableActivity="true" />
+
+        <activity
             android:name="com.google.android.gms.oss.licenses.OssLicensesActivity"
             android:theme="@style/Theme.AppCompat.DayNight" />
 

@@ -23,7 +23,6 @@ import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.installed.InstalledFragment
-import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.tags.AppsTagActivity
 import com.anod.appwatcher.utils.Hash
 import com.anod.appwatcher.utils.Theme
@@ -168,7 +167,6 @@ abstract class DrawerActivity : ToolbarActivity(), AccountSelectionDialog.Select
             }
             R.id.menu_act_installed -> {
                 startActivity(InstalledFragment.intent(
-                        Preferences.SORT_DATE_DESC,
                         false,
                         this,
                         themeRes,

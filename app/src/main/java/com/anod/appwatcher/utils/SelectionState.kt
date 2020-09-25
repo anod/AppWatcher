@@ -104,4 +104,12 @@ class SelectionState : Collection<String> {
             }
         }
     }
+
+    fun clear() {
+        selectedKeys.clear()
+        selectedCount = 0
+        defaultSelected = false
+        extras.clear()
+        selectionChange.value = Change(false, null, false, bundleOf("hasSelection" to false))
+    }
 }

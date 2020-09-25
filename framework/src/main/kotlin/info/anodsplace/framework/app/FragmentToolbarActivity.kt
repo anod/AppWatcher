@@ -19,7 +19,7 @@ open class FragmentFactory(val fragmentTag: String) : Serializable {
     }
 }
 
-class FragmentToolbarActivity : ToolbarActivity() {
+open class FragmentToolbarActivity : ToolbarActivity() {
 
     override val themeRes: Int
         get() = intentExtras.getInt("themeRes", 0)
@@ -62,8 +62,8 @@ class FragmentToolbarActivity : ToolbarActivity() {
         private const val EXTRA_FACTORY = "extra_factory"
         private const val EXTRA_ARGUMENTS = "extra_arguments"
 
-        fun intent(factory: FragmentFactory, arguments: Bundle, themeRes: Int, themeColors: CustomThemeColors, context: Context): Intent {
-            return Intent(context, FragmentToolbarActivity::class.java).apply {
+        fun intent(factory: FragmentFactory, arguments: Bundle, themeRes: Int, themeColors: CustomThemeColors, context: Context, clazz: Class<*> = FragmentToolbarActivity::class.java): Intent {
+            return Intent(context, clazz).apply {
                 putExtra(EXTRA_FACTORY, factory)
                 putExtra(EXTRA_ARGUMENTS, arguments)
                 putExtra("themeRes", themeRes)
