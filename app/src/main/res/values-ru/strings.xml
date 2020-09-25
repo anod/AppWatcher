@@ -187,4 +187,13 @@
     <string name="schedule_chip_unavailable">"%d недоступно"</string>
     <string name="pref_notify_no_changes_summary">"Уведомлять когда текст обновления изменился"</string>
     <string name="pref_notify_no_changes">"Без изменений"</string>
+    <string name="import_installed">Импорт установленных</string>
+    <string name="wish_list_is_empty">Список желаемых пуст</string>
+    <string name="shortcut_recently_installed">Недавно установленные</string>
+    <string name="delete_tag">Удалить</string>
+    <string name="delete_tag_message">Тэг \'%s\' будет удален</string>
+    <string name="more">Больше</string>
+    <string name="import_mode">Ресим импорта</string>
+    <string name="none">Ничего</string>
+    <string name="number_selected">%d выбранно</string>
 </resources>
