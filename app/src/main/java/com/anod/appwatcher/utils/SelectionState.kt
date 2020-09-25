@@ -29,11 +29,7 @@ class SelectionState : Collection<String> {
     }
 
     fun selectKey(key: String, select: Boolean, selectExtra: Bundle = Bundle.EMPTY) {
-        val allExtras = bundleOf(
-                "hasSelection" to isNotEmpty()
-        )
-        allExtras.putAll(getExtra(key))
-        allExtras.putAll(selectExtra)
+        selectedKeys.put(key, select)
         if (select) {
             selectedCount += 1
         } else {
@@ -42,8 +38,13 @@ class SelectionState : Collection<String> {
                 selectedCount = 0
             }
         }
-        selectedKeys.put(key, select)
-        selectionChange.value = Change(defaultSelected, key, true, allExtras)
+
+        val allExtras = bundleOf(
+                "hasSelection" to isNotEmpty()
+        )
+        allExtras.putAll(getExtra(key))
+        allExtras.putAll(selectExtra)
+        selectionChange.value = Change(defaultSelected, key, select, allExtras)
     }
 
     fun toggleKey(key: String, selectExtra: Bundle) {

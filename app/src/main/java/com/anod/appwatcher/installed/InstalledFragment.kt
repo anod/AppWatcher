@@ -80,6 +80,7 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
             updateTitle()
         } else {
             actionButton.hide()
+            importViewModel.clearSelection()
         }
     }
 
