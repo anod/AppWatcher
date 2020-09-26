@@ -3,9 +3,10 @@ package com.anod.appwatcher.utils
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.graphics.Path
-import androidx.annotation.DrawableRes
 import android.widget.ImageView
+import androidx.annotation.DrawableRes
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.App
@@ -14,7 +15,10 @@ import com.squareup.picasso.Picasso.LoadedFrom.DISK
 import com.squareup.picasso.Request
 import com.squareup.picasso.RequestCreator
 import com.squareup.picasso.RequestHandler
+import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.content.loadIcon
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.IOException
 
 class PicassoAppIcon(context: Context) {
@@ -22,8 +26,8 @@ class PicassoAppIcon(context: Context) {
     private var iconPath: Path = AdaptiveIconTransformation.maskToPath(Application.provide(context).prefs.iconShape)
     private val picasso: Picasso by lazy {
         Picasso.Builder(this.context)
-            .addRequestHandler(PackageIconRequestHandler(this.context))
-            .build()
+                .addRequestHandler(PackageIconRequestHandler(this.context))
+                .build()
     }
 
     private val iconSize: Int by lazy {
@@ -45,6 +49,15 @@ class PicassoAppIcon(context: Context) {
 
             val icon = packageManager.loadIcon(cmp, context.resources.displayMetrics) ?: return null
             return Result(icon, DISK)
+        }
+    }
+
+    suspend fun get(imageUrl: String): Bitmap? = withContext(Dispatchers.IO) {
+        return@withContext try {
+            retrieve(imageUrl).get()
+        } catch (e: Exception) {
+            AppLog.e(e)
+            null
         }
     }
 

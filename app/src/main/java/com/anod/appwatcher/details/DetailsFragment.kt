@@ -2,13 +2,10 @@
 package com.anod.appwatcher.details
 
 import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -40,7 +37,6 @@ import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.*
 import com.anod.appwatcher.watchlist.AppViewHolderResourceProvider
 import com.google.android.material.appbar.AppBarLayout
-import com.squareup.picasso.Picasso
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.anim.RevealAnimatorCompat
 import info.anodsplace.framework.app.addMultiWindowFlags
@@ -217,39 +213,36 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         if (app.iconUrl.isEmpty()) {
             setDefaultIcon()
         } else {
-            iconLoader.retrieve(app.iconUrl).into(iconLoadTarget)
+            loadIcon(app.iconUrl)
         }
     }
 
-    private val iconLoadTarget = object : com.squareup.picasso.Target {
-        override fun onBitmapLoaded(bitmap: Bitmap, from: Picasso.LoadedFrom) {
-            lifecycleScope.launchWhenCreated {
-                try {
-                    val palette = withContext(Dispatchers.Default) { Palette.from(bitmap).generate() }
-                    icon.setImageBitmap(bitmap)
-                    toolbar.logo = BitmapDrawable(resources, bitmap)
-                    toolbar.logo.alpha = 0
-                    onPaletteGenerated(palette)
-                } catch (e: Exception) {
-                    AppLog.e(e)
+    private fun loadIcon(imageUrl: String) {
+        lifecycleScope.launchWhenCreated {
+            try {
+                val bitmap = iconLoader.get(imageUrl)
+                if (bitmap == null) {
+                    setDefaultIcon()
+                    return@launchWhenCreated
                 }
+                val palette = withContext(Dispatchers.Default) { Palette.from(bitmap).generate() }
+                icon.setImageBitmap(bitmap)
+                toolbar.logo = BitmapDrawable(resources, bitmap)
+                toolbar.logo.alpha = 0
+                onPaletteGenerated(palette)
+            } catch (e: Exception) {
+                AppLog.e("loadIcon", e)
+                setDefaultIcon()
             }
-        }
-
-        override fun onBitmapFailed(e: Exception, errorDrawable: Drawable?) {
-            AppLog.e("iconLoadTarget::onBitmapFailed", e)
-            setDefaultIcon()
-        }
-
-        override fun onPrepareLoad(placeHolderDrawable: Drawable?) {
-
         }
     }
 
     private fun setDefaultIcon() {
-        background.visibility = View.VISIBLE
-        applyColor(ContextCompat.getColor(requireContext(), R.color.theme_accent))
-        icon.setImageResource(R.drawable.ic_app_icon_placeholder)
+        if (isAdded) {
+            background.visibility = View.VISIBLE
+            applyColor(ContextCompat.getColor(requireContext(), R.color.theme_accent))
+            icon.setImageResource(R.drawable.ic_app_icon_placeholder)
+        }
     }
 
     private fun setupToolbar() {
@@ -406,8 +399,6 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         playStoreButton.isEnabled = alpha > 0.8f
 
         val inverseAlpha = (1.0f - alpha)
-        Log.d("inverseAlpha", inverseAlpha.toString());
-
         toolbar.logo?.alpha = (inverseAlpha * 255).toInt()
         titleString.alpha = inverseAlpha
         subtitleString.alpha = inverseAlpha
