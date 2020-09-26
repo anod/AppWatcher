@@ -178,11 +178,11 @@ interface AppListTable {
             }
         }
 
-        private fun createSortOrder(sortId: Int, orederByRecentlyUpdated: Boolean): String {
+        private fun createSortOrder(sortId: Int, orderByRecentlyUpdated: Boolean): String {
             val filter = mutableListOf(
                     Columns.status + " DESC"
             )
-            if (orederByRecentlyUpdated) {
+            if (orderByRecentlyUpdated) {
                 filter.add(Columns.recentFlag + " DESC")
             }
             when (sortId) {
