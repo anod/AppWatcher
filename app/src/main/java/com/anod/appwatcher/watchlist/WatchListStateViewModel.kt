@@ -43,10 +43,11 @@ class WatchListStateViewModel(application: android.app.Application) : AndroidVie
     }
 
     init {
-        val filter = IntentFilter()
-        filter.addAction(UpdateCheck.syncProgress)
-        filter.addAction(UpdateCheck.syncStop)
-        filter.addAction(listChangedEvent)
+        val filter = IntentFilter().apply {
+            addAction(UpdateCheck.syncProgress)
+            addAction(UpdateCheck.syncStop)
+            addAction(listChangedEvent)
+        }
         application.registerReceiver(syncFinishedReceiver, filter)
     }
 

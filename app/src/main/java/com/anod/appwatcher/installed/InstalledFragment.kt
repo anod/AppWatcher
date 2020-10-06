@@ -20,12 +20,14 @@ import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.provide
 import com.anod.appwatcher.utils.SingleLiveEvent
 import com.anod.appwatcher.watchlist.*
+import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.DialogSingleChoice
 import info.anodsplace.framework.app.FragmentFactory
 import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.content.startActivitySafely
 import kotlinx.android.synthetic.main.fragment_applist.*
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class InstalledFragment : WatchListFragment(), ActionMode.Callback {
@@ -65,6 +67,15 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
                 }
             }
         })
+
+        lifecycleScope.launch {
+            provide.packageRemoved.collect {
+                AppLog.d("Package removed: $it")
+                if (importViewModel.progress.value !is ImportProgress) {
+                    reload()
+                }
+            }
+        }
     }
 
     private fun switchImportMode(selectionMode: Boolean, animated: Boolean) {

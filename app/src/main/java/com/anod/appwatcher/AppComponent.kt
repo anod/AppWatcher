@@ -20,6 +20,11 @@ import info.anodsplace.playstore.OnlineNetwork
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.channels.BroadcastChannel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 
 /**
  * @author alex
@@ -63,4 +68,7 @@ class AppComponent internal constructor(private val app: AppWatcherApplication) 
     val database: AppsDatabase by lazy { AppsDatabase.instance(app) }
 
     val appScope: CoroutineScope by lazy { CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate) }
+
+    val packageRemovedReceiver = BroadcastChannel<String>(1)
+    val packageRemoved: Flow<String> = packageRemovedReceiver.asFlow().filterNotNull().distinctUntilChanged()
 }

@@ -14,6 +14,7 @@ import com.anod.appwatcher.provide
 import com.anod.appwatcher.utils.PicassoAppIcon
 import com.anod.appwatcher.utils.SingleLiveEvent
 import com.anod.appwatcher.utils.reveal
+import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.content.getRecentlyInstalled
 import info.anodsplace.framework.view.setOnSafeClickListener
@@ -51,6 +52,16 @@ class RecentlyInstalledViewHolder(
     init {
         moreButton.setOnClickListener {
             action.value = Installed(false)
+        }
+
+        lifecycleScope.launch {
+            itemView.context.provide.packageRemoved.collect {
+                AppLog.d("Package removed: $it")
+                loadJob?.cancel()
+                loadJob = launch {
+                    reload(silent = false)
+                }
+            }
         }
     }
 
@@ -97,18 +108,23 @@ class RecentlyInstalledViewHolder(
     fun bind(item: RecentItem) {
         placeholder()
         loadJob = lifecycleScope.launch {
-            packages.collect { packages ->
-                appViews.forEachIndexed { index, appView ->
-                    if (index >= packages.size) {
-                        appView.visibility = View.GONE
-                    } else {
-                        val pair = packages[index]
-                        bindPackage(animate, index, appView, pair.first, pair.second)
-                    }
+            reload(silent = false)
+        }
+    }
+
+    private suspend fun reload(silent: Boolean) = withContext(Dispatchers.Main) {
+        val revealAnimation = if (silent) false else animate
+        packages.collect { packages ->
+            appViews.forEachIndexed { index, appView ->
+                if (index >= packages.size) {
+                    appView.visibility = View.GONE
+                } else {
+                    val pair = packages[index]
+                    bindPackage(revealAnimation, index, appView, pair.first, pair.second)
                 }
-                moreButton.reveal(animate, startDelay = packages.size * 50L, duration = shortAnimationDuration)
-                animate = false
             }
+            moreButton.reveal(revealAnimation, startDelay = packages.size * 50L, duration = shortAnimationDuration)
+            animate = false
         }
     }
 

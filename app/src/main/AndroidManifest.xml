@@ -130,6 +130,13 @@
             android:authorities="${applicationId}.workmanager-init"
             tools:node="remove" />
 
+        <receiver android:name=".installed.PackageRemovedReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_FULLY_REMOVED" />
+                <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
+
         <!-- Version < 3.0. DeX Mode and Screen Mirroring support -->
         <meta-data
             android:name="com.samsung.android.keepalive.density"
