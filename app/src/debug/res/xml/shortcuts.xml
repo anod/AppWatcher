@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="updates"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_updates"
+        android:shortcutShortLabel="@string/shortcut_updates"
+        android:shortcutLongLabel="@string/shortcut_updates">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.anod.appwatcher.debug"
+            android:targetClass="com.anod.appwatcher.AppWatcherActivity">
+            <extra
+                android:name="tab_id"
+                android:value="3" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:shortcutId="search"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_search"
+        android:shortcutShortLabel="@string/shortcut_search"
+        android:shortcutLongLabel="@string/shortcut_search">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.anod.appwatcher.debug"
+            android:targetClass="com.anod.appwatcher.AppWatcherActivity">
+            <extra
+                android:name="expand_search"
+                android:value="true" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:shortcutId="recently_installed"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_recent"
+        android:shortcutShortLabel="@string/shortcut_recently_installed"
+        android:shortcutLongLabel="@string/shortcut_recently_installed">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.anod.appwatcher.debug"
+            android:targetClass="com.anod.appwatcher.AppWatcherActivity">
+            <extra
+                android:name="open_recently_installed"
+                android:value="true" />
+        </intent>
+    </shortcut>
+</shortcuts>
+

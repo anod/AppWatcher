@@ -33,7 +33,7 @@ abstract class WatchListViewModel(application: Application) : AndroidViewModel(a
     var titleFilter = ""
     var sortId = 0
     var tag: Tag? = null
-    val installedApps = InstalledApps.PackageManager(context.packageManager)
+    val installedApps = InstalledApps.MemoryCache(InstalledApps.PackageManager(context.packageManager))
     var filterId: Int = Filters.TAB_ALL
         get() = this.filter.filterId
         set(value) {
@@ -63,8 +63,10 @@ abstract class WatchListViewModel(application: Application) : AndroidViewModel(a
     fun load(config: WatchListPagingSource.Config): Flow<PagingData<SectionItem>> {
         headerFactory = createSectionHeaderFactory(config)
         hasData = false
-
-        return Pager(PagingConfig(pageSize = 10)) {
+        installedApps.reset()
+        // When initialLoadSize larger than pageSize it cause a bug
+        // where after filter if there is only one pages items are shown multiple times
+        return Pager(PagingConfig(pageSize = 20, initialLoadSize = 20)) {
             pagingSource = createPagingSource(config)
             pagingSource!!
         }.flow.map { pagingData: PagingData<SectionItem> ->
