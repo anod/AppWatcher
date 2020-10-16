@@ -52,7 +52,7 @@ dependencies {
     api("com.android.volley:volley:1.1.0")
     implementation("com.squareup.okhttp3:okhttp:4.8.1")
 
-    implementation(project(":framework"))
+    implementation(project(":lib:framework"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4.10")

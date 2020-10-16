@@ -160,8 +160,8 @@ dependencies {
 
     testImplementation("junit:junit:4.13")
 
-    implementation(project(":colorpicker"))
-    implementation(project(":framework"))
+    implementation(project(":lib:colorpicker"))
+    implementation(project(":lib:framework"))
     implementation(project(":playstore"))
 
     debugImplementation("com.squareup.leakcanary:leakcanary-android:2.5")

@@ -1,1 +1,1 @@
-include(":app", ":framework", ":colorpicker", ":playstore")
+include(":app", ":lib:framework", ":lib:colorpicker", ":playstore")
