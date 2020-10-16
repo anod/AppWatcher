@@ -167,6 +167,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
                 }
                 openAppDetails(app)
             }
+            else -> {}
         }
     }
 
