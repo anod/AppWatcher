@@ -22,6 +22,9 @@ jobs:
       run: echo $GOOGLE_SERVICES_JSON > app/google-services.json
       env:
         GOOGLE_SERVICES_JSON: ${{ secrets.GoogleServicesJson }}
+
+    - name: Checkout submodule  
+      run: git submodule update
       
     - name: Unit Test
       run: ./gradlew testDebugUnitTest
