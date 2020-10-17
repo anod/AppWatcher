@@ -24,7 +24,7 @@ jobs:
         GOOGLE_SERVICES_JSON: ${{ secrets.GoogleServicesJson }}
 
     - name: Checkout submodule  
-      run: git submodule update
+      run: git submodule update --init --recursive
       
     - name: Unit Test
       run: ./gradlew testDebugUnitTest
