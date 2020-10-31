@@ -10,6 +10,7 @@ import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.database.entities.packageToApp
 import com.anod.appwatcher.installed.InstalledTaskWorker
+import com.anod.appwatcher.model.AppListFilter
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import kotlin.math.max
@@ -18,6 +19,7 @@ class WatchListPagingSource(
         private val sortId: Int,
         private val titleFilter: String,
         private val config: Config,
+        private val itemFilter: AppListFilter,
         private val tag: Tag? = null,
         private val appContext: ApplicationContext
 ) : PagingSource<Int, SectionItem>() {
@@ -47,9 +49,11 @@ class WatchListPagingSource(
         val data = AppListTable.Queries.loadAppList(
                 sortId, config.showRecentlyUpdated, tag, titleFilter, SqlOffset(offset, limit), database.apps()
         )
-        items.addAll(data.map { AppItem(it, false) })
+        val filtered = data.filter { !itemFilter.filterRecord(it) }
 
-        if (data.isEmpty()) {
+        items.addAll(filtered.map { AppItem(it, false) })
+
+        if (filtered.isEmpty()) {
             if (params.key != null && config.showOnDevice) {
                 val installed = InstalledTaskWorker(appContext, sortId, titleFilter).run()
                 val allInstalledPackageNames = installed.map { it.packageName }
@@ -58,8 +62,9 @@ class WatchListPagingSource(
                         .asSequence()
                         .filterNot { watchingPackages.containsKey(it) }
                         .map { appContext.packageManager.packageToApp(-1, it) }
-                        .forEach { app ->
-                            items.add(OnDeviceItem(AppListItem(app, "", noNewDetails = false, recentFlag = false), false))
+                        .map { app -> AppListItem(app, "", noNewDetails = false, recentFlag = false) }
+                        .forEach { item ->
+                            items.add(OnDeviceItem(item, false))
                         }
             } else if (params.key == null) {
                 items.add(Empty)

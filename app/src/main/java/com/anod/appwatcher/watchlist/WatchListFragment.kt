@@ -105,7 +105,9 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
         adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
             override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
                 if (positionStart == 0 && (listView.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition() == 0) {
-                    listView.scrollToPosition(0)
+                    if (isVisible) {
+                        listView.scrollToPosition(0)
+                    }
                 }
             }
         })
@@ -177,17 +179,17 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
         (requireActivity() as AppDetailsRouter).openAppDetails(app.appId, app.rowId, app.detailsUrl)
     }
 
-    protected open fun config(filterId: Int) = WatchListPagingSource.Config(
+    protected open fun config() = WatchListPagingSource.Config(
             showRecentlyUpdated = prefs.showRecentlyUpdated,
-            showOnDevice = filterId == Filters.TAB_ALL && prefs.showOnDevice,
-            showRecentlyInstalled = filterId == Filters.TAB_ALL && prefs.showRecent
+            showOnDevice = viewModel.filterId == Filters.TAB_ALL && prefs.showOnDevice,
+            showRecentlyInstalled = viewModel.filterId == Filters.TAB_ALL && prefs.showRecent
     )
 
     fun reload() {
         listView.isVisible = false
         loadJob?.cancel()
         loadJob = lifecycleScope.launch {
-            viewModel.load(config(viewModel.filterId)).collectLatest { result ->
+            viewModel.load(config()).collectLatest { result ->
                 listView.isVisible = true
                 progress.isVisible = false
                 AppLog.d("Load status changed: $result")

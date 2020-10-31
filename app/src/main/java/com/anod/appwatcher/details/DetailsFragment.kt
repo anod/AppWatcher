@@ -370,10 +370,12 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
 
     private fun animateBackground() {
         background.post {
-            val location = IntArray(2)
-            icon.getLocationOnScreen(location)
-            if (ViewCompat.isAttachedToWindow(background)) {
-                RevealAnimatorCompat.show(background, location[0], location[1], 0).start()
+            if (isVisible) {
+                val location = IntArray(2)
+                icon.getLocationOnScreen(location)
+                if (ViewCompat.isAttachedToWindow(background)) {
+                    RevealAnimatorCompat.show(background, location[0], location[1], 0).start()
+                }
             }
         }
     }

@@ -225,7 +225,7 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
         }
     }
 
-    override fun config(filterId: Int) = WatchListPagingSource.Config(
+    override fun config() = WatchListPagingSource.Config(
             showRecentlyUpdated = false,
             showOnDevice = true,
             showRecentlyInstalled = false,

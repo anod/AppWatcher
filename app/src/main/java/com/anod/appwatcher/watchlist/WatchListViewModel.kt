@@ -42,6 +42,7 @@ abstract class WatchListViewModel(application: Application) : AndroidViewModel(a
         }
     var filter: AppListFilter = AppListFilter.All()
         private set
+
     val changes = AppListTable.Queries.changes(database.apps())
             .debounce(600)
             .map {
@@ -72,11 +73,6 @@ abstract class WatchListViewModel(application: Application) : AndroidViewModel(a
         }.flow.map { pagingData: PagingData<SectionItem> ->
             hasData = true
             pagingData
-                    .filterSync { item ->
-                        if (item is AppItem) {
-                            !filter.filterRecord(item.appListItem)
-                        } else true
-                    }
                     .insertSeparators { before, after ->
                         headerFactory.insertSeparator(before, after)
                     }
@@ -99,6 +95,7 @@ class AppsWatchListViewModel(application: Application) : WatchListViewModel(appl
             sortId = sortId,
             titleFilter = titleFilter,
             config = config,
+            itemFilter = filter,
             tag = tag,
             appContext = context
     )

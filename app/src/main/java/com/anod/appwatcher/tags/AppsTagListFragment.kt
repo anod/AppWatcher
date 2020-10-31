@@ -39,7 +39,7 @@ class AppsTagListFragment : WatchListFragment() {
         return it
     }
 
-    override fun config(filterId: Int) = WatchListPagingSource.Config(
+    override fun config() = WatchListPagingSource.Config(
             showRecentlyUpdated = prefs.showRecentlyUpdated,
             showOnDevice = false,
             showRecentlyInstalled = false
