@@ -66,6 +66,8 @@ class WatchListPagingSource(
                         .forEach { item ->
                             items.add(OnDeviceItem(item, false))
                         }
+            } else if (page == 0 && data.isEmpty() && items.firstOrNull() is RecentItem) {
+                items.add(EmptyItem)
             }
         }
 

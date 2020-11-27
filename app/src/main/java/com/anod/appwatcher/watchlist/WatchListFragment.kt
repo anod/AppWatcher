@@ -106,6 +106,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
                 viewModel.installedApps,
                 viewLifecycleOwner,
                 action,
+                { emptyBinding -> createEmptyViewHolder(emptyBinding, action) },
                 { appItem -> getItemSelection(appItem) },
                 viewModel.selection,
                 requireContext())
@@ -133,8 +134,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
                 if (isEmpty) {
                     if (binding.emptyView.childCount == 0) {
                         val emptyBinding = ListItemEmptyBinding.inflate(layoutInflater, binding.emptyView, true)
-                        val holder = createEmptyViewHolder(emptyBinding, action)
-                        holder.bind()
+                        createEmptyViewHolder(emptyBinding, action)
                     }
                     binding.emptyView.isVisible = true
                     binding.listView.isVisible = false
@@ -232,7 +232,8 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
         }
     }
 
-    protected open fun createEmptyViewHolder(emptyBinding: ListItemEmptyBinding, action: SingleLiveEvent<WishListAction>) = EmptyViewHolder(emptyBinding, !prefs.showRecent, action)
+    protected open fun createEmptyViewHolder(emptyBinding: ListItemEmptyBinding, action: SingleLiveEvent<WishListAction>)
+        = EmptyViewHolder(emptyBinding, false, action)
 
     protected open fun mapAction(it: WishListAction): WishListAction {
         if (it is EmptyButton) {

@@ -51,7 +51,7 @@ class AppsTagListFragment : WatchListFragment() {
         }
         emptyBinding.button2.isVisible = false
         emptyBinding.button3.isVisible = false
-        return EmptyViewHolder(emptyBinding, true, action)
+        return EmptyViewHolder(emptyBinding, false, action)
     }
 
     class Factory(

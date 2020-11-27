@@ -6,6 +6,7 @@
     android:background="?android:attr/windowBackground"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:minHeight="160dp"
     android:elevation="0dp"
     android:paddingTop="0dp">
 
@@ -92,7 +93,7 @@
     <LinearLayout
         android:id="@+id/error"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_gravity="center"
         android:layout_margin="16dp"
         android:layout_marginLeft="16dp"

@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.AppListItem
+import com.anod.appwatcher.databinding.ListItemEmptyBinding
 import com.anod.appwatcher.utils.PicassoAppIcon
 import com.anod.appwatcher.utils.SingleLiveEvent
 import info.anodsplace.framework.content.InstalledApps
@@ -25,6 +26,7 @@ class SectionItemDiffCallback : DiffUtil.ItemCallback<SectionItem>() {
         is RecentItem -> newItem is RecentItem
         is AppItem -> newItem is AppItem && oldItem.appListItem.app.appId == newItem.appListItem.app.appId
         is OnDeviceItem -> newItem is OnDeviceItem && oldItem.appListItem.app.appId == newItem.appListItem.app.appId
+        is EmptyItem -> newItem is EmptyItem
     }
 
     override fun areContentsTheSame(oldItem: SectionItem, newItem: SectionItem) = when (oldItem) {
@@ -32,6 +34,7 @@ class SectionItemDiffCallback : DiffUtil.ItemCallback<SectionItem>() {
         is RecentItem -> newItem is RecentItem
         is AppItem -> newItem is AppItem && oldItem == newItem
         is OnDeviceItem -> newItem is OnDeviceItem && oldItem == newItem
+        is EmptyItem -> newItem is EmptyItem
     }
 }
 
@@ -39,6 +42,7 @@ class WatchListPagingAdapter(
         installedApps: InstalledApps,
         private val lifecycleOwner: LifecycleOwner,
         private val action: SingleLiveEvent<WishListAction>,
+        private val emptyViewHolderFactory: (itemBinding: ListItemEmptyBinding) -> EmptyViewHolder,
         private val calcSelection: (appItem: AppListItem) -> AppViewHolder.Selection,
         selection: LiveData<Pair<Int, AppViewHolder.Selection>>,
         private val context: Context
@@ -64,19 +68,20 @@ class WatchListPagingAdapter(
             is AppItem -> R.layout.list_item_app
             is RecentItem -> R.layout.list_item_recently_installed
             is OnDeviceItem -> R.layout.list_item_app
+            is EmptyItem -> R.layout.list_item_empty
             else -> throw UnsupportedOperationException("Unknown view")
         }
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val item = getItem(position)
-        holder as? PlaceholderViewHolder ?: throw UnsupportedOperationException("Unknown view")
+        holder as? SectionItem
         when (item) {
             is Header -> (holder as SectionHeaderViewHolder).bind(item.type)
             is AppItem -> (holder as AppViewHolder).bind(position, item.appListItem, item.isLocal, calcSelection(item.appListItem))
             is RecentItem -> (holder as RecentlyInstalledViewHolder).bind(item)
+            is EmptyItem -> { }
             is OnDeviceItem -> (holder as AppViewHolder).bind(position, item.appListItem, true, calcSelection(item.appListItem))
-            null -> holder.placeholder()
         }
     }
 
@@ -93,6 +98,10 @@ class WatchListPagingAdapter(
             R.layout.list_item_app -> {
                 val itemView = LayoutInflater.from(context).inflate(R.layout.list_item_app, parent, false)
                 AppViewHolder(itemView, itemDataProvider, appIcon, action)
+            }
+            R.layout.list_item_empty -> {
+                val binding = ListItemEmptyBinding.inflate(LayoutInflater.from(context), parent, false)
+                return emptyViewHolderFactory(binding)
             }
             else -> throw UnsupportedOperationException("Unknown view")
         }

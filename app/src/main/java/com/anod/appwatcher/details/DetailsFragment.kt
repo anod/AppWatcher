@@ -17,6 +17,8 @@ import androidx.core.app.ShareCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.ViewCompat
+import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
@@ -83,7 +85,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         _binding = FragmentAppChangelogBinding.inflate(inflater, container, false)
-        return inflater.inflate(R.layout.fragment_app_changelog, container, false)
+        return binding.root
     }
 
     override fun onDestroyView() {
@@ -99,16 +101,16 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         viewModel.appId.value = requireArguments().getString(DetailsActivity.EXTRA_APP_ID) ?: ""
 
         setupToolbar()
-        binding.progressBar.visibility = View.GONE
-        binding.error.visibility = View.GONE
-        binding.list.visibility = View.GONE
-        binding.background.visibility = View.INVISIBLE
+        binding.progressBar.isVisible = false
+        binding.error.isVisible = false
+        binding.list.isInvisible = true
+        binding.background.isInvisible = true
         binding.appbar.addOnOffsetChangedListener(this)
 
         binding.retryButton.setOnClickListener {
-            binding.progressBar.visibility = View.VISIBLE
-            binding.error.visibility = View.GONE
-            binding.list.visibility = View.GONE
+            binding.progressBar.isVisible = true
+            binding.error.isVisible = false
+            binding.list.isInvisible = true
             binding.retryButton.postDelayed({
                 try {
                     viewModel.loadLocalChangelog()
@@ -121,8 +123,8 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         if (viewModel.appId.value!!.isEmpty()) {
             Toast.makeText(requireContext(), getString(R.string.cannot_load_app, viewModel.appId), Toast.LENGTH_LONG).show()
             AppLog.e("Cannot loadChangelog app details: '${viewModel.appId}'")
-            binding.progressBar.visibility = View.GONE
-            binding.error.visibility = View.VISIBLE
+            binding.progressBar.isVisible = false
+            binding.error.isVisible = true
             return
         }
 
@@ -137,15 +139,15 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
                     if (adapter.isEmpty) {
                         showRetryMessage()
                     } else {
-                        binding.progressBar.visibility = View.GONE
-                        binding.list.visibility = View.VISIBLE
-                        binding.error.visibility = View.GONE
+                        binding.progressBar.isVisible = false
+                        binding.list.isVisible = true
+                        binding.error.isVisible = false
                     }
                 }
                 else -> {
-                    binding.progressBar.visibility = View.GONE
-                    binding.list.visibility = View.VISIBLE
-                    binding.error.visibility = View.GONE
+                    binding.progressBar.isVisible = false
+                    binding.list.isVisible = true
+                    binding.error.isVisible = false
                     adapter.setData(viewModel.localChangelog, viewModel.recentChange)
                 }
             }
@@ -155,8 +157,9 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
             if (app == null) {
                 Toast.makeText(requireContext(), getString(R.string.cannot_load_app, viewModel.appId), Toast.LENGTH_LONG).show()
                 AppLog.e("Cannot loadChangelog app details: '${viewModel.appId}'")
-                binding.progressBar.visibility = View.GONE
-                binding.error.visibility = View.VISIBLE
+                binding.progressBar.isVisible = false
+                binding.error.isVisible = true
+                binding.list.isInvisible = true
             } else {
                 if (!loaded) {
                     loaded = true
@@ -186,7 +189,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
 
     override fun onResume() {
         super.onResume()
-        binding.progressBar.visibility = View.VISIBLE
+        binding.progressBar.isVisible = true
 
         try {
             viewModel.loadLocalChangelog()
@@ -248,7 +251,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
 
     private fun setDefaultIcon() {
         if (isAdded) {
-            binding.background.visibility = View.VISIBLE
+            binding.background.isVisible = true
             applyColor(ContextCompat.getColor(requireContext(), R.color.theme_accent))
             binding.header.icon.setImageResource(R.drawable.ic_app_icon_placeholder)
         }
@@ -346,9 +349,9 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
     }
 
     private fun showRetryMessage() {
-        binding.progressBar.visibility = View.GONE
-        binding.error.visibility = View.VISIBLE
-        binding.list.visibility = View.GONE
+        binding.progressBar.isVisible = false
+        binding.error.isVisible = true
+        binding.list.isInvisible = true
 
         if (!Application.provide(this).networkConnection.isNetworkAvailable) {
             Toast.makeText(requireContext(), R.string.check_connection, Toast.LENGTH_SHORT).show()
@@ -414,10 +417,10 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         titleString.alpha = inverseAlpha
         subtitleString.alpha = inverseAlpha
         binding.container.post {
-            binding.toolbar.let {
+            _binding?.toolbar?.let {
                 it.title = titleString
                 it.subtitle = subtitleString
-                binding.playStoreButton.translationY = verticalOffset.toFloat()
+                _binding?.playStoreButton?.translationY = verticalOffset.toFloat()
             }
         }
     }

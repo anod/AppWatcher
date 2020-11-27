@@ -14,6 +14,7 @@ object OnDeviceHeader : SectionHeader()
 sealed class SectionItem
 class Header(val type: SectionHeader) : SectionItem()
 object RecentItem : SectionItem()
+object EmptyItem : SectionItem()
 class AppItem(val appListItem: AppListItem, val isLocal: Boolean) : SectionItem() {
     override fun hashCode(): Int {
         return hashCodeOf(appListItem, isLocal)

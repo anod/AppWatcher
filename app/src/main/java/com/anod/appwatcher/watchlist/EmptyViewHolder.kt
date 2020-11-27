@@ -7,8 +7,7 @@ import com.anod.appwatcher.databinding.ListItemEmptyBinding
 import com.anod.appwatcher.utils.SingleLiveEvent
 import info.anodsplace.framework.view.setOnSafeClickListener
 
-class EmptyViewHolder(emptyBinding: ListItemEmptyBinding, topMargin: Boolean, action: SingleLiveEvent<WishListAction>) : RecyclerView.ViewHolder(emptyBinding.root), PlaceholderViewHolder {
-
+class EmptyViewHolder(emptyBinding: ListItemEmptyBinding, topMargin: Boolean, action: SingleLiveEvent<WishListAction>) : RecyclerView.ViewHolder(emptyBinding.root) {
     init {
         emptyBinding.button1.setOnSafeClickListener {
             action.value = EmptyButton(1)
@@ -20,11 +19,5 @@ class EmptyViewHolder(emptyBinding: ListItemEmptyBinding, topMargin: Boolean, ac
             action.value = EmptyButton(3)
         }
         emptyBinding.topMargin.isVisible = topMargin
-    }
-
-    override fun placeholder() {
-    }
-
-    fun bind() {
     }
 }
