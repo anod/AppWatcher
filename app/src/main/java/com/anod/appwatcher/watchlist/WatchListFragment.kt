@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.*
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -31,6 +32,7 @@ import info.anodsplace.framework.app.FragmentFactory
 import info.anodsplace.framework.content.startActivitySafely
 import kotlinx.android.synthetic.main.fragment_applist.*
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -94,7 +96,6 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
                 viewModel.installedApps,
                 viewLifecycleOwner,
                 action,
-                { emptyView -> createEmptyViewHolder(emptyView, action) },
                 { appItem -> getItemSelection(appItem) },
                 viewModel.selection,
                 requireContext())
@@ -112,6 +113,28 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
             }
         })
 
+        viewLifecycleOwner.lifecycleScope.launchWhenCreated {
+            adapter.loadStateFlow.collectLatest { loadState ->
+                val isEmpty = (
+                        loadState.source.refresh is LoadState.NotLoading
+                        && adapter.itemCount < 1
+                )
+                AppLog.d("loadStateFlow: ${loadState.source.refresh}")
+                if (isEmpty) {
+                    if (emptyView.childCount == 0) {
+                        val itemView = LayoutInflater.from(context).inflate(R.layout.list_item_empty, emptyView, true)
+                        val holder = createEmptyViewHolder(itemView, action)
+                        holder.bind()
+                    }
+                    emptyView.isVisible = true
+                    listView.isVisible = false
+                } else {
+                    emptyView.isVisible = false
+                    listView.isVisible = true
+                }
+            }
+        }
+
         if (prefs.enablePullToRefresh) {
             listView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -121,8 +144,9 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
             })
         }
 
-        action.map { mapAction(it) }.observe(viewLifecycleOwner, Observer {
-            onListAction(it)
+        action.observe(viewLifecycleOwner, Observer {
+            val mapped = mapAction(it)
+            onListAction(mapped)
         })
 
         stateViewModel.sortId.observe(viewLifecycleOwner) {

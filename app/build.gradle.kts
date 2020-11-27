@@ -22,7 +22,7 @@ android {
         applicationId = "com.anod.appwatcher"
         minSdkVersion(21)
         targetSdkVersion(29)
-        versionCode = 14605
+        versionCode = 14607
         versionName = "1.4.6"
         resValue("string", "content_authority", "com.anod.appwatcher")
 
@@ -107,13 +107,13 @@ dependencies {
     implementation("androidx.recyclerview:recyclerview:1.1.0")
     implementation("androidx.palette:palette:1.0.0")
     implementation("androidx.cardview:cardview:1.0.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.0.2")
+    implementation("androidx.constraintlayout:constraintlayout:2.0.4")
     implementation("androidx.work:work-runtime:2.4.0")
     implementation("androidx.core:core:1.3.2")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
-    implementation("androidx.paging:paging-runtime:3.0.0-alpha08")
+    implementation("androidx.paging:paging-runtime:3.0.0-alpha09")
     // Google
-    implementation("com.google.android.material:material:1.3.0-alpha03")
+    implementation("com.google.android.material:material:1.3.0-alpha04")
     implementation("com.google.android.gms:play-services-oss-licenses:17.0.0")
     implementation("com.google.android.gms:play-services-identity:17.0.0")
     implementation("com.google.android.gms:play-services-auth:18.1.0")
@@ -126,8 +126,8 @@ dependencies {
     implementation("com.google.api-client:google-api-client:1.30.10")
     implementation("com.google.api-client:google-api-client-android:1.30.10")
 
-    implementation("com.google.firebase:firebase-analytics:17.6.0")
-    implementation("com.google.firebase:firebase-crashlytics:17.2.2")
+    implementation("com.google.firebase:firebase-analytics:18.0.0")
+    implementation("com.google.firebase:firebase-crashlytics:17.3.0")
 
     // 3rd party
     implementation("com.squareup.okhttp3:okhttp:4.8.1")
@@ -154,9 +154,9 @@ dependencies {
     implementation("androidx.room:room-ktx:2.2.5")
 
     // Kotlin
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.0")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4.10")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.2")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4.20")
 
     testImplementation("junit:junit:4.13.1")
 

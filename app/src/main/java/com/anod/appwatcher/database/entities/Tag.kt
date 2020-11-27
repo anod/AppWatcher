@@ -5,6 +5,7 @@ import android.os.Parcel
 import android.os.Parcelable
 import android.provider.BaseColumns
 import androidx.annotation.ColorInt
+import androidx.core.graphics.ColorUtils
 import androidx.room.*
 import com.anod.appwatcher.database.TagsTable
 
@@ -30,6 +31,9 @@ data class Tag(
             hsv[2] *= 0.6f
             return Color.HSVToColor(hsv)
         }
+
+    val isLightColor: Boolean
+        get() = ColorUtils.calculateLuminance(color) > 0.5
 
     @Ignore
     constructor(name: String) : this(0, name, DEFAULT_COLOR)

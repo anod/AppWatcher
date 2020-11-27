@@ -66,8 +66,6 @@ class WatchListPagingSource(
                         .forEach { item ->
                             items.add(OnDeviceItem(item, false))
                         }
-            } else if (params.key == null) {
-                items.add(Empty)
             }
         }
 

@@ -69,7 +69,7 @@ class SyncScheduler(private val context: ApplicationContext) {
                 .build()
 
         AppLog.i("Enqueue update check", "OneTimeWork")
-        return wm.enqueue(request)
+        return wm.enqueueUniqueWork(tagManual, ExistingWorkPolicy.REPLACE, request)
                 .state
                 .map {
                     when (it) {
@@ -97,5 +97,6 @@ class SyncScheduler(private val context: ApplicationContext) {
 
     companion object {
         private const val tag = "AppRefresh"
+        private const val tagManual = "AppRefreshManual"
     }
 }

@@ -43,18 +43,21 @@ abstract class WatchListViewModel(application: Application) : AndroidViewModel(a
     var filter: AppListFilter = AppListFilter.All()
         private set
 
+    private var hasData = false
+    private var firstChange = true
     val changes = AppListTable.Queries.changes(database.apps())
             .debounce(600)
             .map {
-                if (hasData) {
+                if (hasData && !firstChange) {
                     hasData = false
                     pagingSource?.invalidate()
                 }
+                firstChange = false
                 true
             }
     var pagingSource: PagingSource<Int, SectionItem>? = null
         private set
-    private var hasData = false
+
     private lateinit var headerFactory: SectionHeaderFactory
     val selection = MutableLiveData<Pair<Int, AppViewHolder.Selection>>()
 

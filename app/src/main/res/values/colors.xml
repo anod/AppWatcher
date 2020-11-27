@@ -45,6 +45,9 @@
     <color name="color_item_line">@color/material_grey_200</color>
     <color name="shortcut_icon_background">#F5F5F5</color>
 
+    <color name="text_dark">#de000000</color>
+    <color name="text_light">#ffffffff</color>
+
     <color name="chip_green">#26A69A</color>
     <color name="chip_pink">#F06292</color>
     <color name="chip_gray">#757F94</color>

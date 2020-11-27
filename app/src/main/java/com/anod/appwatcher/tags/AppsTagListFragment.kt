@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.anod.appwatcher.R
@@ -47,6 +49,15 @@ class AppsTagListFragment : WatchListFragment() {
 
     override fun createEmptyViewHolder(emptyView: View, action: SingleLiveEvent<WishListAction>): EmptyViewHolder {
         emptyView.findViewById<TextView>(R.id.emptyText).setText(R.string.tags_list_is_empty)
+        viewModel.tag?.let {
+            val button = emptyView.findViewById<Button>(R.id.button1)
+            button.setBackgroundColor(it.color)
+            if (it.isLightColor) {
+                button.setTextColor(ResourcesCompat.getColor(resources, R.color.text_dark, context?.theme))
+            } else {
+                button.setTextColor(ResourcesCompat.getColor(resources, R.color.text_light, context?.theme))
+            }
+        }
         emptyView.findViewById<Button>(R.id.button2).isVisible = false
         emptyView.findViewById<Button>(R.id.button3).isVisible = false
         return EmptyViewHolder(emptyView, true, action)
@@ -58,7 +69,7 @@ class AppsTagListFragment : WatchListFragment() {
             private val tag: Tag?
     ) : FragmentFactory("apps-tags-$filterId-$sortId-${tag?.hashCode()}") {
 
-        override fun create(): Fragment? = AppsTagListFragment().also {
+        override fun create(): Fragment = AppsTagListFragment().also {
             it.arguments = Bundle().apply {
                 putInt(ARG_FILTER, filterId)
                 putInt(ARG_SORT, sortId)
