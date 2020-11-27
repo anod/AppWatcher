@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">App Watcher</string>
-    <string name="menu_add">Добавитъ</string>
+    <string name="menu_add">Добавить</string>
     <string name="menu_refresh">Обновить</string>
     <string name="failed_gain_access">Пожалуйста разрешите доступ. Разрешение требуется для того, чтобы связаться с Google Play Маркет.</string>
     <string name="search_action">Поиск</string>
@@ -113,7 +113,7 @@
     <string name="user_action_required">Требуется действие пользователя</string>
     <string name="check_connection">Проверьте соединение с интернетом</string>
     <string name="refresh_scheduled">Обновление запланировано</string>
-    <string name="recently_installed">Недавно установиленные</string>
+    <string name="recently_installed">Недавно установленные</string>
     <string name="shortcut_search">Поиск</string>
     <string name="open">Открыть</string>
     <string name="channel_app_updates">Обновления</string>
@@ -133,7 +133,7 @@
         <item>Черная</item> <!-- MODE_NIGHT_YES = 2; -->
     </string-array>
 
-    <string name="pref_title_updates_frequency">Переодичность проверки</string>
+    <string name="pref_title_updates_frequency">Периодичность проверки</string>
     <string name="share_subject">%1$s версия %2$s</string>
     <string name="new_updates">Новые обновления</string>
     <string name="shortcut_updates">Обновляемые</string>
@@ -146,7 +146,7 @@
     <string name="log">Логи</string>
     <string name="user_log">Логи</string>
     <string name="refresh_gdrive_mesage">Регистрация Google Drive аккаунта после обновления</string>
-    <string name="setup_new_interface_message">Настройте главный экран, чтобы включить дополнительные разделы. Ранее разделы были доступны в Установленныx. Можнo поменять позже в настройках.</string>
+    <string name="setup_new_interface_message">Настройте главный экран, чтобы включить дополнительные разделы. Ранее разделы были доступны в Установленных. Можно поменять позже в настройках.</string>
     <string name="setup_interface_title">Настройка интерфейса</string>
     <string name="setup_interface_section_ondevice">Отображать раздел с аппликациями на устройстве под списком наблюдений</string>
     <string name="i_understand">Я понял</string>
@@ -163,7 +163,7 @@
     <string name="pref_pull_to_refresh">Обновить</string>
     <string name="app_info">Апп Инфо</string>
     <string name="crash_reports_title">Отчеты о сбоях</string>
-    <string name="crash_reports_descr">Собирайте отчеты о сбоях. Требуется перезпуск.</string>
+    <string name="crash_reports_descr">Собирайте отчеты о сбоях. Требуется перезапуск.</string>
     <string name="tab_updatable">Обновляемые</string>
     <string name="pref_privacy">Конфиденциальность</string>
     <string name="adaptive_icon_style">Форма иконки</string>
@@ -193,7 +193,7 @@
     <string name="delete_tag">Удалить</string>
     <string name="delete_tag_message">Тэг \'%s\' будет удален</string>
     <string name="more">Больше</string>
-    <string name="import_mode">Ресим импорта</string>
+    <string name="import_mode">Режим импорта</string>
     <string name="none">Ничего</string>
-    <string name="number_selected">%d выбранно</string>
+    <string name="number_selected">%d выбрано</string>
 </resources>
