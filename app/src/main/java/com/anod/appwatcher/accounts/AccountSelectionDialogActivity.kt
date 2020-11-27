@@ -13,7 +13,7 @@ import android.widget.Button
 import android.widget.RadioButton
 import androidx.appcompat.app.AppCompatActivity
 import com.anod.appwatcher.R
-import kotlinx.android.synthetic.main.activity_choose_account.*
+import com.anod.appwatcher.databinding.ActivityChooseAccountBinding
 
 /**
  * @author alex
@@ -34,9 +34,12 @@ class AccountSelectionDialogActivity : AppCompatActivity() {
         AccountManager.get(this@AccountSelectionDialogActivity)
     }
 
+    private lateinit var binding: ActivityChooseAccountBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_choose_account)
+        binding = ActivityChooseAccountBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         setTitle(R.string.choose_an_account)
 
         val accounts = accountManager.getAccountsByType(AuthTokenBlocking.ACCOUNT_TYPE)
@@ -51,7 +54,7 @@ class AccountSelectionDialogActivity : AppCompatActivity() {
 
         findViewById<Button>(android.R.id.button2).setOnClickListener {
 
-            val account = (list.adapter as AccountsAdapter).selectedAccount
+            val account = (binding.list.adapter as AccountsAdapter).selectedAccount
             if (account == null) {
                 setResult(Activity.RESULT_CANCELED)
             } else {
@@ -70,7 +73,7 @@ class AccountSelectionDialogActivity : AppCompatActivity() {
 
         val adapter = AccountsAdapter(this, accounts)
         adapter.selectedAccount = intent?.extras?.get("account") as? Account
-        list.adapter = adapter
+        binding.list.adapter = adapter
     }
 
     class AccountsAdapter(context: Context, accounts: Array<Account>): ArrayAdapter<Account>(context, R.layout.list_item_radio, accounts) {

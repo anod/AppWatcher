@@ -1,20 +1,26 @@
 package com.anod.appwatcher.details
 
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.commitNow
 import com.anod.appwatcher.R
+import com.anod.appwatcher.databinding.ActivityAppChangelogBinding
 import com.anod.appwatcher.utils.Theme
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ToolbarActivity
 
 abstract class DetailsActivity : ToolbarActivity() {
 
+    private lateinit var binding: ActivityAppChangelogBinding
     override val themeRes: Int
         get() = Theme(this).themeDialogNoActionBar
 
-    override val layoutResource: Int
-        get() = R.layout.activity_app_changelog
+    override val layoutView: View
+        get() {
+            binding = ActivityAppChangelogBinding.inflate(layoutInflater)
+            return binding.root
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

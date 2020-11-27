@@ -6,11 +6,11 @@ import android.os.Bundle
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
-import androidx.annotation.LayoutRes
 import androidx.annotation.MenuRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -23,6 +23,7 @@ import com.anod.appwatcher.Application
 import com.anod.appwatcher.ChangelogActivity
 import com.anod.appwatcher.MarketSearchActivity
 import com.anod.appwatcher.R
+import com.anod.appwatcher.databinding.ActivityMainBinding
 import com.anod.appwatcher.details.DetailsActivity
 import com.anod.appwatcher.details.DetailsEmptyView
 import com.anod.appwatcher.details.DetailsFragment
@@ -39,7 +40,6 @@ import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.FragmentFactory
 import info.anodsplace.framework.app.HingeDevice
-import kotlinx.android.synthetic.main.activity_main.*
 
 sealed class ListState
 object SyncStarted : ListState()
@@ -54,6 +54,8 @@ interface AppDetailsRouter {
 
 abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionListener, AppDetailsRouter {
 
+    internal lateinit var binding: ActivityMainBinding
+
     override val themeRes: Int
         get() = Theme(this).theme
     override val themeColors: CustomThemeColors
@@ -61,8 +63,11 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
 
     open val defaultFilterId = Filters.TAB_ALL
 
-    @get:LayoutRes
-    override val layoutResource = R.layout.activity_main
+    override val layoutView: View
+        get() {
+            binding = ActivityMainBinding.inflate(layoutInflater)
+            return binding.root
+        }
 
     @get:IdRes
     override val detailsLayoutId = R.id.details
@@ -81,7 +86,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     protected abstract val menuResource: Int
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putInt("tab_id", viewPager.currentItem)
+        outState.putInt("tab_id", binding.viewPager.currentItem)
         outState.putString("filter", actionMenu.search.query)
         super.onSaveInstanceState(outState)
     }
@@ -101,13 +106,13 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
             actionMenu.search.expand = expandSearch
         }
 
-        viewPager.offscreenPageLimit = 0
-        viewPager.adapter = createViewPagerAdapter()
+        binding.viewPager.offscreenPageLimit = 0
+        binding.viewPager.adapter = createViewPagerAdapter()
 
-        viewPager.currentItem = filterId
+        binding.viewPager.currentItem = filterId
         actionMenu.filterId = filterId
         updateSubtitle(filterId)
-        viewPager.addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {
+        binding.viewPager.addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {
             override fun onPageSelected(position: Int) {
                 onFilterSelected(position)
             }
@@ -115,7 +120,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
 
         menuAction.observe(this) {
             when (it) {
-                is FilterMenuAction -> viewPager.currentItem = it.filterId
+                is FilterMenuAction -> binding.viewPager.currentItem = it.filterId
                 is SortMenuAction -> stateViewModel.sortId.value = it.sortId
                 is SearchQueryAction -> {
                     if (it.submit) {
@@ -183,7 +188,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         if (filterId == 0) {
             supportActionBar?.subtitle = ""
         } else {
-            supportActionBar?.subtitle = (viewPager.adapter as? Adapter)?.getPageTitle(filterId)
+            supportActionBar?.subtitle = (binding.viewPager.adapter as? Adapter)?.getPageTitle(filterId)
                     ?: ""
         }
     }

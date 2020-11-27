@@ -26,7 +26,6 @@ import info.anodsplace.framework.app.DialogSingleChoice
 import info.anodsplace.framework.app.FragmentFactory
 import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.content.startActivitySafely
-import kotlinx.android.synthetic.main.fragment_applist.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -50,13 +49,14 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
                     viewModel.sortId = it.sortId
                     reload()
                 }
+                is FilterMenuAction -> { }
             }
         }
 
         importViewModel.progress.observe(this, Observer { status ->
             when (status) {
                 is ImportStarted -> {
-                    actionButton.isEnabled = false
+                    binding.actionButton.isEnabled = false
                 }
                 is ImportProgress -> {
                 }
@@ -82,15 +82,15 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
         importViewModel.selectionMode = selectionMode
         if (importViewModel.selectionMode) {
             if (animated) {
-                actionButton.show()
+                binding.actionButton.show()
             } else {
-                actionButton.isVisible = true
+                binding.actionButton.isVisible = true
             }
-            actionButton.isEnabled = importViewModel.hasSelection
+            binding.actionButton.isEnabled = importViewModel.hasSelection
             actionMode = (activity as? ToolbarActivity)?.startActionMode(this)
             updateTitle()
         } else {
-            actionButton.hide()
+            binding.actionButton.hide()
             importViewModel.clearSelection()
         }
     }
@@ -148,12 +148,12 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
             switchImportMode(!importViewModel.selectionMode, animated = false)
         }
 
-        actionButton.setOnClickListener {
+        binding.actionButton.setOnClickListener {
             startImport()
         }
 
         importViewModel.selectionChange.observe(viewLifecycleOwner) { change ->
-            actionButton.isEnabled = change.extras.getBoolean("hasSelection")
+            binding.actionButton.isEnabled = change.extras.getBoolean("hasSelection")
             val index = change.extras.getInt("index", -1)
             updateTitle()
             if (change.key == null) {
@@ -171,7 +171,7 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
             return
         }
 
-        actionButton.isEnabled = false
+        binding.actionButton.isEnabled = false
 
         lifecycleScope.launch {
             try {

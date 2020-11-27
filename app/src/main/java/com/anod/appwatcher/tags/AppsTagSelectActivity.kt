@@ -20,13 +20,13 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.databinding.ActivityTagSelectBinding
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.Theme
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.view.Keyboard
-import kotlinx.android.synthetic.main.activity_tag_select.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -62,6 +62,7 @@ class AppsTagViewModel(application: android.app.Application) : AndroidViewModel(
 
 class AppsTagSelectActivity : ToolbarActivity() {
 
+    private lateinit var binding: ActivityTagSelectBinding
     override val themeRes: Int
         get() = Theme(this).themeDialogNoActionBar
     override val themeColors: CustomThemeColors
@@ -70,8 +71,12 @@ class AppsTagSelectActivity : ToolbarActivity() {
     private var isAllSelected: Boolean = false
     private val viewModel: AppsTagViewModel by viewModels()
     private val adapter: TagAppsAdapter by lazy { TagAppsAdapter(this, viewModel.tagAppsImport) }
-    override val layoutResource: Int
-        get() = R.layout.activity_tag_select
+
+    override val layoutView: View
+        get() {
+            binding = ActivityTagSelectBinding.inflate(layoutInflater)
+            return binding.root
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,10 +87,10 @@ class AppsTagSelectActivity : ToolbarActivity() {
 
         supportActionBar!!.setBackgroundDrawable(ColorDrawable(tag.color))
 
-        list.layoutManager = LinearLayoutManager(this)
+        binding.list.layoutManager = LinearLayoutManager(this)
 
         findViewById<View>(android.R.id.button3).setOnClickListener {
-            val importAdapter = list.adapter as TagAppsAdapter
+            val importAdapter = binding.list.adapter as TagAppsAdapter
             isAllSelected = !isAllSelected
             importAdapter.selectAllApps(isAllSelected)
         }
@@ -105,11 +110,11 @@ class AppsTagSelectActivity : ToolbarActivity() {
 
         viewModel.tags.observe(this) {
             viewModel.tagAppsImport.initSelected(it)
-            list.adapter = adapter
+            binding.list.adapter = adapter
         }
 
         viewModel.apps.observe(this) {
-            progress.visibility = View.GONE
+            binding.progress.visibility = View.GONE
             adapter.setData(it)
         }
     }

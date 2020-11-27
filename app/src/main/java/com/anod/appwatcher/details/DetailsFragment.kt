@@ -31,6 +31,7 @@ import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.generateTitle
+import com.anod.appwatcher.databinding.FragmentAppChangelogBinding
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.tags.TagSnackbar
@@ -45,8 +46,6 @@ import info.anodsplace.framework.content.forAppInfo
 import info.anodsplace.framework.content.forUninstall
 import info.anodsplace.framework.content.startActivitySafely
 import info.anodsplace.framework.graphics.chooseDark
-import kotlinx.android.synthetic.main.fragment_app_changelog.*
-import kotlinx.android.synthetic.main.view_changelog_header.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -57,6 +56,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
     private var loaded = false
     private val viewModel: DetailsViewModel by viewModels()
     private var toggleMenu: MenuItem? = null
+
     private val titleString: AlphaSpannableString by lazy {
         val span = AlphaForegroundColorSpan(ColorAttribute(android.R.attr.textColor, requireContext(), Color.WHITE).value)
         AlphaSpannableString(viewModel.app.value!!.generateTitle(resources), span)
@@ -74,12 +74,21 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         AppViewHolderResourceProvider(requireContext(), InstalledApps.PackageManager(requireContext().packageManager))
     }
 
-    private val appDetailsView: AppDetailsView by lazy { AppDetailsView(container, dataProvider) }
+    private val appDetailsView: AppDetailsView by lazy { AppDetailsView(binding.container, dataProvider) }
 
     private val adapter: ChangesAdapter by lazy { ChangesAdapter(requireContext()) }
 
+    private var _binding: FragmentAppChangelogBinding? = null
+    private val binding get() = _binding!!
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        _binding = FragmentAppChangelogBinding.inflate(inflater, container, false)
         return inflater.inflate(R.layout.fragment_app_changelog, container, false)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -90,17 +99,17 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         viewModel.appId.value = requireArguments().getString(DetailsActivity.EXTRA_APP_ID) ?: ""
 
         setupToolbar()
-        progressBar.visibility = View.GONE
-        error.visibility = View.GONE
-        list.visibility = View.GONE
-        background.visibility = View.INVISIBLE
-        appbar.addOnOffsetChangedListener(this)
+        binding.progressBar.visibility = View.GONE
+        binding.error.visibility = View.GONE
+        binding.list.visibility = View.GONE
+        binding.background.visibility = View.INVISIBLE
+        binding.appbar.addOnOffsetChangedListener(this)
 
-        retryButton.setOnClickListener {
-            progressBar.visibility = View.VISIBLE
-            error.visibility = View.GONE
-            list.visibility = View.GONE
-            retryButton.postDelayed({
+        binding.retryButton.setOnClickListener {
+            binding.progressBar.visibility = View.VISIBLE
+            binding.error.visibility = View.GONE
+            binding.list.visibility = View.GONE
+            binding.retryButton.postDelayed({
                 try {
                     viewModel.loadLocalChangelog()
                 } catch (e: Exception) {
@@ -112,8 +121,8 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         if (viewModel.appId.value!!.isEmpty()) {
             Toast.makeText(requireContext(), getString(R.string.cannot_load_app, viewModel.appId), Toast.LENGTH_LONG).show()
             AppLog.e("Cannot loadChangelog app details: '${viewModel.appId}'")
-            progressBar.visibility = View.GONE
-            error.visibility = View.VISIBLE
+            binding.progressBar.visibility = View.GONE
+            binding.error.visibility = View.VISIBLE
             return
         }
 
@@ -128,15 +137,15 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
                     if (adapter.isEmpty) {
                         showRetryMessage()
                     } else {
-                        progressBar.visibility = View.GONE
-                        list.visibility = View.VISIBLE
-                        error.visibility = View.GONE
+                        binding.progressBar.visibility = View.GONE
+                        binding.list.visibility = View.VISIBLE
+                        binding.error.visibility = View.GONE
                     }
                 }
                 else -> {
-                    progressBar.visibility = View.GONE
-                    list.visibility = View.VISIBLE
-                    error.visibility = View.GONE
+                    binding.progressBar.visibility = View.GONE
+                    binding.list.visibility = View.VISIBLE
+                    binding.error.visibility = View.GONE
                     adapter.setData(viewModel.localChangelog, viewModel.recentChange)
                 }
             }
@@ -146,14 +155,14 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
             if (app == null) {
                 Toast.makeText(requireContext(), getString(R.string.cannot_load_app, viewModel.appId), Toast.LENGTH_LONG).show()
                 AppLog.e("Cannot loadChangelog app details: '${viewModel.appId}'")
-                progressBar.visibility = View.GONE
-                error.visibility = View.VISIBLE
+                binding.progressBar.visibility = View.GONE
+                binding.error.visibility = View.VISIBLE
             } else {
                 if (!loaded) {
                     loaded = true
                     setupAppView(app)
-                    list.layoutManager = LinearLayoutManager(requireContext())
-                    list.adapter = adapter
+                    binding.list.layoutManager = LinearLayoutManager(requireContext())
+                    binding.list.adapter = adapter
                 }
                 val isWatched = app.status != AppInfoMetadata.STATUS_DELETED
                 toggleMenu?.isChecked = isWatched
@@ -177,7 +186,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
 
     override fun onResume() {
         super.onResume()
-        progressBar.visibility = View.VISIBLE
+        binding.progressBar.visibility = View.VISIBLE
 
         try {
             viewModel.loadLocalChangelog()
@@ -205,10 +214,10 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
     }
 
     private fun setupAppView(app: App) {
-        playStoreButton.setOnClickListener(this)
+        binding.playStoreButton.setOnClickListener(this)
 
         appDetailsView.fillDetails(app, false, "", false, app.rowId == -1)
-        toolbar.title = titleString
+        binding.toolbar.title = titleString
 
         if (app.iconUrl.isEmpty()) {
             setDefaultIcon()
@@ -226,9 +235,9 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
                     return@launchWhenCreated
                 }
                 val palette = withContext(Dispatchers.Default) { Palette.from(bitmap).generate() }
-                icon.setImageBitmap(bitmap)
-                toolbar.logo = BitmapDrawable(resources, bitmap)
-                toolbar.logo.alpha = 0
+                binding.header.icon.setImageBitmap(bitmap)
+                binding.toolbar.logo = BitmapDrawable(resources, bitmap)
+                binding.toolbar.logo.alpha = 0
                 onPaletteGenerated(palette)
             } catch (e: Exception) {
                 AppLog.e("loadIcon", e)
@@ -239,15 +248,15 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
 
     private fun setDefaultIcon() {
         if (isAdded) {
-            background.visibility = View.VISIBLE
+            binding.background.visibility = View.VISIBLE
             applyColor(ContextCompat.getColor(requireContext(), R.color.theme_accent))
-            icon.setImageResource(R.drawable.ic_app_icon_placeholder)
+            binding.header.icon.setImageResource(R.drawable.ic_app_icon_placeholder)
         }
     }
 
     private fun setupToolbar() {
-        toolbar.inflateMenu(R.menu.changelog)
-        val menu = toolbar.menu
+        binding.toolbar.inflateMenu(R.menu.changelog)
+        val menu = binding.toolbar.menu
         toggleMenu = menu.findItem(R.id.menu_watch_toggle).wrapCheckStateIcon()
         toggleMenu?.isEnabled = false
         val tagMenu = menu.findItem(R.id.menu_tag_app)
@@ -258,12 +267,12 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
             menu.findItem(R.id.menu_app_info).isVisible = false
         }
 
-        toolbar.setNavigationIcon(R.drawable.ic_baseline_arrow_white_24)
-        toolbar.setNavigationOnClickListener {
+        binding.toolbar.setNavigationIcon(R.drawable.ic_baseline_arrow_white_24)
+        binding.toolbar.setNavigationOnClickListener {
             requireActivity().onBackPressed()
         }
 
-        toolbar.setOnMenuItemClickListener(this)
+        binding.toolbar.setOnMenuItemClickListener(this)
     }
 
     private fun loadTagSubmenu(tagMenu: MenuItem) {
@@ -337,9 +346,9 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
     }
 
     private fun showRetryMessage() {
-        progressBar.visibility = View.GONE
-        error.visibility = View.VISIBLE
-        list.visibility = View.GONE
+        binding.progressBar.visibility = View.GONE
+        binding.error.visibility = View.VISIBLE
+        binding.list.visibility = View.GONE
 
         if (!Application.provide(this).networkConnection.isNetworkAvailable) {
             Toast.makeText(requireContext(), R.string.check_connection, Toast.LENGTH_SHORT).show()
@@ -361,20 +370,20 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
     }
 
     private fun applyColor(@ColorInt color: Int) {
-        val drawable = DrawableCompat.wrap(playStoreButton.drawable)
+        val drawable = DrawableCompat.wrap(binding.playStoreButton.drawable)
         DrawableCompat.setTint(drawable, color)
-        playStoreButton.setImageDrawable(drawable)
-        background.setBackgroundColor(color)
-        progressBar.indeterminateDrawable.setColorFilter(color, PorterDuff.Mode.SRC_IN)
+        binding.playStoreButton.setImageDrawable(drawable)
+        binding.background.setBackgroundColor(color)
+        binding.progressBar.indeterminateDrawable.setColorFilter(color, PorterDuff.Mode.SRC_IN)
     }
 
     private fun animateBackground() {
-        background.post {
+        binding.background.post {
             if (isVisible) {
                 val location = IntArray(2)
-                icon.getLocationOnScreen(location)
-                if (ViewCompat.isAttachedToWindow(background)) {
-                    RevealAnimatorCompat.show(background, location[0], location[1], 0).start()
+                binding.header.icon.getLocationOnScreen(location)
+                if (ViewCompat.isAttachedToWindow(binding.background)) {
+                    RevealAnimatorCompat.show(binding.background, location[0], location[1], 0).start()
                 }
             }
         }
@@ -396,19 +405,19 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
             return
         }
 
-        header.alpha = alpha
-        playStoreButton.alpha = alpha
-        playStoreButton.isEnabled = alpha > 0.8f
+        binding.header.root.alpha = alpha
+        binding.playStoreButton.alpha = alpha
+        binding.playStoreButton.isEnabled = alpha > 0.8f
 
         val inverseAlpha = (1.0f - alpha)
-        toolbar.logo?.alpha = (inverseAlpha * 255).toInt()
+        binding.toolbar.logo?.alpha = (inverseAlpha * 255).toInt()
         titleString.alpha = inverseAlpha
         subtitleString.alpha = inverseAlpha
-        container.post {
-            toolbar?.let {
+        binding.container.post {
+            binding.toolbar.let {
                 it.title = titleString
                 it.subtitle = subtitleString
-                playStoreButton.translationY = verticalOffset.toFloat()
+                binding.playStoreButton.translationY = verticalOffset.toFloat()
             }
         }
     }

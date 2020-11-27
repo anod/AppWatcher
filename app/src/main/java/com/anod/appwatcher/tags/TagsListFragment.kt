@@ -15,13 +15,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.databinding.ActivityTagsEditorBinding
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.utils.Theme
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.FragmentFactory
 import info.anodsplace.framework.app.FragmentToolbarActivity
 import info.anodsplace.framework.graphics.DrawableTint
-import kotlinx.android.synthetic.main.activity_tags_editor.*
 
 /**
  * @author Alex Gavrishev
@@ -31,10 +31,19 @@ import kotlinx.android.synthetic.main.activity_tags_editor.*
 
 class TagsListFragment : Fragment(), View.OnClickListener {
 
+    private var _binding: ActivityTagsEditorBinding? = null
+    private val binding get() = _binding!!
+
     private val viewModel: TagsListViewModel by viewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.activity_tags_editor, container, false)
+        _binding = ActivityTagsEditorBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -48,15 +57,15 @@ class TagsListFragment : Fragment(), View.OnClickListener {
             viewModel.appInfo.value = null
             requireActivity().title = getString(R.string.tags)
         }
-        emptyView.isVisible = false
-        list.layoutManager = LinearLayoutManager(requireContext())
-        list.adapter = TagAdapter(requireContext(), this)
-        list.addItemDecoration(DividerItemDecoration(requireContext(), DividerItemDecoration.HORIZONTAL))
+        binding.emptyView.isVisible = false
+        binding.list.layoutManager = LinearLayoutManager(requireContext())
+        binding.list.adapter = TagAdapter(requireContext(), this)
+        binding.list.addItemDecoration(DividerItemDecoration(requireContext(), DividerItemDecoration.HORIZONTAL))
 
         viewModel.tagsAppItems.observe(viewLifecycleOwner, Observer {
-            (list.adapter as TagAdapter).update(it)
+            (binding.list.adapter as TagAdapter).update(it)
             if (it.isEmpty()) {
-                emptyView.isVisible = true
+                binding.emptyView.isVisible = true
             }
         })
     }

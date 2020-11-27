@@ -22,13 +22,9 @@ import finsky.api.model.FilterPredicate
 import info.anodsplace.playstore.AppDetailsFilter
 import info.anodsplace.playstore.AppNameFilter
 import info.anodsplace.playstore.WishListEndpoint
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-@FlowPreview
-@ExperimentalCoroutinesApi
 class WishListViewModel(application: Application) : AndroidViewModel(application) {
     private val context: Context
         get() = getApplication<AppWatcherApplication>()

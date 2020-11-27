@@ -10,10 +10,10 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.R
+import com.anod.appwatcher.databinding.ActivityUserLogBinding
 import com.anod.appwatcher.utils.Theme
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.ToolbarActivity
-import kotlinx.android.synthetic.main.activity_user_log.*
 
 /**
  * @author Alex Gavrishev
@@ -56,17 +56,23 @@ class UserLogActivity : ToolbarActivity() {
         }
     }
 
-    override val layoutResource: Int
-        get() = R.layout.activity_user_log
+    private lateinit var binding: ActivityUserLogBinding
     override val themeRes: Int
         get() = Theme(this).theme
     override val themeColors: CustomThemeColors
         get() = Theme(this).colors
 
+
+    override val layoutView: View
+        get() {
+            binding = ActivityUserLogBinding.inflate(layoutInflater)
+            return binding.root
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        list.layoutManager = LinearLayoutManager(this)
-        list.adapter = UserLogAdapter(UserLogger(), this)
+        binding.list.layoutManager = LinearLayoutManager(this)
+        binding.list.adapter = UserLogAdapter(UserLogger(), this)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

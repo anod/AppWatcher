@@ -1,7 +1,6 @@
 plugins {
     id("com.android.application")
     kotlin("android")
-    kotlin("android.extensions")
     kotlin("kapt")
     id("com.google.gms.oss.licenses.plugin")
 }
@@ -33,6 +32,10 @@ android {
                 argument("room.incremental", "true")
             }
         }
+    }
+
+    buildFeatures {
+        viewBinding = true
     }
 
     signingConfigs {
@@ -85,10 +88,6 @@ android {
 
     kotlinOptions {
         jvmTarget = "1.8"
-    }
-
-    androidExtensions {
-        isExperimental = true
     }
 
     packagingOptions {

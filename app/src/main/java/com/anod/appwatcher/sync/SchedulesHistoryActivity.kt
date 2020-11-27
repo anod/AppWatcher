@@ -14,12 +14,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.*
+import com.anod.appwatcher.databinding.ActivityUserLogBinding
+import com.anod.appwatcher.databinding.ListItemScheduleBinding
 import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.utils.colorStateListOf
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.ToolbarActivity
-import kotlinx.android.synthetic.main.activity_user_log.*
-import kotlinx.android.synthetic.main.list_item_schedule.view.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -29,7 +29,7 @@ import java.util.*
  */
 class SchedulesHistoryActivity : ToolbarActivity() {
 
-    class ScheduleViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class ScheduleViewHolder(private val itemBinding: ListItemScheduleBinding) : RecyclerView.ViewHolder(itemBinding.root) {
         private val sdf = SimpleDateFormat("MMM d, HH:mm:ss", Locale.getDefault())
         private val context: Context
             get() = itemView.context
@@ -42,46 +42,46 @@ class SchedulesHistoryActivity : ToolbarActivity() {
             } else {
                 sdf.format(Date(schedule.start))
             }
-            itemView.time.text = range
+            itemBinding.time.text = range
             val result = schedule.result()
-            itemView.status.text = when (result) {
+            itemBinding.status.text = when (result) {
                 is New -> context.getString(R.string.schedule_status_new)
                 is Success -> context.getString(R.string.schedule_status_success)
                 is Failed -> context.getString(R.string.schedule_status_failed)
                 is Skipped -> context.getString(R.string.schedule_status_skipped)
             }
-            itemView.status.chipBackgroundColor = when (result) {
+            itemBinding.status.chipBackgroundColor = when (result) {
                 is New -> colorStateListOf(context, R.color.chip_blue)
                 is Success -> colorStateListOf(context, R.color.chip_green)
                 is Failed -> colorStateListOf(context, R.color.chip_orange)
                 is Skipped -> colorStateListOf(context, R.color.chip_gray)
             }
-            itemView.reason.text = when (schedule.reason) {
+            itemBinding.reason.text = when (schedule.reason) {
                 Schedule.reasonSchedule -> context.getString(R.string.schedule_reason_schedule)
                 Schedule.reasonManual -> context.getString(R.string.schedule_status_manual)
                 else -> "Unknown"
             }
-            itemView.reason.chipBackgroundColor = when (schedule.reason) {
+            itemBinding.reason.chipBackgroundColor = when (schedule.reason) {
                 Schedule.reasonSchedule -> colorStateListOf(context, R.color.chip_gray)
                 Schedule.reasonManual -> colorStateListOf(context, R.color.chip_yellow)
                 else -> colorStateListOf(context, R.color.chip_blue)
             }
-            
-            itemView.checked.text = context.getString(R.string.schedule_chip_checked, schedule.checked)
-            itemView.checked.isVisible = result is Success
-            itemView.found.text = context.getString(R.string.schedule_chip_found, schedule.found)
-            itemView.found.isVisible = result is Success
-            itemView.unavailable.text = context.getString(R.string.schedule_chip_unavailable, schedule.unavailable)
-            itemView.unavailable.isVisible = result is Success && schedule.unavailable > 0
-            itemView.notified.text = context.getString(R.string.schedule_chip_notified, schedule.notified)
-            itemView.notified.isVisible = result is Success
 
-            itemView.description.isVisible = when (result) {
+            itemBinding.checked.text = context.getString(R.string.schedule_chip_checked, schedule.checked)
+            itemBinding.checked.isVisible = result is Success
+            itemBinding.found.text = context.getString(R.string.schedule_chip_found, schedule.found)
+            itemBinding.found.isVisible = result is Success
+            itemBinding.unavailable.text = context.getString(R.string.schedule_chip_unavailable, schedule.unavailable)
+            itemBinding.unavailable.isVisible = result is Success && schedule.unavailable > 0
+            itemBinding.notified.text = context.getString(R.string.schedule_chip_notified, schedule.notified)
+            itemBinding.notified.isVisible = result is Success
+
+            itemBinding.description.isVisible = when (result) {
                 is Failed -> true
                 is Skipped -> true
                 else -> false
             }
-            itemView.description.text = when (result) {
+            itemBinding.description.text = when (result) {
                 is Failed -> when (result.reason) {
                     Schedule.statusFailed -> "Unknown error"
                     Schedule.statusFailedNoToken -> "Cannot receive access token"
@@ -108,8 +108,8 @@ class SchedulesHistoryActivity : ToolbarActivity() {
             }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ScheduleViewHolder {
-            val view = LayoutInflater.from(context).inflate(R.layout.list_item_schedule, parent, false)
-            return ScheduleViewHolder(view)
+            val binding = ListItemScheduleBinding.inflate(LayoutInflater.from(context), parent, false)
+            return ScheduleViewHolder(binding)
         }
 
         override fun getItemCount() = schedules.size
@@ -119,8 +119,13 @@ class SchedulesHistoryActivity : ToolbarActivity() {
         }
     }
 
-    override val layoutResource: Int
-        get() = R.layout.activity_user_log
+    private lateinit var binding: ActivityUserLogBinding
+    override val layoutView: View
+        get() {
+            binding = ActivityUserLogBinding.inflate(layoutInflater)
+            return binding.root
+        }
+
     override val themeRes: Int
         get() = Theme(this).theme
     override val themeColors: CustomThemeColors
@@ -128,12 +133,12 @@ class SchedulesHistoryActivity : ToolbarActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        list.layoutManager = LinearLayoutManager(this)
+        binding.list.layoutManager = LinearLayoutManager(this)
         val adapter = SchedulesAdapter(this)
         val schedules = Application.provide(this).database.schedules()
         schedules.load().observe(this, Observer {
             adapter.schedules = it
         })
-        list.adapter = adapter
+        binding.list.adapter = adapter
     }
 }

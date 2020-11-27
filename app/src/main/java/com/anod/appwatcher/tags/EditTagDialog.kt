@@ -10,27 +10,35 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.databinding.DialogEditTagBinding
 import com.anod.appwatcher.utils.Theme
 import info.anodsplace.colorpicker.ColorPickerDialog
 import info.anodsplace.colorpicker.ColorPickerSwatch
 import info.anodsplace.colorpicker.ColorStateDrawable
 import info.anodsplace.framework.app.DialogMessage
-import kotlinx.android.synthetic.main.dialog_edit_tag.*
 
 /**
  * @author Alex Gavrishev
  * *
  * @date 14/04/2017.
  */
-
 class EditTagDialog : DialogFragment(), ColorPickerSwatch.OnColorSelectedListener {
 
     private lateinit var tag: Tag
 
     private val viewModel: TagsListViewModel by viewModels()
 
+    private var _binding: DialogEditTagBinding? = null
+    private val binding get() = _binding!!
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.dialog_edit_tag, container, false)
+        _binding = DialogEditTagBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -38,19 +46,19 @@ class EditTagDialog : DialogFragment(), ColorPickerSwatch.OnColorSelectedListene
 
         tag = requireArguments().getParcelable("tag") ?: Tag("")
 
-        tagName.setText(tag.name)
+        binding.tagName.setText(tag.name)
         val colorDrawable = arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.color_picker_swatch, null)!!)
-        colorPreview.setImageDrawable(ColorStateDrawable(colorDrawable, tag.color))
-        tagName.requestFocus()
+        binding.colorPreview.setImageDrawable(ColorStateDrawable(colorDrawable, tag.color))
+        binding.tagName.requestFocus()
         dialog?.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
 
         if (tag.id == -1) {
-            button3.visibility = View.GONE
+            binding.button3.visibility = View.GONE
         } else {
-            button3.visibility = View.VISIBLE
+            binding.button3.visibility = View.VISIBLE
         }
 
-        colorPreview.setOnClickListener {
+        binding.colorPreview.setOnClickListener {
             val dialog = ColorPickerDialog.newInstance(tag.color, false, activity, Theme(requireActivity()).themeDialog)
             dialog.setStyle(STYLE_NORMAL, Theme(requireActivity()).themeDialogNoActionBar)
             dialog.setOnColorSelectedListener(this)
@@ -58,17 +66,17 @@ class EditTagDialog : DialogFragment(), ColorPickerSwatch.OnColorSelectedListene
         }
 
 
-        button1.setOnClickListener {
-            tag = Tag(tag.id, tagName.text.toString().trim { it <= ' ' }, tag.color)
+        binding.button1.setOnClickListener {
+            tag = Tag(tag.id, binding.tagName.text.toString().trim { it <= ' ' }, tag.color)
             viewModel.saveTag(tag)
             dismiss()
         }
 
-        button2.setOnClickListener {
+        binding.button2.setOnClickListener {
             dismiss()
         }
 
-        button3.setOnClickListener {
+        binding.button3.setOnClickListener {
             DialogMessage(
                     requireContext(),
                     R.style.AlertDialog,
@@ -88,7 +96,7 @@ class EditTagDialog : DialogFragment(), ColorPickerSwatch.OnColorSelectedListene
         tag = Tag(tag.id, tag.name, color)
 
         val colorDrawable = arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.color_picker_swatch, null)!!)
-        colorPreview.setImageDrawable(ColorStateDrawable(colorDrawable, tag.color))
+        binding.colorPreview.setImageDrawable(ColorStateDrawable(colorDrawable, tag.color))
     }
 
     companion object {

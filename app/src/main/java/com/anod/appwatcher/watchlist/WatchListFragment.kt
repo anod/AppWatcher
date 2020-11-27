@@ -16,11 +16,15 @@ import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.anod.appwatcher.*
-import com.anod.appwatcher.R
+import com.anod.appwatcher.AppWatcherApplication
+import com.anod.appwatcher.Application
+import com.anod.appwatcher.BuildConfig
+import com.anod.appwatcher.MarketSearchActivity
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.databinding.FragmentApplistBinding
+import com.anod.appwatcher.databinding.ListItemEmptyBinding
 import com.anod.appwatcher.installed.InstalledFragment
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
@@ -30,9 +34,7 @@ import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.CustomThemeActivity
 import info.anodsplace.framework.app.FragmentFactory
 import info.anodsplace.framework.content.startActivitySafely
-import kotlinx.android.synthetic.main.fragment_applist.*
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -58,6 +60,8 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
     private var loadJob: Job? = null
     private val action = SingleLiveEvent<WishListAction>()
     private val stateViewModel: WatchListStateViewModel by activityViewModels()
+    private var _binding: FragmentApplistBinding? = null
+    val binding get() = _binding!!
 
     protected open fun viewModelFactory(): ViewModelProvider.Factory {
         return object : ViewModelProvider.Factory {
@@ -66,21 +70,27 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_applist, container, false)
+        _binding = FragmentApplistBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         if (prefs.enablePullToRefresh) {
-            swipeLayout.setOnRefreshListener(this)
+            binding.swipeLayout.setOnRefreshListener(this)
         } else {
-            swipeLayout.isEnabled = false
+            binding.swipeLayout.isEnabled = false
         }
 
-        progress.isVisible = true
+        binding.progress.isVisible = true
         val metrics = resources.displayMetrics
-        swipeLayout.setDistanceToTriggerSync((16 * metrics.density).toInt())
+        binding.swipeLayout.setDistanceToTriggerSync((16 * metrics.density).toInt())
 
         val args = requireArguments()
         viewModel.sortId = args.getInt(ARG_SORT)
@@ -89,7 +99,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
 
         // Setup layout manager
         val layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
-        listView.layoutManager = layoutManager
+        binding.listView.layoutManager = layoutManager
 
         // Setup header decorator
         adapter = WatchListPagingAdapter(
@@ -99,15 +109,15 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
                 { appItem -> getItemSelection(appItem) },
                 viewModel.selection,
                 requireContext())
-        listView.adapter = adapter
+        binding.listView.adapter = adapter
 
         // When an item inserted into top there is no indication and list maintains previous position
         // Request to scroll to the top in this case
         adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
             override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-                if (positionStart == 0 && (listView.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition() == 0) {
+                if (positionStart == 0 && (binding.listView.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition() == 0) {
                     if (isVisible) {
-                        listView.scrollToPosition(0)
+                        binding.listView.scrollToPosition(0)
                     }
                 }
             }
@@ -121,25 +131,25 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
                 )
                 AppLog.d("loadStateFlow: ${loadState.source.refresh}")
                 if (isEmpty) {
-                    if (emptyView.childCount == 0) {
-                        val itemView = LayoutInflater.from(context).inflate(R.layout.list_item_empty, emptyView, true)
-                        val holder = createEmptyViewHolder(itemView, action)
+                    if (binding.emptyView.childCount == 0) {
+                        val emptyBinding = ListItemEmptyBinding.inflate(layoutInflater, binding.emptyView, true)
+                        val holder = createEmptyViewHolder(emptyBinding, action)
                         holder.bind()
                     }
-                    emptyView.isVisible = true
-                    listView.isVisible = false
+                    binding.emptyView.isVisible = true
+                    binding.listView.isVisible = false
                 } else {
-                    emptyView.isVisible = false
-                    listView.isVisible = true
+                    binding.emptyView.isVisible = false
+                    binding.listView.isVisible = true
                 }
             }
         }
 
         if (prefs.enablePullToRefresh) {
-            listView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            binding.listView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                     val isOnTop = !recyclerView.canScrollVertically(-1)
-                    swipeLayout.isEnabled = isOnTop
+                    binding.swipeLayout.isEnabled = isOnTop
                 }
             })
         }
@@ -162,10 +172,10 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
         stateViewModel.listState.observe(viewLifecycleOwner) {
             when (it) {
                 is SyncStarted -> {
-                    swipeLayout.isRefreshing = true
+                    binding.swipeLayout.isRefreshing = true
                 }
                 else -> {
-                    swipeLayout.isRefreshing = false
+                    binding.swipeLayout.isRefreshing = false
                 }
             }
         }
@@ -210,19 +220,19 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
     )
 
     fun reload() {
-        listView.isVisible = false
+        binding.listView.isVisible = false
         loadJob?.cancel()
         loadJob = lifecycleScope.launch {
             viewModel.load(config()).collectLatest { result ->
-                listView.isVisible = true
-                progress.isVisible = false
+                binding.listView.isVisible = true
+                binding.progress.isVisible = false
                 AppLog.d("Load status changed: $result")
                 adapter.submitData(result)
             }
         }
     }
 
-    protected open fun createEmptyViewHolder(emptyView: View, action: SingleLiveEvent<WishListAction>) = EmptyViewHolder(emptyView, !prefs.showRecent, action)
+    protected open fun createEmptyViewHolder(emptyBinding: ListItemEmptyBinding, action: SingleLiveEvent<WishListAction>) = EmptyViewHolder(emptyBinding, !prefs.showRecent, action)
 
     protected open fun mapAction(it: WishListAction): WishListAction {
         if (it is EmptyButton) {
@@ -249,7 +259,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
             private val tag: Tag?
     ) : FragmentFactory("watch-list-$filterId-$sortId-${tag?.hashCode()}") {
 
-        override fun create(): Fragment? = WatchListFragment().also {
+        override fun create(): Fragment = WatchListFragment().also {
             it.arguments = Bundle().apply {
                 putInt(ARG_FILTER, filterId)
                 putInt(ARG_SORT, sortId)

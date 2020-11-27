@@ -183,7 +183,7 @@
     <string name="schedule_reason_schedule">"Запланированная"</string>
     <string name="schedule_status_manual">"Ручная"</string>
     <string name="schedule_chip_checked">"%d синхронизировано"</string>
-    <string name="schedule_chip_found">"%%d обновлений"</string>
+    <string name="schedule_chip_found">"%d обновлений"</string>
     <string name="schedule_chip_unavailable">"%d недоступно"</string>
     <string name="pref_notify_no_changes_summary">"Уведомлять когда текст обновления изменился"</string>
     <string name="pref_notify_no_changes">"Без изменений"</string>

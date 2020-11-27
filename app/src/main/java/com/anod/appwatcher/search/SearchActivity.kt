@@ -21,6 +21,7 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AccountSelectionDialog
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
+import com.anod.appwatcher.databinding.ActivityMarketSearchBinding
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.SingleLiveEvent
@@ -29,7 +30,6 @@ import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.view.Keyboard
-import kotlinx.android.synthetic.main.activity_market_search.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
@@ -55,18 +55,22 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
 
     private val viewModel: SearchViewModel by viewModels()
 
-    override val layoutResource: Int
-        get() = R.layout.activity_market_search
+    private lateinit var binding: ActivityMarketSearchBinding
+    override val layoutView: View
+        get() {
+            binding = ActivityMarketSearchBinding.inflate(layoutInflater)
+            return binding.root
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        retryButton.setOnClickListener { retrySearchResult() }
-        list.layoutManager = LinearLayoutManager(this)
-        list.visibility = View.GONE
-        empty.visibility = View.GONE
-        loading.visibility = View.VISIBLE
-        retryBox.visibility = View.GONE
+        binding.retryButton.setOnClickListener { retrySearchResult() }
+        binding.list.layoutManager = LinearLayoutManager(this)
+        binding.list.visibility = View.GONE
+        binding.empty.visibility = View.GONE
+        binding.loading.visibility = View.VISIBLE
+        binding.retryBox.visibility = View.GONE
 
         viewModel.initFromIntent(intent)
 
@@ -123,15 +127,15 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
             is DetailsAvailable -> {
                 showListView()
                 adapter = ResultsAdapterSingle(context, action, viewModel.packages, status.document)
-                list.adapter = adapter
+                binding.list.adapter = adapter
             }
             is NoNetwork -> {
-                loading.isVisible = false
+                binding.loading.isVisible = false
                 showRetryButton()
                 Toast.makeText(context, R.string.check_connection, Toast.LENGTH_SHORT).show()
             }
             is Error -> {
-                loading.isVisible = false
+                binding.loading.isVisible = false
                 showRetryButton()
             }
             is NoResults -> {
@@ -150,7 +154,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
                             }
                         }
                     }
-                    list.adapter = adapter
+                    binding.list.adapter = adapter
                 }
                 (adapter as ResultsAdapterList).submitData(status.pagingData)
             }
@@ -244,32 +248,32 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
     }
 
     private fun showRetryButton() {
-        list.visibility = View.GONE
-        empty.visibility = View.GONE
-        loading.visibility = View.GONE
-        retryBox.visibility = View.VISIBLE
+        binding.list.visibility = View.GONE
+        binding.empty.visibility = View.GONE
+        binding.loading.visibility = View.GONE
+        binding.retryBox.visibility = View.VISIBLE
     }
 
     private fun showLoading() {
-        list.visibility = View.GONE
-        empty.visibility = View.GONE
-        loading.visibility = View.VISIBLE
-        retryBox.visibility = View.GONE
+        binding.list.visibility = View.GONE
+        binding.empty.visibility = View.GONE
+        binding.loading.visibility = View.VISIBLE
+        binding.retryBox.visibility = View.GONE
     }
 
     private fun showNoResults(query: String) {
-        loading.visibility = View.GONE
-        list.visibility = View.GONE
-        retryBox.visibility = View.GONE
-        empty.text = if (query.isNotEmpty()) getString(R.string.no_result_found, query) else getString(R.string.search_for_app)
-        empty.visibility = View.VISIBLE
+        binding.loading.visibility = View.GONE
+        binding.list.visibility = View.GONE
+        binding.retryBox.visibility = View.GONE
+        binding.empty.text = if (query.isNotEmpty()) getString(R.string.no_result_found, query) else getString(R.string.search_for_app)
+        binding.empty.visibility = View.VISIBLE
     }
 
     private fun showListView() {
-        list.visibility = View.VISIBLE
-        empty.visibility = View.GONE
-        loading.visibility = View.GONE
-        retryBox.visibility = View.GONE
+        binding.list.visibility = View.VISIBLE
+        binding.empty.visibility = View.GONE
+        binding.loading.visibility = View.GONE
+        binding.retryBox.visibility = View.GONE
     }
 
     private fun retrySearchResult() {

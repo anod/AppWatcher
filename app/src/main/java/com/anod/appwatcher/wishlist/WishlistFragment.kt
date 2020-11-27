@@ -14,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.anod.appwatcher.R
+import com.anod.appwatcher.databinding.FragmentWishlistBinding
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.search.Add
 import com.anod.appwatcher.search.Delete
@@ -25,7 +26,6 @@ import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.FragmentFactory
 import info.anodsplace.framework.app.FragmentToolbarActivity
 import info.anodsplace.framework.view.Keyboard
-import kotlinx.android.synthetic.main.fragment_wishlist.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -42,6 +42,8 @@ class WishListFragment : Fragment() {
     lateinit var searchView: SearchView
     lateinit var adapter: ResultsAdapterList
     private val action = SingleLiveEvent<ResultAction>()
+    private var _binding: FragmentWishlistBinding? = null
+    val binding get() = _binding!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,7 +51,13 @@ class WishListFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_wishlist, container, false)
+        _binding = FragmentWishlistBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -75,15 +83,15 @@ class WishListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        list.layoutManager = LinearLayoutManager(context)
-        retryButton.setOnClickListener {
+        binding.list.layoutManager = LinearLayoutManager(context)
+        binding.retryButton.setOnClickListener {
             load()
         }
 
-        list.visibility = View.GONE
-        empty.visibility = View.GONE
-        loading.visibility = View.VISIBLE
-        retryView.visibility = View.GONE
+        binding.list.visibility = View.GONE
+        binding.empty.visibility = View.GONE
+        binding.loading.visibility = View.VISIBLE
+        binding.retryView.visibility = View.GONE
 
         requireActivity().setTitle(R.string.wishlist)
 
@@ -97,19 +105,19 @@ class WishListFragment : Fragment() {
         } else {
             viewModel.init(account, authToken)
             this.adapter = ResultsAdapterList(requireContext(), action, viewModel.packages)
-            list.adapter = this.adapter
+            binding.list.adapter = this.adapter
         }
 
         viewModel.appStatusChange.observe(viewLifecycleOwner, Observer {
             val newStatus = it.first
             if (newStatus == AppInfoMetadata.STATUS_NORMAL) {
                 TagSnackbar.make(requireActivity(), it.second!!, false).show()
-                list.adapter!!.notifyDataSetChanged()
+                binding.list.adapter!!.notifyDataSetChanged()
             }
         })
 
         viewModel.packages.observe(viewLifecycleOwner, Observer {
-            list.adapter?.notifyDataSetChanged()
+            binding.list.adapter?.notifyDataSetChanged()
         })
 
         action.observe(this, Observer {
@@ -122,10 +130,10 @@ class WishListFragment : Fragment() {
         adapter.addLoadStateListener { loadStates ->
             when (loadStates.refresh) {
                 is LoadState.Loading -> {
-                    loading.isVisible = true
+                    binding.loading.isVisible = true
                 }
                 is LoadState.NotLoading -> {
-                    loading.isVisible = false
+                    binding.loading.isVisible = false
                     if (adapter.itemCount == 0) {
                         showNoResults()
                     } else {
@@ -133,7 +141,7 @@ class WishListFragment : Fragment() {
                     }
                 }
                 is LoadState.Error -> {
-                    loading.isVisible = false
+                    binding.loading.isVisible = false
                     showRetryButton()
                 }
             }
@@ -152,25 +160,25 @@ class WishListFragment : Fragment() {
     }
 
     private fun showRetryButton() {
-        list.visibility = View.GONE
-        empty.visibility = View.GONE
-        loading.visibility = View.GONE
-        retryView.visibility = View.VISIBLE
+        binding.list.visibility = View.GONE
+        binding.empty.visibility = View.GONE
+        binding.loading.visibility = View.GONE
+        binding.retryView.visibility = View.VISIBLE
     }
 
     private fun showListView() {
-        list.visibility = View.VISIBLE
-        empty.visibility = View.GONE
-        loading.visibility = View.GONE
-        retryView.visibility = View.GONE
+        binding.list.visibility = View.VISIBLE
+        binding.empty.visibility = View.GONE
+        binding.loading.visibility = View.GONE
+        binding.retryView.visibility = View.GONE
     }
 
     private fun showNoResults() {
-        loading.visibility = View.GONE
-        list.visibility = View.GONE
-        retryView.visibility = View.GONE
-        empty.setText(R.string.no_result_wishlist)
-        empty.visibility = View.VISIBLE
+        binding.loading.visibility = View.GONE
+        binding.list.visibility = View.GONE
+        binding.retryView.visibility = View.GONE
+        binding.empty.setText(R.string.no_result_wishlist)
+        binding.empty.visibility = View.VISIBLE
     }
 
     companion object {

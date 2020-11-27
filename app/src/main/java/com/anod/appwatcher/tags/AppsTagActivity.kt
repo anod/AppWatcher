@@ -11,7 +11,6 @@ import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.watchlist.WatchListActivity
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.addMultiWindowFlags
-import kotlinx.android.synthetic.main.activity_main.*
 
 /**
  * @author Alex Gavrishev
@@ -38,7 +37,7 @@ class AppsTagActivity : WatchListActivity() {
         tag = restoreTag(savedInstanceState)
         super.onCreate(savedInstanceState)
 
-        toolbar.setBackgroundColor(tag.color)
+        binding.toolbar.setBackgroundColor(tag.color)
         title = tag.name
     }
 

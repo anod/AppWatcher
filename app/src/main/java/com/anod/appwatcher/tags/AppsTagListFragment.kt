@@ -1,17 +1,12 @@
 package com.anod.appwatcher.tags
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.Button
-import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
-import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.databinding.ListItemEmptyBinding
 import com.anod.appwatcher.utils.SingleLiveEvent
 import com.anod.appwatcher.watchlist.*
 import info.anodsplace.framework.app.FragmentFactory
@@ -23,10 +18,6 @@ import info.anodsplace.framework.app.FragmentFactory
  */
 
 class AppsTagListFragment : WatchListFragment() {
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_appstag_list, container, false)
-    }
 
     override fun mapAction(it: WishListAction): WishListAction {
         if (it is EmptyButton) {
@@ -47,10 +38,10 @@ class AppsTagListFragment : WatchListFragment() {
             showRecentlyInstalled = false
     )
 
-    override fun createEmptyViewHolder(emptyView: View, action: SingleLiveEvent<WishListAction>): EmptyViewHolder {
-        emptyView.findViewById<TextView>(R.id.emptyText).setText(R.string.tags_list_is_empty)
+    override fun createEmptyViewHolder(emptyBinding: ListItemEmptyBinding, action: SingleLiveEvent<WishListAction>): EmptyViewHolder {
+        emptyBinding.emptyText.setText(R.string.tags_list_is_empty)
         viewModel.tag?.let {
-            val button = emptyView.findViewById<Button>(R.id.button1)
+            val button = emptyBinding.button1
             button.setBackgroundColor(it.color)
             if (it.isLightColor) {
                 button.setTextColor(ResourcesCompat.getColor(resources, R.color.text_dark, context?.theme))
@@ -58,9 +49,9 @@ class AppsTagListFragment : WatchListFragment() {
                 button.setTextColor(ResourcesCompat.getColor(resources, R.color.text_light, context?.theme))
             }
         }
-        emptyView.findViewById<Button>(R.id.button2).isVisible = false
-        emptyView.findViewById<Button>(R.id.button3).isVisible = false
-        return EmptyViewHolder(emptyView, true, action)
+        emptyBinding.button2.isVisible = false
+        emptyBinding.button3.isVisible = false
+        return EmptyViewHolder(emptyBinding, true, action)
     }
 
     class Factory(
