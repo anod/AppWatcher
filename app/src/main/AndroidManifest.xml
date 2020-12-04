@@ -42,10 +42,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ChangelogActivity"
-            android:label=""
-            android:theme="@style/AppTheme.Dialog.NoActionBar" />
-        <activity
             android:name=".MarketSearchActivity"
             android:resizeableActivity="true"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"

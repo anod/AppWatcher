@@ -2,14 +2,12 @@
 package com.anod.appwatcher.installed
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.fragment.app.commit
 import androidx.lifecycle.AndroidViewModel
-import com.anod.appwatcher.ChangelogActivity
-import com.anod.appwatcher.details.DetailsActivity
+import com.anod.appwatcher.details.DetailsDialog
 import com.anod.appwatcher.details.DetailsEmptyView
 import com.anod.appwatcher.details.DetailsFragment
 import com.anod.appwatcher.watchlist.AppDetailsRouter
@@ -53,12 +51,7 @@ class InstalledActivity : FragmentToolbarActivity(), AppDetailsRouter {
                 addToBackStack(DetailsFragment.tag)
             }
         } else {
-            val intent = Intent(this, ChangelogActivity::class.java).apply {
-                putExtra(DetailsActivity.EXTRA_APP_ID, appId)
-                putExtra(DetailsActivity.EXTRA_ROW_ID, rowId)
-                putExtra(DetailsActivity.EXTRA_DETAILS_URL, detailsUrl)
-            }
-            startActivity(intent)
+            DetailsDialog.show(appId, rowId, detailsUrl, supportFragmentManager)
         }
     }
 

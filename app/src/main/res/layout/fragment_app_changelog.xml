@@ -118,7 +118,6 @@
             android:text="@string/retry" />
     </LinearLayout>
 
-
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/playStoreButton"
         android:layout_width="40dp"

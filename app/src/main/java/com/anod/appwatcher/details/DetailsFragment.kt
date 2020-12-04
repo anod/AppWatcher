@@ -96,9 +96,9 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.detailsUrl = requireArguments().getString(DetailsActivity.EXTRA_DETAILS_URL) ?: ""
-        viewModel.rowId = requireArguments().getInt(DetailsActivity.EXTRA_ROW_ID, -1)
-        viewModel.appId.value = requireArguments().getString(DetailsActivity.EXTRA_APP_ID) ?: ""
+        viewModel.detailsUrl = requireArguments().getString(extraDetailsUrl) ?: ""
+        viewModel.rowId = requireArguments().getInt(extraRowId, -1)
+        viewModel.appId.value = requireArguments().getString(extraAppId) ?: ""
 
         setupToolbar()
         binding.progressBar.isVisible = false
@@ -426,12 +426,16 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
     }
 
     companion object {
+        const val extraAppId = "app_id"
+        const val extraDetailsUrl = "url"
+        const val extraRowId = "row_id"
+
         const val tag = "DetailsFragment"
         fun newInstance(appId: String, detailsUrl: String, rowId: Int) = DetailsFragment().apply {
             arguments = Bundle().apply {
-                putString(DetailsActivity.EXTRA_APP_ID, appId)
-                putString(DetailsActivity.EXTRA_DETAILS_URL, detailsUrl)
-                putInt(DetailsActivity.EXTRA_ROW_ID, rowId)
+                putString(extraAppId, appId)
+                putString(extraDetailsUrl, detailsUrl)
+                putInt(extraRowId, rowId)
             }
         }
     }

@@ -15,12 +15,12 @@ repositories {
 }
 
 android {
-    compileSdkVersion(29)
+    compileSdkVersion(30)
 
     defaultConfig {
         applicationId = "com.anod.appwatcher"
         minSdkVersion(21)
-        targetSdkVersion(29)
+        targetSdkVersion(30)
         versionCode = 14608
         versionName = "1.4.6"
         resValue("string", "content_authority", "com.anod.appwatcher")
@@ -91,13 +91,15 @@ android {
     }
 
     packagingOptions {
-        exclude("META-INF/DEPENDENCIES")
-        exclude("META-INF/LICENSE*")
-        exclude("META-INF/license*")
-        exclude("META-INF/NOTICE*")
-        exclude("META-INF/notice*")
-        exclude("META-INF/ASL2.0")
-        exclude("META-INF/*.kotlin_module")
+        resources {
+            excludes += "META-INF/DEPENDENCIES"
+            excludes += "META-INF/LICENSE*"
+            excludes += "META-INF/license*"
+            excludes += "META-INF/NOTICE*"
+            excludes += "META-INF/notice*"
+            excludes += "META-INF/ASL2.0"
+            excludes += "META-INF/*.kotlin_module"
+        }
     }
 }
 
@@ -110,7 +112,7 @@ dependencies {
     implementation("androidx.work:work-runtime:2.4.0")
     implementation("androidx.core:core:1.3.2")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
-    implementation("androidx.paging:paging-runtime:3.0.0-alpha09")
+    implementation("androidx.paging:paging-runtime:3.0.0-alpha10")
     // Google
     implementation("com.google.android.material:material:1.3.0-alpha04")
     implementation("com.google.android.gms:play-services-oss-licenses:17.0.0")

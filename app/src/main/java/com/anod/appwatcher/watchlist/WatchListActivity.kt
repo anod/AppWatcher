@@ -1,6 +1,7 @@
 package com.anod.appwatcher.watchlist
 
 import android.accounts.Account
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.KeyEvent
@@ -20,11 +21,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import androidx.viewpager.widget.ViewPager
 import com.anod.appwatcher.Application
-import com.anod.appwatcher.ChangelogActivity
 import com.anod.appwatcher.MarketSearchActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.databinding.ActivityMainBinding
-import com.anod.appwatcher.details.DetailsActivity
+import com.anod.appwatcher.details.DetailsDialog
 import com.anod.appwatcher.details.DetailsEmptyView
 import com.anod.appwatcher.details.DetailsFragment
 import com.anod.appwatcher.model.Filters
@@ -86,9 +86,9 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     protected abstract val menuResource: Int
 
     override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
         outState.putInt("tab_id", binding.viewPager.currentItem)
         outState.putString("filter", actionMenu.search.query)
-        super.onSaveInstanceState(outState)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -156,6 +156,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
                     this.showAccountsDialogWithCheck()
                     actionMenu.stopRefresh()
                 }
+                else -> {}
             }
         }
     }
@@ -234,12 +235,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
                 addToBackStack(DetailsFragment.tag)
             }
         } else {
-            val intent = Intent(this, ChangelogActivity::class.java).apply {
-                putExtra(DetailsActivity.EXTRA_APP_ID, appId)
-                putExtra(DetailsActivity.EXTRA_ROW_ID, rowId)
-                putExtra(DetailsActivity.EXTRA_DETAILS_URL, detailsUrl)
-            }
-            startActivity(intent)
+            DetailsDialog.show(appId, rowId, detailsUrl, supportFragmentManager)
         }
     }
 
