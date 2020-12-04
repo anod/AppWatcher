@@ -3,6 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.anod.appwatcher">
 
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+        </intent>
+    </queries>
+
     <uses-sdk />
     <!-- for google account token -->
     <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
@@ -107,7 +113,8 @@
             android:name=".AppListContentProvider"
             android:authorities="${applicationId}"
             android:label="@string/app_name"
-            android:syncable="true" />
+            android:syncable="true"
+            android:exported="false" />
 
         <meta-data
             android:name="com.google.android.backup.api_key"
@@ -126,7 +133,9 @@
             android:authorities="${applicationId}.workmanager-init"
             tools:node="remove" />
 
-        <receiver android:name=".installed.PackageRemovedReceiver">
+        <receiver
+            android:name=".installed.PackageRemovedReceiver"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.PACKAGE_FULLY_REMOVED" />
                 <data android:scheme="package" />
