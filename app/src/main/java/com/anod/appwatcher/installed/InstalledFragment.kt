@@ -214,6 +214,8 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
                     reload()
                 }
             }
+            else -> {
+            }
         }
     }
 
@@ -237,7 +239,7 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
             private val showImportAction: Boolean
     ) : FragmentFactory("recently-installed-$sortId-$showImportAction") {
 
-        override fun create(): Fragment? = InstalledFragment().also {
+        override fun create(): Fragment = InstalledFragment().also {
             it.arguments = Bundle().apply {
                 putInt(ARG_FILTER, Filters.TAB_ALL)
                 putInt(ARG_SORT, sortId)

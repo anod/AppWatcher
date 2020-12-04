@@ -49,6 +49,7 @@ import info.anodsplace.framework.content.forUninstall
 import info.anodsplace.framework.content.startActivitySafely
 import info.anodsplace.framework.graphics.chooseDark
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -121,9 +122,9 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
             }, 500)
         }
 
-        if (viewModel.appId.value!!.isEmpty()) {
-            Toast.makeText(requireContext(), getString(R.string.cannot_load_app, viewModel.appId), Toast.LENGTH_LONG).show()
-            AppLog.e("Cannot loadChangelog app details: '${viewModel.appId}'")
+        if (viewModel.appId.value.isEmpty()) {
+            Toast.makeText(requireContext(), getString(R.string.cannot_load_app, viewModel.appId.value), Toast.LENGTH_LONG).show()
+            AppLog.e("Cannot loadChangelog app details: '${viewModel.appId.value}'")
             binding.progressBar.isVisible = false
             binding.error.isVisible = true
             return
@@ -155,10 +156,11 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         })
 
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.app.collectLatest { app ->
+            viewModel.app.collect { app ->
                 if (app == null) {
-                    Toast.makeText(requireContext(), getString(R.string.cannot_load_app, viewModel.appId), Toast.LENGTH_LONG).show()
-                    AppLog.e("Cannot loadChangelog app details: '${viewModel.appId}'")
+                    val appId = viewModel.appId.value
+                    Toast.makeText(requireContext(), getString(R.string.cannot_load_app, appId), Toast.LENGTH_LONG).show()
+                    AppLog.e("Cannot loadChangelog app details: '${appId}'")
                     binding.progressBar.isVisible = false
                     binding.error.isVisible = true
                     binding.list.isInvisible = true
@@ -267,7 +269,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         toggleMenu?.isEnabled = false
         val tagMenu = menu.findItem(R.id.menu_tag_app)
         subscribeForTagSubmenu(tagMenu)
-        if (!dataProvider.installedApps.packageInfo(viewModel.appId.value!!).isInstalled) {
+        if (!dataProvider.installedApps.packageInfo(viewModel.appId.value).isInstalled) {
             menu.findItem(R.id.menu_uninstall).isVisible = false
             menu.findItem(R.id.menu_open).isVisible = false
             menu.findItem(R.id.menu_app_info).isVisible = false
