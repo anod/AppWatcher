@@ -35,6 +35,7 @@ import info.anodsplace.framework.app.CustomThemeActivity
 import info.anodsplace.framework.app.FragmentFactory
 import info.anodsplace.framework.content.startActivitySafely
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -180,7 +181,9 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
             }
         }
 
-        viewModel.changes.observe(viewLifecycleOwner) { }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.changes.collect { }
+        }
 
         reload()
     }

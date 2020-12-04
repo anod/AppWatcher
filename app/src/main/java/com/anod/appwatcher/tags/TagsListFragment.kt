@@ -9,7 +9,7 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -22,6 +22,8 @@ import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.FragmentFactory
 import info.anodsplace.framework.app.FragmentToolbarActivity
 import info.anodsplace.framework.graphics.DrawableTint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 /**
  * @author Alex Gavrishev
@@ -62,12 +64,14 @@ class TagsListFragment : Fragment(), View.OnClickListener {
         binding.list.adapter = TagAdapter(requireContext(), this)
         binding.list.addItemDecoration(DividerItemDecoration(requireContext(), DividerItemDecoration.HORIZONTAL))
 
-        viewModel.tagsAppItems.observe(viewLifecycleOwner, Observer {
-            (binding.list.adapter as TagAdapter).update(it)
-            if (it.isEmpty()) {
-                binding.emptyView.isVisible = true
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.tagsAppItems.collectLatest {
+                (binding.list.adapter as TagAdapter).update(it)
+                if (it.isEmpty()) {
+                    binding.emptyView.isVisible = true
+                }
             }
-        })
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

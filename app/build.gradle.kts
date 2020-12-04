@@ -136,22 +136,19 @@ dependencies {
     implementation("com.jakewharton:process-phoenix:2.0.0")
 
     // ViewModel and LiveData
-    implementation("androidx.lifecycle:lifecycle-extensions:2.2.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel:2.2.0")
     kapt("androidx.lifecycle:lifecycle-compiler:2.2.0")
 
     implementation("androidx.room:room-runtime:2.2.5")
+    implementation("androidx.room:room-ktx:2.2.5")
     kapt("androidx.room:room-compiler:2.2.5")
 
     // KTX
     implementation("androidx.work:work-runtime-ktx:2.4.0")
     implementation("androidx.fragment:fragment-ktx:1.2.5")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.2.0")
-    implementation("androidx.room:room-ktx:2.2.5")
     implementation("androidx.work:work-runtime-ktx:2.4.0")
     implementation("androidx.fragment:fragment-ktx:1.2.5")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.2.0")
     implementation("androidx.room:room-ktx:2.2.5")
 
     // Kotlin

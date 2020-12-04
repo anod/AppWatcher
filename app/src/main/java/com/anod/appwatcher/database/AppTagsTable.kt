@@ -3,7 +3,6 @@ package com.anod.appwatcher.database
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.provider.BaseColumns
-import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.withTransaction
@@ -11,6 +10,7 @@ import com.anod.appwatcher.database.entities.AppTag
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.database.entities.TagAppsCount
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
 /**
@@ -22,13 +22,13 @@ import kotlinx.coroutines.withContext
 interface AppTagsTable {
 
     @Query("SELECT * FROM $table WHERE ${Columns.tagId} = :tagId")
-    fun forTag(tagId: Int): LiveData<List<AppTag>>
+    fun forTag(tagId: Int): Flow<List<AppTag>>
 
     @Query("SELECT * FROM $table WHERE ${Columns.appId} = :appId")
-    fun forApp(appId: String): LiveData<List<AppTag>>
+    fun forApp(appId: String): Flow<List<AppTag>>
 
     @Query("SELECT ${Columns.tagId}, count() as count FROM $table GROUP BY ${Columns.tagId}")
-    fun queryCounts(): LiveData<List<TagAppsCount>>
+    fun queryCounts(): Flow<List<TagAppsCount>>
 
 //    @Query("SELECT * FROM $table WHERE ${Columns.appId} = :appId AND ${Columns.tagId} = :tagId")
 //    fun appWithTag(appId: String, tagId: Int): AppTag?

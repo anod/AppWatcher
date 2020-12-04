@@ -3,7 +3,6 @@ package com.anod.appwatcher.search
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.AppInfo
@@ -12,13 +11,14 @@ import com.anod.appwatcher.utils.SingleLiveEvent
 import finsky.api.model.Document
 import info.anodsplace.framework.app.DialogMessage
 import info.anodsplace.framework.content.InstalledApps
+import kotlinx.coroutines.flow.StateFlow
 import java.util.*
 
 class ResultsAppViewHolder(
         itemView: View,
         private val iconLoader: PicassoAppIcon,
         private val action: SingleLiveEvent<ResultAction>,
-        private val packages: LiveData<List<String>>,
+        private val packages: StateFlow<List<String>>,
         private val colorBgDisabled: Int,
         private val colorBgNormal: Int,
         private val installedApps: InstalledApps.MemoryCache)

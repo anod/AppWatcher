@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import androidx.paging.*
 import com.anod.appwatcher.AppComponent
@@ -19,10 +18,7 @@ import finsky.api.model.Document
 import info.anodsplace.playstore.AppDetailsFilter
 import info.anodsplace.playstore.DetailsEndpoint
 import info.anodsplace.playstore.SearchEndpoint
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 sealed class SearchStatus
@@ -51,9 +47,10 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
     var searchQuery = MutableLiveData<String>()
     var authToken = MutableLiveData<String>()
     val searchQueryAuthenticated = searchQuery.combineLatest(authToken)
-    val packages = provide.database.apps().observePackages().map { list ->
+    val packages: StateFlow<List<String>> = provide.database.apps().observePackages().map { list ->
         list.map { it.packageName }
-    }
+    }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
     var appStatusChange = MutableLiveData<Pair<Int, AppInfo?>>()
 
     private var endpointDetails: DetailsEndpoint? = null

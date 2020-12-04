@@ -10,9 +10,7 @@ import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.observe
-import androidx.lifecycle.switchMap
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.anod.appwatcher.AppWatcherApplication
 import com.anod.appwatcher.Application
@@ -29,6 +27,9 @@ import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.view.Keyboard
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.launch
 
 /**
@@ -39,20 +40,20 @@ import kotlinx.coroutines.launch
 
 class AppsTagViewModel(application: android.app.Application) : AndroidViewModel(application) {
     private val context = ApplicationContext(getApplication<AppWatcherApplication>())
-    val titleFilter = MutableLiveData("")
-    var tag = MutableLiveData<Tag>()
+    val titleFilter = MutableStateFlow("")
+    var tag = MutableStateFlow(Tag(""))
 
     private val database: AppsDatabase
         get() = Application.provide(context).database
 
     internal lateinit var tagAppsImport: TagAppsImport
 
-    val apps = titleFilter.switchMap { titleFilter ->
+    val apps = titleFilter.flatMapConcat { titleFilter ->
         val appsTable = database.apps()
         AppListTable.Queries.loadAppList(Preferences.SORT_NAME_ASC, titleFilter, appsTable)
     }
 
-    val tags = tag.switchMap { database.appTags().forTag(it.id) }
+    val tags = tag.flatMapConcat { database.appTags().forTag(it.id) }
 
     suspend fun import() {
         tagAppsImport.run()
@@ -108,14 +109,16 @@ class AppsTagSelectActivity : ToolbarActivity() {
             }
         }
 
-        viewModel.tags.observe(this) {
-            viewModel.tagAppsImport.initSelected(it)
-            binding.list.adapter = adapter
-        }
+        lifecycleScope.launch {
+            viewModel.tags.collectLatest {
+                viewModel.tagAppsImport.initSelected(it)
+                binding.list.adapter = adapter
+            }
 
-        viewModel.apps.observe(this) {
-            binding.progress.visibility = View.GONE
-            adapter.setData(it)
+            viewModel.apps.collectLatest {
+                binding.progress.visibility = View.GONE
+                adapter.setData(it)
+            }
         }
     }
 

@@ -3,10 +3,10 @@ package com.anod.appwatcher.database
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.provider.BaseColumns
-import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.anod.appwatcher.database.entities.Tag
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
 /**
@@ -18,7 +18,7 @@ import kotlinx.coroutines.withContext
 interface TagsTable {
 
     @Query("SELECT * FROM $table ORDER BY ${Columns.name} COLLATE LOCALIZED ASC")
-    fun observe(): LiveData<List<Tag>>
+    fun observe(): Flow<List<Tag>>
 
     @Query("SELECT * FROM $table ORDER BY ${Columns.name} COLLATE LOCALIZED ASC")
     suspend fun load(): List<Tag>

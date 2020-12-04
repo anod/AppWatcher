@@ -49,6 +49,7 @@ import info.anodsplace.framework.content.forUninstall
 import info.anodsplace.framework.content.startActivitySafely
 import info.anodsplace.framework.graphics.chooseDark
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.abs
@@ -153,27 +154,29 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
             }
         })
 
-        viewModel.app.observe(viewLifecycleOwner, Observer { app ->
-            if (app == null) {
-                Toast.makeText(requireContext(), getString(R.string.cannot_load_app, viewModel.appId), Toast.LENGTH_LONG).show()
-                AppLog.e("Cannot loadChangelog app details: '${viewModel.appId}'")
-                binding.progressBar.isVisible = false
-                binding.error.isVisible = true
-                binding.list.isInvisible = true
-            } else {
-                if (!loaded) {
-                    loaded = true
-                    setupAppView(app)
-                    binding.list.layoutManager = LinearLayoutManager(requireContext())
-                    binding.list.adapter = adapter
-                }
-                val isWatched = app.status != AppInfoMetadata.STATUS_DELETED
-                toggleMenu?.isChecked = isWatched
-                if (!isWatched) {
-                    toggleMenu?.isEnabled = true
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.app.collectLatest { app ->
+                if (app == null) {
+                    Toast.makeText(requireContext(), getString(R.string.cannot_load_app, viewModel.appId), Toast.LENGTH_LONG).show()
+                    AppLog.e("Cannot loadChangelog app details: '${viewModel.appId}'")
+                    binding.progressBar.isVisible = false
+                    binding.error.isVisible = true
+                    binding.list.isInvisible = true
+                } else {
+                    if (!loaded) {
+                        loaded = true
+                        setupAppView(app)
+                        binding.list.layoutManager = LinearLayoutManager(requireContext())
+                        binding.list.adapter = adapter
+                    }
+                    val isWatched = app.status != AppInfoMetadata.STATUS_DELETED
+                    toggleMenu?.isChecked = isWatched
+                    if (!isWatched) {
+                        toggleMenu?.isEnabled = true
+                    }
                 }
             }
-        })
+        }
 
         viewModel.watchStateChange.observe(viewLifecycleOwner) { result ->
             when (result) {
@@ -263,7 +266,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         toggleMenu = menu.findItem(R.id.menu_watch_toggle).wrapCheckStateIcon()
         toggleMenu?.isEnabled = false
         val tagMenu = menu.findItem(R.id.menu_tag_app)
-        loadTagSubmenu(tagMenu)
+        subscribeForTagSubmenu(tagMenu)
         if (!dataProvider.installedApps.packageInfo(viewModel.appId.value!!).isInstalled) {
             menu.findItem(R.id.menu_uninstall).isVisible = false
             menu.findItem(R.id.menu_open).isVisible = false
@@ -278,18 +281,19 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         binding.toolbar.setOnMenuItemClickListener(this)
     }
 
-    private fun loadTagSubmenu(tagMenu: MenuItem) {
+    private fun subscribeForTagSubmenu(tagMenu: MenuItem) {
         tagMenu.isVisible = false
-        viewModel.tagsMenuItems.observe(viewLifecycleOwner, Observer {
-            val result = it ?: emptyList()
-            tagMenu.isVisible = result.isNotEmpty()
-            val tagSubMenu = tagMenu.subMenu
-            tagSubMenu.removeGroup(R.id.menu_group_tags)
-            for (item in result) {
-                tagSubMenu.add(R.id.menu_group_tags, item.first.id, 0, item.first.name).isChecked = item.second
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.tagsMenuItems.collectLatest { result ->
+                tagMenu.isVisible = result.isNotEmpty()
+                val tagSubMenu = tagMenu.subMenu
+                tagSubMenu.removeGroup(R.id.menu_group_tags)
+                for (item in result) {
+                    tagSubMenu.add(R.id.menu_group_tags, item.first.id, 0, item.first.name).isChecked = item.second
+                }
+                tagSubMenu.setGroupCheckable(R.id.menu_group_tags, true, false)
             }
-            tagSubMenu.setGroupCheckable(R.id.menu_group_tags, true, false)
-        })
+        }
     }
 
     override fun onMenuItemClick(item: MenuItem): Boolean {

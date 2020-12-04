@@ -4,10 +4,10 @@ package com.anod.appwatcher.database
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.provider.BaseColumns
-import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.anod.appwatcher.database.entities.Schedule
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import java.util.concurrent.Callable
 
@@ -15,7 +15,7 @@ import java.util.concurrent.Callable
 interface SchedulesTable {
 
     @Query("SELECT * FROM $table ORDER BY ${Columns.start} DESC")
-    fun load(): LiveData<List<Schedule>>
+    fun load(): Flow<List<Schedule>>
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
     suspend fun update(schedule: Schedule)

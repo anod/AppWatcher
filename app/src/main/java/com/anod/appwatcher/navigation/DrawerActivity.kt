@@ -31,6 +31,7 @@ import com.google.android.material.navigation.NavigationView
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ToolbarActivity
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 /**
@@ -99,9 +100,11 @@ abstract class DrawerActivity : ToolbarActivity(), AccountSelectionDialog.Select
             updateLastUpdateTime(it ?: 0)
         })
 
-        viewModel.tags.observe(this, Observer {
-            updateTags(it ?: emptyList())
-        })
+        lifecycleScope.launch {
+            viewModel.tags.collectLatest {
+                updateTags(it)
+            }
+        }
 
         this.navigationView?.setNavigationItemSelectedListener { menuItem ->
             this.drawerLayout?.closeDrawers()

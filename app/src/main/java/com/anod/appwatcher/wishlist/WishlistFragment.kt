@@ -116,9 +116,11 @@ class WishListFragment : Fragment() {
             }
         })
 
-        viewModel.packages.observe(viewLifecycleOwner, Observer {
-            binding.list.adapter?.notifyDataSetChanged()
-        })
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.packages.collectLatest {
+                binding.list.adapter?.notifyDataSetChanged()
+            }
+        }
 
         action.observe(this, Observer {
             when (it) {

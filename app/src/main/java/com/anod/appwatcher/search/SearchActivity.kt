@@ -98,9 +98,11 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
             }
         })
 
-        viewModel.packages.observe(this, Observer {
-            adapter?.notifyDataSetChanged()
-        })
+        lifecycleScope.launch {
+            viewModel.packages.collectLatest {
+                adapter?.notifyDataSetChanged()
+            }
+        }
 
         action.observe(this, Observer {
             when (it) {

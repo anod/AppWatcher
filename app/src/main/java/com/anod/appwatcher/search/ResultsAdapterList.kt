@@ -3,16 +3,15 @@ package com.anod.appwatcher.search
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.lifecycle.LiveData
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
-import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.utils.SingleLiveEvent
 import finsky.api.model.Document
 import info.anodsplace.framework.app.ThemeCompat
 import info.anodsplace.framework.content.InstalledApps
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * @author Alex Gavrishev
@@ -31,7 +30,7 @@ class DocumentDiffCallback : DiffUtil.ItemCallback<Document>() {
     }
 }
 
-class ResultsAdapterList(private val context: Context, private val action: SingleLiveEvent<ResultAction>, private val packages: LiveData<List<String>>)
+class ResultsAdapterList(private val context: Context, private val action: SingleLiveEvent<ResultAction>, private val packages: StateFlow<List<String>>)
     : PagingDataAdapter<Document, ResultsAppViewHolder>(DocumentDiffCallback()) {
 
     private val colorBgDisabled = ThemeCompat.getColor(context, R.attr.inactiveRow)

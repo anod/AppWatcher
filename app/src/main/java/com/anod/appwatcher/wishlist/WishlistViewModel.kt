@@ -5,7 +5,6 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -22,7 +21,10 @@ import finsky.api.model.FilterPredicate
 import info.anodsplace.playstore.AppDetailsFilter
 import info.anodsplace.playstore.AppNameFilter
 import info.anodsplace.playstore.WishListEndpoint
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class WishListViewModel(application: Application) : AndroidViewModel(application) {
@@ -35,9 +37,9 @@ class WishListViewModel(application: Application) : AndroidViewModel(application
 
     private var endpoint: WishListEndpoint? = null
 
-    val packages = provide.database.apps().observePackages().map { list ->
+    val packages: StateFlow<List<String>> = provide.database.apps().observePackages().map { list ->
         list.map { it.packageName }
-    }
+    }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     fun init(account: Account, authToken: String) {
         endpoint = WishListEndpoint(context, provide.requestQueue, provide.deviceInfo, account).also {

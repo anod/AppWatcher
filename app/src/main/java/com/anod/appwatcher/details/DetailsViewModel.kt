@@ -17,6 +17,7 @@ import finsky.api.model.Document
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.playstore.DetailsEndpoint
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 typealias TagMenuItem = Pair<Tag, Boolean>
@@ -38,12 +39,12 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
         get() = provide.database
 
     var detailsUrl = ""
-    var appId = MutableLiveData("")
+    var appId = MutableStateFlow("")
     var rowId: Int = -1
 
-    val app: LiveData<App> = appId.switchMap app@{ appId ->
+    val app: StateFlow<App?> = appId.flatMapLatest app@{ appId ->
         if (appId.isEmpty()) {
-            return@app MutableLiveData<App>(null)
+            return@app flowOf(null)
         }
 
         return@app database.apps().observeApp(appId).map {
@@ -55,7 +56,7 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
                 it
             }
         }
-    }
+    }.stateIn(viewModelScope, SharingStarted.Lazily, null)
 
     val watchStateChange: MutableLiveData<Int> = MutableLiveData()
 
@@ -69,30 +70,30 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
     }
     var authToken = ""
     var localChangelog: List<AppChange> = emptyList()
-    val tagsMenuItems: LiveData<List<TagMenuItem>> = appId.switchMap tagsMenu@{ appId ->
+    val tagsMenuItems: StateFlow<List<TagMenuItem>> = appId.flatMapLatest tagsMenu@{ appId ->
         if (appId.isEmpty()) {
-            return@tagsMenu MutableLiveData(emptyList<TagMenuItem>())
+            return@tagsMenu flowOf(emptyList<TagMenuItem>())
         }
-        return@tagsMenu database.tags().observe().switchMap { tags ->
-            return@switchMap database.appTags().forApp(appId).map { appTags ->
+        return@tagsMenu database.tags().observe().flatMapLatest { tags ->
+            return@flatMapLatest database.appTags().forApp(appId).map { appTags ->
                 val appTagsList = appTags.map { it.tagId }
                 tags.map { TagMenuItem(it, appTagsList.contains(it.id)) }
             }
         }
-    }
+    }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     val changelogState = MutableLiveData<ChangelogLoadState>()
     val document: Document?
         get() = detailsEndpoint.document
-    var recentChange = AppChange(appId.value!!, 0, "", "", "", false)
+    var recentChange = AppChange(appId.value, 0, "", "", "", false)
 
     fun loadLocalChangelog() {
-        if (appId.value!!.isBlank()) {
+        if (appId.value.isBlank()) {
             this.updateChangelogState(LocalComplete)
             return
         }
         viewModelScope.launch {
-            localChangelog = database.changelog().ofApp(appId.value!!)
+            localChangelog = database.changelog().ofApp(appId.value)
             updateChangelogState(LocalComplete)
         }
     }
@@ -116,7 +117,7 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
     private fun onDataChanged(details: DfeDetails) {
         val appDetails = details.document?.appDetails
         if (appDetails != null) {
-            recentChange = AppChange(appId.value!!, appDetails.versionCode, appDetails.versionString, appDetails.recentChangesHtml
+            recentChange = AppChange(appId.value, appDetails.versionCode, appDetails.versionString, appDetails.recentChangesHtml
                     ?: "", appDetails.uploadDate, false)
             app.value!!.testing = when {
                 appDetails.testingProgramInfo.subscribed -> 1
@@ -155,9 +156,9 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
     fun changeTag(tagId: Int, checked: Boolean) {
         viewModelScope.launch {
             if (checked) {
-                provide.database.appTags().delete(tagId, appId.value!!) > 0
+                provide.database.appTags().delete(tagId, appId.value) > 0
             } else {
-                AppTagsTable.Queries.insert(tagId, appId.value!!, provide.database)
+                AppTagsTable.Queries.insert(tagId, appId.value, provide.database)
             }
         }
     }

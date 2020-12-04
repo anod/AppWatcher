@@ -8,7 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.core.view.isVisible
-import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.Application
@@ -20,6 +20,8 @@ import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.utils.colorStateListOf
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.ToolbarActivity
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -136,9 +138,11 @@ class SchedulesHistoryActivity : ToolbarActivity() {
         binding.list.layoutManager = LinearLayoutManager(this)
         val adapter = SchedulesAdapter(this)
         val schedules = Application.provide(this).database.schedules()
-        schedules.load().observe(this, Observer {
-            adapter.schedules = it
-        })
+        lifecycleScope.launch {
+            schedules.load().collectLatest {
+                adapter.schedules = it
+            }
+        }
         binding.list.adapter = adapter
     }
 }

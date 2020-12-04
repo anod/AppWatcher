@@ -3,16 +3,14 @@ package com.anod.appwatcher.search
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
-import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.utils.SingleLiveEvent
-
 import finsky.api.model.Document
 import info.anodsplace.framework.app.ThemeCompat
 import info.anodsplace.framework.content.InstalledApps
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * @author Alex Gavrishev
@@ -23,7 +21,7 @@ import info.anodsplace.framework.content.InstalledApps
 class ResultsAdapterSingle(
         private val context: Context,
         private val action: SingleLiveEvent<ResultAction>,
-        private val packages: LiveData<List<String>>,
+        private val packages: StateFlow<List<String>>,
         private val document: Document): RecyclerView.Adapter<ResultsAppViewHolder>() {
 
     private val colorBgDisabled = ThemeCompat.getColor(context, R.attr.inactiveRow)

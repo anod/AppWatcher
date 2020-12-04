@@ -5,7 +5,6 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.provider.BaseColumns
 import android.text.TextUtils
-import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.RawQuery
@@ -17,6 +16,7 @@ import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.preferences.Preferences
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import java.util.*
 import java.util.concurrent.Callable
@@ -28,16 +28,16 @@ class SqlOffset(val offset: Int, val limit: Int)
 interface AppListTable {
 
     @RawQuery(observedEntities = [(App::class), (AppChange::class), (AppTag::class)])
-    fun observeRows(query: SupportSQLiteQuery): LiveData<List<Int>>
+    fun observeRows(query: SupportSQLiteQuery): Flow<List<Int>>
 
     @RawQuery(observedEntities = [(App::class), (AppChange::class), (AppTag::class)])
-    fun observe(query: SupportSQLiteQuery): LiveData<List<AppListItem>>
+    fun observe(query: SupportSQLiteQuery): Flow<List<AppListItem>>
 
     @RawQuery(observedEntities = [(App::class), (AppChange::class), (AppTag::class)])
     suspend fun load(query: SupportSQLiteQuery): List<AppListItem>
 
     @Query("SELECT * FROM $table WHERE ${Columns.appId} == :appId")
-    fun observeApp(appId: String): LiveData<App?>
+    fun observeApp(appId: String): Flow<App?>
 
     @Query("SELECT * FROM $table WHERE ${Columns.appId} == :appId")
     suspend fun loadApp(appId: String): App?
@@ -51,7 +51,7 @@ interface AppListTable {
 
     @Query("SELECT ${BaseColumns._ID}, ${Columns.packageName} FROM $table WHERE " +
             "${Columns.status} != ${AppInfoMetadata.STATUS_DELETED}")
-    fun observePackages(): LiveData<List<PackageRowPair>>
+    fun observePackages(): Flow<List<PackageRowPair>>
 
     @Query("SELECT ${BaseColumns._ID}, ${Columns.packageName} FROM $table WHERE " +
             "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${AppInfoMetadata.STATUS_DELETED} ELSE ${Columns.status} >= ${AppInfoMetadata.STATUS_NORMAL} END")
@@ -131,15 +131,15 @@ interface AppListTable {
             return@withContext AppListItemCursor(cursor)
         }
 
-        fun loadAppList(sortId: Int, titleFilter: String, table: AppListTable): LiveData<List<AppListItem>> {
+        fun loadAppList(sortId: Int, titleFilter: String, table: AppListTable): Flow<List<AppListItem>> {
             return loadAppList(sortId, false, null, titleFilter, table)
         }
 
-        fun changes(table: AppListTable): LiveData<List<Int>> {
+        fun changes(table: AppListTable): Flow<List<Int>> {
             return table.observeRows(SimpleSQLiteQuery("SELECT ${BaseColumns._ID} FROM ${AppListTable.table} LIMIT 1", emptyArray()))
         }
 
-        private fun loadAppList(sortId: Int, orderByRecentlyUpdated: Boolean, tag: Tag?, titleFilter: String, table: AppListTable): LiveData<List<AppListItem>> {
+        private fun loadAppList(sortId: Int, orderByRecentlyUpdated: Boolean, tag: Tag?, titleFilter: String, table: AppListTable): Flow<List<AppListItem>> {
             val query = createAppsListQuery(sortId, orderByRecentlyUpdated, tag, titleFilter, null)
             return table.observe(SimpleSQLiteQuery(query.first, query.second))
         }

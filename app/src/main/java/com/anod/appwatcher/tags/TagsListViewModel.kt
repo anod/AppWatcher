@@ -8,23 +8,24 @@ import com.anod.appwatcher.database.AppTagsTable
 import com.anod.appwatcher.database.TagsTable
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.model.AppInfo
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 typealias TagAppItem = Pair<Tag,Boolean>
 
 class TagsListViewModel(application: Application): AndroidViewModel(application) {
 
-    val appInfo = MutableLiveData<AppInfo?>()
+    val appInfo = MutableStateFlow<AppInfo?>(null)
 
     private val provide: AppComponent
         get() = getApplication<AppWatcherApplication>().appComponent
 
-    val tagsAppItems: LiveData<List<TagAppItem>> = appInfo.switchMap tagsApp@ { info ->
-        return@tagsApp provide.database.tags().observe().switchMap { tags ->
+    val tagsAppItems: Flow<List<TagAppItem>> = appInfo.flatMapConcat tagsApp@{ info ->
+        return@tagsApp provide.database.tags().observe().flatMapConcat { tags ->
             if (info == null || info.appId.isEmpty()) {
-                return@switchMap MutableLiveData(tags.map { TagAppItem(it, false) })
+                return@flatMapConcat flowOf(tags.map { TagAppItem(it, false) })
             }
-            return@switchMap provide.database.appTags().forApp(info.appId).map { appTags ->
+            return@flatMapConcat provide.database.appTags().forApp(info.appId).map { appTags ->
                 val appTagsList = appTags.map { it.tagId }
                 tags.map { TagAppItem(it, appTagsList.contains(it.id)) }
             }
