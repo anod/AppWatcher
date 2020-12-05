@@ -56,7 +56,7 @@ class WatchListPagingSource(
         if (filtered.isEmpty()) {
             if (params.key != null && config.showOnDevice) {
                 val installed = InstalledTaskWorker(appContext, sortId, titleFilter).run()
-                val allInstalledPackageNames = installed.map { it.packageName }
+                val allInstalledPackageNames = installed.map { it.pkg.name }
                 val watchingPackages = database.apps().loadRowIds(allInstalledPackageNames).associateBy({ it.packageName }, { it.rowId })
                 allInstalledPackageNames
                         .asSequence()

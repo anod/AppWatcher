@@ -35,6 +35,10 @@ class RecentlyInstalledViewHolder(
 
     private var loadJob: Job? = null
 
+    companion object {
+        const val recentlyInstalledViews = 10
+    }
+
     private val appViews: List<RecentAppView> = arrayListOf(
             R.id.app1,
             R.id.app2,
@@ -89,7 +93,9 @@ class RecentlyInstalledViewHolder(
             emit(cache)
         }
         val packages = withContext(Dispatchers.Default) {
-            appContext.packageManager.getRecentlyInstalled().take(appViews.size)
+            appContext.packageManager.getRecentlyInstalled()
+                    .take(recentlyInstalledViews)
+                    .map { it.name }
         }
         if (packages.isNotEmpty()) {
             val database = appContext.provide.database

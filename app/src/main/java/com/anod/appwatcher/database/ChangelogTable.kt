@@ -6,6 +6,7 @@ import android.provider.BaseColumns
 import androidx.room.Dao
 import androidx.room.Query
 import com.anod.appwatcher.database.entities.AppChange
+import info.anodsplace.framework.util.chunked
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -31,6 +32,20 @@ interface ChangelogTable {
 
     @Query("UPDATE $table SET ${Columns.noNewDetails} = 0")
     suspend fun resetNoNewDetails(): Int
+
+    @Suppress("FunctionName")
+    @Query("SELECT l.* FROM changelog l " +
+            "INNER JOIN (" +
+            "SELECT app_id, MAX(code) as latestCode FROM changelog GROUP BY app_id" +
+            ") r ON l.app_id = r.app_id AND l.code = r.latestCode " +
+            "WHERE l.app_id IN (:appIds)")
+    suspend fun _load(appIds: List<String>): List<AppChange>
+
+    suspend fun load(appIds: List<String>): List<AppChange> {
+        return appIds.chunked({
+            _load(it)
+        })
+    }
 
     object Queries {
         suspend fun all(table: ChangelogTable): AppChangeCursor = withContext(Dispatchers.IO) {

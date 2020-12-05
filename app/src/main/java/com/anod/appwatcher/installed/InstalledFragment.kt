@@ -68,6 +68,29 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
             }
         })
 
+        val vm = viewModel as InstalledViewModel
+        val changelogAdapter = vm.changelogAdapter
+        changelogAdapter.account?.let { account ->
+            lifecycleScope.launch {
+                try {
+                    val token = AuthTokenBlocking(requireContext().applicationContext).retrieve(account)
+                    if (token.isNotBlank()) {
+                        changelogAdapter.authToken = token
+                    } else {
+                        AppLog.e("Error retrieving token")
+                    }
+                } catch (e: AuthTokenStartIntent) {
+                    startActivity(e.intent)
+                } catch (e: Exception) {
+                    AppLog.e("onResume", e)
+                }
+
+                changelogAdapter.updated.collect {
+                    reload()
+                }
+            }
+        }
+
         lifecycleScope.launch {
             provide.packageRemoved.collect {
                 AppLog.d("Package removed: $it")

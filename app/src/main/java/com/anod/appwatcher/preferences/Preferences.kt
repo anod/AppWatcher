@@ -151,6 +151,8 @@ class Preferences(context: Context) : DeviceIdStorage {
         set(value) = preferences.edit().putString("adaptive-icon-shape", value).apply()
 
     companion object {
+        const val recentDays: Long = 3
+
         private const val VIEWED = "viewed"
         private const val LAST_UPDATE_TIME = "last_update_time"
         private const val WIFI_ONLY = "wifi_only"

@@ -15,12 +15,13 @@ import com.anod.appwatcher.database.entities.*
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.preferences.Preferences
+import info.anodsplace.framework.util.chunked
+import info.anodsplace.framework.util.dayStartAgoMillis
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import java.util.*
 import java.util.concurrent.Callable
-import java.util.concurrent.TimeUnit
 
 class SqlOffset(val offset: Int, val limit: Int)
 
@@ -45,9 +46,14 @@ interface AppListTable {
     @Query("SELECT * FROM $table WHERE ${BaseColumns._ID} == :rowId")
     suspend fun loadAppRow(rowId: Int): App?
 
+    @Suppress("FunctionName")
     @Query("SELECT ${BaseColumns._ID}, ${Columns.packageName} FROM $table " +
             "WHERE ${Columns.packageName} IN (:packageNames) AND ${Columns.status} != ${AppInfoMetadata.STATUS_DELETED}")
-    suspend fun loadRowIds(packageNames: List<String>): List<PackageRowPair>
+    suspend fun _loadRowIds(packageNames: List<String>): List<PackageRowPair>
+
+    suspend fun loadRowIds(packageNames: List<String>): List<PackageRowPair> {
+        return packageNames.chunked({ _loadRowIds(it) })
+    }
 
     @Query("SELECT ${BaseColumns._ID}, ${Columns.packageName} FROM $table WHERE " +
             "${Columns.status} != ${AppInfoMetadata.STATUS_DELETED}")
@@ -275,16 +281,9 @@ interface AppListTable {
         const val ERROR_INSERT = -2
 
         const val table = "app_list"
-        private const val recentDays: Long = 3
 
         val recentTime: Long
-            get() {
-                val timestamp = System.currentTimeMillis()
-                // https://stackoverflow.com/questions/13892163/get-timestamp-for-start-of-day
-                // val dayEnd = dayStart + 86399999
-                val dayStart = timestamp - (timestamp % 86400000)
-                return dayStart - TimeUnit.DAYS.toMillis(recentDays)
-            }
+            get() = dayStartAgoMillis(days = Preferences.recentDays)
 
         val projection: Array<String>
             get() = projection(recentTime)

@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.paging.*
+import com.anod.appwatcher.AppComponent
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.Tag
@@ -25,10 +26,12 @@ import kotlinx.coroutines.flow.map
 abstract class WatchListViewModel(application: Application) : AndroidViewModel(application) {
     val context: ApplicationContext
         get() = ApplicationContext(getApplication())
+    val provide: AppComponent
+        get() = com.anod.appwatcher.Application.provide(context)
     val database: AppsDatabase
-        get() = com.anod.appwatcher.Application.provide(context).database
+        get() = provide.database
     val prefs: Preferences
-        get() = com.anod.appwatcher.Application.provide(context).prefs
+        get() = provide.prefs
     var titleFilter = ""
     var sortId = 0
     var tag: Tag? = null

@@ -10,7 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.anod.appwatcher.provide
 import com.anod.appwatcher.utils.SelectionState
 import com.anod.appwatcher.watchlist.AppViewHolder
-import info.anodsplace.framework.content.getInstalledPackages
+import info.anodsplace.framework.content.getInstalledPackagesCodes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -57,8 +57,8 @@ class ImportInstalledViewModel(application: android.app.Application) : AndroidVi
         importManager!!.reset()
         viewModelScope.launch {
             val packages = withContext(Dispatchers.Default) {
-                provide.packageManager.getInstalledPackages()
-                        .associateBy({ it.packageName }) { it.versionCode }
+                provide.packageManager.getInstalledPackagesCodes()
+                        .associateBy({ it.name }) { it.versionCode }
             }
 
             packages.forEach { (packageName, versionCode) ->

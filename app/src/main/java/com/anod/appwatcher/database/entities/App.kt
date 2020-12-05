@@ -1,7 +1,6 @@
 package com.anod.appwatcher.database.entities
 
 import android.content.ComponentName
-import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.net.Uri
@@ -11,9 +10,10 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.utils.PicassoAppIcon
+import info.anodsplace.framework.content.InstalledPackageApp
 import info.anodsplace.framework.content.getAppTitle
 import info.anodsplace.framework.content.getLaunchComponent
-import info.anodsplace.framework.content.getPackageInfo
+import info.anodsplace.framework.content.getPackageInfoOrNull
 import java.text.DateFormat
 import java.util.*
 
@@ -23,11 +23,11 @@ import java.util.*
  */
 
 fun PackageManager.packageToApp(rowId: Int, packageName: String): App {
-    val packageInfo = this.getPackageInfo(packageName, this)
-            ?: return App.fromLocalPackage(rowId, null, packageName, "", null)
-    val launchComponent = this.getLaunchComponent(packageInfo, this)
-    val appTitle = this.getAppTitle(packageInfo, this)
-    return App.fromLocalPackage(rowId, packageInfo, packageName, appTitle, launchComponent)
+    val packageInfo = this.getPackageInfoOrNull(packageName)
+            ?: return App.fromLocalPackage(rowId, packageName, 0, 0, "", "", null)
+    val launchComponent = this.getLaunchComponent(packageName)
+    val appTitle = this.getAppTitle(packageInfo)
+    return App.fromLocalPackage(rowId, packageName, packageInfo.lastUpdateTime, packageInfo.versionCode, packageInfo.versionName, appTitle, launchComponent)
 }
 
 @Entity(tableName = AppListTable.table)
@@ -82,18 +82,18 @@ data class App(
     @Ignore
     var testing: Int = 0
 
-    private constructor(rowId: Int, packageName: String, versionCode: Int, versionName: String, title: String, iconUrl: String, status: Int, uploadDate: String)
+    private constructor(rowId: Int, packageName: String, versionCode: Int, versionName: String, title: String, iconUrl: String, status: Int, uploadDate: String, uploadTime: Long)
             : this(rowId, packageName, packageName, versionCode, versionName, title, "", iconUrl, status,
-            uploadDate, Price("", "", 0), createDetailsUrl(packageName), 0, "", 0)
+            uploadDate, Price("", "", 0), createDetailsUrl(packageName), uploadTime, "", 0)
 
     companion object {
-        fun fromLocalPackage(rowId: Int, packageInfo: PackageInfo?, packageName: String, appTitle: String, launchComponent: ComponentName?): App {
-            if (packageInfo == null) {
-                return App(rowId,
-                        packageName, 0, appTitle,
-                        packageName, "", AppInfoMetadata.STATUS_DELETED, ""
-                )
-            }
+        fun fromInstalledPackage(rowId: Int, installed: InstalledPackageApp): App = fromLocalPackage(
+                rowId,
+                installed.pkg.name, installed.pkg.updateTime, installed.pkg.versionCode, installed.pkg.versionName,
+                installed.title, installed.launchComponent
+        )
+
+        fun fromLocalPackage(rowId: Int, packageName: String, uploadTime: Long, versionCode: Int, versionName: String, appTitle: String, launchComponent: ComponentName?): App {
             val iconUrl: String = if (launchComponent != null) {
                 Uri.fromParts(PicassoAppIcon.SCHEME, launchComponent.flattenToShortString(), null).toString()
             } else {
@@ -101,12 +101,12 @@ data class App(
             }
 
             val dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM)
-            val lastUpdate = dateFormat.format(Date(packageInfo.lastUpdateTime))
-            val versionName = packageInfo.versionName ?: ""
+            val lastUpdate = dateFormat.format(Date(uploadTime))
 
             return App(rowId,
-                    packageInfo.packageName, packageInfo.versionCode, versionName,
-                    appTitle, iconUrl, AppInfoMetadata.STATUS_DELETED, lastUpdate
+                    packageName, versionCode, versionName,
+                    appTitle, iconUrl, AppInfoMetadata.STATUS_DELETED,
+                    lastUpdate, uploadTime
             )
         }
 

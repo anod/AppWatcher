@@ -3,6 +3,7 @@ package com.anod.appwatcher.details
 import android.view.View
 import android.widget.TextView
 import androidx.annotation.ColorInt
+import androidx.core.view.isVisible
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.generateTitle
@@ -51,13 +52,23 @@ class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase
         }
 
         if (isLocalApp) {
-            this.creator?.visibility = View.GONE
-            this.recentChanges?.visibility = View.GONE
+            this.creator?.isVisible = false
             this.price?.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stat_communication_stay_primary_portrait, 0, 0, 0)
             this.price?.setTextColor(textColor)
             this.price?.text = resourceProvider.formatVersionText(app.versionName, app.versionNumber, 0)
+            if (changeDetails.isNotBlank()) {
+                this.recentChanges?.isVisible = true
+                this.recentChanges?.alpha = if (noNewChanges) 0.4f else 1.0f
+                this.recentChanges?.text = Html.parse(changeDetails)
+                        .toString()
+                        .replace(newLineRegex, "\n")
+                        .removePrefix(app.versionName + "\n")
+                        .removePrefix(app.versionName + ":\n")
+            } else {
+                this.recentChanges?.isVisible = false
+            }
         } else {
-            this.creator?.visibility = View.VISIBLE
+            this.creator?.isVisible = false
             if (changeDetails.isBlank()) {
                 this.recentChanges?.alpha = 0.4f
                 this.recentChanges?.text = resourceProvider.noRecentChangesText
