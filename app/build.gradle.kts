@@ -112,12 +112,12 @@ dependencies {
     implementation("androidx.work:work-runtime:2.4.0")
     implementation("androidx.core:core:1.3.2")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
-    implementation("androidx.paging:paging-runtime:3.0.0-alpha10")
+    implementation("androidx.paging:paging-runtime:3.0.0-alpha11")
     // Google
-    implementation("com.google.android.material:material:1.3.0-alpha04")
+    implementation("com.google.android.material:material:1.3.0-beta01")
     implementation("com.google.android.gms:play-services-oss-licenses:17.0.0")
     implementation("com.google.android.gms:play-services-identity:17.0.0")
-    implementation("com.google.android.gms:play-services-auth:18.1.0")
+    implementation("com.google.android.gms:play-services-auth:19.0.0")
 
     implementation("com.google.apis:google-api-services-drive:v3-rev20200706-1.30.10") {
         exclude(group = "org.apache.httpcomponents")
@@ -139,9 +139,9 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel:2.2.0")
     kapt("androidx.lifecycle:lifecycle-compiler:2.2.0")
 
-    implementation("androidx.room:room-runtime:2.2.5")
-    implementation("androidx.room:room-ktx:2.2.5")
-    kapt("androidx.room:room-compiler:2.2.5")
+    implementation("androidx.room:room-runtime:2.2.6")
+    implementation("androidx.room:room-ktx:2.2.6")
+    kapt("androidx.room:room-compiler:2.2.6")
 
     // KTX
     implementation("androidx.work:work-runtime-ktx:2.4.0")
@@ -149,12 +149,12 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0")
     implementation("androidx.work:work-runtime-ktx:2.4.0")
     implementation("androidx.fragment:fragment-ktx:1.2.5")
-    implementation("androidx.room:room-ktx:2.2.5")
+    implementation("androidx.room:room-ktx:2.2.6")
 
     // Kotlin
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.2")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4.20")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4.21")
 
     testImplementation("junit:junit:4.13.1")
 
@@ -162,7 +162,7 @@ dependencies {
     implementation(project(":lib:framework"))
     implementation(project(":playstore"))
 
-    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.5")
+    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.6")
 }
 
 // ADD THIS AT THE BOTTOM

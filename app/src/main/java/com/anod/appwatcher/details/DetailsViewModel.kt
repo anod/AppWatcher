@@ -23,9 +23,14 @@ import kotlinx.coroutines.launch
 typealias TagMenuItem = Pair<Tag, Boolean>
 
 sealed class ChangelogLoadState
+object Initial : ChangelogLoadState()
 object LocalComplete : ChangelogLoadState()
 class RemoteComplete(val error: Boolean) : ChangelogLoadState()
 object Complete : ChangelogLoadState()
+
+sealed class AppLoadingState
+class Loaded(val app: App) : AppLoadingState()
+object NotFound : AppLoadingState()
 
 class DetailsViewModel(application: android.app.Application) : AndroidViewModel(application) {
 
@@ -39,26 +44,31 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
         get() = provide.database
 
     var detailsUrl = ""
-    var appId = MutableStateFlow("")
+    var appId = ""
     var rowId: Int = -1
 
-    val app: StateFlow<App?> = appId.flatMapLatest app@{ appId ->
-        if (appId.isEmpty()) {
-            return@app flowOf(null)
-        }
+    val appLoading: Flow<AppLoadingState> = flowOf(appId)
+            .filter { appId.isNotEmpty() }
+            .flatMapConcat {
+                return@flatMapConcat database.apps().observeApp(it).map { app ->
+                    if (app == null && rowId == -1) {
+                        AppLog.i("Show details for unwatched $appId", "DetailsView")
+                        Loaded(context.packageManager.packageToApp(-1, appId))
+                    } else {
+                        AppLog.i("Show details for watched $appId", "DetailsView")
+                        if (app == null) NotFound else Loaded(app)
+                    }
+                }
+            }//.shareIn(viewModelScope, SharingStarted.Lazily, replay = 1)
 
-        return@app database.apps().observeApp(appId).map {
-            if (it == null && rowId == -1) {
-                AppLog.i("Show details for unwatched $appId", "DetailsView")
-                context.packageManager.packageToApp(-1, appId)
-            } else {
-                AppLog.i("Show details for watched $appId", "DetailsView")
-                it
-            }
+    val app: StateFlow<App?> = appLoading.map {
+        when (it) {
+            is Loaded -> it.app
+            else -> null
         }
     }.stateIn(viewModelScope, SharingStarted.Lazily, null)
 
-    val watchStateChange: MutableLiveData<Int> = MutableLiveData()
+    val watchStateChange: MutableSharedFlow<Int> = MutableSharedFlow()
 
     val account: Account? by lazy {
         Application.provide(application).prefs.account
@@ -70,7 +80,7 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
     }
     var authToken = ""
     var localChangelog: List<AppChange> = emptyList()
-    val tagsMenuItems: StateFlow<List<TagMenuItem>> = appId.flatMapLatest tagsMenu@{ appId ->
+    val tagsMenuItems: StateFlow<List<TagMenuItem>> = flowOf(appId).flatMapLatest tagsMenu@{ appId ->
         if (appId.isEmpty()) {
             return@tagsMenu flowOf(emptyList<TagMenuItem>())
         }
@@ -82,18 +92,18 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
         }
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    val changelogState = MutableLiveData<ChangelogLoadState>()
+    val changelogState = MutableStateFlow<ChangelogLoadState>(Initial)
     val document: Document?
         get() = detailsEndpoint.document
-    var recentChange = AppChange(appId.value, 0, "", "", "", false)
+    var recentChange = AppChange(appId, 0, "", "", "", false)
 
     fun loadLocalChangelog() {
-        if (appId.value.isBlank()) {
+        if (appId.isBlank()) {
             this.updateChangelogState(LocalComplete)
             return
         }
         viewModelScope.launch {
-            localChangelog = database.changelog().ofApp(appId.value)
+            localChangelog = database.changelog().ofApp(appId)
             updateChangelogState(LocalComplete)
         }
     }
@@ -117,7 +127,7 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
     private fun onDataChanged(details: DfeDetails) {
         val appDetails = details.document?.appDetails
         if (appDetails != null) {
-            recentChange = AppChange(appId.value, appDetails.versionCode, appDetails.versionString, appDetails.recentChangesHtml
+            recentChange = AppChange(appId, appDetails.versionCode, appDetails.versionString, appDetails.recentChangesHtml
                     ?: "", appDetails.uploadDate, false)
             app.value!!.testing = when {
                 appDetails.testingProgramInfo.subscribed -> 1
@@ -144,7 +154,10 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
                     this.changelogState.value = state
                 }
             }
-            Complete -> { }
+            Complete -> {
+            }
+            Initial -> {
+            }
         }
     }
 
@@ -156,23 +169,23 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
     fun changeTag(tagId: Int, checked: Boolean) {
         viewModelScope.launch {
             if (checked) {
-                provide.database.appTags().delete(tagId, appId.value) > 0
+                provide.database.appTags().delete(tagId, appId) > 0
             } else {
-                AppTagsTable.Queries.insert(tagId, appId.value, provide.database)
+                AppTagsTable.Queries.insert(tagId, appId, provide.database)
             }
         }
     }
 
     fun watch() {
-        val document = this@DetailsViewModel.document
-        if (document == null) {
-            watchStateChange.value = AppListTable.ERROR_INSERT
-            return
-        }
-        val info = AppInfo(document)
         viewModelScope.launch {
-            val result = AppListTable.Queries.insertSafetly(info, database)
-            watchStateChange.value = result
+            val document = this@DetailsViewModel.document
+            if (document == null) {
+                watchStateChange.emit(AppListTable.ERROR_INSERT)
+            } else {
+                val info = AppInfo(document)
+                val result = AppListTable.Queries.insertSafetly(info, database)
+                watchStateChange.emit(result)
+            }
         }
     }
 }

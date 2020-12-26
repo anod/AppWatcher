@@ -21,9 +21,7 @@ import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.observe
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.anod.appwatcher.Application
@@ -51,6 +49,7 @@ import info.anodsplace.framework.graphics.chooseDark
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.abs
@@ -100,7 +99,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
 
         viewModel.detailsUrl = requireArguments().getString(extraDetailsUrl) ?: ""
         viewModel.rowId = requireArguments().getInt(extraRowId, -1)
-        viewModel.appId.value = requireArguments().getString(extraAppId) ?: ""
+        viewModel.appId = requireArguments().getString(extraAppId) ?: ""
 
         setupToolbar()
         binding.progressBar.isVisible = false
@@ -122,49 +121,34 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
             }, 500)
         }
 
-        if (viewModel.appId.value.isEmpty()) {
-            Toast.makeText(requireContext(), getString(R.string.cannot_load_app, viewModel.appId.value), Toast.LENGTH_LONG).show()
-            AppLog.e("Cannot loadChangelog app details: '${viewModel.appId.value}'")
+        if (viewModel.appId.isEmpty()) {
+            Toast.makeText(requireContext(), getString(R.string.cannot_load_app, viewModel.appId), Toast.LENGTH_LONG).show()
+            AppLog.e("Cannot loadChangelog app details: '${viewModel.appId}'")
             binding.progressBar.isVisible = false
             binding.error.isVisible = true
             return
         }
 
-        viewModel.changelogState.observe(viewLifecycleOwner, Observer {
-            when (it) {
-                is Complete -> {
-                    toggleMenu?.isEnabled = true
-                    viewModel.app.value?.let { app ->
-                        appDetailsView.title.text = app.generateTitle(resources)
+        viewLifecycleOwner.lifecycleScope.launch {
+            launch {
+                viewModel.appLoading.collect { loadingState ->
+                    when (loadingState) {
+                        is Loaded -> {
+                        }
+                        is NotFound -> {
+                            val appId = viewModel.appId
+                            Toast.makeText(requireContext(), getString(R.string.cannot_load_app, appId), Toast.LENGTH_LONG).show()
+                            AppLog.e("Cannot loadChangelog app details: '${appId}'")
+                            binding.progressBar.isVisible = false
+                            binding.error.isVisible = true
+                            binding.list.isInvisible = true
+                        }
                     }
-                    adapter.setData(viewModel.localChangelog, viewModel.recentChange)
-                    if (adapter.isEmpty) {
-                        showRetryMessage()
-                    } else {
-                        binding.progressBar.isVisible = false
-                        binding.list.isVisible = true
-                        binding.error.isVisible = false
-                    }
-                }
-                else -> {
-                    binding.progressBar.isVisible = false
-                    binding.list.isVisible = true
-                    binding.error.isVisible = false
-                    adapter.setData(viewModel.localChangelog, viewModel.recentChange)
                 }
             }
-        })
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.app.collect { app ->
-                if (app == null) {
-                    val appId = viewModel.appId.value
-                    Toast.makeText(requireContext(), getString(R.string.cannot_load_app, appId), Toast.LENGTH_LONG).show()
-                    AppLog.e("Cannot loadChangelog app details: '${appId}'")
-                    binding.progressBar.isVisible = false
-                    binding.error.isVisible = true
-                    binding.list.isInvisible = true
-                } else {
+            launch {
+                viewModel.app.filterNotNull().collect { app ->
                     if (!loaded) {
                         loaded = true
                         setupAppView(app)
@@ -178,15 +162,42 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
                     }
                 }
             }
-        }
 
-        viewModel.watchStateChange.observe(viewLifecycleOwner) { result ->
-            when (result) {
-                AppListTable.ERROR_ALREADY_ADDED -> Toast.makeText(requireContext(), R.string.app_already_added, Toast.LENGTH_SHORT).show()
-                AppListTable.ERROR_INSERT -> Toast.makeText(requireContext(), R.string.error_insert_app, Toast.LENGTH_SHORT).show()
-                else -> {
-                    val info = AppInfo(viewModel.document!!)
-                    TagSnackbar.make(requireActivity(), info, false).show()
+            launch {
+                viewModel.changelogState.collect {
+                    when (it) {
+                        is Complete -> {
+                            toggleMenu?.isEnabled = true
+                            viewModel.app.value?.let { app ->
+                                appDetailsView.title.text = app.generateTitle(resources)
+                            }
+                            adapter.setData(viewModel.localChangelog, viewModel.recentChange)
+                            if (adapter.isEmpty) {
+                                showRetryMessage()
+                            } else {
+                                binding.progressBar.isVisible = false
+                                binding.list.isVisible = true
+                                binding.error.isVisible = false
+                            }
+                        }
+                        else -> {
+                            binding.progressBar.isVisible = false
+                            binding.list.isVisible = true
+                            binding.error.isVisible = false
+                            adapter.setData(viewModel.localChangelog, viewModel.recentChange)
+                        }
+                    }
+                }
+            }
+
+            viewModel.watchStateChange.collect { result ->
+                when (result) {
+                    AppListTable.ERROR_ALREADY_ADDED -> Toast.makeText(requireContext(), R.string.app_already_added, Toast.LENGTH_SHORT).show()
+                    AppListTable.ERROR_INSERT -> Toast.makeText(requireContext(), R.string.error_insert_app, Toast.LENGTH_SHORT).show()
+                    else -> {
+                        val info = AppInfo(viewModel.document!!)
+                        TagSnackbar.make(requireActivity(), info, false).show()
+                    }
                 }
             }
         }
@@ -269,7 +280,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         toggleMenu?.isEnabled = false
         val tagMenu = menu.findItem(R.id.menu_tag_app)
         subscribeForTagSubmenu(tagMenu)
-        if (!dataProvider.installedApps.packageInfo(viewModel.appId.value).isInstalled) {
+        if (!dataProvider.installedApps.packageInfo(viewModel.appId).isInstalled) {
             menu.findItem(R.id.menu_uninstall).isVisible = false
             menu.findItem(R.id.menu_open).isVisible = false
             menu.findItem(R.id.menu_app_info).isVisible = false
@@ -315,7 +326,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
                 return true
             }
             R.id.menu_uninstall -> {
-                val uninstallIntent = Intent().forUninstall(viewModel.appId.value!!)
+                val uninstallIntent = Intent().forUninstall(viewModel.appId)
                 startActivity(uninstallIntent)
                 return true
             }
@@ -324,14 +335,14 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
                 return true
             }
             R.id.menu_open -> {
-                val launchIntent = requireContext().packageManager.getLaunchIntentForPackage(viewModel.appId.value!!)
+                val launchIntent = requireContext().packageManager.getLaunchIntentForPackage(viewModel.appId)
                 if (launchIntent != null) {
                     launchIntent.addMultiWindowFlags(requireContext())
                     startActivitySafely(launchIntent)
                 }
             }
             R.id.menu_app_info -> {
-                startActivity(Intent().forAppInfo(viewModel.appId.value!!, requireContext()))
+                startActivity(Intent().forAppInfo(viewModel.appId, requireContext()))
             }
         }
         if (item.groupId == R.id.menu_group_tags) {
