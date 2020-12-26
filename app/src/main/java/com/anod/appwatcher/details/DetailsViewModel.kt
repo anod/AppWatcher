@@ -47,19 +47,21 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
     var appId = ""
     var rowId: Int = -1
 
-    val appLoading: Flow<AppLoadingState> = flowOf(appId)
-            .filter { appId.isNotEmpty() }
-            .flatMapConcat {
-                return@flatMapConcat database.apps().observeApp(it).map { app ->
-                    if (app == null && rowId == -1) {
-                        AppLog.i("Show details for unwatched $appId", "DetailsView")
-                        Loaded(context.packageManager.packageToApp(-1, appId))
-                    } else {
-                        AppLog.i("Show details for watched $appId", "DetailsView")
-                        if (app == null) NotFound else Loaded(app)
-                    }
-                }
-            }//.shareIn(viewModelScope, SharingStarted.Lazily, replay = 1)
+    val appLoading: Flow<AppLoadingState> = flow {
+        if (appId.isNotEmpty()) {
+            emit(appId)
+        }
+    }.flatMapConcat {
+        return@flatMapConcat database.apps().observeApp(it).map { app ->
+            if (app == null && rowId == -1) {
+                AppLog.i("Show details for unwatched $appId", "DetailsView")
+                Loaded(context.packageManager.packageToApp(-1, appId))
+            } else {
+                AppLog.i("Show details for watched $appId", "DetailsView")
+                if (app == null) NotFound else Loaded(app)
+            }
+        }
+    }
 
     val app: StateFlow<App?> = appLoading.map {
         when (it) {
@@ -80,7 +82,11 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
     }
     var authToken = ""
     var localChangelog: List<AppChange> = emptyList()
-    val tagsMenuItems: StateFlow<List<TagMenuItem>> = flowOf(appId).flatMapLatest tagsMenu@{ appId ->
+    val tagsMenuItems: StateFlow<List<TagMenuItem>> = flow {
+        if (appId.isNotEmpty()) {
+            emit(appId)
+        }
+    }.flatMapLatest tagsMenu@{ appId ->
         if (appId.isEmpty()) {
             return@tagsMenu flowOf(emptyList<TagMenuItem>())
         }
