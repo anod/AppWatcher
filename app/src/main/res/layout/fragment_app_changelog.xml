@@ -82,14 +82,6 @@
         tools:listitem="@layout/list_item_change"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:paddingTop="96dp" />
-
     <LinearLayout
         android:id="@+id/error"
         android:layout_width="match_parent"

@@ -3,7 +3,6 @@ package com.anod.appwatcher.details
 
 import android.content.Intent
 import android.graphics.Color
-import android.graphics.PorterDuff
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -34,6 +33,7 @@ import com.anod.appwatcher.database.entities.generateTitle
 import com.anod.appwatcher.databinding.FragmentAppChangelogBinding
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
+import com.anod.appwatcher.provide
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.*
 import com.anod.appwatcher.watchlist.AppViewHolderResourceProvider
@@ -102,14 +102,11 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         viewModel.appId = requireArguments().getString(extraAppId) ?: ""
 
         setupToolbar()
-        binding.progressBar.isVisible = false
-        binding.error.isVisible = false
-        binding.list.isInvisible = true
+        binding.showChangelogList()
         binding.background.isInvisible = true
         binding.appbar.addOnOffsetChangedListener(this)
 
         binding.retryButton.setOnClickListener {
-            binding.progressBar.isVisible = true
             binding.error.isVisible = false
             binding.list.isInvisible = true
             binding.retryButton.postDelayed({
@@ -124,7 +121,6 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         if (viewModel.appId.isEmpty()) {
             Toast.makeText(requireContext(), getString(R.string.cannot_load_app, viewModel.appId), Toast.LENGTH_LONG).show()
             AppLog.e("Cannot loadChangelog app details: '${viewModel.appId}'")
-            binding.progressBar.isVisible = false
             binding.error.isVisible = true
             return
         }
@@ -139,9 +135,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
                             val appId = viewModel.appId
                             Toast.makeText(requireContext(), getString(R.string.cannot_load_app, appId), Toast.LENGTH_LONG).show()
                             AppLog.e("Cannot loadChangelog app details: '${appId}'")
-                            binding.progressBar.isVisible = false
-                            binding.error.isVisible = true
-                            binding.list.isInvisible = true
+                            binding.showErrorWithRetry()
                         }
                     }
                 }
@@ -173,17 +167,16 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
                             }
                             adapter.setData(viewModel.localChangelog, viewModel.recentChange)
                             if (adapter.isEmpty) {
-                                showRetryMessage()
+                                binding.showErrorWithRetry()
+                                if (!provide.networkConnection.isNetworkAvailable) {
+                                    Toast.makeText(requireContext(), R.string.check_connection, Toast.LENGTH_SHORT).show()
+                                }
                             } else {
-                                binding.progressBar.isVisible = false
-                                binding.list.isVisible = true
-                                binding.error.isVisible = false
+                                binding.showChangelogList()
                             }
                         }
                         else -> {
-                            binding.progressBar.isVisible = false
-                            binding.list.isVisible = true
-                            binding.error.isVisible = false
+                            binding.showChangelogList()
                             adapter.setData(viewModel.localChangelog, viewModel.recentChange)
                         }
                     }
@@ -205,9 +198,12 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
 
     override fun onResume() {
         super.onResume()
-        binding.progressBar.isVisible = true
+        if (binding.error.isVisible) {
+            binding.showChangelogList()
+        }
 
         try {
+            viewModel.changelogState.tryEmit(Initial)
             viewModel.loadLocalChangelog()
         } catch (e: Exception) {
             AppLog.e("onResume", e)
@@ -365,16 +361,6 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         builder.startChooser()
     }
 
-    private fun showRetryMessage() {
-        binding.progressBar.isVisible = false
-        binding.error.isVisible = true
-        binding.list.isInvisible = true
-
-        if (!Application.provide(this).networkConnection.isNetworkAvailable) {
-            Toast.makeText(requireContext(), R.string.check_connection, Toast.LENGTH_SHORT).show()
-        }
-    }
-
     private fun onPaletteGenerated(palette: Palette?) {
         val context = context ?: return
         val defaultColor = ContextCompat.getColor(context, R.color.theme_primary)
@@ -394,7 +380,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         DrawableCompat.setTint(drawable, color)
         binding.playStoreButton.setImageDrawable(drawable)
         binding.background.setBackgroundColor(color)
-        binding.progressBar.indeterminateDrawable.setColorFilter(color, PorterDuff.Mode.SRC_IN)
+        binding.retryButton.setBackgroundColor(color)
     }
 
     private fun animateBackground() {
@@ -457,4 +443,14 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         }
     }
 
+}
+
+fun FragmentAppChangelogBinding.showErrorWithRetry() {
+    error.isVisible = true
+    list.isInvisible = true
+}
+
+fun FragmentAppChangelogBinding.showChangelogList() {
+    error.isVisible = false
+    list.isVisible = true
 }
