@@ -179,7 +179,6 @@
 
     <style name="Changelog.Title" parent="@style/TextAppearance.Widget.AppCompat.Toolbar.Title">
         <item name="android:textSize">14sp</item>
-        <!-- include other attributes you want to change: textColor, textStyle, etc -->
     </style>
 
     <style name="Changelog.Subtitle" parent="@style/TextAppearance.Widget.AppCompat.Toolbar.Subtitle">
@@ -188,27 +187,27 @@
 
     <style name="Changelog.ActionBar" parent="@style/ThemeOverlay.MaterialComponents.ActionBar.Primary">
         <item name="colorControlNormal">@android:color/white</item>
-        <item name="popupTheme">@style/ThemeOverlay.AppCompat.DayNight</item>
+        <!--        <item name="popupTheme">@style/ThemeOverlay.AppCompat.DayNight</item>-->
     </style>
 
     <style name="AppTheme.ActionBar" parent="@style/ThemeOverlay.MaterialComponents.ActionBar.Primary">
-        <item name="popupTheme">@style/ThemeOverlay.AppCompat.DayNight</item>
+        <!--        <item name="popupTheme">@style/ThemeOverlay.AppCompat.DayNight</item>-->
     </style>
 
     <style name="AppTheme.ActionBar.LightBackground" parent="@style/ThemeOverlay.MaterialComponents.ActionBar.Primary">
-        <item name="android:textColorPrimary">@color/black_theme_primary</item>
-        <item name="popupTheme">@style/ThemeOverlay.AppCompat.DayNight</item>
+        <!--        <item name="android:textColorPrimary">@color/black_theme_primary</item>-->
+        <!--        <item name="popupTheme">@style/ThemeOverlay.AppCompat.DayNight</item>-->
     </style>
 
     <style name="AppTheme.ActionBar.DarkBackground" parent="@style/ThemeOverlay.MaterialComponents.ActionBar.Primary">
-        <item name="android:textColorPrimary">@android:color/white</item>
-        <item name="android:textColorSecondary">@android:color/white</item>
-        <item name="actionMenuTextColor">@android:color/white</item>
-        <item name="colorControlNormal">@android:color/white</item>
-        <!-- Counteracts the effect of setting textColorPrimary for popup menus. -->
-        <item name="popupTheme">@style/ThemeOverlay.AppCompat.DayNight</item>
-        <!-- Used to tint the ActionMode background and preserve the underline. -->
-        <item name="android:colorBackground">@android:color/white</item>
+        <!--        <item name="android:textColorPrimary">@android:color/white</item>-->
+        <!--        <item name="android:textColorSecondary">@android:color/white</item>-->
+        <!--        <item name="actionMenuTextColor">@android:color/white</item>-->
+        <!--        <item name="colorControlNormal">@android:color/white</item>-->
+        <!--        &lt;!&ndash; Counteracts the effect of setting textColorPrimary for popup menus. &ndash;&gt;-->
+        <!--        &lt;!&ndash;        <item name="popupTheme">@style/ThemeOverlay.AppCompat.DayNight</item>&ndash;&gt;-->
+        <!--        &lt;!&ndash; Used to tint the ActionMode background and preserve the underline. &ndash;&gt;-->
+        <!--        <item name="android:colorBackground">@android:color/white</item>-->
     </style>
 
     <style name="TextAppearance.AppTheme.Headline1" parent="TextAppearance.MaterialComponents.Headline1" />

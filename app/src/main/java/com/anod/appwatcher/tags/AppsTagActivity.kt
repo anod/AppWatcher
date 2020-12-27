@@ -60,7 +60,7 @@ class AppsTagActivity : WatchListActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.menu_act_addtag) {
-            startActivity(AppsTagSelectActivity.createIntent(tag, this))
+            AppsTagSelectDialog.show(tag, supportFragmentManager)
             return true
         }
         return super.onOptionsItemSelected(item)

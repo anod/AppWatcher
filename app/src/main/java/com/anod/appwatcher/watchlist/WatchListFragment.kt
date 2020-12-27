@@ -28,7 +28,7 @@ import com.anod.appwatcher.databinding.ListItemEmptyBinding
 import com.anod.appwatcher.installed.InstalledFragment
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
-import com.anod.appwatcher.tags.AppsTagSelectActivity
+import com.anod.appwatcher.tags.AppsTagSelectDialog
 import com.anod.appwatcher.utils.SingleLiveEvent
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.CustomThemeActivity
@@ -197,7 +197,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
                     (activity as CustomThemeActivity).themeRes,
                     (activity as CustomThemeActivity).themeColors))
             is ShareFromStore -> activity?.startActivitySafely(Intent.makeMainActivity(ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity")))
-            is AddAppToTag -> startActivity(AppsTagSelectActivity.createIntent(viewModel.tag!!, requireActivity()))
+            is AddAppToTag -> AppsTagSelectDialog.show(action.tag, childFragmentManager)
             is ItemClick -> {
                 val app = action.app
                 if (BuildConfig.DEBUG) {

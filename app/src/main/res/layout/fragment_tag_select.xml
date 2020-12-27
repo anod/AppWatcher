@@ -5,7 +5,9 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <include layout="@layout/toolbar" />
+    <include
+        android:id="@+id/appBar"
+        layout="@layout/toolbar" />
 
     <ProgressBar
         android:id="@android:id/progress"
@@ -33,7 +35,7 @@
         app:allowStacking="false">
 
         <Button
-            android:id="@android:id/button3"
+            android:id="@+id/button3"
             style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -47,14 +49,14 @@
             android:visibility="invisible" />
 
         <Button
-            android:id="@android:id/button2"
+            android:id="@+id/button2"
             style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@android:string/cancel" />
 
         <Button
-            android:id="@android:id/button1"
+            android:id="@+id/button1"
             style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
