@@ -93,9 +93,14 @@ class AppsTagSelectDialog : DialogFragment(R.layout.fragment_tag_select) {
     }
 
     private fun createOptionsMenu(): Boolean {
-        (binding.appBar as Toolbar).inflateMenu(R.menu.searchbox)
-        val menu = (binding.appBar as Toolbar).menu
+        val toolbar = binding.appBar as Toolbar
+        toolbar.inflateMenu(R.menu.searchbox)
+        val menu = toolbar.menu
 
+        toolbar.setNavigationIcon(R.drawable.ic_baseline_arrow_white_24)
+        toolbar.setNavigationOnClickListener {
+            dismiss()
+        }
         val searchItem = menu.findItem(R.id.menu_search)
         val searchView = searchItem.actionView as SearchView
         searchView.setIconifiedByDefault(false)
