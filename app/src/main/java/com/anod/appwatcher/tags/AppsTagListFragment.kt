@@ -7,9 +7,9 @@ import androidx.fragment.app.Fragment
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.databinding.ListItemEmptyBinding
-import com.anod.appwatcher.utils.SingleLiveEvent
 import com.anod.appwatcher.watchlist.*
 import info.anodsplace.framework.app.FragmentFactory
+import kotlinx.coroutines.flow.MutableSharedFlow
 
 /**
  * @author Alex Gavrishev
@@ -38,7 +38,7 @@ class AppsTagListFragment : WatchListFragment() {
             showRecentlyInstalled = false
     )
 
-    override fun createEmptyViewHolder(emptyBinding: ListItemEmptyBinding, action: SingleLiveEvent<WishListAction>): EmptyViewHolder {
+    override fun createEmptyViewHolder(emptyBinding: ListItemEmptyBinding, action: MutableSharedFlow<WishListAction>): EmptyViewHolder {
         emptyBinding.emptyText.setText(R.string.tags_list_is_empty)
         viewModel.tag?.let {
             val button = emptyBinding.button1

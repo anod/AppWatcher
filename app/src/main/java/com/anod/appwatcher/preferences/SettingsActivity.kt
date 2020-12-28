@@ -11,7 +11,6 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.Observer
-import androidx.lifecycle.observe
 import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.BuildConfig
@@ -38,6 +37,9 @@ import info.anodsplace.framework.app.DialogSingleChoice
 import info.anodsplace.framework.app.SettingsActionBarActivity
 import info.anodsplace.framework.content.startActivityForResultSafely
 import info.anodsplace.framework.playservices.GooglePlayServices
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -163,37 +165,41 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
         if (requestCode == REQUEST_BACKUP_FILE) {
             if (resultCode == Activity.RESULT_OK) {
                 val uri = data!!.data ?: return
-                viewModel.import(uri).observe(this) {
-                    when (it) {
-                        -1 -> {
-                            AppLog.d("Importing...")
-                            isProgressVisible = true
-                        }
-                        else -> {
-                            AppLog.d("Import finished with code: $it")
-                            isProgressVisible = false
-                            ImportTask.showImportFinishToast(this, it)
+                GlobalScope.launch {
+                    viewModel.import(uri).collect {
+                        when (it) {
+                            -1 -> {
+                                AppLog.d("Importing...")
+                                isProgressVisible = true
+                            }
+                            else -> {
+                                AppLog.d("Import finished with code: $it")
+                                isProgressVisible = false
+                                ImportTask.showImportFinishToast(this@SettingsActivity, it)
+                            }
                         }
                     }
                 }
-
             }
         } else if (requestCode == REQUEST_BACKUP_DEST) {
             if (resultCode == Activity.RESULT_OK) {
                 val uri = data!!.data ?: return
-                viewModel.export(uri).observe(this) {
-                    when (it) {
-                        -1 -> {
-                            AppLog.d("Exporting...")
-                            isProgressVisible = true
-                        }
-                        else -> {
-                            AppLog.d("Export finished with code: $it")
-                            isProgressVisible = false
-                            when (it) {
-                                DbBackupManager.RESULT_OK -> Toast.makeText(this, resources.getString(R.string.export_done), Toast.LENGTH_SHORT).show()
-                                DbBackupManager.ERROR_STORAGE_NOT_AVAILABLE -> Toast.makeText(this, resources.getString(R.string.external_storage_not_available), Toast.LENGTH_SHORT).show()
-                                DbBackupManager.ERROR_FILE_WRITE -> Toast.makeText(this, resources.getString(R.string.failed_to_write_file), Toast.LENGTH_SHORT).show()
+                GlobalScope.launch {
+                    viewModel.export(uri).collect {
+                        when (it) {
+                            -1 -> {
+                                AppLog.d("Exporting...")
+                                isProgressVisible = true
+                            }
+                            else -> {
+                                AppLog.d("Export finished with code: $it")
+                                isProgressVisible = false
+                                val ctx = this@SettingsActivity
+                                when (it) {
+                                    DbBackupManager.RESULT_OK -> Toast.makeText(ctx, resources.getString(R.string.export_done), Toast.LENGTH_SHORT).show()
+                                    DbBackupManager.ERROR_STORAGE_NOT_AVAILABLE -> Toast.makeText(ctx, resources.getString(R.string.external_storage_not_available), Toast.LENGTH_SHORT).show()
+                                    DbBackupManager.ERROR_FILE_WRITE -> Toast.makeText(ctx, resources.getString(R.string.failed_to_write_file), Toast.LENGTH_SHORT).show()
+                                }
                             }
                         }
                     }

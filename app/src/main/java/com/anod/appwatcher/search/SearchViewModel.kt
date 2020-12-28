@@ -5,7 +5,6 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.paging.*
 import com.anod.appwatcher.AppComponent
@@ -13,7 +12,6 @@ import com.anod.appwatcher.AppWatcherApplication
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
-import com.anod.appwatcher.utils.combineLatest
 import finsky.api.model.Document
 import info.anodsplace.playstore.AppDetailsFilter
 import info.anodsplace.playstore.DetailsEndpoint
@@ -44,14 +42,14 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
     var isShareSource = false
     var hasFocus = false
     private var isPackageSearch = false
-    var searchQuery = MutableLiveData<String>()
-    var authToken = MutableLiveData<String>()
-    val searchQueryAuthenticated = searchQuery.combineLatest(authToken)
+    var searchQuery = MutableStateFlow("")
+    var authToken = MutableStateFlow("")
+    val searchQueryAuthenticated = searchQuery.combine(authToken) { query, token -> Pair(query, token) }
     val packages: StateFlow<List<String>> = provide.database.apps().observePackages().map { list ->
         list.map { it.packageName }
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    var appStatusChange = MutableLiveData<Pair<Int, AppInfo?>>()
+    var appStatusChange = MutableStateFlow<Pair<Int, AppInfo?>>(Pair(-1, null))
 
     private var endpointDetails: DetailsEndpoint? = null
     private var endpointSearch: SearchEndpoint? = null

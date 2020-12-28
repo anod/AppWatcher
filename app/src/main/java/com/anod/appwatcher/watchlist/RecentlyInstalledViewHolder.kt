@@ -11,8 +11,8 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.packageToApp
 import com.anod.appwatcher.installed.RecentAppView
 import com.anod.appwatcher.provide
+import com.anod.appwatcher.utils.EventFlow
 import com.anod.appwatcher.utils.PicassoAppIcon
-import com.anod.appwatcher.utils.SingleLiveEvent
 import com.anod.appwatcher.utils.reveal
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
@@ -31,7 +31,7 @@ class RecentlyInstalledViewHolder(
         private val lifecycleScope: LifecycleCoroutineScope,
         private val iconLoader: PicassoAppIcon,
         private val packageManager: PackageManager,
-        private val action: SingleLiveEvent<WishListAction>) : RecyclerView.ViewHolder(itemView), PlaceholderViewHolder {
+        private val action: EventFlow<WishListAction>) : RecyclerView.ViewHolder(itemView), PlaceholderViewHolder {
 
     private var loadJob: Job? = null
 
@@ -55,7 +55,7 @@ class RecentlyInstalledViewHolder(
 
     init {
         moreButton.setOnClickListener {
-            action.value = Installed(false)
+            action.tryEmit(Installed(false))
         }
 
         lifecycleScope.launch {
@@ -140,7 +140,7 @@ class RecentlyInstalledViewHolder(
         appView.title.text = app.title
         appView.watched.visibility = if (rowId > 0) View.VISIBLE else View.INVISIBLE
         appView.content.setOnSafeClickListener {
-            action.value = ItemClick(app, index)
+            action.tryEmit(ItemClick(app, index))
         }
         appView.reveal(animate, startDelay = index * 50L, duration = shortAnimationDuration, fromAlpha = initialAlpha)
     }

@@ -1,7 +1,6 @@
 package com.anod.appwatcher.watchlist
 
 import android.accounts.Account
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.KeyEvent
@@ -18,6 +17,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.observe
 import androidx.viewpager.widget.ViewPager
 import com.anod.appwatcher.Application
@@ -34,12 +34,13 @@ import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.search.SearchActivity
 import com.anod.appwatcher.upgrade.UpgradeCheck
 import com.anod.appwatcher.upgrade.UpgradeRefresh
-import com.anod.appwatcher.utils.SingleLiveEvent
+import com.anod.appwatcher.utils.EventFlow
 import com.anod.appwatcher.utils.Theme
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.FragmentFactory
 import info.anodsplace.framework.app.HingeDevice
+import kotlinx.coroutines.flow.collectLatest
 
 sealed class ListState
 object SyncStarted : ListState()
@@ -78,7 +79,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     val prefs: Preferences
         get() = Application.provide(this).prefs
 
-    private val menuAction = SingleLiveEvent<MenuAction>()
+    private val menuAction = EventFlow<MenuAction>()
     private val actionMenu by lazy { WatchListMenu(menuAction, this) }
     private val stateViewModel: WatchListStateViewModel by viewModels()
 
@@ -118,18 +119,20 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
             }
         })
 
-        menuAction.observe(this) {
-            when (it) {
-                is FilterMenuAction -> binding.viewPager.currentItem = it.filterId
-                is SortMenuAction -> stateViewModel.sortId.value = it.sortId
-                is SearchQueryAction -> {
-                    if (it.submit) {
-                        startActivity(Intent(this, MarketSearchActivity::class.java).apply {
-                            putExtra(SearchActivity.EXTRA_KEYWORD, it.query)
-                            putExtra(SearchActivity.EXTRA_EXACT, true)
-                        })
-                    } else {
-                        stateViewModel.titleFilter.value = it.query
+        lifecycleScope.launchWhenResumed {
+            menuAction.collectLatest {
+                when (it) {
+                    is FilterMenuAction -> binding.viewPager.currentItem = it.filterId
+                    is SortMenuAction -> stateViewModel.sortId.value = it.sortId
+                    is SearchQueryAction -> {
+                        if (it.submit) {
+                            startActivity(Intent(this@WatchListActivity, MarketSearchActivity::class.java).apply {
+                                putExtra(SearchActivity.EXTRA_KEYWORD, it.query)
+                                putExtra(SearchActivity.EXTRA_EXACT, true)
+                            })
+                        } else {
+                            stateViewModel.titleFilter.value = it.query
+                        }
                     }
                 }
             }

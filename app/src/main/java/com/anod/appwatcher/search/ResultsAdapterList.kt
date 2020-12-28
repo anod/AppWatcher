@@ -7,7 +7,7 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
-import com.anod.appwatcher.utils.SingleLiveEvent
+import com.anod.appwatcher.utils.EventFlow
 import finsky.api.model.Document
 import info.anodsplace.framework.app.ThemeCompat
 import info.anodsplace.framework.content.InstalledApps
@@ -30,7 +30,7 @@ class DocumentDiffCallback : DiffUtil.ItemCallback<Document>() {
     }
 }
 
-class ResultsAdapterList(private val context: Context, private val action: SingleLiveEvent<ResultAction>, private val packages: StateFlow<List<String>>)
+class ResultsAdapterList(private val context: Context, private val action: EventFlow<ResultAction>, private val packages: StateFlow<List<String>>)
     : PagingDataAdapter<Document, ResultsAppViewHolder>(DocumentDiffCallback()) {
 
     private val colorBgDisabled = ThemeCompat.getColor(context, R.attr.inactiveRow)

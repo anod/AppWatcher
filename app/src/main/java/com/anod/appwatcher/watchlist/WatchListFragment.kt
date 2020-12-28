@@ -29,7 +29,7 @@ import com.anod.appwatcher.installed.InstalledFragment
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.tags.AppsTagSelectDialog
-import com.anod.appwatcher.utils.SingleLiveEvent
+import com.anod.appwatcher.utils.EventFlow
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.CustomThemeActivity
 import info.anodsplace.framework.app.FragmentFactory
@@ -59,7 +59,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
     protected val viewModel: WatchListViewModel by viewModels { viewModelFactory() }
 
     private var loadJob: Job? = null
-    private val action = SingleLiveEvent<WishListAction>()
+    private val action = EventFlow<WishListAction>()
     private val stateViewModel: WatchListStateViewModel by activityViewModels()
     private var _binding: FragmentApplistBinding? = null
     val binding get() = _binding!!
@@ -155,10 +155,12 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
             })
         }
 
-        action.observe(viewLifecycleOwner, Observer {
-            val mapped = mapAction(it)
-            onListAction(mapped)
-        })
+        viewLifecycleOwner.lifecycleScope.launchWhenResumed {
+            action.collectLatest {
+                val mapped = mapAction(it)
+                onListAction(mapped)
+            }
+        }
 
         stateViewModel.sortId.observe(viewLifecycleOwner) {
             viewModel.sortId = it ?: 0
@@ -235,8 +237,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
         }
     }
 
-    protected open fun createEmptyViewHolder(emptyBinding: ListItemEmptyBinding, action: SingleLiveEvent<WishListAction>)
-        = EmptyViewHolder(emptyBinding, false, action)
+    protected open fun createEmptyViewHolder(emptyBinding: ListItemEmptyBinding, action: EventFlow<WishListAction>) = EmptyViewHolder(emptyBinding, false, action)
 
     protected open fun mapAction(it: WishListAction): WishListAction {
         if (it is EmptyButton) {

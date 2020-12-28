@@ -21,7 +21,7 @@ import com.anod.appwatcher.search.Delete
 import com.anod.appwatcher.search.ResultAction
 import com.anod.appwatcher.search.ResultsAdapterList
 import com.anod.appwatcher.tags.TagSnackbar
-import com.anod.appwatcher.utils.SingleLiveEvent
+import com.anod.appwatcher.utils.EventFlow
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.FragmentFactory
 import info.anodsplace.framework.app.FragmentToolbarActivity
@@ -41,7 +41,7 @@ class WishListFragment : Fragment() {
     private val viewModel: WishListViewModel by viewModels()
     lateinit var searchView: SearchView
     lateinit var adapter: ResultsAdapterList
-    private val action = SingleLiveEvent<ResultAction>()
+    private val action = EventFlow<ResultAction>()
     private var _binding: FragmentWishlistBinding? = null
     val binding get() = _binding!!
 
@@ -50,7 +50,7 @@ class WishListFragment : Fragment() {
         setHasOptionsMenu(true)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentWishlistBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -122,12 +122,14 @@ class WishListFragment : Fragment() {
             }
         }
 
-        action.observe(this, Observer {
-            when (it) {
-                is Delete -> viewModel.delete(it.info)
-                is Add -> viewModel.add(it.info)
+        viewLifecycleOwner.lifecycleScope.launchWhenResumed {
+            action.collectLatest {
+                when (it) {
+                    is Delete -> viewModel.delete(it.info)
+                    is Add -> viewModel.add(it.info)
+                }
             }
-        })
+        }
 
         adapter.addLoadStateListener { loadStates ->
             when (loadStates.refresh) {

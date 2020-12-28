@@ -3,7 +3,6 @@ package com.anod.appwatcher.watchlist
 
 import android.content.Context
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
@@ -16,8 +15,8 @@ import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.databinding.ListItemEmptyBinding
+import com.anod.appwatcher.utils.EventFlow
 import com.anod.appwatcher.utils.PicassoAppIcon
-import com.anod.appwatcher.utils.SingleLiveEvent
 import info.anodsplace.framework.content.InstalledApps
 
 class SectionItemDiffCallback : DiffUtil.ItemCallback<SectionItem>() {
@@ -41,7 +40,7 @@ class SectionItemDiffCallback : DiffUtil.ItemCallback<SectionItem>() {
 class WatchListPagingAdapter(
         installedApps: InstalledApps,
         private val lifecycleOwner: LifecycleOwner,
-        private val action: SingleLiveEvent<WishListAction>,
+        private val action: EventFlow<WishListAction>,
         private val emptyViewHolderFactory: (itemBinding: ListItemEmptyBinding) -> EmptyViewHolder,
         private val calcSelection: (appItem: AppListItem) -> AppViewHolder.Selection,
         selection: LiveData<Pair<Int, AppViewHolder.Selection>>,
@@ -74,13 +73,12 @@ class WatchListPagingAdapter(
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val item = getItem(position)
-        holder as? SectionItem
-        when (item) {
+        when (val item = getItem(position)) {
             is Header -> (holder as SectionHeaderViewHolder).bind(item.type)
             is AppItem -> (holder as AppViewHolder).bind(position, item.appListItem, item.isLocal, calcSelection(item.appListItem))
             is RecentItem -> (holder as RecentlyInstalledViewHolder).bind(item)
-            is EmptyItem -> { }
+            is EmptyItem -> {
+            }
             is OnDeviceItem -> (holder as AppViewHolder).bind(position, item.appListItem, true, calcSelection(item.appListItem))
         }
     }

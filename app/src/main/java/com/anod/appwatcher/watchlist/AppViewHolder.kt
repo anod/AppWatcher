@@ -8,15 +8,15 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.details.AppDetailsView
+import com.anod.appwatcher.utils.EventFlow
 import com.anod.appwatcher.utils.PicassoAppIcon
-import com.anod.appwatcher.utils.SingleLiveEvent
 import info.anodsplace.framework.view.setOnSafeClickListener
 
 class AppViewHolder(
         itemView: View,
         resourceProvider: ResourceProvider,
         iconLoader: PicassoAppIcon,
-        private val action: SingleLiveEvent<WishListAction>)
+        private val action: EventFlow<WishListAction>)
     : AppViewHolderBase<AppItem>(itemView, resourceProvider, iconLoader) {
 
     enum class Selection {
@@ -36,11 +36,11 @@ class AppViewHolder(
     init {
         val content = itemView.findViewById<View>(R.id.content)
         content.setOnSafeClickListener {
-            action.value = ItemClick(this.app!!, index)
+            action.tryEmit(ItemClick(this.app!!, index))
         }
 
         content.setOnLongClickListener {
-            action.value = ItemLongClick(this.app!!, index)
+            action.tryEmit(ItemLongClick(this.app!!, index))
             true
         }
     }

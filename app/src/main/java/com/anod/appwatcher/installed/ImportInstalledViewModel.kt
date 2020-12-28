@@ -5,13 +5,13 @@ import android.accounts.Account
 import androidx.core.os.bundleOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.anod.appwatcher.provide
 import com.anod.appwatcher.utils.SelectionState
 import com.anod.appwatcher.watchlist.AppViewHolder
 import info.anodsplace.framework.content.getInstalledPackagesCodes
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -33,7 +33,7 @@ class ImportInstalledViewModel(application: android.app.Application) : AndroidVi
     val hasSelection: Boolean
         get() = selectionState.isNotEmpty()
 
-    val progress = MutableLiveData<ImportStatus>()
+    val progress = MutableStateFlow<ImportStatus>(ImportNotStarted)
     val selectionChange: LiveData<SelectionState.Change> = selectionState.selectionChange
 
     override fun onCleared() {

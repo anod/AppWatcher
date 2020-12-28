@@ -15,6 +15,7 @@ import kotlinx.coroutines.withContext
 import java.util.*
 
 sealed class ImportStatus
+object ImportNotStarted : ImportStatus()
 class ImportStarted(val docIds: List<String>) : ImportStatus()
 class ImportProgress(val docIds: List<String>, val result: SimpleArrayMap<String, Int>) : ImportStatus()
 object ImportFinished : ImportStatus()

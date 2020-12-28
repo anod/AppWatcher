@@ -6,8 +6,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.AppInfo
+import com.anod.appwatcher.utils.EventFlow
 import com.anod.appwatcher.utils.PicassoAppIcon
-import com.anod.appwatcher.utils.SingleLiveEvent
 import finsky.api.model.Document
 import info.anodsplace.framework.app.DialogMessage
 import info.anodsplace.framework.content.InstalledApps
@@ -17,7 +17,7 @@ import java.util.*
 class ResultsAppViewHolder(
         itemView: View,
         private val iconLoader: PicassoAppIcon,
-        private val action: SingleLiveEvent<ResultAction>,
+        private val action: EventFlow<ResultAction>,
         private val packages: StateFlow<List<String>>,
         private val colorBgDisabled: Int,
         private val colorBgNormal: Int,
@@ -51,14 +51,14 @@ class ResultsAppViewHolder(
         if (packages.contains(info.packageName)) {
             DialogMessage(itemView.context, R.style.AlertDialog, R.string.already_exist, R.string.delete_existing_item) { builder ->
                 builder.setPositiveButton(R.string.delete) { _, _ ->
-                    action.value = Delete(info)
+                    action.tryEmit(Delete(info))
                 }
                 builder.setNegativeButton(android.R.string.cancel) { _, _ ->
 
                 }
             }.show()
         } else {
-            action.value = Add(info)
+            action.tryEmit(Add(info))
         }
     }
 

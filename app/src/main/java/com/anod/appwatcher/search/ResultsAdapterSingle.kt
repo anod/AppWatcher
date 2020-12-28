@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
-import com.anod.appwatcher.utils.SingleLiveEvent
+import com.anod.appwatcher.utils.EventFlow
 import finsky.api.model.Document
 import info.anodsplace.framework.app.ThemeCompat
 import info.anodsplace.framework.content.InstalledApps
@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 class ResultsAdapterSingle(
         private val context: Context,
-        private val action: SingleLiveEvent<ResultAction>,
+        private val action: EventFlow<ResultAction>,
         private val packages: StateFlow<List<String>>,
         private val document: Document): RecyclerView.Adapter<ResultsAppViewHolder>() {
 

@@ -11,7 +11,6 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.isVisible
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -24,7 +23,7 @@ import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.databinding.ActivityMarketSearchBinding
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.tags.TagSnackbar
-import com.anod.appwatcher.utils.SingleLiveEvent
+import com.anod.appwatcher.utils.EventFlow
 import com.anod.appwatcher.utils.Theme
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
@@ -32,6 +31,7 @@ import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.view.Keyboard
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -46,7 +46,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
         get() = Theme(this).colors
 
     private var adapter: RecyclerView.Adapter<ResultsAppViewHolder>? = null
-    private val action = SingleLiveEvent<ResultAction>()
+    private val action = EventFlow<ResultAction>()
     lateinit var searchView: SearchView
 
     private val accountSelectionDialog: AccountSelectionDialog by lazy {
@@ -81,35 +81,41 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
             onAccountSelected(viewModel.account!!)
         }
 
-        viewModel.searchQueryAuthenticated.observe(this, Observer {
-            val query = it.first
-            val authToken = it.second
-            if (query.isBlank()) {
-                showNoResults("")
-            } else {
-                search(query, authToken)
+        lifecycleScope.launch {
+            viewModel.searchQueryAuthenticated.collectLatest {
+                val query = it.first
+                val authToken = it.second
+                if (query.isBlank()) {
+                    showNoResults("")
+                } else {
+                    search(query, authToken)
+                }
             }
-        })
-
-        viewModel.appStatusChange.observe(this, Observer {
-            val newStatus = it.first
-            if (newStatus == AppInfoMetadata.STATUS_NORMAL) {
-                TagSnackbar.make(this, it.second!!, viewModel.isShareSource).show()
-            }
-        })
+        }
 
         lifecycleScope.launch {
+            launch {
+                viewModel.appStatusChange.collect {
+                    val newStatus = it.first
+                    if (newStatus == AppInfoMetadata.STATUS_NORMAL) {
+                        TagSnackbar.make(this@SearchActivity, it.second!!, viewModel.isShareSource).show()
+                    }
+                }
+            }
+
             viewModel.packages.collectLatest {
                 adapter?.notifyDataSetChanged()
             }
         }
 
-        action.observe(this, Observer {
-            when (it) {
-                is Delete -> viewModel.delete(it.info)
-                is Add -> viewModel.add(it.info)
+        lifecycleScope.launchWhenResumed {
+            action.collectLatest {
+                when (it) {
+                    is Delete -> viewModel.delete(it.info)
+                    is Add -> viewModel.add(it.info)
+                }
             }
-        })
+        }
     }
 
     private fun search(query: String, authToken: String) {

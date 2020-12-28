@@ -14,7 +14,7 @@ import com.anod.appwatcher.installed.InstalledFragment
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.provide
 import com.anod.appwatcher.tags.TagsListFragment
-import com.anod.appwatcher.utils.SingleLiveEvent
+import com.anod.appwatcher.utils.EventFlow
 import com.anod.appwatcher.utils.forMyApps
 import info.anodsplace.framework.app.CustomThemeActivity
 import info.anodsplace.framework.app.DialogSingleChoice
@@ -27,7 +27,7 @@ class FilterMenuAction(val filterId: Int) : MenuAction()
 class SearchQueryAction(val query: String, val submit: Boolean) : MenuAction()
 
 class SearchMenu(
-        private val action: SingleLiveEvent<MenuAction>
+        private val action: EventFlow<MenuAction>
 ) : SearchView.OnQueryTextListener {
     private var menuItem: MenuItem? = null
 
@@ -74,13 +74,13 @@ class SearchMenu(
             onQueryTextChange("")
             collapseSearch()
         }
-        action.value = SearchQueryAction(query, true)
+        action.tryEmit(SearchQueryAction(query, true))
         return true
     }
 
     override fun onQueryTextChange(newText: String): Boolean {
         query = newText
-        action.value = SearchQueryAction(newText, false)
+        action.tryEmit(SearchQueryAction(newText, false))
         return true
     }
 }
@@ -90,7 +90,7 @@ class SearchMenu(
  * @date 03/12/2017
  */
 class WatchListMenu(
-        private val action: SingleLiveEvent<MenuAction>,
+        private val action: EventFlow<MenuAction>,
         private val activity: AppCompatActivity
 ) {
     val search = SearchMenu(action)
@@ -165,7 +165,7 @@ class WatchListMenu(
                 val selected = prefs.sortIndex
                 DialogSingleChoice(activity, R.style.AlertDialog, R.array.sort_titles, selected) { dialog, index ->
                     prefs.sortIndex = index
-                    action.value = SortMenuAction(index)
+                    action.tryEmit(SortMenuAction(index))
                     dialog.dismiss()
                 }.show()
                 return true
@@ -174,7 +174,7 @@ class WatchListMenu(
             R.id.menu_filter_installed,
             R.id.menu_filter_not_installed,
             R.id.menu_filter_updatable -> {
-                action.value = FilterMenuAction(item.order)
+                action.tryEmit(FilterMenuAction(item.order))
                 return true
             }
             R.id.menu_my_apps -> {

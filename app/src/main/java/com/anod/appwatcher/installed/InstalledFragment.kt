@@ -18,7 +18,7 @@ import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.provide
-import com.anod.appwatcher.utils.SingleLiveEvent
+import com.anod.appwatcher.utils.EventFlow
 import com.anod.appwatcher.watchlist.*
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
@@ -27,10 +27,11 @@ import info.anodsplace.framework.app.FragmentFactory
 import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.content.startActivitySafely
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class InstalledFragment : WatchListFragment(), ActionMode.Callback {
-    private val menuAction = SingleLiveEvent<MenuAction>()
+    private val menuAction = EventFlow<MenuAction>()
     private val search = SearchMenu(menuAction)
     private val importViewModel: ImportInstalledViewModel by viewModels()
     private var actionMode: ActionMode? = null
@@ -38,67 +39,6 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-
-        menuAction.observe(this) {
-            when (it) {
-                is SearchQueryAction -> {
-                    viewModel.titleFilter = it.query
-                    reload()
-                }
-                is SortMenuAction -> {
-                    viewModel.sortId = it.sortId
-                    reload()
-                }
-                is FilterMenuAction -> { }
-            }
-        }
-
-        importViewModel.progress.observe(this, Observer { status ->
-            when (status) {
-                is ImportStarted -> {
-                    binding.actionButton.isEnabled = false
-                }
-                is ImportProgress -> {
-                }
-                is ImportFinished -> {
-                    Toast.makeText(context, R.string.import_done, Toast.LENGTH_LONG).show()
-                    importViewModel.clearSelection()
-                    reload()
-                }
-            }
-        })
-
-        val vm = viewModel as InstalledViewModel
-        val changelogAdapter = vm.changelogAdapter
-        changelogAdapter.account?.let { account ->
-            lifecycleScope.launch {
-                try {
-                    val token = AuthTokenBlocking(requireContext().applicationContext).retrieve(account)
-                    if (token.isNotBlank()) {
-                        changelogAdapter.authToken = token
-                    } else {
-                        AppLog.e("Error retrieving token")
-                    }
-                } catch (e: AuthTokenStartIntent) {
-                    startActivity(e.intent)
-                } catch (e: Exception) {
-                    AppLog.e("onResume", e)
-                }
-
-                changelogAdapter.updated.collect {
-                    reload()
-                }
-            }
-        }
-
-        lifecycleScope.launch {
-            provide.packageRemoved.collect {
-                AppLog.d("Package removed: $it")
-                if (importViewModel.progress.value !is ImportProgress) {
-                    reload()
-                }
-            }
-        }
     }
 
     private fun switchImportMode(selectionMode: Boolean, animated: Boolean) {
@@ -136,7 +76,7 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
         when (item.itemId) {
             R.id.menu_act_sort -> {
                 DialogSingleChoice(requireContext(), R.style.AlertDialog, R.array.sort_titles, viewModel.sortId) { dialog, index ->
-                    menuAction.value = SortMenuAction(index)
+                    menuAction.tryEmit(SortMenuAction(index))
                     dialog.dismiss()
                 }.show()
                 return true
@@ -183,6 +123,75 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
                 viewModel.selection.value = Pair(index, if (change.defaultSelected) AppViewHolder.Selection.Selected else AppViewHolder.Selection.NotSelected)
             } else {
                 viewModel.selection.value = Pair(index, importViewModel.getPackageSelection(change.key))
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launchWhenResumed {
+            menuAction.collectLatest {
+                when (it) {
+                    is SearchQueryAction -> {
+                        viewModel.titleFilter = it.query
+                        reload()
+                    }
+                    is SortMenuAction -> {
+                        viewModel.sortId = it.sortId
+                        reload()
+                    }
+                    is FilterMenuAction -> {
+                    }
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            importViewModel.progress.collect { status ->
+                when (status) {
+                    is ImportNotStarted -> {
+
+                    }
+                    is ImportStarted -> {
+                        binding.actionButton.isEnabled = false
+                    }
+                    is ImportProgress -> {
+                    }
+                    is ImportFinished -> {
+                        Toast.makeText(context, R.string.import_done, Toast.LENGTH_LONG).show()
+                        importViewModel.clearSelection()
+                        reload()
+                    }
+                }
+            }
+        }
+
+        val vm = viewModel as InstalledViewModel
+        val changelogAdapter = vm.changelogAdapter
+        changelogAdapter.account?.let { account ->
+            lifecycleScope.launch {
+                try {
+                    val token = AuthTokenBlocking(requireContext().applicationContext).retrieve(account)
+                    if (token.isNotBlank()) {
+                        changelogAdapter.authToken = token
+                    } else {
+                        AppLog.e("Error retrieving token")
+                    }
+                } catch (e: AuthTokenStartIntent) {
+                    startActivity(e.intent)
+                } catch (e: Exception) {
+                    AppLog.e("onResume", e)
+                }
+
+                changelogAdapter.updated.collect {
+                    reload()
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            provide.packageRemoved.collect {
+                AppLog.d("Package removed: $it")
+                if (importViewModel.progress.value !is ImportProgress) {
+                    reload()
+                }
             }
         }
     }

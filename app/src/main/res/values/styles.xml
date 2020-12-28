@@ -195,15 +195,15 @@
     </style>
 
     <style name="AppTheme.ActionBar.LightBackground" parent="@style/ThemeOverlay.MaterialComponents.ActionBar.Primary">
-        <!--        <item name="android:textColorPrimary">@color/black_theme_primary</item>-->
+        <item name="android:textColorPrimary">@color/black_theme_primary</item>
         <!--        <item name="popupTheme">@style/ThemeOverlay.AppCompat.DayNight</item>-->
     </style>
 
     <style name="AppTheme.ActionBar.DarkBackground" parent="@style/ThemeOverlay.MaterialComponents.ActionBar.Primary">
-        <!--        <item name="android:textColorPrimary">@android:color/white</item>-->
-        <!--        <item name="android:textColorSecondary">@android:color/white</item>-->
-        <!--        <item name="actionMenuTextColor">@android:color/white</item>-->
-        <!--        <item name="colorControlNormal">@android:color/white</item>-->
+        <item name="android:textColorPrimary">@android:color/white</item>
+        <item name="android:textColorSecondary">@android:color/white</item>
+        <item name="actionMenuTextColor">@android:color/white</item>
+        <item name="colorControlNormal">@android:color/white</item>
         <!--        &lt;!&ndash; Counteracts the effect of setting textColorPrimary for popup menus. &ndash;&gt;-->
         <!--        &lt;!&ndash;        <item name="popupTheme">@style/ThemeOverlay.AppCompat.DayNight</item>&ndash;&gt;-->
         <!--        &lt;!&ndash; Used to tint the ActionMode background and preserve the underline. &ndash;&gt;-->
