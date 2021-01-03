@@ -41,16 +41,17 @@ class GDriveSignIn(private val activity: Activity, private val listener: Listene
 
     companion object {
         const val resultCodeGDriveSignIn = 123
+        const val resultCodeGDriveException = 124
 
         fun showResolutionNotification(resolution: PendingIntent, context: ApplicationContext) {
             val notification = NotificationCompat.Builder(context.actual, SyncNotification.authenticationId).apply {
                 setAutoCancel(true)
                 setSmallIcon(R.drawable.ic_notification)
                 setContentTitle(context.getString(R.string.google_drive_sync_failed))
-                setContentText(context.getString(R.string.user_action_required))
+                setContentText(context.getString(R.string.google_drive_sync_action))
                 setContentIntent(resolution)
             }.build()
-            context.notificationManager.notify(SyncNotification.gpsNotificationId, notification)
+            context.notificationManager.notify(SyncNotification.gmsNotificationId, notification)
         }
     }
 
@@ -83,6 +84,8 @@ class GDriveSignIn(private val activity: Activity, private val listener: Listene
             // a listener.
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
             handleSignInResult(task)
+        } else if (requestCode == resultCodeGDriveException) {
+            // Nothing?
         }
     }
 

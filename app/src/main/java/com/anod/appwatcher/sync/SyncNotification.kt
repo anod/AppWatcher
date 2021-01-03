@@ -25,7 +25,7 @@ class SyncNotification(private val context: ApplicationContext) {
 
     companion object {
         internal const val syncNotificationId = 1
-        internal const val gpsNotificationId = 2
+        internal const val gmsNotificationId = 2
         const val updatesChannelId = "versions_updates"
         const val pricesChannelId = "prices_change"
         const val authenticationId = "authentication"

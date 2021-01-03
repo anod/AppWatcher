@@ -29,7 +29,7 @@ class GDriveUpload(private val context: ApplicationContext, private val googleAc
             try {
                 doUploadLocked(db)
             } catch (e: Exception) {
-                throw Exception(e)
+                throw e
             }
         }
     }

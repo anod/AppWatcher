@@ -110,7 +110,7 @@
     <string name="action_tag">%s Тэг</string>
     <string name="tag_app">Таг %1s</string>
     <string name="google_drive_sync_failed">Ошибка синхронизации Google Drive</string>
-    <string name="user_action_required">Требуется действие пользователя</string>
+    <string name="google_drive_sync_action">Синхронизируйте вручную в настройках</string>
     <string name="check_connection">Проверьте соединение с интернетом</string>
     <string name="refresh_scheduled">Обновление запланировано</string>
     <string name="recently_installed">Недавно установленные</string>

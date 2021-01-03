@@ -5,6 +5,8 @@ package com.anod.appwatcher.backup.gdrive
 
 import android.content.Intent
 import androidx.core.util.Pair
+import com.google.android.gms.auth.UserRecoverableAuthException
+import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
 import com.google.api.client.http.HttpRequestInitializer
 import com.google.api.client.http.InputStreamContent
 import com.google.api.client.http.javanet.NetHttpTransport
@@ -34,6 +36,14 @@ class DriveService(private val service: Drive) {
             return Drive.Builder(NetHttpTransport(), JacksonFactory(), credential)
                     .setApplicationName(appName)
                     .build()
+        }
+
+        fun extractUserRecoverableException(e: Exception): UserRecoverableAuthException? {
+            return if (e is UserRecoverableAuthIOException) {
+                e.cause
+            } else {
+                e as? UserRecoverableAuthException
+            }
         }
     }
 

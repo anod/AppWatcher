@@ -1,10 +1,14 @@
 package com.anod.appwatcher.backup.gdrive
 
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import androidx.work.*
 import com.anod.appwatcher.Application
+import com.anod.appwatcher.SettingsActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import info.anodsplace.framework.AppLog
+import info.anodsplace.framework.app.ApplicationContext
 import java.util.concurrent.TimeUnit
 
 /**
@@ -54,6 +58,14 @@ class UploadService(appContext: Context, params: WorkerParameters) : CoroutineWo
             worker.doUploadInBackground()
         } catch (e: Exception) {
             AppLog.e(e)
+            DriveService.extractUserRecoverableException(e)?.let {
+                val settingActivity = Intent(applicationContext, SettingsActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                GDriveSignIn.showResolutionNotification(
+                        PendingIntent.getActivity(applicationContext, 0, settingActivity, 0), ApplicationContext(applicationContext)
+                )
+            }
             return Result.failure()
         }
 

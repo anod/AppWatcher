@@ -19,6 +19,7 @@ import com.anod.appwatcher.backup.DbBackupManager
 import com.anod.appwatcher.backup.ImportTask
 import com.anod.appwatcher.backup.gdrive.GDrive
 import com.anod.appwatcher.backup.gdrive.GDriveSignIn
+import com.anod.appwatcher.backup.gdrive.GDriveSignIn.Companion.resultCodeGDriveException
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.preferences.Preferences.Companion.THEME_BLACK
 import com.anod.appwatcher.preferences.Preferences.Companion.THEME_DEFAULT
@@ -26,6 +27,7 @@ import com.anod.appwatcher.sync.SchedulesHistoryActivity
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.userLog.UserLogActivity
 import com.anod.appwatcher.utils.Theme
+import com.google.android.gms.auth.UserRecoverableAuthException
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
@@ -427,11 +429,14 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
         Toast.makeText(this, R.string.sync_finish, Toast.LENGTH_SHORT).show()
     }
 
-    override fun onGDriveError() {
+    override fun onGDriveError(exception: UserRecoverableAuthException?) {
         isProgressVisible = false
         syncNowItem.enabled = syncEnabledItem.checked
         notifyDataSetChanged()
         Toast.makeText(this, R.string.sync_error, Toast.LENGTH_SHORT).show()
+        if (exception?.intent != null) {
+            startActivityForResult(exception.intent, resultCodeGDriveException);
+        }
     }
 
     companion object {

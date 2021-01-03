@@ -1,7 +1,7 @@
 package com.anod.appwatcher.backup.gdrive
 
 import android.content.Context
-import android.widget.Toast
+import com.google.android.gms.auth.UserRecoverableAuthException
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.ApplicationContext
@@ -25,7 +25,7 @@ class GDrive(private val context: ApplicationContext, private val googleAccount:
         fun onGDriveSyncProgress()
         fun onGDriveSyncStart()
         fun onGDriveSyncFinish()
-        fun onGDriveError()
+        fun onGDriveError(exception: UserRecoverableAuthException?)
     }
 
     fun sync() {
@@ -36,9 +36,8 @@ class GDrive(private val context: ApplicationContext, private val googleAccount:
                 worker.doSync()
                 listener?.onGDriveSyncFinish()
             } catch (e: Exception) {
-                AppLog.e(e)
-                Toast.makeText(context.actual, e.message ?: "Error", Toast.LENGTH_SHORT).show()
-                listener?.onGDriveError()
+                AppLog.e("sync exception: ${e.javaClass}", e)
+                listener?.onGDriveError(DriveService.extractUserRecoverableException(e))
             }
         }
     }

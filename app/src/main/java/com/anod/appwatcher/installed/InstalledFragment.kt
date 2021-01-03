@@ -181,6 +181,7 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
                 }
 
                 changelogAdapter.updated.collect {
+                    AppLog.d("InstalledFragment changelog update collected")
                     reload()
                 }
             }

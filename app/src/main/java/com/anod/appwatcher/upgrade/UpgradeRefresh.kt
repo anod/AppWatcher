@@ -29,8 +29,9 @@ class UpgradeRefresh(val prefs: Preferences, val activity: Activity, private val
                 }
 
                 override fun onGDriveLoginError(errorCode: Int) {
-                    val settingActivity = Intent(activity, SettingsActivity::class.java)
-                    settingActivity.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    val settingActivity = Intent(activity, SettingsActivity::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    }
                     GDriveSignIn.showResolutionNotification(
                             PendingIntent.getActivity(activity, 0, settingActivity, 0), ApplicationContext(activity))
                 }

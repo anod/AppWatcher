@@ -21,10 +21,10 @@ class ChangelogAdapter(
         private val context: ApplicationContext,
         private val viewModelScope: CoroutineScope
 ) {
-    private val request = MutableSharedFlow<Request>()
+    private val request = MutableSharedFlow<Request>(extraBufferCapacity = 1)
     private var job: Job? = null
-    val changelogs = mutableMapOf<String, AppChange>()
-    val updated = MutableSharedFlow<Boolean>(0)
+    val changelogs = mutableMapOf<String, AppChange?>()
+    val updated = MutableSharedFlow<Boolean>(0, extraBufferCapacity = 1)
     val account: Account? = context.provide.prefs.account
     var authToken = ""
         set(value) {
@@ -34,19 +34,22 @@ class ChangelogAdapter(
             }
         }
 
-
-    suspend fun load(watchingPackages: List<String>, notWatchedPackages: List<InstalledPackage>) {
+    fun load(watchingPackages: List<String>, notWatchedPackages: List<InstalledPackage>) {
+        AppLog.d("ChangelogAdapter.load ${watchingPackages.size}, ${notWatchedPackages.size}, existing ${changelogs.keys.size}")
         try {
-            request.emit(Pair(watchingPackages, notWatchedPackages))
+            request.tryEmit(Pair(watchingPackages, notWatchedPackages))
         } catch (e: Exception) {
+            AppLog.d("ChangelogAdapter exception: $e")
             AppLog.e(e)
         }
     }
 
     private fun subscribeForChangelogRequests() {
+        AppLog.d("ChangelogAdapter subscribeForChangelogRequests")
         job?.cancel()
         job = viewModelScope.launch {
             request.collect { request ->
+                AppLog.d("ChangelogAdapter collect $request")
                 try {
                     val packagesMap = request.second.associateBy { it.name }
                     val localIds = request.first.subtract(changelogs.keys)
@@ -59,8 +62,16 @@ class ChangelogAdapter(
                         val docIds = loadIds.map { BulkDocId(it, packagesMap.getValue(it).versionCode) }
                         loadChangelogs(docIds)
                     }
-                    updated.emit(true)
+                    val unknownIds = packagesMap.keys.subtract(changelogs.keys)
+                    if (unknownIds.isNotEmpty()) {
+                        unknownIds.associateByTo(changelogs, { it }, { null })
+                    }
+                    AppLog.d("ChangelogAdapter updated $localIds, $loadIds., $unknownIds")
+                    if (localIds.isNotEmpty() || loadIds.isNotEmpty()) {
+                        updated.emit(true)
+                    }
                 } catch (e: Exception) {
+                    AppLog.d("ChangelogAdapter collect exception $e")
                     AppLog.e(e)
                 }
             }
