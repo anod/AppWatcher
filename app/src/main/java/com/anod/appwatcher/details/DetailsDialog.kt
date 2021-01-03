@@ -10,7 +10,6 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commitNow
 import com.anod.appwatcher.R
 import com.anod.appwatcher.utils.Theme
-import java.sql.RowId
 
 class DetailsDialog: DialogFragment(R.layout.activity_app_changelog) {
 
@@ -33,6 +32,14 @@ class DetailsDialog: DialogFragment(R.layout.activity_app_changelog) {
     }
 
     companion object {
+        fun dismiss(fm: FragmentManager): Boolean {
+            val dialog = fm.findFragmentByTag(DetailsDialog::class.java.simpleName) as? DetailsDialog
+            if (dialog != null) {
+                dialog.dismiss()
+                return true
+            }
+            return false
+        }
 
         fun show(appId: String, rowId: Int, detailsUrl: String?, fm: FragmentManager) {
             DetailsDialog().apply {

@@ -68,7 +68,7 @@ class WatchListPagingAdapter(
             is RecentItem -> R.layout.list_item_recently_installed
             is OnDeviceItem -> R.layout.list_item_app
             is EmptyItem -> R.layout.list_item_empty
-            else -> throw UnsupportedOperationException("Unknown view")
+            else -> 0
         }
     }
 
@@ -102,6 +102,18 @@ class WatchListPagingAdapter(
                 return emptyViewHolderFactory(binding)
             }
             else -> throw UnsupportedOperationException("Unknown view")
+        }
+    }
+
+    fun notifyRecentlyInstalledChanged() {
+        val count = itemCount
+        if (count > 0) {
+            for (i in 0 until count) {
+                if (getItemViewType(i) == R.layout.list_item_recently_installed) {
+                    notifyItemChanged(i)
+                    break
+                }
+            }
         }
     }
 }

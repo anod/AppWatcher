@@ -246,7 +246,9 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         if (stateViewModel.isWideLayout && supportFragmentManager.findFragmentByTag(DetailsFragment.tag) != null) {
             supportFragmentManager.popBackStack(DetailsFragment.tag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
         } else {
-            super.onBackPressed()
+            if (!DetailsDialog.dismiss(supportFragmentManager)) {
+                super.onBackPressed()
+            }
         }
     }
 
