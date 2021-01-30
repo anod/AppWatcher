@@ -106,8 +106,9 @@ class RecentlyInstalledViewHolder(
             cache = result
             emit(result)
         } else {
-            cache = emptyList()
-            emit(emptyList())
+            val result: List<Pair<String, Int>> = emptyList()
+            cache = result
+            emit(result)
         }
     }
 

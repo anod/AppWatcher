@@ -109,12 +109,12 @@ dependencies {
     implementation("androidx.palette:palette:1.0.0")
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("androidx.constraintlayout:constraintlayout:2.0.4")
-    implementation("androidx.work:work-runtime:2.4.0")
+    implementation("androidx.work:work-runtime:2.5.0")
     implementation("androidx.core:core:1.3.2")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
-    implementation("androidx.paging:paging-runtime:3.0.0-alpha11")
+    implementation("androidx.paging:paging-runtime:3.0.0-alpha13")
     // Google
-    implementation("com.google.android.material:material:1.3.0-beta01")
+    implementation("com.google.android.material:material:1.3.0-rc01")
     implementation("com.google.android.gms:play-services-oss-licenses:17.0.0")
     implementation("com.google.android.gms:play-services-identity:17.0.0")
     implementation("com.google.android.gms:play-services-auth:19.0.0")
@@ -127,8 +127,8 @@ dependencies {
     implementation("com.google.api-client:google-api-client:1.30.10")
     implementation("com.google.api-client:google-api-client-android:1.30.10")
 
-    implementation("com.google.firebase:firebase-analytics:18.0.0")
-    implementation("com.google.firebase:firebase-crashlytics:17.3.0")
+    implementation("com.google.firebase:firebase-analytics:18.0.2")
+    implementation("com.google.firebase:firebase-crashlytics:17.3.1")
 
     // 3rd party
     implementation("com.squareup.okhttp3:okhttp:4.8.1")
@@ -144,10 +144,10 @@ dependencies {
     kapt("androidx.room:room-compiler:2.2.6")
 
     // KTX
-    implementation("androidx.work:work-runtime-ktx:2.4.0")
+    implementation("androidx.work:work-runtime-ktx:2.5.0")
     implementation("androidx.fragment:fragment-ktx:1.2.5")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0")
-    implementation("androidx.work:work-runtime-ktx:2.4.0")
+    implementation("androidx.work:work-runtime-ktx:2.5.0")
     implementation("androidx.fragment:fragment-ktx:1.2.5")
     implementation("androidx.room:room-ktx:2.2.6")
 

@@ -2,6 +2,7 @@
 package com.anod.appwatcher.search
 
 import androidx.paging.PagingSource
+import androidx.paging.PagingState
 import finsky.api.model.Document
 import info.anodsplace.framework.AppLog
 import info.anodsplace.playstore.ListEndpoint
@@ -34,4 +35,5 @@ class ListEndpointPagingSource(
         }
     }
 
+    override fun getRefreshKey(state: PagingState<String, Document>): String? = null
 }

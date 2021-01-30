@@ -2,6 +2,7 @@
 package com.anod.appwatcher.installed
 
 import androidx.paging.PagingSource
+import androidx.paging.PagingState
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
@@ -62,4 +63,5 @@ class InstalledPagingSource(
         )
     }
 
+    override fun getRefreshKey(state: PagingState<Int, SectionItem>): Int? = null
 }

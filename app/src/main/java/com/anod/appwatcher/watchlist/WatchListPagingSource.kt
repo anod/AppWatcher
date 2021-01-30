@@ -2,6 +2,7 @@
 package com.anod.appwatcher.watchlist
 
 import androidx.paging.PagingSource
+import androidx.paging.PagingState
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
@@ -78,4 +79,5 @@ class WatchListPagingSource(
         )
     }
 
+    override fun getRefreshKey(state: PagingState<Int, SectionItem>): Int? = null
 }
