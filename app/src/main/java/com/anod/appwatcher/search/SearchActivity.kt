@@ -98,7 +98,12 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
                 viewModel.appStatusChange.collect {
                     val newStatus = it.first
                     if (newStatus == AppInfoMetadata.STATUS_NORMAL) {
-                        TagSnackbar.make(this@SearchActivity, it.second!!, viewModel.isShareSource).show()
+                        TagSnackbar.make(
+                            binding.root,
+                            it.second!!,
+                            viewModel.isShareSource,
+                            this@SearchActivity
+                        ).show()
                     }
                 }
             }

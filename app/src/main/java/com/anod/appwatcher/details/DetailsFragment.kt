@@ -74,17 +74,29 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         get() = Application.provide(this).iconLoader
 
     private val dataProvider: AppViewHolderResourceProvider by lazy {
-        AppViewHolderResourceProvider(requireContext(), InstalledApps.PackageManager(requireContext().packageManager))
+        AppViewHolderResourceProvider(
+            requireContext(),
+            InstalledApps.PackageManager(requireContext().packageManager)
+        )
     }
 
-    private val appDetailsView: AppDetailsView by lazy { AppDetailsView(binding.container, dataProvider) }
+    private val appDetailsView: AppDetailsView by lazy {
+        AppDetailsView(
+            binding.container,
+            dataProvider
+        )
+    }
 
     private val adapter: ChangesAdapter by lazy { ChangesAdapter(requireContext()) }
 
     private var _binding: FragmentAppChangelogBinding? = null
     private val binding get() = _binding!!
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         _binding = FragmentAppChangelogBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -189,7 +201,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
                     AppListTable.ERROR_INSERT -> Toast.makeText(requireContext(), R.string.error_insert_app, Toast.LENGTH_SHORT).show()
                     else -> {
                         val info = AppInfo(viewModel.document!!)
-                        TagSnackbar.make(requireActivity(), info, false).show()
+                        TagSnackbar.make(view, info, false, requireActivity()).show()
                     }
                 }
             }
@@ -350,7 +362,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
 
     private fun shareApp() {
         val appInfo = this.viewModel.app.value ?: return
-        val builder = ShareCompat.IntentBuilder.from(requireActivity())
+        val builder = ShareCompat.IntentBuilder(requireActivity())
 
         val changes = if (viewModel.recentChange.details.isBlank()) "" else "${viewModel.recentChange.details}\n\n"
         val text = getString(R.string.share_text, changes, String.format(StoreIntent.URL_WEB_PLAY_STORE, appInfo.packageName))

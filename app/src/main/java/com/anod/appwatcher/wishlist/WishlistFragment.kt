@@ -9,7 +9,6 @@ import androidx.appcompat.widget.SearchView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -108,10 +107,10 @@ class WishListFragment : Fragment() {
             binding.list.adapter = this.adapter
         }
 
-        viewModel.appStatusChange.observe(viewLifecycleOwner, Observer {
+        viewModel.appStatusChange.observe(viewLifecycleOwner, {
             val newStatus = it.first
             if (newStatus == AppInfoMetadata.STATUS_NORMAL) {
-                TagSnackbar.make(requireActivity(), it.second!!, false).show()
+                TagSnackbar.make(binding.root, it.second!!, false, requireActivity()).show()
                 binding.list.adapter!!.notifyDataSetChanged()
             }
         })
