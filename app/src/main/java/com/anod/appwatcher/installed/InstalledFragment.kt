@@ -9,7 +9,9 @@ import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.*
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
@@ -111,19 +113,12 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
             switchImportMode(!importViewModel.selectionMode, animated = false)
         }
 
-        binding.actionButton.setOnClickListener {
-            startImport()
-        }
+        binding.actionButton.setOnClickListener { startImport() }
 
         importViewModel.selectionChange.observe(viewLifecycleOwner) { change ->
             binding.actionButton.isEnabled = change.extras.getBoolean("hasSelection")
-            val index = change.extras.getInt("index", -1)
             updateTitle()
-            if (change.key == null) {
-                viewModel.selection.value = Pair(index, if (change.defaultSelected) AppViewHolder.Selection.Selected else AppViewHolder.Selection.NotSelected)
-            } else {
-                viewModel.selection.value = Pair(index, importViewModel.getPackageSelection(change.key))
-            }
+            viewModel.updateSelection(change) { key -> importViewModel.getPackageSelection(key) }
         }
 
         viewLifecycleOwner.lifecycleScope.launchWhenResumed {
@@ -147,7 +142,6 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
             importViewModel.progress.collect { status ->
                 when (status) {
                     is ImportNotStarted -> {
-
                     }
                     is ImportStarted -> {
                         binding.actionButton.isEnabled = false
@@ -164,26 +158,10 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
         }
 
         val vm = viewModel as InstalledViewModel
-        val changelogAdapter = vm.changelogAdapter
-        changelogAdapter.account?.let { account ->
-            lifecycleScope.launch {
-                try {
-                    val token = AuthTokenBlocking(requireContext().applicationContext).retrieve(account)
-                    if (token.isNotBlank()) {
-                        changelogAdapter.authToken = token
-                    } else {
-                        AppLog.e("Error retrieving token")
-                    }
-                } catch (e: AuthTokenStartIntent) {
-                    startActivity(e.intent)
-                } catch (e: Exception) {
-                    AppLog.e("onResume", e)
-                }
-
-                changelogAdapter.updated.collect {
-                    AppLog.d("InstalledFragment changelog update collected")
-                    reload()
-                }
+        lifecycleScope.launch {
+            vm.changelogAdapter.updated.collect {
+                AppLog.d("InstalledFragment changelog update collected")
+                reload()
             }
         }
 
@@ -194,6 +172,26 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
                     reload()
                 }
             }
+        }
+    }
+
+    override suspend fun onReload() {
+        val vm = viewModel as InstalledViewModel
+        if (vm.changelogAdapter.authToken.isNotEmpty()) {
+            return
+        }
+        val account = vm.account ?: return
+        try {
+            val token = AuthTokenBlocking(requireContext().applicationContext).retrieve(account)
+            if (token.isNotBlank()) {
+                vm.changelogAdapter.authToken = token
+            } else {
+                AppLog.e("Error retrieving token")
+            }
+        } catch (e: AuthTokenStartIntent) {
+            startActivity(e.intent)
+        } catch (e: Exception) {
+            AppLog.e("onResume", e)
         }
     }
 

@@ -12,6 +12,7 @@ import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.model.AppListFilter
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
+import com.anod.appwatcher.utils.SelectionState
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.content.InstalledApps
 import kotlinx.coroutines.flow.Flow
@@ -90,6 +91,21 @@ abstract class WatchListViewModel(application: Application) : AndroidViewModel(a
             Filters.UNINSTALLED -> AppListFilter.Uninstalled(installedApps)
             Filters.UPDATABLE -> AppListFilter.Updatable(installedApps)
             else -> AppListFilter.All()
+        }
+    }
+
+    fun updateSelection(
+        change: SelectionState.Change,
+        getPackageSelection: (key: String) -> AppViewHolder.Selection
+    ) {
+        val index = change.extras.getInt("index", -1)
+        if (change.key == null) {
+            selection.value = Pair(
+                index,
+                if (change.defaultSelected) AppViewHolder.Selection.Selected else AppViewHolder.Selection.NotSelected
+            )
+        } else {
+            selection.value = Pair(index, getPackageSelection(change.key))
         }
     }
 }

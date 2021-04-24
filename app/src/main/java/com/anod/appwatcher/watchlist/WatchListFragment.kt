@@ -238,6 +238,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
         binding.listView.isVisible = false
         loadJob?.cancel()
         loadJob = lifecycleScope.launch {
+            onReload()
             viewModel.load(config()).collectLatest { result ->
                 binding.listView.isVisible = true
                 binding.progress.isVisible = false
@@ -247,7 +248,12 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
         }
     }
 
-    protected open fun createEmptyViewHolder(emptyBinding: ListItemEmptyBinding, action: EventFlow<WishListAction>) = EmptyViewHolder(emptyBinding, false, action)
+    open suspend fun onReload() {}
+
+    protected open fun createEmptyViewHolder(
+        emptyBinding: ListItemEmptyBinding,
+        action: EventFlow<WishListAction>
+    ) = EmptyViewHolder(emptyBinding, false, action)
 
     protected open fun mapAction(it: WishListAction): WishListAction {
         if (it is EmptyButton) {
