@@ -12,13 +12,14 @@ class SettingsViewModel(application: Application): AndroidViewModel(application)
 
     fun import(srcUri: Uri) = flow {
         emit(-1)
-        emit(ImportTask(ApplicationContext(getApplication())).execute(srcUri))
-        emit(-1)
+        val task = ImportTask(ApplicationContext(getApplication()))
+        emit(task.execute(srcUri))
     }
 
     fun export(dstUri: Uri) = flow {
         emit(-1)
-        emit(ExportTask(ApplicationContext(getApplication())).execute(dstUri))
+        val task = ExportTask(ApplicationContext(getApplication()))
+        emit(task.execute(dstUri))
     }
 
 }

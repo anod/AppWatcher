@@ -42,16 +42,16 @@ class DbBackupManager(private val context: ApplicationContext) {
     private suspend fun writeDb(outputStream: OutputStream): Boolean {
         AppLog.d("Write into: $outputStream")
         val writer = DbJsonWriter()
-        try {
-            sDataLock.withLock {
+        return sDataLock.withLock {
+            return try {
                 val buf = BufferedWriter(OutputStreamWriter(outputStream))
                 writer.write(buf, Application.provide(context).database)
+                true
+            } catch (e: IOException) {
+                AppLog.e(e)
+                false
             }
-        } catch (e: IOException) {
-            AppLog.e(e)
-            return false
         }
-        return true
     }
 
     internal suspend fun doImport(uri: Uri): Int = withContext(Dispatchers.IO) {
@@ -66,7 +66,7 @@ class DbBackupManager(private val context: ApplicationContext) {
             return@withContext ERROR_FILE_READ
         }
         val reader = DbJsonReader()
-        var container: DbJsonReader.Container? = null
+        var container: DbJsonReader.Container?
         try {
             val buf = BufferedReader(InputStreamReader(inputStream))
             sDataLock.withLock {

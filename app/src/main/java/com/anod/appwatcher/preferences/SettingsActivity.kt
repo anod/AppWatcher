@@ -5,21 +5,23 @@ import android.app.Activity
 import android.app.UiModeManager.*
 import android.content.Intent
 import android.net.Uri
+import android.os.Bundle
 import android.os.Environment
 import android.text.format.DateUtils
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.lifecycle.Observer
 import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.R
 import com.anod.appwatcher.backup.DbBackupManager
+import com.anod.appwatcher.backup.ExportTask
 import com.anod.appwatcher.backup.ImportTask
 import com.anod.appwatcher.backup.gdrive.GDrive
 import com.anod.appwatcher.backup.gdrive.GDriveSignIn
-import com.anod.appwatcher.backup.gdrive.GDriveSignIn.Companion.resultCodeGDriveException
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.preferences.Preferences.Companion.THEME_BLACK
 import com.anod.appwatcher.preferences.Preferences.Companion.THEME_DEFAULT
@@ -37,9 +39,9 @@ import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.DialogItems
 import info.anodsplace.framework.app.DialogSingleChoice
 import info.anodsplace.framework.app.SettingsActionBarActivity
-import info.anodsplace.framework.content.startActivityForResultSafely
+import info.anodsplace.framework.content.CreateDocument
 import info.anodsplace.framework.playservices.GooglePlayServices
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.io.File
@@ -51,24 +53,115 @@ import java.util.*
 @SuppressLint("Registered")
 open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDriveSignIn.Listener {
 
+    private lateinit var gdriveErrorIntentRequest: ActivityResultLauncher<Intent>
+    private lateinit var importDocumentRequest: ActivityResultLauncher<Array<String>>
+    private lateinit var exportDocumentRequest: ActivityResultLauncher<CreateDocument.Args>
+
     override val themeRes: Int
         get() = Theme(this).theme
     override val themeColors: CustomThemeColors
         get() = Theme(this).colors
 
-    private val syncEnabledItem: SwitchItem by lazy { SwitchItem(R.string.pref_title_drive_sync_enabled, R.string.pref_descr_drive_sync_enabled, ACTION_SYNC_ENABLE) }
-    private val syncNowItem: TextItem by lazy { TextItem(R.string.pref_title_drive_sync_now, 0, ACTION_SYNC_NOW) }
-    private val wifiItem: SwitchItem by lazy { SwitchItem(R.string.menu_wifi_only, 0, ACTION_WIFI_ONLY, prefs.isWifiOnly) }
-    private val chargingItem: SwitchItem by lazy { SwitchItem(R.string.menu_requires_charging, 0, ACTION_REQUIRES_CHARGING, prefs.isRequiresCharging) }
-    private val frequencyItem: TextItem by lazy { TextItem(R.string.pref_title_updates_frequency, 0, ACTION_UPDATE_FREQUENCY) }
+    private val syncEnabledItem: SwitchItem by lazy {
+        SwitchItem(
+                R.string.pref_title_drive_sync_enabled,
+                R.string.pref_descr_drive_sync_enabled,
+                ACTION_SYNC_ENABLE
+        )
+    }
+    private val syncNowItem: TextItem by lazy {
+        TextItem(
+                R.string.pref_title_drive_sync_now,
+                0,
+                ACTION_SYNC_NOW
+        )
+    }
+    private val wifiItem: SwitchItem by lazy {
+        SwitchItem(
+                R.string.menu_wifi_only,
+                0,
+                ACTION_WIFI_ONLY,
+                prefs.isWifiOnly
+        )
+    }
+    private val chargingItem: SwitchItem by lazy {
+        SwitchItem(
+                R.string.menu_requires_charging,
+                0,
+                ACTION_REQUIRES_CHARGING,
+                prefs.isRequiresCharging
+        )
+    }
+    private val frequencyItem: TextItem by lazy {
+        TextItem(
+                R.string.pref_title_updates_frequency,
+                0,
+                ACTION_UPDATE_FREQUENCY
+        )
+    }
 
     private val gDriveSignIn: GDriveSignIn by lazy { GDriveSignIn(this, this) }
 
     private var recreateWatchlistOnBack: Boolean = false
     private val viewModel: SettingsViewModel by viewModels()
-
+    private val appScope: CoroutineScope
+        get() = Application.provide(this).appScope
     private val prefs: Preferences
         get() = Application.provide(this).prefs
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        exportDocumentRequest = registerForActivityResult(CreateDocument()) { uri ->
+            if (uri == null) {
+                AppLog.d("Create document cancelled")
+            } else {
+                appScope.launch {
+                    viewModel.export(uri).collect { result -> onExportResult(result) }
+                }
+            }
+        }
+
+        importDocumentRequest = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+            if (uri == null) {
+                AppLog.d("Open document cancelled")
+            } else {
+                appScope.launch {
+                    viewModel.import(uri).collect { result -> onImportResult(result) }
+                }
+            }
+        }
+
+        gdriveErrorIntentRequest = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { }
+    }
+
+    private fun onImportResult(result: Int) {
+        when (result) {
+            -1 -> {
+                AppLog.d("Importing...")
+                isProgressVisible = true
+            }
+            else -> {
+                AppLog.d("Import finished with code: $result")
+                isProgressVisible = false
+                ImportTask.showImportFinishToast(this@SettingsActivity, result)
+            }
+        }
+    }
+
+    private fun onExportResult(result: Int) {
+        when (result) {
+            -1 -> {
+                AppLog.d("Exporting...")
+                isProgressVisible = true
+            }
+            else -> {
+                AppLog.d("Export finished with code: $result")
+                isProgressVisible = false
+                ExportTask.showFinishToast(this@SettingsActivity, result)
+            }
+        }
+    }
 
     override fun onBackPressed() {
         super.onBackPressed()
@@ -83,7 +176,6 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
     }
 
     override fun createPreferenceItems(): List<Preference> {
-
         val useAutoSync = prefs.useAutoSync
         val currentIndex = resources.getIntArray(R.array.updates_frequency_values).indexOf(prefs.updatesFrequency)
         val frequencyTitles = resources.getStringArray(R.array.updates_frequency)
@@ -164,75 +256,30 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == REQUEST_BACKUP_FILE) {
-            if (resultCode == Activity.RESULT_OK) {
-                val uri = data!!.data ?: return
-                GlobalScope.launch {
-                    viewModel.import(uri).collect {
-                        when (it) {
-                            -1 -> {
-                                AppLog.d("Importing...")
-                                isProgressVisible = true
-                            }
-                            else -> {
-                                AppLog.d("Import finished with code: $it")
-                                isProgressVisible = false
-                                ImportTask.showImportFinishToast(this@SettingsActivity, it)
-                            }
-                        }
-                    }
-                }
-            }
-        } else if (requestCode == REQUEST_BACKUP_DEST) {
-            if (resultCode == Activity.RESULT_OK) {
-                val uri = data!!.data ?: return
-                GlobalScope.launch {
-                    viewModel.export(uri).collect {
-                        when (it) {
-                            -1 -> {
-                                AppLog.d("Exporting...")
-                                isProgressVisible = true
-                            }
-                            else -> {
-                                AppLog.d("Export finished with code: $it")
-                                isProgressVisible = false
-                                val ctx = this@SettingsActivity
-                                when (it) {
-                                    DbBackupManager.RESULT_OK -> Toast.makeText(ctx, resources.getString(R.string.export_done), Toast.LENGTH_SHORT).show()
-                                    DbBackupManager.ERROR_STORAGE_NOT_AVAILABLE -> Toast.makeText(ctx, resources.getString(R.string.external_storage_not_available), Toast.LENGTH_SHORT).show()
-                                    DbBackupManager.ERROR_FILE_WRITE -> Toast.makeText(ctx, resources.getString(R.string.failed_to_write_file), Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
-            gDriveSignIn.onActivityResult(requestCode, resultCode, data)
-        }
-
+        gDriveSignIn.onActivityResult(requestCode, resultCode, data)
         super.onActivityResult(requestCode, resultCode, data)
     }
 
     override fun onPreferenceItemClick(action: Int, pref: Item) {
         when (action) {
             ACTION_EXPORT -> {
-                try {
-                    startActivityForResult(Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                        setDataAndType(Uri.parse(DbBackupManager.defaultBackupDir.absolutePath), "application/json")
-                        putExtra(Intent.EXTRA_TITLE, "appwatcher-" + DbBackupManager.generateFileName())
-                    }, REQUEST_BACKUP_DEST)
-                } catch (e: Exception) {
-                    AppLog.e(e)
-                    Toast.makeText(this, "Cannot start activity: $intent", Toast.LENGTH_SHORT).show()
-                }
+                exportDocumentRequest.launch(
+                        CreateDocument.Args(
+                                Uri.parse(DbBackupManager.defaultBackupDir.absolutePath),
+                                "application/json",
+                                "appwatcher-" + DbBackupManager.generateFileName()
+                        )
+                )
             }
-            ACTION_IMPORT -> startActivityForResultSafely(Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                addCategory(Intent.CATEGORY_OPENABLE)
-                type = "*/*"
-                putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("application/json", "text/plain", "*/*"))
-            }, REQUEST_BACKUP_FILE)
-            ACTION_LICENSES -> startActivity(Intent(this, OssLicensesMenuActivity::class.java))
+            ACTION_IMPORT -> {
+                importDocumentRequest.launch(arrayOf("application/json", "text/plain", "*/*"))
+            }
+            ACTION_LICENSES -> startActivity(
+                    Intent(
+                            this,
+                            OssLicensesMenuActivity::class.java
+                    )
+            )
             ACTION_SYNC_ENABLE -> {
                 syncNowItem.enabled = false // disable temporary sync now
                 if (syncEnabledItem.checked) {
@@ -261,12 +308,17 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
                     val useAutoSync = prefs.useAutoSync
                     if (useAutoSync) {
                         SyncScheduler(this)
-                                .schedule(prefs.isRequiresCharging, prefs.isWifiOnly, prefs.updatesFrequency.toLong(), true)
-                                .observe(this, Observer { })
+                                .schedule(
+                                        prefs.isRequiresCharging,
+                                        prefs.isWifiOnly,
+                                        prefs.updatesFrequency.toLong(),
+                                        true
+                                )
+                                .observe(this, { })
                     } else {
                         SyncScheduler(this)
                                 .cancel()
-                                .observe(this, Observer { })
+                                .observe(this, { })
                     }
                     frequencyItem.summary = resources.getStringArray(R.array.updates_frequency)[which]
                     wifiItem.enabled = useAutoSync
@@ -279,15 +331,25 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
                 val useWifiOnly = (pref as ToggleItem).checked
                 prefs.isWifiOnly = useWifiOnly
                 SyncScheduler(this)
-                        .schedule(prefs.isRequiresCharging, useWifiOnly, prefs.updatesFrequency.toLong(), true)
-                        .observe(this, Observer { })
+                        .schedule(
+                                prefs.isRequiresCharging,
+                                useWifiOnly,
+                                prefs.updatesFrequency.toLong(),
+                                true
+                        )
+                        .observe(this, { })
             }
             ACTION_REQUIRES_CHARGING -> {
                 val requiresCharging = (pref as ToggleItem).checked
                 prefs.isRequiresCharging = requiresCharging
                 SyncScheduler(this)
-                        .schedule(requiresCharging, prefs.isWifiOnly, prefs.updatesFrequency.toLong(), true)
-                        .observe(this, Observer { })
+                        .schedule(
+                                requiresCharging,
+                                prefs.isWifiOnly,
+                                prefs.updatesFrequency.toLong(),
+                                true
+                        )
+                        .observe(this, { })
             }
             ACTION_NOTIFY_UPTODATE -> prefs.isNotifyInstalledUpToDate = (pref as ToggleItem).checked
             ACTION_THEME -> {
@@ -435,14 +497,11 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
         notifyDataSetChanged()
         Toast.makeText(this, R.string.sync_error, Toast.LENGTH_SHORT).show()
         if (exception?.intent != null) {
-            startActivityForResult(exception.intent, resultCodeGDriveException);
+            gdriveErrorIntentRequest.launch(exception.intent)
         }
     }
 
     companion object {
-        private const val REQUEST_BACKUP_DEST = 1
-        private const val REQUEST_BACKUP_FILE = 2
-
         private const val ACTION_EXPORT = 3
         private const val ACTION_IMPORT = 4
         private const val ACTION_LICENSES = 6

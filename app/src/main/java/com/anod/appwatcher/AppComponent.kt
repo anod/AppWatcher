@@ -51,7 +51,7 @@ class AppComponent internal constructor(private val app: AppWatcherApplication) 
         NetworkConnectivity(app)
     }
     val memoryCache: LruCache<String, Any?> by lazy {
-        createLruCache<String, Any?>()
+        createLruCache()
     }
     val notificationManager: NotificationManager
         get() = app.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
