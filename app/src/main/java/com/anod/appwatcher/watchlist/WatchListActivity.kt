@@ -2,6 +2,7 @@ package com.anod.appwatcher.watchlist
 
 import android.accounts.Account
 import android.content.Intent
+import android.graphics.Rect
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.Menu
@@ -18,7 +19,6 @@ import androidx.fragment.app.FragmentPagerAdapter
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.observe
 import androidx.viewpager.widget.ViewPager
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.MarketSearchActivity
@@ -39,7 +39,6 @@ import com.anod.appwatcher.utils.Theme
 import info.anodsplace.framework.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.FragmentFactory
-import info.anodsplace.framework.app.HingeDevice
 import kotlinx.coroutines.flow.collectLatest
 
 sealed class ListState
@@ -147,9 +146,14 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
                 is SyncStopped -> {
                     actionMenu.stopRefresh()
                     if (it.updatesCount == 0) {
-                        Toast.makeText(this@WatchListActivity, R.string.no_updates_found, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this@WatchListActivity,
+                            R.string.no_updates_found,
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
-                    ViewModelProvider(this@WatchListActivity).get(DrawerViewModel::class.java).refreshLastUpdateTime()
+                    ViewModelProvider(this@WatchListActivity).get(DrawerViewModel::class.java)
+                        .refreshLastUpdateTime()
                 }
                 is NoNetwork -> {
                     Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()
@@ -159,13 +163,14 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
                     this.showAccountsDialogWithCheck()
                     actionMenu.stopRefresh()
                 }
-                else -> {}
+                else -> {
+                }
             }
         }
     }
 
-    override fun updateWideLayout(isWideLayout: Boolean, duoDevice: HingeDevice) {
-        super.updateWideLayout(isWideLayout, duoDevice)
+    override fun updateWideLayout(isWideLayout: Boolean, hinge: Rect) {
+        super.updateWideLayout(isWideLayout, hinge)
         stateViewModel.isWideLayout = isWideLayout
         if (stateViewModel.isWideLayout) {
             if (supportFragmentManager.findFragmentByTag(DetailsEmptyView.tag) == null) {

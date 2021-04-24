@@ -47,7 +47,7 @@ class ResultsAppViewHolder(
         }
         val info = AppInfo(doc!!)
 
-        val packages = packages.value ?: emptyList()
+        val packages = packages.value
         if (packages.contains(info.packageName)) {
             DialogMessage(itemView.context, R.style.AlertDialog, R.string.already_exist, R.string.delete_existing_item) { builder ->
                 builder.setPositiveButton(R.string.delete) { _, _ ->
@@ -82,7 +82,7 @@ class ResultsAppViewHolder(
         creator.text = doc.creator
         updated.text = uploadDate
 
-        val packages = packages.value ?: emptyList()
+        val packages = packages.value
         if (packages.contains(packageName)) {
             row.setBackgroundColor(colorBgDisabled)
         } else {

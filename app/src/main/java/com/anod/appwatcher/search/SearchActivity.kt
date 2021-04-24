@@ -147,7 +147,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
                 showRetryButton()
             }
             is NoResults -> {
-                showNoResults(viewModel.searchQuery.value ?: "")
+                showNoResults(viewModel.searchQuery.value)
             }
             is SearchPage -> {
                 if (adapter !is ResultsAdapterList) {
@@ -157,7 +157,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
                                 if (itemCount > 0) {
                                     showListView()
                                 } else {
-                                    showNoResults(viewModel.searchQuery.value ?: "")
+                                    showNoResults(viewModel.searchQuery.value)
                                 }
                             }
                         }
@@ -188,7 +188,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
             }
         })
 
-        val searchQuery = viewModel.searchQuery.value ?: ""
+        val searchQuery = viewModel.searchQuery.value
         searchView.setQuery(searchQuery, true)
         if (viewModel.hasFocus) {
             searchView.post { searchView.requestFocus() }
@@ -285,11 +285,11 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
     }
 
     private fun retrySearchResult() {
-        val query = viewModel.searchQuery.value ?: ""
+        val query = viewModel.searchQuery.value
         if (query.isBlank()) {
             showNoResults("")
         } else {
-            val authToken = viewModel.authToken.value ?: ""
+            val authToken = viewModel.authToken.value
             if (authToken.isEmpty()) {
                 if (viewModel.account == null) {
                     accountSelectionDialog.show()

@@ -34,7 +34,7 @@ internal open class DfeRequest(
             : this(Method.GET, url, dfeApiContext, listener, errorListener)
 
     private fun getSignatureResponse(networkResponse: NetworkResponse): String {
-        return networkResponse.headers["X-DFE-Signature-Response"] ?: ""
+        return networkResponse.headers?.get("X-DFE-Signature-Response") ?: ""
     }
 
     override fun getHeaders(): MutableMap<String, String> {
@@ -105,8 +105,8 @@ internal open class DfeRequest(
             val wrapperAndVerifySignature = this.parseWrapperAndVerifySignature(error.networkResponse, false)
             if (wrapperAndVerifySignature != null) {
                 val response = this.handleServerCommands(wrapperAndVerifySignature)
-                if (response != null) {
-                    return response.error
+                if (response?.error != null) {
+                    return response.error!!
                 }
             }
         }
@@ -140,11 +140,11 @@ internal open class DfeRequest(
             val cacheHeaders = HttpHeaderParser.parseCacheHeaders(networkResponse) ?: return null
             val currentTimeMillis = System.currentTimeMillis()
             try {
-                val s = networkResponse.headers["X-DFE-Soft-TTL"]
+                val s = networkResponse.headers?.get("X-DFE-Soft-TTL")
                 if (s != null) {
                     cacheHeaders.softTtl = currentTimeMillis + java.lang.Long.parseLong(s)
                 }
-                val s2 = networkResponse.headers["X-DFE-Hard-TTL"]
+                val s2 = networkResponse.headers?.get("X-DFE-Hard-TTL")
                 if (s2 != null) {
                     cacheHeaders.ttl = currentTimeMillis + java.lang.Long.parseLong(s2)
                 }

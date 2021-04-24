@@ -5,7 +5,6 @@ plugins {
 
 repositories {
     mavenCentral()
-    jcenter()
     maven(url = "https://jitpack.io")
     maven(url = "https://oss.sonatype.org/content/repositories/snapshots/")
     maven(url = "https://maven.google.com")
@@ -25,8 +24,6 @@ android {
 
     buildTypes {
         getByName("release") {
-            matchingFallbacks
-//            matchingFallbacks = listOf("", "")
             postprocessing {
                 isRemoveUnusedCode = false
                 isRemoveUnusedResources = false
@@ -49,11 +46,11 @@ dependencies {
     implementation("androidx.collection:collection-ktx:1.1.0")
     // Update from 3.11.4 breaks parsing, may be needs to be regerated
     api(group = "com.google.protobuf", name = "protobuf-javalite", version = "3.11.4")
-    api("com.android.volley:volley:1.1.0")
+    api("com.android.volley:volley:1.2.0")
     implementation("com.squareup.okhttp3:okhttp:4.8.1")
 
     implementation(project(":lib:framework"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.2")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4.21")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.3")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4.32")
 }
