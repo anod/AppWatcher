@@ -238,8 +238,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     override fun openAppDetails(appId: String, rowId: Int, detailsUrl: String?) {
         if (stateViewModel.isWideLayout) {
             supportFragmentManager.commit {
-                add(R.id.details, DetailsFragment.newInstance(appId, detailsUrl
-                        ?: "", rowId), DetailsFragment.tag)
+                add(R.id.details, DetailsFragment.newInstance(appId, detailsUrl ?: "", rowId), DetailsFragment.tag)
                 addToBackStack(DetailsFragment.tag)
             }
         } else {

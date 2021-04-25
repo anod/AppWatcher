@@ -27,7 +27,7 @@ fun PackageManager.packageToApp(rowId: Int, packageName: String): App {
             ?: return App.fromLocalPackage(rowId, packageName, 0, 0, "", "", null)
     val launchComponent = this.getLaunchComponent(packageName)
     val appTitle = this.getAppTitle(packageInfo)
-    return App.fromLocalPackage(rowId, packageName, packageInfo.lastUpdateTime, packageInfo.versionCode, packageInfo.versionName, appTitle, launchComponent)
+    return App.fromLocalPackage(rowId, packageName, packageInfo.lastUpdateTime, packageInfo.versionCode, packageInfo.versionName ?: "", appTitle, launchComponent)
 }
 
 @Entity(tableName = AppListTable.table)
