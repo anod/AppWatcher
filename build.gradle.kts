@@ -1,6 +1,5 @@
 buildscript {
     repositories {
-        jcenter()
         mavenCentral()
         maven(url = "https://oss.sonatype.org/content/repositories/snapshots/")
         maven(url = "https://maven.fabric.io/public")

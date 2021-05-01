@@ -20,7 +20,7 @@ android {
         applicationId = "com.anod.appwatcher"
         minSdk = 21
         targetSdk = 30
-        versionCode = 14701
+        versionCode = 14702
         versionName = "1.4.7"
         resValue("string", "content_authority", "com.anod.appwatcher")
 
@@ -84,7 +84,7 @@ android {
     }
 
     kotlinOptions {
-        // jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 
     packagingOptions {
