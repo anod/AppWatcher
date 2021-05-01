@@ -14,12 +14,12 @@ repositories {
 }
 
 android {
-    compileSdkVersion(30)
+    compileSdk = 30
 
     defaultConfig {
         applicationId = "com.anod.appwatcher"
-        minSdkVersion(21)
-        targetSdkVersion(30)
+        minSdk = 21
+        targetSdk = 30
         versionCode = 14701
         versionName = "1.4.7"
         resValue("string", "content_authority", "com.anod.appwatcher")
@@ -54,7 +54,6 @@ android {
     buildTypes {
         getByName("debug") {
             isMinifyEnabled = false
-            isShrinkResources = false
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
             proguardFile(getDefaultProguardFile("proguard-android.txt"))
@@ -64,7 +63,6 @@ android {
 
         getByName("release") {
             isMinifyEnabled = true
-            isShrinkResources = true
             proguardFile(getDefaultProguardFile("proguard-android.txt"))
             proguardFile("../proguard-project.txt")
             signingConfig = signingConfigs.getByName("release")
@@ -81,12 +79,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        // jvmTarget = "1.8"
     }
 
     packagingOptions {

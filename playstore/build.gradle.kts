@@ -17,21 +17,7 @@ android {
     defaultConfig {
         minSdkVersion(21)
         targetSdkVersion(30)
-        versionCode = 1
-        versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    buildTypes {
-        getByName("release") {
-            postprocessing {
-                isRemoveUnusedCode = false
-                isRemoveUnusedResources = false
-                isObfuscate = false
-                isOptimizeCode = false
-                proguardFile("proguard-rules.pro")
-            }
-        }
     }
 
     compileOptions {
