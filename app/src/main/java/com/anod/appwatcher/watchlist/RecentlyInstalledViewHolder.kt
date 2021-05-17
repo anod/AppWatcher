@@ -15,29 +15,32 @@ import com.anod.appwatcher.utils.EventFlow
 import com.anod.appwatcher.utils.PicassoAppIcon
 import com.anod.appwatcher.utils.reveal
 import info.anodsplace.framework.AppLog
-import info.anodsplace.framework.app.ApplicationContext
-import info.anodsplace.framework.content.getRecentlyInstalled
 import info.anodsplace.framework.view.setOnSafeClickListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class RecentlyInstalledViewHolder(
         itemView: View,
-        private val lifecycleScope: LifecycleCoroutineScope,
+        lifecycleScope: LifecycleCoroutineScope,
+        private val packages: Flow<List<InstalledPackageRow>>,
         private val iconLoader: PicassoAppIcon,
         private val packageManager: PackageManager,
         private val action: EventFlow<WishListAction>) : RecyclerView.ViewHolder(itemView), PlaceholderViewHolder {
 
-    private var loadJob: Job? = null
-
     companion object {
-        const val recentlyInstalledViews = 10
+        const val animateInitial = 0
+        const val animateStart = 1
+        const val animateDone = 2
     }
+
+    private var loadJob: Job? = null
+    private val shortAnimationDuration = itemView.resources.getInteger(android.R.integer.config_shortAnimTime).toLong()
+    private val initialAlpha = 0.3f
+    private var animate = animateInitial
 
     private val appViews: List<RecentAppView> = arrayListOf(
             R.id.app1,
@@ -50,33 +53,27 @@ class RecentlyInstalledViewHolder(
             R.id.app8,
             R.id.app9,
             R.id.app10
-    ).map { itemView.findViewById<RecentAppView>(it) }
-    private val moreButton: View = itemView.findViewById<View>(R.id.more)
+    ).map { itemView.findViewById(it) }
 
     init {
-        moreButton.setOnClickListener {
-            action.tryEmit(Installed(false))
-        }
-
         lifecycleScope.launch {
             itemView.context.provide.packageRemoved.collect {
                 AppLog.d("Package removed: $it")
                 loadJob?.cancel()
                 loadJob = launch {
-                    reload(silent = false)
+                    reload()
                 }
             }
         }
-    }
 
-    private val shortAnimationDuration = itemView.resources.getInteger(android.R.integer.config_shortAnimTime).toLong()
-    private val initialAlpha = 0.3f
-    private val appContext: ApplicationContext = ApplicationContext(itemView.context.applicationContext)
-    private var animate = true
+        placeholder()
+        loadJob = lifecycleScope.launch {
+            reload()
+        }
+    }
 
     override fun placeholder() {
         loadJob?.cancel()
-        moreButton.isVisible = false
         appViews.forEach { view ->
             view.isVisible = true
             view.alpha = initialAlpha
@@ -87,51 +84,23 @@ class RecentlyInstalledViewHolder(
         }
     }
 
-    private var cache: List<Pair<String, Int>> = emptyList()
-    private val packages: Flow<List<Pair<String, Int>>> = flow {
-        if (cache.isNotEmpty()) {
-            emit(cache)
-        }
-        val packages = withContext(Dispatchers.Default) {
-            appContext.packageManager.getRecentlyInstalled()
-                    .take(recentlyInstalledViews)
-                    .map { it.name }
-        }
-        if (packages.isNotEmpty()) {
-            val database = appContext.provide.database
-            val watchingPackages = database.apps().loadRowIds(packages).associateBy({ it.packageName }, { it.rowId })
-            val result: List<Pair<String, Int>> = withContext(Dispatchers.Default) {
-                packages.map { Pair(it, watchingPackages[it] ?: -1) }
-            }
-            cache = result
-            emit(result)
-        } else {
-            val result: List<Pair<String, Int>> = emptyList()
-            cache = result
-            emit(result)
-        }
-    }
-
     fun bind(item: RecentItem) {
-        placeholder()
-        loadJob = lifecycleScope.launch {
-            reload(silent = false)
+        if (animate == animateInitial) {
+            animate = animateStart
         }
     }
 
-    private suspend fun reload(silent: Boolean) = withContext(Dispatchers.Main) {
-        val revealAnimation = if (silent) false else animate
+    private suspend fun reload() = withContext(Dispatchers.Main) {
         packages.collect { packages ->
             appViews.forEachIndexed { index, appView ->
                 if (index >= packages.size) {
-                    appView.visibility = View.GONE
+                    appView.isVisible = false
                 } else {
                     val pair = packages[index]
-                    bindPackage(revealAnimation, index, appView, pair.first, pair.second)
+                    bindPackage(animate == animateStart, index, appView, pair.first, pair.second)
                 }
             }
-            moreButton.reveal(revealAnimation, startDelay = packages.size * 50L, duration = shortAnimationDuration)
-            animate = false
+            animate = animateDone
         }
     }
 
@@ -139,11 +108,10 @@ class RecentlyInstalledViewHolder(
         val app = packageManager.packageToApp(rowId, packageName)
         iconLoader.loadAppIntoImageView(app, appView.icon, R.drawable.ic_app_icon_placeholder)
         appView.title.text = app.title
-        appView.watched.visibility = if (rowId > 0) View.VISIBLE else View.INVISIBLE
+        appView.watched.isVisible = (rowId > 0)
         appView.content.setOnSafeClickListener {
             action.tryEmit(ItemClick(app, index))
         }
         appView.reveal(animate, startDelay = index * 50L, duration = shortAnimationDuration, fromAlpha = initialAlpha)
     }
-
 }

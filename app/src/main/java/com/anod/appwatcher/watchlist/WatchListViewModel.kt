@@ -15,16 +15,26 @@ import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.SelectionState
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.content.InstalledApps
+import info.anodsplace.framework.content.getRecentlyInstalled
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 
 /**
  * @author Alex Gavrishev
  * @date 13/04/2018
  */
 
+typealias InstalledPackageRow = Pair<String, Int>
+
 abstract class WatchListViewModel(application: Application) : AndroidViewModel(application) {
+    companion object {
+        const val recentlyInstalledViews = 10
+    }
+
     val context: ApplicationContext
         get() = ApplicationContext(getApplication())
     val provide: AppComponent
@@ -66,6 +76,25 @@ abstract class WatchListViewModel(application: Application) : AndroidViewModel(a
 
     abstract fun createPagingSource(config: WatchListPagingSource.Config): PagingSource<Int, SectionItem>
     abstract fun createSectionHeaderFactory(config: WatchListPagingSource.Config): SectionHeaderFactory
+
+    val recentlyInstalledPackages: Flow<List<InstalledPackageRow>> = flow {
+        val packages = withContext(Dispatchers.Default) {
+            provide.packageManager.getRecentlyInstalled()
+                    .take(recentlyInstalledViews)
+                    .map { it.name }
+        }
+        if (packages.isNotEmpty()) {
+            val database = provide.database
+            val watchingPackages = database.apps().loadRowIds(packages).associateBy({ it.packageName }, { it.rowId })
+            val result: List<Pair<String, Int>> = withContext(Dispatchers.Default) {
+                packages.map { Pair(it, watchingPackages[it] ?: -1) }
+            }
+            emit(result)
+        } else {
+            val result: List<Pair<String, Int>> = emptyList()
+            emit(result)
+        }
+    }
 
     fun load(config: WatchListPagingSource.Config): Flow<PagingData<SectionItem>> {
         headerFactory = createSectionHeaderFactory(config)

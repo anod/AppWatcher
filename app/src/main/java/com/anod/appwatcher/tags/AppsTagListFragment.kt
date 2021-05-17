@@ -57,7 +57,8 @@ class AppsTagListFragment : WatchListFragment() {
     class Factory(
             private val filterId: Int,
             private val sortId: Int,
-            private val tag: Tag?
+            private val tag: Tag?,
+            val title: String
     ) : FragmentFactory("apps-tags-$filterId-$sortId-${tag?.hashCode()}") {
 
         override fun create(): Fragment = AppsTagListFragment().also {

@@ -52,25 +52,12 @@ class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener 
     }
 
     override fun createViewPagerAdapter(): Adapter {
-        val adapter = Adapter(this)
-        val title = resources.getStringArray(R.array.filter_titles)
-
-        adapter.addFragment(WatchListFragment.Factory(
-                Filters.TAB_ALL,
-                prefs.sortIndex,
-                null), title[Filters.TAB_ALL])
-        adapter.addFragment(WatchListFragment.Factory(
-                Filters.INSTALLED,
-                prefs.sortIndex,
-                null), title[Filters.INSTALLED])
-        adapter.addFragment(WatchListFragment.Factory(
-                Filters.UNINSTALLED,
-                prefs.sortIndex,
-                null), title[Filters.UNINSTALLED])
-        adapter.addFragment(WatchListFragment.Factory(
-                Filters.UPDATABLE,
-                prefs.sortIndex,
-                null), title[Filters.UPDATABLE])
-        return adapter
+        val factories = listOf(
+                WatchListFragment.Factory(Filters.TAB_ALL, prefs.sortIndex, null),
+                WatchListFragment.Factory(Filters.INSTALLED, prefs.sortIndex, null),
+                WatchListFragment.Factory(Filters.UNINSTALLED, prefs.sortIndex, null),
+                WatchListFragment.Factory(Filters.UPDATABLE, prefs.sortIndex, null)
+        )
+        return Adapter(factories, this)
     }
 }

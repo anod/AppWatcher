@@ -15,11 +15,11 @@ import androidx.annotation.IdRes
 import androidx.annotation.MenuRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentPagerAdapter
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.viewpager.widget.ViewPager
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import androidx.viewpager2.widget.ViewPager2
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.MarketSearchActivity
 import com.anod.appwatcher.R
@@ -106,17 +106,18 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
             actionMenu.search.expand = expandSearch
         }
 
-        binding.viewPager.offscreenPageLimit = 0
+        binding.viewPager.offscreenPageLimit = 1
         binding.viewPager.adapter = createViewPagerAdapter()
-
-        binding.viewPager.currentItem = filterId
-        actionMenu.filterId = filterId
-        updateSubtitle(filterId)
-        binding.viewPager.addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {
+        binding.viewPager.setCurrentItem(filterId, false)
+        binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
                 onFilterSelected(position)
             }
         })
+
+        actionMenu.filterId = filterId
+        updateSubtitle(filterId)
 
         lifecycleScope.launchWhenResumed {
             menuAction.collectLatest {
@@ -197,8 +198,8 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         if (filterId == 0) {
             supportActionBar?.subtitle = ""
         } else {
-            supportActionBar?.subtitle = (binding.viewPager.adapter as? Adapter)?.getPageTitle(filterId)
-                    ?: ""
+            val titles = resources.getStringArray(R.array.filter_titles)
+            supportActionBar?.subtitle = titles.getOrNull(filterId) ?: ""
         }
     }
 
@@ -256,21 +257,12 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         }
     }
 
-    class Adapter(activity: WatchListActivity) : FragmentPagerAdapter(activity.supportFragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
-        private val fragments = mutableListOf<Fragment>()
-        private val fragmentTitles = mutableListOf<String>()
+    class Adapter(private val factories: List<FragmentFactory>, activity: WatchListActivity) : FragmentStateAdapter(activity) {
 
-        fun addFragment(fragmentFactory: FragmentFactory, title: String) {
-            fragments.add(fragmentFactory.create()!!)
-            fragmentTitles.add(title)
-        }
+        override fun getItemCount(): Int = factories.size
 
-        override fun getItem(position: Int) = fragments[position]
-
-        override fun getCount() = fragments.size
-
-        override fun getPageTitle(position: Int): CharSequence {
-            return fragmentTitles[position]
+        override fun createFragment(position: Int): Fragment {
+            return factories[position].create()!!
         }
     }
 

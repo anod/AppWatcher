@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<com.anod.appwatcher.utils.NestedScrollableHost xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?attr/colorItemBackground"
-    android:orientation="vertical">
+    android:background="?attr/colorItemBackground">
 
     <HorizontalScrollView
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:minHeight="72dp"
-        android:fillViewport="true"
-        android:layout_height="wrap_content">
+        android:fillViewport="true">
 
         <LinearLayout
             android:id="@android:id/list"
@@ -60,43 +58,6 @@
             <include
                 android:id="@+id/app10"
                 layout="@layout/list_item_recently_installed_app" />
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/more"
-                android:layout_width="96dp"
-                android:layout_height="match_parent"
-                android:minHeight="96dp"
-                android:layout_marginTop="2dp"
-                android:layout_marginBottom="2dp"
-                android:layout_marginStart="4dp"
-                app:cardCornerRadius="1dp"
-                android:clickable="true"
-                android:focusable="true"
-                app:cardElevation="1dp">
-
-                <ImageView
-                    android:layout_marginTop="8dp"
-                    android:id="@+id/icon"
-                    android:layout_width="@dimen/icon_size_big"
-                    android:layout_height="@dimen/icon_size_big"
-                    android:layout_gravity="center_horizontal"
-                    android:contentDescription="@null"
-                    android:src="@drawable/ic_baseline_arrow_forward_ios_24" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="top"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="64dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginBottom="16dp"
-                    android:ellipsize="end"
-                    android:gravity="center_horizontal"
-                    android:maxLines="2"
-                    android:text="@string/more"
-                    android:textAppearance="?attr/textAppearanceBody2" />
-            </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
     </HorizontalScrollView>
-</LinearLayout>
+</com.anod.appwatcher.utils.NestedScrollableHost>

@@ -289,11 +289,11 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
         }
 
         private fun intent(sortId: Int, showImportAction: Boolean, context: Context, themeRes: Int, themeColors: CustomThemeColors) = InstalledActivity.intent(
+                context,
                 Factory(sortId, showImportAction),
-                Bundle.EMPTY,
                 themeRes,
-                themeColors,
-                context)
+                themeColors
+        )
     }
 
     override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {

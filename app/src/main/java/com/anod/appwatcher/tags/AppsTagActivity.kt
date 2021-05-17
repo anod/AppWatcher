@@ -67,25 +67,13 @@ class AppsTagActivity : WatchListActivity() {
     }
 
     override fun createViewPagerAdapter(): Adapter {
-        val adapter = Adapter(this)
-
-        adapter.addFragment(AppsTagListFragment.Factory(
-                Filters.TAB_ALL,
-                prefs.sortIndex,
-                tag), getString(R.string.tab_all))
-        adapter.addFragment(AppsTagListFragment.Factory(
-                Filters.INSTALLED,
-                prefs.sortIndex,
-                tag), getString(R.string.tab_installed))
-        adapter.addFragment(AppsTagListFragment.Factory(
-                Filters.UNINSTALLED,
-                prefs.sortIndex,
-                tag), getString(R.string.tab_not_installed))
-        adapter.addFragment(AppsTagListFragment.Factory(
-                Filters.UPDATABLE,
-                prefs.sortIndex,
-                tag), getString(R.string.tab_updatable))
-        return adapter
+        val factories = listOf(
+                AppsTagListFragment.Factory(Filters.TAB_ALL, prefs.sortIndex, tag, title = getString(R.string.tab_all)),
+                AppsTagListFragment.Factory(Filters.INSTALLED, prefs.sortIndex, tag, title = getString(R.string.tab_installed)),
+                AppsTagListFragment.Factory(Filters.UNINSTALLED, prefs.sortIndex, tag, title = getString(R.string.tab_not_installed)),
+                AppsTagListFragment.Factory(Filters.UPDATABLE, prefs.sortIndex, tag, title = getString(R.string.tab_updatable))
+        )
+        return Adapter(factories, this)
     }
 
     companion object {

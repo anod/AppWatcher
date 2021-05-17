@@ -40,6 +40,10 @@ class DefaultSectionHeaderFactory(
                     }
                     return Header(WatchingHeader)
                 }
+                is EmptyItem -> {
+                }
+                is Header -> {
+                }
             }
         }
 

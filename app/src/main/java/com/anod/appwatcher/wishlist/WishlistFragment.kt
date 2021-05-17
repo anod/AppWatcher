@@ -193,13 +193,13 @@ class WishListFragment : Fragment() {
         }
 
         fun intent(context: Context, themeRes: Int, themeColors: CustomThemeColors, account: Account?, authToken: String?) = FragmentToolbarActivity.intent(
+                context,
                 Factory(),
                 Bundle().apply {
                     putParcelable(EXTRA_ACCOUNT, account)
                     putString(EXTRA_AUTH_TOKEN, authToken)
                 },
                 themeRes,
-                themeColors,
-                context)
+                themeColors)
     }
 }

@@ -1,35 +1,48 @@
 package com.anod.appwatcher.watchlist
 
 import android.view.View
-import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.R
+import com.anod.appwatcher.utils.EventFlow
+import com.anod.appwatcher.utils.collect
+import info.anodsplace.framework.view.setOnSafeClickListener
+import kotlinx.coroutines.flow.Flow
 
-private fun View.requestMeasure(parent: ViewGroup) {
-    if (this.layoutParams == null) {
-        this.layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-    }
-    val displayMetrics = parent.context.resources.displayMetrics
-
-    val widthSpec = View.MeasureSpec.makeMeasureSpec(displayMetrics.widthPixels, View.MeasureSpec.EXACTLY)
-    val heightSpec = View.MeasureSpec.makeMeasureSpec(displayMetrics.heightPixels, View.MeasureSpec.EXACTLY)
-
-    val childWidth = ViewGroup.getChildMeasureSpec(widthSpec,
-            parent.paddingLeft + parent.paddingRight, this.layoutParams.width)
-    val childHeight = ViewGroup.getChildMeasureSpec(heightSpec,
-            parent.paddingTop + parent.paddingBottom, this.layoutParams.height)
-
-    this.measure(childWidth, childHeight)
-
-    this.layout(0, 0, this.measuredWidth, this.measuredHeight)
-}
-
-class SectionHeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), PlaceholderViewHolder {
+open class SectionHeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), PlaceholderViewHolder {
     val title: TextView = itemView as TextView
+    var item: SectionHeader? = null
+
+    init {
+        title.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, null, null)
+    }
+
+    class Expandable(
+            itemView: View,
+            lifecycleScope: LifecycleCoroutineScope,
+            available: Flow<Boolean>,
+            action: EventFlow<WishListAction>) : SectionHeaderViewHolder(itemView) {
+        init {
+            title.setOnSafeClickListener {
+                if (this.item != null) {
+                    action.tryEmit(SectionHeaderClick(this.item!!))
+                }
+            }
+            available.collect(lifecycleScope) {
+                if (it) {
+                    val drawable = ContextCompat.getDrawable(title.context, R.drawable.ic_baseline_arrow_forward_ios_24)
+                    title.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, drawable, null)
+                } else {
+                    title.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, null, null)
+                }
+            }
+        }
+    }
 
     fun bind(item: SectionHeader) {
+        this.item = item
         when (item) {
             is NewHeader -> {
                 title.setText(R.string.new_updates)

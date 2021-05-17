@@ -78,9 +78,6 @@
         </activity>
         <activity android:name=".tags.AppsTagActivity" />
         <activity
-            android:name=".tags.AppsTagSelectActivity"
-            android:theme="@style/AppTheme.Dialog" />
-        <activity
             android:name=".accounts.AccountSelectionDialogActivity"
             android:theme="@style/AlertDialog" />
         <activity

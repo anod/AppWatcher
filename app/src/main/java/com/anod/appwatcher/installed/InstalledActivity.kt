@@ -3,11 +3,10 @@ package com.anod.appwatcher.installed
 
 import android.content.Context
 import android.graphics.Rect
-import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
+import androidx.annotation.Keep
 import androidx.fragment.app.commit
-import androidx.lifecycle.AndroidViewModel
 import com.anod.appwatcher.details.DetailsDialog
 import com.anod.appwatcher.details.DetailsEmptyView
 import com.anod.appwatcher.details.DetailsFragment
@@ -17,10 +16,7 @@ import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.FragmentFactory
 import info.anodsplace.framework.app.FragmentToolbarActivity
 
-class InstalledActivityViewModel(application: android.app.Application) : AndroidViewModel(application) {
-    var isWideLayout = false
-}
-
+@Keep
 class InstalledActivity : FragmentToolbarActivity(), AppDetailsRouter {
 
     @get:IdRes
@@ -56,7 +52,13 @@ class InstalledActivity : FragmentToolbarActivity(), AppDetailsRouter {
     }
 
     companion object {
-        fun intent(factory: FragmentFactory, arguments: Bundle, themeRes: Int, themeColors: CustomThemeColors, context: Context) =
-                intent(factory, arguments, themeRes, themeColors, context, InstalledActivity::class.java)
+        fun intent(context: Context, factory: FragmentFactory, themeRes: Int, themeColors: CustomThemeColors) =
+                intent(
+                        context = context,
+                        factory = factory,
+                        themeRes = themeRes,
+                        themeColors = themeColors,
+                        clazz = InstalledActivity::class.java
+                )
     }
 }

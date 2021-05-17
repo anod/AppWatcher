@@ -20,7 +20,7 @@ android {
         applicationId = "com.anod.appwatcher"
         minSdk = 21
         targetSdk = 30
-        versionCode = 14702
+        versionCode = 14703
         versionName = "1.4.7"
         resValue("string", "content_authority", "com.anod.appwatcher")
 
@@ -108,9 +108,9 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.0.4")
     implementation("androidx.work:work-runtime:2.5.0")
     implementation("androidx.work:work-runtime-ktx:2.5.0")
-    implementation("androidx.core:core:1.5.0-rc01")
+    implementation("androidx.core:core:1.5.0-rc02")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
-    implementation("androidx.paging:paging-runtime:3.0.0-rc01")
+    implementation("androidx.paging:paging-runtime:3.0.0")
     implementation("androidx.fragment:fragment-ktx:1.3.3")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
     // Google
@@ -132,7 +132,7 @@ dependencies {
 
     // 3rd party
     implementation("com.squareup.okhttp3:okhttp:4.8.1")
-    implementation("com.squareup.picasso:picasso:2.71828")
+    implementation("com.squareup.picasso:picasso:2.8")
     implementation("com.jakewharton:process-phoenix:2.0.0")
 
     // ViewModel and LiveData

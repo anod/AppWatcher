@@ -44,6 +44,7 @@ import kotlinx.coroutines.launch
 
 sealed class WishListAction
 object SearchInStore : WishListAction()
+class SectionHeaderClick(val header: SectionHeader) : WishListAction()
 class Installed(val importMode: Boolean) : WishListAction()
 object ShareFromStore : WishListAction()
 class AddAppToTag(val tag: Tag) : WishListAction()
@@ -108,6 +109,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
         // Setup header decorator
         adapter = WatchListPagingAdapter(
                 viewModel.installedApps,
+                viewModel.recentlyInstalledPackages,
                 viewLifecycleOwner,
                 action,
                 { emptyBinding -> createEmptyViewHolder(emptyBinding, action) },
@@ -262,6 +264,12 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
                 2 -> Installed(true)
                 3 -> ShareFromStore
                 else -> throw IllegalArgumentException("Unknown Idx")
+            }
+        }
+        if (it is SectionHeaderClick) {
+            return when (it.header) {
+                is RecentlyInstalledHeader -> Installed(false)
+                else -> throw IllegalArgumentException("Not supported header")
             }
         }
         return it

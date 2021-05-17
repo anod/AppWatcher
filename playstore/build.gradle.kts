@@ -21,8 +21,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlinOptions {
@@ -34,7 +34,7 @@ dependencies {
     implementation(files("libs/keyczar-0.71g-090613.jar"))
     implementation("androidx.collection:collection:1.1.0")
     implementation("androidx.collection:collection-ktx:1.1.0")
-    // Update from 3.11.4 breaks parsing, may be needs to be regerated
+    // Update from 3.11.4 breaks parsing, may be needs to be regenerated
     api(group = "com.google.protobuf", name = "protobuf-javalite", version = "3.11.4")
     api("com.android.volley:volley:1.2.0")
     implementation("com.squareup.okhttp3:okhttp:4.8.1")

@@ -15,7 +15,6 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import com.anod.appwatcher.*
 import com.anod.appwatcher.accounts.AccountSelectionDialog
@@ -44,9 +43,9 @@ abstract class DrawerActivity : ToolbarActivity(), AccountSelectionDialog.Select
         get() = Theme(this).theme
 
     private var authToken: String? = null
-    private val drawerLayout: DrawerLayout? by lazy { findViewById<DrawerLayout?>(R.id.drawer_layout) }
-    private val navigationView: NavigationView? by lazy { findViewById<NavigationView?>(R.id.nav_view) }
-    private val accountNameView: TextView? by lazy { navigationView?.getHeaderView(0)?.findViewById<TextView>(R.id.account_name) }
+    private val drawerLayout: DrawerLayout? by lazy { findViewById(R.id.drawer_layout) }
+    private val navigationView: NavigationView? by lazy { findViewById(R.id.nav_view) }
+    private val accountNameView: TextView? by lazy { navigationView?.getHeaderView(0)?.findViewById(R.id.account_name) }
     private val drawerViewModel: DrawerViewModel by viewModels()
 
     open val isHomeAsMenu: Boolean
@@ -92,11 +91,11 @@ abstract class DrawerActivity : ToolbarActivity(), AccountSelectionDialog.Select
             this.accountSelectionDialog.show()
         }
 
-        viewModel.account.observe(this, Observer {
+        viewModel.account.observe(this, {
             updateDrawerAccount(it)
         })
 
-        viewModel.lastUpdateTime.observe(this, Observer {
+        viewModel.lastUpdateTime.observe(this, {
             updateLastUpdateTime(it ?: 0)
         })
 

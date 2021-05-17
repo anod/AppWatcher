@@ -163,6 +163,7 @@ class TagsListFragment : Fragment(), View.OnClickListener {
         }
 
         fun intent(context: Context, themeRes: Int, themeColors: CustomThemeColors, app: AppInfo?) = FragmentToolbarActivity.intent(
+                context,
                 Factory(),
                 Bundle().apply {
                     if (app != null) {
@@ -170,7 +171,6 @@ class TagsListFragment : Fragment(), View.OnClickListener {
                     }
                 },
                 themeRes,
-                themeColors,
-                context)
+                themeColors)
     }
 }
