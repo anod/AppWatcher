@@ -122,6 +122,9 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
         // Request to scroll to the top in this case
         adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
             override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                if (_binding == null) {
+                    return
+                }
                 if (positionStart == 0 && (binding.listView.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition() == 0) {
                     if (isVisible) {
                         binding.listView.scrollToPosition(0)
