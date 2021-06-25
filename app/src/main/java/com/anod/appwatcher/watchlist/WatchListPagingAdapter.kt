@@ -126,16 +126,4 @@ class WatchListPagingAdapter(
             else -> throw UnsupportedOperationException("Unknown view")
         }
     }
-
-    fun notifyRecentlyInstalledChanged() {
-        val count = itemCount
-        if (count > 0) {
-            for (i in 0 until count) {
-                if (getItemViewType(i) == R.layout.list_item_recently_installed) {
-                    notifyItemChanged(i)
-                    break
-                }
-            }
-        }
-    }
 }

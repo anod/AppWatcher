@@ -108,14 +108,15 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
 
         // Setup header decorator
         adapter = WatchListPagingAdapter(
-                viewModel.installedApps,
-                viewModel.recentlyInstalledPackages,
-                viewLifecycleOwner,
-                action,
-                { emptyBinding -> createEmptyViewHolder(emptyBinding, action) },
-                { appItem -> getItemSelection(appItem) },
-                viewModel.selection,
-                requireContext())
+            viewModel.installedApps,
+            viewModel.recentlyInstalledPackages,
+            viewLifecycleOwner,
+            action,
+            { emptyBinding -> createEmptyViewHolder(emptyBinding, action) },
+            { appItem -> getItemSelection(appItem) },
+            viewModel.selection,
+            requireContext()
+        )
         binding.listView.adapter = adapter
 
         // When an item inserted into top there is no indication and list maintains previous position
@@ -201,7 +202,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
     override fun onResume() {
         super.onResume()
         if (config().showRecentlyInstalled) {
-            adapter.notifyRecentlyInstalledChanged()
+            viewModel.refreshRecentlyInstalledPackages.value = true
         }
     }
 

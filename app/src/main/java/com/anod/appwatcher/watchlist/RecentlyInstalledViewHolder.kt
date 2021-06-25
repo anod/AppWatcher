@@ -10,26 +10,23 @@ import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.packageToApp
 import com.anod.appwatcher.installed.RecentAppView
-import com.anod.appwatcher.provide
 import com.anod.appwatcher.utils.EventFlow
 import com.anod.appwatcher.utils.PicassoAppIcon
 import com.anod.appwatcher.utils.reveal
-import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.view.setOnSafeClickListener
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class RecentlyInstalledViewHolder(
-        itemView: View,
-        lifecycleScope: LifecycleCoroutineScope,
-        private val packages: Flow<List<InstalledPackageRow>>,
-        private val iconLoader: PicassoAppIcon,
-        private val packageManager: PackageManager,
-        private val action: EventFlow<WishListAction>) : RecyclerView.ViewHolder(itemView), PlaceholderViewHolder {
+    itemView: View,
+    lifecycleScope: LifecycleCoroutineScope,
+    private val packages: Flow<List<InstalledPackageRow>>,
+    private val iconLoader: PicassoAppIcon,
+    private val packageManager: PackageManager,
+    private val action: EventFlow<WishListAction>
+) : RecyclerView.ViewHolder(itemView), PlaceholderViewHolder {
 
     companion object {
         const val animateInitial = 0
@@ -56,19 +53,19 @@ class RecentlyInstalledViewHolder(
     ).map { itemView.findViewById(it) }
 
     init {
-        lifecycleScope.launch {
-            itemView.context.provide.packageRemoved.collect {
-                AppLog.d("Package removed: $it")
-                loadJob?.cancel()
-                loadJob = launch {
-                    reload()
-                }
-            }
-        }
-
         placeholder()
         loadJob = lifecycleScope.launch {
-            reload()
+            packages.collect { packages ->
+                appViews.forEachIndexed { index, appView ->
+                    if (index >= packages.size) {
+                        appView.isVisible = false
+                    } else {
+                        val pair = packages[index]
+                        bindPackage(animate == animateStart, index, appView, pair.first, pair.second)
+                    }
+                }
+                animate = animateDone
+            }
         }
     }
 
@@ -87,20 +84,6 @@ class RecentlyInstalledViewHolder(
     fun bind(item: RecentItem) {
         if (animate == animateInitial) {
             animate = animateStart
-        }
-    }
-
-    private suspend fun reload() = withContext(Dispatchers.Main) {
-        packages.collect { packages ->
-            appViews.forEachIndexed { index, appView ->
-                if (index >= packages.size) {
-                    appView.isVisible = false
-                } else {
-                    val pair = packages[index]
-                    bindPackage(animate == animateStart, index, appView, pair.first, pair.second)
-                }
-            }
-            animate = animateDone
         }
     }
 

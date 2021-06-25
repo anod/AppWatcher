@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.anod.appwatcher.provide
+import kotlinx.coroutines.launch
 
 class PackageRemovedReceiver : BroadcastReceiver() {
 
@@ -12,7 +13,10 @@ class PackageRemovedReceiver : BroadcastReceiver() {
         val action = intent?.action ?: return
         if (action == Intent.ACTION_PACKAGE_FULLY_REMOVED) {
             val packageName = intent.data?.schemeSpecificPart ?: ""
-            context?.provide?.packageRemovedReceiver?.offer(packageName + ":" + System.currentTimeMillis())
+            val component = context?.provide ?: return
+            component.appScope.launch {
+                component.packageRemovedReceiver.emit(packageName + ":" + System.currentTimeMillis())
+            }
         }
     }
 }
