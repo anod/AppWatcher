@@ -44,9 +44,9 @@ class AppsTagListFragment : WatchListFragment() {
             val button = emptyBinding.button1
             button.setBackgroundColor(it.color)
             if (it.isLightColor) {
-                button.setTextColor(ResourcesCompat.getColor(resources, R.color.text_dark, context?.theme))
+                button.setTextColor(ResourcesCompat.getColor(resources, R.color.black, context?.theme))
             } else {
-                button.setTextColor(ResourcesCompat.getColor(resources, R.color.text_light, context?.theme))
+                button.setTextColor(ResourcesCompat.getColor(resources, R.color.white, context?.theme))
             }
         }
         emptyBinding.button2.isVisible = false

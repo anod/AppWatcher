@@ -26,16 +26,16 @@ class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase
     private var warningColor: Int
 
     val title: TextView = view.findViewById(R.id.title)
-    private val creator: TextView? = view.findViewById<TextView?>(R.id.creator)
-    private val price: TextView? = view.findViewById<TextView?>(R.id.price)
-    private val updateDate: TextView? = view.findViewById<TextView?>(R.id.update_date)
+    private val creator: TextView? = view.findViewById(R.id.creator)
+    private val price: TextView? = view.findViewById(R.id.price)
+    private val updateDate: TextView? = view.findViewById(R.id.update_date)
     private val recentChanges = view.findViewById<TextView?>(R.id.recent_changes)
     private val newLineRegex = Regex("\n+")
     private val resources = view.resources
 
     init {
-        accentColor = resourceProvider.getColor(R.color.theme_accent)
-        textColor = resourceProvider.getColor(R.color.primary_text)
+        accentColor = resourceProvider.getColor(R.color.accent)
+        textColor = resourceProvider.getColor(R.color.black)
         warningColor = resourceProvider.getColor(R.color.material_amber_800)
     }
 

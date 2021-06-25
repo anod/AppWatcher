@@ -276,7 +276,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
     private fun setDefaultIcon() {
         if (isAdded) {
             binding.background.isVisible = true
-            applyColor(ContextCompat.getColor(requireContext(), R.color.theme_accent))
+            applyColor(ContextCompat.getColor(requireContext(), R.color.accent))
             binding.header.icon.setImageResource(R.drawable.ic_app_icon_placeholder)
         }
     }
@@ -375,13 +375,13 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
 
     private fun onPaletteGenerated(palette: Palette?) {
         val context = context ?: return
-        val defaultColor = ContextCompat.getColor(context, R.color.theme_primary)
+        val defaultColor = ContextCompat.getColor(context, R.color.white)
         val darkSwatch = palette?.chooseDark(defaultColor) ?: Palette.Swatch(defaultColor, 0)
         applyColor(darkSwatch.rgb)
         animateBackground()
 
         if (Theme(requireActivity()).isNightTheme) {
-            appDetailsView.updateAccentColor(ContextCompat.getColor(requireContext(), R.color.primary_text_dark))
+            appDetailsView.updateAccentColor(ContextCompat.getColor(requireContext(), R.color.black))
         } else {
             appDetailsView.updateAccentColor(darkSwatch.rgb)
         }

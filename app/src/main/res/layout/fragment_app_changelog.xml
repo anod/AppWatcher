@@ -30,7 +30,7 @@
                 android:layout_height="136dp"
                 app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed"
                 app:layout_collapseMode="parallax"
-                android:background="@color/theme_primary" />
+                android:background="?attr/colorPrimary" />
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
@@ -68,10 +68,9 @@
             android:ellipsize="end"
             android:gravity="left"
             android:maxLines="1"
-            android:textColor="@color/theme_accent"
+            android:textColor="@color/accent"
             android:textSize="@dimen/textSize"
             tools:text="5.6.1609P.1258283" />
-
 
     </com.google.android.material.appbar.AppBarLayout>
 

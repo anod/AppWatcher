@@ -144,9 +144,9 @@ abstract class DrawerActivity : ToolbarActivity(), AccountSelectionDialog.Select
             tagIndicator.setBackgroundDrawable(d)
             tagIndicator.text = if (count > 99) "99+" else "" + count
             if (tag.isLightColor) {
-                tagIndicator.setTextColor(ResourcesCompat.getColor(resources, R.color.text_dark, theme))
+                tagIndicator.setTextColor(ResourcesCompat.getColor(resources, R.color.black, theme))
             } else {
-                tagIndicator.setTextColor(ResourcesCompat.getColor(resources, R.color.text_light, theme))
+                tagIndicator.setTextColor(ResourcesCompat.getColor(resources, R.color.white, theme))
             }
             item.intent = AppsTagActivity.createTagIntent(tag, this@DrawerActivity)
         }

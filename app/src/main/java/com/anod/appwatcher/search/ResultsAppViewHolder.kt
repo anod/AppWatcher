@@ -33,9 +33,7 @@ class ResultsAppViewHolder(
     val price: TextView = itemView.findViewById(R.id.price)
     val icon: ImageView = itemView.findViewById(R.id.icon)
 
-    private val installedText = itemView.resources.getString(R.string.installed).apply {
-        toUpperCase(Locale.getDefault())
-    }
+    private val installedText = itemView.resources.getString(R.string.installed).uppercase(Locale.getDefault())
 
     init {
         this.row.setOnClickListener(this)

@@ -6,9 +6,12 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="?android:attr/selectableItemBackground"
+    app:cardElevation="0dp"
+    app:cardCornerRadius="4dp"
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="8dp"
     android:clickable="true"
     android:gravity="center_vertical"
-    android:orientation="horizontal"
     android:minHeight="68dp"
     android:paddingTop="8dp"
     android:focusable="true">
@@ -96,7 +99,7 @@
         android:ellipsize="end"
         android:gravity="left"
         android:maxLines="1"
-        android:textColor="@color/theme_accent"
+        android:textColor="@color/accent"
         android:textSize="@dimen/textSize"
         app:layout_constraintEnd_toStartOf="@id/update_date"
         app:layout_constraintStart_toEndOf="@+id/watched"
@@ -138,4 +141,3 @@
         app:layout_constraintTop_toBottomOf="@+id/recent_changes" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-

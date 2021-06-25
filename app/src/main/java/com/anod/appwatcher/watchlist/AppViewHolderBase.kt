@@ -47,9 +47,7 @@ open class AppViewHolderResourceProvider(
         override val installedApps: InstalledApps)
     : AppViewHolderBase.ResourceProvider {
 
-    override val installedText: String = context.resources.getString(R.string.installed).apply {
-        toUpperCase(Locale.getDefault())
-    }
+    override val installedText: String = context.resources.getString(R.string.installed).uppercase(Locale.getDefault())
     override val noRecentChangesText: String = context.resources.getString(R.string.no_recent_changes)
 
     override fun getString(@StringRes resId: Int): String {

@@ -28,9 +28,9 @@ class InstalledTaskWorker(
         if (titleFilter.isNotEmpty()) {
             val filtered = ArrayList<InstalledPackageApp>(installedPackages.size)
             val locale = Locale.getDefault()
-            val lcFilter = titleFilter.toLowerCase(locale)
+            val lcFilter = titleFilter.lowercase(locale)
             for (installedPackage in installedPackages) {
-                if (installedPackage.title.toLowerCase(locale).contains(lcFilter)) {
+                if (installedPackage.title.lowercase(locale).contains(lcFilter)) {
                     filtered.add(installedPackage)
                 }
             }
