@@ -28,7 +28,7 @@ import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.wishlist.WishListFragment
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import info.anodsplace.framework.AppLog
+import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.ToolbarActivity
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch

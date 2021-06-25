@@ -8,7 +8,7 @@ import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.watchlist.WatchListActivity
 import com.anod.appwatcher.watchlist.WatchListFragment
-import info.anodsplace.framework.AppLog
+import info.anodsplace.applog.AppLog
 
 
 class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener {

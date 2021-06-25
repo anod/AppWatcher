@@ -10,7 +10,7 @@ import androidx.room.withTransaction
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.database.entities.*
-import info.anodsplace.framework.AppLog
+import info.anodsplace.applog.AppLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.*

@@ -5,7 +5,7 @@ import android.net.Uri
 import android.os.Environment
 import androidx.room.withTransaction
 import com.anod.appwatcher.Application
-import info.anodsplace.framework.AppLog
+import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.json.MalformedJsonException
 import kotlinx.coroutines.Dispatchers

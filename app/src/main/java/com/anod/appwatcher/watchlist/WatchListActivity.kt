@@ -36,7 +36,7 @@ import com.anod.appwatcher.upgrade.UpgradeCheck
 import com.anod.appwatcher.upgrade.UpgradeRefresh
 import com.anod.appwatcher.utils.EventFlow
 import com.anod.appwatcher.utils.Theme
-import info.anodsplace.framework.AppLog
+import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.FragmentFactory
 import kotlinx.coroutines.flow.collectLatest

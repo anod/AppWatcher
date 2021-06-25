@@ -33,7 +33,7 @@ import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.tags.AppsTagSelectDialog
 import com.anod.appwatcher.utils.EventFlow
-import info.anodsplace.framework.AppLog
+import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.CustomThemeActivity
 import info.anodsplace.framework.app.FragmentFactory
 import info.anodsplace.framework.content.startActivitySafely

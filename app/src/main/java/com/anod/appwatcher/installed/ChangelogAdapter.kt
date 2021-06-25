@@ -5,7 +5,7 @@ import com.android.volley.VolleyError
 import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.provide
 import finsky.api.BulkDocId
-import info.anodsplace.framework.AppLog
+import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.content.InstalledPackage
 import info.anodsplace.playstore.BulkDetailsEndpoint

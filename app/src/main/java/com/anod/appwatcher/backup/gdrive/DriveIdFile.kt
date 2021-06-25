@@ -3,7 +3,7 @@ package com.anod.appwatcher.backup.gdrive
 import android.content.Context
 import com.anod.appwatcher.backup.DbJsonWriter
 import com.anod.appwatcher.database.AppsDatabase
-import info.anodsplace.framework.AppLog
+import info.anodsplace.applog.AppLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.*
@@ -38,7 +38,7 @@ class DriveIdFile(
                 name = file.fileName,
                 space = AppData
         )
-        if (list.isEmpty()) {
+        if (list.isEmpty() || list.files.isEmpty()) {
             AppLog.d("[GDrive] File NOT found " + file.fileName)
             return@withContext null
         }

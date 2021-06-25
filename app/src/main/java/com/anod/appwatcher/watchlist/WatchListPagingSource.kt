@@ -12,7 +12,7 @@ import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.database.entities.packageToApp
 import com.anod.appwatcher.installed.InstalledTaskWorker
 import com.anod.appwatcher.model.AppListFilter
-import info.anodsplace.framework.AppLog
+import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import kotlin.math.max
 

@@ -1,6 +1,6 @@
 package com.anod.appwatcher.utils
 
-import info.anodsplace.framework.AppLog
+import info.anodsplace.applog.AppLog
 
 object LogCat {
 

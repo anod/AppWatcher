@@ -15,7 +15,7 @@ import com.android.volley.TimeoutError
 import com.android.volley.VolleyError
 import com.anod.appwatcher.sync.SyncNotification
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import info.anodsplace.framework.AppLog
+import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.app.ApplicationInstance
 import info.anodsplace.framework.app.CustomThemeActivity

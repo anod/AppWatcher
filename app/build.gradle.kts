@@ -20,7 +20,7 @@ android {
         applicationId = "com.anod.appwatcher"
         minSdk = 21
         targetSdk = 30
-        versionCode = 14703
+        versionCode = 14704
         versionName = "1.4.7"
         resValue("string", "content_authority", "com.anod.appwatcher")
 
@@ -102,21 +102,21 @@ android {
 
 dependencies {
     // AndroidX
-    implementation("androidx.recyclerview:recyclerview:1.2.0")
+    implementation("androidx.recyclerview:recyclerview:1.2.1")
     implementation("androidx.palette:palette:1.0.0")
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("androidx.constraintlayout:constraintlayout:2.0.4")
     implementation("androidx.work:work-runtime:2.5.0")
     implementation("androidx.work:work-runtime-ktx:2.5.0")
-    implementation("androidx.core:core:1.5.0-rc02")
+    implementation("androidx.core:core:1.5.0")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("androidx.paging:paging-runtime:3.0.0")
-    implementation("androidx.fragment:fragment-ktx:1.3.3")
+    implementation("androidx.fragment:fragment-ktx:1.3.5")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
     // Google
     implementation("com.google.android.material:material:1.3.0")
     implementation("com.google.android.gms:play-services-oss-licenses:17.0.0")
-    implementation("com.google.android.gms:play-services-identity:17.0.0")
+    implementation("com.google.android.gms:play-services-identity:17.0.1")
     implementation("com.google.android.gms:play-services-auth:19.0.0")
 
     implementation("com.google.apis:google-api-services-drive:v3-rev20200706-1.30.10") {
@@ -127,8 +127,8 @@ dependencies {
     implementation("com.google.api-client:google-api-client:1.30.10")
     implementation("com.google.api-client:google-api-client-android:1.30.10")
 
-    implementation("com.google.firebase:firebase-analytics:18.0.3")
-    implementation("com.google.firebase:firebase-crashlytics:17.4.1")
+    implementation("com.google.firebase:firebase-analytics:19.0.0")
+    implementation("com.google.firebase:firebase-crashlytics:18.0.1")
 
     // 3rd party
     implementation("com.squareup.okhttp3:okhttp:4.8.1")
@@ -144,12 +144,14 @@ dependencies {
     kapt("androidx.room:room-compiler:2.3.0")
 
     // Kotlin
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.3")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4.32")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.5.10")
 
     testImplementation("junit:junit:4.13.2")
 
+    implementation(project(":lib:applog"))
+    implementation(project(":lib:graphics"))
     implementation(project(":lib:colorpicker"))
     implementation(project(":lib:framework"))
     implementation(project(":playstore"))

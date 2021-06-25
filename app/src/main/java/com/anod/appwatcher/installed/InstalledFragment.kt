@@ -22,7 +22,7 @@ import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.provide
 import com.anod.appwatcher.utils.EventFlow
 import com.anod.appwatcher.watchlist.*
-import info.anodsplace.framework.AppLog
+import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.DialogSingleChoice
 import info.anodsplace.framework.app.FragmentFactory

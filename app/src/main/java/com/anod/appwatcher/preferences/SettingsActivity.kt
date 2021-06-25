@@ -34,7 +34,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.jakewharton.processphoenix.ProcessPhoenix
-import info.anodsplace.framework.AppLog
+import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.DialogItems
 import info.anodsplace.framework.app.DialogSingleChoice
@@ -265,9 +265,9 @@ open class SettingsActivity : SettingsActionBarActivity(), GDrive.Listener, GDri
             ACTION_EXPORT -> {
                 exportDocumentRequest.launch(
                         CreateDocument.Args(
-                                Uri.parse(DbBackupManager.defaultBackupDir.absolutePath),
-                                "application/json",
-                                "appwatcher-" + DbBackupManager.generateFileName()
+                            "application/json",
+                            "appwatcher-" + DbBackupManager.generateFileName(),
+                            Uri.parse(DbBackupManager.defaultBackupDir.absolutePath),
                         )
                 )
             }

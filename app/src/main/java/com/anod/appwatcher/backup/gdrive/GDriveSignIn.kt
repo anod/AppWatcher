@@ -15,7 +15,7 @@ import com.google.android.gms.tasks.Task
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.http.HttpRequestInitializer
 import com.google.api.services.drive.DriveScopes
-import info.anodsplace.framework.AppLog
+import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.ActivityListener
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.playservices.GoogleSignInConnect

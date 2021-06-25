@@ -25,7 +25,7 @@ import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.EventFlow
 import com.anod.appwatcher.utils.Theme
-import info.anodsplace.framework.AppLog
+import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.view.Keyboard

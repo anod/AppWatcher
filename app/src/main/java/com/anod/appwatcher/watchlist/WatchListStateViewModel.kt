@@ -12,7 +12,7 @@ import com.anod.appwatcher.AppWatcherApplication
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.sync.UpdateCheck
-import info.anodsplace.framework.AppLog
+import info.anodsplace.applog.AppLog
 
 /**
  * @author Alex Gavrishev

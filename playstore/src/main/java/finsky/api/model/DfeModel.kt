@@ -3,7 +3,7 @@ package finsky.api.model
 import com.android.volley.Request
 import com.android.volley.Response
 import finsky.protos.Messages
-import info.anodsplace.framework.AppLog
+import info.anodsplace.applog.AppLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext

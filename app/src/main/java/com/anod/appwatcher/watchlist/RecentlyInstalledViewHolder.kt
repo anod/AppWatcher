@@ -14,7 +14,7 @@ import com.anod.appwatcher.provide
 import com.anod.appwatcher.utils.EventFlow
 import com.anod.appwatcher.utils.PicassoAppIcon
 import com.anod.appwatcher.utils.reveal
-import info.anodsplace.framework.AppLog
+import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.view.setOnSafeClickListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

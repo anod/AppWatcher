@@ -16,18 +16,23 @@ object UploadDateParserFactory {
     private val ES_SHORT_MONTHS = arrayOf("ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sept", "oct", "nov", "dic")
     private val ES_US_SHORT_MONTHS = arrayOf("ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic")
     private val FR_CA_SHORT_MONTHS = arrayOf("janv", "févr", "mars", "avr", "mai", "juin", "juill", "août", "sept", "oct", "nov", "déc")
+    private val EN_SHORT_MONTHS = arrayOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec")
 
     private val ru_ALL = Locale("ru", "")
     private val sv_ALL = Locale("sv", "")
     private val es_ES = Locale("es", "ES")
     private val es_US = Locale("es", "US")
+    private val es_UY = Locale("es", "UY")
     private val fr_CA = Locale("fr", "CA")
     private val de_ALL = Locale("de", "")
     private val hu_ALL = Locale("hu", "")
+    private val pt_BR = Locale("pt", "BR")
+    private val hi_IN = Locale("hi", "IN")
     private val en_IN = Locale("en", "IN")
     private val en_CA = Locale("en", "CA")
-    private val pt_BR = Locale("pt", "BR")
-    private val es_UY = Locale("es", "UY")
+    private val en_MY = Locale("en", "MY")
+    private val en_AU = Locale("en", "AU")
+    private val en_GB = Locale("en", "GB")
 
     fun create(locale: Locale): List<DateFormat> {
         val lang = locale.language
@@ -41,18 +46,24 @@ object UploadDateParserFactory {
             lang == hu_ALL.language -> listOf(SimpleDateFormat("yyyy. MMM d.", locale))
             locale == en_IN -> listOf(SimpleDateFormat("dd-MMM-yyyy", locale))
             locale == en_CA -> listOf(
-                    SimpleDateFormat("MMM dd, yyyy", locale),
-                    SimpleDateFormat("MMM. dd, yyyy", locale)
+                SimpleDateFormat("MMM dd, yyyy", locale),
+                SimpleDateFormat("MMM. dd, yyyy", locale)
             )
             locale == pt_BR -> listOf(
-                    SimpleDateFormat("dd 'de' MMM. 'de' yyyy", locale),
-                    SimpleDateFormat("dd 'de' MMM 'de' yyyy", locale)
+                SimpleDateFormat("dd 'de' MMM. 'de' yyyy", locale),
+                SimpleDateFormat("dd 'de' MMM 'de' yyyy", locale)
             )
-            locale == Locale("hi", "IN") -> listOf(SimpleDateFormat("dd/MM/yyyy", locale))
+            locale == hi_IN -> listOf(SimpleDateFormat("dd/MM/yyyy", locale))
+            locale == en_AU || locale == en_MY || locale == en_GB -> listOf(
+                SimpleDateFormat("d MMM. yyyy", locale),
+                SimpleDateFormat("d MMM yyyy", locale),
+                CustomMonthDateFormat(EN_SHORT_MONTHS),
+                DateFormat.getDateInstance(DateFormat.MEDIUM, locale)
+            )
             else -> listOf(
-                    SimpleDateFormat("d MMM. yyyy", locale),
-                    SimpleDateFormat("d MMM yyyy", locale),
-                    DateFormat.getDateInstance(DateFormat.MEDIUM, locale)
+                SimpleDateFormat("d MMM. yyyy", locale),
+                SimpleDateFormat("d MMM yyyy", locale),
+                DateFormat.getDateInstance(DateFormat.MEDIUM, locale)
             )
         }
 

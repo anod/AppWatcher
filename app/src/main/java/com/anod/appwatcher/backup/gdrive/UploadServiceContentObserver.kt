@@ -6,7 +6,7 @@ import com.anod.appwatcher.Application
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppTagsTable
 import com.anod.appwatcher.database.TagsTable
-import info.anodsplace.framework.AppLog
+import info.anodsplace.applog.AppLog
 
 /**
  * @author Alex Gavrishev

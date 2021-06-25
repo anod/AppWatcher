@@ -15,7 +15,7 @@ import com.squareup.picasso.Picasso.LoadedFrom.DISK
 import com.squareup.picasso.Request
 import com.squareup.picasso.RequestCreator
 import com.squareup.picasso.RequestHandler
-import info.anodsplace.framework.AppLog
+import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.loadIcon
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

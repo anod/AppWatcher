@@ -12,7 +12,7 @@ import android.net.Uri
 import android.provider.BaseColumns
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.BuildConfig
-import info.anodsplace.framework.AppLog
+import info.anodsplace.applog.AppLog
 
 @SuppressLint("Registered")
 open class DbContentProvider : ContentProvider() {

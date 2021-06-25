@@ -3,7 +3,7 @@ package com.anod.appwatcher.backup.gdrive
 import android.content.Context
 import com.google.android.gms.auth.UserRecoverableAuthException
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import info.anodsplace.framework.AppLog
+import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

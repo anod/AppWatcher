@@ -21,7 +21,7 @@ import com.anod.appwatcher.utils.Theme
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.FragmentFactory
 import info.anodsplace.framework.app.FragmentToolbarActivity
-import info.anodsplace.framework.graphics.DrawableTint
+import info.anodsplace.graphics.DrawableTint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 

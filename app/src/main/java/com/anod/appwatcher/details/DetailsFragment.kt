@@ -38,14 +38,14 @@ import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.*
 import com.anod.appwatcher.watchlist.AppViewHolderResourceProvider
 import com.google.android.material.appbar.AppBarLayout
-import info.anodsplace.framework.AppLog
+import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.anim.RevealAnimatorCompat
 import info.anodsplace.framework.app.addMultiWindowFlags
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.forAppInfo
 import info.anodsplace.framework.content.forUninstall
 import info.anodsplace.framework.content.startActivitySafely
-import info.anodsplace.framework.graphics.chooseDark
+import info.anodsplace.graphics.chooseDark
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest

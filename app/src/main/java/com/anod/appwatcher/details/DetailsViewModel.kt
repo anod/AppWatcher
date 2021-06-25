@@ -14,7 +14,7 @@ import com.anod.appwatcher.database.entities.packageToApp
 import com.anod.appwatcher.model.AppInfo
 import finsky.api.model.DfeDetails
 import finsky.api.model.Document
-import info.anodsplace.framework.AppLog
+import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.playstore.DetailsEndpoint
 import kotlinx.coroutines.flow.*

@@ -6,7 +6,7 @@ import com.anod.appwatcher.Application
 import com.anod.appwatcher.backup.DbJsonWriter
 import com.anod.appwatcher.database.AppsDatabase
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import info.anodsplace.framework.AppLog
+import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex

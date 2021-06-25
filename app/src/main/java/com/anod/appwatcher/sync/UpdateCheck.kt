@@ -27,7 +27,7 @@ import com.anod.appwatcher.utils.compareLettersAndDigits
 import com.anod.appwatcher.utils.extractUploadDate
 import finsky.api.BulkDocId
 import finsky.api.model.Document
-import info.anodsplace.framework.AppLog
+import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.playstore.BulkDetailsEndpoint
@@ -109,7 +109,7 @@ class UpdateCheck(private val context: ApplicationContext) {
 
         val syncResult = try {
             doSync(lastUpdatesViewed, authToken, account)
-        } catch (e: RemoteException) {
+        } catch (e: Exception) {
             AppLog.e("Error during synchronization ${e.message}", e)
             SyncResult(false, listOf(), 0, 0)
         }

@@ -6,8 +6,8 @@ import android.content.res.Resources
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import com.squareup.picasso.Transformation
-import info.anodsplace.framework.AppLog
-import info.anodsplace.framework.graphics.PathParser
+import info.anodsplace.applog.AppLog
+import info.anodsplace.graphics.PathParser
 
 class AdaptiveIconTransformation(
         private val context: Context,

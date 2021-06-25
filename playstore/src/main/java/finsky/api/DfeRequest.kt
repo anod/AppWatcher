@@ -12,7 +12,7 @@ import com.android.volley.toolbox.HttpHeaderParser
 import com.google.protobuf.InvalidProtocolBufferException
 import finsky.protos.Messages.Response
 import finsky.utils.Utils
-import info.anodsplace.framework.AppLog
+import info.anodsplace.applog.AppLog
 import java.io.ByteArrayInputStream
 import java.io.IOException
 import java.util.zip.GZIPInputStream

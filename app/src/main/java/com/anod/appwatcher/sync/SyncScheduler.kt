@@ -5,7 +5,7 @@ import android.os.Build
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
 import androidx.work.*
-import info.anodsplace.framework.AppLog
+import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import java.util.concurrent.TimeUnit
 

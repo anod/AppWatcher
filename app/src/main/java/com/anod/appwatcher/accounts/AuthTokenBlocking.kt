@@ -6,7 +6,7 @@ import android.accounts.AuthenticatorException
 import android.accounts.OperationCanceledException
 import android.content.Context
 import android.content.Intent
-import info.anodsplace.framework.AppLog
+import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -24,7 +24,11 @@ class AuthTokenBlocking(context: ApplicationContext) {
         try {
             token = getAuthToken(acc)
         } catch (e: Exception) {
-            AppLog.e(e)
+            if (e is AuthTokenStartIntent) {
+                throw e
+            } else {
+                AppLog.e(e)
+            }
         }
 
         if (token.isNotEmpty()) {
@@ -34,9 +38,10 @@ class AuthTokenBlocking(context: ApplicationContext) {
         try {
             token = getAuthToken(acc)
         } catch (e: Exception) {
-            AppLog.e(e)
             if (e is AuthTokenStartIntent) {
                 throw e
+            } else {
+                AppLog.e(e)
             }
         }
         return@withContext token

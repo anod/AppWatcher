@@ -11,7 +11,7 @@ import com.anod.appwatcher.database.TagsTable
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.model.AppInfo
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import info.anodsplace.framework.AppLog
+import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
