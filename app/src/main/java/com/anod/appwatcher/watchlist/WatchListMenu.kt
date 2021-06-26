@@ -7,12 +7,9 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.ViewModelProvider
-import com.anod.appwatcher.MarketSearchActivity
-import com.anod.appwatcher.R
-import com.anod.appwatcher.SettingsActivity
+import com.anod.appwatcher.*
 import com.anod.appwatcher.installed.InstalledFragment
 import com.anod.appwatcher.model.Filters
-import com.anod.appwatcher.provide
 import com.anod.appwatcher.tags.TagsListFragment
 import com.anod.appwatcher.utils.EventFlow
 import com.anod.appwatcher.utils.forMyApps
@@ -20,6 +17,9 @@ import info.anodsplace.framework.app.CustomThemeActivity
 import info.anodsplace.framework.app.DialogSingleChoice
 import info.anodsplace.framework.content.startActivitySafely
 import info.anodsplace.framework.view.MenuItemAnimation
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 sealed class MenuAction
 class SortMenuAction(val sortId: Int) : MenuAction()
@@ -100,6 +100,8 @@ class WatchListMenu(
             field = value
         }
 
+    private val appScope: CoroutineScope
+        get() = Application.provide(activity).appScope
     private val refreshMenuAnimation = MenuItemAnimation(activity, R.anim.rotate)
 
     private var filterItem: MenuItem? = null
@@ -136,7 +138,12 @@ class WatchListMenu(
                 return true
             }
             R.id.menu_act_refresh -> {
-                ViewModelProvider(activity).get(WatchListStateViewModel::class.java).requestRefresh()
+                appScope.launch {
+                    ViewModelProvider(activity).get(WatchListStateViewModel::class.java)
+                        .requestRefresh().collect {
+
+                        }
+                }
                 return true
             }
             R.id.menu_settings -> {

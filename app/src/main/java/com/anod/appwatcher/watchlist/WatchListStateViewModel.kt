@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.work.Operation
 import com.anod.appwatcher.AppWatcherApplication
@@ -13,6 +12,8 @@ import com.anod.appwatcher.Application
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.sync.UpdateCheck
 import info.anodsplace.applog.AppLog
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 /**
  * @author Alex Gavrishev
@@ -58,7 +59,7 @@ class WatchListStateViewModel(application: android.app.Application) : AndroidVie
     private val app: AppWatcherApplication
         get() = getApplication()
 
-    fun requestRefresh(): LiveData<Operation.State> {
+    fun requestRefresh(): Flow<Operation.State> {
         AppLog.d("Refresh requested")
         if (!isAuthenticated) {
             if (Application.provide(app).networkConnection.isNetworkAvailable) {
@@ -66,7 +67,7 @@ class WatchListStateViewModel(application: android.app.Application) : AndroidVie
             } else {
                 this.listState.value = NoNetwork
             }
-            return MutableLiveData()
+            return flowOf()
         }
 
         this.listState.value = SyncStarted

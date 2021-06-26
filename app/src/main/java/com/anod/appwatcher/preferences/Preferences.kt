@@ -2,8 +2,8 @@ package com.anod.appwatcher.preferences
 
 import android.accounts.Account
 import android.annotation.SuppressLint
+import android.app.UiModeManager
 import android.content.Context
-import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.utils.AdaptiveIconTransformation
@@ -11,11 +11,7 @@ import info.anodsplace.playstore.DeviceIdStorage
 
 class Preferences(context: Context) : DeviceIdStorage {
 
-    private val preferences: SharedPreferences
-
-    init {
-        preferences = context.getSharedPreferences(PREFS_NAME, 0)
-    }
+    private val preferences = context.getSharedPreferences(PREFS_NAME, 0)
 
     var account: Account?
         get() {
@@ -131,6 +127,13 @@ class Preferences(context: Context) : DeviceIdStorage {
         get() = preferences.getInt(THEME, THEME_DEFAULT)
         set(theme) = preferences.edit().putInt(THEME, theme).apply()
 
+    var themeIndex: Int
+        get() = themesCombined.indexOf("$nightMode-$theme")
+        set(value) {
+            nightMode = nightModes[value]
+            theme = themeIds[value]
+        }
+
     var defaultMainFilterId: Int
         get() = preferences.getInt(FILTER_ID, Filters.TAB_ALL)
         set(filterId) = preferences.edit().putInt(FILTER_ID, filterId).apply()
@@ -181,6 +184,28 @@ class Preferences(context: Context) : DeviceIdStorage {
 
         const val THEME_DEFAULT = 0
         const val THEME_BLACK = 1
+
+        private val themesCombined = arrayOf(
+            "${UiModeManager.MODE_NIGHT_AUTO}-$THEME_DEFAULT",
+            "${UiModeManager.MODE_NIGHT_AUTO}-$THEME_BLACK",
+            "${UiModeManager.MODE_NIGHT_NO}-$THEME_DEFAULT",
+            "${UiModeManager.MODE_NIGHT_YES}-$THEME_DEFAULT",
+            "${UiModeManager.MODE_NIGHT_YES}-$THEME_BLACK",
+        )
+        private val nightModes = arrayOf(
+            UiModeManager.MODE_NIGHT_AUTO,
+            UiModeManager.MODE_NIGHT_AUTO,
+            UiModeManager.MODE_NIGHT_NO,
+            UiModeManager.MODE_NIGHT_YES,
+            UiModeManager.MODE_NIGHT_YES,
+        )
+        private val themeIds = arrayOf(
+            THEME_DEFAULT,
+            THEME_BLACK,
+            THEME_DEFAULT,
+            THEME_DEFAULT,
+            THEME_BLACK,
+        )
     }
 
 }

@@ -282,7 +282,10 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
     override fun onRefresh() {
         val isRefreshing = (stateViewModel.listState.value is SyncStarted)
         if (!isRefreshing) {
-            stateViewModel.requestRefresh().observe(viewLifecycleOwner) { }
+            val appScope = Application.provide(requireContext()).appScope
+            appScope.launch {
+                stateViewModel.requestRefresh().collect { }
+            }
         }
     }
 

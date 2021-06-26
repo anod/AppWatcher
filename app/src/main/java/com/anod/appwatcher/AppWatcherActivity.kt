@@ -2,13 +2,14 @@ package com.anod.appwatcher
 
 import android.os.Bundle
 import android.widget.TextView
-import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import com.anod.appwatcher.installed.InstalledFragment
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.watchlist.WatchListActivity
 import com.anod.appwatcher.watchlist.WatchListFragment
 import info.anodsplace.applog.AppLog
+import kotlinx.coroutines.flow.collect
 
 
 class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener {
@@ -28,9 +29,11 @@ class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener 
         supportActionBar!!.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp)
 
         if (prefs.useAutoSync) {
-            SyncScheduler(this)
+            lifecycleScope.launchWhenCreated {
+                SyncScheduler(applicationContext)
                     .schedule(prefs.isRequiresCharging, prefs.isWifiOnly, prefs.updatesFrequency.toLong(), false)
-                    .observe(this, Observer { })
+                    .collect { }
+            }
         }
 
         if (intentExtras.containsKey("open_recently_installed")) {

@@ -1,1 +1,1 @@
-include(":app", ":lib:applog", ":lib:graphics", ":lib:framework", ":lib:colorpicker", ":playstore")
+include(":app", ":lib:applog", ":lib:compose", ":lib:graphics", ":lib:framework", ":lib:colorpicker", ":playstore")

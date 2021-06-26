@@ -2,11 +2,12 @@ package com.anod.appwatcher.sync
 
 import android.content.Context
 import android.os.Build
-import androidx.lifecycle.LiveData
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.map
 import androidx.work.*
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.ApplicationContext
+import kotlinx.coroutines.flow.Flow
 import java.util.concurrent.TimeUnit
 
 /**
@@ -21,7 +22,7 @@ class SyncScheduler(private val context: ApplicationContext) {
 
     constructor(context: Context) : this(ApplicationContext(context))
 
-    fun schedule(requiresCharging: Boolean, requiresWifi: Boolean, windowStartSec: Long, replace: Boolean): LiveData<Operation.State> {
+    fun schedule(requiresCharging: Boolean, requiresWifi: Boolean, windowStartSec: Long, replace: Boolean): Flow<Operation.State> {
         val constraints: Constraints = Constraints.Builder().apply {
             setRequiresCharging(requiresCharging)
             if (requiresWifi) {
@@ -43,18 +44,18 @@ class SyncScheduler(private val context: ApplicationContext) {
             ExistingPeriodicWorkPolicy.KEEP
         AppLog.i("Schedule sync in ${windowStartSec / 3600} hours (${if (replace) "Replace" else "Keep existing"})", "PeriodicWork")
         return wm.enqueueUniquePeriodicWork(tag, policy, request)
-                .state
-                .map {
-                    when (it) {
-                        is Operation.State.SUCCESS -> AppLog.i("Sync scheduled", "PeriodicWork")
-                        is Operation.State.IN_PROGRESS -> AppLog.i("Sync schedule in progress", "PeriodicWork")
-                        is Operation.State.FAILURE -> AppLog.e("Sync schedule error", "PeriodicWork", it.throwable)
-                    }
-                    it
+            .state
+            .map {
+                when (it) {
+                    is Operation.State.SUCCESS -> AppLog.i("Sync scheduled", "PeriodicWork")
+                    is Operation.State.IN_PROGRESS -> AppLog.i("Sync schedule in progress", "PeriodicWork")
+                    is Operation.State.FAILURE -> AppLog.e("Sync schedule error", "PeriodicWork", it.throwable)
                 }
+                it
+            }.asFlow()
     }
 
-    fun execute(): LiveData<Operation.State> {
+    fun execute(): Flow<Operation.State> {
         val constraints: Constraints = Constraints.Builder().apply {
             setRequiresCharging(false)
             setRequiredNetworkType(NetworkType.CONNECTED)
@@ -62,37 +63,39 @@ class SyncScheduler(private val context: ApplicationContext) {
         }.build()
 
         val request: OneTimeWorkRequest = OneTimeWorkRequest.Builder(SyncWorker::class.java)
-                .setInputData(Data.Builder()
-                        .putBoolean(UpdateCheck.extrasManual, true)
-                        .build())
+            .setInputData(
+                Data.Builder()
+                    .putBoolean(UpdateCheck.extrasManual, true)
+                    .build()
+            )
                 .setConstraints(constraints)
                 .build()
 
         AppLog.i("Enqueue update check", "OneTimeWork")
         return wm.enqueueUniqueWork(tagManual, ExistingWorkPolicy.REPLACE, request)
-                .state
-                .map {
-                    when (it) {
-                        is Operation.State.SUCCESS -> AppLog.i("Update scheduled", "OneTimeWork")
-                        is Operation.State.IN_PROGRESS -> AppLog.i("Update schedule in progress", "OneTimeWork")
-                        is Operation.State.FAILURE -> AppLog.e("Update schedule error", "OneTimeWork", it.throwable)
-                    }
-                    it
+            .state
+            .map {
+                when (it) {
+                    is Operation.State.SUCCESS -> AppLog.i("Update scheduled", "OneTimeWork")
+                    is Operation.State.IN_PROGRESS -> AppLog.i("Update schedule in progress", "OneTimeWork")
+                    is Operation.State.FAILURE -> AppLog.e("Update schedule error", "OneTimeWork", it.throwable)
                 }
+                it
+            }.asFlow()
     }
 
-    fun cancel(): LiveData<Operation.State> {
+    fun cancel(): Flow<Operation.State> {
         AppLog.i("Cancel scheduled sync", "SyncSchedule")
         return wm.cancelUniqueWork(tag)
-                .state
-                .map {
-                    when (it) {
-                        is Operation.State.SUCCESS -> AppLog.i("Sync canceled", "PeriodicWork")
-                        is Operation.State.IN_PROGRESS -> AppLog.i("Sync cancel in progress", "PeriodicWork")
-                        is Operation.State.FAILURE -> AppLog.e("Sync cancel error", "PeriodicWork", it.throwable)
-                    }
-                    it
+            .state
+            .map {
+                when (it) {
+                    is Operation.State.SUCCESS -> AppLog.i("Sync canceled", "PeriodicWork")
+                    is Operation.State.IN_PROGRESS -> AppLog.i("Sync cancel in progress", "PeriodicWork")
+                    is Operation.State.FAILURE -> AppLog.e("Sync cancel error", "PeriodicWork", it.throwable)
                 }
+                it
+            }.asFlow()
     }
 
     companion object {

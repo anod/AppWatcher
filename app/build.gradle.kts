@@ -98,6 +98,15 @@ android {
             excludes += "META-INF/*.kotlin_module"
         }
     }
+
+    buildFeatures {
+        compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerVersion = "1.5.10"
+        kotlinCompilerExtensionVersion = "1.0.0-beta09"
+    }
 }
 
 dependencies {
@@ -107,13 +116,18 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.0.4")
     implementation("androidx.work:work-runtime:2.5.0")
     implementation("androidx.work:work-runtime-ktx:2.5.0")
-    implementation("androidx.core:core:1.5.0")
+    implementation("androidx.core:core:1.6.0")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("androidx.paging:paging-runtime:3.0.0")
     implementation("androidx.fragment:fragment-ktx:1.3.5")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
+
+    // Compose
+    implementation("androidx.activity:activity-compose:1.3.0-rc01")
+    implementation("androidx.compose.material:material:1.0.0-rc01")
+
     // Google
-    implementation("com.google.android.material:material:1.4.0-rc01")
+    implementation("com.google.android.material:material:1.4.0")
     implementation("com.google.android.gms:play-services-oss-licenses:17.0.0")
     implementation("com.google.android.gms:play-services-identity:17.0.1")
     implementation("com.google.android.gms:play-services-auth:19.0.0")
@@ -127,7 +141,7 @@ dependencies {
     implementation("com.google.api-client:google-api-client-android:1.30.10")
 
     implementation("com.google.firebase:firebase-analytics:19.0.0")
-    implementation("com.google.firebase:firebase-crashlytics:18.0.1")
+    implementation("com.google.firebase:firebase-crashlytics:18.1.0")
 
     // 3rd party
     implementation("com.squareup.okhttp3:okhttp:4.8.1")
@@ -150,6 +164,7 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
 
     implementation(project(":lib:applog"))
+    implementation(project(":lib:compose"))
     implementation(project(":lib:graphics"))
     implementation(project(":lib:colorpicker"))
     implementation(project(":lib:framework"))
