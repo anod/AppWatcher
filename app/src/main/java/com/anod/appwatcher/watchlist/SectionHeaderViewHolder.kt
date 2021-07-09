@@ -3,7 +3,10 @@ package com.anod.appwatcher.watchlist
 import android.view.View
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.utils.EventFlow
@@ -20,24 +23,27 @@ open class SectionHeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(ite
     }
 
     class Expandable(
-            itemView: View,
-            lifecycleScope: LifecycleCoroutineScope,
-            available: Flow<Boolean>,
-            action: EventFlow<WishListAction>) : SectionHeaderViewHolder(itemView) {
+        itemView: View,
+        lifecycleOwner: LifecycleOwner,
+        available: Flow<Boolean>,
+        action: EventFlow<WishListAction>
+    ) : SectionHeaderViewHolder(itemView) {
         init {
             title.setOnSafeClickListener {
                 if (this.item != null) {
                     action.tryEmit(SectionHeaderClick(this.item!!))
                 }
             }
-            available.collect(lifecycleScope) {
-                if (it) {
-                    val drawable = ContextCompat.getDrawable(title.context, R.drawable.ic_baseline_arrow_forward_ios_24)
-                    title.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, drawable, null)
-                } else {
-                    title.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, null, null)
+            available
+                .flowWithLifecycle(lifecycleOwner.lifecycle, minActiveState = Lifecycle.State.STARTED)
+                .collect(lifecycleOwner.lifecycleScope) {
+                    if (it) {
+                        val drawable = ContextCompat.getDrawable(title.context, R.drawable.ic_baseline_arrow_forward_ios_24)
+                        title.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, drawable, null)
+                    } else {
+                        title.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, null, null)
+                    }
                 }
-            }
         }
     }
 

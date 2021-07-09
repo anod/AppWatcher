@@ -5,7 +5,10 @@ import android.content.pm.PackageManager
 import android.view.View
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
-import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.packageToApp
@@ -21,7 +24,7 @@ import kotlinx.coroutines.launch
 
 class RecentlyInstalledViewHolder(
     itemView: View,
-    lifecycleScope: LifecycleCoroutineScope,
+    lifecycleOwner: LifecycleOwner,
     private val packages: Flow<List<InstalledPackageRow>>,
     private val iconLoader: PicassoAppIcon,
     private val packageManager: PackageManager,
@@ -54,17 +57,20 @@ class RecentlyInstalledViewHolder(
 
     init {
         placeholder()
-        loadJob = lifecycleScope.launch {
-            packages.collect { packages ->
-                appViews.forEachIndexed { index, appView ->
-                    if (index >= packages.size) {
-                        appView.isVisible = false
-                    } else {
-                        val pair = packages[index]
-                        bindPackage(animate == animateStart, index, appView, pair.first, pair.second)
+        loadJob = lifecycleOwner.lifecycleScope.launch {
+
+            lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                packages.collect { packages ->
+                    appViews.forEachIndexed { index, appView ->
+                        if (index >= packages.size) {
+                            appView.isVisible = false
+                        } else {
+                            val pair = packages[index]
+                            bindPackage(animate == animateStart, index, appView, pair.first, pair.second)
+                        }
                     }
+                    animate = animateDone
                 }
-                animate = animateDone
             }
         }
     }

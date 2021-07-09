@@ -18,7 +18,7 @@ private val Rubik = FontFamily.Default
 //)
 
 val typography = Typography()
-val CarWidgetTypography = Typography(
+val AppTypography = Typography(
     h4 = typography.h4.merge(TextStyle(fontFamily = Rubik)),
     h5 = typography.h5.merge(TextStyle(fontFamily = Rubik)),
     h6 = typography.h6.merge(TextStyle(fontFamily = Rubik)),
@@ -86,7 +86,7 @@ private val BlackThemeColors = darkColors(
     onError = Color.White
 )
 
-val CarWidgetShapes = Shapes(
+val AppShapes = Shapes(
     small = RoundedCornerShape(4.dp),
     medium = RoundedCornerShape(4.dp),
     large = RoundedCornerShape(8.dp)
@@ -103,8 +103,8 @@ fun AppTheme(
     } else LightThemeColors
     MaterialTheme(
         colors = colors,
-        typography = CarWidgetTypography,
-        shapes = CarWidgetShapes,
+        typography = AppTypography,
+        shapes = AppShapes,
         content = content
     )
 }

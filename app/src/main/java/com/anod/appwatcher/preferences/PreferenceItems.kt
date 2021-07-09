@@ -26,7 +26,7 @@ private fun renderDriveSyncTime(prefs: Preferences, context: Context): String {
 fun preferenceItems(prefs: Preferences, inProgress: Boolean, playServices: GooglePlayServices, context: Context): List<PreferenceItem> {
     val hasPlayServices = playServices.isSupported
     val useAutoSync = prefs.useAutoSync
-    val currentIndex = context.resources.getIntArray(R.array.updates_frequency_values).indexOf(prefs.updatesFrequency)
+    val currentIndex = context.resources.getStringArray(R.array.updates_frequency_values).indexOf(prefs.updatesFrequency.toString())
     val frequencyTitles = context.resources.getStringArray(R.array.updates_frequency)
 
     return mutableListOf(

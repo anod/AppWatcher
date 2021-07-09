@@ -343,13 +343,11 @@ class UpdateCheck(private val context: ApplicationContext) {
                 val worker = GDriveSync(context, googleAccount)
                 worker.doSync()
                 pref.lastDriveSyncTime = System.currentTimeMillis()
-            } catch (e: Exception) {
-                AppLog.e("Perform Google Drive sync exception: ${e.message
-                        ?: "'empty message'"}", e)
-                AppLog.e("Google Drive sync exception: ${e.message ?: "'empty message'"}")
+            } catch (e: GDriveSync.SyncError) {
+                AppLog.e("Perform Google Drive sync exception: ${e.message ?: "'empty message'"}", e)
             }
         } else {
-            AppLog.d("DriveSync backup is fresh")
+            AppLog.d("Google Drive sync is fresh")
         }
     }
 

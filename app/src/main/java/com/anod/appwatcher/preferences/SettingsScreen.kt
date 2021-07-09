@@ -5,6 +5,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -12,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.anod.appwatcher.R
@@ -28,6 +30,7 @@ import kotlinx.coroutines.launch
 fun SettingsScreen(viewModel: SettingsViewModel) {
     val coroutineScope = rememberCoroutineScope()
     val prefs = viewModel.preferences
+    val progress by viewModel.isProgressVisible.collectAsState()
     val items by viewModel.items.collectAsState()
     val exportDocumentRequest = rememberLauncherForActivityResult(contract = CreateDocument()) { uri ->
         if (uri == null) {
@@ -62,6 +65,15 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
                         navigationIcon = {
                             IconButton(onClick = { coroutineScope.launch { viewModel.actions.emit(UiAction.OnBackNav) } }) {
                                 Icon(imageVector = Icons.Default.ArrowBack, contentDescription = stringResource(id = R.string.back))
+                            }
+                        },
+                        actions = {
+                            if (progress) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .size(32.dp),
+                                    color = MaterialTheme.colors.secondaryVariant
+                                )
                             }
                         },
                         elevation = 0.dp
@@ -121,8 +133,7 @@ fun onSettingsItemClick(prefs: Preferences, item: PreferenceItem, viewModel: Set
             prefs.isNotifyNoChanges = (item as PreferenceItem.Switch).checked
         }
         "crash-reports" -> {
-            prefs.collectCrashReports = (item as PreferenceItem.Switch).checked
-            // TODO: ProcessPhoenix.triggerRebirth(this, Intent(this, AppWatcherActivity::class.java))
+            viewModel.updateCrashReports((item as PreferenceItem.Switch).checked)
         }
         "pull-to-refresh" -> {
             prefs.enablePullToRefresh = viewModel.setRecreateFlag(item, prefs.enablePullToRefresh)

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <integer-array name="updates_frequency_values" translatable="false">
+    <string-array name="updates_frequency_values" translatable="false">
         <item>0</item>
         <item>3600</item>
         <item>7200</item>
         <item>10800</item>
         <item>21600</item>
         <item>43200</item>
-    </integer-array>
+    </string-array>
 
     <array name="adaptive_icon_style_paths_values" translatable="false">
         <item />

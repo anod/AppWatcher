@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.lifecycleScope
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -105,15 +104,15 @@ class WatchListPagingAdapter(
             ViewType.recentItemHeader -> {
                 val itemView = LayoutInflater.from(context).inflate(R.layout.list_apps_header, parent, false)
                 SectionHeaderViewHolder.Expandable(
-                        itemView,
-                        lifecycleOwner.lifecycleScope,
-                        recentlyInstalledPackages.map { it.isNotEmpty() },
-                        action
+                    itemView,
+                    lifecycleOwner,
+                    recentlyInstalledPackages.map { it.isNotEmpty() },
+                    action
                 )
             }
             ViewType.recentItem -> {
                 val view = LayoutInflater.from(context).inflate(R.layout.list_item_recently_installed, parent, false)
-                return RecentlyInstalledViewHolder(view, lifecycleOwner.lifecycleScope, recentlyInstalledPackages, appIcon, packageManager, action)
+                return RecentlyInstalledViewHolder(view, lifecycleOwner, recentlyInstalledPackages, appIcon, packageManager, action)
             }
             ViewType.appItem -> {
                 val itemView = LayoutInflater.from(context).inflate(R.layout.list_item_app, parent, false)

@@ -1,14 +1,15 @@
 package com.anod.appwatcher.preferences
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.ComponentActivity
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.material.*
 import androidx.lifecycle.lifecycleScope
 import com.anod.appwatcher.AppWatcherActivity
@@ -17,16 +18,20 @@ import com.anod.appwatcher.backup.ExportTask
 import com.anod.appwatcher.backup.ImportTask
 import com.anod.appwatcher.backup.gdrive.GDriveSignIn
 import com.anod.appwatcher.compose.UiAction
+import com.anod.appwatcher.sync.SchedulesHistoryActivity
+import com.anod.appwatcher.userLog.UserLogActivity
 import com.anod.appwatcher.utils.Theme
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
+import com.jakewharton.processphoenix.ProcessPhoenix
 import info.anodsplace.applog.AppLog
+import info.anodsplace.framework.app.WindowCustomTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @SuppressLint("Registered")
-open class SettingsActivity : ComponentActivity(), GDriveSignIn.Listener {
+open class SettingsActivity : AppCompatActivity(), GDriveSignIn.Listener {
 
     private lateinit var gDriveErrorIntentRequest: ActivityResultLauncher<Intent>
     private val gDriveSignIn: GDriveSignIn by lazy { GDriveSignIn(this, this) }
@@ -35,7 +40,12 @@ open class SettingsActivity : ComponentActivity(), GDriveSignIn.Listener {
         get() = Application.provide(this).appScope
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        setTheme(Theme(this).theme)
+        val theme = Theme(this)
+        AppCompatDelegate.setDefaultNightMode(Application.with(this).nightMode)
+        setTheme(theme.theme)
+        if (theme.colors.available) {
+            WindowCustomTheme.apply(theme.colors, window, this)
+        }
         super.onCreate(savedInstanceState)
 
         gDriveErrorIntentRequest = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { }
@@ -62,9 +72,25 @@ open class SettingsActivity : ComponentActivity(), GDriveSignIn.Listener {
                     UiAction.GDriveSignIn -> gDriveSignIn.signIn()
                     is UiAction.GDriveErrorIntent -> gDriveErrorIntentRequest.launch(action.intent)
                     UiAction.Recreate -> {
-                        this@SettingsActivity.setResult(Activity.RESULT_OK, Intent().putExtra("recreateWatchlistOnBack", true))
+                        this@SettingsActivity.setResult(RESULT_OK, Intent().putExtra("recreateWatchlistOnBack", true))
                         this@SettingsActivity.recreate()
                         recreateWatchlist()
+                    }
+                    UiAction.OpenRefreshHistory -> {
+                        startActivity(Intent(applicationContext, SchedulesHistoryActivity::class.java))
+                    }
+                    UiAction.OpenUserLog -> {
+                        startActivity(Intent(applicationContext, UserLogActivity::class.java))
+                    }
+                    UiAction.Rebirth -> {
+                        ProcessPhoenix.triggerRebirth(applicationContext, Intent(applicationContext, AppWatcherActivity::class.java))
+                    }
+                    is UiAction.ShowToast -> {
+                        if (action.resId == 0) {
+                            Toast.makeText(this@SettingsActivity, action.text, action.length).show()
+                        } else {
+                            Toast.makeText(this@SettingsActivity, action.resId, action.length).show()
+                        }
                     }
                 }
             }

@@ -120,7 +120,6 @@ dependencies {
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("androidx.paging:paging-runtime:3.0.0")
     implementation("androidx.fragment:fragment-ktx:1.3.5")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
 
     // Compose
     implementation("androidx.activity:activity-compose:1.3.0-rc01")
@@ -149,8 +148,10 @@ dependencies {
     implementation("com.jakewharton:process-phoenix:2.0.0")
 
     // ViewModel and LiveData
-    implementation("androidx.lifecycle:lifecycle-viewmodel:2.3.1")
-    kapt("androidx.lifecycle:lifecycle-compiler:2.3.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0-alpha02")
+    implementation("androidx.lifecycle:lifecycle-viewmodel:2.4.0-alpha02")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.4.0-alpha02")
+    kapt("androidx.lifecycle:lifecycle-compiler:2.4.0-alpha02")
 
     implementation("androidx.room:room-runtime:2.3.0")
     implementation("androidx.room:room-ktx:2.3.0")

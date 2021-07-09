@@ -3,17 +3,18 @@ package com.anod.appwatcher.preferences
 import android.app.Application
 import android.content.Context
 import android.net.Uri
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.anod.appwatcher.AppWatcherApplication
 import com.anod.appwatcher.R
 import com.anod.appwatcher.backup.ExportTask
 import com.anod.appwatcher.backup.ImportTask
-import com.anod.appwatcher.backup.gdrive.GDrive
+import com.anod.appwatcher.backup.gdrive.GDriveSync
 import com.anod.appwatcher.compose.UiAction
 import com.anod.appwatcher.sync.SyncScheduler
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import info.anodsplace.applog.AppLog
 import info.anodsplace.compose.PreferenceItem
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.playservices.GooglePlayServices
@@ -26,7 +27,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     private val playServices: GooglePlayServices = GooglePlayServices(application)
     private val appScope: CoroutineScope = com.anod.appwatcher.Application.provide(application).appScope
     private val context: Context
-        get() = getApplication()
+        get() = getApplication<AppWatcherApplication>()
 
     val preferences: Preferences = com.anod.appwatcher.Application.provide(application).prefs
     val actions: MutableSharedFlow<UiAction> = MutableSharedFlow()
@@ -39,13 +40,13 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     fun import(srcUri: Uri) = flow {
         emit(-1)
-        val task = ImportTask(ApplicationContext(getApplication()))
+        val task = ImportTask(ApplicationContext(context))
         emit(task.execute(srcUri))
     }
 
     fun export(dstUri: Uri) = flow {
         emit(-1)
-        val task = ExportTask(ApplicationContext(getApplication()))
+        val task = ExportTask(ApplicationContext(context))
         emit(task.execute(dstUri))
     }
 
@@ -62,19 +63,21 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun gDriveSyncNow() {
-        val googleAccount = GoogleSignIn.getLastSignedInAccount(getApplication())
+        val googleAccount = GoogleSignIn.getLastSignedInAccount(context)
         if (googleAccount != null) {
-            isProgressVisible.value = true
-            Toast.makeText(context, R.string.sync_start, Toast.LENGTH_SHORT).show()
             appScope.launch {
                 try {
-                    GDrive(getApplication(), googleAccount).sync()
+                    isProgressVisible.value = true
+                    actions.emit(UiAction.ShowToast(resId = R.string.sync_start))
+                    GDriveSync(context, googleAccount).doSync()
+                    preferences.lastDriveSyncTime = System.currentTimeMillis()
                     isProgressVisible.value = false
-                    Toast.makeText(context, R.string.sync_finish, Toast.LENGTH_SHORT).show()
+                    actions.emit(UiAction.ShowToast(resId = R.string.sync_finish))
                 } catch (e: Exception) {
+                    AppLog.e(e)
                     isProgressVisible.value = false
-                    Toast.makeText(context, R.string.sync_error, Toast.LENGTH_SHORT).show()
-                    if (e is GDrive.SyncError && e.error?.intent != null) {
+                    actions.emit(UiAction.ShowToast(resId = R.string.sync_error))
+                    if (e is GDriveSync.SyncError && e.error?.intent != null) {
                         viewModelScope.launch {
                             actions.emit(UiAction.GDriveErrorIntent(e.error.intent))
                         }
@@ -83,7 +86,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             }
         } else {
             isProgressVisible.value = false
-            Toast.makeText(context, R.string.no_gdrive_account, Toast.LENGTH_SHORT).show()
+            viewModelScope.launch {
+                actions.emit(UiAction.ShowToast(resId = R.string.no_gdrive_account))
+            }
         }
     }
 
@@ -91,9 +96,13 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         if (isSuccess) {
             preferences.isDriveSyncEnabled = true
             com.anod.appwatcher.Application.provide(context).uploadServiceContentObserver
-            Toast.makeText(context, R.string.gdrive_connected, Toast.LENGTH_SHORT).show()
+            viewModelScope.launch {
+                actions.emit(UiAction.ShowToast(resId = R.string.gdrive_connected))
+            }
         } else {
-            Toast.makeText(context, "Drive login error $errorCode", Toast.LENGTH_SHORT).show()
+            viewModelScope.launch {
+                actions.emit(UiAction.ShowToast(text = "Drive login error $errorCode"))
+            }
         }
         isProgressVisible.value = false
     }
@@ -128,6 +137,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun updateTheme(newThemeIndex: Int) {
+        if (preferences.themeIndex == newThemeIndex) {
+            return
+        }
         val nightMode = preferences.nightMode
         val theme = preferences.theme
         preferences.themeIndex = newThemeIndex
@@ -148,9 +160,19 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun updateIconsShape(iconShapes: String) {
+        if (preferences.iconShape == iconShapes) {
+            return
+        }
         preferences.iconShape = iconShapes
         com.anod.appwatcher.Application.provide(context).iconLoader.setIconShape(iconShapes)
         recreateWatchlistOnBack = true
+        viewModelScope.launch {
+            actions.emit(UiAction.Recreate)
+        }
+    }
+
+    fun updateCrashReports(checked: Boolean) {
+        preferences.collectCrashReports = checked
         viewModelScope.launch {
             actions.emit(UiAction.Recreate)
         }
