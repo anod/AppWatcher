@@ -32,6 +32,7 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
     val prefs = viewModel.preferences
     val progress by viewModel.isProgressVisible.collectAsState()
     val items by viewModel.items.collectAsState()
+
     val exportDocumentRequest = rememberLauncherForActivityResult(contract = CreateDocument()) { uri ->
         if (uri == null) {
             AppLog.d("Create document cancelled")
@@ -84,15 +85,13 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
                     preferences = items,
                     onClick = { item ->
                         when (item.key) {
-                            "export" -> {
-                                exportDocumentRequest.launch(
-                                    CreateDocument.Args(
-                                        "application/json",
-                                        "appwatcher-" + DbBackupManager.generateFileName(),
-                                        Uri.parse(DbBackupManager.defaultBackupDir.absolutePath),
-                                    )
+                            "export" -> exportDocumentRequest.launch(
+                                CreateDocument.Args(
+                                    "application/json",
+                                    "appwatcher-" + DbBackupManager.generateFileName(),
+                                    Uri.parse(DbBackupManager.defaultBackupDir.absolutePath),
                                 )
-                            }
+                            )
                             "import" -> importDocumentRequest.launch(arrayOf("application/json", "text/plain", "*/*"))
                             "licenses" -> coroutineScope.launch { viewModel.actions.emit(UiAction.OssLicenses) }
                             "user-log" -> coroutineScope.launch { viewModel.actions.emit(UiAction.OpenUserLog) }

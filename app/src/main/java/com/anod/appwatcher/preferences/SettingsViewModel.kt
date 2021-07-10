@@ -32,9 +32,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     val preferences: Preferences = com.anod.appwatcher.Application.provide(application).prefs
     val actions: MutableSharedFlow<UiAction> = MutableSharedFlow()
     val isProgressVisible = MutableStateFlow(false)
+    val reload = MutableSharedFlow<Boolean>()
     var recreateWatchlistOnBack: Boolean = false
 
-    val items = isProgressVisible.map { inProgress ->
+    val items = combine(isProgressVisible, reload.onStart { emit(true) }) { (inProgress, _) ->
         preferenceItems(preferences, inProgress, playServices, application)
     }.stateIn(viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = emptyList())
 
@@ -56,9 +57,14 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             isProgressVisible.value = true
             viewModelScope.launch {
                 actions.emit(UiAction.GDriveSignIn)
+                reload.emit(true)
             }
         } else {
             preferences.isDriveSyncEnabled = false
+            viewModelScope.launch {
+                actions.emit(UiAction.GDriveSignOut)
+                reload.emit(true)
+            }
         }
     }
 

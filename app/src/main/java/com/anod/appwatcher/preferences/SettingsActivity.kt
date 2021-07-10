@@ -11,7 +11,9 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.material.*
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.backup.ExportTask
@@ -54,44 +56,59 @@ open class SettingsActivity : AppCompatActivity(), GDriveSignIn.Listener {
             SettingsScreen(viewModel)
         }
 
-        lifecycleScope.launchWhenResumed {
-            viewModel.actions.collect { action ->
-                when (action) {
-                    UiAction.OnBackNav -> finish()
-                    UiAction.OssLicenses -> startActivity(Intent(applicationContext, OssLicensesMenuActivity::class.java))
-                    is UiAction.Export -> {
-                        appScope.launch {
-                            viewModel.export(action.uri).collect { result -> onExportResult(result) }
-                        }
-                    }
-                    is UiAction.Import -> {
-                        appScope.launch {
-                            viewModel.import(action.uri).collect { result -> onImportResult(result) }
-                        }
-                    }
-                    UiAction.GDriveSignIn -> gDriveSignIn.signIn()
-                    is UiAction.GDriveErrorIntent -> gDriveErrorIntentRequest.launch(action.intent)
-                    UiAction.Recreate -> {
-                        this@SettingsActivity.setResult(RESULT_OK, Intent().putExtra("recreateWatchlistOnBack", true))
-                        this@SettingsActivity.recreate()
-                        recreateWatchlist()
-                    }
-                    UiAction.OpenRefreshHistory -> {
-                        startActivity(Intent(applicationContext, SchedulesHistoryActivity::class.java))
-                    }
-                    UiAction.OpenUserLog -> {
-                        startActivity(Intent(applicationContext, UserLogActivity::class.java))
-                    }
-                    UiAction.Rebirth -> {
-                        ProcessPhoenix.triggerRebirth(applicationContext, Intent(applicationContext, AppWatcherActivity::class.java))
-                    }
-                    is UiAction.ShowToast -> {
-                        if (action.resId == 0) {
-                            Toast.makeText(this@SettingsActivity, action.text, action.length).show()
-                        } else {
-                            Toast.makeText(this@SettingsActivity, action.resId, action.length).show()
-                        }
-                    }
+        lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.actions.collect { action ->
+                    handleUiAction(action)
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.reload.collect { }
+            }
+        }
+    }
+
+    private fun handleUiAction(action: UiAction) {
+        when (action) {
+            UiAction.OnBackNav -> finish()
+            UiAction.OssLicenses -> startActivity(Intent(applicationContext, OssLicensesMenuActivity::class.java))
+            is UiAction.Export -> {
+                appScope.launch {
+                    viewModel.export(action.uri).collect { result -> onExportResult(result) }
+                }
+            }
+            is UiAction.Import -> {
+                appScope.launch {
+                    viewModel.import(action.uri).collect { result -> onImportResult(result) }
+                }
+            }
+            UiAction.GDriveSignIn -> gDriveSignIn.signIn()
+            UiAction.GDriveSignOut -> {
+                lifecycleScope.launch { gDriveSignIn.signOut() }
+            }
+            is UiAction.GDriveErrorIntent -> gDriveErrorIntentRequest.launch(action.intent)
+            UiAction.Recreate -> {
+                this@SettingsActivity.setResult(RESULT_OK, Intent().putExtra("recreateWatchlistOnBack", true))
+                this@SettingsActivity.recreate()
+                recreateWatchlist()
+            }
+            UiAction.OpenRefreshHistory -> {
+                startActivity(Intent(applicationContext, SchedulesHistoryActivity::class.java))
+            }
+            UiAction.OpenUserLog -> {
+                startActivity(Intent(applicationContext, UserLogActivity::class.java))
+            }
+            UiAction.Rebirth -> {
+                ProcessPhoenix.triggerRebirth(applicationContext, Intent(applicationContext, AppWatcherActivity::class.java))
+            }
+            is UiAction.ShowToast -> {
+                if (action.resId == 0) {
+                    Toast.makeText(this@SettingsActivity, action.text, action.length).show()
+                } else {
+                    Toast.makeText(this@SettingsActivity, action.resId, action.length).show()
                 }
             }
         }

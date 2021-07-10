@@ -13,6 +13,7 @@ sealed class UiAction {
     object OpenUserLog : UiAction()
     object OpenRefreshHistory : UiAction()
     object GDriveSignIn : UiAction()
+    object GDriveSignOut : UiAction()
     class GDriveErrorIntent(val intent: Intent) : UiAction()
     object Recreate : UiAction()
     object Rebirth : UiAction()

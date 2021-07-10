@@ -21,6 +21,8 @@ import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.playservices.GoogleSignInConnect
 import java.util.*
 import java.util.concurrent.ExecutionException
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 internal fun createGDriveSignInOptions(): GoogleSignInOptions {
     return GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -69,6 +71,14 @@ class GDriveSignIn(private val activity: Activity, private val listener: Listene
             override fun onError(errorCode: Int, client: GoogleSignInClient) {
                 AppLog.e("Silent sign in failed with code $errorCode (${GoogleSignInStatusCodes.getStatusCodeString(errorCode)}). starting signIn intent")
                 activity.startActivityForResult(client.signInIntent, resultCodeGDriveSignIn)
+            }
+        })
+    }
+
+    suspend fun signOut() = suspendCoroutine<Unit> { continuation ->
+        driveConnect.disconnect(object : GoogleSignInConnect.SignOutResult {
+            override fun onResult() {
+                continuation.resume(Unit)
             }
         })
     }
