@@ -59,7 +59,7 @@ class RecentlyInstalledViewHolder(
         placeholder()
         loadJob = lifecycleOwner.lifecycleScope.launch {
 
-            lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 packages.collect { packages ->
                     appViews.forEachIndexed { index, appView ->
                         if (index >= packages.size) {

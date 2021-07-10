@@ -199,13 +199,6 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
         reload()
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (config().showRecentlyInstalled) {
-            viewModel.refreshRecentlyInstalledPackages.value = true
-        }
-    }
-
     protected open fun onListAction(action: WishListAction) {
         when (action) {
             is SearchInStore -> startActivity(MarketSearchActivity.intent(requireContext(), "", true))

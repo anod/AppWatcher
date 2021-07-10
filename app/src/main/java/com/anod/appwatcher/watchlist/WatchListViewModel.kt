@@ -71,13 +71,10 @@ abstract class WatchListViewModel(application: Application) : AndroidViewModel(a
     abstract fun createPagingSource(config: WatchListPagingSource.Config): PagingSource<Int, SectionItem>
     abstract fun createSectionHeaderFactory(config: WatchListPagingSource.Config): SectionHeaderFactory
 
-    val refreshRecentlyInstalledPackages = MutableStateFlow(false)
-    val recentlyInstalledPackages: Flow<List<InstalledPackageRow>> = combine(
-        refreshRecentlyInstalledPackages,
-        provide.packageRemoved.onStart { emit("") }
-    ) { _, _ ->
-        provide.recentlyInstalledPackages.load()
-    }.shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+    val recentlyInstalledPackages: Flow<List<InstalledPackageRow>> = provide
+        .packageRemoved.onStart { emit("") }.map {
+            provide.recentlyInstalledPackages.load()
+        }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
 
     fun load(config: WatchListPagingSource.Config): Flow<PagingData<SectionItem>> {
         headerFactory = createSectionHeaderFactory(config)
