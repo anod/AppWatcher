@@ -51,7 +51,10 @@ fun preferenceItems(prefs: Preferences, inProgress: Boolean, playServices: Googl
             titleRes = R.string.menu_requires_charging,
             key = "requires-charging"
         ),
-
+        PreferenceItem.Text(
+                titleRes = R.string.refresh_history,
+                key = "refresh-history"
+        ),
         PreferenceItem.Category(titleRes = R.string.settings_notifications),
         PreferenceItem.Switch(
             checked = prefs.isNotifyInstalledUpToDate,
@@ -171,10 +174,6 @@ fun preferenceItems(prefs: Preferences, inProgress: Boolean, playServices: Googl
         PreferenceItem.Text(
             titleRes = R.string.user_log,
             key = "user-log"
-        ),
-        PreferenceItem.Text(
-            titleRes = R.string.refresh_history,
-            key = "refresh-history"
         )
     )
 }

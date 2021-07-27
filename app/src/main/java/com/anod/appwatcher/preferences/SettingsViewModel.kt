@@ -106,7 +106,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 actions.emit(UiAction.ShowToast(resId = R.string.gdrive_connected))
             }
         } else {
+            preferences.isDriveSyncEnabled = false
             viewModelScope.launch {
+                reload.emit(true)
                 actions.emit(UiAction.ShowToast(text = "Drive login error $errorCode"))
             }
         }

@@ -59,14 +59,15 @@ open class SettingsActivity : AppCompatActivity(), GDriveSignIn.Listener {
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.actions.collect { action ->
+                    AppLog.d("Action collected $action")
                     handleUiAction(action)
                 }
             }
         }
 
-        lifecycleScope.launch {
-            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.reload.collect { }
+        lifecycleScope.launchWhenCreated {
+            viewModel.reload.collect {
+                AppLog.d("Reloaded")
             }
         }
     }
@@ -165,6 +166,6 @@ open class SettingsActivity : AppCompatActivity(), GDriveSignIn.Listener {
     }
 
     override fun onGDriveLoginError(errorCode: Int) {
-        viewModel.onGDriveLoginResult(true, 0)
+        viewModel.onGDriveLoginResult(false, errorCode)
     }
 }
