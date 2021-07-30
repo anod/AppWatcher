@@ -35,12 +35,10 @@ class WatchListPagingSource(
     private val database: AppsDatabase = Application.provide(appContext).database
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, SectionItem> {
-        AppLog.d("Load(key = ${params.key}, loadSize = ${params.loadSize})")
-        val page = params.key ?: 0
+        val offset = params.key ?: 0
         var limit = params.loadSize
-        val offset = page * params.loadSize
         val items = mutableListOf<SectionItem>()
-        if (params.key == null) {
+        if (offset == 0) {
             if (config.showRecentlyInstalled) {
                 items.add(RecentItem)
                 limit = max(0, limit - 1)
@@ -67,17 +65,38 @@ class WatchListPagingSource(
                         .forEach { item ->
                             items.add(OnDeviceItem(item, false))
                         }
-            } else if (page == 0 && data.isEmpty() && items.firstOrNull() is RecentItem) {
+            } else if (offset == 0 && data.isEmpty() && items.firstOrNull() is RecentItem) {
                 items.add(EmptyItem)
             }
         }
 
-        return LoadResult.Page(
+        val prevKey = when {
+            params.key == null -> null
+            (offset > 0 && offset < params.loadSize) -> 0
+            (offset - params.loadSize) < 0 -> null
+            else -> offset - params.loadSize
+        }
+        val page = LoadResult.Page(
                 data = items,
-                prevKey = null,
-                nextKey = if (data.isEmpty()) null else page + 1
+                prevKey = prevKey,
+                nextKey = if (data.isEmpty()) null else offset + params.loadSize
         )
+        AppLog.d("Page prevKey=${page.prevKey} nextKey=${page.nextKey}, Params: Key=${params.key}")
+        return page
     }
 
-    override fun getRefreshKey(state: PagingState<Int, SectionItem>): Int? = null
+    override fun getRefreshKey(state: PagingState<Int, SectionItem>): Int? {
+        val anchorPosition = state.anchorPosition ?: 0
+        val key = getRefreshKey(anchorPosition)
+        AppLog.d("Page getRefreshKey=$key")
+        return key
+    }
+
+    companion object {
+        const val pageSize = 20
+        fun getRefreshKey(position: Int): Int {
+            val pages = position / pageSize
+            return pages * pageSize
+        }
+    }
 }

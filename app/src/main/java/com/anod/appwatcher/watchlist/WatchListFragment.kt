@@ -40,6 +40,7 @@ import info.anodsplace.framework.content.startActivitySafely
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 
 sealed class WishListAction
@@ -134,13 +135,15 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
             }
         })
 
-        viewLifecycleOwner.lifecycleScope.launchWhenCreated {
-            adapter.loadStateFlow.collectLatest { loadState ->
+        viewLifecycleOwner.lifecycleScope.launchWhenResumed {
+            adapter.loadStateFlow
+                    .drop(1) // fix empty view flickering
+                    .collectLatest { loadState ->
                 val isEmpty = (
                         loadState.source.refresh is LoadState.NotLoading
                         && adapter.itemCount < 1
                 )
-                AppLog.d("loadStateFlow: ${loadState.source.refresh}")
+                AppLog.d("loadStateFlow: ${loadState.source.refresh}, isEmpty: $isEmpty")
                 if (isEmpty) {
                     if (binding.emptyView.childCount == 0) {
                         val emptyBinding = ListItemEmptyBinding.inflate(layoutInflater, binding.emptyView, true)
@@ -192,11 +195,23 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
             }
         }
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.changes.collect { }
+        viewLifecycleOwner.lifecycleScope.launchWhenResumed {
+            viewModel.changes.collect {
+                adapter.refresh()
+            }
         }
 
-        reload()
+        binding.listView.isVisible = false
+        binding.progress.isVisible = true
+        // Start loading when fragment resumed
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (viewModel.firstResume) {
+            reload()
+            viewModel.firstResume = false
+        }
     }
 
     protected open fun onListAction(action: WishListAction) {
@@ -233,12 +248,12 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
             showRecentlyInstalled = viewModel.filterId == Filters.TAB_ALL && prefs.showRecent
     )
 
-    fun reload() {
+    fun reload(initialKey: Int? = null) {
         binding.listView.isVisible = false
         loadJob?.cancel()
-        loadJob = lifecycleScope.launch {
+        loadJob = lifecycleScope.launchWhenCreated {
             onReload()
-            viewModel.load(config()).collectLatest { result ->
+            viewModel.load(config(), initialKey = initialKey).collectLatest { result ->
                 binding.listView.isVisible = true
                 binding.progress.isVisible = false
                 AppLog.d("Load status changed: $result")

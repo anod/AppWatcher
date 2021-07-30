@@ -13,8 +13,11 @@ import com.anod.appwatcher.model.AppListFilter
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.SelectionState
+import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.content.InstalledApps
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 
 /**
@@ -29,6 +32,7 @@ abstract class WatchListViewModel(application: Application) : AndroidViewModel(a
         const val recentlyInstalledViews = 10
     }
 
+    var firstResume: Boolean = true
     val context: ApplicationContext
         get() = ApplicationContext(getApplication())
     val provide: AppComponent
@@ -50,18 +54,14 @@ abstract class WatchListViewModel(application: Application) : AndroidViewModel(a
     var filter: AppListFilter = AppListFilter.All()
         private set
 
-    private var hasData = false
-    private var firstChange = true
     val changes = AppListTable.Queries.changes(database.apps())
-            .debounce(600)
-            .map {
-                if (hasData && !firstChange) {
-                    hasData = false
-                    pagingSource?.invalidate()
-                }
-                firstChange = false
-                true
-            }
+         .drop(1)
+        .map { (System.currentTimeMillis() / 1000).toInt() }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), initialValue = 0)
+        .filter { it > 0 }
+        .onEach { delay(600) }
+        .flowOn(Dispatchers.Default)
+
     var pagingSource: PagingSource<Int, SectionItem>? = null
         private set
 
@@ -76,22 +76,20 @@ abstract class WatchListViewModel(application: Application) : AndroidViewModel(a
             provide.recentlyInstalledPackages.load()
         }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
 
-    fun load(config: WatchListPagingSource.Config): Flow<PagingData<SectionItem>> {
+    fun load(config: WatchListPagingSource.Config, initialKey: Int? = null): Flow<PagingData<SectionItem>> {
         headerFactory = createSectionHeaderFactory(config)
-        hasData = false
         installedApps.reset()
         // When initialLoadSize larger than pageSize it cause a bug
         // where after filter if there is only one pages items are shown multiple times
-        return Pager(PagingConfig(pageSize = 20, initialLoadSize = 20)) {
+        return Pager(PagingConfig(pageSize = WatchListPagingSource.pageSize, initialLoadSize = WatchListPagingSource.pageSize), initialKey = initialKey) {
             pagingSource = createPagingSource(config)
             pagingSource!!
-        }.flow.map { pagingData: PagingData<SectionItem> ->
-            hasData = true
-            pagingData
-                    .insertSeparators { before, after ->
+        }.flow
+                .map { pagingData: PagingData<SectionItem> ->
+                    pagingData.insertSeparators { before, after ->
                         headerFactory.insertSeparator(before, after)
                     }
-        }.cachedIn(viewModelScope)
+                }.cachedIn(viewModelScope)
     }
 
     private fun createFilter(filterId: Int, installedApps: InstalledApps): AppListFilter {
