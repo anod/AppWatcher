@@ -122,8 +122,8 @@ dependencies {
     implementation("androidx.fragment:fragment-ktx:1.3.6")
 
     // Compose
-    implementation("androidx.activity:activity-compose:1.3.0-rc02")
-    implementation("androidx.compose.material:material:1.0.0-rc02")
+    implementation("androidx.activity:activity-compose:1.3.0")
+    implementation("androidx.compose.material:material:1.0.0")
 
     // Google
     implementation("com.google.android.material:material:1.4.0")
@@ -158,8 +158,8 @@ dependencies {
     kapt("androidx.room:room-compiler:2.3.0")
 
     // Kotlin
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.1")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.5.10")
 
     testImplementation("junit:junit:4.13.2")
