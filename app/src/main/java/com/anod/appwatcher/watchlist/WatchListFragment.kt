@@ -201,17 +201,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
             }
         }
 
-        binding.listView.isVisible = false
-        binding.progress.isVisible = true
-        // Start loading when fragment resumed
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (viewModel.firstResume) {
-            reload()
-            viewModel.firstResume = false
-        }
+        reload()
     }
 
     protected open fun onListAction(action: WishListAction) {

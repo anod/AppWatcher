@@ -20,7 +20,7 @@ android {
         applicationId = "com.anod.appwatcher"
         minSdk = 21
         targetSdk = 30
-        versionCode = 14704
+        versionCode = 14705
         versionName = "1.4.7"
         resValue("string", "content_authority", "com.anod.appwatcher")
 
