@@ -32,7 +32,6 @@ import info.anodsplace.framework.view.Keyboard
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -82,7 +81,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
         }
 
         lifecycleScope.launch {
-            viewModel.searchQueryAuthenticated.collectLatest {
+            viewModel.searchQueryAuthenticated.collect {
                 val query = it.first
                 val authToken = it.second
                 if (query.isBlank()) {
@@ -108,13 +107,13 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
                 }
             }
 
-            viewModel.packages.collectLatest {
+            viewModel.packages.collect {
                 adapter?.notifyDataSetChanged()
             }
         }
 
         lifecycleScope.launchWhenResumed {
-            action.collectLatest {
+            action.collect {
                 when (it) {
                     is Delete -> viewModel.delete(it.info)
                     is Add -> viewModel.add(it.info)
@@ -126,7 +125,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
     private fun search(query: String, authToken: String) {
         searchJob?.cancel()
         searchJob = lifecycleScope.launch {
-            viewModel.search(query, authToken).collectLatest { status ->
+            viewModel.search(query, authToken).collect { status ->
                 AppLog.d("Search status changed: $status")
                 onSearchStatusChange(status)
             }

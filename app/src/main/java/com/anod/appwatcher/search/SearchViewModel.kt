@@ -74,6 +74,10 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
     fun search(query: String, authToken: String): Flow<SearchStatus> = flow {
         val requestQueue = provide.requestQueue
         val deviceInfo = provide.deviceInfo
+        if (account == null) {
+            emit(Error)
+            return@flow
+        }
         endpointSearch = SearchEndpoint(context, requestQueue, deviceInfo, account!!, query).also {
             it.authToken = authToken
         }
