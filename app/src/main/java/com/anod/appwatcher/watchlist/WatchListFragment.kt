@@ -71,7 +71,9 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
 
     protected open fun viewModelFactory(): ViewModelProvider.Factory {
         return object : ViewModelProvider.Factory {
-            override fun <T : ViewModel?> create(modelClass: Class<T>): T = AppsWatchListViewModel(application) as T
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return AppsWatchListViewModel(application) as T
+            }
         }
     }
 

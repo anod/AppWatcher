@@ -104,8 +104,8 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerVersion = "1.5.10"
-        kotlinCompilerExtensionVersion = "1.0.0-beta09"
+        kotlinCompilerVersion = "1.5.21"
+        kotlinCompilerExtensionVersion = "1.0.1"
     }
 }
 
@@ -113,7 +113,7 @@ dependencies {
     // AndroidX
     implementation("androidx.recyclerview:recyclerview:1.2.1")
     implementation("androidx.palette:palette:1.0.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.0.4")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.0")
     implementation("androidx.work:work-runtime:2.5.0")
     implementation("androidx.work:work-runtime-ktx:2.5.0")
     implementation("androidx.core:core:1.6.0")
@@ -122,8 +122,8 @@ dependencies {
     implementation("androidx.fragment:fragment-ktx:1.3.6")
 
     // Compose
-    implementation("androidx.activity:activity-compose:1.3.0")
-    implementation("androidx.compose.material:material:1.0.0")
+    implementation("androidx.activity:activity-compose:1.3.1")
+    implementation("androidx.compose.material:material:1.0.1")
 
     // Google
     implementation("com.google.android.material:material:1.4.0")
@@ -140,7 +140,7 @@ dependencies {
     implementation("com.google.api-client:google-api-client-android:1.30.10")
 
     implementation("com.google.firebase:firebase-analytics:19.0.0")
-    implementation("com.google.firebase:firebase-crashlytics:18.2.0")
+    implementation("com.google.firebase:firebase-crashlytics:18.2.1")
 
     // 3rd party
     implementation("com.squareup.okhttp3:okhttp:4.8.1")
@@ -148,10 +148,10 @@ dependencies {
     implementation("com.jakewharton:process-phoenix:2.0.0")
 
     // ViewModel and LiveData
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0-alpha02")
-    implementation("androidx.lifecycle:lifecycle-viewmodel:2.4.0-alpha02")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.4.0-alpha02")
-    kapt("androidx.lifecycle:lifecycle-compiler:2.4.0-alpha02")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0-alpha03")
+    implementation("androidx.lifecycle:lifecycle-viewmodel:2.4.0-alpha03")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.4.0-alpha03")
+    kapt("androidx.lifecycle:lifecycle-compiler:2.4.0-alpha03")
 
     implementation("androidx.room:room-runtime:2.3.0")
     implementation("androidx.room:room-ktx:2.3.0")
@@ -160,7 +160,7 @@ dependencies {
     // Kotlin
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.1")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.5.10")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.5.21")
 
     testImplementation("junit:junit:4.13.2")
 

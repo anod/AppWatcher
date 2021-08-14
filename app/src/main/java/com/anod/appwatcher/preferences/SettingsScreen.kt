@@ -110,9 +110,9 @@ fun onSettingsItemClick(prefs: Preferences, item: PreferenceItem, viewModel: Set
         "drive_sync" -> viewModel.gDriveSyncToggle((item as PreferenceItem.Switch).checked)
         "drive-sync-now" -> viewModel.gDriveSyncNow()
         "update_frequency" -> viewModel.changeUpdatePolicy(
-            (item as PreferenceItem.List).value.toInt(),
-            prefs.isWifiOnly,
-            prefs.isRequiresCharging
+            frequency = (item as PreferenceItem.List).value.toInt(),
+            isWifiOnly = prefs.isWifiOnly,
+            isRequiresCharging = prefs.isRequiresCharging
         )
         "wifi_only" -> {
             val useWifiOnly = (item as PreferenceItem.Switch).checked

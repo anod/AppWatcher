@@ -93,7 +93,9 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
 
     override fun viewModelFactory(): ViewModelProvider.Factory {
         return object : ViewModelProvider.Factory {
-            override fun <T : ViewModel?> create(modelClass: Class<T>): T = InstalledViewModel(application) as T
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return InstalledViewModel(application) as T
+            }
         }
     }
 

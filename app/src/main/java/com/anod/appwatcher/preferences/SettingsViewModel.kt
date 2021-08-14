@@ -6,6 +6,7 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.Operation
 import com.anod.appwatcher.AppWatcherApplication
 import com.anod.appwatcher.R
 import com.anod.appwatcher.backup.ExportTask
@@ -123,15 +124,16 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         val useAutoSync = preferences.useAutoSync
 
         appScope.launch {
+            reload.emit(true)
             if (useAutoSync) {
                 SyncScheduler(context).schedule(
                     preferences.isRequiresCharging,
                     preferences.isWifiOnly,
                     preferences.updatesFrequency.toLong(),
                     true
-                ).collect { }
+                ).first { it !is Operation.State.IN_PROGRESS }
             } else {
-                SyncScheduler(context).cancel().collect { }
+                SyncScheduler(context).cancel().first { it !is Operation.State.IN_PROGRESS }
             }
         }
     }
