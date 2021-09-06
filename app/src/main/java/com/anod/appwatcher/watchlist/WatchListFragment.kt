@@ -138,25 +138,26 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
         })
 
         viewLifecycleOwner.lifecycleScope.launchWhenResumed {
-            adapter.loadStateFlow
-                    .drop(1) // fix empty view flickering
-                    .collectLatest { loadState ->
-                val isEmpty = (
+            adapter
+                .loadStateFlow
+                .drop(1) // fix empty view flickering
+                .collectLatest { loadState ->
+                    val isEmpty = (
                         loadState.source.refresh is LoadState.NotLoading
                         && adapter.itemCount < 1
-                )
-                AppLog.d("loadStateFlow: ${loadState.source.refresh}, isEmpty: $isEmpty")
-                if (isEmpty) {
-                    if (binding.emptyView.childCount == 0) {
-                        val emptyBinding = ListItemEmptyBinding.inflate(layoutInflater, binding.emptyView, true)
-                        createEmptyViewHolder(emptyBinding, action)
+                    )
+                    AppLog.d("loadStateFlow: ${loadState.source.refresh}, isEmpty: $isEmpty")
+                    if (isEmpty) {
+                        if (binding.emptyView.childCount == 0) {
+                            val emptyBinding = ListItemEmptyBinding.inflate(layoutInflater, binding.emptyView, true)
+                            createEmptyViewHolder(emptyBinding, action)
+                        }
+                        binding.emptyView.isVisible = true
+                        binding.listView.isVisible = false
+                    } else {
+                        binding.emptyView.isVisible = false
+                        binding.listView.isVisible = true
                     }
-                    binding.emptyView.isVisible = true
-                    binding.listView.isVisible = false
-                } else {
-                    binding.emptyView.isVisible = false
-                    binding.listView.isVisible = true
-                }
             }
         }
 

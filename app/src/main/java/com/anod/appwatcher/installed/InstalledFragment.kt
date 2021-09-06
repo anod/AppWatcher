@@ -30,6 +30,7 @@ import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.content.startActivitySafely
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 
 class InstalledFragment : WatchListFragment(), ActionMode.Callback {
@@ -168,12 +169,21 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
         }
 
         lifecycleScope.launch {
-            provide.packageRemoved.collect {
-                AppLog.d("Package removed: $it")
+            provide.packageChanged.collect {
+                AppLog.d("Package changed: $it")
                 if (importViewModel.progress.value !is ImportProgress) {
                     reload()
                 }
             }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launchWhenResumed {
+            adapter
+                .loadStateFlow
+                .drop(1) // fix empty view flickering
+                .collectLatest {
+                    binding.swipeLayout.isRefreshing = false
+                }
         }
     }
 
@@ -194,6 +204,12 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
             startActivity(e.intent)
         } catch (e: Exception) {
             AppLog.e("onResume", e)
+        }
+    }
+
+    override fun onRefresh() {
+        if (importViewModel.progress.value !is ImportProgress) {
+            reload()
         }
     }
 

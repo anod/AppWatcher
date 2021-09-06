@@ -13,7 +13,6 @@ import com.anod.appwatcher.model.AppListFilter
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.SelectionState
-import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.content.InstalledApps
 import kotlinx.coroutines.Dispatchers
@@ -32,7 +31,6 @@ abstract class WatchListViewModel(application: Application) : AndroidViewModel(a
         const val recentlyInstalledViews = 10
     }
 
-    var firstResume: Boolean = true
     val context: ApplicationContext
         get() = ApplicationContext(getApplication())
     val provide: AppComponent
@@ -55,7 +53,7 @@ abstract class WatchListViewModel(application: Application) : AndroidViewModel(a
         private set
 
     val changes = AppListTable.Queries.changes(database.apps())
-         .drop(1)
+        .drop(1)
         .map { (System.currentTimeMillis() / 1000).toInt() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), initialValue = 0)
         .filter { it > 0 }
@@ -72,9 +70,10 @@ abstract class WatchListViewModel(application: Application) : AndroidViewModel(a
     abstract fun createSectionHeaderFactory(config: WatchListPagingSource.Config): SectionHeaderFactory
 
     val recentlyInstalledPackages: Flow<List<InstalledPackageRow>> = provide
-        .packageRemoved.onStart { emit("") }.map {
-            provide.recentlyInstalledPackages.load()
-        }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
+        .packageChanged
+        .onStart { emit("") }
+        .map { provide.recentlyInstalledPackages.load() }
+        .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
 
     fun load(config: WatchListPagingSource.Config, initialKey: Int? = null): Flow<PagingData<SectionItem>> {
         headerFactory = createSectionHeaderFactory(config)
@@ -85,11 +84,12 @@ abstract class WatchListViewModel(application: Application) : AndroidViewModel(a
             pagingSource = createPagingSource(config)
             pagingSource!!
         }.flow
-                .map { pagingData: PagingData<SectionItem> ->
-                    pagingData.insertSeparators { before, after ->
-                        headerFactory.insertSeparator(before, after)
-                    }
-                }.cachedIn(viewModelScope)
+            .map { pagingData: PagingData<SectionItem> ->
+                pagingData.insertSeparators { before, after ->
+                    headerFactory.insertSeparator(before, after)
+                }
+            }
+            .cachedIn(viewModelScope)
     }
 
     private fun createFilter(filterId: Int, installedApps: InstalledApps): AppListFilter {

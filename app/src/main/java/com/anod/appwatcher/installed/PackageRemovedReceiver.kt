@@ -11,12 +11,24 @@ class PackageRemovedReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context?, intent: Intent?) {
         val action = intent?.action ?: return
-        if (action == Intent.ACTION_PACKAGE_FULLY_REMOVED) {
-            val packageName = intent.data?.schemeSpecificPart ?: ""
-            val component = context?.provide ?: return
-            component.appScope.launch {
-                component.packageRemovedReceiver.emit(packageName + ":" + System.currentTimeMillis())
+        when (action) {
+            Intent.ACTION_PACKAGE_FULLY_REMOVED -> {
+                notify(context, intent)
             }
+            Intent.ACTION_PACKAGE_ADDED -> {
+                notify(context, intent)
+            }
+            Intent.ACTION_PACKAGE_REPLACED -> {
+                notify(context, intent)
+            }
+        }
+    }
+
+    private fun notify(context: Context?, intent: Intent?) {
+        val packageName = intent?.data?.schemeSpecificPart ?: ""
+        val component = context?.provide ?: return
+        component.appScope.launch {
+            component.packageChangedReceiver.emit(packageName + ":" + System.currentTimeMillis())
         }
     }
 }

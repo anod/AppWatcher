@@ -69,7 +69,7 @@ class AppComponent internal constructor(private val app: AppWatcherApplication) 
 
     val appScope: CoroutineScope by lazy { CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate) }
 
-    val packageRemovedReceiver = MutableSharedFlow<String?>()
-    val packageRemoved: Flow<String> = packageRemovedReceiver.filterNotNull().distinctUntilChanged()
+    val packageChangedReceiver = MutableSharedFlow<String?>()
+    val packageChanged: Flow<String> = packageChangedReceiver.filterNotNull().distinctUntilChanged()
     val recentlyInstalledPackages: RecentlyInstalledPackages by lazy { RecentlyInstalledPackages(packageManager, database) }
 }
