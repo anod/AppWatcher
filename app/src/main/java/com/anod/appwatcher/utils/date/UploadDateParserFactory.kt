@@ -31,7 +31,6 @@ object UploadDateParserFactory {
     private val en_IN = Locale("en", "IN")
     private val en_CA = Locale("en", "CA")
     private val en_MY = Locale("en", "MY")
-    private val en_AU = Locale("en", "AU")
     private val en_GB = Locale("en", "GB")
 
     fun create(locale: Locale): List<DateFormat> {
@@ -54,7 +53,7 @@ object UploadDateParserFactory {
                 SimpleDateFormat("dd 'de' MMM 'de' yyyy", locale)
             )
             locale == hi_IN -> listOf(SimpleDateFormat("dd/MM/yyyy", locale))
-            locale == en_AU || locale == en_MY || locale == en_GB -> listOf(
+            lang == en_GB.language-> listOf(
                 SimpleDateFormat("d MMM. yyyy", locale),
                 SimpleDateFormat("d MMM yyyy", locale),
                 CustomMonthDateFormat(EN_SHORT_MONTHS),
