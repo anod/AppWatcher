@@ -85,7 +85,7 @@ class WatchListPagingSource(
         return page
     }
 
-    override fun getRefreshKey(state: PagingState<Int, SectionItem>): Int? {
+    override fun getRefreshKey(state: PagingState<Int, SectionItem>): Int {
         val anchorPosition = state.anchorPosition ?: 0
         val key = getRefreshKey(anchorPosition)
         AppLog.d("Page getRefreshKey=$key")

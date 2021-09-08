@@ -36,9 +36,9 @@ class TagsListFragment : Fragment(), View.OnClickListener {
     private var _binding: ActivityTagsEditorBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: TagsListViewModel by viewModels()
+    private val viewModel: TagsViewModel by viewModels()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = ActivityTagsEditorBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -52,13 +52,9 @@ class TagsListFragment : Fragment(), View.OnClickListener {
         super.onViewCreated(view, savedInstanceState)
 
         setHasOptionsMenu(true)
-        if (requireArguments().containsKey(EXTRA_APP)) {
-            viewModel.appInfo.value = requireArguments().getParcelable(EXTRA_APP)
-            requireActivity().title = getString(R.string.tag_app, viewModel.appInfo.value!!.title)
-        } else {
-            viewModel.appInfo.value = null
-            requireActivity().title = getString(R.string.tags)
-        }
+        viewModel.appInfo.value = requireArguments().getParcelable(EXTRA_APP)
+        requireActivity().title = getString(R.string.tag_app, viewModel.appInfo.value!!.title)
+
         binding.emptyView.isVisible = false
         binding.list.layoutManager = LinearLayoutManager(requireContext())
         binding.list.adapter = TagAdapter(requireContext(), this)
@@ -81,8 +77,7 @@ class TagsListFragment : Fragment(), View.OnClickListener {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.add_tag) {
-            val dialog = EditTagDialog.newInstance(null, Theme(requireActivity()))
-            dialog.show(parentFragmentManager, "edit-tag-dialog")
+            EditTagDialog.show(parentFragmentManager, null, Theme(requireActivity()))
             return true
         }
         return super.onOptionsItemSelected(item)
@@ -91,8 +86,7 @@ class TagsListFragment : Fragment(), View.OnClickListener {
     override fun onClick(v: View) {
         val holder = v.tag as TagHolder
         if (viewModel.appInfo.value == null) {
-            val dialog = EditTagDialog.newInstance(holder.tag, Theme(requireActivity()))
-            dialog.show(parentFragmentManager, "edit-tag-dialog")
+            EditTagDialog.show(parentFragmentManager, holder.tag, Theme(requireActivity()))
         } else {
             if (holder.name.isSelected) {
                 viewModel.removeAppTag(holder.tag)
@@ -162,13 +156,11 @@ class TagsListFragment : Fragment(), View.OnClickListener {
             override fun create() = TagsListFragment()
         }
 
-        fun intent(context: Context, themeRes: Int, themeColors: CustomThemeColors, app: AppInfo?) = FragmentToolbarActivity.intent(
+        fun intent(context: Context, themeRes: Int, themeColors: CustomThemeColors, app: AppInfo) = FragmentToolbarActivity.intent(
                 context,
                 Factory(),
                 Bundle().apply {
-                    if (app != null) {
-                        putParcelable(EXTRA_APP, app)
-                    }
+                    putParcelable(EXTRA_APP, app)
                 },
                 themeRes,
                 themeColors)

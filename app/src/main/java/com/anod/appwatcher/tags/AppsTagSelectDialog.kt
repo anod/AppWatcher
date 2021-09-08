@@ -2,11 +2,16 @@ package com.anod.appwatcher.tags
 
 import android.app.Activity
 import android.content.Context
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
+import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.children
+import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.viewModels
@@ -16,14 +21,15 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.databinding.FragmentTagSelectBinding
 import com.anod.appwatcher.details.DetailsDialog
+import com.anod.appwatcher.provide
 import com.anod.appwatcher.utils.Theme
+import com.anod.appwatcher.utils.colorStateListOf
 import info.anodsplace.framework.app.ApplicationContext
+import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.view.Keyboard
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-
 
 class AppsTagSelectDialog : DialogFragment(R.layout.fragment_tag_select) {
 
@@ -55,8 +61,6 @@ class AppsTagSelectDialog : DialogFragment(R.layout.fragment_tag_select) {
         viewModel.tagAppsImport = TagAppsImport(tag, ApplicationContext(requireContext()))
         viewModel.tag.value = tag
 
-        binding.appBar.setBackgroundDrawable(ColorDrawable(tag.color))
-
         binding.list.layoutManager = LinearLayoutManager(requireContext())
         binding.button3.setOnClickListener {
             val importAdapter = binding.list.adapter as TagAppsAdapter
@@ -69,10 +73,14 @@ class AppsTagSelectDialog : DialogFragment(R.layout.fragment_tag_select) {
         }
 
         binding.button1.setOnClickListener {
-            GlobalScope.launch(Dispatchers.Main) {
+            provide.appScope.launch(Dispatchers.Main) {
                 viewModel.import()
                 dismiss()
             }
+        }
+
+        binding.back.setOnClickListener {
+            dismiss()
         }
 
         lifecycleScope.launch {
@@ -89,38 +97,26 @@ class AppsTagSelectDialog : DialogFragment(R.layout.fragment_tag_select) {
             }
         }
 
-        createOptionsMenu()
+        binding.searchField.editText?.setText(viewModel.titleFilter.value)
+        binding.searchField.editText?.doOnTextChanged { inputText, _, _, _ ->
+            viewModel.titleFilter.value = inputText.toString()
+        }
+        Keyboard.hide(binding.searchField.editText!!, requireContext())
+
+        applyTagColor(tag)
     }
 
-    private fun createOptionsMenu(): Boolean {
-        val toolbar = binding.appBar as Toolbar
-        toolbar.inflateMenu(R.menu.searchbox)
-        val menu = toolbar.menu
-
-        toolbar.setNavigationIcon(R.drawable.ic_baseline_arrow_white_24)
-        toolbar.setNavigationOnClickListener {
-            dismiss()
-        }
-        val searchItem = menu.findItem(R.id.menu_search)
-        val searchView = searchItem.actionView as SearchView
-        searchView.setIconifiedByDefault(false)
-        searchItem.expandActionView()
-
-        searchView.setQuery(viewModel.titleFilter.value, true)
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String): Boolean {
-                Keyboard.hide(searchView, requireContext())
-                return false
-            }
-
-            override fun onQueryTextChange(query: String): Boolean {
-                viewModel.titleFilter.value = query
-                return true
-            }
-        })
-
-        Keyboard.hide(searchView, requireContext())
-        return true
+    private fun applyTagColor(tag: Tag) {
+        binding.appBar.setBackgroundDrawable(ColorDrawable(tag.color))
+        val isLightColor = tag.isLightColor
+        val iconsColor = if (isLightColor) Color.BLACK else Color.WHITE
+        val colorStates = ColorStateList.valueOf(iconsColor)
+        binding.back.imageTintList = colorStates
+        binding.searchField.setStartIconTintList(colorStates)
+        binding.searchField.boxStrokeColor = iconsColor
+        binding.searchField.hintTextColor = colorStates
+        binding.searchField.editText?.setTextColor(colorStates)
+        binding.searchField.editText?.setHintTextColor(colorStates)
     }
 
     companion object {

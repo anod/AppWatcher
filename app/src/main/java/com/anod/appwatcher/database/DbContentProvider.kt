@@ -73,13 +73,13 @@ open class DbContentProvider : ContentProvider() {
     }
 
     private class Query {
-        internal var type: Int = 0
-        internal var table: String? = null
-        internal var selection: String? = null
-        internal var selectionArgs: Array<String>? = null
-        internal var notifyUri: Uri? = null
-        internal var groupBy: String? = null
-        internal var projection: Array<String>? = null
+        var type: Int = 0
+        var table: String? = null
+        var selection: String? = null
+        var selectionArgs: Array<String>? = null
+        var notifyUri: Uri? = null
+        var groupBy: String? = null
+        var projection: Array<String>? = null
     }
 
     override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int {

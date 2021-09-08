@@ -35,7 +35,6 @@ class SchedulesHistoryActivity : ToolbarActivity() {
         private val sdf = SimpleDateFormat("MMM d, HH:mm:ss", Locale.getDefault())
         private val context: Context
             get() = itemView.context
-        private var textColor: Int? = null
 
         fun apply(position: Int, schedule: Schedule) {
             val range = if (schedule.finish > 0) {
@@ -97,9 +96,6 @@ class SchedulesHistoryActivity : ToolbarActivity() {
                 else -> ""
             }
         }
-
-        private fun getString(@StringRes id: Int, vararg args: Any) = itemView.resources.getString(id, args)
-
     }
 
     class SchedulesAdapter(val context: Context) : RecyclerView.Adapter<ScheduleViewHolder>() {

@@ -32,11 +32,12 @@ object TagSnackbar {
 
     internal class TagAction(private val activity: Activity, private val app: AppInfo) : View.OnClickListener {
         override fun onClick(v: View) {
-            this.activity.startActivity(TagsListFragment.intent(activity, Theme(activity).theme, Theme(activity).colors, app))
+            val theme = Theme(activity)
+            this.activity.startActivity(TagsListFragment.intent(activity, theme.theme, theme.colors, app))
         }
     }
 
-    private class TagCallback internal constructor(private val activity: Activity, private val finishActivity: Boolean) : Snackbar.Callback() {
+    private class TagCallback(private val activity: Activity, private val finishActivity: Boolean) : Snackbar.Callback() {
 
         override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
             if (this.finishActivity) {

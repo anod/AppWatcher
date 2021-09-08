@@ -15,7 +15,14 @@
 		android:id="@+id/menu_act_addtag"
 		android:icon="@drawable/ic_add_circle_white_24dp"
 		appwatcher:showAsAction="ifRoom"
-		android:title="@string/menu_refresh">
+		android:title="@string/menu_tag_apps">
+	</item>
+
+	<item
+		android:id="@+id/menu_act_edittag"
+		android:icon="@drawable/ic_baseline_edit_24"
+		appwatcher:showAsAction="ifRoom"
+		android:title="@string/menu_edit">
 	</item>
 
 	<item

@@ -94,7 +94,7 @@ class AppDetailsUploadDateTest {
     }
 
     private inner class DateDesc @Throws(ParseException::class)
-    constructor(locale: String, internal val date: String, internal val expected: String) {
-        internal val locale: Locale = Locale(locale.substring(0, 2), locale.substring(3, 5))
+    constructor(locale: String, val date: String, val expected: String) {
+        val locale: Locale = Locale(locale.substring(0, 2), locale.substring(3, 5))
     }
 }

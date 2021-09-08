@@ -56,10 +56,13 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
 
     internal lateinit var binding: ActivityMainBinding
 
+    val theme: Theme
+        get() = Theme(this)
+
     override val themeRes: Int
-        get() = Theme(this).theme
+        get() = theme.theme
     override val themeColors: CustomThemeColors
-        get() = Theme(this).colors
+        get() = theme.colors
 
     open val defaultFilterId = Filters.TAB_ALL
 

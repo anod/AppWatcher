@@ -13,19 +13,18 @@ import kotlinx.coroutines.launch
 
 typealias TagAppItem = Pair<Tag,Boolean>
 
-class TagsListViewModel(application: Application): AndroidViewModel(application) {
-
-    val appInfo = MutableStateFlow<AppInfo?>(null)
-
+class TagsViewModel(application: Application): AndroidViewModel(application) {
     private val provide: AppComponent
         get() = getApplication<AppWatcherApplication>().appComponent
 
-    val tagsAppItems: Flow<List<TagAppItem>> = appInfo.flatMapConcat tagsApp@{ info ->
-        return@tagsApp provide.database.tags().observe().flatMapConcat { tags ->
+    val appInfo = MutableStateFlow<AppInfo?>(null)
+
+    val tagsAppItems: Flow<List<TagAppItem>> = appInfo.flatMapLatest tagsApp@{ info ->
+        return@tagsApp provide.database.tags().observe().flatMapLatest { tags ->
             if (info == null || info.appId.isEmpty()) {
-                return@flatMapConcat flowOf(tags.map { TagAppItem(it, false) })
+                return@flatMapLatest flowOf(tags.map { TagAppItem(it, false) })
             }
-            return@flatMapConcat provide.database.appTags().forApp(info.appId).map { appTags ->
+            return@flatMapLatest provide.database.appTags().forApp(info.appId).map { appTags ->
                 val appTagsList = appTags.map { it.tagId }
                 tags.map { TagAppItem(it, appTagsList.contains(it.id)) }
             }

@@ -2,13 +2,18 @@ package com.anod.appwatcher.tags
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
+import android.view.Menu
 import android.view.MenuItem
+import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.children
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.watchlist.WatchListActivity
+import com.google.android.material.appbar.MaterialToolbar
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.addMultiWindowFlags
 
@@ -26,18 +31,19 @@ class AppsTagActivity : WatchListActivity() {
 
     override val themeRes: Int
         get() = if (themeColors.statusBarColor.isLight)
-            Theme(this).themeLightActionBar
+            theme.themeLightActionBar
         else
-            Theme(this).themeDarkActionBar
+            theme.themeDarkActionBar
 
     override val themeColors: CustomThemeColors
-        get() = CustomThemeColors(tag.color, Theme(this).colors.navigationBarColor)
+        get() = CustomThemeColors(tag.color, theme.colors.navigationBarColor)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         tag = restoreTag(savedInstanceState)
         super.onCreate(savedInstanceState)
 
-        binding.toolbar.setBackgroundColor(tag.color)
+        val toolbar = binding.toolbar as MaterialToolbar
+        toolbar.setBackgroundColor(tag.color)
         title = tag.name
     }
 
@@ -62,6 +68,9 @@ class AppsTagActivity : WatchListActivity() {
         if (item.itemId == R.id.menu_act_addtag) {
             AppsTagSelectDialog.show(tag, supportFragmentManager)
             return true
+        }
+        if (item.itemId == R.id.menu_act_edittag) {
+            EditTagDialog.show(supportFragmentManager, tag, theme)
         }
         return super.onOptionsItemSelected(item)
     }

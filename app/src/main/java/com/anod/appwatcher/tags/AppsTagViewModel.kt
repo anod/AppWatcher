@@ -9,7 +9,7 @@ import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.preferences.Preferences
 import info.anodsplace.framework.app.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.flatMapLatest
 
 /**
  * @author Alex Gavrishev
@@ -25,12 +25,12 @@ class AppsTagViewModel(application: android.app.Application) : AndroidViewModel(
 
     internal lateinit var tagAppsImport: TagAppsImport
 
-    val apps = titleFilter.flatMapConcat { titleFilter ->
+    val apps = titleFilter.flatMapLatest { titleFilter ->
         val appsTable = database.apps()
         AppListTable.Queries.loadAppList(Preferences.SORT_NAME_ASC, titleFilter, appsTable)
     }
 
-    val tags = tag.flatMapConcat { database.appTags().forTag(it.id) }
+    val tags = tag.flatMapLatest { database.appTags().forTag(it.id) }
 
     suspend fun import() {
         tagAppsImport.run()

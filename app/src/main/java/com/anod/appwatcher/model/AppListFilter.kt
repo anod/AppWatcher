@@ -13,7 +13,7 @@ interface AppListFilter {
     val filterId: Int
     fun filterRecord(item: AppListItem): Boolean
 
-    class All() : AppListFilter {
+    class All : AppListFilter {
         override val filterId = Filters.TAB_ALL
         override fun filterRecord(item: AppListItem): Boolean {
             return false

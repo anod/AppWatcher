@@ -7,6 +7,7 @@ import android.text.format.DateUtils
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -23,6 +24,7 @@ import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.installed.InstalledFragment
 import com.anod.appwatcher.tags.AppsTagActivity
+import com.anod.appwatcher.tags.EditTagDialog
 import com.anod.appwatcher.utils.Hash
 import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.wishlist.WishListFragment
@@ -135,6 +137,16 @@ abstract class DrawerActivity : ToolbarActivity(), AccountSelectionDialog.Select
     private fun updateTags(result: List<Pair<Tag, Int>>) {
         val menu = this.navigationView?.menu ?: return
         menu.removeGroup(1)
+        val addTag = menu.add(1, -1, Menu.NONE, R.string.tags)
+        addTag.setActionView(R.layout.drawer_tag_add)
+        val addTagButton = addTag.actionView.findViewById<View>(R.id.button1)
+        addTagButton.setOnClickListener {
+            EditTagDialog.show(supportFragmentManager, null, Theme(this))
+        }
+        addTag.setOnMenuItemClickListener {
+            EditTagDialog.show(supportFragmentManager, null, Theme(this))
+            true
+        }
         result.forEach { (tag, count) ->
             val item = menu.add(1, tag.id, Menu.NONE, tag.name)
             item.setActionView(R.layout.drawer_tag_indicator)

@@ -8,6 +8,8 @@
         <item name="android:backgroundDimEnabled">false</item>
     </style>
 
+    <style name="AppTheme" />
+
     <style name="AppTheme.Dialog" parent="@style/Theme.MaterialComponents.DayNight.Dialog">
         <!-- Set AppCompat’s color theming attrs -->
         <item name="colorPrimary">@color/material_blue_800</item>
@@ -133,12 +135,10 @@
     </style>
 
     <style name="AppTheme.Main.LightActionBar" parent="AppTheme.Main">
-        <item name="colorOnPrimary">@color/white</item>
         <item name="android:actionBarTheme">@style/AppTheme.ActionBar.LightBackground</item>
     </style>
 
     <style name="AppTheme.Main.DarkActionBar" parent="AppTheme.Main">
-        <item name="colorOnPrimary">@color/white</item>
         <item name="android:actionBarTheme">@style/AppTheme.ActionBar.DarkBackground</item>
     </style>
 
@@ -173,7 +173,6 @@
     </style>
 
     <style name="AppTheme.Black.LightActionBar" parent="AppTheme.Black">
-        <item name="colorOnPrimary">@color/white</item>
         <item name="android:actionBarTheme">@style/AppTheme.ActionBar.LightBackground</item>
     </style>
 
@@ -212,18 +211,26 @@
         <item name="colorControlNormal">@android:color/white</item>
     </style>
 
-    <style name="AppTheme.ActionBar" parent="@style/ThemeOverlay.MaterialComponents.ActionBar.Primary">
-    </style>
+    <style name="AppTheme.ActionBar" />
 
     <style name="AppTheme.ActionBar.LightBackground" parent="@style/ThemeOverlay.MaterialComponents.ActionBar.Primary">
         <item name="android:textColorPrimary">@color/alwaysBlack</item>
+        <item name="colorControlNormal">@color/alwaysBlack</item>
     </style>
 
     <style name="AppTheme.ActionBar.DarkBackground" parent="@style/ThemeOverlay.MaterialComponents.ActionBar.Primary">
-        <item name="android:textColorPrimary">@android:color/white</item>
-        <item name="android:textColorSecondary">@android:color/white</item>
-        <item name="actionMenuTextColor">@android:color/white</item>
-        <item name="colorControlNormal">@android:color/white</item>
+        <item name="android:textColorPrimary">@color/alwaysWhite</item>
+        <item name="colorControlNormal">@color/alwaysWhite</item>
+    </style>
+
+    <style name="AppTheme.PopupMenu" />
+
+    <style name="AppTheme.PopupMenu.LightBackground" parent="@style/Widget.MaterialComponents.PopupMenu.Overflow">
+        <item name="popupMenuBackground">@color/alwaysBlack</item>
+    </style>
+
+    <style name="AppTheme.PopupMenu.DarkBackground" parent="@style/Widget.MaterialComponents.PopupMenu.Overflow">
+        <item name="popupMenuBackground">@color/alwaysBlack</item>
     </style>
 
     <style name="TextAppearance.AppTheme.Headline1" parent="TextAppearance.MaterialComponents.Headline1" />

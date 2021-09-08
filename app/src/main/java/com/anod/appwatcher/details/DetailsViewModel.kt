@@ -44,15 +44,16 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
         get() = provide.database
 
     var detailsUrl = ""
-    var appId = ""
+
+    private val _appId = MutableStateFlow("")
+    var appId: String
+        get() = _appId.value
+        set(value) { _appId.value = value }
+
     var rowId: Int = -1
 
-    val appLoading: Flow<AppLoadingState> = flow {
-        if (appId.isNotEmpty()) {
-            emit(appId)
-        }
-    }.flatMapConcat {
-        return@flatMapConcat database.apps().observeApp(it).map { app ->
+    val appLoading: Flow<AppLoadingState> = _appId.filter { it.isNotEmpty() }.flatMapLatest {
+        return@flatMapLatest database.apps().observeApp(it).map { app ->
             if (app == null && rowId == -1) {
                 AppLog.i("Show details for unwatched $appId", "DetailsView")
                 Loaded(context.packageManager.packageToApp(-1, appId))

@@ -8,6 +8,8 @@ import androidx.annotation.ColorInt
 import androidx.core.graphics.ColorUtils
 import androidx.room.*
 import com.anod.appwatcher.database.TagsTable
+import com.anod.appwatcher.utils.hashCodeOf
+import okhttp3.internal.toHexString
 
 /**
  * @author Alex Gavrishev
@@ -57,9 +59,7 @@ data class Tag(
         }
     }
 
-    override fun describeContents(): Int {
-        return 0
-    }
+    override fun describeContents(): Int = 0
 
     override fun writeToParcel(dest: Parcel, flags: Int) {
         dest.writeInt(this.id)
@@ -67,14 +67,10 @@ data class Tag(
         dest.writeInt(this.color)
     }
 
-    override fun hashCode(): Int {
-        var result = name.hashCode()
-        result = 31 * result + color
-        return result
-    }
+    override fun hashCode() = hashCodeOf(name, color)
 
     companion object {
-        const val DEFAULT_COLOR = 0xFF9E9E9E.toInt()
+        const val DEFAULT_COLOR = 0xFF2196F3.toInt()
 
         @JvmField val CREATOR: Parcelable.Creator<Tag> = object : Parcelable.Creator<Tag> {
             override fun createFromParcel(source: Parcel): Tag {
