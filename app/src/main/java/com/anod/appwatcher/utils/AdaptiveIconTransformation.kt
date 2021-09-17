@@ -104,13 +104,16 @@ class AdaptiveIconTransformation(
                 return Path()
             }
 
-            val path = PathParser.createPathFromPathData(mask)
-            if (path == null) {
-                AppLog.e("cannot parse configMask: $mask", "AdaptiveIcon")
-                return PathParser.createPathFromPathData(circlePath)
+            return try {
+                val path = PathParser.createPathFromPathData(mask)
+                if (path == null) {
+                    AppLog.e("cannot parse configMask: $mask", "AdaptiveIcon")
+                    PathParser.createPathFromPathData(circlePath)
+                } else path
+            } catch (e: Exception) {
+                AppLog.e("error parsing configMask: $mask", "AdaptiveIcon", e)
+                PathParser.createPathFromPathData(circlePath)
             }
-
-            return path
         }
     }
 }
