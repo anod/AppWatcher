@@ -4,7 +4,7 @@
     <string name="menu_add">Hozzáadás</string>
     <string name="menu_tag_apps">Appok megcímkézése</string>
     <string name="menu_edit">Szerkesztés</string>
-    <string name="menu_refresh">Frissítés</string>
+    <string name="menu_refresh">Ellenőrzés most</string>
     <string name="failed_gain_access">Válassz egy fiókot és engedélyezd a hozzáférést Ez szükséges a Google Play Áruházzal való kommunikációhoz.</string>
     <string name="search_action">Keresés</string>
     <string name="search_for_app">Keress rá egy alkalmazásra és kattints rá a figyelőlistához való hozzáadáshoz.\n(Tipp: az alkalmazást közvetlenül is hozzáadhatod a Play Áruházból a \"Megosztás\" gombbal)</string>
@@ -18,7 +18,7 @@
     <string name="menu_update_frequency">Ellenőrzési gyakoriság</string>
     <string name="menu_wifi_only">Csak Wi-Fi-n</string>
     <string name="alert_dialog_remove_title">Eltávolítod?</string>
-    <string name="alert_dialog_remove_message">Megszünteted ennek az alkalmazás frissítéseinek figyelését: \"%s\" ?</string>
+    <string name="alert_dialog_remove_message">Megszünteted ehhez az alkalmazáshoz a frissítések figyelését: \"%s\" ?</string>
     <string name="alert_dialog_remove">Megszüntetés</string>
     <string name="alert_dialog_cancel">Mégse</string>
     <string name="version">%s</string>
@@ -47,9 +47,9 @@
     <string name="import_done">Az importálás kész</string>
     <string name="external_storage_not_available">Külső tárhely nem elérhető</string>
     <string name="restore_deserialize_failed">A JSON adat nem volt olvasható</string>
-    <string name="failed_to_read_file">A fájl nem volt olvasható</string>
+    <string name="failed_to_read_file">A fájl nem olvasható</string>
     <string name="file_not_exist">A fájl nem létezik</string>
-    <string name="failed_to_write_file">A fájlba írás sikertelen</string>
+    <string name="failed_to_write_file">A fájl nem írható</string>
     <string name="import_export">Importálás</string>
     <string name="export_path" translatable="false">/sdcard/data/com.anod.appwatcher/backup/</string>
     <string name="new_updates">Új frissítések</string>
@@ -101,8 +101,8 @@
     <string name="preferences">Beállítások</string>
     <string name="all">Mind</string>
     <string name="import_action">Importálás</string>
-    <string name="import_permission_denied">Az importálás nem kezdhető meg a szükséges engedélyek nélkül</string>
-    <string name="export_permission_denied">Az exportálás nem kezdhető meg a szükséges engedélyek nélkül</string>
+    <string name="import_permission_denied">Az importálás nem indítható hiányzó engedélyek miatt</string>
+    <string name="export_permission_denied">Az exportálás nem indítható hiányzó engedélyek miatt</string>
     <string name="version_text" translatable="false">%1$s (%2$d)</string>
     <string name="version_updated_text" translatable="false">%1$s (%2$d ➝ %3$d)</string>
     <string name="menu_requires_charging">Csak töltés közben</string>
@@ -136,7 +136,7 @@
     <string name="open">Megnyitás</string>
     <string name="channel_app_updates">Alkalmazás frissítések</string>
     <string name="channel_updates_description">Értesítés a figyelt alkalmazások új verzióiról</string>
-    <string name="channel_prices">Árváltozások</string>
+    <string name="channel_prices">Vételár változás</string>
     <string name="channel_prices_description">Értesítés a figyelt alkalmazások árváltozásairól</string>
     <string name="channel_authentication">Hitelesítés</string>
     <string name="channel_authentication_description">Értesítés a hitelesítési problémákról</string>
@@ -165,17 +165,17 @@
     <string name="pref_notify_installed">Telepítési értesítések</string>
     <string name="pref_notify_no_changes_summary">Értesítés, ha frissítés van a változásnaplóban</string>
     <string name="pref_notify_no_changes">Nincs változás értesítések</string>
-    <string name="pref_pull_to_refresh">Lehúzás a kereséshez</string>
+    <string name="pref_pull_to_refresh">Lehúzással újraellenőrzés</string>
     <string name="app_info">Alkalmazás info</string>
     <string name="pref_privacy">Adatvédelem</string>
     <string name="crash_reports_title">Összeomlási jelentések</string>
-    <string name="crash_reports_descr">Összeomlási jelentések összeállítása. Újraindítást igényel.</string>
+    <string name="crash_reports_descr">Összeomlási jelentések összeállítása. Módosítva az alkalmazás újraindul.</string>
 
     <string-array name="sort_titles">
-        <item>By name &#x2193;</item>
-        <item>By name &#x2191;</item>
-        <item>By date &#x2191;</item>
-        <item>By date &#x2193;</item>
+        <item>Név &#x2193;</item>
+        <item>Név &#x2191;</item>
+        <item>Dátum &#x2191;</item>
+        <item>Dátum &#x2193;</item>
     </string-array>
 
     <string name="theme_system_dark">Rendszer (sötét)</string>
@@ -191,10 +191,10 @@
     <string-array name="updates_frequency">
         <item>kézi</item>
         <item>óránként</item>
-        <item>Every 2 óránként</item>
-        <item>Every 3 óránként</item>
-        <item>Every 6 óránként</item>
-        <item>Every 12 óránként</item>
+        <item>2 óránként</item>
+        <item>3 óránként</item>
+        <item>6 óránként</item>
+        <item>12 óránként</item>
     </string-array>
 
     <string name="adaptive_icon_style">Ikon alakzat alkalmazása</string>
@@ -212,7 +212,7 @@
         <item>Csepp</item>
     </array>
     <string name="beta">β</string>
-    <string name="refresh_history">Frissítési előzmények</string>
+    <string name="refresh_history">Keresési előzmények</string>
     <string name="schedule_status_new">Új</string>
     <string name="schedule_status_success">Sikeres</string>
     <string name="schedule_status_failed">Sikertelen</string>
