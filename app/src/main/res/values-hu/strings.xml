@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">App Watcher</string>
+    <string name="menu_add">Hozzáadás</string>
+    <string name="menu_tag_apps">Tag apps</string>
+    <string name="menu_edit">Szerkesztés</string>
+    <string name="menu_refresh">Frissítés</string>
+    <string name="failed_gain_access">Please allow access and select an account. This required in order to communicate with Google Play Store.</string>
+    <string name="search_action">Keresés</string>
+    <string name="search_for_app">Search for an application and click on it to add to the watch list.\n( Tip: you can add apps directly from Play Store using \"Share\" button )</string>
+    <string name="loading">Betöltés…</string>
+    <string name="no_result_found">Nincs találat erre: \"%s\"</string>
+    <string name="no_result_wishlist">No wishlist items. You can add them in Play Store</string>
+    <string name="error_insert_app">Failed to add application to the watch list.</string>
+    <string name="application_icon">Alkalmazás ikon</string>
+    <string name="remove">Eltávolítás</string>
+    <string name="problem_occurred">Problem occurred during receiving information.</string>
+    <string name="menu_update_frequency">Ellenőrzési gyakoriság</string>
+    <string name="menu_wifi_only">Csak Wi-Fi</string>
+    <string name="alert_dialog_remove_title">Eltávolítás?</string>
+    <string name="alert_dialog_remove_message">Do you want to stop watching after \"%s\" updates?</string>
+    <string name="alert_dialog_remove">Eltávolítás</string>
+    <string name="alert_dialog_cancel">Mégse</string>
+    <string name="version">%s</string>
+    <string name="update">Frissítve erre: %s</string>
+    <string name="notification_one_updated">%s frissítve</string>
+    <string name="notification_many_updates">%d app frissítve</string>
+    <string name="notification_2_apps">%1$s, %2$s</string>
+    <string name="notification_2_apps_more">%1$s, %2$s és továbbiak</string>
+    <string name="notification_click">Kattints a részletekhez</string>
+    <string name="no_updates_found">Nem található frissítés.</string>
+    <string name="dialog_about_title">%1$s ver. %2$s</string>
+    <string name="dialog_about_text">"Author: Alex Gavrishev&lt;br/&gt;&lt;a href=https://play.google.com/store/apps/developer?id=Alex+Gavrishev /&lt;Google Play Store&lt;/a&gt;"</string>
+    <string name="share">Megosztás</string>
+    <string name="share_subject">%1$s version %2$s</string>
+    <string name="share_text" translatable="false">%1$s %2$s</string>
+    <string name="app_stored">\"%s\" hozzáadva</string>
+    <string name="rate_app">Értékelés</string>
+    <string name="installed">Telepítve</string>
+    <string name="import_installed">Telepítettek importálása</string>
+    <string name="no_recent_changes">No information about recent changes was provided.</string>
+    <string name="last_update">Updated %1$s</string>
+    <string name="no_files_found">Nem található fájl</string>
+    <string name="please_wait">Kérlek, várj…</string>
+    <string name="export_done">Done</string>
+    <string name="unable_delete_file">Unable to delete file</string>
+    <string name="import_done">Import finished</string>
+    <string name="external_storage_not_available">External storage not available</string>
+    <string name="restore_deserialize_failed">Cannot read JSON data</string>
+    <string name="failed_to_read_file">Cannot read file</string>
+    <string name="file_not_exist">File not exist</string>
+    <string name="failed_to_write_file">Failed to write into file</string>
+    <string name="import_export">Import</string>
+    <string name="export_path" translatable="false">/sdcard/data/com.anod.appwatcher/backup/</string>
+    <string name="new_updates">New updates</string>
+    <string name="recently_updated">Recently updated</string>
+    <string name="watching">Watching</string>
+    <string name="menu_filter">Search</string>
+    <string name="choose_an_account">Choose an account</string>
+    <string name="app_already_added">App already in the watch list</string>
+    <string name="free">FREE</string>
+    <string name="error_fetching_info">Error fetching information. Please, try again</string>
+    <string name="retry">Retry</string>
+    <string name="never">never</string>
+    <string name="now">now</string>
+    <string name="no_registered_google_accounts">No registered google accounts</string>
+    <string name="gdrive_connected">Google Drive connected</string>
+    <string name="sync_start">Sync start</string>
+    <string name="sync_finish">Sync finish</string>
+    <string name="sync_error">Sync error</string>
+    <string name="action_settings">Settings</string>
+    <string name="store">Store</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="add_to_appwatcher">Add to App Watcher</string>
+
+    <string name="tab_all">All</string>
+    <string name="tab_installed">Installed</string>
+    <string name="tab_not_installed">Not Installed</string>
+    <string name="tab_updatable">Updatable</string>
+    <string-array name="filter_titles">
+        <item>@string/tab_all</item>
+        <item>@string/tab_installed</item>
+        <item>@string/tab_not_installed</item>
+        <item>@string/tab_updatable</item>
+    </string-array>
+
+    <string name="navdrawer_item_add">Add</string>
+    <string name="navdrawer_item_refresh">Update</string>
+    <string name="navdrawer_item_settings">Settings</string>
+
+    <string name="activity_market">Search</string>
+    <string name="downloaded">On device</string>
+    <string name="category_updates">Updates</string>
+    <string name="cannot_load_app">Cannot load app details: \'%s\'</string>
+    <string name="uninstall">Uninstall</string>
+    <string name="watch_list_is_empty">Watch list is empty</string>
+    <string name="wish_list_is_empty">Wish list is empty</string>
+    <string name="search_for_an_app">Search for an app</string>
+    <string name="share_from_play_store">Share from Play Store</string>
+    <string name="search">Search…</string>
+    <string name="preferences">Settings</string>
+    <string name="all">All</string>
+    <string name="import_action">Import</string>
+    <string name="import_permission_denied">Cannot start import without permissions</string>
+    <string name="export_permission_denied">Cannot start export without permissions</string>
+    <string name="version_text" translatable="false">%1$s (%2$d)</string>
+    <string name="version_updated_text" translatable="false">%1$s (%2$d ➝ %3$d)</string>
+    <string name="menu_requires_charging">Requires charging</string>
+    <string name="sort">Sort</string>
+    <string name="allow">Allow</string>
+    <string name="settings_notifications">Notifications</string>
+    <string name="uptodate_summary">Notify when app was already updated</string>
+    <string name="uptodate_title">Updated notifications</string>
+    <string name="noti_action_update">Update</string>
+    <string name="play_store_my_apps">Play Store: My Apps</string>
+    <string name="navdrawer_item_wishlist">Wishlist</string>
+    <string name="wishlist">Wishlist</string>
+    <string name="add_new_tag">Enter tag name…</string>
+    <string name="tags">Tags</string>
+    <string name="no_apps_with_this_tag">No apps with this tag</string>
+    <string name="add_apps">Add apps</string>
+    <string name="tag_name">Tag name</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="tag">Tag</string>
+    <string name="action_tag">%s Tag</string>
+    <string name="tag_app">Tag %1s</string>
+    <string name="google_drive_sync_failed">Google Drive sync failed.</string>
+    <string name="google_drive_sync_action">Sync manually in the settings</string>
+    <string name="check_connection">Check internet connection</string>
+    <string name="refresh_scheduled">Refresh scheduled</string>
+    <string name="recently_installed">Recently installed</string>
+    <string name="shortcut_search">Search</string>
+    <string name="shortcut_updates">Updatable</string>
+    <string name="shortcut_recently_installed">@string/recently_installed</string>
+    <string name="open">Open</string>
+    <string name="channel_app_updates">Apps updates</string>
+    <string name="channel_updates_description">Notifications about new versions of watching apps</string>
+    <string name="channel_prices">Price changes</string>
+    <string name="channel_prices_description">Notifications about price changes of watching apps</string>
+    <string name="channel_authentication">Authentication</string>
+    <string name="channel_authentication_description">Notifications about authentication problems</string>
+    <string name="updates_not_available">Updates information is not available</string>
+    <string name="filter">Filter</string>
+    <string name="pref_show_recent_title">Show recently installed</string>
+    <string name="pref_show_recent_descr">Show recently installed section in the main view</string>
+    <string name="pref_show_ondevice_title">Show On device</string>
+    <string name="pref_show_ondevice_descr">Show On device section in the main view</string>
+    <string name="pref_show_recently_updated_title">Show recently updated</string>
+    <string name="pref_show_recently_updated_descr">Show a section with recently updated apps for several days</string>
+    <string name="log">App log</string>
+    <string name="user_log">App log</string>
+    <string name="refresh_gdrive_mesage">Refreshing Google Drive account after upgrade</string>
+    <string name="setup_new_interface_message">Configure main screen to include additional sections. Previously those sections were available under \"Installed\" filter. Can be changed later in the settings.</string>
+    <string name="setup_interface_title">Configure interface</string>
+    <string name="setup_interface_section_ondevice">Show installed on device apps section under the watch list</string>
+    <string name="setup_interface_section_recent">Show section with recently installed apps on the top</string>
+    <string name="setup_interface_section_recently_updated">Show recently updated apps section</string>
+    <string name="i_understand">I understand</string>
+    <string name="already_exist">Already watched</string>
+    <string name="delete_existing_item">Do you want to delete?</string>
+    <string name="pref_default_filter">Default list</string>
+    <string name="pref_default_filter_summary">Choose which filter will be applied when app is opened</string>
+    <string name="pref_notify_installed_summary">Notify about installed apps</string>
+    <string name="pref_notify_installed">Installed notifications</string>
+    <string name="pref_notify_no_changes_summary">Notify when there is an update in changelog</string>
+    <string name="pref_notify_no_changes">No changes notifications</string>
+    <string name="pref_pull_to_refresh">Pull to refresh</string>
+    <string name="app_info">App Info</string>
+    <string name="pref_privacy">Privacy</string>
+    <string name="crash_reports_title">Crash reports</string>
+    <string name="crash_reports_descr">Collect crash reports. Requires restart.</string>
+
+    <string-array name="sort_titles">
+        <item>By name &#x2193;</item>
+        <item>By name &#x2191;</item>
+        <item>By date &#x2191;</item>
+        <item>By date &#x2193;</item>
+    </string-array>
+
+    <string name="theme_system_dark">Set by system (Dark)</string>
+    <string name="theme_system_black">Set by system (Black)</string>
+    <string-array name="themes">
+        <item>@string/theme_system_dark</item> <!-- MODE_NIGHT_AUTO_BATTERY = 0; -->
+        <item>@string/theme_system_black</item> <!-- MODE_NIGHT_AUTO_BATTERY = 0; -->
+        <item>Light</item> <!-- MODE_NIGHT_NO = 1; -->
+        <item>Dark</item> <!-- MODE_NIGHT_YES = 2; -->
+        <item>Black</item> <!-- MODE_NIGHT_YES = 2; -->
+    </string-array>
+
+    <string-array name="updates_frequency">
+        <item>Manually</item>
+        <item>Every hour</item>
+        <item>Every 2 hours</item>
+        <item>Every 3 hours</item>
+        <item>Every 6 hours</item>
+        <item>Every 12 hours</item>
+    </string-array>
+
+    <string name="adaptive_icon_style">Apply icon shape</string>
+    <string name="adaptive_icon_style_summary">Apply a shape for square, non transparent icons</string>
+    <string name="open_play_store">Open play store</string>
+    <string name="tags_list_is_empty">Tags list is empty</string>
+    <string name="watched">Watched</string>
+    <string name="tag_color">Tag color</string>
+    <array name="adaptive_icon_style_names">
+        <item>None</item>
+        <item>Square</item>
+        <item>Rounded square</item>
+        <item>Squircle</item>
+        <item>Circle</item>
+        <item>Teardrop</item>
+    </array>
+    <string name="beta">β</string>
+    <string name="refresh_history">Refresh history</string>
+    <string name="schedule_status_new">New</string>
+    <string name="schedule_status_success">Success</string>
+    <string name="schedule_status_failed">Failed</string>
+    <string name="schedule_status_skipped">Skipped</string>
+    <string name="schedule_reason_schedule">Schedule</string>
+    <string name="schedule_status_manual">Manual</string>
+    <string name="schedule_chip_checked">%d synced</string>
+    <string name="schedule_chip_found">%d updates</string>
+    <string name="schedule_chip_unavailable">%d not available</string>
+    <string name="schedule_chip_notified">%d notified</string>
+    <string name="delete_tag">Delete</string>
+    <string name="delete_tag_message">You are going to delete tag \'%s\'</string>
+    <string name="more">More apps</string>
+    <string name="import_mode">Import mode</string>
+    <string name="none">None</string>
+    <string name="number_selected">%d selected</string>
+    <string name="back">back</string>
+    <string name="no_gdrive_account">No Google Drive account, sign in again</string>
+</resources>
