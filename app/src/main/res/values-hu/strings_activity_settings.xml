@@ -4,7 +4,7 @@
     <string name="pref_header_drive_sync">Lista szinkronizálás</string>
 
     <string name="pref_title_drive_sync_enabled">Google Drive szinkronizálás</string>
-    <string name="pref_descr_drive_sync_enabled">A jelenlegi lista szinkronizálás a Google Drive-val</string>
+    <string name="pref_descr_drive_sync_enabled">A jelenlegi lista szinkronizálása a Google Drive-val</string>
     <string name="pref_title_drive_sync_now">Szinkronizálás most</string>
     <string name="pref_descr_drive_sync_now">Utoljára szinkronizálva: %1$s</string>
 
