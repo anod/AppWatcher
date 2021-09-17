@@ -25,7 +25,7 @@ import com.anod.appwatcher.watchlist.*
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.DialogSingleChoice
-import info.anodsplace.framework.app.FragmentFactory
+import info.anodsplace.framework.app.FragmentContainerFactory
 import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.content.startActivitySafely
 import kotlinx.coroutines.flow.collect
@@ -286,7 +286,7 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
     class Factory(
             private val sortId: Int,
             private val showImportAction: Boolean
-    ) : FragmentFactory("recently-installed-$sortId-$showImportAction") {
+    ) : FragmentContainerFactory("recently-installed-$sortId-$showImportAction") {
 
         override fun create(): Fragment = InstalledFragment().also {
             it.arguments = Bundle().apply {

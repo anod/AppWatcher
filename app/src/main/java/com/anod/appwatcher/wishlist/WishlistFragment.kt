@@ -22,7 +22,7 @@ import com.anod.appwatcher.search.ResultsAdapterList
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.EventFlow
 import info.anodsplace.framework.app.CustomThemeColors
-import info.anodsplace.framework.app.FragmentFactory
+import info.anodsplace.framework.app.FragmentContainerFactory
 import info.anodsplace.framework.app.FragmentToolbarActivity
 import info.anodsplace.framework.view.Keyboard
 import kotlinx.coroutines.Job
@@ -188,7 +188,7 @@ class WishListFragment : Fragment() {
         const val EXTRA_ACCOUNT = "extra_account"
         const val EXTRA_AUTH_TOKEN = "extra_auth_token"
 
-        private class Factory : FragmentFactory("wishlist") {
+        private class Factory : FragmentContainerFactory("wishlist") {
             override fun create() = WishListFragment()
         }
 

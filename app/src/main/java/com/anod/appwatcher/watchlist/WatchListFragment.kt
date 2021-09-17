@@ -35,7 +35,7 @@ import com.anod.appwatcher.tags.AppsTagSelectDialog
 import com.anod.appwatcher.utils.EventFlow
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.CustomThemeActivity
-import info.anodsplace.framework.app.FragmentFactory
+import info.anodsplace.framework.app.FragmentContainerFactory
 import info.anodsplace.framework.content.startActivitySafely
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
@@ -294,7 +294,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
             private val filterId: Int,
             private val sortId: Int,
             private val tag: Tag?
-    ) : FragmentFactory("watch-list-$filterId-$sortId-${tag?.hashCode()}") {
+    ) : FragmentContainerFactory("watch-list-$filterId-$sortId-${tag?.hashCode()}") {
 
         override fun create(): Fragment = WatchListFragment().also {
             it.arguments = Bundle().apply {

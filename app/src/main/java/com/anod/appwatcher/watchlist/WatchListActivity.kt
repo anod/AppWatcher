@@ -38,7 +38,7 @@ import com.anod.appwatcher.utils.EventFlow
 import com.anod.appwatcher.utils.Theme
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
-import info.anodsplace.framework.app.FragmentFactory
+import info.anodsplace.framework.app.FragmentContainerFactory
 import kotlinx.coroutines.flow.collectLatest
 
 sealed class ListState
@@ -260,7 +260,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         }
     }
 
-    class Adapter(private val factories: List<FragmentFactory>, activity: WatchListActivity) : FragmentStateAdapter(activity) {
+    class Adapter(private val factories: List<FragmentContainerFactory>, activity: WatchListActivity) : FragmentStateAdapter(activity) {
 
         override fun getItemCount(): Int = factories.size
 

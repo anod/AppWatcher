@@ -8,7 +8,7 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.databinding.ListItemEmptyBinding
 import com.anod.appwatcher.watchlist.*
-import info.anodsplace.framework.app.FragmentFactory
+import info.anodsplace.framework.app.FragmentContainerFactory
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 /**
@@ -59,7 +59,7 @@ class AppsTagListFragment : WatchListFragment() {
             private val sortId: Int,
             private val tag: Tag?,
             val title: String
-    ) : FragmentFactory("apps-tags-$filterId-$sortId-${tag?.hashCode()}") {
+    ) : FragmentContainerFactory("apps-tags-$filterId-$sortId-${tag?.hashCode()}") {
 
         override fun create(): Fragment = AppsTagListFragment().also {
             it.arguments = Bundle().apply {

@@ -19,7 +19,7 @@ import com.anod.appwatcher.databinding.ActivityTagsEditorBinding
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.utils.Theme
 import info.anodsplace.framework.app.CustomThemeColors
-import info.anodsplace.framework.app.FragmentFactory
+import info.anodsplace.framework.app.FragmentContainerFactory
 import info.anodsplace.framework.app.FragmentToolbarActivity
 import info.anodsplace.graphics.DrawableTint
 import kotlinx.coroutines.flow.collectLatest
@@ -152,7 +152,7 @@ class TagsListFragment : Fragment(), View.OnClickListener {
     companion object {
         const val EXTRA_APP = "app"
 
-        class Factory : FragmentFactory("tags_list") {
+        class Factory : FragmentContainerFactory("tags_list") {
             override fun create() = TagsListFragment()
         }
 

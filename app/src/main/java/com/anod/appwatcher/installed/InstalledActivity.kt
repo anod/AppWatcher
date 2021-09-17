@@ -13,7 +13,7 @@ import com.anod.appwatcher.details.DetailsFragment
 import com.anod.appwatcher.watchlist.AppDetailsRouter
 import info.anodsplace.framework.R
 import info.anodsplace.framework.app.CustomThemeColors
-import info.anodsplace.framework.app.FragmentFactory
+import info.anodsplace.framework.app.FragmentContainerFactory
 import info.anodsplace.framework.app.FragmentToolbarActivity
 
 @Keep
@@ -52,7 +52,7 @@ class InstalledActivity : FragmentToolbarActivity(), AppDetailsRouter {
     }
 
     companion object {
-        fun intent(context: Context, factory: FragmentFactory, themeRes: Int, themeColors: CustomThemeColors) =
+        fun intent(context: Context, factory: FragmentContainerFactory, themeRes: Int, themeColors: CustomThemeColors) =
                 intent(
                         context = context,
                         factory = factory,
