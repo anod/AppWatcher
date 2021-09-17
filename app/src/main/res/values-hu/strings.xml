@@ -2,23 +2,23 @@
 <resources>
     <string name="app_name">App Watcher</string>
     <string name="menu_add">Hozzáadás</string>
-    <string name="menu_tag_apps">Tag apps</string>
+    <string name="menu_tag_apps">Appok megcímkézése</string>
     <string name="menu_edit">Szerkesztés</string>
     <string name="menu_refresh">Frissítés</string>
-    <string name="failed_gain_access">Please allow access and select an account. This required in order to communicate with Google Play Store.</string>
+    <string name="failed_gain_access">Válassz egy fiókot és engedélyezd a hozzáférést Ez szüskéges a Google Play Áruházzal való kommunikációhoz.</string>
     <string name="search_action">Keresés</string>
     <string name="search_for_app">Search for an application and click on it to add to the watch list.\n( Tip: you can add apps directly from Play Store using \"Share\" button )</string>
     <string name="loading">Betöltés…</string>
     <string name="no_result_found">Nincs találat erre: \"%s\"</string>
-    <string name="no_result_wishlist">No wishlist items. You can add them in Play Store</string>
-    <string name="error_insert_app">Failed to add application to the watch list.</string>
+    <string name="no_result_wishlist">Nincsenek kívánságlista elemek. Hozzáadhatsz őket a Play Áruházból</string>
+    <string name="error_insert_app">Nem sikerült hozzáadni az appot a kívánságlistához.</string>
     <string name="application_icon">Alkalmazás ikon</string>
     <string name="remove">Eltávolítás</string>
-    <string name="problem_occurred">Problem occurred during receiving information.</string>
+    <string name="problem_occurred">Hiba lépett fel az információk lekérése közben.</string>
     <string name="menu_update_frequency">Ellenőrzési gyakoriság</string>
-    <string name="menu_wifi_only">Csak Wi-Fi</string>
-    <string name="alert_dialog_remove_title">Eltávolítás?</string>
-    <string name="alert_dialog_remove_message">Do you want to stop watching after \"%s\" updates?</string>
+    <string name="menu_wifi_only">Csak Wi-Fi-n</string>
+    <string name="alert_dialog_remove_title">Eltávolítod?</string>
+    <string name="alert_dialog_remove_message">Megszünteted ennek az appnak a frissítéseinek figyelését: \"%s\" ?</string>
     <string name="alert_dialog_remove">Eltávolítás</string>
     <string name="alert_dialog_cancel">Mégse</string>
     <string name="version">%s</string>
@@ -29,54 +29,54 @@
     <string name="notification_2_apps_more">%1$s, %2$s és továbbiak</string>
     <string name="notification_click">Kattints a részletekhez</string>
     <string name="no_updates_found">Nem található frissítés.</string>
-    <string name="dialog_about_title">%1$s ver. %2$s</string>
-    <string name="dialog_about_text">"Author: Alex Gavrishev&lt;br/&gt;&lt;a href=https://play.google.com/store/apps/developer?id=Alex+Gavrishev /&lt;Google Play Store&lt;/a&gt;"</string>
+    <string name="dialog_about_title">%1$s (%2$s)</string>
+    <string name="dialog_about_text">"Fejlesztő: Alex Gavrishev&lt;br/&gt;&lt;a href=https://play.google.com/store/apps/developer?id=Alex+Gavrishev /&lt;Google Play Store&lt;/a&gt;"</string>
     <string name="share">Megosztás</string>
-    <string name="share_subject">%1$s version %2$s</string>
+    <string name="share_subject">%1$s verzió %2$s</string>
     <string name="share_text" translatable="false">%1$s %2$s</string>
     <string name="app_stored">\"%s\" hozzáadva</string>
     <string name="rate_app">Értékelés</string>
     <string name="installed">Telepítve</string>
     <string name="import_installed">Telepítettek importálása</string>
-    <string name="no_recent_changes">No information about recent changes was provided.</string>
-    <string name="last_update">Updated %1$s</string>
+    <string name="no_recent_changes">A legutóbbi változásokról nem adtak meg információt.</string>
+    <string name="last_update">%1$s frissítve</string>
     <string name="no_files_found">Nem található fájl</string>
     <string name="please_wait">Kérlek, várj…</string>
-    <string name="export_done">Done</string>
-    <string name="unable_delete_file">Unable to delete file</string>
-    <string name="import_done">Import finished</string>
-    <string name="external_storage_not_available">External storage not available</string>
-    <string name="restore_deserialize_failed">Cannot read JSON data</string>
-    <string name="failed_to_read_file">Cannot read file</string>
-    <string name="file_not_exist">File not exist</string>
-    <string name="failed_to_write_file">Failed to write into file</string>
-    <string name="import_export">Import</string>
+    <string name="export_done">Kész</string>
+    <string name="unable_delete_file">Nem lehet törölni a fájlt</string>
+    <string name="import_done">Az importálás kész</string>
+    <string name="external_storage_not_available">Külső tárhely nem elérhető</string>
+    <string name="restore_deserialize_failed">A JSON adat nem volt olvasható</string>
+    <string name="failed_to_read_file">A fájl nem volt olvasható</string>
+    <string name="file_not_exist">A fájl nem létezik</string>
+    <string name="failed_to_write_file">A fájlba írás sikertelen</string>
+    <string name="import_export">Importálás</string>
     <string name="export_path" translatable="false">/sdcard/data/com.anod.appwatcher/backup/</string>
-    <string name="new_updates">New updates</string>
-    <string name="recently_updated">Recently updated</string>
+    <string name="new_updates">Új frissítések</string>
+    <string name="recently_updated">Mostanában frissítve</string>
     <string name="watching">Watching</string>
-    <string name="menu_filter">Search</string>
-    <string name="choose_an_account">Choose an account</string>
-    <string name="app_already_added">App already in the watch list</string>
-    <string name="free">FREE</string>
+    <string name="menu_filter">Keresés</string>
+    <string name="choose_an_account">Válassz egy fiókot</string>
+    <string name="app_already_added">Az app már szerepel a figyeltek között</string>
+    <string name="free">INGYENES</string>
     <string name="error_fetching_info">Error fetching information. Please, try again</string>
-    <string name="retry">Retry</string>
-    <string name="never">never</string>
-    <string name="now">now</string>
-    <string name="no_registered_google_accounts">No registered google accounts</string>
-    <string name="gdrive_connected">Google Drive connected</string>
-    <string name="sync_start">Sync start</string>
-    <string name="sync_finish">Sync finish</string>
-    <string name="sync_error">Sync error</string>
-    <string name="action_settings">Settings</string>
+    <string name="retry">Újra</string>
+    <string name="never">soha</string>
+    <string name="now">most</string>
+    <string name="no_registered_google_accounts">Nincsenek regisztrált Google fiókok</string>
+    <string name="gdrive_connected">A Google Drive-hoz csatlakozva</string>
+    <string name="sync_start">Szinkronizálás indítása</string>
+    <string name="sync_finish">Szinkronizálás befejezése</string>
+    <string name="sync_error">Szinkronizálási hiba</string>
+    <string name="action_settings">Beállítások</string>
     <string name="store">Store</string>
-    <string name="dismiss">Dismiss</string>
-    <string name="add_to_appwatcher">Add to App Watcher</string>
+    <string name="dismiss">Elvetés</string>
+    <string name="add_to_appwatcher">Hozzáadás az App Watcher-hoz</string>
 
-    <string name="tab_all">All</string>
-    <string name="tab_installed">Installed</string>
-    <string name="tab_not_installed">Not Installed</string>
-    <string name="tab_updatable">Updatable</string>
+    <string name="tab_all">Mind</string>
+    <string name="tab_installed">Telepített</string>
+    <string name="tab_not_installed">Nem telepített</string>
+    <string name="tab_updatable">Frissíthető</string>
     <string-array name="filter_titles">
         <item>@string/tab_all</item>
         <item>@string/tab_installed</item>
@@ -84,91 +84,91 @@
         <item>@string/tab_updatable</item>
     </string-array>
 
-    <string name="navdrawer_item_add">Add</string>
-    <string name="navdrawer_item_refresh">Update</string>
-    <string name="navdrawer_item_settings">Settings</string>
+    <string name="navdrawer_item_add">Hozzáadás</string>
+    <string name="navdrawer_item_refresh">Frissítés</string>
+    <string name="navdrawer_item_settings">Beállítások</string>
 
-    <string name="activity_market">Search</string>
-    <string name="downloaded">On device</string>
-    <string name="category_updates">Updates</string>
-    <string name="cannot_load_app">Cannot load app details: \'%s\'</string>
+    <string name="activity_market">Keresés</string>
+    <string name="downloaded">Az eszközön</string>
+    <string name="category_updates">Frissítések</string>
+    <string name="cannot_load_app">Az app részletei nem voltak betölthetők: \'%s\'</string>
     <string name="uninstall">Uninstall</string>
-    <string name="watch_list_is_empty">Watch list is empty</string>
-    <string name="wish_list_is_empty">Wish list is empty</string>
-    <string name="search_for_an_app">Search for an app</string>
-    <string name="share_from_play_store">Share from Play Store</string>
-    <string name="search">Search…</string>
-    <string name="preferences">Settings</string>
-    <string name="all">All</string>
-    <string name="import_action">Import</string>
-    <string name="import_permission_denied">Cannot start import without permissions</string>
-    <string name="export_permission_denied">Cannot start export without permissions</string>
+    <string name="watch_list_is_empty">A figyelési lista üres</string>
+    <string name="wish_list_is_empty">A kívánságlista üres</string>
+    <string name="search_for_an_app">App keresése</string>
+    <string name="share_from_play_store">Megosztás a Play Store-ból</string>
+    <string name="search">Keresés…</string>
+    <string name="preferences">Beállítások</string>
+    <string name="all">Mind</string>
+    <string name="import_action">Importálás</string>
+    <string name="import_permission_denied">Az importálás nem kezdhető meg a szükségesengedélyek nélkül</string>
+    <string name="export_permission_denied">Az exportálás nem kezdhető meg a szükségesengedélyek nélkül</string>
     <string name="version_text" translatable="false">%1$s (%2$d)</string>
     <string name="version_updated_text" translatable="false">%1$s (%2$d ➝ %3$d)</string>
-    <string name="menu_requires_charging">Requires charging</string>
-    <string name="sort">Sort</string>
-    <string name="allow">Allow</string>
-    <string name="settings_notifications">Notifications</string>
-    <string name="uptodate_summary">Notify when app was already updated</string>
-    <string name="uptodate_title">Updated notifications</string>
-    <string name="noti_action_update">Update</string>
-    <string name="play_store_my_apps">Play Store: My Apps</string>
-    <string name="navdrawer_item_wishlist">Wishlist</string>
-    <string name="wishlist">Wishlist</string>
-    <string name="add_new_tag">Enter tag name…</string>
-    <string name="tags">Tags</string>
-    <string name="no_apps_with_this_tag">No apps with this tag</string>
-    <string name="add_apps">Add apps</string>
-    <string name="tag_name">Tag name</string>
-    <string name="save">Save</string>
-    <string name="delete">Delete</string>
-    <string name="tag">Tag</string>
-    <string name="action_tag">%s Tag</string>
-    <string name="tag_app">Tag %1s</string>
-    <string name="google_drive_sync_failed">Google Drive sync failed.</string>
-    <string name="google_drive_sync_action">Sync manually in the settings</string>
-    <string name="check_connection">Check internet connection</string>
+    <string name="menu_requires_charging">Csak töltés közben</string>
+    <string name="sort">Rendezés</string>
+    <string name="allow">Engedélyezés</string>
+    <string name="settings_notifications">Értesítések</string>
+    <string name="uptodate_summary">Értesítés, ha az alkalmazás már frissült</string>
+    <string name="uptodate_title">Frissítési értesítések</string>
+    <string name="noti_action_update">Frissítés</string>
+    <string name="play_store_my_apps">Play Store: Alkalmazásaim</string>
+    <string name="navdrawer_item_wishlist">Kívánságlista</string>
+    <string name="wishlist">Kívánságlista</string>
+    <string name="add_new_tag">Add meg a címkenevet…</string>
+    <string name="tags">Címkék</string>
+    <string name="no_apps_with_this_tag">Nincs app ezzel a címkével</string>
+    <string name="add_apps">Appok hozzáadása</string>
+    <string name="tag_name">Címkenév</string>
+    <string name="save">Mentés</string>
+    <string name="delete">Törlés</string>
+    <string name="tag">Címke</string>
+    <string name="action_tag">%s címke</string>
+    <string name="tag_app">Címke %1s</string>
+    <string name="google_drive_sync_failed">A Google Drive szinkronizálás sikertelen.</string>
+    <string name="google_drive_sync_action">Szinkronizálj kézzel a beállításokban</string>
+    <string name="check_connection">Ellenőrizd az internet kapcsolatot</string>
     <string name="refresh_scheduled">Refresh scheduled</string>
-    <string name="recently_installed">Recently installed</string>
-    <string name="shortcut_search">Search</string>
-    <string name="shortcut_updates">Updatable</string>
+    <string name="recently_installed">Mostanában telepítve</string>
+    <string name="shortcut_search">Keresés</string>
+    <string name="shortcut_updates">Frissíthető</string>
     <string name="shortcut_recently_installed">@string/recently_installed</string>
-    <string name="open">Open</string>
-    <string name="channel_app_updates">Apps updates</string>
+    <string name="open">Megnyitás</string>
+    <string name="channel_app_updates">App frissítések</string>
     <string name="channel_updates_description">Notifications about new versions of watching apps</string>
-    <string name="channel_prices">Price changes</string>
-    <string name="channel_prices_description">Notifications about price changes of watching apps</string>
-    <string name="channel_authentication">Authentication</string>
-    <string name="channel_authentication_description">Notifications about authentication problems</string>
-    <string name="updates_not_available">Updates information is not available</string>
-    <string name="filter">Filter</string>
+    <string name="channel_prices">Árváltozások</string>
+    <string name="channel_prices_description">Értesítések a figyelt appok árváltozásairól</string>
+    <string name="channel_authentication">Hitelesítés</string>
+    <string name="channel_authentication_description">Értesítések a hitelesítési problémákról</string>
+    <string name="updates_not_available">Frissítési információk nem érhetők el</string>
+    <string name="filter">Szűrő</string>
     <string name="pref_show_recent_title">Show recently installed</string>
     <string name="pref_show_recent_descr">Show recently installed section in the main view</string>
-    <string name="pref_show_ondevice_title">Show On device</string>
-    <string name="pref_show_ondevice_descr">Show On device section in the main view</string>
-    <string name="pref_show_recently_updated_title">Show recently updated</string>
-    <string name="pref_show_recently_updated_descr">Show a section with recently updated apps for several days</string>
-    <string name="log">App log</string>
-    <string name="user_log">App log</string>
+    <string name="pref_show_ondevice_title">Az eszközön lévők</string>
+    <string name="pref_show_ondevice_descr">Az eszközön lévők mutatása a főlapon</string>
+    <string name="pref_show_recently_updated_title">A mostanában frissítettek</string>
+    <string name="pref_show_recently_updated_descr">A mostanában frissítettek mutatása egy sávban a főlapon</string>
+    <string name="log">Alkalmazás napló</string>
+    <string name="user_log">Alkalmazás napló</string>
     <string name="refresh_gdrive_mesage">Refreshing Google Drive account after upgrade</string>
     <string name="setup_new_interface_message">Configure main screen to include additional sections. Previously those sections were available under \"Installed\" filter. Can be changed later in the settings.</string>
     <string name="setup_interface_title">Configure interface</string>
     <string name="setup_interface_section_ondevice">Show installed on device apps section under the watch list</string>
     <string name="setup_interface_section_recent">Show section with recently installed apps on the top</string>
     <string name="setup_interface_section_recently_updated">Show recently updated apps section</string>
-    <string name="i_understand">I understand</string>
-    <string name="already_exist">Already watched</string>
-    <string name="delete_existing_item">Do you want to delete?</string>
-    <string name="pref_default_filter">Default list</string>
+    <string name="i_understand">Értem</string>
+    <string name="already_exist">Már figyelve</string>
+    <string name="delete_existing_item">Törölni akarod?</string>
+    <string name="pref_default_filter">Alapértelmezett lista</string>
     <string name="pref_default_filter_summary">Choose which filter will be applied when app is opened</string>
     <string name="pref_notify_installed_summary">Notify about installed apps</string>
     <string name="pref_notify_installed">Installed notifications</string>
     <string name="pref_notify_no_changes_summary">Notify when there is an update in changelog</string>
     <string name="pref_notify_no_changes">No changes notifications</string>
-    <string name="pref_pull_to_refresh">Pull to refresh</string>
+    <string name="pref_pull_to_refresh">Lehúzás a kereséshez</string>
     <string name="app_info">App Info</string>
-    <string name="pref_privacy">Privacy</string>
-    <string name="crash_reports_title">Crash reports</string>
+    <string name="pref_privacy">Adatvédelem</string>
+    <string name="crash_reports_title">Összeomlási jelentések</string>
     <string name="crash_reports_descr">Collect crash reports. Requires restart.</string>
 
     <string-array name="sort_titles">
@@ -178,8 +178,8 @@
         <item>By date &#x2193;</item>
     </string-array>
 
-    <string name="theme_system_dark">Set by system (Dark)</string>
-    <string name="theme_system_black">Set by system (Black)</string>
+    <string name="theme_system_dark">Rendszer (sötét)</string>
+    <string name="theme_system_black">Rendszer (fekete)</string>
     <string-array name="themes">
         <item>@string/theme_system_dark</item> <!-- MODE_NIGHT_AUTO_BATTERY = 0; -->
         <item>@string/theme_system_black</item> <!-- MODE_NIGHT_AUTO_BATTERY = 0; -->
@@ -189,46 +189,46 @@
     </string-array>
 
     <string-array name="updates_frequency">
-        <item>Manually</item>
-        <item>Every hour</item>
-        <item>Every 2 hours</item>
-        <item>Every 3 hours</item>
-        <item>Every 6 hours</item>
-        <item>Every 12 hours</item>
+        <item>kézi</item>
+        <item>óránként</item>
+        <item>Every 2 óránként</item>
+        <item>Every 3 óránként</item>
+        <item>Every 6 óránként</item>
+        <item>Every 12 óránként</item>
     </string-array>
 
     <string name="adaptive_icon_style">Apply icon shape</string>
     <string name="adaptive_icon_style_summary">Apply a shape for square, non transparent icons</string>
-    <string name="open_play_store">Open play store</string>
-    <string name="tags_list_is_empty">Tags list is empty</string>
-    <string name="watched">Watched</string>
-    <string name="tag_color">Tag color</string>
+    <string name="open_play_store"Play Áruház megnyitása</string>
+    <string name="tags_list_is_empty">A címke lista üres</string>
+    <string name="watched">Figyelt</string>
+    <string name="tag_color">Címke színe</string>
     <array name="adaptive_icon_style_names">
-        <item>None</item>
-        <item>Square</item>
-        <item>Rounded square</item>
-        <item>Squircle</item>
-        <item>Circle</item>
-        <item>Teardrop</item>
+        <item>Nincs</item>
+        <item>Szögletes</item>
+        <item>Kerek sarkok</item>
+        <item>Lekerekített</item>
+        <item>Kör</item>
+        <item>Csepp</item>
     </array>
     <string name="beta">β</string>
-    <string name="refresh_history">Refresh history</string>
-    <string name="schedule_status_new">New</string>
-    <string name="schedule_status_success">Success</string>
-    <string name="schedule_status_failed">Failed</string>
-    <string name="schedule_status_skipped">Skipped</string>
-    <string name="schedule_reason_schedule">Schedule</string>
-    <string name="schedule_status_manual">Manual</string>
-    <string name="schedule_chip_checked">%d synced</string>
-    <string name="schedule_chip_found">%d updates</string>
-    <string name="schedule_chip_unavailable">%d not available</string>
-    <string name="schedule_chip_notified">%d notified</string>
-    <string name="delete_tag">Delete</string>
-    <string name="delete_tag_message">You are going to delete tag \'%s\'</string>
-    <string name="more">More apps</string>
-    <string name="import_mode">Import mode</string>
-    <string name="none">None</string>
-    <string name="number_selected">%d selected</string>
-    <string name="back">back</string>
-    <string name="no_gdrive_account">No Google Drive account, sign in again</string>
+    <string name="refresh_history">Frissítési előzmények</string>
+    <string name="schedule_status_new">Új</string>
+    <string name="schedule_status_success">Sikeres</string>
+    <string name="schedule_status_failed">Sikertelen</string>
+    <string name="schedule_status_skipped">Kihagyva</string>
+    <string name="schedule_reason_schedule">Időzített</string>
+    <string name="schedule_status_manual">Kézi</string>
+    <string name="schedule_chip_checked">%d szinkronizálva</string>
+    <string name="schedule_chip_found">%d frissítés</string>
+    <string name="schedule_chip_unavailable">%d nem elérhető</string>
+    <string name="schedule_chip_notified">%d értesítve</string>
+    <string name="delete_tag">Törlés</string>
+    <string name="delete_tag_message">Az alábbi címke törlésére készülsz: \'%s\'</string>
+    <string name="more">További appok</string>
+    <string name="import_mode">Importálási mód</string>
+    <string name="none">Nincs</string>
+    <string name="number_selected">%d kiválasztva</string>
+    <string name="back">vissza</string>
+    <string name="no_gdrive_account">Nincs elérhető Google Drive fiók, jelentkezz be újra</string>
 </resources>
