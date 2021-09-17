@@ -1,0 +1,36 @@
+<resources>
+
+    <!-- Exampreferencesings for List sync -->
+    <string name="pref_header_drive_sync">Lista szinkronizálás</string>
+
+    <string name="pref_title_drive_sync_enabled">Google Drive szinkronizálás</string>
+    <string name="pref_descr_drive_sync_enabled">A jelenlegi lista szinkronizálás a Google Drive-val</string>
+    <string name="pref_title_drive_sync_now">Szinkronizálás most</string>
+    <string name="pref_descr_drive_sync_now">Utoljára szinkronizálva: %1$s</string>
+
+    <!-- Exampreferencesings for List backup -->
+    <string name="pref_header_backup">Lista mentése/visszaállítása</string>
+
+    <string name="pref_title_export">Exportálás</string>
+    <string name="pref_descr_export">Lista exportálása a helyi tárolóra</string>
+    <string name="pref_title_import">Importálás</string>
+    <string name="pref_descr_import">Lista exportálása a helyi tárolóból</string>
+    <string name="pref_title_location">Hely</string>
+
+    <!-- Exampreferencesings for About -->
+    <string name="pref_header_about">Névjegy</string>
+
+    <string name="pref_title_about">Verzió/string>
+    <string name="pref_title_opensource">Nyílt forráskódú licenszek</string>
+    <string name="pref_descr_opensource">A nyílt forráskódú szoftver licensz részletei</string>
+
+    <string name="pref_header_interface">Kezelőfelület</string>
+    <string name="pref_title_theme">Téma</string>
+    <string name="pref_descr_theme">Válassz a különböző témák közül</string>
+
+    <string name="pref_export_db" translatable="false">Adatbázis exportálása SD-kártyára</string>
+    <string name="pref_gdrive_upload" translatable="false">Feltöltés</string>
+
+    <string name="pref_title_updates_frequency">Új frissítések keresése</string>
+
+</resources>
