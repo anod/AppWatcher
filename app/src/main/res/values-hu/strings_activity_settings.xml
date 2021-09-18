@@ -20,7 +20,7 @@
     <!-- Exampreferencesings for About -->
     <string name="pref_header_about">Névjegy</string>
 
-    <string name="pref_title_about">Verzió/string>
+    <string name="pref_title_about">Verzió</string>
     <string name="pref_title_opensource">Nyílt forráskódú licenszek</string>
     <string name="pref_descr_opensource">A nyílt forráskódú szoftver licensz részletei</string>
 
