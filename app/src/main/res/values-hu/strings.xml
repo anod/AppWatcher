@@ -199,7 +199,7 @@
 
     <string name="adaptive_icon_style">Ikon alakzat alkalmazása</string>
     <string name="adaptive_icon_style_summary">Alakzat alkalmazása négyzet alakú, nem átlátszó ikonokra</string>
-    <string name="open_play_store"Play Áruház megnyitása</string>
+    <string name="open_play_store">Play Áruház megnyitása</string>
     <string name="tags_list_is_empty">A címke lista üres</string>
     <string name="watched">Figyelt</string>
     <string name="tag_color">Címke színe</string>
