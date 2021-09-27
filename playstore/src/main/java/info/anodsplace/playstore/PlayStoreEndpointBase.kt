@@ -2,12 +2,12 @@ package info.anodsplace.playstore
 
 import android.accounts.Account
 import android.content.Context
-import com.android.volley.RequestQueue
 import finsky.api.DfeApi
 import finsky.api.DfeApiImpl
 import finsky.api.model.DfeModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
 
 /**
  * @author alex
@@ -21,7 +21,7 @@ interface DeviceInfoProvider {
 
 abstract class PlayStoreEndpointBase<D : DfeModel>(
         context: Context,
-        private val requestQueue: RequestQueue,
+        private val http: OkHttpClient,
         private val deviceInfoProvider: DeviceInfoProvider,
         private val account: Account) : PlayStoreEndpoint {
 
@@ -31,7 +31,7 @@ abstract class PlayStoreEndpointBase<D : DfeModel>(
         internal set
 
     val dfeApi: DfeApi by lazy {
-        DfeApiImpl(requestQueue, context, account, authToken, deviceInfoProvider)
+        DfeApiImpl(http, context, account, authToken, deviceInfoProvider)
     }
 
     override suspend fun start(): D = withContext(Dispatchers.Main) {

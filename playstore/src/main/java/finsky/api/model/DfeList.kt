@@ -1,14 +1,12 @@
 package finsky.api.model
 
-import com.android.volley.Request
-import com.android.volley.Response
 import com.google.protobuf.InvalidProtocolBufferException
 import finsky.api.DfeApi
-import finsky.protos.Messages
-import finsky.protos.Messages.DocV2
-import finsky.protos.Messages.ListResponse
-import finsky.protos.Messages.Response.ResponseWrapper
-import finsky.protos.Messages.Search.SearchResponse
+import finsky.protos.DocV2
+import finsky.protos.ListResponse
+import finsky.protos.Payload
+import finsky.protos.ResponseWrapper
+import finsky.protos.Search.SearchResponse
 
 class DfeListResponse(val items: List<Document>, val nextPageUrl: String?)
 
@@ -100,27 +98,27 @@ open class DfeList(private val dfeApi: DfeApi,
     override val isReady: Boolean
         get() = this.listResponse != null
 
-    override fun makeRequest(url: String, responseListener: Response.Listener<ResponseWrapper>, errorListener: Response.ErrorListener): Request<*> {
-        return this.dfeApi.list(url, responseListener, errorListener)
+    override suspend fun makeRequest(url: String): ResponseWrapper {
+        return dfeApi.list(url)
     }
 
     companion object {
 
-        private fun payload(responseWrapper: ResponseWrapper?): Messages.Response.Payload {
+        private fun payload(responseWrapper: ResponseWrapper?): Payload {
             return if (responseWrapper != null && responseWrapper.hasPayload()) {
                 responseWrapper.payload
-            } else Messages.Response.Payload.getDefaultInstance()
+            } else Payload.getDefaultInstance()
         }
 
         private fun searchResponse(responseWrapper: ResponseWrapper?): SearchResponse {
-            val payload: Messages.Response.Payload = payload(responseWrapper)
+            val payload: Payload = payload(responseWrapper)
             return if (payload(responseWrapper).hasSearchResponse()) {
                 payload.searchResponse
             } else SearchResponse.getDefaultInstance()
         }
 
         private fun listResponse(responseWrapper: ResponseWrapper?): ListResponse {
-            val payload: Messages.Response.Payload = payload(responseWrapper)
+            val payload: Payload = payload(responseWrapper)
             return if (payload.hasListResponse()) {
                 payload.listResponse
             } else ListResponse.getDefaultInstance()

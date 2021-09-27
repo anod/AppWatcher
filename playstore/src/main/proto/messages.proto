@@ -1,6 +1,7 @@
 syntax = "proto2";
 
 package finsky.protos;
+option java_multiple_files = true;
 
 message Common
 {
@@ -107,9 +108,11 @@ message AppDetails
 }
 
 message TestingProgramInfo {
-  optional bool subscribed = 2;
-  optional bool subscribed1 = 3;
-  optional string testingProgramEmail = 5;
+    optional bool subscribed = 2;
+    optional bool subscribedAndInstalled = 3;
+    optional string email = 5;
+    optional string displayName = 7;
+    optional Image image = 6;
 }
 
 message EarlyAccessInfo {
@@ -339,38 +342,51 @@ message ListResponse
     repeated DocV2 doc =2;
 }
 
-message Response
-{
-    message Payload {
-        optional ListResponse listResponse = 1;
-        optional Details.DetailsResponse detailsResponse = 2;
+message TestingProgramResponse {
+  optional TestingProgramResult result = 2;
+}
+
+message TestingProgramResult {
+  optional TestingProgramDetails details = 4;
+}
+
+message TestingProgramDetails {
+  optional bool subscribed = 2;
+  optional int64 id = 3;
+  optional bool unsubscribed = 4;
+}
+
+
+message Payload {
+    optional ListResponse listResponse = 1;
+    optional Details.DetailsResponse detailsResponse = 2;
 //        optional ReviewResponse reviewResponse = 3;
 //        optional BuyResponse buyResponse = 4;
-        optional Search.SearchResponse searchResponse = 5;
+    optional Search.SearchResponse searchResponse = 5;
 //        optional BrowseResponse browseResponse = 7;
 //        optional PurchaseStatusResponse purchaseStatusResponse = 8;
-        optional Details.BulkDetailsResponse bulkDetailsResponse = 19;
+    optional Details.BulkDetailsResponse bulkDetailsResponse = 19;
 //        optional DeliveryResponse deliveryResponse = 21;
 //        optional UploadDeviceConfigResponse uploadDeviceConfigResponse = 25;
 //        optional AndroidCheckinResponse androidCheckinResponse = 26;
 //        optional SearchSuggestResponse searchSuggestResponse = 40;
-    }
+    optional TestingProgramResponse testingProgramResponse = 80;
+}
 
-    message PreFetch {
-        optional string url = 1;
-        optional ResponseWrapper response = 2;
-        optional string etag = 3;
-        optional int64 ttl = 4;
-        optional int64 softTtl = 5;
-    }
+message PreFetch {
+    optional string url = 1;
+    optional ResponseWrapper response = 2;
+    optional string etag = 3;
+    optional int64 ttl = 4;
+    optional int64 softTtl = 5;
+}
 
-    message ResponseWrapper {
-        optional Payload payload = 1;
-        optional ResponseMessages.ServerCommands commands = 2;
-        repeated PreFetch preFetch = 3;
-        // repeated Notification notification = 4;
-        optional ResponseMessages.ServerMetadata serverMetadata = 5;
-    }
+message ResponseWrapper {
+    optional Payload payload = 1;
+    optional ResponseMessages.ServerCommands commands = 2;
+    repeated PreFetch preFetch = 3;
+    // repeated Notification notification = 4;
+    optional ResponseMessages.ServerMetadata serverMetadata = 5;
 }
 
 message EncodedTargets {

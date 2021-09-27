@@ -2,10 +2,10 @@ package info.anodsplace.playstore
 
 import android.accounts.Account
 import android.content.Context
-import com.android.volley.RequestQueue
 import finsky.api.DfeApi
 import finsky.api.model.DfeList
 import finsky.api.model.DfeSearch
+import okhttp3.OkHttpClient
 
 /**
  * @author alex
@@ -14,11 +14,11 @@ import finsky.api.model.DfeSearch
  */
 class SearchEndpoint(
         context: Context,
-        requestQueue: RequestQueue,
+        http: OkHttpClient,
         deviceInfoProvider: DeviceInfoProvider,
         account: Account,
         private val initialQuery: String
-) : ListEndpoint(context, requestQueue, deviceInfoProvider, account) {
+) : ListEndpoint(context, http, deviceInfoProvider, account) {
 
     override fun createDfeList(dfeApi: DfeApi, url: String): DfeList {
         return DfeSearch(dfeApi, url)

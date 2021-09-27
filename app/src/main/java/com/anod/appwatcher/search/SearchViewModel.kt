@@ -72,7 +72,7 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun search(query: String, authToken: String): Flow<SearchStatus> = flow {
-        val requestQueue = provide.requestQueue
+        val requestQueue = provide.networkClient
         val deviceInfo = provide.deviceInfo
         if (account == null) {
             emit(Error)

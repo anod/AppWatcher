@@ -113,7 +113,7 @@ dependencies {
     // AndroidX
     implementation("androidx.recyclerview:recyclerview:1.2.1")
     implementation("androidx.palette:palette:1.0.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.1")
     implementation("androidx.work:work-runtime:2.6.0")
     implementation("androidx.work:work-runtime-ktx:2.6.0")
     implementation("androidx.core:core:1.6.0")
@@ -143,15 +143,15 @@ dependencies {
     implementation("com.google.firebase:firebase-crashlytics:18.2.1")
 
     // 3rd party
-    implementation("com.squareup.okhttp3:okhttp:4.8.1")
+    implementation("com.squareup.okhttp3:okhttp:4.9.1")
     implementation("com.squareup.picasso:picasso:2.8")
     implementation("com.jakewharton:process-phoenix:2.0.0")
 
     // ViewModel and LiveData
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0-alpha03")
-    implementation("androidx.lifecycle:lifecycle-viewmodel:2.4.0-alpha03")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.4.0-alpha03")
-    kapt("androidx.lifecycle:lifecycle-compiler:2.4.0-alpha03")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0-beta01")
+    implementation("androidx.lifecycle:lifecycle-viewmodel:2.4.0-beta01")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.4.0-beta01")
+    kapt("androidx.lifecycle:lifecycle-compiler:2.4.0-beta01")
 
     implementation("androidx.room:room-runtime:2.3.0")
     implementation("androidx.room:room-ktx:2.3.0")

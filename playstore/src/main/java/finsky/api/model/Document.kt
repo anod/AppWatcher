@@ -1,7 +1,7 @@
 package finsky.api.model
 
 import android.util.SparseArray
-import finsky.protos.Messages.*
+import finsky.protos.*
 
 class Document(private val doc: DocV2) {
 

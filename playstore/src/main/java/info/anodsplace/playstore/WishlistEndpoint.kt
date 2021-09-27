@@ -2,9 +2,9 @@ package info.anodsplace.playstore
 
 import android.accounts.Account
 import android.content.Context
-import com.android.volley.RequestQueue
 import finsky.api.DfeApi
 import finsky.api.model.DfeList
+import okhttp3.OkHttpClient
 
 /**
  * @author Alex Gavrishev
@@ -12,9 +12,9 @@ import finsky.api.model.DfeList
  */
 class WishListEndpoint(
         context: Context,
-        requestQueue: RequestQueue,
+        http: OkHttpClient,
         deviceInfoProvider: DeviceInfoProvider,
-        account: Account) : ListEndpoint(context, requestQueue, deviceInfoProvider, account) {
+        account: Account) : ListEndpoint(context, http, deviceInfoProvider, account) {
 
     override fun createDfeList(dfeApi: DfeApi, url: String) = DfeList(dfeApi, url)
 

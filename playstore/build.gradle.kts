@@ -36,8 +36,7 @@ dependencies {
     implementation("androidx.collection:collection-ktx:1.1.0")
     // Update from 3.11.4 breaks parsing, may be needs to be regenerated
     api(group = "com.google.protobuf", name = "protobuf-javalite", version = "3.11.4")
-    api("com.android.volley:volley:1.2.0")
-    implementation("com.squareup.okhttp3:okhttp:4.8.1")
+    implementation("com.squareup.okhttp3:okhttp:4.9.1")
 
     implementation(project(":lib:applog"))
     implementation(project(":lib:framework"))

@@ -1,10 +1,8 @@
 package finsky.api.model
 
-import com.android.volley.Request
-import com.android.volley.Response
 import finsky.api.DfeApi
-import finsky.protos.Messages
-import finsky.protos.Messages.Details
+import finsky.protos.ResponseWrapper
+import finsky.protos.Details
 
 class DfeDetails(private val api: DfeApi) : DfeModel() {
     private var detailsResponse: Details.DetailsResponse? = null
@@ -12,8 +10,8 @@ class DfeDetails(private val api: DfeApi) : DfeModel() {
     override val url: String
         get() = detailsUrl
 
-    override fun makeRequest(url: String, responseListener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener): Request<*> {
-        return api.details(url, responseListener, errorListener)
+    override suspend fun makeRequest(url: String): ResponseWrapper {
+        return api.details(url)
     }
 
     val document: Document?
@@ -24,7 +22,7 @@ class DfeDetails(private val api: DfeApi) : DfeModel() {
     override val isReady: Boolean
         get() = this.detailsResponse != null
 
-    override fun onResponse(responseWrapper: Messages.Response.ResponseWrapper) {
+    override fun onResponse(responseWrapper: ResponseWrapper) {
         this.detailsResponse = responseWrapper.payload.detailsResponse
     }
 }

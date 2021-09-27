@@ -9,12 +9,9 @@ import android.os.StrictMode
 import android.util.LruCache
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.work.Configuration
-import com.android.volley.NetworkError
-import com.android.volley.NoConnectionError
-import com.android.volley.TimeoutError
-import com.android.volley.VolleyError
 import com.anod.appwatcher.sync.SyncNotification
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import finsky.api.DfeError
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.app.ApplicationInstance
@@ -22,6 +19,7 @@ import info.anodsplace.framework.app.CustomThemeActivity
 import info.anodsplace.framework.app.WindowCustomTheme
 import java.io.File
 import java.io.IOException
+import java.net.UnknownHostException
 
 class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstance, Configuration.Provider {
 
@@ -87,11 +85,9 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
     }
 
     private fun isNetworkError(tr: Throwable): Boolean {
-        return tr is NetworkError
+        return tr is DfeError
+                || tr is UnknownHostException
                 || (tr is IOException && tr.message?.contains("NetworkError") == true)
-                || tr is VolleyError
-                || tr is TimeoutError
-                || tr is NoConnectionError
                 || appComponent.networkConnection.isNetworkException(tr)
     }
 

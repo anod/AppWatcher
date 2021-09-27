@@ -72,7 +72,7 @@ internal class ImportBulkManager(private val context: Context) {
     private suspend fun importDetails(docIds: List<BulkDocId>): SimpleArrayMap<String, Int> = withContext(Main) {
         val endpoint = BulkDetailsEndpoint(
                 context,
-                Application.provide(context).requestQueue,
+                Application.provide(context).networkClient,
                 Application.provide(context).deviceInfo,
                 account!!,
                 docIds

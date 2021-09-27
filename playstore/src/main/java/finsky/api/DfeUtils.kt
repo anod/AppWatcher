@@ -1,8 +1,8 @@
 package finsky.api
 
 import android.util.Base64
-
-import finsky.protos.Messages
+import finsky.protos.DocV2
+import finsky.protos.Payload
 
 object DfeUtils {
 
@@ -10,7 +10,7 @@ object DfeUtils {
         return Base64.encodeToString(input, Base64.NO_WRAP or Base64.URL_SAFE)
     }
 
-    fun getRootDoc(payload: Messages.Response.Payload?): Messages.DocV2? {
+    fun getRootDoc(payload: Payload?): DocV2? {
         if (null == payload) {
             return null
         }
@@ -22,7 +22,7 @@ object DfeUtils {
         return null
     }
 
-    private fun getRootDoc(doc: Messages.DocV2): Messages.DocV2? {
+    private fun getRootDoc(doc: DocV2): DocV2? {
         if (isRootDoc(doc)) {
             return doc
         }
@@ -35,7 +35,7 @@ object DfeUtils {
         return null
     }
 
-    private fun isRootDoc(doc: Messages.DocV2): Boolean {
+    private fun isRootDoc(doc: DocV2): Boolean {
         return doc.childList.isNotEmpty() && doc.getChild(0).backendId == 3 && doc.getChild(0).docType == 1
     }
 }

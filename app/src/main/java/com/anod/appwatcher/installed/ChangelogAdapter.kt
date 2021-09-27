@@ -1,7 +1,6 @@
 package com.anod.appwatcher.installed
 
 import android.accounts.Account
-import com.android.volley.VolleyError
 import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.provide
 import finsky.api.BulkDocId
@@ -82,7 +81,7 @@ class ChangelogAdapter(
                     recentChanges, it.appDetails.uploadDate, false
                 )
             }
-        } catch (e: VolleyError) {
+        } catch (e: Throwable) {
             AppLog.e("Fetching of bulk updates failed ${e.message ?: ""}", "UpdateCheck")
             emptyList<AppChange>()
         }
@@ -91,7 +90,7 @@ class ChangelogAdapter(
     private fun createEndpoint(docIds: List<BulkDocId>): BulkDetailsEndpoint {
         return BulkDetailsEndpoint(
                 context.actual,
-                context.provide.requestQueue, context.provide.deviceInfo,
+                context.provide.networkClient, context.provide.deviceInfo,
                 account!!, docIds
         ).also { it.authToken = authToken }
     }

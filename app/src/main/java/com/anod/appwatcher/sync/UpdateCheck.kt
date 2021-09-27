@@ -10,7 +10,6 @@ import android.text.TextUtils
 import android.text.format.DateUtils
 import androidx.core.content.contentValuesOf
 import androidx.work.Data
-import com.android.volley.VolleyError
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.backup.gdrive.GDriveSilentSignIn
@@ -170,13 +169,13 @@ class UpdateCheck(private val context: ApplicationContext) {
             list.associateBy { it.app.packageName }
         }.forEach { localApps ->
             val docIds = localApps.map { BulkDocId(it.key, it.value.app.versionNumber) }
-            val endpoint = BulkDetailsEndpoint(context.actual, Application.provide(context).requestQueue, Application.provide(context).deviceInfo, account, docIds).also {
+            val endpoint = BulkDetailsEndpoint(context.actual, Application.provide(context).networkClient, Application.provide(context).deviceInfo, account, docIds).also {
                 it.authToken = authToken
             }
             AppLog.d("Sending chunk... $docIds")
             try {
                 endpoint.start()
-            } catch (e: VolleyError) {
+            } catch (e: Exception) {
                 AppLog.e("Fetching of bulk updates failed ${e.message ?: ""}", "UpdateCheck")
             }
             unavailable += (docIds.size - endpoint.documents.size)

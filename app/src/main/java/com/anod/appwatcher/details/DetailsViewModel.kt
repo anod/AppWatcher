@@ -79,7 +79,7 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
 
     private val detailsEndpoint: DetailsEndpoint by lazy {
         val account = this.account ?: Account("empty", "empty")
-        DetailsEndpoint(application, provide.requestQueue, provide.deviceInfo, account, detailsUrl)
+        DetailsEndpoint(application, provide.networkClient, provide.deviceInfo, account, detailsUrl)
     }
     var authToken = ""
     var localChangelog: List<AppChange> = emptyList()
@@ -138,7 +138,7 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
                     ?: "", appDetails.uploadDate, false)
             app.value!!.testing = when {
                 appDetails.testingProgramInfo.subscribed -> 1
-                appDetails.testingProgramInfo.subscribed1 -> 2
+                appDetails.testingProgramInfo.subscribedAndInstalled -> 2
                 else -> 0
             }
         }

@@ -1,24 +1,23 @@
 package finsky.api.model
 
-import com.android.volley.Request
-import com.android.volley.Response
+import android.net.Uri
 import finsky.api.DfeApi
-import finsky.protos.Messages
+import finsky.protos.ResponseWrapper
 
 class DfeSearch(
         private val dfeApi: DfeApi,
         url: String)
     : DfeList(dfeApi, url, SEARCH) {
 
-    override fun makeRequest(url: String, responseListener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener): Request<*> {
-        return this.dfeApi.search(url, responseListener, errorListener)
+    override suspend fun makeRequest(url: String): ResponseWrapper {
+        return dfeApi.search(url)
     }
 
     companion object {
         private const val backendId = 3
 
         fun createSearchUrl(query: String): String {
-            return DfeApi.SEARCH_CHANNEL_URI
+            return Uri.parse(DfeApi.SEARCH_CHANNEL_URI)
                     .buildUpon()
                     .appendQueryParameter("c", backendId.toString())
                     .appendQueryParameter("q", query)

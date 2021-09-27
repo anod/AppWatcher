@@ -1,10 +1,6 @@
 package finsky.api
 
-import android.net.Uri
-
-import com.android.volley.Request
-import com.android.volley.Response
-import finsky.protos.Messages
+import finsky.protos.ResponseWrapper
 
 class BulkDocId(val packageName: String, val versionCode: Int) : Comparable<BulkDocId> {
     override fun compareTo(other: BulkDocId): Int {
@@ -18,21 +14,24 @@ class BulkDocId(val packageName: String, val versionCode: Int) : Comparable<Bulk
 
 interface DfeApi {
 
-    fun search(url: String, responseListener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener): Request<*>
+    suspend fun search(url: String): ResponseWrapper
 
-    fun details(url: String, responseListener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener): Request<*>
+    suspend fun details(url: String): ResponseWrapper
 
-    fun details(docIds: List<BulkDocId>, includeDetails: Boolean, listener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener): Request<*>
+    suspend fun details(docIds: List<BulkDocId>, includeDetails: Boolean): ResponseWrapper
 
     fun createLibraryUrl(c: Int, libraryId: String, dt: Int, serverToken: ByteArray?): String
 
-    fun list(url: String, listener: Response.Listener<Messages.Response.ResponseWrapper>, errorListener: Response.ErrorListener): Request<*>
+    suspend fun list(url: String): ResponseWrapper
 
     companion object {
-        val BASE_URI = Uri.parse("https://android.clients.google.com/fdfe/")!!
-        val SEARCH_CHANNEL_URI = Uri.parse("search")!!
-        val BULK_DETAILS_URI = Uri.parse("bulkDetails")!!
-        val LIBRARY_URI = Uri.parse("library")!!
+        const val URL_FDFE = "https://android.clients.google.com/fdfe/"
+        const val SEARCH_CHANNEL_URI = "search"
+        const val BULK_DETAILS_URI = "bulkDetails"
+        const val LIBRARY_URI = "library"
+        const val PURCHASE_URL = "purchase"
+        const val PURCHASE_HISTORY_URL = "purchaseHistory"
+        const val URL_TESTING_PROGRAM = "apps/testingProgram"
     }
 }
 

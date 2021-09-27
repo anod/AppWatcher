@@ -2,14 +2,12 @@ package info.anodsplace.playstore
 
 import android.accounts.Account
 import android.content.Context
-import com.android.volley.RequestQueue
 import finsky.api.DfeApi
 import finsky.api.DfeApiImpl
 import finsky.api.model.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
 
 /**
  * @author Alex Gavrishev
@@ -17,13 +15,13 @@ import kotlinx.coroutines.withContext
  */
 abstract class ListEndpoint(
         context: Context,
-        requestQueue: RequestQueue,
+        http: OkHttpClient,
         deviceInfoProvider: DeviceInfoProvider,
         account: Account) : PlayStoreEndpoint {
     override var authToken = ""
 
     private val dfeApi: DfeApi by lazy {
-        DfeApiImpl(requestQueue, context, account, authToken, deviceInfoProvider)
+        DfeApiImpl(http, context, account, authToken, deviceInfoProvider)
     }
 
     open var data: DfeList? = null

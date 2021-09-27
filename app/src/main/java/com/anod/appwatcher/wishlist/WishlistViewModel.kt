@@ -42,7 +42,7 @@ class WishListViewModel(application: Application) : AndroidViewModel(application
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     fun init(account: Account, authToken: String) {
-        endpoint = WishListEndpoint(context, provide.requestQueue, provide.deviceInfo, account).also {
+        endpoint = WishListEndpoint(context, provide.networkClient, provide.deviceInfo, account).also {
             it.authToken = authToken
         }
     }

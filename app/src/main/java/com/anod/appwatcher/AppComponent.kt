@@ -5,8 +5,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.telephony.TelephonyManager
 import android.util.LruCache
-import com.android.volley.RequestQueue
-import com.android.volley.toolbox.NoCache
 import com.anod.appwatcher.backup.gdrive.UploadServiceContentObserver
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.preferences.Preferences
@@ -16,8 +14,6 @@ import info.anodsplace.framework.net.NetworkConnectivity
 import info.anodsplace.framework.util.createLruCache
 import info.anodsplace.playstore.DeviceId
 import info.anodsplace.playstore.DeviceInfoProvider
-import info.anodsplace.playstore.Network
-import info.anodsplace.playstore.OnlineNetwork
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -25,6 +21,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
+import okhttp3.OkHttpClient
 
 /**
  * @author alex
@@ -41,11 +38,11 @@ class AppComponent internal constructor(private val app: AppWatcherApplication) 
 
     val uploadServiceContentObserver: UploadServiceContentObserver by lazy { UploadServiceContentObserver(app) }
 
-    val requestQueue: RequestQueue by lazy {
-        val requestQueue = RequestQueue(NoCache(), OnlineNetwork(networkConnection, Network()), 2)
-        requestQueue.start()
-        requestQueue
+    val networkClient: OkHttpClient by lazy {
+        OkHttpClient.Builder()
+                .build()
     }
+
     val iconLoader: PicassoAppIcon by lazy { PicassoAppIcon(this.app) }
     val networkConnection: NetworkConnectivity by lazy {
         NetworkConnectivity(app)
