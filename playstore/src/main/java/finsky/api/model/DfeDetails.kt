@@ -7,11 +7,9 @@ import finsky.protos.Details
 class DfeDetails(private val api: DfeApi) : DfeModel() {
     private var detailsResponse: Details.DetailsResponse? = null
     var detailsUrl: String = ""
-    override val url: String
-        get() = detailsUrl
 
-    override suspend fun makeRequest(url: String): ResponseWrapper {
-        return api.details(url)
+    override suspend fun makeRequest(): ResponseWrapper {
+        return api.details(detailsUrl)
     }
 
     val document: Document?

@@ -19,13 +19,12 @@ class FilterComposite(private val predicates: List<FilterPredicate>) {
 
 abstract class DfeModel {
     abstract val isReady: Boolean
-    abstract val url: String
     abstract fun onResponse(responseWrapper: ResponseWrapper)
 
     open suspend fun execute() = withContext(Dispatchers.Main) {
-        val responseWrapper = makeRequest(url)
+        val responseWrapper = makeRequest()
         onResponse(responseWrapper)
     }
 
-    abstract suspend fun makeRequest(url: String): ResponseWrapper
+    abstract suspend fun makeRequest(): ResponseWrapper
 }

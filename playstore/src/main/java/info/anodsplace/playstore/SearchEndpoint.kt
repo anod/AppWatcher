@@ -20,12 +20,7 @@ class SearchEndpoint(
         private val initialQuery: String
 ) : ListEndpoint(context, http, deviceInfoProvider, account) {
 
-    override fun createDfeList(dfeApi: DfeApi, url: String): DfeList {
-        return DfeSearch(dfeApi, url)
+    override fun createDfeList(dfeApi: DfeApi, nextPageUrl: String): DfeList {
+        return DfeSearch(dfeApi, initialQuery, nextPageUrl)
     }
-
-    override fun createInitialUrl(dfeApi: DfeApi): String {
-        return DfeSearch.createSearchUrl(initialQuery)
-    }
-
 }

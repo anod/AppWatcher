@@ -14,24 +14,25 @@ class BulkDocId(val packageName: String, val versionCode: Int) : Comparable<Bulk
 
 interface DfeApi {
 
-    suspend fun search(url: String): ResponseWrapper
+    suspend fun search(initialQuery: String, nextPageUrl: String): ResponseWrapper
 
-    suspend fun details(url: String): ResponseWrapper
+    suspend fun details(appDetailsUrl: String): ResponseWrapper
 
     suspend fun details(docIds: List<BulkDocId>, includeDetails: Boolean): ResponseWrapper
 
-    fun createLibraryUrl(c: Int, libraryId: String, dt: Int, serverToken: ByteArray?): String
+    suspend fun wishlist(nextPageUrl: String): ResponseWrapper
 
-    suspend fun list(url: String): ResponseWrapper
+    suspend fun purchaseHistory(url: String, offset: Int): ResponseWrapper
 
     companion object {
-        const val URL_FDFE = "https://android.clients.google.com/fdfe/"
-        const val SEARCH_CHANNEL_URI = "search"
-        const val BULK_DETAILS_URI = "bulkDetails"
-        const val LIBRARY_URI = "library"
-        const val PURCHASE_URL = "purchase"
-        const val PURCHASE_HISTORY_URL = "purchaseHistory"
-        const val URL_TESTING_PROGRAM = "apps/testingProgram"
+        const val URL_FDFE = "https://android.clients.google.com/fdfe"
+        const val SEARCH_CHANNEL_URI = "${URL_FDFE}/search"
+        const val BULK_DETAILS_URI = "${URL_FDFE}/bulkDetails"
+        const val LIBRARY_URI = "${URL_FDFE}/library"
+        const val PURCHASE_HISTORY_URL = "${URL_FDFE}/purchaseHistory"
+
+        const val wishlistBackendId = 0
+        const val searchBackendId = 3
     }
 }
 

@@ -8,10 +8,8 @@ import finsky.protos.ResponseWrapper
 class DfeBulkDetails(private val api: DfeApi, private val filter: FilterPredicate) : DfeModel() {
     private var bulkDetailsResponse: Details.BulkDetailsResponse? = null
     var docIds: List<BulkDocId> = listOf()
-    override val url: String
-        get() = ""
 
-    override suspend fun makeRequest(url: String): ResponseWrapper {
+    override suspend fun makeRequest(): ResponseWrapper {
         return api.details(docIds, true)
     }
 

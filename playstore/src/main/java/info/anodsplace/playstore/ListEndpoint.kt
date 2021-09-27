@@ -17,7 +17,8 @@ abstract class ListEndpoint(
         context: Context,
         http: OkHttpClient,
         deviceInfoProvider: DeviceInfoProvider,
-        account: Account) : PlayStoreEndpoint {
+        account: Account
+) : PlayStoreEndpoint {
     override var authToken = ""
 
     private val dfeApi: DfeApi by lazy {
@@ -37,14 +38,9 @@ abstract class ListEndpoint(
     var nextPageUrl = ""
 
     override suspend fun start(): DfeList = withContext(Dispatchers.Main) {
-        val url = if (nextPageUrl.isEmpty()) createInitialUrl(dfeApi) else nextPageUrl
-        data = createDfeList(dfeApi, url)
+        data = createDfeList(dfeApi, nextPageUrl)
         return@withContext data!!
     }
 
-    open fun createDfeList(dfeApi: DfeApi, url: String): DfeList {
-        return DfeList(dfeApi, url)
-    }
-
-    abstract fun createInitialUrl(dfeApi: DfeApi): String
+    abstract fun createDfeList(dfeApi: DfeApi, nextPageUrl: String): DfeList
 }

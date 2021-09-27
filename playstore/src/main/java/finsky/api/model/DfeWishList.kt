@@ -3,12 +3,11 @@ package finsky.api.model
 import finsky.api.DfeApi
 import finsky.protos.ResponseWrapper
 
-class DfeSearch(
+class DfeWishList(
         private val dfeApi: DfeApi,
-        private val initialQuery: String,
         private val nextPageUrl: String
-) : DfeList(SEARCH) {
+) : DfeList(ALL) {
     override suspend fun makeRequest(): ResponseWrapper {
-        return dfeApi.search(initialQuery, nextPageUrl)
+        return dfeApi.wishlist(nextPageUrl)
     }
 }

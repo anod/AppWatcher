@@ -10,7 +10,6 @@ import java.util.zip.GZIPInputStream
 
 class DfeResponse {
 
-
     fun parseNetworkError(networkResponse: InputStream) {
         val wrapperAndVerifySignature = this.parseWrapperAndVerifySignature(networkResponse, false)
         if (wrapperAndVerifySignature != null) {
@@ -26,7 +25,7 @@ class DfeResponse {
             this.handleServerCommands(wrapperAndVerifySignature)
             if (wrapperAndVerifySignature.serverMetadata != null) {
                 val serverMetadata = wrapperAndVerifySignature.serverMetadata
-                AppLog.d("Server metadata $serverMetadata")
+                AppLog.d("Server metadata latency ${serverMetadata.latencyMillis}")
             }
             return verifyPayload(wrapperAndVerifySignature)
         }
@@ -41,12 +40,12 @@ class DfeResponse {
                 }
             }
         } catch (ex: Exception) {
-            AppLog.e("Null wrapper parsed for request=[%s]", this)
+            AppLog.e("Null wrapper parsed", ex)
             throw DfeParseError("Parse error", ex)
         }
 
         if (payload == null) {
-            AppLog.e("Null parsed response for request=[%s]", this)
+            AppLog.e("Null parsed response")
             throw DfeParseError("No payload")
         }
         return wrapper

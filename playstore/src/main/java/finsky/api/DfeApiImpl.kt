@@ -9,6 +9,7 @@ import info.anodsplace.applog.AppLog
 import info.anodsplace.playstore.DeviceInfoProvider
 import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.*
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
@@ -27,15 +28,21 @@ class DfeApiImpl(http: OkHttpClient, private val apiContext: DfeApiContext) : Df
     constructor(queue: OkHttpClient, context: Context, account: Account, authToken: String, deviceInfo: DeviceInfoProvider)
             : this(queue, DfeApiContext(context, account, authToken, deviceInfo))
 
-
-    override suspend fun search(url: String): ResponseWrapper {
-        val cacheKey = DfeCacheKey(DfeApi.URL_FDFE + url, apiContext, emptyMap())
+    override suspend fun search(initialQuery: String, nextPageUrl: String): ResponseWrapper {
+        val url = if (nextPageUrl.isEmpty())
+                DfeApi.SEARCH_CHANNEL_URI.toHttpUrl().newBuilder()
+                    .addQueryParameter("c", DfeApi.searchBackendId.toString())
+                    .addQueryParameter("q", initialQuery)
+                    .build().toString()
+            else
+                DfeApi.URL_FDFE + "/" + nextPageUrl
+        val cacheKey = DfeCacheKey(url, apiContext, emptyMap())
         val dfeRequest = createRequest(cacheKey)
         return newCall(dfeRequest)
     }
 
-    override suspend fun details(url: String): ResponseWrapper {
-        val cacheKey = DfeCacheKey(DfeApi.URL_FDFE + url, apiContext, emptyMap())
+    override suspend fun details(appDetailsUrl: String): ResponseWrapper {
+        val cacheKey = DfeCacheKey(DfeApi.URL_FDFE + "/" + appDetailsUrl, apiContext, emptyMap())
         val dfeRequest = createRequest(cacheKey)
         return newCall(dfeRequest)
     }
@@ -47,7 +54,7 @@ class DfeApiImpl(http: OkHttpClient, private val apiContext: DfeApiContext) : Df
                 .build()
 
         val cacheKey = DfeCacheKey(
-                DfeApi.URL_FDFE + DfeApi.BULK_DETAILS_URI, apiContext,
+                DfeApi.BULK_DETAILS_URI, apiContext,
                 mapOf("docidhash" to computeDocumentIdHash(bulkDetailsRequest))
         )
 
@@ -58,20 +65,19 @@ class DfeApiImpl(http: OkHttpClient, private val apiContext: DfeApiContext) : Df
         return newCall(dfeRequest)
     }
 
-    override fun createLibraryUrl(c: Int, libraryId: String, dt: Int, serverToken: ByteArray?): String {
-        val appendQueryParameter = Uri.parse(DfeApi.LIBRARY_URI).buildUpon()
-                .appendQueryParameter("c", c.toString())
-                .appendQueryParameter("dt", dt.toString())
-                .appendQueryParameter("libid", libraryId)
-
-        if (serverToken != null) {
-            appendQueryParameter.appendQueryParameter("st", DfeUtils.base64Encode(serverToken))
-        }
-        return appendQueryParameter.toString()
+    override suspend fun wishlist(nextPageUrl: String): ResponseWrapper {
+        val libraryId = "u-wl"
+        val url = if (nextPageUrl.isEmpty())
+                createLibraryUrl(DfeApi.wishlistBackendId, libraryId, 7, null)
+            else
+                DfeApi.URL_FDFE + "/" + nextPageUrl
+        val cacheKey = DfeCacheKey(url, apiContext, emptyMap())
+        val dfeRequest = createRequest(cacheKey)
+        return newCall(dfeRequest)
     }
 
-    override suspend fun list(url: String): ResponseWrapper {
-        val cacheKey = DfeCacheKey(DfeApi.URL_FDFE + url, apiContext, emptyMap())
+    override suspend fun purchaseHistory(url: String, offset: Int): ResponseWrapper {
+        val cacheKey = DfeCacheKey(DfeApi.PURCHASE_HISTORY_URL, apiContext, emptyMap())
         val dfeRequest = createRequest(cacheKey)
         return newCall(dfeRequest)
     }
@@ -87,7 +93,7 @@ class DfeApiImpl(http: OkHttpClient, private val apiContext: DfeApiContext) : Df
             }
 
             override fun onResponse(call: Call, response: Response) {
-                AppLog.d("Network response [${dfeRequest.url}] $response")
+                AppLog.d("Network response $response")
 
                 try {
                     val body = response.body ?: throw DfeError("Empty body $response")
@@ -155,14 +161,18 @@ class DfeApiImpl(http: OkHttpClient, private val apiContext: DfeApiContext) : Df
                 if (stale > 0) {
                     cacheControlBuilder.maxStale(stale, TimeUnit.SECONDS)
                 } else {
-                    cacheControlBuilder.maxStale(networkCacheControl.maxStaleSeconds, TimeUnit.SECONDS)
+                    if (networkCacheControl.maxStaleSeconds > 0) {
+                        cacheControlBuilder.maxStale(networkCacheControl.maxStaleSeconds, TimeUnit.SECONDS)
+                    }
                 }
                 val hardTtl = networkResponse.headers["X-DFE-Hard-TTL"]?.toLongOrNull()
                 val maxAge = if (hardTtl == null) 0 else TimeUnit.MILLISECONDS.toSeconds(currentTimeMillis + hardTtl).toInt()
                 if (maxAge > 0) {
                     cacheControlBuilder.maxAge(maxAge, TimeUnit.SECONDS)
                 } else {
-                    cacheControlBuilder.maxAge(networkCacheControl.maxAgeSeconds, TimeUnit.SECONDS)
+                    if (networkCacheControl.maxAgeSeconds > 0) {
+                        cacheControlBuilder.maxAge(networkCacheControl.maxAgeSeconds, TimeUnit.SECONDS)
+                    }
                 }
             } catch (ex: NumberFormatException) {
                 AppLog.e("Invalid TTL: ${networkResponse.headers}", ex)
@@ -172,6 +182,18 @@ class DfeApiImpl(http: OkHttpClient, private val apiContext: DfeApiContext) : Df
 
             return cacheControlBuilder.build()
         }
+    }
+
+    private fun createLibraryUrl(c: Int, libraryId: String, dt: Int, serverToken: ByteArray?): String {
+        val builder = DfeApi.LIBRARY_URI.toHttpUrl().newBuilder()
+                .addQueryParameter("c", c.toString())
+                .addQueryParameter("dt", dt.toString())
+                .addQueryParameter("libid", libraryId)
+
+        if (serverToken != null) {
+            builder.addQueryParameter("st", DfeUtils.base64Encode(serverToken))
+        }
+        return builder.build().toString()
     }
 
     companion object {

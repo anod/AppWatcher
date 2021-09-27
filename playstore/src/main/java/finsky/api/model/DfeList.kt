@@ -1,7 +1,6 @@
 package finsky.api.model
 
 import com.google.protobuf.InvalidProtocolBufferException
-import finsky.api.DfeApi
 import finsky.protos.DocV2
 import finsky.protos.ListResponse
 import finsky.protos.Payload
@@ -10,10 +9,7 @@ import finsky.protos.Search.SearchResponse
 
 class DfeListResponse(val items: List<Document>, val nextPageUrl: String?)
 
-open class DfeList(private val dfeApi: DfeApi,
-                   override val url: String,
-                   private val listType: Int = ALL
-) : DfeModel() {
+abstract class DfeList(private val listType: Int) : DfeModel() {
 
     val count: Int
         get() = listResponse?.items?.size ?: 0
@@ -98,12 +94,7 @@ open class DfeList(private val dfeApi: DfeApi,
     override val isReady: Boolean
         get() = this.listResponse != null
 
-    override suspend fun makeRequest(url: String): ResponseWrapper {
-        return dfeApi.list(url)
-    }
-
     companion object {
-
         private fun payload(responseWrapper: ResponseWrapper?): Payload {
             return if (responseWrapper != null && responseWrapper.hasPayload()) {
                 responseWrapper.payload
