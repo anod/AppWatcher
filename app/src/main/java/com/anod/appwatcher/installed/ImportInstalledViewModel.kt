@@ -99,6 +99,7 @@ class ImportInstalledViewModel(application: android.app.Application) : AndroidVi
             is ImportFinished -> {
                 isImportStarted = false
             }
+            ImportNotStarted -> { }
         }
     }
 

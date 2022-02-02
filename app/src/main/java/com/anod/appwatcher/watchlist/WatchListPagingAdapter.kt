@@ -92,6 +92,7 @@ class WatchListPagingAdapter(
             is EmptyItem -> {
             }
             is OnDeviceItem -> (holder as AppViewHolder).bind(position, item.appListItem, true, calcSelection(item.appListItem))
+            null -> { }
         }
     }
 

@@ -10,7 +10,7 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecovera
 import com.google.api.client.http.HttpRequestInitializer
 import com.google.api.client.http.InputStreamContent
 import com.google.api.client.http.javanet.NetHttpTransport
-import com.google.api.client.json.jackson2.JacksonFactory
+import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.drive.Drive
 import com.google.api.services.drive.model.File
 import com.google.api.services.drive.model.FileList
@@ -22,10 +22,11 @@ import java.io.OutputStream
 import java.util.concurrent.Executors
 
 
-sealed class GDriveSpace(val name: String)
-object DriveSpace : GDriveSpace("drive")
-object AppData : GDriveSpace("appDataFolder")
-object Photos : GDriveSpace("photos")
+sealed class GDriveSpace(val name: String) {
+    object Drive : GDriveSpace("drive")
+    object AppData : GDriveSpace("appDataFolder")
+    object Photos : GDriveSpace("photos")
+}
 
 class DriveService(private val service: Drive) {
     constructor(credential: HttpRequestInitializer, appName: String)
@@ -33,7 +34,7 @@ class DriveService(private val service: Drive) {
 
     companion object {
         private fun createService(credential: HttpRequestInitializer, appName: String): Drive {
-            return Drive.Builder(NetHttpTransport(), JacksonFactory(), credential)
+            return Drive.Builder(NetHttpTransport(), GsonFactory.getDefaultInstance(), credential)
                     .setApplicationName(appName)
                     .build()
         }
@@ -54,7 +55,8 @@ class DriveService(private val service: Drive) {
      */
     suspend fun createFile(name: String, mimeType: String, space: GDriveSpace): String = withContext(dispatcher) {
         val metadata = File()
-                .setSpaces(listOf(space.name))
+//                .setSpaces(listOf(space.name))
+                .setParents(listOf(space.name))
                 .setMimeType(mimeType)
                 .setName(name)
         val googleFile = service.files().create(metadata).execute()

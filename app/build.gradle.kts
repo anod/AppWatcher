@@ -20,8 +20,8 @@ android {
         applicationId = "com.anod.appwatcher"
         minSdk = 21
         targetSdk = 30
-        versionCode = 14708
-        versionName = "1.4.7"
+        versionCode = 14709
+        versionName = "1.4.9"
         resValue("string", "content_authority", "com.anod.appwatcher")
 
         vectorDrawables.generatedDensities("hdpi", "xxhdpi")
@@ -70,12 +70,10 @@ android {
     }
 
     lint {
-        disable("InvalidPackage", "MissingTranslation")
-        informational("DuplicatePlatformClasses")
-        isCheckReleaseBuilds = true
-        // Or, if you prefer, you can continue to check for errors in close builds,
-        // but continue the build even when errors are found:
-        isAbortOnError = true
+        disable.addAll(listOf("InvalidPackage", "MissingTranslation"))
+        informational.add("DuplicatePlatformClasses")
+        checkReleaseBuilds = true
+        abortOnError = true
     }
 
     compileOptions {
@@ -104,8 +102,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerVersion = "1.5.21"
-        kotlinCompilerExtensionVersion = "1.0.2"
+        kotlinCompilerExtensionVersion = "1.1.0-rc03"
     }
 }
 
@@ -113,34 +110,33 @@ dependencies {
     // AndroidX
     implementation("androidx.recyclerview:recyclerview:1.2.1")
     implementation("androidx.palette:palette:1.0.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.1")
-    implementation("androidx.work:work-runtime:2.6.0")
-    implementation("androidx.work:work-runtime-ktx:2.6.0")
-    implementation("androidx.core:core:1.6.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.3")
+    implementation("androidx.work:work-runtime:2.7.1")
+    implementation("androidx.work:work-runtime-ktx:2.7.1")
+    implementation("androidx.core:core:1.7.0")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
-    implementation("androidx.paging:paging-runtime:3.0.1")
-    implementation("androidx.fragment:fragment-ktx:1.3.6")
+    implementation("androidx.paging:paging-runtime:3.1.0")
+    implementation("androidx.fragment:fragment-ktx:1.4.1")
 
     // Compose
-    implementation("androidx.activity:activity-compose:1.3.1")
-    implementation("androidx.compose.material:material:1.0.2")
+    implementation("androidx.activity:activity-compose:1.4.0")
+    implementation("androidx.compose.material:material:1.0.5")
 
     // Google
-    implementation("com.google.android.material:material:1.4.0")
+    implementation("com.google.android.material:material:1.5.0")
     implementation("com.google.android.gms:play-services-oss-licenses:17.0.0")
-    implementation("com.google.android.gms:play-services-identity:17.0.1")
-    implementation("com.google.android.gms:play-services-auth:19.2.0")
+    implementation("com.google.android.gms:play-services-identity:18.0.1")
+    implementation("com.google.android.gms:play-services-auth:20.0.1")
 
-    implementation("com.google.apis:google-api-services-drive:v3-rev20200706-1.30.10") {
+    implementation("com.google.api-client:google-api-client:1.33.0")
+    implementation("com.google.api-client:google-api-client-android:1.33.0")
+    implementation("com.google.apis:google-api-services-drive:v3-rev20211107-1.32.1") {
         exclude(group = "org.apache.httpcomponents")
         exclude(group = "commons-logging")
     }
 
-    implementation("com.google.api-client:google-api-client:1.30.10")
-    implementation("com.google.api-client:google-api-client-android:1.30.10")
-
-    implementation("com.google.firebase:firebase-analytics:19.0.1")
-    implementation("com.google.firebase:firebase-crashlytics:18.2.1")
+    implementation("com.google.firebase:firebase-analytics:20.0.2")
+    implementation("com.google.firebase:firebase-crashlytics:18.2.7")
 
     // 3rd party
     implementation("com.squareup.okhttp3:okhttp:4.9.1")
@@ -148,19 +144,19 @@ dependencies {
     implementation("com.jakewharton:process-phoenix:2.0.0")
 
     // ViewModel and LiveData
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0-beta01")
-    implementation("androidx.lifecycle:lifecycle-viewmodel:2.4.0-beta01")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.4.0-beta01")
-    kapt("androidx.lifecycle:lifecycle-compiler:2.4.0-beta01")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel:2.4.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.4.0")
+    kapt("androidx.lifecycle:lifecycle-compiler:2.4.0")
 
-    implementation("androidx.room:room-runtime:2.3.0")
-    implementation("androidx.room:room-ktx:2.3.0")
-    kapt("androidx.room:room-compiler:2.3.0")
+    implementation("androidx.room:room-runtime:2.4.1")
+    implementation("androidx.room:room-ktx:2.4.1")
+    kapt("androidx.room:room-compiler:2.4.1")
 
     // Kotlin
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.1")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.5.21")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.10")
 
     testImplementation("junit:junit:4.13.2")
 

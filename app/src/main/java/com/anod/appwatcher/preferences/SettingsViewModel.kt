@@ -86,7 +86,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                     actions.emit(UiAction.ShowToast(resId = R.string.sync_error))
                     if (e is GDriveSync.SyncError && e.error?.intent != null) {
                         viewModelScope.launch {
-                            actions.emit(UiAction.GDriveErrorIntent(e.error.intent))
+                            actions.emit(UiAction.GDriveErrorIntent(e.error.intent!!))
                         }
                     }
                 }

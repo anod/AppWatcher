@@ -28,6 +28,7 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+    namespace = "info.anodsplace.playstore"
 }
 
 dependencies {

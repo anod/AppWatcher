@@ -49,10 +49,11 @@ class GDriveSync(private val context: ApplicationContext, private val googleAcco
         val driveClient = DriveService(createCredentials(context.actual, googleAccount), "AppWatcher")
         val file = DriveIdFile(AppListFile, driveClient, context.actual)
 
+        AppLog.i("Check if there is an existing file", "GDriveSync")
         val driveId = file.getId()
 
-        // There is as file exist, create driveFileReader
         if (driveId != null) {
+            AppLog.i("Read remote items", "GDriveSync")
             insertRemoteItems(file, db)
         }
 

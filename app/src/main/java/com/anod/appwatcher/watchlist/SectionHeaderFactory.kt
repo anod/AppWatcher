@@ -61,6 +61,9 @@ class DefaultSectionHeaderFactory(
                     }
                     return Header(WatchingHeader)
                 }
+                EmptyItem -> { }
+                is Header -> { }
+                RecentItem -> { }
             }
         }
 
@@ -88,6 +91,9 @@ class DefaultSectionHeaderFactory(
                         }
                     }
                 }
+                EmptyItem -> { }
+                is Header -> { }
+                RecentItem -> { }
             }
         }
 

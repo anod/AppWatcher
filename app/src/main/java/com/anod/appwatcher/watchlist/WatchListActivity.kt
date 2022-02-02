@@ -265,7 +265,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         override fun getItemCount(): Int = factories.size
 
         override fun createFragment(position: Int): Fragment {
-            return factories[position].create()!!
+            return factories[position].create()
         }
     }
 

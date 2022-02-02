@@ -36,40 +36,42 @@ class DriveIdFile(
                 orderBy = "quotaBytesUsed desc",
                 mimeType = file.mimeType,
                 name = file.fileName,
-                space = AppData
+                space = GDriveSpace.AppData
         )
         if (list.isEmpty() || list.files.isEmpty()) {
-            AppLog.d("[GDrive] File NOT found " + file.fileName)
+            AppLog.i("File not found " + file.fileName, "DriveIdFile")
             return@withContext null
         }
         driveId = list.files[0].id
+        AppLog.i("Found $driveId", "DriveIdFile")
         return@withContext driveId
     }
 
     suspend fun create() = withContext(Dispatchers.Main) {
-        AppLog.d("[GDrive] Create new file ")
+        AppLog.i("Create a new file", "DriveIdFile")
 
         driveId = driveClient.createFile(
                 name = file.fileName,
                 mimeType = file.mimeType,
-                space = AppData)
+                space = GDriveSpace.AppData)
     }
 
     suspend fun write(writer: DbJsonWriter, db: AppsDatabase): Long = withContext(Dispatchers.IO) {
         var bytes = 0L
         val driveId = withContext(Dispatchers.Main) {
             if (driveId == null) {
-                AppLog.e("Drive Id is not initialized", "GDrive")
+                AppLog.e("Drive Id is not initialized", "DriveIdFile")
             }
             driveId
         } ?: return@withContext bytes
 
         try {
-            AppLog.d("[GDrive] Write full list to temp ")
+            AppLog.i("Write full list to a temp file", "DriveIdFile")
             val tempFile = File.createTempFile(file.fileName, ".json", tempDir)
             val file = FileWriter(tempFile)
             writer.write(file, db)
             val inputStream = BufferedInputStream(FileInputStream(tempFile))
+            AppLog.i("Save temp file to drive", "DriveIdFile")
             driveClient.saveFile(driveId, "application/json", inputStream)
             bytes = tempFile.length()
         } catch (e: IOException) {
@@ -81,7 +83,7 @@ class DriveIdFile(
     suspend fun read(): Reader? = withContext(Dispatchers.IO) {
         val driveId = withContext(Dispatchers.Main) {
             if (driveId == null) {
-                AppLog.e("Drive Id is not initialized", "GDrive")
+                AppLog.e("Drive Id is not initialized", "DriveIdFile")
             }
             driveId
         } ?: return@withContext null
