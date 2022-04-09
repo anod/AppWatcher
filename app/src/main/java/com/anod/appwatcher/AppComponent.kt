@@ -8,7 +8,7 @@ import android.util.LruCache
 import com.anod.appwatcher.backup.gdrive.UploadServiceContentObserver
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.preferences.Preferences
-import com.anod.appwatcher.utils.PicassoAppIcon
+import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.watchlist.RecentlyInstalledPackages
 import info.anodsplace.framework.net.NetworkConnectivity
 import info.anodsplace.framework.util.createLruCache
@@ -43,7 +43,7 @@ class AppComponent internal constructor(private val app: AppWatcherApplication) 
                 .build()
     }
 
-    val iconLoader: PicassoAppIcon by lazy { PicassoAppIcon(this.app) }
+    val iconLoader: AppIconLoader by lazy { AppIconLoader(this.app) }
     val networkConnection: NetworkConnectivity by lazy {
         NetworkConnectivity(app)
     }

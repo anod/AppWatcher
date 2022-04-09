@@ -9,13 +9,13 @@ import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.details.AppDetailsView
 import com.anod.appwatcher.utils.EventFlow
-import com.anod.appwatcher.utils.PicassoAppIcon
+import com.anod.appwatcher.utils.AppIconLoader
 import info.anodsplace.framework.view.setOnSafeClickListener
 
 class AppViewHolder(
         itemView: View,
         resourceProvider: ResourceProvider,
-        iconLoader: PicassoAppIcon,
+        iconLoader: AppIconLoader,
         private val action: EventFlow<WishListAction>)
     : AppViewHolderBase<AppItem>(itemView, resourceProvider, iconLoader) {
 

@@ -11,7 +11,7 @@ import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppListItem
-import com.anod.appwatcher.utils.PicassoAppIcon
+import com.anod.appwatcher.utils.AppIconLoader
 
 internal class TagAppsAdapter(private val context: Context, private val tagAppsImport: TagAppsImport)
     : RecyclerView.Adapter<TagAppsAdapter.ItemViewHolder>() {
@@ -36,11 +36,11 @@ internal class TagAppsAdapter(private val context: Context, private val tagAppsI
         return apps.size
     }
 
-    private val mIconLoader: PicassoAppIcon = Application.provide(context).iconLoader
+    private val mIconLoader: AppIconLoader = Application.provide(context).iconLoader
 
     internal class ItemViewHolder(
             itemView: View,
-            private val mIconLoader: PicassoAppIcon,
+            private val mIconLoader: AppIconLoader,
             private val tagAppsImport: TagAppsImport) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
 
         val title: CheckedTextView = itemView.findViewById(R.id.title)

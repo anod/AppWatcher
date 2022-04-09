@@ -14,7 +14,7 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.databinding.ListItemEmptyBinding
 import com.anod.appwatcher.utils.EventFlow
-import com.anod.appwatcher.utils.PicassoAppIcon
+import com.anod.appwatcher.utils.AppIconLoader
 import info.anodsplace.framework.content.InstalledApps
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -49,7 +49,7 @@ class WatchListPagingAdapter(
 ) : PagingDataAdapter<SectionItem, RecyclerView.ViewHolder>(SectionItemDiffCallback()) {
 
     private val itemDataProvider = AppViewHolderResourceProvider(context, installedApps)
-    private val appIcon: PicassoAppIcon = Application.provide(context).iconLoader
+    private val appIcon: AppIconLoader = Application.provide(context).iconLoader
     private val packageManager = Application.provide(context).packageManager
 
     init {

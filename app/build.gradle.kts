@@ -115,18 +115,18 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.7.1")
     implementation("androidx.core:core:1.7.0")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
-    implementation("androidx.paging:paging-runtime:3.1.0")
+    implementation("androidx.paging:paging-runtime:3.1.1")
     implementation("androidx.fragment:fragment-ktx:1.4.1")
 
     // Compose
     implementation("androidx.activity:activity-compose:1.4.0")
-    implementation("androidx.compose.material:material:1.0.5")
+    implementation("androidx.compose.material:material:1.1.1")
 
     // Google
     implementation("com.google.android.material:material:1.5.0")
     implementation("com.google.android.gms:play-services-oss-licenses:17.0.0")
     implementation("com.google.android.gms:play-services-identity:18.0.1")
-    implementation("com.google.android.gms:play-services-auth:20.0.1")
+    implementation("com.google.android.gms:play-services-auth:20.1.0")
 
     implementation("com.google.api-client:google-api-client:1.33.0")
     implementation("com.google.api-client:google-api-client-android:1.33.0")
@@ -135,23 +135,23 @@ dependencies {
         exclude(group = "commons-logging")
     }
 
-    implementation("com.google.firebase:firebase-analytics:20.0.2")
-    implementation("com.google.firebase:firebase-crashlytics:18.2.7")
+    implementation("com.google.firebase:firebase-analytics:20.1.2")
+    implementation("com.google.firebase:firebase-crashlytics:18.2.9")
 
     // 3rd party
-    implementation("com.squareup.okhttp3:okhttp:4.9.1")
-    implementation("com.squareup.picasso:picasso:2.8")
+    implementation("com.squareup.okhttp3:okhttp:4.9.3")
+    implementation("io.coil-kt:coil-base:2.0.0-rc02")
     implementation("com.jakewharton:process-phoenix:2.0.0")
 
     // ViewModel and LiveData
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel:2.4.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.4.0")
-    kapt("androidx.lifecycle:lifecycle-compiler:2.4.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel:2.4.1")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.4.1")
+    kapt("androidx.lifecycle:lifecycle-compiler:2.4.1")
 
-    implementation("androidx.room:room-runtime:2.4.1")
-    implementation("androidx.room:room-ktx:2.4.1")
-    kapt("androidx.room:room-compiler:2.4.1")
+    implementation("androidx.room:room-runtime:2.4.2")
+    implementation("androidx.room:room-ktx:2.4.2")
+    kapt("androidx.room:room-compiler:2.4.2")
 
     // Kotlin
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")

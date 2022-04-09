@@ -14,21 +14,20 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.packageToApp
 import com.anod.appwatcher.installed.RecentAppView
 import com.anod.appwatcher.utils.EventFlow
-import com.anod.appwatcher.utils.PicassoAppIcon
+import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.reveal
 import info.anodsplace.framework.view.setOnSafeClickListener
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class RecentlyInstalledViewHolder(
-    itemView: View,
-    lifecycleOwner: LifecycleOwner,
-    private val packages: Flow<List<InstalledPackageRow>>,
-    private val iconLoader: PicassoAppIcon,
-    private val packageManager: PackageManager,
-    private val action: EventFlow<WishListAction>
+        itemView: View,
+        lifecycleOwner: LifecycleOwner,
+        private val packages: Flow<List<InstalledPackageRow>>,
+        private val iconLoader: AppIconLoader,
+        private val packageManager: PackageManager,
+        private val action: EventFlow<WishListAction>
 ) : RecyclerView.ViewHolder(itemView), PlaceholderViewHolder {
 
     companion object {

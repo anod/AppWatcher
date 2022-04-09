@@ -5,7 +5,8 @@ import android.content.Context
 import android.content.res.Resources
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
-import com.squareup.picasso.Transformation
+import coil.size.Size
+import coil.transform.Transformation
 import info.anodsplace.applog.AppLog
 import info.anodsplace.graphics.PathParser
 
@@ -13,27 +14,22 @@ class AdaptiveIconTransformation(
         private val context: Context,
         private val mask: Path,
         private val layerSize: Int,
-        private val cacheKey: String) : Transformation {
-
-//    constructor(context: Context, mask: Path, cacheKey: String):
-//            this(context, mask, TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 105f, context.resources.displayMetrics).roundToInt(), cacheKey)
+        key: String) : Transformation {
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.DITHER_FLAG or Paint.FILTER_BITMAP_FLAG)
 
-    override fun key() = "${cacheKey.hashCode()}-${mask.hashCode()}-$layerSize"
+    override val cacheKey: String = "${key.hashCode()}-${mask.hashCode()}-$layerSize"
 
-    override fun transform(source: Bitmap): Bitmap {
-        if (mask.isEmpty || source.width != source.height) {
-            return source
+    override suspend fun transform(input: Bitmap, size: Size): Bitmap {
+        if (mask.isEmpty || input.width != input.height) {
+            return input
         }
 
-        // AppLog.d("${source.width}x${source.height} [${source.hasAlpha()}] $cacheKey")
-
         val isTransparent = arrayOf(
-                source.getPixel(0, 0) == Color.TRANSPARENT,
-                source.getPixel(0, source.height - 1) == Color.TRANSPARENT,
-                source.getPixel(source.width - 1, 0) == Color.TRANSPARENT,
-                source.getPixel(source.width - 1, source.height - 1) == Color.TRANSPARENT
+                input.getPixel(0, 0) == Color.TRANSPARENT,
+                input.getPixel(0, input.height - 1) == Color.TRANSPARENT,
+                input.getPixel(input.width - 1, 0) == Color.TRANSPARENT,
+                input.getPixel(input.width - 1, input.height - 1) == Color.TRANSPARENT
         ).reduce { a, b -> a && b }
 
         if (!isTransparent) {
@@ -47,7 +43,7 @@ class AdaptiveIconTransformation(
 
             val maskBitmap = Bitmap.createBitmap(layerSize, layerSize, Bitmap.Config.ALPHA_8)
             val layersBitmap = Bitmap.createBitmap(layerSize, layerSize, Bitmap.Config.ARGB_8888)
-            val background = BitmapDrawable(context.resources, source)
+            val background = BitmapDrawable(context.resources, input)
             background.setBounds(0, 0, layerSize, layerSize)
 
             paint.shader = null
@@ -70,11 +66,11 @@ class AdaptiveIconTransformation(
             paint.shader = BitmapShader(layersBitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP)
             canvas.drawBitmap(maskBitmap, 0f, 0f, paint)
 
-            source.recycle()
+            input.recycle()
             return resultBitmap
         }
 
-        return source
+        return input
     }
 
     companion object {

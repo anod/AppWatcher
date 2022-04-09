@@ -9,7 +9,7 @@ import androidx.room.*
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.model.AppInfoMetadata
-import com.anod.appwatcher.utils.PicassoAppIcon
+import com.anod.appwatcher.utils.AppIconLoader
 import info.anodsplace.framework.content.InstalledPackageApp
 import info.anodsplace.framework.content.getAppTitle
 import info.anodsplace.framework.content.getLaunchComponent
@@ -95,9 +95,9 @@ data class App(
 
         fun fromLocalPackage(rowId: Int, packageName: String, uploadTime: Long, versionCode: Int, versionName: String, appTitle: String, launchComponent: ComponentName?): App {
             val iconUrl: String = if (launchComponent != null) {
-                Uri.fromParts(PicassoAppIcon.SCHEME, launchComponent.flattenToShortString(), null).toString()
+                Uri.fromParts(AppIconLoader.SCHEME, launchComponent.flattenToShortString(), null).toString()
             } else {
-                Uri.fromParts(PicassoAppIcon.SCHEME, ComponentName(packageName, packageName).flattenToShortString(), null).toString()
+                Uri.fromParts(AppIconLoader.SCHEME, ComponentName(packageName, packageName).flattenToShortString(), null).toString()
             }
 
             val dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM)

@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.utils.EventFlow
-import com.anod.appwatcher.utils.PicassoAppIcon
+import com.anod.appwatcher.utils.AppIconLoader
 import finsky.api.model.Document
 import info.anodsplace.framework.app.DialogMessage
 import info.anodsplace.framework.content.InstalledApps
@@ -16,7 +16,7 @@ import java.util.*
 
 class ResultsAppViewHolder(
         itemView: View,
-        private val iconLoader: PicassoAppIcon,
+        private val iconLoader: AppIconLoader,
         private val action: EventFlow<ResultAction>,
         private val packages: StateFlow<List<String>>,
         private val colorBgDisabled: Int,
@@ -87,9 +87,10 @@ class ResultsAppViewHolder(
             row.setBackgroundColor(colorBgNormal)
         }
 
-        iconLoader.retrieve(doc.iconUrl ?: "")
-                .placeholder(R.drawable.ic_app_icon_placeholder)
-                .into(icon)
+        iconLoader.retrieve(doc.iconUrl ?: "") {
+            it.placeholder(R.drawable.ic_app_icon_placeholder)
+            it.target(icon)
+        }
 
         val isInstalled = installedApps.packageInfo(packageName).isInstalled
         if (isInstalled) {

@@ -5,10 +5,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.Toast
 import androidx.annotation.ColorInt
 import androidx.appcompat.widget.Toolbar
@@ -47,7 +44,6 @@ import info.anodsplace.framework.content.forUninstall
 import info.anodsplace.framework.content.startActivitySafely
 import info.anodsplace.graphics.chooseDark
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
@@ -70,7 +66,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         AlphaSpannableString(viewModel.app.value!!.uploadDate, span)
     }
 
-    private val iconLoader: PicassoAppIcon
+    private val iconLoader: AppIconLoader
         get() = Application.provide(this).iconLoader
 
     private val dataProvider: AppViewHolderResourceProvider by lazy {
@@ -256,15 +252,16 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
     private fun loadIcon(imageUrl: String) {
         lifecycleScope.launchWhenCreated {
             try {
-                val bitmap = iconLoader.get(imageUrl)
-                if (bitmap == null) {
+                val drawable = iconLoader.get(imageUrl) as? BitmapDrawable
+                if (drawable == null) {
                     setDefaultIcon()
                     return@launchWhenCreated
                 }
-                val palette = withContext(Dispatchers.Default) { Palette.from(bitmap).generate() }
+                val bitmap = drawable.bitmap
                 binding.header.icon.setImageBitmap(bitmap)
-                binding.toolbar.logo = BitmapDrawable(resources, bitmap)
+                binding.toolbar.logo = drawable
                 binding.toolbar.logo.alpha = 0
+                val palette = withContext(Dispatchers.Default) { Palette.from(bitmap).generate() }
                 onPaletteGenerated(palette)
             } catch (e: Exception) {
                 AppLog.e("loadIcon", e)

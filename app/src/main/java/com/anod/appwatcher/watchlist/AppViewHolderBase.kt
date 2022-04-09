@@ -8,7 +8,7 @@ import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.R
-import com.anod.appwatcher.utils.PicassoAppIcon
+import com.anod.appwatcher.utils.AppIconLoader
 import info.anodsplace.framework.content.InstalledApps
 import java.util.*
 
@@ -25,7 +25,7 @@ interface PlaceholderViewHolder {
 abstract class AppViewHolderBase<T>(
         itemView: View,
         protected val resourceProvider: ResourceProvider,
-        protected val iconLoader: PicassoAppIcon) : RecyclerView.ViewHolder(itemView), PlaceholderViewHolder {
+        protected val iconLoader: AppIconLoader) : RecyclerView.ViewHolder(itemView), PlaceholderViewHolder {
 
     interface ResourceProvider {
         val installedText: String
