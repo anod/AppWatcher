@@ -8,8 +8,7 @@ import androidx.annotation.ColorInt
 import androidx.core.graphics.ColorUtils
 import androidx.room.*
 import com.anod.appwatcher.database.TagsTable
-import com.anod.appwatcher.utils.hashCodeOf
-import okhttp3.internal.toHexString
+import info.anodsplace.ktx.hashCodeOf
 
 /**
  * @author Alex Gavrishev

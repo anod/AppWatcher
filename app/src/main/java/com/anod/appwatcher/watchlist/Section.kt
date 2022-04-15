@@ -2,7 +2,7 @@
 package com.anod.appwatcher.watchlist
 
 import com.anod.appwatcher.database.entities.AppListItem
-import com.anod.appwatcher.utils.hashCodeOf
+import info.anodsplace.ktx.hashCodeOf
 
 sealed class SectionHeader
 object NewHeader : SectionHeader()

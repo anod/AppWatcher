@@ -5,6 +5,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -15,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.anod.appwatcher.R
 import com.anod.appwatcher.backup.DbBackupManager
@@ -80,8 +82,9 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
                         elevation = 0.dp
                     )
                 }
-            ) {
+            ) { contentPadding ->
                 PreferencesScreen(
+                    modifier = Modifier.padding(contentPadding),
                     preferences = items,
                     onClick = { item ->
                         when (item.key) {
@@ -110,7 +113,7 @@ fun onSettingsItemClick(prefs: Preferences, item: PreferenceItem, viewModel: Set
         "drive_sync" -> viewModel.gDriveSyncToggle((item as PreferenceItem.Switch).checked)
         "drive-sync-now" -> viewModel.gDriveSyncNow()
         "update_frequency" -> viewModel.changeUpdatePolicy(
-            frequency = (item as PreferenceItem.List).value.toInt(),
+            frequency = (item as PreferenceItem.Pick).value.toInt(),
             isWifiOnly = prefs.isWifiOnly,
             isRequiresCharging = prefs.isRequiresCharging
         )
@@ -147,13 +150,144 @@ fun onSettingsItemClick(prefs: Preferences, item: PreferenceItem, viewModel: Set
             prefs.showRecentlyUpdated = viewModel.setRecreateFlag(item, prefs.showRecentlyUpdated)
         }
         "default-filter" -> {
-            prefs.defaultMainFilterId = (item as PreferenceItem.List).value.toInt()
+            prefs.defaultMainFilterId = (item as PreferenceItem.Pick).value.toInt()
         }
         "icon-style" -> {
-            viewModel.updateIconsShape((item as PreferenceItem.List).value)
+            viewModel.updateIconsShape((item as PreferenceItem.Pick).value)
         }
         "theme" -> {
-            viewModel.updateTheme((item as PreferenceItem.List).value.toInt())
+            viewModel.updateTheme((item as PreferenceItem.Pick).value.toInt())
+        }
+    }
+}
+
+
+@Preview
+@Composable
+fun PreferencesScreenPreview() {
+    AppTheme {
+        Surface {
+            PreferencesScreen(
+                    preferences = listOf(
+                            PreferenceItem.Category(titleRes = R.string.category_updates),
+                            PreferenceItem.Pick(
+                                    entriesRes = R.array.updates_frequency,
+                                    entryValuesRes = R.array.updates_frequency_values,
+                                    value = "3600",
+                                    titleRes = R.string.pref_title_updates_frequency,
+                                    summary = "Every 3600 minutes",
+                                    key = "update_frequency"
+                            ),
+                            PreferenceItem.Switch(
+                                    checked = true,
+                                    enabled = true,
+                                    titleRes = R.string.menu_wifi_only,
+                                    key = "wifi_only"
+                            ),
+                            PreferenceItem.Switch(
+                                    checked = true,
+                                    enabled = false,
+                                    titleRes = R.string.menu_requires_charging,
+                                    key = "requires-charging"
+                            ),
+
+                            PreferenceItem.Category(titleRes = R.string.pref_header_drive_sync),
+                            PreferenceItem.Switch(
+                                    checked = false,
+                                    enabled = true,
+                                    titleRes = R.string.pref_title_drive_sync_enabled,
+                                    summaryRes = R.string.pref_descr_drive_sync_enabled,
+                                    summary = "",
+                                    key = "drive_sync"
+                            ),
+                            PreferenceItem.Text(
+                                    enabled = false,
+                                    titleRes = R.string.pref_title_drive_sync_now,
+                                    summary = "",
+                                    key = "drive-sync-now"
+                            ),
+
+                            PreferenceItem.Category(titleRes = R.string.pref_header_backup),
+                            PreferenceItem.Text(
+                                    titleRes = R.string.pref_title_export,
+                                    summaryRes = R.string.pref_descr_export,
+                                    key = "export"
+                            ),
+                            PreferenceItem.Text(
+                                    titleRes = R.string.pref_title_import,
+                                    summaryRes = R.string.pref_descr_import,
+                                    key = "import"
+                            ),
+
+                            PreferenceItem.Category(titleRes = R.string.pref_header_interface),
+                            PreferenceItem.List(
+                                    entries = R.array.themes,
+                                    entryValues = 0,
+                                    value = "0",
+                                    titleRes = R.string.pref_title_theme,
+                                    summaryRes = R.string.pref_descr_theme,
+                                    key = "theme"
+                            ),
+                            PreferenceItem.Switch(
+                                    checked = false,
+                                    titleRes = R.string.pref_show_recent_title,
+                                    summaryRes = R.string.pref_show_recent_descr,
+                                    key = "show-recent"
+                            ),
+                            PreferenceItem.Switch(
+                                    checked = true,
+                                    titleRes = R.string.pref_show_ondevice_title,
+                                    summaryRes = R.string.pref_show_ondevice_descr,
+                                    key = "show-on-device"
+                            ),
+                            PreferenceItem.List(
+                                    entries = R.array.filter_titles,
+                                    entryValues = 0,
+                                    value = "1",
+                                    titleRes = R.string.pref_default_filter,
+                                    summaryRes = R.string.pref_default_filter_summary,
+                                    key = "default-filter"
+                            ),
+                            PreferenceItem.Switch(
+                                    checked = false,
+                                    titleRes = R.string.pref_pull_to_refresh,
+                                    key = "pull-to-refresh"
+                            ),
+                            PreferenceItem.List(
+                                    entries = R.array.adaptive_icon_style_names,
+                                    entryValues = R.array.adaptive_icon_style_paths_values,
+                                    value = "",
+                                    titleRes = R.string.adaptive_icon_style,
+                                    summaryRes = R.string.adaptive_icon_style_summary,
+                                    key = "icon-style"
+                            ),
+
+                            PreferenceItem.Category(titleRes = R.string.pref_privacy),
+                            PreferenceItem.Switch(
+                                    checked = false,
+                                    titleRes = R.string.crash_reports_title,
+                                    summaryRes = R.string.crash_reports_descr,
+                                    key = "crash-reports"
+                            ),
+
+                            PreferenceItem.Category(titleRes = R.string.pref_header_about),
+                            PreferenceItem.Text(
+                                    titleRes = R.string.pref_title_about,
+                                    summary = "12345566",
+                                    key = "about"
+                            ),
+                            PreferenceItem.Text(
+                                    titleRes = R.string.pref_title_opensource,
+                                    summaryRes = R.string.pref_descr_opensource,
+                                    key = "licenses"
+                            ),
+                            PreferenceItem.Text(
+                                    titleRes = R.string.user_log,
+                                    key = "user-log"
+                            )
+                    ),
+                    onClick = { }
+            )
         }
     }
 }

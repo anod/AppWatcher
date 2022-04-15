@@ -101,7 +101,7 @@ class WatchListMenu(
 
     private val appScope: CoroutineScope
         get() = Application.provide(activity).appScope
-    private val refreshMenuAnimation = MenuItemAnimation(activity, R.anim.rotate)
+    private val refreshMenuAnimation = MenuItemAnimation(activity, info.anodsplace.framework.R.anim.rotate)
 
     private var filterItem: MenuItem? = null
 

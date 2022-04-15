@@ -178,8 +178,8 @@
         <item>By date &#x2193;</item>
     </string-array>
 
-    <string name="theme_system_dark">Set by system (Dark)</string>
-    <string name="theme_system_black">Set by system (Black)</string>
+    <string name="theme_system_dark">Follow system (Dark)</string>
+    <string name="theme_system_black">Follow system (Black)</string>
     <string-array name="themes">
         <item>@string/theme_system_dark</item> <!-- MODE_NIGHT_AUTO_BATTERY = 0; -->
         <item>@string/theme_system_black</item> <!-- MODE_NIGHT_AUTO_BATTERY = 0; -->

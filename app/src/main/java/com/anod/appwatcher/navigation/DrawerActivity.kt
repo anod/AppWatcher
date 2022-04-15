@@ -25,13 +25,13 @@ import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.installed.InstalledFragment
 import com.anod.appwatcher.tags.AppsTagActivity
 import com.anod.appwatcher.tags.EditTagDialog
-import com.anod.appwatcher.utils.Hash
 import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.wishlist.WishListFragment
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.ToolbarActivity
+import info.anodsplace.framework.util.Hash
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 

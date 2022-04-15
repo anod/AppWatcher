@@ -48,7 +48,7 @@ class EditTagDialog : DialogFragment(), ColorPickerSwatch.OnColorSelectedListene
         tag = requireArguments().getParcelable("tag") ?: Tag("")
 
         binding.tagName.setText(tag.name)
-        val colorDrawable = arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.color_picker_swatch, null)!!)
+        val colorDrawable = arrayOf(ResourcesCompat.getDrawable(resources, info.anodsplace.colorpicker.R.drawable.color_picker_swatch, null)!!)
         binding.colorPreview.setImageDrawable(ColorStateDrawable(colorDrawable, tag.color))
         binding.tagName.requestFocus()
         dialog?.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
@@ -95,7 +95,7 @@ class EditTagDialog : DialogFragment(), ColorPickerSwatch.OnColorSelectedListene
     override fun onColorSelected(color: Int) {
         tag = Tag(tag.id, tag.name, color)
 
-        val colorDrawable = arrayOf(ResourcesCompat.getDrawable(resources, R.drawable.color_picker_swatch, null)!!)
+        val colorDrawable = arrayOf(ResourcesCompat.getDrawable(resources, info.anodsplace.colorpicker.R.drawable.color_picker_swatch, null)!!)
         binding.colorPreview.setImageDrawable(ColorStateDrawable(colorDrawable, tag.color))
     }
 

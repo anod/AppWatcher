@@ -120,7 +120,6 @@ dependencies {
 
     // Compose
     implementation("androidx.activity:activity-compose:1.4.0")
-    implementation("androidx.compose.material:material:1.1.1")
 
     // Google
     implementation("com.google.android.material:material:1.5.0")
@@ -165,6 +164,7 @@ dependencies {
     implementation(project(":lib:graphics"))
     implementation(project(":lib:colorpicker"))
     implementation(project(":lib:framework"))
+    implementation(project(":lib:ktx"))
     implementation(project(":playstore"))
 
     debugImplementation("com.squareup.leakcanary:leakcanary-android:2.6")

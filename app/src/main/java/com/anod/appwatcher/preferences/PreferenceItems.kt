@@ -26,17 +26,14 @@ private fun renderDriveSyncTime(prefs: Preferences, context: Context): String {
 fun preferenceItems(prefs: Preferences, inProgress: Boolean, playServices: GooglePlayServices, context: Context): List<PreferenceItem> {
     val hasPlayServices = playServices.isSupported
     val useAutoSync = prefs.useAutoSync
-    val currentIndex = context.resources.getStringArray(R.array.updates_frequency_values).indexOf(prefs.updatesFrequency.toString())
-    val frequencyTitles = context.resources.getStringArray(R.array.updates_frequency)
 
     return mutableListOf(
         PreferenceItem.Category(titleRes = R.string.category_updates),
-        PreferenceItem.List(
-            entries = R.array.updates_frequency,
-            entryValues = R.array.updates_frequency_values,
+        PreferenceItem.Pick(
+            entriesRes = R.array.updates_frequency,
+            entryValuesRes = R.array.updates_frequency_values,
             value = prefs.updatesFrequency.toString(),
             titleRes = R.string.pref_title_updates_frequency,
-            summary = if (currentIndex == -1) "Every ${prefs.updatesFrequency} minutes" else frequencyTitles[currentIndex],
             key = "update_frequency"
         ),
         PreferenceItem.Switch(
@@ -104,12 +101,11 @@ fun preferenceItems(prefs: Preferences, inProgress: Boolean, playServices: Googl
         ),
 
         PreferenceItem.Category(titleRes = R.string.pref_header_interface),
-        PreferenceItem.List(
-            entries = R.array.themes,
-            entryValues = 0,
+        PreferenceItem.Pick(
+            entriesRes = R.array.themes,
+            entryValuesRes = 0,
             value = prefs.themeIndex.toString(),
             titleRes = R.string.pref_title_theme,
-            summaryRes = R.string.pref_descr_theme,
             key = "theme"
         ),
         PreferenceItem.Switch(
@@ -130,9 +126,9 @@ fun preferenceItems(prefs: Preferences, inProgress: Boolean, playServices: Googl
             summaryRes = R.string.pref_show_recently_updated_descr,
             key = "show-recently-updated"
         ),
-        PreferenceItem.List(
-            entries = R.array.filter_titles,
-            entryValues = 0,
+        PreferenceItem.Pick(
+            entriesRes = R.array.filter_titles,
+            entryValuesRes = 0,
             value = prefs.defaultMainFilterId.toString(),
             titleRes = R.string.pref_default_filter,
             summaryRes = R.string.pref_default_filter_summary,
@@ -143,9 +139,9 @@ fun preferenceItems(prefs: Preferences, inProgress: Boolean, playServices: Googl
             titleRes = R.string.pref_pull_to_refresh,
             key = "pull-to-refresh"
         ),
-        PreferenceItem.List(
-            entries = R.array.adaptive_icon_style_names,
-            entryValues = R.array.adaptive_icon_style_paths_values,
+        PreferenceItem.Pick(
+            entriesRes = R.array.adaptive_icon_style_names,
+            entryValuesRes = R.array.adaptive_icon_style_paths_values,
             value = prefs.iconShape,
             titleRes = R.string.adaptive_icon_style,
             summaryRes = R.string.adaptive_icon_style_summary,

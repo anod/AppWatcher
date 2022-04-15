@@ -11,11 +11,6 @@ import androidx.compose.ui.unit.dp
 import com.anod.appwatcher.preferences.Preferences
 
 private val Rubik = FontFamily.Default
-//FontFamily(
-//Font(R.font.rubik),
-//Font(R.font.rubik_light, FontWeight.W300),
-//Font(R.font.rubik_medium, FontWeight.W500)
-//)
 
 val typography = Typography()
 val AppTypography = Typography(
