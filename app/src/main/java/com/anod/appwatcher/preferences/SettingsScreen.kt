@@ -4,25 +4,35 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.ImageLoader
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.anod.appwatcher.R
 import com.anod.appwatcher.backup.DbBackupManager
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.UiAction
+import com.anod.appwatcher.utils.AdaptiveIconTransformation
+import com.google.accompanist.flowlayout.FlowRow
 import info.anodsplace.applog.AppLog
+import info.anodsplace.compose.Preference
 import info.anodsplace.compose.PreferenceItem
 import info.anodsplace.compose.PreferencesScreen
 import info.anodsplace.framework.content.CreateDocument
@@ -52,59 +62,146 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
     }
 
     AppTheme(
-        darkTheme = when (prefs.nightMode) {
-            AppCompatDelegate.MODE_NIGHT_NO -> false
-            AppCompatDelegate.MODE_NIGHT_YES -> true
-            // MODE_NIGHT_AUTO
-            else -> isSystemInDarkTheme()
-        },
-        theme = prefs.theme
+            darkTheme = when (prefs.nightMode) {
+                AppCompatDelegate.MODE_NIGHT_NO -> false
+                AppCompatDelegate.MODE_NIGHT_YES -> true
+                // MODE_NIGHT_AUTO
+                else -> isSystemInDarkTheme()
+            },
+            theme = prefs.theme
     ) {
         Surface {
             Scaffold(
-                topBar = {
-                    TopAppBar(
-                        title = { Text(text = stringResource(id = R.string.navdrawer_item_settings)) },
-                        navigationIcon = {
-                            IconButton(onClick = { coroutineScope.launch { viewModel.actions.emit(UiAction.OnBackNav) } }) {
-                                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = stringResource(id = R.string.back))
-                            }
-                        },
-                        actions = {
-                            if (progress) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier
-                                        .size(32.dp),
-                                    color = MaterialTheme.colors.secondaryVariant
-                                )
-                            }
-                        },
-                        elevation = 0.dp
-                    )
-                }
+                    topBar = {
+                        TopAppBar(
+                                title = { Text(text = stringResource(id = R.string.navdrawer_item_settings)) },
+                                navigationIcon = {
+                                    IconButton(onClick = { coroutineScope.launch { viewModel.actions.emit(UiAction.OnBackNav) } }) {
+                                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = stringResource(id = R.string.back))
+                                    }
+                                },
+                                actions = {
+                                    if (progress) {
+                                        CircularProgressIndicator(
+                                                modifier = Modifier
+                                                        .size(32.dp),
+                                                color = MaterialTheme.colors.secondaryVariant
+                                        )
+                                    }
+                                },
+                                elevation = 0.dp
+                        )
+                    }
             ) { contentPadding ->
                 PreferencesScreen(
-                    modifier = Modifier.padding(contentPadding),
-                    preferences = items,
-                    onClick = { item ->
-                        when (item.key) {
-                            "export" -> exportDocumentRequest.launch(
-                                CreateDocument.Args(
-                                    "application/json",
-                                    "appwatcher-" + DbBackupManager.generateFileName(),
-                                    Uri.parse(DbBackupManager.defaultBackupDir.absolutePath),
+                        modifier = Modifier.padding(contentPadding),
+                        preferences = items,
+                        placeholder = { item, paddingValues ->
+                            when (item.key) {
+                                "icon-style" -> Preference(
+                                        item,
+                                        paddingValues,
+                                        secondaryText = {
+                                            Column {
+                                                Text(
+                                                        modifier = Modifier.padding(top = 4.dp),
+                                                        text = stringResource(id = R.string.adaptive_icon_style_summary),
+                                                        style = MaterialTheme.typography.body2.copy(
+                                                                color = MaterialTheme.colors.onSurface
+                                                        )
+                                                )
+                                                IconShapeSelector(
+                                                        prefs = prefs,
+                                                        imageLoader = viewModel.imageLoader,
+                                                        modifier = Modifier
+                                                                .padding(top = 8.dp)
+                                                                .fillMaxWidth()
+                                                )
+                                            }
+                                        },
+                                        onClick = { })
+                                else -> {}
+                            }
+                        },
+                        onClick = { item ->
+                            when (item.key) {
+                                "export" -> exportDocumentRequest.launch(
+                                        CreateDocument.Args(
+                                                "application/json",
+                                                "appwatcher-" + DbBackupManager.generateFileName(),
+                                                Uri.parse(DbBackupManager.defaultBackupDir.absolutePath),
+                                        )
                                 )
-                            )
-                            "import" -> importDocumentRequest.launch(arrayOf("application/json", "text/plain", "*/*"))
-                            "licenses" -> coroutineScope.launch { viewModel.actions.emit(UiAction.OssLicenses) }
-                            "user-log" -> coroutineScope.launch { viewModel.actions.emit(UiAction.OpenUserLog) }
-                            "refresh-history" -> coroutineScope.launch { viewModel.actions.emit(UiAction.OpenRefreshHistory) }
-                            else -> onSettingsItemClick(prefs, item, viewModel)
+                                "import" -> importDocumentRequest.launch(arrayOf("application/json", "text/plain", "*/*"))
+                                "licenses" -> coroutineScope.launch { viewModel.actions.emit(UiAction.OssLicenses) }
+                                "user-log" -> coroutineScope.launch { viewModel.actions.emit(UiAction.OpenUserLog) }
+                                "refresh-history" -> coroutineScope.launch { viewModel.actions.emit(UiAction.OpenRefreshHistory) }
+                                else -> onSettingsItemClick(prefs, item, viewModel)
+                            }
                         }
-                    }
                 )
             }
         }
+    }
+}
+
+@Composable
+fun IconShapeSelector(prefs: Preferences, imageLoader: ImageLoader, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val paths = stringArrayResource(id = R.array.adaptive_icon_style_paths_values)
+    val names = stringArrayResource(id = R.array.adaptive_icon_style_names)
+    val iconSize = 48.dp
+    val iconSizePx = with(LocalDensity.current) { iconSize.roundToPx() }
+    var value by remember { mutableStateOf(prefs.iconShape) }
+
+    FlowRow(
+            modifier = modifier,
+            mainAxisSpacing = 8.dp,
+            crossAxisSpacing = 4.dp
+    )
+    {
+        val isNone = value.isEmpty()
+        Box(
+                modifier = Modifier
+                        .size(iconSize, iconSize)
+                        .border(BorderStroke(1.dp, MaterialTheme.colors.secondaryVariant.copy(
+                            alpha = if (isNone) 1.0f else 0.1f
+                        )))
+                        .clickable(onClick = {
+                            prefs.iconShape = ""
+                            value = ""
+                        }),
+                contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = names[0],
+                color = if (isNone) MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.onSurface
+            )
+        }
+
+        paths.filter { it.isNotEmpty() }.forEachIndexed { index, path ->
+            val mask = AdaptiveIconTransformation.maskToPath(path)
+            val selected = value == path
+            AsyncImage(
+                    modifier = Modifier
+                            .size(iconSize, iconSize)
+                            .clickable(onClick = {
+                                prefs.iconShape = path
+                                value = path
+                            }),
+                    colorFilter = ColorFilter.tint(
+                            color = if (selected) MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.secondary.copy(alpha = 0.3f)
+                    ),
+                    model = ImageRequest.Builder(context)
+                            .data(R.drawable.ic_square)
+                            .size(iconSizePx, iconSizePx)
+                            .transformations(listOf(AdaptiveIconTransformation(context, mask, "icon-style")))
+                            .build(),
+                    contentDescription = names[index],
+                    imageLoader = imageLoader
+            )
+        }
+
     }
 }
 
@@ -113,9 +210,9 @@ fun onSettingsItemClick(prefs: Preferences, item: PreferenceItem, viewModel: Set
         "drive_sync" -> viewModel.gDriveSyncToggle((item as PreferenceItem.Switch).checked)
         "drive-sync-now" -> viewModel.gDriveSyncNow()
         "update_frequency" -> viewModel.changeUpdatePolicy(
-            frequency = (item as PreferenceItem.Pick).value.toInt(),
-            isWifiOnly = prefs.isWifiOnly,
-            isRequiresCharging = prefs.isRequiresCharging
+                frequency = (item as PreferenceItem.Pick).value.toInt(),
+                isWifiOnly = prefs.isWifiOnly,
+                isRequiresCharging = prefs.isRequiresCharging
         )
         "wifi_only" -> {
             val useWifiOnly = (item as PreferenceItem.Switch).checked
@@ -253,10 +350,7 @@ fun PreferencesScreenPreview() {
                                     titleRes = R.string.pref_pull_to_refresh,
                                     key = "pull-to-refresh"
                             ),
-                            PreferenceItem.List(
-                                    entries = R.array.adaptive_icon_style_names,
-                                    entryValues = R.array.adaptive_icon_style_paths_values,
-                                    value = "",
+                            PreferenceItem.Placeholder(
                                     titleRes = R.string.adaptive_icon_style,
                                     summaryRes = R.string.adaptive_icon_style_summary,
                                     key = "icon-style"

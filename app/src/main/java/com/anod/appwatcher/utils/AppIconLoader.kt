@@ -90,7 +90,7 @@ class AppIconLoader(context: Context) {
     private fun request(imageUrl: String, customize: (ImageRequest.Builder) -> Unit = {}): ImageRequest {
         return ImageRequest.Builder(context).apply {
             data(imageUrl.ifEmpty { null })
-            transformations(listOf(AdaptiveIconTransformation(context, iconPath, iconSize, imageUrl)))
+            transformations(listOf(AdaptiveIconTransformation(context, iconPath, imageUrl)))
             size(iconSize, iconSize)
             customize(this)
         }.build()

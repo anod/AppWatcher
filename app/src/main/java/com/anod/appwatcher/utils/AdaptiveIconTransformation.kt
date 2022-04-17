@@ -6,6 +6,7 @@ import android.content.res.Resources
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import coil.size.Size
+import coil.size.pxOrElse
 import coil.transform.Transformation
 import info.anodsplace.applog.AppLog
 import info.anodsplace.graphics.PathParser
@@ -13,17 +14,18 @@ import info.anodsplace.graphics.PathParser
 class AdaptiveIconTransformation(
         private val context: Context,
         private val mask: Path,
-        private val layerSize: Int,
         key: String) : Transformation {
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.DITHER_FLAG or Paint.FILTER_BITMAP_FLAG)
 
-    override val cacheKey: String = "${key.hashCode()}-${mask.hashCode()}-$layerSize"
+    override val cacheKey: String = "${key.hashCode()}-${mask.hashCode()}"
 
     override suspend fun transform(input: Bitmap, size: Size): Bitmap {
-        if (mask.isEmpty || input.width != input.height) {
+        if (mask.isEmpty || input.width != input.height || size.width != size.height) {
             return input
         }
+
+        val layerSize = size.width.pxOrElse { 0 }
 
         val isTransparent = arrayOf(
                 input.getPixel(0, 0) == Color.TRANSPARENT,

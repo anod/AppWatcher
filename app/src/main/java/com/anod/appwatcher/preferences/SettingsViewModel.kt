@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.Operation
+import coil.ImageLoader
 import com.anod.appwatcher.AppWatcherApplication
 import com.anod.appwatcher.R
 import com.anod.appwatcher.backup.ExportTask
@@ -14,6 +15,7 @@ import com.anod.appwatcher.backup.ImportTask
 import com.anod.appwatcher.backup.gdrive.GDriveSync
 import com.anod.appwatcher.compose.UiAction
 import com.anod.appwatcher.sync.SyncScheduler
+import com.anod.appwatcher.utils.AppIconLoader
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import info.anodsplace.applog.AppLog
 import info.anodsplace.compose.PreferenceItem
@@ -35,6 +37,13 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     val isProgressVisible = MutableStateFlow(false)
     val reload = MutableSharedFlow<Boolean>()
     var recreateWatchlistOnBack: Boolean = false
+    val imageLoader: ImageLoader by lazy {
+        ImageLoader.Builder(context)
+                .components {
+                    add(AppIconLoader.PackageIconFetcher.Factory(context))
+                }
+                .build()
+    }
 
     val items = combine(isProgressVisible, reload.onStart { emit(true) }) { (inProgress, _) ->
         preferenceItems(preferences, inProgress, playServices, application)

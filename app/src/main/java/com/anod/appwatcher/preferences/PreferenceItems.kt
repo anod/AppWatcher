@@ -139,10 +139,7 @@ fun preferenceItems(prefs: Preferences, inProgress: Boolean, playServices: Googl
             titleRes = R.string.pref_pull_to_refresh,
             key = "pull-to-refresh"
         ),
-        PreferenceItem.Pick(
-            entriesRes = R.array.adaptive_icon_style_names,
-            entryValuesRes = R.array.adaptive_icon_style_paths_values,
-            value = prefs.iconShape,
+        PreferenceItem.Placeholder(
             titleRes = R.string.adaptive_icon_style,
             summaryRes = R.string.adaptive_icon_style_summary,
             key = "icon-style"

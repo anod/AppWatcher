@@ -120,6 +120,8 @@ dependencies {
 
     // Compose
     implementation("androidx.activity:activity-compose:1.4.0")
+    implementation("com.google.accompanist:accompanist-flowlayout:0.24.6-alpha")
+    implementation("io.coil-kt:coil-compose-base:2.0.0-rc03")
 
     // Google
     implementation("com.google.android.material:material:1.5.0")
@@ -139,7 +141,7 @@ dependencies {
 
     // 3rd party
     implementation("com.squareup.okhttp3:okhttp:4.9.3")
-    implementation("io.coil-kt:coil-base:2.0.0-rc02")
+    implementation("io.coil-kt:coil-base:2.0.0-rc03")
     implementation("com.jakewharton:process-phoenix:2.0.0")
 
     // ViewModel and LiveData
@@ -153,8 +155,8 @@ dependencies {
     kapt("androidx.room:room-compiler:2.4.2")
 
     // Kotlin
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.10")
 
     testImplementation("junit:junit:4.13.2")
