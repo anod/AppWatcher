@@ -115,7 +115,8 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
                                                         imageLoader = viewModel.imageLoader,
                                                         modifier = Modifier
                                                                 .padding(top = 8.dp)
-                                                                .fillMaxWidth()
+                                                                .fillMaxWidth(),
+                                                        onPathChange = { newPath -> viewModel.updateIconsShape(newPath) }
                                                 )
                                             }
                                         },
@@ -146,7 +147,7 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
 }
 
 @Composable
-fun IconShapeSelector(prefs: Preferences, imageLoader: ImageLoader, modifier: Modifier = Modifier) {
+fun IconShapeSelector(prefs: Preferences, imageLoader: ImageLoader, modifier: Modifier = Modifier, onPathChange: (String) -> Unit = {}) {
     val context = LocalContext.current
     val paths = stringArrayResource(id = R.array.adaptive_icon_style_paths_values)
     val names = stringArrayResource(id = R.array.adaptive_icon_style_names)
@@ -168,8 +169,8 @@ fun IconShapeSelector(prefs: Preferences, imageLoader: ImageLoader, modifier: Mo
                             alpha = if (isNone) 1.0f else 0.1f
                         )))
                         .clickable(onClick = {
-                            prefs.iconShape = ""
                             value = ""
+                            onPathChange("")
                         }),
                 contentAlignment = Alignment.Center
         ) {
@@ -186,8 +187,8 @@ fun IconShapeSelector(prefs: Preferences, imageLoader: ImageLoader, modifier: Mo
                     modifier = Modifier
                             .size(iconSize, iconSize)
                             .clickable(onClick = {
-                                prefs.iconShape = path
                                 value = path
+                                onPathChange(path)
                             }),
                     colorFilter = ColorFilter.tint(
                             color = if (selected) MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.secondary.copy(alpha = 0.3f)

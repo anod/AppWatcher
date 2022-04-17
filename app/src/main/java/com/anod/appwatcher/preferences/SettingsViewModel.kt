@@ -178,16 +178,13 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun updateIconsShape(iconShapes: String) {
-        if (preferences.iconShape == iconShapes) {
+    fun updateIconsShape(newIconShape: String) {
+        if (preferences.iconShape == newIconShape) {
             return
         }
-        preferences.iconShape = iconShapes
-        com.anod.appwatcher.Application.provide(context).iconLoader.setIconShape(iconShapes)
+        preferences.iconShape = newIconShape
+        com.anod.appwatcher.Application.provide(context).iconLoader.setIconShape(newIconShape)
         recreateWatchlistOnBack = true
-        viewModelScope.launch {
-            actions.emit(UiAction.Recreate)
-        }
     }
 
     fun updateCrashReports(checked: Boolean) {
