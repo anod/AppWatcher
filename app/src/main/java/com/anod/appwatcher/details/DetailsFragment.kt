@@ -228,7 +228,9 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
                         viewModel.loadRemoteChangelog()
                     }
                 } catch (e: AuthTokenStartIntent) {
-                    startActivity(e.intent)
+                    if (isAdded) {
+                        startActivity(e.intent)
+                    }
                 } catch (e: Exception) {
                     AppLog.e("onResume", e)
                 }

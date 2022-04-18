@@ -12,6 +12,7 @@ import androidx.core.content.contentValuesOf
 import androidx.work.Data
 import com.anod.appwatcher.Application
 import com.anod.appwatcher.accounts.AuthTokenBlocking
+import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.backup.gdrive.GDriveSilentSignIn
 import com.anod.appwatcher.backup.gdrive.GDriveSync
 import com.anod.appwatcher.database.*
@@ -343,7 +344,11 @@ class UpdateCheck(private val context: ApplicationContext) {
                 worker.doSync()
                 pref.lastDriveSyncTime = System.currentTimeMillis()
             } catch (e: GDriveSync.SyncError) {
-                AppLog.e("Perform Google Drive sync exception: ${e.message ?: "'empty message'"}", e)
+                if (e.error != null) {
+                    AppLog.e("Perform Google Drive sync exception: Requires interactive sign in: '${e.message}'","UpdateCheck")
+                } else {
+                    AppLog.e("Perform Google Drive sync exception: ${e.message}", "UpdateCheck", e)
+                }
             }
         } else {
             AppLog.d("Google Drive sync is fresh")
@@ -355,6 +360,8 @@ class UpdateCheck(private val context: ApplicationContext) {
         var authToken: String? = null
         try {
             authToken = tokenHelper.retrieve(account)
+        } catch (e: AuthTokenStartIntent) {
+            AppLog.e("AuthToken: require interactive sing in")
         } catch (e: Throwable) {
             AppLog.e("AuthTokenBlocking request exception: " + e.message, e)
         }

@@ -57,7 +57,7 @@ class UploadService(appContext: Context, params: WorkerParameters) : CoroutineWo
         try {
             worker.doUploadInBackground()
         } catch (e: Exception) {
-            AppLog.e(e)
+            AppLog.e("UploadService::doWork - ${e.message}", e)
             DriveService.extractUserRecoverableException(e)?.let {
                 val settingActivity = Intent(applicationContext, SettingsActivity::class.java).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK

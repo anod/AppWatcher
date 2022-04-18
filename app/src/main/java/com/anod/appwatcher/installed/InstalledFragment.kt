@@ -28,6 +28,7 @@ import info.anodsplace.framework.app.DialogSingleChoice
 import info.anodsplace.framework.app.FragmentContainerFactory
 import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.content.startActivitySafely
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
@@ -240,7 +241,10 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
                     activity?.finish()
                 }
             } catch (e: AuthTokenStartIntent) {
-                startActivitySafely(e.intent)
+                if (isAdded) {
+                    startActivitySafely(e.intent)
+                }
+                delay(100)
                 activity?.finish()
             }
         }
