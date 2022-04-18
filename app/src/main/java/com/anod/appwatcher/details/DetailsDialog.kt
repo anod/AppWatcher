@@ -10,15 +10,18 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commitNow
 import com.anod.appwatcher.R
 import com.anod.appwatcher.utils.Theme
+import com.anod.appwatcher.utils.prefs
+import org.koin.core.component.KoinComponent
 
-class DetailsDialog: DialogFragment(R.layout.activity_app_changelog) {
+class DetailsDialog : DialogFragment(R.layout.activity_app_changelog), KoinComponent {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         if (context is Activity) {
-            setStyle(STYLE_NORMAL, Theme(context).themeDialogNoActionBar)
+            setStyle(STYLE_NORMAL, Theme(context, prefs).themeDialogNoActionBar)
         }
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val appId = requireArguments().getString(DetailsFragment.extraAppId) ?: ""

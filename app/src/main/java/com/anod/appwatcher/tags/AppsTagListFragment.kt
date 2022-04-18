@@ -7,9 +7,11 @@ import androidx.fragment.app.Fragment
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.databinding.ListItemEmptyBinding
+import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.*
 import info.anodsplace.framework.app.FragmentContainerFactory
 import kotlinx.coroutines.flow.MutableSharedFlow
+import org.koin.core.component.KoinComponent
 
 /**
  * @author Alex Gavrishev
@@ -17,7 +19,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
  * @date 01/04/2017.
  */
 
-class AppsTagListFragment : WatchListFragment() {
+class AppsTagListFragment : WatchListFragment(), KoinComponent {
 
     override fun mapAction(it: WishListAction): WishListAction {
         if (it is EmptyButton) {

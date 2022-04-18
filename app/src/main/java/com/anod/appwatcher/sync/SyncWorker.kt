@@ -5,15 +5,16 @@ import android.content.Intent
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import info.anodsplace.applog.AppLog
-import info.anodsplace.framework.app.ApplicationContext
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
 
-class SyncWorker(appContext: Context, workerParams: WorkerParameters) : CoroutineWorker(appContext, workerParams) {
+class SyncWorker(appContext: Context, workerParams: WorkerParameters) : CoroutineWorker(appContext, workerParams), KoinComponent {
     override suspend fun doWork(): Result {
 
         AppLog.d("Scheduled call executed. Id: $id")
 
-        val syncAdapter = UpdateCheck(ApplicationContext(applicationContext))
-        val result  = syncAdapter.perform(inputData)
+        val syncAdapter = get<UpdateCheck>()
+        val result = syncAdapter.perform(inputData)
 
         val finishIntent = Intent(UpdateCheck.syncStop)
         finishIntent.putExtra(UpdateCheck.extrasUpdatesCount, result)
@@ -22,6 +23,3 @@ class SyncWorker(appContext: Context, workerParams: WorkerParameters) : Coroutin
         return Result.success()
     }
 }
-
-
-

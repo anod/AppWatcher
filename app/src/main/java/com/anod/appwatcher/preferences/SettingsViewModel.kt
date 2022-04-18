@@ -8,69 +8,65 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.Operation
 import coil.ImageLoader
-import com.anod.appwatcher.AppWatcherApplication
 import com.anod.appwatcher.R
-import com.anod.appwatcher.backup.ExportTask
-import com.anod.appwatcher.backup.ImportTask
+import com.anod.appwatcher.backup.ExportBackupTask
+import com.anod.appwatcher.backup.ImportBackupTask
 import com.anod.appwatcher.backup.gdrive.GDriveSync
+import com.anod.appwatcher.backup.gdrive.UploadServiceContentObserver
 import com.anod.appwatcher.compose.UiAction
+import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.sync.SyncScheduler
-import com.anod.appwatcher.utils.AppIconLoader
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import info.anodsplace.applog.AppLog
 import info.anodsplace.compose.PreferenceItem
-import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.playservices.GooglePlayServices
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
+import org.koin.core.component.inject
+import org.koin.core.parameter.parametersOf
 
-class SettingsViewModel(application: Application) : AndroidViewModel(application) {
+class SettingsViewModel(application: Application) : AndroidViewModel(application), KoinComponent {
 
     private val playServices: GooglePlayServices = GooglePlayServices(application)
-    private val appScope: CoroutineScope = com.anod.appwatcher.Application.provide(application).appScope
-    private val context: Context
-        get() = getApplication<AppWatcherApplication>()
+    private val appScope: CoroutineScope by inject()
+    private val context: Context by inject()
+    val prefs: Preferences by inject()
+    val imageLoader: ImageLoader by inject()
 
-    val preferences: Preferences = com.anod.appwatcher.Application.provide(application).prefs
     val actions: MutableSharedFlow<UiAction> = MutableSharedFlow()
     val isProgressVisible = MutableStateFlow(false)
     val reload = MutableSharedFlow<Boolean>()
     var recreateWatchlistOnBack: Boolean = false
-    val imageLoader: ImageLoader by lazy {
-        ImageLoader.Builder(context)
-                .components {
-                    add(AppIconLoader.PackageIconFetcher.Factory(context))
-                }
-                .build()
-    }
 
     val items = combine(isProgressVisible, reload.onStart { emit(true) }) { (inProgress, _) ->
-        preferenceItems(preferences, inProgress, playServices, application)
+        preferenceItems(prefs, inProgress, playServices, application)
     }.stateIn(viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = emptyList())
 
     fun import(srcUri: Uri) = flow {
         emit(-1)
-        val task = ImportTask(ApplicationContext(context))
+        val task = get<ImportBackupTask>()
         emit(task.execute(srcUri))
     }
 
     fun export(dstUri: Uri) = flow {
         emit(-1)
-        val task = ExportTask(ApplicationContext(context))
+        val task = get<ExportBackupTask>()
         emit(task.execute(dstUri))
     }
 
     fun gDriveSyncToggle(checked: Boolean) {
         if (checked) {
-            preferences.isDriveSyncEnabled = true
+            prefs.isDriveSyncEnabled = true
             isProgressVisible.value = true
             viewModelScope.launch {
                 actions.emit(UiAction.GDriveSignIn)
                 reload.emit(true)
             }
         } else {
-            preferences.isDriveSyncEnabled = false
+            prefs.isDriveSyncEnabled = false
             viewModelScope.launch {
                 actions.emit(UiAction.GDriveSignOut)
                 reload.emit(true)
@@ -85,8 +81,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 try {
                     isProgressVisible.value = true
                     actions.emit(UiAction.ShowToast(resId = R.string.sync_start))
-                    GDriveSync(context, googleAccount).doSync()
-                    preferences.lastDriveSyncTime = System.currentTimeMillis()
+                    val gDriveSync = get<GDriveSync> { parametersOf(googleAccount) }
+                    gDriveSync.doSync()
+                    prefs.lastDriveSyncTime = System.currentTimeMillis()
                     isProgressVisible.value = false
                     actions.emit(UiAction.ShowToast(resId = R.string.sync_finish))
                 } catch (e: Exception) {
@@ -110,13 +107,16 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     fun onGDriveLoginResult(isSuccess: Boolean, errorCode: Int) {
         if (isSuccess) {
-            preferences.isDriveSyncEnabled = true
-            com.anod.appwatcher.Application.provide(context).uploadServiceContentObserver
+            prefs.isDriveSyncEnabled = true
+            val observer = get<UploadServiceContentObserver>()
+            val invalidationTracker = get<AppsDatabase>().invalidationTracker
+            invalidationTracker.removeObserver(observer)
+            invalidationTracker.addObserver(observer)
             viewModelScope.launch {
                 actions.emit(UiAction.ShowToast(resId = R.string.gdrive_connected))
             }
         } else {
-            preferences.isDriveSyncEnabled = false
+            prefs.isDriveSyncEnabled = false
             viewModelScope.launch {
                 reload.emit(true)
                 actions.emit(UiAction.ShowToast(text = "Drive login error $errorCode"))
@@ -126,20 +126,20 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun changeUpdatePolicy(frequency: Int, isWifiOnly: Boolean, isRequiresCharging: Boolean) {
-        preferences.updatesFrequency = frequency
-        preferences.isWifiOnly = isWifiOnly
-        preferences.isRequiresCharging = isRequiresCharging
+        prefs.updatesFrequency = frequency
+        prefs.isWifiOnly = isWifiOnly
+        prefs.isRequiresCharging = isRequiresCharging
 
-        val useAutoSync = preferences.useAutoSync
+        val useAutoSync = prefs.useAutoSync
 
         appScope.launch {
             reload.emit(true)
             if (useAutoSync) {
                 SyncScheduler(context).schedule(
-                    preferences.isRequiresCharging,
-                    preferences.isWifiOnly,
-                    preferences.updatesFrequency.toLong(),
-                    true
+                        prefs.isRequiresCharging,
+                        prefs.isWifiOnly,
+                        prefs.updatesFrequency.toLong(),
+                        true
                 ).first { it !is Operation.State.IN_PROGRESS }
             } else {
                 SyncScheduler(context).cancel().first { it !is Operation.State.IN_PROGRESS }
@@ -156,21 +156,21 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun updateTheme(newThemeIndex: Int) {
-        if (preferences.themeIndex == newThemeIndex) {
+        if (prefs.themeIndex == newThemeIndex) {
             return
         }
-        val nightMode = preferences.nightMode
-        val theme = preferences.theme
-        preferences.themeIndex = newThemeIndex
+        val nightMode = prefs.nightMode
+        val theme = prefs.theme
+        prefs.themeIndex = newThemeIndex
         var recreate = false
-        if (preferences.theme != theme) {
+        if (prefs.theme != theme) {
             recreate = true
         }
-        if (preferences.nightMode != nightMode) {
+        if (prefs.nightMode != nightMode) {
             recreate = true
         }
         if (recreate) {
-            AppCompatDelegate.setDefaultNightMode(preferences.nightMode)
+            AppCompatDelegate.setDefaultNightMode(prefs.nightMode)
             recreateWatchlistOnBack = true
             viewModelScope.launch {
                 actions.emit(UiAction.Recreate)
@@ -179,16 +179,15 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun updateIconsShape(newIconShape: String) {
-        if (preferences.iconShape == newIconShape) {
+        if (prefs.iconShape == newIconShape) {
             return
         }
-        preferences.iconShape = newIconShape
-        com.anod.appwatcher.Application.provide(context).iconLoader.setIconShape(newIconShape)
+        prefs.iconShape = newIconShape
         recreateWatchlistOnBack = true
     }
 
     fun updateCrashReports(checked: Boolean) {
-        preferences.collectCrashReports = checked
+        prefs.collectCrashReports = checked
         viewModelScope.launch {
             actions.emit(UiAction.Recreate)
         }

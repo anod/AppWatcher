@@ -3,7 +3,6 @@ package com.anod.appwatcher.installed
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.anod.appwatcher.Application
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppListItem
@@ -19,9 +18,9 @@ class InstalledPagingSource(
         private val titleFilter: String,
         private val config: WatchListPagingSource.Config,
         private val changelogAdapter: ChangelogAdapter,
-        private val appContext: ApplicationContext
+        private val appContext: ApplicationContext,
+        private val database: AppsDatabase
 ) : PagingSource<Int, SectionItem>() {
-    private val database: AppsDatabase = Application.provide(appContext).database
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, SectionItem> {
         val installed = InstalledTaskWorker(appContext, sortId, titleFilter).run()

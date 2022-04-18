@@ -7,11 +7,10 @@ import android.os.Environment
 import android.widget.Toast
 import androidx.core.net.toFile
 import com.anod.appwatcher.R
-import info.anodsplace.framework.app.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class ImportTask(private val context: ApplicationContext) {
+class ImportBackupTask(private val dbBackupManager: DbBackupManager) {
 
     suspend fun execute(srcUri: Uri): Int = withContext(Dispatchers.IO) {
         if (srcUri.scheme == ContentResolver.SCHEME_FILE) {
@@ -20,7 +19,7 @@ class ImportTask(private val context: ApplicationContext) {
                 return@withContext res
             }
         }
-        return@withContext DbBackupManager(context.actual).doImport(srcUri)
+        return@withContext dbBackupManager.doImport(srcUri)
     }
 
     private fun validateFileDestination(destUri: Uri): Int {

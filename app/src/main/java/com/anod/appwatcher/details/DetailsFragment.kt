@@ -5,7 +5,10 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.ColorInt
 import androidx.appcompat.widget.Toolbar
@@ -20,7 +23,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
@@ -30,7 +32,6 @@ import com.anod.appwatcher.database.entities.generateTitle
 import com.anod.appwatcher.databinding.FragmentAppChangelogBinding
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
-import com.anod.appwatcher.provide
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.*
 import com.anod.appwatcher.watchlist.AppViewHolderResourceProvider
@@ -48,13 +49,16 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import kotlin.math.abs
 
-class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetChangedListener, Toolbar.OnMenuItemClickListener {
+class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetChangedListener, Toolbar.OnMenuItemClickListener, KoinComponent {
 
     private var loaded = false
     private val viewModel: DetailsViewModel by viewModels()
     private var toggleMenu: MenuItem? = null
+    private val authToken: AuthTokenBlocking by inject()
 
     private val titleString: AlphaSpannableString by lazy {
         val span = AlphaForegroundColorSpan(ColorAttribute(android.R.attr.textColor, requireContext(), Color.WHITE).value)
@@ -66,8 +70,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         AlphaSpannableString(viewModel.app.value!!.uploadDate, span)
     }
 
-    private val iconLoader: AppIconLoader
-        get() = Application.provide(this).iconLoader
+    private val iconLoader: AppIconLoader by inject()
 
     private val dataProvider: AppViewHolderResourceProvider by lazy {
         AppViewHolderResourceProvider(
@@ -176,7 +179,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
                             adapter.setData(viewModel.localChangelog, viewModel.recentChange)
                             if (adapter.isEmpty) {
                                 binding.showErrorWithRetry()
-                                if (!provide.networkConnection.isNetworkAvailable) {
+                                if (!networkConnection.isNetworkAvailable) {
                                     Toast.makeText(requireContext(), R.string.check_connection, Toast.LENGTH_SHORT).show()
                                 }
                             } else {
@@ -197,7 +200,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
                     AppListTable.ERROR_INSERT -> Toast.makeText(requireContext(), R.string.error_insert_app, Toast.LENGTH_SHORT).show()
                     else -> {
                         val info = AppInfo(viewModel.document!!)
-                        TagSnackbar.make(view, info, false, requireActivity()).show()
+                        TagSnackbar.make(view, info, false, requireActivity(), prefs).show()
                     }
                 }
             }
@@ -219,9 +222,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         viewModel.account?.let { account ->
             lifecycleScope.launch {
                 try {
-                    val token = AuthTokenBlocking(requireContext().applicationContext).retrieve(account)
-                    if (token.isNotBlank()) {
-                        viewModel.authToken = token
+                    if (authToken.refreshToken(account)) {
                         viewModel.loadRemoteChangelog()
                     } else {
                         AppLog.e("Error retrieving token")
@@ -379,7 +380,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         applyColor(darkSwatch.rgb)
         animateBackground()
 
-        if (Theme(requireActivity()).isNightTheme) {
+        if (Theme(requireActivity(), prefs).isNightTheme) {
             appDetailsView.updateAccentColor(ContextCompat.getColor(requireContext(), R.color.black))
         } else {
             appDetailsView.updateAccentColor(darkSwatch.rgb)

@@ -5,19 +5,20 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.paging.*
-import com.anod.appwatcher.AppComponent
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.model.AppListFilter
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
+import com.anod.appwatcher.utils.PackageChangedReceiver
 import com.anod.appwatcher.utils.SelectionState
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.content.InstalledApps
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import org.koin.core.component.KoinComponent
 
 /**
  * @author Alex Gavrishev
@@ -26,19 +27,22 @@ import kotlinx.coroutines.flow.*
 
 typealias InstalledPackageRow = Pair<String, Int>
 
-abstract class WatchListViewModel(application: Application) : AndroidViewModel(application) {
+abstract class WatchListViewModel(application: Application) : AndroidViewModel(application), KoinComponent {
     companion object {
         const val recentlyInstalledViews = 10
     }
 
     val context: ApplicationContext
-        get() = ApplicationContext(getApplication())
-    val provide: AppComponent
-        get() = com.anod.appwatcher.Application.provide(context)
+        get() = getKoin().get()
     val database: AppsDatabase
-        get() = provide.database
+        get() = getKoin().get()
     val prefs: Preferences
-        get() = provide.prefs
+        get() = getKoin().get()
+    private val packageChanged: PackageChangedReceiver
+        get() = getKoin().get()
+    private val recentlyInstalledPackagesLoader: RecentlyInstalledPackagesLoader
+        get() = getKoin().get()
+
     var titleFilter = ""
     var sortId = 0
     var tag: Tag? = null
@@ -69,11 +73,11 @@ abstract class WatchListViewModel(application: Application) : AndroidViewModel(a
     abstract fun createPagingSource(config: WatchListPagingSource.Config): PagingSource<Int, SectionItem>
     abstract fun createSectionHeaderFactory(config: WatchListPagingSource.Config): SectionHeaderFactory
 
-    val recentlyInstalledPackages: Flow<List<InstalledPackageRow>> = provide
-        .packageChanged
-        .onStart { emit("") }
-        .map { provide.recentlyInstalledPackages.load() }
-        .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
+    val recentlyInstalledPackages: Flow<List<InstalledPackageRow>> = packageChanged
+            .observer
+            .onStart { emit("") }
+            .map { recentlyInstalledPackagesLoader.load() }
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
 
     fun load(config: WatchListPagingSource.Config, initialKey: Int? = null): Flow<PagingData<SectionItem>> {
         headerFactory = createSectionHeaderFactory(config)
@@ -117,7 +121,7 @@ abstract class WatchListViewModel(application: Application) : AndroidViewModel(a
     }
 }
 
-class AppsWatchListViewModel(application: Application) : WatchListViewModel(application) {
+class AppsWatchListViewModel(application: Application) : WatchListViewModel(application), KoinComponent {
 
     override fun createPagingSource(config: WatchListPagingSource.Config) = WatchListPagingSource(
             sortId = sortId,
@@ -125,7 +129,8 @@ class AppsWatchListViewModel(application: Application) : WatchListViewModel(appl
             config = config,
             itemFilter = filter,
             tag = tag,
-            appContext = context
+            appContext = context,
+            database = database
     )
 
     override fun createSectionHeaderFactory(config: WatchListPagingSource.Config) = DefaultSectionHeaderFactory(config.showRecentlyUpdated)

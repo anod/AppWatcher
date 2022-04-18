@@ -2,6 +2,7 @@
 package com.anod.appwatcher.watchlist
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.lifecycle.LifecycleOwner
@@ -9,12 +10,11 @@ import androidx.lifecycle.LiveData
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.databinding.ListItemEmptyBinding
-import com.anod.appwatcher.utils.EventFlow
 import com.anod.appwatcher.utils.AppIconLoader
+import com.anod.appwatcher.utils.EventFlow
 import info.anodsplace.framework.content.InstalledApps
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -45,21 +45,21 @@ class WatchListPagingAdapter(
         private val emptyViewHolderFactory: (itemBinding: ListItemEmptyBinding) -> EmptyViewHolder,
         private val calcSelection: (appItem: AppListItem) -> AppViewHolder.Selection,
         selection: LiveData<Pair<Int, AppViewHolder.Selection>>,
-        private val context: Context
+        private val context: Context,
+        private val iconLoader: AppIconLoader,
+        private val packageManager: PackageManager
 ) : PagingDataAdapter<SectionItem, RecyclerView.ViewHolder>(SectionItemDiffCallback()) {
 
     private val itemDataProvider = AppViewHolderResourceProvider(context, installedApps)
-    private val appIcon: AppIconLoader = Application.provide(context).iconLoader
-    private val packageManager = Application.provide(context).packageManager
 
     init {
-        selection.observe(lifecycleOwner, {
+        selection.observe(lifecycleOwner) {
             if (it.first >= 0) {
                 notifyItemChanged(it.first)
             } else {
                 notifyDataSetChanged()
             }
-        })
+        }
     }
 
     object ViewType {
@@ -113,11 +113,11 @@ class WatchListPagingAdapter(
             }
             ViewType.recentItem -> {
                 val view = LayoutInflater.from(context).inflate(R.layout.list_item_recently_installed, parent, false)
-                return RecentlyInstalledViewHolder(view, lifecycleOwner, recentlyInstalledPackages, appIcon, packageManager, action)
+                return RecentlyInstalledViewHolder(view, lifecycleOwner, recentlyInstalledPackages, iconLoader, packageManager, action)
             }
             ViewType.appItem -> {
                 val itemView = LayoutInflater.from(context).inflate(R.layout.list_item_app, parent, false)
-                AppViewHolder(itemView, itemDataProvider, appIcon, action)
+                AppViewHolder(itemView, itemDataProvider, iconLoader, action)
             }
             ViewType.emptyItem -> {
                 val binding = ListItemEmptyBinding.inflate(LayoutInflater.from(context), parent, false)

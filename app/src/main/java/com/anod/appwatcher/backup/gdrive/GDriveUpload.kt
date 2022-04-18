@@ -1,8 +1,6 @@
 package com.anod.appwatcher.backup.gdrive
 
-import android.content.Context
 import android.text.format.Formatter
-import com.anod.appwatcher.Application
 import com.anod.appwatcher.backup.DbJsonWriter
 import com.anod.appwatcher.database.AppsDatabase
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -17,17 +15,13 @@ import kotlinx.coroutines.withContext
  * @author Alex Gavrishev
  * @date 26/06/2017
  */
-class GDriveUpload(private val context: ApplicationContext, private val googleAccount: GoogleSignInAccount) {
-
-    constructor(context: Context, googleAccount: GoogleSignInAccount)
-            : this(ApplicationContext(context), googleAccount)
+class GDriveUpload(private val googleAccount: GoogleSignInAccount, private val context: ApplicationContext, private val database: AppsDatabase) {
 
     @Throws(Exception::class)
     suspend fun doUploadInBackground() {
-        val db = Application.provide(context).database
         sLock.withLock {
             try {
-                doUploadLocked(db)
+                doUploadLocked(database)
             } catch (e: Exception) {
                 throw e
             }

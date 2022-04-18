@@ -1,18 +1,15 @@
 // Copyright (c) 2019. Alex Gavrishev
 package com.anod.appwatcher.installed
 
-import android.accounts.Account
-import android.content.Context
 import androidx.collection.SimpleArrayMap
-import com.anod.appwatcher.Application
 import finsky.api.BulkDocId
-import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.playstore.BulkDetailsEndpoint
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
-import java.util.*
+import org.koin.core.Koin
+import org.koin.core.parameter.parametersOf
 
 sealed class ImportStatus
 object ImportNotStarted : ImportStatus()
@@ -20,13 +17,10 @@ class ImportStarted(val docIds: List<String>) : ImportStatus()
 class ImportProgress(val docIds: List<String>, val result: SimpleArrayMap<String, Int>) : ImportStatus()
 object ImportFinished : ImportStatus()
 
-internal class ImportBulkManager(private val context: Context) {
+internal class ImportBulkManager(private val koin: Koin) {
 
     private var listsDocIds: MutableList<MutableList<BulkDocId>?> = mutableListOf()
     private var currentBulk: Int = 0
-
-    private var account: Account? = null
-    private var authSubToken: String = ""
 
     fun reset() {
         listsDocIds = mutableListOf()
@@ -52,9 +46,7 @@ internal class ImportBulkManager(private val context: Context) {
     val isEmpty: Boolean
         get() = listsDocIds.isEmpty()
 
-    suspend fun start(account: Account, authSubToken: String): Flow<ImportStatus> = withContext(Main) {
-        this@ImportBulkManager.account = account
-        this@ImportBulkManager.authSubToken = authSubToken
+    suspend fun start(): Flow<ImportStatus> = withContext(Main) {
         currentBulk = 0
         return@withContext flow {
             for (items in listsDocIds) {
@@ -70,19 +62,11 @@ internal class ImportBulkManager(private val context: Context) {
     }
 
     private suspend fun importDetails(docIds: List<BulkDocId>): SimpleArrayMap<String, Int> = withContext(Main) {
-        val endpoint = BulkDetailsEndpoint(
-                context,
-                Application.provide(context).networkClient,
-                Application.provide(context).deviceInfo,
-                account!!,
-                docIds
-        ).also {
-            it.authToken = authSubToken
-        }
+        val endpoint = koin.get<BulkDetailsEndpoint> { parametersOf(docIds) }
         try {
             val model = endpoint.start()
             val docs = model.documents.toTypedArray()
-            val task = ImportTask(ApplicationContext(context))
+            val task = koin.get<ImportInstalledTask>()
             return@withContext task.execute(*docs)
         } catch (e: Exception) {
             return@withContext SimpleArrayMap<String, Int>()

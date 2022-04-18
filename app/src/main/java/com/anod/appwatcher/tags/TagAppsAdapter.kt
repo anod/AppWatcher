@@ -7,13 +7,12 @@ import android.view.ViewGroup
 import android.widget.CheckedTextView
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
-import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.utils.AppIconLoader
 
-internal class TagAppsAdapter(private val context: Context, private val tagAppsImport: TagAppsImport)
+internal class TagAppsAdapter(private val context: Context, private val tagAppsImport: TagAppsImport, private val iconLoader: AppIconLoader)
     : RecyclerView.Adapter<TagAppsAdapter.ItemViewHolder>() {
 
     private var apps: List<AppListItem> = emptyList()
@@ -25,7 +24,7 @@ internal class TagAppsAdapter(private val context: Context, private val tagAppsI
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         val itemView = LayoutInflater.from(context).inflate(R.layout.list_item_import_app, parent, false)
-        return ItemViewHolder(itemView, mIconLoader, tagAppsImport)
+        return ItemViewHolder(itemView, iconLoader, tagAppsImport)
     }
 
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
@@ -35,8 +34,6 @@ internal class TagAppsAdapter(private val context: Context, private val tagAppsI
     override fun getItemCount(): Int {
         return apps.size
     }
-
-    private val mIconLoader: AppIconLoader = Application.provide(context).iconLoader
 
     internal class ItemViewHolder(
             itemView: View,

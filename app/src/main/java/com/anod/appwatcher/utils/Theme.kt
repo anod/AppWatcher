@@ -2,7 +2,6 @@ package com.anod.appwatcher.utils
 
 import android.app.Activity
 import android.content.res.Configuration
-import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.preferences.Preferences
 import info.anodsplace.framework.app.CustomThemeColor
@@ -12,12 +11,12 @@ import info.anodsplace.framework.app.CustomThemeColors
  * @author Alex Gavrishev
  * @date 07/12/2017
  */
-class Theme(private val activity: Activity) {
+class Theme(private val activity: Activity, private val prefs: Preferences) {
 
     val theme: Int
         get() {
             if (isNightMode) {
-                if (Application.provide(activity).prefs.theme == Preferences.THEME_BLACK) {
+                if (prefs.theme == Preferences.THEME_BLACK) {
                     return R.style.AppTheme_Black
                 }
             }
@@ -27,7 +26,7 @@ class Theme(private val activity: Activity) {
     val themeLightActionBar: Int
         get() {
             if (isNightMode) {
-                if (Application.provide(activity).prefs.theme == Preferences.THEME_BLACK) {
+                if (prefs.theme == Preferences.THEME_BLACK) {
                     return R.style.AppTheme_Black_LightActionBar
                 }
             }
@@ -37,7 +36,7 @@ class Theme(private val activity: Activity) {
     val themeDarkActionBar: Int
         get() {
             if (isNightMode) {
-                if (Application.provide(activity).prefs.theme == Preferences.THEME_BLACK) {
+                if (prefs.theme == Preferences.THEME_BLACK) {
                     return R.style.AppTheme_Black
                 }
                 R.style.AppTheme_Main
@@ -50,7 +49,7 @@ class Theme(private val activity: Activity) {
             when (isNightMode) {
                 false ->
                     CustomThemeColors(CustomThemeColor.white, CustomThemeColor.white)
-                Application.provide(activity).prefs.theme == Preferences.THEME_BLACK ->
+                prefs.theme == Preferences.THEME_BLACK ->
                     CustomThemeColors(CustomThemeColor.black, CustomThemeColor.black)
                 else ->
                     CustomThemeColors(CustomThemeColor(0, R.color.dark_primary_base, false), CustomThemeColor(0, R.color.dark_primary_base, false))
@@ -59,7 +58,7 @@ class Theme(private val activity: Activity) {
     val themeDialog: Int
         get() {
             if (isNightMode) {
-                if (Application.provide(activity).prefs.theme == Preferences.THEME_BLACK) {
+                if (prefs.theme == Preferences.THEME_BLACK) {
                     return R.style.AppTheme_Dialog_Black
                 }
             }
@@ -69,7 +68,7 @@ class Theme(private val activity: Activity) {
     val themeDialogNoActionBar: Int
         get() {
             if (isNightMode) {
-                if (Application.provide(activity).prefs.theme == Preferences.THEME_BLACK) {
+                if (prefs.theme == Preferences.THEME_BLACK) {
                     return R.style.AppTheme_Dialog_NoActionBar_Black
                 }
             }

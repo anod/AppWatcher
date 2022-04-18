@@ -3,7 +3,6 @@ package com.anod.appwatcher.watchlist
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.anod.appwatcher.Application
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.SqlOffset
@@ -22,7 +21,8 @@ class WatchListPagingSource(
         private val config: Config,
         private val itemFilter: AppListFilter,
         private val tag: Tag? = null,
-        private val appContext: ApplicationContext
+        private val appContext: ApplicationContext,
+        private val database: AppsDatabase
 ) : PagingSource<Int, SectionItem>() {
 
     class Config(
@@ -31,8 +31,6 @@ class WatchListPagingSource(
             val showRecentlyInstalled: Boolean,
             val selectionMode: Boolean = false
     )
-
-    private val database: AppsDatabase = Application.provide(appContext).database
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, SectionItem> {
         val offset = params.key ?: 0

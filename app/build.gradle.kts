@@ -141,6 +141,7 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.9.3")
     implementation("io.coil-kt:coil-base:2.0.0-rc03")
     implementation("com.jakewharton:process-phoenix:2.0.0")
+    implementation("io.insert-koin:koin-core:3.2.0-beta-1")
 
     // ViewModel and LiveData
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1")

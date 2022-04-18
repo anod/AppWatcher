@@ -4,22 +4,47 @@ import android.accounts.Account
 import android.accounts.AccountManager
 import android.accounts.AuthenticatorException
 import android.accounts.OperationCanceledException
-import android.content.Context
 import android.content.Intent
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.withContext
 import java.io.IOException
+import java.util.concurrent.TimeUnit
 
-class AuthTokenStartIntent(val intent: Intent) : RuntimeException("Auth Token Intent: $intent")
+class AuthTokenStartIntent(val intent: Intent) : RuntimeException("getAuthToken finished with intent: $intent")
 
 class AuthTokenBlocking(context: ApplicationContext) {
-    constructor(context: Context) : this(ApplicationContext(context))
+
+    companion object {
+        private const val AUTH_TOKEN_TYPE = "androidmarket"
+        const val ACCOUNT_TYPE = "com.google"
+        private val expiration = TimeUnit.MINUTES.toMillis(5L)
+    }
+
+    val isFresh: Boolean
+        get() = token.isNotEmpty() && lastUpdated > 0 && (System.currentTimeMillis() - lastUpdated) < expiration
+
+    val tokenState = MutableStateFlow("")
+    val tokenAvailable = tokenState.filter { it.isNotEmpty() }
+    val token: String
+        get() = tokenState.value
 
     private val accountManager: AccountManager = AccountManager.get(context.actual)
+    private var lastUpdated = 0L
 
-    suspend fun retrieve(acc: Account): String = withContext(Dispatchers.IO) {
+    suspend fun refreshToken(account: Account): Boolean = withContext(Dispatchers.Main) {
+        tokenState.value = retrieve(account)
+        if (tokenState.value.isEmpty()) {
+            return@withContext false
+        }
+        lastUpdated = System.currentTimeMillis()
+        return@withContext true
+    }
+
+    private suspend fun retrieve(acc: Account): String = withContext(Dispatchers.IO) {
         var token = ""
         try {
             token = getAuthToken(acc)
@@ -59,10 +84,5 @@ class AuthTokenBlocking(context: ApplicationContext) {
         }
 
         return token
-    }
-
-    companion object {
-        private const val AUTH_TOKEN_TYPE = "androidmarket"
-        const val ACCOUNT_TYPE = "com.google"
     }
 }

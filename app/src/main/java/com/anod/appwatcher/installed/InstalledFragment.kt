@@ -19,8 +19,10 @@ import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
-import com.anod.appwatcher.provide
 import com.anod.appwatcher.utils.EventFlow
+import com.anod.appwatcher.utils.PackageChangedReceiver
+import com.anod.appwatcher.utils.account
+import com.anod.appwatcher.utils.networkConnection
 import com.anod.appwatcher.watchlist.*
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
@@ -29,16 +31,20 @@ import info.anodsplace.framework.app.FragmentContainerFactory
 import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.content.startActivitySafely
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
+import org.koin.core.component.inject
 
-class InstalledFragment : WatchListFragment(), ActionMode.Callback {
+class InstalledFragment : WatchListFragment(), ActionMode.Callback, KoinComponent {
     private val menuAction = EventFlow<MenuAction>()
     private val search = SearchMenu(menuAction)
     private val importViewModel: ImportInstalledViewModel by viewModels()
     private var actionMode: ActionMode? = null
+    private val packageChanged: PackageChangedReceiver by inject()
+    private val authToken: AuthTokenBlocking by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -96,7 +102,7 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
     override fun viewModelFactory(): ViewModelProvider.Factory {
         return object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return InstalledViewModel(application) as T
+                return InstalledViewModel(get()) as T
             }
         }
     }
@@ -170,7 +176,7 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
         }
 
         lifecycleScope.launch {
-            provide.packageChanged.collect {
+            packageChanged.observer.collect {
                 AppLog.d("Package changed: $it")
                 if (importViewModel.progress.value !is ImportProgress) {
                     reload()
@@ -190,15 +196,12 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
 
     override suspend fun onReload() {
         val vm = viewModel as InstalledViewModel
-        if (vm.changelogAdapter.authToken.isNotEmpty()) {
+        if (authToken.isFresh) {
             return
         }
         val account = vm.account ?: return
         try {
-            val token = AuthTokenBlocking(requireContext().applicationContext).retrieve(account)
-            if (token.isNotBlank()) {
-                vm.changelogAdapter.authToken = token
-            } else {
+            if (!authToken.refreshToken(account)) {
                 AppLog.e("Error retrieving token")
             }
         } catch (e: AuthTokenStartIntent) {
@@ -215,25 +218,26 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback {
     }
 
     private fun startImport() {
-        val account = provide.prefs.account
         if (account == null) {
             Toast.makeText(context, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
             return
         }
 
+        val account = account!!
+
         binding.actionButton.isEnabled = false
 
         lifecycleScope.launch {
             try {
-                val token = AuthTokenBlocking(requireContext()).retrieve(account)
-                if (token.isNotBlank()) {
-                    importViewModel.import(account, token)
+
+                if (authToken.refreshToken(account)) {
+                    importViewModel.import()
                 } else {
                     if (context == null) {
                         activity?.finish()
                         return@launch
                     }
-                    if (provide.networkConnection.isNetworkAvailable) {
+                    if (networkConnection.isNetworkAvailable) {
                         Toast.makeText(context, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
                     } else {
                         Toast.makeText(context, R.string.check_connection, Toast.LENGTH_SHORT).show()

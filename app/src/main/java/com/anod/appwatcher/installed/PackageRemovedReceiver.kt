@@ -4,10 +4,13 @@ package com.anod.appwatcher.installed
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.anod.appwatcher.provide
+import com.anod.appwatcher.utils.PackageChangedReceiver
+import com.anod.appwatcher.utils.appScope
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
 
-class PackageRemovedReceiver : BroadcastReceiver() {
+class PackageRemovedReceiver : BroadcastReceiver(), KoinComponent {
 
     override fun onReceive(context: Context?, intent: Intent?) {
         val action = intent?.action ?: return
@@ -26,9 +29,8 @@ class PackageRemovedReceiver : BroadcastReceiver() {
 
     private fun notify(context: Context?, intent: Intent?) {
         val packageName = intent?.data?.schemeSpecificPart ?: ""
-        val component = context?.provide ?: return
-        component.appScope.launch {
-            component.packageChangedReceiver.emit(packageName + ":" + System.currentTimeMillis())
+        appScope.launch {
+            get<PackageChangedReceiver>().emit(packageName + ":" + System.currentTimeMillis())
         }
     }
 }

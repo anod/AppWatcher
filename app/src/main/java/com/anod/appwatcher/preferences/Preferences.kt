@@ -7,9 +7,8 @@ import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.utils.AdaptiveIconTransformation
-import info.anodsplace.playstore.DeviceIdStorage
 
-class Preferences(context: Context) : DeviceIdStorage {
+class Preferences(context: Context) {
 
     private val preferences = context.getSharedPreferences(PREFS_NAME, 0)
 
@@ -34,18 +33,6 @@ class Preferences(context: Context) : DeviceIdStorage {
     var lastUpdateTime: Long
         get() = preferences.getLong(LAST_UPDATE_TIME, -1)
         set(value) = preferences.edit().putLong(LAST_UPDATE_TIME, value).apply()
-
-    override var deviceId: String
-        get() = preferences.getString(DEVICE_ID, "")!!
-        set(value) {
-            val editor = preferences.edit()
-            if (value.isEmpty()) {
-                editor.remove(DEVICE_ID)
-            } else {
-                editor.putString(DEVICE_ID, value)
-            }
-            editor.apply()
-        }
 
     var isWifiOnly: Boolean
         get() = preferences.getBoolean(WIFI_ONLY, false)
@@ -150,8 +137,12 @@ class Preferences(context: Context) : DeviceIdStorage {
         }
 
     var iconShape: String
-        get() = preferences.getString("adaptive-icon-shape", AdaptiveIconTransformation.getSystemDefaultMask())!!
+        get() = preferences.getString("adaptive-icon-shape", defaultSystemMask)!!
         set(value) = preferences.edit().putString("adaptive-icon-shape", value).apply()
+
+    private val defaultSystemMask: String by lazy {
+        AdaptiveIconTransformation.getSystemDefaultMask()
+    }
 
     companion object {
         const val recentDays: Long = 3

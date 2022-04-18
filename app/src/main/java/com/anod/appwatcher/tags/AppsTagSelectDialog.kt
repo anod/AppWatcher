@@ -7,10 +7,6 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.View
-import androidx.appcompat.widget.SearchView
-import androidx.appcompat.widget.Toolbar
-import androidx.core.graphics.drawable.DrawableCompat
-import androidx.core.view.children
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
@@ -21,21 +17,21 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.databinding.FragmentTagSelectBinding
 import com.anod.appwatcher.details.DetailsDialog
-import com.anod.appwatcher.provide
 import com.anod.appwatcher.utils.Theme
-import com.anod.appwatcher.utils.colorStateListOf
-import info.anodsplace.framework.app.ApplicationContext
-import info.anodsplace.framework.app.CustomThemeColors
+import com.anod.appwatcher.utils.appScope
+import com.anod.appwatcher.utils.prefs
 import info.anodsplace.framework.view.Keyboard
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
 
-class AppsTagSelectDialog : DialogFragment(R.layout.fragment_tag_select) {
+class AppsTagSelectDialog : DialogFragment(R.layout.fragment_tag_select), KoinComponent {
 
     private var isAllSelected: Boolean = false
     private val viewModel: AppsTagViewModel by viewModels()
-    private val adapter: TagAppsAdapter by lazy { TagAppsAdapter(requireContext(), viewModel.tagAppsImport) }
+    private val adapter: TagAppsAdapter by lazy { TagAppsAdapter(requireContext(), viewModel.tagAppsImport, get()) }
 
     private var _binding: FragmentTagSelectBinding? = null
     private val binding get() = _binding!!
@@ -43,7 +39,7 @@ class AppsTagSelectDialog : DialogFragment(R.layout.fragment_tag_select) {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         if (context is Activity) {
-            setStyle(STYLE_NORMAL, Theme(context).themeDialogNoActionBar)
+            setStyle(STYLE_NORMAL, Theme(context, prefs).themeDialogNoActionBar)
         }
     }
 
@@ -58,7 +54,7 @@ class AppsTagSelectDialog : DialogFragment(R.layout.fragment_tag_select) {
         _binding = FragmentTagSelectBinding.bind(view)
 
         val tag: Tag = requireArguments().getParcelable(extraTag)!!
-        viewModel.tagAppsImport = TagAppsImport(tag, ApplicationContext(requireContext()))
+        viewModel.tagAppsImport = TagAppsImport(tag, get(), get())
         viewModel.tag.value = tag
 
         binding.list.layoutManager = LinearLayoutManager(requireContext())
@@ -73,7 +69,7 @@ class AppsTagSelectDialog : DialogFragment(R.layout.fragment_tag_select) {
         }
 
         binding.button1.setOnClickListener {
-            provide.appScope.launch(Dispatchers.Main) {
+            appScope.launch(Dispatchers.Main) {
                 viewModel.import()
                 dismiss()
             }

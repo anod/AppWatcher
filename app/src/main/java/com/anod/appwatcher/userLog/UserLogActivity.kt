@@ -12,14 +12,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.databinding.ActivityUserLogBinding
 import com.anod.appwatcher.utils.Theme
+import com.anod.appwatcher.utils.prefs
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.ToolbarActivity
+import org.koin.core.component.KoinComponent
 
 /**
  * @author Alex Gavrishev
  * @date 04/01/2018
  */
-class UserLogActivity : ToolbarActivity() {
+class UserLogActivity : ToolbarActivity(), KoinComponent {
 
     class UserLogViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val lineNumber: TextView = itemView.findViewById(R.id.lineNumber)
@@ -58,9 +60,9 @@ class UserLogActivity : ToolbarActivity() {
 
     private lateinit var binding: ActivityUserLogBinding
     override val themeRes: Int
-        get() = Theme(this).theme
+        get() = Theme(this, prefs).theme
     override val themeColors: CustomThemeColors
-        get() = Theme(this).colors
+        get() = Theme(this, prefs).colors
 
 
     override val layoutView: View

@@ -1,27 +1,26 @@
 package com.anod.appwatcher.installed
 
-import android.accounts.Account
+import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.AppChange
-import com.anod.appwatcher.provide
 import finsky.api.BulkDocId
 import info.anodsplace.applog.AppLog
-import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.content.InstalledPackage
 import info.anodsplace.playstore.BulkDetailsEndpoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
+import org.koin.core.Koin
+import org.koin.core.parameter.parametersOf
 
 class ChangelogAdapter(
-    private val context: ApplicationContext,
-    private val viewModelScope: CoroutineScope,
-    private val account: Account?
+        private val viewModelScope: CoroutineScope,
+        private val database: AppsDatabase,
+        private val koin: Koin
 ) {
     private var job: Job? = null
     val changelogs = mutableMapOf<String, AppChange?>()
     val updated = MutableSharedFlow<Boolean>(0, extraBufferCapacity = 1)
-    var authToken = ""
 
     suspend fun load(watchingPackages: List<String>, notWatchedPackages: List<InstalledPackage>) {
         AppLog.d("ChangelogAdapter.load ${watchingPackages.size}, ${notWatchedPackages.size}, existing ${changelogs.keys.size}")
@@ -52,7 +51,7 @@ class ChangelogAdapter(
         val packagesMap = notWatchedPackages.associateBy { it.name }
         val localIds = watchingPackages.subtract(changelogs.keys)
         if (localIds.isNotEmpty()) {
-            val local = context.provide.database.changelog().load(watchingPackages)
+            val local = database.changelog().load(watchingPackages)
             local.associateByTo(changelogs, { it.appId }, { it })
         }
         val loadIds = packagesMap.keys.subtract(changelogs.keys)
@@ -88,10 +87,6 @@ class ChangelogAdapter(
     }
 
     private fun createEndpoint(docIds: List<BulkDocId>): BulkDetailsEndpoint {
-        return BulkDetailsEndpoint(
-                context.actual,
-                context.provide.networkClient, context.provide.deviceInfo,
-                account!!, docIds
-        ).also { it.authToken = authToken }
+        return koin.get { parametersOf(docIds) }
     }
 }

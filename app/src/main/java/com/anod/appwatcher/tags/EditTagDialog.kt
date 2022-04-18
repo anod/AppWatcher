@@ -13,17 +13,19 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.databinding.DialogEditTagBinding
 import com.anod.appwatcher.utils.Theme
+import com.anod.appwatcher.utils.prefs
 import info.anodsplace.colorpicker.ColorPickerDialog
 import info.anodsplace.colorpicker.ColorPickerSwatch
 import info.anodsplace.colorpicker.ColorStateDrawable
 import info.anodsplace.framework.app.DialogMessage
+import org.koin.core.component.KoinComponent
 
 /**
  * @author Alex Gavrishev
  * *
  * @date 14/04/2017.
  */
-class EditTagDialog : DialogFragment(), ColorPickerSwatch.OnColorSelectedListener {
+class EditTagDialog : DialogFragment(), ColorPickerSwatch.OnColorSelectedListener, KoinComponent {
 
     private lateinit var tag: Tag
 
@@ -60,8 +62,8 @@ class EditTagDialog : DialogFragment(), ColorPickerSwatch.OnColorSelectedListene
         }
 
         binding.colorPreview.setOnClickListener {
-            val dialog = ColorPickerDialog.newInstance(tag.color, false, activity, Theme(requireActivity()).themeDialog)
-            dialog.setStyle(STYLE_NORMAL, Theme(requireActivity()).themeDialogNoActionBar)
+            val dialog = ColorPickerDialog.newInstance(tag.color, false, activity, Theme(requireActivity(), prefs).themeDialog)
+            dialog.setStyle(STYLE_NORMAL, Theme(requireActivity(), prefs).themeDialogNoActionBar)
             dialog.setOnColorSelectedListener(this)
             dialog.show(parentFragmentManager, "color-picker")
         }

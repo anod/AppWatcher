@@ -1,9 +1,11 @@
 package com.anod.appwatcher.database
 
-import android.content.*
+import android.content.ContentProviderOperation
+import android.content.ContentProviderResult
+import android.content.ContentResolver
+import android.content.ContentValues
 import android.net.Uri
 import androidx.room.Database
-import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.room.withTransaction
@@ -13,7 +15,6 @@ import com.anod.appwatcher.database.entities.*
 import info.anodsplace.applog.AppLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.util.*
 
 /**
  * @author Alex Gavrishev
@@ -54,21 +55,6 @@ abstract class AppsDatabase : RoomDatabase() {
     companion object {
         const val version = 18
         val dbName = if (BuildConfig.DEBUG) "app_watcher.db" else "app_watcher"
-
-        fun instance(context: Context): AppsDatabase {
-            return Room.databaseBuilder(context, AppsDatabase::class.java, dbName)
-                    .enableMultiInstanceInvalidation()
-                    .addMigrations(
-                            MIGRATION_9_11,
-                            MIGRATION_11_12,
-                            MIGRATION_12_13,
-                            MIGRATION_13_14,
-                            MIGRATION_14_15,
-                            MIGRATION_15_16,
-                            MIGRATION_16_17,
-                            MIGRATION_17_18)
-                    .build()
-        }
 
         private val MIGRATION_17_18 = object : Migration(17, 18) {
             override fun migrate(database: SupportSQLiteDatabase) {
@@ -214,5 +200,16 @@ abstract class AppsDatabase : RoomDatabase() {
                 database.execSQL("ALTER TABLE tags_temp RENAME TO tags")
             }
         }
+
+        val migrations: Array<Migration> = arrayOf(
+                MIGRATION_9_11,
+                MIGRATION_11_12,
+                MIGRATION_12_13,
+                MIGRATION_13_14,
+                MIGRATION_14_15,
+                MIGRATION_15_16,
+                MIGRATION_16_17,
+                MIGRATION_17_18
+        )
     }
 }

@@ -7,7 +7,6 @@ import android.text.format.DateUtils
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -17,7 +16,9 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
-import com.anod.appwatcher.*
+import com.anod.appwatcher.MarketSearchActivity
+import com.anod.appwatcher.R
+import com.anod.appwatcher.SettingsActivity
 import com.anod.appwatcher.accounts.AccountSelectionDialog
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
@@ -25,7 +26,7 @@ import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.installed.InstalledFragment
 import com.anod.appwatcher.tags.AppsTagActivity
 import com.anod.appwatcher.tags.EditTagDialog
-import com.anod.appwatcher.utils.Theme
+import com.anod.appwatcher.utils.*
 import com.anod.appwatcher.wishlist.WishListFragment
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.crashlytics.FirebaseCrashlytics
@@ -34,27 +35,26 @@ import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.util.Hash
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 /**
  * @author Alex Gavrishev
  * @date 01/12/2017
  */
-abstract class DrawerActivity : ToolbarActivity(), AccountSelectionDialog.SelectionListener {
+abstract class DrawerActivity : ToolbarActivity(), AccountSelectionDialog.SelectionListener, KoinComponent {
 
     override val themeRes: Int
-        get() = Theme(this).theme
+        get() = Theme(this, prefs).theme
 
-    private var authToken: String? = null
     private val drawerLayout: DrawerLayout? by lazy { findViewById(R.id.drawer_layout) }
     private val navigationView: NavigationView? by lazy { findViewById(R.id.nav_view) }
     private val accountNameView: TextView? by lazy { navigationView?.getHeaderView(0)?.findViewById(R.id.account_name) }
     private val drawerViewModel: DrawerViewModel by viewModels()
+    val authToken: AuthTokenBlocking by inject()
 
     open val isHomeAsMenu: Boolean
         get() = false
-
-    val provide: AppComponent
-        get() = Application.provide(this)
 
     fun showAccountsDialogWithCheck() {
         Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
@@ -62,7 +62,7 @@ abstract class DrawerActivity : ToolbarActivity(), AccountSelectionDialog.Select
     }
 
     private val accountSelectionDialog: AccountSelectionDialog by lazy {
-        AccountSelectionDialog(this, Application.provide(this).prefs, this)
+        AccountSelectionDialog(this, prefs, this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,11 +70,10 @@ abstract class DrawerActivity : ToolbarActivity(), AccountSelectionDialog.Select
 
         setupDrawer()
 
-        val account = Application.provide(this).prefs.account
         if (account == null) {
             accountSelectionDialog.show()
         } else {
-            onAccountSelected(account)
+            onAccountSelected(account!!)
         }
     }
 
@@ -93,13 +92,13 @@ abstract class DrawerActivity : ToolbarActivity(), AccountSelectionDialog.Select
             this.accountSelectionDialog.show()
         }
 
-        viewModel.account.observe(this, {
+        viewModel.account.observe(this) {
             updateDrawerAccount(it)
-        })
+        }
 
-        viewModel.lastUpdateTime.observe(this, {
+        viewModel.lastUpdateTime.observe(this) {
             updateLastUpdateTime(it ?: 0)
-        })
+        }
 
         lifecycleScope.launch {
             viewModel.tags.collectLatest {
@@ -141,10 +140,10 @@ abstract class DrawerActivity : ToolbarActivity(), AccountSelectionDialog.Select
         addTag.setActionView(R.layout.drawer_tag_add)
         val addTagButton = addTag.actionView.findViewById<View>(R.id.button1)
         addTagButton.setOnClickListener {
-            EditTagDialog.show(supportFragmentManager, null, Theme(this))
+            EditTagDialog.show(supportFragmentManager, null, Theme(this, prefs))
         }
         addTag.setOnMenuItemClickListener {
-            EditTagDialog.show(supportFragmentManager, null, Theme(this))
+            EditTagDialog.show(supportFragmentManager, null, Theme(this, prefs))
             true
         }
         result.forEach { (tag, count) ->
@@ -153,7 +152,7 @@ abstract class DrawerActivity : ToolbarActivity(), AccountSelectionDialog.Select
             val tagIndicator = item.actionView.findViewById<View>(android.R.id.text1) as TextView
             val d = ResourcesCompat.getDrawable(resources, R.drawable.circular_color, null)
             DrawableCompat.setTint(DrawableCompat.wrap(d!!), tag.color)
-            tagIndicator.setBackgroundDrawable(d)
+            tagIndicator.background = d
             tagIndicator.text = if (count > 99) "99+" else "" + count
             if (tag.isLightColor) {
                 tagIndicator.setTextColor(ResourcesCompat.getColor(resources, R.color.alwaysBlack, theme))
@@ -162,7 +161,7 @@ abstract class DrawerActivity : ToolbarActivity(), AccountSelectionDialog.Select
             }
             item.intent = AppsTagActivity.createTagIntent(tag, this@DrawerActivity)
         }
-        provide.memoryCache.put("tags", result.map { it.first })
+        memoryCache.put("tags", result.map { it.first })
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -193,11 +192,10 @@ abstract class DrawerActivity : ToolbarActivity(), AccountSelectionDialog.Select
                 return true
             }
             R.id.menu_wishlist -> {
-                val account = Application.provide(this).prefs.account
                 startActivity(WishListFragment.intent(
                         this,
                         themeRes, themeColors,
-                        account, authToken))
+                        account, authToken.token))
                 return true
             }
         }
@@ -221,20 +219,17 @@ abstract class DrawerActivity : ToolbarActivity(), AccountSelectionDialog.Select
 
     override fun onAccountSelected(account: Account) {
         drawerViewModel.account.value = account
-        val collectReports = provide.prefs.collectCrashReports
+        val collectReports = prefs.collectCrashReports
         lifecycleScope.launch {
             try {
-                val token = AuthTokenBlocking(applicationContext).retrieve(account)
-                if (token.isNotBlank()) {
-                    onAuthToken(token)
+                if (authToken.refreshToken(account)) {
                     if (collectReports) {
                         FirebaseCrashlytics.getInstance().setUserId(Hash.sha256(account.name).encoded)
                     }
                     updateDrawerAccount(account)
                 } else {
                     AppLog.e("Error retrieving authentication token")
-                    onAuthToken("")
-                    if (Application.provide(this@DrawerActivity).networkConnection.isNetworkAvailable) {
+                    if (networkConnection.isNetworkAvailable) {
                         Toast.makeText(this@DrawerActivity, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
                     } else {
                         Toast.makeText(this@DrawerActivity, R.string.check_connection, Toast.LENGTH_SHORT).show()
@@ -246,12 +241,8 @@ abstract class DrawerActivity : ToolbarActivity(), AccountSelectionDialog.Select
         }
     }
 
-    open fun onAuthToken(authToken: String) {
-        this.authToken = authToken
-    }
-
     override fun onAccountNotFound(errorMessage: String) {
-        if (Application.provide(this@DrawerActivity).networkConnection.isNetworkAvailable) {
+        if (networkConnection.isNetworkAvailable) {
             if (errorMessage.isNotBlank()) {
                 Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
             } else {

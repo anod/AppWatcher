@@ -6,22 +6,24 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.StringRes
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
+import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.*
 import com.anod.appwatcher.databinding.ActivityUserLogBinding
 import com.anod.appwatcher.databinding.ListItemScheduleBinding
 import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.utils.colorStateListOf
+import com.anod.appwatcher.utils.prefs
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.ToolbarActivity
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -29,7 +31,8 @@ import java.util.*
  * @author Alex Gavrishev
  * @date 04/01/2018
  */
-class SchedulesHistoryActivity : ToolbarActivity() {
+class SchedulesHistoryActivity : ToolbarActivity(), KoinComponent {
+    private val database: AppsDatabase by inject()
 
     class ScheduleViewHolder(private val itemBinding: ListItemScheduleBinding) : RecyclerView.ViewHolder(itemBinding.root) {
         private val sdf = SimpleDateFormat("MMM d, HH:mm:ss", Locale.getDefault())
@@ -125,15 +128,15 @@ class SchedulesHistoryActivity : ToolbarActivity() {
         }
 
     override val themeRes: Int
-        get() = Theme(this).theme
+        get() = Theme(this, prefs).theme
     override val themeColors: CustomThemeColors
-        get() = Theme(this).colors
+        get() = Theme(this, prefs).colors
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding.list.layoutManager = LinearLayoutManager(this)
         val adapter = SchedulesAdapter(this)
-        val schedules = Application.provide(this).database.schedules()
+        val schedules = database.schedules()
         lifecycleScope.launch {
             schedules.load().collectLatest {
                 adapter.schedules = it

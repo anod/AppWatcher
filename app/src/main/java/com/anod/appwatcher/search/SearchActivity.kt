@@ -15,41 +15,43 @@ import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AccountSelectionDialog
-import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.databinding.ActivityMarketSearchBinding
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.EventFlow
 import com.anod.appwatcher.utils.Theme
+import com.anod.appwatcher.utils.networkConnection
+import com.anod.appwatcher.utils.prefs
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.view.Keyboard
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
 
 @SuppressLint("Registered")
-open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionListener {
+open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionListener, KoinComponent {
 
     private var searchJob: Job? = null
     override val themeRes: Int
-        get() = Theme(this).theme
+        get() = Theme(this, prefs).theme
     override val themeColors: CustomThemeColors
-        get() = Theme(this).colors
+        get() = Theme(this, prefs).colors
 
     private var adapter: RecyclerView.Adapter<ResultsAppViewHolder>? = null
     private val action = EventFlow<ResultAction>()
+
     lateinit var searchView: SearchView
 
     private val accountSelectionDialog: AccountSelectionDialog by lazy {
-        AccountSelectionDialog(this, Application.provide(this).prefs, this)
+        AccountSelectionDialog(this, prefs, this)
     }
 
     private val viewModel: SearchViewModel by viewModels()
@@ -73,7 +75,6 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
 
         viewModel.initFromIntent(intent)
 
-        viewModel.account = Application.provide(this).prefs.account
         if (viewModel.account == null) {
             accountSelectionDialog.show()
         } else {
@@ -81,13 +82,11 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
         }
 
         lifecycleScope.launch {
-            viewModel.searchQueryAuthenticated.collect {
-                val query = it.first
-                val authToken = it.second
+            viewModel.searchQueryAuthenticated.collect { query ->
                 if (query.isBlank()) {
                     showNoResults("")
                 } else {
-                    search(query, authToken)
+                    search(query)
                 }
             }
         }
@@ -98,10 +97,11 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
                     val newStatus = it.first
                     if (newStatus == AppInfoMetadata.STATUS_NORMAL) {
                         TagSnackbar.make(
-                            binding.root,
-                            it.second!!,
-                            viewModel.isShareSource,
-                            this@SearchActivity
+                                binding.root,
+                                it.second!!,
+                                viewModel.isShareSource,
+                                this@SearchActivity,
+                                prefs
                         ).show()
                     }
                 }
@@ -122,10 +122,10 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
         }
     }
 
-    private fun search(query: String, authToken: String) {
+    private fun search(query: String) {
         searchJob?.cancel()
         searchJob = lifecycleScope.launch {
-            viewModel.search(query, authToken).collect { status ->
+            viewModel.search(query).collect { status ->
                 AppLog.d("Search status changed: $status")
                 onSearchStatusChange(status)
             }
@@ -138,7 +138,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
             is Loading -> showLoading()
             is DetailsAvailable -> {
                 showListView()
-                adapter = ResultsAdapterSingle(context, action, viewModel.packages, status.document)
+                adapter = ResultsAdapterSingle(context, action, viewModel.packages, status.document, get())
                 binding.list.adapter = adapter
             }
             is NoNetwork -> {
@@ -155,7 +155,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
             }
             is SearchPage -> {
                 if (adapter !is ResultsAdapterList) {
-                    adapter = ResultsAdapterList(context, action, viewModel.packages).apply {
+                    adapter = ResultsAdapterList(context, action, viewModel.packages, get()).apply {
                         addLoadStateListener { loadState ->
                             if (loadState.refresh is LoadState.NotLoading) {
                                 if (itemCount > 0) {
@@ -213,14 +213,10 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
     }
 
     override fun onAccountSelected(account: Account) {
-        viewModel.account = account
         lifecycleScope.launch {
             try {
-                val token = AuthTokenBlocking(applicationContext).retrieve(account)
-                if (token.isNotBlank()) {
-                    viewModel.authToken.value = token
-                } else {
-                    if (Application.provide(this@SearchActivity).networkConnection.isNetworkAvailable) {
+                if (!viewModel.authToken.refreshToken(account)) {
+                    if (networkConnection.isNetworkAvailable) {
                         Toast.makeText(this@SearchActivity, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
                     } else {
                         Toast.makeText(this@SearchActivity, R.string.check_connection, Toast.LENGTH_SHORT).show()
@@ -236,7 +232,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
     }
 
     override fun onAccountNotFound(errorMessage: String) {
-        if (Application.provide(this).networkConnection.isNetworkAvailable) {
+        if (networkConnection.isNetworkAvailable) {
             if (errorMessage.isNotBlank()) {
                 Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
             } else {
@@ -293,15 +289,14 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
         if (query.isBlank()) {
             showNoResults("")
         } else {
-            val authToken = viewModel.authToken.value
-            if (authToken.isEmpty()) {
+            if (viewModel.authToken.token.isEmpty()) {
                 if (viewModel.account == null) {
                     accountSelectionDialog.show()
                 } else {
                     onAccountSelected(viewModel.account!!)
                 }
             } else {
-                search(query, authToken)
+                search(query)
             }
         }
     }

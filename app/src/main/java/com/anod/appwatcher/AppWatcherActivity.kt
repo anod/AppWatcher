@@ -6,12 +6,13 @@ import androidx.lifecycle.lifecycleScope
 import com.anod.appwatcher.installed.InstalledFragment
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.sync.SyncScheduler
+import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.WatchListActivity
 import com.anod.appwatcher.watchlist.WatchListFragment
 import info.anodsplace.applog.AppLog
-import kotlinx.coroutines.flow.collect
+import org.koin.core.component.KoinComponent
 
-class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener {
+class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener, KoinComponent {
 
     override val isHomeAsMenu: Boolean
         get() = true

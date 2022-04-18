@@ -2,22 +2,27 @@ package com.anod.appwatcher.search
 
 import android.accounts.Account
 import android.app.Application
-import android.content.Context
 import android.content.Intent
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.*
-import com.anod.appwatcher.AppComponent
-import com.anod.appwatcher.AppWatcherApplication
+import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.database.AppListTable
+import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
+import com.anod.appwatcher.utils.networkConnection
+import com.anod.appwatcher.utils.prefs
 import finsky.api.model.Document
 import info.anodsplace.playstore.AppDetailsFilter
 import info.anodsplace.playstore.DetailsEndpoint
 import info.anodsplace.playstore.SearchEndpoint
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
+import org.koin.core.component.inject
+import org.koin.core.parameter.parametersOf
 
 sealed class SearchStatus
 object Loading : SearchStatus()
@@ -31,21 +36,19 @@ sealed class ResultAction
 class Delete(val info: AppInfo) : ResultAction()
 class Add(val info: AppInfo) : ResultAction()
 
-class SearchViewModel(application: Application) : AndroidViewModel(application) {
-    private val context: Context
-        get() = getApplication<AppWatcherApplication>()
-    private val provide: AppComponent
-        get() = com.anod.appwatcher.Application.provide(context)
+class SearchViewModel(application: Application) : AndroidViewModel(application), KoinComponent {
+    private val database: AppsDatabase by inject()
+    val authToken: AuthTokenBlocking by inject()
+    val account: Account?
+        get() = prefs.account
 
-    var account: Account? = null
     private var initiateSearch = false
     var isShareSource = false
     var hasFocus = false
     private var isPackageSearch = false
     var searchQuery = MutableStateFlow("")
-    var authToken = MutableStateFlow("")
-    val searchQueryAuthenticated = searchQuery.combine(authToken) { query, token -> Pair(query, token) }
-    val packages: StateFlow<List<String>> = provide.database.apps().observePackages().map { list ->
+    val searchQueryAuthenticated = searchQuery.combine(authToken.tokenAvailable) { query, _ -> query }
+    val packages: StateFlow<List<String>> = database.apps().observePackages().map { list ->
         list.map { it.packageName }
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
@@ -71,21 +74,15 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
         hasFocus = intent.getBooleanExtra(SearchActivity.EXTRA_FOCUS, false)
     }
 
-    fun search(query: String, authToken: String): Flow<SearchStatus> = flow {
-        val requestQueue = provide.networkClient
-        val deviceInfo = provide.deviceInfo
+    fun search(query: String): Flow<SearchStatus> = flow {
         if (account == null) {
             emit(Error)
             return@flow
         }
-        endpointSearch = SearchEndpoint(context, requestQueue, deviceInfo, account!!, query).also {
-            it.authToken = authToken
-        }
+        endpointSearch = get() { parametersOf(query) }
         if (isPackageSearch) {
             val detailsUrl = AppInfo.createDetailsUrl(query)
-            endpointDetails = DetailsEndpoint(context, requestQueue, deviceInfo, account!!, detailsUrl).also {
-                it.authToken = authToken
-            }
+            endpointDetails = get() { parametersOf(detailsUrl) }
         }
         emit(Loading)
         if (endpointDetails == null) {
@@ -99,7 +96,7 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
                     emitAll(createPager(endpointSearch!!))
                 }
             } catch (e: Exception) {
-                if (!provide.networkConnection.isNetworkAvailable) {
+                if (!networkConnection.isNetworkAvailable) {
                     emit(NoNetwork)
                 } else {
                     emitAll(createPager(endpointSearch!!))
@@ -118,14 +115,14 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
 
     fun delete(info: AppInfo) {
         viewModelScope.launch {
-            AppListTable.Queries.delete(info.appId, provide.database)
+            AppListTable.Queries.delete(info.appId, database)
             appStatusChange.value = Pair(AppInfoMetadata.STATUS_DELETED, info)
         }
     }
 
     fun add(info: AppInfo) {
         viewModelScope.launch {
-            val result = AppListTable.Queries.insertSafetly(info, provide.database)
+            val result = AppListTable.Queries.insertSafetly(info, database)
             if (result != AppListTable.ERROR_INSERT) {
                 appStatusChange.value = Pair(AppInfoMetadata.STATUS_NORMAL, info)
             }

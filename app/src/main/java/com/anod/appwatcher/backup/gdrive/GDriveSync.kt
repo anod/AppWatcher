@@ -1,8 +1,6 @@
 package com.anod.appwatcher.backup.gdrive
 
-import android.content.Context
 import android.text.format.Formatter
-import com.anod.appwatcher.Application
 import com.anod.appwatcher.backup.DbJsonReader
 import com.anod.appwatcher.backup.DbJsonWriter
 import com.anod.appwatcher.database.AppListTable
@@ -26,17 +24,14 @@ import java.io.BufferedReader
  * *
  * @date 2014-11-15
  */
-class GDriveSync(private val context: ApplicationContext, private val googleAccount: GoogleSignInAccount) {
-
-    constructor(context: Context, googleAccount: GoogleSignInAccount) : this(ApplicationContext(context), googleAccount)
+class GDriveSync(private val googleAccount: GoogleSignInAccount, private val context: ApplicationContext, private val database: AppsDatabase) {
 
     class SyncError(val error: UserRecoverableAuthException?, cause: Exception) : Exception(cause.message, cause)
 
     suspend fun doSync() = withContext(Dispatchers.IO) {
         try {
-            val db = Application.provide(context).database
             sLock.withLock {
-                return@withContext doSyncLocked(db)
+                return@withContext doSyncLocked(database)
             }
         } catch (e: Exception) {
             AppLog.e("Sync failed: ${e.message}", "GDriveSync")

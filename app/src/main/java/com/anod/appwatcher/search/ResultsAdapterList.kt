@@ -5,8 +5,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
-import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
+import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.EventFlow
 import finsky.api.model.Document
 import info.anodsplace.framework.app.ThemeCompat
@@ -30,8 +30,12 @@ class DocumentDiffCallback : DiffUtil.ItemCallback<Document>() {
     }
 }
 
-class ResultsAdapterList(private val context: Context, private val action: EventFlow<ResultAction>, private val packages: StateFlow<List<String>>)
-    : PagingDataAdapter<Document, ResultsAppViewHolder>(DocumentDiffCallback()) {
+class ResultsAdapterList(
+        private val context: Context,
+        private val action: EventFlow<ResultAction>,
+        private val packages: StateFlow<List<String>>,
+        private val iconLoader: AppIconLoader
+) : PagingDataAdapter<Document, ResultsAppViewHolder>(DocumentDiffCallback()) {
 
     private val colorBgDisabled = ThemeCompat.getColor(context, R.attr.inactiveRow)
     private val colorBgNormal = ThemeCompat.getColor(context, R.attr.colorItemBackground)
@@ -39,8 +43,6 @@ class ResultsAdapterList(private val context: Context, private val action: Event
 
     val isEmpty: Boolean
         get() = this.itemCount == 0
-
-    private val iconLoader = Application.provide(context).iconLoader
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ResultsAppViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.list_item_market_app, parent, false)

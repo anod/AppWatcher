@@ -7,11 +7,10 @@ import android.os.Environment
 import android.widget.Toast
 import androidx.core.net.toFile
 import com.anod.appwatcher.R
-import info.anodsplace.framework.app.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class ExportTask(private val context: ApplicationContext) {
+class ExportBackupTask(private val dbBackupManager: DbBackupManager) {
 
     companion object {
         fun showFinishToast(ctx: Context, result: Int) {
@@ -42,7 +41,7 @@ class ExportTask(private val context: ApplicationContext) {
                 return@withContext res
             }
         }
-        return@withContext DbBackupManager(context.actual).doExport(destUri)
+        return@withContext dbBackupManager.doExport(destUri)
     }
 
     private fun validateFileDestination(destUri: Uri): Int {

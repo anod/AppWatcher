@@ -10,7 +10,6 @@ import android.text.TextUtils
 import android.text.format.DateUtils
 import androidx.core.content.contentValuesOf
 import androidx.work.Data
-import com.anod.appwatcher.Application
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.backup.gdrive.GDriveSilentSignIn
@@ -30,9 +29,12 @@ import finsky.api.model.Document
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.content.InstalledApps
+import info.anodsplace.framework.net.NetworkConnectivity
 import info.anodsplace.playstore.BulkDetailsEndpoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.koin.core.Koin
+import org.koin.core.parameter.parametersOf
 import java.util.*
 
 /**
@@ -40,8 +42,14 @@ import java.util.*
  *  @date 6/3/2017
  */
 
-class UpdateCheck(private val context: ApplicationContext) {
-    val database = Application.provide(context).database
+class UpdateCheck(
+        private val context: ApplicationContext,
+        private val database: AppsDatabase,
+        private val preferences: Preferences,
+        private val networkConnection: NetworkConnectivity,
+        private val authToken: AuthTokenBlocking,
+        private val koin: Koin
+) {
 
     class SyncResult(
             val success: Boolean,
@@ -60,7 +68,6 @@ class UpdateCheck(private val context: ApplicationContext) {
         const val extrasUpdatesCount = "extra_updates_count"
     }
 
-    private val preferences = Application.provide(context).prefs
     private val installedAppsProvider = InstalledApps.PackageManager(context.packageManager)
 
     suspend fun perform(extras: Data): Int = withContext(Dispatchers.Default) {
@@ -77,7 +84,7 @@ class UpdateCheck(private val context: ApplicationContext) {
 
         // Skip any check if sync requested from application
         if (!manualSync) {
-            if (preferences.isWifiOnly && !Application.provide(context).networkConnection.isWifiEnabled) {
+            if (preferences.isWifiOnly && !networkConnection.isWifiEnabled) {
                 AppLog.i("Wifi not enabled, skipping update check....", "UpdateCheck")
                 SchedulesTable.Queries.save(schedule.finish(Schedule.statusSkippedNoWifi), database)
                 return@withContext -1
@@ -92,8 +99,8 @@ class UpdateCheck(private val context: ApplicationContext) {
 
         AppLog.i("Perform synchronization", "UpdateCheck")
 
-        val authToken = requestAuthToken(account)
-        if (authToken == null) {
+        val refreshed = refreshAuthToken(account)
+        if (!refreshed) {
             SchedulesTable.Queries.save(schedule.finish(Schedule.statusFailedNoToken), database)
             AppLog.e("Cannot receive access token")
             return@withContext -1
@@ -108,7 +115,7 @@ class UpdateCheck(private val context: ApplicationContext) {
         SchedulesTable.Queries.save(schedule, database)
 
         val syncResult = try {
-            doSync(lastUpdatesViewed, authToken, account)
+            doSync(lastUpdatesViewed)
         } catch (e: Exception) {
             AppLog.e("Error during synchronization ${e.message}", e)
             SyncResult(false, listOf(), 0, 0)
@@ -155,7 +162,7 @@ class UpdateCheck(private val context: ApplicationContext) {
     }
 
     @Throws(RemoteException::class)
-    private suspend fun doSync(lastUpdatesViewed: Boolean, authToken: String, account: Account): SyncResult {
+    private suspend fun doSync(lastUpdatesViewed: Boolean): SyncResult {
 
         val apps = AppListTable.Queries.loadAppList(false, database.apps())
         if (apps.isEmpty) {
@@ -170,9 +177,7 @@ class UpdateCheck(private val context: ApplicationContext) {
             list.associateBy { it.app.packageName }
         }.forEach { localApps ->
             val docIds = localApps.map { BulkDocId(it.key, it.value.app.versionNumber) }
-            val endpoint = BulkDetailsEndpoint(context.actual, Application.provide(context).networkClient, Application.provide(context).deviceInfo, account, docIds).also {
-                it.authToken = authToken
-            }
+            val endpoint = koin.get<BulkDetailsEndpoint> { parametersOf(docIds) }
             AppLog.d("Sending chunk... $docIds")
             try {
                 endpoint.start()
@@ -340,12 +345,12 @@ class UpdateCheck(private val context: ApplicationContext) {
             try {
                 AppLog.i("Perform Google Drive sync", "UpdateCheck")
                 val googleAccount = signIn.signInLocked()
-                val worker = GDriveSync(context, googleAccount)
+                val worker = koin.get<GDriveSync> { parametersOf(googleAccount) }
                 worker.doSync()
                 pref.lastDriveSyncTime = System.currentTimeMillis()
             } catch (e: GDriveSync.SyncError) {
                 if (e.error != null) {
-                    AppLog.e("Perform Google Drive sync exception: Requires interactive sign in: '${e.message}'","UpdateCheck")
+                    AppLog.e("Perform Google Drive sync exception: Requires interactive sign in: '${e.message}'", "UpdateCheck")
                 } else {
                     AppLog.e("Perform Google Drive sync exception: ${e.message}", "UpdateCheck", e)
                 }
@@ -355,17 +360,16 @@ class UpdateCheck(private val context: ApplicationContext) {
         }
     }
 
-    private suspend fun requestAuthToken(account: Account): String? {
-        val tokenHelper = AuthTokenBlocking(context)
-        var authToken: String? = null
-        try {
-            authToken = tokenHelper.retrieve(account)
+    private suspend fun refreshAuthToken(account: Account): Boolean {
+        return try {
+            authToken.refreshToken(account)
         } catch (e: AuthTokenStartIntent) {
             AppLog.e("AuthToken: require interactive sing in")
+            false
         } catch (e: Throwable) {
             AppLog.e("AuthTokenBlocking request exception: " + e.message, e)
+            false
         }
-        return authToken
     }
 
     private fun fillMissingData(marketApp: Document, localApp: App, values: ContentValues) {

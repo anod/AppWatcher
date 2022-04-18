@@ -5,15 +5,11 @@ import android.content.Context
 import android.net.Uri
 import android.provider.Settings.Secure
 
-interface DeviceIdStorage {
-    var deviceId: String
-}
-
-class DeviceId(private val context: Context,private val storage: DeviceIdStorage) {
+class DeviceId(private val context: Context) {
     private val GSERVICES = Uri.parse("content://com.google.android.gsf.gservices")
 
     fun load(): String {
-        var deviceId = "" //storage.deviceId
+        var deviceId = ""
         if (deviceId.isNotEmpty()) {
             return deviceId
         }
@@ -23,7 +19,6 @@ class DeviceId(private val context: Context,private val storage: DeviceIdStorage
         if (deviceId.isEmpty()) {
             return Secure.getString(cr, Secure.ANDROID_ID)
         }
-        storage.deviceId = deviceId
         return deviceId
     }
 

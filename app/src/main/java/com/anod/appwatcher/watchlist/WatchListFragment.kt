@@ -19,8 +19,6 @@ import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.anod.appwatcher.AppWatcherApplication
-import com.anod.appwatcher.Application
 import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.MarketSearchActivity
 import com.anod.appwatcher.database.entities.App
@@ -30,18 +28,20 @@ import com.anod.appwatcher.databinding.FragmentApplistBinding
 import com.anod.appwatcher.databinding.ListItemEmptyBinding
 import com.anod.appwatcher.installed.InstalledFragment
 import com.anod.appwatcher.model.Filters
-import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.tags.AppsTagSelectDialog
 import com.anod.appwatcher.utils.EventFlow
+import com.anod.appwatcher.utils.appScope
+import com.anod.appwatcher.utils.prefs
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.CustomThemeActivity
 import info.anodsplace.framework.app.FragmentContainerFactory
 import info.anodsplace.framework.content.startActivitySafely
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
 
 sealed class WishListAction
 object SearchInStore : WishListAction()
@@ -53,13 +53,7 @@ class EmptyButton(val idx: Int) : WishListAction()
 class ItemClick(val app: App, val index: Int) : WishListAction()
 class ItemLongClick(val app: App, val index: Int) : WishListAction()
 
-open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
-    protected val application: AppWatcherApplication
-        get() = requireContext().applicationContext as AppWatcherApplication
-    protected val prefs: Preferences by lazy {
-        Application.provide(requireContext()).prefs
-    }
-
+open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, KoinComponent {
     protected lateinit var adapter: WatchListPagingAdapter
     protected val viewModel: WatchListViewModel by viewModels { viewModelFactory() }
 
@@ -72,7 +66,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
     protected open fun viewModelFactory(): ViewModelProvider.Factory {
         return object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return AppsWatchListViewModel(application) as T
+                return AppsWatchListViewModel(get()) as T
             }
         }
     }
@@ -111,14 +105,16 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
 
         // Setup header decorator
         adapter = WatchListPagingAdapter(
-            viewModel.installedApps,
-            viewModel.recentlyInstalledPackages,
-            viewLifecycleOwner,
-            action,
-            { emptyBinding -> createEmptyViewHolder(emptyBinding, action) },
-            { appItem -> getItemSelection(appItem) },
-            viewModel.selection,
-            requireContext()
+                viewModel.installedApps,
+                viewModel.recentlyInstalledPackages,
+                viewLifecycleOwner,
+                action,
+                { emptyBinding -> createEmptyViewHolder(emptyBinding, action) },
+                { appItem -> getItemSelection(appItem) },
+                viewModel.selection,
+                requireContext(),
+                iconLoader = get(),
+                packageManager = get()
         )
         binding.listView.adapter = adapter
 
@@ -283,7 +279,6 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener 
     override fun onRefresh() {
         val isRefreshing = (stateViewModel.listState.value is SyncStarted)
         if (!isRefreshing) {
-            val appScope = Application.provide(requireContext()).appScope
             appScope.launch {
                 stateViewModel.requestRefresh().collect { }
             }

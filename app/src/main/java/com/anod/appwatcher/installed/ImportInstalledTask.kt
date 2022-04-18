@@ -1,20 +1,15 @@
 package com.anod.appwatcher.installed
 
 import androidx.collection.SimpleArrayMap
-import com.anod.appwatcher.Application
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
-
 import finsky.api.model.Document
-import info.anodsplace.framework.app.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class ImportTask(context: ApplicationContext) {
-
-    private val database = Application.provide(context).database
+class ImportInstalledTask(private val database: AppsDatabase) {
 
     suspend fun execute(vararg documents: Document): SimpleArrayMap<String, Int> = withContext(Dispatchers.IO) {
         val result = SimpleArrayMap<String, Int>()

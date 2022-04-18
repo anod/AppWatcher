@@ -4,15 +4,16 @@ import android.app.Dialog
 import android.os.Bundle
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
-import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.AppInfoMetadata
+import com.anod.appwatcher.utils.appScope
+import com.anod.appwatcher.utils.appsDatabase
 import info.anodsplace.framework.app.DialogMessage
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
 
-class RemoveDialogFragment : DialogFragment() {
+class RemoveDialogFragment : DialogFragment(), KoinComponent {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val title = requireArguments().getString(ARG_TITLE)
@@ -20,10 +21,9 @@ class RemoveDialogFragment : DialogFragment() {
         val message = getString(R.string.alert_dialog_remove_message, title)
 
         return DialogMessage(requireActivity(), R.style.AppTheme_Dialog, R.string.alert_dialog_remove_title, message) { builder ->
-            val db = Application.provide(requireContext()).database
             builder.setPositiveButton(R.string.alert_dialog_remove) { _, _ ->
-                GlobalScope.launch(Dispatchers.Main) {
-                    db.apps().updateStatus(rowId, AppInfoMetadata.STATUS_DELETED)
+                appScope.launch(Dispatchers.Main) {
+                    appsDatabase.apps().updateStatus(rowId, AppInfoMetadata.STATUS_DELETED)
                 }
             }
 

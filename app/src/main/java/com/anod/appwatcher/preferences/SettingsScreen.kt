@@ -41,7 +41,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun SettingsScreen(viewModel: SettingsViewModel) {
     val coroutineScope = rememberCoroutineScope()
-    val prefs = viewModel.preferences
+    val prefs = viewModel.prefs
     val progress by viewModel.isProgressVisible.collectAsState()
     val items by viewModel.items.collectAsState()
 
@@ -166,7 +166,7 @@ fun IconShapeSelector(prefs: Preferences, imageLoader: ImageLoader, modifier: Mo
                 modifier = Modifier
                         .size(iconSize, iconSize)
                         .border(BorderStroke(1.dp, MaterialTheme.colors.secondaryVariant.copy(
-                            alpha = if (isNone) 1.0f else 0.1f
+                                alpha = if (isNone) 1.0f else 0.1f
                         )))
                         .clickable(onClick = {
                             value = ""

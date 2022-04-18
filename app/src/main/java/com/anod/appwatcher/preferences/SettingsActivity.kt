@@ -14,14 +14,14 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.anod.appwatcher.AppWatcherActivity
-import com.anod.appwatcher.Application
-import com.anod.appwatcher.backup.ExportTask
-import com.anod.appwatcher.backup.ImportTask
+import com.anod.appwatcher.backup.ExportBackupTask
+import com.anod.appwatcher.backup.ImportBackupTask
 import com.anod.appwatcher.backup.gdrive.GDriveSignIn
 import com.anod.appwatcher.compose.UiAction
 import com.anod.appwatcher.sync.SchedulesHistoryActivity
 import com.anod.appwatcher.userLog.UserLogActivity
 import com.anod.appwatcher.utils.Theme
+import com.anod.appwatcher.utils.prefs
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.jakewharton.processphoenix.ProcessPhoenix
@@ -29,19 +29,20 @@ import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.WindowCustomTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
 
 @SuppressLint("Registered")
-open class SettingsActivity : AppCompatActivity(), GDriveSignIn.Listener {
+open class SettingsActivity : AppCompatActivity(), GDriveSignIn.Listener, KoinComponent {
 
     private lateinit var gDriveErrorIntentRequest: ActivityResultLauncher<Intent>
     private val gDriveSignIn: GDriveSignIn by lazy { GDriveSignIn(this, this) }
     private val viewModel: SettingsViewModel by viewModels()
     private val appScope: CoroutineScope
-        get() = Application.provide(this).appScope
+        get() = getKoin().get()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val theme = Theme(this)
-        AppCompatDelegate.setDefaultNightMode(Application.with(this).nightMode)
+        val theme = Theme(this, prefs)
+        AppCompatDelegate.setDefaultNightMode(prefs.nightMode)
         setTheme(theme.theme)
         if (theme.colors.available) {
             WindowCustomTheme.apply(theme.colors, window, this)
@@ -122,7 +123,7 @@ open class SettingsActivity : AppCompatActivity(), GDriveSignIn.Listener {
             else -> {
                 AppLog.d("Import finished with code: $result")
                 viewModel.isProgressVisible.value = false
-                ImportTask.showImportFinishToast(this@SettingsActivity, result)
+                ImportBackupTask.showImportFinishToast(this@SettingsActivity, result)
             }
         }
     }
@@ -136,7 +137,7 @@ open class SettingsActivity : AppCompatActivity(), GDriveSignIn.Listener {
             else -> {
                 AppLog.d("Export finished with code: $result")
                 viewModel.isProgressVisible.value = false
-                ExportTask.showFinishToast(this@SettingsActivity, result)
+                ExportBackupTask.showFinishToast(this@SettingsActivity, result)
             }
         }
     }

@@ -8,10 +8,12 @@ import android.os.Bundle
 import com.anod.appwatcher.sync.SyncNotification
 import com.anod.appwatcher.utils.forMyApps
 import com.anod.appwatcher.utils.forPlayStore
+import com.anod.appwatcher.utils.prefs
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.content.startActivitySafely
+import org.koin.core.component.KoinComponent
 
-class NotificationActivity : Activity() {
+class NotificationActivity : Activity(), KoinComponent {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,7 +26,7 @@ class NotificationActivity : Activity() {
             }
             actionMyApps -> startActivitySafely(Intent().forMyApps(false, this))
             actionMarkViewed -> {
-                Application.provide(this).prefs.isLastUpdatesViewed = true
+                prefs.isLastUpdatesViewed = true
             }
         }
         finish()

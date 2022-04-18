@@ -4,18 +4,21 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.work.*
-import com.anod.appwatcher.Application
 import com.anod.appwatcher.SettingsActivity
+import com.anod.appwatcher.utils.prefs
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.ApplicationContext
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
+import org.koin.core.parameter.parametersOf
 import java.util.concurrent.TimeUnit
 
 /**
  * @author Alex Gavrishev
  * @date 13/06/2017
  */
-class UploadService(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
+class UploadService(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params), KoinComponent {
 
     companion object {
         private const val windowStartDelaySeconds = 60L
@@ -53,7 +56,7 @@ class UploadService(appContext: Context, params: WorkerParameters) : CoroutineWo
             return Result.failure()
         }
 
-        val worker = GDriveUpload(applicationContext, googleAccount)
+        val worker = get<GDriveUpload> { parametersOf(googleAccount) }
         try {
             worker.doUploadInBackground()
         } catch (e: Exception) {
@@ -69,7 +72,6 @@ class UploadService(appContext: Context, params: WorkerParameters) : CoroutineWo
             return Result.failure()
         }
 
-        val prefs = Application.provide(applicationContext).prefs
         prefs.lastDriveSyncTime = System.currentTimeMillis()
         return Result.success()
     }

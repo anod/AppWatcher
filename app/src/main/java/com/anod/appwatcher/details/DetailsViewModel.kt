@@ -1,9 +1,9 @@
 package com.anod.appwatcher.details
 
 import android.accounts.Account
-import androidx.lifecycle.*
-import com.anod.appwatcher.AppComponent
-import com.anod.appwatcher.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppTagsTable
 import com.anod.appwatcher.database.AppsDatabase
@@ -12,6 +12,7 @@ import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.database.entities.packageToApp
 import com.anod.appwatcher.model.AppInfo
+import com.anod.appwatcher.utils.prefs
 import finsky.api.model.DfeDetails
 import finsky.api.model.Document
 import info.anodsplace.applog.AppLog
@@ -19,6 +20,9 @@ import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.playstore.DetailsEndpoint
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import org.koin.core.parameter.parametersOf
 
 typealias TagMenuItem = Pair<Tag, Boolean>
 
@@ -32,23 +36,19 @@ sealed class AppLoadingState
 class Loaded(val app: App) : AppLoadingState()
 object NotFound : AppLoadingState()
 
-class DetailsViewModel(application: android.app.Application) : AndroidViewModel(application) {
-
-    val context: ApplicationContext
-        get() = ApplicationContext(getApplication())
-
-    val provide: AppComponent
-        get() = Application.provide(context)
-
-    val database: AppsDatabase
-        get() = provide.database
+class DetailsViewModel(application: android.app.Application) : AndroidViewModel(application), KoinComponent {
+    val context: ApplicationContext by inject()
+    val database: AppsDatabase by inject()
+    val authToken: AuthTokenBlocking by inject()
 
     var detailsUrl = ""
 
     private val _appId = MutableStateFlow("")
     var appId: String
         get() = _appId.value
-        set(value) { _appId.value = value }
+        set(value) {
+            _appId.value = value
+        }
 
     var rowId: Int = -1
 
@@ -73,15 +73,11 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
 
     val watchStateChange: MutableSharedFlow<Int> = MutableSharedFlow()
 
-    val account: Account? by lazy {
-        Application.provide(application).prefs.account
-    }
+    val account: Account?
+        get() = prefs.account
 
-    private val detailsEndpoint: DetailsEndpoint by lazy {
-        val account = this.account ?: Account("empty", "empty")
-        DetailsEndpoint(application, provide.networkClient, provide.deviceInfo, account, detailsUrl)
-    }
-    var authToken = ""
+    private val detailsEndpoint: DetailsEndpoint by inject { parametersOf(detailsUrl) }
+
     var localChangelog: List<AppChange> = emptyList()
     val tagsMenuItems: StateFlow<List<TagMenuItem>> = flow {
         if (appId.isNotEmpty()) {
@@ -116,10 +112,9 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
     }
 
     fun loadRemoteChangelog() {
-        if (this.authToken.isBlank()) {
+        if (authToken.token.isBlank()) {
             this.updateChangelogState(RemoteComplete(true))
         } else {
-            detailsEndpoint.authToken = this.authToken
             viewModelScope.launch {
                 try {
                     val model = detailsEndpoint.start()
@@ -176,9 +171,9 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
     fun changeTag(tagId: Int, checked: Boolean) {
         viewModelScope.launch {
             if (checked) {
-                provide.database.appTags().delete(tagId, appId) > 0
+                database.appTags().delete(tagId, appId) > 0
             } else {
-                AppTagsTable.Queries.insert(tagId, appId, provide.database)
+                AppTagsTable.Queries.insert(tagId, appId, database)
             }
         }
     }

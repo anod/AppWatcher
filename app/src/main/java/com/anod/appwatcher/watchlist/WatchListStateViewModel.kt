@@ -8,23 +8,26 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.work.Operation
 import com.anod.appwatcher.AppWatcherApplication
-import com.anod.appwatcher.Application
+import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.sync.UpdateCheck
+import com.anod.appwatcher.utils.networkConnection
 import info.anodsplace.applog.AppLog
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 /**
  * @author Alex Gavrishev
  * *
  * @date 18/03/2017.
  */
-class WatchListStateViewModel(application: android.app.Application) : AndroidViewModel(application) {
+class WatchListStateViewModel(application: android.app.Application) : AndroidViewModel(application), KoinComponent {
+    private val authToken: AuthTokenBlocking by inject()
     val titleFilter = MutableLiveData<String>()
     val sortId = MutableLiveData<Int>()
     val listState = MutableLiveData<ListState>()
-    var isAuthenticated = false
     var isWideLayout = false
 
     /**
@@ -61,8 +64,8 @@ class WatchListStateViewModel(application: android.app.Application) : AndroidVie
 
     fun requestRefresh(): Flow<Operation.State> {
         AppLog.d("Refresh requested")
-        if (!isAuthenticated) {
-            if (Application.provide(app).networkConnection.isNetworkAvailable) {
+        if (!authToken.isFresh) {
+            if (networkConnection.isNetworkAvailable) {
                 this.listState.value = ShowAuthDialog
             } else {
                 this.listState.value = NoNetwork

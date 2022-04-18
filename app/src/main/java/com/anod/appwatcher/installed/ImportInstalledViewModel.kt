@@ -1,25 +1,27 @@
 // Copyright (c) 2019. Alex Gavrishev
 package com.anod.appwatcher.installed
 
-import android.accounts.Account
+import android.content.pm.PackageManager
 import androidx.core.os.bundleOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
-import com.anod.appwatcher.provide
 import com.anod.appwatcher.utils.SelectionState
 import com.anod.appwatcher.watchlist.AppViewHolder
 import info.anodsplace.framework.content.getInstalledPackagesCodes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
+import org.koin.core.component.inject
 
-class ImportInstalledViewModel(application: android.app.Application) : AndroidViewModel(application) {
+class ImportInstalledViewModel(application: android.app.Application) : AndroidViewModel(application), KoinComponent {
 
     private var isImportStarted = false
-    private var importManager: ImportBulkManager? = ImportBulkManager(application)
+    private var importManager: ImportBulkManager? = get()
+    private val packageManager: PackageManager by inject()
     private val selectionState = SelectionState()
 
     val selectedCount: Int
@@ -53,11 +55,11 @@ class ImportInstalledViewModel(application: android.app.Application) : AndroidVi
         selectionState.clear()
     }
 
-    fun import(account: Account, token: String) {
+    fun import() {
         importManager!!.reset()
         viewModelScope.launch {
             val packages = withContext(Dispatchers.Default) {
-                provide.packageManager.getInstalledPackagesCodes()
+                packageManager.getInstalledPackagesCodes()
                         .associateBy({ it.name }) { it.versionCode }
             }
 
@@ -67,7 +69,7 @@ class ImportInstalledViewModel(application: android.app.Application) : AndroidVi
                 }
             }
 
-            importManager!!.start(account, token).collect { status ->
+            importManager!!.start().collect { status ->
                 onChanged(status)
                 progress.value = status
             }
@@ -92,7 +94,7 @@ class ImportInstalledViewModel(application: android.app.Application) : AndroidVi
             is ImportProgress -> {
                 status.docIds.forEach { packageName ->
                     val resultCode = status.result.get(packageName)
-                    val packageStatus = if (resultCode == ImportTask.RESULT_OK) importStatusDone else importStatusError
+                    val packageStatus = if (resultCode == ImportInstalledTask.RESULT_OK) importStatusDone else importStatusError
                     selectionState.setExtra(packageName, bundleOf("status" to packageStatus))
                 }
             }

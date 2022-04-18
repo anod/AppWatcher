@@ -18,12 +18,14 @@ import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.databinding.ActivityTagsEditorBinding
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.utils.Theme
+import com.anod.appwatcher.utils.prefs
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.FragmentContainerFactory
 import info.anodsplace.framework.app.FragmentToolbarActivity
 import info.anodsplace.graphics.DrawableTint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
 
 /**
  * @author Alex Gavrishev
@@ -31,7 +33,7 @@ import kotlinx.coroutines.launch
  * @date 10/03/2017.
  */
 
-class TagsListFragment : Fragment(), View.OnClickListener {
+class TagsListFragment : Fragment(), View.OnClickListener, KoinComponent {
 
     private var _binding: ActivityTagsEditorBinding? = null
     private val binding get() = _binding!!
@@ -77,7 +79,7 @@ class TagsListFragment : Fragment(), View.OnClickListener {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.add_tag) {
-            EditTagDialog.show(parentFragmentManager, null, Theme(requireActivity()))
+            EditTagDialog.show(parentFragmentManager, null, Theme(requireActivity(), prefs))
             return true
         }
         return super.onOptionsItemSelected(item)
@@ -86,7 +88,7 @@ class TagsListFragment : Fragment(), View.OnClickListener {
     override fun onClick(v: View) {
         val holder = v.tag as TagHolder
         if (viewModel.appInfo.value == null) {
-            EditTagDialog.show(parentFragmentManager, holder.tag, Theme(requireActivity()))
+            EditTagDialog.show(parentFragmentManager, holder.tag, Theme(requireActivity(), prefs))
         } else {
             if (holder.name.isSelected) {
                 viewModel.removeAppTag(holder.tag)

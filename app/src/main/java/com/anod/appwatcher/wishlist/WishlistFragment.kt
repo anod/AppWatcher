@@ -21,6 +21,7 @@ import com.anod.appwatcher.search.ResultAction
 import com.anod.appwatcher.search.ResultsAdapterList
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.EventFlow
+import com.anod.appwatcher.utils.prefs
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.FragmentContainerFactory
 import info.anodsplace.framework.app.FragmentToolbarActivity
@@ -28,13 +29,15 @@ import info.anodsplace.framework.view.Keyboard
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
 
 /**
  * @author Alex Gavrishev
  * *
  * @date 16/12/2016.
  */
-class WishListFragment : Fragment() {
+class WishListFragment : Fragment(), KoinComponent {
 
     private var loadJob: Job? = null
     private val viewModel: WishListViewModel by viewModels()
@@ -102,18 +105,17 @@ class WishListFragment : Fragment() {
             requireActivity().finish()
             return
         } else {
-            viewModel.init(account, authToken)
-            this.adapter = ResultsAdapterList(requireContext(), action, viewModel.packages)
+            this.adapter = ResultsAdapterList(requireContext(), action, viewModel.packages, iconLoader = get())
             binding.list.adapter = this.adapter
         }
 
-        viewModel.appStatusChange.observe(viewLifecycleOwner, {
+        viewModel.appStatusChange.observe(viewLifecycleOwner) {
             val newStatus = it.first
             if (newStatus == AppInfoMetadata.STATUS_NORMAL) {
-                TagSnackbar.make(binding.root, it.second!!, false, requireActivity()).show()
+                TagSnackbar.make(binding.root, it.second!!, false, requireActivity(), prefs).show()
                 binding.list.adapter!!.notifyDataSetChanged()
             }
-        })
+        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.packages.collectLatest {

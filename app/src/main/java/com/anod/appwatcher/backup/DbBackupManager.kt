@@ -1,10 +1,9 @@
 package com.anod.appwatcher.backup
 
-import android.content.Context
 import android.net.Uri
 import android.os.Environment
 import androidx.room.withTransaction
-import com.anod.appwatcher.Application
+import com.anod.appwatcher.database.AppsDatabase
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.json.MalformedJsonException
@@ -21,9 +20,7 @@ import java.util.*
 
  * @author alex
  */
-class DbBackupManager(private val context: ApplicationContext) {
-
-    constructor(context: Context) : this(ApplicationContext(context))
+class DbBackupManager(private val context: ApplicationContext, private val db: AppsDatabase) {
 
     internal suspend fun doExport(destUri: Uri): Int = withContext(Dispatchers.IO) {
         val outputStream: OutputStream?
@@ -45,7 +42,7 @@ class DbBackupManager(private val context: ApplicationContext) {
         return sDataLock.withLock {
             return try {
                 val buf = BufferedWriter(OutputStreamWriter(outputStream))
-                writer.write(buf, Application.provide(context).database)
+                writer.write(buf, db)
                 true
             } catch (e: IOException) {
                 AppLog.e(e)
@@ -86,7 +83,6 @@ class DbBackupManager(private val context: ApplicationContext) {
             return@withContext RESULT_OK
         }
 
-        val db = Application.provide(context).database
         return@withContext db.withTransaction {
             db.apps().delete()
             db.tags().delete()

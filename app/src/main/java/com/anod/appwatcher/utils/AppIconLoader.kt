@@ -16,9 +16,9 @@ import coil.fetch.Fetcher
 import coil.fetch.SourceResult
 import coil.request.ImageRequest
 import coil.request.Options
-import com.anod.appwatcher.Application
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.App
+import com.anod.appwatcher.preferences.Preferences
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.loadIcon
 import info.anodsplace.graphics.BitmapByteArray
@@ -26,16 +26,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okio.Buffer
 
-class AppIconLoader(context: Context) {
+class AppIconLoader(context: Context, private val prefs: Preferences, private val imageLoader: ImageLoader) {
     private val context: Context = context.applicationContext
-    private var iconPath: Path = AdaptiveIconTransformation.maskToPath(Application.provide(context).prefs.iconShape)
-    private val imageLoader: ImageLoader by lazy {
-        ImageLoader.Builder(context)
-                .components {
-                    add(PackageIconFetcher.Factory(context))
-                }
-                .build()
-    }
+    private var _iconPathPair: Pair<Int, Path> = Pair(0, Path())
+    private val iconPath: Path
+        get() {
+            val shapeHashCode = prefs.iconShape.hashCode()
+            if (shapeHashCode != _iconPathPair.first) {
+                _iconPathPair = Pair(shapeHashCode, AdaptiveIconTransformation.maskToPath(prefs.iconShape))
+            }
+            return _iconPathPair.second
+        }
 
     private val iconSize: Int by lazy {
         context.resources.getDimensionPixelSize(R.dimen.icon_size)
@@ -94,10 +95,6 @@ class AppIconLoader(context: Context) {
             size(iconSize, iconSize)
             customize(this)
         }.build()
-    }
-
-    fun setIconShape(mask: String) {
-        this.iconPath = AdaptiveIconTransformation.maskToPath(mask)
     }
 
     companion object {

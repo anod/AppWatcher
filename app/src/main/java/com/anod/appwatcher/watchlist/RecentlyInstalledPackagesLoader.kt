@@ -6,13 +6,13 @@ import info.anodsplace.framework.content.getRecentlyInstalled
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class RecentlyInstalledPackages(private val packageManager: PackageManager, private val database: AppsDatabase) {
+class RecentlyInstalledPackagesLoader(private val packageManager: PackageManager, private val database: AppsDatabase) {
 
     suspend fun load(): List<Pair<String, Int>> {
         val packages = withContext(Dispatchers.Default) {
             packageManager.getRecentlyInstalled()
-                .take(WatchListViewModel.recentlyInstalledViews)
-                .map { it.name }
+                    .take(WatchListViewModel.recentlyInstalledViews)
+                    .map { it.name }
         }
         return if (packages.isNotEmpty()) {
             val watchingPackages = database.apps().loadRowIds(packages).associateBy({ it.packageName }, { it.rowId })

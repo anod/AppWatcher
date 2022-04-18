@@ -7,9 +7,12 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.ViewModelProvider
-import com.anod.appwatcher.*
+import com.anod.appwatcher.MarketSearchActivity
+import com.anod.appwatcher.R
+import com.anod.appwatcher.SettingsActivity
 import com.anod.appwatcher.installed.InstalledFragment
 import com.anod.appwatcher.model.Filters
+import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.EventFlow
 import com.anod.appwatcher.utils.forMyApps
 import info.anodsplace.framework.app.CustomThemeActivity
@@ -17,7 +20,6 @@ import info.anodsplace.framework.app.DialogSingleChoice
 import info.anodsplace.framework.content.startActivitySafely
 import info.anodsplace.framework.view.MenuItemAnimation
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 sealed class MenuAction
@@ -90,7 +92,9 @@ class SearchMenu(
  */
 class WatchListMenu(
         private val action: EventFlow<MenuAction>,
-        private val activity: AppCompatActivity
+        private val activity: AppCompatActivity,
+        private val appScope: CoroutineScope,
+        private val prefs: Preferences
 ) {
     val search = SearchMenu(action)
     var filterId: Int = Filters.TAB_ALL
@@ -99,8 +103,6 @@ class WatchListMenu(
             field = value
         }
 
-    private val appScope: CoroutineScope
-        get() = Application.provide(activity).appScope
     private val refreshMenuAnimation = MenuItemAnimation(activity, info.anodsplace.framework.R.anim.rotate)
 
     private var filterItem: MenuItem? = null
@@ -159,7 +161,6 @@ class WatchListMenu(
                 return true
             }
             R.id.menu_act_sort -> {
-                val prefs = activity.provide.prefs
                 val selected = prefs.sortIndex
                 DialogSingleChoice(activity, R.style.AlertDialog, R.array.sort_titles, selected) { dialog, index ->
                     prefs.sortIndex = index

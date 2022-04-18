@@ -20,7 +20,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
-import com.anod.appwatcher.Application
 import com.anod.appwatcher.MarketSearchActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.databinding.ActivityMainBinding
@@ -30,16 +29,17 @@ import com.anod.appwatcher.details.DetailsFragment
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.navigation.DrawerActivity
 import com.anod.appwatcher.navigation.DrawerViewModel
-import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.search.SearchActivity
 import com.anod.appwatcher.upgrade.UpgradeCheck
-import com.anod.appwatcher.upgrade.UpgradeRefresh
 import com.anod.appwatcher.utils.EventFlow
 import com.anod.appwatcher.utils.Theme
+import com.anod.appwatcher.utils.appScope
+import com.anod.appwatcher.utils.prefs
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.FragmentContainerFactory
 import kotlinx.coroutines.flow.collectLatest
+import org.koin.core.component.KoinComponent
 
 sealed class ListState
 object SyncStarted : ListState()
@@ -52,12 +52,12 @@ interface AppDetailsRouter {
     fun openAppDetails(appId: String, rowId: Int, detailsUrl: String?)
 }
 
-abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionListener, AppDetailsRouter {
+abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionListener, AppDetailsRouter, KoinComponent {
 
     internal lateinit var binding: ActivityMainBinding
 
     val theme: Theme
-        get() = Theme(this)
+        get() = Theme(this, prefs)
 
     override val themeRes: Int
         get() = theme.theme
@@ -78,11 +78,8 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     @get:IdRes
     override val hingeLayoutId = R.id.hinge
 
-    val prefs: Preferences
-        get() = Application.provide(this).prefs
-
     private val menuAction = EventFlow<MenuAction>()
-    private val actionMenu by lazy { WatchListMenu(menuAction, this) }
+    private val actionMenu by lazy { WatchListMenu(menuAction, this, appScope, prefs) }
     private val stateViewModel: WatchListStateViewModel by viewModels()
 
     @get:MenuRes
@@ -183,11 +180,6 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
                 }
             }
         }
-    }
-
-    override fun onAuthToken(authToken: String) {
-        super.onAuthToken(authToken)
-        stateViewModel.isAuthenticated = authToken.isNotEmpty()
     }
 
     protected abstract fun createViewPagerAdapter(): Adapter

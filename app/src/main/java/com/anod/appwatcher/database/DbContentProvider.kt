@@ -10,7 +10,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteQueryBuilder
 import android.net.Uri
 import android.provider.BaseColumns
-import com.anod.appwatcher.Application
+import com.anod.appwatcher.AppWatcherApplication
 import com.anod.appwatcher.BuildConfig
 import info.anodsplace.applog.AppLog
 
@@ -38,7 +38,7 @@ open class DbContentProvider : ContentProvider() {
     }
 
     private val dbSchemaManager: DbDataSource by lazy {
-        DbDataSource(Application.provide(context!!).database.openHelper)
+        DbDataSource((context as AppWatcherApplication).appsDatabase.openHelper)
     }
 
     private fun matchQuery(uri: Uri): Query? {
@@ -105,7 +105,7 @@ open class DbContentProvider : ContentProvider() {
     }
 
     override fun onCreate(): Boolean {
-        AppLog.d("Initializing ${Application.provide(context!!).database.openHelper.databaseName}")
+        AppLog.d("Initializing ${(context as AppWatcherApplication).appsDatabase.openHelper.databaseName}")
         return false
     }
 
