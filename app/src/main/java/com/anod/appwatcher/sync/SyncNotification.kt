@@ -64,9 +64,6 @@ class SyncNotification(private val context: ApplicationContext) {
     }
 
     fun createChannels() {
-        if (Build.VERSION.SDK_INT < 26) {
-            return
-        }
         val updates = NotificationChannel(updatesChannelId, context.getString(R.string.channel_app_updates), NotificationManager.IMPORTANCE_DEFAULT)
         updates.description = context.getString(R.string.channel_updates_description)
         updates.setShowBadge(true)

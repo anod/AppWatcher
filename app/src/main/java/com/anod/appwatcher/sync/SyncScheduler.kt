@@ -1,7 +1,6 @@
 package com.anod.appwatcher.sync
 
 import android.content.Context
-import android.os.Build
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.map
 import androidx.work.*
@@ -59,7 +58,7 @@ class SyncScheduler(private val context: ApplicationContext) {
         val constraints: Constraints = Constraints.Builder().apply {
             setRequiresCharging(false)
             setRequiredNetworkType(NetworkType.CONNECTED)
-            if (Build.VERSION.SDK_INT >= 23) setRequiresDeviceIdle(false)
+            setRequiresDeviceIdle(false)
         }.build()
 
         val request: OneTimeWorkRequest = OneTimeWorkRequest.Builder(SyncWorker::class.java)

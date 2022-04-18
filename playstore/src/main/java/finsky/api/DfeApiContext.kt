@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Build
 import android.text.TextUtils
 import finsky.config.ContentLevel
+import finsky.utils.NetworkStateChangedReceiver
 import finsky.utils.NetworkType
 import info.anodsplace.playstore.DeviceInfoProvider
 import java.util.*
@@ -47,7 +48,7 @@ class DfeApiContext private constructor(internal val context: Context, val accou
     internal fun createHeaders(): MutableMap<String, String> {
         synchronized(this) {
             val hashMap = this.headers.toMutableMap()
-            hashMap["X-DFE-Network-Type"] = NetworkType(context).value.toString()
+            hashMap["X-DFE-Network-Type"] = NetworkStateChangedReceiver.getCachedNetworkType(context).value.toString()
             hashMap["Authorization"] = "GoogleLogin auth=$lastAuthToken"
             return hashMap
         }

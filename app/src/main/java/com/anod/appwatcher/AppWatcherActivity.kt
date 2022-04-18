@@ -11,7 +11,6 @@ import com.anod.appwatcher.watchlist.WatchListFragment
 import info.anodsplace.applog.AppLog
 import kotlinx.coroutines.flow.collect
 
-
 class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener {
 
     override val isHomeAsMenu: Boolean

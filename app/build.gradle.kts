@@ -18,13 +18,11 @@ android {
 
     defaultConfig {
         applicationId = "com.anod.appwatcher"
-        minSdk = 21
-        targetSdk = 30
-        versionCode = 14900
-        versionName = "1.4.9"
+        minSdk = 27
+        targetSdk = 31
+        versionCode = 15000
+        versionName = "1.5.0"
         resValue("string", "content_authority", "com.anod.appwatcher")
-
-        vectorDrawables.generatedDensities("hdpi", "xxhdpi")
 
         javaCompileOptions {
             annotationProcessorOptions {
@@ -169,7 +167,7 @@ dependencies {
     implementation(project(":lib:ktx"))
     implementation(project(":playstore"))
 
-    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.6")
+    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.8.1")
 }
 
 // ADD THIS AT THE BOTTOM

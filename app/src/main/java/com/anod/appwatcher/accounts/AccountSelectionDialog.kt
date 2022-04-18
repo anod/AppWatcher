@@ -43,26 +43,16 @@ class AccountSelectionDialog(
         fun onAccountNotFound(errorMessage: String)
     }
 
-    @TargetApi(Build.VERSION_CODES.M)
     fun show() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val intent = AccountManager.newChooseAccountIntent(
-                    account,
-                    null,
-                    arrayOf(AuthTokenBlocking.ACCOUNT_TYPE),
-                    null,
-                    null,
-                    null,
-                    null)
-            activity.startActivityForResult(intent, ACCOUNT_REQUEST)
-        } else {
-            // Use the Builder class for convenient dialog construction
-            if (ContextCompat.checkSelfPermission(activity, Manifest.permission.GET_ACCOUNTS) != PackageManager.PERMISSION_GRANTED) {
-                showPermissionsDialog()
-                return
-            }
-            activity.startActivityForResult(AccountSelectionDialogActivity.intent(account, activity),  ACCOUNT_REQUEST)
-        }
+        val intent = AccountManager.newChooseAccountIntent(
+                account,
+                null,
+                arrayOf(AuthTokenBlocking.ACCOUNT_TYPE),
+                null,
+                null,
+                null,
+                null)
+        activity.startActivityForResult(intent, ACCOUNT_REQUEST)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
