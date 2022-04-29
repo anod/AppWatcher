@@ -49,8 +49,10 @@ class InstalledPagingSource(
                 .map { app ->
                     val appChange = changelogAdapter.changelogs[app.appId]
                     OnDeviceItem(AppListItem(
-                            app, appChange?.details ?: "",
-                            noNewDetails = false, recentFlag = false
+                            app = app,
+                            changeDetails = appChange?.details ?: "",
+                            noNewDetails = false,
+                            recentFlag = false
                     ), config.selectionMode)
                 }.toList()
 

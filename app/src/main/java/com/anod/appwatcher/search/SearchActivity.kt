@@ -2,7 +2,6 @@ package com.anod.appwatcher.search
 
 import android.accounts.Account
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -17,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AccountSelectionDialog
+import com.anod.appwatcher.accounts.AccountSelectionResult
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.databinding.ActivityMarketSearchBinding
 import com.anod.appwatcher.model.AppInfoMetadata
@@ -37,7 +37,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 
 @SuppressLint("Registered")
-open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionListener, KoinComponent {
+open class SearchActivity : ToolbarActivity(), KoinComponent {
 
     private var searchJob: Job? = null
     override val themeRes: Int
@@ -50,9 +50,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
 
     lateinit var searchView: SearchView
 
-    private val accountSelectionDialog: AccountSelectionDialog by lazy {
-        AccountSelectionDialog(this, prefs, this)
-    }
+    private lateinit var accountSelectionDialog: AccountSelectionDialog
 
     private val viewModel: SearchViewModel by viewModels()
 
@@ -74,6 +72,17 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
         binding.retryBox.visibility = View.GONE
 
         viewModel.initFromIntent(intent)
+
+        accountSelectionDialog = AccountSelectionDialog(this, prefs)
+        lifecycleScope.launchWhenCreated {
+            accountSelectionDialog.accountSelected.collect { result ->
+                when (result) {
+                    AccountSelectionResult.Canceled -> onAccountNotFound("")
+                    is AccountSelectionResult.Error -> onAccountNotFound(result.errorMessage)
+                    is AccountSelectionResult.Success -> onAccountSelected(result.account)
+                }
+            }
+        }
 
         if (viewModel.account == null) {
             accountSelectionDialog.show()
@@ -212,7 +221,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
         }
     }
 
-    override fun onAccountSelected(account: Account) {
+    private fun onAccountSelected(account: Account) {
         lifecycleScope.launch {
             try {
                 if (!viewModel.authToken.refreshToken(account)) {
@@ -231,7 +240,7 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
         }
     }
 
-    override fun onAccountNotFound(errorMessage: String) {
+    private fun onAccountNotFound(errorMessage: String) {
         if (networkConnection.isNetworkAvailable) {
             if (errorMessage.isNotBlank()) {
                 Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
@@ -242,17 +251,6 @@ open class SearchActivity : ToolbarActivity(), AccountSelectionDialog.SelectionL
             Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()
         }
         finish()
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        accountSelectionDialog.onRequestPermissionResult(requestCode, permissions, grantResults)
-    }
-
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        accountSelectionDialog.onActivityResult(requestCode, resultCode, data)
     }
 
     private fun showRetryButton() {

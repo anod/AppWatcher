@@ -20,6 +20,7 @@ import com.anod.appwatcher.MarketSearchActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.SettingsActivity
 import com.anod.appwatcher.accounts.AccountSelectionDialog
+import com.anod.appwatcher.accounts.AccountSelectionResult
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.database.entities.Tag
@@ -42,7 +43,7 @@ import org.koin.core.component.inject
  * @author Alex Gavrishev
  * @date 01/12/2017
  */
-abstract class DrawerActivity : ToolbarActivity(), AccountSelectionDialog.SelectionListener, KoinComponent {
+abstract class DrawerActivity : ToolbarActivity(), KoinComponent {
 
     override val themeRes: Int
         get() = Theme(this, prefs).theme
@@ -61,14 +62,24 @@ abstract class DrawerActivity : ToolbarActivity(), AccountSelectionDialog.Select
         accountSelectionDialog.show()
     }
 
-    private val accountSelectionDialog: AccountSelectionDialog by lazy {
-        AccountSelectionDialog(this, prefs, this)
-    }
+    private lateinit var accountSelectionDialog: AccountSelectionDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setupDrawer()
+
+        accountSelectionDialog = AccountSelectionDialog(this, prefs)
+
+        lifecycleScope.launchWhenCreated {
+            accountSelectionDialog.accountSelected.collect { result ->
+                when (result) {
+                    AccountSelectionResult.Canceled -> onAccountNotFound("")
+                    is AccountSelectionResult.Error -> onAccountNotFound(result.errorMessage)
+                    is AccountSelectionResult.Success -> onAccountSelected(result.account)
+                }
+            }
+        }
 
         if (account == null) {
             accountSelectionDialog.show()
@@ -207,17 +218,7 @@ abstract class DrawerActivity : ToolbarActivity(), AccountSelectionDialog.Select
         return super.onOptionsItemSelected(item)
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        accountSelectionDialog.onRequestPermissionResult(requestCode, permissions, grantResults)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        accountSelectionDialog.onActivityResult(requestCode, resultCode, data)
-    }
-
-    override fun onAccountSelected(account: Account) {
+    protected open fun onAccountSelected(account: Account) {
         drawerViewModel.account.value = account
         val collectReports = prefs.collectCrashReports
         lifecycleScope.launch {
@@ -241,7 +242,7 @@ abstract class DrawerActivity : ToolbarActivity(), AccountSelectionDialog.Select
         }
     }
 
-    override fun onAccountNotFound(errorMessage: String) {
+    private fun onAccountNotFound(errorMessage: String) {
         if (networkConnection.isNetworkAvailable) {
             if (errorMessage.isNotBlank()) {
                 Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()

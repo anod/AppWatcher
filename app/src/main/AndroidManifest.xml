@@ -76,9 +76,6 @@
         </activity>
         <activity android:name=".tags.AppsTagActivity" />
         <activity
-            android:name=".accounts.AccountSelectionDialogActivity"
-            android:theme="@style/AlertDialog" />
-        <activity
             android:name=".NotificationActivity"
             android:exported="true"
             android:noHistory="true"

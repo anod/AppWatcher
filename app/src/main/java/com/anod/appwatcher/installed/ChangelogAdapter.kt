@@ -2,6 +2,7 @@ package com.anod.appwatcher.installed
 
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.AppChange
+import com.anod.appwatcher.preferences.Preferences
 import finsky.api.BulkDocId
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.InstalledPackage
@@ -16,6 +17,7 @@ import org.koin.core.parameter.parametersOf
 class ChangelogAdapter(
         private val viewModelScope: CoroutineScope,
         private val database: AppsDatabase,
+        private val prefs: Preferences,
         private val koin: Koin
 ) {
     private var job: Job? = null
@@ -69,24 +71,26 @@ class ChangelogAdapter(
     }
 
     private suspend fun loadChangelogs(docIds: List<BulkDocId>) {
-        val endpoint = createEndpoint(docIds)
+        if (prefs.account == null) {
+            AppLog.e("No account selected", "ChangelogAdapter")
+            return
+        }
+        val endpoint = koin.get<BulkDetailsEndpoint> { parametersOf(docIds) }
         try {
             endpoint.start()
             endpoint.documents.associateByTo(changelogs, { it.docId }) {
                 val recentChanges = it.appDetails.recentChangesHtml?.trim() ?: ""
                 AppChange(
-                    it.docId,
-                    it.appDetails.versionCode, it.appDetails.versionString,
-                    recentChanges, it.appDetails.uploadDate, false
+                        appId = it.docId,
+                        versionCode = it.appDetails.versionCode,
+                        versionName = it.appDetails.versionString,
+                        details = recentChanges,
+                        uploadDate = it.appDetails.uploadDate,
+                        noNewDetails = false
                 )
             }
         } catch (e: Throwable) {
-            AppLog.e("Fetching of bulk updates failed ${e.message ?: ""}", "UpdateCheck")
-            emptyList<AppChange>()
+            AppLog.e("Fetching of bulk updates failed ${e.message ?: ""}", "ChangelogAdapter")
         }
-    }
-
-    private fun createEndpoint(docIds: List<BulkDocId>): BulkDetailsEndpoint {
-        return koin.get { parametersOf(docIds) }
     }
 }
