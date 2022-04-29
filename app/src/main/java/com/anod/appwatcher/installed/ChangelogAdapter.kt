@@ -52,12 +52,12 @@ class ChangelogAdapter(
         val localIds = watchingPackages.subtract(changelogs.keys)
         if (localIds.isNotEmpty()) {
             val local = database.changelog().load(watchingPackages)
+            localIds.associateByTo(changelogs, { it }, { null })
             local.associateByTo(changelogs, { it.appId }, { it })
         }
         val loadIds = packagesMap.keys.subtract(changelogs.keys)
         if (loadIds.isNotEmpty()) {
-            val docIds =
-                loadIds.map { BulkDocId(it, packagesMap.getValue(it).versionCode) }
+            val docIds = loadIds.map { BulkDocId(it, packagesMap.getValue(it).versionCode) }
             loadChangelogs(docIds)
         }
         val unknownIds = packagesMap.keys.subtract(changelogs.keys)

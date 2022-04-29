@@ -245,7 +245,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener,
             viewModel.load(config(), initialKey = initialKey).collectLatest { result ->
                 binding.listView.isVisible = true
                 binding.progress.isVisible = false
-                AppLog.d("Load status changed: $result")
+                AppLog.d("Load status changed: $initialKey - $result")
                 adapter.submitData(result)
             }
         }

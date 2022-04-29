@@ -3,6 +3,7 @@ package com.anod.appwatcher.installed
 
 import androidx.collection.SimpleArrayMap
 import finsky.api.BulkDocId
+import info.anodsplace.applog.AppLog
 import info.anodsplace.playstore.BulkDetailsEndpoint
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.flow.Flow
@@ -21,6 +22,8 @@ internal class ImportBulkManager(private val koin: Koin) {
 
     private var listsDocIds: MutableList<MutableList<BulkDocId>?> = mutableListOf()
     private var currentBulk: Int = 0
+    private val importTask: ImportInstalledTask
+        get() = koin.get()
 
     fun reset() {
         listsDocIds = mutableListOf()
@@ -66,9 +69,9 @@ internal class ImportBulkManager(private val koin: Koin) {
         try {
             val model = endpoint.start()
             val docs = model.documents.toTypedArray()
-            val task = koin.get<ImportInstalledTask>()
-            return@withContext task.execute(*docs)
+            return@withContext importTask.execute(*docs)
         } catch (e: Exception) {
+            AppLog.e(e)
             return@withContext SimpleArrayMap<String, Int>()
         }
     }
