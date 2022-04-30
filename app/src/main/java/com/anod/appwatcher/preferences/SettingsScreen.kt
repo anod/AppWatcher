@@ -1,30 +1,28 @@
 package com.anod.appwatcher.preferences
 
+import android.graphics.Matrix
+import android.graphics.Path
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asComposePath
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.ImageLoader
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.anod.appwatcher.R
 import com.anod.appwatcher.backup.DbBackupManager
 import com.anod.appwatcher.compose.AppTheme
@@ -112,7 +110,6 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
                                                 )
                                                 IconShapeSelector(
                                                         prefs = prefs,
-                                                        imageLoader = viewModel.imageLoader,
                                                         modifier = Modifier
                                                                 .padding(top = 8.dp)
                                                                 .fillMaxWidth(),
@@ -147,9 +144,8 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
 }
 
 @Composable
-fun IconShapeSelector(prefs: Preferences, imageLoader: ImageLoader, modifier: Modifier = Modifier, onPathChange: (String) -> Unit = {}) {
-    val context = LocalContext.current
-    val paths = stringArrayResource(id = R.array.adaptive_icon_style_paths_values)
+fun IconShapeSelector(prefs: Preferences, modifier: Modifier = Modifier, onPathChange: (String) -> Unit = {}) {
+    val pathMasks = stringArrayResource(id = R.array.adaptive_icon_style_paths_values)
     val names = stringArrayResource(id = R.array.adaptive_icon_style_names)
     val iconSize = 48.dp
     val iconSizePx = with(LocalDensity.current) { iconSize.roundToPx() }
@@ -175,34 +171,33 @@ fun IconShapeSelector(prefs: Preferences, imageLoader: ImageLoader, modifier: Mo
                 contentAlignment = Alignment.Center
         ) {
             Text(
-                text = names[0],
-                color = if (isNone) MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.onSurface
+                    text = names[0],
+                    color = if (isNone) MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.onSurface
             )
         }
 
-        paths.filter { it.isNotEmpty() }.forEachIndexed { index, path ->
-            val mask = AdaptiveIconTransformation.maskToPath(path)
-            val selected = value == path
-            AsyncImage(
+        pathMasks.filter { it.isNotEmpty() }.forEachIndexed { index, pathMask ->
+            val path = AdaptiveIconTransformation.maskToPath(pathMask)
+            val outline = Path()
+            val maskMatrix = Matrix()
+            maskMatrix.setScale(iconSizePx / AdaptiveIconTransformation.MASK_SIZE, iconSizePx / AdaptiveIconTransformation.MASK_SIZE)
+            path.transform(maskMatrix, outline)
+
+            val selected = value == pathMask
+            Box(
                     modifier = Modifier
                             .size(iconSize, iconSize)
+                            .clip(GenericShape { _, _ ->
+                                addPath(outline.asComposePath())
+                            })
                             .clickable(onClick = {
-                                value = path
-                                onPathChange(path)
-                            }),
-                    colorFilter = ColorFilter.tint(
-                            color = if (selected) MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.secondary.copy(alpha = 0.3f)
-                    ),
-                    model = ImageRequest.Builder(context)
-                            .data(R.drawable.ic_square)
-                            .size(iconSizePx, iconSizePx)
-                            .transformations(listOf(AdaptiveIconTransformation(context, mask, "icon-style")))
-                            .build(),
-                    contentDescription = names[index],
-                    imageLoader = imageLoader
-            )
+                                value = pathMask
+                                onPathChange(pathMask)
+                            }, role = Role.Button, onClickLabel = names[index])
+                            .background(color = if (selected) MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.secondary.copy(alpha = 0.3f))
+            ) {
+            }
         }
-
     }
 }
 
