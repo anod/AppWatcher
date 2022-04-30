@@ -12,6 +12,7 @@ import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.sync.UpdateCheck
 import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.PackageChangedReceiver
+import com.anod.appwatcher.utils.date.UploadDateParserCache
 import com.anod.appwatcher.watchlist.RecentlyInstalledPackagesLoader
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.net.NetworkConnectivity
@@ -40,6 +41,7 @@ fun createAppModule(): Module = module {
         }
     }
 
+    singleOf(::UploadDateParserCache)
     singleOf(::ApplicationContext)
     singleOf(::Preferences)
     singleOf(::UploadServiceContentObserver)
@@ -66,6 +68,7 @@ fun createAppModule(): Module = module {
                 authToken = get(),
                 networkConnection = get(),
                 preferences = get(),
+                uploadDateParserCache = get(),
                 koin = getKoin()
         )
     }

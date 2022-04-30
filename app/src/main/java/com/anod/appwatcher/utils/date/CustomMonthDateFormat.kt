@@ -6,33 +6,47 @@ import java.text.ParsePosition
 import java.util.*
 
 /**
- * @author Alex Gavrishev
- * *
- * @date 12/09/2016.
+ * Parse "d MMM. y" and "d-MMM-y"
  */
-
-internal class CustomMonthDateFormat(private val monthNames: Array<String>) : DateFormat() {
+internal class CustomMonthDateFormat(private val monthNames: Array<String>, private val order: Array<STATE>) : DateFormat() {
 
     override fun format(date: Date, toAppendTo: StringBuffer, fieldPosition: FieldPosition): StringBuffer {
-        val sb = StringBuffer()
-        sb.append("d MMM. y г.")
-        return sb
+        val cal = Calendar.getInstance()
+        cal.time = date
+        val monthIdx = cal.get(Calendar.MONTH)
+        return StringBuffer().append(order.joinToString(" ") { state ->
+            when (state) {
+                STATE.DAY -> cal.get(Calendar.DAY_OF_MONTH).toString()
+                STATE.MONTH -> monthNames[monthIdx]
+                STATE.YEAR -> cal.get(Calendar.YEAR).toString()
+                STATE.UNKNOWN -> throw IllegalStateException("UNKNOWN is not valid")
+            }
+        })
     }
 
     override fun parse(source: String, pos: ParsePosition): Date? {
+        assert(order.size == 3)
+
         val start = pos.index
         val textLength = source.length
 
-        var state = STATE_DAY
+        var stateIndex = 0
+        var state: STATE = STATE.UNKNOWN
         var sb = StringBuilder()
         var day = 0
         var month = -1
         var year = 0
-        // "d MMM. y г."
+        // "d MMM. y г.", "d-MMM-y", "MMM d, y"
         for (index in start until textLength) {
             val ch = source[index]
-            if (state == STATE_DAY) {
-                if (ch == ' ') {
+            if (state == STATE.UNKNOWN) {
+                if (stopChar[ch] == true) {
+                    continue
+                }
+                state = order[stateIndex]
+            }
+            if (state == STATE.DAY) {
+                if (stopChar[ch] == true) {
                     day = toInt(sb.toString())
                     if (day == -1) {
                         pos.index = 0
@@ -40,14 +54,12 @@ internal class CustomMonthDateFormat(private val monthNames: Array<String>) : Da
                         break
                     }
                     sb = StringBuilder()
-                    state = STATE_MONTH
+                    stateIndex++
+                    state = STATE.UNKNOWN
                     continue
                 }
-            } else if (state == STATE_MONTH) {
-                if (ch == '.') {
-                    continue
-                }
-                if (ch == ' ') {
+            } else if (state == STATE.MONTH) {
+                if (stopChar[ch] == true) {
                     val monthName = sb.toString()
                     month = monthNames.indexOf(monthName)
                     if (month == -1) {
@@ -56,11 +68,12 @@ internal class CustomMonthDateFormat(private val monthNames: Array<String>) : Da
                         break
                     }
                     sb = StringBuilder()
-                    state = STATE_YEAR
+                    stateIndex++
+                    state = STATE.UNKNOWN
                     continue
                 }
-            } else {// if (state == STATE_YEAR)
-                if (ch == ' ') {
+            } else if (state == STATE.YEAR) {
+                if (stopChar[ch] == true) {
                     year = toInt(sb.toString())
                     if (year == -1) {
                         pos.index = 0
@@ -90,10 +103,22 @@ internal class CustomMonthDateFormat(private val monthNames: Array<String>) : Da
     }
 
     companion object {
+        val ORDER_DMY = arrayOf(STATE.DAY, STATE.MONTH, STATE.YEAR)
+        val ORDER_MDY = arrayOf(STATE.MONTH, STATE.DAY, STATE.YEAR)
 
-        private const val STATE_DAY = 0
-        private const val STATE_MONTH = 1
-        private const val STATE_YEAR = 2
+        val stopChar = mapOf(
+                ' ' to true,
+                ',' to true,
+                '.' to true,
+                '-' to true
+        )
+
+        enum class STATE {
+            UNKNOWN,
+            DAY,
+            MONTH,
+            YEAR,
+        }
 
         private fun toInt(text: String): Int {
             if ("" == text) {

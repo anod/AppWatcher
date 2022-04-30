@@ -6,8 +6,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.AppInfo
-import com.anod.appwatcher.utils.EventFlow
 import com.anod.appwatcher.utils.AppIconLoader
+import com.anod.appwatcher.utils.EventFlow
+import com.anod.appwatcher.utils.date.UploadDateParserCache
 import finsky.api.model.Document
 import info.anodsplace.framework.app.DialogMessage
 import info.anodsplace.framework.content.InstalledApps
@@ -21,8 +22,9 @@ class ResultsAppViewHolder(
         private val packages: StateFlow<List<String>>,
         private val colorBgDisabled: Int,
         private val colorBgNormal: Int,
-        private val installedApps: InstalledApps.MemoryCache)
-    : RecyclerView.ViewHolder(itemView), View.OnClickListener {
+        private val installedApps: InstalledApps.MemoryCache,
+        private val uploadDateParserCache: UploadDateParserCache
+) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
 
     var doc: Document? = null
 
@@ -43,7 +45,7 @@ class ResultsAppViewHolder(
         if (doc == null) {
             return
         }
-        val info = AppInfo(doc!!)
+        val info = AppInfo(doc!!, uploadDateParserCache)
 
         val packages = packages.value
         if (packages.contains(info.packageName)) {

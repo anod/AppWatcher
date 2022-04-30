@@ -24,7 +24,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.anod.appwatcher.R
-import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.entities.App
@@ -49,16 +48,13 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import kotlin.math.abs
 
-class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetChangedListener, Toolbar.OnMenuItemClickListener, KoinComponent {
+class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetChangedListener, Toolbar.OnMenuItemClickListener {
 
     private var loaded = false
     private val viewModel: DetailsViewModel by viewModels()
     private var toggleMenu: MenuItem? = null
-    private val authToken: AuthTokenBlocking by inject()
 
     private val titleString: AlphaSpannableString by lazy {
         val span = AlphaForegroundColorSpan(ColorAttribute(android.R.attr.textColor, requireContext(), Color.WHITE).value)
@@ -69,8 +65,6 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         val span = AlphaForegroundColorSpan(ColorAttribute(android.R.attr.textColor, requireContext(), Color.WHITE).value)
         AlphaSpannableString(viewModel.app.value!!.uploadDate, span)
     }
-
-    private val iconLoader: AppIconLoader by inject()
 
     private val dataProvider: AppViewHolderResourceProvider by lazy {
         AppViewHolderResourceProvider(
@@ -179,7 +173,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
                             adapter.setData(viewModel.localChangelog, viewModel.recentChange)
                             if (adapter.isEmpty) {
                                 binding.showErrorWithRetry()
-                                if (!networkConnection.isNetworkAvailable) {
+                                if (!viewModel.networkConnection.isNetworkAvailable) {
                                     Toast.makeText(requireContext(), R.string.check_connection, Toast.LENGTH_SHORT).show()
                                 }
                             } else {
@@ -199,8 +193,8 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
                     AppListTable.ERROR_ALREADY_ADDED -> Toast.makeText(requireContext(), R.string.app_already_added, Toast.LENGTH_SHORT).show()
                     AppListTable.ERROR_INSERT -> Toast.makeText(requireContext(), R.string.error_insert_app, Toast.LENGTH_SHORT).show()
                     else -> {
-                        val info = AppInfo(viewModel.document!!)
-                        TagSnackbar.make(view, info, false, requireActivity(), prefs).show()
+                        val info = AppInfo(viewModel.document!!, viewModel.uploadDateParserCache)
+                        TagSnackbar.make(view, info, false, requireActivity(), viewModel.prefs).show()
                     }
                 }
             }
@@ -222,7 +216,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         viewModel.account?.let { account ->
             lifecycleScope.launch {
                 try {
-                    if (authToken.refreshToken(account)) {
+                    if (viewModel.authToken.refreshToken(account)) {
                         viewModel.loadRemoteChangelog()
                     } else {
                         AppLog.e("Error retrieving token")
@@ -255,7 +249,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
     private fun loadIcon(imageUrl: String) {
         lifecycleScope.launchWhenCreated {
             try {
-                val drawable = iconLoader.get(imageUrl) as? BitmapDrawable
+                val drawable = viewModel.iconLoader.get(imageUrl) as? BitmapDrawable
                 if (drawable == null) {
                     setDefaultIcon()
                     return@launchWhenCreated
@@ -380,7 +374,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         applyColor(darkSwatch.rgb)
         animateBackground()
 
-        if (Theme(requireActivity(), prefs).isNightTheme) {
+        if (Theme(requireActivity(), viewModel.prefs).isNightTheme) {
             appDetailsView.updateAccentColor(ContextCompat.getColor(requireContext(), R.color.black))
         } else {
             appDetailsView.updateAccentColor(darkSwatch.rgb)

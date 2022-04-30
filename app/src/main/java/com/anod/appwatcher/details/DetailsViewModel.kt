@@ -12,6 +12,8 @@ import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.database.entities.packageToApp
 import com.anod.appwatcher.model.AppInfo
+import com.anod.appwatcher.utils.AppIconLoader
+import com.anod.appwatcher.utils.date.UploadDateParserCache
 import com.anod.appwatcher.utils.prefs
 import finsky.api.model.DfeDetails
 import finsky.api.model.Document
@@ -40,7 +42,9 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
     val context: ApplicationContext by inject()
     val database: AppsDatabase by inject()
     val authToken: AuthTokenBlocking by inject()
-
+    val uploadDateParserCache: UploadDateParserCache by inject()
+    val iconLoader: AppIconLoader by inject()
+    
     var detailsUrl = ""
 
     private val _appId = MutableStateFlow("")
@@ -184,7 +188,7 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
             if (document == null) {
                 watchStateChange.emit(AppListTable.ERROR_INSERT)
             } else {
-                val info = AppInfo(document)
+                val info = AppInfo(document, uploadDateParserCache)
                 val result = AppListTable.Queries.insertSafetly(info, database)
                 watchStateChange.emit(result)
             }

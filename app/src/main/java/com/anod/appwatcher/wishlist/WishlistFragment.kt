@@ -105,7 +105,7 @@ class WishListFragment : Fragment(), KoinComponent {
             requireActivity().finish()
             return
         } else {
-            this.adapter = ResultsAdapterList(requireContext(), action, viewModel.packages, iconLoader = get())
+            this.adapter = ResultsAdapterList(requireContext(), action, viewModel.packages, iconLoader = get(), uploadDateParserCache = get())
             binding.list.adapter = this.adapter
         }
 

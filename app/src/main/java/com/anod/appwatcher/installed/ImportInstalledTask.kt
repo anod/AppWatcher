@@ -5,17 +5,18 @@ import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
+import com.anod.appwatcher.utils.date.UploadDateParserCache
 import finsky.api.model.Document
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class ImportInstalledTask(private val database: AppsDatabase) {
+class ImportInstalledTask(private val database: AppsDatabase, private val uploadDateParserCache: UploadDateParserCache) {
 
     suspend fun execute(vararg documents: Document): SimpleArrayMap<String, Int> = withContext(Dispatchers.IO) {
         val result = SimpleArrayMap<String, Int>()
         val packages = database.apps().loadPackages(false).map { it.packageName }
         for (doc in documents) {
-            val info = AppInfo(doc)
+            val info = AppInfo(doc, uploadDateParserCache)
             val status = addSync(info, packages, database.apps(), database)
             result.put(info.packageName, status)
         }

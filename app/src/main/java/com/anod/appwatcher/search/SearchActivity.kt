@@ -147,7 +147,7 @@ open class SearchActivity : ToolbarActivity(), KoinComponent {
             is Loading -> showLoading()
             is DetailsAvailable -> {
                 showListView()
-                adapter = ResultsAdapterSingle(context, action, viewModel.packages, status.document, get())
+                adapter = ResultsAdapterSingle(context, action, viewModel.packages, status.document, iconLoader = get(), uploadDateParserCache = get())
                 binding.list.adapter = adapter
             }
             is NoNetwork -> {
@@ -164,7 +164,7 @@ open class SearchActivity : ToolbarActivity(), KoinComponent {
             }
             is SearchPage -> {
                 if (adapter !is ResultsAdapterList) {
-                    adapter = ResultsAdapterList(context, action, viewModel.packages, get()).apply {
+                    adapter = ResultsAdapterList(context, action, viewModel.packages, iconLoader = get(), uploadDateParserCache = get()).apply {
                         addLoadStateListener { loadState ->
                             if (loadState.refresh is LoadState.NotLoading) {
                                 if (itemCount > 0) {

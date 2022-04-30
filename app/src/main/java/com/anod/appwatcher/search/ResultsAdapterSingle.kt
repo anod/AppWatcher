@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.EventFlow
+import com.anod.appwatcher.utils.date.UploadDateParserCache
 import finsky.api.model.Document
 import info.anodsplace.framework.app.ThemeCompat
 import info.anodsplace.framework.content.InstalledApps
@@ -23,7 +24,8 @@ class ResultsAdapterSingle(
         private val action: EventFlow<ResultAction>,
         private val packages: StateFlow<List<String>>,
         private val document: Document,
-        private val iconLoader: AppIconLoader
+        private val iconLoader: AppIconLoader,
+        private val uploadDateParserCache: UploadDateParserCache
 ) : RecyclerView.Adapter<ResultsAppViewHolder>() {
 
     private val colorBgDisabled = ThemeCompat.getColor(context, R.attr.inactiveRow)
@@ -35,7 +37,7 @@ class ResultsAdapterSingle(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ResultsAppViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.list_item_market_app, parent, false)
-        return ResultsAppViewHolder(view, iconLoader, action, packages, colorBgDisabled, colorBgNormal, installedApps)
+        return ResultsAppViewHolder(view, iconLoader, action, packages, colorBgDisabled, colorBgNormal, installedApps, uploadDateParserCache)
     }
 
     override fun onBindViewHolder(holder: ResultsAppViewHolder, position: Int) {

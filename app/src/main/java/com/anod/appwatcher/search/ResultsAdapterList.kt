@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.DiffUtil
 import com.anod.appwatcher.R
 import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.EventFlow
+import com.anod.appwatcher.utils.date.UploadDateParserCache
 import finsky.api.model.Document
 import info.anodsplace.framework.app.ThemeCompat
 import info.anodsplace.framework.content.InstalledApps
@@ -34,7 +35,8 @@ class ResultsAdapterList(
         private val context: Context,
         private val action: EventFlow<ResultAction>,
         private val packages: StateFlow<List<String>>,
-        private val iconLoader: AppIconLoader
+        private val iconLoader: AppIconLoader,
+        private val uploadDateParserCache: UploadDateParserCache
 ) : PagingDataAdapter<Document, ResultsAppViewHolder>(DocumentDiffCallback()) {
 
     private val colorBgDisabled = ThemeCompat.getColor(context, R.attr.inactiveRow)
@@ -46,7 +48,7 @@ class ResultsAdapterList(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ResultsAppViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.list_item_market_app, parent, false)
-        return ResultsAppViewHolder(view, iconLoader, action, packages, colorBgDisabled, colorBgNormal, installedApps)
+        return ResultsAppViewHolder(view, iconLoader, action, packages, colorBgDisabled, colorBgNormal, installedApps, uploadDateParserCache)
     }
 
     override fun onBindViewHolder(holder: ResultsAppViewHolder, position: Int) {

@@ -23,6 +23,7 @@ import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.compareLettersAndDigits
+import com.anod.appwatcher.utils.date.UploadDateParserCache
 import com.anod.appwatcher.utils.extractUploadDate
 import finsky.api.BulkDocId
 import finsky.api.model.Document
@@ -48,6 +49,7 @@ class UpdateCheck(
         private val preferences: Preferences,
         private val networkConnection: NetworkConnectivity,
         private val authToken: AuthTokenBlocking,
+        private val uploadDateParserCache: UploadDateParserCache,
         private val koin: Koin
 ) {
 
@@ -275,7 +277,7 @@ class UpdateCheck(
 
         if (appDetails.versionCode > localApp.versionNumber) {
             AppLog.d("New version found [" + appDetails.versionCode + "]")
-            val newApp = AppInfo(localApp.rowId, AppInfoMetadata.STATUS_UPDATED, marketApp)
+            val newApp = AppInfo(localApp.rowId, AppInfoMetadata.STATUS_UPDATED, marketApp, uploadDateParserCache)
             val installedInfo = installedAppsProvider.packageInfo(appDetails.packageName)
             val recentChanges = appDetails.recentChangesHtml ?: ""
             return Pair(newApp.contentValues, UpdatedApp(newApp, recentChanges, installedInfo.versionCode, true))
@@ -373,7 +375,7 @@ class UpdateCheck(
     }
 
     private fun fillMissingData(marketApp: Document, localApp: App, values: ContentValues) {
-        val refreshTime = marketApp.extractUploadDate()
+        val refreshTime = marketApp.extractUploadDate(uploadDateParserCache)
         values.put(AppListTable.Columns.uploadTimestamp, refreshTime)
         values.put(AppListTable.Columns.uploadDate, marketApp.appDetails.uploadDate)
         if (TextUtils.isEmpty(localApp.versionName)) {

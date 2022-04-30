@@ -2,6 +2,7 @@ package com.anod.appwatcher.model
 
 import android.os.Parcel
 import android.os.Parcelable
+import com.anod.appwatcher.utils.date.UploadDateParserCache
 import com.anod.appwatcher.utils.extractUploadDate
 import finsky.api.model.Document
 
@@ -53,10 +54,9 @@ class AppInfo : AppInfoMetadata, Parcelable {
         this.recentFlag = recentFlag
     }
 
-    constructor(doc: Document) : this(0, STATUS_NORMAL, doc)
+    constructor(doc: Document, uploadDateParserCache: UploadDateParserCache) : this(0, STATUS_NORMAL, doc, uploadDateParserCache)
 
-    constructor(rowId: Int, status: Int, doc: Document) : super(doc.docId, status)
-    {
+    constructor(rowId: Int, status: Int, doc: Document, uploadDateParserCache: UploadDateParserCache) : super(doc.docId, status) {
         this.rowId = rowId
         this.appId = doc.docId
         this.detailsUrl = doc.detailsUrl
@@ -75,7 +75,7 @@ class AppInfo : AppInfoMetadata, Parcelable {
         this.priceCur = offer.currencyCode ?: ""
 
         this.iconUrl = doc.iconUrl ?: ""
-        this.uploadTime = doc.extractUploadDate()
+        this.uploadTime = doc.extractUploadDate(uploadDateParserCache)
         this.updateTime = System.currentTimeMillis()
         this.recentFlag = true
     }
