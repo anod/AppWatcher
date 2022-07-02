@@ -231,4 +231,5 @@
     <string name="number_selected">%d selected</string>
     <string name="back">back</string>
     <string name="no_gdrive_account">No Google Drive account, sign in again</string>
+    <string name="translate">Translate</string>
 </resources>

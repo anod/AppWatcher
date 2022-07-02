@@ -26,6 +26,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed"
         tools:text="5.6.1609P.1258283"
+        android:textIsSelectable="true"
         android:singleLine="true" />
 
     <TextView
@@ -40,6 +41,7 @@
         app:layout_constraintStart_toEndOf="@+id/version"
         app:layout_constraintVertical_chainStyle="packed"
         android:singleLine="true"
+        android:textIsSelectable="true"
         tools:text="20 January 2018" />
 
     <TextView
@@ -50,6 +52,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        android:textIsSelectable="true"
         tools:text="- Added hardware connection instructions for DSL Modem Router, 3G/4G Router and Archer C5400X.\n- Added connection guidance whenever you are disconnected.- Enhanced the visual design.\n- Reduced the download size of this App.\n- Fixed various bugs." />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

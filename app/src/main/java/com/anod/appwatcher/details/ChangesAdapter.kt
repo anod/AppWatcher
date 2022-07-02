@@ -1,15 +1,18 @@
 package com.anod.appwatcher.details
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.text.util.Linkify
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.AppChange
+import info.anodsplace.framework.content.startActivitySafely
 import info.anodsplace.framework.text.Html
+import java.net.URLEncoder
+import java.util.*
 
 class ChangeView(itemView: View) : RecyclerView.ViewHolder(itemView) {
     val changelog: TextView = itemView.findViewById<TextView>(R.id.changelog).apply {
@@ -25,6 +28,31 @@ class ChangeView(itemView: View) : RecyclerView.ViewHolder(itemView) {
             changelog.setText(R.string.no_recent_changes)
         } else {
             changelog.text = Html.parse(change.details)
+        }
+        changelog.customSelectionActionModeCallback = object : ActionMode.Callback {
+            override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+                menu.add(Menu.NONE, R.id.menu_translate, Menu.CATEGORY_SECONDARY, R.string.translate)
+                return true
+            }
+
+            override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
+                return false
+            }
+
+            override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
+                if (item.itemId == R.id.menu_translate) {
+                    val lang = Locale.getDefault().language
+                    val encoded = URLEncoder.encode(changelog.text.toString(), "utf-8")
+                    changelog.context.startActivitySafely(Intent(Intent.ACTION_VIEW).apply {
+                        data = Uri.parse("https://translate.google.com/?sl=auto&tl=${lang}&text=${encoded}&op=translate")
+                    })
+                    return true
+                }
+                return false
+            }
+
+            override fun onDestroyActionMode(mode: ActionMode) {
+            }
         }
     }
 }
