@@ -179,8 +179,9 @@ fun IconShapeSelector(prefs: Preferences, modifier: Modifier = Modifier, onPathC
         pathMasks.filter { it.isNotEmpty() }.forEachIndexed { index, pathMask ->
             val path = AdaptiveIconTransformation.maskToPath(pathMask)
             val outline = Path()
-            val maskMatrix = Matrix()
-            maskMatrix.setScale(iconSizePx / AdaptiveIconTransformation.MASK_SIZE, iconSizePx / AdaptiveIconTransformation.MASK_SIZE)
+            val maskMatrix = Matrix().apply {
+                setScale(iconSizePx / AdaptiveIconTransformation.MASK_SIZE, iconSizePx / AdaptiveIconTransformation.MASK_SIZE)
+            }
             path.transform(maskMatrix, outline)
 
             val selected = value == pathMask
