@@ -1,6 +1,7 @@
 // Copyright (c) 2020. Alex Gavrishev
 package com.anod.appwatcher.watchlist
 
+import android.content.pm.PackageManager
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.anod.appwatcher.database.AppListTable
@@ -12,7 +13,6 @@ import com.anod.appwatcher.database.entities.packageToApp
 import com.anod.appwatcher.installed.InstalledTaskWorker
 import com.anod.appwatcher.model.AppListFilter
 import info.anodsplace.applog.AppLog
-import info.anodsplace.framework.app.ApplicationContext
 import kotlin.math.max
 
 class WatchListPagingSource(
@@ -21,7 +21,7 @@ class WatchListPagingSource(
         private val config: Config,
         private val itemFilter: AppListFilter,
         private val tag: Tag? = null,
-        private val appContext: ApplicationContext,
+        private val packageManager: PackageManager,
         private val database: AppsDatabase
 ) : PagingSource<Int, SectionItem>() {
 
@@ -52,13 +52,13 @@ class WatchListPagingSource(
 
         if (filtered.isEmpty()) {
             if (params.key != null && config.showOnDevice) {
-                val installed = InstalledTaskWorker(appContext, sortId, titleFilter).run()
+                val installed = InstalledTaskWorker(packageManager, sortId, titleFilter).run()
                 val allInstalledPackageNames = installed.map { it.pkg.name }
                 val watchingPackages = database.apps().loadRowIds(allInstalledPackageNames).associateBy({ it.packageName }, { it.rowId })
                 allInstalledPackageNames
                         .asSequence()
                         .filterNot { watchingPackages.containsKey(it) }
-                        .map { appContext.packageManager.packageToApp(-1, it) }
+                        .map { packageManager.packageToApp(-1, it) }
                         .map { app -> AppListItem(app, "", noNewDetails = false, recentFlag = false) }
                         .forEach { item ->
                             items.add(OnDeviceItem(item, false))

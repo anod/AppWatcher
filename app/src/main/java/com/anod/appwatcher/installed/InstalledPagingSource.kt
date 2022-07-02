@@ -1,6 +1,7 @@
 // Copyright (c) 2020. Alex Gavrishev
 package com.anod.appwatcher.installed
 
+import android.content.pm.PackageManager
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.anod.appwatcher.database.AppsDatabase
@@ -10,7 +11,6 @@ import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.watchlist.OnDeviceItem
 import com.anod.appwatcher.watchlist.SectionItem
 import com.anod.appwatcher.watchlist.WatchListPagingSource
-import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.util.dayStartAgoMillis
 
 class InstalledPagingSource(
@@ -18,12 +18,12 @@ class InstalledPagingSource(
         private val titleFilter: String,
         private val config: WatchListPagingSource.Config,
         private val changelogAdapter: ChangelogAdapter,
-        private val appContext: ApplicationContext,
+        private val packageManager: PackageManager,
         private val database: AppsDatabase
 ) : PagingSource<Int, SectionItem>() {
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, SectionItem> {
-        val installed = InstalledTaskWorker(appContext, sortId, titleFilter).run()
+        val installed = InstalledTaskWorker(packageManager, sortId, titleFilter).run()
         val allInstalledPackageNames = installed.map { it.pkg.name }
         val watchingPackages = database.apps().loadRowIds(allInstalledPackageNames).associateBy({ it.packageName }, { it.rowId })
 

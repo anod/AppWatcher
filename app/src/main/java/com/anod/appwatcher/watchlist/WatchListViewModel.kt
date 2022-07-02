@@ -1,6 +1,7 @@
 package com.anod.appwatcher.watchlist
 
 import android.app.Application
+import android.content.pm.PackageManager
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -19,6 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 /**
  * @author Alex Gavrishev
@@ -42,11 +44,13 @@ abstract class WatchListViewModel(application: Application) : AndroidViewModel(a
         get() = getKoin().get()
     private val recentlyInstalledPackagesLoader: RecentlyInstalledPackagesLoader
         get() = getKoin().get()
+    private val packageManager: PackageManager
+        get() = getKoin().get()
 
     var titleFilter = ""
     var sortId = 0
     var tag: Tag? = null
-    val installedApps = InstalledApps.MemoryCache(InstalledApps.PackageManager(context.packageManager))
+    val installedApps = InstalledApps.MemoryCache(InstalledApps.PackageManager(packageManager))
     var filterId: Int = Filters.TAB_ALL
         get() = this.filter.filterId
         set(value) {
@@ -57,12 +61,12 @@ abstract class WatchListViewModel(application: Application) : AndroidViewModel(a
         private set
 
     val changes = AppListTable.Queries.changes(database.apps())
-        .drop(1)
-        .map { (System.currentTimeMillis() / 1000).toInt() }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), initialValue = 0)
-        .filter { it > 0 }
-        .onEach { delay(600) }
-        .flowOn(Dispatchers.Default)
+            .drop(1)
+            .map { (System.currentTimeMillis() / 1000).toInt() }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), initialValue = 0)
+            .filter { it > 0 }
+            .onEach { delay(600) }
+            .flowOn(Dispatchers.Default)
 
     var pagingSource: PagingSource<Int, SectionItem>? = null
         private set
@@ -88,12 +92,12 @@ abstract class WatchListViewModel(application: Application) : AndroidViewModel(a
             pagingSource = createPagingSource(config)
             pagingSource!!
         }.flow
-            .map { pagingData: PagingData<SectionItem> ->
-                pagingData.insertSeparators { before, after ->
-                    headerFactory.insertSeparator(before, after)
+                .map { pagingData: PagingData<SectionItem> ->
+                    pagingData.insertSeparators { before, after ->
+                        headerFactory.insertSeparator(before, after)
+                    }
                 }
-            }
-            .cachedIn(viewModelScope)
+                .cachedIn(viewModelScope)
     }
 
     private fun createFilter(filterId: Int, installedApps: InstalledApps): AppListFilter {
@@ -106,14 +110,14 @@ abstract class WatchListViewModel(application: Application) : AndroidViewModel(a
     }
 
     fun updateSelection(
-        change: SelectionState.Change,
-        getPackageSelection: (key: String) -> AppViewHolder.Selection
+            change: SelectionState.Change,
+            getPackageSelection: (key: String) -> AppViewHolder.Selection
     ) {
         val index = change.extras.getInt("index", -1)
         if (change.key == null) {
             selection.value = Pair(
-                index,
-                if (change.defaultSelected) AppViewHolder.Selection.Selected else AppViewHolder.Selection.NotSelected
+                    index,
+                    if (change.defaultSelected) AppViewHolder.Selection.Selected else AppViewHolder.Selection.NotSelected
             )
         } else {
             selection.value = Pair(index, getPackageSelection(change.key))
@@ -122,6 +126,7 @@ abstract class WatchListViewModel(application: Application) : AndroidViewModel(a
 }
 
 class AppsWatchListViewModel(application: Application) : WatchListViewModel(application), KoinComponent {
+    private val packageManager: PackageManager by inject()
 
     override fun createPagingSource(config: WatchListPagingSource.Config) = WatchListPagingSource(
             sortId = sortId,
@@ -129,7 +134,7 @@ class AppsWatchListViewModel(application: Application) : WatchListViewModel(appl
             config = config,
             itemFilter = filter,
             tag = tag,
-            appContext = context,
+            packageManager = packageManager,
             database = database
     )
 

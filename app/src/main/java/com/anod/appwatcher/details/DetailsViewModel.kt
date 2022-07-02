@@ -1,6 +1,7 @@
 package com.anod.appwatcher.details
 
 import android.accounts.Account
+import android.content.pm.PackageManager
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.anod.appwatcher.accounts.AuthTokenBlocking
@@ -44,7 +45,8 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
     val authToken: AuthTokenBlocking by inject()
     val uploadDateParserCache: UploadDateParserCache by inject()
     val iconLoader: AppIconLoader by inject()
-    
+    val packageManager: PackageManager by inject()
+
     var detailsUrl = ""
 
     private val _appId = MutableStateFlow("")
@@ -60,7 +62,7 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
         return@flatMapLatest database.apps().observeApp(it).map { app ->
             if (app == null && rowId == -1) {
                 AppLog.i("Show details for unwatched $appId", "DetailsView")
-                Loaded(context.packageManager.packageToApp(-1, appId))
+                Loaded(packageManager.packageToApp(-1, appId))
             } else {
                 AppLog.i("Show details for watched $appId", "DetailsView")
                 if (app == null) NotFound else Loaded(app)

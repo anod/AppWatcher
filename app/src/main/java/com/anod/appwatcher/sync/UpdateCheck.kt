@@ -1,9 +1,11 @@
 package com.anod.appwatcher.sync
 
 import android.accounts.Account
+import android.app.NotificationManager
 import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.RemoteException
 import android.provider.BaseColumns
 import android.text.TextUtils
@@ -45,6 +47,8 @@ import java.util.*
 
 class UpdateCheck(
         private val context: ApplicationContext,
+        private val packageManager: PackageManager,
+        private val notificationManager: NotificationManager,
         private val database: AppsDatabase,
         private val preferences: Preferences,
         private val networkConnection: NetworkConnectivity,
@@ -70,7 +74,7 @@ class UpdateCheck(
         const val extrasUpdatesCount = "extra_updates_count"
     }
 
-    private val installedAppsProvider = InstalledApps.PackageManager(context.packageManager)
+    private val installedAppsProvider = InstalledApps.PackageManager(packageManager)
 
     suspend fun perform(extras: Data): Int = withContext(Dispatchers.Default) {
         val manualSync = extras.getBoolean(extrasManual, false)
@@ -304,7 +308,7 @@ class UpdateCheck(
     }
 
     private suspend fun notifyIfNeeded(manualSync: Boolean, updatedApps: List<UpdatedApp>, schedule: Schedule) {
-        val sn = SyncNotification(context)
+        val sn = SyncNotification(context, notificationManager)
         if (manualSync) {
             if (updatedApps.isEmpty()) {
                 AppLog.i("No new updates", "UpdateCheck")

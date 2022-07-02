@@ -12,12 +12,13 @@ import com.anod.appwatcher.utils.prefs
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.content.startActivitySafely
 import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
 
 class NotificationActivity : Activity(), KoinComponent {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val sn = SyncNotification(ApplicationContext(this))
+        val sn = SyncNotification(ApplicationContext(this), get())
         sn.cancel()
         when (intent.getIntExtra(extraActionType, 0)) {
             actionPlayStore -> {

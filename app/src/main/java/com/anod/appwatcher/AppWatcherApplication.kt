@@ -2,12 +2,10 @@ package com.anod.appwatcher
 
 import android.app.Activity
 import android.app.Application
-import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.os.StrictMode
-import android.util.LruCache
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.room.Room
 import androidx.work.Configuration
@@ -29,17 +27,12 @@ import info.anodsplace.framework.app.WindowCustomTheme
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.context.startKoin
-import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import java.io.IOException
 import java.net.UnknownHostException
 
 class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstance, Configuration.Provider, KoinComponent {
 
-    override val notificationManager: NotificationManager
-        get() = get()
-    override val memoryCache: LruCache<String, Any?>
-        get() = get(named("memoryCache"))
     override val nightMode: Int
         get() = get<Preferences>().nightMode
 
@@ -91,7 +84,7 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
         }
 
         AppCompatDelegate.setDefaultNightMode(prefs.nightMode)
-        SyncNotification(ApplicationContext(this)).createChannels()
+        SyncNotification(ApplicationContext(this), get()).createChannels()
         registerActivityLifecycleCallbacks(LifecycleCallbacks())
     }
 

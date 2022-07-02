@@ -1,6 +1,7 @@
 package com.anod.appwatcher.backup.gdrive
 
 import android.app.Activity
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -53,7 +54,8 @@ class GDriveSignIn(private val activity: Activity, private val listener: Listene
                 setContentText(context.getString(R.string.google_drive_sync_action))
                 setContentIntent(resolution)
             }.build()
-            context.notificationManager.notify(SyncNotification.gmsNotificationId, notification)
+            val notificationManager = context.actual.getSystemService(NotificationManager::class.java)
+            notificationManager.notify(SyncNotification.gmsNotificationId, notification)
         }
     }
 

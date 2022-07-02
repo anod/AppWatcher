@@ -6,7 +6,6 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.NotificationActivity
@@ -21,7 +20,7 @@ import info.anodsplace.framework.text.Html
  * *
  * @date 2014-09-24
  */
-class SyncNotification(private val context: ApplicationContext) {
+class SyncNotification(private val context: ApplicationContext, private val notificationManager: NotificationManager) {
 
     companion object {
         internal const val syncNotificationId = 1
@@ -75,7 +74,7 @@ class SyncNotification(private val context: ApplicationContext) {
         val authentication = NotificationChannel(authenticationId, context.getString(R.string.channel_authentication), NotificationManager.IMPORTANCE_DEFAULT)
         prices.description = context.getString(R.string.channel_authentication_description)
         prices.setShowBadge(true)
-        context.notificationManager.createNotificationChannels(listOf(updates, prices, authentication))
+        notificationManager.createNotificationChannels(listOf(updates, prices, authentication))
     }
 
     fun show(updatedApps: List<UpdatedApp>) {
@@ -83,12 +82,10 @@ class SyncNotification(private val context: ApplicationContext) {
         val sorted = updatedApps.sortedWith(compareBy({ it.isNewUpdate }, { it.title }))
 
         val notification = this.create(sorted)
-        val notificationManager = context.notificationManager
         notificationManager.notify(syncNotificationId, notification)
     }
 
     fun cancel() {
-        val notificationManager = context.notificationManager
         notificationManager.cancel(syncNotificationId)
     }
 
@@ -161,7 +158,7 @@ class SyncNotification(private val context: ApplicationContext) {
                 context.actual).also {
             it.putExtra(NotificationActivity.extraPackage, update.packageName)
         }
-        
+
         builder.addAction(R.drawable.ic_play_arrow_white_24dp, context.getString(R.string.store),
                 PendingIntent.getActivity(context.actual, 0, playIntent, 0)
         )

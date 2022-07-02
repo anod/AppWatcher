@@ -64,6 +64,8 @@ fun createAppModule(): Module = module {
     factory {
         UpdateCheck(
                 context = get(),
+                packageManager = get(),
+                notificationManager = get(),
                 database = get(),
                 authToken = get(),
                 networkConnection = get(),

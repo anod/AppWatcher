@@ -12,11 +12,11 @@ repositories {
 }
 
 android {
-    compileSdk = 30
+    compileSdk = 32
 
     defaultConfig {
         minSdk = 27
-        targetSdk = 30
+        targetSdk = 32
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -41,7 +41,7 @@ dependencies {
 
     implementation(project(":lib:applog"))
     implementation(project(":lib:framework"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.10")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.2")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.7.0")
 }
