@@ -106,18 +106,21 @@ class Preferences(context: Context) {
         get() = preferences.getBoolean("show-recently-updated", true)
         set(value) = preferences.edit().putBoolean("show-recently-updated", value).apply()
 
-    var nightMode: Int
-        get() = preferences.getInt(NIGHT_MODE, AppCompatDelegate.MODE_NIGHT_NO)
+    var uiMode: Int
+        get() = preferences.getInt(NIGHT_MODE, UiModeManager.MODE_NIGHT_NO)
         set(nightMode) = preferences.edit().putInt(NIGHT_MODE, nightMode).apply()
+
+    val appCompatNightMode: Int
+        get() = uiModeMap[uiMode] ?: AppCompatDelegate.MODE_NIGHT_NO
 
     var theme: Int
         get() = preferences.getInt(THEME, THEME_DEFAULT)
         set(theme) = preferences.edit().putInt(THEME, theme).apply()
 
     var themeIndex: Int
-        get() = themesCombined.indexOf("$nightMode-$theme")
+        get() = themesCombined.indexOf("$uiMode-$theme")
         set(value) {
-            nightMode = nightModes[value]
+            uiMode = uiModes[value]
             theme = themeIds[value]
         }
 
@@ -177,25 +180,33 @@ class Preferences(context: Context) {
         const val THEME_BLACK = 1
 
         private val themesCombined = arrayOf(
-            "${UiModeManager.MODE_NIGHT_AUTO}-$THEME_DEFAULT",
-            "${UiModeManager.MODE_NIGHT_AUTO}-$THEME_BLACK",
-            "${UiModeManager.MODE_NIGHT_NO}-$THEME_DEFAULT",
-            "${UiModeManager.MODE_NIGHT_YES}-$THEME_DEFAULT",
-            "${UiModeManager.MODE_NIGHT_YES}-$THEME_BLACK",
+                "${UiModeManager.MODE_NIGHT_AUTO}-$THEME_DEFAULT",
+                "${UiModeManager.MODE_NIGHT_AUTO}-$THEME_BLACK",
+                "${UiModeManager.MODE_NIGHT_NO}-$THEME_DEFAULT",
+                "${UiModeManager.MODE_NIGHT_YES}-$THEME_DEFAULT",
+                "${UiModeManager.MODE_NIGHT_YES}-$THEME_BLACK",
         )
-        private val nightModes = arrayOf(
-            UiModeManager.MODE_NIGHT_AUTO,
-            UiModeManager.MODE_NIGHT_AUTO,
-            UiModeManager.MODE_NIGHT_NO,
-            UiModeManager.MODE_NIGHT_YES,
-            UiModeManager.MODE_NIGHT_YES,
+
+        private val uiModes = arrayOf(
+                UiModeManager.MODE_NIGHT_AUTO,
+                UiModeManager.MODE_NIGHT_AUTO,
+                UiModeManager.MODE_NIGHT_NO,
+                UiModeManager.MODE_NIGHT_YES,
+                UiModeManager.MODE_NIGHT_YES,
         )
+
+        private val uiModeMap = mapOf(
+                UiModeManager.MODE_NIGHT_AUTO to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+                UiModeManager.MODE_NIGHT_NO to AppCompatDelegate.MODE_NIGHT_NO,
+                UiModeManager.MODE_NIGHT_YES to AppCompatDelegate.MODE_NIGHT_YES
+        )
+
         private val themeIds = arrayOf(
-            THEME_DEFAULT,
-            THEME_BLACK,
-            THEME_DEFAULT,
-            THEME_DEFAULT,
-            THEME_BLACK,
+                THEME_DEFAULT,
+                THEME_BLACK,
+                THEME_DEFAULT,
+                THEME_DEFAULT,
+                THEME_BLACK,
         )
     }
 

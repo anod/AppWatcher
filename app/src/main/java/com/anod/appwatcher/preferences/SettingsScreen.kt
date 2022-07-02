@@ -60,7 +60,7 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
     }
 
     AppTheme(
-            darkTheme = when (prefs.nightMode) {
+            darkTheme = when (prefs.uiMode) {
                 AppCompatDelegate.MODE_NIGHT_NO -> false
                 AppCompatDelegate.MODE_NIGHT_YES -> true
                 // MODE_NIGHT_AUTO

@@ -42,7 +42,7 @@ open class SettingsActivity : AppCompatActivity(), GDriveSignIn.Listener, KoinCo
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val theme = Theme(this, prefs)
-        AppCompatDelegate.setDefaultNightMode(prefs.nightMode)
+        AppCompatDelegate.setDefaultNightMode(prefs.appCompatNightMode)
         setTheme(theme.theme)
         if (theme.colors.available) {
             WindowCustomTheme.apply(theme.colors, window, this)

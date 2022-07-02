@@ -159,18 +159,18 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         if (prefs.themeIndex == newThemeIndex) {
             return
         }
-        val nightMode = prefs.nightMode
+        val nightMode = prefs.uiMode
         val theme = prefs.theme
         prefs.themeIndex = newThemeIndex
         var recreate = false
         if (prefs.theme != theme) {
             recreate = true
         }
-        if (prefs.nightMode != nightMode) {
+        if (prefs.uiMode != nightMode) {
             recreate = true
         }
         if (recreate) {
-            AppCompatDelegate.setDefaultNightMode(prefs.nightMode)
+            AppCompatDelegate.setDefaultNightMode(prefs.appCompatNightMode)
             recreateWatchlistOnBack = true
             viewModelScope.launch {
                 actions.emit(UiAction.Recreate)

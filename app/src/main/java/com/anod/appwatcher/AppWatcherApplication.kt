@@ -32,9 +32,9 @@ import java.io.IOException
 import java.net.UnknownHostException
 
 class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstance, Configuration.Provider, KoinComponent {
-
-    override val nightMode: Int
-        get() = get<Preferences>().nightMode
+    
+    override val appCompatNightMode: Int
+        get() = get<Preferences>().appCompatNightMode
 
     val appsDatabase: AppsDatabase by lazy {
         Room.databaseBuilder(this, AppsDatabase::class.java, AppsDatabase.dbName)
@@ -83,7 +83,7 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
             appsDatabase.invalidationTracker.addObserver(get<UploadServiceContentObserver>())
         }
 
-        AppCompatDelegate.setDefaultNightMode(prefs.nightMode)
+        AppCompatDelegate.setDefaultNightMode(prefs.appCompatNightMode)
         SyncNotification(ApplicationContext(this), get()).createChannels()
         registerActivityLifecycleCallbacks(LifecycleCallbacks())
     }
