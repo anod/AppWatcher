@@ -53,7 +53,7 @@ android {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
             proguardFile(getDefaultProguardFile("proguard-android.txt"))
-
+            proguardFile("../proguard-project.txt")
             resValue("string", "content_authority", "com.anod.appwatcher.debug")
         }
 

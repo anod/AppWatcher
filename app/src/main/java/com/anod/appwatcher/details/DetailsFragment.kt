@@ -68,15 +68,15 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
 
     private val dataProvider: AppViewHolderResourceProvider by lazy {
         AppViewHolderResourceProvider(
-            requireContext(),
-            InstalledApps.PackageManager(requireContext().packageManager)
+                requireContext(),
+                InstalledApps.PackageManager(requireContext().packageManager)
         )
     }
 
     private val appDetailsView: AppDetailsView by lazy {
         AppDetailsView(
-            binding.container,
-            dataProvider
+                binding.container,
+                dataProvider
         )
     }
 
@@ -86,9 +86,9 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
     private val binding get() = _binding!!
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View {
         _binding = FragmentAppChangelogBinding.inflate(inflater, container, false)
         return binding.root
@@ -372,6 +372,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         val defaultColor = ContextCompat.getColor(context, R.color.white)
         val darkSwatch = palette?.chooseDark(defaultColor) ?: Palette.Swatch(defaultColor, 0)
         applyColor(darkSwatch.rgb)
+        binding.toolbar.setBackgroundColor(darkSwatch.rgb)
         animateBackground()
 
         if (Theme(requireActivity(), viewModel.prefs).isNightTheme) {
@@ -422,7 +423,9 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         binding.playStoreButton.isEnabled = alpha > 0.8f
 
         val inverseAlpha = (1.0f - alpha)
-        binding.toolbar.logo?.alpha = (inverseAlpha * 255).toInt()
+        val inverseAlphaInt = (inverseAlpha * 255).toInt()
+        binding.toolbar.background?.alpha = inverseAlphaInt
+        binding.toolbar.logo?.alpha = inverseAlphaInt
         titleString.alpha = inverseAlpha
         subtitleString.alpha = inverseAlpha
         binding.container.post {

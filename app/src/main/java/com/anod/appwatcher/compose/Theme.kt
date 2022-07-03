@@ -29,12 +29,14 @@ val AppTypography = Typography(
 private val Gray200 = Color(0xFFeeeeee)
 private val BlueGray500 = Color(0xFF2196F3)
 private val BlueGray800 = Color(0xFF1565C0)
+private val BlueGray800HighContrast = Color(0xFF5199EC)
 private val BlueGray900 = Color(0xFF0D47A1)
+private val BlueGray900HighContrast = Color(0xFF1D70ED)
+
 private val Error = Color(0x7EC62828)
 val WarningColor = Color(0xfff4511e)
 
 private val DarkSurface = Color(0xFF263238)
-private val DarkSurfaceVariant = Color(0xFF425661)
 
 private val LightThemeColors = lightColors(
         primary = Color.White,
@@ -53,7 +55,7 @@ private val LightThemeColors = lightColors(
 
 private val DarkThemeColors = darkColors(
         primary = DarkSurface,
-        primaryVariant = DarkSurfaceVariant,
+        primaryVariant = DarkSurface,
         onPrimary = Color.White,
         secondary = BlueGray500,
         secondaryVariant = BlueGray800,
@@ -68,10 +70,10 @@ private val DarkThemeColors = darkColors(
 
 private val BlackThemeColors = darkColors(
         primary = Color.Black,
-        primaryVariant = DarkSurfaceVariant,
+        primaryVariant = Color.Black,
         onPrimary = Color.White,
-        secondary = BlueGray800,
-        secondaryVariant = BlueGray900,
+        secondary = BlueGray800HighContrast,
+        secondaryVariant = BlueGray900HighContrast,
         onSecondary = Color.White,
         background = Color.Black,
         onBackground = Color.White,

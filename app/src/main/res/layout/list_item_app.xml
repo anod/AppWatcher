@@ -29,20 +29,22 @@
 
     <CheckBox
         android:id="@+id/checkBox"
+        style="@style/Widget.AppCompat.CompoundButton.CheckBox"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:visibility="gone"
-        android:button="@drawable/ic_check_circle_app"
-        android:buttonTintMode="add"
-        android:buttonTint="@android:color/transparent"
-        tools:visibility="visible"
-        android:text="@null"
-        tools:checked="false"
-        tools:enabled="true"
-        android:layout_marginTop="24dp"
         android:layout_marginStart="32dp"
+        android:layout_marginTop="24dp"
+        android:button="@drawable/ic_check_circle_app"
+        android:text="@null"
+        android:visibility="gone"
+        app:buttonTint="@android:color/transparent"
+        app:buttonTintMode="add"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        tools:checked="true"
+        tools:enabled="true"
+        tools:ignore="TouchTargetSizeCheck"
+        tools:visibility="visible" />
 
     <TextView
         android:id="@+id/title"
@@ -86,7 +88,7 @@
         app:layout_constraintStart_toEndOf="@+id/icon"
         app:layout_constraintTop_toBottomOf="@id/creator"
         android:contentDescription="@string/watched"
-        app:tint="@color/material_grey_500" />
+        app:tint="@color/material_grey_700" />
 
     <TextView
         android:id="@+id/price"
@@ -99,7 +101,7 @@
         android:ellipsize="end"
         android:gravity="left"
         android:maxLines="1"
-        android:textColor="@color/accent"
+        android:textColor="@color/material_blue_800_high_contrast"
         android:textSize="@dimen/textSize"
         app:layout_constraintEnd_toStartOf="@id/update_date"
         app:layout_constraintStart_toEndOf="@+id/watched"

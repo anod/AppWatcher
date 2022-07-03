@@ -17,6 +17,9 @@
     <color name="material_grey_800_">#424242</color>
     <color name="material_amber_800">#FF8F00</color>
 
+    <color name="material_blue_800_high_contrast">#1565C0</color>
+    <color name="material_blue_900_high_contrast">#0D47A1</color>
+
     <color name="dark_primary_base">#263238</color>
     <color name="dark_primary_light">#37474f</color>
     <color name="dark_primary_dark">#102027</color>
@@ -46,4 +49,3 @@
     <color name="chip_purple">#ff5bff</color>
 
 </resources>
-
