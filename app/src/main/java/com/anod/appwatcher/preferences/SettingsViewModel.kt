@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.Operation
-import coil.ImageLoader
 import com.anod.appwatcher.R
 import com.anod.appwatcher.backup.ExportBackupTask
 import com.anod.appwatcher.backup.ImportBackupTask
@@ -34,7 +33,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     private val appScope: CoroutineScope by inject()
     private val context: Context by inject()
     val prefs: Preferences by inject()
-    val imageLoader: ImageLoader by inject()
 
     val actions: MutableSharedFlow<UiAction> = MutableSharedFlow()
     val isProgressVisible = MutableStateFlow(false)
