@@ -424,7 +424,6 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
 
         val inverseAlpha = (1.0f - alpha)
         val inverseAlphaInt = (inverseAlpha * 255).toInt()
-        binding.toolbar.background?.alpha = inverseAlphaInt
         binding.toolbar.logo?.alpha = inverseAlphaInt
         titleString.alpha = inverseAlpha
         subtitleString.alpha = inverseAlpha
