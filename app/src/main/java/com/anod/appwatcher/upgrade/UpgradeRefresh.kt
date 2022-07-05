@@ -13,7 +13,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import info.anodsplace.framework.app.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 /**
@@ -34,7 +33,7 @@ class UpgradeRefresh(val prefs: Preferences, val activity: Activity, private val
                         flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     }
                     GDriveSignIn.showResolutionNotification(
-                            PendingIntent.getActivity(activity, 0, settingActivity, 0), ApplicationContext(activity))
+                            PendingIntent.getActivity(activity, 0, settingActivity, PendingIntent.FLAG_IMMUTABLE), ApplicationContext(activity))
                 }
             })
             when {
@@ -59,8 +58,8 @@ class UpgradeRefresh(val prefs: Preferences, val activity: Activity, private val
             scheduler.execute().collect { }
             if (prefs.useAutoSync) {
                 scheduler
-                    .schedule(prefs.isRequiresCharging, prefs.isWifiOnly, prefs.updatesFrequency.toLong(), true)
-                    .collect { }
+                        .schedule(prefs.isRequiresCharging, prefs.isWifiOnly, prefs.updatesFrequency.toLong(), true)
+                        .collect { }
             }
         }
     }

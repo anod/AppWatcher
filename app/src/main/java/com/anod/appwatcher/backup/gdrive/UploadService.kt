@@ -66,7 +66,7 @@ class UploadService(appContext: Context, params: WorkerParameters) : CoroutineWo
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 }
                 GDriveSignIn.showResolutionNotification(
-                        PendingIntent.getActivity(applicationContext, 0, settingActivity, 0), ApplicationContext(applicationContext)
+                        PendingIntent.getActivity(applicationContext, 0, settingActivity, PendingIntent.FLAG_IMMUTABLE), ApplicationContext(applicationContext)
                 )
             }
             return Result.failure()

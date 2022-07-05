@@ -95,7 +95,7 @@ class SyncNotification(private val context: ApplicationContext, private val noti
         val data = Uri.parse("com.anod.appwatcher://notification")
         notificationIntent.data = data
         notificationIntent.putExtra(WatchListActivity.EXTRA_FROM_NOTIFICATION, true)
-        val contentIntent = PendingIntent.getActivity(context.actual, 0, notificationIntent, 0)
+        val contentIntent = PendingIntent.getActivity(context.actual, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
 
         val title = renderTitle(updatedApps)
         val text = renderText(updatedApps)
@@ -132,7 +132,7 @@ class SyncNotification(private val context: ApplicationContext, private val noti
                 NotificationActivity.actionMyApps,
                 context.actual)
         builder.addAction(R.drawable.ic_system_update_alt_white_24dp, context.getString(R.string.noti_action_update),
-                PendingIntent.getActivity(context.actual, 0, updateIntent, 0)
+                PendingIntent.getActivity(context.actual, 0, updateIntent, PendingIntent.FLAG_IMMUTABLE)
         )
 
         val readIntent = NotificationActivity.intent(
@@ -141,13 +141,13 @@ class SyncNotification(private val context: ApplicationContext, private val noti
                 context.actual
         )
         builder.addAction(R.drawable.ic_clear_white_24dp, context.getString(R.string.dismiss),
-                PendingIntent.getActivity(context.actual, 0, readIntent, 0)
+                PendingIntent.getActivity(context.actual, 0, readIntent, PendingIntent.FLAG_IMMUTABLE)
         )
     }
 
     private fun addSingleExtraInfo(update: UpdatedApp, builder: NotificationCompat.Builder) {
 
-        val changes = if (update.recentChanges.isBlank()) context.getString(R.string.no_recent_changes) else update.recentChanges
+        val changes = update.recentChanges.ifBlank { context.getString(R.string.no_recent_changes) }
 
         builder.setContentText(Html.parse(changes))
         builder.setStyle(NotificationCompat.BigTextStyle().bigText(Html.parse(changes)))
@@ -160,7 +160,7 @@ class SyncNotification(private val context: ApplicationContext, private val noti
         }
 
         builder.addAction(R.drawable.ic_play_arrow_white_24dp, context.getString(R.string.store),
-                PendingIntent.getActivity(context.actual, 0, playIntent, 0)
+                PendingIntent.getActivity(context.actual, 0, playIntent, PendingIntent.FLAG_IMMUTABLE)
         )
 
         if (update.installedVersionCode > 0) {
@@ -169,7 +169,7 @@ class SyncNotification(private val context: ApplicationContext, private val noti
                     NotificationActivity.actionMyApps,
                     context.actual)
             builder.addAction(R.drawable.ic_system_update_alt_white_24dp, context.getString(R.string.noti_action_update),
-                    PendingIntent.getActivity(context.actual, 0, updateIntent, 0)
+                    PendingIntent.getActivity(context.actual, 0, updateIntent, PendingIntent.FLAG_IMMUTABLE)
             )
         }
 
@@ -178,7 +178,7 @@ class SyncNotification(private val context: ApplicationContext, private val noti
                 NotificationActivity.actionMarkViewed,
                 context.actual)
         builder.addAction(R.drawable.ic_clear_white_24dp, context.getString(R.string.dismiss),
-                PendingIntent.getActivity(context.actual, 0, readIntent, 0)
+                PendingIntent.getActivity(context.actual, 0, readIntent, PendingIntent.FLAG_IMMUTABLE)
         )
     }
 

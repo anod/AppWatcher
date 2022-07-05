@@ -136,7 +136,7 @@ class GDriveSilentSignIn(private val context: ApplicationContext) {
                 val settingActivity = Intent(context.actual, SettingsActivity::class.java)
                 settingActivity.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 GDriveSignIn.showResolutionNotification(
-                        PendingIntent.getActivity(context.actual, 0, settingActivity, 0), context)
+                        PendingIntent.getActivity(context.actual, 0, settingActivity, PendingIntent.FLAG_IMMUTABLE), context)
             }
             throw Exception("Google drive account is null", e)
         } catch (e: ExecutionException) {

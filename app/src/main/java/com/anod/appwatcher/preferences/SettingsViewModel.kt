@@ -14,10 +14,13 @@ import com.anod.appwatcher.backup.gdrive.GDriveSync
 import com.anod.appwatcher.backup.gdrive.UploadServiceContentObserver
 import com.anod.appwatcher.compose.UiAction
 import com.anod.appwatcher.database.AppsDatabase
+import com.anod.appwatcher.sync.SyncNotification
 import com.anod.appwatcher.sync.SyncScheduler
+import com.anod.appwatcher.sync.UpdatedApp
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import info.anodsplace.applog.AppLog
 import info.anodsplace.compose.PreferenceItem
+import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.playservices.GooglePlayServices
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
@@ -189,5 +192,20 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             actions.emit(UiAction.Recreate)
         }
+    }
+
+    fun testNotification() {
+        SyncNotification(ApplicationContext(context), get()).show(listOf(
+                UpdatedApp(
+                        packageName = "com.anod.appwatcher",
+                        title = "Test",
+                        installedVersionCode = 0,
+                        isNewUpdate = true,
+                        recentChanges = "Test notification",
+                        uploadDate = "Now",
+                        uploadTime = System.currentTimeMillis(),
+                        versionNumber = 1,
+                )
+        ))
     }
 }

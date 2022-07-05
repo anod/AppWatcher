@@ -252,6 +252,9 @@ fun onSettingsItemClick(prefs: Preferences, item: PreferenceItem, viewModel: Set
         "theme" -> {
             viewModel.updateTheme((item as PreferenceItem.Pick).value.toInt())
         }
+        "test-notification" -> {
+            viewModel.testNotification()
+        }
     }
 }
 
