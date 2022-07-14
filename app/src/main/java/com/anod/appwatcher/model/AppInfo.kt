@@ -65,7 +65,7 @@ class AppInfo : AppInfoMetadata, Parcelable {
         this.title = doc.title
         this.versionNumber = app.versionCode
         this.versionName = app.versionString ?: ""
-        this.creator = doc.creator
+        this.creator = app.developerName ?: ""
         this.uploadDate = app.uploadDate ?: ""
         this.appType = app.appType ?: ""
 
@@ -80,7 +80,7 @@ class AppInfo : AppInfoMetadata, Parcelable {
         this.recentFlag = true
     }
 
-     constructor(`in`: Parcel) : super(`in`.readString()!!, `in`.readInt()) {
+    constructor(`in`: Parcel) : super(`in`.readString()!!, `in`.readInt()) {
         rowId = `in`.readInt()
         packageName = `in`.readString()!!
         versionNumber = `in`.readInt()
@@ -174,7 +174,8 @@ class AppInfo : AppInfoMetadata, Parcelable {
 
     companion object {
 
-        @JvmField val CREATOR: Parcelable.Creator<AppInfo> = object : Parcelable.Creator<AppInfo> {
+        @JvmField
+        val CREATOR: Parcelable.Creator<AppInfo> = object : Parcelable.Creator<AppInfo> {
             override fun createFromParcel(`in`: Parcel): AppInfo {
                 return AppInfo(`in`)
             }

@@ -35,6 +35,8 @@ import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.*
 import com.anod.appwatcher.watchlist.AppViewHolderResourceProvider
 import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.color.ColorRoles
+import com.google.android.material.color.MaterialColors
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.anim.RevealAnimatorCompat
 import info.anodsplace.framework.app.addMultiWindowFlags
@@ -50,6 +52,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.abs
 
+
 class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetChangedListener, Toolbar.OnMenuItemClickListener {
 
     private var loaded = false
@@ -57,12 +60,12 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
     private var toggleMenu: MenuItem? = null
 
     private val titleString: AlphaSpannableString by lazy {
-        val span = AlphaForegroundColorSpan(ColorAttribute(android.R.attr.textColor, requireContext(), Color.WHITE).value)
+        val span = AlphaForegroundColorSpan(ColorAttribute(android.R.attr.textColor, requireContext(), Color.BLUE).value)
         AlphaSpannableString(viewModel.app.value!!.generateTitle(resources), span)
     }
 
     private val subtitleString: AlphaSpannableString by lazy {
-        val span = AlphaForegroundColorSpan(ColorAttribute(android.R.attr.textColor, requireContext(), Color.WHITE).value)
+        val span = AlphaForegroundColorSpan(ColorAttribute(android.R.attr.textColor, requireContext(), Color.BLUE).value)
         AlphaSpannableString(viewModel.app.value!!.uploadDate, span)
     }
 
@@ -372,14 +375,11 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         val defaultColor = ContextCompat.getColor(context, R.color.white)
         val darkSwatch = palette?.chooseDark(defaultColor) ?: Palette.Swatch(defaultColor, 0)
         applyColor(darkSwatch.rgb)
-        binding.toolbar.setBackgroundColor(darkSwatch.rgb)
         animateBackground()
 
-        if (Theme(requireActivity(), viewModel.prefs).isNightTheme) {
-            appDetailsView.updateAccentColor(ContextCompat.getColor(requireContext(), R.color.black))
-        } else {
-            appDetailsView.updateAccentColor(darkSwatch.rgb)
-        }
+        val isLightTheme = !Theme(requireActivity(), viewModel.prefs).isNightTheme
+        val colorRoles: ColorRoles = MaterialColors.getColorRoles(darkSwatch.rgb, isLightTheme)
+        appDetailsView.updateAccentColor(colorRoles.accent)
     }
 
     private fun applyColor(@ColorInt color: Int) {
