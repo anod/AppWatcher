@@ -163,9 +163,9 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
             }
 
             launch {
-                viewModel.viewStates.map { it.appLoadingState }.distinctUntilChanged().collect { appLoadingState ->
-                    AppLog.d("Details collecting appLoadingState $appLoadingState")
-                    if (appLoadingState == AppLoadingState.NotFound && !viewModel.viewState.errorShown) {
+                viewModel.viewStates.filter { it.appLoadingState is AppLoadingState.NotFound }.distinctUntilChanged().collect { _ ->
+                    AppLog.d("Details collecting appLoadingState AppLoadingState.NotFound")
+                    if (!viewModel.viewState.errorShown) {
                         viewModel.errorShown = true
                         val appId = viewModel.appId
                         Toast.makeText(requireContext(), getString(R.string.cannot_load_app, appId), Toast.LENGTH_LONG).show()
@@ -205,14 +205,12 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
             }
 
             launch {
-                viewModel.viewStates.collect { viewState ->
-                    AppLog.d("Details collecting viewState (viewState.changelogState) ${viewState.changelogState}")
-                    when (viewState.changelogState) {
+                viewModel.viewStates.map { it.changelogState }.distinctUntilChanged().collect { changelogState ->
+                    AppLog.d("Details collecting changelogState $changelogState")
+                    val viewState = viewModel.viewState
+                    when (changelogState) {
                         is ChangelogLoadState.Complete -> {
                             toggleMenu?.isEnabled = true
-                            viewState.app?.let { app ->
-                                appDetailsView.title.text = app.generateTitle(resources)
-                            }
                             adapter.setData(viewState.localChangelog, viewState.recentChange, viewState.accentColorRoles?.accent)
                             if (adapter.isEmpty) {
                                 binding.showErrorWithRetry()
