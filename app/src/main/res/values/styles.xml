@@ -165,7 +165,7 @@
         <item name="colorItemBackground">?android:attr/colorBackground</item>
         <item name="colorPreferenceBackground">?android:attr/selectableItemBackgroundBorderless
         </item>
-        <item name="colorItemLine">?attr/colorPrimary</item>
+        <item name="colorItemLine">?attr/colorSurfaceVariant</item>
 
         <item name="android:navigationBarColor">?attr/colorSurface</item>
         <item name="android:windowBackground">?attr/colorItemBackground</item>

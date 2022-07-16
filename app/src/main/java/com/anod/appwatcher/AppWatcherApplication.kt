@@ -17,8 +17,6 @@ import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.sync.SyncNotification
 import com.anod.appwatcher.utils.AppLogLogger
 import com.anod.appwatcher.utils.networkConnection
-import com.google.android.material.color.DynamicColors
-import com.google.android.material.color.DynamicColorsOptions
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import finsky.api.DfeError
 import info.anodsplace.applog.AppLog
@@ -87,10 +85,6 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
 
         AppCompatDelegate.setDefaultNightMode(prefs.appCompatNightMode)
         SyncNotification(ApplicationContext(this), get()).createChannels()
-        DynamicColors.applyToActivitiesIfAvailable(this, DynamicColorsOptions.Builder().apply {
-            setThemeOverlay(com.google.android.material.R.style.ThemeOverlay_Material3_DynamicColors_DayNight)
-            setPrecondition { _, _ -> true }
-        }.build())
         registerActivityLifecycleCallbacks(LifecycleCallbacks())
     }
 

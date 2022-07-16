@@ -52,7 +52,7 @@ class Theme(private val context: Context, private val prefs: Preferences) {
                 (prefs.theme == Preferences.THEME_BLACK) ->
                     CustomThemeColors(CustomThemeColor.black, CustomThemeColor.black)
                 else ->
-                    CustomThemeColors(CustomThemeColor(0, R.color.md_background, false), CustomThemeColor(0, R.color.md_background, false))
+                    CustomThemeColors(CustomThemeColor(colorAttr = android.R.attr.colorBackground), CustomThemeColor(colorAttr = android.R.attr.colorBackground))
             }
 
     val themeDialog: Int

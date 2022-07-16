@@ -123,10 +123,7 @@ fun darkTheme(theme: Int, supportsDynamic: Boolean): ColorScheme {
             )
         } else BlackThemeColors
     } else {
-        if (supportsDynamic) dynamicDarkColorScheme(LocalContext.current).copy(
-                background = DarkSurface,
-                surface = DarkSurface,
-        ) else DarkThemeColors
+        if (supportsDynamic) dynamicDarkColorScheme(LocalContext.current) else DarkThemeColors
     }
 }
 

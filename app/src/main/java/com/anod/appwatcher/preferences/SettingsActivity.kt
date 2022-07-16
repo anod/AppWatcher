@@ -24,6 +24,7 @@ import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.utils.prefs
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
+import com.google.android.material.color.DynamicColors
 import com.jakewharton.processphoenix.ProcessPhoenix
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.WindowCustomTheme
@@ -44,6 +45,7 @@ open class SettingsActivity : AppCompatActivity(), GDriveSignIn.Listener, KoinCo
         val theme = Theme(this, prefs)
         AppCompatDelegate.setDefaultNightMode(prefs.appCompatNightMode)
         setTheme(theme.theme)
+        DynamicColors.applyToActivityIfAvailable(this)
         if (theme.colors.available) {
             WindowCustomTheme.apply(theme.colors, window, this)
         }

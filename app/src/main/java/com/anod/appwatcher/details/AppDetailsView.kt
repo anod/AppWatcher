@@ -34,9 +34,9 @@ class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase
     private val resources = view.resources
 
     init {
-        accentColor = resourceProvider.getColor(R.color.md_primary)
-        textColor = resourceProvider.getColor(R.color.md_onSurface)
-        warningColor = resourceProvider.getColor(R.color.material_amber_800)
+        accentColor = resourceProvider.getColorOfAttribute(com.google.android.material.R.attr.colorPrimary)
+        textColor = resourceProvider.getColorOfAttribute(com.google.android.material.R.attr.colorOnSurface)
+        warningColor = resourceProvider.getColorOfResource(R.color.material_amber_800)
     }
 
     fun fillDetails(app: App, recentFlag: Boolean, changeDetails: String, noNewChanges: Boolean, isLocalApp: Boolean) {
