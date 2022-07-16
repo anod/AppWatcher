@@ -101,7 +101,7 @@
         android:ellipsize="end"
         android:gravity="left"
         android:maxLines="1"
-        android:textColor="@color/material_blue_800_high_contrast"
+        android:textColor="?attr/colorSecondary"
         android:textSize="@dimen/textSize"
         app:layout_constraintEnd_toStartOf="@id/update_date"
         app:layout_constraintStart_toEndOf="@+id/watched"

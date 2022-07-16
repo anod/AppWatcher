@@ -49,10 +49,10 @@ class Theme(private val context: Context, private val prefs: Preferences) {
             when (isNightMode) {
                 false ->
                     CustomThemeColors(CustomThemeColor.white, CustomThemeColor.white)
-                prefs.theme == Preferences.THEME_BLACK ->
+                (prefs.theme == Preferences.THEME_BLACK) ->
                     CustomThemeColors(CustomThemeColor.black, CustomThemeColor.black)
                 else ->
-                    CustomThemeColors(CustomThemeColor(0, R.color.dark_primary_base, false), CustomThemeColor(0, R.color.dark_primary_base, false))
+                    CustomThemeColors(CustomThemeColor(0, R.color.md_background, false), CustomThemeColor(0, R.color.md_background, false))
             }
 
     val themeDialog: Int

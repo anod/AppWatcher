@@ -7,8 +7,7 @@
     android:paddingStart="24dp"
     android:paddingEnd="16dp"
     android:paddingTop="16dp"
-    android:paddingBottom="16dp"
-    android:theme="@style/ThemeOverlay.Material3.DynamicColors.DayNight">
+    android:paddingBottom="16dp">
 
     <TextView
         android:layout_width="wrap_content"
@@ -37,7 +36,7 @@
             android:text="@string/choose_an_account"
             android:textColor="?attr/colorOnSecondary"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-            app:drawableEndCompat="@drawable/ic_drawer_accounts_expand" />
+            app:drawableEndCompat="@drawable/ic_baseline_expand_more_24" />
 
         <TextView
             android:id="@+id/last_update"

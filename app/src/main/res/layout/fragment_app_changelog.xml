@@ -79,7 +79,7 @@
             android:ellipsize="end"
             android:gravity="left"
             android:maxLines="1"
-            android:textColor="@color/accent"
+            android:textColor="?attr/colorPrimary"
             android:textSize="@dimen/textSize"
             tools:text="5.6.1609P.1258283" />
 
@@ -131,7 +131,7 @@
         android:src="@drawable/ic_play_arrow_black_48dp"
         android:contentDescription="@string/open_play_store"
         app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed"
-        app:backgroundTint="@color/fab_tint"
+        app:backgroundTint="@color/alwaysWhite"
         app:elevation="1dp"
         app:fabSize="mini" />
 

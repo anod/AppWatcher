@@ -1,10 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="white">#FFFFFF</color>
-    <color name="black">#de000000</color>
-    <color name="accent">#FF03a9f4</color>
-    <color name="grey">#424242</color>
-
     <color name="alwaysBlack">@android:color/black</color>
     <color name="alwaysWhite">#FFFFFF</color>
 
@@ -16,28 +11,31 @@
     <color name="material_grey_700">#616161</color>
     <color name="material_grey_800_">#424242</color>
     <color name="material_amber_800">#FF8F00</color>
-
-    <color name="material_blue_800_high_contrast">#1565C0</color>
-    <color name="material_blue_900_high_contrast">#0D47A1</color>
-
-    <color name="dark_primary_base">#263238</color>
-    <color name="dark_primary_light">#37474f</color>
-    <color name="dark_primary_dark">#102027</color>
-
-    <color name="row_error_red">#7EC62828</color>
-
-    <color name="neutral_theme_primary">@color/dark_primary_base</color>
-    <color name="neutral_theme_primary_dark">@color/dark_primary_base</color>
-    <color name="neutral_theme_accent">@color/dark_primary_base</color>
-
-    <color name="item_background">@android:color/white</color>
-    <color name="preference_background">@android:color/white</color>
-    <color name="row_inactive">@color/material_blue_500</color>
-
-    <color name="fab_tint">@android:color/white</color>
     <color name="fastscroll_thumb">#64616161</color>
-    <color name="color_item_line">@color/material_grey_200</color>
-    <color name="shortcut_icon_background">#F5F5F5</color>
+    
+    <color name="md_primary">#2196F3</color>,
+    <color name="md_onPrimary">#ffffff</color>,
+    <color name="md_primaryContainer">#bde9ff</color>,
+    <color name="md_onPrimaryContainer">#001f2a</color>,
+    <color name="md_secondary">#005db7</color>,
+    <color name="md_onSecondary">#ffffff</color>,
+    <color name="md_secondaryContainer">#d6e3ff</color>,
+    <color name="md_onSecondaryContainer">#001b3d</color>,
+    <color name="md_tertiary">#2b5bb5</color>,
+    <color name="md_onTertiary">#ffffff</color>,
+    <color name="md_tertiaryContainer">#d9e2ff</color>,
+    <color name="md_onTertiaryContainer">#001945</color>,
+    <color name="md_error">#ba1a1a</color>,
+    <color name="md_onError">#ffffff</color>,
+    <color name="md_errorContainer">#ffdad6</color>,
+    <color name="md_onErrorContainer">#410002</color>,
+    <color name="md_background">#fafcff</color>,
+    <color name="md_onBackground">#001f2a</color>,
+    <color name="md_surface">#fafcff</color>,
+    <color name="md_onSurface">#001f2a</color>,
+    <color name="md_surfaceVariant">#dce4e9</color>,
+    <color name="md_onSurfaceVariant">#40484c</color>,
+    <color name="md_outline">#70787d</color>
 
     <color name="chip_green">#26A69A</color>
     <color name="chip_pink">#F06292</color>
@@ -47,5 +45,4 @@
     <color name="chip_blue_dark">#1976D2</color>
     <color name="chip_orange">#F57C00</color>
     <color name="chip_purple">#ff5bff</color>
-
 </resources>

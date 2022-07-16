@@ -34,8 +34,8 @@ class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase
     private val resources = view.resources
 
     init {
-        accentColor = resourceProvider.getColor(R.color.accent)
-        textColor = resourceProvider.getColor(R.color.black)
+        accentColor = resourceProvider.getColor(R.color.md_primary)
+        textColor = resourceProvider.getColor(R.color.md_onSurface)
         warningColor = resourceProvider.getColor(R.color.material_amber_800)
     }
 

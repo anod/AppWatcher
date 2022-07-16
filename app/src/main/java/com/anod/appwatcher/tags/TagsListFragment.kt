@@ -142,7 +142,7 @@ class TagsListFragment : Fragment(), View.OnClickListener, KoinComponent {
             if (checked) {
                 name.isSelected = true
                 val checkmark = DrawableTint(itemView.resources, R.drawable.ic_check_black_24dp, itemView.context.theme)
-                    .apply(R.color.black)
+                        .apply(R.color.md_surface)
                 name.setCompoundDrawablesWithIntrinsicBounds(null, null, checkmark, null)
             } else {
                 name.isSelected = false

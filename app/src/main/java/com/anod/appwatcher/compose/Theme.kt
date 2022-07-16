@@ -7,84 +7,102 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.anod.appwatcher.preferences.Preferences
 
-private val Rubik = FontFamily.Default
-
-val typography = Typography()
-val AppTypography = Typography(
-        displayLarge = typography.displayLarge.merge(TextStyle(fontFamily = Rubik)),
-        displayMedium = typography.displayMedium.merge(TextStyle(fontFamily = Rubik)),
-        displaySmall = typography.displaySmall.merge(TextStyle(fontFamily = Rubik)),
-        headlineLarge = typography.headlineLarge.merge(TextStyle(fontFamily = Rubik)),
-        headlineMedium = typography.headlineMedium.merge(TextStyle(fontFamily = Rubik)),
-        headlineSmall = typography.headlineSmall.merge(TextStyle(fontFamily = Rubik)),
-        titleLarge = typography.titleLarge.merge(TextStyle(fontFamily = Rubik)),
-        titleMedium = typography.titleMedium.merge(TextStyle(fontFamily = Rubik)),
-        titleSmall = typography.titleSmall.merge(TextStyle(fontFamily = Rubik)),
-        bodyLarge = typography.bodyLarge.merge(TextStyle(fontFamily = Rubik)),
-        bodyMedium = typography.bodyMedium.merge(TextStyle(fontFamily = Rubik)),
-        bodySmall = typography.bodySmall.merge(TextStyle(fontFamily = Rubik)),
-        labelLarge = typography.labelLarge.merge(TextStyle(fontFamily = Rubik)),
-        labelMedium = typography.labelMedium.merge(TextStyle(fontFamily = Rubik)),
-        labelSmall = typography.labelSmall.merge(TextStyle(fontFamily = Rubik)),
-)
+private val AppTypography = Typography()
 
 private val Gray200 = Color(0xFFeeeeee)
 private val BlueGray500 = Color(0xFF2196F3)
 private val BlueGray800 = Color(0xFF1565C0)
-private val BlueGray800HighContrast = Color(0xFF5199EC)
 private val BlueGray900 = Color(0xFF0D47A1)
-private val BlueGray900HighContrast = Color(0xFF1D70ED)
-
-private val Error = Color(0x7EC62828)
-val WarningColor = Color(0xfff4511e)
-
-private val DarkSurface = Color(0xFF263238)
 
 private val LightThemeColors = lightColorScheme(
-        primary = Color.White,
-        onPrimary = Color.Black,
-        secondary = BlueGray800,
-        onSecondary = Color.White,
-        tertiary = BlueGray900,
-        surface = Color.White,
-        onSurface = Color.Black,
-        background = Color.White,
-        onBackground = Color.Black,
-        error = Error,
-        onError = Color.White,
+        primary = Color(0xFF2196F3),
+        onPrimary = Color(0xFFffffff),
+        primaryContainer = Color(0xFFbde9ff),
+        onPrimaryContainer = Color(0xFF001f2a),
+        secondary = Color(0xFF005db7),
+        onSecondary = Color(0xFFffffff),
+        secondaryContainer = Color(0xFFd6e3ff),
+        onSecondaryContainer = Color(0xFF001b3d),
+        tertiary = Color(0xFF2b5bb5),
+        onTertiary = Color(0xFFffffff),
+        tertiaryContainer = Color(0xFFd9e2ff),
+        onTertiaryContainer = Color(0xFF001945),
+        error = Color(0xFFba1a1a),
+        onError = Color(0xFFffffff),
+        errorContainer = Color(0xFFffdad6),
+        onErrorContainer = Color(0xFF410002),
+
+        background = Color(0xFFfafcff),
+        onBackground = Color(0xFF001f2a),
+
+        surface = Color(0xFFfafcff),
+        onSurface = Color(0xFF001f2a),
+
+        surfaceVariant = Color(0xFFdce4e9),
+        onSurfaceVariant = Color(0xFF40484c),
+        outline = Color(0xFF70787d)
 )
 
+private val DarkSurface = Color(0xFF263238)
 private val DarkThemeColors = darkColorScheme(
-        primary = DarkSurface,
-        onPrimary = Color.White,
-        secondary = BlueGray500,
-        onSecondary = Color.White,
-        tertiary = BlueGray800,
+        primary = Color(0xFF67d3ff),
+        onPrimary = Color(0xFF003546),
+        primaryContainer = Color(0xFF004d64),
+        onPrimaryContainer = Color(0xFFbde9ff),
+        secondary = Color(0xFF8ccdff),
+        onSecondary = Color(0xFF00344e),
+        secondaryContainer = Color(0xFF004b6f),
+        onSecondaryContainer = Color(0xFFcae6ff),
+        tertiary = Color(0xFF8ecdff),
+        onTertiary = Color(0xFFffffff),
+        tertiaryContainer = Color(0xFFcae6ff),
+        onTertiaryContainer = Color(0xFF001e30),
+        error = Color(0xFFffb4ab),
+        onError = Color(0xFF690005),
+        errorContainer = Color(0xFF93000a),
+        onErrorContainer = Color(0xFFffdad6),
+
         background = DarkSurface,
-        onBackground = Color.White,
+        onBackground = Color(0xFFbde9ff),
+
         surface = DarkSurface,
-        onSurface = Color.White.copy(alpha = 0.8f),
-        error = Error,
-        onError = Color.White
+        onSurface = Color(0xFFffffff),
+
+        surfaceVariant = Color(0xFF40484c),
+        onSurfaceVariant = Color(0xFFc0c8cd),
+        outline = Color(0xFF8a9297)
 )
 
 private val BlackThemeColors = darkColorScheme(
-        primary = Color.Black,
-        onPrimary = Color.White,
-        secondary = BlueGray800HighContrast,
-        onSecondary = Color.White,
-        tertiary = BlueGray900HighContrast,
+        primary = Color(0xFF67d3ff),
+        onPrimary = Color(0xFF003546),
+        primaryContainer = Color(0xFF004d64),
+        onPrimaryContainer = Color(0xFFbde9ff),
+        secondary = Color(0xFF8ccdff),
+        onSecondary = Color(0xFF00344e),
+        secondaryContainer = Color(0xFF004b6f),
+        onSecondaryContainer = Color(0xFFcae6ff),
+        tertiary = Color(0xFF8ecdff),
+        onTertiary = Color(0xFFffffff),
+        tertiaryContainer = Color(0xFFcae6ff),
+        onTertiaryContainer = Color(0xFF001e30),
+        error = Color(0xFFffb4ab),
+        onError = Color(0xFF690005),
+        errorContainer = Color(0xFF93000a),
+        onErrorContainer = Color(0xFFffdad6),
+
         background = Color.Black,
-        onBackground = Color.White,
+        onBackground = Color(0xFFbde9ff),
+
         surface = Color.Black,
-        onSurface = Color.White.copy(alpha = 0.8f),
-        error = Error,
-        onError = Color.White
+        onSurface = Color(0xFFffffff),
+
+        surfaceVariant = Color(0xFF40484c),
+        onSurfaceVariant = Color(0xFFc0c8cd),
+        outline = Color(0xFF8a9297)
 )
 
 val AppShapes = Shapes(

@@ -194,7 +194,7 @@ fun IconShapeSelector(prefs: Preferences, modifier: Modifier = Modifier, onPathC
                                 value = pathMask
                                 onPathChange(pathMask)
                             }, role = Role.Button, onClickLabel = names[index])
-                            .background(color = if (selected) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f))
+                            .background(color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f))
             ) {
             }
         }
