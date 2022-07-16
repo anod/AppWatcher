@@ -105,19 +105,17 @@
         <item name="android:statusBarColor">@color/white</item>
         <item name="android:actionBarTheme">@style/AppTheme.ActionBar</item>
         <!--Material type attributes-->
-        <item name="textAppearanceHeadline1">@style/TextAppearance.AppTheme.Headline1</item>
-        <item name="textAppearanceHeadline2">@style/TextAppearance.AppTheme.Headline2</item>
-        <item name="textAppearanceHeadline3">@style/TextAppearance.AppTheme.Headline3</item>
-        <item name="textAppearanceHeadline4">@style/TextAppearance.AppTheme.Headline4</item>
-        <item name="textAppearanceHeadline5">@style/TextAppearance.AppTheme.Headline5</item>
-        <item name="textAppearanceHeadline6">@style/TextAppearance.AppTheme.Headline6</item>
-        <item name="textAppearanceSubtitle1">@style/TextAppearance.AppTheme.Subtitle1</item>
-        <item name="textAppearanceSubtitle2">@style/TextAppearance.AppTheme.Subtitle2</item>
-        <item name="textAppearanceBody1">@style/TextAppearance.AppTheme.Body1</item>
-        <item name="textAppearanceBody2">@style/TextAppearance.AppTheme.Body2</item>
-        <item name="textAppearanceButton">@style/TextAppearance.AppTheme.Button</item>
-        <item name="textAppearanceCaption">@style/TextAppearance.AppTheme.Caption</item>
-        <item name="textAppearanceOverline">@style/TextAppearance.AppTheme.Overline</item>
+        <item name="textAppearanceDisplaySmall">@style/TextAppearance.AppTheme.DisplaySmall</item>
+        <item name="textAppearanceHeadlineLarge">@style/TextAppearance.AppTheme.HeadlineLarge</item>
+        <item name="textAppearanceHeadlineMedium">@style/TextAppearance.AppTheme.HeadlineMedium</item>
+        <item name="textAppearanceHeadlineSmall">@style/TextAppearance.AppTheme.HeadlineSmall</item>
+        <item name="textAppearanceTitleLarge">@style/TextAppearance.AppTheme.TitleLarge</item>
+        <item name="textAppearanceTitleMedium">@style/TextAppearance.AppTheme.TitleMedium</item>
+        <item name="textAppearanceTitleSmall">@style/TextAppearance.AppTheme.TitleSmall</item>
+        <item name="textAppearanceBodyLarge">@style/TextAppearance.AppTheme.BodyLarge</item>
+        <item name="textAppearanceBodyMedium">@style/TextAppearance.AppTheme.BodyMedium</item>
+        <item name="textAppearanceBodySmall">@style/TextAppearance.AppTheme.BodySmall</item>
+        <item name="textAppearanceLabelMedium">@style/TextAppearance.AppTheme.LabelMedium</item>
         <!-- ActionMode -->
         <item name="windowActionModeOverlay">true</item>
         <item name="actionModeStyle">@style/Widget.App.ActionMode</item>
@@ -234,35 +232,29 @@
         <item name="popupMenuBackground">@color/alwaysBlack</item>
     </style>
 
-    <style name="TextAppearance.AppTheme.Headline1" parent="TextAppearance.MaterialComponents.Headline1" />
+    <style name="TextAppearance.AppTheme.DisplaySmall" parent="TextAppearance.Material3.DisplaySmall" />
 
-    <style name="TextAppearance.AppTheme.Headline2" parent="TextAppearance.MaterialComponents.Headline2" />
+    <style name="TextAppearance.AppTheme.HeadlineLarge" parent="TextAppearance.Material3.HeadlineLarge" />
 
-    <style name="TextAppearance.AppTheme.Headline3" parent="TextAppearance.MaterialComponents.Headline3" />
+    <style name="TextAppearance.AppTheme.HeadlineMedium" parent="TextAppearance.Material3.HeadlineMedium" />
 
-    <style name="TextAppearance.AppTheme.Headline4" parent="TextAppearance.MaterialComponents.Headline4" />
+    <style name="TextAppearance.AppTheme.HeadlineSmall" parent="TextAppearance.Material3.HeadlineSmall" />
 
-    <style name="TextAppearance.AppTheme.Headline5" parent="TextAppearance.MaterialComponents.Headline5" />
+    <style name="TextAppearance.AppTheme.TitleLarge" parent="TextAppearance.Material3.TitleLarge" />
 
-    <style name="TextAppearance.AppTheme.Headline6" parent="TextAppearance.MaterialComponents.Headline6">
+    <style name="TextAppearance.AppTheme.TitleMedium" parent="TextAppearance.Material3.TitleMedium">
         <item name="android:textColor">?attr/colorOnPrimary</item>
     </style>
 
-    <style name="TextAppearance.AppTheme.Subtitle1" parent="TextAppearance.MaterialComponents.Subtitle1">
+    <style name="TextAppearance.AppTheme.TitleSmall" parent="TextAppearance.Material3.TitleSmall">
         <item name="android:textColor">?attr/colorOnPrimary</item>
     </style>
 
-    <style name="TextAppearance.AppTheme.Subtitle2" parent="TextAppearance.MaterialComponents.Subtitle2">
-        <item name="android:textColor">?attr/colorOnPrimary</item>
-    </style>
+    <style name="TextAppearance.AppTheme.BodyLarge" parent="TextAppearance.Material3.BodyLarge" />
 
-    <style name="TextAppearance.AppTheme.Body1" parent="TextAppearance.MaterialComponents.Body1" />
+    <style name="TextAppearance.AppTheme.BodyMedium" parent="TextAppearance.Material3.BodyMedium" />
 
-    <style name="TextAppearance.AppTheme.Body2" parent="TextAppearance.MaterialComponents.Body2" />
+    <style name="TextAppearance.AppTheme.BodySmall" parent="TextAppearance.Material3.BodySmall" />
 
-    <style name="TextAppearance.AppTheme.Button" parent="TextAppearance.MaterialComponents.Button" />
-
-    <style name="TextAppearance.AppTheme.Caption" parent="TextAppearance.MaterialComponents.Caption" />
-
-    <style name="TextAppearance.AppTheme.Overline" parent="TextAppearance.MaterialComponents.Overline" />
+    <style name="TextAppearance.AppTheme.LabelMedium" parent="TextAppearance.Material3.LabelMedium" />
 </resources>

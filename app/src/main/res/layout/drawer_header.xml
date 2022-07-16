@@ -8,13 +8,14 @@
     android:paddingEnd="16dp"
     android:paddingTop="16dp"
     android:paddingBottom="16dp"
-    android:theme="@style/ThemeOverlay.MaterialComponents.Dark">
+    android:theme="@style/ThemeOverlay.Material3.DynamicColors.DayNight">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="40dp"
         android:text="@string/app_name"
         android:singleLine="true"
+        android:textColor="?attr/colorOnSecondary"
         android:textSize="24sp" />
 
     <LinearLayout
@@ -23,21 +24,24 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="44dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:focusable="true"
         android:clickable="true"
+        android:focusable="true"
+        android:minHeight="48dp"
         android:orientation="vertical">
 
         <TextView
             android:id="@+id/account_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:drawableEndCompat="@drawable/ic_drawer_accounts_expand"
             android:gravity="center_vertical"
             android:text="@string/choose_an_account"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+            android:textColor="?attr/colorOnSecondary"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            app:drawableEndCompat="@drawable/ic_drawer_accounts_expand" />
 
         <TextView
             android:id="@+id/last_update"
+            android:textColor="?attr/colorOnSecondary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/last_update" />

@@ -1,10 +1,12 @@
 package com.anod.appwatcher.compose
 
+import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
@@ -14,16 +16,21 @@ private val Rubik = FontFamily.Default
 
 val typography = Typography()
 val AppTypography = Typography(
-        h4 = typography.h4.merge(TextStyle(fontFamily = Rubik)),
-        h5 = typography.h5.merge(TextStyle(fontFamily = Rubik)),
-        h6 = typography.h6.merge(TextStyle(fontFamily = Rubik)),
-        subtitle1 = typography.subtitle1.merge(TextStyle(fontFamily = Rubik)),
-        subtitle2 = typography.subtitle2.merge(TextStyle(fontFamily = Rubik)),
-        body1 = typography.body1.merge(TextStyle(fontFamily = Rubik)),
-        body2 = typography.body2.merge(TextStyle(fontFamily = Rubik)),
-        button = typography.button.merge(TextStyle(fontFamily = Rubik)),
-        caption = typography.caption.merge(TextStyle(fontFamily = Rubik)),
-        overline = typography.overline.merge(TextStyle(fontFamily = Rubik))
+        displayLarge = typography.displayLarge.merge(TextStyle(fontFamily = Rubik)),
+        displayMedium = typography.displayMedium.merge(TextStyle(fontFamily = Rubik)),
+        displaySmall = typography.displaySmall.merge(TextStyle(fontFamily = Rubik)),
+        headlineLarge = typography.headlineLarge.merge(TextStyle(fontFamily = Rubik)),
+        headlineMedium = typography.headlineMedium.merge(TextStyle(fontFamily = Rubik)),
+        headlineSmall = typography.headlineSmall.merge(TextStyle(fontFamily = Rubik)),
+        titleLarge = typography.titleLarge.merge(TextStyle(fontFamily = Rubik)),
+        titleMedium = typography.titleMedium.merge(TextStyle(fontFamily = Rubik)),
+        titleSmall = typography.titleSmall.merge(TextStyle(fontFamily = Rubik)),
+        bodyLarge = typography.bodyLarge.merge(TextStyle(fontFamily = Rubik)),
+        bodyMedium = typography.bodyMedium.merge(TextStyle(fontFamily = Rubik)),
+        bodySmall = typography.bodySmall.merge(TextStyle(fontFamily = Rubik)),
+        labelLarge = typography.labelLarge.merge(TextStyle(fontFamily = Rubik)),
+        labelMedium = typography.labelMedium.merge(TextStyle(fontFamily = Rubik)),
+        labelSmall = typography.labelSmall.merge(TextStyle(fontFamily = Rubik)),
 )
 
 private val Gray200 = Color(0xFFeeeeee)
@@ -38,13 +45,12 @@ val WarningColor = Color(0xfff4511e)
 
 private val DarkSurface = Color(0xFF263238)
 
-private val LightThemeColors = lightColors(
+private val LightThemeColors = lightColorScheme(
         primary = Color.White,
-        primaryVariant = Gray200,
         onPrimary = Color.Black,
         secondary = BlueGray800,
-        secondaryVariant = BlueGray900,
         onSecondary = Color.White,
+        tertiary = BlueGray900,
         surface = Color.White,
         onSurface = Color.Black,
         background = Color.White,
@@ -53,13 +59,12 @@ private val LightThemeColors = lightColors(
         onError = Color.White,
 )
 
-private val DarkThemeColors = darkColors(
+private val DarkThemeColors = darkColorScheme(
         primary = DarkSurface,
-        primaryVariant = DarkSurface,
         onPrimary = Color.White,
         secondary = BlueGray500,
-        secondaryVariant = BlueGray800,
         onSecondary = Color.White,
+        tertiary = BlueGray800,
         background = DarkSurface,
         onBackground = Color.White,
         surface = DarkSurface,
@@ -68,13 +73,12 @@ private val DarkThemeColors = darkColors(
         onError = Color.White
 )
 
-private val BlackThemeColors = darkColors(
+private val BlackThemeColors = darkColorScheme(
         primary = Color.Black,
-        primaryVariant = Color.Black,
         onPrimary = Color.White,
         secondary = BlueGray800HighContrast,
-        secondaryVariant = BlueGray900HighContrast,
         onSecondary = Color.White,
+        tertiary = BlueGray900HighContrast,
         background = Color.Black,
         onBackground = Color.White,
         surface = Color.Black,
@@ -89,17 +93,36 @@ val AppShapes = Shapes(
         large = RoundedCornerShape(8.dp)
 )
 
+fun supportsDynamic(): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+
+@Composable
+fun darkTheme(theme: Int, supportsDynamic: Boolean): ColorScheme {
+    return if (theme == Preferences.THEME_BLACK) {
+        if (supportsDynamic) {
+            dynamicDarkColorScheme(LocalContext.current).copy(
+                    // TODO
+            )
+        } else BlackThemeColors
+    } else {
+        if (supportsDynamic) dynamicDarkColorScheme(LocalContext.current) else DarkThemeColors
+    }
+}
+
 @Composable
 fun AppTheme(
         darkTheme: Boolean = isSystemInDarkTheme(),
         theme: Int = Preferences.THEME_DEFAULT,
         content: @Composable () -> Unit
 ) {
-    val colors = if (darkTheme) {
-        if (theme == Preferences.THEME_BLACK) BlackThemeColors else DarkThemeColors
-    } else LightThemeColors
+
+    val colors = if (supportsDynamic()) {
+        if (darkTheme) darkTheme(theme, supportsDynamic = true) else dynamicLightColorScheme(LocalContext.current)
+    } else {
+        if (darkTheme) darkTheme(theme, supportsDynamic = false) else LightThemeColors
+    }
+
     MaterialTheme(
-            colors = colors,
+            colorScheme = colors,
             typography = AppTypography,
             shapes = AppShapes,
             content = content

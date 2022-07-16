@@ -9,9 +9,9 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.GenericShape
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,6 +36,7 @@ import info.anodsplace.compose.PreferencesScreen
 import info.anodsplace.framework.content.CreateDocument
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(viewModel: SettingsViewModel) {
     val coroutineScope = rememberCoroutineScope()
@@ -71,7 +72,7 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
         Surface {
             Scaffold(
                     topBar = {
-                        TopAppBar(
+                        CenterAlignedTopAppBar(
                                 title = { Text(text = stringResource(id = R.string.navdrawer_item_settings)) },
                                 navigationIcon = {
                                     IconButton(onClick = { coroutineScope.launch { viewModel.actions.emit(UiAction.OnBackNav) } }) {
@@ -83,29 +84,27 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
                                         CircularProgressIndicator(
                                                 modifier = Modifier
                                                         .size(32.dp),
-                                                color = MaterialTheme.colors.secondaryVariant
+                                                color = MaterialTheme.colorScheme.tertiary
                                         )
                                     }
                                 },
-                                elevation = 0.dp
                         )
                     }
             ) { contentPadding ->
                 PreferencesScreen(
                         modifier = Modifier.padding(contentPadding),
                         preferences = items,
-                        placeholder = { item, paddingValues ->
+                        placeholder = { item, _ ->
                             when (item.key) {
                                 "icon-style" -> Preference(
                                         item,
-                                        paddingValues,
                                         secondaryText = {
                                             Column {
                                                 Text(
                                                         modifier = Modifier.padding(top = 4.dp),
                                                         text = stringResource(id = R.string.adaptive_icon_style_summary),
-                                                        style = MaterialTheme.typography.body2.copy(
-                                                                color = MaterialTheme.colors.onSurface
+                                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                                                color = MaterialTheme.colorScheme.onSurface
                                                         )
                                                 )
                                                 IconShapeSelector(
@@ -161,7 +160,7 @@ fun IconShapeSelector(prefs: Preferences, modifier: Modifier = Modifier, onPathC
         Box(
                 modifier = Modifier
                         .size(iconSize, iconSize)
-                        .border(BorderStroke(1.dp, MaterialTheme.colors.secondaryVariant.copy(
+                        .border(BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary.copy(
                                 alpha = if (isNone) 1.0f else 0.1f
                         )))
                         .clickable(onClick = {
@@ -172,7 +171,7 @@ fun IconShapeSelector(prefs: Preferences, modifier: Modifier = Modifier, onPathC
         ) {
             Text(
                     text = names[0],
-                    color = if (isNone) MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.onSurface
+                    color = if (isNone) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurface
             )
         }
 
@@ -195,7 +194,7 @@ fun IconShapeSelector(prefs: Preferences, modifier: Modifier = Modifier, onPathC
                                 value = pathMask
                                 onPathChange(pathMask)
                             }, role = Role.Button, onClickLabel = names[index])
-                            .background(color = if (selected) MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.secondary.copy(alpha = 0.3f))
+                            .background(color = if (selected) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f))
             ) {
             }
         }
