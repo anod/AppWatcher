@@ -380,8 +380,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         val defaultColor = ContextCompat.getColor(context, R.color.md_surface)
         val darkSwatch = palette?.chooseDark(defaultColor) ?: Palette.Swatch(defaultColor, 0)
         val harmonizedColor = MaterialColors.harmonizeWithPrimary(context, darkSwatch.rgb)
-        val isLightTheme = !Theme(requireActivity(), viewModel.prefs).isNightTheme
-        val colorRoles: ColorRoles = MaterialColors.getColorRoles(harmonizedColor, isLightTheme)
+        val colorRoles: ColorRoles = MaterialColors.getColorRoles(harmonizedColor, false)
 
         applyColor(colorRoles.accentContainer)
         animateBackground()
