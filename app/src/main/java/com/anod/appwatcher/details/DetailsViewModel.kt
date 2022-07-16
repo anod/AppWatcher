@@ -1,9 +1,13 @@
 package com.anod.appwatcher.details
 
 import android.accounts.Account
+import android.app.Application
 import android.content.pm.PackageManager
-import androidx.lifecycle.AndroidViewModel
+import android.graphics.drawable.BitmapDrawable
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppTagsTable
@@ -14,14 +18,19 @@ import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.database.entities.packageToApp
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.utils.AppIconLoader
+import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.date.UploadDateParserCache
 import com.anod.appwatcher.utils.prefs
+import com.google.android.material.color.ColorRoles
 import finsky.api.model.DfeDetails
 import finsky.api.model.Document
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.ApplicationContext
+import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.playstore.DetailsEndpoint
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -29,152 +38,182 @@ import org.koin.core.parameter.parametersOf
 
 typealias TagMenuItem = Pair<Tag, Boolean>
 
-sealed class ChangelogLoadState
-object Initial : ChangelogLoadState()
-object LocalComplete : ChangelogLoadState()
-class RemoteComplete(val error: Boolean) : ChangelogLoadState()
-object Complete : ChangelogLoadState()
+sealed class ChangelogLoadState {
+    object Initial : ChangelogLoadState()
+    object LocalComplete : ChangelogLoadState()
+    class RemoteComplete(val error: Boolean) : ChangelogLoadState()
+    object Complete : ChangelogLoadState()
+}
 
-sealed class AppLoadingState
-class Loaded(val app: App) : AppLoadingState()
-object NotFound : AppLoadingState()
+sealed class AppLoadingState {
+    object Initial : AppLoadingState()
+    object Loaded : AppLoadingState()
+    object NotFound : AppLoadingState()
+}
 
-class DetailsViewModel(application: android.app.Application) : AndroidViewModel(application), KoinComponent {
+sealed class AppIconState {
+    object Initial : AppIconState()
+    class Loaded(val drawable: BitmapDrawable) : AppIconState()
+    object Default : AppIconState()
+}
+
+data class DetailsScreenState(
+        val appId: String,
+        val rowId: Int,
+        val detailsUrl: String,
+        val appLoadingState: AppLoadingState = AppLoadingState.Initial,
+        val app: App? = null,
+        val appIconState: AppIconState = AppIconState.Initial,
+        val account: Account? = null,
+        val changelogState: ChangelogLoadState = ChangelogLoadState.Initial,
+        val localChangelog: List<AppChange> = emptyList(),
+        val recentChange: AppChange = AppChange(appId, 0, "", "", "", false),
+        val errorShown: Boolean = false,
+        val tagsMenuItems: List<TagMenuItem> = emptyList(),
+        val accentColorRoles: ColorRoles? = null,
+        val document: Document? = null,
+        val isInstalled: Boolean = false
+)
+
+sealed interface DetailsScreenAction {
+    class WatchAppResult(val result: Int) : DetailsScreenAction
+}
+
+sealed interface DetailsScreenEvent {
+    class UpdateTag(val tagId: Int, val checked: Boolean) : DetailsScreenEvent
+    object WatchApp : DetailsScreenEvent
+    class UpdateAccentColor(val colorRoles: ColorRoles) : DetailsScreenEvent
+}
+
+class DetailsViewModel(application: Application, argAppId: String, argRowId: Int, argDetailsUrl: String) : BaseFlowViewModel<DetailsScreenState, DetailsScreenEvent, DetailsScreenAction>(application), KoinComponent {
+
+    class Factory(
+            private val application: Application,
+            private val argAppId: String,
+            private val argRowId: Int,
+            private val argDetailsUrl: String
+    ) : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+            return DetailsViewModel(application, argAppId, argRowId, argDetailsUrl) as T
+        }
+    }
+
     val context: ApplicationContext by inject()
     val database: AppsDatabase by inject()
     val authToken: AuthTokenBlocking by inject()
     val uploadDateParserCache: UploadDateParserCache by inject()
-    val iconLoader: AppIconLoader by inject()
+    private val iconLoader: AppIconLoader by inject()
     val packageManager: PackageManager by inject()
+    val installedApps: InstalledApps by lazy { InstalledApps.PackageManager(packageManager) }
 
-    var detailsUrl = ""
+    private val detailsEndpoint: DetailsEndpoint by inject { parametersOf(viewState.detailsUrl) }
 
-    private val _appId = MutableStateFlow("")
-    var appId: String
-        get() = _appId.value
+    init {
+        val isInstalled = installedApps.packageInfo(argAppId).isInstalled
+        viewState = DetailsScreenState(appId = argAppId, rowId = argRowId, detailsUrl = argDetailsUrl, account = prefs.account, isInstalled = isInstalled)
+    }
+
+    val appId: String
+        get() = viewState.appId
+    val rowId: Int
+        get() = viewState.rowId
+
+    var errorShown: Boolean
+        get() = viewState.errorShown
         set(value) {
-            _appId.value = value
+            viewState = viewState.copy(errorShown = value)
         }
 
-    var rowId: Int = -1
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun observeApp() {
+        viewModelScope.launch {
+            database.apps().observeApp(appId).collect { app ->
+                if (app == null && rowId == -1) {
+                    AppLog.i("Show details for unwatched $appId", "DetailsView")
+                    val localApp = packageManager.packageToApp(-1, appId)
+                    viewState = viewState.copy(
+                            appLoadingState = AppLoadingState.Loaded,
+                            app = localApp,
+                            appIconState = if (localApp.iconUrl.isEmpty()) AppIconState.Default else viewState.appIconState
+                    )
+                    if (localApp.iconUrl.isNotEmpty()) {
+                        loadAppIcon(localApp.iconUrl)
+                    }
+                } else {
+                    AppLog.i("Show details for watched $appId", "DetailsView")
+                    viewState = viewState.copy(
+                            appLoadingState = if (app == null) AppLoadingState.NotFound else AppLoadingState.Loaded,
+                            app = app,
+                            appIconState = if (app?.iconUrl?.isNotEmpty() == true) viewState.appIconState else AppIconState.Default
+                    )
+                    if (app?.iconUrl?.isNotEmpty() == true) {
+                        loadAppIcon(app.iconUrl)
+                    }
+                }
+            }
+        }
 
-    val appLoading: Flow<AppLoadingState> = _appId.filter { it.isNotEmpty() }.flatMapLatest {
-        return@flatMapLatest database.apps().observeApp(it).map { app ->
-            if (app == null && rowId == -1) {
-                AppLog.i("Show details for unwatched $appId", "DetailsView")
-                Loaded(packageManager.packageToApp(-1, appId))
-            } else {
-                AppLog.i("Show details for watched $appId", "DetailsView")
-                if (app == null) NotFound else Loaded(app)
+        viewModelScope.launch {
+            database.tags().observe().flatMapLatest { tags ->
+                return@flatMapLatest database.appTags().forApp(appId).map { appTags ->
+                    val appTagsList = appTags.map { it.tagId }
+                    tags.map { TagMenuItem(it, appTagsList.contains(it.id)) }
+                }
+            }.collect { tagsMenuItems ->
+                viewState = viewState.copy(tagsMenuItems = tagsMenuItems)
             }
         }
     }
 
-    val app: StateFlow<App?> = appLoading.map {
-        when (it) {
-            is Loaded -> it.app
-            else -> null
+    private fun loadAppIcon(iconUrl: String) {
+        viewModelScope.launch {
+            val drawable = iconLoader.get(iconUrl) as? BitmapDrawable
+            if (drawable == null) {
+                viewState = viewState.copy(appIconState = AppIconState.Default)
+                return@launch
+            }
+            viewState = viewState.copy(appIconState = AppIconState.Loaded(drawable = drawable))
         }
-    }.stateIn(viewModelScope, SharingStarted.Lazily, null)
+    }
 
-    val watchStateChange: MutableSharedFlow<Int> = MutableSharedFlow()
-
-    val account: Account?
-        get() = prefs.account
-
-    private val detailsEndpoint: DetailsEndpoint by inject { parametersOf(detailsUrl) }
-
-    var localChangelog: List<AppChange> = emptyList()
-    val tagsMenuItems: StateFlow<List<TagMenuItem>> = flow {
-        if (appId.isNotEmpty()) {
-            emit(appId)
-        }
-    }.flatMapLatest tagsMenu@{ appId ->
-        if (appId.isEmpty()) {
-            return@tagsMenu flowOf(emptyList<TagMenuItem>())
-        }
-        return@tagsMenu database.tags().observe().flatMapLatest { tags ->
-            return@flatMapLatest database.appTags().forApp(appId).map { appTags ->
-                val appTagsList = appTags.map { it.tagId }
-                tags.map { TagMenuItem(it, appTagsList.contains(it.id)) }
+    override fun handleEvent(event: DetailsScreenEvent) {
+        when (event) {
+            is DetailsScreenEvent.UpdateTag -> changeTag(event.tagId, event.checked)
+            DetailsScreenEvent.WatchApp -> watchApp()
+            is DetailsScreenEvent.UpdateAccentColor -> {
+                viewState = viewState.copy(accentColorRoles = event.colorRoles)
             }
         }
-    }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
-
-    val changelogState = MutableStateFlow<ChangelogLoadState>(Initial)
-    val document: Document?
-        get() = detailsEndpoint.document
-    var recentChange = AppChange(appId, 0, "", "", "", false)
+    }
 
     fun loadLocalChangelog() {
         if (appId.isBlank()) {
-            this.updateChangelogState(LocalComplete)
+            viewState = viewState.copy(changelogState = mergeChangelogState(ChangelogLoadState.LocalComplete))
             return
         }
         viewModelScope.launch {
-            localChangelog = database.changelog().ofApp(appId)
-            updateChangelogState(LocalComplete)
+            val localChangelog = database.changelog().ofApp(appId)
+            viewState = viewState.copy(localChangelog = localChangelog, changelogState = mergeChangelogState(ChangelogLoadState.LocalComplete))
         }
     }
 
     fun loadRemoteChangelog() {
         if (authToken.token.isBlank()) {
-            this.updateChangelogState(RemoteComplete(true))
+            viewState = viewState.copy(changelogState = mergeChangelogState(ChangelogLoadState.RemoteComplete(true)))
         } else {
             viewModelScope.launch {
                 try {
                     val model = detailsEndpoint.start()
                     onDataChanged(model)
                 } catch (e: Exception) {
-                    onErrorResponse(e)
+                    AppLog.e("Cannot fetch details for $appId", e)
+                    viewState = viewState.copy(changelogState = mergeChangelogState(ChangelogLoadState.RemoteComplete(true)))
                 }
             }
         }
     }
 
-    private fun onDataChanged(details: DfeDetails) {
-        val appDetails = details.document?.appDetails
-        if (appDetails != null) {
-            recentChange = AppChange(appId, appDetails.versionCode, appDetails.versionString, appDetails.recentChangesHtml
-                    ?: "", appDetails.uploadDate, false)
-            app.value!!.testing = when {
-                appDetails.testingProgramInfo.subscribed -> 1
-                appDetails.testingProgramInfo.subscribedAndInstalled -> 2
-                else -> 0
-            }
-        }
-        this.updateChangelogState(RemoteComplete(false))
-    }
-
-    private fun updateChangelogState(state: ChangelogLoadState) {
-        when (state) {
-            is LocalComplete -> {
-                if (this.changelogState.value is RemoteComplete || this.changelogState.value is Complete) {
-                    this.changelogState.value = Complete
-                } else {
-                    this.changelogState.value = state
-                }
-            }
-            is RemoteComplete -> {
-                if (this.changelogState.value is LocalComplete || this.changelogState.value is Complete) {
-                    this.changelogState.value = Complete
-                } else {
-                    this.changelogState.value = state
-                }
-            }
-            Complete -> {
-            }
-            Initial -> {
-            }
-        }
-    }
-
-    private fun onErrorResponse(error: Exception) {
-        AppLog.e("Cannot fetch details for $appId - $error")
-        this.updateChangelogState(RemoteComplete(true))
-    }
-
-    fun changeTag(tagId: Int, checked: Boolean) {
+    private fun changeTag(tagId: Int, checked: Boolean) {
         viewModelScope.launch {
             if (checked) {
                 database.appTags().delete(tagId, appId) > 0
@@ -184,16 +223,58 @@ class DetailsViewModel(application: android.app.Application) : AndroidViewModel(
         }
     }
 
-    fun watch() {
+    private fun watchApp() {
         viewModelScope.launch {
-            val document = this@DetailsViewModel.document
+            val document = viewState.document
             if (document == null) {
-                watchStateChange.emit(AppListTable.ERROR_INSERT)
+                emitAction(DetailsScreenAction.WatchAppResult(AppListTable.ERROR_INSERT))
             } else {
                 val info = AppInfo(document, uploadDateParserCache)
                 val result = AppListTable.Queries.insertSafetly(info, database)
-                watchStateChange.emit(result)
+                emitAction(DetailsScreenAction.WatchAppResult(result))
             }
         }
     }
+
+    private fun onDataChanged(details: DfeDetails) {
+        val appDetails = details.document?.appDetails
+
+        if (appDetails != null) {
+            val app = viewState.app?.apply {
+                testing = when {
+                    appDetails.testingProgramInfo.subscribed -> 1
+                    appDetails.testingProgramInfo.subscribedAndInstalled -> 2
+                    else -> 0
+                }
+            }
+            viewState = viewState.copy(
+                    app = app,
+                    recentChange = AppChange(appId, appDetails.versionCode, appDetails.versionString, appDetails.recentChangesHtml
+                            ?: "", appDetails.uploadDate, false),
+                    changelogState = mergeChangelogState(ChangelogLoadState.RemoteComplete(false)),
+                    document = details.document
+            )
+        } else {
+            viewState = viewState.copy(changelogState = mergeChangelogState(ChangelogLoadState.RemoteComplete(false)))
+        }
+    }
+
+    private fun mergeChangelogState(newChangelogState: ChangelogLoadState): ChangelogLoadState {
+        val changelogState = viewState.changelogState
+        return when (newChangelogState) {
+            is ChangelogLoadState.LocalComplete -> if (changelogState is ChangelogLoadState.RemoteComplete || changelogState is ChangelogLoadState.Complete) {
+                ChangelogLoadState.Complete
+            } else {
+                newChangelogState
+            }
+            is ChangelogLoadState.RemoteComplete -> if (changelogState is ChangelogLoadState.LocalComplete || changelogState is ChangelogLoadState.Complete) {
+                return ChangelogLoadState.Complete
+            } else {
+                return newChangelogState
+            }
+            ChangelogLoadState.Complete -> ChangelogLoadState.Complete
+            ChangelogLoadState.Initial -> ChangelogLoadState.Initial
+        }
+    }
+
 }

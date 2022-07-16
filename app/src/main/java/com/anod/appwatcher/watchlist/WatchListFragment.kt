@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -135,26 +134,26 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener,
 
         viewLifecycleOwner.lifecycleScope.launchWhenResumed {
             adapter
-                .loadStateFlow
-                .drop(1) // fix empty view flickering
-                .collectLatest { loadState ->
-                    val isEmpty = (
-                        loadState.source.refresh is LoadState.NotLoading
-                        && adapter.itemCount < 1
-                    )
-                    AppLog.d("loadStateFlow: ${loadState.source.refresh}, isEmpty: $isEmpty")
-                    if (isEmpty) {
-                        if (binding.emptyView.childCount == 0) {
-                            val emptyBinding = ListItemEmptyBinding.inflate(layoutInflater, binding.emptyView, true)
-                            createEmptyViewHolder(emptyBinding, action)
+                    .loadStateFlow
+                    .drop(1) // fix empty view flickering
+                    .collectLatest { loadState ->
+                        val isEmpty = (
+                                loadState.source.refresh is LoadState.NotLoading
+                                        && adapter.itemCount < 1
+                                )
+                        AppLog.d("loadStateFlow: ${loadState.source.refresh}, isEmpty: $isEmpty")
+                        if (isEmpty) {
+                            if (binding.emptyView.childCount == 0) {
+                                val emptyBinding = ListItemEmptyBinding.inflate(layoutInflater, binding.emptyView, true)
+                                createEmptyViewHolder(emptyBinding, action)
+                            }
+                            binding.emptyView.isVisible = true
+                            binding.listView.isVisible = false
+                        } else {
+                            binding.emptyView.isVisible = false
+                            binding.listView.isVisible = true
                         }
-                        binding.emptyView.isVisible = true
-                        binding.listView.isVisible = false
-                    } else {
-                        binding.emptyView.isVisible = false
-                        binding.listView.isVisible = true
                     }
-            }
         }
 
         if (prefs.enablePullToRefresh) {
@@ -217,7 +216,6 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener,
                 val app = action.app
                 if (BuildConfig.DEBUG) {
                     AppLog.d(app.packageName)
-                    Toast.makeText(activity, app.packageName, Toast.LENGTH_SHORT).show()
                 }
                 openAppDetails(app)
             }
@@ -254,8 +252,8 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener,
     open suspend fun onReload() {}
 
     protected open fun createEmptyViewHolder(
-        emptyBinding: ListItemEmptyBinding,
-        action: EventFlow<WishListAction>
+            emptyBinding: ListItemEmptyBinding,
+            action: EventFlow<WishListAction>
     ) = EmptyViewHolder(emptyBinding, false, action)
 
     protected open fun mapAction(it: WishListAction): WishListAction {

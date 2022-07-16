@@ -3,9 +3,9 @@ package com.anod.appwatcher.details
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
+import android.app.Application
 import android.content.Intent
 import android.graphics.Color
-import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -42,14 +42,14 @@ import com.google.android.material.color.MaterialColors
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.anim.RevealAnimatorCompat
 import info.anodsplace.framework.app.addMultiWindowFlags
-import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.forAppInfo
 import info.anodsplace.framework.content.forUninstall
 import info.anodsplace.framework.content.startActivitySafely
 import info.anodsplace.graphics.chooseDark
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.abs
@@ -57,25 +57,29 @@ import kotlin.math.abs
 
 class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetChangedListener, Toolbar.OnMenuItemClickListener {
 
-    private var loaded = false
-    private val viewModel: DetailsViewModel by viewModels()
+    private val viewModel: DetailsViewModel by viewModels(factoryProducer = {
+        DetailsViewModel.Factory(
+                application = requireContext().applicationContext as Application,
+                argAppId = requireArguments().getString(extraAppId) ?: "",
+                argRowId = requireArguments().getInt(extraRowId, -1),
+                argDetailsUrl = requireArguments().getString(extraDetailsUrl) ?: ""
+        )
+    })
     private var toggleMenu: MenuItem? = null
+    private var tagMenu: MenuItem? = null
 
     private val titleString: AlphaSpannableString by lazy {
         val span = AlphaForegroundColorSpan(Color.WHITE)
-        AlphaSpannableString(viewModel.app.value!!.generateTitle(resources), span)
+        AlphaSpannableString(viewModel.viewState.app!!.generateTitle(resources), span)
     }
 
     private val subtitleString: AlphaSpannableString by lazy {
         val span = AlphaForegroundColorSpan(Color.WHITE)
-        AlphaSpannableString(viewModel.app.value!!.uploadDate, span)
+        AlphaSpannableString(viewModel.viewState.app!!.uploadDate, span)
     }
 
     private val dataProvider: AppViewHolderResourceProvider by lazy {
-        AppViewHolderResourceProvider(
-                requireContext(),
-                InstalledApps.PackageManager(requireContext().packageManager)
-        )
+        AppViewHolderResourceProvider(requireContext(), viewModel.installedApps)
     }
 
     private val appDetailsView: AppDetailsView by lazy {
@@ -107,10 +111,6 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.detailsUrl = requireArguments().getString(extraDetailsUrl) ?: ""
-        viewModel.rowId = requireArguments().getInt(extraRowId, -1)
-        viewModel.appId = requireArguments().getString(extraAppId) ?: ""
-
         setupToolbar()
         binding.showChangelogList()
         binding.background.isInvisible = true
@@ -136,30 +136,53 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
+
             launch {
-                viewModel.appLoading.collect { loadingState ->
-                    when (loadingState) {
-                        is Loaded -> {
+                viewModel.viewStates.map { it.appIconState }.distinctUntilChanged().collect { appIconState ->
+                    AppLog.d("Details collecting appIconState $appIconState")
+                    when (appIconState) {
+                        is AppIconState.Loaded -> {
+                            try {
+                                val bitmap = appIconState.drawable.bitmap
+                                binding.header.icon.setImageBitmap(bitmap)
+                                binding.toolbar.logo = appIconState.drawable
+                                binding.toolbar.logo.alpha = 0
+                                val palette = withContext(Dispatchers.Default) { Palette.from(bitmap).generate() }
+                                onPaletteGenerated(palette)
+                            } catch (e: Exception) {
+                                AppLog.e("loadIcon", e)
+                                setDefaultIcon()
+                            }
                         }
-                        is NotFound -> {
-                            val appId = viewModel.appId
-                            Toast.makeText(requireContext(), getString(R.string.cannot_load_app, appId), Toast.LENGTH_LONG).show()
-                            AppLog.e("Cannot loadChangelog app details: '${appId}'")
-                            binding.showErrorWithRetry()
+                        AppIconState.Default -> {
+                            setDefaultIcon()
                         }
+                        AppIconState.Initial -> {}
                     }
                 }
             }
 
             launch {
-                viewModel.app.filterNotNull().collect { app ->
-                    if (!loaded) {
-                        loaded = true
-                        setupAppView(app)
-                        binding.list.layoutManager = LinearLayoutManager(requireContext())
-                        binding.list.adapter = adapter
+                viewModel.viewStates.map { it.appLoadingState }.distinctUntilChanged().collect { appLoadingState ->
+                    AppLog.d("Details collecting appLoadingState $appLoadingState")
+                    if (appLoadingState == AppLoadingState.NotFound && !viewModel.viewState.errorShown) {
+                        viewModel.errorShown = true
+                        val appId = viewModel.appId
+                        Toast.makeText(requireContext(), getString(R.string.cannot_load_app, appId), Toast.LENGTH_LONG).show()
+                        AppLog.e("Cannot loadChangelog app details: '${appId}'")
+                        binding.showErrorWithRetry()
                     }
-                    val isWatched = app.status != AppInfoMetadata.STATUS_DELETED
+                }
+            }
+
+            launch {
+                viewModel.viewStates.filter { it.appLoadingState is AppLoadingState.Loaded }.distinctUntilChanged().collect { viewState ->
+                    AppLog.d("Details collecting loaded view state $viewState")
+                    updateAppView(viewState.app!!, viewState.appIconState)
+                    binding.list.layoutManager = LinearLayoutManager(requireContext())
+                    binding.list.adapter = adapter
+
+                    val isWatched = viewState.app.status != AppInfoMetadata.STATUS_DELETED
                     toggleMenu?.isChecked = isWatched
                     if (!isWatched) {
                         toggleMenu?.isEnabled = true
@@ -168,14 +191,29 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
             }
 
             launch {
-                viewModel.changelogState.collect {
-                    when (it) {
-                        is Complete -> {
+                viewModel.viewStates.map { it.tagsMenuItems }.distinctUntilChanged().collect { tagsMenuItems ->
+                    AppLog.d("Details collecting tagsMenuItems $tagsMenuItems")
+                    tagMenu?.isVisible = tagsMenuItems.isNotEmpty()
+                    tagMenu?.subMenu?.also { tagSubMenu ->
+                        tagSubMenu.removeGroup(R.id.menu_group_tags)
+                        for (item in tagsMenuItems) {
+                            tagSubMenu.add(R.id.menu_group_tags, item.first.id, 0, item.first.name).isChecked = item.second
+                        }
+                        tagSubMenu.setGroupCheckable(R.id.menu_group_tags, true, false)
+                    }
+                }
+            }
+
+            launch {
+                viewModel.viewStates.collect { viewState ->
+                    AppLog.d("Details collecting viewState (viewState.changelogState) ${viewState.changelogState}")
+                    when (viewState.changelogState) {
+                        is ChangelogLoadState.Complete -> {
                             toggleMenu?.isEnabled = true
-                            viewModel.app.value?.let { app ->
+                            viewState.app?.let { app ->
                                 appDetailsView.title.text = app.generateTitle(resources)
                             }
-                            adapter.setData(viewModel.localChangelog, viewModel.recentChange)
+                            adapter.setData(viewState.localChangelog, viewState.recentChange, viewState.accentColorRoles?.accent)
                             if (adapter.isEmpty) {
                                 binding.showErrorWithRetry()
                                 if (!viewModel.networkConnection.isNetworkAvailable) {
@@ -187,23 +225,30 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
                         }
                         else -> {
                             binding.showChangelogList()
-                            adapter.setData(viewModel.localChangelog, viewModel.recentChange)
+                            adapter.setData(viewState.localChangelog, viewState.recentChange, viewState.accentColorRoles?.accent)
+                        }
+                    }
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.viewActions.collect { action ->
+                when (action) {
+                    is DetailsScreenAction.WatchAppResult -> when (action.result) {
+                        AppListTable.ERROR_ALREADY_ADDED -> Toast.makeText(requireContext(), R.string.app_already_added, Toast.LENGTH_SHORT).show()
+                        AppListTable.ERROR_INSERT -> Toast.makeText(requireContext(), R.string.error_insert_app, Toast.LENGTH_SHORT).show()
+                        else -> {
+                            val info = AppInfo(viewModel.viewState.document!!, viewModel.uploadDateParserCache)
+                            TagSnackbar.make(view, info, false, requireActivity(), viewModel.prefs).show()
                         }
                     }
                 }
             }
 
-            viewModel.watchStateChange.collect { result ->
-                when (result) {
-                    AppListTable.ERROR_ALREADY_ADDED -> Toast.makeText(requireContext(), R.string.app_already_added, Toast.LENGTH_SHORT).show()
-                    AppListTable.ERROR_INSERT -> Toast.makeText(requireContext(), R.string.error_insert_app, Toast.LENGTH_SHORT).show()
-                    else -> {
-                        val info = AppInfo(viewModel.document!!, viewModel.uploadDateParserCache)
-                        TagSnackbar.make(view, info, false, requireActivity(), viewModel.prefs).show()
-                    }
-                }
-            }
         }
+
+        viewModel.observeApp()
     }
 
     override fun onResume() {
@@ -213,11 +258,11 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         }
 
         try {
-            viewModel.changelogState.tryEmit(Initial)
             viewModel.loadLocalChangelog()
         } catch (e: Exception) {
             AppLog.e("onResume", e)
         }
+
         viewModel.account?.let { account ->
             lifecycleScope.launch {
                 try {
@@ -238,7 +283,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         }
     }
 
-    private fun setupAppView(app: App) {
+    private fun updateAppView(app: App, appIconState: AppIconState) {
         binding.playStoreButton.setOnClickListener(this)
 
         appDetailsView.fillDetails(app, false, "", false, app.rowId == -1)
@@ -247,31 +292,8 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
             appDetailsView.creator?.isVisible = true
         }
 
-        if (app.iconUrl.isEmpty()) {
+        if (appIconState is AppIconState.Default) {
             setDefaultIcon()
-        } else {
-            loadIcon(app.iconUrl)
-        }
-    }
-
-    private fun loadIcon(imageUrl: String) {
-        lifecycleScope.launchWhenCreated {
-            try {
-                val drawable = viewModel.iconLoader.get(imageUrl) as? BitmapDrawable
-                if (drawable == null) {
-                    setDefaultIcon()
-                    return@launchWhenCreated
-                }
-                val bitmap = drawable.bitmap
-                binding.header.icon.setImageBitmap(bitmap)
-                binding.toolbar.logo = drawable
-                binding.toolbar.logo.alpha = 0
-                val palette = withContext(Dispatchers.Default) { Palette.from(bitmap).generate() }
-                onPaletteGenerated(palette)
-            } catch (e: Exception) {
-                AppLog.e("loadIcon", e)
-                setDefaultIcon()
-            }
         }
     }
 
@@ -288,9 +310,9 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         val menu = binding.toolbar.menu
         toggleMenu = menu.findItem(R.id.menu_watch_toggle).wrapCheckStateIcon()
         toggleMenu?.isEnabled = false
-        val tagMenu = menu.findItem(R.id.menu_tag_app)
-        subscribeForTagSubmenu(tagMenu)
-        if (!dataProvider.installedApps.packageInfo(viewModel.appId).isInstalled) {
+        tagMenu = menu.findItem(R.id.menu_tag_app)
+        tagMenu?.isVisible = false
+        if (!viewModel.viewState.isInstalled) {
             menu.findItem(R.id.menu_uninstall).isVisible = false
             menu.findItem(R.id.menu_open).isVisible = false
             menu.findItem(R.id.menu_app_info).isVisible = false
@@ -304,31 +326,16 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         binding.toolbar.setOnMenuItemClickListener(this)
     }
 
-    private fun subscribeForTagSubmenu(tagMenu: MenuItem) {
-        tagMenu.isVisible = false
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.tagsMenuItems.collectLatest { result ->
-                tagMenu.isVisible = result.isNotEmpty()
-                val tagSubMenu = tagMenu.subMenu
-                tagSubMenu.removeGroup(R.id.menu_group_tags)
-                for (item in result) {
-                    tagSubMenu.add(R.id.menu_group_tags, item.first.id, 0, item.first.name).isChecked = item.second
-                }
-                tagSubMenu.setGroupCheckable(R.id.menu_group_tags, true, false)
-            }
-        }
-    }
-
     override fun onMenuItemClick(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.menu_watch_toggle -> {
                 if (item.isChecked) {
                     val removeDialog = RemoveDialogFragment.newInstance(
-                            viewModel.app.value!!.title, viewModel.app.value!!.rowId
+                            viewModel.viewState.app!!.title, viewModel.viewState.app!!.rowId
                     )
                     removeDialog.show(childFragmentManager, "removeDialog")
                 } else {
-                    viewModel.watch()
+                    viewModel.handleEvent(DetailsScreenEvent.WatchApp)
                 }
                 return true
             }
@@ -356,17 +363,17 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
             }
         }
         if (item.groupId == R.id.menu_group_tags) {
-            viewModel.changeTag(item.itemId, item.isChecked)
+            viewModel.handleEvent(DetailsScreenEvent.UpdateTag(item.itemId, item.isChecked))
         }
 
         return false
     }
 
     private fun shareApp() {
-        val appInfo = this.viewModel.app.value ?: return
+        val appInfo = viewModel.viewState.app ?: return
         val builder = ShareCompat.IntentBuilder(requireActivity())
 
-        val changes = if (viewModel.recentChange.details.isBlank()) "" else "${viewModel.recentChange.details}\n\n"
+        val changes = if (viewModel.viewState.recentChange.details.isBlank()) "" else "${viewModel.viewState.recentChange.details}\n\n"
         val text = getString(R.string.share_text, changes, String.format(StoreIntent.URL_WEB_PLAY_STORE, appInfo.packageName))
 
         builder.setSubject(getString(R.string.share_subject, appInfo.title, appInfo.versionName))
@@ -382,9 +389,10 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         val harmonizedColor = MaterialColors.harmonizeWithPrimary(context, darkSwatch.rgb)
         val colorRoles: ColorRoles = MaterialColors.getColorRoles(harmonizedColor, false)
 
+        viewModel.handleEvent(DetailsScreenEvent.UpdateAccentColor(colorRoles))
+
         applyColor(colorRoles.accentContainer)
         animateBackground()
-
 
         appDetailsView.updateAccentColor(colorRoles.accent)
     }
@@ -420,7 +428,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
     override fun onClick(v: View) {
         val id = v.id
         if (id == R.id.playStoreButton) {
-            val intent = Intent().forPlayStore(viewModel.app.value!!.packageName, requireContext())
+            val intent = Intent().forPlayStore(viewModel.viewState.app!!.packageName, requireContext())
             this.startActivitySafely(intent)
         }
     }
@@ -429,7 +437,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         val totalScrollRange = appBarLayout.totalScrollRange.toFloat()
         val alpha = 1.0f - abs(verticalOffset.toFloat() / totalScrollRange)
 
-        if (!loaded) {
+        if (viewModel.viewState.appLoadingState !is AppLoadingState.Loaded) {
             return
         }
 
@@ -440,7 +448,6 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         val inverseAlpha = (1.0f - alpha)
         val inverseAlphaInt = (inverseAlpha * 255).toInt()
         binding.toolbar.logo?.alpha = inverseAlphaInt
-//        binding.toolbar.background?.alpha = inverseAlphaInt
         titleString.alpha = inverseAlpha
         subtitleString.alpha = inverseAlpha
         binding.container.post {

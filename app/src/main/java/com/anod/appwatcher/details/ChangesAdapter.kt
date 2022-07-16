@@ -14,12 +14,18 @@ import info.anodsplace.framework.text.Html
 import java.net.URLEncoder
 import java.util.*
 
-class ChangeView(itemView: View) : RecyclerView.ViewHolder(itemView) {
+class ChangeView(itemView: View, accentColor: Int?) : RecyclerView.ViewHolder(itemView) {
     val changelog: TextView = itemView.findViewById<TextView>(R.id.changelog).apply {
         autoLinkMask = Linkify.ALL
     }
     val version: TextView = itemView.findViewById(R.id.version)
     val uploadDate: TextView = itemView.findViewById(R.id.upload_date)
+
+    init {
+        if (accentColor != null) {
+            changelog.setLinkTextColor(accentColor)
+        }
+    }
 
     fun bindView(change: AppChange) {
         version.text = "${change.versionName} (${change.versionCode})"
@@ -59,6 +65,7 @@ class ChangeView(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
 class ChangesAdapter(private val context: Context) : RecyclerView.Adapter<ChangeView>() {
 
+    private var accentColor: Int? = null
     private var localChanges = emptyList<AppChange>()
 
     val isEmpty: Boolean
@@ -68,14 +75,15 @@ class ChangesAdapter(private val context: Context) : RecyclerView.Adapter<Change
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChangeView {
         val v = LayoutInflater.from(context).inflate(R.layout.list_item_change, parent, false)
-        return ChangeView(v)
+        return ChangeView(v, accentColor)
     }
 
     override fun onBindViewHolder(holder: ChangeView, position: Int) {
         holder.bindView(localChanges[position])
     }
 
-    fun setData(localChanges: List<AppChange>, recentChange: AppChange) {
+    fun setData(localChanges: List<AppChange>, recentChange: AppChange, accentColor: Int?) {
+        this.accentColor = accentColor
         when {
             localChanges.isEmpty() -> {
                 if (!recentChange.isEmpty) {
@@ -93,6 +101,7 @@ class ChangesAdapter(private val context: Context) : RecyclerView.Adapter<Change
                 }
             }
         }
+
         notifyDataSetChanged()
     }
 }
