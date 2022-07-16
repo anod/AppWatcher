@@ -1,6 +1,8 @@
 // Copyright (c) 2020. Alex Gavrishev
 package com.anod.appwatcher.details
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
@@ -60,12 +62,12 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
     private var toggleMenu: MenuItem? = null
 
     private val titleString: AlphaSpannableString by lazy {
-        val span = AlphaForegroundColorSpan(ColorAttribute(android.R.attr.textColor, requireContext(), Color.BLUE).value)
+        val span = AlphaForegroundColorSpan(Color.WHITE)
         AlphaSpannableString(viewModel.app.value!!.generateTitle(resources), span)
     }
 
     private val subtitleString: AlphaSpannableString by lazy {
-        val span = AlphaForegroundColorSpan(ColorAttribute(android.R.attr.textColor, requireContext(), Color.BLUE).value)
+        val span = AlphaForegroundColorSpan(Color.WHITE)
         AlphaSpannableString(viewModel.app.value!!.uploadDate, span)
     }
 
@@ -241,6 +243,9 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
 
         appDetailsView.fillDetails(app, false, "", false, app.rowId == -1)
         binding.toolbar.title = titleString
+        if (appDetailsView.creator?.text?.isNotEmpty() == true) {
+            appDetailsView.creator?.isVisible = true
+        }
 
         if (app.iconUrl.isEmpty()) {
             setDefaultIcon()
@@ -372,7 +377,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
 
     private fun onPaletteGenerated(palette: Palette?) {
         val context = context ?: return
-        val defaultColor = ContextCompat.getColor(context, R.color.white)
+        val defaultColor = ContextCompat.getColor(context, R.color.black)
         val darkSwatch = palette?.chooseDark(defaultColor) ?: Palette.Swatch(defaultColor, 0)
         applyColor(darkSwatch.rgb)
         animateBackground()
@@ -396,7 +401,15 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
                 val location = IntArray(2)
                 binding.header.icon.getLocationOnScreen(location)
                 if (ViewCompat.isAttachedToWindow(binding.background)) {
-                    RevealAnimatorCompat.show(binding.background, location[0], location[1], 0).start()
+                    RevealAnimatorCompat.show(binding.background, location[0], location[1], 0).also { animator ->
+                        animator.addListener(object : AnimatorListenerAdapter() {
+                            override fun onAnimationEnd(animation: Animator?) {
+                                binding.toolbar.background = binding.background.background.constantState?.newDrawable()
+                                animator.removeAllListeners()
+                            }
+                        })
+                        animator.start()
+                    }
                 }
             }
         }
@@ -425,6 +438,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         val inverseAlpha = (1.0f - alpha)
         val inverseAlphaInt = (inverseAlpha * 255).toInt()
         binding.toolbar.logo?.alpha = inverseAlphaInt
+//        binding.toolbar.background?.alpha = inverseAlphaInt
         titleString.alpha = inverseAlpha
         subtitleString.alpha = inverseAlpha
         binding.container.post {

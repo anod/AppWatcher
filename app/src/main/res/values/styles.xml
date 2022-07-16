@@ -196,20 +196,6 @@
         <item name="colorOnSurface">@color/white</item>
     </style>
 
-    <style name="Changelog" />
-
-    <style name="Changelog.Title" parent="@style/TextAppearance.Widget.AppCompat.Toolbar.Title">
-        <item name="android:textSize">14sp</item>
-    </style>
-
-    <style name="Changelog.Subtitle" parent="@style/TextAppearance.Widget.AppCompat.Toolbar.Subtitle">
-        <item name="android:textSize">10sp</item>
-    </style>
-
-    <style name="Changelog.ActionBar" parent="@style/ThemeOverlay.MaterialComponents.ActionBar.Primary">
-        <item name="colorControlNormal">@android:color/white</item>
-    </style>
-
     <style name="AppTheme.ActionBar" />
 
     <style name="AppTheme.ActionBar.LightBackground" parent="@style/ThemeOverlay.MaterialComponents.ActionBar.Primary">

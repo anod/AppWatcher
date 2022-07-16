@@ -1,6 +1,5 @@
 package com.anod.appwatcher.details
 
-import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.view.View
@@ -17,9 +16,7 @@ class DetailsDialog : DialogFragment(R.layout.activity_app_changelog), KoinCompo
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        if (context is Activity) {
-            setStyle(STYLE_NORMAL, Theme(context, prefs).themeDialogNoActionBar)
-        }
+        setStyle(STYLE_NORMAL, Theme(context, prefs).themeDialogNoActionBar)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

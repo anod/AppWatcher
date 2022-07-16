@@ -26,7 +26,7 @@ class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase
     private var warningColor: Int
 
     val title: TextView = view.findViewById(R.id.title)
-    private val creator: TextView? = view.findViewById(R.id.creator)
+    val creator: TextView? = view.findViewById(R.id.creator)
     private val price: TextView? = view.findViewById(R.id.price)
     private val updateDate: TextView? = view.findViewById(R.id.update_date)
     private val recentChanges = view.findViewById<TextView?>(R.id.recent_changes)

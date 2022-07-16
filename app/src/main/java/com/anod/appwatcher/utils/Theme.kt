@@ -1,6 +1,6 @@
 package com.anod.appwatcher.utils
 
-import android.app.Activity
+import android.content.Context
 import android.content.res.Configuration
 import com.anod.appwatcher.R
 import com.anod.appwatcher.preferences.Preferences
@@ -11,7 +11,7 @@ import info.anodsplace.framework.app.CustomThemeColors
  * @author Alex Gavrishev
  * @date 07/12/2017
  */
-class Theme(private val activity: Activity, private val prefs: Preferences) {
+class Theme(private val context: Context, private val prefs: Preferences) {
 
     val theme: Int
         get() {
@@ -80,8 +80,7 @@ class Theme(private val activity: Activity, private val prefs: Preferences) {
 
     private val isNightMode: Boolean
         get() {
-            val currentNightMode = activity.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-            when (currentNightMode) {
+            when (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
                 Configuration.UI_MODE_NIGHT_YES -> return true
                 Configuration.UI_MODE_NIGHT_NO, Configuration.UI_MODE_NIGHT_UNDEFINED -> return false
             }

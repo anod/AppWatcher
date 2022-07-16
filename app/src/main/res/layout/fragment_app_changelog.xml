@@ -28,17 +28,28 @@
                 android:id="@+id/background"
                 android:layout_width="wrap_content"
                 android:layout_height="136dp"
+                tools:background="@color/chip_green"
                 app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed"
                 app:layout_collapseMode="parallax"
                 android:background="?attr/colorPrimary" />
 
-            <androidx.appcompat.widget.Toolbar
+            <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:theme="@style/Changelog.ActionBar"
-                app:titleTextAppearance="@style/Changelog.Title"
-                app:subtitleTextAppearance="@style/Changelog.Subtitle"
+                app:titleTextAppearance="?attr/textAppearanceLabelLarge"
+                app:subtitleTextAppearance="?attr/textAppearanceLabelSmall"
+                android:background="@android:color/transparent"
+                tools:title="Netflix"
+                tools:subtitle="Date"
+                tools:menu="@menu/changelog"
+                tools:logo="@drawable/ic_app_icon_placeholder"
+                app:logoScaleType="centerCrop"
+                android:elevation="0dp"
+                app:titleTextColor="@color/alwaysWhite"
+                app:subtitleTextColor="@color/alwaysWhite"
+                app:navigationIconTint="@color/alwaysWhite"
+                app:navigationIcon="@drawable/ic_baseline_arrow_white_24"
                 app:titleMarginStart="16dp"
                 app:layout_collapseMode="pin"
                 app:contentInsetStartWithNavigation="0dp" />

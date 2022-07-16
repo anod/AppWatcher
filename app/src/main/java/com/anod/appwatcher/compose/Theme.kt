@@ -100,11 +100,15 @@ fun darkTheme(theme: Int, supportsDynamic: Boolean): ColorScheme {
     return if (theme == Preferences.THEME_BLACK) {
         if (supportsDynamic) {
             dynamicDarkColorScheme(LocalContext.current).copy(
-                    // TODO
+                    background = Color.Black,
+                    surface = Color.Black,
             )
         } else BlackThemeColors
     } else {
-        if (supportsDynamic) dynamicDarkColorScheme(LocalContext.current) else DarkThemeColors
+        if (supportsDynamic) dynamicDarkColorScheme(LocalContext.current).copy(
+                background = DarkSurface,
+                surface = DarkSurface,
+        ) else DarkThemeColors
     }
 }
 
