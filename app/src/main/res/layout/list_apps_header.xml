@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/sectionTitle"
     style="?attr/textAppearanceOverline"
@@ -7,7 +8,6 @@
     android:layout_height="@dimen/list_apps_header_height"
     android:layout_weight="1"
     android:background="?attr/colorItemBackground"
-    android:drawableEnd="@drawable/ic_baseline_arrow_forward_ios_24"
     android:foreground="?attr/selectableItemBackground"
     android:ellipsize="end"
     android:focusable="false"
@@ -20,4 +20,5 @@
     android:textColor="?attr/colorPrimary"
     android:textSize="14sp"
     android:textStyle="bold"
-    tools:text="Recently updated" />
+    tools:text="Recently updated"
+    app:drawableEndCompat="@drawable/ic_baseline_arrow_forward_ios_24" />

@@ -18,5 +18,5 @@ data class Price(
         val micros: Int?) {
 
     val isFree: Boolean
-        get() = micros == 0
+        get() = micros == 0 || micros == null
 }

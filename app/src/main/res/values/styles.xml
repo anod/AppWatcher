@@ -45,14 +45,14 @@
     </style>
 
     <style name="AppTheme.Dialog.Black" parent="AppTheme.Dialog">
+        <item name="colorSurface">@color/alwaysBlack</item>
         <item name="android:colorBackground">@android:color/black</item>
         <item name="android:colorBackgroundCacheHint">@android:color/black</item>
         <item name="android:windowBackground">@android:color/black</item>
         <item name="colorItemBackground">@android:color/black</item>
-        <item name="colorItemLine">@android:color/transparent</item>
     </style>
 
-    <style name="AppTheme.Dialog.NoActionBar" parent="@style/Theme.Material3.DayNight.NoActionBar">
+    <style name="AppTheme.Dialog.NoActionBar" parent="@style/ThemeOverlay.Material3.MaterialAlertDialog">
         <item name="colorOnErrorContainer">@color/md_onErrorContainer</item>
         <item name="colorOnError">@color/md_onError</item>
         <item name="colorErrorContainer">@color/md_errorContainer</item>
@@ -102,7 +102,7 @@
         <item name="colorOnSurfaceVariant">@color/md_onSurfaceVariant</item>
         <item name="colorOnSurface">@color/md_onSurface</item>
         <item name="colorSurfaceVariant">@color/md_surfaceVariant</item>
-        <item name="colorSurface">@color/md_surface</item>
+        <item name="colorSurface">@color/alwaysBlack</item>
         <item name="colorOnSecondaryContainer">@color/md_onSecondaryContainer</item>
         <item name="colorOnSecondary">@color/md_onSecondary</item>
         <item name="colorSecondaryContainer">@color/md_secondaryContainer</item>
@@ -116,7 +116,6 @@
         <item name="android:colorBackgroundCacheHint">@color/alwaysBlack</item>
         <item name="android:windowBackground">@color/alwaysBlack</item>
         <item name="colorItemBackground">@color/alwaysBlack</item>
-        <item name="colorItemLine">@android:color/transparent</item>
 
         <item name="android:windowFrame">@null</item>
         <item name="android:windowIsFloating">true</item>
@@ -161,11 +160,9 @@
 
         <item name="android:buttonStyle">@style/BrandButtonStyle</item>
 
-        <item name="inactiveRow">?attr/colorPrimary</item>
         <item name="colorItemBackground">?android:attr/colorBackground</item>
         <item name="colorPreferenceBackground">?android:attr/selectableItemBackgroundBorderless
         </item>
-        <item name="colorItemLine">?attr/colorSurfaceVariant</item>
 
         <item name="android:navigationBarColor">?attr/colorSurface</item>
         <item name="android:windowBackground">?attr/colorItemBackground</item>
@@ -227,7 +224,6 @@
         <item name="android:windowBackground">@android:color/black</item>
         <item name="colorItemBackground">@android:color/black</item>
         <item name="colorPreferenceBackground">@android:color/black</item>
-        <item name="colorItemLine">@color/md_onSurface</item>
     </style>
 
     <style name="AppTheme.Black.LightActionBar" parent="AppTheme.Black">

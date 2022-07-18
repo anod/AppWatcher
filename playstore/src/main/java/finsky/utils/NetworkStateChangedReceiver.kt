@@ -1,8 +1,10 @@
 package finsky.utils
 
+import android.Manifest
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.telephony.TelephonyManager
@@ -44,6 +46,9 @@ class NetworkStateChangedReceiver : BroadcastReceiver() {
                 return NetworkType.Wifi
             }
             if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                if (context.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+                    return NetworkType.CellOther
+                }
                 val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
                 return when (tm.dataNetworkType) {
                     TelephonyManager.NETWORK_TYPE_GPRS,

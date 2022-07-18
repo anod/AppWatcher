@@ -98,8 +98,6 @@
         android:layout_height="match_parent"
         android:layout_gravity="center"
         android:layout_margin="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
         android:gravity="center"
         android:orientation="vertical"
         android:paddingTop="80dp">

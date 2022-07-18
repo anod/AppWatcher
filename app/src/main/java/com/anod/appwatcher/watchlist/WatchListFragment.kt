@@ -104,6 +104,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener,
 
         // Setup header decorator
         adapter = WatchListPagingAdapter(
+                viewModel.tag?.color,
                 viewModel.installedApps,
                 viewModel.recentlyInstalledPackages,
                 viewLifecycleOwner,

@@ -28,7 +28,7 @@ class ResultsAdapterSingle(
         private val uploadDateParserCache: UploadDateParserCache
 ) : RecyclerView.Adapter<ResultsAppViewHolder>() {
 
-    private val colorBgDisabled = ThemeCompat.getColor(context, R.attr.inactiveRow)
+    private val colorBgDisabled = ThemeCompat.getColor(context, com.google.android.material.R.attr.colorSurfaceVariant)
     private val colorBgNormal = ThemeCompat.getColor(context, R.attr.colorItemBackground)
     private val installedApps = InstalledApps.MemoryCache(InstalledApps.PackageManager(context.packageManager))
 

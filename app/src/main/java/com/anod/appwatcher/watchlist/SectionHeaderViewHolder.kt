@@ -14,20 +14,24 @@ import com.anod.appwatcher.utils.collect
 import info.anodsplace.framework.view.setOnSafeClickListener
 import kotlinx.coroutines.flow.Flow
 
-open class SectionHeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), PlaceholderViewHolder {
+open class SectionHeaderViewHolder(itemView: View, titleColorOverride: Int?) : RecyclerView.ViewHolder(itemView), PlaceholderViewHolder {
     val title: TextView = itemView as TextView
     var item: SectionHeader? = null
 
     init {
         title.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, null, null)
+        if (titleColorOverride != null) {
+            title.setTextColor(titleColorOverride)
+        }
     }
 
     class Expandable(
-        itemView: View,
-        lifecycleOwner: LifecycleOwner,
-        available: Flow<Boolean>,
-        action: EventFlow<WishListAction>
-    ) : SectionHeaderViewHolder(itemView) {
+            itemView: View,
+            titleColorOverride: Int?,
+            lifecycleOwner: LifecycleOwner,
+            available: Flow<Boolean>,
+            action: EventFlow<WishListAction>
+    ) : SectionHeaderViewHolder(itemView, titleColorOverride) {
         init {
             title.setOnSafeClickListener {
                 if (this.item != null) {
@@ -35,15 +39,15 @@ open class SectionHeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(ite
                 }
             }
             available
-                .flowWithLifecycle(lifecycleOwner.lifecycle, minActiveState = Lifecycle.State.STARTED)
-                .collect(lifecycleOwner.lifecycleScope) {
-                    if (it) {
-                        val drawable = ContextCompat.getDrawable(title.context, R.drawable.ic_baseline_arrow_forward_ios_24)
-                        title.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, drawable, null)
-                    } else {
-                        title.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, null, null)
+                    .flowWithLifecycle(lifecycleOwner.lifecycle, minActiveState = Lifecycle.State.STARTED)
+                    .collect(lifecycleOwner.lifecycleScope) {
+                        if (it) {
+                            val drawable = ContextCompat.getDrawable(title.context, R.drawable.ic_baseline_arrow_forward_ios_24)
+                            title.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, drawable, null)
+                        } else {
+                            title.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, null, null)
+                        }
                     }
-                }
         }
     }
 

@@ -1,6 +1,5 @@
 package com.anod.appwatcher.tags
 
-import android.app.Activity
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -38,9 +37,7 @@ class AppsTagSelectDialog : DialogFragment(R.layout.fragment_tag_select), KoinCo
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        if (context is Activity) {
-            setStyle(STYLE_NORMAL, Theme(context, prefs).themeDialogNoActionBar)
-        }
+        setStyle(STYLE_NORMAL, Theme(context, prefs).themeDialogNoActionBar)
     }
 
     override fun onDestroyView() {
@@ -105,14 +102,20 @@ class AppsTagSelectDialog : DialogFragment(R.layout.fragment_tag_select), KoinCo
     private fun applyTagColor(tag: Tag) {
         binding.appBar.setBackgroundDrawable(ColorDrawable(tag.color))
         val isLightColor = tag.isLightColor
-        val iconsColor = if (isLightColor) Color.BLACK else Color.WHITE
-        val colorStates = ColorStateList.valueOf(iconsColor)
+        val onTagColor = if (isLightColor) Color.BLACK else Color.WHITE
+        val colorStates = ColorStateList.valueOf(onTagColor)
         binding.back.imageTintList = colorStates
         binding.searchField.setStartIconTintList(colorStates)
-        binding.searchField.boxStrokeColor = iconsColor
+        binding.searchField.boxStrokeColor = onTagColor
         binding.searchField.hintTextColor = colorStates
         binding.searchField.editText?.setTextColor(colorStates)
         binding.searchField.editText?.setHintTextColor(colorStates)
+        binding.button3.setTextColor(onTagColor)
+        binding.button2.setTextColor(onTagColor)
+        binding.button1.setTextColor(onTagColor)
+        binding.button3.setBackgroundColor(tag.color)
+        binding.button2.setBackgroundColor(tag.color)
+        binding.button1.setBackgroundColor(tag.color)
     }
 
     companion object {

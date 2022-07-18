@@ -6,13 +6,13 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.databinding.ActivityUserLogBinding
 import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.utils.prefs
+import com.google.android.material.color.MaterialColors
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.ToolbarActivity
 import org.koin.core.component.KoinComponent
@@ -27,19 +27,16 @@ class UserLogActivity : ToolbarActivity(), KoinComponent {
         private val lineNumber: TextView = itemView.findViewById(R.id.lineNumber)
         private val messageView: TextView = itemView.findViewById(R.id.messageView)
 
-        private var textColor: Int? = null
         fun apply(position: Int, message: Message) {
             lineNumber.text = "$position"
             messageView.text = "${message.timestamp} ${message.message}"
 
-            if (textColor == null) {
-                textColor = messageView.textColors.defaultColor
-            }
-
             if (message.level > Log.WARN) {
-                messageView.setTextColor(ContextCompat.getColor(messageView.context, android.R.color.holo_red_dark))
+                val errorColor = MaterialColors.getColor(messageView.context, android.R.attr.colorError, "UserLogActivity")
+                messageView.setTextColor(errorColor)
             } else {
-                messageView.setTextColor(textColor!!)
+                val textColor = MaterialColors.getColor(messageView.context, com.google.android.material.R.attr.colorOnSurface, "UserLogActivity")
+                messageView.setTextColor(textColor)
             }
         }
     }

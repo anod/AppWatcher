@@ -2,6 +2,7 @@ package com.anod.appwatcher.details
 
 import android.accounts.Account
 import android.app.Application
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.BitmapDrawable
 import androidx.lifecycle.ViewModel
@@ -9,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.anod.appwatcher.accounts.AuthTokenBlocking
+import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppTagsTable
 import com.anod.appwatcher.database.AppsDatabase
@@ -19,6 +21,7 @@ import com.anod.appwatcher.database.entities.packageToApp
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.BaseFlowViewModel
+import com.anod.appwatcher.utils.account
 import com.anod.appwatcher.utils.date.UploadDateParserCache
 import com.anod.appwatcher.utils.prefs
 import com.google.android.material.color.ColorRoles
@@ -67,7 +70,7 @@ data class DetailsScreenState(
         val account: Account? = null,
         val changelogState: ChangelogLoadState = ChangelogLoadState.Initial,
         val localChangelog: List<AppChange> = emptyList(),
-        val recentChange: AppChange = AppChange(appId, 0, "", "", "", false),
+        val recentChange: AppChange = AppChange("", 0, "", "", "", false),
         val errorShown: Boolean = false,
         val tagsMenuItems: List<TagMenuItem> = emptyList(),
         val accentColorRoles: ColorRoles? = null,
@@ -77,11 +80,15 @@ data class DetailsScreenState(
 
 sealed interface DetailsScreenAction {
     class WatchAppResult(val result: Int) : DetailsScreenAction
+    class AuthTokenStartIntent(val intent: Intent) : DetailsScreenAction
 }
 
 sealed interface DetailsScreenEvent {
     class UpdateTag(val tagId: Int, val checked: Boolean) : DetailsScreenEvent
     object WatchApp : DetailsScreenEvent
+    object LoadChangelog : DetailsScreenEvent
+    object ReloadChangelog : DetailsScreenEvent
+
     class UpdateAccentColor(val colorRoles: ColorRoles) : DetailsScreenEvent
 }
 
@@ -183,10 +190,40 @@ class DetailsViewModel(application: Application, argAppId: String, argRowId: Int
             is DetailsScreenEvent.UpdateAccentColor -> {
                 viewState = viewState.copy(accentColorRoles = event.colorRoles)
             }
+            DetailsScreenEvent.LoadChangelog -> loadChangelog()
+            DetailsScreenEvent.ReloadChangelog -> {
+                viewState = viewState.copy(changelogState = ChangelogLoadState.Initial)
+                loadChangelog()
+            }
         }
     }
 
-    fun loadLocalChangelog() {
+    private fun loadChangelog() {
+        try {
+            loadLocalChangelog()
+        } catch (e: Exception) {
+            AppLog.e("onResume", e)
+        }
+
+        account?.let { account ->
+            viewModelScope.launch {
+                try {
+                    if (authToken.refreshToken(account)) {
+                        loadRemoteChangelog()
+                    } else {
+                        AppLog.e("Error retrieving token")
+                        loadRemoteChangelog()
+                    }
+                } catch (e: AuthTokenStartIntent) {
+                    emitAction(DetailsScreenAction.AuthTokenStartIntent(e.intent))
+                } catch (e: Exception) {
+                    AppLog.e("onResume", e)
+                }
+            }
+        }
+    }
+
+    private fun loadLocalChangelog() {
         if (appId.isBlank()) {
             viewState = viewState.copy(changelogState = mergeChangelogState(ChangelogLoadState.LocalComplete))
             return
@@ -197,7 +234,7 @@ class DetailsViewModel(application: Application, argAppId: String, argRowId: Int
         }
     }
 
-    fun loadRemoteChangelog() {
+    private fun loadRemoteChangelog() {
         if (authToken.token.isBlank()) {
             viewState = viewState.copy(changelogState = mergeChangelogState(ChangelogLoadState.RemoteComplete(true)))
         } else {

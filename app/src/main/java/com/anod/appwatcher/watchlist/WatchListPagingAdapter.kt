@@ -38,6 +38,7 @@ class SectionItemDiffCallback : DiffUtil.ItemCallback<SectionItem>() {
 }
 
 class WatchListPagingAdapter(
+        private val tagColor: Int?,
         installedApps: InstalledApps,
         private val recentlyInstalledPackages: Flow<List<InstalledPackageRow>>,
         private val lifecycleOwner: LifecycleOwner,
@@ -92,7 +93,7 @@ class WatchListPagingAdapter(
             is EmptyItem -> {
             }
             is OnDeviceItem -> (holder as AppViewHolder).bind(position, item.appListItem, true, calcSelection(item.appListItem))
-            null -> { }
+            null -> {}
         }
     }
 
@@ -100,15 +101,16 @@ class WatchListPagingAdapter(
         return when (viewType) {
             ViewType.simpleHeader -> {
                 val itemView = LayoutInflater.from(context).inflate(R.layout.list_apps_header, parent, false)
-                SectionHeaderViewHolder(itemView)
+                SectionHeaderViewHolder(itemView, tagColor)
             }
             ViewType.recentItemHeader -> {
                 val itemView = LayoutInflater.from(context).inflate(R.layout.list_apps_header, parent, false)
                 SectionHeaderViewHolder.Expandable(
-                    itemView,
-                    lifecycleOwner,
-                    recentlyInstalledPackages.map { it.isNotEmpty() },
-                    action
+                        itemView,
+                        tagColor,
+                        lifecycleOwner,
+                        recentlyInstalledPackages.map { it.isNotEmpty() },
+                        action
                 )
             }
             ViewType.recentItem -> {
@@ -117,7 +119,7 @@ class WatchListPagingAdapter(
             }
             ViewType.appItem -> {
                 val itemView = LayoutInflater.from(context).inflate(R.layout.list_item_app, parent, false)
-                AppViewHolder(itemView, itemDataProvider, iconLoader, action)
+                AppViewHolder(itemView, tagColor, itemDataProvider, iconLoader, action)
             }
             ViewType.emptyItem -> {
                 val binding = ListItemEmptyBinding.inflate(LayoutInflater.from(context), parent, false)

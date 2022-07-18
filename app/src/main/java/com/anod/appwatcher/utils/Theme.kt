@@ -45,16 +45,12 @@ class Theme(private val context: Context, private val prefs: Preferences) {
         }
 
     val colors: CustomThemeColors
-        get() =
-            when (isNightMode) {
-                false ->
-                    CustomThemeColors(CustomThemeColor.white, CustomThemeColor.white)
-                (prefs.theme == Preferences.THEME_BLACK) ->
-                    CustomThemeColors(CustomThemeColor.black, CustomThemeColor.black)
-                else ->
-                    CustomThemeColors(CustomThemeColor(colorAttr = android.R.attr.colorBackground), CustomThemeColor(colorAttr = android.R.attr.colorBackground))
-            }
-
+        get() = isNightMode.let { isNightMode ->
+            if (prefs.theme == Preferences.THEME_BLACK)
+                CustomThemeColors(CustomThemeColor.black, CustomThemeColor.black)
+            else
+                CustomThemeColors(CustomThemeColor(colorAttr = android.R.attr.colorBackground, isLight = !isNightMode), CustomThemeColor(colorAttr = android.R.attr.colorBackground, isLight = !isNightMode))
+        }
     val themeDialog: Int
         get() {
             if (isNightMode) {
@@ -75,10 +71,7 @@ class Theme(private val context: Context, private val prefs: Preferences) {
             return R.style.AppTheme_Dialog_NoActionBar
         }
 
-    val isNightTheme: Boolean
-        get() = isNightMode
-
-    private val isNightMode: Boolean
+    val isNightMode: Boolean
         get() {
             when (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
                 Configuration.UI_MODE_NIGHT_YES -> return true

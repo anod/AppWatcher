@@ -18,7 +18,7 @@
         android:singleLine="true"
         android:ellipsize="middle"
         tools:text="9999"
-        android:textColor="?attr/colorOnPrimary"
+        android:textColor="?attr/colorOnSurface"
         tools:ignore="SpUsage" />
 
     <TextView
@@ -29,6 +29,6 @@
         android:gravity="center_vertical"
         android:textSize="@dimen/log_message_size"
         tools:text="Log message"
-        android:textColor="?attr/colorOnPrimary"
+        android:textColor="?attr/colorOnSurface"
         tools:ignore="SpUsage" />
 </LinearLayout>

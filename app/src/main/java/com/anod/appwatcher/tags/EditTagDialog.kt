@@ -14,6 +14,7 @@ import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.databinding.DialogEditTagBinding
 import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.utils.prefs
+import com.google.android.material.color.DynamicColors
 import info.anodsplace.colorpicker.ColorPickerDialog
 import info.anodsplace.colorpicker.ColorPickerSwatch
 import info.anodsplace.colorpicker.ColorStateDrawable
@@ -108,7 +109,9 @@ class EditTagDialog : DialogFragment(), ColorPickerSwatch.OnColorSelectedListene
                     putParcelable("tag", tag)
                 }
             }
-            setStyle(STYLE_NO_TITLE, theme.themeDialog)
+            if (!DynamicColors.isDynamicColorAvailable()) {
+                setStyle(STYLE_NO_TITLE, theme.themeDialog)
+            }
         }
 
         fun show(fragmentManager: FragmentManager, tag: Tag?, theme: Theme) {

@@ -39,7 +39,7 @@ class SearchMenu(
             field = value
         }
 
-    fun init(searchMenuItem: MenuItem, context: Context) {
+    fun init(searchMenuItem: MenuItem?, context: Context) {
         menuItem = searchMenuItem
         menuItem?.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
             override fun onMenuItemActionExpand(menuItem: MenuItem): Boolean {
@@ -141,9 +141,9 @@ class WatchListMenu(
             R.id.menu_act_refresh -> {
                 appScope.launch {
                     ViewModelProvider(activity)
-                        .get(WatchListStateViewModel::class.java)
-                        .requestRefresh()
-                        .collect { }
+                            .get(WatchListStateViewModel::class.java)
+                            .requestRefresh()
+                            .collect { }
                 }
                 return true
             }

@@ -1,8 +1,11 @@
 package com.anod.appwatcher.details
 
 import android.content.Context
+import android.graphics.Point
 import android.os.Bundle
+import android.view.Gravity
 import android.view.View
+import androidx.annotation.FractionRes
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
@@ -17,6 +20,11 @@ class DetailsDialog : DialogFragment(R.layout.activity_app_changelog), KoinCompo
     override fun onAttach(context: Context) {
         super.onAttach(context)
         setStyle(STYLE_NORMAL, Theme(context, prefs).themeDialogNoActionBar)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        adjustToCenterScreen(R.fraction.dialog_width_percentage, R.fraction.dialog_height_percentage)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -52,4 +60,24 @@ class DetailsDialog : DialogFragment(R.layout.activity_app_changelog), KoinCompo
             }
         }
     }
+}
+
+
+fun DialogFragment.adjustToCenterScreen(@FractionRes widthFraction: Int, @FractionRes heightFraction: Int) {
+    val size = getScreenSize()
+    setLayoutSize((size.x * resources.getFraction(widthFraction, 1, 1)).toInt(),
+            (size.y * resources.getFraction(heightFraction, 1, 1)).toInt())
+}
+
+fun DialogFragment.setLayoutSize(width: Int, height: Int, gravity: Int = Gravity.CENTER) {
+    val window = dialog?.window
+    window?.setLayout(width, height)
+    window?.setGravity(gravity)
+}
+
+fun DialogFragment.getScreenSize(): Point {
+    val window = dialog?.window
+    val size = Point()
+    window?.windowManager?.defaultDisplay?.getSize(size)
+    return size
 }

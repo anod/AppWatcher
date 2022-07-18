@@ -39,7 +39,7 @@ class ResultsAdapterList(
         private val uploadDateParserCache: UploadDateParserCache
 ) : PagingDataAdapter<Document, ResultsAppViewHolder>(DocumentDiffCallback()) {
 
-    private val colorBgDisabled = ThemeCompat.getColor(context, R.attr.inactiveRow)
+    private val colorBgDisabled = ThemeCompat.getColor(context, com.google.android.material.R.attr.colorSurfaceVariant)
     private val colorBgNormal = ThemeCompat.getColor(context, R.attr.colorItemBackground)
     private val installedApps = InstalledApps.MemoryCache(InstalledApps.PackageManager(context.packageManager))
 

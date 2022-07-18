@@ -12,7 +12,7 @@
     <color name="material_grey_800_">#424242</color>
     <color name="material_amber_800">#FF8F00</color>
     <color name="fastscroll_thumb">#64616161</color>
-    
+
     <color name="md_primary">#2196F3</color>,
     <color name="md_onPrimary">#ffffff</color>,
     <color name="md_primaryContainer">#bde9ff</color>,
@@ -35,7 +35,7 @@
     <color name="md_onSurface">#001f2a</color>,
     <color name="md_surfaceVariant">#dce4e9</color>,
     <color name="md_onSurfaceVariant">#40484c</color>,
-    <color name="md_outline">#70787d</color>
+    <color name="md_outline">#9970787D</color>
 
     <color name="chip_green">#26A69A</color>
     <color name="chip_pink">#F06292</color>

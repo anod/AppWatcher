@@ -26,7 +26,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.anod.appwatcher.R
-import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.generateTitle
@@ -112,6 +111,8 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         super.onViewCreated(view, savedInstanceState)
 
         setupToolbar()
+        binding.list.layoutManager = LinearLayoutManager(requireContext())
+        binding.list.adapter = adapter
         binding.showChangelogList()
         binding.background.isInvisible = true
         binding.appbar.addOnOffsetChangedListener(this)
@@ -120,11 +121,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
             binding.error.isVisible = false
             binding.list.isInvisible = true
             binding.retryButton.postDelayed({
-                try {
-                    viewModel.loadLocalChangelog()
-                } catch (e: Exception) {
-                    AppLog.e("retryButton", e)
-                }
+                viewModel.handleEvent(DetailsScreenEvent.ReloadChangelog)
             }, 500)
         }
 
@@ -163,7 +160,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
             }
 
             launch {
-                viewModel.viewStates.filter { it.appLoadingState is AppLoadingState.NotFound }.distinctUntilChanged().collect { _ ->
+                viewModel.viewStates.filter { it.appLoadingState is AppLoadingState.NotFound }.distinctUntilChanged().collect {
                     AppLog.d("Details collecting appLoadingState AppLoadingState.NotFound")
                     if (!viewModel.viewState.errorShown) {
                         viewModel.errorShown = true
@@ -176,18 +173,20 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
             }
 
             launch {
-                viewModel.viewStates.filter { it.appLoadingState is AppLoadingState.Loaded }.distinctUntilChanged().collect { viewState ->
-                    AppLog.d("Details collecting loaded view state $viewState")
-                    updateAppView(viewState.app!!, viewState.appIconState)
-                    binding.list.layoutManager = LinearLayoutManager(requireContext())
-                    binding.list.adapter = adapter
+                viewModel.viewStates
+                        .map { it.appLoadingState is AppLoadingState.Loaded }
+                        .filter { it }
+                        .distinctUntilChanged().collect { loaded ->
+                            val viewState = viewModel.viewState
+                            AppLog.d("Details collecting loaded view state $loaded $viewState")
+                            updateAppView(viewState.app!!, viewState.appIconState)
 
-                    val isWatched = viewState.app.status != AppInfoMetadata.STATUS_DELETED
-                    toggleMenu?.isChecked = isWatched
-                    if (!isWatched) {
-                        toggleMenu?.isEnabled = true
-                    }
-                }
+                            val isWatched = viewState.app.status != AppInfoMetadata.STATUS_DELETED
+                            toggleMenu?.isChecked = isWatched
+                            if (!isWatched) {
+                                toggleMenu?.isEnabled = true
+                            }
+                        }
             }
 
             launch {
@@ -205,7 +204,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
             }
 
             launch {
-                viewModel.viewStates.map { it.changelogState }.distinctUntilChanged().collect { changelogState ->
+                viewModel.viewStates.map { it.changelogState }.distinctUntilChanged().filter { it !is ChangelogLoadState.Initial }.collect { changelogState ->
                     AppLog.d("Details collecting changelogState $changelogState")
                     val viewState = viewModel.viewState
                     when (changelogState) {
@@ -241,6 +240,9 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
                             TagSnackbar.make(view, info, false, requireActivity(), viewModel.prefs).show()
                         }
                     }
+                    is DetailsScreenAction.AuthTokenStartIntent -> {
+                        startActivitySafely(action.intent)
+                    }
                 }
             }
 
@@ -255,31 +257,9 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
             binding.showChangelogList()
         }
 
-        try {
-            viewModel.loadLocalChangelog()
-        } catch (e: Exception) {
-            AppLog.e("onResume", e)
-        }
-
-        viewModel.account?.let { account ->
-            lifecycleScope.launch {
-                try {
-                    if (viewModel.authToken.refreshToken(account)) {
-                        viewModel.loadRemoteChangelog()
-                    } else {
-                        AppLog.e("Error retrieving token")
-                        viewModel.loadRemoteChangelog()
-                    }
-                } catch (e: AuthTokenStartIntent) {
-                    if (isAdded) {
-                        startActivity(e.intent)
-                    }
-                } catch (e: Exception) {
-                    AppLog.e("onResume", e)
-                }
-            }
-        }
+        viewModel.handleEvent(DetailsScreenEvent.LoadChangelog)
     }
+
 
     private fun updateAppView(app: App, appIconState: AppIconState) {
         binding.playStoreButton.setOnClickListener(this)
@@ -315,6 +295,8 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
             menu.findItem(R.id.menu_open).isVisible = false
             menu.findItem(R.id.menu_app_info).isVisible = false
         }
+
+        binding.toolbar.overflowIcon?.setTint(Color.WHITE)
 
         binding.toolbar.setNavigationIcon(R.drawable.ic_baseline_arrow_white_24)
         binding.toolbar.setNavigationOnClickListener {
@@ -384,15 +366,18 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         val context = context ?: return
         val defaultColor = ContextCompat.getColor(context, R.color.md_surface)
         val darkSwatch = palette?.chooseDark(defaultColor) ?: Palette.Swatch(defaultColor, 0)
-        val harmonizedColor = MaterialColors.harmonizeWithPrimary(context, darkSwatch.rgb)
-        val colorRoles: ColorRoles = MaterialColors.getColorRoles(harmonizedColor, false)
+        val colorRoles: ColorRoles = MaterialColors.getColorRoles(darkSwatch.rgb, false)
 
         viewModel.handleEvent(DetailsScreenEvent.UpdateAccentColor(colorRoles))
 
         applyColor(colorRoles.accentContainer)
         animateBackground()
 
-        appDetailsView.updateAccentColor(colorRoles.accent)
+        if (Theme(context, prefs = viewModel.prefs).isNightMode) {
+            appDetailsView.updateAccentColor(colorRoles.onAccentContainer)
+        } else {
+            appDetailsView.updateAccentColor(colorRoles.accentContainer)
+        }
     }
 
     private fun applyColor(@ColorInt color: Int) {
