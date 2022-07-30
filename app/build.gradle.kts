@@ -2,7 +2,7 @@ plugins {
     id("com.android.application")
     kotlin("android")
     kotlin("kapt")
-    id("com.google.devtools.ksp").version("1.7.0-1.0.6")
+    id("com.google.devtools.ksp").version("1.7.10-1.0.6")
     id("com.google.android.gms.oss-licenses-plugin")
 }
 
@@ -98,7 +98,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.2.0"
+        kotlinCompilerExtensionVersion = "1.3.0-rc01"
     }
     namespace = "com.anod.appwatcher"
 }
@@ -113,11 +113,11 @@ dependencies {
     implementation("androidx.core:core:1.8.0")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("androidx.paging:paging-runtime:3.1.1")
-    implementation("androidx.fragment:fragment-ktx:1.5.0")
+    implementation("androidx.fragment:fragment-ktx:1.5.1")
 
     // Compose
-    implementation("androidx.activity:activity-compose:1.5.0")
-    implementation("com.google.accompanist:accompanist-flowlayout:0.24.9-beta")
+    implementation("androidx.activity:activity-compose:1.5.1")
+    implementation("com.google.accompanist:accompanist-flowlayout:0.25.0")
     implementation("io.coil-kt:coil-compose-base:2.1.0")
 
     // Google
@@ -133,29 +133,29 @@ dependencies {
         exclude(group = "commons-logging")
     }
 
-    implementation("com.google.firebase:firebase-analytics:21.0.0")
-    implementation("com.google.firebase:firebase-crashlytics:18.2.11")
+    implementation("com.google.firebase:firebase-analytics:21.1.0")
+    implementation("com.google.firebase:firebase-crashlytics:18.2.12")
 
     // 3rd party
     implementation("com.squareup.okhttp3:okhttp:4.9.3")
     implementation("io.coil-kt:coil-base:2.1.0")
-    implementation("com.jakewharton:process-phoenix:2.0.0")
+    implementation("com.jakewharton:process-phoenix:2.1.2")
     implementation("io.insert-koin:koin-core:3.2.0")
 
     // ViewModel and LiveData
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel:2.5.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel:2.5.1")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
     kapt("androidx.lifecycle:lifecycle-compiler:2.5.0")
 
-    implementation("androidx.room:room-runtime:2.4.2")
-    implementation("androidx.room:room-ktx:2.4.2")
+    implementation("androidx.room:room-runtime:2.4.3")
+    implementation("androidx.room:room-ktx:2.4.3")
     ksp("androidx.room:room-compiler:2.4.2")
 
     // Kotlin
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.2")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.7.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.7.10")
 
     testImplementation("junit:junit:4.13.2")
 
@@ -167,7 +167,7 @@ dependencies {
     implementation(project(":lib:ktx"))
     implementation(project(":playstore"))
 
-    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.8.1")
+    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.9.1")
 }
 
 // ADD THIS AT THE BOTTOM
