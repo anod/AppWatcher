@@ -1,14 +1,20 @@
 package com.anod.appwatcher.compose
 
+import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
+import androidx.core.view.ViewCompat
 import com.anod.appwatcher.preferences.Preferences
+import com.google.android.material.color.MaterialColors
 
 private val AppTypography = Typography()
 
@@ -16,6 +22,7 @@ private val Gray200 = Color(0xFFeeeeee)
 private val BlueGray500 = Color(0xFF2196F3)
 private val BlueGray800 = Color(0xFF1565C0)
 private val BlueGray900 = Color(0xFF0D47A1)
+val Amber800 = Color(0xFFFF8F00)
 
 private val LightThemeColors = lightColorScheme(
         primary = Color(0xFF2196F3),
@@ -131,17 +138,36 @@ fun darkTheme(theme: Int, supportsDynamic: Boolean): ColorScheme {
 fun AppTheme(
         darkTheme: Boolean = isSystemInDarkTheme(),
         theme: Int = Preferences.THEME_DEFAULT,
+        customPrimaryColor: Color? = null,
         content: @Composable () -> Unit
 ) {
 
-    val colors = if (supportsDynamic()) {
+    var colorScheme = if (supportsDynamic()) {
         if (darkTheme) darkTheme(theme, supportsDynamic = true) else dynamicLightColorScheme(LocalContext.current)
     } else {
         if (darkTheme) darkTheme(theme, supportsDynamic = false) else LightThemeColors
     }
 
+    if (customPrimaryColor != null) {
+        val roles = MaterialColors.getColorRoles(customPrimaryColor.value.toInt(), !darkTheme)
+        colorScheme = colorScheme.copy(
+                primary = customPrimaryColor,
+                onPrimary = Color(roles.onAccent),
+                primaryContainer = Color(roles.accentContainer),
+                onPrimaryContainer = Color(roles.onAccentContainer)
+        )
+    }
+
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            (view.context as Activity).window.statusBarColor = colorScheme.primary.toArgb()
+            ViewCompat.getWindowInsetsController(view)?.isAppearanceLightStatusBars = darkTheme
+        }
+    }
+
     MaterialTheme(
-            colorScheme = colors,
+            colorScheme = colorScheme,
             typography = AppTypography,
             shapes = AppShapes,
             content = content

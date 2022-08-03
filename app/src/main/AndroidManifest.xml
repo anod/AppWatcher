@@ -73,7 +73,7 @@
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
         </activity>
-        <activity android:name=".tags.AppsTagActivity" />
+        <activity android:name=".tags.AppsTagComposeActivity" />
         <activity
             android:name=".NotificationActivity"
             android:exported="true"
@@ -138,6 +138,7 @@
                 <action android:name="android.intent.action.PACKAGE_FULLY_REMOVED" />
                 <action android:name="android.intent.action.PACKAGE_ADDED" />
                 <action android:name="android.intent.action.PACKAGE_REPLACED" />
+
                 <data android:scheme="package" />
             </intent-filter>
         </receiver>

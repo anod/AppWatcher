@@ -25,7 +25,7 @@ class WatchListPagingSource(
         private val database: AppsDatabase
 ) : PagingSource<Int, SectionItem>() {
 
-    class Config(
+    data class Config(
             val showRecentlyUpdated: Boolean,
             val showOnDevice: Boolean,
             val showRecentlyInstalled: Boolean,
@@ -38,7 +38,7 @@ class WatchListPagingSource(
         val items = mutableListOf<SectionItem>()
         if (offset == 0) {
             if (config.showRecentlyInstalled) {
-                items.add(RecentItem)
+                items.add(SectionItem.Recent)
                 limit = max(0, limit - 1)
             }
         }
@@ -48,7 +48,7 @@ class WatchListPagingSource(
         )
         val filtered = data.filter { !itemFilter.filterRecord(it) }
 
-        items.addAll(filtered.map { AppItem(it, false) })
+        items.addAll(filtered.map { SectionItem.App(it, false) })
 
         if (filtered.isEmpty()) {
             if (params.key != null && config.showOnDevice) {
@@ -61,10 +61,10 @@ class WatchListPagingSource(
                         .map { packageManager.packageToApp(-1, it) }
                         .map { app -> AppListItem(app, "", noNewDetails = false, recentFlag = false) }
                         .forEach { item ->
-                            items.add(OnDeviceItem(item, false))
+                            items.add(SectionItem.OnDevice(item, false))
                         }
-            } else if (offset == 0 && data.isEmpty() && items.firstOrNull() is RecentItem) {
-                items.add(EmptyItem)
+            } else if (offset == 0 && data.isEmpty() && items.firstOrNull() is SectionItem.Recent) {
+                items.add(SectionItem.Empty)
             }
         }
 

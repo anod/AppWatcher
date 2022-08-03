@@ -6,7 +6,7 @@ import com.anod.appwatcher.database.entities.AppTag
 import com.anod.appwatcher.database.entities.Tag
 import info.anodsplace.framework.app.ApplicationContext
 
-internal class TagAppsImport(private val tag: Tag, private val context: ApplicationContext, private val database: AppsDatabase) {
+class TagAppsImport(private val tag: Tag, private val context: ApplicationContext, private val database: AppsDatabase) {
 
     private var apps = mutableMapOf<String, Boolean>()
     private var defaultSelected: Boolean = false
@@ -27,7 +27,7 @@ internal class TagAppsImport(private val tag: Tag, private val context: Applicat
         return defaultSelected
     }
 
-    fun initSelected(list: List<AppTag> ) {
+    fun initSelected(list: List<AppTag>) {
         if (list.isEmpty()) {
             return
         }

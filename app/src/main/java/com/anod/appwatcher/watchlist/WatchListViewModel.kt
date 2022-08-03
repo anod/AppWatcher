@@ -1,17 +1,20 @@
 package com.anod.appwatcher.watchlist
 
-import android.app.Application
 import android.content.pm.PackageManager
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.paging.*
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
+import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.model.AppListFilter
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
+import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.PackageChangedReceiver
 import com.anod.appwatcher.utils.SelectionState
 import info.anodsplace.framework.app.ApplicationContext
@@ -29,7 +32,35 @@ import org.koin.core.component.inject
 
 typealias InstalledPackageRow = Pair<String, Int>
 
-abstract class WatchListViewModel(application: Application) : AndroidViewModel(application), KoinComponent {
+data class WatchListState(
+        val titleFilter: String = "",
+        val sortId: Int = 0,
+        val tag: Tag? = null,
+        val filter: AppListFilter = AppListFilter.All()
+)
+
+sealed interface WatchListAction {
+    class ItemClick(val app: App, val index: Int) : WatchListAction
+    object Reload : WatchListAction
+    object SearchInStore : WatchListAction
+    class SectionHeaderClick(val header: SectionHeader) : WatchListAction
+    class Installed(val importMode: Boolean) : WatchListAction
+    object ShareFromStore : WatchListAction
+    class AddAppToTag(val tag: Tag) : WatchListAction
+    class EmptyButton(val idx: Int) : WatchListAction
+    class ItemLongClick(val app: App, val index: Int) : WatchListAction
+}
+
+sealed interface WatchListEvent {
+    class SetFilter(val filterId: Int) : WatchListEvent
+    class ChangeSort(val sortId: Int) : WatchListEvent
+    class FilterByTitle(val titleFilter: String) : WatchListEvent
+    class ItemClick(val item: SectionItem, val index: Int) : WatchListEvent
+}
+
+data class WatchListPageArgs(val sortId: Int, val filterId: Int, val tag: Tag?)
+
+abstract class WatchListViewModel(args: WatchListPageArgs) : BaseFlowViewModel<WatchListState, WatchListEvent, WatchListAction>(), KoinComponent {
     companion object {
         const val recentlyInstalledViews = 10
     }
@@ -47,18 +78,15 @@ abstract class WatchListViewModel(application: Application) : AndroidViewModel(a
     private val packageManager: PackageManager
         get() = getKoin().get()
 
-    var titleFilter = ""
-    var sortId = 0
-    var tag: Tag? = null
     val installedApps = InstalledApps.MemoryCache(InstalledApps.PackageManager(packageManager))
-    var filterId: Int = Filters.TAB_ALL
-        get() = this.filter.filterId
-        set(value) {
-            field = value
-            this.filter = createFilter(value, installedApps)
-        }
-    var filter: AppListFilter = AppListFilter.All()
-        private set
+
+    init {
+        viewState = WatchListState(
+                filter = createFilter(args.filterId),
+                sortId = args.sortId,
+                tag = args.tag,
+        )
+    }
 
     val changes = AppListTable.Queries.changes(database.apps())
             .drop(1)
@@ -83,6 +111,31 @@ abstract class WatchListViewModel(application: Application) : AndroidViewModel(a
             .map { recentlyInstalledPackagesLoader.load() }
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
 
+    override fun handleEvent(event: WatchListEvent) {
+        when (event) {
+            is WatchListEvent.SetFilter -> {
+                viewState = viewState.copy(filter = createFilter(event.filterId))
+            }
+            is WatchListEvent.ChangeSort -> {
+                viewState = viewState.copy(sortId = event.sortId)
+                emitAction(WatchListAction.Reload)
+            }
+            is WatchListEvent.FilterByTitle -> {
+                viewState = viewState.copy(titleFilter = event.titleFilter)
+                emitAction(WatchListAction.Reload)
+            }
+            is WatchListEvent.ItemClick -> {
+                when (event.item) {
+                    is SectionItem.Header -> emitAction(WatchListAction.SectionHeaderClick(event.item.type))
+                    is SectionItem.App -> emitAction(WatchListAction.ItemClick(event.item.appListItem.app, event.index))
+                    is SectionItem.OnDevice -> emitAction(WatchListAction.ItemClick(event.item.appListItem.app, event.index))
+                    SectionItem.Empty -> {}
+                    SectionItem.Recent -> {}
+                }
+            }
+        }
+    }
+
     fun load(config: WatchListPagingSource.Config, initialKey: Int? = null): Flow<PagingData<SectionItem>> {
         headerFactory = createSectionHeaderFactory(config)
         installedApps.reset()
@@ -100,7 +153,7 @@ abstract class WatchListViewModel(application: Application) : AndroidViewModel(a
                 .cachedIn(viewModelScope)
     }
 
-    private fun createFilter(filterId: Int, installedApps: InstalledApps): AppListFilter {
+    private fun createFilter(filterId: Int): AppListFilter {
         return when (filterId) {
             Filters.INSTALLED -> AppListFilter.Installed(installedApps)
             Filters.UNINSTALLED -> AppListFilter.Uninstalled(installedApps)
@@ -125,15 +178,21 @@ abstract class WatchListViewModel(application: Application) : AndroidViewModel(a
     }
 }
 
-class AppsWatchListViewModel(application: Application) : WatchListViewModel(application), KoinComponent {
+class AppsWatchListViewModel(args: WatchListPageArgs) : WatchListViewModel(args), KoinComponent {
     private val packageManager: PackageManager by inject()
 
+    class Factory(private val args: WatchListPageArgs) : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+            return AppsWatchListViewModel(args) as T
+        }
+    }
+
     override fun createPagingSource(config: WatchListPagingSource.Config) = WatchListPagingSource(
-            sortId = sortId,
-            titleFilter = titleFilter,
+            sortId = viewState.sortId,
+            titleFilter = viewState.titleFilter,
             config = config,
-            itemFilter = filter,
-            tag = tag,
+            itemFilter = viewState.filter,
+            tag = viewState.tag,
             packageManager = packageManager,
             database = database
     )

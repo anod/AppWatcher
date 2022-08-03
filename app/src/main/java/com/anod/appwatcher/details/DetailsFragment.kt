@@ -3,7 +3,6 @@ package com.anod.appwatcher.details
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
-import android.app.Application
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -58,7 +57,6 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
 
     private val viewModel: DetailsViewModel by viewModels(factoryProducer = {
         DetailsViewModel.Factory(
-                application = requireContext().applicationContext as Application,
                 argAppId = requireArguments().getString(extraAppId) ?: "",
                 argRowId = requireArguments().getInt(extraRowId, -1),
                 argDetailsUrl = requireArguments().getString(extraDetailsUrl) ?: ""

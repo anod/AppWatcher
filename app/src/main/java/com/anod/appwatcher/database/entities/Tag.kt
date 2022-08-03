@@ -6,7 +6,10 @@ import android.os.Parcelable
 import android.provider.BaseColumns
 import androidx.annotation.ColorInt
 import androidx.core.graphics.ColorUtils
-import androidx.room.*
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.Ignore
+import androidx.room.PrimaryKey
 import com.anod.appwatcher.database.TagsTable
 import info.anodsplace.ktx.hashCodeOf
 
@@ -71,7 +74,8 @@ data class Tag(
     companion object {
         const val DEFAULT_COLOR = 0xFF2196F3.toInt()
 
-        @JvmField val CREATOR: Parcelable.Creator<Tag> = object : Parcelable.Creator<Tag> {
+        @JvmField
+        val CREATOR: Parcelable.Creator<Tag> = object : Parcelable.Creator<Tag> {
             override fun createFromParcel(source: Parcel): Tag {
                 return Tag(source)
             }

@@ -2,6 +2,7 @@ package com.anod.appwatcher.model
 
 import com.anod.appwatcher.database.entities.AppListItem
 import info.anodsplace.framework.content.InstalledApps
+import info.anodsplace.ktx.hashCodeOf
 
 /**
  * @author alex
@@ -15,9 +16,9 @@ interface AppListFilter {
 
     class All : AppListFilter {
         override val filterId = Filters.TAB_ALL
-        override fun filterRecord(item: AppListItem): Boolean {
-            return false
-        }
+        override fun filterRecord(item: AppListItem): Boolean = false
+        override fun hashCode(): Int = hashCodeOf(filterId)
+        override fun equals(other: Any?): Boolean = (other as? Installed)?.hashCode() == hashCode()
     }
 
     class Installed(private val installedApps: InstalledApps) : AppListFilter {
@@ -27,6 +28,9 @@ interface AppListFilter {
             val installedInfo = installedApps.packageInfo(packageName)
             return !installedInfo.isInstalled
         }
+
+        override fun hashCode(): Int = hashCodeOf(filterId)
+        override fun equals(other: Any?): Boolean = (other as? Installed)?.hashCode() == hashCode()
     }
 
     class Uninstalled(private val installedApps: InstalledApps) : AppListFilter {
@@ -36,6 +40,9 @@ interface AppListFilter {
             val installedInfo = installedApps.packageInfo(packageName)
             return installedInfo.isInstalled
         }
+
+        override fun hashCode(): Int = hashCodeOf(filterId)
+        override fun equals(other: Any?): Boolean = (other as? Installed)?.hashCode() == hashCode()
     }
 
     class Updatable(private val installedApps: InstalledApps) : AppListFilter {
@@ -47,6 +54,9 @@ interface AppListFilter {
             val updatable = installedInfo.isInstalled && installedInfo.isUpdatable(versionCode)
             return !updatable
         }
+
+        override fun hashCode(): Int = hashCodeOf(filterId)
+        override fun equals(other: Any?): Boolean = (other as? Installed)?.hashCode() == hashCode()
     }
 
 }

@@ -12,6 +12,7 @@ import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.sync.UpdateCheck
 import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.PackageChangedReceiver
+import com.anod.appwatcher.utils.RealAppIconLoader
 import com.anod.appwatcher.utils.date.UploadDateParserCache
 import com.anod.appwatcher.watchlist.RecentlyInstalledPackagesLoader
 import info.anodsplace.framework.app.ApplicationContext
@@ -24,6 +25,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import okhttp3.OkHttpClient
 import org.koin.core.module.Module
+import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -46,7 +48,9 @@ fun createAppModule(): Module = module {
     singleOf(::Preferences)
     singleOf(::UploadServiceContentObserver)
     single { OkHttpClient.Builder().build() }
-    singleOf(::AppIconLoader)
+    singleOf(::RealAppIconLoader) {
+        bind<AppIconLoader>()
+    }
     singleOf(::NetworkConnectivity)
     singleOf(::RecentlyInstalledPackagesLoader)
     single<LruCache<String, Any?>>(named("memoryCache")) { createLruCache() }
@@ -57,7 +61,7 @@ fun createAppModule(): Module = module {
     single {
         ImageLoader.Builder(get())
                 .components {
-                    add(AppIconLoader.PackageIconFetcher.Factory(get()))
+                    add(RealAppIconLoader.PackageIconFetcher.Factory(get()))
                 }
                 .build()
     }

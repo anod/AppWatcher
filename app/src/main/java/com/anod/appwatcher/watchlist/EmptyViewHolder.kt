@@ -7,16 +7,16 @@ import com.anod.appwatcher.databinding.ListItemEmptyBinding
 import info.anodsplace.framework.view.setOnSafeClickListener
 import kotlinx.coroutines.flow.MutableSharedFlow
 
-class EmptyViewHolder(emptyBinding: ListItemEmptyBinding, topMargin: Boolean, action: MutableSharedFlow<WishListAction>) : RecyclerView.ViewHolder(emptyBinding.root) {
+class EmptyViewHolder(emptyBinding: ListItemEmptyBinding, topMargin: Boolean, action: MutableSharedFlow<WatchListAction>) : RecyclerView.ViewHolder(emptyBinding.root) {
     init {
         emptyBinding.button1.setOnSafeClickListener {
-            action.tryEmit(EmptyButton(1))
+            action.tryEmit(WatchListAction.EmptyButton(1))
         }
         emptyBinding.button2.setOnSafeClickListener {
-            action.tryEmit(EmptyButton(2))
+            action.tryEmit(WatchListAction.EmptyButton(2))
         }
         emptyBinding.button3.setOnSafeClickListener {
-            action.tryEmit(EmptyButton(3))
+            action.tryEmit(WatchListAction.EmptyButton(3))
         }
         emptyBinding.topMargin.isVisible = topMargin
     }

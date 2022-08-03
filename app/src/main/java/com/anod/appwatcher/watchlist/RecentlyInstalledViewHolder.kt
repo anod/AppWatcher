@@ -13,8 +13,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.packageToApp
 import com.anod.appwatcher.installed.RecentAppView
-import com.anod.appwatcher.utils.EventFlow
 import com.anod.appwatcher.utils.AppIconLoader
+import com.anod.appwatcher.utils.EventFlow
 import com.anod.appwatcher.utils.reveal
 import info.anodsplace.framework.view.setOnSafeClickListener
 import kotlinx.coroutines.Job
@@ -27,7 +27,7 @@ class RecentlyInstalledViewHolder(
         private val packages: Flow<List<InstalledPackageRow>>,
         private val iconLoader: AppIconLoader,
         private val packageManager: PackageManager,
-        private val action: EventFlow<WishListAction>
+        private val action: EventFlow<WatchListAction>
 ) : RecyclerView.ViewHolder(itemView), PlaceholderViewHolder {
 
     companion object {
@@ -86,7 +86,7 @@ class RecentlyInstalledViewHolder(
         }
     }
 
-    fun bind(item: RecentItem) {
+    fun bind(item: SectionItem.Recent) {
         if (animate == animateInitial) {
             animate = animateStart
         }
@@ -98,7 +98,7 @@ class RecentlyInstalledViewHolder(
         appView.title.text = app.title
         appView.watched.isVisible = (rowId > 0)
         appView.content.setOnSafeClickListener {
-            action.tryEmit(ItemClick(app, index))
+            action.tryEmit(WatchListAction.ItemClick(app, index))
         }
         appView.reveal(animate, startDelay = index * 50L, duration = shortAnimationDuration, fromAlpha = initialAlpha)
     }

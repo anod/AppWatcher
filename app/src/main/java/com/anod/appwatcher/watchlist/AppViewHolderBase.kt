@@ -46,6 +46,12 @@ abstract class AppViewHolderBase<T>(
     override fun placeholder() {}
 }
 
+fun formatVersionText(versionName: String, versionNumber: Int, newVersionNumber: Int, context: Context): String {
+    if (newVersionNumber > 0) {
+        return context.getString(R.string.version_updated_text, versionName, versionNumber, newVersionNumber)
+    }
+    return context.getString(R.string.version_text, versionName, versionNumber)
+}
 
 open class AppViewHolderResourceProvider(
         private val context: Context,
@@ -70,10 +76,6 @@ open class AppViewHolderResourceProvider(
     }
 
     override fun formatVersionText(versionName: String, versionNumber: Int, newVersionNumber: Int): String {
-        if (newVersionNumber > 0) {
-            return context.getString(R.string.version_updated_text, versionName, versionNumber, newVersionNumber)
-        }
-        return context.getString(R.string.version_text, versionName, versionNumber)
+        return formatVersionText(versionName, versionNumber, newVersionNumber, context)
     }
-
 }

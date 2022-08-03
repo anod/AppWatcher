@@ -21,19 +21,19 @@ import kotlinx.coroutines.flow.map
 
 class SectionItemDiffCallback : DiffUtil.ItemCallback<SectionItem>() {
     override fun areItemsTheSame(oldItem: SectionItem, newItem: SectionItem) = when (oldItem) {
-        is Header -> newItem is Header && oldItem.type::class == newItem.type::class
-        is RecentItem -> newItem is RecentItem
-        is AppItem -> newItem is AppItem && oldItem.appListItem.app.appId == newItem.appListItem.app.appId
-        is OnDeviceItem -> newItem is OnDeviceItem && oldItem.appListItem.app.appId == newItem.appListItem.app.appId
-        is EmptyItem -> newItem is EmptyItem
+        is SectionItem.Header -> newItem is SectionItem.Header && oldItem.type::class == newItem.type::class
+        is SectionItem.Recent -> newItem is SectionItem.Recent
+        is SectionItem.App -> newItem is SectionItem.App && oldItem.appListItem.app.appId == newItem.appListItem.app.appId
+        is SectionItem.OnDevice -> newItem is SectionItem.OnDevice && oldItem.appListItem.app.appId == newItem.appListItem.app.appId
+        is SectionItem.Empty -> newItem is SectionItem.Empty
     }
 
     override fun areContentsTheSame(oldItem: SectionItem, newItem: SectionItem) = when (oldItem) {
-        is Header -> newItem is Header && oldItem.type::class == newItem.type::class
-        is RecentItem -> newItem is RecentItem
-        is AppItem -> newItem is AppItem && oldItem == newItem
-        is OnDeviceItem -> newItem is OnDeviceItem && oldItem == newItem
-        is EmptyItem -> newItem is EmptyItem
+        is SectionItem.Header -> newItem is SectionItem.Header && oldItem.type::class == newItem.type::class
+        is SectionItem.Recent -> newItem is SectionItem.Recent
+        is SectionItem.App -> newItem is SectionItem.App && oldItem == newItem
+        is SectionItem.OnDevice -> newItem is SectionItem.OnDevice && oldItem == newItem
+        is SectionItem.Empty -> newItem is SectionItem.Empty
     }
 }
 
@@ -42,7 +42,7 @@ class WatchListPagingAdapter(
         installedApps: InstalledApps,
         private val recentlyInstalledPackages: Flow<List<InstalledPackageRow>>,
         private val lifecycleOwner: LifecycleOwner,
-        private val action: EventFlow<WishListAction>,
+        private val action: EventFlow<WatchListAction>,
         private val emptyViewHolderFactory: (itemBinding: ListItemEmptyBinding) -> EmptyViewHolder,
         private val calcSelection: (appItem: AppListItem) -> AppViewHolder.Selection,
         selection: LiveData<Pair<Int, AppViewHolder.Selection>>,
@@ -73,26 +73,26 @@ class WatchListPagingAdapter(
 
     override fun getItemViewType(position: Int): Int {
         return when (val item = getItem(position)) {
-            is Header -> when (item.type) {
+            is SectionItem.Header -> when (item.type) {
                 is RecentlyInstalledHeader -> ViewType.recentItemHeader
                 else -> ViewType.simpleHeader
             }
-            is AppItem -> ViewType.appItem
-            is OnDeviceItem -> ViewType.appItem
-            is RecentItem -> ViewType.recentItem
-            is EmptyItem -> ViewType.emptyItem
+            is SectionItem.App -> ViewType.appItem
+            is SectionItem.OnDevice -> ViewType.appItem
+            is SectionItem.Recent -> ViewType.recentItem
+            is SectionItem.Empty -> ViewType.emptyItem
             else -> 0
         }
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (val item = getItem(position)) {
-            is Header -> (holder as SectionHeaderViewHolder).bind(item.type)
-            is AppItem -> (holder as AppViewHolder).bind(position, item.appListItem, item.isLocal, calcSelection(item.appListItem))
-            is RecentItem -> (holder as RecentlyInstalledViewHolder).bind(item)
-            is EmptyItem -> {
+            is SectionItem.Header -> (holder as SectionHeaderViewHolder).bind(item.type)
+            is SectionItem.App -> (holder as AppViewHolder).bind(position, item.appListItem, item.isLocal, calcSelection(item.appListItem))
+            is SectionItem.Recent -> (holder as RecentlyInstalledViewHolder).bind(item)
+            is SectionItem.Empty -> {
             }
-            is OnDeviceItem -> (holder as AppViewHolder).bind(position, item.appListItem, true, calcSelection(item.appListItem))
+            is SectionItem.OnDevice -> (holder as AppViewHolder).bind(position, item.appListItem, true, calcSelection(item.appListItem))
             null -> {}
         }
     }

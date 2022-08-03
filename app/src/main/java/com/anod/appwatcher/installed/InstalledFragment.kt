@@ -9,7 +9,6 @@ import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.anod.appwatcher.R
@@ -35,7 +34,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.get
 import org.koin.core.component.inject
 
 class InstalledFragment : WatchListFragment(), ActionMode.Callback, KoinComponent {
@@ -85,7 +83,7 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback, KoinComponen
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.menu_act_sort -> {
-                DialogSingleChoice(requireContext(), R.style.AlertDialog, R.array.sort_titles, viewModel.sortId) { dialog, index ->
+                DialogSingleChoice(requireContext(), R.style.AlertDialog, R.array.sort_titles, viewModel.viewState.sortId) { dialog, index ->
                     menuAction.tryEmit(SortMenuAction(index))
                     dialog.dismiss()
                 }.show()
@@ -100,11 +98,11 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback, KoinComponen
     }
 
     override fun viewModelFactory(): ViewModelProvider.Factory {
-        return object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return InstalledViewModel(get()) as T
-            }
-        }
+        return InstalledViewModel.Factory(WatchListPageArgs(
+                filterId = viewModel.viewState.filter.filterId,
+                sortId = viewModel.viewState.sortId,
+                tag = viewModel.viewState.tag
+        ))
     }
 
     override fun getItemSelection(appItem: AppListItem): AppViewHolder.Selection {
@@ -135,12 +133,10 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback, KoinComponen
             menuAction.collectLatest {
                 when (it) {
                     is SearchQueryAction -> {
-                        viewModel.titleFilter = it.query
-                        reload()
+                        viewModel.handleEvent(WatchListEvent.FilterByTitle(it.query))
                     }
                     is SortMenuAction -> {
-                        viewModel.sortId = it.sortId
-                        reload()
+                        viewModel.handleEvent(WatchListEvent.ChangeSort(it.sortId))
                     }
                     is FilterMenuAction -> {
                     }
@@ -186,11 +182,11 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback, KoinComponen
 
         viewLifecycleOwner.lifecycleScope.launchWhenResumed {
             adapter
-                .loadStateFlow
-                .drop(1) // fix empty view flickering
-                .collectLatest {
-                    binding.swipeLayout.isRefreshing = false
-                }
+                    .loadStateFlow
+                    .drop(1) // fix empty view flickering
+                    .collectLatest {
+                        binding.swipeLayout.isRefreshing = false
+                    }
         }
     }
 
@@ -254,9 +250,9 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback, KoinComponen
         }
     }
 
-    override fun onListAction(action: WishListAction) {
+    override fun onListAction(action: WatchListAction) {
         when (action) {
-            is ItemClick -> {
+            is WatchListAction.ItemClick -> {
                 val app = action.app
                 if (importViewModel.selectionMode) {
                     selectPackage(app, action.index)
@@ -264,7 +260,7 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback, KoinComponen
                     openAppDetails(app)
                 }
             }
-            is ItemLongClick -> {
+            is WatchListAction.ItemLongClick -> {
                 if (!importViewModel.selectionMode) {
                     switchImportMode(true, animated = true)
                     selectPackage(action.app, action.index)

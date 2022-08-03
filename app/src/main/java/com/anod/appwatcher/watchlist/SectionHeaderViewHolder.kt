@@ -30,12 +30,12 @@ open class SectionHeaderViewHolder(itemView: View, titleColorOverride: Int?) : R
             titleColorOverride: Int?,
             lifecycleOwner: LifecycleOwner,
             available: Flow<Boolean>,
-            action: EventFlow<WishListAction>
+            action: EventFlow<WatchListAction>
     ) : SectionHeaderViewHolder(itemView, titleColorOverride) {
         init {
             title.setOnSafeClickListener {
                 if (this.item != null) {
-                    action.tryEmit(SectionHeaderClick(this.item!!))
+                    action.tryEmit(WatchListAction.SectionHeaderClick(this.item!!))
                 }
             }
             available

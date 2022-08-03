@@ -112,11 +112,15 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.7.1")
     implementation("androidx.core:core:1.8.0")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
-    implementation("androidx.paging:paging-runtime:3.1.1")
     implementation("androidx.fragment:fragment-ktx:1.5.1")
+
+    implementation("androidx.paging:paging-runtime:3.2.0-alpha01")
+    implementation("androidx.paging:paging-compose:1.0.0-alpha15")
 
     // Compose
     implementation("androidx.activity:activity-compose:1.5.1")
+    implementation("androidx.compose.ui:ui-viewbinding:1.2.0")
+    implementation("com.google.accompanist:accompanist-pager:0.25.0")
     implementation("com.google.accompanist:accompanist-flowlayout:0.25.0")
     implementation("io.coil-kt:coil-compose-base:2.1.0")
 
@@ -145,12 +149,13 @@ dependencies {
     // ViewModel and LiveData
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel:2.5.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
-    kapt("androidx.lifecycle:lifecycle-compiler:2.5.0")
+    kapt("androidx.lifecycle:lifecycle-compiler:2.5.1")
 
     implementation("androidx.room:room-runtime:2.4.3")
     implementation("androidx.room:room-ktx:2.4.3")
-    ksp("androidx.room:room-compiler:2.4.2")
+    ksp("androidx.room:room-compiler:2.4.3")
 
     // Kotlin
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")

@@ -2,6 +2,7 @@ package com.anod.appwatcher.utils
 
 import android.accounts.Account
 import android.util.LruCache
+import coil.ImageLoader
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.preferences.Preferences
 import info.anodsplace.framework.net.NetworkConnectivity
@@ -27,3 +28,6 @@ val KoinComponent.account: Account?
 
 val KoinComponent.memoryCache: LruCache<String, Any?>
     get() = get(named("memoryCache"))
+
+val KoinComponent.imageLoader: ImageLoader
+    get() = get()

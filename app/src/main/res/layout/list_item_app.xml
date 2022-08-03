@@ -56,7 +56,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/icon"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="Car Widget Pro" />
+        tools:text="Car Widget Pro Lorem ipsum dolor sit amet, consectetur adipiscing elit" />
 
     <TextView
         android:id="@+id/creator"
@@ -73,6 +73,7 @@
         app:layout_constraintEnd_toStartOf="@+id/update_date"
         app:layout_constraintStart_toEndOf="@+id/icon"
         app:layout_constraintTop_toBottomOf="@id/title"
+        tools:visibility="gone"
         tools:text="Alex Gavrishev" />
 
     <ImageView

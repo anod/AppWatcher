@@ -10,9 +10,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -37,37 +35,30 @@ import info.anodsplace.framework.app.FragmentContainerFactory
 import info.anodsplace.framework.content.startActivitySafely
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
-
-sealed class WishListAction
-object SearchInStore : WishListAction()
-class SectionHeaderClick(val header: SectionHeader) : WishListAction()
-class Installed(val importMode: Boolean) : WishListAction()
-object ShareFromStore : WishListAction()
-class AddAppToTag(val tag: Tag) : WishListAction()
-class EmptyButton(val idx: Int) : WishListAction()
-class ItemClick(val app: App, val index: Int) : WishListAction()
-class ItemLongClick(val app: App, val index: Int) : WishListAction()
 
 open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, KoinComponent {
     protected lateinit var adapter: WatchListPagingAdapter
     protected val viewModel: WatchListViewModel by viewModels { viewModelFactory() }
 
     private var loadJob: Job? = null
-    private val action = EventFlow<WishListAction>()
+    private val action = EventFlow<WatchListAction>()
     private val stateViewModel: WatchListStateViewModel by activityViewModels()
     private var _binding: FragmentApplistBinding? = null
     val binding get() = _binding!!
 
     protected open fun viewModelFactory(): ViewModelProvider.Factory {
-        return object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return AppsWatchListViewModel(get()) as T
-            }
-        }
+        val args = requireArguments()
+        return AppsWatchListViewModel.Factory(WatchListPageArgs(
+                sortId = args.getInt(ARG_SORT),
+                filterId = args.getInt(ARG_FILTER),
+                tag = args.getParcelable(ARG_TAG)
+        ))
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -92,19 +83,13 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener,
         binding.progress.isVisible = true
         val metrics = resources.displayMetrics
         binding.swipeLayout.setDistanceToTriggerSync((16 * metrics.density).toInt())
-
-        val args = requireArguments()
-        viewModel.sortId = args.getInt(ARG_SORT)
-        viewModel.filterId = args.getInt(ARG_FILTER)
-        viewModel.tag = args.getParcelable(ARG_TAG)
-
         // Setup layout manager
         val layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
         binding.listView.layoutManager = layoutManager
 
         // Setup header decorator
         adapter = WatchListPagingAdapter(
-                viewModel.tag?.color,
+                viewModel.viewState.tag?.color,
                 viewModel.installedApps,
                 viewModel.recentlyInstalledPackages,
                 viewLifecycleOwner,
@@ -173,23 +158,27 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener,
             }
         }
 
-        stateViewModel.sortId.observe(viewLifecycleOwner) {
-            viewModel.sortId = it ?: 0
-            reload()
+        viewLifecycleOwner.lifecycleScope.launchWhenResumed {
+            stateViewModel.viewStates.map { it.sortId }.distinctUntilChanged().collect {
+                viewModel.handleEvent(WatchListEvent.ChangeSort(it))
+            }
         }
 
-        stateViewModel.titleFilter.distinctUntilChanged().observe(viewLifecycleOwner) {
-            viewModel.titleFilter = it ?: ""
-            reload()
+        viewLifecycleOwner.lifecycleScope.launchWhenResumed {
+            stateViewModel.viewStates.map { it.titleFilter }.distinctUntilChanged().collect { titleFilter ->
+                viewModel.handleEvent(WatchListEvent.FilterByTitle(titleFilter))
+            }
         }
 
-        stateViewModel.listState.observe(viewLifecycleOwner) {
-            when (it) {
-                is SyncStarted -> {
-                    binding.swipeLayout.isRefreshing = true
-                }
-                else -> {
-                    binding.swipeLayout.isRefreshing = false
+        viewLifecycleOwner.lifecycleScope.launchWhenResumed {
+            stateViewModel.viewStates.map { it.listState }.distinctUntilChanged().collect { listState ->
+                when (listState) {
+                    is ListState.SyncStarted -> {
+                        binding.swipeLayout.isRefreshing = true
+                    }
+                    else -> {
+                        binding.swipeLayout.isRefreshing = false
+                    }
                 }
             }
         }
@@ -200,20 +189,25 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener,
             }
         }
 
+        viewLifecycleOwner.lifecycleScope.launchWhenResumed {
+            viewModel.viewActions.collect { action -> onListAction(action) }
+        }
+
         reload()
     }
 
-    protected open fun onListAction(action: WishListAction) {
+    protected open fun onListAction(action: WatchListAction) {
         when (action) {
-            is SearchInStore -> startActivity(MarketSearchActivity.intent(requireContext(), "", true))
-            is Installed -> startActivity(InstalledFragment.intent(
+            is WatchListAction.Reload -> reload()
+            is WatchListAction.SearchInStore -> startActivity(MarketSearchActivity.intent(requireContext(), "", true))
+            is WatchListAction.Installed -> startActivity(InstalledFragment.intent(
                     action.importMode,
                     requireContext(),
                     (activity as CustomThemeActivity).themeRes,
                     (activity as CustomThemeActivity).themeColors))
-            is ShareFromStore -> activity?.startActivitySafely(Intent.makeMainActivity(ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity")))
-            is AddAppToTag -> AppsTagSelectDialog.show(action.tag, childFragmentManager)
-            is ItemClick -> {
+            is WatchListAction.ShareFromStore -> activity?.startActivitySafely(Intent.makeMainActivity(ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity")))
+            is WatchListAction.AddAppToTag -> AppsTagSelectDialog.show(action.tag, childFragmentManager)
+            is WatchListAction.ItemClick -> {
                 val app = action.app
                 if (BuildConfig.DEBUG) {
                     AppLog.d(app.packageName)
@@ -232,8 +226,8 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener,
 
     protected open fun config() = WatchListPagingSource.Config(
             showRecentlyUpdated = prefs.showRecentlyUpdated,
-            showOnDevice = viewModel.filterId == Filters.TAB_ALL && prefs.showOnDevice,
-            showRecentlyInstalled = viewModel.filterId == Filters.TAB_ALL && prefs.showRecent
+            showOnDevice = viewModel.viewState.filter.filterId == Filters.TAB_ALL && prefs.showOnDevice,
+            showRecentlyInstalled = viewModel.viewState.filter.filterId == Filters.TAB_ALL && prefs.showRecent
     )
 
     fun reload(initialKey: Int? = null) {
@@ -254,21 +248,21 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener,
 
     protected open fun createEmptyViewHolder(
             emptyBinding: ListItemEmptyBinding,
-            action: EventFlow<WishListAction>
+            action: EventFlow<WatchListAction>
     ) = EmptyViewHolder(emptyBinding, false, action)
 
-    protected open fun mapAction(it: WishListAction): WishListAction {
-        if (it is EmptyButton) {
+    protected open fun mapAction(it: WatchListAction): WatchListAction {
+        if (it is WatchListAction.EmptyButton) {
             return when (it.idx) {
-                1 -> SearchInStore
-                2 -> Installed(true)
-                3 -> ShareFromStore
+                1 -> WatchListAction.SearchInStore
+                2 -> WatchListAction.Installed(true)
+                3 -> WatchListAction.ShareFromStore
                 else -> throw IllegalArgumentException("Unknown Idx")
             }
         }
-        if (it is SectionHeaderClick) {
+        if (it is WatchListAction.SectionHeaderClick) {
             return when (it.header) {
-                is RecentlyInstalledHeader -> Installed(false)
+                is RecentlyInstalledHeader -> WatchListAction.Installed(false)
                 else -> throw IllegalArgumentException("Not supported header")
             }
         }
@@ -276,7 +270,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener,
     }
 
     override fun onRefresh() {
-        val isRefreshing = (stateViewModel.listState.value is SyncStarted)
+        val isRefreshing = (stateViewModel.viewState.listState is ListState.SyncStarted)
         if (!isRefreshing) {
             appScope.launch {
                 stateViewModel.requestRefresh().collect { }

@@ -11,28 +11,30 @@ object WatchingHeader : SectionHeader()
 object RecentlyInstalledHeader : SectionHeader()
 object OnDeviceHeader : SectionHeader()
 
-sealed class SectionItem
-class Header(val type: SectionHeader) : SectionItem()
-object RecentItem : SectionItem()
-object EmptyItem : SectionItem()
-class AppItem(val appListItem: AppListItem, val isLocal: Boolean) : SectionItem() {
-    override fun hashCode(): Int {
-        return hashCodeOf(appListItem, isLocal)
+sealed interface SectionItem {
+    class Header(val type: SectionHeader) : SectionItem
+    object Recent : SectionItem
+    object Empty : SectionItem
+
+    class App(val appListItem: AppListItem, val isLocal: Boolean) : SectionItem {
+        override fun hashCode(): Int {
+            return hashCodeOf(appListItem, isLocal)
+        }
+
+        override fun equals(other: Any?): Boolean {
+            val item = other as? App ?: return false
+            return hashCode() == item.hashCode()
+        }
     }
 
-    override fun equals(other: Any?): Boolean {
-        val item = other as? AppItem ?: return false
-        return hashCode() == item.hashCode()
-    }
-}
+    class OnDevice(val appListItem: AppListItem, var showSelection: Boolean) : SectionItem {
+        override fun hashCode(): Int {
+            return hashCodeOf(appListItem, showSelection)
+        }
 
-class OnDeviceItem(val appListItem: AppListItem, var showSelection: Boolean) : SectionItem() {
-    override fun hashCode(): Int {
-        return hashCodeOf(appListItem, showSelection)
-    }
-
-    override fun equals(other: Any?): Boolean {
-        val item = other as? OnDeviceItem ?: return false
-        return hashCode() == item.hashCode()
+        override fun equals(other: Any?): Boolean {
+            val item = other as? OnDevice ?: return false
+            return hashCode() == item.hashCode()
+        }
     }
 }

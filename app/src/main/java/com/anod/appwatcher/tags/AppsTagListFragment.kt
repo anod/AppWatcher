@@ -8,7 +8,10 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.databinding.ListItemEmptyBinding
 import com.anod.appwatcher.utils.prefs
-import com.anod.appwatcher.watchlist.*
+import com.anod.appwatcher.watchlist.EmptyViewHolder
+import com.anod.appwatcher.watchlist.WatchListAction
+import com.anod.appwatcher.watchlist.WatchListFragment
+import com.anod.appwatcher.watchlist.WatchListPagingSource
 import info.anodsplace.framework.app.FragmentContainerFactory
 import kotlinx.coroutines.flow.MutableSharedFlow
 import org.koin.core.component.KoinComponent
@@ -21,12 +24,12 @@ import org.koin.core.component.KoinComponent
 
 class AppsTagListFragment : WatchListFragment(), KoinComponent {
 
-    override fun mapAction(it: WishListAction): WishListAction {
-        if (it is EmptyButton) {
+    override fun mapAction(it: WatchListAction): WatchListAction {
+        if (it is WatchListAction.EmptyButton) {
             return when (it.idx) {
                 1 -> {
-                    val tag = viewModel.tag!!
-                    AddAppToTag(tag)
+                    val tag = viewModel.viewState.tag!!
+                    WatchListAction.AddAppToTag(tag)
                 }
                 else -> throw IllegalArgumentException("Unknown Idx")
             }
@@ -40,9 +43,9 @@ class AppsTagListFragment : WatchListFragment(), KoinComponent {
             showRecentlyInstalled = false
     )
 
-    override fun createEmptyViewHolder(emptyBinding: ListItemEmptyBinding, action: MutableSharedFlow<WishListAction>): EmptyViewHolder {
+    override fun createEmptyViewHolder(emptyBinding: ListItemEmptyBinding, action: MutableSharedFlow<WatchListAction>): EmptyViewHolder {
         emptyBinding.emptyText.setText(R.string.tags_list_is_empty)
-        viewModel.tag?.let {
+        viewModel.viewState.tag?.let {
             val button = emptyBinding.button1
             button.setBackgroundColor(it.color)
             if (it.isLightColor) {

@@ -26,7 +26,30 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okio.Buffer
 
-class AppIconLoader(context: Context, private val prefs: Preferences, private val imageLoader: ImageLoader) {
+interface AppIconLoader {
+    val coilLoader: ImageLoader
+    suspend fun get(imageUrl: String): Drawable?
+    fun retrieve(imageUrl: String, customize: (ImageRequest.Builder) -> Unit)
+    fun loadAppIntoImageView(app: App, iconView: ImageView, @DrawableRes defaultRes: Int)
+    fun request(imageUrl: String, customize: (ImageRequest.Builder) -> Unit = {}): ImageRequest
+
+    class Simple(context: Context, override val coilLoader: ImageLoader) : AppIconLoader {
+        private val context: Context = context.applicationContext
+        override suspend fun get(imageUrl: String): Drawable? = null
+
+        override fun retrieve(imageUrl: String, customize: (ImageRequest.Builder) -> Unit) {
+        }
+
+        override fun loadAppIntoImageView(app: App, iconView: ImageView, defaultRes: Int) {
+        }
+
+        override fun request(imageUrl: String, customize: (ImageRequest.Builder) -> Unit): ImageRequest {
+            return ImageRequest.Builder(context).data(imageUrl).build()
+        }
+    }
+}
+
+class RealAppIconLoader(context: Context, private val prefs: Preferences, override val coilLoader: ImageLoader) : AppIconLoader {
     private val context: Context = context.applicationContext
     private var _iconPathPair: Pair<Int, Path> = Pair(0, Path())
     private val iconPath: Path
@@ -58,7 +81,7 @@ class AppIconLoader(context: Context, private val prefs: Preferences, private va
 
             val icon = packageManager.loadIcon(cmp, context.resources.displayMetrics) ?: return null
 
-            val source = BitmapByteArray.flatten(icon) ?: return  null
+            val source = BitmapByteArray.flatten(icon) ?: return null
             return SourceResult(
                     source = ImageSource(Buffer().apply { write(source) }, options.context),
                     mimeType = null,
@@ -67,28 +90,28 @@ class AppIconLoader(context: Context, private val prefs: Preferences, private va
         }
     }
 
-    suspend fun get(imageUrl: String): Drawable? = withContext(Dispatchers.IO) {
+    override suspend fun get(imageUrl: String): Drawable? = withContext(Dispatchers.IO) {
         return@withContext try {
-            imageLoader.execute(request(imageUrl)).drawable
+            coilLoader.execute(request(imageUrl)).drawable
         } catch (e: Exception) {
             AppLog.e(e)
             null
         }
     }
 
-    fun retrieve(imageUrl: String, customize: (ImageRequest.Builder) -> Unit)  {
-        imageLoader.enqueue(request(imageUrl, customize))
+    override fun retrieve(imageUrl: String, customize: (ImageRequest.Builder) -> Unit) {
+        coilLoader.enqueue(request(imageUrl, customize))
     }
 
-    fun loadAppIntoImageView(app: App, iconView: ImageView, @DrawableRes defaultRes: Int) {
+    override fun loadAppIntoImageView(app: App, iconView: ImageView, @DrawableRes defaultRes: Int) {
         val request = request(app.iconUrl) {
             it.placeholder(defaultRes)
             it.target(iconView)
         }
-        imageLoader.enqueue(request)
+        coilLoader.enqueue(request)
     }
 
-    private fun request(imageUrl: String, customize: (ImageRequest.Builder) -> Unit = {}): ImageRequest {
+    override fun request(imageUrl: String, customize: (ImageRequest.Builder) -> Unit): ImageRequest {
         return ImageRequest.Builder(context).apply {
             data(imageUrl.ifEmpty { null })
             transformations(listOf(AdaptiveIconTransformation(context, iconPath, imageUrl)))

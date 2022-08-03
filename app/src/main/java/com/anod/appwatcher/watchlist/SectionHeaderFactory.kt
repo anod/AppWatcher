@@ -8,10 +8,10 @@ import com.anod.appwatcher.model.AppInfoMetadata
  */
 
 interface SectionHeaderFactory {
-    fun insertSeparator(before: SectionItem?, after: SectionItem?): Header?
+    fun insertSeparator(before: SectionItem?, after: SectionItem?): SectionItem.Header?
 
     class Empty : SectionHeaderFactory {
-        override fun insertSeparator(before: SectionItem?, after: SectionItem?): Header? = null
+        override fun insertSeparator(before: SectionItem?, after: SectionItem?): SectionItem.Header? = null
     }
 }
 
@@ -19,7 +19,7 @@ class DefaultSectionHeaderFactory(
         private var showRecentlyUpdated: Boolean
 ) : SectionHeaderFactory {
 
-    override fun insertSeparator(before: SectionItem?, after: SectionItem?): Header? {
+    override fun insertSeparator(before: SectionItem?, after: SectionItem?): SectionItem.Header? {
         if (after == null) {
             // we're at the end of the list
             return null
@@ -27,50 +27,50 @@ class DefaultSectionHeaderFactory(
 
         if (before == null) {
             when (after) {
-                is RecentItem -> return Header(RecentlyInstalledHeader)
-                is OnDeviceItem -> return Header(OnDeviceHeader)
-                is AppItem -> {
+                is SectionItem.Recent -> return SectionItem.Header(RecentlyInstalledHeader)
+                is SectionItem.OnDevice -> return SectionItem.Header(OnDeviceHeader)
+                is SectionItem.App -> {
                     val appListItem = after.appListItem
                     val status = appListItem.app.status
                     if (status == AppInfoMetadata.STATUS_UPDATED) {
-                        return Header(NewHeader)
+                        return SectionItem.Header(NewHeader)
                     }
                     if (showRecentlyUpdated && appListItem.recentFlag) {
-                        return Header(RecentlyUpdatedHeader)
+                        return SectionItem.Header(RecentlyUpdatedHeader)
                     }
-                    return Header(WatchingHeader)
+                    return SectionItem.Header(WatchingHeader)
                 }
-                is EmptyItem -> {
+                is SectionItem.Empty -> {
                 }
-                is Header -> {
+                is SectionItem.Header -> {
                 }
             }
         }
 
-        if (before is RecentItem) {
+        if (before is SectionItem.Recent) {
             when (after) {
-                is OnDeviceItem -> return Header(OnDeviceHeader)
-                is AppItem -> {
+                is SectionItem.OnDevice -> return SectionItem.Header(OnDeviceHeader)
+                is SectionItem.App -> {
                     val appListItem = after.appListItem
                     val status = appListItem.app.status
                     if (status == AppInfoMetadata.STATUS_UPDATED) {
-                        return Header(NewHeader)
+                        return SectionItem.Header(NewHeader)
                     }
                     if (showRecentlyUpdated && appListItem.recentFlag) {
-                        return Header(RecentlyUpdatedHeader)
+                        return SectionItem.Header(RecentlyUpdatedHeader)
                     }
-                    return Header(WatchingHeader)
+                    return SectionItem.Header(WatchingHeader)
                 }
-                EmptyItem -> { }
-                is Header -> { }
-                RecentItem -> { }
+                SectionItem.Empty -> {}
+                is SectionItem.Header -> {}
+                SectionItem.Recent -> {}
             }
         }
 
-        if (before is AppItem) {
+        if (before is SectionItem.App) {
             when (after) {
-                is OnDeviceItem -> return Header(OnDeviceHeader)
-                is AppItem -> {
+                is SectionItem.OnDevice -> return SectionItem.Header(OnDeviceHeader)
+                is SectionItem.App -> {
                     val beforeItem = before.appListItem
                     val afterItem = after.appListItem
                     if (
@@ -78,22 +78,22 @@ class DefaultSectionHeaderFactory(
                             && afterItem.app.status == AppInfoMetadata.STATUS_NORMAL
                     ) {
                         if (showRecentlyUpdated && afterItem.recentFlag) {
-                            return Header(RecentlyUpdatedHeader)
+                            return SectionItem.Header(RecentlyUpdatedHeader)
                         }
-                        return Header(WatchingHeader)
+                        return SectionItem.Header(WatchingHeader)
                     } else if (
                             showRecentlyUpdated
                             && beforeItem.app.status == AppInfoMetadata.STATUS_NORMAL
                             && afterItem.app.status == AppInfoMetadata.STATUS_NORMAL
                     ) {
                         if (beforeItem.recentFlag && !afterItem.recentFlag) {
-                            return Header(WatchingHeader)
+                            return SectionItem.Header(WatchingHeader)
                         }
                     }
                 }
-                EmptyItem -> { }
-                is Header -> { }
-                RecentItem -> { }
+                SectionItem.Empty -> {}
+                is SectionItem.Header -> {}
+                SectionItem.Recent -> {}
             }
         }
 

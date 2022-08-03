@@ -1,35 +1,71 @@
 package com.anod.appwatcher.tags
 
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.SavedStateHandle
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.preferences.Preferences
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.anod.appwatcher.utils.BaseFlowViewModel
+import com.anod.appwatcher.utils.prefs
+import com.anod.appwatcher.watchlist.WatchListEvent
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
 import org.koin.core.component.inject
+
+data class AppsTagScreenState(
+        val tag: Tag,
+        val titleFilter: String = "",
+        val sortId: Int = 0,
+)
+
+sealed interface AppsTagScreenEvent {
+    object OnBackPressed : AppsTagScreenEvent
+    class FilterByTitle(val titleFilter: String) : AppsTagScreenEvent
+    class ListEvent(val event: WatchListEvent) : AppsTagScreenEvent
+}
+
+sealed interface AppsTagScreenAction {
+    object OnBackPressed : AppsTagScreenAction
+}
 
 /**
  * @author Alex Gavrishev
  * @date 19/04/2016.
  */
-class AppsTagViewModel(application: android.app.Application) : AndroidViewModel(application), KoinComponent {
-    val titleFilter = MutableStateFlow("")
-    var tag = MutableStateFlow(Tag(""))
-
+class AppsTagViewModel(state: SavedStateHandle) : BaseFlowViewModel<AppsTagScreenState, AppsTagScreenEvent, AppsTagScreenAction>(), KoinComponent {
     private val database: AppsDatabase by inject()
+    val tagAppsImport: TagAppsImport by lazy { TagAppsImport(viewState.tag, get(), get()) }
 
-    internal lateinit var tagAppsImport: TagAppsImport
+    init {
+        viewState = AppsTagScreenState(
+                tag = state[EXTRA_TAG] ?: Tag(0, "", 0),
+                sortId = prefs.sortIndex
+        )
+    }
 
-    val apps = titleFilter.flatMapLatest { titleFilter ->
+    val apps = viewStates.map { it.titleFilter }.distinctUntilChanged().flatMapLatest { titleFilter ->
         val appsTable = database.apps()
         AppListTable.Queries.loadAppList(Preferences.SORT_NAME_ASC, titleFilter, appsTable)
     }
+    val tags = database.appTags().forTag(viewState.tag.id)
 
-    val tags = tag.flatMapLatest { database.appTags().forTag(it.id) }
+    override fun handleEvent(event: AppsTagScreenEvent) {
+        when (event) {
+            is AppsTagScreenEvent.FilterByTitle -> viewState = viewState.copy(titleFilter = event.titleFilter)
+            is AppsTagScreenEvent.ListEvent -> {}
+            AppsTagScreenEvent.OnBackPressed -> emitAction(AppsTagScreenAction.OnBackPressed)
+        }
+    }
 
     suspend fun import() {
         tagAppsImport.run()
     }
+
+    companion object {
+        const val EXTRA_TAG = "extra_tag"
+    }
+
 }

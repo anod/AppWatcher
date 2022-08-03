@@ -50,10 +50,6 @@ class AppsTagSelectDialog : DialogFragment(R.layout.fragment_tag_select), KoinCo
 
         _binding = FragmentTagSelectBinding.bind(view)
 
-        val tag: Tag = requireArguments().getParcelable(extraTag)!!
-        viewModel.tagAppsImport = TagAppsImport(tag, get(), get())
-        viewModel.tag.value = tag
-
         binding.list.layoutManager = LinearLayoutManager(requireContext())
         binding.button3.setOnClickListener {
             val importAdapter = binding.list.adapter as TagAppsAdapter
@@ -90,13 +86,13 @@ class AppsTagSelectDialog : DialogFragment(R.layout.fragment_tag_select), KoinCo
             }
         }
 
-        binding.searchField.editText?.setText(viewModel.titleFilter.value)
+        binding.searchField.editText?.setText(viewModel.viewState.titleFilter)
         binding.searchField.editText?.doOnTextChanged { inputText, _, _, _ ->
-            viewModel.titleFilter.value = inputText.toString()
+            viewModel.handleEvent(AppsTagScreenEvent.FilterByTitle(inputText.toString()))
         }
         Keyboard.hide(binding.searchField.editText!!, requireContext())
 
-        applyTagColor(tag)
+        applyTagColor(viewModel.viewState.tag)
     }
 
     private fun applyTagColor(tag: Tag) {

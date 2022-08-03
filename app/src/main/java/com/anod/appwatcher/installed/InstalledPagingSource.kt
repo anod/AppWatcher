@@ -8,7 +8,6 @@ import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.preferences.Preferences
-import com.anod.appwatcher.watchlist.OnDeviceItem
 import com.anod.appwatcher.watchlist.SectionItem
 import com.anod.appwatcher.watchlist.WatchListPagingSource
 import info.anodsplace.framework.util.dayStartAgoMillis
@@ -48,7 +47,7 @@ class InstalledPagingSource(
                 }
                 .map { app ->
                     val appChange = changelogAdapter.changelogs[app.appId]
-                    OnDeviceItem(AppListItem(
+                    SectionItem.OnDevice(AppListItem(
                             app = app,
                             changeDetails = appChange?.details ?: "",
                             noNewDetails = false,

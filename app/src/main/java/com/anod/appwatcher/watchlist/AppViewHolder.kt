@@ -17,8 +17,8 @@ class AppViewHolder(
         accentColor: Int?,
         resourceProvider: ResourceProvider,
         iconLoader: AppIconLoader,
-        private val action: EventFlow<WishListAction>)
-    : AppViewHolderBase<AppItem>(itemView, resourceProvider, iconLoader) {
+        private val action: EventFlow<WatchListAction>)
+    : AppViewHolderBase<SectionItem.App>(itemView, resourceProvider, iconLoader) {
 
     enum class Selection {
         None, Disabled, NotSelected, Selected;
@@ -41,11 +41,11 @@ class AppViewHolder(
     init {
         val content = itemView.findViewById<View>(R.id.content)
         content.setOnSafeClickListener {
-            action.tryEmit(ItemClick(this.app!!, index))
+            action.tryEmit(WatchListAction.ItemClick(this.app!!, index))
         }
 
         content.setOnLongClickListener {
-            action.tryEmit(ItemLongClick(this.app!!, index))
+            action.tryEmit(WatchListAction.ItemLongClick(this.app!!, index))
             true
         }
     }

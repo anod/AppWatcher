@@ -1,7 +1,5 @@
 package com.anod.appwatcher.tags
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
 import com.anod.appwatcher.R
@@ -11,7 +9,6 @@ import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.WatchListActivity
 import com.google.android.material.appbar.MaterialToolbar
 import info.anodsplace.framework.app.CustomThemeColors
-import info.anodsplace.framework.app.addMultiWindowFlags
 import org.koin.core.component.KoinComponent
 
 /**
@@ -83,11 +80,6 @@ class AppsTagActivity : WatchListActivity(), KoinComponent {
     }
 
     companion object {
-        const val EXTRA_TAG = "extra_tag"
-
-        fun createTagIntent(tag: Tag, context: Context) = Intent(context, AppsTagActivity::class.java).apply {
-            putExtra(EXTRA_TAG, tag)
-            addMultiWindowFlags(context)
-        }
+        private const val EXTRA_TAG = "extra_tag"
     }
 }

@@ -1,7 +1,6 @@
 package com.anod.appwatcher.details
 
 import android.accounts.Account
-import android.app.Application
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.BitmapDrawable
@@ -92,16 +91,15 @@ sealed interface DetailsScreenEvent {
     class UpdateAccentColor(val colorRoles: ColorRoles) : DetailsScreenEvent
 }
 
-class DetailsViewModel(application: Application, argAppId: String, argRowId: Int, argDetailsUrl: String) : BaseFlowViewModel<DetailsScreenState, DetailsScreenEvent, DetailsScreenAction>(application), KoinComponent {
+class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) : BaseFlowViewModel<DetailsScreenState, DetailsScreenEvent, DetailsScreenAction>(), KoinComponent {
 
     class Factory(
-            private val application: Application,
             private val argAppId: String,
             private val argRowId: Int,
             private val argDetailsUrl: String
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            return DetailsViewModel(application, argAppId, argRowId, argDetailsUrl) as T
+            return DetailsViewModel(argAppId, argRowId, argDetailsUrl) as T
         }
     }
 

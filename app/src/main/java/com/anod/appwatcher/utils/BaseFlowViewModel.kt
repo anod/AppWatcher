@@ -1,13 +1,12 @@
 package com.anod.appwatcher.utils
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-abstract class BaseFlowViewModel<State, Event, Action>(val app: Application) : AndroidViewModel(app) {
+abstract class BaseFlowViewModel<State, Event, Action> : ViewModel() {
 
     private lateinit var _viewState: MutableStateFlow<State>
     val viewStates: StateFlow<State>

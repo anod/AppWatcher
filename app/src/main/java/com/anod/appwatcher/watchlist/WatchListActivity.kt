@@ -14,6 +14,7 @@ import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.annotation.MenuRes
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
@@ -39,14 +40,18 @@ import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.FragmentContainerFactory
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 
-sealed class ListState
-object SyncStarted : ListState()
-class SyncStopped(val updatesCount: Int) : ListState()
-object Updated : ListState()
-object NoNetwork : ListState()
-object ShowAuthDialog : ListState()
+sealed class ListState {
+    object SyncStarted : ListState()
+    class SyncStopped(val updatesCount: Int) : ListState()
+    object Updated : ListState()
+    object NoNetwork : ListState()
+    object ShowAuthDialog : ListState()
+}
 
 interface AppDetailsRouter {
     fun openAppDetails(appId: String, rowId: Int, detailsUrl: String?)
@@ -80,7 +85,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
 
     private val menuAction = EventFlow<MenuAction>()
     private val actionMenu by lazy { WatchListMenu(menuAction, this, appScope, prefs) }
-    private val stateViewModel: WatchListStateViewModel by viewModels()
+    private val stateViewModel: WatchListStateViewModel by viewModels(factoryProducer = { WatchListStateViewModel.Factory(application) })
 
     @get:MenuRes
     protected abstract val menuResource: Int
@@ -123,7 +128,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
             menuAction.collectLatest {
                 when (it) {
                     is FilterMenuAction -> binding.viewPager.currentItem = it.filterId
-                    is SortMenuAction -> stateViewModel.sortId.value = it.sortId
+                    is SortMenuAction -> stateViewModel.handleEvent(WatchListSharedStateEvent.ChangeSort(it.sortId))
                     is SearchQueryAction -> {
                         if (it.submit) {
                             startActivity(Intent(this@WatchListActivity, MarketSearchActivity::class.java).apply {
@@ -131,40 +136,42 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
                                 putExtra(SearchActivity.EXTRA_EXACT, true)
                             })
                         } else {
-                            stateViewModel.titleFilter.value = it.query
+                            stateViewModel.handleEvent(WatchListSharedStateEvent.FilterByTitle(it.query))
                         }
                     }
                 }
             }
         }
 
-        stateViewModel.listState.observe(this) {
-            when (it) {
-                is SyncStarted -> {
-                    actionMenu.startRefresh()
-                    Toast.makeText(this, R.string.refresh_scheduled, Toast.LENGTH_SHORT).show()
-                }
-                is SyncStopped -> {
-                    actionMenu.stopRefresh()
-                    if (it.updatesCount == 0) {
-                        Toast.makeText(
-                            this@WatchListActivity,
-                            R.string.no_updates_found,
-                            Toast.LENGTH_SHORT
-                        ).show()
+        lifecycleScope.launch {
+            stateViewModel.viewStates.map { it.listState }.distinctUntilChanged().collect {
+                when (it) {
+                    is ListState.SyncStarted -> {
+                        actionMenu.startRefresh()
+                        Toast.makeText(this@WatchListActivity, R.string.refresh_scheduled, Toast.LENGTH_SHORT).show()
                     }
-                    ViewModelProvider(this@WatchListActivity).get(DrawerViewModel::class.java)
-                        .refreshLastUpdateTime()
-                }
-                is NoNetwork -> {
-                    Toast.makeText(this, R.string.check_connection, Toast.LENGTH_SHORT).show()
-                    actionMenu.stopRefresh()
-                }
-                is ShowAuthDialog -> {
-                    this.showAccountsDialogWithCheck()
-                    actionMenu.stopRefresh()
-                }
-                else -> {
+                    is ListState.SyncStopped -> {
+                        actionMenu.stopRefresh()
+                        if (it.updatesCount == 0) {
+                            Toast.makeText(
+                                    this@WatchListActivity,
+                                    R.string.no_updates_found,
+                                    Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        ViewModelProvider(this@WatchListActivity).get(DrawerViewModel::class.java)
+                                .refreshLastUpdateTime()
+                    }
+                    is ListState.NoNetwork -> {
+                        Toast.makeText(this@WatchListActivity, R.string.check_connection, Toast.LENGTH_SHORT).show()
+                        actionMenu.stopRefresh()
+                    }
+                    is ListState.ShowAuthDialog -> {
+                        this@WatchListActivity.showAccountsDialogWithCheck()
+                        actionMenu.stopRefresh()
+                    }
+                    else -> {
+                    }
                 }
             }
         }
@@ -172,8 +179,8 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
 
     override fun updateWideLayout(isWideLayout: Boolean, hinge: Rect) {
         super.updateWideLayout(isWideLayout, hinge)
-        stateViewModel.isWideLayout = isWideLayout
-        if (stateViewModel.isWideLayout) {
+        stateViewModel.handleEvent(WatchListSharedStateEvent.SetWideLayout(isWideLayout))
+        if (isWideLayout) {
             if (supportFragmentManager.findFragmentByTag(DetailsEmptyView.tag) == null) {
                 supportFragmentManager.commit {
                     replace(R.id.details, DetailsEmptyView(), DetailsEmptyView.tag)
@@ -232,7 +239,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     }
 
     override fun openAppDetails(appId: String, rowId: Int, detailsUrl: String?) {
-        if (stateViewModel.isWideLayout) {
+        if (stateViewModel.viewState.isWideLayout) {
             supportFragmentManager.commit {
                 add(R.id.details, DetailsFragment.newInstance(appId, detailsUrl ?: "", rowId), DetailsFragment.tag)
                 addToBackStack(DetailsFragment.tag)
@@ -243,7 +250,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     }
 
     override fun onBackPressed() {
-        if (stateViewModel.isWideLayout && supportFragmentManager.findFragmentByTag(DetailsFragment.tag) != null) {
+        if (stateViewModel.viewState.isWideLayout && supportFragmentManager.findFragmentByTag(DetailsFragment.tag) != null) {
             supportFragmentManager.popBackStack(DetailsFragment.tag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
         } else {
             if (!DetailsDialog.dismiss(supportFragmentManager)) {
@@ -252,7 +259,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         }
     }
 
-    class Adapter(private val factories: List<FragmentContainerFactory>, activity: WatchListActivity) : FragmentStateAdapter(activity) {
+    class Adapter(private val factories: List<FragmentContainerFactory>, activity: FragmentActivity) : FragmentStateAdapter(activity) {
 
         override fun getItemCount(): Int = factories.size
 
