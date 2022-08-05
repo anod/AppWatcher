@@ -33,10 +33,11 @@ import org.koin.core.component.inject
 typealias InstalledPackageRow = Pair<String, Int>
 
 data class WatchListState(
+        val pagingSourceConfig: WatchListPagingSource.Config,
         val titleFilter: String = "",
         val sortId: Int = 0,
         val tag: Tag? = null,
-        val filter: AppListFilter = AppListFilter.All()
+        val filter: AppListFilter = AppListFilter.All(),
 )
 
 sealed interface WatchListAction {
@@ -58,9 +59,9 @@ sealed interface WatchListEvent {
     class ItemClick(val item: SectionItem, val index: Int) : WatchListEvent
 }
 
-data class WatchListPageArgs(val sortId: Int, val filterId: Int, val tag: Tag?)
+data class WatchListPageArgs(val filterId: Int, val tag: Tag?)
 
-abstract class WatchListViewModel(args: WatchListPageArgs) : BaseFlowViewModel<WatchListState, WatchListEvent, WatchListAction>(), KoinComponent {
+abstract class WatchListViewModel(args: WatchListPageArgs, pagingSourceConfig: WatchListPagingSource.Config) : BaseFlowViewModel<WatchListState, WatchListEvent, WatchListAction>(), KoinComponent {
     companion object {
         const val recentlyInstalledViews = 10
     }
@@ -82,8 +83,8 @@ abstract class WatchListViewModel(args: WatchListPageArgs) : BaseFlowViewModel<W
 
     init {
         viewState = WatchListState(
+                pagingSourceConfig = pagingSourceConfig,
                 filter = createFilter(args.filterId),
-                sortId = args.sortId,
                 tag = args.tag,
         )
     }
@@ -96,14 +97,21 @@ abstract class WatchListViewModel(args: WatchListPageArgs) : BaseFlowViewModel<W
             .onEach { delay(600) }
             .flowOn(Dispatchers.Default)
 
-    var pagingSource: PagingSource<Int, SectionItem>? = null
-        private set
+
+    private var _pagingData: Flow<PagingData<SectionItem>>? = null
+    val pagingData: Flow<PagingData<SectionItem>>
+        get() {
+            if (_pagingData == null) {
+                _pagingData = createPager()
+            }
+            return _pagingData!!
+        }
 
     private lateinit var headerFactory: SectionHeaderFactory
     val selection = MutableLiveData<Pair<Int, AppViewHolder.Selection>>()
 
-    abstract fun createPagingSource(config: WatchListPagingSource.Config): PagingSource<Int, SectionItem>
-    abstract fun createSectionHeaderFactory(config: WatchListPagingSource.Config): SectionHeaderFactory
+    abstract fun createPagingSource(): PagingSource<Int, SectionItem>
+    abstract fun createSectionHeaderFactory(): SectionHeaderFactory
 
     val recentlyInstalledPackages: Flow<List<InstalledPackageRow>> = packageChanged
             .observer
@@ -136,15 +144,16 @@ abstract class WatchListViewModel(args: WatchListPageArgs) : BaseFlowViewModel<W
         }
     }
 
-    fun load(config: WatchListPagingSource.Config, initialKey: Int? = null): Flow<PagingData<SectionItem>> {
-        headerFactory = createSectionHeaderFactory(config)
+    fun createPager(): Flow<PagingData<SectionItem>> {
+        headerFactory = createSectionHeaderFactory()
         installedApps.reset()
         // When initialLoadSize larger than pageSize it cause a bug
         // where after filter if there is only one pages items are shown multiple times
-        return Pager(PagingConfig(pageSize = WatchListPagingSource.pageSize, initialLoadSize = WatchListPagingSource.pageSize), initialKey = initialKey) {
-            pagingSource = createPagingSource(config)
-            pagingSource!!
-        }.flow
+        return Pager(
+                config = PagingConfig(pageSize = WatchListPagingSource.pageSize, initialLoadSize = WatchListPagingSource.pageSize),
+                initialKey = null,
+                pagingSourceFactory = { createPagingSource() }
+        ).flow
                 .map { pagingData: PagingData<SectionItem> ->
                     pagingData.insertSeparators { before, after ->
                         headerFactory.insertSeparator(before, after)
@@ -178,25 +187,24 @@ abstract class WatchListViewModel(args: WatchListPageArgs) : BaseFlowViewModel<W
     }
 }
 
-class AppsWatchListViewModel(args: WatchListPageArgs) : WatchListViewModel(args), KoinComponent {
+class AppsWatchListViewModel(args: WatchListPageArgs, pagingSourceConfig: WatchListPagingSource.Config) : WatchListViewModel(args, pagingSourceConfig), KoinComponent {
     private val packageManager: PackageManager by inject()
 
-    class Factory(private val args: WatchListPageArgs) : ViewModelProvider.Factory {
+    class Factory(private val args: WatchListPageArgs, private val pagingSourceConfig: WatchListPagingSource.Config) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            return AppsWatchListViewModel(args) as T
+            return AppsWatchListViewModel(args, pagingSourceConfig) as T
         }
     }
 
-    override fun createPagingSource(config: WatchListPagingSource.Config) = WatchListPagingSource(
-            sortId = viewState.sortId,
+    override fun createPagingSource() = WatchListPagingSource(
+            prefs = prefs,
             titleFilter = viewState.titleFilter,
-            config = config,
+            config = viewState.pagingSourceConfig,
             itemFilter = viewState.filter,
             tag = viewState.tag,
             packageManager = packageManager,
             database = database
     )
 
-    override fun createSectionHeaderFactory(config: WatchListPagingSource.Config) = DefaultSectionHeaderFactory(config.showRecentlyUpdated)
-
+    override fun createSectionHeaderFactory() = DefaultSectionHeaderFactory(viewState.pagingSourceConfig.showRecentlyUpdated)
 }

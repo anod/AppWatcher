@@ -27,18 +27,18 @@ class DefaultSectionHeaderFactory(
 
         if (before == null) {
             when (after) {
-                is SectionItem.Recent -> return SectionItem.Header(RecentlyInstalledHeader)
-                is SectionItem.OnDevice -> return SectionItem.Header(OnDeviceHeader)
+                is SectionItem.Recent -> return SectionItem.Header(SectionHeader.RecentlyInstalled)
+                is SectionItem.OnDevice -> return SectionItem.Header(SectionHeader.OnDevice)
                 is SectionItem.App -> {
                     val appListItem = after.appListItem
                     val status = appListItem.app.status
                     if (status == AppInfoMetadata.STATUS_UPDATED) {
-                        return SectionItem.Header(NewHeader)
+                        return SectionItem.Header(SectionHeader.New)
                     }
                     if (showRecentlyUpdated && appListItem.recentFlag) {
-                        return SectionItem.Header(RecentlyUpdatedHeader)
+                        return SectionItem.Header(SectionHeader.RecentlyUpdated)
                     }
-                    return SectionItem.Header(WatchingHeader)
+                    return SectionItem.Header(SectionHeader.Watching)
                 }
                 is SectionItem.Empty -> {
                 }
@@ -49,17 +49,17 @@ class DefaultSectionHeaderFactory(
 
         if (before is SectionItem.Recent) {
             when (after) {
-                is SectionItem.OnDevice -> return SectionItem.Header(OnDeviceHeader)
+                is SectionItem.OnDevice -> return SectionItem.Header(SectionHeader.OnDevice)
                 is SectionItem.App -> {
                     val appListItem = after.appListItem
                     val status = appListItem.app.status
                     if (status == AppInfoMetadata.STATUS_UPDATED) {
-                        return SectionItem.Header(NewHeader)
+                        return SectionItem.Header(SectionHeader.New)
                     }
                     if (showRecentlyUpdated && appListItem.recentFlag) {
-                        return SectionItem.Header(RecentlyUpdatedHeader)
+                        return SectionItem.Header(SectionHeader.RecentlyUpdated)
                     }
-                    return SectionItem.Header(WatchingHeader)
+                    return SectionItem.Header(SectionHeader.Watching)
                 }
                 SectionItem.Empty -> {}
                 is SectionItem.Header -> {}
@@ -69,7 +69,7 @@ class DefaultSectionHeaderFactory(
 
         if (before is SectionItem.App) {
             when (after) {
-                is SectionItem.OnDevice -> return SectionItem.Header(OnDeviceHeader)
+                is SectionItem.OnDevice -> return SectionItem.Header(SectionHeader.OnDevice)
                 is SectionItem.App -> {
                     val beforeItem = before.appListItem
                     val afterItem = after.appListItem
@@ -78,16 +78,16 @@ class DefaultSectionHeaderFactory(
                             && afterItem.app.status == AppInfoMetadata.STATUS_NORMAL
                     ) {
                         if (showRecentlyUpdated && afterItem.recentFlag) {
-                            return SectionItem.Header(RecentlyUpdatedHeader)
+                            return SectionItem.Header(SectionHeader.RecentlyUpdated)
                         }
-                        return SectionItem.Header(WatchingHeader)
+                        return SectionItem.Header(SectionHeader.Watching)
                     } else if (
                             showRecentlyUpdated
                             && beforeItem.app.status == AppInfoMetadata.STATUS_NORMAL
                             && afterItem.app.status == AppInfoMetadata.STATUS_NORMAL
                     ) {
                         if (beforeItem.recentFlag && !afterItem.recentFlag) {
-                            return SectionItem.Header(WatchingHeader)
+                            return SectionItem.Header(SectionHeader.Watching)
                         }
                     }
                 }

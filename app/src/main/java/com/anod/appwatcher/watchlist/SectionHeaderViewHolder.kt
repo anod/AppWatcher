@@ -54,19 +54,19 @@ open class SectionHeaderViewHolder(itemView: View, titleColorOverride: Int?) : R
     fun bind(item: SectionHeader) {
         this.item = item
         when (item) {
-            is NewHeader -> {
+            is SectionHeader.New -> {
                 title.setText(R.string.new_updates)
             }
-            is RecentlyUpdatedHeader -> {
+            is SectionHeader.RecentlyUpdated -> {
                 title.setText(R.string.recently_updated)
             }
-            is WatchingHeader -> {
+            is SectionHeader.Watching -> {
                 title.setText(R.string.watching)
             }
-            is RecentlyInstalledHeader -> {
+            is SectionHeader.RecentlyInstalled -> {
                 title.setText(R.string.recently_installed)
             }
-            is OnDeviceHeader -> {
+            is SectionHeader.OnDevice -> {
                 title.setText(R.string.downloaded)
             }
         }

@@ -1,5 +1,6 @@
 package com.anod.appwatcher.tags
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -15,35 +16,42 @@ import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.watchlist.WatchListPageArgs
+import com.anod.appwatcher.watchlist.WatchListPagingSource
+import com.anod.appwatcher.watchlist.WatchListSharedState
+import com.anod.appwatcher.watchlist.WatchListSharedStateEvent
 import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
+import info.anodsplace.applog.AppLog
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPagerApi::class)
 @Composable
-fun AppsTagScreen(tag: Tag, sortIndex: Int, onEvent: (AppsTagScreenEvent) -> Unit) {
+fun TagWatchListScreen(screenState: WatchListSharedState, pagingSourceConfig: WatchListPagingSource.Config, onEvent: (WatchListSharedStateEvent) -> Unit) {
     var topBarMoreMenu by remember { mutableStateOf(false) }
     var topBarFilterMenu by remember { mutableStateOf(false) }
     var topBarSortMenu by remember { mutableStateOf(false) }
     var subtitle: String? by remember { mutableStateOf(null) }
-    val titles = listOf(
+
+    val filterTitles = listOf(
             stringResource(id = R.string.tab_all),
             stringResource(id = R.string.tab_installed),
             stringResource(id = R.string.tab_not_installed),
             stringResource(id = R.string.tab_updatable),
     )
+
     val pages = listOf(
-            WatchListPageArgs(sortId = sortIndex, filterId = Filters.TAB_ALL, tag = tag),
-            WatchListPageArgs(sortId = sortIndex, filterId = Filters.INSTALLED, tag = tag),
-            WatchListPageArgs(sortId = sortIndex, filterId = Filters.UNINSTALLED, tag = tag),
-            WatchListPageArgs(sortId = sortIndex, filterId = Filters.UPDATABLE, tag = tag),
+            WatchListPageArgs(filterId = Filters.TAB_ALL, tag = screenState.tag),
+            WatchListPageArgs(filterId = Filters.INSTALLED, tag = screenState.tag),
+            WatchListPageArgs(filterId = Filters.UNINSTALLED, tag = screenState.tag),
+            WatchListPageArgs(filterId = Filters.UPDATABLE, tag = screenState.tag),
     )
     val pagerState = rememberPagerState(initialPage = 0)
     subtitle = if (pagerState.currentPage > 0) {
-        titles[pagerState.currentPage]
+        filterTitles[pagerState.currentPage]
     } else {
         null
     }
+
+    AppLog.d("Recomposition: TagWatchListScreen")
 
     Scaffold(
             topBar = {
@@ -51,16 +59,16 @@ fun AppsTagScreen(tag: Tag, sortIndex: Int, onEvent: (AppsTagScreenEvent) -> Uni
                         title = {
                             if (subtitle != null) {
                                 Column {
-                                    Text(tag.name, color = MaterialTheme.colorScheme.onPrimary, style = MaterialTheme.typography.headlineSmall)
+                                    Text(screenState.tag.name, color = MaterialTheme.colorScheme.onPrimary, style = MaterialTheme.typography.headlineSmall)
                                     Text(subtitle!!, color = MaterialTheme.colorScheme.onPrimary, style = MaterialTheme.typography.labelLarge)
                                 }
                             } else {
-                                Text(tag.name, color = MaterialTheme.colorScheme.onPrimary, style = MaterialTheme.typography.headlineMedium)
+                                Text(screenState.tag.name, color = MaterialTheme.colorScheme.onPrimary, style = MaterialTheme.typography.headlineMedium)
                             }
                         },
                         navigationIcon = {
                             IconButton(onClick = {
-                                onEvent(AppsTagScreenEvent.OnBackPressed)
+                                onEvent(WatchListSharedStateEvent.OnBackPressed)
                             }) {
                                 Icon(imageVector = Icons.Default.ArrowBack, contentDescription = stringResource(id = R.string.back))
                             }
@@ -109,23 +117,38 @@ fun AppsTagScreen(tag: Tag, sortIndex: Int, onEvent: (AppsTagScreenEvent) -> Uni
                             }
 
                             DropdownMenu(expanded = topBarSortMenu, onDismissRequest = { topBarSortMenu = false }) {
-                                DropdownMenuItem(text = { Text(text = stringResource(id = R.string.sort_by_name_asc)) }, onClick = { })
-                                DropdownMenuItem(text = { Text(text = stringResource(id = R.string.sort_by_name_desc)) }, onClick = { })
-                                DropdownMenuItem(text = { Text(text = stringResource(id = R.string.sort_by_date_asc)) }, onClick = { })
-                                DropdownMenuItem(text = { Text(text = stringResource(id = R.string.sort_by_date_desc)) }, onClick = { })
+                                val sortTitles = listOf(
+                                        stringResource(id = R.string.sort_by_name_asc),
+                                        stringResource(id = R.string.sort_by_name_desc),
+                                        stringResource(id = R.string.sort_by_date_asc),
+                                        stringResource(id = R.string.sort_by_date_desc),
+                                )
+                                sortTitles.forEachIndexed { index, sortTitle ->
+                                    DropdownMenuItem(
+                                            text = { Text(text = sortTitle) },
+                                            leadingIcon = { Icon(imageVector = if (screenState.sortId == index) Icons.Default.RadioButtonChecked else Icons.Default.RadioButtonUnchecked, contentDescription = null) },
+                                            onClick = {
+                                                onEvent(WatchListSharedStateEvent.ChangeSort(sortId = index))
+                                                topBarMoreMenu = false
+                                                topBarSortMenu = false
+                                            }
+                                    )
+                                }
                             }
                         },
                         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                                containerColor = Color(tag.color),
+                                containerColor = Color(screenState.tag.color),
                                 navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
                                 actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
                         )
                 )
             }
     ) { paddingValues ->
-        HorizontalPager(count = pages.size, state = pagerState, modifier = Modifier.padding(paddingValues)) { pageIndex ->
-            AppsTagListPage(args = pages[pageIndex], onEvent = { event -> onEvent(AppsTagScreenEvent.ListEvent(event)) })
+        //HorizontalPager(count = pages.size, state = pagerState, modifier = Modifier.padding(paddingValues)) { pageIndex ->
+        Box(modifier = Modifier.padding(paddingValues)) {
+            WatchListPage(args = pages[0], pagingSourceConfig = pagingSourceConfig, sortId = screenState.sortId, onEvent = { event -> onEvent(WatchListSharedStateEvent.ListEvent(event)) })
         }
+        //}
     }
 }
 
@@ -133,6 +156,9 @@ fun AppsTagScreen(tag: Tag, sortIndex: Int, onEvent: (AppsTagScreenEvent) -> Uni
 @Composable
 fun DefaultPreview() {
     AppTheme {
-        AppsTagScreen(Tag(0, "Android", Color.Cyan.value.toInt()), sortIndex = 0, onEvent = { })
+        TagWatchListScreen(WatchListSharedState(
+                tag = Tag(0, "Android", Color.Cyan.value.toInt()),
+                sortId = 0,
+        ), pagingSourceConfig = WatchListPagingSource.Config(showRecentlyUpdated = true, showOnDevice = false, showRecentlyInstalled = false), onEvent = { })
     }
 }

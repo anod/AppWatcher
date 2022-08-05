@@ -25,8 +25,8 @@ import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.installed.InstalledFragment
-import com.anod.appwatcher.tags.AppsTagComposeActivity
 import com.anod.appwatcher.tags.EditTagDialog
+import com.anod.appwatcher.tags.TagWatchListComposeActivity
 import com.anod.appwatcher.utils.*
 import com.anod.appwatcher.wishlist.WishListFragment
 import com.google.android.material.navigation.NavigationView
@@ -170,7 +170,7 @@ abstract class DrawerActivity : ToolbarActivity(), KoinComponent {
             } else {
                 tagIndicator.setTextColor(ResourcesCompat.getColor(resources, R.color.alwaysWhite, theme))
             }
-            item.intent = AppsTagComposeActivity.createTagIntent(tag, this@DrawerActivity)
+            item.intent = TagWatchListComposeActivity.createTagIntent(tag, this@DrawerActivity)
         }
         memoryCache.put("tags", result.map { it.first })
     }

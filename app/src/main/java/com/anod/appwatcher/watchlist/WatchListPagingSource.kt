@@ -12,11 +12,12 @@ import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.database.entities.packageToApp
 import com.anod.appwatcher.installed.InstalledTaskWorker
 import com.anod.appwatcher.model.AppListFilter
+import com.anod.appwatcher.preferences.Preferences
 import info.anodsplace.applog.AppLog
 import kotlin.math.max
 
 class WatchListPagingSource(
-        private val sortId: Int,
+        private val prefs: Preferences,
         private val titleFilter: String,
         private val config: Config,
         private val itemFilter: AppListFilter,
@@ -34,6 +35,7 @@ class WatchListPagingSource(
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, SectionItem> {
         val offset = params.key ?: 0
+        val sortId = prefs.sortIndex
         var limit = params.loadSize
         val items = mutableListOf<SectionItem>()
         if (offset == 0) {

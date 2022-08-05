@@ -12,11 +12,11 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.parameter.parametersOf
 
-class InstalledViewModel(args: WatchListPageArgs) : WatchListViewModel(args), KoinComponent {
+class InstalledViewModel(args: WatchListPageArgs, pagingSourceConfig: WatchListPagingSource.Config) : WatchListViewModel(args, pagingSourceConfig), KoinComponent {
 
-    class Factory(private val args: WatchListPageArgs) : ViewModelProvider.Factory {
+    class Factory(private val args: WatchListPageArgs, private val pagingSourceConfig: WatchListPagingSource.Config) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return InstalledViewModel(args) as T
+            return InstalledViewModel(args, pagingSourceConfig) as T
         }
     }
 
@@ -27,11 +27,9 @@ class InstalledViewModel(args: WatchListPageArgs) : WatchListViewModel(args), Ko
 
     val changelogAdapter: ChangelogAdapter by inject { parametersOf(viewModelScope) }
 
-    override fun createPagingSource(config: WatchListPagingSource.Config): PagingSource<Int, SectionItem> {
-        return InstalledPagingSource(viewState.sortId, viewState.titleFilter, config, changelogAdapter, packageManager, database)
+    override fun createPagingSource(): PagingSource<Int, SectionItem> {
+        return InstalledPagingSource(prefs, viewState.titleFilter, config = viewState.pagingSourceConfig, changelogAdapter, packageManager, database)
     }
 
-    override fun createSectionHeaderFactory(config: WatchListPagingSource.Config) =
-            SectionHeaderFactory.Empty()
-
+    override fun createSectionHeaderFactory() = SectionHeaderFactory.Empty()
 }

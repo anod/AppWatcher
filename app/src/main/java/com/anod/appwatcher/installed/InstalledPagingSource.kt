@@ -13,7 +13,7 @@ import com.anod.appwatcher.watchlist.WatchListPagingSource
 import info.anodsplace.framework.util.dayStartAgoMillis
 
 class InstalledPagingSource(
-        private val sortId: Int,
+        private val prefs: Preferences,
         private val titleFilter: String,
         private val config: WatchListPagingSource.Config,
         private val changelogAdapter: ChangelogAdapter,
@@ -22,6 +22,7 @@ class InstalledPagingSource(
 ) : PagingSource<Int, SectionItem>() {
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, SectionItem> {
+        val sortId = prefs.sortIndex
         val installed = InstalledTaskWorker(packageManager, sortId, titleFilter).run()
         val allInstalledPackageNames = installed.map { it.pkg.name }
         val watchingPackages = database.apps().loadRowIds(allInstalledPackageNames).associateBy({ it.packageName }, { it.rowId })

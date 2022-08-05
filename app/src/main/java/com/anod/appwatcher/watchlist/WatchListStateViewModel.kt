@@ -5,15 +5,16 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.lifecycle.SavedStateHandle
 import androidx.work.Operation
 import com.anod.appwatcher.accounts.AuthTokenBlocking
+import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.sync.UpdateCheck
+import com.anod.appwatcher.tags.AppsTagViewModel
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.networkConnection
+import com.anod.appwatcher.utils.prefs
 import info.anodsplace.applog.AppLog
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -21,28 +22,29 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 data class WatchListSharedState(
+        val tag: Tag,
+        val sortId: Int,
         val titleFilter: String = "",
-        val sortId: Int = 0,
         val listState: ListState? = null,
-        val isWideLayout: Boolean = false
+        val isWideLayout: Boolean = false,
 )
 
 sealed interface WatchListSharedStateEvent {
+    object OnBackPressed : WatchListSharedStateEvent
     class ChangeSort(val sortId: Int) : WatchListSharedStateEvent
     class FilterByTitle(val query: String) : WatchListSharedStateEvent
     class SetWideLayout(val wideLayout: Boolean) : WatchListSharedStateEvent
+    class ListEvent(val event: WatchListEvent) : WatchListSharedStateEvent
 }
 
-sealed interface WatchListSharedStateAction
+sealed interface WatchListSharedStateAction {
+    object OnBackPressed : WatchListSharedStateAction
+    class ListAction(val action: WatchListAction) : WatchListSharedStateAction
+}
 
-class WatchListStateViewModel(private val application: Application) : BaseFlowViewModel<WatchListSharedState, WatchListSharedStateEvent, WatchListSharedStateAction>(), KoinComponent {
+class WatchListStateViewModel(state: SavedStateHandle) : BaseFlowViewModel<WatchListSharedState, WatchListSharedStateEvent, WatchListSharedStateAction>(), KoinComponent {
     private val authToken: AuthTokenBlocking by inject()
-
-    class Factory(private val application: Application) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            return WatchListStateViewModel(application) as T
-        }
-    }
+    private val application: Application by inject()
 
     /**
      * Receive notifications from UpdateCheck
@@ -61,7 +63,10 @@ class WatchListStateViewModel(private val application: Application) : BaseFlowVi
     }
 
     init {
-        viewState = WatchListSharedState()
+        viewState = WatchListSharedState(
+                tag = state[AppsTagViewModel.EXTRA_TAG] ?: Tag(0, "", 0),
+                sortId = prefs.sortIndex
+        )
         val filter = IntentFilter().apply {
             addAction(UpdateCheck.syncProgress)
             addAction(UpdateCheck.syncStop)
@@ -72,9 +77,27 @@ class WatchListStateViewModel(private val application: Application) : BaseFlowVi
 
     override fun handleEvent(event: WatchListSharedStateEvent) {
         when (event) {
-            is WatchListSharedStateEvent.ChangeSort -> viewState = viewState.copy(sortId = event.sortId)
+            is WatchListSharedStateEvent.ChangeSort -> {
+                prefs.sortIndex = event.sortId
+                viewState = viewState.copy(sortId = event.sortId)
+            }
             is WatchListSharedStateEvent.FilterByTitle -> viewState = viewState.copy(titleFilter = event.query)
             is WatchListSharedStateEvent.SetWideLayout -> viewState = viewState.copy(isWideLayout = event.wideLayout)
+            is WatchListSharedStateEvent.ListEvent -> {
+                when (val listEvent = event.event) {
+                    is WatchListEvent.ItemClick -> {
+                        when (val item = listEvent.item) {
+                            is SectionItem.Header -> emitAction(WatchListSharedStateAction.ListAction(WatchListAction.SectionHeaderClick(item.type)))
+                            is SectionItem.App -> emitAction(WatchListSharedStateAction.ListAction(WatchListAction.ItemClick(item.appListItem.app, listEvent.index)))
+                            is SectionItem.OnDevice -> emitAction(WatchListSharedStateAction.ListAction(WatchListAction.ItemClick(item.appListItem.app, listEvent.index)))
+                            SectionItem.Empty -> {}
+                            SectionItem.Recent -> {}
+                        }
+                    }
+                    else -> {}
+                }
+            }
+            WatchListSharedStateEvent.OnBackPressed -> emitAction(WatchListSharedStateAction.OnBackPressed)
         }
     }
 

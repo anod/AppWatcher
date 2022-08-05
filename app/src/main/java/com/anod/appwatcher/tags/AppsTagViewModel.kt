@@ -7,7 +7,6 @@ import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.prefs
-import com.anod.appwatcher.watchlist.WatchListEvent
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -23,12 +22,10 @@ data class AppsTagScreenState(
 
 sealed interface AppsTagScreenEvent {
     object OnBackPressed : AppsTagScreenEvent
-    class FilterByTitle(val titleFilter: String) : AppsTagScreenEvent
-    class ListEvent(val event: WatchListEvent) : AppsTagScreenEvent
+    class FilterByTitle(val query: String) : AppsTagScreenEvent
 }
 
 sealed interface AppsTagScreenAction {
-    object OnBackPressed : AppsTagScreenAction
 }
 
 /**
@@ -54,9 +51,8 @@ class AppsTagViewModel(state: SavedStateHandle) : BaseFlowViewModel<AppsTagScree
 
     override fun handleEvent(event: AppsTagScreenEvent) {
         when (event) {
-            is AppsTagScreenEvent.FilterByTitle -> viewState = viewState.copy(titleFilter = event.titleFilter)
-            is AppsTagScreenEvent.ListEvent -> {}
-            AppsTagScreenEvent.OnBackPressed -> emitAction(AppsTagScreenAction.OnBackPressed)
+            is AppsTagScreenEvent.FilterByTitle -> viewState = viewState.copy(titleFilter = event.query)
+            AppsTagScreenEvent.OnBackPressed -> TODO()
         }
     }
 

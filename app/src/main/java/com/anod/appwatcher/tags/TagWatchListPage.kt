@@ -1,6 +1,7 @@
 package com.anod.appwatcher.tags
 
 import android.content.Context
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -8,10 +9,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowRight
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -40,26 +38,36 @@ import com.anod.appwatcher.database.entities.generateTitle
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.watchlist.*
+import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.text.Html
 import org.koin.java.KoinJavaComponent.getKoin
 
 @Composable
-fun AppsTagListPage(args: WatchListPageArgs, onEvent: (WatchListEvent) -> Unit) {
-    val viewModel: WatchListViewModel = viewModel(factory = AppsWatchListViewModel.Factory(args))
-    val config by remember {
-        mutableStateOf(WatchListPagingSource.Config(
-                showRecentlyUpdated = viewModel.prefs.showRecentlyUpdated,
-                showOnDevice = false,
-                showRecentlyInstalled = false
-        ))
+fun WatchListPage(args: WatchListPageArgs, pagingSourceConfig: WatchListPagingSource.Config, sortId: Int, onEvent: (WatchListEvent) -> Unit) {
+    val viewModel: WatchListViewModel = viewModel(factory = AppsWatchListViewModel.Factory(args, pagingSourceConfig = pagingSourceConfig))
+    val items = viewModel.pagingData.collectAsLazyPagingItems()
+
+    AppLog.d("Recomposition: WatchListPage [${args.hashCode()}, ${pagingSourceConfig.hashCode()}, ${sortId}, ${items.hashCode()}, ${viewModel.hashCode()}]")
+
+    LaunchedEffect(key1 = sortId) {
+        AppLog.d("Refresh list items")
+        items.refresh()
     }
-    val items = viewModel.load(config, initialKey = null).collectAsLazyPagingItems()
 
     LazyColumn {
-        itemsIndexed(items) { index, item ->
+        itemsIndexed(
+                items = items,
+                key = { _, item -> item.hashCode() }
+        ) { index, item ->
             if (item != null) { // TODO: Preload?
                 WatchListSectionItem(item, index, onEvent, installedApps = viewModel.installedApps)
+            } else {
+                Box(modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .background(MaterialTheme.colorScheme.inverseOnSurface))
+
             }
         }
     }
@@ -69,11 +77,11 @@ fun AppsTagListPage(args: WatchListPageArgs, onEvent: (WatchListEvent) -> Unit) 
 fun WatchListSectionItem(item: SectionItem, index: Int, onEvent: (WatchListEvent) -> Unit, installedApps: InstalledApps, appIconLoader: AppIconLoader = getKoin().get()) {
     when (item) {
         is SectionItem.Header -> when (item.type) {
-            is RecentlyInstalledHeader -> SectionHeader(item.type, onClick = { onEvent(WatchListEvent.ItemClick(item, index)) })
+            is SectionHeader.RecentlyInstalled -> SectionHeader(item.type, onClick = { onEvent(WatchListEvent.ItemClick(item, index)) })
             else -> SectionHeader(item.type, onClick = null)
         }
-        is SectionItem.App -> AppItem(index, item.appListItem, isLocalApp = item.isLocal, selection = AppViewHolder.Selection.None, installedApps = installedApps, appIconLoader = appIconLoader)
-        is SectionItem.OnDevice -> AppItem(index, item.appListItem, isLocalApp = true, selection = AppViewHolder.Selection.None, installedApps = installedApps, appIconLoader = appIconLoader)
+        is SectionItem.App -> AppItem(item.appListItem, isLocalApp = item.isLocal, selection = AppViewHolder.Selection.None, onClick = { onEvent(WatchListEvent.ItemClick(item, index)) }, installedApps = installedApps, appIconLoader = appIconLoader)
+        is SectionItem.OnDevice -> AppItem(item.appListItem, isLocalApp = true, selection = AppViewHolder.Selection.None, onClick = { onEvent(WatchListEvent.ItemClick(item, index)) }, installedApps = installedApps, appIconLoader = appIconLoader)
         is SectionItem.Recent -> RecentItem()
         is SectionItem.Empty -> EmptyItem()
     }
@@ -82,11 +90,11 @@ fun WatchListSectionItem(item: SectionItem, index: Int, onEvent: (WatchListEvent
 @Composable
 fun SectionHeader(item: SectionHeader, onClick: (() -> Unit)? = null) {
     val text = when (item) {
-        is NewHeader -> stringResource(R.string.new_updates)
-        is RecentlyUpdatedHeader -> stringResource(R.string.recently_updated)
-        is WatchingHeader -> stringResource(R.string.watching)
-        is RecentlyInstalledHeader -> stringResource(R.string.recently_installed)
-        is OnDeviceHeader -> stringResource(R.string.downloaded)
+        is SectionHeader.New -> stringResource(R.string.new_updates)
+        is SectionHeader.RecentlyUpdated -> stringResource(R.string.recently_updated)
+        is SectionHeader.Watching -> stringResource(R.string.watching)
+        is SectionHeader.RecentlyInstalled -> stringResource(R.string.recently_installed)
+        is SectionHeader.OnDevice -> stringResource(R.string.downloaded)
     }
     if (onClick == null) {
         Row(
@@ -130,7 +138,7 @@ data class AppItemState(val color: Color, val text: String, val iconRes: Int, va
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppItem(index: Int, item: AppListItem, isLocalApp: Boolean, selection: AppViewHolder.Selection, installedApps: InstalledApps, appIconLoader: AppIconLoader = getKoin().get()) {
+fun AppItem(item: AppListItem, isLocalApp: Boolean, selection: AppViewHolder.Selection, onClick: (() -> Unit), installedApps: InstalledApps, appIconLoader: AppIconLoader = getKoin().get()) {
     val view = LocalView.current
     val context = LocalContext.current
     val app = item.app
@@ -155,6 +163,7 @@ fun AppItem(index: Int, item: AppListItem, isLocalApp: Boolean, selection: AppVi
     }
 
     ListItem(
+            modifier = Modifier.clickable(enabled = true, onClick = onClick),
             headlineText = {
                 Text(text = title)
             },
@@ -278,7 +287,7 @@ fun WatchListPreview() {
     )
     val installedApps = InstalledApps.StaticMap(emptyMap())
     val items = listOf(
-            SectionItem.Header(type = RecentlyUpdatedHeader),
+            SectionItem.Header(type = SectionHeader.RecentlyUpdated),
             SectionItem.App(AppListItem(
                     app = App(
                             rowId = -1,

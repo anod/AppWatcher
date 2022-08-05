@@ -85,7 +85,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
 
     private val menuAction = EventFlow<MenuAction>()
     private val actionMenu by lazy { WatchListMenu(menuAction, this, appScope, prefs) }
-    private val stateViewModel: WatchListStateViewModel by viewModels(factoryProducer = { WatchListStateViewModel.Factory(application) })
+    private val stateViewModel: WatchListStateViewModel by viewModels()
 
     @get:MenuRes
     protected abstract val menuResource: Int

@@ -74,7 +74,7 @@ class WatchListPagingAdapter(
     override fun getItemViewType(position: Int): Int {
         return when (val item = getItem(position)) {
             is SectionItem.Header -> when (item.type) {
-                is RecentlyInstalledHeader -> ViewType.recentItemHeader
+                is SectionHeader.RecentlyInstalled -> ViewType.recentItemHeader
                 else -> ViewType.simpleHeader
             }
             is SectionItem.App -> ViewType.appItem

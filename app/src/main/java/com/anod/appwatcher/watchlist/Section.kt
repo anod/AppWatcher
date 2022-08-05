@@ -4,17 +4,49 @@ package com.anod.appwatcher.watchlist
 import com.anod.appwatcher.database.entities.AppListItem
 import info.anodsplace.ktx.hashCodeOf
 
-sealed class SectionHeader
-object NewHeader : SectionHeader()
-object RecentlyUpdatedHeader : SectionHeader()
-object WatchingHeader : SectionHeader()
-object RecentlyInstalledHeader : SectionHeader()
-object OnDeviceHeader : SectionHeader()
+sealed interface SectionHeader {
+    object New : SectionHeader
+    object RecentlyUpdated : SectionHeader
+    object Watching : SectionHeader
+    object RecentlyInstalled : SectionHeader
+    object OnDevice : SectionHeader
+}
 
 sealed interface SectionItem {
-    class Header(val type: SectionHeader) : SectionItem
-    object Recent : SectionItem
-    object Empty : SectionItem
+    override fun hashCode(): Int
+
+    class Header(val type: SectionHeader) : SectionItem {
+        override fun hashCode(): Int {
+            return hashCodeOf(type)
+        }
+
+        override fun equals(other: Any?): Boolean {
+            val item = other as? Header ?: return false
+            return hashCode() == item.hashCode()
+        }
+    }
+
+    object Recent : SectionItem {
+        override fun hashCode(): Int {
+            return hashCodeOf(this)
+        }
+
+        override fun equals(other: Any?): Boolean {
+            val item = other as? Recent ?: return false
+            return hashCode() == item.hashCode()
+        }
+    }
+
+    object Empty : SectionItem {
+        override fun hashCode(): Int {
+            return hashCodeOf(this)
+        }
+
+        override fun equals(other: Any?): Boolean {
+            val item = other as? Empty ?: return false
+            return hashCode() == item.hashCode()
+        }
+    }
 
     class App(val appListItem: AppListItem, val isLocal: Boolean) : SectionItem {
         override fun hashCode(): Int {

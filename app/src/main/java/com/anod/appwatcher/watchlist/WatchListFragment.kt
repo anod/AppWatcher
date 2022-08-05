@@ -53,13 +53,21 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener,
     val binding get() = _binding!!
 
     protected open fun viewModelFactory(): ViewModelProvider.Factory {
-        val args = requireArguments()
-        return AppsWatchListViewModel.Factory(WatchListPageArgs(
-                sortId = args.getInt(ARG_SORT),
-                filterId = args.getInt(ARG_FILTER),
-                tag = args.getParcelable(ARG_TAG)
-        ))
+        val args = requireArguments().let {
+            WatchListPageArgs(
+//                sortId = args.getInt(ARG_SORT),
+                    filterId = it.getInt(ARG_FILTER),
+                    tag = it.getParcelable(ARG_TAG)
+            )
+        }
+        return AppsWatchListViewModel.Factory(args = args, pagingSourceConfig = pagingSourceConfig(args))
     }
+
+    open fun pagingSourceConfig(args: WatchListPageArgs): WatchListPagingSource.Config = WatchListPagingSource.Config(
+            showRecentlyUpdated = prefs.showRecentlyUpdated,
+            showOnDevice = args.filterId == Filters.TAB_ALL && prefs.showOnDevice,
+            showRecentlyInstalled = args.filterId == Filters.TAB_ALL && prefs.showRecent
+    )
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         _binding = FragmentApplistBinding.inflate(inflater, container, false)
@@ -224,21 +232,15 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener,
         (requireActivity() as AppDetailsRouter).openAppDetails(app.appId, app.rowId, app.detailsUrl)
     }
 
-    protected open fun config() = WatchListPagingSource.Config(
-            showRecentlyUpdated = prefs.showRecentlyUpdated,
-            showOnDevice = viewModel.viewState.filter.filterId == Filters.TAB_ALL && prefs.showOnDevice,
-            showRecentlyInstalled = viewModel.viewState.filter.filterId == Filters.TAB_ALL && prefs.showRecent
-    )
-
-    fun reload(initialKey: Int? = null) {
+    fun reload() {
         binding.listView.isVisible = false
         loadJob?.cancel()
         loadJob = lifecycleScope.launchWhenCreated {
             onReload()
-            viewModel.load(config(), initialKey = initialKey).collectLatest { result ->
+            viewModel.createPager().collectLatest { result ->
                 binding.listView.isVisible = true
                 binding.progress.isVisible = false
-                AppLog.d("Load status changed: $initialKey - $result")
+                AppLog.d("Load status changed: $result")
                 adapter.submitData(result)
             }
         }
@@ -262,7 +264,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener,
         }
         if (it is WatchListAction.SectionHeaderClick) {
             return when (it.header) {
-                is RecentlyInstalledHeader -> WatchListAction.Installed(false)
+                is SectionHeader.RecentlyInstalled -> WatchListAction.Installed(false)
                 else -> throw IllegalArgumentException("Not supported header")
             }
         }

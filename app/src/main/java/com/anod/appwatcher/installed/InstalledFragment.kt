@@ -97,12 +97,18 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback, KoinComponen
         return super.onOptionsItemSelected(item)
     }
 
+    override fun pagingSourceConfig(args: WatchListPageArgs) = WatchListPagingSource.Config(
+            showRecentlyUpdated = false,
+            showOnDevice = true,
+            showRecentlyInstalled = false,
+            selectionMode = importViewModel.selectionMode
+    )
+
     override fun viewModelFactory(): ViewModelProvider.Factory {
         return InstalledViewModel.Factory(WatchListPageArgs(
                 filterId = viewModel.viewState.filter.filterId,
-                sortId = viewModel.viewState.sortId,
                 tag = viewModel.viewState.tag
-        ))
+        ), viewModel.viewState.pagingSourceConfig)
     }
 
     override fun getItemSelection(appItem: AppListItem): AppViewHolder.Selection {
@@ -279,13 +285,6 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback, KoinComponen
             Toast.makeText(activity, R.string.app_already_added, Toast.LENGTH_SHORT).show()
         }
     }
-
-    override fun config() = WatchListPagingSource.Config(
-            showRecentlyUpdated = false,
-            showOnDevice = true,
-            showRecentlyInstalled = false,
-            selectionMode = importViewModel.selectionMode
-    )
 
     class Factory(
             private val sortId: Int,
