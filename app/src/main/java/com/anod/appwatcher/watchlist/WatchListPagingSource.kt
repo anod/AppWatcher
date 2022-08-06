@@ -2,7 +2,6 @@
 package com.anod.appwatcher.watchlist
 
 import android.content.pm.PackageManager
-import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
@@ -17,16 +16,17 @@ import info.anodsplace.applog.AppLog
 import kotlin.math.max
 
 class WatchListPagingSource(
-        private val prefs: Preferences,
-        private val titleFilter: String,
+        override var filterQuery: String,
         private val config: Config,
         private val itemFilter: AppListFilter,
-        private val tag: Tag? = null,
+        private val prefs: Preferences,
         private val packageManager: PackageManager,
-        private val database: AppsDatabase
-) : PagingSource<Int, SectionItem>() {
+        private val database: AppsDatabase,
+) : FilterablePagingSource() {
 
     data class Config(
+            val filterId: Int,
+            val tag: Tag?,
             val showRecentlyUpdated: Boolean,
             val showOnDevice: Boolean,
             val showRecentlyInstalled: Boolean,
@@ -46,7 +46,7 @@ class WatchListPagingSource(
         }
 
         val data = AppListTable.Queries.loadAppList(
-                sortId, config.showRecentlyUpdated, tag, titleFilter, SqlOffset(offset, limit), database.apps()
+                sortId, config.showRecentlyUpdated, config.tag, filterQuery, SqlOffset(offset, limit), database.apps()
         )
         val filtered = data.filter { !itemFilter.filterRecord(it) }
 
@@ -54,7 +54,7 @@ class WatchListPagingSource(
 
         if (filtered.isEmpty()) {
             if (params.key != null && config.showOnDevice) {
-                val installed = InstalledTaskWorker(packageManager, sortId, titleFilter).run()
+                val installed = InstalledTaskWorker(packageManager, sortId, filterQuery).run()
                 val allInstalledPackageNames = installed.map { it.pkg.name }
                 val watchingPackages = database.apps().loadRowIds(allInstalledPackageNames).associateBy({ it.packageName }, { it.rowId })
                 allInstalledPackageNames

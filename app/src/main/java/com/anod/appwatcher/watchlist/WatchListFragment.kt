@@ -25,7 +25,6 @@ import com.anod.appwatcher.databinding.FragmentApplistBinding
 import com.anod.appwatcher.databinding.ListItemEmptyBinding
 import com.anod.appwatcher.installed.InstalledFragment
 import com.anod.appwatcher.model.Filters
-import com.anod.appwatcher.tags.AppsTagSelectDialog
 import com.anod.appwatcher.utils.EventFlow
 import com.anod.appwatcher.utils.appScope
 import com.anod.appwatcher.utils.prefs
@@ -53,21 +52,18 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener,
     val binding get() = _binding!!
 
     protected open fun viewModelFactory(): ViewModelProvider.Factory {
-        val args = requireArguments().let {
-            WatchListPageArgs(
-//                sortId = args.getInt(ARG_SORT),
-                    filterId = it.getInt(ARG_FILTER),
-                    tag = it.getParcelable(ARG_TAG)
-            )
-        }
-        return AppsWatchListViewModel.Factory(args = args, pagingSourceConfig = pagingSourceConfig(args))
+        return AppsWatchListViewModel.Factory(pagingSourceConfig = pagingSourceConfig(requireArguments()))
     }
 
-    open fun pagingSourceConfig(args: WatchListPageArgs): WatchListPagingSource.Config = WatchListPagingSource.Config(
-            showRecentlyUpdated = prefs.showRecentlyUpdated,
-            showOnDevice = args.filterId == Filters.TAB_ALL && prefs.showOnDevice,
-            showRecentlyInstalled = args.filterId == Filters.TAB_ALL && prefs.showRecent
-    )
+    open fun pagingSourceConfig(args: Bundle): WatchListPagingSource.Config = args.getInt(ARG_FILTER).let { filterId ->
+        WatchListPagingSource.Config(
+                filterId = filterId,
+                tag = args.getParcelable(ARG_TAG),
+                showRecentlyUpdated = prefs.showRecentlyUpdated,
+                showOnDevice = filterId == Filters.TAB_ALL && prefs.showOnDevice,
+                showRecentlyInstalled = filterId == Filters.TAB_ALL && prefs.showRecent
+        )
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         _binding = FragmentApplistBinding.inflate(inflater, container, false)
@@ -168,13 +164,13 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener,
 
         viewLifecycleOwner.lifecycleScope.launchWhenResumed {
             stateViewModel.viewStates.map { it.sortId }.distinctUntilChanged().collect {
-                viewModel.handleEvent(WatchListEvent.ChangeSort(it))
+                viewModel.handleEvent(WatchListEvent.ChangeSort(it, reload = true))
             }
         }
 
         viewLifecycleOwner.lifecycleScope.launchWhenResumed {
             stateViewModel.viewStates.map { it.titleFilter }.distinctUntilChanged().collect { titleFilter ->
-                viewModel.handleEvent(WatchListEvent.FilterByTitle(titleFilter))
+                viewModel.handleEvent(WatchListEvent.FilterByTitle(titleFilter, reload = true))
             }
         }
 
@@ -214,7 +210,6 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener,
                     (activity as CustomThemeActivity).themeRes,
                     (activity as CustomThemeActivity).themeColors))
             is WatchListAction.ShareFromStore -> activity?.startActivitySafely(Intent.makeMainActivity(ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity")))
-            is WatchListAction.AddAppToTag -> AppsTagSelectDialog.show(action.tag, childFragmentManager)
             is WatchListAction.ItemClick -> {
                 val app = action.app
                 if (BuildConfig.DEBUG) {

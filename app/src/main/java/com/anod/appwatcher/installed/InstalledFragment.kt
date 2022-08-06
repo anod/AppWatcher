@@ -97,7 +97,9 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback, KoinComponen
         return super.onOptionsItemSelected(item)
     }
 
-    override fun pagingSourceConfig(args: WatchListPageArgs) = WatchListPagingSource.Config(
+    override fun pagingSourceConfig(args: Bundle) = WatchListPagingSource.Config(
+            filterId = args.getInt(ARG_FILTER),
+            tag = args.getParcelable(ARG_TAG),
             showRecentlyUpdated = false,
             showOnDevice = true,
             showRecentlyInstalled = false,
@@ -105,10 +107,7 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback, KoinComponen
     )
 
     override fun viewModelFactory(): ViewModelProvider.Factory {
-        return InstalledViewModel.Factory(WatchListPageArgs(
-                filterId = viewModel.viewState.filter.filterId,
-                tag = viewModel.viewState.tag
-        ), viewModel.viewState.pagingSourceConfig)
+        return InstalledViewModel.Factory(viewModel.viewState.pagingSourceConfig)
     }
 
     override fun getItemSelection(appItem: AppListItem): AppViewHolder.Selection {
@@ -139,10 +138,10 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback, KoinComponen
             menuAction.collectLatest {
                 when (it) {
                     is SearchQueryAction -> {
-                        viewModel.handleEvent(WatchListEvent.FilterByTitle(it.query))
+                        viewModel.handleEvent(WatchListEvent.FilterByTitle(it.query, true))
                     }
                     is SortMenuAction -> {
-                        viewModel.handleEvent(WatchListEvent.ChangeSort(it.sortId))
+                        viewModel.handleEvent(WatchListEvent.ChangeSort(it.sortId, true))
                     }
                     is FilterMenuAction -> {
                     }

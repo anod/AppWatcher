@@ -6,17 +6,19 @@ import android.content.pm.PackageManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingSource
-import com.anod.appwatcher.watchlist.*
+import com.anod.appwatcher.watchlist.FilterablePagingSource
+import com.anod.appwatcher.watchlist.SectionHeaderFactory
+import com.anod.appwatcher.watchlist.WatchListPagingSource
+import com.anod.appwatcher.watchlist.WatchListViewModel
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.parameter.parametersOf
 
-class InstalledViewModel(args: WatchListPageArgs, pagingSourceConfig: WatchListPagingSource.Config) : WatchListViewModel(args, pagingSourceConfig), KoinComponent {
+class InstalledViewModel(pagingSourceConfig: WatchListPagingSource.Config) : WatchListViewModel(pagingSourceConfig), KoinComponent {
 
-    class Factory(private val args: WatchListPageArgs, private val pagingSourceConfig: WatchListPagingSource.Config) : ViewModelProvider.Factory {
+    class Factory(private val pagingSourceConfig: WatchListPagingSource.Config) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return InstalledViewModel(args, pagingSourceConfig) as T
+            return InstalledViewModel(pagingSourceConfig) as T
         }
     }
 
@@ -27,8 +29,8 @@ class InstalledViewModel(args: WatchListPageArgs, pagingSourceConfig: WatchListP
 
     val changelogAdapter: ChangelogAdapter by inject { parametersOf(viewModelScope) }
 
-    override fun createPagingSource(): PagingSource<Int, SectionItem> {
-        return InstalledPagingSource(prefs, viewState.titleFilter, config = viewState.pagingSourceConfig, changelogAdapter, packageManager, database)
+    override fun createPagingSource(): FilterablePagingSource {
+        return InstalledPagingSource(viewState.titleFilter, prefs, config = viewState.pagingSourceConfig, changelogAdapter, packageManager, database)
     }
 
     override fun createSectionHeaderFactory() = SectionHeaderFactory.Empty()

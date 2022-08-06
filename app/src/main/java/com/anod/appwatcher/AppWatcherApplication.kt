@@ -15,7 +15,6 @@ import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.installed.createInstalledModule
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.sync.SyncNotification
-import com.anod.appwatcher.utils.AppLogLogger
 import com.anod.appwatcher.utils.networkConnection
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import finsky.api.DfeError
@@ -58,7 +57,6 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
         AppLog.setDebug(BuildConfig.DEBUG, "AppWatcher")
 
         startKoin {
-            logger(AppLogLogger())
             modules(modules = listOf(
                     module {
                         single<Context> { this@AppWatcherApplication }

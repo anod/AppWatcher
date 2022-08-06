@@ -14,6 +14,12 @@ import info.anodsplace.framework.text.Html
 import java.net.URLEncoder
 import java.util.*
 
+
+private fun TextView.fixTextSelection() {
+    setTextIsSelectable(false)
+    post { setTextIsSelectable(true) }
+}
+
 class ChangeView(itemView: View, accentColor: Int?) : RecyclerView.ViewHolder(itemView) {
     val changelog: TextView = itemView.findViewById<TextView>(R.id.changelog).apply {
         autoLinkMask = Linkify.ALL
@@ -35,6 +41,7 @@ class ChangeView(itemView: View, accentColor: Int?) : RecyclerView.ViewHolder(it
         } else {
             changelog.text = Html.parse(change.details)
         }
+        changelog.fixTextSelection()
         changelog.customSelectionActionModeCallback = object : ActionMode.Callback {
             override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
                 menu.add(Menu.NONE, R.id.menu_translate, Menu.CATEGORY_SECONDARY, R.string.translate)

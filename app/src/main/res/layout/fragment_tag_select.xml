@@ -32,13 +32,12 @@
             android:layout_marginBottom="4dp"
             app:startIconDrawable="@drawable/ic_search_24dp"
             app:startIconContentDescription="@string/search"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
             android:hint="@string/search">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                />
+                android:layout_height="wrap_content" />
 
         </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>

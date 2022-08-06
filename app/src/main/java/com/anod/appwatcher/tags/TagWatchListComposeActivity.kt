@@ -67,6 +67,8 @@ class TagWatchListComposeActivity : AppCompatActivity() {
             ) {
                 val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
                 val pagingSourceConfig = WatchListPagingSource.Config(
+                        filterId = screenState.filterId,
+                        tag = screenState.tag,
                         showRecentlyUpdated = viewModel.prefs.showRecentlyUpdated,
                         showOnDevice = false,
                         showRecentlyInstalled = false
@@ -87,7 +89,6 @@ class TagWatchListComposeActivity : AppCompatActivity() {
                         startActivity(InstalledFragment.intent(listAction.importMode, this, theme.theme, theme.colors))
                     }
                     is WatchListAction.ShareFromStore -> startActivitySafely(Intent.makeMainActivity(ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity")))
-                    is WatchListAction.AddAppToTag -> AppsTagSelectDialog.show(viewModel.viewState.tag, supportFragmentManager)
                     is WatchListAction.ItemClick -> {
                         val app = listAction.app
                         if (BuildConfig.DEBUG) {
@@ -98,6 +99,8 @@ class TagWatchListComposeActivity : AppCompatActivity() {
                     else -> {}
                 }
             }
+            is WatchListSharedStateAction.AddAppToTag -> AppsTagSelectDialog.show(action.tag, supportFragmentManager)
+
         }
     }
 

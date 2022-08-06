@@ -1,4 +1,4 @@
-package com.anod.appwatcher.tags
+package com.anod.appwatcher.watchlist
 
 import android.content.Context
 import androidx.compose.foundation.background
@@ -37,23 +37,32 @@ import com.anod.appwatcher.database.entities.Price
 import com.anod.appwatcher.database.entities.generateTitle
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.utils.AppIconLoader
-import com.anod.appwatcher.watchlist.*
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.text.Html
 import org.koin.java.KoinJavaComponent.getKoin
 
 @Composable
-fun WatchListPage(args: WatchListPageArgs, pagingSourceConfig: WatchListPagingSource.Config, sortId: Int, onEvent: (WatchListEvent) -> Unit) {
-    val viewModel: WatchListViewModel = viewModel(factory = AppsWatchListViewModel.Factory(args, pagingSourceConfig = pagingSourceConfig))
+fun WatchListPage(pagingSourceConfig: WatchListPagingSource.Config, sortId: Int, titleQuery: String, onEvent: (WatchListEvent) -> Unit) {
+    val viewModel: WatchListViewModel = viewModel(factory = AppsWatchListViewModel.Factory(pagingSourceConfig))
     val items = viewModel.pagingData.collectAsLazyPagingItems()
 
-    AppLog.d("Recomposition: WatchListPage [${args.hashCode()}, ${pagingSourceConfig.hashCode()}, ${sortId}, ${items.hashCode()}, ${viewModel.hashCode()}]")
-
     LaunchedEffect(key1 = sortId) {
-        AppLog.d("Refresh list items")
+        AppLog.d("Refresh list items - sort changed")
         items.refresh()
     }
+
+    var currentQuery by remember { mutableStateOf(titleQuery) }
+    LaunchedEffect(titleQuery) {
+        if (currentQuery != titleQuery) {
+            viewModel.handleEvent(WatchListEvent.FilterByTitle(titleQuery, true))
+            AppLog.d("Refresh list items - title query changed '$titleQuery'")
+            currentQuery = titleQuery
+            items.refresh()
+        }
+    }
+
+    AppLog.d("Recomposition: WatchListPage [${pagingSourceConfig.hashCode()}, ${sortId}, ${items.hashCode()}, ${viewModel.hashCode()}, ${titleQuery}, ${currentQuery}]")
 
     LazyColumn {
         itemsIndexed(

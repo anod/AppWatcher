@@ -17,7 +17,7 @@ sealed interface SectionItem {
 
     class Header(val type: SectionHeader) : SectionItem {
         override fun hashCode(): Int {
-            return hashCodeOf(type)
+            return hashCodeOf(javaClass.canonicalName, type)
         }
 
         override fun equals(other: Any?): Boolean {
@@ -28,7 +28,7 @@ sealed interface SectionItem {
 
     object Recent : SectionItem {
         override fun hashCode(): Int {
-            return hashCodeOf(this)
+            return hashCodeOf(javaClass.canonicalName)
         }
 
         override fun equals(other: Any?): Boolean {
@@ -39,7 +39,7 @@ sealed interface SectionItem {
 
     object Empty : SectionItem {
         override fun hashCode(): Int {
-            return hashCodeOf(this)
+            return hashCodeOf(javaClass.canonicalName)
         }
 
         override fun equals(other: Any?): Boolean {
@@ -50,7 +50,7 @@ sealed interface SectionItem {
 
     class App(val appListItem: AppListItem, val isLocal: Boolean) : SectionItem {
         override fun hashCode(): Int {
-            return hashCodeOf(appListItem, isLocal)
+            return hashCodeOf(javaClass.canonicalName, appListItem, isLocal)
         }
 
         override fun equals(other: Any?): Boolean {
@@ -61,7 +61,7 @@ sealed interface SectionItem {
 
     class OnDevice(val appListItem: AppListItem, var showSelection: Boolean) : SectionItem {
         override fun hashCode(): Int {
-            return hashCodeOf(appListItem, showSelection)
+            return hashCodeOf(javaClass.canonicalName, appListItem, showSelection)
         }
 
         override fun equals(other: Any?): Boolean {

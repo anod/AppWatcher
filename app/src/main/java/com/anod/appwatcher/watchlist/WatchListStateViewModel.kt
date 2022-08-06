@@ -9,6 +9,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.work.Operation
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.sync.UpdateCheck
 import com.anod.appwatcher.tags.AppsTagViewModel
@@ -24,6 +25,7 @@ import org.koin.core.component.inject
 data class WatchListSharedState(
         val tag: Tag,
         val sortId: Int,
+        val filterId: Int,
         val titleFilter: String = "",
         val listState: ListState? = null,
         val isWideLayout: Boolean = false,
@@ -35,11 +37,14 @@ sealed interface WatchListSharedStateEvent {
     class FilterByTitle(val query: String) : WatchListSharedStateEvent
     class SetWideLayout(val wideLayout: Boolean) : WatchListSharedStateEvent
     class ListEvent(val event: WatchListEvent) : WatchListSharedStateEvent
+    class FilterById(val filterId: Int) : WatchListSharedStateEvent
+    class AddAppToTag(val tag: Tag) : WatchListSharedStateEvent
 }
 
 sealed interface WatchListSharedStateAction {
     object OnBackPressed : WatchListSharedStateAction
     class ListAction(val action: WatchListAction) : WatchListSharedStateAction
+    class AddAppToTag(val tag: Tag) : WatchListSharedStateAction
 }
 
 class WatchListStateViewModel(state: SavedStateHandle) : BaseFlowViewModel<WatchListSharedState, WatchListSharedStateEvent, WatchListSharedStateAction>(), KoinComponent {
@@ -65,7 +70,8 @@ class WatchListStateViewModel(state: SavedStateHandle) : BaseFlowViewModel<Watch
     init {
         viewState = WatchListSharedState(
                 tag = state[AppsTagViewModel.EXTRA_TAG] ?: Tag(0, "", 0),
-                sortId = prefs.sortIndex
+                sortId = prefs.sortIndex,
+                filterId = state["tab_id"] ?: Filters.TAB_ALL
         )
         val filter = IntentFilter().apply {
             addAction(UpdateCheck.syncProgress)
@@ -97,7 +103,11 @@ class WatchListStateViewModel(state: SavedStateHandle) : BaseFlowViewModel<Watch
                     else -> {}
                 }
             }
+            is WatchListSharedStateEvent.AddAppToTag -> emitAction(WatchListSharedStateAction.AddAppToTag(event.tag))
             WatchListSharedStateEvent.OnBackPressed -> emitAction(WatchListSharedStateAction.OnBackPressed)
+            is WatchListSharedStateEvent.FilterById -> {
+                viewState = viewState.copy(filterId = event.filterId)
+            }
         }
     }
 
