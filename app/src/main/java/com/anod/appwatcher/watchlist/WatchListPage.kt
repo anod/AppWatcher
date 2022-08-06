@@ -2,6 +2,7 @@ package com.anod.appwatcher.watchlist
 
 import android.content.Context
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -24,6 +25,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
@@ -66,18 +68,24 @@ fun WatchListPage(pagingSourceConfig: WatchListPagingSource.Config, sortId: Int,
     AppLog.d("Recomposition: WatchListPage [${pagingSourceConfig.hashCode()}, ${sortId}, ${items.hashCode()}, ${viewModel.hashCode()}, ${titleQuery}, ${currentQuery}]")
 
     LazyColumn {
-        itemsIndexed(
-                items = items,
-                key = { _, item -> item.hashCode() }
-        ) { index, item ->
-            if (item != null) { // TODO: Preload?
-                WatchListSectionItem(item, index, onEvent, installedApps = viewModel.installedApps)
-            } else {
-                Box(modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp)
-                        .background(MaterialTheme.colorScheme.inverseOnSurface))
+        if (items.itemCount == 0) {
+            item {
+                EmptyItem(Modifier.padding(top = 128.dp))
+            }
+        } else {
+            itemsIndexed(
+                    items = items,
+                    key = { _, item -> item.hashCode() }
+            ) { index, item ->
+                if (item != null) { // TODO: Preload?
+                    WatchListSectionItem(item, index, onEvent, installedApps = viewModel.installedApps)
+                } else {
+                    Box(modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
+                            .background(MaterialTheme.colorScheme.inverseOnSurface))
 
+                }
             }
         }
     }
@@ -146,6 +154,32 @@ private val newLineRegex = Regex("\n+")
 
 data class AppItemState(val color: Color, val text: String, val iconRes: Int, val showRecent: Boolean)
 
+@Composable
+fun VersionText(text: String, color: Color, modifier: Modifier = Modifier) {
+    Text(
+            text = text,
+            color = color,
+            modifier = modifier,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.labelSmall
+    )
+}
+
+@Composable
+fun ChangelogText(text: String, noNewDetails: Boolean) {
+    Text(
+            text = text,
+            modifier = Modifier
+                    .alpha(if (noNewDetails) 0.4f else 1.0f)
+                    .padding(top = 4.dp),
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.bodySmall,
+            lineHeight = 14.sp
+    )
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppItem(item: AppListItem, isLocalApp: Boolean, selection: AppViewHolder.Selection, onClick: (() -> Unit), installedApps: InstalledApps, appIconLoader: AppIconLoader = getKoin().get()) {
@@ -177,9 +211,11 @@ fun AppItem(item: AppListItem, isLocalApp: Boolean, selection: AppViewHolder.Sel
             headlineText = {
                 Text(text = title)
             },
+            overlineText = { },
             supportingText = {
                 Column {
                     Row(
+                            modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically
                     ) {
                         if (isLocalApp) {
@@ -187,28 +223,27 @@ fun AppItem(item: AppListItem, isLocalApp: Boolean, selection: AppViewHolder.Sel
                             val versionText: String by remember {
                                 mutableStateOf(formatVersionText(app.versionName, app.versionNumber, 0, context))
                             }
-                            Text(text = versionText, color = MaterialTheme.colorScheme.primary, modifier = Modifier.fillMaxWidth(0.6f), maxLines = 2, overflow = TextOverflow.Ellipsis)
+                            VersionText(text = versionText, color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f))
                         } else {
                             if (appItemState.iconRes != 0) {
                                 Icon(painter = painterResource(id = appItemState.iconRes), contentDescription = null)
                             }
-                            Text(text = appItemState.text, color = appItemState.color, modifier = Modifier.fillMaxWidth(0.6f), maxLines = 2, overflow = TextOverflow.Ellipsis)
+                            VersionText(text = appItemState.text, color = appItemState.color, modifier = Modifier.weight(1f))
                         }
-                        Spacer(modifier = Modifier.weight(1f))
                         if (app.uploadDate.isNotEmpty()) {
-                            Text(text = app.uploadDate, maxLines = 1)
+                            Text(text = app.uploadDate, maxLines = 1, style = MaterialTheme.typography.labelSmall)
                         }
                     }
                     if (appItemState.showRecent) {
                         if (isLocalApp) {
                             if (changesHtml.isNotBlank()) {
-                                Text(text = changesHtml, modifier = Modifier.alpha(if (item.noNewDetails) 0.4f else 1.0f), maxLines = 2, overflow = TextOverflow.Ellipsis)
+                                ChangelogText(text = changesHtml, noNewDetails = item.noNewDetails)
                             }
                         } else {
                             if (changesHtml.isBlank()) {
-                                Text(text = stringResource(id = R.string.no_recent_changes), modifier = Modifier.alpha(0.4f))
+                                ChangelogText(text = stringResource(id = R.string.no_recent_changes), noNewDetails = true)
                             } else {
-                                Text(text = changesHtml, modifier = Modifier.alpha(if (item.noNewDetails) 0.4f else 1.0f), maxLines = 2, overflow = TextOverflow.Ellipsis)
+                                ChangelogText(text = changesHtml, noNewDetails = item.noNewDetails)
                             }
                         }
                     }
@@ -292,8 +327,84 @@ fun RecentItem() {
 }
 
 @Composable
-fun EmptyItem() {
-    Text(text = "EmptyItem")
+fun EmptyItem(
+        modifier: Modifier = Modifier,
+        button1Text: @Composable () -> Unit = { Text(text = stringResource(id = R.string.search_for_an_app)) },
+        button2Text: @Composable (() -> Unit)? = { Text(text = stringResource(id = R.string.import_installed)) },
+        button3Text: @Composable (() -> Unit)? = { Text(text = stringResource(id = R.string.share_from_play_store)) },
+) {
+    Column(
+            modifier = modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Image(painter = painterResource(id = R.drawable.ic_empty_box), contentDescription = null)
+        Text(text = stringResource(id = R.string.watch_list_is_empty), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 24.dp))
+        Button(onClick = { }, modifier = Modifier
+                .defaultMinSize(minWidth = 188.dp)
+                .padding(top = 8.dp)) {
+            button1Text()
+        }
+        if (button2Text != null) {
+            Button(onClick = { }, modifier = Modifier
+                    .defaultMinSize(minWidth = 188.dp)
+                    .padding(top = 8.dp)) {
+                button2Text()
+            }
+        }
+        if (button3Text != null) {
+            Button(onClick = { }, modifier = Modifier
+                    .defaultMinSize(minWidth = 188.dp)
+                    .padding(top = 8.dp)) {
+                button3Text()
+            }
+        }
+    }
+}
+
+@Preview(uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun WatchListEmptyPreview() {
+    val appIconLoader = AppIconLoader.Simple(
+            LocalContext.current,
+            ImageLoader.Builder(LocalContext.current).build()
+    )
+    val installedApps = InstalledApps.StaticMap(mapOf())
+    val items = listOf(SectionItem.Empty)
+
+    AppTheme(
+            customPrimaryColor = Color.Yellow
+    ) {
+        Surface {
+            LazyColumn {
+                item {
+                    Row {
+                        Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                        .size(width = 140.dp, height = 40.dp)
+                                        .background(MaterialTheme.colorScheme.primary)) {
+                            Text("On primary", color = MaterialTheme.colorScheme.onPrimary)
+                        }
+
+                        Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                        .size(width = 140.dp, height = 40.dp)
+                                        .background(MaterialTheme.colorScheme.primaryContainer)) {
+                            Text("On container", color = MaterialTheme.colorScheme.onPrimaryContainer)
+                        }
+                    }
+                }
+
+                itemsIndexed(items) { index, item ->
+                    WatchListSectionItem(item = item, index = index, onEvent = {}, installedApps = installedApps, appIconLoader = appIconLoader)
+                }
+            }
+        }
+    }
+
 }
 
 @Preview(uiMode = UI_MODE_NIGHT_YES)
@@ -304,7 +415,8 @@ fun WatchListPreview() {
             ImageLoader.Builder(LocalContext.current).build()
     )
     val installedApps = InstalledApps.StaticMap(mapOf(
-            "package2" to InstalledApps.Info(versionName = "very long long version name consectetur adipiscing elit", versionCode = 11223300)
+            "package2" to InstalledApps.Info(versionName = "very long long version name consectetur adipiscing elit", versionCode = 11223300),
+            "package3" to InstalledApps.Info(versionName = "version name", versionCode = 11223300)
     ))
     val items = listOf(
             SectionItem.Header(type = SectionHeader.RecentlyUpdated),
@@ -359,6 +471,29 @@ fun WatchListPreview() {
                             rowId = -1,
                             appId = "appId2",
                             packageName = "package2",
+                            versionNumber = 11223300,
+                            versionName = "very long long version name",
+                            title = "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+                            uploadTime = 0,
+                            uploadDate = "20 Sept, 2017 yo",
+                            appType = "app",
+                            creator = "Banana man",
+                            detailsUrl = "url",
+                            iconUrl = "",
+                            price = Price("", "", 0),
+                            status = 0,
+                            updateTime = 0
+                    ),
+                    changeDetails = "Nunc aliquam egestas diam, id bibendum massa. Duis vitae lorem nunc. Integer eu elit urna. Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
+                    noNewDetails = false,
+                    recentFlag = true),
+                    isLocal = false
+            ),
+            SectionItem.App(AppListItem(
+                    app = App(
+                            rowId = -1,
+                            appId = "appId3",
+                            packageName = "package3",
                             versionNumber = 11223344,
                             versionName = "very long long version name",
                             title = "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
@@ -384,26 +519,6 @@ fun WatchListPreview() {
     ) {
         Surface {
             LazyColumn {
-                item {
-                    Row {
-                        Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier
-                                        .size(width = 140.dp, height = 40.dp)
-                                        .background(MaterialTheme.colorScheme.primary)) {
-                            Text("On primary", color = MaterialTheme.colorScheme.onPrimary)
-                        }
-
-                        Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier
-                                        .size(width = 140.dp, height = 40.dp)
-                                        .background(MaterialTheme.colorScheme.primaryContainer)) {
-                            Text("On container", color = MaterialTheme.colorScheme.onPrimaryContainer)
-                        }
-                    }
-
-                }
                 itemsIndexed(items) { index, item ->
                     WatchListSectionItem(item = item, index = index, onEvent = {}, installedApps = installedApps, appIconLoader = appIconLoader)
                 }
