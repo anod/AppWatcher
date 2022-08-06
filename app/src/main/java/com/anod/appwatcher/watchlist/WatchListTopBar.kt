@@ -1,6 +1,9 @@
 package com.anod.appwatcher.watchlist
 
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -12,7 +15,9 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import com.anod.appwatcher.R
+import com.anod.appwatcher.compose.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,6 +30,7 @@ fun WatchListTopBar(
         filterTitles: List<String>,
         sortId: Int,
         visibleActions: @Composable () -> Unit,
+        dropdownActions: @Composable (dismiss: () -> Unit) -> Unit,
         onEvent: (WatchListSharedStateEvent) -> Unit
 ) {
     val focusRequester = remember { FocusRequester() }
@@ -110,11 +116,7 @@ fun WatchListTopBar(
                 }
 
                 DropdownMenu(expanded = topBarMoreMenu, onDismissRequest = { topBarMoreMenu = false }) {
-                    DropdownMenuItem(
-                            text = { Text(text = stringResource(id = R.string.menu_edit)) },
-                            leadingIcon = { Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(id = R.string.menu_edit)) },
-                            onClick = { }
-                    )
+                    dropdownActions(dismiss = { topBarMoreMenu = false })
 
                     DropdownMenuItem(
                             text = { Text(text = stringResource(id = R.string.filter)) },
@@ -166,4 +168,45 @@ fun WatchListTopBar(
                     actionIconContentColor = contentColor,
             )
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun DefaultPreview() {
+    AppTheme(
+            customPrimaryColor = Color.Cyan
+    ) {
+        Scaffold(
+                topBar = {
+                    WatchListTopBar(
+                            title = "Title",
+                            subtitle = "Subtitle",
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                            filterTitles = listOf(),
+                            filterQuery = "",
+                            sortId = 0,
+                            visibleActions = {
+                                IconButton(onClick = { }) {
+                                    Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(id = R.string.menu_tag_apps))
+                                }
+                            },
+                            dropdownActions = { dismiss ->
+                                DropdownMenuItem(
+                                        text = { Text(text = stringResource(id = R.string.menu_edit)) },
+                                        leadingIcon = { Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(id = R.string.menu_edit)) },
+                                        onClick = {
+
+                                        }
+                                )
+                            },
+                            onEvent = { }
+                    )
+                }
+        ) { paddingValues ->
+            Box(Modifier.padding(paddingValues)) {
+            }
+        }
+    }
 }

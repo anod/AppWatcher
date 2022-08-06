@@ -39,12 +39,14 @@ sealed interface WatchListSharedStateEvent {
     class ListEvent(val event: WatchListEvent) : WatchListSharedStateEvent
     class FilterById(val filterId: Int) : WatchListSharedStateEvent
     class AddAppToTag(val tag: Tag) : WatchListSharedStateEvent
+    class EditTag(val tag: Tag) : WatchListSharedStateEvent
 }
 
 sealed interface WatchListSharedStateAction {
     object OnBackPressed : WatchListSharedStateAction
     class ListAction(val action: WatchListAction) : WatchListSharedStateAction
     class AddAppToTag(val tag: Tag) : WatchListSharedStateAction
+    class EditTag(val tag: Tag) : WatchListSharedStateAction
 }
 
 class WatchListStateViewModel(state: SavedStateHandle) : BaseFlowViewModel<WatchListSharedState, WatchListSharedStateEvent, WatchListSharedStateAction>(), KoinComponent {
@@ -108,6 +110,7 @@ class WatchListStateViewModel(state: SavedStateHandle) : BaseFlowViewModel<Watch
             is WatchListSharedStateEvent.FilterById -> {
                 viewState = viewState.copy(filterId = event.filterId)
             }
+            is WatchListSharedStateEvent.EditTag -> emitAction(WatchListSharedStateAction.EditTag(event.tag))
         }
     }
 

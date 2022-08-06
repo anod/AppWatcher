@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 import com.anod.appwatcher.BuildConfig
@@ -100,7 +101,7 @@ class TagWatchListComposeActivity : AppCompatActivity() {
                 }
             }
             is WatchListSharedStateAction.AddAppToTag -> AppsTagSelectDialog.show(action.tag, supportFragmentManager)
-
+            is WatchListSharedStateAction.EditTag -> EditTagDialog.show(supportFragmentManager, tag = action.tag, theme = Theme(this, viewModel.prefs))
         }
     }
 
@@ -112,6 +113,16 @@ class TagWatchListComposeActivity : AppCompatActivity() {
             }
         } else {
             DetailsDialog.show(appId, rowId, detailsUrl, supportFragmentManager)
+        }
+    }
+
+    override fun onBackPressed() {
+        if (viewModel.viewState.isWideLayout && supportFragmentManager.findFragmentByTag(DetailsFragment.tag) != null) {
+            supportFragmentManager.popBackStack(DetailsFragment.tag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+        } else {
+            if (!DetailsDialog.dismiss(supportFragmentManager)) {
+                super.onBackPressed()
+            }
         }
     }
 

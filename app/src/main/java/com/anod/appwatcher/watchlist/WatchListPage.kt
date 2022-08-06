@@ -1,6 +1,7 @@
 package com.anod.appwatcher.watchlist
 
 import android.content.Context
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -178,22 +179,24 @@ fun AppItem(item: AppListItem, isLocalApp: Boolean, selection: AppViewHolder.Sel
             },
             supportingText = {
                 Column {
-                    Row {
+                    Row(
+                            verticalAlignment = Alignment.CenterVertically
+                    ) {
                         if (isLocalApp) {
                             Icon(painter = painterResource(id = R.drawable.ic_stat_communication_stay_primary_portrait), contentDescription = null)
                             val versionText: String by remember {
                                 mutableStateOf(formatVersionText(app.versionName, app.versionNumber, 0, context))
                             }
-                            Text(text = versionText, color = MaterialTheme.colorScheme.primary)
+                            Text(text = versionText, color = MaterialTheme.colorScheme.primary, modifier = Modifier.fillMaxWidth(0.6f), maxLines = 2, overflow = TextOverflow.Ellipsis)
                         } else {
                             if (appItemState.iconRes != 0) {
                                 Icon(painter = painterResource(id = appItemState.iconRes), contentDescription = null)
                             }
-                            Text(text = appItemState.text, color = appItemState.color)
+                            Text(text = appItemState.text, color = appItemState.color, modifier = Modifier.fillMaxWidth(0.6f), maxLines = 2, overflow = TextOverflow.Ellipsis)
                         }
                         Spacer(modifier = Modifier.weight(1f))
                         if (app.uploadDate.isNotEmpty()) {
-                            Text(text = app.uploadDate)
+                            Text(text = app.uploadDate, maxLines = 1)
                         }
                     }
                     if (appItemState.showRecent) {
@@ -209,6 +212,12 @@ fun AppItem(item: AppListItem, isLocalApp: Boolean, selection: AppViewHolder.Sel
                             }
                         }
                     }
+
+                    Divider(modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp),
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.38f)
+                    )
                 }
             },
             leadingContent = {
@@ -287,21 +296,23 @@ fun EmptyItem() {
     Text(text = "EmptyItem")
 }
 
-@Preview(showBackground = true)
+@Preview(uiMode = UI_MODE_NIGHT_YES)
 @Composable
 fun WatchListPreview() {
     val appIconLoader = AppIconLoader.Simple(
             LocalContext.current,
             ImageLoader.Builder(LocalContext.current).build()
     )
-    val installedApps = InstalledApps.StaticMap(emptyMap())
+    val installedApps = InstalledApps.StaticMap(mapOf(
+            "package2" to InstalledApps.Info(versionName = "very long long version name consectetur adipiscing elit", versionCode = 11223300)
+    ))
     val items = listOf(
             SectionItem.Header(type = SectionHeader.RecentlyUpdated),
             SectionItem.App(AppListItem(
                     app = App(
                             rowId = -1,
-                            appId = "appId",
-                            packageName = "package",
+                            appId = "appId0",
+                            packageName = "package0",
                             versionNumber = 11223344,
                             versionName = "very long long version name",
                             title = "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
@@ -319,13 +330,83 @@ fun WatchListPreview() {
                     noNewDetails = true,
                     recentFlag = true),
                     isLocal = false
+            ),
+            SectionItem.App(AppListItem(
+                    app = App(
+                            rowId = -1,
+                            appId = "appId1",
+                            packageName = "package1",
+                            versionNumber = 11223344,
+                            versionName = "very long long version name",
+                            title = "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+                            uploadTime = 0,
+                            uploadDate = "20 Sept, 2017 yo",
+                            appType = "app",
+                            creator = "Banana man",
+                            detailsUrl = "url",
+                            iconUrl = "",
+                            price = Price("", "", 0),
+                            status = 0,
+                            updateTime = 0
+                    ),
+                    changeDetails = "Nunc aliquam egestas diam, id bibendum massa. Duis vitae lorem nunc. Integer eu elit urna. Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
+                    noNewDetails = true,
+                    recentFlag = true),
+                    isLocal = true
+            ),
+            SectionItem.App(AppListItem(
+                    app = App(
+                            rowId = -1,
+                            appId = "appId2",
+                            packageName = "package2",
+                            versionNumber = 11223344,
+                            versionName = "very long long version name",
+                            title = "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+                            uploadTime = 0,
+                            uploadDate = "20 Sept, 2017 yo",
+                            appType = "app",
+                            creator = "Banana man",
+                            detailsUrl = "url",
+                            iconUrl = "",
+                            price = Price("", "", 0),
+                            status = 0,
+                            updateTime = 0
+                    ),
+                    changeDetails = "Nunc aliquam egestas diam, id bibendum massa. Duis vitae lorem nunc. Integer eu elit urna. Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
+                    noNewDetails = false,
+                    recentFlag = true),
+                    isLocal = false
             )
     )
 
-    AppTheme {
-        LazyColumn {
-            itemsIndexed(items) { index, item ->
-                WatchListSectionItem(item = item, index = index, onEvent = {}, installedApps = installedApps, appIconLoader = appIconLoader)
+    AppTheme(
+            customPrimaryColor = Color.Yellow
+    ) {
+        Surface {
+            LazyColumn {
+                item {
+                    Row {
+                        Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                        .size(width = 140.dp, height = 40.dp)
+                                        .background(MaterialTheme.colorScheme.primary)) {
+                            Text("On primary", color = MaterialTheme.colorScheme.onPrimary)
+                        }
+
+                        Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                        .size(width = 140.dp, height = 40.dp)
+                                        .background(MaterialTheme.colorScheme.primaryContainer)) {
+                            Text("On container", color = MaterialTheme.colorScheme.onPrimaryContainer)
+                        }
+                    }
+
+                }
+                itemsIndexed(items) { index, item ->
+                    WatchListSectionItem(item = item, index = index, onEvent = {}, installedApps = installedApps, appIconLoader = appIconLoader)
+                }
             }
         }
     }

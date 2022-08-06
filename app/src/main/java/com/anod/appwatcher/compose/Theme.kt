@@ -149,9 +149,9 @@ fun AppTheme(
     }
 
     if (customPrimaryColor != null) {
-        val roles = MaterialColors.getColorRoles(customPrimaryColor.value.toInt(), !darkTheme)
+        val roles = MaterialColors.getColorRoles(customPrimaryColor.toArgb(), !darkTheme)
         colorScheme = colorScheme.copy(
-                primary = customPrimaryColor,
+                primary = Color(roles.accent), //customPrimaryColor,
                 onPrimary = Color(roles.onAccent),
                 primaryContainer = Color(roles.accentContainer),
                 onPrimaryContainer = Color(roles.onAccentContainer)

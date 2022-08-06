@@ -3,15 +3,12 @@ package com.anod.appwatcher.tags
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import com.anod.appwatcher.R
-import com.anod.appwatcher.compose.AppTheme
-import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.watchlist.*
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -53,11 +50,21 @@ fun TagWatchListScreen(screenState: WatchListSharedState, pagingSourceConfig: Wa
                                 Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(id = R.string.menu_tag_apps))
                             }
                         },
+                        dropdownActions = { dismiss ->
+                            DropdownMenuItem(
+                                    text = { Text(text = stringResource(id = R.string.menu_edit)) },
+                                    leadingIcon = { Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(id = R.string.menu_edit)) },
+                                    onClick = {
+                                        onEvent(WatchListSharedStateEvent.EditTag(screenState.tag))
+                                        dismiss()
+                                    }
+                            )
+                        },
                         onEvent = onEvent
                 )
             }
     ) { paddingValues ->
-        HorizontalPager(count = filterPagesTitles.size, state = pagerState, modifier = Modifier.padding(paddingValues)) { _ ->
+        HorizontalPager(count = filterPagesTitles.size, state = pagerState, modifier = Modifier.padding(paddingValues)) {
             WatchListPage(pagingSourceConfig = pagingSourceConfig, sortId = screenState.sortId, titleQuery = screenState.titleFilter, onEvent = { event -> onEvent(WatchListSharedStateEvent.ListEvent(event)) })
         }
     }
@@ -66,27 +73,5 @@ fun TagWatchListScreen(screenState: WatchListSharedState, pagingSourceConfig: Wa
         if (screenState.filterId != pagerState.currentPage) {
             pagerState.scrollToPage(screenState.filterId)
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    AppTheme {
-        TagWatchListScreen(
-                screenState = WatchListSharedState(
-                        tag = Tag(0, "Android", Color.Cyan.value.toInt()),
-                        filterId = 0,
-                        sortId = 0
-                ),
-                pagingSourceConfig = WatchListPagingSource.Config(
-                        tag = Tag(0, "Android", Color.Cyan.value.toInt()),
-                        filterId = 0,
-                        showRecentlyUpdated = true,
-                        showOnDevice = false,
-                        showRecentlyInstalled = false
-                ),
-                onEvent = { }
-        )
     }
 }
