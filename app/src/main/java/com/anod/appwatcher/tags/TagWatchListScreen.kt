@@ -65,7 +65,13 @@ fun TagWatchListScreen(screenState: WatchListSharedState, pagingSourceConfig: Wa
             }
     ) { paddingValues ->
         HorizontalPager(count = filterPagesTitles.size, state = pagerState, modifier = Modifier.padding(paddingValues)) {
-            WatchListPage(pagingSourceConfig = pagingSourceConfig, sortId = screenState.sortId, titleQuery = screenState.titleFilter, onEvent = { event -> onEvent(WatchListSharedStateEvent.ListEvent(event)) })
+            WatchListPage(
+                    pagingSourceConfig = pagingSourceConfig,
+                    sortId = screenState.sortId,
+                    titleQuery = screenState.titleFilter,
+                    isRefreshing = screenState.listState is ListState.SyncStarted,
+                    onEvent = { event -> onEvent(WatchListSharedStateEvent.ListEvent(event)) }
+            )
         }
     }
 

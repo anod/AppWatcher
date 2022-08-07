@@ -41,13 +41,15 @@ import com.anod.appwatcher.database.entities.Price
 import com.anod.appwatcher.database.entities.generateTitle
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.utils.AppIconLoader
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.text.Html
 import org.koin.java.KoinJavaComponent.getKoin
 
 @Composable
-fun WatchListPage(pagingSourceConfig: WatchListPagingSource.Config, sortId: Int, titleQuery: String, onEvent: (WatchListEvent) -> Unit) {
+fun WatchListPage(pagingSourceConfig: WatchListPagingSource.Config, sortId: Int, titleQuery: String, isRefreshing: Boolean, onEvent: (WatchListEvent) -> Unit) {
     val viewModel: WatchListViewModel = viewModel(factory = AppsWatchListViewModel.Factory(pagingSourceConfig))
     val items = viewModel.pagingData.collectAsLazyPagingItems()
 
@@ -69,28 +71,36 @@ fun WatchListPage(pagingSourceConfig: WatchListPagingSource.Config, sortId: Int,
     AppLog.d("Recomposition: WatchListPage [${pagingSourceConfig.hashCode()}, ${sortId}, ${items.hashCode()}, ${viewModel.hashCode()}, ${titleQuery}, ${currentQuery}]")
 
     val isEmpty = items.loadState.source.refresh is LoadState.NotLoading && items.itemCount < 1
-    LazyColumn {
-        if (isEmpty) {
-            item {
-                EmptyItem(onEvent = onEvent, modifier = Modifier.padding(top = 128.dp))
-            }
-        } else {
-            itemsIndexed(
-                    items = items,
-                    key = { _, item -> item.hashCode() }
-            ) { index, item ->
-                if (item != null) { // TODO: Preload?
-                    WatchListSectionItem(item, index, onEvent, installedApps = viewModel.installedApps)
-                } else {
-                    Box(modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp)
-                            .background(MaterialTheme.colorScheme.inverseOnSurface))
+    val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isRefreshing)
+    SwipeRefresh(
+            state = swipeRefreshState,
+            swipeEnabled = viewModel.prefs.enablePullToRefresh,
+            onRefresh = { onEvent(WatchListEvent.Refresh) }
+    ) {
+        LazyColumn {
+            if (isEmpty) {
+                item {
+                    EmptyItem(onEvent = onEvent, modifier = Modifier.padding(top = 128.dp))
+                }
+            } else {
+                itemsIndexed(
+                        items = items,
+                        key = { _, item -> item.hashCode() }
+                ) { index, item ->
+                    if (item != null) { // TODO: Preload?
+                        WatchListSectionItem(item, index, onEvent, installedApps = viewModel.installedApps)
+                    } else {
+                        Box(modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp)
+                                .background(MaterialTheme.colorScheme.inverseOnSurface))
 
+                    }
                 }
             }
         }
     }
+
 }
 
 @Composable

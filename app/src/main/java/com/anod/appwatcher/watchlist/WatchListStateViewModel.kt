@@ -14,11 +14,13 @@ import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.sync.UpdateCheck
 import com.anod.appwatcher.tags.AppsTagViewModel
 import com.anod.appwatcher.utils.BaseFlowViewModel
+import com.anod.appwatcher.utils.appScope
 import com.anod.appwatcher.utils.networkConnection
 import com.anod.appwatcher.utils.prefs
 import info.anodsplace.applog.AppLog
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -28,7 +30,7 @@ data class WatchListSharedState(
         val filterId: Int,
         val titleFilter: String = "",
         val listState: ListState? = null,
-        val isWideLayout: Boolean = false,
+        val isWideLayout: Boolean = false
 )
 
 sealed interface WatchListSharedStateEvent {
@@ -102,7 +104,18 @@ class WatchListStateViewModel(state: SavedStateHandle) : BaseFlowViewModel<Watch
                             SectionItem.Recent -> {}
                         }
                     }
-                    else -> {}
+                    is WatchListEvent.ChangeSort -> {}
+                    is WatchListEvent.EmptyButton -> {}
+                    is WatchListEvent.FilterByTitle -> {}
+                    WatchListEvent.Refresh -> {
+                        val isRefreshing = (viewState.listState is ListState.SyncStarted)
+                        if (!isRefreshing) {
+                            appScope.launch {
+                                requestRefresh().collect { }
+                            }
+                        }
+                    }
+                    is WatchListEvent.SetFilter -> {}
                 }
             }
             is WatchListSharedStateEvent.AddAppToTag -> emitAction(WatchListSharedStateAction.AddAppToTag(event.tag))

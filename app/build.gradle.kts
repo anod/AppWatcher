@@ -122,6 +122,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-viewbinding:1.2.0")
     implementation("com.google.accompanist:accompanist-pager:0.25.0")
     implementation("com.google.accompanist:accompanist-flowlayout:0.25.0")
+    implementation("com.google.accompanist:accompanist-swiperefresh:0.25.0")
     implementation("io.coil-kt:coil-compose-base:2.1.0")
 
     // Google
