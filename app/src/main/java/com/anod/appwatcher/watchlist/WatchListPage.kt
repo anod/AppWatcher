@@ -27,6 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
 import coil.ImageLoader
@@ -67,10 +68,11 @@ fun WatchListPage(pagingSourceConfig: WatchListPagingSource.Config, sortId: Int,
 
     AppLog.d("Recomposition: WatchListPage [${pagingSourceConfig.hashCode()}, ${sortId}, ${items.hashCode()}, ${viewModel.hashCode()}, ${titleQuery}, ${currentQuery}]")
 
+    val isEmpty = items.loadState.source.refresh is LoadState.NotLoading && items.itemCount < 1
     LazyColumn {
-        if (items.itemCount == 0) {
+        if (isEmpty) {
             item {
-                EmptyItem(Modifier.padding(top = 128.dp))
+                EmptyItem(onEvent = onEvent, modifier = Modifier.padding(top = 128.dp))
             }
         } else {
             itemsIndexed(
@@ -101,7 +103,7 @@ fun WatchListSectionItem(item: SectionItem, index: Int, onEvent: (WatchListEvent
         is SectionItem.App -> AppItem(item.appListItem, isLocalApp = item.isLocal, selection = AppViewHolder.Selection.None, onClick = { onEvent(WatchListEvent.ItemClick(item, index)) }, installedApps = installedApps, appIconLoader = appIconLoader)
         is SectionItem.OnDevice -> AppItem(item.appListItem, isLocalApp = true, selection = AppViewHolder.Selection.None, onClick = { onEvent(WatchListEvent.ItemClick(item, index)) }, installedApps = installedApps, appIconLoader = appIconLoader)
         is SectionItem.Recent -> RecentItem()
-        is SectionItem.Empty -> EmptyItem()
+        is SectionItem.Empty -> EmptyItem(onEvent = onEvent)
     }
 }
 
@@ -152,19 +154,7 @@ fun SectionHeaderText(text: String) {
 
 private val newLineRegex = Regex("\n+")
 
-data class AppItemState(val color: Color, val text: String, val iconRes: Int, val showRecent: Boolean)
-
-@Composable
-fun VersionText(text: String, color: Color, modifier: Modifier = Modifier) {
-    Text(
-            text = text,
-            color = color,
-            modifier = modifier,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            style = MaterialTheme.typography.labelSmall
-    )
-}
+data class AppItemState(val color: Color, val text: String, val installed: Boolean, val showRecent: Boolean)
 
 @Composable
 fun ChangelogText(text: String, noNewDetails: Boolean) {
@@ -180,7 +170,6 @@ fun ChangelogText(text: String, noNewDetails: Boolean) {
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppItem(item: AppListItem, isLocalApp: Boolean, selection: AppViewHolder.Selection, onClick: (() -> Unit), installedApps: InstalledApps, appIconLoader: AppIconLoader = getKoin().get()) {
     val view = LocalView.current
@@ -206,73 +195,79 @@ fun AppItem(item: AppListItem, isLocalApp: Boolean, selection: AppViewHolder.Sel
         mutableStateOf(calcAppItemState(app, item.recentFlag, textColor, primaryColor, packageInfo, context))
     }
 
-    ListItem(
-            modifier = Modifier.clickable(enabled = true, onClick = onClick),
-            headlineText = {
-                Text(text = title)
-            },
-            overlineText = { },
-            supportingText = {
-                Column {
-                    Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        if (isLocalApp) {
-                            Icon(painter = painterResource(id = R.drawable.ic_stat_communication_stay_primary_portrait), contentDescription = null)
-                            val versionText: String by remember {
-                                mutableStateOf(formatVersionText(app.versionName, app.versionNumber, 0, context))
-                            }
-                            VersionText(text = versionText, color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f))
-                        } else {
-                            if (appItemState.iconRes != 0) {
-                                Icon(painter = painterResource(id = appItemState.iconRes), contentDescription = null)
-                            }
-                            VersionText(text = appItemState.text, color = appItemState.color, modifier = Modifier.weight(1f))
-                        }
-                        if (app.uploadDate.isNotEmpty()) {
-                            Text(text = app.uploadDate, maxLines = 1, style = MaterialTheme.typography.labelSmall)
-                        }
-                    }
-                    if (appItemState.showRecent) {
-                        if (isLocalApp) {
-                            if (changesHtml.isNotBlank()) {
-                                ChangelogText(text = changesHtml, noNewDetails = item.noNewDetails)
-                            }
-                        } else {
-                            if (changesHtml.isBlank()) {
-                                ChangelogText(text = stringResource(id = R.string.no_recent_changes), noNewDetails = true)
-                            } else {
-                                ChangelogText(text = changesHtml, noNewDetails = item.noNewDetails)
-                            }
-                        }
-                    }
-
-                    Divider(modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp),
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.38f)
+    Row(
+            modifier = Modifier
+                    .clickable(enabled = true, onClick = onClick)
+                    .heightIn(min = 68.dp)
+                    .padding(top = 8.dp, bottom = 8.dp, start = 16.dp, end = 16.dp)
+    ) {
+        val imageRequest = remember {
+            mutableStateOf(appIconLoader.request(app.iconUrl))
+        }
+        AsyncImage(
+                model = imageRequest.value,
+                contentDescription = title,
+                imageLoader = appIconLoader.coilLoader,
+                modifier = Modifier.size(40.dp),
+                placeholder = painterResource(id = R.drawable.ic_app_icon_placeholder)
+        )
+        Column(
+                modifier = Modifier.padding(start = 16.dp)
+        ) {
+            Text(text = title, style = MaterialTheme.typography.bodyLarge)
+            Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (appItemState.installed || isLocalApp) {
+                    Icon(painter = painterResource(id = R.drawable.ic_stat_communication_stay_primary_portrait), contentDescription = stringResource(id = R.string.installed), modifier = Modifier.padding(end = 4.dp))
+                }
+//                    val versionText: String by remember {
+//                        mutableStateOf(formatVersionText(app.versionName, app.versionNumber, 0, context))
+//                    }
+//                    VersionText(text = versionText, color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f))
+                Text(
+                        text = appItemState.text,
+                        color = appItemState.color,
+                        modifier = Modifier.weight(1f),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.bodySmall
+                )
+                if (app.uploadDate.isNotEmpty()) {
+                    Text(
+                            text = app.uploadDate,
+                            maxLines = 1,
+                            style = MaterialTheme.typography.bodySmall
                     )
                 }
-            },
-            leadingContent = {
-                val imageRequest = remember {
-                    mutableStateOf(appIconLoader.request(app.iconUrl))
+            }
+            if (appItemState.showRecent) {
+                if (isLocalApp) {
+                    if (changesHtml.isNotBlank()) {
+                        ChangelogText(text = changesHtml, noNewDetails = item.noNewDetails)
+                    }
+                } else {
+                    if (changesHtml.isBlank()) {
+                        ChangelogText(text = stringResource(id = R.string.no_recent_changes), noNewDetails = true)
+                    } else {
+                        ChangelogText(text = changesHtml, noNewDetails = item.noNewDetails)
+                    }
                 }
-                AsyncImage(
-                        model = imageRequest.value,
-                        contentDescription = title,
-                        imageLoader = appIconLoader.coilLoader,
-                        modifier = Modifier.size(40.dp),
-                        placeholder = painterResource(id = R.drawable.ic_app_icon_placeholder)
-                )
-            },
-    )
+            }
+
+            Divider(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+            )
+        }
+    }
 }
 
 private fun calcAppItemState(app: App, recentFlag: Boolean, textColor: Color, primaryColor: Color, packageInfo: InstalledApps.Info, context: Context): AppItemState {
     var color = textColor
-    var iconRes = 0
+    var installed = false
     var text = ""
     when {
         app.versionNumber == 0 -> {
@@ -280,7 +275,7 @@ private fun calcAppItemState(app: App, recentFlag: Boolean, textColor: Color, pr
             text = context.getString(R.string.updates_not_available)
         }
         packageInfo.isInstalled -> {
-            iconRes = R.drawable.ic_stat_communication_stay_primary_portrait
+            installed = true
             when {
                 app.versionNumber > packageInfo.versionCode -> {
                     color = Amber800
@@ -318,7 +313,7 @@ private fun calcAppItemState(app: App, recentFlag: Boolean, textColor: Color, pr
         }
     }
 
-    return AppItemState(color, text, iconRes, showRecent)
+    return AppItemState(color, text, installed, showRecent)
 }
 
 @Composable
@@ -328,6 +323,7 @@ fun RecentItem() {
 
 @Composable
 fun EmptyItem(
+        onEvent: (WatchListEvent) -> Unit,
         modifier: Modifier = Modifier,
         button1Text: @Composable () -> Unit = { Text(text = stringResource(id = R.string.search_for_an_app)) },
         button2Text: @Composable (() -> Unit)? = { Text(text = stringResource(id = R.string.import_installed)) },
@@ -341,20 +337,20 @@ fun EmptyItem(
     ) {
         Image(painter = painterResource(id = R.drawable.ic_empty_box), contentDescription = null)
         Text(text = stringResource(id = R.string.watch_list_is_empty), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 24.dp))
-        Button(onClick = { }, modifier = Modifier
+        Button(onClick = { onEvent(WatchListEvent.EmptyButton(1)) }, modifier = Modifier
                 .defaultMinSize(minWidth = 188.dp)
                 .padding(top = 8.dp)) {
             button1Text()
         }
         if (button2Text != null) {
-            Button(onClick = { }, modifier = Modifier
+            Button(onClick = { onEvent(WatchListEvent.EmptyButton(3)) }, modifier = Modifier
                     .defaultMinSize(minWidth = 188.dp)
                     .padding(top = 8.dp)) {
                 button2Text()
             }
         }
         if (button3Text != null) {
-            Button(onClick = { }, modifier = Modifier
+            Button(onClick = { onEvent(WatchListEvent.EmptyButton(3)) }, modifier = Modifier
                     .defaultMinSize(minWidth = 188.dp)
                     .padding(top = 8.dp)) {
                 button3Text()
@@ -404,7 +400,6 @@ fun WatchListEmptyPreview() {
             }
         }
     }
-
 }
 
 @Preview(uiMode = UI_MODE_NIGHT_YES)

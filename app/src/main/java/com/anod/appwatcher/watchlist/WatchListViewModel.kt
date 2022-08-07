@@ -56,6 +56,7 @@ sealed interface WatchListEvent {
     class ChangeSort(val sortId: Int, val reload: Boolean) : WatchListEvent
     class FilterByTitle(val titleFilter: String, val reload: Boolean) : WatchListEvent
     class ItemClick(val item: SectionItem, val index: Int) : WatchListEvent
+    class EmptyButton(val idx: Int) : WatchListEvent
 }
 
 abstract class FilterablePagingSource : PagingSource<Int, SectionItem>() {
@@ -150,6 +151,7 @@ abstract class WatchListViewModel(pagingSourceConfig: WatchListPagingSource.Conf
                     SectionItem.Recent -> {}
                 }
             }
+            is WatchListEvent.EmptyButton -> emitAction(WatchListAction.EmptyButton(event.idx))
         }
     }
 
