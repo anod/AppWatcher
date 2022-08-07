@@ -15,6 +15,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
@@ -63,8 +64,12 @@ fun WatchListTopBar(
                             leadingIcon = {
                                 Icon(imageVector = Icons.Default.Search, contentDescription = stringResource(id = R.string.menu_filter))
                             },
-                            keyboardOptions = KeyboardOptions.Default,
-                            keyboardActions = KeyboardActions.Default,
+                            keyboardOptions = KeyboardOptions(
+                                    imeAction = ImeAction.Search
+                            ),
+                            keyboardActions = KeyboardActions(
+                                    onSearch = { onEvent(WatchListSharedStateEvent.OnSearch(searchValue)) }
+                            ),
                             singleLine = true,
                             colors = TextFieldDefaults.textFieldColors(
                                     containerColor = containerColor,
@@ -197,7 +202,7 @@ fun DefaultPreview() {
                                         text = { Text(text = stringResource(id = R.string.menu_edit)) },
                                         leadingIcon = { Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(id = R.string.menu_edit)) },
                                         onClick = {
-
+                                            dismiss()
                                         }
                                 )
                             },

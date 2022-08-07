@@ -278,49 +278,42 @@ fun AppItem(item: AppListItem, isLocalApp: Boolean, selection: AppViewHolder.Sel
 private fun calcAppItemState(app: App, recentFlag: Boolean, textColor: Color, primaryColor: Color, packageInfo: InstalledApps.Info, context: Context): AppItemState {
     var color = textColor
     var installed = false
-    var text = ""
-    when {
+    val text = when {
         app.versionNumber == 0 -> {
             color = Amber800
-            text = context.getString(R.string.updates_not_available)
+            context.getString(R.string.updates_not_available)
         }
         packageInfo.isInstalled -> {
             installed = true
             when {
                 app.versionNumber > packageInfo.versionCode -> {
                     color = Amber800
-                    text = formatVersionText(packageInfo.versionName, packageInfo.versionCode, app.versionNumber, context)
+                    formatVersionText(packageInfo.versionName, packageInfo.versionCode, app.versionNumber, context)
                 }
                 app.status == AppInfoMetadata.STATUS_UPDATED || recentFlag -> {
                     color = primaryColor
-                    text = formatVersionText(packageInfo.versionName, packageInfo.versionCode, 0, context)
+                    formatVersionText(packageInfo.versionName, packageInfo.versionCode, 0, context)
                 }
                 else -> {
-                    text = formatVersionText(packageInfo.versionName, packageInfo.versionCode, 0, context)
+                    formatVersionText(packageInfo.versionName, packageInfo.versionCode, 0, context)
                 }
             }
         }
         else -> {
-            text = if (app.price.isFree) {
+            if (app.status == AppInfoMetadata.STATUS_UPDATED || recentFlag) {
+                color = primaryColor
+            }
+            if (app.price.isFree) {
                 context.getString(R.string.free)
             } else {
                 app.price.text
             }
-
-            if (app.status == AppInfoMetadata.STATUS_UPDATED || recentFlag) {
-                color = primaryColor
-            }
         }
     }
 
-    // Recent changes
     val showRecent = when {
-        app.status == AppInfoMetadata.STATUS_UPDATED || recentFlag -> {
-            true
-        }
-        else -> {
-            false
-        }
+        app.status == AppInfoMetadata.STATUS_UPDATED || recentFlag -> true
+        else -> false
     }
 
     return AppItemState(color, text, installed, showRecent)
