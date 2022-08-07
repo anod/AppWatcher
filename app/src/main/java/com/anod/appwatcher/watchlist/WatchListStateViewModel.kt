@@ -110,8 +110,9 @@ class WatchListStateViewModel(state: SavedStateHandle) : BaseFlowViewModel<Watch
                     WatchListEvent.Refresh -> {
                         val isRefreshing = (viewState.listState is ListState.SyncStarted)
                         if (!isRefreshing) {
+                            val schedule = requestRefresh()
                             appScope.launch {
-                                requestRefresh().collect { }
+                                schedule.collect { }
                             }
                         }
                     }
