@@ -16,6 +16,7 @@ import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppListItem
+import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.EventFlow
@@ -99,7 +100,7 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback, KoinComponen
 
     override fun pagingSourceConfig(args: Bundle) = WatchListPagingSource.Config(
             filterId = args.getInt(ARG_FILTER),
-            tag = args.getParcelable(ARG_TAG),
+            tagId = args.getParcelable<Tag?>(ARG_TAG)?.let { tag -> if (tag.isEmpty) null else tag.id },
             showRecentlyUpdated = false,
             showOnDevice = true,
             showRecentlyInstalled = false,
@@ -107,7 +108,7 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback, KoinComponen
     )
 
     override fun viewModelFactory(): ViewModelProvider.Factory {
-        return InstalledViewModel.Factory(viewModel.viewState.pagingSourceConfig)
+        return InstalledViewModel.Factory(pagingSourceConfig = pagingSourceConfig(requireArguments()))
     }
 
     override fun getItemSelection(appItem: AppListItem): AppViewHolder.Selection {

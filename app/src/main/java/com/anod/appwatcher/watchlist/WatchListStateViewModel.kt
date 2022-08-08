@@ -6,8 +6,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import androidx.work.Operation
 import com.anod.appwatcher.accounts.AuthTokenBlocking
+import com.anod.appwatcher.database.AppsDatabase
+import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.sync.SyncScheduler
@@ -20,6 +23,7 @@ import com.anod.appwatcher.utils.prefs
 import info.anodsplace.applog.AppLog
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -47,7 +51,11 @@ sealed interface WatchListSharedStateEvent {
 
 sealed interface WatchListSharedStateAction {
     object OnBackPressed : WatchListSharedStateAction
-    class ListAction(val action: WatchListAction) : WatchListSharedStateAction
+    object SearchInStore : WatchListSharedStateAction
+    object ImportInstalled : WatchListSharedStateAction
+    object ShareFromStore : WatchListSharedStateAction
+    class ExpandSection(val type: SectionHeader) : WatchListSharedStateAction
+    class OpenApp(val app: App, val index: Int) : WatchListSharedStateAction
     class AddAppToTag(val tag: Tag) : WatchListSharedStateAction
     class EditTag(val tag: Tag) : WatchListSharedStateAction
     class OnSearch(val query: String) : WatchListSharedStateAction
@@ -56,6 +64,7 @@ sealed interface WatchListSharedStateAction {
 class WatchListStateViewModel(state: SavedStateHandle) : BaseFlowViewModel<WatchListSharedState, WatchListSharedStateEvent, WatchListSharedStateAction>(), KoinComponent {
     private val authToken: AuthTokenBlocking by inject()
     private val application: Application by inject()
+    private val db: AppsDatabase by inject()
 
     /**
      * Receive notifications from UpdateCheck
@@ -75,7 +84,7 @@ class WatchListStateViewModel(state: SavedStateHandle) : BaseFlowViewModel<Watch
 
     init {
         viewState = WatchListSharedState(
-                tag = state[AppsTagViewModel.EXTRA_TAG] ?: Tag(0, "", 0),
+                tag = state[AppsTagViewModel.EXTRA_TAG] ?: Tag.empty,
                 sortId = prefs.sortIndex,
                 filterId = state["tab_id"] ?: Filters.TAB_ALL
         )
@@ -85,6 +94,17 @@ class WatchListStateViewModel(state: SavedStateHandle) : BaseFlowViewModel<Watch
             addAction(listChangedEvent)
         }
         application.registerReceiver(syncFinishedReceiver, filter)
+
+        viewModelScope.launch {
+            if (!viewState.tag.isEmpty) {
+                db.tags()
+                        .observe()
+                        .mapNotNull { list -> list.first { tag -> tag.id == viewState.tag.id } }
+                        .collect { tag ->
+                            viewState = viewState.copy(tag = tag)
+                        }
+            }
+        }
     }
 
     override fun handleEvent(event: WatchListSharedStateEvent) {
@@ -99,15 +119,20 @@ class WatchListStateViewModel(state: SavedStateHandle) : BaseFlowViewModel<Watch
                 when (val listEvent = event.event) {
                     is WatchListEvent.ItemClick -> {
                         when (val item = listEvent.item) {
-                            is SectionItem.Header -> emitAction(WatchListSharedStateAction.ListAction(WatchListAction.SectionHeaderClick(item.type)))
-                            is SectionItem.App -> emitAction(WatchListSharedStateAction.ListAction(WatchListAction.ItemClick(item.appListItem.app, listEvent.index)))
-                            is SectionItem.OnDevice -> emitAction(WatchListSharedStateAction.ListAction(WatchListAction.ItemClick(item.appListItem.app, listEvent.index)))
-                            SectionItem.Empty -> {}
-                            SectionItem.Recent -> {}
+                            is SectionItem.Header -> emitAction(WatchListSharedStateAction.ExpandSection(item.type))
+                            is SectionItem.App -> emitAction(WatchListSharedStateAction.OpenApp(item.appListItem.app, listEvent.index))
+                            is SectionItem.OnDevice -> emitAction(WatchListSharedStateAction.OpenApp(item.appListItem.app, listEvent.index))
+                            else -> {}
                         }
                     }
                     is WatchListEvent.ChangeSort -> {}
-                    is WatchListEvent.EmptyButton -> {}
+                    is WatchListEvent.EmptyButton -> {
+                        when (listEvent.idx) {
+                            1 -> emitAction(WatchListSharedStateAction.SearchInStore)
+                            2 -> emitAction(WatchListSharedStateAction.ImportInstalled)
+                            3 -> emitAction(WatchListSharedStateAction.ShareFromStore)
+                        }
+                    }
                     is WatchListEvent.FilterByTitle -> {}
                     WatchListEvent.Refresh -> {
                         val isRefreshing = (viewState.listState is ListState.SyncStarted)

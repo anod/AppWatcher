@@ -7,7 +7,6 @@ import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.SqlOffset
 import com.anod.appwatcher.database.entities.AppListItem
-import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.database.entities.packageToApp
 import com.anod.appwatcher.installed.InstalledTaskWorker
 import com.anod.appwatcher.model.AppListFilter
@@ -26,7 +25,7 @@ class WatchListPagingSource(
 
     data class Config(
             val filterId: Int,
-            val tag: Tag?,
+            val tagId: Int?,
             val showRecentlyUpdated: Boolean,
             val showOnDevice: Boolean,
             val showRecentlyInstalled: Boolean,
@@ -46,7 +45,7 @@ class WatchListPagingSource(
         }
 
         val data = AppListTable.Queries.loadAppList(
-                sortId, config.showRecentlyUpdated, config.tag, filterQuery, SqlOffset(offset, limit), database.apps()
+                sortId, config.showRecentlyUpdated, config.tagId, filterQuery, SqlOffset(offset, limit), database.apps()
         )
         val filtered = data.filter { !itemFilter.filterRecord(it) }
 

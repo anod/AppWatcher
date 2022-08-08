@@ -50,7 +50,7 @@ import org.koin.java.KoinJavaComponent.getKoin
 
 @Composable
 fun WatchListPage(pagingSourceConfig: WatchListPagingSource.Config, sortId: Int, titleQuery: String, isRefreshing: Boolean, onEvent: (WatchListEvent) -> Unit) {
-    val viewModel: WatchListViewModel = viewModel(factory = AppsWatchListViewModel.Factory(pagingSourceConfig))
+    val viewModel: WatchListViewModel = viewModel(key = pagingSourceConfig.filterId.toString(), factory = AppsWatchListViewModel.Factory(pagingSourceConfig))
     val items = viewModel.pagingData.collectAsLazyPagingItems()
 
     LaunchedEffect(key1 = sortId) {
@@ -73,11 +73,14 @@ fun WatchListPage(pagingSourceConfig: WatchListPagingSource.Config, sortId: Int,
     val isEmpty = items.loadState.source.refresh is LoadState.NotLoading && items.itemCount < 1
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isRefreshing)
     SwipeRefresh(
+            modifier = Modifier.fillMaxSize(),
             state = swipeRefreshState,
             swipeEnabled = viewModel.prefs.enablePullToRefresh,
             onRefresh = { onEvent(WatchListEvent.Refresh) }
     ) {
-        LazyColumn {
+        LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+        ) {
             if (isEmpty) {
                 item {
                     EmptyItem(onEvent = onEvent, modifier = Modifier.padding(top = 128.dp))
@@ -346,7 +349,7 @@ fun EmptyItem(
             button1Text()
         }
         if (button2Text != null) {
-            Button(onClick = { onEvent(WatchListEvent.EmptyButton(3)) }, modifier = Modifier
+            Button(onClick = { onEvent(WatchListEvent.EmptyButton(2)) }, modifier = Modifier
                     .defaultMinSize(minWidth = 188.dp)
                     .padding(top = 8.dp)) {
                 button2Text()

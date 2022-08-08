@@ -24,7 +24,6 @@ import com.anod.appwatcher.details.DetailsFragment
 import com.anod.appwatcher.installed.InstalledFragment
 import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.utils.prefs
-import com.anod.appwatcher.watchlist.WatchListAction
 import com.anod.appwatcher.watchlist.WatchListPagingSource
 import com.anod.appwatcher.watchlist.WatchListSharedStateAction
 import com.anod.appwatcher.watchlist.WatchListStateViewModel
@@ -63,13 +62,14 @@ class TagWatchListComposeActivity : AppCompatActivity() {
         }
 
         setContent {
+            val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
+
             AppTheme(
-                    customPrimaryColor = Color(viewModel.viewState.tag.color)
+                    customPrimaryColor = Color(screenState.tag.color)
             ) {
-                val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
                 val pagingSourceConfig = WatchListPagingSource.Config(
                         filterId = screenState.filterId,
-                        tag = screenState.tag,
+                        tagId = if (screenState.tag.isEmpty) null else screenState.tag.id,
                         showRecentlyUpdated = viewModel.prefs.showRecentlyUpdated,
                         showOnDevice = false,
                         showRecentlyInstalled = false
@@ -82,24 +82,17 @@ class TagWatchListComposeActivity : AppCompatActivity() {
     private fun onViewAction(action: WatchListSharedStateAction) {
         when (action) {
             WatchListSharedStateAction.OnBackPressed -> onBackPressed()
-            is WatchListSharedStateAction.ListAction -> {
-                when (val listAction = action.action) {
-                    is WatchListAction.SearchInStore -> startActivity(MarketSearchActivity.intent(this, "", true))
-                    is WatchListAction.Installed -> {
-                        val theme = Theme(this, viewModel.prefs)
-                        startActivity(InstalledFragment.intent(listAction.importMode, this, theme.theme, theme.colors))
-                    }
-                    is WatchListAction.ShareFromStore -> startActivitySafely(Intent.makeMainActivity(ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity")))
-                    is WatchListAction.ItemClick -> {
-                        val app = listAction.app
-                        if (BuildConfig.DEBUG) {
-                            AppLog.d(app.packageName)
-                        }
-                        openAppDetails(app.appId, app.rowId, app.detailsUrl)
-                    }
-                    else -> {}
+            is WatchListSharedStateAction.OpenApp -> {
+                val app = action.app
+                if (BuildConfig.DEBUG) {
+                    AppLog.d(app.packageName)
                 }
+                openAppDetails(app.appId, app.rowId, app.detailsUrl)
             }
+            is WatchListSharedStateAction.ExpandSection -> {}
+            is WatchListSharedStateAction.SearchInStore -> startActivity(MarketSearchActivity.intent(this, "", true))
+            is WatchListSharedStateAction.ImportInstalled -> Theme(this, viewModel.prefs).also { theme -> startActivity(InstalledFragment.intent(true, this, theme.theme, theme.colors)) }
+            is WatchListSharedStateAction.ShareFromStore -> startActivitySafely(Intent.makeMainActivity(ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity")))
             is WatchListSharedStateAction.AddAppToTag -> AppsTagSelectDialog.show(action.tag, supportFragmentManager)
             is WatchListSharedStateAction.EditTag -> EditTagDialog.show(supportFragmentManager, tag = action.tag, theme = Theme(this, viewModel.prefs))
             is WatchListSharedStateAction.OnSearch -> startActivity(MarketSearchActivity.intent(this, action.query, true))

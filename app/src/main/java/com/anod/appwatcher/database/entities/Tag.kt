@@ -28,6 +28,9 @@ data class Tag(
         @ColorInt
         val color: Int) : Parcelable {
 
+    val isEmpty: Boolean
+        get() = (id == 0 && name.isEmpty() && color == 0)
+
     val darkColor: Int
         get() {
             val hsv = FloatArray(3)
@@ -73,6 +76,7 @@ data class Tag(
 
     companion object {
         const val DEFAULT_COLOR = 0xFF2196F3.toInt()
+        val empty = Tag(0, "", 0)
 
         @JvmField
         val CREATOR: Parcelable.Creator<Tag> = object : Parcelable.Creator<Tag> {

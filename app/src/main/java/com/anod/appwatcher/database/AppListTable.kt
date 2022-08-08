@@ -20,7 +20,6 @@ import info.anodsplace.framework.util.dayStartAgoMillis
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
-import java.util.*
 import java.util.concurrent.Callable
 
 class SqlOffset(val offset: Int, val limit: Int)
@@ -145,20 +144,20 @@ interface AppListTable {
             return table.observeRows(SimpleSQLiteQuery("SELECT ${BaseColumns._ID} FROM ${AppListTable.table} LIMIT 1", emptyArray()))
         }
 
-        private fun loadAppList(sortId: Int, orderByRecentlyUpdated: Boolean, tag: Tag?, titleFilter: String, table: AppListTable): Flow<List<AppListItem>> {
-            val query = createAppsListQuery(sortId, orderByRecentlyUpdated, tag, titleFilter, null)
+        private fun loadAppList(sortId: Int, orderByRecentlyUpdated: Boolean, tagId: Int?, titleFilter: String, table: AppListTable): Flow<List<AppListItem>> {
+            val query = createAppsListQuery(sortId, orderByRecentlyUpdated, tagId, titleFilter, null)
             return table.observe(SimpleSQLiteQuery(query.first, query.second))
         }
 
-        suspend fun loadAppList(sortId: Int, orderByRecentlyUpdated: Boolean, tag: Tag?, titleFilter: String, offset: SqlOffset, table: AppListTable): List<AppListItem> {
-            val query = createAppsListQuery(sortId, orderByRecentlyUpdated, tag, titleFilter, offset)
+        suspend fun loadAppList(sortId: Int, orderByRecentlyUpdated: Boolean, tagId: Int?, titleFilter: String, offset: SqlOffset, table: AppListTable): List<AppListItem> {
+            val query = createAppsListQuery(sortId, orderByRecentlyUpdated, tagId, titleFilter, offset)
             return table.load(SimpleSQLiteQuery(query.first, query.second))
         }
 
-        private fun createAppsListQuery(sortId: Int, orderByRecentlyUpdated: Boolean, tag: Tag?, titleFilter: String, offset: SqlOffset?): Pair<String, Array<String>> {
-            val tables = if (tag == null) table else AppTagsTable.table + ", " + table
+        private fun createAppsListQuery(sortId: Int, orderByRecentlyUpdated: Boolean, tagId: Int?, titleFilter: String, offset: SqlOffset?): Pair<String, Array<String>> {
+            val tables = if (tagId == null) table else AppTagsTable.table + ", " + table
             val rangeSql = if (offset == null) "" else " LIMIT ? OFFSET ? "
-            val selection = createSelection(tag, titleFilter, offset)
+            val selection = createSelection(tagId, titleFilter, offset)
 
             val sql = "SELECT $table.*, ${ChangelogTable.TableColumns.details}, ${ChangelogTable.TableColumns.noNewDetails}, " +
                     "CASE WHEN ${Columns.updateTimestamp} > $recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
@@ -200,16 +199,16 @@ interface AppListTable {
             return filter.joinToString(", ")
         }
 
-        private fun createSelection(tag: Tag?, titleFilter: String, offset: SqlOffset?): Pair<String, Array<String>> {
+        private fun createSelection(tagId: Int?, titleFilter: String, offset: SqlOffset?): Pair<String, Array<String>> {
             val selc = ArrayList<String>(3)
             val args = ArrayList<String>(5)
 
             selc.add(Columns.status + " != ?")
             args.add(AppInfoMetadata.STATUS_DELETED.toString())
 
-            if (tag != null) {
+            if (tagId != null) {
                 selc.add(AppTagsTable.TableColumns.tagId + " = ?")
-                args.add(tag.id.toString())
+                args.add(tagId.toString())
                 selc.add(AppTagsTable.TableColumns.appId + " = " + TableColumns.appId)
             }
 

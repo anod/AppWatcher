@@ -10,7 +10,6 @@ import androidx.paging.*
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
-import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.model.AppListFilter
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
@@ -36,7 +35,6 @@ data class WatchListState(
         val pagingSourceConfig: WatchListPagingSource.Config,
         val titleFilter: String,
         val sortId: Int,
-        val tag: Tag? = null,
         val filter: AppListFilter = AppListFilter.All(),
 )
 
@@ -89,8 +87,7 @@ abstract class WatchListViewModel(pagingSourceConfig: WatchListPagingSource.Conf
                 pagingSourceConfig = pagingSourceConfig,
                 sortId = prefs.sortIndex,
                 titleFilter = "",
-                filter = createFilter(pagingSourceConfig.filterId),
-                tag = pagingSourceConfig.tag,
+                filter = createFilter(pagingSourceConfig.filterId)
         )
     }
 

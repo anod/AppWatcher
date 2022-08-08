@@ -9,6 +9,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.anod.appwatcher.R
+import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.watchlist.*
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -24,6 +25,13 @@ fun TagWatchListScreen(screenState: WatchListSharedState, pagingSourceConfig: Wa
             stringResource(id = R.string.tab_installed),
             stringResource(id = R.string.tab_not_installed),
             stringResource(id = R.string.tab_updatable),
+    )
+
+    val filterIds = listOf(
+            Filters.TAB_ALL,
+            Filters.INSTALLED,
+            Filters.UNINSTALLED,
+            Filters.UPDATABLE
     )
 
     val pagerState = rememberPagerState(initialPage = screenState.filterId)
@@ -64,9 +72,11 @@ fun TagWatchListScreen(screenState: WatchListSharedState, pagingSourceConfig: Wa
                 )
             }
     ) { paddingValues ->
-        HorizontalPager(count = filterPagesTitles.size, state = pagerState, modifier = Modifier.padding(paddingValues)) {
+        HorizontalPager(count = filterPagesTitles.size, state = pagerState, modifier = Modifier.padding(paddingValues)) { pageIndex ->
+            val pageConfig = pagingSourceConfig.copy(filterId = filterIds[pageIndex])
+            AppLog.d("Recomposition HorizontalPager ${pageConfig.filterId}")
             WatchListPage(
-                    pagingSourceConfig = pagingSourceConfig,
+                    pagingSourceConfig = pageConfig,
                     sortId = screenState.sortId,
                     titleQuery = screenState.titleFilter,
                     isRefreshing = screenState.listState is ListState.SyncStarted,

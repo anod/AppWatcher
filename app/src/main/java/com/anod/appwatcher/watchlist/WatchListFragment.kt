@@ -58,7 +58,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener,
     open fun pagingSourceConfig(args: Bundle): WatchListPagingSource.Config = args.getInt(ARG_FILTER).let { filterId ->
         WatchListPagingSource.Config(
                 filterId = filterId,
-                tag = args.getParcelable(ARG_TAG),
+                tagId = args.getParcelable<Tag?>(ARG_TAG)?.let { tag -> if (tag.isEmpty) null else tag.id },
                 showRecentlyUpdated = prefs.showRecentlyUpdated,
                 showOnDevice = filterId == Filters.TAB_ALL && prefs.showOnDevice,
                 showRecentlyInstalled = filterId == Filters.TAB_ALL && prefs.showRecent
@@ -91,9 +91,10 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener,
         val layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
         binding.listView.layoutManager = layoutManager
 
+        val tag = requireArguments().getParcelable<Tag?>(ARG_TAG)
         // Setup header decorator
         adapter = WatchListPagingAdapter(
-                viewModel.viewState.tag?.color,
+                tag?.color,
                 viewModel.installedApps,
                 viewModel.recentlyInstalledPackages,
                 viewLifecycleOwner,
