@@ -142,6 +142,8 @@ fun WatchListTopBar(
                     filterTitles.forEachIndexed { index, title ->
                         DropdownMenuItem(text = { Text(text = title) }, onClick = {
                             onEvent(WatchListSharedStateEvent.FilterById(filterId = index))
+                            topBarMoreMenu = false
+                            topBarFilterMenu = false
                         })
                     }
                 }
