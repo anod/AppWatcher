@@ -2,7 +2,6 @@ package com.anod.appwatcher.watchlist
 
 import android.accounts.Account
 import android.content.Intent
-import android.graphics.Rect
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.Menu
@@ -39,6 +38,7 @@ import com.anod.appwatcher.utils.prefs
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.FragmentContainerFactory
+import info.anodsplace.framework.app.HingeDeviceLayout
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -177,10 +177,10 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         }
     }
 
-    override fun updateWideLayout(isWideLayout: Boolean, hinge: Rect) {
-        super.updateWideLayout(isWideLayout, hinge)
-        stateViewModel.handleEvent(WatchListSharedStateEvent.SetWideLayout(isWideLayout))
-        if (isWideLayout) {
+    override fun updateWideLayout(wideLayout: HingeDeviceLayout) {
+        super.updateWideLayout(wideLayout)
+        stateViewModel.handleEvent(WatchListSharedStateEvent.SetWideLayout(wideLayout))
+        if (wideLayout.isWideLayout) {
             if (supportFragmentManager.findFragmentByTag(DetailsEmptyView.tag) == null) {
                 supportFragmentManager.commit {
                     replace(R.id.details, DetailsEmptyView(), DetailsEmptyView.tag)
@@ -239,7 +239,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     }
 
     override fun openAppDetails(appId: String, rowId: Int, detailsUrl: String?) {
-        if (stateViewModel.viewState.isWideLayout) {
+        if (stateViewModel.viewState.wideLayout?.isWideLayout == true) {
             supportFragmentManager.commit {
                 add(R.id.details, DetailsFragment.newInstance(appId, detailsUrl ?: "", rowId), DetailsFragment.tag)
                 addToBackStack(DetailsFragment.tag)
@@ -250,7 +250,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     }
 
     override fun onBackPressed() {
-        if (stateViewModel.viewState.isWideLayout && supportFragmentManager.findFragmentByTag(DetailsFragment.tag) != null) {
+        if (stateViewModel.viewState.wideLayout?.isWideLayout == true && supportFragmentManager.findFragmentByTag(DetailsFragment.tag) != null) {
             supportFragmentManager.popBackStack(DetailsFragment.tag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
         } else {
             if (!DetailsDialog.dismiss(supportFragmentManager)) {

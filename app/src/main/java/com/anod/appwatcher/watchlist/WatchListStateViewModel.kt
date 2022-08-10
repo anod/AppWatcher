@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Rect
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.work.Operation
@@ -21,6 +22,7 @@ import com.anod.appwatcher.utils.appScope
 import com.anod.appwatcher.utils.networkConnection
 import com.anod.appwatcher.utils.prefs
 import info.anodsplace.applog.AppLog
+import info.anodsplace.framework.app.HingeDeviceLayout
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapNotNull
@@ -34,19 +36,21 @@ data class WatchListSharedState(
         val filterId: Int,
         val titleFilter: String = "",
         val listState: ListState? = null,
-        val isWideLayout: Boolean = false
+        val wideLayout: HingeDeviceLayout = HingeDeviceLayout(isWideLayout = false, hinge = Rect()),
+        val selectedApp: App? = null
 )
 
 sealed interface WatchListSharedStateEvent {
     object OnBackPressed : WatchListSharedStateEvent
     class ChangeSort(val sortId: Int) : WatchListSharedStateEvent
     class FilterByTitle(val query: String) : WatchListSharedStateEvent
-    class SetWideLayout(val wideLayout: Boolean) : WatchListSharedStateEvent
+    class SetWideLayout(val layout: HingeDeviceLayout) : WatchListSharedStateEvent
     class ListEvent(val event: WatchListEvent) : WatchListSharedStateEvent
     class FilterById(val filterId: Int) : WatchListSharedStateEvent
     class AddAppToTag(val tag: Tag) : WatchListSharedStateEvent
     class EditTag(val tag: Tag) : WatchListSharedStateEvent
     class OnSearch(val query: String) : WatchListSharedStateEvent
+    class SelectApp(val app: App?) : WatchListSharedStateEvent
 }
 
 sealed interface WatchListSharedStateAction {
@@ -86,7 +90,7 @@ class WatchListStateViewModel(state: SavedStateHandle) : BaseFlowViewModel<Watch
         viewState = WatchListSharedState(
                 tag = state[AppsTagViewModel.EXTRA_TAG] ?: Tag.empty,
                 sortId = prefs.sortIndex,
-                filterId = state["tab_id"] ?: Filters.TAB_ALL
+                filterId = state["tab_id"] ?: Filters.TAB_ALL,
         )
         val filter = IntentFilter().apply {
             addAction(UpdateCheck.syncProgress)
@@ -114,13 +118,19 @@ class WatchListStateViewModel(state: SavedStateHandle) : BaseFlowViewModel<Watch
                 viewState = viewState.copy(sortId = event.sortId)
             }
             is WatchListSharedStateEvent.FilterByTitle -> viewState = viewState.copy(titleFilter = event.query)
-            is WatchListSharedStateEvent.SetWideLayout -> viewState = viewState.copy(isWideLayout = event.wideLayout)
+            is WatchListSharedStateEvent.SetWideLayout -> viewState = viewState.copy(wideLayout = event.layout)
             is WatchListSharedStateEvent.ListEvent -> {
                 when (val listEvent = event.event) {
                     is WatchListEvent.ItemClick -> {
                         when (val item = listEvent.item) {
                             is SectionItem.Header -> emitAction(WatchListSharedStateAction.ExpandSection(item.type))
-                            is SectionItem.App -> emitAction(WatchListSharedStateAction.OpenApp(item.appListItem.app, listEvent.index))
+                            is SectionItem.App -> {
+                                if (viewState.wideLayout.isWideLayout) {
+                                    viewState = viewState.copy(selectedApp = item.appListItem.app)
+                                } else {
+                                    emitAction(WatchListSharedStateAction.OpenApp(item.appListItem.app, listEvent.index))
+                                }
+                            }
                             is SectionItem.OnDevice -> emitAction(WatchListSharedStateAction.OpenApp(item.appListItem.app, listEvent.index))
                             else -> {}
                         }
@@ -147,12 +157,21 @@ class WatchListStateViewModel(state: SavedStateHandle) : BaseFlowViewModel<Watch
                 }
             }
             is WatchListSharedStateEvent.AddAppToTag -> emitAction(WatchListSharedStateAction.AddAppToTag(event.tag))
-            WatchListSharedStateEvent.OnBackPressed -> emitAction(WatchListSharedStateAction.OnBackPressed)
+            WatchListSharedStateEvent.OnBackPressed -> {
+                if (viewState.wideLayout.isWideLayout && viewState.selectedApp != null) {
+                    viewState = viewState.copy(selectedApp = null)
+                } else {
+                    emitAction(WatchListSharedStateAction.OnBackPressed)
+                }
+            }
             is WatchListSharedStateEvent.FilterById -> {
                 viewState = viewState.copy(filterId = event.filterId)
             }
             is WatchListSharedStateEvent.EditTag -> emitAction(WatchListSharedStateAction.EditTag(event.tag))
             is WatchListSharedStateEvent.OnSearch -> emitAction(WatchListSharedStateAction.OnSearch(event.query))
+            is WatchListSharedStateEvent.SelectApp -> {
+                viewState = viewState.copy(selectedApp = event.app)
+            }
         }
     }
 

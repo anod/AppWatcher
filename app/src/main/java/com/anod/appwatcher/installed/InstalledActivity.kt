@@ -2,7 +2,6 @@
 package com.anod.appwatcher.installed
 
 import android.content.Context
-import android.graphics.Rect
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.annotation.Keep
@@ -15,6 +14,7 @@ import info.anodsplace.framework.R
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.FragmentContainerFactory
 import info.anodsplace.framework.app.FragmentToolbarActivity
+import info.anodsplace.framework.app.HingeDeviceLayout
 
 @Keep
 class InstalledActivity : FragmentToolbarActivity(), AppDetailsRouter {
@@ -27,9 +27,9 @@ class InstalledActivity : FragmentToolbarActivity(), AppDetailsRouter {
 
     private val stateViewModel: InstalledActivityViewModel by viewModels()
 
-    override fun updateWideLayout(isWideLayout: Boolean, hinge: Rect) {
-        super.updateWideLayout(isWideLayout, hinge)
-        stateViewModel.isWideLayout = isWideLayout
+    override fun updateWideLayout(wideLayout: HingeDeviceLayout) {
+        super.updateWideLayout(wideLayout)
+        stateViewModel.isWideLayout = wideLayout.isWideLayout
         if (stateViewModel.isWideLayout) {
             if (supportFragmentManager.findFragmentByTag(DetailsEmptyView.tag) == null) {
                 supportFragmentManager.commit {
