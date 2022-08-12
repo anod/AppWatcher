@@ -29,7 +29,6 @@ class WatchListPagingSource(
             val showRecentlyUpdated: Boolean,
             val showOnDevice: Boolean,
             val showRecentlyInstalled: Boolean,
-            val selectionMode: Boolean = false
     )
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, SectionItem> {

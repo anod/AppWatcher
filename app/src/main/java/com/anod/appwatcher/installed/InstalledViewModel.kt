@@ -28,9 +28,17 @@ class InstalledViewModel(pagingSourceConfig: WatchListPagingSource.Config) : Wat
         get() = getKoin().getOrNull()
 
     val changelogAdapter: ChangelogAdapter by inject { parametersOf(viewModelScope) }
-
+    var selectionMode = false
     override fun createPagingSource(): FilterablePagingSource {
-        return InstalledPagingSource(viewState.titleFilter, prefs, config = viewState.pagingSourceConfig, changelogAdapter, packageManager, database)
+        return InstalledPagingSource(
+                viewState.titleFilter,
+                prefs,
+                config = viewState.pagingSourceConfig,
+                selectionMode = selectionMode,
+                changelogAdapter,
+                packageManager,
+                database
+        )
     }
 
     override fun createSectionHeaderFactory() = SectionHeaderFactory.Empty()

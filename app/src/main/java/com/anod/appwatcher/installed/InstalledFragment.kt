@@ -65,6 +65,7 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback, KoinComponen
             binding.actionButton.hide()
             importViewModel.clearSelection()
         }
+        (viewModel as InstalledViewModel).selectionMode = importViewModel.selectionMode
     }
 
     private fun updateTitle() {
@@ -103,8 +104,7 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback, KoinComponen
             tagId = args.getParcelable<Tag?>(ARG_TAG)?.let { tag -> if (tag.isEmpty) null else tag.id },
             showRecentlyUpdated = false,
             showOnDevice = true,
-            showRecentlyInstalled = false,
-            selectionMode = importViewModel.selectionMode
+            showRecentlyInstalled = false
     )
 
     override fun viewModelFactory(): ViewModelProvider.Factory {

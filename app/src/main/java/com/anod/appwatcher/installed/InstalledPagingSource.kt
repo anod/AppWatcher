@@ -16,6 +16,7 @@ class InstalledPagingSource(
         override var filterQuery: String,
         private val prefs: Preferences,
         private val config: WatchListPagingSource.Config,
+        private val selectionMode: Boolean,
         private val changelogAdapter: ChangelogAdapter,
         private val packageManager: PackageManager,
         private val database: AppsDatabase,
@@ -41,7 +42,7 @@ class InstalledPagingSource(
                 .asSequence()
                 .mapNotNull {
                     val rowId = watchingPackages[it.pkg.name] ?: -1
-                    if (config.selectionMode && rowId >= 0)
+                    if (selectionMode && rowId >= 0)
                         null
                     else
                         App.fromInstalledPackage(rowId, it)
@@ -53,7 +54,7 @@ class InstalledPagingSource(
                             changeDetails = appChange?.details ?: "",
                             noNewDetails = false,
                             recentFlag = false
-                    ), config.selectionMode)
+                    ), selectionMode)
                 }.toList()
 
 
