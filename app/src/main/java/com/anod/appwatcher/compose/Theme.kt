@@ -156,13 +156,13 @@ fun AppTheme(
                 primaryContainer = Color(roles.accentContainer),
                 onPrimaryContainer = Color(roles.onAccentContainer)
         )
-    }
 
-    val view = LocalView.current
-    if (!view.isInEditMode) {
-        SideEffect {
-            (view.context as Activity).window.statusBarColor = colorScheme.primary.toArgb()
-            ViewCompat.getWindowInsetsController(view)?.isAppearanceLightStatusBars = darkTheme
+        val view = LocalView.current
+        if (!view.isInEditMode) {
+            SideEffect {
+                (view.context as Activity).window.statusBarColor = colorScheme.primary.toArgb()
+                ViewCompat.getWindowInsetsController(view)?.isAppearanceLightStatusBars = darkTheme
+            }
         }
     }
 

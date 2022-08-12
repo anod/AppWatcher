@@ -75,7 +75,8 @@ class TagWatchListComposeActivity : AppCompatActivity() {
             val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
 
             AppTheme(
-                    customPrimaryColor = Color(screenState.tag.color)
+                    customPrimaryColor = Color(screenState.tag.color),
+                    theme = viewModel.prefs.theme
             ) {
                 val pagingSourceConfig = WatchListPagingSource.Config(
                         filterId = screenState.filterId,
