@@ -22,7 +22,6 @@ import com.anod.appwatcher.utils.prefs
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.FragmentContainerFactory
 import info.anodsplace.framework.app.FragmentToolbarActivity
-import info.anodsplace.graphics.DrawableTint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -141,9 +140,7 @@ class TagsListFragment : Fragment(), View.OnClickListener, KoinComponent {
 
             if (checked) {
                 name.isSelected = true
-                val checkmark = DrawableTint(itemView.resources, R.drawable.ic_check_black_24dp, itemView.context.theme)
-                        .apply(R.color.md_surface)
-                name.setCompoundDrawablesWithIntrinsicBounds(null, null, checkmark, null)
+                name.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_check_black_24dp, 0)
             } else {
                 name.isSelected = false
                 name.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
