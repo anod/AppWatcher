@@ -45,6 +45,9 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback, KoinComponen
     private val packageChanged: PackageChangedReceiver by inject()
     private val authToken: AuthTokenBlocking by inject()
 
+    private val installedViewModel: InstalledViewModel
+        get() = viewModel as InstalledViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
@@ -65,7 +68,7 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback, KoinComponen
             binding.actionButton.hide()
             importViewModel.clearSelection()
         }
-        (viewModel as InstalledViewModel).selectionMode = importViewModel.selectionMode
+        installedViewModel.selectionMode = importViewModel.selectionMode
     }
 
     private fun updateTitle() {
@@ -85,8 +88,8 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback, KoinComponen
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.menu_act_sort -> {
-                DialogSingleChoice(requireContext(), R.style.AlertDialog, R.array.sort_titles, viewModel.viewState.sortId) { dialog, index ->
-                    menuAction.tryEmit(SortMenuAction(index))
+                DialogSingleChoice(requireContext(), R.style.AlertDialog, R.array.sort_titles, installedViewModel.sortId) { dialog, index ->
+                    installedViewModel.changeSortId(index, reload = true)
                     dialog.dismiss()
                 }.show()
                 return true
@@ -108,7 +111,8 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback, KoinComponen
     )
 
     override fun viewModelFactory(): ViewModelProvider.Factory {
-        return InstalledViewModel.Factory(pagingSourceConfig = pagingSourceConfig(requireArguments()))
+        val args = requireArguments()
+        return InstalledViewModel.Factory(sortIndex = args.getInt(ARG_SORT), pagingSourceConfig = pagingSourceConfig(args))
     }
 
     override fun getItemSelection(appItem: AppListItem): AppViewHolder.Selection {
@@ -142,7 +146,7 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback, KoinComponen
                         viewModel.handleEvent(WatchListEvent.FilterByTitle(it.query, true))
                     }
                     is SortMenuAction -> {
-                        viewModel.handleEvent(WatchListEvent.ChangeSort(it.sortId, true))
+                        installedViewModel.changeSortId(sortId = it.sortId, reload = true)
                     }
                     is FilterMenuAction -> {
                     }
@@ -273,8 +277,7 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback, KoinComponen
                     reload()
                 }
             }
-            else -> {
-            }
+            else -> super.onListAction(action)
         }
     }
 
@@ -285,6 +288,35 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback, KoinComponen
             Toast.makeText(activity, R.string.app_already_added, Toast.LENGTH_SHORT).show()
         }
     }
+
+    override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
+        (activity as? ToolbarActivity)?.menuInflater?.inflate(R.menu.selection, menu)
+        return true
+    }
+
+    override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {
+        return false
+    }
+
+    override fun onActionItemClicked(mode: ActionMode?, item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.menu_act_select_all -> {
+                importViewModel.selectAll(true)
+                return true
+            }
+            R.id.menu_act_select_none -> {
+                importViewModel.selectAll(false)
+                return true
+            }
+            else -> false
+        }
+    }
+
+    override fun onDestroyActionMode(mode: ActionMode?) {
+        switchImportMode(false, animated = true)
+        reload()
+    }
+
 
     class Factory(
             private val sortId: Int,
@@ -315,33 +347,5 @@ class InstalledFragment : WatchListFragment(), ActionMode.Callback, KoinComponen
                 themeRes,
                 themeColors
         )
-    }
-
-    override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-        (activity as? ToolbarActivity)?.menuInflater?.inflate(R.menu.selection, menu)
-        return true
-    }
-
-    override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-        return false
-    }
-
-    override fun onActionItemClicked(mode: ActionMode?, item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.menu_act_select_all -> {
-                importViewModel.selectAll(true)
-                return true
-            }
-            R.id.menu_act_select_none -> {
-                importViewModel.selectAll(false)
-                return true
-            }
-            else -> false
-        }
-    }
-
-    override fun onDestroyActionMode(mode: ActionMode?) {
-        switchImportMode(false, animated = true)
-        reload()
     }
 }

@@ -34,7 +34,6 @@ typealias InstalledPackageRow = Pair<String, Int>
 data class WatchListState(
         val pagingSourceConfig: WatchListPagingSource.Config,
         val titleFilter: String,
-        val sortId: Int,
         val filter: AppListFilter = AppListFilter.All(),
 )
 
@@ -50,9 +49,9 @@ sealed interface WatchListAction {
 }
 
 sealed interface WatchListEvent {
+    object Reload : WatchListEvent
     object Refresh : WatchListEvent
     class SetFilter(val filterId: Int) : WatchListEvent
-    class ChangeSort(val sortId: Int, val reload: Boolean) : WatchListEvent
     class FilterByTitle(val titleFilter: String, val reload: Boolean) : WatchListEvent
     class ItemClick(val item: SectionItem, val index: Int) : WatchListEvent
     class EmptyButton(val idx: Int) : WatchListEvent
@@ -85,7 +84,6 @@ abstract class WatchListViewModel(pagingSourceConfig: WatchListPagingSource.Conf
     init {
         viewState = WatchListState(
                 pagingSourceConfig = pagingSourceConfig,
-                sortId = prefs.sortIndex,
                 titleFilter = "",
                 filter = createFilter(pagingSourceConfig.filterId)
         )
@@ -127,12 +125,6 @@ abstract class WatchListViewModel(pagingSourceConfig: WatchListPagingSource.Conf
             is WatchListEvent.SetFilter -> {
                 viewState = viewState.copy(filter = createFilter(event.filterId))
             }
-            is WatchListEvent.ChangeSort -> {
-                viewState = viewState.copy(sortId = event.sortId)
-                if (event.reload) {
-                    emitAction(WatchListAction.Reload)
-                }
-            }
             is WatchListEvent.FilterByTitle -> {
                 viewState = viewState.copy(titleFilter = event.titleFilter)
                 pagingSource?.filterQuery = event.titleFilter
@@ -150,8 +142,9 @@ abstract class WatchListViewModel(pagingSourceConfig: WatchListPagingSource.Conf
                 }
             }
             is WatchListEvent.EmptyButton -> emitAction(WatchListAction.EmptyButton(event.idx))
-            WatchListEvent.Refresh -> { /**/
-            }
+            WatchListEvent.Refresh -> {}
+            WatchListEvent.Reload -> emitAction(WatchListAction.Reload)
+
         }
     }
 

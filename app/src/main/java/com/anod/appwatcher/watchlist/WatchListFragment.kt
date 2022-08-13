@@ -165,7 +165,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener,
 
         viewLifecycleOwner.lifecycleScope.launchWhenResumed {
             stateViewModel.viewStates.map { it.sortId }.distinctUntilChanged().collect {
-                viewModel.handleEvent(WatchListEvent.ChangeSort(it, reload = true))
+                viewModel.handleEvent(WatchListEvent.Reload)
             }
         }
 

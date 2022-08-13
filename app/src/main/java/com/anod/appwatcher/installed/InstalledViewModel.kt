@@ -6,19 +6,16 @@ import android.content.pm.PackageManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.anod.appwatcher.watchlist.FilterablePagingSource
-import com.anod.appwatcher.watchlist.SectionHeaderFactory
-import com.anod.appwatcher.watchlist.WatchListPagingSource
-import com.anod.appwatcher.watchlist.WatchListViewModel
+import com.anod.appwatcher.watchlist.*
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.parameter.parametersOf
 
-class InstalledViewModel(pagingSourceConfig: WatchListPagingSource.Config) : WatchListViewModel(pagingSourceConfig), KoinComponent {
+class InstalledViewModel(sortIndex: Int, pagingSourceConfig: WatchListPagingSource.Config) : WatchListViewModel(pagingSourceConfig), KoinComponent {
 
-    class Factory(private val pagingSourceConfig: WatchListPagingSource.Config) : ViewModelProvider.Factory {
+    class Factory(private val sortIndex: Int, private val pagingSourceConfig: WatchListPagingSource.Config) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return InstalledViewModel(pagingSourceConfig) as T
+            return InstalledViewModel(sortIndex, pagingSourceConfig) as T
         }
     }
 
@@ -29,11 +26,20 @@ class InstalledViewModel(pagingSourceConfig: WatchListPagingSource.Config) : Wat
 
     val changelogAdapter: ChangelogAdapter by inject { parametersOf(viewModelScope) }
     var selectionMode = false
+    var sortId: Int = sortIndex
+        private set
+
+    fun changeSortId(sortId: Int, reload: Boolean) {
+        this.sortId = sortId
+        if (reload) {
+            emitAction(WatchListAction.Reload)
+        }
+    }
+
     override fun createPagingSource(): FilterablePagingSource {
         return InstalledPagingSource(
                 viewState.titleFilter,
-                prefs,
-                config = viewState.pagingSourceConfig,
+                sortIndex = sortId,
                 selectionMode = selectionMode,
                 changelogAdapter,
                 packageManager,

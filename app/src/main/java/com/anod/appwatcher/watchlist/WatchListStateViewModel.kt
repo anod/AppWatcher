@@ -90,7 +90,9 @@ class WatchListStateViewModel(state: SavedStateHandle) : BaseFlowViewModel<Watch
         viewState = WatchListSharedState(
                 tag = state[AppsTagViewModel.EXTRA_TAG] ?: Tag.empty,
                 sortId = prefs.sortIndex,
-                filterId = state["tab_id"] ?: Filters.TAB_ALL,
+                filterId = state.get<Any?>("tab_id")?.let { tabId ->
+                    (tabId as? Int) ?: (tabId as? String)?.toIntOrNull()
+                } ?: Filters.TAB_ALL,
         )
         val filter = IntentFilter().apply {
             addAction(UpdateCheck.syncProgress)
@@ -135,7 +137,6 @@ class WatchListStateViewModel(state: SavedStateHandle) : BaseFlowViewModel<Watch
                             else -> {}
                         }
                     }
-                    is WatchListEvent.ChangeSort -> {}
                     is WatchListEvent.EmptyButton -> {
                         when (listEvent.idx) {
                             1 -> emitAction(WatchListSharedStateAction.SearchInStore)
@@ -143,7 +144,6 @@ class WatchListStateViewModel(state: SavedStateHandle) : BaseFlowViewModel<Watch
                             3 -> emitAction(WatchListSharedStateAction.ShareFromStore)
                         }
                     }
-                    is WatchListEvent.FilterByTitle -> {}
                     WatchListEvent.Refresh -> {
                         val isRefreshing = (viewState.listState is ListState.SyncStarted)
                         if (!isRefreshing) {
@@ -153,7 +153,9 @@ class WatchListStateViewModel(state: SavedStateHandle) : BaseFlowViewModel<Watch
                             }
                         }
                     }
+                    is WatchListEvent.FilterByTitle -> {}
                     is WatchListEvent.SetFilter -> {}
+                    WatchListEvent.Reload -> {}
                 }
             }
             is WatchListSharedStateEvent.AddAppToTag -> emitAction(WatchListSharedStateAction.AddAppToTag(event.tag))

@@ -94,7 +94,9 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
         }
 
         if (get<Preferences>().collectCrashReports) {
-            FirebaseCrashlytics.getInstance().recordException(tr)
+            if (tr !is kotlinx.coroutines.CancellationException) {
+                FirebaseCrashlytics.getInstance().recordException(tr)
+            }
         }
     }
 

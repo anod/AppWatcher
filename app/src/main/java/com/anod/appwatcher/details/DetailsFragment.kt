@@ -395,7 +395,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
                     RevealAnimatorCompat.show(binding.background, location[0], location[1], 0).also { animator ->
                         animator.addListener(object : AnimatorListenerAdapter() {
                             override fun onAnimationEnd(animation: Animator?) {
-                                binding.toolbar.background = binding.background.background.constantState?.newDrawable()
+                                _binding?.toolbar?.background = _binding?.background?.background?.constantState?.newDrawable()
                                 animator.removeAllListeners()
                             }
                         })
