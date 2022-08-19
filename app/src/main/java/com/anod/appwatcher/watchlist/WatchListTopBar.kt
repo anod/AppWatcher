@@ -4,21 +4,17 @@ import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
+import com.anod.appwatcher.compose.TopBarSearchField
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,52 +30,22 @@ fun WatchListTopBar(
         dropdownActions: @Composable (dismiss: () -> Unit) -> Unit,
         onEvent: (WatchListSharedStateEvent) -> Unit
 ) {
-    val focusRequester = remember { FocusRequester() }
 
     var showSearchView by remember { mutableStateOf(filterQuery.isNotBlank()) }
     var topBarMoreMenu by remember { mutableStateOf(false) }
     var topBarFilterMenu by remember { mutableStateOf(false) }
     var topBarSortMenu by remember { mutableStateOf(false) }
 
-    LaunchedEffect(showSearchView) {
-        if (showSearchView) {
-            focusRequester.requestFocus()
-        }
-    }
-
     SmallTopAppBar(
             title = {
                 if (showSearchView) {
-                    var searchValue by remember { mutableStateOf(filterQuery) }
-                    TextField(
-                            modifier = Modifier.focusRequester(focusRequester),
-                            value = searchValue,
-                            onValueChange = {
-                                searchValue = it
-                                onEvent(WatchListSharedStateEvent.FilterByTitle(query = it))
-                            },
-                            placeholder = {
-                                Text(text = stringResource(id = R.string.search))
-                            },
-                            leadingIcon = {
-                                Icon(imageVector = Icons.Default.Search, contentDescription = stringResource(id = R.string.menu_filter))
-                            },
-                            keyboardOptions = KeyboardOptions(
-                                    imeAction = ImeAction.Search
-                            ),
-                            keyboardActions = KeyboardActions(
-                                    onSearch = { onEvent(WatchListSharedStateEvent.OnSearch(searchValue)) }
-                            ),
-                            singleLine = true,
-                            colors = TextFieldDefaults.textFieldColors(
-                                    containerColor = containerColor,
-                                    textColor = contentColor,
-                                    focusedLeadingIconColor = contentColor,
-                                    unfocusedLeadingIconColor = contentColor.copy(alpha = 0.4f),
-                                    placeholderColor = contentColor.copy(alpha = 0.4f),
-                                    focusedTrailingIconColor = contentColor,
-                                    unfocusedTrailingIconColor = contentColor.copy(alpha = 0.4f),
-                            )
+                    TopBarSearchField(
+                            query = filterQuery,
+                            onValueChange = { onEvent(WatchListSharedStateEvent.FilterByTitle(query = it)) },
+                            onSearchAction = { onEvent(WatchListSharedStateEvent.OnSearch(it)) },
+                            containerColor = containerColor,
+                            contentColor = contentColor,
+                            requestFocus = true
                     )
                 } else {
                     if (subtitle != null) {

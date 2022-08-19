@@ -29,7 +29,7 @@ import com.anod.appwatcher.details.DetailsFragment
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.navigation.DrawerActivity
 import com.anod.appwatcher.navigation.DrawerViewModel
-import com.anod.appwatcher.search.SearchActivity
+import com.anod.appwatcher.search.SearchComposeActivity
 import com.anod.appwatcher.upgrade.UpgradeCheck
 import com.anod.appwatcher.utils.EventFlow
 import com.anod.appwatcher.utils.Theme
@@ -132,8 +132,8 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
                     is SearchQueryAction -> {
                         if (it.submit) {
                             startActivity(Intent(this@WatchListActivity, MarketSearchActivity::class.java).apply {
-                                putExtra(SearchActivity.EXTRA_KEYWORD, it.query)
-                                putExtra(SearchActivity.EXTRA_EXACT, true)
+                                putExtra(SearchComposeActivity.EXTRA_KEYWORD, it.query)
+                                putExtra(SearchComposeActivity.EXTRA_EXACT, true)
                             })
                         } else {
                             stateViewModel.handleEvent(WatchListSharedStateEvent.FilterByTitle(it.query))
@@ -239,7 +239,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     }
 
     override fun openAppDetails(appId: String, rowId: Int, detailsUrl: String?) {
-        if (stateViewModel.viewState.wideLayout?.isWideLayout == true) {
+        if (stateViewModel.viewState.wideLayout.isWideLayout) {
             supportFragmentManager.commit {
                 add(R.id.details, DetailsFragment.newInstance(appId, detailsUrl ?: "", rowId), DetailsFragment.tag)
                 addToBackStack(DetailsFragment.tag)
@@ -250,7 +250,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     }
 
     override fun onBackPressed() {
-        if (stateViewModel.viewState.wideLayout?.isWideLayout == true && supportFragmentManager.findFragmentByTag(DetailsFragment.tag) != null) {
+        if (stateViewModel.viewState.wideLayout.isWideLayout && supportFragmentManager.findFragmentByTag(DetailsFragment.tag) != null) {
             supportFragmentManager.popBackStack(DetailsFragment.tag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
         } else {
             if (!DetailsDialog.dismiss(supportFragmentManager)) {

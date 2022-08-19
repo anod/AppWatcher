@@ -1,9 +1,11 @@
 package finsky.api.model
 
 import android.util.SparseArray
-import finsky.protos.*
+import finsky.protos.AppDetails
+import finsky.protos.Common
+import finsky.protos.DocV2
 
-class Document(private val doc: DocV2) {
+data class Document(private val doc: DocV2) {
 
     val appDetails: AppDetails
         get() = this.doc.details.appDetails

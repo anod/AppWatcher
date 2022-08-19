@@ -98,7 +98,7 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
                             when (item.key) {
                                 "icon-style" -> Preference(
                                         item,
-                                        secondaryText = {
+                                        secondary = {
                                             Column {
                                                 Text(
                                                         modifier = Modifier.padding(top = 4.dp),

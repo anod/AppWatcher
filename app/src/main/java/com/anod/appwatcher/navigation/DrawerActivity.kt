@@ -149,7 +149,7 @@ abstract class DrawerActivity : ToolbarActivity(), KoinComponent {
         menu.removeGroup(1)
         val addTag = menu.add(1, -1, Menu.NONE, R.string.tags)
         addTag.setActionView(R.layout.drawer_tag_add)
-        val addTagButton = addTag.actionView.findViewById<View>(R.id.button1)
+        val addTagButton = addTag.actionView!!.findViewById<View>(R.id.button1)
         addTagButton.setOnClickListener {
             EditTagDialog.show(supportFragmentManager, null, Theme(this, prefs))
         }
@@ -160,7 +160,7 @@ abstract class DrawerActivity : ToolbarActivity(), KoinComponent {
         result.forEach { (tag, count) ->
             val item = menu.add(1, tag.id, Menu.NONE, tag.name)
             item.setActionView(R.layout.drawer_tag_indicator)
-            val tagIndicator = item.actionView.findViewById<View>(android.R.id.text1) as TextView
+            val tagIndicator = item.actionView!!.findViewById<View>(android.R.id.text1) as TextView
             val d = ResourcesCompat.getDrawable(resources, R.drawable.circular_color, null)
             DrawableCompat.setTint(DrawableCompat.wrap(d!!), tag.color)
             tagIndicator.background = d

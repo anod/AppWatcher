@@ -12,12 +12,12 @@ repositories {
 }
 
 android {
-    compileSdk = 32
+    compileSdk = 33
 
     defaultConfig {
         applicationId = "com.anod.appwatcher"
         minSdk = 27
-        targetSdk = 32
+        targetSdk = 33
         versionCode = 15005
         versionName = "1.5.0"
         resValue("string", "content_authority", "com.anod.appwatcher")
@@ -112,18 +112,21 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.7.1")
     implementation("androidx.core:core:1.8.0")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
-    implementation("androidx.fragment:fragment-ktx:1.5.1")
+    implementation("androidx.fragment:fragment-ktx:1.5.2")
 
-    implementation("androidx.paging:paging-runtime:3.2.0-alpha01")
-    implementation("androidx.paging:paging-compose:1.0.0-alpha15")
+    implementation("androidx.paging:paging-runtime:3.2.0-alpha02")
+    implementation("androidx.paging:paging-compose:1.0.0-alpha16")
 
     // Compose
     implementation("androidx.activity:activity-compose:1.5.1")
-    implementation("androidx.compose.ui:ui-viewbinding:1.2.0")
-    implementation("com.google.accompanist:accompanist-pager:0.25.0")
-    implementation("com.google.accompanist:accompanist-flowlayout:0.25.0")
-    implementation("com.google.accompanist:accompanist-swiperefresh:0.25.0")
-    implementation("io.coil-kt:coil-compose-base:2.1.0")
+    implementation("androidx.compose.ui:ui-viewbinding:1.2.1")
+    implementation("com.google.accompanist:accompanist-pager:0.25.1")
+    implementation("com.google.accompanist:accompanist-flowlayout:0.25.1")
+    implementation("com.google.accompanist:accompanist-swiperefresh:0.25.1")
+
+    // Coil
+    implementation("io.coil-kt:coil-base:2.2.0")
+    implementation("io.coil-kt:coil-compose-base:2.2.0")
 
     // Google
     implementation("com.google.android.material:material:1.6.1")
@@ -143,7 +146,6 @@ dependencies {
 
     // 3rd party
     implementation("com.squareup.okhttp3:okhttp:4.9.3")
-    implementation("io.coil-kt:coil-base:2.1.0")
     implementation("com.jakewharton:process-phoenix:2.1.2")
     implementation("io.insert-koin:koin-core:3.2.0")
 

@@ -4,7 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.net.UrlQuerySanitizer
 import android.os.Bundle
-import com.anod.appwatcher.search.SearchActivity
+import com.anod.appwatcher.search.SearchComposeActivity
 
 class ShareRecieverActivity : Activity() {
 
@@ -19,9 +19,9 @@ class ShareRecieverActivity : Activity() {
             val sanitizer = UrlQuerySanitizer(text)
             val id = sanitizer.getValue("id")
             if (id != null) {
-                searchIntent.putExtra(SearchActivity.EXTRA_PACKAGE, true)
-                searchIntent.putExtra(SearchActivity.EXTRA_KEYWORD, id)
-                searchIntent.putExtra(SearchActivity.EXTRA_EXACT, true)
+                searchIntent.putExtra(SearchComposeActivity.EXTRA_PACKAGE, true)
+                searchIntent.putExtra(SearchComposeActivity.EXTRA_KEYWORD, id)
+                searchIntent.putExtra(SearchComposeActivity.EXTRA_EXACT, true)
                 fallback = false
             }
         }
@@ -29,15 +29,15 @@ class ShareRecieverActivity : Activity() {
         if (fallback) {
             val title = intent.getStringExtra(Intent.EXTRA_TITLE)
             if (title != null && title != "") {
-                searchIntent.putExtra(SearchActivity.EXTRA_KEYWORD, title)
+                searchIntent.putExtra(SearchComposeActivity.EXTRA_KEYWORD, title)
             } else if (text != null && text != "") {
-                searchIntent.putExtra(SearchActivity.EXTRA_KEYWORD, text)
+                searchIntent.putExtra(SearchComposeActivity.EXTRA_KEYWORD, text)
             } else {
-                searchIntent.putExtra(SearchActivity.EXTRA_KEYWORD, "")
+                searchIntent.putExtra(SearchComposeActivity.EXTRA_KEYWORD, "")
             }
-            searchIntent.putExtra(SearchActivity.EXTRA_EXACT, false)
+            searchIntent.putExtra(SearchComposeActivity.EXTRA_EXACT, false)
         }
-        searchIntent.putExtra(SearchActivity.EXTRA_SHARE, true)
+        searchIntent.putExtra(SearchComposeActivity.EXTRA_SHARE, true)
         startActivity(searchIntent)
         finish()
     }

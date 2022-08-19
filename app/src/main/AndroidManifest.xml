@@ -9,6 +9,9 @@
     </queries>
 
     <uses-sdk />
+
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <!-- for google account token -->
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
 

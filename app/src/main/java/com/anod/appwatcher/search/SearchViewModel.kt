@@ -1,58 +1,100 @@
 package com.anod.appwatcher.search
 
 import android.accounts.Account
-import android.app.Application
 import android.content.Intent
-import androidx.lifecycle.AndroidViewModel
+import android.content.pm.PackageManager
+import android.widget.Toast
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.paging.*
+import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenBlocking
+import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
+import com.anod.appwatcher.preferences.Preferences
+import com.anod.appwatcher.utils.BaseFlowViewModel
+import com.anod.appwatcher.utils.date.UploadDateParserCache
 import com.anod.appwatcher.utils.networkConnection
-import com.anod.appwatcher.utils.prefs
 import finsky.api.model.Document
+import info.anodsplace.framework.app.HingeDeviceLayout
+import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.playstore.AppDetailsFilter
 import info.anodsplace.playstore.DetailsEndpoint
 import info.anodsplace.playstore.SearchEndpoint
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.component.inject
 import org.koin.core.parameter.parametersOf
 
-sealed class SearchStatus
-object Loading : SearchStatus()
-class DetailsAvailable(val document: Document) : SearchStatus()
-object NoResults : SearchStatus()
-object NoNetwork : SearchStatus()
-object Error : SearchStatus()
-class SearchPage(val pagingData: PagingData<Document>) : SearchStatus()
+sealed interface SearchStatus {
+    object Loading : SearchStatus
+    data class DetailsAvailable(val document: Document) : SearchStatus
+    object NoResults : SearchStatus
+    object NoNetwork : SearchStatus
+    object Error : SearchStatus
+    object SearchList : SearchStatus
+}
 
-sealed class ResultAction
-class Delete(val info: AppInfo) : ResultAction()
-class Add(val info: AppInfo) : ResultAction()
+sealed interface SearchViewAction {
+    class StartActivity(val intent: Intent, val finish: Boolean) : SearchViewAction
+    class ShowToast(val resId: Int = 0, val duration: Int = Toast.LENGTH_LONG, val finish: Boolean = false, val text: String = "") : SearchViewAction
+    object ShowAccountDialog : SearchViewAction
+    class AppStateChanged(val newStatus: Int, val info: AppInfo, val isShareSource: Boolean) : SearchViewAction
+    class AlreadyWatchedNotice(val document: Document) : SearchViewAction
+    object OnBackPressed : SearchViewAction
+}
 
-class SearchViewModel(application: Application) : AndroidViewModel(application), KoinComponent {
+
+sealed interface SearchViewEvent {
+    object NoAccount : SearchViewEvent
+    object OnBackPressed : SearchViewEvent
+    class Delete(val document: Document) : SearchViewEvent
+    class ItemClick(val document: Document) : SearchViewEvent
+    class SetWideLayout(val wideLayout: HingeDeviceLayout) : SearchViewEvent
+    class SearchQueryChange(val query: String) : SearchViewEvent
+    class OnSearchEnter(val query: String) : SearchViewEvent
+    class AccountSelectError(val errorMessage: String) : SearchViewEvent
+    class AccountSelected(val account: Account) : SearchViewEvent
+}
+
+data class SearchViewState(
+        val searchQuery: String = "",
+        val isShareSource: Boolean = false,
+        val hasFocus: Boolean = false,
+        val initiateSearch: Boolean = false,
+        val isPackageSearch: Boolean = false,
+        val authenticated: Boolean = false,
+        val account: Account? = null,
+        val searchStatus: SearchStatus = SearchStatus.Loading,
+        val watchingPackages: List<String> = emptyList(),
+        val wideLayout: HingeDeviceLayout = HingeDeviceLayout(),
+)
+
+class SearchViewModel(
+        initialState: SearchViewState
+) : BaseFlowViewModel<SearchViewState, SearchViewEvent, SearchViewAction>(), KoinComponent {
+
+    class Factory(private val initialState: SearchViewState) : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+            return SearchViewModel(initialState) as T
+        }
+    }
+
     private val database: AppsDatabase by inject()
-    val authToken: AuthTokenBlocking by inject()
-    val account: Account?
-        get() = prefs.account
-
-    private var initiateSearch = false
-    var isShareSource = false
-    var hasFocus = false
-    private var isPackageSearch = false
-    var searchQuery = MutableStateFlow("")
-    val searchQueryAuthenticated = searchQuery.combine(authToken.tokenAvailable) { query, _ -> query }
-    val packages: StateFlow<List<String>> = database.apps().observePackages().map { list ->
-        list.map { it.packageName }
-    }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
-
-    var appStatusChange = MutableStateFlow<Pair<Int, AppInfo?>>(Pair(-1, null))
+    private val authToken: AuthTokenBlocking by inject()
+    private val uploadDateParserCache: UploadDateParserCache by inject()
+    private val packageManager: PackageManager by inject()
+    val installedApps by lazy { InstalledApps.MemoryCache(InstalledApps.PackageManager(packageManager)) }
+    val prefs: Preferences by inject()
 
     private var endpointDetails: DetailsEndpoint? = null
     private var endpointSearch: SearchEndpoint? = null
@@ -62,70 +104,148 @@ class SearchViewModel(application: Application) : AndroidViewModel(application),
         endpointSearch = null
     }
 
-    fun initFromIntent(intent: Intent?) {
-        if (intent == null) {
-            searchQuery.value = ""
-            return
+    init {
+        viewState = initialState.copy(
+                account = prefs.account,
+                searchStatus = if (initialState.searchQuery.isNotEmpty() && initialState.initiateSearch) SearchStatus.Loading else SearchStatus.NoResults
+        )
+        if (prefs.account == null) {
+            handleEvent(SearchViewEvent.NoAccount)
         }
-        searchQuery.value = intent.getStringExtra(SearchActivity.EXTRA_KEYWORD) ?: ""
-        isPackageSearch = intent.getBooleanExtra(SearchActivity.EXTRA_PACKAGE, false)
-        initiateSearch = intent.getBooleanExtra(SearchActivity.EXTRA_EXACT, false)
-        isShareSource = intent.getBooleanExtra(SearchActivity.EXTRA_SHARE, false)
-        hasFocus = intent.getBooleanExtra(SearchActivity.EXTRA_FOCUS, false)
+        viewModelScope.launch {
+            database.apps().observePackages().collect { list ->
+                viewState = viewState.copy(watchingPackages = list.map { it.packageName })
+            }
+        }
+        if (initialState.searchQuery.isNotEmpty() && initialState.initiateSearch) {
+            handleEvent(SearchViewEvent.OnSearchEnter(initialState.searchQuery))
+        }
     }
 
-    fun search(query: String): Flow<SearchStatus> = flow {
-        if (account == null) {
-            emit(Error)
+    override fun handleEvent(event: SearchViewEvent) {
+        when (event) {
+            is SearchViewEvent.ItemClick -> {
+                if (viewState.watchingPackages.contains(event.document.appDetails.packageName)) {
+                    emitAction(SearchViewAction.AlreadyWatchedNotice(event.document))
+                } else add(event.document)
+            }
+            is SearchViewEvent.Delete -> delete(event.document)
+            SearchViewEvent.NoAccount -> emitAction(SearchViewAction.ShowAccountDialog)
+            is SearchViewEvent.SetWideLayout -> viewState = viewState.copy(wideLayout = event.wideLayout)
+            is SearchViewEvent.SearchQueryChange -> viewState = viewState.copy(searchQuery = event.query)
+            is SearchViewEvent.OnSearchEnter -> onSearchRequest(event.query)
+            is SearchViewEvent.AccountSelectError -> onAccountSelectError(event.errorMessage)
+            is SearchViewEvent.AccountSelected -> onAccountSelected(event.account)
+            SearchViewEvent.OnBackPressed -> emitAction(SearchViewAction.OnBackPressed)
+        }
+    }
+
+    private fun onAccountSelectError(errorMessage: String) {
+        if (networkConnection.isNetworkAvailable) {
+            if (errorMessage.isNotBlank()) {
+                emitAction(SearchViewAction.ShowToast(text = errorMessage, duration = Toast.LENGTH_LONG, finish = true))
+            } else {
+                emitAction(SearchViewAction.ShowToast(resId = R.string.failed_gain_access, duration = Toast.LENGTH_LONG, finish = true))
+            }
+        } else {
+            emitAction(SearchViewAction.ShowToast(resId = R.string.check_connection, duration = Toast.LENGTH_SHORT, finish = true))
+        }
+    }
+
+    private fun onSearchRequest(query: String) {
+        viewModelScope.launch {
+            search(query).collect { searchStatus ->
+                viewState = viewState.copy(searchQuery = query, searchStatus = searchStatus)
+                if (searchStatus == SearchStatus.NoNetwork) {
+                    emitAction(SearchViewAction.ShowToast(resId = R.string.check_connection, duration = Toast.LENGTH_SHORT, finish = true))
+                }
+            }
+        }
+    }
+
+    private fun search(query: String): Flow<SearchStatus> = flow {
+        if (prefs.account == null) {
+            emit(SearchStatus.Error)
             return@flow
         }
-        endpointSearch = get() { parametersOf(query) }
-        if (isPackageSearch) {
+        endpointSearch = get { parametersOf(query) }
+        if (viewState.isPackageSearch) {
             val detailsUrl = AppInfo.createDetailsUrl(query)
-            endpointDetails = get() { parametersOf(detailsUrl) }
+            endpointDetails = get { parametersOf(detailsUrl) }
         }
-        emit(Loading)
+        emit(SearchStatus.Loading)
         if (endpointDetails == null) {
-            emitAll(createPager(endpointSearch!!))
+            _pagingData = null
+            emit(SearchStatus.SearchList)
         } else {
             try {
                 val model = endpointDetails!!.start()
                 if (model.document != null) {
-                    emit(DetailsAvailable(model.document!!))
+                    emit(SearchStatus.DetailsAvailable(model.document!!))
                 } else {
-                    emitAll(createPager(endpointSearch!!))
+                    _pagingData = null
+                    emit(SearchStatus.SearchList)
                 }
             } catch (e: Exception) {
                 if (!networkConnection.isNetworkAvailable) {
-                    emit(NoNetwork)
+                    emit(SearchStatus.NoNetwork)
                 } else {
-                    emitAll(createPager(endpointSearch!!))
+                    _pagingData = null
+                    emit(SearchStatus.SearchList)
                 }
             }
         }
     }
 
-    private fun createPager(endpointSearch: SearchEndpoint) = Pager(PagingConfig(pageSize = 10)) { ListEndpointPagingSource(endpointSearch) }
+    private var _pagingData: Flow<PagingData<Document>>? = null
+    val pagingData: Flow<PagingData<Document>>
+        get() {
+            if (_pagingData == null) {
+                _pagingData = createPager()
+            }
+            return _pagingData!!
+        }
+
+    private fun createPager() = Pager(PagingConfig(pageSize = 10)) { ListEndpointPagingSource(endpointSearch!!) }
             .flow
             .cachedIn(viewModelScope)
             .map {
-                val filtered = it.filter { d -> AppDetailsFilter.predicate(d) }
-                SearchPage(filtered)
+                it.filter { d -> AppDetailsFilter.predicate(d) }
             }
 
-    fun delete(info: AppInfo) {
+    private fun onAccountSelected(account: Account) {
+        viewState = viewState.copy(account = account)
         viewModelScope.launch {
-            AppListTable.Queries.delete(info.appId, database)
-            appStatusChange.value = Pair(AppInfoMetadata.STATUS_DELETED, info)
+            try {
+                if (!authToken.refreshToken(account)) {
+                    if (networkConnection.isNetworkAvailable) {
+                        emitAction(SearchViewAction.ShowToast(resId = R.string.failed_gain_access, duration = Toast.LENGTH_LONG, finish = true))
+                    } else {
+                        emitAction(SearchViewAction.ShowToast(resId = R.string.check_connection, duration = Toast.LENGTH_SHORT, finish = true))
+                    }
+                }
+            } catch (e: AuthTokenStartIntent) {
+                emitAction(SearchViewAction.StartActivity(intent = e.intent, finish = true))
+            }
         }
     }
 
-    fun add(info: AppInfo) {
+    private fun delete(document: Document) {
         viewModelScope.launch {
+            val info = AppInfo(document, uploadDateParserCache)
+            AppListTable.Queries.delete(info.appId, database)
+            emitAction(SearchViewAction.AppStateChanged(newStatus = AppInfoMetadata.STATUS_DELETED, info = info, isShareSource = viewState.isShareSource))
+        }
+    }
+
+    private fun add(document: Document) {
+        viewModelScope.launch {
+            val info = AppInfo(document, uploadDateParserCache)
             val result = AppListTable.Queries.insertSafetly(info, database)
             if (result != AppListTable.ERROR_INSERT) {
-                appStatusChange.value = Pair(AppInfoMetadata.STATUS_NORMAL, info)
+                emitAction(SearchViewAction.AppStateChanged(newStatus = AppInfoMetadata.STATUS_NORMAL, info = info, isShareSource = viewState.isShareSource))
             }
         }
     }
+
 }

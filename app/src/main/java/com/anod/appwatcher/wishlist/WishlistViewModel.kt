@@ -1,8 +1,5 @@
 package com.anod.appwatcher.wishlist
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -13,6 +10,9 @@ import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.search.ListEndpointPagingSource
+import com.anod.appwatcher.utils.BaseFlowViewModel
+import com.anod.appwatcher.utils.date.UploadDateParserCache
+import finsky.api.model.Document
 import finsky.api.model.FilterComposite
 import finsky.api.model.FilterPredicate
 import info.anodsplace.playstore.AppDetailsFilter
@@ -26,17 +26,28 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class WishListViewModel(application: Application) : AndroidViewModel(application), KoinComponent {
-    private val database: AppsDatabase by inject()
-    var appStatusChange = MutableLiveData<Pair<Int, AppInfo?>>()
+data class WishListState(
+        val nameFilter: String = "",
+        val watchingPackages: List<String> = emptyList(),
+)
 
+sealed interface WishListAction {
+    class AppStateChanged(val newStatus: Int, val info: AppInfo) : WishListAction
+}
+
+sealed interface WishListEvent {
+    class Delete(val document: Document) : WishListEvent
+    class ItemClick(val document: Document) : WishListEvent
+}
+
+class WishListViewModel() : BaseFlowViewModel<WishListState, WishListEvent, WishListAction>(), KoinComponent {
+    private val database: AppsDatabase by inject()
     private val endpoint: WishListEndpoint by inject()
+    private val uploadDateParserCache: UploadDateParserCache by inject()
 
     val packages: StateFlow<List<String>> = database.apps().observePackages().map { list ->
         list.map { it.packageName }
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
-
-    var nameFilter = ""
 
     private fun predicate(nameFilter: String): FilterPredicate {
         if (nameFilter.isBlank()) {
@@ -48,26 +59,37 @@ class WishListViewModel(application: Application) : AndroidViewModel(application
         )).predicate
     }
 
-    fun delete(info: AppInfo) {
+    private fun delete(document: Document) {
         viewModelScope.launch {
+            val info = AppInfo(document, uploadDateParserCache)
             AppListTable.Queries.delete(info.appId, database)
-            appStatusChange.value = Pair(AppInfoMetadata.STATUS_DELETED, info)
+            emitAction(WishListAction.AppStateChanged(newStatus = AppInfoMetadata.STATUS_DELETED, info = info))
         }
     }
 
-    fun add(info: AppInfo) {
+    private fun add(document: Document) {
         viewModelScope.launch {
-            AppListTable.Queries.insert(info, database)
-            appStatusChange.value = Pair(AppInfoMetadata.STATUS_NORMAL, info)
+            val info = AppInfo(document, uploadDateParserCache)
+            val result = AppListTable.Queries.insertSafetly(info, database)
+            if (result != AppListTable.ERROR_INSERT) {
+                emitAction(WishListAction.AppStateChanged(newStatus = AppInfoMetadata.STATUS_NORMAL, info = info))
+            }
         }
     }
 
     fun load() = Pager(PagingConfig(pageSize = 10)) { ListEndpointPagingSource(endpoint) }
             .flow
             .map { pageData ->
-                val predicate = predicate(nameFilter)
+                val predicate = predicate(viewState.nameFilter)
                 pageData.filter { d -> predicate(d) }
             }
             .cachedIn(viewModelScope)
+
+    override fun handleEvent(event: WishListEvent) {
+        when (event) {
+            is WishListEvent.Delete -> {}
+            is WishListEvent.ItemClick -> {}
+        }
+    }
 
 }

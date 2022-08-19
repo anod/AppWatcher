@@ -2,9 +2,9 @@ package com.anod.appwatcher
 
 import android.content.Context
 import android.content.Intent
-import com.anod.appwatcher.search.SearchActivity
+import com.anod.appwatcher.search.SearchComposeActivity
 
-class MarketSearchActivity : SearchActivity() {
+class MarketSearchActivity : SearchComposeActivity() {
 
     companion object {
 
