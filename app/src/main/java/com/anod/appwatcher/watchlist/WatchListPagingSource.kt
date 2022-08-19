@@ -10,18 +10,21 @@ import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.database.entities.packageToApp
 import com.anod.appwatcher.installed.InstalledTaskWorker
 import com.anod.appwatcher.model.AppListFilter
+import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
 import info.anodsplace.applog.AppLog
+import info.anodsplace.framework.content.InstalledApps
 import kotlin.math.max
 
 class WatchListPagingSource(
         override var filterQuery: String,
         private val config: Config,
-        private val itemFilter: AppListFilter,
         private val prefs: Preferences,
         private val packageManager: PackageManager,
         private val database: AppsDatabase,
+        private val installedApps: InstalledApps
 ) : FilterablePagingSource() {
+    private val itemFilter: AppListFilter = createFilter(config.filterId)
 
     data class Config(
             val filterId: Int,
@@ -30,6 +33,15 @@ class WatchListPagingSource(
             val showOnDevice: Boolean,
             val showRecentlyInstalled: Boolean,
     )
+
+    private fun createFilter(filterId: Int): AppListFilter {
+        return when (filterId) {
+            Filters.INSTALLED -> AppListFilter.Installed(installedApps)
+            Filters.UNINSTALLED -> AppListFilter.Uninstalled(installedApps)
+            Filters.UPDATABLE -> AppListFilter.Updatable(installedApps)
+            else -> AppListFilter.All()
+        }
+    }
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, SectionItem> {
         val offset = params.key ?: 0

@@ -154,7 +154,6 @@ class WatchListStateViewModel(state: SavedStateHandle) : BaseFlowViewModel<Watch
                         }
                     }
                     is WatchListEvent.FilterByTitle -> {}
-                    is WatchListEvent.SetFilter -> {}
                     WatchListEvent.Reload -> {}
                 }
             }

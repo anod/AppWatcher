@@ -40,7 +40,7 @@ class SearchMenu(
         }
 
     fun init(searchMenuItem: MenuItem?, context: Context) {
-        menuItem = searchMenuItem
+        menuItem = searchMenuItem ?: return
         menuItem?.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
             override fun onMenuItemActionExpand(menuItem: MenuItem): Boolean {
                 return true

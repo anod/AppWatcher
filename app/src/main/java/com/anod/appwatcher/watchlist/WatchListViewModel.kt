@@ -10,8 +10,6 @@ import androidx.paging.*
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
-import com.anod.appwatcher.model.AppListFilter
-import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.PackageChangedReceiver
@@ -34,7 +32,6 @@ typealias InstalledPackageRow = Pair<String, Int>
 data class WatchListState(
         val pagingSourceConfig: WatchListPagingSource.Config,
         val titleFilter: String,
-        val filter: AppListFilter = AppListFilter.All(),
 )
 
 sealed interface WatchListAction {
@@ -51,7 +48,6 @@ sealed interface WatchListAction {
 sealed interface WatchListEvent {
     object Reload : WatchListEvent
     object Refresh : WatchListEvent
-    class SetFilter(val filterId: Int) : WatchListEvent
     class FilterByTitle(val titleFilter: String, val reload: Boolean) : WatchListEvent
     class ItemClick(val item: SectionItem, val index: Int) : WatchListEvent
     class EmptyButton(val idx: Int) : WatchListEvent
@@ -85,7 +81,6 @@ abstract class WatchListViewModel(pagingSourceConfig: WatchListPagingSource.Conf
         viewState = WatchListState(
                 pagingSourceConfig = pagingSourceConfig,
                 titleFilter = "",
-                filter = createFilter(pagingSourceConfig.filterId)
         )
     }
 
@@ -122,9 +117,6 @@ abstract class WatchListViewModel(pagingSourceConfig: WatchListPagingSource.Conf
 
     override fun handleEvent(event: WatchListEvent) {
         when (event) {
-            is WatchListEvent.SetFilter -> {
-                viewState = viewState.copy(filter = createFilter(event.filterId))
-            }
             is WatchListEvent.FilterByTitle -> {
                 viewState = viewState.copy(titleFilter = event.titleFilter)
                 pagingSource?.filterQuery = event.titleFilter
@@ -171,15 +163,6 @@ abstract class WatchListViewModel(pagingSourceConfig: WatchListPagingSource.Conf
                 .cachedIn(viewModelScope)
     }
 
-    private fun createFilter(filterId: Int): AppListFilter {
-        return when (filterId) {
-            Filters.INSTALLED -> AppListFilter.Installed(installedApps)
-            Filters.UNINSTALLED -> AppListFilter.Uninstalled(installedApps)
-            Filters.UPDATABLE -> AppListFilter.Updatable(installedApps)
-            else -> AppListFilter.All()
-        }
-    }
-
     fun updateSelection(
             change: SelectionState.Change,
             getPackageSelection: (key: String) -> AppViewHolder.Selection
@@ -209,9 +192,9 @@ class AppsWatchListViewModel(pagingSourceConfig: WatchListPagingSource.Config) :
             filterQuery = viewState.titleFilter,
             prefs = prefs,
             config = viewState.pagingSourceConfig,
-            itemFilter = viewState.filter,
             packageManager = packageManager,
-            database = database
+            database = database,
+            installedApps = installedApps
     )
 
     override fun createSectionHeaderFactory() = DefaultSectionHeaderFactory(viewState.pagingSourceConfig.showRecentlyUpdated)
