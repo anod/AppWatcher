@@ -21,6 +21,8 @@ import info.anodsplace.playstore.AppDetailsFilter
 import info.anodsplace.playstore.AppNameFilter
 import info.anodsplace.playstore.WishListEndpoint
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -86,8 +88,8 @@ class WishListViewModel(account: Account?, authToken: String) : BaseFlowViewMode
     private fun createPager() = Pager(PagingConfig(pageSize = 10)) { ListEndpointPagingSource(endpoint) }
             .flow
             .cachedIn(viewModelScope)
-            .map { pageData ->
-                val predicate = predicate(viewState.nameFilter)
+            .combine(viewStates.map { it.nameFilter }.distinctUntilChanged()) { pageData, nameFilter ->
+                val predicate = predicate(nameFilter)
                 pageData.filter { d -> predicate(d) }
             }
 

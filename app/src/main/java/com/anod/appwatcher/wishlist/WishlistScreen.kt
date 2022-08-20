@@ -4,8 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -22,6 +21,7 @@ import com.anod.appwatcher.search.MarketAppItem
 import com.anod.appwatcher.search.RetryButton
 import com.anod.appwatcher.utils.AppIconLoader
 import finsky.api.model.Document
+import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.InstalledApps
 import kotlinx.coroutines.flow.Flow
 import org.koin.java.KoinJavaComponent
@@ -35,7 +35,7 @@ fun WishListScreen(
         installedApps: InstalledApps,
         appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get()
 ) {
-
+    var showSearchView by remember { mutableStateOf(false) }
     Scaffold(
             topBar = {
                 SearchTopBar(
@@ -43,7 +43,8 @@ fun WishListScreen(
                         searchQuery = screenState.nameFilter,
                         onNavigation = { onEvent(WishListEvent.OnBackPress) },
                         onValueChange = { onEvent(WishListEvent.OnNameFilter(it)) },
-                        showSearch = false
+                        onSearchAction = { showSearchView = false },
+                        showSearch = showSearchView
                 )
             }
     ) { paddingValues ->
@@ -85,6 +86,7 @@ fun WishListScreen(
 
 @Composable
 fun WishlistResults(items: LazyPagingItems<Document>, screenState: WishListState, onEvent: (WishListEvent) -> Unit, installedApps: InstalledApps, appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get()) {
+    AppLog.d("Recomposition: ${items.hashCode()}, ${screenState.hashCode()}, ${installedApps.hashCode()}, ${appIconLoader.hashCode()}")
     LazyColumn(
             modifier = Modifier
                     .fillMaxSize()
