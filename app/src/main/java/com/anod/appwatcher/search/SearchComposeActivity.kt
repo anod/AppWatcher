@@ -14,7 +14,6 @@ import com.anod.appwatcher.accounts.AccountSelectionDialog
 import com.anod.appwatcher.accounts.AccountSelectionResult
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
-import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.tags.TagSnackbar
 import info.anodsplace.framework.app.DialogMessage
 import kotlinx.coroutines.launch
@@ -85,16 +84,14 @@ open class SearchComposeActivity : BaseComposeActivity() {
                     finish()
                 }
             }
-            is SearchViewAction.AppStateChanged -> {
-                if (action.newStatus == AppInfoMetadata.STATUS_NORMAL) {
-                    TagSnackbar.make(
-                            findViewById<View>(R.id.content).rootView,
-                            action.info,
-                            action.isShareSource,
-                            this,
-                            viewModel.prefs
-                    ).show()
-                }
+            is SearchViewAction.ShowTagSnackbar -> {
+                TagSnackbar.make(
+                        findViewById<View>(android.R.id.content).rootView,
+                        action.info,
+                        action.isShareSource,
+                        this,
+                        viewModel.prefs
+                ).show()
             }
             is SearchViewAction.AlreadyWatchedNotice -> {
                 DialogMessage(this, R.style.AlertDialog, R.string.already_exist, R.string.delete_existing_item) { builder ->

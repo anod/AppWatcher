@@ -15,7 +15,6 @@ import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.model.AppInfo
-import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.date.UploadDateParserCache
@@ -26,6 +25,7 @@ import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.playstore.AppDetailsFilter
 import info.anodsplace.playstore.DetailsEndpoint
 import info.anodsplace.playstore.SearchEndpoint
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -38,17 +38,17 @@ import org.koin.core.parameter.parametersOf
 sealed interface SearchStatus {
     object Loading : SearchStatus
     data class DetailsAvailable(val document: Document) : SearchStatus
-    object NoResults : SearchStatus
-    object NoNetwork : SearchStatus
-    object Error : SearchStatus
-    object SearchList : SearchStatus
+    data class NoResults(val query: String) : SearchStatus
+    data class NoNetwork(val query: String) : SearchStatus
+    data class Error(val query: String) : SearchStatus
+    data class SearchList(val query: String) : SearchStatus
 }
 
 sealed interface SearchViewAction {
     class StartActivity(val intent: Intent, val finish: Boolean) : SearchViewAction
     class ShowToast(val resId: Int = 0, val duration: Int = Toast.LENGTH_LONG, val finish: Boolean = false, val text: String = "") : SearchViewAction
     object ShowAccountDialog : SearchViewAction
-    class AppStateChanged(val newStatus: Int, val info: AppInfo, val isShareSource: Boolean) : SearchViewAction
+    class ShowTagSnackbar(val info: AppInfo, val isShareSource: Boolean) : SearchViewAction
     class AlreadyWatchedNotice(val document: Document) : SearchViewAction
     object OnBackPressed : SearchViewAction
 }
@@ -98,6 +98,7 @@ class SearchViewModel(
 
     private var endpointDetails: DetailsEndpoint? = null
     private var endpointSearch: SearchEndpoint? = null
+    private var searchJob: Job? = null
 
     override fun onCleared() {
         endpointDetails = null
@@ -107,7 +108,7 @@ class SearchViewModel(
     init {
         viewState = initialState.copy(
                 account = prefs.account,
-                searchStatus = if (initialState.searchQuery.isNotEmpty() && initialState.initiateSearch) SearchStatus.Loading else SearchStatus.NoResults
+                searchStatus = if (initialState.searchQuery.isNotEmpty() && initialState.initiateSearch) SearchStatus.Loading else SearchStatus.NoResults(query = "")
         )
         if (prefs.account == null) {
             handleEvent(SearchViewEvent.NoAccount)
@@ -153,10 +154,11 @@ class SearchViewModel(
     }
 
     private fun onSearchRequest(query: String) {
-        viewModelScope.launch {
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
             search(query).collect { searchStatus ->
                 viewState = viewState.copy(searchQuery = query, searchStatus = searchStatus)
-                if (searchStatus == SearchStatus.NoNetwork) {
+                if (searchStatus is SearchStatus.NoNetwork) {
                     emitAction(SearchViewAction.ShowToast(resId = R.string.check_connection, duration = Toast.LENGTH_SHORT, finish = true))
                 }
             }
@@ -165,7 +167,7 @@ class SearchViewModel(
 
     private fun search(query: String): Flow<SearchStatus> = flow {
         if (prefs.account == null) {
-            emit(SearchStatus.Error)
+            emit(SearchStatus.Error(query = query))
             return@flow
         }
         endpointSearch = get { parametersOf(query) }
@@ -176,7 +178,7 @@ class SearchViewModel(
         emit(SearchStatus.Loading)
         if (endpointDetails == null) {
             _pagingData = null
-            emit(SearchStatus.SearchList)
+            emit(SearchStatus.SearchList(query = query))
         } else {
             try {
                 val model = endpointDetails!!.start()
@@ -184,14 +186,14 @@ class SearchViewModel(
                     emit(SearchStatus.DetailsAvailable(model.document!!))
                 } else {
                     _pagingData = null
-                    emit(SearchStatus.SearchList)
+                    emit(SearchStatus.SearchList(query = query))
                 }
             } catch (e: Exception) {
                 if (!networkConnection.isNetworkAvailable) {
-                    emit(SearchStatus.NoNetwork)
+                    emit(SearchStatus.NoNetwork(query = query))
                 } else {
                     _pagingData = null
-                    emit(SearchStatus.SearchList)
+                    emit(SearchStatus.SearchList(query = query))
                 }
             }
         }
@@ -234,7 +236,6 @@ class SearchViewModel(
         viewModelScope.launch {
             val info = AppInfo(document, uploadDateParserCache)
             AppListTable.Queries.delete(info.appId, database)
-            emitAction(SearchViewAction.AppStateChanged(newStatus = AppInfoMetadata.STATUS_DELETED, info = info, isShareSource = viewState.isShareSource))
         }
     }
 
@@ -243,7 +244,7 @@ class SearchViewModel(
             val info = AppInfo(document, uploadDateParserCache)
             val result = AppListTable.Queries.insertSafetly(info, database)
             if (result != AppListTable.ERROR_INSERT) {
-                emitAction(SearchViewAction.AppStateChanged(newStatus = AppInfoMetadata.STATUS_NORMAL, info = info, isShareSource = viewState.isShareSource))
+                emitAction(SearchViewAction.ShowTagSnackbar(info = info, isShareSource = viewState.isShareSource))
             }
         }
     }

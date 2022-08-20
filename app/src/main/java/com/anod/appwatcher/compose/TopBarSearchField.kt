@@ -12,6 +12,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -30,6 +31,7 @@ fun TopBarSearchField(
         requestFocus: Boolean = false
 ) {
     val focusRequester = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
     var searchValue by remember { mutableStateOf(query) }
     val keyboard = LocalSoftwareKeyboardController.current
 
@@ -54,7 +56,10 @@ fun TopBarSearchField(
                     imeAction = ImeAction.Search
             ),
             keyboardActions = KeyboardActions(
-                    onSearch = { onSearchAction(searchValue) }
+                    onSearch = {
+                        onSearchAction(searchValue)
+                        focusManager.clearFocus()
+                    }
             ),
             singleLine = true,
             colors = TextFieldDefaults.textFieldColors(
