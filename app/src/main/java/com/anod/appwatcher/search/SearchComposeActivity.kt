@@ -30,11 +30,10 @@ open class SearchComposeActivity : BaseComposeActivity() {
         viewModel.handleEvent(SearchViewEvent.SetWideLayout(hingeDevice.layout.value))
 
         setContent {
-            val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
-
             AppTheme(
                     theme = viewModel.prefs.theme
             ) {
+                val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
                 SearchResultsScreen(
                         screenState = screenState,
                         onEvent = { viewModel.handleEvent(it) },

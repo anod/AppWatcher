@@ -136,8 +136,8 @@ fun darkTheme(theme: Int, supportsDynamic: Boolean): ColorScheme {
 
 @Composable
 fun AppTheme(
-        darkTheme: Boolean = isSystemInDarkTheme(),
         theme: Int = Preferences.THEME_DEFAULT,
+        darkTheme: Boolean = theme == Preferences.THEME_BLACK || isSystemInDarkTheme(),
         customPrimaryColor: Color? = null,
         content: @Composable () -> Unit
 ) {
@@ -148,6 +148,8 @@ fun AppTheme(
         if (darkTheme) darkTheme(theme, supportsDynamic = false) else LightThemeColors
     }
 
+    var statusBarColor = colorScheme.surface.toArgb()
+    var isAppearanceLightStatusBars = !darkTheme
     if (customPrimaryColor != null) {
         val roles = MaterialColors.getColorRoles(customPrimaryColor.toArgb(), !darkTheme)
         colorScheme = colorScheme.copy(
@@ -156,13 +158,16 @@ fun AppTheme(
                 primaryContainer = Color(roles.accentContainer),
                 onPrimaryContainer = Color(roles.onAccentContainer)
         )
+        statusBarColor = colorScheme.primary.toArgb()
+        isAppearanceLightStatusBars = MaterialColors.isColorLight(statusBarColor)
+    }
 
-        val view = LocalView.current
-        if (!view.isInEditMode) {
-            SideEffect {
-                (view.context as Activity).window.statusBarColor = colorScheme.primary.toArgb()
-                ViewCompat.getWindowInsetsController(view)?.isAppearanceLightStatusBars = darkTheme
-            }
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            (view.context as Activity).window.statusBarColor = statusBarColor
+            (view.context as Activity).window.navigationBarColor = colorScheme.surface.toArgb()
+            ViewCompat.getWindowInsetsController(view)?.isAppearanceLightStatusBars = isAppearanceLightStatusBars
         }
     }
 

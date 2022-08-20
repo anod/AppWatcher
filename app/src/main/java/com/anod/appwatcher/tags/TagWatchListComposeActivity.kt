@@ -36,7 +36,6 @@ import com.anod.appwatcher.watchlist.WatchListSharedStateAction
 import com.anod.appwatcher.watchlist.WatchListSharedStateEvent
 import com.anod.appwatcher.watchlist.WatchListStateViewModel
 import info.anodsplace.applog.AppLog
-import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.addMultiWindowFlags
 import info.anodsplace.framework.content.startActivitySafely
 import kotlinx.coroutines.launch
@@ -44,21 +43,18 @@ import kotlinx.coroutines.launch
 class TagWatchListComposeActivity : BaseComposeActivity() {
     val viewModel: WatchListStateViewModel by viewModels()
 
-    override val themeColors: CustomThemeColors
-        get() = CustomThemeColors(viewModel.viewState.tag.color, theme.colors.navigationBarColor)
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         viewModel.handleEvent(WatchListSharedStateEvent.SetWideLayout(hingeDevice.layout.value))
 
         setContent {
-            val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
-
             AppTheme(
-                    customPrimaryColor = Color(screenState.tag.color),
+                    customPrimaryColor = Color(viewModel.viewState.tag.color),
                     theme = viewModel.prefs.theme
             ) {
+                val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
+                
                 val pagingSourceConfig = WatchListPagingSource.Config(
                         filterId = screenState.filterId,
                         tagId = if (screenState.tag.isEmpty) null else screenState.tag.id,

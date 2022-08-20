@@ -36,7 +36,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="false"
-        android:theme="@style/AppTheme.Black"
+        android:theme="@style/AppTheme.Main"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".ShareRecieverActivity"
