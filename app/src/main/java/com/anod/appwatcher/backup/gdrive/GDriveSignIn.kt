@@ -1,7 +1,6 @@
 package com.anod.appwatcher.backup.gdrive
 
 import android.app.Activity
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -19,7 +18,9 @@ import com.google.api.services.drive.DriveScopes
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.ActivityListener
 import info.anodsplace.framework.app.ApplicationContext
+import info.anodsplace.framework.app.NotificationManager
 import info.anodsplace.framework.playservices.GoogleSignInConnect
+import org.koin.java.KoinJavaComponent
 import java.util.*
 import java.util.concurrent.ExecutionException
 import kotlin.coroutines.resume
@@ -54,7 +55,7 @@ class GDriveSignIn(private val activity: Activity, private val listener: Listene
                 setContentText(context.getString(R.string.google_drive_sync_action))
                 setContentIntent(resolution)
             }.build()
-            val notificationManager = context.actual.getSystemService(NotificationManager::class.java)
+            val notificationManager = KoinJavaComponent.getKoin().get<NotificationManager>()
             notificationManager.notify(SyncNotification.gmsNotificationId, notification)
         }
     }

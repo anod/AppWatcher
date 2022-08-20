@@ -173,6 +173,7 @@ dependencies {
     implementation(project(":lib:colorpicker"))
     implementation(project(":lib:framework"))
     implementation(project(":lib:ktx"))
+    implementation(project(":lib:permissions"))
     implementation(project(":playstore"))
 
     debugImplementation("com.squareup.leakcanary:leakcanary-android:2.9.1")

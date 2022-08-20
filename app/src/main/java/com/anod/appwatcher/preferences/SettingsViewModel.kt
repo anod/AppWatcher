@@ -26,7 +26,11 @@ import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import info.anodsplace.applog.AppLog
 import info.anodsplace.compose.PreferenceItem
 import info.anodsplace.framework.app.ApplicationContext
+import info.anodsplace.framework.app.NotificationManager
+import info.anodsplace.framework.content.forAppInfo
 import info.anodsplace.framework.playservices.GooglePlayServices
+import info.anodsplace.permissions.AppPermission
+import info.anodsplace.permissions.AppPermissions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -40,7 +44,8 @@ import org.koin.core.parameter.parametersOf
 data class SettingsViewState(
         val items: List<PreferenceItem>,
         val isProgressVisible: Boolean = false,
-        var recreateWatchlistOnBack: Boolean = false
+        val recreateWatchlistOnBack: Boolean = false,
+        val areNotificationsEnabled: Boolean = false
 )
 
 sealed interface SettingsViewEvent {
@@ -58,8 +63,11 @@ sealed interface SettingsViewEvent {
     object OssLicenses : SettingsViewEvent
     object OpenUserLog : SettingsViewEvent
     object OpenRefreshHistory : SettingsViewEvent
-
     class GDriveLoginResult(val isSuccess: Boolean, val errorCode: Int) : SettingsViewEvent
+    object NotificationPermissionRequest : SettingsViewEvent
+    class NotificationPermissionResult(val granted: Boolean) : SettingsViewEvent
+    object ShowAppSettings : SettingsViewEvent
+    object CheckNotificationPermission : SettingsViewEvent
 }
 
 sealed interface SettingsViewAction {
@@ -70,20 +78,24 @@ sealed interface SettingsViewAction {
     class GDriveErrorIntent(val intent: Intent) : SettingsViewAction
     object Recreate : SettingsViewAction
     object Rebirth : SettingsViewAction
+    object RequestNotificationPermission : SettingsViewAction
+
     class ShowToast(@StringRes val resId: Int = 0, val text: String = "", val length: Int = Toast.LENGTH_SHORT) : SettingsViewAction
     class ExportResult(val result: Int) : SettingsViewAction
     class ImportResult(val result: Int) : SettingsViewAction
 }
 
-class SettingsViewModel() : BaseFlowViewModel<SettingsViewState, SettingsViewEvent, SettingsViewAction>(), KoinComponent {
+class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent, SettingsViewAction>(), KoinComponent {
     private val application: Application by inject()
     private val playServices: GooglePlayServices = GooglePlayServices(application)
     private val appScope: CoroutineScope by inject()
     private val context: Context by inject()
+    private val notificationManager: NotificationManager by inject()
 
     init {
         viewState = SettingsViewState(
-                items = preferenceItems(prefs, false, playServices, application)
+                items = preferenceItems(prefs, false, playServices, application),
+                areNotificationsEnabled = notificationManager.areNotificationsEnabled
         )
     }
 
@@ -121,6 +133,24 @@ class SettingsViewModel() : BaseFlowViewModel<SettingsViewState, SettingsViewEve
             is SettingsViewEvent.UpdateCrashReports -> updateCrashReports(event.checked)
             is SettingsViewEvent.UpdateIconsShape -> updateIconsShape(event.newPath)
             is SettingsViewEvent.UpdateTheme -> updateTheme(event.newTheme)
+            SettingsViewEvent.NotificationPermissionRequest -> {
+                AppPermissions.isGranted(application, AppPermission.PostNotification)
+
+                emitAction(SettingsViewAction.RequestNotificationPermission)
+            }
+            is SettingsViewEvent.NotificationPermissionResult -> {
+                viewState = viewState.copy(
+                        areNotificationsEnabled = prefs.areNotificationsEnabled,
+                        items = preferenceItems(prefs, inProgress = false, playServices, application)
+                )
+            }
+            SettingsViewEvent.ShowAppSettings -> emitAction(SettingsViewAction.StartActivity(Intent().forAppInfo(application.packageName, application)))
+            SettingsViewEvent.CheckNotificationPermission -> {
+                val areNotificationsEnabled = prefs.areNotificationsEnabled
+                if (areNotificationsEnabled != viewState.areNotificationsEnabled) {
+                    viewState = viewState.copy(areNotificationsEnabled = areNotificationsEnabled)
+                }
+            }
         }
     }
 

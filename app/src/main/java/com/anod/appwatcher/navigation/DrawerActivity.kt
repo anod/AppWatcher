@@ -10,6 +10,7 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.viewModels
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.DrawableCompat
@@ -34,6 +35,9 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.ToolbarActivity
 import info.anodsplace.framework.util.Hash
+import info.anodsplace.permissions.AppPermission
+import info.anodsplace.permissions.AppPermissions
+import info.anodsplace.permissions.toRequestInput
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -45,6 +49,7 @@ import org.koin.core.component.inject
  */
 abstract class DrawerActivity : ToolbarActivity(), KoinComponent {
 
+
     override val themeRes: Int
         get() = Theme(this, prefs).theme
 
@@ -53,6 +58,7 @@ abstract class DrawerActivity : ToolbarActivity(), KoinComponent {
     private val accountNameView: TextView? by lazy { navigationView?.getHeaderView(0)?.findViewById(R.id.account_name) }
     private val drawerViewModel: DrawerViewModel by viewModels()
     val authToken: AuthTokenBlocking by inject()
+    private lateinit var notificationPermissionRequest: ActivityResultLauncher<AppPermissions.Request.Input>
 
     open val isHomeAsMenu: Boolean
         get() = false
@@ -70,6 +76,16 @@ abstract class DrawerActivity : ToolbarActivity(), KoinComponent {
         setupDrawer()
 
         accountSelectionDialog = AccountSelectionDialog(this, prefs)
+        notificationPermissionRequest = registerForActivityResult(AppPermissions.Request()) {
+            val enabled = it[AppPermission.PostNotification.value] ?: false
+            if (!enabled && prefs.notificationDisabledToastCount < 3) {
+                Toast.makeText(this, R.string.notifications_not_enabled, Toast.LENGTH_LONG).show()
+                prefs.notificationDisabledToastCount = prefs.notificationDisabledToastCount + 1
+            }
+            if (enabled) {
+                onNotificationEnabled()
+            }
+        }
 
         lifecycleScope.launchWhenCreated {
             accountSelectionDialog.accountSelected.collect { result ->
@@ -87,6 +103,8 @@ abstract class DrawerActivity : ToolbarActivity(), KoinComponent {
             onAccountSelected(account!!)
         }
     }
+
+    open fun onNotificationEnabled() {}
 
     private fun setupDrawer() {
         this.navigationView ?: return
@@ -227,6 +245,9 @@ abstract class DrawerActivity : ToolbarActivity(), KoinComponent {
                         FirebaseCrashlytics.getInstance().setUserId(Hash.sha256(account.name).encoded)
                     }
                     updateDrawerAccount(account)
+                    if (!prefs.areNotificationsEnabled && prefs.updatesFrequency > 0) {
+                        notificationPermissionRequest.launch(AppPermission.PostNotification.toRequestInput())
+                    }
                 } else {
                     AppLog.e("Error retrieving authentication token")
                     if (networkConnection.isNetworkAvailable) {

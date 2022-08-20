@@ -19,10 +19,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asComposePath
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.anod.appwatcher.R
@@ -34,6 +36,7 @@ import info.anodsplace.applog.AppLog
 import info.anodsplace.compose.Preference
 import info.anodsplace.compose.PreferenceItem
 import info.anodsplace.compose.PreferencesScreen
+import info.anodsplace.framework.app.NotificationManager
 import info.anodsplace.framework.content.CreateDocument
 import org.koin.java.KoinJavaComponent
 
@@ -108,6 +111,31 @@ fun SettingsScreen(screenState: SettingsViewState, onEvent: (SettingsViewEvent) 
                                             }
                                         },
                                         onClick = { })
+                                "update_frequency" -> {
+                                    if (!screenState.areNotificationsEnabled) {
+                                        Column(modifier = Modifier
+                                                .padding(top = 16.dp)
+                                                .border(width = 1.dp, color = MaterialTheme.colorScheme.primary, shape = MaterialTheme.shapes.medium)
+                                                .background(MaterialTheme.colorScheme.primaryContainer),
+                                                horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            Text(
+                                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                                                    text = stringResource(R.string.notifications_not_enabled),
+                                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                                    textAlign = TextAlign.Center,
+                                                    style = MaterialTheme.typography.bodyLarge
+                                            )
+                                            Button(
+                                                    modifier = Modifier.padding(all = 4.dp),
+                                                    onClick = { onEvent(SettingsViewEvent.NotificationPermissionRequest) }
+                                            ) {
+                                                Text(text = stringResource(R.string.allow))
+                                            }
+                                        }
+
+                                    }
+                                }
                                 else -> {}
                             }
                         },
@@ -250,128 +278,136 @@ fun onSettingsItemClick(prefs: Preferences, item: PreferenceItem, onEvent: (Sett
 }
 
 
-@Preview
+@Preview(showSystemUi = true)
 @Composable
 fun PreferencesScreenPreview() {
+    val items = listOf(
+            PreferenceItem.Category(titleRes = R.string.category_updates),
+            PreferenceItem.Pick(
+                    entriesRes = R.array.updates_frequency,
+                    entryValuesRes = R.array.updates_frequency_values,
+                    value = "3600",
+                    titleRes = R.string.pref_title_updates_frequency,
+                    summary = "Every 3600 minutes",
+                    key = "update_frequency",
+                    enabled = false
+            ),
+            PreferenceItem.Switch(
+                    checked = true,
+                    enabled = true,
+                    titleRes = R.string.menu_wifi_only,
+                    key = "wifi_only"
+            ),
+            PreferenceItem.Switch(
+                    checked = true,
+                    enabled = false,
+                    titleRes = R.string.menu_requires_charging,
+                    key = "requires-charging"
+            ),
+
+            PreferenceItem.Category(titleRes = R.string.pref_header_drive_sync),
+            PreferenceItem.Switch(
+                    checked = false,
+                    enabled = true,
+                    titleRes = R.string.pref_title_drive_sync_enabled,
+                    summaryRes = R.string.pref_descr_drive_sync_enabled,
+                    summary = "",
+                    key = "drive_sync"
+            ),
+            PreferenceItem.Text(
+                    enabled = false,
+                    titleRes = R.string.pref_title_drive_sync_now,
+                    summary = "",
+                    key = "drive-sync-now"
+            ),
+
+            PreferenceItem.Category(titleRes = R.string.pref_header_backup),
+            PreferenceItem.Text(
+                    titleRes = R.string.pref_title_export,
+                    summaryRes = R.string.pref_descr_export,
+                    key = "export"
+            ),
+            PreferenceItem.Text(
+                    titleRes = R.string.pref_title_import,
+                    summaryRes = R.string.pref_descr_import,
+                    key = "import"
+            ),
+
+            PreferenceItem.Category(titleRes = R.string.pref_header_interface),
+            PreferenceItem.List(
+                    entries = R.array.themes,
+                    entryValues = 0,
+                    value = "0",
+                    titleRes = R.string.pref_title_theme,
+                    summaryRes = R.string.pref_descr_theme,
+                    key = "theme"
+            ),
+            PreferenceItem.Switch(
+                    checked = false,
+                    titleRes = R.string.pref_show_recent_title,
+                    summaryRes = R.string.pref_show_recent_descr,
+                    key = "show-recent"
+            ),
+            PreferenceItem.Switch(
+                    checked = true,
+                    titleRes = R.string.pref_show_ondevice_title,
+                    summaryRes = R.string.pref_show_ondevice_descr,
+                    key = "show-on-device"
+            ),
+            PreferenceItem.List(
+                    entries = R.array.filter_titles,
+                    entryValues = 0,
+                    value = "1",
+                    titleRes = R.string.pref_default_filter,
+                    summaryRes = R.string.pref_default_filter_summary,
+                    key = "default-filter"
+            ),
+            PreferenceItem.Switch(
+                    checked = false,
+                    titleRes = R.string.pref_pull_to_refresh,
+                    key = "pull-to-refresh"
+            ),
+            PreferenceItem.Placeholder(
+                    titleRes = R.string.adaptive_icon_style,
+                    summaryRes = R.string.adaptive_icon_style_summary,
+                    key = "icon-style"
+            ),
+
+            PreferenceItem.Category(titleRes = R.string.pref_privacy),
+            PreferenceItem.Switch(
+                    checked = false,
+                    titleRes = R.string.crash_reports_title,
+                    summaryRes = R.string.crash_reports_descr,
+                    key = "crash-reports"
+            ),
+
+            PreferenceItem.Category(titleRes = R.string.pref_header_about),
+            PreferenceItem.Text(
+                    titleRes = R.string.pref_title_about,
+                    summary = "12345566",
+                    key = "about"
+            ),
+            PreferenceItem.Text(
+                    titleRes = R.string.pref_title_opensource,
+                    summaryRes = R.string.pref_descr_opensource,
+                    key = "licenses"
+            ),
+            PreferenceItem.Text(
+                    titleRes = R.string.user_log,
+                    key = "user-log"
+            )
+    )
+    val context = LocalContext.current
     AppTheme {
         Surface {
-            PreferencesScreen(
-                    preferences = listOf(
-                            PreferenceItem.Category(titleRes = R.string.category_updates),
-                            PreferenceItem.Pick(
-                                    entriesRes = R.array.updates_frequency,
-                                    entryValuesRes = R.array.updates_frequency_values,
-                                    value = "3600",
-                                    titleRes = R.string.pref_title_updates_frequency,
-                                    summary = "Every 3600 minutes",
-                                    key = "update_frequency"
-                            ),
-                            PreferenceItem.Switch(
-                                    checked = true,
-                                    enabled = true,
-                                    titleRes = R.string.menu_wifi_only,
-                                    key = "wifi_only"
-                            ),
-                            PreferenceItem.Switch(
-                                    checked = true,
-                                    enabled = false,
-                                    titleRes = R.string.menu_requires_charging,
-                                    key = "requires-charging"
-                            ),
-
-                            PreferenceItem.Category(titleRes = R.string.pref_header_drive_sync),
-                            PreferenceItem.Switch(
-                                    checked = false,
-                                    enabled = true,
-                                    titleRes = R.string.pref_title_drive_sync_enabled,
-                                    summaryRes = R.string.pref_descr_drive_sync_enabled,
-                                    summary = "",
-                                    key = "drive_sync"
-                            ),
-                            PreferenceItem.Text(
-                                    enabled = false,
-                                    titleRes = R.string.pref_title_drive_sync_now,
-                                    summary = "",
-                                    key = "drive-sync-now"
-                            ),
-
-                            PreferenceItem.Category(titleRes = R.string.pref_header_backup),
-                            PreferenceItem.Text(
-                                    titleRes = R.string.pref_title_export,
-                                    summaryRes = R.string.pref_descr_export,
-                                    key = "export"
-                            ),
-                            PreferenceItem.Text(
-                                    titleRes = R.string.pref_title_import,
-                                    summaryRes = R.string.pref_descr_import,
-                                    key = "import"
-                            ),
-
-                            PreferenceItem.Category(titleRes = R.string.pref_header_interface),
-                            PreferenceItem.List(
-                                    entries = R.array.themes,
-                                    entryValues = 0,
-                                    value = "0",
-                                    titleRes = R.string.pref_title_theme,
-                                    summaryRes = R.string.pref_descr_theme,
-                                    key = "theme"
-                            ),
-                            PreferenceItem.Switch(
-                                    checked = false,
-                                    titleRes = R.string.pref_show_recent_title,
-                                    summaryRes = R.string.pref_show_recent_descr,
-                                    key = "show-recent"
-                            ),
-                            PreferenceItem.Switch(
-                                    checked = true,
-                                    titleRes = R.string.pref_show_ondevice_title,
-                                    summaryRes = R.string.pref_show_ondevice_descr,
-                                    key = "show-on-device"
-                            ),
-                            PreferenceItem.List(
-                                    entries = R.array.filter_titles,
-                                    entryValues = 0,
-                                    value = "1",
-                                    titleRes = R.string.pref_default_filter,
-                                    summaryRes = R.string.pref_default_filter_summary,
-                                    key = "default-filter"
-                            ),
-                            PreferenceItem.Switch(
-                                    checked = false,
-                                    titleRes = R.string.pref_pull_to_refresh,
-                                    key = "pull-to-refresh"
-                            ),
-                            PreferenceItem.Placeholder(
-                                    titleRes = R.string.adaptive_icon_style,
-                                    summaryRes = R.string.adaptive_icon_style_summary,
-                                    key = "icon-style"
-                            ),
-
-                            PreferenceItem.Category(titleRes = R.string.pref_privacy),
-                            PreferenceItem.Switch(
-                                    checked = false,
-                                    titleRes = R.string.crash_reports_title,
-                                    summaryRes = R.string.crash_reports_descr,
-                                    key = "crash-reports"
-                            ),
-
-                            PreferenceItem.Category(titleRes = R.string.pref_header_about),
-                            PreferenceItem.Text(
-                                    titleRes = R.string.pref_title_about,
-                                    summary = "12345566",
-                                    key = "about"
-                            ),
-                            PreferenceItem.Text(
-                                    titleRes = R.string.pref_title_opensource,
-                                    summaryRes = R.string.pref_descr_opensource,
-                                    key = "licenses"
-                            ),
-                            PreferenceItem.Text(
-                                    titleRes = R.string.user_log,
-                                    key = "user-log"
-                            )
+            SettingsScreen(
+                    screenState = SettingsViewState(
+                            items = items,
+                            areNotificationsEnabled = false,
+                            isProgressVisible = true
                     ),
-                    onClick = { }
+                    onEvent = { },
+                    prefs = Preferences(context, NotificationManager.NoOp())
             )
         }
     }

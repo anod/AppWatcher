@@ -32,9 +32,10 @@ fun preferenceItems(prefs: Preferences, inProgress: Boolean, playServices: Googl
             PreferenceItem.Pick(
                     entriesRes = R.array.updates_frequency,
                     entryValuesRes = R.array.updates_frequency_values,
-                    value = prefs.updatesFrequency.toString(),
+                    value = if (prefs.areNotificationsEnabled) prefs.updatesFrequency.toString() else "0",
                     titleRes = R.string.pref_title_updates_frequency,
-                    key = "update_frequency"
+                    key = "update_frequency",
+                    enabled = prefs.areNotificationsEnabled
             ),
             PreferenceItem.Switch(
                     checked = prefs.isWifiOnly,

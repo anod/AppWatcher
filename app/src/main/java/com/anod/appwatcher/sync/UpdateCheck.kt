@@ -1,7 +1,6 @@
 package com.anod.appwatcher.sync
 
 import android.accounts.Account
-import android.app.NotificationManager
 import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Intent
@@ -31,6 +30,7 @@ import finsky.api.BulkDocId
 import finsky.api.model.Document
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.ApplicationContext
+import info.anodsplace.framework.app.NotificationManager
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.net.NetworkConnectivity
 import info.anodsplace.playstore.BulkDetailsEndpoint

@@ -2,7 +2,6 @@ package com.anod.appwatcher.sync
 
 import android.app.Notification
 import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
 import android.net.Uri
@@ -13,6 +12,7 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.watchlist.WatchListActivity
 import info.anodsplace.framework.app.ApplicationContext
+import info.anodsplace.framework.app.NotificationManager
 import info.anodsplace.framework.text.Html
 
 /**

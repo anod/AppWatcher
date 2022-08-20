@@ -21,18 +21,29 @@ import com.anod.appwatcher.compose.BaseComposeActivity
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.jakewharton.processphoenix.ProcessPhoenix
 import info.anodsplace.applog.AppLog
+import info.anodsplace.permissions.AppPermission
+import info.anodsplace.permissions.AppPermissions
+import info.anodsplace.permissions.toRequestInput
 import kotlinx.coroutines.launch
 
 @SuppressLint("Registered")
 open class SettingsActivity : BaseComposeActivity(), GDriveSignIn.Listener {
 
     private lateinit var gDriveErrorIntentRequest: ActivityResultLauncher<Intent>
+    private lateinit var notificationPermissionRequest: ActivityResultLauncher<AppPermissions.Request.Input>
     private val gDriveSignIn: GDriveSignIn by lazy { GDriveSignIn(this, this) }
     private val viewModel: SettingsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         gDriveErrorIntentRequest = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { }
+        notificationPermissionRequest = registerForActivityResult(AppPermissions.Request()) {
+            val enabled = it[AppPermission.PostNotification.value] ?: false
+            viewModel.handleEvent(SettingsViewEvent.NotificationPermissionResult(enabled))
+            if (!enabled) {
+                viewModel.handleEvent(SettingsViewEvent.ShowAppSettings)
+            }
+        }
 
         setContent {
             val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
@@ -51,6 +62,11 @@ open class SettingsActivity : BaseComposeActivity(), GDriveSignIn.Listener {
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.handleEvent(SettingsViewEvent.CheckNotificationPermission)
     }
 
     private fun handleUiAction(action: SettingsViewAction) {
@@ -79,6 +95,7 @@ open class SettingsActivity : BaseComposeActivity(), GDriveSignIn.Listener {
                 }
             }
             is SettingsViewAction.StartActivity -> startActivity(action.intent)
+            SettingsViewAction.RequestNotificationPermission -> notificationPermissionRequest.launch(AppPermission.PostNotification.toRequestInput())
         }
     }
 

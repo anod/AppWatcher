@@ -28,13 +28,7 @@ class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener,
         super.onCreate(savedInstanceState)
         supportActionBar!!.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp)
 
-        if (prefs.useAutoSync) {
-            lifecycleScope.launchWhenCreated {
-                SyncScheduler(applicationContext)
-                    .schedule(prefs.isRequiresCharging, prefs.isWifiOnly, prefs.updatesFrequency.toLong(), false)
-                    .collect { }
-            }
-        }
+        onNotificationEnabled()
 
         if (intentExtras.containsKey("open_recently_installed")) {
             intent!!.extras!!.remove("open_recently_installed")
@@ -44,6 +38,16 @@ class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener,
                     themeRes,
                     themeColors
             ))
+        }
+    }
+
+    override fun onNotificationEnabled() {
+        if (prefs.useAutoSync) {
+            lifecycleScope.launchWhenCreated {
+                SyncScheduler(applicationContext)
+                        .schedule(prefs.isRequiresCharging, prefs.isWifiOnly, prefs.updatesFrequency.toLong(), false)
+                        .collect { }
+            }
         }
     }
 

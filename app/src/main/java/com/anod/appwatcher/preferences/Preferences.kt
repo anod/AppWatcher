@@ -7,8 +7,10 @@ import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.utils.AdaptiveIconTransformation
+import info.anodsplace.framework.app.NotificationManager
 
-class Preferences(context: Context) {
+class Preferences(context: Context, private val notificationManager: NotificationManager) {
+
 
     private val preferences = context.getSharedPreferences(PREFS_NAME, 0)
 
@@ -29,6 +31,10 @@ class Preferences(context: Context) {
             }
             editor.apply()
         }
+
+    var notificationDisabledToastCount: Int
+        get() = preferences.getInt("noti_disabled_toasts", -0)
+        set(value) = preferences.edit().putInt("noti_disabled_toasts", value).apply()
 
     var lastUpdateTime: Long
         get() = preferences.getLong(LAST_UPDATE_TIME, -1)
@@ -54,8 +60,11 @@ class Preferences(context: Context) {
         get() = preferences.getLong("cleanup-time", -1)
         set(value) = preferences.edit().putLong("cleanup-time", value).apply()
 
+    val areNotificationsEnabled: Boolean
+        get() = notificationManager.areNotificationsEnabled
+
     val useAutoSync: Boolean
-        get() = this.updatesFrequency > 0
+        get() = this.updatesFrequency > 0 && notificationManager.areNotificationsEnabled
 
     var updatesFrequency: Int
         get() {
