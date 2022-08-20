@@ -2,7 +2,6 @@ package com.anod.appwatcher.watchlist
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -14,9 +13,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
-import com.anod.appwatcher.compose.TopBarSearchField
+import com.anod.appwatcher.compose.SearchTopBar
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WatchListTopBar(
         title: String,
@@ -31,52 +29,23 @@ fun WatchListTopBar(
         onEvent: (WatchListSharedStateEvent) -> Unit
 ) {
 
-    var showSearchView by remember { mutableStateOf(filterQuery.isNotBlank()) }
+    val showSearchView by remember { mutableStateOf(filterQuery.isNotBlank()) }
     var topBarMoreMenu by remember { mutableStateOf(false) }
     var topBarFilterMenu by remember { mutableStateOf(false) }
     var topBarSortMenu by remember { mutableStateOf(false) }
 
-    SmallTopAppBar(
-            title = {
-                if (showSearchView) {
-                    TopBarSearchField(
-                            query = filterQuery,
-                            onValueChange = { onEvent(WatchListSharedStateEvent.FilterByTitle(query = it)) },
-                            onSearchAction = { onEvent(WatchListSharedStateEvent.OnSearch(it)) },
-                            containerColor = containerColor,
-                            contentColor = contentColor,
-                            requestFocus = true
-                    )
-                } else {
-                    if (subtitle != null) {
-                        Column {
-                            Text(title, color = contentColor, style = MaterialTheme.typography.headlineSmall)
-                            Text(subtitle, color = contentColor, style = MaterialTheme.typography.labelLarge)
-                        }
-                    } else {
-                        Text(title, color = contentColor, style = MaterialTheme.typography.headlineMedium)
-                    }
-                }
-            },
-            navigationIcon = {
-                IconButton(onClick = {
-                    if (showSearchView) {
-                        showSearchView = false
-                    } else {
-                        onEvent(WatchListSharedStateEvent.OnBackPressed)
-                    }
-                }) {
-                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = stringResource(id = R.string.back))
-                }
-            },
+    SearchTopBar(
+            title = title,
+            subtitle = subtitle,
+            searchQuery = filterQuery,
+            showSearch = showSearchView,
+            initialSearchFocus = true,
+            containerColor = containerColor,
+            contentColor = contentColor,
+            onValueChange = { onEvent(WatchListSharedStateEvent.FilterByTitle(query = it)) },
+            onSearchAction = { onEvent(WatchListSharedStateEvent.OnSearch(it)) },
+            onNavigation = { onEvent(WatchListSharedStateEvent.OnBackPressed) },
             actions = {
-                if (!showSearchView) {
-                    IconButton(onClick = {
-                        showSearchView = true
-                    }) {
-                        Icon(imageVector = Icons.Default.Search, contentDescription = stringResource(id = R.string.menu_filter))
-                    }
-                }
 
                 visibleActions()
 
@@ -133,13 +102,7 @@ fun WatchListTopBar(
                         )
                     }
                 }
-            },
-            colors = TopAppBarDefaults.smallTopAppBarColors(
-                    containerColor = containerColor,
-                    titleContentColor = contentColor,
-                    navigationIconContentColor = contentColor,
-                    actionIconContentColor = contentColor,
-            )
+            }
     )
 }
 

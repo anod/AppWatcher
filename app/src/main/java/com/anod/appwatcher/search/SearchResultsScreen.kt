@@ -3,8 +3,6 @@ package com.anod.appwatcher.search
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -23,7 +21,7 @@ import androidx.paging.compose.items
 import coil.ImageLoader
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
-import com.anod.appwatcher.compose.TopBarSearchField
+import com.anod.appwatcher.compose.SearchTopBar
 import com.anod.appwatcher.utils.AppIconLoader
 import finsky.api.model.Document
 import finsky.protos.AppDetails
@@ -42,20 +40,13 @@ fun SearchResultsScreen(screenState: SearchViewState, pagingDataFlow: () -> Flow
     Scaffold(
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
             topBar = {
-                SmallTopAppBar(
-                        title = {
-                            TopBarSearchField(
-                                    query = screenState.searchQuery,
-                                    onValueChange = { onEvent(SearchViewEvent.SearchQueryChange(query = it)) },
-                                    onSearchAction = { onEvent(SearchViewEvent.OnSearchEnter(it)) },
-                                    requestFocus = !screenState.initiateSearch
-                            )
-                        },
-                        navigationIcon = {
-                            IconButton(onClick = { onEvent(SearchViewEvent.OnBackPressed) }) {
-                                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = stringResource(id = R.string.back))
-                            }
-                        }
+                SearchTopBar(
+                        title = stringResource(id = R.string.search),
+                        showSearch = true,
+                        onValueChange = { onEvent(SearchViewEvent.SearchQueryChange(query = it)) },
+                        onSearchAction = { onEvent(SearchViewEvent.OnSearchEnter(it)) },
+                        initialSearchFocus = !screenState.initiateSearch,
+                        onNavigation = { onEvent(SearchViewEvent.OnBackPressed) }
                 )
             }
     ) { paddingValues ->
@@ -73,8 +64,8 @@ fun SearchResultsScreen(screenState: SearchViewState, pagingDataFlow: () -> Flow
                 is SearchStatus.DetailsAvailable -> {
                     SearchSingleResult(searchStatus.document, screenState = screenState, onEvent = onEvent, installedApps = installedApps, appIconLoader = appIconLoader)
                 }
-                is SearchStatus.Error -> RetryButton(query = searchStatus.query, onEvent = onEvent)
-                is SearchStatus.NoNetwork -> RetryButton(query = searchStatus.query, onEvent = onEvent)
+                is SearchStatus.Error -> RetryButton(onRetryClick = { onEvent(SearchViewEvent.OnSearchEnter(searchStatus.query)) })
+                is SearchStatus.NoNetwork -> RetryButton(onRetryClick = { onEvent(SearchViewEvent.OnSearchEnter(searchStatus.query)) })
                 is SearchStatus.NoResults -> EmptyResult(query = searchStatus.query)
                 is SearchStatus.SearchList -> {
                     val pagingData = remember(searchStatus.query) { pagingDataFlow() }
@@ -107,7 +98,7 @@ fun EmptyResult(query: String) {
 }
 
 @Composable
-fun RetryButton(query: String, onEvent: (SearchViewEvent) -> Unit) {
+fun RetryButton(onRetryClick: () -> Unit) {
     Column(
             modifier = Modifier
                     .padding(start = 32.dp, end = 32.dp),
@@ -117,7 +108,7 @@ fun RetryButton(query: String, onEvent: (SearchViewEvent) -> Unit) {
                 text = stringResource(id = R.string.problem_occurred),
                 textAlign = TextAlign.Center
         )
-        Button(onClick = { onEvent(SearchViewEvent.OnSearchEnter(query)) }) {
+        Button(onClick = onRetryClick) {
             Text(text = stringResource(id = R.string.retry))
         }
     }

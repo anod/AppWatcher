@@ -28,7 +28,7 @@ import com.anod.appwatcher.installed.InstalledFragment
 import com.anod.appwatcher.tags.EditTagDialog
 import com.anod.appwatcher.tags.TagWatchListComposeActivity
 import com.anod.appwatcher.utils.*
-import com.anod.appwatcher.wishlist.WishListFragment
+import com.anod.appwatcher.wishlist.WishListActivity
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import info.anodsplace.applog.AppLog
@@ -203,9 +203,8 @@ abstract class DrawerActivity : ToolbarActivity(), KoinComponent {
                 return true
             }
             R.id.menu_wishlist -> {
-                startActivity(WishListFragment.intent(
+                startActivity(WishListActivity.intent(
                         this,
-                        themeRes, themeColors,
                         account, authToken.token))
                 return true
             }

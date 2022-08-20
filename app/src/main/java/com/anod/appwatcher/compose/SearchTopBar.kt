@@ -1,8 +1,10 @@
 package com.anod.appwatcher.compose
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -19,6 +21,78 @@ import androidx.compose.ui.text.input.ImeAction
 import com.anod.appwatcher.R
 import info.anodsplace.applog.AppLog
 import kotlinx.coroutines.delay
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SearchTopBar(
+        title: String,
+        subtitle: String? = null,
+        containerColor: Color = MaterialTheme.colorScheme.surface,
+        contentColor: Color = MaterialTheme.colorScheme.onSurface,
+        searchQuery: String = "",
+        showSearch: Boolean = false,
+        initialSearchFocus: Boolean = false,
+        onValueChange: (String) -> Unit = { },
+        onSearchAction: (String) -> Unit = { },
+        onNavigation: () -> Unit = { },
+        actions: @Composable () -> Unit = { },
+) {
+    var showSearchView by remember { mutableStateOf(showSearch) }
+    var requestFocus by remember { mutableStateOf(initialSearchFocus) }
+    SmallTopAppBar(
+            title = {
+                if (showSearchView) {
+                    TopBarSearchField(
+                            query = searchQuery,
+                            onValueChange = onValueChange,
+                            onSearchAction = onSearchAction,
+                            requestFocus = requestFocus,
+                            contentColor = contentColor,
+                            containerColor = containerColor
+                    )
+                } else {
+                    if (subtitle != null) {
+                        Column {
+                            Text(title, color = contentColor, style = MaterialTheme.typography.headlineSmall)
+                            Text(subtitle, color = contentColor, style = MaterialTheme.typography.labelLarge)
+                        }
+                    } else {
+                        Text(title, color = contentColor, style = MaterialTheme.typography.headlineMedium)
+                    }
+                }
+            },
+            actions = {
+                if (!showSearchView) {
+                    IconButton(onClick = {
+                        showSearchView = true
+                        requestFocus = true
+                    }) {
+                        Icon(imageVector = Icons.Default.Search, contentDescription = stringResource(id = R.string.menu_filter))
+                    }
+                }
+
+                actions()
+            },
+            navigationIcon = {
+                IconButton(onClick = {
+                    if (showSearchView) {
+                        showSearchView = false
+                    } else {
+                        onNavigation()
+                    }
+                }) {
+                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = stringResource(id = R.string.back))
+                }
+            },
+            colors = TopAppBarDefaults.smallTopAppBarColors(
+                    containerColor = containerColor,
+                    titleContentColor = contentColor,
+                    navigationIconContentColor = contentColor,
+                    actionIconContentColor = contentColor,
+            )
+    )
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -78,6 +152,8 @@ fun TopBarSearchField(
             focusRequester.requestFocus()
             delay(100)
             keyboard?.show()
+        } else {
+            keyboard?.hide()
         }
     }
 }

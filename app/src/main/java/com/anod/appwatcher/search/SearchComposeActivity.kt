@@ -87,7 +87,7 @@ open class SearchComposeActivity : BaseComposeActivity() {
                 TagSnackbar.make(
                         findViewById<View>(android.R.id.content).rootView,
                         action.info,
-                        action.isShareSource,
+                        finishActivity = action.isShareSource,
                         this,
                         viewModel.prefs
                 ).show()

@@ -54,6 +54,9 @@
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:label="@string/activity_market" />
         <activity
+            android:name=".wishlist.WishListActivity"
+            android:label="@string/wishlist" />
+        <activity
             android:name=".userLog.UserLogActivity"
             android:label="@string/log" />
 
