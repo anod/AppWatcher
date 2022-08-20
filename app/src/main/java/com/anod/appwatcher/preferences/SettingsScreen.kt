@@ -5,8 +5,10 @@ import android.graphics.Path
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.compose.foundation.*
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.material.icons.Icons
@@ -26,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import com.anod.appwatcher.R
 import com.anod.appwatcher.backup.DbBackupManager
 import com.anod.appwatcher.compose.AppTheme
-import com.anod.appwatcher.compose.UiAction
 import com.anod.appwatcher.utils.AdaptiveIconTransformation
 import com.google.accompanist.flowlayout.FlowRow
 import info.anodsplace.applog.AppLog
@@ -34,21 +35,17 @@ import info.anodsplace.compose.Preference
 import info.anodsplace.compose.PreferenceItem
 import info.anodsplace.compose.PreferencesScreen
 import info.anodsplace.framework.content.CreateDocument
-import kotlinx.coroutines.launch
+import org.koin.java.KoinJavaComponent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(viewModel: SettingsViewModel) {
-    val coroutineScope = rememberCoroutineScope()
-    val prefs = viewModel.prefs
-    val progress by viewModel.isProgressVisible.collectAsState()
-    val items by viewModel.items.collectAsState()
+fun SettingsScreen(screenState: SettingsViewState, onEvent: (SettingsViewEvent) -> Unit, prefs: Preferences = KoinJavaComponent.getKoin().get()) {
 
     val exportDocumentRequest = rememberLauncherForActivityResult(contract = CreateDocument()) { uri ->
         if (uri == null) {
             AppLog.d("Create document cancelled")
         } else {
-            coroutineScope.launch { viewModel.actions.emit(UiAction.Export(uri)) }
+            onEvent(SettingsViewEvent.Export(uri))
         }
     }
 
@@ -56,17 +53,11 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
         if (uri == null) {
             AppLog.d("Open document cancelled")
         } else {
-            coroutineScope.launch { viewModel.actions.emit(UiAction.Import(uri)) }
+            onEvent(SettingsViewEvent.Import(uri))
         }
     }
 
     AppTheme(
-            darkTheme = when (prefs.uiMode) {
-                AppCompatDelegate.MODE_NIGHT_NO -> false
-                AppCompatDelegate.MODE_NIGHT_YES -> true
-                // MODE_NIGHT_AUTO
-                else -> isSystemInDarkTheme()
-            },
             theme = prefs.theme
     ) {
         Surface {
@@ -75,12 +66,12 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
                         CenterAlignedTopAppBar(
                                 title = { Text(text = stringResource(id = R.string.navdrawer_item_settings)) },
                                 navigationIcon = {
-                                    IconButton(onClick = { coroutineScope.launch { viewModel.actions.emit(UiAction.OnBackNav) } }) {
+                                    IconButton(onClick = { onEvent(SettingsViewEvent.OnBackNav) }) {
                                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = stringResource(id = R.string.back))
                                     }
                                 },
                                 actions = {
-                                    if (progress) {
+                                    if (screenState.isProgressVisible) {
                                         CircularProgressIndicator(
                                                 modifier = Modifier
                                                         .size(32.dp),
@@ -93,7 +84,7 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
             ) { contentPadding ->
                 PreferencesScreen(
                         modifier = Modifier.padding(contentPadding),
-                        preferences = items,
+                        preferences = screenState.items,
                         placeholder = { item, _ ->
                             when (item.key) {
                                 "icon-style" -> Preference(
@@ -112,7 +103,7 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
                                                         modifier = Modifier
                                                                 .padding(top = 8.dp)
                                                                 .fillMaxWidth(),
-                                                        onPathChange = { newPath -> viewModel.updateIconsShape(newPath) }
+                                                        onPathChange = { newPath -> onEvent(SettingsViewEvent.UpdateIconsShape(newPath)) }
                                                 )
                                             }
                                         },
@@ -130,10 +121,10 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
                                         )
                                 )
                                 "import" -> importDocumentRequest.launch(arrayOf("application/json", "text/plain", "*/*"))
-                                "licenses" -> coroutineScope.launch { viewModel.actions.emit(UiAction.OssLicenses) }
-                                "user-log" -> coroutineScope.launch { viewModel.actions.emit(UiAction.OpenUserLog) }
-                                "refresh-history" -> coroutineScope.launch { viewModel.actions.emit(UiAction.OpenRefreshHistory) }
-                                else -> onSettingsItemClick(prefs, item, viewModel)
+                                "licenses" -> onEvent(SettingsViewEvent.OssLicenses)
+                                "user-log" -> onEvent(SettingsViewEvent.OpenUserLog)
+                                "refresh-history" -> onEvent(SettingsViewEvent.OpenRefreshHistory)
+                                else -> onSettingsItemClick(prefs, item, onEvent)
                             }
                         }
                 )
@@ -201,22 +192,22 @@ fun IconShapeSelector(prefs: Preferences, modifier: Modifier = Modifier, onPathC
     }
 }
 
-fun onSettingsItemClick(prefs: Preferences, item: PreferenceItem, viewModel: SettingsViewModel) {
+fun onSettingsItemClick(prefs: Preferences, item: PreferenceItem, onEvent: (SettingsViewEvent) -> Unit) {
     when (item.key) {
-        "drive_sync" -> viewModel.gDriveSyncToggle((item as PreferenceItem.Switch).checked)
-        "drive-sync-now" -> viewModel.gDriveSyncNow()
-        "update_frequency" -> viewModel.changeUpdatePolicy(
+        "drive_sync" -> onEvent(SettingsViewEvent.GDriveSyncToggle((item as PreferenceItem.Switch).checked))
+        "drive-sync-now" -> onEvent(SettingsViewEvent.GDriveSyncNow)
+        "update_frequency" -> onEvent(SettingsViewEvent.ChangeUpdatePolicy(
                 frequency = (item as PreferenceItem.Pick).value.toInt(),
                 isWifiOnly = prefs.isWifiOnly,
                 isRequiresCharging = prefs.isRequiresCharging
-        )
+        ))
         "wifi_only" -> {
             val useWifiOnly = (item as PreferenceItem.Switch).checked
-            viewModel.changeUpdatePolicy(prefs.updatesFrequency, useWifiOnly, prefs.isRequiresCharging)
+            onEvent(SettingsViewEvent.ChangeUpdatePolicy(prefs.updatesFrequency, useWifiOnly, prefs.isRequiresCharging))
         }
         "requires-charging" -> {
             val requiresCharging = (item as PreferenceItem.Switch).checked
-            viewModel.changeUpdatePolicy(prefs.updatesFrequency, prefs.isWifiOnly, requiresCharging)
+            onEvent(SettingsViewEvent.ChangeUpdatePolicy(prefs.updatesFrequency, prefs.isWifiOnly, requiresCharging))
         }
         Preferences.NOTIFY_INSTALLED_UPTODATE -> {
             prefs.isNotifyInstalledUpToDate = (item as PreferenceItem.Switch).checked
@@ -228,31 +219,32 @@ fun onSettingsItemClick(prefs: Preferences, item: PreferenceItem, viewModel: Set
             prefs.isNotifyNoChanges = (item as PreferenceItem.Switch).checked
         }
         "crash-reports" -> {
-            viewModel.updateCrashReports((item as PreferenceItem.Switch).checked)
+            onEvent(SettingsViewEvent.UpdateCrashReports((item as PreferenceItem.Switch).checked))
         }
         "pull-to-refresh" -> {
-            prefs.enablePullToRefresh = viewModel.setRecreateFlag(item, prefs.enablePullToRefresh)
+            onEvent(SettingsViewEvent.SetRecreateFlag(item, prefs.enablePullToRefresh) { prefs.enablePullToRefresh = it })
+
         }
         "show-recent" -> {
-            prefs.showRecent = viewModel.setRecreateFlag(item, prefs.showRecent)
+            onEvent(SettingsViewEvent.SetRecreateFlag(item, prefs.showRecent) { prefs.showRecent = it })
         }
         "show-on-device" -> {
-            prefs.showOnDevice = viewModel.setRecreateFlag(item, prefs.showOnDevice)
+            onEvent(SettingsViewEvent.SetRecreateFlag(item, prefs.showOnDevice) { prefs.showOnDevice = it })
         }
         "show-recently-updated" -> {
-            prefs.showRecentlyUpdated = viewModel.setRecreateFlag(item, prefs.showRecentlyUpdated)
+            onEvent(SettingsViewEvent.SetRecreateFlag(item, prefs.showRecentlyUpdated) { prefs.showRecentlyUpdated = it })
         }
         "default-filter" -> {
             prefs.defaultMainFilterId = (item as PreferenceItem.Pick).value.toInt()
         }
         "icon-style" -> {
-            viewModel.updateIconsShape((item as PreferenceItem.Pick).value)
+            onEvent(SettingsViewEvent.UpdateIconsShape((item as PreferenceItem.Pick).value))
         }
         "theme" -> {
-            viewModel.updateTheme((item as PreferenceItem.Pick).value.toInt())
+            onEvent(SettingsViewEvent.UpdateTheme((item as PreferenceItem.Pick).value.toInt()))
         }
         "test-notification" -> {
-            viewModel.testNotification()
+            onEvent(SettingsViewEvent.TestNotification)
         }
     }
 }

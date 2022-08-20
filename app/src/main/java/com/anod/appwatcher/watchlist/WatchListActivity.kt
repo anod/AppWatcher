@@ -249,6 +249,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (stateViewModel.viewState.wideLayout.isWideLayout && supportFragmentManager.findFragmentByTag(DetailsFragment.tag) != null) {
             supportFragmentManager.popBackStack(DetailsFragment.tag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
