@@ -33,80 +33,85 @@ import org.koin.java.KoinJavaComponent
 
 @Composable
 fun MarketAppItem(document: Document, onClick: () -> Unit, isWatched: Boolean, isInstalled: Boolean, appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get()) {
-    Row(
-            modifier = Modifier
-                    .clickable(enabled = true, onClick = onClick)
-                    .background(color = if (isWatched) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.38f) else MaterialTheme.colorScheme.surface)
-                    .heightIn(min = 68.dp)
-                    .padding(top = 8.dp, bottom = 8.dp, start = 16.dp, end = 16.dp),
-    ) {
-
-        val imageRequest = remember {
-            mutableStateOf(appIconLoader.request(document.iconUrl ?: ""))
-        }
-        AsyncImage(
-                model = imageRequest.value,
-                contentDescription = document.title,
-                imageLoader = appIconLoader.coilLoader,
+    Box()
+    {
+        Row(
                 modifier = Modifier
-                        .size(40.dp)
-                        .padding(top = 8.dp),
-                placeholder = painterResource(id = R.drawable.ic_app_icon_placeholder)
-        )
-
-        Column(
-                modifier = Modifier.padding(start = 16.dp)
+                        .clickable(enabled = true, onClick = onClick)
+                        .background(color = if (isWatched) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.38f) else MaterialTheme.colorScheme.surface)
+                        .padding(top = 8.dp, bottom = 8.dp, start = 16.dp, end = 16.dp)
+                        .heightIn(min = 68.dp)
         ) {
-            Text(text = document.title, style = MaterialTheme.typography.bodyLarge)
-            Text(
-                    text = document.creator,
-                    maxLines = 1,
-                    style = MaterialTheme.typography.bodySmall
+
+            val imageRequest = remember {
+                mutableStateOf(appIconLoader.request(document.iconUrl ?: ""))
+            }
+            AsyncImage(
+                    model = imageRequest.value,
+                    contentDescription = document.title,
+                    imageLoader = appIconLoader.coilLoader,
+                    modifier = Modifier
+                            .size(40.dp)
+                            .padding(top = 8.dp),
+                    placeholder = painterResource(id = R.drawable.ic_app_icon_placeholder)
             )
-            Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+
+            Column(
+                    modifier = Modifier.padding(start = 16.dp)
             ) {
+                Text(text = document.title, style = MaterialTheme.typography.bodyLarge)
                 Text(
-                        text = document.appDetails.uploadDate,
+                        text = document.creator,
                         maxLines = 1,
-                        modifier = Modifier.weight(1f),
-                        overflow = TextOverflow.Ellipsis,
                         style = MaterialTheme.typography.bodySmall
                 )
-                if (isInstalled) {
+                Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
-                            text = stringResource(id = R.string.installed).toUpperCase(Locale.current),
-                            color = MaterialTheme.colorScheme.primary,
+                            text = document.appDetails.uploadDate,
                             maxLines = 1,
+                            modifier = Modifier.weight(1f),
+                            overflow = TextOverflow.Ellipsis,
                             style = MaterialTheme.typography.bodySmall
                     )
-                } else {
-                    val context = LocalContext.current
-                    val offerText by remember(document.offer) {
-                        mutableStateOf(
-                                when {
-                                    document.offer.offerType == 0 -> ""
-                                    document.offer.micros.toInt() == 0 -> context.getString(R.string.free)
-                                    else -> document.offer.formattedAmount
-                                })
-                    }
-                    if (offerText.isNotEmpty()) {
+                    if (isInstalled) {
                         Text(
-                                text = offerText,
+                                text = stringResource(id = R.string.installed).toUpperCase(Locale.current),
                                 color = MaterialTheme.colorScheme.primary,
                                 maxLines = 1,
                                 style = MaterialTheme.typography.bodySmall
                         )
+                    } else {
+                        val context = LocalContext.current
+                        val offerText by remember(document.offer) {
+                            mutableStateOf(
+                                    when {
+                                        document.offer.offerType == 0 -> ""
+                                        document.offer.micros.toInt() == 0 -> context.getString(R.string.free)
+                                        else -> document.offer.formattedAmount
+                                    })
+                        }
+                        if (offerText.isNotEmpty()) {
+                            Text(
+                                    text = offerText,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    maxLines = 1,
+                                    style = MaterialTheme.typography.bodySmall
+                            )
+                        }
                     }
                 }
             }
-            Divider(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-            )
         }
+
+        Divider(modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 72.dp)
+                .align(alignment = Alignment.BottomEnd),
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+        )
     }
 }
 

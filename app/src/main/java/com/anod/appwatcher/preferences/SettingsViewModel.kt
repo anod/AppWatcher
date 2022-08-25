@@ -148,7 +148,10 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
             SettingsViewEvent.CheckNotificationPermission -> {
                 val areNotificationsEnabled = prefs.areNotificationsEnabled
                 if (areNotificationsEnabled != viewState.areNotificationsEnabled) {
-                    viewState = viewState.copy(areNotificationsEnabled = areNotificationsEnabled)
+                    viewState = viewState.copy(
+                            areNotificationsEnabled = prefs.areNotificationsEnabled,
+                            items = preferenceItems(prefs, inProgress = false, playServices, application)
+                    )
                 }
             }
         }

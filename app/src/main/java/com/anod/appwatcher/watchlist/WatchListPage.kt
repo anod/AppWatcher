@@ -208,73 +208,76 @@ fun AppItem(item: AppListItem, isLocalApp: Boolean, selection: AppViewHolder.Sel
         mutableStateOf(calcAppItemState(app, item.recentFlag, textColor, primaryColor, packageInfo, context))
     }
 
-    Row(
-            modifier = Modifier
-                    .clickable(enabled = true, onClick = onClick)
-                    .heightIn(min = 68.dp)
-                    .padding(top = 8.dp, bottom = 8.dp, start = 16.dp, end = 16.dp)
-    ) {
-        val imageRequest = remember {
-            mutableStateOf(appIconLoader.request(app.iconUrl))
-        }
-        AsyncImage(
-                model = imageRequest.value,
-                contentDescription = title,
-                imageLoader = appIconLoader.coilLoader,
-                modifier = Modifier.size(40.dp),
-                placeholder = painterResource(id = R.drawable.ic_app_icon_placeholder)
-        )
-        Column(
-                modifier = Modifier.padding(start = 16.dp)
+    Box() {
+        Row(
+                modifier = Modifier
+                        .clickable(enabled = true, onClick = onClick)
+                        .heightIn(min = 68.dp)
+                        .padding(top = 8.dp, bottom = 8.dp, start = 16.dp, end = 16.dp)
         ) {
-            Text(text = title, style = MaterialTheme.typography.bodyLarge)
-            Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+            val imageRequest = remember {
+                mutableStateOf(appIconLoader.request(app.iconUrl))
+            }
+            AsyncImage(
+                    model = imageRequest.value,
+                    contentDescription = title,
+                    imageLoader = appIconLoader.coilLoader,
+                    modifier = Modifier.size(40.dp),
+                    placeholder = painterResource(id = R.drawable.ic_app_icon_placeholder)
+            )
+            Column(
+                    modifier = Modifier.padding(start = 16.dp)
             ) {
-                if (appItemState.installed || isLocalApp) {
-                    Icon(painter = painterResource(id = R.drawable.ic_stat_communication_stay_primary_portrait), contentDescription = stringResource(id = R.string.installed), modifier = Modifier.padding(end = 4.dp))
-                }
+                Text(text = title, style = MaterialTheme.typography.bodyLarge)
+                Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (appItemState.installed || isLocalApp) {
+                        Icon(painter = painterResource(id = R.drawable.ic_stat_communication_stay_primary_portrait), contentDescription = stringResource(id = R.string.installed), modifier = Modifier.padding(end = 4.dp))
+                    }
 //                    val versionText: String by remember {
 //                        mutableStateOf(formatVersionText(app.versionName, app.versionNumber, 0, context))
 //                    }
 //                    VersionText(text = versionText, color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f))
-                Text(
-                        text = appItemState.text,
-                        color = appItemState.color,
-                        modifier = Modifier.weight(1f),
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.bodySmall
-                )
-                if (app.uploadDate.isNotEmpty()) {
                     Text(
-                            text = app.uploadDate,
-                            maxLines = 1,
+                            text = appItemState.text,
+                            color = appItemState.color,
+                            modifier = Modifier.weight(1f),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
                             style = MaterialTheme.typography.bodySmall
                     )
-                }
-            }
-            if (appItemState.showRecent) {
-                if (isLocalApp) {
-                    if (changesHtml.isNotBlank()) {
-                        ChangelogText(text = changesHtml, noNewDetails = item.noNewDetails)
+                    if (app.uploadDate.isNotEmpty()) {
+                        Text(
+                                text = app.uploadDate,
+                                maxLines = 1,
+                                style = MaterialTheme.typography.bodySmall
+                        )
                     }
-                } else {
-                    if (changesHtml.isBlank()) {
-                        ChangelogText(text = stringResource(id = R.string.no_recent_changes), noNewDetails = true)
+                }
+                if (appItemState.showRecent) {
+                    if (isLocalApp) {
+                        if (changesHtml.isNotBlank()) {
+                            ChangelogText(text = changesHtml, noNewDetails = item.noNewDetails)
+                        }
                     } else {
-                        ChangelogText(text = changesHtml, noNewDetails = item.noNewDetails)
+                        if (changesHtml.isBlank()) {
+                            ChangelogText(text = stringResource(id = R.string.no_recent_changes), noNewDetails = true)
+                        } else {
+                            ChangelogText(text = changesHtml, noNewDetails = item.noNewDetails)
+                        }
                     }
                 }
             }
-
-            Divider(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-            )
         }
+
+        Divider(modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 72.dp)
+                .align(alignment = Alignment.BottomEnd),
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+        )
     }
 }
 

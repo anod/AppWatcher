@@ -277,8 +277,7 @@ fun onSettingsItemClick(prefs: Preferences, item: PreferenceItem, onEvent: (Sett
     }
 }
 
-
-@Preview(showSystemUi = true)
+@Preview(showSystemUi = true, locale = "ru")
 @Composable
 fun PreferencesScreenPreview() {
     val items = listOf(

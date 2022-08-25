@@ -46,6 +46,7 @@ fun SearchResultsScreen(screenState: SearchViewState, pagingDataFlow: () -> Flow
                         onValueChange = { onEvent(SearchViewEvent.SearchQueryChange(query = it)) },
                         onSearchAction = { onEvent(SearchViewEvent.OnSearchEnter(it)) },
                         initialSearchFocus = !screenState.initiateSearch,
+                        searchQuery = screenState.searchQuery,
                         onNavigation = { onEvent(SearchViewEvent.OnBackPressed) }
                 )
             }
