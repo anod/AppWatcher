@@ -21,6 +21,7 @@ import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.preferences.Preferences
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.loadIcon
+import info.anodsplace.graphics.AdaptiveIcon
 import info.anodsplace.graphics.BitmapByteArray
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -56,7 +57,7 @@ class RealAppIconLoader(context: Context, private val prefs: Preferences, overri
         get() {
             val shapeHashCode = prefs.iconShape.hashCode()
             if (shapeHashCode != _iconPathPair.first) {
-                _iconPathPair = Pair(shapeHashCode, AdaptiveIconTransformation.maskToPath(prefs.iconShape))
+                _iconPathPair = Pair(shapeHashCode, AdaptiveIcon.maskToPath(prefs.iconShape))
             }
             return _iconPathPair.second
         }

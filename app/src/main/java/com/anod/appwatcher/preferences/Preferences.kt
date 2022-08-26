@@ -7,6 +7,7 @@ import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import com.anod.appwatcher.model.Filters
 import info.anodsplace.framework.app.NotificationManager
+import info.anodsplace.graphics.AdaptiveIcon
 
 class Preferences(context: Context, private val notificationManager: NotificationManager) {
 
@@ -152,7 +153,7 @@ class Preferences(context: Context, private val notificationManager: Notificatio
         set(value) = preferences.edit().putString("adaptive-icon-shape", value).apply()
 
     private val defaultSystemMask: String by lazy {
-        AdaptiveIconTransformation.getSystemDefaultMask()
+        AdaptiveIcon.getSystemDefaultMask()
     }
 
     companion object {
