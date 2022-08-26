@@ -1,38 +1,31 @@
 package com.anod.appwatcher.preferences
 
-import android.graphics.Matrix
-import android.graphics.Path
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.GenericShape
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.asComposePath
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.anod.appwatcher.R
 import com.anod.appwatcher.backup.DbBackupManager
 import com.anod.appwatcher.compose.AppTheme
-import com.anod.appwatcher.utils.AdaptiveIconTransformation
-import com.google.accompanist.flowlayout.FlowRow
 import info.anodsplace.applog.AppLog
+import info.anodsplace.compose.IconShapeSelector
 import info.anodsplace.compose.Preference
 import info.anodsplace.compose.PreferenceItem
 import info.anodsplace.compose.PreferencesScreen
@@ -102,7 +95,9 @@ fun SettingsScreen(screenState: SettingsViewState, onEvent: (SettingsViewEvent) 
                                                         )
                                                 )
                                                 IconShapeSelector(
-                                                        prefs = prefs,
+                                                        pathMasks = stringArrayResource(id = R.array.adaptive_icon_style_paths_values),
+                                                        names = stringArrayResource(id = R.array.adaptive_icon_style_names),
+                                                        selected = prefs.iconShape,
                                                         modifier = Modifier
                                                                 .padding(top = 8.dp)
                                                                 .fillMaxWidth(),
@@ -156,65 +151,6 @@ fun SettingsScreen(screenState: SettingsViewState, onEvent: (SettingsViewEvent) 
                             }
                         }
                 )
-            }
-        }
-    }
-}
-
-@Composable
-fun IconShapeSelector(prefs: Preferences, modifier: Modifier = Modifier, onPathChange: (String) -> Unit = {}) {
-    val pathMasks = stringArrayResource(id = R.array.adaptive_icon_style_paths_values)
-    val names = stringArrayResource(id = R.array.adaptive_icon_style_names)
-    val iconSize = 48.dp
-    val iconSizePx = with(LocalDensity.current) { iconSize.roundToPx() }
-    var value by remember { mutableStateOf(prefs.iconShape) }
-
-    FlowRow(
-            modifier = modifier,
-            mainAxisSpacing = 8.dp,
-            crossAxisSpacing = 4.dp
-    )
-    {
-        val isNone = value.isEmpty()
-        Box(
-                modifier = Modifier
-                        .size(iconSize, iconSize)
-                        .border(BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary.copy(
-                                alpha = if (isNone) 1.0f else 0.1f
-                        )))
-                        .clickable(onClick = {
-                            value = ""
-                            onPathChange("")
-                        }),
-                contentAlignment = Alignment.Center
-        ) {
-            Text(
-                    text = names[0],
-                    color = if (isNone) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurface
-            )
-        }
-
-        pathMasks.filter { it.isNotEmpty() }.forEachIndexed { index, pathMask ->
-            val path = AdaptiveIconTransformation.maskToPath(pathMask)
-            val outline = Path()
-            val maskMatrix = Matrix().apply {
-                setScale(iconSizePx / AdaptiveIconTransformation.MASK_SIZE, iconSizePx / AdaptiveIconTransformation.MASK_SIZE)
-            }
-            path.transform(maskMatrix, outline)
-
-            val selected = value == pathMask
-            Box(
-                    modifier = Modifier
-                            .size(iconSize, iconSize)
-                            .clip(GenericShape { _, _ ->
-                                addPath(outline.asComposePath())
-                            })
-                            .clickable(onClick = {
-                                value = pathMask
-                                onPathChange(pathMask)
-                            }, role = Role.Button, onClickLabel = names[index])
-                            .background(color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f))
-            ) {
             }
         }
     }

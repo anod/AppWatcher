@@ -6,7 +6,6 @@ import android.app.UiModeManager
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import com.anod.appwatcher.model.Filters
-import com.anod.appwatcher.utils.AdaptiveIconTransformation
 import info.anodsplace.framework.app.NotificationManager
 
 class Preferences(context: Context, private val notificationManager: NotificationManager) {
