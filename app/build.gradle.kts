@@ -113,6 +113,7 @@ dependencies {
     implementation("androidx.core:core:1.8.0")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("androidx.fragment:fragment-ktx:1.5.2")
+    implementation("androidx.core:core-splashscreen:1.0.0")
 
     implementation("androidx.paging:paging-runtime:3.2.0-alpha02")
     implementation("androidx.paging:paging-compose:1.0.0-alpha16")
@@ -132,7 +133,7 @@ dependencies {
     implementation("com.google.android.material:material:1.6.1")
     implementation("com.google.android.gms:play-services-oss-licenses:17.0.0")
     implementation("com.google.android.gms:play-services-identity:18.0.1")
-    implementation("com.google.android.gms:play-services-auth:20.2.0")
+    implementation("com.google.android.gms:play-services-auth:20.3.0")
 
     implementation("com.google.api-client:google-api-client:1.33.0")
     implementation("com.google.api-client:google-api-client-android:1.33.0")
@@ -141,8 +142,8 @@ dependencies {
         exclude(group = "commons-logging")
     }
 
-    implementation("com.google.firebase:firebase-analytics:21.1.0")
-    implementation("com.google.firebase:firebase-crashlytics:18.2.12")
+    implementation("com.google.firebase:firebase-analytics:21.1.1")
+    implementation("com.google.firebase:firebase-crashlytics:18.2.13")
 
     // 3rd party
     implementation("com.squareup.okhttp3:okhttp:4.9.3")

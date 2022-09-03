@@ -234,8 +234,10 @@
         <item name="android:actionBarTheme">@style/AppTheme.ActionBar.DarkBackground</item>
     </style>
 
-    <style name="AppTheme.Splash" parent="AppTheme.Base">
-        <item name="android:windowBackground">@drawable/splash_screen</item>
+    <style name="AppTheme.Splash" parent="Theme.SplashScreen.IconBackground">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_foreground</item>
+        <item name="windowSplashScreenIconBackgroundColor">@color/md_primary</item>
+        <item name="postSplashScreenTheme">@null</item>
     </style>
 
     <style name="AlertDialog" parent="@style/Theme.Material3.DayNight.Dialog.Alert" />

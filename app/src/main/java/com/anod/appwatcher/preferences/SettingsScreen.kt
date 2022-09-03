@@ -86,24 +86,15 @@ fun SettingsScreen(screenState: SettingsViewState, onEvent: (SettingsViewEvent) 
                                 "icon-style" -> Preference(
                                         item,
                                         secondary = {
-                                            Column {
-                                                Text(
-                                                        modifier = Modifier.padding(top = 4.dp),
-                                                        text = stringResource(id = R.string.adaptive_icon_style_summary),
-                                                        style = MaterialTheme.typography.bodyMedium.copy(
-                                                                color = MaterialTheme.colorScheme.onSurface
-                                                        )
-                                                )
-                                                IconShapeSelector(
-                                                        pathMasks = stringArrayResource(id = R.array.adaptive_icon_style_paths_values),
-                                                        names = stringArrayResource(id = R.array.adaptive_icon_style_names),
-                                                        selected = prefs.iconShape,
-                                                        modifier = Modifier
-                                                                .padding(top = 8.dp)
-                                                                .fillMaxWidth(),
-                                                        onPathChange = { newPath -> onEvent(SettingsViewEvent.UpdateIconsShape(newPath)) }
-                                                )
-                                            }
+                                            IconShapeSelector(
+                                                    pathMasks = stringArrayResource(id = R.array.adaptive_icon_style_paths_values),
+                                                    names = stringArrayResource(id = R.array.adaptive_icon_style_names),
+                                                    selected = prefs.iconShape,
+                                                    modifier = Modifier
+                                                            .padding(top = 8.dp)
+                                                            .fillMaxWidth(),
+                                                    onPathChange = { newPath -> onEvent(SettingsViewEvent.UpdateIconsShape(newPath)) }
+                                            )
                                         },
                                         onClick = { })
                                 "update_frequency" -> {
