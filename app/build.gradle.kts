@@ -110,7 +110,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.work:work-runtime:2.7.1")
     implementation("androidx.work:work-runtime-ktx:2.7.1")
-    implementation("androidx.core:core:1.8.0")
+    implementation("androidx.core:core:1.9.0")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("androidx.fragment:fragment-ktx:1.5.2")
     implementation("androidx.core:core-splashscreen:1.0.0")
@@ -146,7 +146,7 @@ dependencies {
     implementation("com.google.firebase:firebase-crashlytics:18.2.13")
 
     // 3rd party
-    implementation("com.squareup.okhttp3:okhttp:4.9.3")
+    implementation("com.squareup.okhttp3:okhttp:4.10.0")
     implementation("com.jakewharton:process-phoenix:2.1.2")
     implementation("io.insert-koin:koin-core:3.2.0")
 
