@@ -52,14 +52,15 @@ class SearchMenu(
             }
         })
 
-        val searchView = menuItem?.actionView as SearchView
-        searchView.setOnQueryTextListener(this)
-        searchView.isSubmitButtonEnabled = true
-        searchView.queryHint = context.getString(R.string.search)
+        val searchView = (menuItem?.actionView as? SearchView)?.apply {
+            setOnQueryTextListener(this@SearchMenu)
+            isSubmitButtonEnabled = true
+            queryHint = context.getString(R.string.search)
+        }
 
         if (expand) {
             menuItem?.expandActionView()
-            searchView.setQuery(query, false)
+            searchView?.setQuery(query, false)
         }
     }
 
