@@ -8,20 +8,22 @@ import com.anod.appwatcher.utils.LogCat
  * @date 03/01/2018
  */
 
-
 interface Message {
     val timestamp: String
     val message: String
     val level: Int
 }
 
-class UserLogMessage(override val timestamp: String, override val message: String, override val level: Int) : Message {
+data class UserLogMessage(
+        override val timestamp: String,
+        override val message: String,
+        override val level: Int) : Message {
 
     companion object {
         fun from(logcatLine: String): UserLogMessage {
             val levelIndex = logcatLine.indexOf('/') - 1
             val messageIndex = logcatLine.indexOf(':', levelIndex)
-            if (logcatLine.length < 22 || !logcatLine[0].isDigit() || levelIndex <= 0 || messageIndex <= 0 ) {
+            if (logcatLine.length < 22 || !logcatLine[0].isDigit() || levelIndex <= 0 || messageIndex <= 0) {
                 return UserLogMessage("", logcatLine, Log.ERROR)
             }
 
@@ -48,9 +50,8 @@ class UserLogMessage(override val timestamp: String, override val message: Strin
 
 class UserLogger {
 
-    val messages: List<Message> by lazy { LogCat.read().map { UserLogMessage.from(it) }.reversed() }
+    val messages: List<Message> by lazy { LogCat.read().map { UserLogMessage.from(it) } }
 
     val content: String
         get() = messages.joinToString("\n")
 }
-

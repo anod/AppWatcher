@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.*
-import com.anod.appwatcher.databinding.ActivityUserLogBinding
+import com.anod.appwatcher.databinding.ActivitySchedulesHistoryBinding
 import com.anod.appwatcher.databinding.ListItemScheduleBinding
 import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.utils.colorStateListOf
@@ -120,10 +120,10 @@ class SchedulesHistoryActivity : ToolbarActivity(), KoinComponent {
         }
     }
 
-    private lateinit var binding: ActivityUserLogBinding
+    private lateinit var binding: ActivitySchedulesHistoryBinding
     override val layoutView: View
         get() {
-            binding = ActivityUserLogBinding.inflate(layoutInflater)
+            binding = ActivitySchedulesHistoryBinding.inflate(layoutInflater)
             return binding.root
         }
 
