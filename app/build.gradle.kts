@@ -112,22 +112,22 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.7.1")
     implementation("androidx.core:core:1.9.0")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
-    implementation("androidx.fragment:fragment-ktx:1.5.2")
+    implementation("androidx.fragment:fragment-ktx:1.5.3")
     implementation("androidx.core:core-splashscreen:1.0.0")
 
     implementation("androidx.paging:paging-runtime:3.2.0-alpha02")
     implementation("androidx.paging:paging-compose:1.0.0-alpha16")
 
     // Compose
-    implementation("androidx.activity:activity-compose:1.5.1")
+    implementation("androidx.activity:activity-compose:1.6.0")
     implementation("androidx.compose.ui:ui-viewbinding:1.2.1")
     implementation("com.google.accompanist:accompanist-pager:0.25.1")
     implementation("com.google.accompanist:accompanist-flowlayout:0.25.1")
     implementation("com.google.accompanist:accompanist-swiperefresh:0.25.1")
 
     // Coil
-    implementation("io.coil-kt:coil-base:2.2.0")
-    implementation("io.coil-kt:coil-compose-base:2.2.0")
+    implementation("io.coil-kt:coil-base:2.2.2")
+    implementation("io.coil-kt:coil-compose-base:2.2.2")
 
     // Google
     implementation("com.google.android.material:material:1.6.1")
@@ -148,7 +148,7 @@ dependencies {
     // 3rd party
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
     implementation("com.jakewharton:process-phoenix:2.1.2")
-    implementation("io.insert-koin:koin-core:3.2.0")
+    implementation("io.insert-koin:koin-core:3.2.2")
 
     // ViewModel and LiveData
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
