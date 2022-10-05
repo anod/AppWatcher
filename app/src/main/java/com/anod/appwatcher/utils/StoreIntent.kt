@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import info.anodsplace.framework.app.addMultiWindowFlags
 
 /**
@@ -24,9 +25,16 @@ fun Intent.forPlayStore(pkg: String, context: Context): Intent {
 }
 
 fun Intent.forMyApps(update: Boolean, context: Context): Intent {
-    this.action = "com.google.android.finsky.VIEW_MY_DOWNLOADS"
-    this.component = ComponentName("com.android.vending",
-            "com.google.android.finsky.activities.MainActivity")
+    action = "com.google.android.finsky.VIEW_MY_DOWNLOADS"
+    component = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+        ComponentName(
+                "com.android.vending",
+                "com.android.vending.AssetBrowserActivity"
+        )
+    else ComponentName(
+            "com.android.vending",
+            "com.google.android.finsky.activities.MainActivity"
+    )
     if (update) {
         this.putExtra("trigger_update_all", true)
     }
