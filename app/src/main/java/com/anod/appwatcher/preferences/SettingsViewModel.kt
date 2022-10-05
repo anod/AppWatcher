@@ -197,7 +197,10 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
                     val gDriveSync = get<GDriveSync> { parametersOf(googleAccount) }
                     gDriveSync.doSync()
                     prefs.lastDriveSyncTime = System.currentTimeMillis()
-                    viewState = viewState.copy(isProgressVisible = false)
+                    viewState = viewState.copy(
+                            isProgressVisible = false,
+                            items = preferenceItems(prefs, inProgress = false, playServices, application)
+                    )
                     emitAction(SettingsViewAction.ShowToast(resId = R.string.sync_finish))
                 } catch (e: Exception) {
                     AppLog.e(e)
@@ -307,12 +310,12 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
                 UpdatedApp(
                         packageName = "com.anod.appwatcher",
                         title = "Test",
-                        installedVersionCode = 0,
+                        installedVersionCode = 25,
                         isNewUpdate = true,
                         recentChanges = "Test notification",
                         uploadDate = "Now",
                         uploadTime = System.currentTimeMillis(),
-                        versionNumber = 1,
+                        versionNumber = 27,
                 )
         ))
     }

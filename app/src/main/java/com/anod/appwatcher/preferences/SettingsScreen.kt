@@ -90,6 +90,8 @@ fun SettingsScreen(screenState: SettingsViewState, onEvent: (SettingsViewEvent) 
                                                     pathMasks = stringArrayResource(id = R.array.adaptive_icon_style_paths_values),
                                                     names = stringArrayResource(id = R.array.adaptive_icon_style_names),
                                                     selected = prefs.iconShape,
+                                                    defaultSystemMask = prefs.defaultSystemMask,
+                                                    systemMaskName = stringResource(id = R.string.system),
                                                     modifier = Modifier
                                                             .padding(top = 8.dp)
                                                             .fillMaxWidth(),

@@ -152,7 +152,7 @@ class Preferences(context: Context, private val notificationManager: Notificatio
         get() = preferences.getString("adaptive-icon-shape", defaultSystemMask)!!
         set(value) = preferences.edit().putString("adaptive-icon-shape", value).apply()
 
-    private val defaultSystemMask: String by lazy {
+    val defaultSystemMask: String by lazy {
         AdaptiveIcon.getSystemDefaultMask()
     }
 
