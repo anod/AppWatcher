@@ -18,8 +18,8 @@ android {
         applicationId = "com.anod.appwatcher"
         minSdk = 27
         targetSdk = 33
-        versionCode = 15010
-        versionName = "1.5.0"
+        versionCode = 15101
+        versionName = "1.5.1"
         resValue("string", "content_authority", "com.anod.appwatcher")
 
         javaCompileOptions {
@@ -98,7 +98,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.3.0-rc01"
+        kotlinCompilerExtensionVersion = "1.3.1"
     }
     namespace = "com.anod.appwatcher"
 }
