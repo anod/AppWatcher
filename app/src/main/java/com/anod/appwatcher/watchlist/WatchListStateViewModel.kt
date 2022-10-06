@@ -105,7 +105,7 @@ class WatchListStateViewModel(state: SavedStateHandle) : BaseFlowViewModel<Watch
             if (!viewState.tag.isEmpty) {
                 db.tags()
                         .observe()
-                        .mapNotNull { list -> list.first { tag -> tag.id == viewState.tag.id } }
+                        .mapNotNull { list -> list.firstOrNull { tag -> tag.id == viewState.tag.id } }
                         .collect { tag ->
                             viewState = viewState.copy(tag = tag)
                         }
