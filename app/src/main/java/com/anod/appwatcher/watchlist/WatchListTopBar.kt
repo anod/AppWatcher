@@ -116,8 +116,8 @@ fun DefaultPreview() {
         Scaffold(
                 topBar = {
                     WatchListTopBar(
-                            title = "Title",
-                            subtitle = "Subtitle",
+                            title = "What will happen when title is too long",
+                            subtitle = "What will happen when subtitle is too long",
                             containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = MaterialTheme.colorScheme.onPrimary,
                             filterTitles = listOf(),

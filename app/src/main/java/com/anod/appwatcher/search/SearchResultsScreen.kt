@@ -71,8 +71,11 @@ fun SearchResultsScreen(screenState: SearchViewState, pagingDataFlow: () -> Flow
                 is SearchStatus.SearchList -> {
                     val pagingData = remember(searchStatus.query) { pagingDataFlow() }
                     val items = pagingData.collectAsLazyPagingItems()
-                    val isEmpty = items.loadState.source.refresh is LoadState.NotLoading && items.itemCount < 1
-                    if (isEmpty) {
+                    val isError = items.loadState.source.refresh is LoadState.Error
+                    val isEmpty = (items.loadState.source.refresh is LoadState.NotLoading && items.itemCount < 1)
+                    if (isError) {
+                        RetryButton(onRetryClick = { onEvent(SearchViewEvent.OnSearchEnter(searchStatus.query)) }, fillMaxSize = true)
+                    } else if (isEmpty) {
                         EmptyResult(query = searchStatus.query)
                     } else {
                         SearchResultsPage(items = items, screenState = screenState, onEvent = onEvent, installedApps = installedApps, appIconLoader = appIconLoader)
@@ -99,10 +102,11 @@ fun EmptyResult(query: String) {
 }
 
 @Composable
-fun RetryButton(onRetryClick: () -> Unit) {
+fun RetryButton(onRetryClick: () -> Unit, fillMaxSize: Boolean = false) {
     Column(
-            modifier = Modifier
-                    .padding(start = 32.dp, end = 32.dp),
+            modifier = Modifier.apply {
+                if (fillMaxSize) fillMaxSize()
+            }.padding(start = 32.dp, end = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(

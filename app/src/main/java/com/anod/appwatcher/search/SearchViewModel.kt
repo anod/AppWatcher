@@ -160,6 +160,8 @@ class SearchViewModel(
                 viewState = viewState.copy(searchQuery = query, searchStatus = searchStatus)
                 if (searchStatus is SearchStatus.NoNetwork) {
                     emitAction(SearchViewAction.ShowToast(resId = R.string.check_connection, duration = Toast.LENGTH_SHORT, finish = true))
+                } else if (searchStatus is SearchStatus.Error) {
+                    emitAction(SearchViewAction.ShowToast(resId = R.string.error_fetching_info, duration = Toast.LENGTH_SHORT, finish = true))
                 }
             }
         }
@@ -170,6 +172,16 @@ class SearchViewModel(
             emit(SearchStatus.Error(query = query))
             return@flow
         }
+        if (!authToken.isFresh) {
+            if (!authToken.refreshToken(prefs.account!!)) {
+                if (!networkConnection.isNetworkAvailable) {
+                    emit(SearchStatus.NoNetwork(query = query))
+                } else {
+                    emit(SearchStatus.Error(query = query))
+                }
+                return@flow
+            }
+        }
         endpointSearch = get { parametersOf(query) }
         if (viewState.isPackageSearch) {
             val detailsUrl = AppInfo.createDetailsUrl(query)
@@ -177,7 +189,7 @@ class SearchViewModel(
         }
         emit(SearchStatus.Loading)
         if (endpointDetails == null) {
-            _pagingData = null
+            resetPager()
             emit(SearchStatus.SearchList(query = query))
         } else {
             try {
@@ -185,14 +197,14 @@ class SearchViewModel(
                 if (model.document != null) {
                     emit(SearchStatus.DetailsAvailable(model.document!!))
                 } else {
-                    _pagingData = null
+                    resetPager()
                     emit(SearchStatus.SearchList(query = query))
                 }
             } catch (e: Exception) {
                 if (!networkConnection.isNetworkAvailable) {
                     emit(SearchStatus.NoNetwork(query = query))
                 } else {
-                    _pagingData = null
+                    resetPager()
                     emit(SearchStatus.SearchList(query = query))
                 }
             }
@@ -207,6 +219,11 @@ class SearchViewModel(
             }
             return _pagingData!!
         }
+
+    private fun resetPager() {
+        // Trigger new pager creation
+        _pagingData = null
+    }
 
     private fun createPager() = Pager(PagingConfig(pageSize = 10)) { ListEndpointPagingSource(endpointSearch!!) }
             .flow
@@ -248,5 +265,4 @@ class SearchViewModel(
             }
         }
     }
-
 }

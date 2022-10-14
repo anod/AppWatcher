@@ -1,6 +1,7 @@
 package com.anod.appwatcher.compose
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -18,6 +19,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
 import com.anod.appwatcher.R
 import info.anodsplace.applog.AppLog
 import kotlinx.coroutines.delay
@@ -25,71 +27,73 @@ import kotlinx.coroutines.delay
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchTopBar(
-        title: String,
-        subtitle: String? = null,
-        containerColor: Color = MaterialTheme.colorScheme.surface,
-        contentColor: Color = MaterialTheme.colorScheme.onSurface,
-        searchQuery: String = "",
-        showSearch: Boolean = false,
-        initialSearchFocus: Boolean = false,
-        onValueChange: (String) -> Unit = { },
-        onSearchAction: (String) -> Unit = { },
-        onNavigation: () -> Unit = { },
-        actions: @Composable () -> Unit = { },
+    title: String,
+    subtitle: String? = null,
+    containerColor: Color = MaterialTheme.colorScheme.surface,
+    contentColor: Color = MaterialTheme.colorScheme.onSurface,
+    searchQuery: String = "",
+    showSearch: Boolean = false,
+    initialSearchFocus: Boolean = false,
+    onValueChange: (String) -> Unit = { },
+    onSearchAction: (String) -> Unit = { },
+    onNavigation: () -> Unit = { },
+    actions: @Composable () -> Unit = { },
 ) {
     var showSearchView by remember { mutableStateOf(showSearch) }
     var requestFocus by remember { mutableStateOf(initialSearchFocus) }
-    SmallTopAppBar(
-            title = {
-                if (showSearchView) {
-                    TopBarSearchField(
-                            query = searchQuery,
-                            onValueChange = onValueChange,
-                            onSearchAction = onSearchAction,
-                            requestFocus = requestFocus,
-                            contentColor = contentColor,
-                            containerColor = containerColor
-                    )
+    TopAppBar(
+        title = {
+            if (showSearchView) {
+                TopBarSearchField(
+                    query = searchQuery,
+                    onValueChange = onValueChange,
+                    onSearchAction = onSearchAction,
+                    requestFocus = requestFocus,
+                    contentColor = contentColor,
+                    containerColor = containerColor
+                )
+            } else {
+                if (subtitle != null) {
+                    Column {
+                        Text(title, color = contentColor, style = MaterialTheme.typography.headlineSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(subtitle, color = contentColor, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
                 } else {
-                    if (subtitle != null) {
-                        Column {
-                            Text(title, color = contentColor, style = MaterialTheme.typography.headlineSmall)
-                            Text(subtitle, color = contentColor, style = MaterialTheme.typography.labelLarge)
-                        }
-                    } else {
-                        Text(title, color = contentColor, style = MaterialTheme.typography.headlineMedium)
-                    }
+                    Text(title, color = contentColor, style = MaterialTheme.typography.headlineSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 }
-            },
-            actions = {
-                if (!showSearchView) {
-                    IconButton(onClick = {
-                        showSearchView = true
-                        requestFocus = true
-                    }) {
-                        Icon(imageVector = Icons.Default.Search, contentDescription = stringResource(id = R.string.menu_filter))
-                    }
+            }
+        },
+        navigationIcon = {
+            IconButton(onClick = {
+                if (showSearchView) {
+                    showSearchView = false
+                } else {
+                    onNavigation()
                 }
-
-                actions()
-            },
-            navigationIcon = {
+            }) {
+                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = stringResource(id = R.string.back))
+            }
+        },
+        actions = {
+            if (!showSearchView) {
                 IconButton(onClick = {
-                    if (showSearchView) {
-                        showSearchView = false
-                    } else {
-                        onNavigation()
-                    }
+                    showSearchView = true
+                    requestFocus = true
                 }) {
-                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = stringResource(id = R.string.back))
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = stringResource(id = R.string.menu_filter)
+                    )
                 }
-            },
-            colors = TopAppBarDefaults.smallTopAppBarColors(
-                    containerColor = containerColor,
-                    titleContentColor = contentColor,
-                    navigationIconContentColor = contentColor,
-                    actionIconContentColor = contentColor,
-            )
+            }
+
+            actions()
+        }, colors = TopAppBarDefaults.smallTopAppBarColors(
+            containerColor = containerColor,
+            titleContentColor = contentColor,
+            navigationIconContentColor = contentColor,
+            actionIconContentColor = contentColor,
+        )
     )
 }
 
@@ -135,6 +139,7 @@ fun TopBarSearchField(
                         focusManager.clearFocus()
                     }
             ),
+            textStyle = MaterialTheme.typography.labelLarge,
             singleLine = true,
             colors = TextFieldDefaults.textFieldColors(
                     containerColor = containerColor,
