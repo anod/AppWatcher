@@ -18,8 +18,8 @@ android {
         applicationId = "com.anod.appwatcher"
         minSdk = 27
         targetSdk = 33
-        versionCode = 15200
-        versionName = "1.5.2"
+        versionCode = 15300
+        versionName = "1.5.3"
         resValue("string", "content_authority", "com.anod.appwatcher")
 
         javaCompileOptions {
