@@ -11,6 +11,7 @@ import com.anod.appwatcher.NotificationActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.watchlist.WatchListActivity
+import com.google.android.material.color.DynamicColors
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.app.NotificationManager
 import info.anodsplace.framework.text.Html
@@ -108,7 +109,10 @@ class SyncNotification(private val context: ApplicationContext, private val noti
                 .setContentText(text)
                 .setContentIntent(contentIntent)
                 .setTicker(title)
-                .color = context.getColor(R.color.material_blue_800)
+
+        if (!DynamicColors.isDynamicColorAvailable()) {
+            builder.color = context.getColor(R.color.material_blue_800)
+        }
 
         if (updatedApps.size == 1) {
             val app = updatedApps[0]

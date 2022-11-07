@@ -22,7 +22,7 @@ import com.anod.appwatcher.preferences.Preferences
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.loadIcon
 import info.anodsplace.graphics.AdaptiveIcon
-import info.anodsplace.graphics.BitmapByteArray
+import info.anodsplace.graphics.toByteArray
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okio.Buffer
@@ -82,7 +82,7 @@ class RealAppIconLoader(context: Context, private val prefs: Preferences, overri
 
             val icon = packageManager.loadIcon(cmp, context.resources.displayMetrics) ?: return null
 
-            val source = BitmapByteArray.flatten(icon) ?: return null
+            val source = icon.toByteArray() ?: return null
             return SourceResult(
                     source = ImageSource(Buffer().apply { write(source) }, options.context),
                     mimeType = null,

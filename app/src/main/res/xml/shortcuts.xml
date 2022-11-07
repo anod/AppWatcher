@@ -3,7 +3,7 @@
     <shortcut
         android:shortcutId="updates"
         android:enabled="true"
-        android:icon="@drawable/ic_shortcut_updates"
+        android:icon="@mipmap/ic_shortcut_updates"
         android:shortcutShortLabel="@string/shortcut_updates"
         android:shortcutLongLabel="@string/shortcut_updates">
         <intent
@@ -18,7 +18,7 @@
     <shortcut
         android:shortcutId="search"
         android:enabled="true"
-        android:icon="@drawable/ic_shortcut_search"
+        android:icon="@mipmap/ic_shortcut_search"
         android:shortcutShortLabel="@string/shortcut_search"
         android:shortcutLongLabel="@string/shortcut_search">
         <intent
@@ -33,7 +33,7 @@
     <shortcut
         android:shortcutId="recently_installed"
         android:enabled="true"
-        android:icon="@drawable/ic_shortcut_recent"
+        android:icon="@mipmap/ic_shortcut_recent"
         android:shortcutShortLabel="@string/shortcut_recently_installed"
         android:shortcutLongLabel="@string/shortcut_recently_installed">
         <intent

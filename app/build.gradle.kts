@@ -2,7 +2,7 @@ plugins {
     id("com.android.application")
     kotlin("android")
     kotlin("kapt")
-    id("com.google.devtools.ksp").version("1.7.10-1.0.6")
+    id("com.google.devtools.ksp").version("1.7.20-1.0.7")
     id("com.google.android.gms.oss-licenses-plugin")
 }
 
@@ -18,8 +18,8 @@ android {
         applicationId = "com.anod.appwatcher"
         minSdk = 27
         targetSdk = 33
-        versionCode = 15102
-        versionName = "1.5.1"
+        versionCode = 15200
+        versionName = "1.5.2"
         resValue("string", "content_authority", "com.anod.appwatcher")
 
         javaCompileOptions {
@@ -65,13 +65,6 @@ android {
         }
     }
 
-    lint {
-        disable.addAll(listOf("InvalidPackage", "MissingTranslation"))
-        informational.add("DuplicatePlatformClasses")
-        checkReleaseBuilds = true
-        abortOnError = true
-    }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -98,7 +91,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.3.1"
+        kotlinCompilerExtensionVersion = "1.3.2"
     }
     namespace = "com.anod.appwatcher"
 }
@@ -112,25 +105,25 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.7.1")
     implementation("androidx.core:core:1.9.0")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
-    implementation("androidx.fragment:fragment-ktx:1.5.3")
+    implementation("androidx.fragment:fragment-ktx:1.5.4")
     implementation("androidx.core:core-splashscreen:1.0.0")
 
-    implementation("androidx.paging:paging-runtime:3.2.0-alpha02")
-    implementation("androidx.paging:paging-compose:1.0.0-alpha16")
+    implementation("androidx.paging:paging-runtime:3.2.0-alpha03")
+    implementation("androidx.paging:paging-compose:1.0.0-alpha17")
 
     // Compose
-    implementation("androidx.activity:activity-compose:1.6.0")
-    implementation("androidx.compose.ui:ui-viewbinding:1.2.1")
-    implementation("com.google.accompanist:accompanist-pager:0.25.1")
-    implementation("com.google.accompanist:accompanist-flowlayout:0.25.1")
-    implementation("com.google.accompanist:accompanist-swiperefresh:0.25.1")
+    implementation("androidx.activity:activity-compose:1.6.1")
+    implementation("androidx.compose.ui:ui-viewbinding:1.3.0")
+    implementation("com.google.accompanist:accompanist-pager:0.27.0")
+    implementation("com.google.accompanist:accompanist-flowlayout:0.27.0")
+    implementation("com.google.accompanist:accompanist-swiperefresh:0.27.0")
 
     // Coil
     implementation("io.coil-kt:coil-base:2.2.2")
     implementation("io.coil-kt:coil-compose-base:2.2.2")
 
     // Google
-    implementation("com.google.android.material:material:1.6.1")
+    implementation("com.google.android.material:material:1.7.0")
     implementation("com.google.android.gms:play-services-oss-licenses:17.0.0")
     implementation("com.google.android.gms:play-services-identity:18.0.1")
     implementation("com.google.android.gms:play-services-auth:20.3.0")
@@ -142,8 +135,8 @@ dependencies {
         exclude(group = "commons-logging")
     }
 
-    implementation("com.google.firebase:firebase-analytics:21.1.1")
-    implementation("com.google.firebase:firebase-crashlytics:18.2.13")
+    implementation("com.google.firebase:firebase-analytics:21.2.0")
+    implementation("com.google.firebase:firebase-crashlytics:18.3.1")
 
     // 3rd party
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
@@ -162,9 +155,9 @@ dependencies {
     ksp("androidx.room:room-compiler:2.4.3")
 
     // Kotlin
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.7.10")
+    implementation(libs.coroutines.core)
+    implementation(libs.coroutines.android)
+    implementation(libs.kotlin.stdlib)
 
     testImplementation("junit:junit:4.13.2")
 
