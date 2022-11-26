@@ -6,11 +6,6 @@ plugins {
     id("com.google.android.gms.oss-licenses-plugin")
 }
 
-repositories {
-    mavenCentral()
-    google()
-}
-
 android {
     compileSdk = 33
 
@@ -18,7 +13,7 @@ android {
         applicationId = "com.anod.appwatcher"
         minSdk = 27
         targetSdk = 33
-        versionCode = 15300
+        versionCode = 15301
         versionName = "1.5.3"
         resValue("string", "content_authority", "com.anod.appwatcher")
 
@@ -113,7 +108,7 @@ dependencies {
 
     // Compose
     implementation("androidx.activity:activity-compose:1.6.1")
-    implementation("androidx.compose.ui:ui-viewbinding:1.3.0")
+    implementation("androidx.compose.ui:ui-viewbinding:1.3.1")
     implementation("com.google.accompanist:accompanist-pager:0.27.0")
     implementation("com.google.accompanist:accompanist-flowlayout:0.27.0")
     implementation("com.google.accompanist:accompanist-swiperefresh:0.27.0")

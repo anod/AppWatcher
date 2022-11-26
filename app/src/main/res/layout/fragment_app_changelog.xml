@@ -70,9 +70,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="left"
-            android:layout_marginBottom="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="60dp"
             android:layout_marginStart="16dp"
             android:drawableLeft="@drawable/ic_stat_communication_stay_primary_portrait"
             android:drawablePadding="4dp"
@@ -120,17 +120,18 @@
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/playStoreButton"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="right"
         android:layout_marginBottom="16dp"
         android:layout_marginRight="16dp"
-        android:layout_marginTop="116dp"
-        android:src="@drawable/ic_play_arrow_black_48dp"
+        android:layout_marginTop="114dp"
+        app:srcCompat="@drawable/ic_play_arrow_black_48dp"
         android:contentDescription="@string/open_play_store"
         app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed"
         app:backgroundTint="@color/alwaysWhite"
         app:elevation="1dp"
+        app:fabCustomSize="40dp"
         app:fabSize="mini" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
