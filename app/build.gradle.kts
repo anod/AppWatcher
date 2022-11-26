@@ -13,8 +13,8 @@ android {
         applicationId = "com.anod.appwatcher"
         minSdk = 27
         targetSdk = 33
-        versionCode = 15301
-        versionName = "1.5.3"
+        versionCode = 15400
+        versionName = "1.5.4"
         resValue("string", "content_authority", "com.anod.appwatcher")
 
         javaCompileOptions {
@@ -109,9 +109,9 @@ dependencies {
     // Compose
     implementation("androidx.activity:activity-compose:1.6.1")
     implementation("androidx.compose.ui:ui-viewbinding:1.3.1")
-    implementation("com.google.accompanist:accompanist-pager:0.27.0")
-    implementation("com.google.accompanist:accompanist-flowlayout:0.27.0")
-    implementation("com.google.accompanist:accompanist-swiperefresh:0.27.0")
+    implementation("com.google.accompanist:accompanist-pager:0.27.1")
+    implementation("com.google.accompanist:accompanist-flowlayout:0.27.1")
+    implementation("com.google.accompanist:accompanist-swiperefresh:0.27.1")
 
     // Coil
     implementation("io.coil-kt:coil-base:2.2.2")
@@ -121,7 +121,7 @@ dependencies {
     implementation("com.google.android.material:material:1.7.0")
     implementation("com.google.android.gms:play-services-oss-licenses:17.0.0")
     implementation("com.google.android.gms:play-services-identity:18.0.1")
-    implementation("com.google.android.gms:play-services-auth:20.3.0")
+    implementation("com.google.android.gms:play-services-auth:20.4.0")
 
     implementation("com.google.api-client:google-api-client:1.33.0")
     implementation("com.google.api-client:google-api-client-android:1.33.0")
@@ -131,7 +131,7 @@ dependencies {
     }
 
     implementation("com.google.firebase:firebase-analytics:21.2.0")
-    implementation("com.google.firebase:firebase-crashlytics:18.3.1")
+    implementation("com.google.firebase:firebase-crashlytics:18.3.2")
 
     // 3rd party
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
@@ -165,7 +165,7 @@ dependencies {
     implementation(project(":lib:permissions"))
     implementation(project(":playstore"))
 
-    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.9.1")
+    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.10")
 }
 
 // ADD THIS AT THE BOTTOM
