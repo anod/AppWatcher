@@ -182,14 +182,6 @@
         <item name="android:statusBarColor">?attr/colorSurface</item>
     </style>
 
-    <style name="AppTheme.Main.LightActionBar" parent="AppTheme.Main">
-        <item name="android:actionBarTheme">@style/AppTheme.ActionBar.LightBackground</item>
-    </style>
-
-    <style name="AppTheme.Main.DarkActionBar" parent="AppTheme.Main">
-        <item name="android:actionBarTheme">@style/AppTheme.ActionBar.DarkBackground</item>
-    </style>
-
     <style name="AppTheme.Black" parent="AppTheme.Base">
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@color/alwaysBlack</item>
@@ -226,14 +218,6 @@
         <item name="colorPreferenceBackground">@android:color/black</item>
     </style>
 
-    <style name="AppTheme.Black.LightActionBar" parent="AppTheme.Black">
-        <item name="android:actionBarTheme">@style/AppTheme.ActionBar.LightBackground</item>
-    </style>
-
-    <style name="AppTheme.Black.DarkActionBar" parent="AppTheme.Black">
-        <item name="android:actionBarTheme">@style/AppTheme.ActionBar.DarkBackground</item>
-    </style>
-
     <style name="AppTheme.Splash" parent="Theme.SplashScreen.IconBackground">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_foreground</item>
         <item name="windowSplashScreenIconBackgroundColor">@color/md_primary</item>
@@ -243,16 +227,6 @@
     <style name="AlertDialog" parent="@style/Theme.Material3.DayNight.Dialog.Alert" />
 
     <style name="AppTheme.ActionBar" />
-
-    <style name="AppTheme.ActionBar.LightBackground" parent="@style/ThemeOverlay.MaterialComponents.ActionBar.Primary">
-        <item name="android:textColorPrimary">@color/alwaysBlack</item>
-        <item name="colorControlNormal">@color/alwaysBlack</item>
-    </style>
-
-    <style name="AppTheme.ActionBar.DarkBackground" parent="@style/ThemeOverlay.MaterialComponents.ActionBar.Primary">
-        <item name="android:textColorPrimary">@color/alwaysWhite</item>
-        <item name="colorControlNormal">@color/alwaysWhite</item>
-    </style>
 
     <style name="AppTheme.PopupMenu" />
 

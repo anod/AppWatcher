@@ -37,7 +37,7 @@ import org.koin.java.KoinJavaComponent
 @Composable
 fun SettingsScreen(screenState: SettingsViewState, onEvent: (SettingsViewEvent) -> Unit, prefs: Preferences = KoinJavaComponent.getKoin().get()) {
 
-    val exportDocumentRequest = rememberLauncherForActivityResult(contract = CreateDocument()) { uri ->
+    val exportDocumentRequest = rememberLauncherForActivityResult(contract = CreateDocument("application/json")) { uri ->
         if (uri == null) {
             AppLog.d("Create document cancelled")
         } else {
@@ -131,7 +131,6 @@ fun SettingsScreen(screenState: SettingsViewState, onEvent: (SettingsViewEvent) 
                             when (item.key) {
                                 "export" -> exportDocumentRequest.launch(
                                         CreateDocument.Args(
-                                                "application/json",
                                                 "appwatcher-" + DbBackupManager.generateFileName(),
                                                 Uri.parse(DbBackupManager.defaultBackupDir.absolutePath),
                                         )

@@ -39,12 +39,13 @@ fun WishListScreen(
     Scaffold(
             topBar = {
                 SearchTopBar(
-                        title = stringResource(id = R.string.wishlist),
-                        searchQuery = screenState.nameFilter,
-                        onNavigation = { onEvent(WishListEvent.OnBackPress) },
-                        onValueChange = { onEvent(WishListEvent.OnNameFilter(it)) },
-                        onSearchAction = { showSearchView = false },
-                        showSearch = showSearchView
+                    title = stringResource(id = R.string.wishlist),
+                    searchQuery = screenState.nameFilter,
+                    hideSearchOnBack = false,
+                    onNavigation = { onEvent(WishListEvent.OnBackPress) },
+                    onValueChange = { onEvent(WishListEvent.OnNameFilter(it)) },
+                    onSearchAction = { showSearchView = false },
+                    showSearch = showSearchView
                 )
             }
     ) { paddingValues ->

@@ -33,6 +33,7 @@ fun SearchTopBar(
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
     searchQuery: String = "",
     showSearch: Boolean = false,
+    hideSearchOnBack: Boolean = true,
     initialSearchFocus: Boolean = false,
     onValueChange: (String) -> Unit = { },
     onSearchAction: (String) -> Unit = { },
@@ -66,7 +67,11 @@ fun SearchTopBar(
         navigationIcon = {
             IconButton(onClick = {
                 if (showSearchView) {
-                    showSearchView = false
+                    if (hideSearchOnBack) {
+                        showSearchView = false
+                    } else {
+                        onNavigation()
+                    }
                 } else {
                     onNavigation()
                 }

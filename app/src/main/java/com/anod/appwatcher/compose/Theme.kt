@@ -168,6 +168,7 @@ fun AppTheme(
             (view.context as Activity).window.statusBarColor = statusBarColor
             (view.context as Activity).window.navigationBarColor = colorScheme.surface.toArgb()
             ViewCompat.getWindowInsetsController(view)?.isAppearanceLightStatusBars = isAppearanceLightStatusBars
+            ViewCompat.getWindowInsetsController(view)?.isAppearanceLightNavigationBars = isAppearanceLightStatusBars
         }
     }
 

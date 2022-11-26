@@ -35,17 +35,17 @@ fun WatchListTopBar(
     var topBarSortMenu by remember { mutableStateOf(false) }
 
     SearchTopBar(
-            title = title,
-            subtitle = subtitle,
-            searchQuery = filterQuery,
-            showSearch = showSearchView,
-            initialSearchFocus = true,
-            containerColor = containerColor,
-            contentColor = contentColor,
-            onValueChange = { onEvent(WatchListSharedStateEvent.FilterByTitle(query = it)) },
-            onSearchAction = { onEvent(WatchListSharedStateEvent.OnSearch(it)) },
-            onNavigation = { onEvent(WatchListSharedStateEvent.OnBackPressed) },
-            actions = {
+        title = title,
+        subtitle = subtitle,
+        searchQuery = filterQuery,
+        showSearch = showSearchView,
+        initialSearchFocus = true,
+        containerColor = containerColor,
+        contentColor = contentColor,
+        onValueChange = { onEvent(WatchListSharedStateEvent.FilterByTitle(query = it)) },
+        onSearchAction = { onEvent(WatchListSharedStateEvent.OnSearch(it)) },
+        onNavigation = { onEvent(WatchListSharedStateEvent.OnBackPressed) },
+        actions = {
 
                 visibleActions()
 

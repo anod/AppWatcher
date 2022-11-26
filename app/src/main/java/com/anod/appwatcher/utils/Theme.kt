@@ -23,27 +23,6 @@ class Theme(private val context: Context, private val prefs: Preferences) {
             return R.style.AppTheme_Main
         }
 
-    val themeLightActionBar: Int
-        get() {
-            if (isNightMode) {
-                if (prefs.theme == Preferences.THEME_BLACK) {
-                    return R.style.AppTheme_Black_LightActionBar
-                }
-            }
-            return R.style.AppTheme_Main_LightActionBar
-        }
-
-    val themeDarkActionBar: Int
-        get() {
-            if (isNightMode) {
-                if (prefs.theme == Preferences.THEME_BLACK) {
-                    return R.style.AppTheme_Black
-                }
-                R.style.AppTheme_Main
-            }
-            return R.style.AppTheme_Main_DarkActionBar
-        }
-
     val colors: CustomThemeColors
         get() = isNightMode.let { isNightMode ->
             if (prefs.theme == Preferences.THEME_BLACK)

@@ -15,6 +15,9 @@ import com.anod.appwatcher.accounts.AccountSelectionResult
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.tags.TagSnackbar
+import com.anod.appwatcher.tags.TagsListFragment
+import com.anod.appwatcher.utils.Theme
+import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.DialogMessage
 import kotlinx.coroutines.launch
 
@@ -35,10 +38,12 @@ open class SearchComposeActivity : BaseComposeActivity() {
             ) {
                 val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
                 SearchResultsScreen(
-                        screenState = screenState,
-                        onEvent = { viewModel.handleEvent(it) },
-                        installedApps = viewModel.installedApps,
-                        pagingDataFlow = { viewModel.pagingData }
+                    screenState = screenState,
+                    onEvent = { viewModel.handleEvent(it) },
+                    installedApps = viewModel.installedApps,
+                    pagingDataFlow = { viewModel.pagingData },
+                    viewActions = viewModel.viewActions,
+                    onActivityAction = { onActivityAction(it) }
                 )
             }
         }
@@ -53,10 +58,6 @@ open class SearchComposeActivity : BaseComposeActivity() {
             }
         }
 
-        lifecycleScope.launch {
-            viewModel.viewActions.collect { onViewAction(it) }
-        }
-
         lifecycleScope.launchWhenCreated {
             hingeDevice.layout.collect {
                 viewModel.handleEvent(SearchViewEvent.SetWideLayout(it))
@@ -64,44 +65,24 @@ open class SearchComposeActivity : BaseComposeActivity() {
         }
     }
 
-    private fun onViewAction(action: SearchViewAction) {
+    private fun onActivityAction(action: SearchActivityAction) {
         when (action) {
-            SearchViewAction.ShowAccountDialog -> accountSelectionDialog.show()
-            is SearchViewAction.ShowToast -> {
-                if (action.resId != 0) {
-                    Toast.makeText(this, action.resId, action.duration).show()
-                } else {
-                    Toast.makeText(this, action.text, action.duration).show()
-                }
-                if (action.finish) {
-                    finish()
-                }
-            }
-            is SearchViewAction.StartActivity -> {
+            SearchActivityAction.ShowAccountDialog -> accountSelectionDialog.show()
+            is SearchActivityAction.StartActivity -> {
                 startActivity(action.intent)
                 if (action.finish) {
                     finish()
                 }
             }
-            is SearchViewAction.ShowTagSnackbar -> {
-                TagSnackbar.make(
-                        findViewById<View>(android.R.id.content).rootView,
-                        action.info,
-                        finishActivity = action.isShareSource,
-                        this,
-                        viewModel.prefs
-                ).show()
+            SearchActivityAction.OnBackPressed -> onBackPressed()
+            SearchActivityAction.FinishActivity -> finish()
+            is SearchActivityAction.ShowTagList -> {
+                val targetTheme = Theme(this, viewModel.prefs)
+                startActivity(TagsListFragment.intent(this, targetTheme.theme, targetTheme.colors, action.info))
+                if (action.finish) {
+                    finish()
+                }
             }
-            is SearchViewAction.AlreadyWatchedNotice -> {
-                DialogMessage(this, R.style.AlertDialog, R.string.already_exist, R.string.delete_existing_item) { builder ->
-                    builder.setPositiveButton(R.string.delete) { _, _ ->
-                        viewModel.handleEvent(SearchViewEvent.Delete(action.document))
-                    }
-                    builder.setNegativeButton(android.R.string.cancel) { _, _ ->
-                    }
-                }.show()
-            }
-            SearchViewAction.OnBackPressed -> onBackPressed()
         }
     }
 

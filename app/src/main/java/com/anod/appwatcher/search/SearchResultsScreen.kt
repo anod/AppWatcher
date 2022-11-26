@@ -5,7 +5,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -22,6 +26,7 @@ import coil.ImageLoader
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.SearchTopBar
+import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.AppIconLoader
 import finsky.api.model.Document
 import finsky.protos.AppDetails
@@ -34,28 +39,38 @@ import org.koin.java.KoinJavaComponent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchResultsScreen(screenState: SearchViewState, pagingDataFlow: () -> Flow<PagingData<Document>>, onEvent: (SearchViewEvent) -> Unit, installedApps: InstalledApps, appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get()) {
+fun SearchResultsScreen(
+    screenState: SearchViewState,
+    pagingDataFlow: () -> Flow<PagingData<Document>>,
+    onEvent: (SearchViewEvent) -> Unit,
+    installedApps: InstalledApps,
+    appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get(),
+    viewActions: Flow<SearchViewAction>,
+    onActivityAction: (SearchActivityAction) -> Unit = { }
+) {
+    val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
             topBar = {
                 SearchTopBar(
-                        title = stringResource(id = R.string.search),
-                        showSearch = true,
-                        onValueChange = { onEvent(SearchViewEvent.SearchQueryChange(query = it)) },
-                        onSearchAction = { onEvent(SearchViewEvent.OnSearchEnter(it)) },
-                        initialSearchFocus = !screenState.initiateSearch,
-                        searchQuery = screenState.searchQuery,
-                        onNavigation = { onEvent(SearchViewEvent.OnBackPressed) }
+                    title = stringResource(id = R.string.search),
+                    showSearch = true,
+                    hideSearchOnBack = false,
+                    onValueChange = { onEvent(SearchViewEvent.SearchQueryChange(query = it)) },
+                    onSearchAction = { onEvent(SearchViewEvent.OnSearchEnter(it)) },
+                    initialSearchFocus = !screenState.initiateSearch,
+                    searchQuery = screenState.searchQuery,
+                    onNavigation = { onEvent(SearchViewEvent.OnBackPressed) }
                 )
             }
     ) { paddingValues ->
         val searchStatus = screenState.searchStatus
         Box(
                 modifier = Modifier
-                        .padding(paddingValues)
-                        .fillMaxSize(),
+                    .padding(paddingValues)
+                    .fillMaxSize(),
                 contentAlignment = if (searchStatus is SearchStatus.DetailsAvailable || searchStatus is SearchStatus.SearchList) Alignment.TopStart else Alignment.Center
         ) {
             when (searchStatus) {
@@ -84,14 +99,69 @@ fun SearchResultsScreen(screenState: SearchViewState, pagingDataFlow: () -> Flow
             }
         }
     }
+
+    var deleteNoticeDocument: Document? by remember { mutableStateOf(null) }
+    LaunchedEffect(key1 = viewActions) {
+        viewActions.collect { action ->
+            when (action) {
+                SearchViewAction.ShowAccountDialog -> onActivityAction(SearchActivityAction.ShowAccountDialog)
+                is SearchViewAction.ShowToast -> {
+                    snackbarHostState.showSnackbar(message = action.message, duration = action.duration)
+                    if (action.finish) {
+                        onActivityAction(SearchActivityAction.FinishActivity)
+                    }
+                }
+                is SearchViewAction.StartActivity -> onActivityAction(SearchActivityAction.StartActivity(action.intent, action.finish))
+                is SearchViewAction.ShowTagSnackbar -> {
+                    val finishActivity = action.isShareSource
+                    val result = snackbarHostState.showSnackbar(TagSnackbar.Visuals(action.info, context))
+                    if (result == SnackbarResult.ActionPerformed) {
+                        onActivityAction(SearchActivityAction.ShowTagList(action.info, finishActivity))
+                    } else if (finishActivity) {
+                        onActivityAction(SearchActivityAction.FinishActivity)
+                    }
+                }
+                is SearchViewAction.AlreadyWatchedNotice -> {
+                    deleteNoticeDocument = action.document
+                }
+                SearchViewAction.OnBackPressed -> onActivityAction(SearchActivityAction.OnBackPressed)
+            }
+        }
+    }
+
+    if (deleteNoticeDocument != null) {
+        DeleteNotice(deleteNoticeDocument!!, onEvent = onEvent, onDismissRequest = { deleteNoticeDocument = null })
+    }
+}
+
+@Composable
+fun DeleteNotice(document: Document, onEvent: (SearchViewEvent) -> Unit, onDismissRequest: () -> Unit) {
+    AlertDialog(
+        title = { Text(text = stringResource(id = R.string.already_exist)) },
+        text = { Text(text = stringResource(id = R.string.delete_existing_item)) },
+        onDismissRequest = onDismissRequest,
+        confirmButton = {
+            Button(onClick = {
+                onEvent(SearchViewEvent.Delete(document))
+                onDismissRequest()
+            }) {
+                Text(text = stringResource(id = R.string.delete))
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismissRequest) {
+                Text(text = stringResource(id = android.R.string.cancel))
+            }
+        }
+    )
 }
 
 @Composable
 fun EmptyResult(query: String) {
     Box(
             modifier = Modifier
-                    .fillMaxSize()
-                    .padding(start = 32.dp, end = 32.dp),
+                .fillMaxSize()
+                .padding(start = 32.dp, end = 32.dp),
             contentAlignment = Alignment.Center
     ) {
         Text(
@@ -104,9 +174,11 @@ fun EmptyResult(query: String) {
 @Composable
 fun RetryButton(onRetryClick: () -> Unit, fillMaxSize: Boolean = false) {
     Column(
-            modifier = Modifier.apply {
-                if (fillMaxSize) fillMaxSize()
-            }.padding(start = 32.dp, end = 32.dp),
+            modifier = Modifier
+                .apply {
+                    if (fillMaxSize) fillMaxSize()
+                }
+                .padding(start = 32.dp, end = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -139,8 +211,8 @@ fun SearchSingleResult(document: Document, screenState: SearchViewState, onEvent
 fun SearchResultsPage(items: LazyPagingItems<Document>, screenState: SearchViewState, onEvent: (SearchViewEvent) -> Unit, installedApps: InstalledApps, appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get()) {
     LazyColumn(
             modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = 16.dp),
+                .fillMaxSize()
+                .padding(top = 16.dp),
     ) {
         items(
                 items = items,
@@ -161,9 +233,9 @@ fun SearchResultsPage(items: LazyPagingItems<Document>, screenState: SearchViewS
                 )
             } else {
                 Box(modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp)
-                        .background(MaterialTheme.colorScheme.inverseOnSurface))
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .background(MaterialTheme.colorScheme.inverseOnSurface))
 
             }
         }
@@ -179,11 +251,12 @@ fun LoadingStatePreview() {
     )
     AppTheme {
         SearchResultsScreen(
-                screenState = SearchViewState(searchStatus = SearchStatus.Loading),
-                pagingDataFlow = { flowOf() },
-                onEvent = { },
-                installedApps = InstalledApps.StaticMap(emptyMap()),
-                appIconLoader = appIconLoader
+            screenState = SearchViewState(searchStatus = SearchStatus.Loading),
+            pagingDataFlow = { flowOf() },
+            onEvent = { },
+            installedApps = InstalledApps.StaticMap(emptyMap()),
+            appIconLoader = appIconLoader,
+            viewActions = flowOf()
         )
     }
 }
@@ -197,11 +270,12 @@ fun EmptyStatePreview() {
     )
     AppTheme {
         SearchResultsScreen(
-                screenState = SearchViewState(searchStatus = SearchStatus.NoResults(query = "")),
-                pagingDataFlow = { flowOf() },
-                onEvent = { },
-                installedApps = InstalledApps.StaticMap(emptyMap()),
-                appIconLoader = appIconLoader
+            screenState = SearchViewState(searchStatus = SearchStatus.NoResults(query = "")),
+            pagingDataFlow = { flowOf() },
+            onEvent = { },
+            installedApps = InstalledApps.StaticMap(emptyMap()),
+            appIconLoader = appIconLoader,
+            viewActions = flowOf()
         )
     }
 }
@@ -215,11 +289,12 @@ fun RetryStatePreview() {
     )
     AppTheme {
         SearchResultsScreen(
-                screenState = SearchViewState(searchStatus = SearchStatus.Error("")),
-                pagingDataFlow = { flowOf() },
-                onEvent = { },
-                installedApps = InstalledApps.StaticMap(emptyMap()),
-                appIconLoader = appIconLoader
+            screenState = SearchViewState(searchStatus = SearchStatus.Error("")),
+            pagingDataFlow = { flowOf() },
+            onEvent = { },
+            installedApps = InstalledApps.StaticMap(emptyMap()),
+            appIconLoader = appIconLoader,
+            viewActions = flowOf()
         )
     }
 }
@@ -249,13 +324,14 @@ fun SearchSingleResultPreview() {
     )
     AppTheme {
         SearchResultsScreen(
-                screenState = SearchViewState(searchQuery = "info.anodsplace.appwatcher", searchStatus = SearchStatus.DetailsAvailable(document = doc)),
-                pagingDataFlow = { flowOf() },
-                onEvent = { },
-                installedApps = InstalledApps.StaticMap(mapOf(
-                        "info.anodsplace.appwatcher" to InstalledApps.Info(versionCode = 15000, versionName = "1.5.0")
-                )),
-                appIconLoader = appIconLoader
+            screenState = SearchViewState(searchQuery = "info.anodsplace.appwatcher", searchStatus = SearchStatus.DetailsAvailable(document = doc)),
+            pagingDataFlow = { flowOf() },
+            onEvent = { },
+            installedApps = InstalledApps.StaticMap(mapOf(
+                    "info.anodsplace.appwatcher" to InstalledApps.Info(versionCode = 15000, versionName = "1.5.0")
+            )),
+            appIconLoader = appIconLoader,
+            viewActions = flowOf()
         )
     }
 }
