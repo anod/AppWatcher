@@ -57,8 +57,7 @@ object TagSnackbar {
 
     internal class TagAction(private val activity: Activity, private val app: AppInfo, private val prefs: Preferences) : View.OnClickListener {
         override fun onClick(v: View) {
-            val theme = Theme(activity, prefs)
-            this.activity.startActivity(TagsListFragment.intent(activity, theme.theme, theme.colors, app))
+            this.activity.startActivity(TagsListFragment.intent(activity, prefs, app))
         }
     }
 

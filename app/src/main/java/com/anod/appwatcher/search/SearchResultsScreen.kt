@@ -25,6 +25,7 @@ import androidx.paging.compose.items
 import coil.ImageLoader
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
+import com.anod.appwatcher.compose.DeleteNotice
 import com.anod.appwatcher.compose.SearchTopBar
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.AppIconLoader
@@ -130,31 +131,17 @@ fun SearchResultsScreen(
     }
 
     if (deleteNoticeDocument != null) {
-        DeleteNotice(deleteNoticeDocument!!, onEvent = onEvent, onDismissRequest = { deleteNoticeDocument = null })
+        DeleteNotice(
+            onDelete = {
+                onEvent(SearchViewEvent.Delete(deleteNoticeDocument!!))
+                deleteNoticeDocument = null
+            },
+            onDismissRequest = { deleteNoticeDocument = null }
+        )
     }
 }
 
-@Composable
-fun DeleteNotice(document: Document, onEvent: (SearchViewEvent) -> Unit, onDismissRequest: () -> Unit) {
-    AlertDialog(
-        title = { Text(text = stringResource(id = R.string.already_exist)) },
-        text = { Text(text = stringResource(id = R.string.delete_existing_item)) },
-        onDismissRequest = onDismissRequest,
-        confirmButton = {
-            Button(onClick = {
-                onEvent(SearchViewEvent.Delete(document))
-                onDismissRequest()
-            }) {
-                Text(text = stringResource(id = R.string.delete))
-            }
-        },
-        dismissButton = {
-            Button(onClick = onDismissRequest) {
-                Text(text = stringResource(id = android.R.string.cancel))
-            }
-        }
-    )
-}
+
 
 @Composable
 fun EmptyResult(query: String) {

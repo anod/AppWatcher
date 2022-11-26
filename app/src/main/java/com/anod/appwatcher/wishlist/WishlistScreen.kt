@@ -7,6 +7,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -16,9 +17,13 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import com.anod.appwatcher.R
+import com.anod.appwatcher.compose.DeleteNotice
 import com.anod.appwatcher.compose.SearchTopBar
 import com.anod.appwatcher.search.MarketAppItem
 import com.anod.appwatcher.search.RetryButton
+import com.anod.appwatcher.search.SearchActivityAction
+import com.anod.appwatcher.search.SearchViewEvent
+import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.AppIconLoader
 import finsky.api.model.Document
 import info.anodsplace.applog.AppLog
@@ -29,14 +34,19 @@ import org.koin.java.KoinJavaComponent
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WishListScreen(
-        screenState: WishListState,
-        pagingDataFlow: Flow<PagingData<Document>>,
-        onEvent: (WishListEvent) -> Unit,
-        installedApps: InstalledApps,
-        appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get()
+    screenState: WishListState,
+    pagingDataFlow: Flow<PagingData<Document>>,
+    onEvent: (WishListEvent) -> Unit,
+    installedApps: InstalledApps,
+    appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get(),
+    viewActions: Flow<WishListAction>,
+    onActivityAction: (WishListActivityAction) -> Unit
 ) {
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
     var showSearchView by remember { mutableStateOf(false) }
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
             topBar = {
                 SearchTopBar(
                     title = stringResource(id = R.string.wishlist),
@@ -51,8 +61,8 @@ fun WishListScreen(
     ) { paddingValues ->
         Box(
                 modifier = Modifier
-                        .padding(paddingValues)
-                        .fillMaxSize(),
+                    .padding(paddingValues)
+                    .fillMaxSize(),
         ) {
             val items = pagingDataFlow.collectAsLazyPagingItems()
             when (items.loadState.refresh) {
@@ -83,15 +93,42 @@ fun WishListScreen(
             }
         }
     }
+
+    var deleteNoticeDocument: Document? by remember { mutableStateOf(null) }
+    LaunchedEffect(key1 = viewActions) {
+        viewActions.collect { action ->
+            when (action) {
+                is WishListAction.AlreadyWatchedNotice -> {
+                    deleteNoticeDocument = action.document
+                }
+                is WishListAction.ShowTagSnackbar -> {
+                    val result = snackbarHostState.showSnackbar(TagSnackbar.Visuals(action.info, context))
+                    if (result == SnackbarResult.ActionPerformed) {
+                        onActivityAction(WishListActivityAction.ShowTagList(action.info))
+                    }
+                }
+                WishListAction.OnBackPress -> onActivityAction(WishListActivityAction.OnBackPress)
+            }
+        }
+    }
+
+    if (deleteNoticeDocument != null) {
+        DeleteNotice(
+            onDelete = {
+                onEvent(WishListEvent.Delete(deleteNoticeDocument!!))
+                deleteNoticeDocument = null
+            },
+            onDismissRequest = { deleteNoticeDocument = null }
+        )
+    }
 }
 
 @Composable
 fun WishlistResults(items: LazyPagingItems<Document>, screenState: WishListState, onEvent: (WishListEvent) -> Unit, installedApps: InstalledApps, appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get()) {
-    AppLog.d("Recomposition: ${items.hashCode()}, ${screenState.hashCode()}, ${installedApps.hashCode()}, ${appIconLoader.hashCode()}")
     LazyColumn(
             modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = 16.dp),
+                .fillMaxSize()
+                .padding(top = 16.dp),
     ) {
         items(
                 items = items,
@@ -112,9 +149,9 @@ fun WishlistResults(items: LazyPagingItems<Document>, screenState: WishListState
                 )
             } else {
                 Box(modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp)
-                        .background(MaterialTheme.colorScheme.inverseOnSurface))
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .background(MaterialTheme.colorScheme.inverseOnSurface))
 
             }
         }
@@ -125,8 +162,8 @@ fun WishlistResults(items: LazyPagingItems<Document>, screenState: WishListState
 fun WishlistEmpty() {
     Box(
             modifier = Modifier
-                    .fillMaxSize()
-                    .padding(start = 32.dp, end = 32.dp),
+                .fillMaxSize()
+                .padding(start = 32.dp, end = 32.dp),
             contentAlignment = Alignment.Center
     ) {
         Text(

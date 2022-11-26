@@ -4,20 +4,16 @@ import android.accounts.Account
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.lifecycleScope
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
-import com.anod.appwatcher.tags.TagSnackbar
+import com.anod.appwatcher.tags.TagsListFragment
 import com.anod.appwatcher.utils.prefs
-import info.anodsplace.framework.app.DialogMessage
-import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 
 /**
@@ -48,34 +44,21 @@ class WishListActivity : BaseComposeActivity(), KoinComponent {
             ) {
                 val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
                 WishListScreen(
-                        screenState = screenState,
-                        onEvent = { viewModel.handleEvent(it) },
-                        installedApps = viewModel.installedApps,
-                        pagingDataFlow = viewModel.pagingData
+                    screenState = screenState,
+                    onEvent = { viewModel.handleEvent(it) },
+                    installedApps = viewModel.installedApps,
+                    pagingDataFlow = viewModel.pagingData,
+                    viewActions = viewModel.viewActions,
+                    onActivityAction = { onActivityAction(it) }
                 )
             }
         }
-
-        lifecycleScope.launch {
-            viewModel.viewActions.collect { onViewAction(it) }
-        }
     }
 
-    private fun onViewAction(action: WishListAction) {
+    private fun onActivityAction(action: WishListActivityAction) {
         when (action) {
-            is WishListAction.AlreadyWatchedNotice -> {
-                DialogMessage(this, R.style.AlertDialog, R.string.already_exist, R.string.delete_existing_item) { builder ->
-                    builder.setPositiveButton(R.string.delete) { _, _ ->
-                        viewModel.handleEvent(WishListEvent.Delete(action.document))
-                    }
-                    builder.setNegativeButton(android.R.string.cancel) { _, _ ->
-                    }
-                }.show()
-            }
-            is WishListAction.ShowTagSnackbar -> {
-                TagSnackbar.make(findViewById<View>(android.R.id.content).rootView, action.info, false, this, viewModel.prefs).show()
-            }
-            WishListAction.OnBackPress -> onBackPressed()
+            WishListActivityAction.OnBackPress -> onBackPressed()
+            is WishListActivityAction.ShowTagList -> startActivity(TagsListFragment.intent(this, viewModel.prefs, action.info))
         }
     }
 

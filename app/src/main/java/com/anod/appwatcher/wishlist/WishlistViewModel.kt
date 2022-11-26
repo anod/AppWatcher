@@ -35,6 +35,11 @@ data class WishListState(
         val watchingPackages: List<String> = emptyList(),
 )
 
+sealed interface WishListActivityAction {
+    class ShowTagList(val info: AppInfo) : WishListActivityAction
+    object OnBackPress : WishListActivityAction
+}
+
 sealed interface WishListAction {
     class ShowTagSnackbar(val info: AppInfo) : WishListAction
     class AlreadyWatchedNotice(val document: Document) : WishListAction

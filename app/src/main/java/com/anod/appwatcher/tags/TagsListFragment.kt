@@ -17,6 +17,7 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.databinding.ActivityTagsEditorBinding
 import com.anod.appwatcher.model.AppInfo
+import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.utils.prefs
 import info.anodsplace.framework.app.CustomThemeColors
@@ -155,7 +156,11 @@ class TagsListFragment : Fragment(), View.OnClickListener, KoinComponent {
             override fun create() = TagsListFragment()
         }
 
-        fun intent(context: Context, themeRes: Int, themeColors: CustomThemeColors, app: AppInfo) = FragmentToolbarActivity.intent(
+        fun intent(context: Context, preferences: Preferences, app: AppInfo) = Theme(context, preferences).let { targetTheme ->
+            intent(context, targetTheme.theme, targetTheme.colors, app)
+        }
+
+        private fun intent(context: Context, themeRes: Int, themeColors: CustomThemeColors, app: AppInfo) = FragmentToolbarActivity.intent(
                 context,
                 Factory(),
                 Bundle().apply {

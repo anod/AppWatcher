@@ -77,8 +77,7 @@ open class SearchComposeActivity : BaseComposeActivity() {
             SearchActivityAction.OnBackPressed -> onBackPressed()
             SearchActivityAction.FinishActivity -> finish()
             is SearchActivityAction.ShowTagList -> {
-                val targetTheme = Theme(this, viewModel.prefs)
-                startActivity(TagsListFragment.intent(this, targetTheme.theme, targetTheme.colors, action.info))
+                startActivity(TagsListFragment.intent(this, viewModel.prefs, action.info))
                 if (action.finish) {
                     finish()
                 }
