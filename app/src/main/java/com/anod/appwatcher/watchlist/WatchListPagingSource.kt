@@ -22,7 +22,7 @@ class WatchListPagingSource(
         private val prefs: Preferences,
         private val packageManager: PackageManager,
         private val database: AppsDatabase,
-        private val installedApps: InstalledApps
+        private val installedApps: InstalledApps,
 ) : FilterablePagingSource() {
     private val itemFilter: AppListFilter = createFilter(config.filterId)
 

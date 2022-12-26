@@ -14,6 +14,6 @@ class SettingsUpgrade(val prefs: Preferences, val context: Context): UpgradeTask
         if (upgrade.oldVersionCode > 95) {
             return
         }
-        prefs.defaultMainFilterId = Filters.TAB_ALL
+        prefs.defaultMainFilterId = Filters.ALL
     }
 }

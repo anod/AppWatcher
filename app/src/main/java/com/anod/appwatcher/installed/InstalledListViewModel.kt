@@ -11,40 +11,40 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.parameter.parametersOf
 
-class InstalledViewModel(sortIndex: Int, pagingSourceConfig: WatchListPagingSource.Config) : WatchListViewModel(pagingSourceConfig), KoinComponent {
+class InstalledListViewModel(pagingSourceConfig: WatchListPagingSource.Config) : WatchListViewModel(pagingSourceConfig), KoinComponent {
 
-    class Factory(private val sortIndex: Int, private val pagingSourceConfig: WatchListPagingSource.Config) : ViewModelProvider.Factory {
+    class Factory(private val pagingSourceConfig: WatchListPagingSource.Config) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return InstalledViewModel(sortIndex, pagingSourceConfig) as T
+            return InstalledListViewModel(pagingSourceConfig) as T
         }
     }
 
     private val packageManager: PackageManager by inject()
-
-    val account: Account?
+    private val changelogAdapter: ChangelogAdapter by inject { parametersOf(viewModelScope) }
+    private val account: Account?
         get() = getKoin().getOrNull()
 
-    val changelogAdapter: ChangelogAdapter by inject { parametersOf(viewModelScope) }
-    var selectionMode = false
-    var sortId: Int = sortIndex
-        private set
-
-    fun changeSortId(sortId: Int, reload: Boolean) {
-        this.sortId = sortId
-        if (reload) {
-            emitAction(WatchListAction.Reload)
+    var sortId: Int = 0
+        set(value) {
+            field = value
+            (pagingSource as? InstalledPagingSource)?.sortId = value
         }
-    }
+    var selectionMode: Boolean = false
+        set(value) {
+            field = value
+            (pagingSource as? InstalledPagingSource)?.selectionMode = value
+        }
 
     override fun createPagingSource(): FilterablePagingSource {
-        return InstalledPagingSource(
+        val pagingSource =  InstalledPagingSource(
                 viewState.titleFilter,
-                sortIndex = sortId,
-                selectionMode = selectionMode,
                 changelogAdapter,
                 packageManager,
                 database
         )
+        pagingSource.sortId = sortId
+        pagingSource.selectionMode = selectionMode
+        return pagingSource
     }
 
     override fun createSectionHeaderFactory() = SectionHeaderFactory.Empty()

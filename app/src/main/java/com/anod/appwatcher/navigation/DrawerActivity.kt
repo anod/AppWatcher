@@ -25,7 +25,7 @@ import com.anod.appwatcher.accounts.AccountSelectionResult
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.database.entities.Tag
-import com.anod.appwatcher.installed.InstalledFragment
+import com.anod.appwatcher.installed.InstalledActivity
 import com.anod.appwatcher.tags.EditTagDialog
 import com.anod.appwatcher.tags.TagWatchListComposeActivity
 import com.anod.appwatcher.utils.*
@@ -213,11 +213,9 @@ abstract class DrawerActivity : ToolbarActivity(), KoinComponent {
                 return true
             }
             R.id.menu_act_installed -> {
-                startActivity(InstalledFragment.intent(
+                startActivity(InstalledActivity.intent(
                         false,
-                        this,
-                        themeRes,
-                        themeColors))
+                        this))
                 return true
             }
             R.id.menu_wishlist -> {

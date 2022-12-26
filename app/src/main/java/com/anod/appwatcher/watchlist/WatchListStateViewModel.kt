@@ -13,14 +13,18 @@ import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.installed.InstalledListSharedStateEvent
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.sync.UpdateCheck
 import com.anod.appwatcher.tags.AppsTagViewModel
 import com.anod.appwatcher.utils.BaseFlowViewModel
+import com.anod.appwatcher.utils.SyncProgress
 import com.anod.appwatcher.utils.appScope
+import com.anod.appwatcher.utils.getInt
 import com.anod.appwatcher.utils.networkConnection
 import com.anod.appwatcher.utils.prefs
+import com.anod.appwatcher.utils.syncProgressFlow
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.HingeDeviceLayout
 import kotlinx.coroutines.flow.Flow
@@ -51,6 +55,7 @@ sealed interface WatchListSharedStateEvent {
     class EditTag(val tag: Tag) : WatchListSharedStateEvent
     class OnSearch(val query: String) : WatchListSharedStateEvent
     class SelectApp(val app: App?) : WatchListSharedStateEvent
+    class UpdateSyncProgress(val syncProgress: SyncProgress) : WatchListSharedStateEvent
 }
 
 sealed interface WatchListSharedStateAction {
@@ -70,36 +75,17 @@ class WatchListStateViewModel(state: SavedStateHandle) : BaseFlowViewModel<Watch
     private val application: Application by inject()
     private val db: AppsDatabase by inject()
 
-    /**
-     * Receive notifications from UpdateCheck
-     */
-    private val syncFinishedReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            when (intent.action) {
-                UpdateCheck.syncProgress -> viewState = viewState.copy(listState = ListState.SyncStarted)
-                UpdateCheck.syncStop -> {
-                    val updatesCount = intent.getIntExtra(UpdateCheck.extrasUpdatesCount, 0)
-                    viewState = viewState.copy(listState = ListState.SyncStopped(updatesCount))
-                }
-                listChangedEvent -> viewState = viewState.copy(listState = ListState.Updated)
-            }
-        }
-    }
-
     init {
         viewState = WatchListSharedState(
                 tag = state[AppsTagViewModel.EXTRA_TAG] ?: Tag.empty,
                 sortId = prefs.sortIndex,
-                filterId = state.get<Any?>("tab_id")?.let { tabId ->
-                    (tabId as? Int) ?: (tabId as? String)?.toIntOrNull()
-                } ?: Filters.TAB_ALL,
+                filterId = state.getInt("tab_id", Filters.ALL),
         )
-        val filter = IntentFilter().apply {
-            addAction(UpdateCheck.syncProgress)
-            addAction(UpdateCheck.syncStop)
-            addAction(listChangedEvent)
+        viewModelScope.launch {
+            syncProgressFlow(application).collect {
+                handleEvent(WatchListSharedStateEvent.UpdateSyncProgress(syncProgress = it))
+            }
         }
-        application.registerReceiver(syncFinishedReceiver, filter)
 
         viewModelScope.launch {
             if (!viewState.tag.isEmpty) {
@@ -122,40 +108,7 @@ class WatchListStateViewModel(state: SavedStateHandle) : BaseFlowViewModel<Watch
             is WatchListSharedStateEvent.FilterByTitle -> viewState = viewState.copy(titleFilter = event.query)
             is WatchListSharedStateEvent.SetWideLayout -> viewState = viewState.copy(wideLayout = event.layout)
             is WatchListSharedStateEvent.ListEvent -> {
-                when (val listEvent = event.event) {
-                    is WatchListEvent.ItemClick -> {
-                        when (val item = listEvent.item) {
-                            is SectionItem.Header -> emitAction(WatchListSharedStateAction.ExpandSection(item.type))
-                            is SectionItem.App -> {
-                                if (viewState.wideLayout.isWideLayout) {
-                                    viewState = viewState.copy(selectedApp = item.appListItem.app)
-                                } else {
-                                    emitAction(WatchListSharedStateAction.OpenApp(item.appListItem.app, listEvent.index))
-                                }
-                            }
-                            is SectionItem.OnDevice -> emitAction(WatchListSharedStateAction.OpenApp(item.appListItem.app, listEvent.index))
-                            else -> {}
-                        }
-                    }
-                    is WatchListEvent.EmptyButton -> {
-                        when (listEvent.idx) {
-                            1 -> emitAction(WatchListSharedStateAction.SearchInStore)
-                            2 -> emitAction(WatchListSharedStateAction.ImportInstalled)
-                            3 -> emitAction(WatchListSharedStateAction.ShareFromStore)
-                        }
-                    }
-                    WatchListEvent.Refresh -> {
-                        val isRefreshing = (viewState.listState is ListState.SyncStarted)
-                        if (!isRefreshing) {
-                            val schedule = requestRefresh()
-                            appScope.launch {
-                                schedule.collect { }
-                            }
-                        }
-                    }
-                    is WatchListEvent.FilterByTitle -> {}
-                    WatchListEvent.Reload -> {}
-                }
+                handleListEvent(event.event)
             }
             is WatchListSharedStateEvent.AddAppToTag -> emitAction(WatchListSharedStateAction.AddAppToTag(event.tag))
             WatchListSharedStateEvent.OnBackPressed -> {
@@ -173,11 +126,56 @@ class WatchListStateViewModel(state: SavedStateHandle) : BaseFlowViewModel<Watch
             is WatchListSharedStateEvent.SelectApp -> {
                 viewState = viewState.copy(selectedApp = event.app)
             }
+            is WatchListSharedStateEvent.UpdateSyncProgress -> {
+                viewState = if (event.syncProgress.isRefreshing) {
+                    viewState.copy(listState = ListState.SyncStarted)
+                } else {
+                    viewState.copy(listState = ListState.SyncStopped(updatesCount = event.syncProgress.updatesCount))
+                }
+            }
         }
     }
 
-    override fun onCleared() {
-        application.unregisterReceiver(syncFinishedReceiver)
+    private fun handleListEvent(listEvent: WatchListEvent) {
+        when (listEvent) {
+            is WatchListEvent.ItemClick -> {
+                val app = when (val item = listEvent.item) {
+                    is SectionItem.Header -> {
+                        emitAction(WatchListSharedStateAction.ExpandSection(item.type))
+                        null
+                    }
+                    is SectionItem.App -> item.appListItem.app
+                    is SectionItem.OnDevice -> item.appListItem.app
+                    else -> null
+                }
+                if (app != null) {
+                    if (viewState.wideLayout.isWideLayout) {
+                        viewState = viewState.copy(selectedApp = app)
+                    } else {
+                        emitAction(WatchListSharedStateAction.OpenApp(app, listEvent.index))
+                    }
+                }
+            }
+            is WatchListEvent.EmptyButton -> {
+                when (listEvent.idx) {
+                    1 -> emitAction(WatchListSharedStateAction.SearchInStore)
+                    2 -> emitAction(WatchListSharedStateAction.ImportInstalled)
+                    3 -> emitAction(WatchListSharedStateAction.ShareFromStore)
+                }
+            }
+            WatchListEvent.Refresh -> {
+                val isRefreshing = (viewState.listState is ListState.SyncStarted)
+                if (!isRefreshing) {
+                    val schedule = requestRefresh()
+                    appScope.launch {
+                        schedule.collect { }
+                    }
+                }
+            }
+            is WatchListEvent.FilterByTitle -> {}
+            WatchListEvent.Reload -> {}
+            is WatchListEvent.ItemLongClick -> {}
+        }
     }
 
     fun requestRefresh(): Flow<Operation.State> {
@@ -193,9 +191,5 @@ class WatchListStateViewModel(state: SavedStateHandle) : BaseFlowViewModel<Watch
 
         viewState = viewState.copy(listState = ListState.SyncStarted)
         return SyncScheduler(application).execute()
-    }
-
-    companion object {
-        const val listChangedEvent = "com.anod.appwatcher.list.changed"
     }
 }

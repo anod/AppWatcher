@@ -195,6 +195,7 @@
     <string name="more">Больше</string>
     <string name="import_mode">Режим импорта</string>
     <string name="none">Ничего</string>
+    <string name="all_selected">Все</string>
     <string name="number_selected">%d выбрано</string>
     <string name="menu_edit">Изменить</string>
     <string name="menu_tag_apps">Добавить Тэг</string>

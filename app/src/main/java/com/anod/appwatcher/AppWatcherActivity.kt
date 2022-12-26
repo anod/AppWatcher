@@ -3,7 +3,7 @@ package com.anod.appwatcher
 import android.os.Bundle
 import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
-import com.anod.appwatcher.installed.InstalledFragment
+import com.anod.appwatcher.installed.InstalledActivity
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.utils.prefs
@@ -32,11 +32,9 @@ class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener,
 
         if (intentExtras.containsKey("open_recently_installed")) {
             intent!!.extras!!.remove("open_recently_installed")
-            startActivity(InstalledFragment.intent(
+            startActivity(InstalledActivity.intent(
                     false,
-                    this,
-                    themeRes,
-                    themeColors
+                    this
             ))
         }
     }
@@ -60,7 +58,7 @@ class AppWatcherActivity : WatchListActivity(), TextView.OnEditorActionListener,
 
     override fun createViewPagerAdapter(): Adapter {
         val factories = listOf(
-                WatchListFragment.Factory(Filters.TAB_ALL, prefs.sortIndex, null),
+                WatchListFragment.Factory(Filters.ALL, prefs.sortIndex, null),
                 WatchListFragment.Factory(Filters.INSTALLED, prefs.sortIndex, null),
                 WatchListFragment.Factory(Filters.UNINSTALLED, prefs.sortIndex, null),
                 WatchListFragment.Factory(Filters.UPDATABLE, prefs.sortIndex, null)

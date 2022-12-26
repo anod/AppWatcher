@@ -23,7 +23,7 @@ import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.databinding.FragmentApplistBinding
 import com.anod.appwatcher.databinding.ListItemEmptyBinding
-import com.anod.appwatcher.installed.InstalledFragment
+import com.anod.appwatcher.installed.InstalledActivity
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.utils.EventFlow
 import com.anod.appwatcher.utils.appScope
@@ -60,8 +60,8 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener,
                 filterId = filterId,
                 tagId = args.getParcelable<Tag?>(ARG_TAG)?.let { tag -> if (tag.isEmpty) null else tag.id },
                 showRecentlyUpdated = prefs.showRecentlyUpdated,
-                showOnDevice = filterId == Filters.TAB_ALL && prefs.showOnDevice,
-                showRecentlyInstalled = filterId == Filters.TAB_ALL && prefs.showRecent
+                showOnDevice = filterId == Filters.ALL && prefs.showOnDevice,
+                showRecentlyInstalled = filterId == Filters.ALL && prefs.showRecent
         )
     }
 
@@ -205,11 +205,10 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener,
         when (action) {
             is WatchListAction.Reload -> reload()
             is WatchListAction.SearchInStore -> startActivity(MarketSearchActivity.intent(requireContext(), "", true))
-            is WatchListAction.Installed -> startActivity(InstalledFragment.intent(
+            is WatchListAction.Installed -> startActivity(InstalledActivity.intent(
                     action.importMode,
-                    requireContext(),
-                    (activity as CustomThemeActivity).themeRes,
-                    (activity as CustomThemeActivity).themeColors))
+                    requireContext()
+            ))
             is WatchListAction.ShareFromStore -> activity?.startActivitySafely(Intent.makeMainActivity(ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity")))
             is WatchListAction.ItemClick -> {
                 val app = action.app

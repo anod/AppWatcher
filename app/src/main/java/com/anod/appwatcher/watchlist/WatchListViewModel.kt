@@ -51,6 +51,7 @@ sealed interface WatchListEvent {
     class FilterByTitle(val titleFilter: String, val reload: Boolean) : WatchListEvent
     class ItemClick(val item: SectionItem, val index: Int) : WatchListEvent
     class EmptyButton(val idx: Int) : WatchListEvent
+    class ItemLongClick(val item: SectionItem, val index: Int) : WatchListEvent
 }
 
 abstract class FilterablePagingSource : PagingSource<Int, SectionItem>() {
@@ -93,7 +94,7 @@ abstract class WatchListViewModel(pagingSourceConfig: WatchListPagingSource.Conf
             .flowOn(Dispatchers.Default)
 
 
-    private var pagingSource: FilterablePagingSource? = null
+    protected var pagingSource: FilterablePagingSource? = null
     private var _pagingData: Flow<PagingData<SectionItem>>? = null
     val pagingData: Flow<PagingData<SectionItem>>
         get() {
@@ -136,7 +137,15 @@ abstract class WatchListViewModel(pagingSourceConfig: WatchListPagingSource.Conf
             is WatchListEvent.EmptyButton -> emitAction(WatchListAction.EmptyButton(event.idx))
             WatchListEvent.Refresh -> {}
             WatchListEvent.Reload -> emitAction(WatchListAction.Reload)
-
+            is WatchListEvent.ItemLongClick -> {
+                when (event.item) {
+                    is SectionItem.Header -> {}
+                    is SectionItem.App -> emitAction(WatchListAction.ItemLongClick(event.item.appListItem.app, event.index))
+                    is SectionItem.OnDevice -> emitAction(WatchListAction.ItemLongClick(event.item.appListItem.app, event.index))
+                    SectionItem.Empty -> {}
+                    SectionItem.Recent -> {}
+                }
+            }
         }
     }
 
@@ -161,21 +170,6 @@ abstract class WatchListViewModel(pagingSourceConfig: WatchListPagingSource.Conf
                     }
                 }
                 .cachedIn(viewModelScope)
-    }
-
-    fun updateSelection(
-            change: SelectionState.Change,
-            getPackageSelection: (key: String) -> AppViewHolder.Selection
-    ) {
-        val index = change.extras.getInt("index", -1)
-        if (change.key == null) {
-            selection.value = Pair(
-                    index,
-                    if (change.defaultSelected) AppViewHolder.Selection.Selected else AppViewHolder.Selection.NotSelected
-            )
-        } else {
-            selection.value = Pair(index, getPackageSelection(change.key))
-        }
     }
 }
 

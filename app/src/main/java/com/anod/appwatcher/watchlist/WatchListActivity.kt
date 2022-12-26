@@ -69,7 +69,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
     override val themeColors: CustomThemeColors
         get() = theme.colors
 
-    open val defaultFilterId = Filters.TAB_ALL
+    open val defaultFilterId = Filters.ALL
 
     override val layoutView: View
         get() {

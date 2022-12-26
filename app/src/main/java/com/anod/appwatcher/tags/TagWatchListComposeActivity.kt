@@ -28,7 +28,7 @@ import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.details.DetailsDialog
 import com.anod.appwatcher.details.DetailsScreen
-import com.anod.appwatcher.installed.InstalledFragment
+import com.anod.appwatcher.installed.InstalledActivity
 import com.anod.appwatcher.utils.Theme
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.WatchListPagingSource
@@ -102,7 +102,7 @@ class TagWatchListComposeActivity : BaseComposeActivity() {
             }
             is WatchListSharedStateAction.ExpandSection -> {}
             is WatchListSharedStateAction.SearchInStore -> startActivity(MarketSearchActivity.intent(this, "", true))
-            is WatchListSharedStateAction.ImportInstalled -> Theme(this, viewModel.prefs).also { theme -> startActivity(InstalledFragment.intent(true, this, theme.theme, theme.colors)) }
+            is WatchListSharedStateAction.ImportInstalled -> startActivity(InstalledActivity.intent(true, this))
             is WatchListSharedStateAction.ShareFromStore -> startActivitySafely(Intent.makeMainActivity(ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity")))
             is WatchListSharedStateAction.AddAppToTag -> AppsTagSelectDialog.show(action.tag, supportFragmentManager)
             is WatchListSharedStateAction.EditTag -> EditTagDialog.show(supportFragmentManager, tag = action.tag, theme = Theme(this, viewModel.prefs))

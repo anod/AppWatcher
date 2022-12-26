@@ -14,6 +14,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.SearchTopBar
+import com.anod.appwatcher.compose.SortDropdownMenu
+import com.anod.appwatcher.compose.SortMenuItem
 
 @Composable
 fun WatchListTopBar(
@@ -47,62 +49,48 @@ fun WatchListTopBar(
         onNavigation = { onEvent(WatchListSharedStateEvent.OnBackPressed) },
         actions = {
 
-                visibleActions()
+            visibleActions()
 
-                IconButton(onClick = {
-                    topBarMoreMenu = true
-                }) {
-                    Icon(imageVector = Icons.Default.MoreVert, contentDescription = stringResource(id = R.string.more))
-                }
+            IconButton(onClick = {
+                topBarMoreMenu = true
+            }) {
+                Icon(imageVector = Icons.Default.MoreVert, contentDescription = stringResource(id = R.string.more))
+            }
 
-                DropdownMenu(expanded = topBarMoreMenu, onDismissRequest = { topBarMoreMenu = false }) {
-                    dropdownActions(dismiss = { topBarMoreMenu = false })
+            DropdownMenu(expanded = topBarMoreMenu, onDismissRequest = { topBarMoreMenu = false }) {
+                dropdownActions(dismiss = { topBarMoreMenu = false })
 
-                    DropdownMenuItem(
-                            text = { Text(text = stringResource(id = R.string.filter)) },
-                            leadingIcon = { Icon(imageVector = Icons.Default.FlashOn, contentDescription = stringResource(id = R.string.filter)) },
-                            trailingIcon = { Icon(imageVector = Icons.Default.ArrowRight, contentDescription = null) },
-                            onClick = { topBarFilterMenu = true }
-                    )
+                DropdownMenuItem(
+                        text = { Text(text = stringResource(id = R.string.filter)) },
+                        leadingIcon = { Icon(imageVector = Icons.Default.FlashOn, contentDescription = stringResource(id = R.string.filter)) },
+                        trailingIcon = { Icon(imageVector = Icons.Default.ArrowRight, contentDescription = null) },
+                        onClick = { topBarFilterMenu = true }
+                )
 
-                    DropdownMenuItem(
-                            text = { Text(text = stringResource(id = R.string.sort)) },
-                            leadingIcon = { Icon(imageVector = Icons.Default.Sort, contentDescription = stringResource(id = R.string.sort)) },
-                            trailingIcon = { Icon(imageVector = Icons.Default.ArrowRight, contentDescription = null) },
-                            onClick = { topBarSortMenu = true }
-                    )
-                }
+                SortMenuItem(onClick = { topBarSortMenu = true })
+            }
 
-                DropdownMenu(expanded = topBarFilterMenu, onDismissRequest = { topBarFilterMenu = false }) {
-                    filterTitles.forEachIndexed { index, title ->
-                        DropdownMenuItem(text = { Text(text = title) }, onClick = {
-                            onEvent(WatchListSharedStateEvent.FilterById(filterId = index))
-                            topBarMoreMenu = false
-                            topBarFilterMenu = false
-                        })
-                    }
-                }
-
-                DropdownMenu(expanded = topBarSortMenu, onDismissRequest = { topBarSortMenu = false }) {
-                    val sortTitles = listOf(
-                            stringResource(id = R.string.sort_by_name_asc),
-                            stringResource(id = R.string.sort_by_name_desc),
-                            stringResource(id = R.string.sort_by_date_asc),
-                            stringResource(id = R.string.sort_by_date_desc),
-                    )
-                    sortTitles.forEachIndexed { index, sortTitle ->
-                        DropdownMenuItem(
-                                text = { Text(text = sortTitle) },
-                                leadingIcon = { Icon(imageVector = if (sortId == index) Icons.Default.RadioButtonChecked else Icons.Default.RadioButtonUnchecked, contentDescription = null) },
-                                onClick = {
-                                    onEvent(WatchListSharedStateEvent.ChangeSort(sortId = index))
-                                    topBarMoreMenu = false
-                                    topBarSortMenu = false
-                                }
-                        )
-                    }
+            DropdownMenu(expanded = topBarFilterMenu, onDismissRequest = { topBarFilterMenu = false }) {
+                filterTitles.forEachIndexed { index, title ->
+                    DropdownMenuItem(text = { Text(text = title) }, onClick = {
+                        onEvent(WatchListSharedStateEvent.FilterById(filterId = index))
+                        topBarMoreMenu = false
+                        topBarFilterMenu = false
+                    })
                 }
             }
+
+            SortDropdownMenu(
+                    selectedSortId = sortId,
+                    onChangeSort = { index ->
+                        onEvent(WatchListSharedStateEvent.ChangeSort(sortId = index))
+                        topBarMoreMenu = false
+                        topBarSortMenu = false
+                    },
+                    expanded = topBarSortMenu,
+                    onDismissRequest = { topBarSortMenu = false }
+            )
+        }
     )
 }
 

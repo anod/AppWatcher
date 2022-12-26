@@ -2,9 +2,11 @@ package com.anod.appwatcher.watchlist
 
 import android.content.Context
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -26,7 +28,6 @@ import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
@@ -41,6 +42,7 @@ import com.anod.appwatcher.database.entities.Price
 import com.anod.appwatcher.database.entities.generateTitle
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.utils.AppIconLoader
+import com.anod.appwatcher.utils.SelectionState
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import info.anodsplace.applog.AppLog
@@ -49,12 +51,13 @@ import info.anodsplace.framework.text.Html
 import org.koin.java.KoinJavaComponent.getKoin
 
 @Composable
-fun WatchListPage(pagingSourceConfig: WatchListPagingSource.Config, sortId: Int, titleQuery: String, isRefreshing: Boolean, onEvent: (WatchListEvent) -> Unit) {
-    val viewModel: WatchListViewModel = viewModel(key = pagingSourceConfig.filterId.toString(), factory = AppsWatchListViewModel.Factory(pagingSourceConfig))
+fun WatchListPage(viewModel: WatchListViewModel, sortId: Int, titleQuery: String, isRefreshing: Boolean, onEvent: (WatchListEvent) -> Unit, selection: SelectionState = SelectionState(), selectionMode: Boolean = false) {
+    AppLog.d("Recomposition: WatchListPage [${sortId}, ${viewModel.hashCode()}, '${titleQuery}', ${selection.hashCode()}, ${selectionMode}]")
+
     val items = viewModel.pagingData.collectAsLazyPagingItems()
 
-    LaunchedEffect(key1 = sortId) {
-        AppLog.d("Refresh list items - sort changed")
+    LaunchedEffect(key1 = sortId, key2 = selectionMode) {
+        AppLog.d("Refresh list items - sort $sortId or selection mode $selectionMode changed")
         items.refresh()
     }
 
@@ -68,7 +71,7 @@ fun WatchListPage(pagingSourceConfig: WatchListPagingSource.Config, sortId: Int,
         }
     }
 
-    AppLog.d("Recomposition: WatchListPage [${pagingSourceConfig.hashCode()}, ${sortId}, ${items.hashCode()}, ${viewModel.hashCode()}, ${titleQuery}, ${currentQuery}]")
+    AppLog.d("Recomposition: WatchListPage [${sortId}, ${items.hashCode()}, ${viewModel.hashCode()}, '${titleQuery}', '${currentQuery}', ${selection.hashCode()}, ${selectionMode}]")
 
     val isEmpty = items.loadState.source.refresh is LoadState.NotLoading && items.itemCount < 1
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isRefreshing)
@@ -91,7 +94,14 @@ fun WatchListPage(pagingSourceConfig: WatchListPagingSource.Config, sortId: Int,
                         key = { _, item -> item.hashCode() }
                 ) { index, item ->
                     if (item != null) { // TODO: Preload?
-                        WatchListSectionItem(item, index, onEvent, installedApps = viewModel.installedApps)
+                        WatchListSectionItem(
+                                item = item,
+                                index = index,
+                                onEvent = onEvent,
+                                selection = selection,
+                                selectionMode = selectionMode,
+                                installedApps = viewModel.installedApps
+                        )
                     } else {
                         Box(modifier = Modifier
                                 .fillMaxWidth()
@@ -107,14 +117,40 @@ fun WatchListPage(pagingSourceConfig: WatchListPagingSource.Config, sortId: Int,
 }
 
 @Composable
-fun WatchListSectionItem(item: SectionItem, index: Int, onEvent: (WatchListEvent) -> Unit, installedApps: InstalledApps, appIconLoader: AppIconLoader = getKoin().get()) {
+fun WatchListSectionItem(
+        item: SectionItem,
+        index: Int,
+        onEvent: (WatchListEvent) -> Unit,
+        installedApps: InstalledApps,
+        selection: SelectionState = SelectionState(),
+        selectionMode: Boolean = false,
+        appIconLoader: AppIconLoader = getKoin().get()
+) {
     when (item) {
         is SectionItem.Header -> when (item.type) {
             is SectionHeader.RecentlyInstalled -> SectionHeader(item.type, onClick = { onEvent(WatchListEvent.ItemClick(item, index)) })
             else -> SectionHeader(item.type, onClick = null)
         }
-        is SectionItem.App -> AppItem(item.appListItem, isLocalApp = item.isLocal, selection = AppViewHolder.Selection.None, onClick = { onEvent(WatchListEvent.ItemClick(item, index)) }, installedApps = installedApps, appIconLoader = appIconLoader)
-        is SectionItem.OnDevice -> AppItem(item.appListItem, isLocalApp = true, selection = AppViewHolder.Selection.None, onClick = { onEvent(WatchListEvent.ItemClick(item, index)) }, installedApps = installedApps, appIconLoader = appIconLoader)
+        is SectionItem.App -> AppItem(
+                item = item.appListItem,
+                isLocalApp = item.isLocal,
+                onClick = { onEvent(WatchListEvent.ItemClick(item, index)) },
+                onLongClick = { onEvent(WatchListEvent.ItemLongClick(item, index)) },
+                selection = selection,
+                selectionMode = selectionMode,
+                installedApps = installedApps,
+                appIconLoader = appIconLoader
+        )
+        is SectionItem.OnDevice -> AppItem(
+                item = item.appListItem,
+                isLocalApp = true,
+                onClick = { onEvent(WatchListEvent.ItemClick(item, index)) },
+                onLongClick = { onEvent(WatchListEvent.ItemLongClick(item, index)) },
+                selection = selection,
+                selectionMode = selectionMode,
+                installedApps = installedApps,
+                appIconLoader = appIconLoader
+        )
         is SectionItem.Recent -> RecentItem()
         is SectionItem.Empty -> EmptyItem(onEvent = onEvent)
     }
@@ -183,8 +219,18 @@ fun ChangelogText(text: String, noNewDetails: Boolean) {
     )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun AppItem(item: AppListItem, isLocalApp: Boolean, selection: AppViewHolder.Selection, onClick: (() -> Unit), installedApps: InstalledApps, appIconLoader: AppIconLoader = getKoin().get()) {
+fun AppItem(
+        item: AppListItem,
+        isLocalApp: Boolean,
+        onClick: (() -> Unit),
+        onLongClick: (() -> Unit),
+        installedApps: InstalledApps,
+        selection: SelectionState = SelectionState(),
+        selectionMode: Boolean = false,
+        appIconLoader: AppIconLoader = getKoin().get()
+) {
     val view = LocalView.current
     val context = LocalContext.current
     val app = item.app
@@ -204,27 +250,55 @@ fun AppItem(item: AppListItem, isLocalApp: Boolean, selection: AppViewHolder.Sel
     val packageInfo by remember {
         mutableStateOf(installedApps.packageInfo(app.packageName))
     }
+    val itemSelection by remember(app.packageName, selectionMode, selection) {
+        mutableStateOf(getPackageSelection(app.packageName, selectionMode, selection))
+    }
     val appItemState by remember {
         mutableStateOf(calcAppItemState(app, item.recentFlag, textColor, primaryColor, packageInfo, context))
     }
 
     Box() {
         Row(
-                modifier = Modifier
-                        .clickable(enabled = true, onClick = onClick)
-                        .heightIn(min = 68.dp)
-                        .padding(top = 8.dp, bottom = 8.dp, start = 16.dp, end = 16.dp)
+            modifier = Modifier
+                    .combinedClickable(enabled = true, onClick = onClick, onLongClick = onLongClick)
+                    .heightIn(min = 68.dp)
+                    .padding(top = 8.dp, bottom = 8.dp, start = 16.dp, end = 16.dp)
         ) {
             val imageRequest = remember {
                 mutableStateOf(appIconLoader.request(app.iconUrl))
             }
-            AsyncImage(
-                    model = imageRequest.value,
-                    contentDescription = title,
-                    imageLoader = appIconLoader.coilLoader,
-                    modifier = Modifier.size(40.dp),
-                    placeholder = painterResource(id = R.drawable.ic_app_icon_placeholder)
-            )
+            if (selectionMode) {
+                Box {
+                    AsyncImage(
+                            model = imageRequest.value,
+                            contentDescription = title,
+                            imageLoader = appIconLoader.coilLoader,
+                            modifier = Modifier.size(40.dp),
+                            placeholder = painterResource(id = R.drawable.ic_app_icon_placeholder)
+                    )
+                    when (itemSelection) {
+                        AppViewHolder.Selection.None -> {}
+                        AppViewHolder.Selection.Disabled -> { }
+                        AppViewHolder.Selection.NotSelected -> { }
+                        AppViewHolder.Selection.Selected -> {
+                            Icon(
+                                modifier = Modifier.size(18.dp).align(Alignment.BottomEnd),
+                                painter = painterResource(id = R.drawable.ic_check_circle_selected_18dp),
+                                contentDescription = stringResource(id = coil.compose.base.R.string.selected),
+                                tint = Color.Unspecified
+                            )
+                        }
+                    }
+                }
+            } else {
+                AsyncImage(
+                        model = imageRequest.value,
+                        contentDescription = title,
+                        imageLoader = appIconLoader.coilLoader,
+                        modifier = Modifier.size(40.dp),
+                        placeholder = painterResource(id = R.drawable.ic_app_icon_placeholder)
+                )
+            }
             Column(
                     modifier = Modifier.padding(start = 16.dp)
             ) {
@@ -279,6 +353,14 @@ fun AppItem(item: AppListItem, isLocalApp: Boolean, selection: AppViewHolder.Sel
                 color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
         )
     }
+}
+
+
+private fun getPackageSelection(packageName: String, selectionMode: Boolean, selection: SelectionState): AppViewHolder.Selection {
+    return if (selectionMode) {
+        if (selection.contains(packageName))
+            AppViewHolder.Selection.Selected else AppViewHolder.Selection.NotSelected
+    } else AppViewHolder.Selection.None
 }
 
 private fun calcAppItemState(app: App, recentFlag: Boolean, textColor: Color, primaryColor: Color, packageInfo: InstalledApps.Info, context: Context): AppItemState {
@@ -517,14 +599,23 @@ fun WatchListPreview() {
                     isLocal = false
             )
     )
-
+    val selectionState = SelectionState()
+    selectionState.selectKey("package3", true)
     AppTheme(
             customPrimaryColor = Color.Yellow
     ) {
         Surface {
             LazyColumn {
                 itemsIndexed(items) { index, item ->
-                    WatchListSectionItem(item = item, index = index, onEvent = {}, installedApps = installedApps, appIconLoader = appIconLoader)
+                    WatchListSectionItem(
+                            item = item,
+                            index = index,
+                            onEvent = {},
+                            selection = selectionState,
+                            selectionMode = true,
+                            installedApps = installedApps,
+                            appIconLoader = appIconLoader
+                    )
                 }
             }
         }

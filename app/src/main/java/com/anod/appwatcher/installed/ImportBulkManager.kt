@@ -12,11 +12,12 @@ import kotlinx.coroutines.withContext
 import org.koin.core.Koin
 import org.koin.core.parameter.parametersOf
 
-sealed class ImportStatus
-object ImportNotStarted : ImportStatus()
-class ImportStarted(val docIds: List<String>) : ImportStatus()
-class ImportProgress(val docIds: List<String>, val result: SimpleArrayMap<String, Int>) : ImportStatus()
-object ImportFinished : ImportStatus()
+sealed interface ImportStatus {
+    object NotStarted : ImportStatus
+    class Started(val docIds: List<String>) : ImportStatus
+    class Progress(val docIds: List<String>, val result: SimpleArrayMap<String, Int>) : ImportStatus
+    object Finished : ImportStatus
+}
 
 internal class ImportBulkManager(private val koin: Koin) {
 
@@ -55,12 +56,12 @@ internal class ImportBulkManager(private val koin: Koin) {
             for (items in listsDocIds) {
                 val docIds = items ?: continue
                 if (docIds.isNotEmpty()) {
-                    emit(ImportStarted(docIds.map { it.packageName }))
+                    emit(ImportStatus.Started(docIds.map { it.packageName }))
                     val result = importDetails(docIds)
-                    emit(ImportProgress(docIds.map { it.packageName }, result))
+                    emit(ImportStatus.Progress(docIds.map { it.packageName }, result))
                 }
             }
-            emit(ImportFinished)
+            emit(ImportStatus.Finished)
         }
     }
 

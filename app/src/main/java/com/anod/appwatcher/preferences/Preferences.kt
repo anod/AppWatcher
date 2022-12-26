@@ -134,7 +134,7 @@ class Preferences(context: Context, private val notificationManager: Notificatio
         }
 
     var defaultMainFilterId: Int
-        get() = preferences.getInt(FILTER_ID, Filters.TAB_ALL)
+        get() = preferences.getInt(FILTER_ID, Filters.ALL)
         set(filterId) = preferences.edit().putInt(FILTER_ID, filterId).apply()
 
     var enablePullToRefresh: Boolean

@@ -10,7 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.anod.appwatcher.MarketSearchActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.SettingsActivity
-import com.anod.appwatcher.installed.InstalledFragment
+import com.anod.appwatcher.installed.InstalledActivity
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.EventFlow
@@ -98,7 +98,7 @@ class WatchListMenu(
         private val prefs: Preferences
 ) {
     val search = SearchMenu(action)
-    var filterId: Int = Filters.TAB_ALL
+    var filterId: Int = Filters.ALL
         set(value) {
             updateFilterItem(value)
             field = value
@@ -116,7 +116,7 @@ class WatchListMenu(
     }
 
     private fun updateFilterItem(filterId: Int) {
-        if (filterId == Filters.TAB_ALL) {
+        if (filterId == Filters.ALL) {
             filterItem?.icon = activity.resources.getDrawable(R.drawable.ic_flash_off_24dp, activity.theme)
         } else {
             filterItem?.icon = activity.resources.getDrawable(R.drawable.ic_flash_on_24dp, activity.theme)
@@ -154,11 +154,9 @@ class WatchListMenu(
                 return true
             }
             R.id.menu_act_installed -> {
-                activity.startActivity(InstalledFragment.intent(
+                activity.startActivity(InstalledActivity.intent(
                         false,
-                        activity,
-                        (activity as CustomThemeActivity).themeRes,
-                        (activity as CustomThemeActivity).themeColors))
+                        activity))
                 return true
             }
             R.id.menu_act_sort -> {

@@ -5,73 +5,72 @@ import android.os.Bundle
 import androidx.collection.SimpleArrayMap
 import androidx.core.os.bundleOf
 import androidx.lifecycle.MutableLiveData
+import info.anodsplace.ktx.equalsHash
+import info.anodsplace.ktx.hashCodeOf
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 
-class SelectionState : Collection<String> {
+data class SelectionState(
+      val defaultSelected: Boolean = false,
+      private val extras: Map<String, Bundle> = emptyMap(),
+      private val selectedKeys: Map<String, Boolean> = emptyMap(),
+      val selectedCount: Int = 0
+) : Collection<String> {
 
-    class Change(
-            val defaultSelected: Boolean,
-            val key: String?,
-            val selected: Boolean,
-            val extras: Bundle
-    )
+    override fun hashCode(): Int = hashCodeOf(defaultSelected, extras, selectedKeys, selectedCount)
 
-    val selectionChange = MutableLiveData<Change>()
+    override fun equals(other: Any?) = equalsHash(this, other)
 
-    private var defaultSelected: Boolean = false
-    private val extras = SimpleArrayMap<String, Bundle>()
-    private val selectedKeys = SimpleArrayMap<String, Boolean>()
-    private var selectedCount = 0
+    fun selectAll(select: Boolean): SelectionState = copy(selectedKeys = emptyMap(), defaultSelected = select, selectedCount = 0)
 
-    fun selectAll(select: Boolean) {
-        selectedKeys.clear()
-        defaultSelected = select
-        selectionChange.value = Change(select, null, select, bundleOf("hasSelection" to isNotEmpty()))
-    }
-
-    fun selectKey(key: String, select: Boolean, selectExtra: Bundle = Bundle.EMPTY) {
-        selectedKeys.put(key, select)
+    fun selectKey(key: String, select: Boolean, selectExtra: Bundle = Bundle.EMPTY): SelectionState {
+        val newSelectedKeys = selectedKeys.toMutableMap()
+        newSelectedKeys[key] = select
+        var newSelectedCount = selectedCount
         if (select) {
-            selectedCount += 1
+            newSelectedCount += 1
         } else {
-            selectedCount -= 1
-            if (selectedCount < 0) {
-                selectedCount = 0
+            newSelectedCount -= 1
+            if (newSelectedCount < 0) {
+                newSelectedCount = 0
             }
         }
 
         val allExtras = bundleOf(
-                "hasSelection" to isNotEmpty()
+            "hasSelection" to isNotEmpty()
         )
         allExtras.putAll(getExtra(key))
         allExtras.putAll(selectExtra)
-        selectionChange.value = Change(defaultSelected, key, select, allExtras)
+        val newExtras = extras.toMutableMap()
+        newExtras[key] = allExtras
+        return copy(selectedKeys = newSelectedKeys, selectedCount = newSelectedCount, extras = newExtras)
     }
 
-    fun toggleKey(key: String, selectExtra: Bundle) {
-        if (selectedKeys.containsKey(key)) {
+    fun toggleKey(key: String, selectExtra: Bundle = Bundle.EMPTY): SelectionState {
+        return if (selectedKeys.containsKey(key)) {
             selectKey(key, !selectedKeys[key]!!, selectExtra)
         } else {
             selectKey(key, !defaultSelected, selectExtra)
         }
     }
 
-    fun getExtra(key: String): Bundle {
+    private fun getExtra(key: String): Bundle {
         if (extras.containsKey(key)) {
-            return extras.get(key) ?: Bundle.EMPTY
+            return extras[key] ?: Bundle.EMPTY
         }
         return Bundle.EMPTY
     }
 
-    fun setExtra(key: String, extra: Bundle) {
-        extras.put(key, extra)
+    fun setExtras(newExtras: Map<String, Bundle>): SelectionState {
+        return copy(extras = newExtras)
     }
 
     override val size: Int
-        get() = if (defaultSelected) -1 else selectedKeys.size()
+        get() = if (defaultSelected) -1 else selectedKeys.size
 
     override fun contains(element: String): Boolean {
         if (selectedKeys.containsKey(element)) {
-            return selectedKeys.get(element) ?: false
+            return selectedKeys[element] ?: false
         }
         return defaultSelected
     }
@@ -93,24 +92,17 @@ class SelectionState : Collection<String> {
     }
 
     override fun iterator(): Iterator<String> {
-        val size = selectedKeys.size()
-        var current = 0
-        return object : Iterator<String> {
-            override fun hasNext() = current < size
-
-            override fun next(): String {
-                val next = selectedKeys.keyAt(current)
-                current += 1
-                return next
-            }
-        }
+        return selectedKeys.keys.iterator()
     }
 
-    fun clear() {
-        selectedKeys.clear()
-        selectedCount = 0
-        defaultSelected = false
-        extras.clear()
-        selectionChange.value = Change(false, null, false, bundleOf("hasSelection" to false))
+    fun clear(): SelectionState {
+        return copy(
+            defaultSelected = false,
+            selectedCount = 0,
+            extras = emptyMap(),
+            selectedKeys = emptyMap()
+        )
     }
 }
+
+

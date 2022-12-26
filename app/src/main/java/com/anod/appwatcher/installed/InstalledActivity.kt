@@ -2,63 +2,112 @@
 package com.anod.appwatcher.installed
 
 import android.content.Context
+import android.content.Intent
+import android.os.Bundle
+import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.annotation.IdRes
 import androidx.annotation.Keep
-import androidx.fragment.app.commit
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.lifecycleScope
+import com.anod.appwatcher.BuildConfig
+import com.anod.appwatcher.compose.AppTheme
+import com.anod.appwatcher.compose.BaseComposeActivity
+import com.anod.appwatcher.compose.MainDetailScreen
 import com.anod.appwatcher.details.DetailsDialog
-import com.anod.appwatcher.details.DetailsEmptyView
-import com.anod.appwatcher.details.DetailsFragment
-import com.anod.appwatcher.watchlist.AppDetailsRouter
-import info.anodsplace.framework.R
+import com.anod.appwatcher.model.Filters
+import com.anod.appwatcher.preferences.Preferences
+import com.anod.appwatcher.tags.DetailContent
+import com.anod.appwatcher.utils.prefs
+import com.anod.appwatcher.watchlist.WatchListFragment
+import com.anod.appwatcher.watchlist.WatchListPagingSource
+import com.anod.appwatcher.watchlist.WatchListSharedStateAction
+import com.anod.appwatcher.watchlist.WatchListSharedStateEvent
+import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.CustomThemeColors
-import info.anodsplace.framework.app.FragmentContainerFactory
-import info.anodsplace.framework.app.FragmentToolbarActivity
-import info.anodsplace.framework.app.HingeDeviceLayout
+import kotlinx.coroutines.launch
 
 @Keep
-class InstalledActivity : FragmentToolbarActivity(), AppDetailsRouter {
+class InstalledActivity : BaseComposeActivity() {
+    private val viewModel: InstalledListSharedViewModel by viewModels()
 
-    @get:IdRes
-    override val detailsLayoutId = R.id.details
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
-    @get:IdRes
-    override val hingeLayoutId = R.id.hinge
+        viewModel.handleEvent(InstalledListSharedStateEvent.SetWideLayout(hingeDevice.layout.value))
 
-    private val stateViewModel: InstalledActivityViewModel by viewModels()
+        setContent {
+            AppTheme(
+                    theme = viewModel.prefs.theme
+            ) {
+                val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
 
-    override fun updateWideLayout(wideLayout: HingeDeviceLayout) {
-        super.updateWideLayout(wideLayout)
-        stateViewModel.isWideLayout = wideLayout.isWideLayout
-        if (stateViewModel.isWideLayout) {
-            if (supportFragmentManager.findFragmentByTag(DetailsEmptyView.tag) == null) {
-                supportFragmentManager.commit {
-                    replace(R.id.details, DetailsEmptyView(), DetailsEmptyView.tag)
+                val pagingSourceConfig = WatchListPagingSource.Config(
+                        filterId = Filters.ALL,
+                        tagId = null,
+                        showRecentlyUpdated = false,
+                        showOnDevice = true,
+                        showRecentlyInstalled = false
+                )
+
+                if (screenState.wideLayout.isWideLayout) {
+                    MainDetailScreen(
+                            wideLayout = screenState.wideLayout,
+                            main = {
+                                InstalledListScreen(screenState = screenState, pagingSourceConfig = pagingSourceConfig) { viewModel.handleEvent(it) }
+                            },
+                            detail = {
+                                DetailContent(app = screenState.selectedApp)
+                            }
+                    )
+                } else {
+                    InstalledListScreen(screenState = screenState, pagingSourceConfig = pagingSourceConfig) { viewModel.handleEvent(it) }
                 }
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.viewActions.collect { onViewAction(it) }
+        }
+    }
+
+    private fun onViewAction(action: InstalledListSharedStateAction) {
+        when (action) {
+            InstalledListSharedStateAction.OnBackPressed -> onBackPressed()
+            is InstalledListSharedStateAction.OpenApp -> {
+                val app = action.app
+                if (BuildConfig.DEBUG) {
+                    AppLog.d(app.packageName)
+                }
+                DetailsDialog.show(app.appId, app.rowId, app.detailsUrl, supportFragmentManager)
             }
         }
     }
 
-    override fun openAppDetails(appId: String, rowId: Int, detailsUrl: String?) {
-        if (stateViewModel.isWideLayout) {
-            supportFragmentManager.commit {
-                add(R.id.details, DetailsFragment.newInstance(appId, detailsUrl
-                        ?: "", rowId), DetailsFragment.tag)
-                addToBackStack(DetailsFragment.tag)
+    override fun onBackPressed() {
+        if (viewModel.viewState.wideLayout.isWideLayout) {
+            if (viewModel.viewState.selectedApp != null) {
+                viewModel.handleEvent(InstalledListSharedStateEvent.SelectApp(app = null))
+            } else {
+                super.onBackPressed()
             }
-        } else {
-            DetailsDialog.show(appId, rowId, detailsUrl, supportFragmentManager)
+        } else if (!DetailsDialog.dismiss(supportFragmentManager)) {
+            super.onBackPressed()
         }
     }
 
     companion object {
-        fun intent(context: Context, factory: FragmentContainerFactory, themeRes: Int, themeColors: CustomThemeColors) =
-                intent(
-                        context = context,
-                        factory = factory,
-                        themeRes = themeRes,
-                        themeColors = themeColors,
-                        clazz = InstalledActivity::class.java
-                )
+        private fun intent(sortId: Int, showImportAction: Boolean, context: Context): Intent {
+            return Intent(context, InstalledActivity::class.java).apply {
+                putExtra(WatchListFragment.ARG_SORT, sortId)
+                putExtra(WatchListFragment.ARG_SHOW_ACTION, showImportAction)
+            }
+        }
+
+        fun intent(importMode: Boolean, context: Context) = intent(
+                if (importMode) Preferences.SORT_NAME_ASC else Preferences.SORT_DATE_DESC,
+                importMode,
+                context
+        )
     }
 }

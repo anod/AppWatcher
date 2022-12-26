@@ -15,7 +15,7 @@ interface AppListFilter {
     fun filterRecord(item: AppListItem): Boolean
 
     class All : AppListFilter {
-        override val filterId = Filters.TAB_ALL
+        override val filterId = Filters.ALL
         override fun filterRecord(item: AppListItem): Boolean = false
         override fun hashCode(): Int = hashCodeOf(filterId)
         override fun equals(other: Any?): Boolean = (other as? Installed)?.hashCode() == hashCode()
