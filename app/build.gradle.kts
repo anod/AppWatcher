@@ -26,6 +26,8 @@ android {
 
     buildFeatures {
         viewBinding = true
+        compose = true
+        buildConfig = true
     }
 
     signingConfigs {
@@ -81,10 +83,6 @@ android {
         }
     }
 
-    buildFeatures {
-        compose = true
-    }
-
     composeOptions {
         kotlinCompilerExtensionVersion = "1.3.2"
     }
@@ -100,7 +98,7 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.7.1")
     implementation("androidx.core:core:1.9.0")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
-    implementation("androidx.fragment:fragment-ktx:1.5.4")
+    implementation("androidx.fragment:fragment-ktx:1.5.5")
     implementation("androidx.core:core-splashscreen:1.0.0")
 
     implementation("androidx.paging:paging-runtime:3.2.0-alpha03")
@@ -108,10 +106,10 @@ dependencies {
 
     // Compose
     implementation("androidx.activity:activity-compose:1.6.1")
-    implementation("androidx.compose.ui:ui-viewbinding:1.3.1")
-    implementation("com.google.accompanist:accompanist-pager:0.27.1")
-    implementation("com.google.accompanist:accompanist-flowlayout:0.27.1")
-    implementation("com.google.accompanist:accompanist-swiperefresh:0.27.1")
+    implementation("androidx.compose.ui:ui-viewbinding:1.3.2")
+    implementation("com.google.accompanist:accompanist-pager:0.28.0")
+    implementation("com.google.accompanist:accompanist-flowlayout:0.28.0")
+    implementation("com.google.accompanist:accompanist-swiperefresh:0.28.0")
 
     // Coil
     implementation("io.coil-kt:coil-base:2.2.2")
@@ -136,7 +134,7 @@ dependencies {
     // 3rd party
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
     implementation("com.jakewharton:process-phoenix:2.1.2")
-    implementation("io.insert-koin:koin-core:3.2.2")
+    implementation("io.insert-koin:koin-core:3.3.0")
 
     // ViewModel and LiveData
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
