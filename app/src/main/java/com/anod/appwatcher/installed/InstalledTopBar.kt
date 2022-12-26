@@ -1,18 +1,12 @@
 package com.anod.appwatcher.installed
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowRight
 import androidx.compose.material.icons.filled.Ballot
 import androidx.compose.material.icons.filled.Deselect
-import androidx.compose.material.icons.filled.FlashOn
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.Sort
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,8 +16,6 @@ import androidx.compose.ui.res.stringResource
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.SearchTopBar
 import com.anod.appwatcher.compose.SortDropdownMenu
-import com.anod.appwatcher.compose.SortMenuItem
-import com.anod.appwatcher.watchlist.WatchListSharedStateEvent
 
 @Composable
 fun InstalledTopBar(
@@ -42,7 +34,7 @@ fun InstalledTopBar(
             showSearch = showSearchView && !selectionMode,
             initialSearchFocus = true,
             onValueChange = { onEvent(InstalledListSharedStateEvent.FilterByTitle(query = it)) },
-            onSearchAction = { onEvent(InstalledListSharedStateEvent.OnSearch(it)) },
+            onSearchAction = { },
             onNavigation = {
                 if (selectionMode) {
                     onEvent(InstalledListSharedStateEvent.SwitchImportMode(selectionMode = false))
@@ -51,7 +43,6 @@ fun InstalledTopBar(
                 }
             },
             actions = {
-
                 if (selectionMode) {
                     IconButton(onClick = { onEvent(InstalledListSharedStateEvent.SetSelection(all = false)) }) {
                         Icon(imageVector = Icons.Default.Deselect, contentDescription = stringResource(id = R.string.none))

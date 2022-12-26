@@ -29,6 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
 import coil.ImageLoader
@@ -51,11 +52,17 @@ import info.anodsplace.framework.text.Html
 import org.koin.java.KoinJavaComponent.getKoin
 
 @Composable
-fun WatchListPage(viewModel: WatchListViewModel, sortId: Int, titleQuery: String, isRefreshing: Boolean, onEvent: (WatchListEvent) -> Unit, selection: SelectionState = SelectionState(), selectionMode: Boolean = false) {
-    AppLog.d("Recomposition: WatchListPage [${sortId}, ${viewModel.hashCode()}, '${titleQuery}', ${selection.hashCode()}, ${selectionMode}]")
-
-    val items = viewModel.pagingData.collectAsLazyPagingItems()
-
+fun WatchListPage(
+        items: LazyPagingItems<SectionItem>,
+        sortId: Int,
+        titleQuery: String,
+        isRefreshing: Boolean,
+        enablePullToRefresh: Boolean,
+        installedApps: InstalledApps,
+        onEvent: (WatchListEvent) -> Unit,
+        selection: SelectionState = SelectionState(),
+        selectionMode: Boolean = false
+) {
     LaunchedEffect(key1 = sortId, key2 = selectionMode) {
         AppLog.d("Refresh list items - sort $sortId or selection mode $selectionMode changed")
         items.refresh()
@@ -64,21 +71,21 @@ fun WatchListPage(viewModel: WatchListViewModel, sortId: Int, titleQuery: String
     var currentQuery by remember { mutableStateOf(titleQuery) }
     LaunchedEffect(titleQuery) {
         if (currentQuery != titleQuery) {
-            viewModel.handleEvent(WatchListEvent.FilterByTitle(titleQuery, true))
+            onEvent(WatchListEvent.FilterByTitle(titleQuery, true))
             AppLog.d("Refresh list items - title query changed '$titleQuery'")
             currentQuery = titleQuery
             items.refresh()
         }
     }
 
-    AppLog.d("Recomposition: WatchListPage [${sortId}, ${items.hashCode()}, ${viewModel.hashCode()}, '${titleQuery}', '${currentQuery}', ${selection.hashCode()}, ${selectionMode}]")
+    AppLog.d("Recomposition: WatchListPage [${sortId}, ${items.hashCode()}, '${titleQuery}', '${currentQuery}', ${selection.hashCode()}, ${selectionMode}]")
 
     val isEmpty = items.loadState.source.refresh is LoadState.NotLoading && items.itemCount < 1
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isRefreshing)
     SwipeRefresh(
             modifier = Modifier.fillMaxSize(),
             state = swipeRefreshState,
-            swipeEnabled = viewModel.prefs.enablePullToRefresh,
+            swipeEnabled = enablePullToRefresh,
             onRefresh = { onEvent(WatchListEvent.Refresh) }
     ) {
         LazyColumn(
@@ -100,7 +107,7 @@ fun WatchListPage(viewModel: WatchListViewModel, sortId: Int, titleQuery: String
                                 onEvent = onEvent,
                                 selection = selection,
                                 selectionMode = selectionMode,
-                                installedApps = viewModel.installedApps
+                                installedApps = installedApps
                         )
                     } else {
                         Box(modifier = Modifier
@@ -257,7 +264,7 @@ fun AppItem(
         mutableStateOf(calcAppItemState(app, item.recentFlag, textColor, primaryColor, packageInfo, context))
     }
 
-    Box() {
+    Box {
         Row(
             modifier = Modifier
                     .combinedClickable(enabled = true, onClick = onClick, onLongClick = onLongClick)
@@ -276,18 +283,13 @@ fun AppItem(
                             modifier = Modifier.size(40.dp),
                             placeholder = painterResource(id = R.drawable.ic_app_icon_placeholder)
                     )
-                    when (itemSelection) {
-                        AppViewHolder.Selection.None -> {}
-                        AppViewHolder.Selection.Disabled -> { }
-                        AppViewHolder.Selection.NotSelected -> { }
-                        AppViewHolder.Selection.Selected -> {
-                            Icon(
+                    if (itemSelection == AppViewHolder.Selection.Selected) {
+                        Icon(
                                 modifier = Modifier.size(18.dp).align(Alignment.BottomEnd),
                                 painter = painterResource(id = R.drawable.ic_check_circle_selected_18dp),
                                 contentDescription = stringResource(id = coil.compose.base.R.string.selected),
                                 tint = Color.Unspecified
-                            )
-                        }
+                        )
                     }
                 }
             } else {
@@ -330,7 +332,7 @@ fun AppItem(
                         )
                     }
                 }
-                if (appItemState.showRecent) {
+                if (isLocalApp || appItemState.showRecent) {
                     if (isLocalApp) {
                         if (changesHtml.isNotBlank()) {
                             ChangelogText(text = changesHtml, noNewDetails = item.noNewDetails)

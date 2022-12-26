@@ -96,13 +96,14 @@ class DfeApiImpl(http: OkHttpClient, private val apiContext: DfeApiContext) : Df
                 AppLog.d("Network response $response")
 
                 try {
-                    val body = response.body ?: throw DfeError("Empty body $response")
-                    if (!response.isSuccessful) {
-                        dfeResponse.parseNetworkError(body.byteStream())
-                    } else {
-                        val responseWrapper = dfeResponse.parseNetworkResponse(body.byteStream())
-                        continuation.resume(responseWrapper)
-                    }
+                    response.body?.use { body ->
+                        if (!response.isSuccessful) {
+                            dfeResponse.parseNetworkError(body.byteStream())
+                        } else {
+                            val responseWrapper = dfeResponse.parseNetworkResponse(body.byteStream())
+                            continuation.resume(responseWrapper)
+                        }
+                    } ?: throw DfeError("Empty body $response")
                 } catch (e: Throwable) {
                     continuation.resumeWithException(e)
                 }

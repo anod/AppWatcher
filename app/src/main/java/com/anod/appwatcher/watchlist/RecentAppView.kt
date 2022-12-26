@@ -1,4 +1,4 @@
-package com.anod.appwatcher.installed
+package com.anod.appwatcher.watchlist
 
 import android.content.Context
 import android.util.AttributeSet

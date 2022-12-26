@@ -12,7 +12,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.packageToApp
-import com.anod.appwatcher.installed.RecentAppView
 import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.EventFlow
 import com.anod.appwatcher.utils.reveal

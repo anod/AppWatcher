@@ -38,6 +38,7 @@ fun SearchTopBar(
     onValueChange: (String) -> Unit = { },
     onSearchAction: (String) -> Unit = { },
     onNavigation: () -> Unit = { },
+    onNavigationHide: () -> Unit = { },
     actions: @Composable () -> Unit = { },
 ) {
     var showSearchView by remember { mutableStateOf(showSearch) }
@@ -68,6 +69,7 @@ fun SearchTopBar(
             IconButton(onClick = {
                 if (showSearchView) {
                     if (hideSearchOnBack) {
+                        onValueChange("")
                         showSearchView = false
                     } else {
                         onNavigation()

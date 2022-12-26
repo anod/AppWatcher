@@ -21,10 +21,7 @@ import com.anod.appwatcher.tags.DetailContent
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.WatchListFragment
 import com.anod.appwatcher.watchlist.WatchListPagingSource
-import com.anod.appwatcher.watchlist.WatchListSharedStateAction
-import com.anod.appwatcher.watchlist.WatchListSharedStateEvent
 import info.anodsplace.applog.AppLog
-import info.anodsplace.framework.app.CustomThemeColors
 import kotlinx.coroutines.launch
 
 @Keep
@@ -41,6 +38,7 @@ class InstalledActivity : BaseComposeActivity() {
                     theme = viewModel.prefs.theme
             ) {
                 val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
+
 
                 val pagingSourceConfig = WatchListPagingSource.Config(
                         filterId = Filters.ALL,

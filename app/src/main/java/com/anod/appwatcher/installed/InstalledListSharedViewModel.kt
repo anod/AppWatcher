@@ -1,16 +1,12 @@
 package com.anod.appwatcher.installed
 
 import android.app.Application
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Rect
 import androidx.core.os.bundleOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.anod.appwatcher.database.entities.App
-import com.anod.appwatcher.sync.UpdateCheck
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.SelectionState
 import com.anod.appwatcher.utils.SyncProgress
@@ -19,14 +15,12 @@ import com.anod.appwatcher.utils.syncProgressFlow
 import com.anod.appwatcher.watchlist.ListState
 import com.anod.appwatcher.watchlist.SectionItem
 import com.anod.appwatcher.watchlist.WatchListEvent
-import com.anod.appwatcher.watchlist.WatchListSharedStateAction
 import info.anodsplace.framework.app.HingeDeviceLayout
 import info.anodsplace.framework.content.getInstalledPackagesCodes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.get
 import org.koin.core.component.inject
 
 data class InstalledListSharedState(
@@ -46,12 +40,10 @@ sealed interface InstalledListSharedStateEvent {
     class UpdateSyncProgress(val syncProgress: SyncProgress) : InstalledListSharedStateEvent
     class ListEvent(val event: WatchListEvent) : InstalledListSharedStateEvent
     class FilterByTitle(val query: String) : InstalledListSharedStateEvent
-    class OnSearch(val query: String) : InstalledListSharedStateEvent
     class ChangeSort(val sortId: Int) : InstalledListSharedStateEvent
     class SwitchImportMode(val selectionMode: Boolean) : InstalledListSharedStateEvent
     class SetSelection(val all: Boolean) : InstalledListSharedStateEvent
     class SelectApp(val app: App?) : InstalledListSharedStateEvent
-
     object Import : InstalledListSharedStateEvent
 }
 
@@ -91,11 +83,8 @@ class InstalledListSharedViewModel(state: SavedStateHandle) : BaseFlowViewModel<
             is InstalledListSharedStateEvent.ChangeSort -> {
                 viewState = viewState.copy(sortId = event.sortId)
             }
-            is InstalledListSharedStateEvent.FilterByTitle -> {
-
-            }
+            is InstalledListSharedStateEvent.FilterByTitle -> viewState = viewState.copy(titleFilter = event.query)
             InstalledListSharedStateEvent.OnBackPressed -> emitAction(InstalledListSharedStateAction.OnBackPressed)
-            is InstalledListSharedStateEvent.OnSearch -> { }
             is InstalledListSharedStateEvent.SwitchImportMode -> {
                 switchImportMode(event.selectionMode)
             }

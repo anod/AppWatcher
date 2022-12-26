@@ -9,6 +9,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.watchlist.*
@@ -77,11 +78,14 @@ fun TagWatchListScreen(screenState: WatchListSharedState, pagingSourceConfig: Wa
             val pageConfig = pagingSourceConfig.copy(filterId = filterIds[pageIndex])
             AppLog.d("Recomposition HorizontalPager ${pageConfig.filterId}")
             val viewModel: WatchListViewModel = viewModel(key = pageConfig.filterId.toString(), factory = AppsWatchListViewModel.Factory(pageConfig))
+            val items = viewModel.pagingData.collectAsLazyPagingItems()
             WatchListPage(
-                    viewModel = viewModel,
+                    items = items,
                     sortId = screenState.sortId,
                     titleQuery = screenState.titleFilter,
                     isRefreshing = screenState.listState is ListState.SyncStarted,
+                    enablePullToRefresh = viewModel.prefs.enablePullToRefresh,
+                    installedApps = viewModel.installedApps,
                     onEvent = { event -> onEvent(WatchListSharedStateEvent.ListEvent(event)) }
             )
         }

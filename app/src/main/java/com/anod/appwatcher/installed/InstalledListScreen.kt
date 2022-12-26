@@ -1,21 +1,20 @@
 package com.anod.appwatcher.installed
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.anod.appwatcher.R
 import com.anod.appwatcher.watchlist.ListState
 import com.anod.appwatcher.watchlist.WatchListPage
@@ -65,13 +64,26 @@ fun InstalledListScreen(
 
             AppLog.d("Recomposition: InstalledListScreen [${viewModel.sortId}, ${viewModel.hashCode()}, '${screenState.titleFilter}', ${screenState.selection.hashCode()}, ${screenState.selectionMode}]")
 
+            val items = viewModel.pagingData.collectAsLazyPagingItems()
+
+            val changelogUpdated by viewModel.changelogAdapter.updated.collectAsState(initial = false)
+            
+            LaunchedEffect(key1 = changelogUpdated) {
+                AppLog.d("InstalledListScreen: changelogUpdated [$changelogUpdated}]")
+                items.refresh()
+            }
+            
+            AppLog.d("Recomposition: InstalledListScreen items [${items.hashCode()}]")
+
             WatchListPage(
-                    viewModel = viewModel,
+                    items = items,
                     sortId = screenState.sortId,
                     titleQuery = screenState.titleFilter,
                     isRefreshing = screenState.listState is ListState.SyncStarted,
+                    enablePullToRefresh = viewModel.prefs.enablePullToRefresh,
                     selection = screenState.selection,
                     selectionMode = screenState.selectionMode,
+                    installedApps = viewModel.installedApps,
                     onEvent = { event -> onEvent(InstalledListSharedStateEvent.ListEvent(event)) }
             )
         }

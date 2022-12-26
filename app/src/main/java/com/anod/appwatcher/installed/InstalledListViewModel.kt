@@ -20,7 +20,7 @@ class InstalledListViewModel(pagingSourceConfig: WatchListPagingSource.Config) :
     }
 
     private val packageManager: PackageManager by inject()
-    private val changelogAdapter: ChangelogAdapter by inject { parametersOf(viewModelScope) }
+    val changelogAdapter: ChangelogAdapter by inject { parametersOf(viewModelScope) }
     private val account: Account?
         get() = getKoin().getOrNull()
 
