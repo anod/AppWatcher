@@ -1,20 +1,22 @@
 package com.anod.appwatcher.installed
 
-import android.app.Application
+import android.accounts.Account
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Rect
 import androidx.core.os.bundleOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.anod.appwatcher.accounts.AuthTokenBlocking
+import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.utils.BaseFlowViewModel
+import com.anod.appwatcher.utils.PackageChangedReceiver
 import com.anod.appwatcher.utils.SelectionState
-import com.anod.appwatcher.utils.SyncProgress
 import com.anod.appwatcher.utils.getInt
-import com.anod.appwatcher.utils.syncProgressFlow
-import com.anod.appwatcher.watchlist.ListState
 import com.anod.appwatcher.watchlist.SectionItem
 import com.anod.appwatcher.watchlist.WatchListEvent
+import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.HingeDeviceLayout
 import info.anodsplace.framework.content.getInstalledPackagesCodes
 import kotlinx.coroutines.Dispatchers
@@ -27,35 +29,39 @@ data class InstalledListSharedState(
         val sortId: Int,
         val selectionMode: Boolean = false,
         val titleFilter: String = "",
-        val listState: ListState? = null,
         val wideLayout: HingeDeviceLayout = HingeDeviceLayout(isWideLayout = false, hinge = Rect()),
         val selectedApp: App? = null,
         val importStatus: ImportStatus = ImportStatus.NotStarted,
-        val selection: SelectionState = SelectionState()
+        val selection: SelectionState = SelectionState(),
+        val packageChanged: String = "",
+        val refreshRequest: Int = 0
 )
 
-sealed interface InstalledListSharedStateEvent {
-    object OnBackPressed : InstalledListSharedStateEvent
-    class SetWideLayout(val layout: HingeDeviceLayout) : InstalledListSharedStateEvent
-    class UpdateSyncProgress(val syncProgress: SyncProgress) : InstalledListSharedStateEvent
-    class ListEvent(val event: WatchListEvent) : InstalledListSharedStateEvent
-    class FilterByTitle(val query: String) : InstalledListSharedStateEvent
-    class ChangeSort(val sortId: Int) : InstalledListSharedStateEvent
-    class SwitchImportMode(val selectionMode: Boolean) : InstalledListSharedStateEvent
-    class SetSelection(val all: Boolean) : InstalledListSharedStateEvent
-    class SelectApp(val app: App?) : InstalledListSharedStateEvent
-    object Import : InstalledListSharedStateEvent
+sealed interface InstalledListSharedEvent {
+    object OnBackPressed : InstalledListSharedEvent
+    class SetWideLayout(val layout: HingeDeviceLayout) : InstalledListSharedEvent
+    class ListEvent(val event: WatchListEvent) : InstalledListSharedEvent
+    class FilterByTitle(val query: String) : InstalledListSharedEvent
+    class ChangeSort(val sortId: Int) : InstalledListSharedEvent
+    class SwitchImportMode(val selectionMode: Boolean) : InstalledListSharedEvent
+    class SetSelection(val all: Boolean) : InstalledListSharedEvent
+    class SelectApp(val app: App?) : InstalledListSharedEvent
+    object Import : InstalledListSharedEvent
 }
 
-sealed interface InstalledListSharedStateAction {
-    object OnBackPressed : InstalledListSharedStateAction
-    class OpenApp(val app: App, val index: Int) : InstalledListSharedStateAction
+sealed interface InstalledListSharedAction {
+    object OnBackPressed : InstalledListSharedAction
+    class OpenApp(val app: App, val index: Int) : InstalledListSharedAction
+    class StartActivity(val intent: Intent) : InstalledListSharedAction
 }
 
-class InstalledListSharedViewModel(state: SavedStateHandle) : BaseFlowViewModel<InstalledListSharedState, InstalledListSharedStateEvent, InstalledListSharedStateAction>(), KoinComponent {
-    private val application: Application by inject()
+class InstalledListSharedViewModel(state: SavedStateHandle) : BaseFlowViewModel<InstalledListSharedState, InstalledListSharedEvent, InstalledListSharedAction>(), KoinComponent {
     private val importManager: ImportBulkManager by inject()
     private val packageManager: PackageManager by inject()
+    private val packageChanged: PackageChangedReceiver by inject()
+    private val authToken: AuthTokenBlocking by inject()
+    private val account: Account?
+        get() = getKoin().getOrNull()
 
     init {
         viewState = InstalledListSharedState(
@@ -63,39 +69,35 @@ class InstalledListSharedViewModel(state: SavedStateHandle) : BaseFlowViewModel<
             selectionMode = state["showAction"] ?: false
         )
         viewModelScope.launch {
-            syncProgressFlow(application).collect {
-                handleEvent(InstalledListSharedStateEvent.UpdateSyncProgress(syncProgress = it))
-            }
-        }
-    }
-
-    override fun handleEvent(event: InstalledListSharedStateEvent) {
-        when (event) {
-            is InstalledListSharedStateEvent.SetWideLayout -> viewState = viewState.copy(wideLayout = event.layout)
-            is InstalledListSharedStateEvent.UpdateSyncProgress -> {
-                viewState = if (event.syncProgress.isRefreshing) {
-                    viewState.copy(listState = ListState.SyncStarted)
-                } else {
-                    viewState.copy(listState = ListState.SyncStopped(updatesCount = event.syncProgress.updatesCount))
+            packageChanged.observer.collect { packageChanged ->
+                if (viewState.importStatus !is ImportStatus.Progress) {
+                    viewState = viewState.copy(packageChanged = packageChanged)
                 }
             }
-            is InstalledListSharedStateEvent.ListEvent -> handleListEvent(event.event)
-            is InstalledListSharedStateEvent.ChangeSort -> {
+        }
+        checkAuthToken()
+    }
+
+    override fun handleEvent(event: InstalledListSharedEvent) {
+        when (event) {
+            is InstalledListSharedEvent.SetWideLayout -> viewState = viewState.copy(wideLayout = event.layout)
+            is InstalledListSharedEvent.ListEvent -> handleListEvent(event.event)
+            is InstalledListSharedEvent.ChangeSort -> {
                 viewState = viewState.copy(sortId = event.sortId)
             }
-            is InstalledListSharedStateEvent.FilterByTitle -> viewState = viewState.copy(titleFilter = event.query)
-            InstalledListSharedStateEvent.OnBackPressed -> emitAction(InstalledListSharedStateAction.OnBackPressed)
-            is InstalledListSharedStateEvent.SwitchImportMode -> {
+            is InstalledListSharedEvent.FilterByTitle -> viewState = viewState.copy(titleFilter = event.query)
+            InstalledListSharedEvent.OnBackPressed -> emitAction(InstalledListSharedAction.OnBackPressed)
+            is InstalledListSharedEvent.SwitchImportMode -> {
                 switchImportMode(event.selectionMode)
             }
-            is InstalledListSharedStateEvent.SetSelection -> {
+            is InstalledListSharedEvent.SetSelection -> {
                 viewState = viewState.copy(selection = viewState.selection.selectAll(event.all))
             }
-            is InstalledListSharedStateEvent.SelectApp -> {
+            is InstalledListSharedEvent.SelectApp -> {
                 viewState = viewState.copy(selectedApp = event.app)
             }
 
-            InstalledListSharedStateEvent.Import -> import()
+            InstalledListSharedEvent.Import -> import()
         }
     }
 
@@ -119,7 +121,7 @@ class InstalledListSharedViewModel(state: SavedStateHandle) : BaseFlowViewModel<
                         if (viewState.wideLayout.isWideLayout) {
                             viewState = viewState.copy(selectedApp = app)
                         } else {
-                            emitAction(InstalledListSharedStateAction.OpenApp(app, listEvent.index))
+                            emitAction(InstalledListSharedAction.OpenApp(app, listEvent.index))
                         }
                     }
                 }
@@ -139,8 +141,29 @@ class InstalledListSharedViewModel(state: SavedStateHandle) : BaseFlowViewModel<
                     switchImportMode(true, packageName)
                 }
             }
-            WatchListEvent.Refresh -> { }
+            WatchListEvent.Refresh -> {
+                checkAuthToken()
+                viewState = viewState.copy(refreshRequest = viewState.refreshRequest + 1)
+            }
             WatchListEvent.Reload -> { }
+        }
+    }
+
+    private fun checkAuthToken() {
+        if (authToken.isFresh) {
+            return
+        }
+        val account = this.account ?: return
+        viewModelScope.launch {
+            try {
+                if (!authToken.refreshToken(account)) {
+                    AppLog.e("Error retrieving token")
+                }
+            } catch (e: AuthTokenStartIntent) {
+                emitAction(InstalledListSharedAction.StartActivity(e.intent))
+            } catch (e: Exception) {
+                AppLog.e("onResume", e)
+            }
         }
     }
 

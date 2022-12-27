@@ -22,6 +22,7 @@ import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.WatchListFragment
 import com.anod.appwatcher.watchlist.WatchListPagingSource
 import info.anodsplace.applog.AppLog
+import info.anodsplace.framework.content.startActivitySafely
 import kotlinx.coroutines.launch
 
 @Keep
@@ -31,7 +32,7 @@ class InstalledActivity : BaseComposeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel.handleEvent(InstalledListSharedStateEvent.SetWideLayout(hingeDevice.layout.value))
+        viewModel.handleEvent(InstalledListSharedEvent.SetWideLayout(hingeDevice.layout.value))
 
         setContent {
             AppTheme(
@@ -69,15 +70,18 @@ class InstalledActivity : BaseComposeActivity() {
         }
     }
 
-    private fun onViewAction(action: InstalledListSharedStateAction) {
+    private fun onViewAction(action: InstalledListSharedAction) {
         when (action) {
-            InstalledListSharedStateAction.OnBackPressed -> onBackPressed()
-            is InstalledListSharedStateAction.OpenApp -> {
+            InstalledListSharedAction.OnBackPressed -> onBackPressed()
+            is InstalledListSharedAction.OpenApp -> {
                 val app = action.app
                 if (BuildConfig.DEBUG) {
                     AppLog.d(app.packageName)
                 }
                 DetailsDialog.show(app.appId, app.rowId, app.detailsUrl, supportFragmentManager)
+            }
+            is InstalledListSharedAction.StartActivity -> {
+                startActivitySafely(action.intent)
             }
         }
     }
@@ -85,7 +89,7 @@ class InstalledActivity : BaseComposeActivity() {
     override fun onBackPressed() {
         if (viewModel.viewState.wideLayout.isWideLayout) {
             if (viewModel.viewState.selectedApp != null) {
-                viewModel.handleEvent(InstalledListSharedStateEvent.SelectApp(app = null))
+                viewModel.handleEvent(InstalledListSharedEvent.SelectApp(app = null))
             } else {
                 super.onBackPressed()
             }

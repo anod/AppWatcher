@@ -23,7 +23,7 @@ fun InstalledTopBar(
         filterQuery: String,
         sortId: Int,
         selectionMode: Boolean,
-        onEvent: (InstalledListSharedStateEvent) -> Unit
+        onEvent: (InstalledListSharedEvent) -> Unit
 ) {
     val showSearchView by remember { mutableStateOf(filterQuery.isNotBlank()) }
     var topBarSortMenu by remember { mutableStateOf(false) }
@@ -33,26 +33,26 @@ fun InstalledTopBar(
             searchQuery = filterQuery,
             showSearch = showSearchView && !selectionMode,
             initialSearchFocus = true,
-            onValueChange = { onEvent(InstalledListSharedStateEvent.FilterByTitle(query = it)) },
+            onValueChange = { onEvent(InstalledListSharedEvent.FilterByTitle(query = it)) },
             onSearchAction = { },
             onNavigation = {
                 if (selectionMode) {
-                    onEvent(InstalledListSharedStateEvent.SwitchImportMode(selectionMode = false))
+                    onEvent(InstalledListSharedEvent.SwitchImportMode(selectionMode = false))
                 } else {
-                    onEvent(InstalledListSharedStateEvent.OnBackPressed)
+                    onEvent(InstalledListSharedEvent.OnBackPressed)
                 }
             },
             actions = {
                 if (selectionMode) {
-                    IconButton(onClick = { onEvent(InstalledListSharedStateEvent.SetSelection(all = false)) }) {
+                    IconButton(onClick = { onEvent(InstalledListSharedEvent.SetSelection(all = false)) }) {
                         Icon(imageVector = Icons.Default.Deselect, contentDescription = stringResource(id = R.string.none))
                     }
 
-                    IconButton(onClick = { onEvent(InstalledListSharedStateEvent.SetSelection(all = true)) }) {
+                    IconButton(onClick = { onEvent(InstalledListSharedEvent.SetSelection(all = true)) }) {
                         Icon(imageVector = Icons.Default.SelectAll, contentDescription = stringResource(id = R.string.all))
                     }
                 } else {
-                    IconButton(onClick = { onEvent(InstalledListSharedStateEvent.SwitchImportMode(selectionMode = true)) }) {
+                    IconButton(onClick = { onEvent(InstalledListSharedEvent.SwitchImportMode(selectionMode = true)) }) {
                         Icon(imageVector = Icons.Default.Ballot, contentDescription = stringResource(id = R.string.import_mode))
                     }
 
@@ -63,7 +63,7 @@ fun InstalledTopBar(
                     SortDropdownMenu(
                             selectedSortId = sortId,
                             onChangeSort = { index ->
-                                onEvent(InstalledListSharedStateEvent.ChangeSort(sortId = index))
+                                onEvent(InstalledListSharedEvent.ChangeSort(sortId = index))
                                 topBarSortMenu = false
                             },
                             expanded = topBarSortMenu,

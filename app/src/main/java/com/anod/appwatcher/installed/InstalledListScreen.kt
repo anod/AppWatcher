@@ -14,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.anod.appwatcher.R
 import com.anod.appwatcher.watchlist.ListState
@@ -26,7 +27,7 @@ import info.anodsplace.applog.AppLog
 fun InstalledListScreen(
     screenState: InstalledListSharedState,
     pagingSourceConfig: WatchListPagingSource.Config,
-    onEvent: (InstalledListSharedStateEvent) -> Unit
+    onEvent: (InstalledListSharedEvent) -> Unit
 ) {
     Scaffold(
             topBar = {
@@ -52,7 +53,7 @@ fun InstalledListScreen(
                             icon = { if (!enabled) {
                                 CircularProgressIndicator()
                             } },
-                            onClick = { if (enabled) { onEvent(InstalledListSharedStateEvent.Import) } }
+                            onClick = { if (enabled) { onEvent(InstalledListSharedEvent.Import) } }
                     )
                 }
             }
@@ -68,8 +69,8 @@ fun InstalledListScreen(
 
             val changelogUpdated by viewModel.changelogAdapter.updated.collectAsState(initial = false)
             
-            LaunchedEffect(key1 = changelogUpdated) {
-                AppLog.d("InstalledListScreen: changelogUpdated [$changelogUpdated}]")
+            LaunchedEffect(key1 = changelogUpdated, key2 = screenState.refreshRequest, key3 = screenState.packageChanged) {
+                AppLog.d("InstalledListScreen: refresh [$changelogUpdated, ${screenState.refreshRequest}, ${screenState.packageChanged}]")
                 items.refresh()
             }
             
@@ -79,12 +80,12 @@ fun InstalledListScreen(
                     items = items,
                     sortId = screenState.sortId,
                     titleQuery = screenState.titleFilter,
-                    isRefreshing = screenState.listState is ListState.SyncStarted,
+                    isRefreshing = screenState.refreshRequest > 0 && items.loadState.refresh is LoadState.Loading,
                     enablePullToRefresh = viewModel.prefs.enablePullToRefresh,
                     selection = screenState.selection,
                     selectionMode = screenState.selectionMode,
                     installedApps = viewModel.installedApps,
-                    onEvent = { event -> onEvent(InstalledListSharedStateEvent.ListEvent(event)) }
+                    onEvent = { event -> onEvent(InstalledListSharedEvent.ListEvent(event)) }
             )
         }
     }

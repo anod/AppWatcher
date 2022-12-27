@@ -1,10 +1,6 @@
 package com.anod.appwatcher.watchlist
 
 import android.app.Application
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.graphics.Rect
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -13,10 +9,8 @@ import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Tag
-import com.anod.appwatcher.installed.InstalledListSharedStateEvent
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.sync.SyncScheduler
-import com.anod.appwatcher.sync.UpdateCheck
 import com.anod.appwatcher.tags.AppsTagViewModel
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.SyncProgress
