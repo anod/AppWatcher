@@ -118,7 +118,7 @@ abstract class WatchListViewModel(pagingSourceConfig: WatchListPagingSource.Conf
 
     override fun handleEvent(event: WatchListEvent) {
         when (event) {
-            is WatchListEvent.FilterByTitle -> {
+            is WatchListEvent.FilterByTitle -> { // TODO: Not in use in compose implementation
                 viewState = viewState.copy(titleFilter = event.titleFilter)
                 pagingSource?.filterQuery = event.titleFilter
                 if (event.reload) {

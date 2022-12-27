@@ -34,6 +34,11 @@ class InstalledListViewModel(pagingSourceConfig: WatchListPagingSource.Config) :
             field = value
             (pagingSource as? InstalledPagingSource)?.selectionMode = value
         }
+    var filterQuery: String = ""
+        set(value) {
+            field = value
+            (pagingSource as? InstalledPagingSource)?.filterQuery = value
+        }
 
     override fun createPagingSource(): FilterablePagingSource {
         val pagingSource =  InstalledPagingSource(
@@ -44,6 +49,7 @@ class InstalledListViewModel(pagingSourceConfig: WatchListPagingSource.Config) :
         )
         pagingSource.sortId = sortId
         pagingSource.selectionMode = selectionMode
+        pagingSource.filterQuery = filterQuery
         return pagingSource
     }
 

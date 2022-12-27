@@ -25,23 +25,23 @@ class ChangelogAdapter(
     val updated = MutableSharedFlow<Boolean>(0, extraBufferCapacity = 1)
 
     suspend fun load(watchingPackages: List<String>, notWatchedPackages: List<InstalledPackage>) {
-        AppLog.d("ChangelogAdapter.load ${watchingPackages.size}, ${notWatchedPackages.size}, existing ${changelogs.keys.size}")
+        AppLog.d("w: ${watchingPackages.size}, nw: ${notWatchedPackages.size}, existing ${changelogs.keys.size}")
         try {
             job?.cancel()
             job = viewModelScope.launch {
-                AppLog.d("ChangelogAdapter collect $watchingPackages $notWatchedPackages")
+                AppLog.d("collect $watchingPackages $notWatchedPackages")
                 try {
                     val hasUpdates = updateChangelog(notWatchedPackages, watchingPackages)
                     if (hasUpdates) {
                         updated.emit(true)
                     }
                 } catch (e: Exception) {
-                    AppLog.d("ChangelogAdapter collect exception $e")
+                    AppLog.d("collect exception $e")
                     AppLog.e(e)
                 }
             }
         } catch (e: Exception) {
-            AppLog.d("ChangelogAdapter exception: $e")
+            AppLog.d("exception: $e")
             AppLog.e(e)
         }
     }
@@ -66,7 +66,7 @@ class ChangelogAdapter(
         if (unknownIds.isNotEmpty()) {
             unknownIds.associateByTo(changelogs, { it }, { null })
         }
-        AppLog.d("ChangelogAdapter updated $localIds, $loadIds, $unknownIds")
+        AppLog.d("updated $localIds, $loadIds, $unknownIds")
         return (localIds.isNotEmpty() || loadIds.isNotEmpty())
     }
 

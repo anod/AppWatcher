@@ -9,6 +9,7 @@ import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.watchlist.FilterablePagingSource
 import com.anod.appwatcher.watchlist.SectionItem
+import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.util.dayStartAgoMillis
 
 class InstalledPagingSource(
@@ -21,6 +22,7 @@ class InstalledPagingSource(
     var selectionMode: Boolean = false
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, SectionItem> {
+        AppLog.d("$params")
         val installed = InstalledTaskWorker(packageManager, sortId, filterQuery).run()
         val allInstalledPackageNames = installed.map { it.pkg.name }
         val watchingPackages = database.apps().loadRowIds(allInstalledPackageNames).associateBy({ it.packageName }, { it.rowId })

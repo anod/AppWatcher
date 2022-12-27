@@ -44,6 +44,7 @@ class WatchListPagingSource(
     }
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, SectionItem> {
+        AppLog.d("$params")
         val offset = params.key ?: 0
         val sortId = prefs.sortIndex
         var limit = params.loadSize

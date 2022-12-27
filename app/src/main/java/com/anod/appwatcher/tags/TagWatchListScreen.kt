@@ -43,7 +43,7 @@ fun TagWatchListScreen(screenState: WatchListSharedState, pagingSourceConfig: Wa
         null
     }
 
-    AppLog.d("Recomposition: TagWatchListScreen")
+    AppLog.d("Recomposition $screenState")
 
     Scaffold(
             topBar = {
@@ -76,13 +76,18 @@ fun TagWatchListScreen(screenState: WatchListSharedState, pagingSourceConfig: Wa
     ) { paddingValues ->
         HorizontalPager(count = filterPagesTitles.size, state = pagerState, modifier = Modifier.padding(paddingValues)) { pageIndex ->
             val pageConfig = pagingSourceConfig.copy(filterId = filterIds[pageIndex])
-            AppLog.d("Recomposition HorizontalPager ${pageConfig.filterId}")
             val viewModel: WatchListViewModel = viewModel(key = pageConfig.filterId.toString(), factory = AppsWatchListViewModel.Factory(pageConfig))
             val items = viewModel.pagingData.collectAsLazyPagingItems()
+
+            LaunchedEffect(key1 = screenState.titleFilter, key2 = screenState.sortId) {
+                AppLog.d("TagWatchListScreen: refresh [page=${pageConfig.filterId}] '${screenState.titleFilter}', ${screenState.sortId}")
+                items.refresh()
+            }
+
+            AppLog.d("TagWatchListScreen: Recomposition [page=${pageConfig.filterId}] ${items.hashCode()}")
+
             WatchListPage(
                     items = items,
-                    sortId = screenState.sortId,
-                    titleQuery = screenState.titleFilter,
                     isRefreshing = screenState.listState is ListState.SyncStarted,
                     enablePullToRefresh = viewModel.prefs.enablePullToRefresh,
                     installedApps = viewModel.installedApps,

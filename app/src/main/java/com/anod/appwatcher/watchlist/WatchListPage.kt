@@ -54,8 +54,6 @@ import org.koin.java.KoinJavaComponent.getKoin
 @Composable
 fun WatchListPage(
         items: LazyPagingItems<SectionItem>,
-        sortId: Int,
-        titleQuery: String,
         isRefreshing: Boolean,
         enablePullToRefresh: Boolean,
         installedApps: InstalledApps,
@@ -63,22 +61,8 @@ fun WatchListPage(
         selection: SelectionState = SelectionState(),
         selectionMode: Boolean = false
 ) {
-    LaunchedEffect(key1 = sortId, key2 = selectionMode) {
-        AppLog.d("Refresh list items - sort $sortId or selection mode $selectionMode changed")
-        items.refresh()
-    }
 
-    var currentQuery by remember { mutableStateOf(titleQuery) }
-    LaunchedEffect(titleQuery) {
-        if (currentQuery != titleQuery) {
-            onEvent(WatchListEvent.FilterByTitle(titleQuery, true))
-            AppLog.d("Refresh list items - title query changed '$titleQuery'")
-            currentQuery = titleQuery
-            items.refresh()
-        }
-    }
-
-    AppLog.d("Recomposition: WatchListPage [${sortId}, ${items.hashCode()}, '${titleQuery}', '${currentQuery}', ${selection.hashCode()}, ${selectionMode}]")
+    AppLog.d("Recomposition: WatchListPage [${items.hashCode()}, ${selection.hashCode()}, ${selectionMode}]")
 
     val isEmpty = items.loadState.source.refresh is LoadState.NotLoading && items.itemCount < 1
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isRefreshing)

@@ -11,6 +11,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -18,6 +21,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.anod.appwatcher.R
 import com.anod.appwatcher.watchlist.ListState
+import com.anod.appwatcher.watchlist.WatchListEvent
 import com.anod.appwatcher.watchlist.WatchListPage
 import com.anod.appwatcher.watchlist.WatchListPagingSource
 import info.anodsplace.applog.AppLog
@@ -29,6 +33,8 @@ fun InstalledListScreen(
     pagingSourceConfig: WatchListPagingSource.Config,
     onEvent: (InstalledListSharedEvent) -> Unit
 ) {
+    AppLog.d("Recomposition $screenState")
+
     Scaffold(
             topBar = {
                 InstalledTopBar(
@@ -62,24 +68,30 @@ fun InstalledListScreen(
             val viewModel: InstalledListViewModel = viewModel(factory = InstalledListViewModel.Factory(pagingSourceConfig))
             viewModel.sortId = screenState.sortId
             viewModel.selectionMode = screenState.selectionMode
-
-            AppLog.d("Recomposition: InstalledListScreen [${viewModel.sortId}, ${viewModel.hashCode()}, '${screenState.titleFilter}', ${screenState.selection.hashCode()}, ${screenState.selectionMode}]")
+            viewModel.filterQuery = screenState.titleFilter
 
             val items = viewModel.pagingData.collectAsLazyPagingItems()
-
             val changelogUpdated by viewModel.changelogAdapter.updated.collectAsState(initial = false)
-            
-            LaunchedEffect(key1 = changelogUpdated, key2 = screenState.refreshRequest, key3 = screenState.packageChanged) {
-                AppLog.d("InstalledListScreen: refresh [$changelogUpdated, ${screenState.refreshRequest}, ${screenState.packageChanged}]")
+            val refreshKey = remember(screenState, changelogUpdated) {
+                RefreshKey(
+                        changelogUpdated = changelogUpdated,
+                        refreshRequest = screenState.refreshRequest,
+                        packageChanged = screenState.packageChanged,
+                        titleFilter = screenState.titleFilter,
+                        selectionMode = screenState.selectionMode,
+                        sortId = screenState.sortId
+                )
+            }
+
+            LaunchedEffect(key1 = refreshKey) {
+                AppLog.d("Refresh $refreshKey")
                 items.refresh()
             }
-            
-            AppLog.d("Recomposition: InstalledListScreen items [${items.hashCode()}]")
+
+            AppLog.d("Recomposition [${items.hashCode()}] $refreshKey")
 
             WatchListPage(
                     items = items,
-                    sortId = screenState.sortId,
-                    titleQuery = screenState.titleFilter,
                     isRefreshing = screenState.refreshRequest > 0 && items.loadState.refresh is LoadState.Loading,
                     enablePullToRefresh = viewModel.prefs.enablePullToRefresh,
                     selection = screenState.selection,
@@ -90,3 +102,13 @@ fun InstalledListScreen(
         }
     }
 }
+
+private data class RefreshKey(
+        val changelogUpdated: Boolean,
+        val refreshRequest: Int,
+        val packageChanged: String,
+        val titleFilter: String,
+        val selectionMode: Boolean,
+        val sortId: Int
+)
+
