@@ -2,6 +2,14 @@ package com.anod.appwatcher.watchlist
 
 import android.content.Context
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.expandIn
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -12,6 +20,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowRight
+import androidx.compose.material.icons.filled.Smartphone
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,7 +40,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
 import coil.ImageLoader
 import coil.compose.AsyncImage
@@ -95,9 +104,9 @@ fun WatchListPage(
                         )
                     } else {
                         Box(modifier = Modifier
-                                .fillMaxWidth()
-                                .height(48.dp)
-                                .background(MaterialTheme.colorScheme.inverseOnSurface))
+                            .fillMaxWidth()
+                            .height(48.dp)
+                            .background(MaterialTheme.colorScheme.inverseOnSurface))
 
                     }
                 }
@@ -159,9 +168,9 @@ fun SectionHeader(item: SectionHeader, onClick: (() -> Unit)? = null) {
     if (onClick == null) {
         Row(
                 modifier = Modifier
-                        .height(48.dp)
-                        .fillMaxWidth()
-                        .padding(start = 8.dp, end = 8.dp),
+                    .height(48.dp)
+                    .fillMaxWidth()
+                    .padding(start = 8.dp, end = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
         ) {
             SectionHeaderText(text = text)
@@ -169,10 +178,10 @@ fun SectionHeader(item: SectionHeader, onClick: (() -> Unit)? = null) {
     } else {
         Row(
                 modifier = Modifier
-                        .height(48.dp)
-                        .fillMaxWidth()
-                        .clickable { onClick() }
-                        .padding(start = 8.dp, end = 8.dp),
+                    .height(48.dp)
+                    .fillMaxWidth()
+                    .clickable { onClick() }
+                    .padding(start = 8.dp, end = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -201,8 +210,8 @@ fun ChangelogText(text: String, noNewDetails: Boolean) {
     Text(
             text = text,
             modifier = Modifier
-                    .alpha(if (noNewDetails) 0.4f else 1.0f)
-                    .padding(top = 4.dp),
+                .alpha(if (noNewDetails) 0.4f else 1.0f)
+                .padding(top = 4.dp),
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.bodySmall,
@@ -251,9 +260,9 @@ fun AppItem(
     Box {
         Row(
             modifier = Modifier
-                    .combinedClickable(enabled = true, onClick = onClick, onLongClick = onLongClick)
-                    .heightIn(min = 68.dp)
-                    .padding(top = 8.dp, bottom = 8.dp, start = 16.dp, end = 16.dp)
+                .combinedClickable(enabled = true, onClick = onClick, onLongClick = onLongClick)
+                .heightIn(min = 68.dp)
+                .padding(top = 8.dp, bottom = 8.dp, start = 16.dp, end = 16.dp)
         ) {
             val imageRequest = remember {
                 mutableStateOf(appIconLoader.request(app.iconUrl))
@@ -267,14 +276,11 @@ fun AppItem(
                             modifier = Modifier.size(40.dp),
                             placeholder = painterResource(id = R.drawable.ic_app_icon_placeholder)
                     )
-                    if (itemSelection == AppViewHolder.Selection.Selected) {
-                        Icon(
-                                modifier = Modifier.size(18.dp).align(Alignment.BottomEnd),
-                                painter = painterResource(id = R.drawable.ic_check_circle_selected_18dp),
-                                contentDescription = stringResource(id = coil.compose.base.R.string.selected),
-                                tint = Color.Unspecified
-                        )
-                    }
+                    SelectedIcon(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd),
+                        itemSelection = itemSelection
+                    )
                 }
             } else {
                 AsyncImage(
@@ -291,10 +297,21 @@ fun AppItem(
                 Text(text = title, style = MaterialTheme.typography.bodyLarge)
                 Row(
                         modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.Top
                 ) {
+                    if (isLocalApp && app.rowId > 0) {
+                        Icon(
+                            imageVector = Icons.Default.Visibility,
+                            contentDescription = stringResource(id = R.string.watched),
+                            modifier = Modifier.size(16.dp).padding(end = 4.dp)
+                        )
+                    }
                     if (appItemState.installed || isLocalApp) {
-                        Icon(painter = painterResource(id = R.drawable.ic_stat_communication_stay_primary_portrait), contentDescription = stringResource(id = R.string.installed), modifier = Modifier.padding(end = 4.dp))
+                        Icon(
+                            imageVector = Icons.Default.Smartphone,
+                            contentDescription = stringResource(id = R.string.installed),
+                            modifier = Modifier.size(16.dp).padding(end = 4.dp)
+                        )
                     }
 //                    val versionText: String by remember {
 //                        mutableStateOf(formatVersionText(app.versionName, app.versionNumber, 0, context))
@@ -317,30 +334,63 @@ fun AppItem(
                     }
                 }
                 if (isLocalApp || appItemState.showRecent) {
-                    if (isLocalApp) {
-                        if (changesHtml.isNotBlank()) {
-                            ChangelogText(text = changesHtml, noNewDetails = item.noNewDetails)
-                        }
-                    } else {
-                        if (changesHtml.isBlank()) {
-                            ChangelogText(text = stringResource(id = R.string.no_recent_changes), noNewDetails = true)
-                        } else {
-                            ChangelogText(text = changesHtml, noNewDetails = item.noNewDetails)
-                        }
-                    }
+                    Changelog(
+                        isLocalApp = isLocalApp,
+                        changesHtml = changesHtml,
+                        noNewDetails = item.noNewDetails
+                    )
                 }
             }
         }
 
         Divider(modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 72.dp)
-                .align(alignment = Alignment.BottomEnd),
+            .fillMaxWidth()
+            .padding(start = 72.dp)
+            .align(alignment = Alignment.BottomEnd),
                 color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
         )
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun SelectedIcon(modifier: Modifier, itemSelection: AppViewHolder.Selection) {
+    AnimatedVisibility(
+        modifier = modifier,
+        visible = itemSelection == AppViewHolder.Selection.Selected,
+        enter =  fadeIn() + scaleIn(),
+        exit = fadeOut() + scaleOut(),
+        label = "SelectedIconVisibility"
+
+) {
+        Icon(
+            modifier = modifier.size(18.dp),
+            painter = painterResource(id = R.drawable.ic_check_circle_selected_18dp),
+            contentDescription = stringResource(id = coil.compose.base.R.string.selected),
+            tint = Color.Unspecified
+        )
+    }
+}
+
+@Composable
+fun Changelog(isLocalApp: Boolean, changesHtml: String, noNewDetails: Boolean) {
+    if (isLocalApp) {
+        AnimatedVisibility(
+            visible = changesHtml.isNotBlank(),
+            enter =  fadeIn(),
+            exit = fadeOut(),
+            label = "ChangelogVisibility"
+        ) {
+            ChangelogText(text = changesHtml, noNewDetails = noNewDetails)
+        }
+    } else {
+        if (changesHtml.isBlank()) {
+            ChangelogText(text = stringResource(id = R.string.no_recent_changes), noNewDetails = true)
+        } else {
+            ChangelogText(text = changesHtml, noNewDetails = noNewDetails)
+        }
+    }
+}
 
 private fun getPackageSelection(packageName: String, selectionMode: Boolean, selection: SelectionState): AppViewHolder.Selection {
     return if (selectionMode) {
@@ -408,28 +458,28 @@ fun EmptyItem(
 ) {
     Column(
             modifier = modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
+                .fillMaxWidth()
+                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(painter = painterResource(id = R.drawable.ic_empty_box), contentDescription = null)
         Text(text = stringResource(id = R.string.watch_list_is_empty), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 24.dp))
         Button(onClick = { onEvent(WatchListEvent.EmptyButton(1)) }, modifier = Modifier
-                .defaultMinSize(minWidth = 188.dp)
-                .padding(top = 8.dp)) {
+            .defaultMinSize(minWidth = 188.dp)
+            .padding(top = 8.dp)) {
             button1Text()
         }
         if (button2Text != null) {
             Button(onClick = { onEvent(WatchListEvent.EmptyButton(2)) }, modifier = Modifier
-                    .defaultMinSize(minWidth = 188.dp)
-                    .padding(top = 8.dp)) {
+                .defaultMinSize(minWidth = 188.dp)
+                .padding(top = 8.dp)) {
                 button2Text()
             }
         }
         if (button3Text != null) {
             Button(onClick = { onEvent(WatchListEvent.EmptyButton(3)) }, modifier = Modifier
-                    .defaultMinSize(minWidth = 188.dp)
-                    .padding(top = 8.dp)) {
+                .defaultMinSize(minWidth = 188.dp)
+                .padding(top = 8.dp)) {
                 button3Text()
             }
         }
@@ -456,16 +506,16 @@ fun WatchListEmptyPreview() {
                         Box(
                                 contentAlignment = Alignment.Center,
                                 modifier = Modifier
-                                        .size(width = 140.dp, height = 40.dp)
-                                        .background(MaterialTheme.colorScheme.primary)) {
+                                    .size(width = 140.dp, height = 40.dp)
+                                    .background(MaterialTheme.colorScheme.primary)) {
                             Text("On primary", color = MaterialTheme.colorScheme.onPrimary)
                         }
 
                         Box(
                                 contentAlignment = Alignment.Center,
                                 modifier = Modifier
-                                        .size(width = 140.dp, height = 40.dp)
-                                        .background(MaterialTheme.colorScheme.primaryContainer)) {
+                                    .size(width = 140.dp, height = 40.dp)
+                                    .background(MaterialTheme.colorScheme.primaryContainer)) {
                             Text("On container", color = MaterialTheme.colorScheme.onPrimaryContainer)
                         }
                     }
@@ -540,7 +590,7 @@ fun WatchListPreview() {
             ),
             SectionItem.App(AppListItem(
                     app = App(
-                            rowId = -1,
+                            rowId = 22,
                             appId = "appId2",
                             packageName = "package2",
                             versionNumber = 11223300,
@@ -559,7 +609,7 @@ fun WatchListPreview() {
                     changeDetails = "Nunc aliquam egestas diam, id bibendum massa. Duis vitae lorem nunc. Integer eu elit urna. Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
                     noNewDetails = false,
                     recentFlag = true),
-                    isLocal = false
+                    isLocal = true
             ),
             SectionItem.App(AppListItem(
                     app = App(

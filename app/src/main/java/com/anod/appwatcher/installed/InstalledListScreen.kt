@@ -92,7 +92,7 @@ fun InstalledListScreen(
 
             WatchListPage(
                     items = items,
-                    isRefreshing = screenState.refreshRequest > 0 && items.loadState.refresh is LoadState.Loading,
+                    isRefreshing = items.loadState.refresh is LoadState.Loading && (screenState.refreshRequest > 0 || items.itemCount < 1),
                     enablePullToRefresh = viewModel.prefs.enablePullToRefresh,
                     selection = screenState.selection,
                     selectionMode = screenState.selectionMode,
