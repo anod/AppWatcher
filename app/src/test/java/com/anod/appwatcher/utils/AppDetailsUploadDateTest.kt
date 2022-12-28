@@ -29,6 +29,7 @@ class AppDetailsUploadDateTest {
         val dates = listOf(
                 DateDesc("en_CA", "Sept 1, 2020", "2020-09-01"),
                 DateDesc("ru_RU", "8 сент. 2021 г.", "2021-09-08"),
+                DateDesc("ru_RU", "22 нояб. 2021 г.", "2021-11-22"),
 
                 DateDesc("nl_BE", "23 mrt. 2018", "2018-03-23"),
 
@@ -99,11 +100,9 @@ class AppDetailsUploadDateTest {
                 assertEquals(date.locale.toString(), date.expected, sdf.format(actualDate))
             } catch (e: Exception) {
                 val expected = SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(date.expected)!!
-                val formats = UploadDateParserFactory.create(date.locale).let { formatters ->
-                    formatters.map { df ->
-                        df.format(expected)
-                    }.distinct()
-                }
+                val formats = UploadDateParserFactory.create(date.locale).map { df ->
+                    df.format(expected)
+                }.distinct()
                 val formatted = "   [" + formats.joinToString("]\n   [") + "]\n"
 
                 fail("[${date.locale}] Source: [${date.date}], Expected one of: \n$formatted")

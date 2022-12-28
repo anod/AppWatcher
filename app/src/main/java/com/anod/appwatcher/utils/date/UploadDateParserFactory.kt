@@ -4,7 +4,7 @@ import com.anod.appwatcher.utils.date.CustomMonthDateFormat.Companion.ORDER_DMY
 import com.anod.appwatcher.utils.date.CustomMonthDateFormat.Companion.ORDER_MDY
 import java.text.DateFormat
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Locale
 
 /**
  * @author Alex Gavrishev
@@ -31,24 +31,42 @@ object UploadDateParserFactory {
         val lang = locale.language
         return when {
             lang == ru_ALL.language -> listOf(
-                    CustomMonthDateFormat(RU_SHORT_MONTHS, order = ORDER_DMY)
+                    CustomMonthDateFormat(RU_SHORT_MONTHS, order = ORDER_DMY),
+                    SimpleDateFormat("d MMM. yyyy", locale),
+                    SimpleDateFormat("d MMM yyyy", locale),
+                    DateFormat.getDateInstance(DateFormat.MEDIUM, locale),
             )
+
             lang == sv_ALL.language -> listOf(
-                    CustomMonthDateFormat(SV_SHORT_MONTHS, order = ORDER_DMY)
+                    CustomMonthDateFormat(SV_SHORT_MONTHS, order = ORDER_DMY),
+                    SimpleDateFormat("d MMM. yyyy", locale),
+                    SimpleDateFormat("d MMM yyyy", locale),
+                    DateFormat.getDateInstance(DateFormat.MEDIUM, locale),
             )
+
             locale == fr_CA -> listOf(
-                    CustomMonthDateFormat(FR_CA_SHORT_MONTHS, order = ORDER_DMY)
+                    CustomMonthDateFormat(FR_CA_SHORT_MONTHS, order = ORDER_DMY),
+                    SimpleDateFormat("d MMM. yyyy", locale),
+                    SimpleDateFormat("d MMM yyyy", locale),
+                    DateFormat.getDateInstance(DateFormat.MEDIUM, locale),
             )
+
             lang == de_ALL.language -> listOf(
-                    SimpleDateFormat("dd.M.yyyy", locale)
+                    SimpleDateFormat("dd.M.yyyy", locale),
+                    DateFormat.getDateInstance(DateFormat.MEDIUM, locale),
             )
+
             lang == hu_ALL.language -> listOf(
-                    SimpleDateFormat("yyyy. MMM d.", locale)
+                    SimpleDateFormat("yyyy. MMM d.", locale),
+                    DateFormat.getDateInstance(DateFormat.MEDIUM, locale),
             )
+
             locale == pt_BR -> listOf(
                     SimpleDateFormat("dd 'de' MMM. 'de' yyyy", locale),
-                    SimpleDateFormat("dd 'de' MMM 'de' yyyy", locale)
+                    SimpleDateFormat("dd 'de' MMM 'de' yyyy", locale),
+                    DateFormat.getDateInstance(DateFormat.MEDIUM, locale),
             )
+
             else -> listOf(
                     SimpleDateFormat("d MMM. yyyy", locale),
                     SimpleDateFormat("d MMM yyyy", locale),

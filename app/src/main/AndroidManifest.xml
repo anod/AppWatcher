@@ -37,6 +37,7 @@
         android:label="@string/app_name"
         android:supportsRtl="false"
         android:theme="@style/AppTheme.Main"
+        android:localeConfig="@xml/locales_config"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".ShareRecieverActivity"
