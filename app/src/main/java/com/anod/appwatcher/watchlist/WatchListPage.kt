@@ -4,12 +4,10 @@ import android.content.Context
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.expandIn
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -60,53 +58,52 @@ import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.text.Html
 import org.koin.java.KoinJavaComponent.getKoin
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun WatchListPage(
-        items: LazyPagingItems<SectionItem>,
-        isRefreshing: Boolean,
-        enablePullToRefresh: Boolean,
-        installedApps: InstalledApps,
-        onEvent: (WatchListEvent) -> Unit,
-        selection: SelectionState = SelectionState(),
-        selectionMode: Boolean = false
+    items: LazyPagingItems<SectionItem>,
+    isRefreshing: Boolean,
+    enablePullToRefresh: Boolean,
+    installedApps: InstalledApps,
+    onEvent: (WatchListEvent) -> Unit,
+    selection: SelectionState = SelectionState(),
+    selectionMode: Boolean = false
 ) {
 
     AppLog.d("Recomposition: WatchListPage [${items.hashCode()}, ${selection.hashCode()}, ${selectionMode}]")
 
     val isEmpty = items.loadState.source.refresh is LoadState.NotLoading && items.itemCount < 1
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isRefreshing)
-    SwipeRefresh(
-            modifier = Modifier.fillMaxSize(),
-            state = swipeRefreshState,
-            swipeEnabled = enablePullToRefresh,
-            onRefresh = { onEvent(WatchListEvent.Refresh) }
-    ) {
+    SwipeRefresh(modifier = Modifier.fillMaxSize(),
+        state = swipeRefreshState,
+        swipeEnabled = enablePullToRefresh,
+        onRefresh = { onEvent(WatchListEvent.Refresh) }) {
         LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
         ) {
             if (isEmpty) {
                 item {
                     EmptyItem(onEvent = onEvent, modifier = Modifier.padding(top = 128.dp))
                 }
             } else {
-                itemsIndexed(
-                        items = items,
-                        key = { _, item -> item.hashCode() }
-                ) { index, item ->
+                itemsIndexed(items = items, key = { _, item -> item.hashCode() }) { index, item ->
                     if (item != null) { // TODO: Preload?
                         WatchListSectionItem(
-                                item = item,
-                                index = index,
-                                onEvent = onEvent,
-                                selection = selection,
-                                selectionMode = selectionMode,
-                                installedApps = installedApps
+                            modifier = Modifier.animateItemPlacement(),
+                            item = item,
+                            index = index,
+                            onEvent = onEvent,
+                            selection = selection,
+                            selectionMode = selectionMode,
+                            installedApps = installedApps
                         )
                     } else {
-                        Box(modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp)
-                            .background(MaterialTheme.colorScheme.inverseOnSurface))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp)
+                                .background(MaterialTheme.colorScheme.inverseOnSurface)
+                        )
 
                     }
                 }
@@ -118,39 +115,49 @@ fun WatchListPage(
 
 @Composable
 fun WatchListSectionItem(
-        item: SectionItem,
-        index: Int,
-        onEvent: (WatchListEvent) -> Unit,
-        installedApps: InstalledApps,
-        selection: SelectionState = SelectionState(),
-        selectionMode: Boolean = false,
-        appIconLoader: AppIconLoader = getKoin().get()
+    item: SectionItem,
+    index: Int,
+    onEvent: (WatchListEvent) -> Unit,
+    installedApps: InstalledApps,
+    modifier: Modifier = Modifier,
+    selection: SelectionState = SelectionState(),
+    selectionMode: Boolean = false,
+    appIconLoader: AppIconLoader = getKoin().get(),
 ) {
     when (item) {
         is SectionItem.Header -> when (item.type) {
-            is SectionHeader.RecentlyInstalled -> SectionHeader(item.type, onClick = { onEvent(WatchListEvent.ItemClick(item, index)) })
-            else -> SectionHeader(item.type, onClick = null)
+            is SectionHeader.RecentlyInstalled -> SectionHeader(item.type,
+                onClick = { onEvent(WatchListEvent.ItemClick(item, index)) })
+
+            else -> SectionHeader(
+                item.type, onClick = null
+            )
         }
+
         is SectionItem.App -> AppItem(
-                item = item.appListItem,
-                isLocalApp = item.isLocal,
-                onClick = { onEvent(WatchListEvent.ItemClick(item, index)) },
-                onLongClick = { onEvent(WatchListEvent.ItemLongClick(item, index)) },
-                selection = selection,
-                selectionMode = selectionMode,
-                installedApps = installedApps,
-                appIconLoader = appIconLoader
+            modifier = modifier,
+            item = item.appListItem,
+            isLocalApp = item.isLocal,
+            onClick = { onEvent(WatchListEvent.ItemClick(item, index)) },
+            onLongClick = { onEvent(WatchListEvent.ItemLongClick(item, index)) },
+            selection = selection,
+            selectionMode = selectionMode,
+            installedApps = installedApps,
+            appIconLoader = appIconLoader
         )
+
         is SectionItem.OnDevice -> AppItem(
-                item = item.appListItem,
-                isLocalApp = true,
-                onClick = { onEvent(WatchListEvent.ItemClick(item, index)) },
-                onLongClick = { onEvent(WatchListEvent.ItemLongClick(item, index)) },
-                selection = selection,
-                selectionMode = selectionMode,
-                installedApps = installedApps,
-                appIconLoader = appIconLoader
+            modifier = modifier,
+            item = item.appListItem,
+            isLocalApp = true,
+            onClick = { onEvent(WatchListEvent.ItemClick(item, index)) },
+            onLongClick = { onEvent(WatchListEvent.ItemLongClick(item, index)) },
+            selection = selection,
+            selectionMode = selectionMode,
+            installedApps = installedApps,
+            appIconLoader = appIconLoader
         )
+
         is SectionItem.Recent -> RecentItem()
         is SectionItem.Empty -> EmptyItem(onEvent = onEvent)
     }
@@ -167,26 +174,30 @@ fun SectionHeader(item: SectionHeader, onClick: (() -> Unit)? = null) {
     }
     if (onClick == null) {
         Row(
-                modifier = Modifier
-                    .height(48.dp)
-                    .fillMaxWidth()
-                    .padding(start = 8.dp, end = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .height(48.dp)
+                .fillMaxWidth()
+                .padding(start = 8.dp, end = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             SectionHeaderText(text = text)
         }
     } else {
         Row(
-                modifier = Modifier
-                    .height(48.dp)
-                    .fillMaxWidth()
-                    .clickable { onClick() }
-                    .padding(start = 8.dp, end = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+            modifier = Modifier
+                .height(48.dp)
+                .fillMaxWidth()
+                .clickable { onClick() }
+                .padding(start = 8.dp, end = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             SectionHeaderText(text = text)
-            Icon(imageVector = Icons.Default.ArrowRight, contentDescription = text, tint = MaterialTheme.colorScheme.primary)
+            Icon(
+                imageVector = Icons.Default.ArrowRight,
+                contentDescription = text,
+                tint = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }
@@ -194,42 +205,45 @@ fun SectionHeader(item: SectionHeader, onClick: (() -> Unit)? = null) {
 @Composable
 fun SectionHeaderText(text: String) {
     Text(
-            text = text.toUpperCase(locale = Locale.current),
-            maxLines = 1,
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.primary,
+        text = text.toUpperCase(locale = Locale.current),
+        maxLines = 1,
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.primary,
     )
 }
 
 private val newLineRegex = Regex("\n+")
 
-data class AppItemState(val color: Color, val text: String, val installed: Boolean, val showRecent: Boolean)
+data class AppItemState(
+    val color: Color, val text: String, val installed: Boolean, val showRecent: Boolean
+)
 
 @Composable
 fun ChangelogText(text: String, noNewDetails: Boolean) {
     Text(
-            text = text,
-            modifier = Modifier
-                .alpha(if (noNewDetails) 0.4f else 1.0f)
-                .padding(top = 4.dp),
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            style = MaterialTheme.typography.bodySmall,
-            lineHeight = 14.sp
+        text = text,
+        modifier = Modifier
+            .alpha(if (noNewDetails) 0.4f else 1.0f)
+            .padding(top = 4.dp),
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis,
+        style = MaterialTheme.typography.bodyMedium,
+        lineHeight = 16.sp
     )
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AppItem(
-        item: AppListItem,
-        isLocalApp: Boolean,
-        onClick: (() -> Unit),
-        onLongClick: (() -> Unit),
-        installedApps: InstalledApps,
-        selection: SelectionState = SelectionState(),
-        selectionMode: Boolean = false,
-        appIconLoader: AppIconLoader = getKoin().get()
+    item: AppListItem,
+    isLocalApp: Boolean,
+    onClick: (() -> Unit),
+    onLongClick: (() -> Unit),
+    installedApps: InstalledApps,
+    modifier: Modifier = Modifier,
+    selection: SelectionState = SelectionState(),
+    selectionMode: Boolean = false,
+    appIconLoader: AppIconLoader = getKoin().get(),
 ) {
     val view = LocalView.current
     val context = LocalContext.current
@@ -237,11 +251,9 @@ fun AppItem(
     val title: String by remember { mutableStateOf(app.generateTitle(view.resources).toString()) }
     val changesHtml: String by remember {
         if (item.changeDetails?.isNotBlank() == true) {
-            mutableStateOf(Html.parse(item.changeDetails)
-                    .toString()
-                    .replace(newLineRegex, "\n")
-                    .removePrefix(app.versionName + "\n")
-                    .removePrefix(app.versionName + ":\n")
+            mutableStateOf(
+                Html.parse(item.changeDetails).toString().replace(newLineRegex, "\n")
+                    .removePrefix(app.versionName + "\n").removePrefix(app.versionName + ":\n")
             )
         } else mutableStateOf("")
     }
@@ -254,13 +266,19 @@ fun AppItem(
         mutableStateOf(getPackageSelection(app.packageName, selectionMode, selection))
     }
     val appItemState by remember {
-        mutableStateOf(calcAppItemState(app, item.recentFlag, textColor, primaryColor, packageInfo, context))
+        mutableStateOf(
+            calcAppItemState(
+                app, item.recentFlag, textColor, primaryColor, packageInfo, context
+            )
+        )
     }
 
-    Box {
+    Box(modifier = modifier) {
         Row(
             modifier = Modifier
-                .combinedClickable(enabled = true, onClick = onClick, onLongClick = onLongClick)
+                .combinedClickable(
+                    enabled = true, onClick = onClick, onLongClick = onLongClick
+                )
                 .heightIn(min = 68.dp)
                 .padding(top = 8.dp, bottom = 8.dp, start = 16.dp, end = 16.dp)
         ) {
@@ -270,47 +288,49 @@ fun AppItem(
             if (selectionMode) {
                 Box {
                     AsyncImage(
-                            model = imageRequest.value,
-                            contentDescription = title,
-                            imageLoader = appIconLoader.coilLoader,
-                            modifier = Modifier.size(40.dp),
-                            placeholder = painterResource(id = R.drawable.ic_app_icon_placeholder)
-                    )
-                    SelectedIcon(
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd),
-                        itemSelection = itemSelection
-                    )
-                }
-            } else {
-                AsyncImage(
                         model = imageRequest.value,
                         contentDescription = title,
                         imageLoader = appIconLoader.coilLoader,
                         modifier = Modifier.size(40.dp),
                         placeholder = painterResource(id = R.drawable.ic_app_icon_placeholder)
+                    )
+                    SelectedIcon(
+                        modifier = Modifier.align(Alignment.BottomEnd),
+                        itemSelection = itemSelection
+                    )
+                }
+            } else {
+                AsyncImage(
+                    model = imageRequest.value,
+                    contentDescription = title,
+                    imageLoader = appIconLoader.coilLoader,
+                    modifier = Modifier.size(40.dp),
+                    placeholder = painterResource(id = R.drawable.ic_app_icon_placeholder)
                 )
             }
             Column(
-                    modifier = Modifier.padding(start = 16.dp)
+                modifier = Modifier.padding(start = 16.dp)
             ) {
                 Text(text = title, style = MaterialTheme.typography.bodyLarge)
                 Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.Top
+                    modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top
                 ) {
                     if (isLocalApp && app.rowId > 0) {
                         Icon(
                             imageVector = Icons.Default.Visibility,
                             contentDescription = stringResource(id = R.string.watched),
-                            modifier = Modifier.size(16.dp).padding(end = 4.dp)
+                            modifier = Modifier
+                                .size(16.dp)
+                                .padding(end = 4.dp)
                         )
                     }
                     if (appItemState.installed || isLocalApp) {
                         Icon(
                             imageVector = Icons.Default.Smartphone,
                             contentDescription = stringResource(id = R.string.installed),
-                            modifier = Modifier.size(16.dp).padding(end = 4.dp)
+                            modifier = Modifier
+                                .size(16.dp)
+                                .padding(end = 4.dp)
                         )
                     }
 //                    val versionText: String by remember {
@@ -318,18 +338,18 @@ fun AppItem(
 //                    }
 //                    VersionText(text = versionText, color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f))
                     Text(
-                            text = appItemState.text,
-                            color = appItemState.color,
-                            modifier = Modifier.weight(1f),
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.bodySmall
+                        text = appItemState.text,
+                        color = appItemState.color,
+                        modifier = Modifier.weight(1f),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.bodySmall
                     )
                     if (app.uploadDate.isNotEmpty()) {
                         Text(
-                                text = app.uploadDate,
-                                maxLines = 1,
-                                style = MaterialTheme.typography.bodySmall
+                            text = app.uploadDate,
+                            maxLines = 1,
+                            style = MaterialTheme.typography.bodySmall
                         )
                     }
                 }
@@ -343,11 +363,12 @@ fun AppItem(
             }
         }
 
-        Divider(modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 72.dp)
-            .align(alignment = Alignment.BottomEnd),
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+        Divider(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 72.dp)
+                .align(alignment = Alignment.BottomEnd),
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
         )
     }
 }
@@ -358,11 +379,11 @@ fun SelectedIcon(modifier: Modifier, itemSelection: AppViewHolder.Selection) {
     AnimatedVisibility(
         modifier = modifier,
         visible = itemSelection == AppViewHolder.Selection.Selected,
-        enter =  fadeIn() + scaleIn(),
+        enter = fadeIn() + scaleIn(),
         exit = fadeOut() + scaleOut(),
         label = "SelectedIconVisibility"
 
-) {
+    ) {
         Icon(
             modifier = modifier.size(18.dp),
             painter = painterResource(id = R.drawable.ic_check_circle_selected_18dp),
@@ -375,31 +396,34 @@ fun SelectedIcon(modifier: Modifier, itemSelection: AppViewHolder.Selection) {
 @Composable
 fun Changelog(isLocalApp: Boolean, changesHtml: String, noNewDetails: Boolean) {
     if (isLocalApp) {
-        AnimatedVisibility(
-            visible = changesHtml.isNotBlank(),
-            enter =  fadeIn(),
-            exit = fadeOut(),
-            label = "ChangelogVisibility"
-        ) {
-            ChangelogText(text = changesHtml, noNewDetails = noNewDetails)
-        }
+        ChangelogText(text = changesHtml, noNewDetails = noNewDetails)
     } else {
         if (changesHtml.isBlank()) {
-            ChangelogText(text = stringResource(id = R.string.no_recent_changes), noNewDetails = true)
+            ChangelogText(
+                text = stringResource(id = R.string.no_recent_changes), noNewDetails = true
+            )
         } else {
             ChangelogText(text = changesHtml, noNewDetails = noNewDetails)
         }
     }
 }
 
-private fun getPackageSelection(packageName: String, selectionMode: Boolean, selection: SelectionState): AppViewHolder.Selection {
+private fun getPackageSelection(
+    packageName: String, selectionMode: Boolean, selection: SelectionState
+): AppViewHolder.Selection {
     return if (selectionMode) {
-        if (selection.contains(packageName))
-            AppViewHolder.Selection.Selected else AppViewHolder.Selection.NotSelected
+        if (selection.contains(packageName)) AppViewHolder.Selection.Selected else AppViewHolder.Selection.NotSelected
     } else AppViewHolder.Selection.None
 }
 
-private fun calcAppItemState(app: App, recentFlag: Boolean, textColor: Color, primaryColor: Color, packageInfo: InstalledApps.Info, context: Context): AppItemState {
+private fun calcAppItemState(
+    app: App,
+    recentFlag: Boolean,
+    textColor: Color,
+    primaryColor: Color,
+    packageInfo: InstalledApps.Info,
+    context: Context
+): AppItemState {
     var color = textColor
     var installed = false
     val text = when {
@@ -407,22 +431,28 @@ private fun calcAppItemState(app: App, recentFlag: Boolean, textColor: Color, pr
             color = Amber800
             context.getString(R.string.updates_not_available)
         }
+
         packageInfo.isInstalled -> {
             installed = true
             when {
                 app.versionNumber > packageInfo.versionCode -> {
                     color = Amber800
-                    formatVersionText(packageInfo.versionName, packageInfo.versionCode, app.versionNumber, context)
+                    formatVersionText(
+                        packageInfo.versionName, packageInfo.versionCode, app.versionNumber, context
+                    )
                 }
+
                 app.status == AppInfoMetadata.STATUS_UPDATED || recentFlag -> {
                     color = primaryColor
                     formatVersionText(packageInfo.versionName, packageInfo.versionCode, 0, context)
                 }
+
                 else -> {
                     formatVersionText(packageInfo.versionName, packageInfo.versionCode, 0, context)
                 }
             }
         }
+
         else -> {
             if (app.status == AppInfoMetadata.STATUS_UPDATED || recentFlag) {
                 color = primaryColor
@@ -450,36 +480,49 @@ fun RecentItem() {
 
 @Composable
 fun EmptyItem(
-        onEvent: (WatchListEvent) -> Unit,
-        modifier: Modifier = Modifier,
-        button1Text: @Composable () -> Unit = { Text(text = stringResource(id = R.string.search_for_an_app)) },
-        button2Text: @Composable (() -> Unit)? = { Text(text = stringResource(id = R.string.import_installed)) },
-        button3Text: @Composable (() -> Unit)? = { Text(text = stringResource(id = R.string.share_from_play_store)) },
+    onEvent: (WatchListEvent) -> Unit,
+    modifier: Modifier = Modifier,
+    button1Text: @Composable () -> Unit = { Text(text = stringResource(id = R.string.search_for_an_app)) },
+    button2Text: @Composable (() -> Unit)? = { Text(text = stringResource(id = R.string.import_installed)) },
+    button3Text: @Composable (() -> Unit)? = { Text(text = stringResource(id = R.string.share_from_play_store)) },
 ) {
     Column(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(painter = painterResource(id = R.drawable.ic_empty_box), contentDescription = null)
-        Text(text = stringResource(id = R.string.watch_list_is_empty), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 24.dp))
-        Button(onClick = { onEvent(WatchListEvent.EmptyButton(1)) }, modifier = Modifier
-            .defaultMinSize(minWidth = 188.dp)
-            .padding(top = 8.dp)) {
+        Text(
+            text = stringResource(id = R.string.watch_list_is_empty),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(top = 24.dp)
+        )
+        Button(
+            onClick = { onEvent(WatchListEvent.EmptyButton(1)) },
+            modifier = Modifier
+                .defaultMinSize(minWidth = 188.dp)
+                .padding(top = 8.dp)
+        ) {
             button1Text()
         }
         if (button2Text != null) {
-            Button(onClick = { onEvent(WatchListEvent.EmptyButton(2)) }, modifier = Modifier
-                .defaultMinSize(minWidth = 188.dp)
-                .padding(top = 8.dp)) {
+            Button(
+                onClick = { onEvent(WatchListEvent.EmptyButton(2)) },
+                modifier = Modifier
+                    .defaultMinSize(minWidth = 188.dp)
+                    .padding(top = 8.dp)
+            ) {
                 button2Text()
             }
         }
         if (button3Text != null) {
-            Button(onClick = { onEvent(WatchListEvent.EmptyButton(3)) }, modifier = Modifier
-                .defaultMinSize(minWidth = 188.dp)
-                .padding(top = 8.dp)) {
+            Button(
+                onClick = { onEvent(WatchListEvent.EmptyButton(3)) },
+                modifier = Modifier
+                    .defaultMinSize(minWidth = 188.dp)
+                    .padding(top = 8.dp)
+            ) {
                 button3Text()
             }
         }
@@ -490,39 +533,48 @@ fun EmptyItem(
 @Composable
 fun WatchListEmptyPreview() {
     val appIconLoader = AppIconLoader.Simple(
-            LocalContext.current,
-            ImageLoader.Builder(LocalContext.current).build()
+        LocalContext.current, ImageLoader.Builder(LocalContext.current).build()
     )
     val installedApps = InstalledApps.StaticMap(mapOf())
     val items = listOf(SectionItem.Empty)
 
     AppTheme(
-            customPrimaryColor = Color.Yellow
+        customPrimaryColor = Color.Yellow
     ) {
         Surface {
             LazyColumn {
                 item {
                     Row {
                         Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier
-                                    .size(width = 140.dp, height = 40.dp)
-                                    .background(MaterialTheme.colorScheme.primary)) {
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .size(width = 140.dp, height = 40.dp)
+                                .background(MaterialTheme.colorScheme.primary)
+                        ) {
                             Text("On primary", color = MaterialTheme.colorScheme.onPrimary)
                         }
 
                         Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier
-                                    .size(width = 140.dp, height = 40.dp)
-                                    .background(MaterialTheme.colorScheme.primaryContainer)) {
-                            Text("On container", color = MaterialTheme.colorScheme.onPrimaryContainer)
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .size(width = 140.dp, height = 40.dp)
+                                .background(MaterialTheme.colorScheme.primaryContainer)
+                        ) {
+                            Text(
+                                "On container", color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
                         }
                     }
                 }
 
                 itemsIndexed(items) { index, item ->
-                    WatchListSectionItem(item = item, index = index, onEvent = {}, installedApps = installedApps, appIconLoader = appIconLoader)
+                    WatchListSectionItem(
+                        item = item,
+                        index = index,
+                        onEvent = {},
+                        installedApps = installedApps,
+                        appIconLoader = appIconLoader
+                    )
                 }
             }
         }
@@ -533,124 +585,128 @@ fun WatchListEmptyPreview() {
 @Composable
 fun WatchListPreview() {
     val appIconLoader = AppIconLoader.Simple(
-            LocalContext.current,
-            ImageLoader.Builder(LocalContext.current).build()
+        LocalContext.current, ImageLoader.Builder(LocalContext.current).build()
     )
-    val installedApps = InstalledApps.StaticMap(mapOf(
-            "package2" to InstalledApps.Info(versionName = "very long long version name consectetur adipiscing elit", versionCode = 11223300),
+    val installedApps = InstalledApps.StaticMap(
+        mapOf(
+            "package2" to InstalledApps.Info(
+                versionName = "very long long version name consectetur adipiscing elit",
+                versionCode = 11223300
+            ),
             "package3" to InstalledApps.Info(versionName = "version name", versionCode = 11223300)
-    ))
+        )
+    )
     val items = listOf(
-            SectionItem.Header(type = SectionHeader.RecentlyUpdated),
-            SectionItem.App(AppListItem(
-                    app = App(
-                            rowId = -1,
-                            appId = "appId0",
-                            packageName = "package0",
-                            versionNumber = 11223344,
-                            versionName = "very long long version name",
-                            title = "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
-                            uploadTime = 0,
-                            uploadDate = "20 Sept, 2017 yo",
-                            appType = "app",
-                            creator = "Banana man",
-                            detailsUrl = "url",
-                            iconUrl = "",
-                            price = Price("", "", 0),
-                            status = 0,
-                            updateTime = 0
-                    ),
-                    changeDetails = "Nunc aliquam egestas diam, id bibendum massa. Duis vitae lorem nunc. Integer eu elit urna. Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
-                    noNewDetails = true,
-                    recentFlag = true),
-                    isLocal = false
-            ),
-            SectionItem.App(AppListItem(
-                    app = App(
-                            rowId = -1,
-                            appId = "appId1",
-                            packageName = "package1",
-                            versionNumber = 11223344,
-                            versionName = "very long long version name",
-                            title = "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
-                            uploadTime = 0,
-                            uploadDate = "20 Sept, 2017 yo",
-                            appType = "app",
-                            creator = "Banana man",
-                            detailsUrl = "url",
-                            iconUrl = "",
-                            price = Price("", "", 0),
-                            status = 0,
-                            updateTime = 0
-                    ),
-                    changeDetails = "Nunc aliquam egestas diam, id bibendum massa. Duis vitae lorem nunc. Integer eu elit urna. Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
-                    noNewDetails = true,
-                    recentFlag = true),
-                    isLocal = true
-            ),
-            SectionItem.App(AppListItem(
-                    app = App(
-                            rowId = 22,
-                            appId = "appId2",
-                            packageName = "package2",
-                            versionNumber = 11223300,
-                            versionName = "very long long version name",
-                            title = "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
-                            uploadTime = 0,
-                            uploadDate = "20 Sept, 2017 yo",
-                            appType = "app",
-                            creator = "Banana man",
-                            detailsUrl = "url",
-                            iconUrl = "",
-                            price = Price("", "", 0),
-                            status = 0,
-                            updateTime = 0
-                    ),
-                    changeDetails = "Nunc aliquam egestas diam, id bibendum massa. Duis vitae lorem nunc. Integer eu elit urna. Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
-                    noNewDetails = false,
-                    recentFlag = true),
-                    isLocal = true
-            ),
-            SectionItem.App(AppListItem(
-                    app = App(
-                            rowId = -1,
-                            appId = "appId3",
-                            packageName = "package3",
-                            versionNumber = 11223344,
-                            versionName = "very long long version name",
-                            title = "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
-                            uploadTime = 0,
-                            uploadDate = "20 Sept, 2017 yo",
-                            appType = "app",
-                            creator = "Banana man",
-                            detailsUrl = "url",
-                            iconUrl = "",
-                            price = Price("", "", 0),
-                            status = 0,
-                            updateTime = 0
-                    ),
-                    changeDetails = "Nunc aliquam egestas diam, id bibendum massa. Duis vitae lorem nunc. Integer eu elit urna. Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
-                    noNewDetails = false,
-                    recentFlag = true),
-                    isLocal = false
-            )
+        SectionItem.Header(type = SectionHeader.RecentlyUpdated), SectionItem.App(
+            AppListItem(
+                app = App(
+                    rowId = -1,
+                    appId = "appId0",
+                    packageName = "package0",
+                    versionNumber = 11223344,
+                    versionName = "very long long version name",
+                    title = "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+                    uploadTime = 0,
+                    uploadDate = "20 Sept, 2017 yo",
+                    appType = "app",
+                    creator = "Banana man",
+                    detailsUrl = "url",
+                    iconUrl = "",
+                    price = Price("", "", 0),
+                    status = 0,
+                    updateTime = 0
+                ),
+                changeDetails = "Nunc aliquam egestas diam, id bibendum massa. Duis vitae lorem nunc. Integer eu elit urna. Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
+                noNewDetails = true,
+                recentFlag = true
+            ), isLocal = false
+        ), SectionItem.App(
+            AppListItem(
+                app = App(
+                    rowId = -1,
+                    appId = "appId1",
+                    packageName = "package1",
+                    versionNumber = 11223344,
+                    versionName = "very long long version name",
+                    title = "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+                    uploadTime = 0,
+                    uploadDate = "20 Sept, 2017 yo",
+                    appType = "app",
+                    creator = "Banana man",
+                    detailsUrl = "url",
+                    iconUrl = "",
+                    price = Price("", "", 0),
+                    status = 0,
+                    updateTime = 0
+                ),
+                changeDetails = "Nunc aliquam egestas diam, id bibendum massa. Duis vitae lorem nunc. Integer eu elit urna. Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
+                noNewDetails = true,
+                recentFlag = true
+            ), isLocal = true
+        ), SectionItem.App(
+            AppListItem(
+                app = App(
+                    rowId = 22,
+                    appId = "appId2",
+                    packageName = "package2",
+                    versionNumber = 11223300,
+                    versionName = "very long long version name",
+                    title = "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+                    uploadTime = 0,
+                    uploadDate = "20 Sept, 2017 yo",
+                    appType = "app",
+                    creator = "Banana man",
+                    detailsUrl = "url",
+                    iconUrl = "",
+                    price = Price("", "", 0),
+                    status = 0,
+                    updateTime = 0
+                ),
+                changeDetails = "Nunc aliquam egestas diam, id bibendum massa. Duis vitae lorem nunc. Integer eu elit urna. Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
+                noNewDetails = false,
+                recentFlag = true
+            ), isLocal = true
+        ), SectionItem.App(
+            AppListItem(
+                app = App(
+                    rowId = -1,
+                    appId = "appId3",
+                    packageName = "package3",
+                    versionNumber = 11223344,
+                    versionName = "very long long version name",
+                    title = "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+                    uploadTime = 0,
+                    uploadDate = "20 Sept, 2017 yo",
+                    appType = "app",
+                    creator = "Banana man",
+                    detailsUrl = "url",
+                    iconUrl = "",
+                    price = Price("", "", 0),
+                    status = 0,
+                    updateTime = 0
+                ),
+                changeDetails = "Nunc aliquam egestas diam, id bibendum massa. Duis vitae lorem nunc. Integer eu elit urna. Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
+                noNewDetails = false,
+                recentFlag = true
+            ), isLocal = false
+        )
     )
     val selectionState = SelectionState()
     selectionState.selectKey("package3", true)
     AppTheme(
-            customPrimaryColor = Color.Yellow
+        customPrimaryColor = Color.Yellow
     ) {
         Surface {
             LazyColumn {
                 itemsIndexed(items) { index, item ->
                     WatchListSectionItem(
-                            item = item,
-                            index = index,
-                            onEvent = {},
-                            selection = selectionState,
-                            selectionMode = true,
-                            installedApps = installedApps,
-                            appIconLoader = appIconLoader
+                        item = item,
+                        index = index,
+                        onEvent = {},
+                        selection = selectionState,
+                        selectionMode = true,
+                        installedApps = installedApps,
+                        appIconLoader = appIconLoader
                     )
                 }
             }
