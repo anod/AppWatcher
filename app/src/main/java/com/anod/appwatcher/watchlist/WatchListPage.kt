@@ -40,9 +40,9 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemsIndexed
 import coil.ImageLoader
-import coil.compose.AsyncImage
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.Amber800
+import com.anod.appwatcher.compose.AppIcon
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppListItem
@@ -282,17 +282,13 @@ fun AppItem(
                 .heightIn(min = 68.dp)
                 .padding(top = 8.dp, bottom = 8.dp, start = 16.dp, end = 16.dp)
         ) {
-            val imageRequest = remember {
-                mutableStateOf(appIconLoader.request(app.iconUrl))
-            }
+
             if (selectionMode) {
                 Box {
-                    AsyncImage(
-                        model = imageRequest.value,
+                    AppIcon(
+                        app = app,
                         contentDescription = title,
-                        imageLoader = appIconLoader.coilLoader,
-                        modifier = Modifier.size(40.dp),
-                        placeholder = painterResource(id = R.drawable.ic_app_icon_placeholder)
+                        appIconLoader = appIconLoader
                     )
                     SelectedIcon(
                         modifier = Modifier.align(Alignment.BottomEnd),
@@ -300,12 +296,10 @@ fun AppItem(
                     )
                 }
             } else {
-                AsyncImage(
-                    model = imageRequest.value,
+                AppIcon(
+                    app = app,
                     contentDescription = title,
-                    imageLoader = appIconLoader.coilLoader,
-                    modifier = Modifier.size(40.dp),
-                    placeholder = painterResource(id = R.drawable.ic_app_icon_placeholder)
+                    appIconLoader = appIconLoader
                 )
             }
             Column(

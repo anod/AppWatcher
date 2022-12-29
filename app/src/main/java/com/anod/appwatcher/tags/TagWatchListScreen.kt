@@ -56,7 +56,7 @@ fun TagWatchListScreen(screenState: WatchListSharedState, pagingSourceConfig: Wa
                         filterQuery = screenState.titleFilter,
                         sortId = screenState.sortId,
                         visibleActions = {
-                            IconButton(onClick = { onEvent(WatchListSharedStateEvent.AddAppToTag(screenState.tag)) }) {
+                            IconButton(onClick = { onEvent(WatchListSharedStateEvent.AddAppToTag(show = true)) }) {
                                 Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(id = R.string.menu_tag_apps))
                             }
                         },
@@ -92,6 +92,13 @@ fun TagWatchListScreen(screenState: WatchListSharedState, pagingSourceConfig: Wa
                     enablePullToRefresh = viewModel.prefs.enablePullToRefresh,
                     installedApps = viewModel.installedApps,
                     onEvent = { event -> onEvent(WatchListSharedStateEvent.ListEvent(event)) }
+            )
+        }
+
+        if (screenState.showAppTagDialog) {
+            AppsTagDialog(
+                tag = screenState.tag,
+                onDismissRequest = { onEvent(WatchListSharedStateEvent.AddAppToTag(show = false)) }
             )
         }
     }

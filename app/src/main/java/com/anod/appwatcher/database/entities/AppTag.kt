@@ -13,7 +13,7 @@ import com.anod.appwatcher.database.AppTagsTable
         tableName = AppTagsTable.table,
         indices = [Index(value = ["app_id", "tags_id"], unique = true)]
 )
-data class AppTag(
+data class  AppTag(
         @PrimaryKey
         @ColumnInfo(name = BaseColumns._ID)
         val id: Int,

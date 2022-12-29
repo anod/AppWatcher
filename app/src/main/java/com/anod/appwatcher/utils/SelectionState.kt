@@ -43,7 +43,40 @@ data class SelectionState(
         allExtras.putAll(selectExtra)
         val newExtras = extras.toMutableMap()
         newExtras[key] = allExtras
-        return copy(selectedKeys = newSelectedKeys, selectedCount = newSelectedCount, extras = newExtras)
+        return copy(selectedKeys = newSelectedKeys, selectedCount = newSelectedCount, extras = newExtras, defaultSelected = false)
+    }
+
+    fun selectKeys(keys: List<String>, select: Boolean, overrideExisting: Boolean = true): SelectionState {
+        if (keys.isEmpty()) {
+            return this
+        }
+        if (!overrideExisting && defaultSelected) {
+            return this
+        }
+        val newSelectedKeys = selectedKeys.toMutableMap()
+        var newSelectedCount = selectedCount
+        var changed = false
+        for (key in keys) {
+            if (!overrideExisting) {
+                if (newSelectedKeys.containsKey(key)) {
+                    continue
+                }
+            }
+            newSelectedKeys[key] = select
+            changed = true
+            if (select) {
+                newSelectedCount += 1
+            } else {
+                newSelectedCount -= 1
+                if (newSelectedCount < 0) {
+                    newSelectedCount = 0
+                }
+            }
+        }
+        if (!changed && !overrideExisting) {
+            return this
+        }
+        return copy(selectedKeys = newSelectedKeys, selectedCount = newSelectedCount, defaultSelected = false)
     }
 
     fun toggleKey(key: String, selectExtra: Bundle = Bundle.EMPTY): SelectionState {
@@ -105,4 +138,9 @@ data class SelectionState(
     }
 }
 
-
+fun SelectionState.filter(selected: Boolean): List<String> {
+    return iterator()
+        .asSequence()
+        .filter { if (selected) contains(it) else !contains(it) }
+        .toList()
+}
