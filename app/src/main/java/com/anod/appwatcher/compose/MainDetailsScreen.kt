@@ -7,7 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
-import com.anod.appwatcher.tags.DetailContent
+import com.anod.appwatcher.watchlist.DetailContent
 import info.anodsplace.framework.app.HingeDeviceLayout
 
 @Composable

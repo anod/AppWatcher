@@ -224,7 +224,7 @@ open class WatchListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener,
     protected open fun getItemSelection(appItem: AppListItem): AppViewHolder.Selection = AppViewHolder.Selection.None
 
     protected fun openAppDetails(app: App) {
-        (requireActivity() as AppDetailsRouter).openAppDetails(app.appId, app.rowId, app.detailsUrl)
+//        (requireActivity() as AppDetailsRouter).openAppDetails(app.appId, app.rowId, app.detailsUrl)
     }
 
     fun reload() {

@@ -6,31 +6,21 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.lifecycleScope
 import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.MarketSearchActivity
-import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.compose.MainDetailScreen
-import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.details.DetailsDialog
-import com.anod.appwatcher.details.DetailsScreen
 import com.anod.appwatcher.installed.InstalledActivity
-import com.anod.appwatcher.utils.Theme
+import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.utils.prefs
+import com.anod.appwatcher.watchlist.DetailContent
 import com.anod.appwatcher.watchlist.WatchListPagingSource
 import com.anod.appwatcher.watchlist.WatchListSharedStateAction
 import com.anod.appwatcher.watchlist.WatchListSharedStateEvent
@@ -41,12 +31,17 @@ import info.anodsplace.framework.content.startActivitySafely
 import kotlinx.coroutines.launch
 
 class TagWatchListComposeActivity : BaseComposeActivity() {
-    val viewModel: WatchListStateViewModel by viewModels()
+    val viewModel: WatchListStateViewModel by viewModels(factoryProducer = {
+        WatchListStateViewModel.Factory(
+            defaultFilterId = Filters.ALL,
+            wideLayout = hingeDevice.layout.value,
+            owner = this,
+            defaultArgs = null
+        )
+    })
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        viewModel.handleEvent(WatchListSharedStateEvent.SetWideLayout(hingeDevice.layout.value))
 
         setContent {
             AppTheme(
@@ -125,23 +120,6 @@ class TagWatchListComposeActivity : BaseComposeActivity() {
         fun createTagIntent(tag: Tag, context: Context) = Intent(context, TagWatchListComposeActivity::class.java).apply {
             putExtra(AppsTagViewModel.EXTRA_TAG, tag)
             addMultiWindowFlags(context)
-        }
-    }
-}
-
-
-@Composable
-fun DetailContent(app: App?) {
-    Surface {
-        if (app == null) {
-            Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-            ) {
-                Image(painter = painterResource(id = R.drawable.ic_empty_box_smile), contentDescription = null)
-            }
-        } else {
-            DetailsScreen(appId = app.appId, rowId = app.rowId, detailsUrl = app.detailsUrl ?: "")
         }
     }
 }

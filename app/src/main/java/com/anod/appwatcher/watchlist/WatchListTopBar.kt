@@ -27,7 +27,8 @@ fun WatchListTopBar(
         filterTitles: List<String>,
         sortId: Int,
         visibleActions: @Composable () -> Unit,
-        dropdownActions: @Composable (dismiss: () -> Unit) -> Unit,
+        dropdownActions: @Composable (dismiss: () -> Unit) -> Unit = { },
+        navigationIcon: @Composable (() -> Unit)? = null,
         onEvent: (WatchListSharedStateEvent) -> Unit
 ) {
 
@@ -47,6 +48,7 @@ fun WatchListTopBar(
         onValueChange = { onEvent(WatchListSharedStateEvent.FilterByTitle(query = it)) },
         onSearchAction = { onEvent(WatchListSharedStateEvent.OnSearch(it)) },
         onNavigation = { onEvent(WatchListSharedStateEvent.OnBackPressed) },
+        navigationIcon = navigationIcon,
         actions = {
 
             visibleActions()

@@ -38,7 +38,7 @@ fun SearchTopBar(
     onValueChange: (String) -> Unit = { },
     onSearchAction: (String) -> Unit = { },
     onNavigation: () -> Unit = { },
-    onNavigationHide: () -> Unit = { },
+    navigationIcon: @Composable (() -> Unit)? = null,
     actions: @Composable () -> Unit = { },
 ) {
     var showSearchView by remember { mutableStateOf(showSearch) }
@@ -78,7 +78,14 @@ fun SearchTopBar(
                     onNavigation()
                 }
             }) {
-                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = stringResource(id = R.string.back))
+                if (navigationIcon != null) {
+                    navigationIcon()
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = stringResource(id = R.string.back)
+                    )
+                }
             }
         },
         actions = {

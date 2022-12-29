@@ -2,8 +2,12 @@ package com.anod.appwatcher.watchlist
 
 import android.app.Application
 import android.graphics.Rect
+import android.os.Bundle
+import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.savedstate.SavedStateRegistryOwner
 import androidx.work.Operation
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.database.AppsDatabase
@@ -31,6 +35,14 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+sealed class ListState {
+    object SyncStarted : ListState()
+    class SyncStopped(val updatesCount: Int) : ListState()
+    object Updated : ListState()
+    object NoNetwork : ListState()
+    object ShowAuthDialog : ListState()
+}
+
 data class WatchListSharedState(
         val tag: Tag,
         val sortId: Int,
@@ -41,7 +53,8 @@ data class WatchListSharedState(
         val selectedApp: App? = null,
         val showAppTagDialog: Boolean = false,
         val showEditTagDialog: Boolean = false,
-        val tagAppsChange: Int = 0
+        val tagAppsChange: Int = 0,
+        val expandSearch: Boolean = false
 )
 
 sealed interface WatchListSharedStateEvent {
@@ -69,16 +82,42 @@ sealed interface WatchListSharedStateAction {
     class OnSearch(val query: String) : WatchListSharedStateAction
 }
 
-class WatchListStateViewModel(state: SavedStateHandle) : BaseFlowViewModel<WatchListSharedState, WatchListSharedStateEvent, WatchListSharedStateAction>(), KoinComponent {
+class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wideLayout: HingeDeviceLayout) : BaseFlowViewModel<WatchListSharedState, WatchListSharedStateEvent, WatchListSharedStateAction>(), KoinComponent {
     private val authToken: AuthTokenBlocking by inject()
     private val application: Application by inject()
     private val db: AppsDatabase by inject()
 
+    class Factory(
+        private val defaultFilterId: Int,
+        private val wideLayout: HingeDeviceLayout,
+        owner: SavedStateRegistryOwner,
+        defaultArgs: Bundle?
+    ) : AbstractSavedStateViewModelFactory(owner, defaultArgs) {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(
+            key: String,
+            modelClass: Class<T>,
+            handle: SavedStateHandle
+        ): T {
+            return WatchListStateViewModel(
+                state = handle,
+                defaultFilterId = defaultFilterId,
+                wideLayout = wideLayout
+            ) as T
+        }
+    }
+
     init {
+        val expandSearch = state.remove("expand_search") ?: false
+        val fromNotification = state.remove("extra_noti") ?: false
+        val filterId = if (fromNotification || expandSearch) defaultFilterId else state.getInt("tab_id", defaultFilterId)
+
         viewState = WatchListSharedState(
-                tag = state[AppsTagViewModel.EXTRA_TAG] ?: Tag.empty,
-                sortId = prefs.sortIndex,
-                filterId = state.getInt("tab_id", Filters.ALL),
+            tag = state[AppsTagViewModel.EXTRA_TAG] ?: Tag.empty,
+            sortId = prefs.sortIndex,
+            filterId = filterId,
+            expandSearch = expandSearch,
+            wideLayout = wideLayout
         )
         viewModelScope.launch {
             syncProgressFlow(application).collect {

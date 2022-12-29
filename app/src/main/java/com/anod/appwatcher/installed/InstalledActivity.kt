@@ -17,8 +17,8 @@ import com.anod.appwatcher.compose.MainDetailScreen
 import com.anod.appwatcher.details.DetailsDialog
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
-import com.anod.appwatcher.tags.DetailContent
 import com.anod.appwatcher.utils.prefs
+import com.anod.appwatcher.watchlist.DetailContent
 import com.anod.appwatcher.watchlist.WatchListFragment
 import com.anod.appwatcher.watchlist.WatchListPagingSource
 import info.anodsplace.applog.AppLog

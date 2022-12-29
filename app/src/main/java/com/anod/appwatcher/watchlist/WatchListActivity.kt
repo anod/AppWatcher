@@ -1,270 +1,189 @@
 package com.anod.appwatcher.watchlist
 
-import android.accounts.Account
+import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
-import android.view.KeyEvent
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import android.widget.TextView
-import android.widget.Toast
+import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.annotation.IdRes
-import androidx.annotation.MenuRes
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.commit
-import androidx.lifecycle.ViewModelProvider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.lifecycleScope
-import androidx.viewpager2.adapter.FragmentStateAdapter
-import androidx.viewpager2.widget.ViewPager2
+import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.MarketSearchActivity
-import com.anod.appwatcher.R
-import com.anod.appwatcher.databinding.ActivityMainBinding
+import com.anod.appwatcher.compose.AppTheme
+import com.anod.appwatcher.compose.BaseComposeActivity
+import com.anod.appwatcher.compose.MainDetailScreen
 import com.anod.appwatcher.details.DetailsDialog
-import com.anod.appwatcher.details.DetailsEmptyView
-import com.anod.appwatcher.details.DetailsFragment
+import com.anod.appwatcher.installed.InstalledActivity
 import com.anod.appwatcher.model.Filters
-import com.anod.appwatcher.navigation.DrawerActivity
-import com.anod.appwatcher.navigation.DrawerViewModel
-import com.anod.appwatcher.search.SearchComposeActivity
+import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.upgrade.Upgrade15500
 import com.anod.appwatcher.upgrade.UpgradeCheck
-import com.anod.appwatcher.utils.EventFlow
-import com.anod.appwatcher.utils.Theme
-import com.anod.appwatcher.utils.appScope
 import com.anod.appwatcher.utils.prefs
 import info.anodsplace.applog.AppLog
-import info.anodsplace.framework.app.CustomThemeColors
-import info.anodsplace.framework.app.FragmentContainerFactory
-import info.anodsplace.framework.app.HingeDeviceLayout
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
+import info.anodsplace.framework.content.startActivitySafely
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 
-sealed class ListState {
-    object SyncStarted : ListState()
-    class SyncStopped(val updatesCount: Int) : ListState()
-    object Updated : ListState()
-    object NoNetwork : ListState()
-    object ShowAuthDialog : ListState()
-}
+abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
+    private val mainViewModel: MainViewModel by viewModels()
+    private val listViewModel: WatchListStateViewModel by viewModels(factoryProducer = {
+        WatchListStateViewModel.Factory(
+            defaultFilterId = prefs.defaultMainFilterId,
+            wideLayout = hingeDevice.layout.value,
+            owner = this,
+            defaultArgs = null
+        )
+    })
 
-interface AppDetailsRouter {
-    fun openAppDetails(appId: String, rowId: Int, detailsUrl: String?)
-}
-
-abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionListener, AppDetailsRouter, KoinComponent {
-
-    internal lateinit var binding: ActivityMainBinding
-
-    val theme: Theme
-        get() = Theme(this, prefs)
-
-    override val themeRes: Int
-        get() = theme.theme
-    override val themeColors: CustomThemeColors
-        get() = theme.colors
-
-    open val defaultFilterId = Filters.ALL
-
-    override val layoutView: View
-        get() {
-            binding = ActivityMainBinding.inflate(layoutInflater)
-            return binding.root
-        }
-
-    @get:IdRes
-    override val detailsLayoutId = R.id.details
-
-    @get:IdRes
-    override val hingeLayoutId = R.id.hinge
-
-    private val menuAction = EventFlow<MenuAction>()
-    private val actionMenu by lazy { WatchListMenu(menuAction, this, appScope, prefs) }
-    private val stateViewModel: WatchListStateViewModel by viewModels()
-
-    @get:MenuRes
-    protected abstract val menuResource: Int
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putInt("tab_id", binding.viewPager.currentItem)
-        outState.putString("filter", actionMenu.search.query)
-    }
-
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val filterId: Int
-        if (savedInstanceState != null) {
-            filterId = savedInstanceState.getInt("tab_id", defaultFilterId)
-            actionMenu.search.query = savedInstanceState.getString("filter") ?: ""
-            AppLog.d("Restore tab: $filterId")
-        } else {
-            val fromNotification = intentExtras.getBoolean(EXTRA_FROM_NOTIFICATION, false)
-            val expandSearch = intentExtras.getBoolean(EXTRA_EXPAND_SEARCH)
-            filterId = if (fromNotification || expandSearch) defaultFilterId else intentExtras.getInt("tab_id", defaultFilterId)
-            actionMenu.search.expand = expandSearch
+        if (intent?.extras?.containsKey("open_recently_installed") == true) {
+            intent!!.extras!!.remove("open_recently_installed")
+            startActivity(InstalledActivity.intent(importMode = false, context = this))
         }
 
-        binding.viewPager.offscreenPageLimit = 1
-        binding.viewPager.adapter = createViewPagerAdapter()
-        binding.viewPager.setCurrentItem(filterId, false)
-        binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                super.onPageSelected(position)
-                onFilterSelected(position)
-            }
-        })
+//            stateViewModel.viewStates.map { it.listState }.distinctUntilChanged().collect {
+//                when (it) {
+//                    is ListState.SyncStarted -> {
+//                        Toast.makeText(this@WatchListActivity, R.string.refresh_scheduled, Toast.LENGTH_SHORT).show()
+//                    }
+//                    is ListState.SyncStopped -> {
+//                        if (it.updatesCount == 0) {
+//                            Toast.makeText(
+//                                    this@WatchListActivity,
+//                                    R.string.no_updates_found,
+//                                    Toast.LENGTH_SHORT
+//                            ).show()
+//                        }
+//                        ViewModelProvider(this@WatchListActivity).get(DrawerViewModel::class.java)
+//                            .refreshLastUpdateTime()
+//                        ListState.SyncStopped
+//                    }
+//                    is ListState.NoNetwork -> {
+//                        Toast.makeText(this@WatchListActivity, R.string.check_connection, Toast.LENGTH_SHORT).show()
+//                    }
+//                    is ListState.ShowAuthDialog -> {
+//                        this@WatchListActivity.showAccountsDialogWithCheck()
+//                    }
+//                }
+//            }
 
-        actionMenu.filterId = filterId
-        updateSubtitle(filterId)
+        setContent {
+            AppTheme(
+                theme = listViewModel.prefs.theme
+            ) {
+                val mainState by mainViewModel.viewStates.collectAsState(initial = mainViewModel.viewState)
+                val listState by listViewModel.viewStates.collectAsState(initial = listViewModel.viewState)
 
-        lifecycleScope.launchWhenResumed {
-            menuAction.collectLatest {
-                when (it) {
-                    is FilterMenuAction -> binding.viewPager.currentItem = it.filterId
-                    is SortMenuAction -> stateViewModel.handleEvent(WatchListSharedStateEvent.ChangeSort(it.sortId))
-                    is SearchQueryAction -> {
-                        if (it.submit) {
-                            startActivity(Intent(this@WatchListActivity, MarketSearchActivity::class.java).apply {
-                                putExtra(SearchComposeActivity.EXTRA_KEYWORD, it.query)
-                                putExtra(SearchComposeActivity.EXTRA_EXACT, true)
-                            })
-                        } else {
-                            stateViewModel.handleEvent(WatchListSharedStateEvent.FilterByTitle(it.query))
+                val pagingSourceConfig = WatchListPagingSource.Config(
+                    filterId = listState.filterId,
+                    tagId = null,
+                    showRecentlyUpdated = listViewModel.prefs.showRecentlyUpdated,
+                    showOnDevice = listViewModel.prefs.showOnDevice,
+                    showRecentlyInstalled = listViewModel.prefs.showRecent
+                )
+
+                if (listState.wideLayout.isWideLayout) {
+                    MainDetailScreen(
+                        wideLayout = listState.wideLayout,
+                        main = {
+                            MainScreen(
+                                mainState = mainState,
+                                onMainEvent = { mainViewModel.handleEvent(it) },
+                                listState = listState,
+                                pagingSourceConfig = pagingSourceConfig,
+                                onListEvent = { listViewModel.handleEvent(it) }
+                            )
+                        },
+                        detail = {
+                            DetailContent(app = listState.selectedApp)
                         }
-                    }
+                    )
+                } else {
+                    MainScreen(
+                        mainState = mainState,
+                        onMainEvent = { mainViewModel.handleEvent(it) },
+                        listState = listState,
+                        pagingSourceConfig = pagingSourceConfig,
+                        onListEvent = { listViewModel.handleEvent(it) }
+                    )
                 }
             }
+            
+
         }
 
         lifecycleScope.launch {
-            stateViewModel.viewStates.map { it.listState }.distinctUntilChanged().collect {
-                when (it) {
-                    is ListState.SyncStarted -> {
-                        actionMenu.startRefresh()
-                        Toast.makeText(this@WatchListActivity, R.string.refresh_scheduled, Toast.LENGTH_SHORT).show()
-                    }
-                    is ListState.SyncStopped -> {
-                        actionMenu.stopRefresh()
-                        if (it.updatesCount == 0) {
-                            Toast.makeText(
-                                    this@WatchListActivity,
-                                    R.string.no_updates_found,
-                                    Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                        ViewModelProvider(this@WatchListActivity).get(DrawerViewModel::class.java)
-                                .refreshLastUpdateTime()
-                    }
-                    is ListState.NoNetwork -> {
-                        Toast.makeText(this@WatchListActivity, R.string.check_connection, Toast.LENGTH_SHORT).show()
-                        actionMenu.stopRefresh()
-                    }
-                    is ListState.ShowAuthDialog -> {
-                        this@WatchListActivity.showAccountsDialogWithCheck()
-                        actionMenu.stopRefresh()
-                    }
-                    else -> {
-                    }
-                }
+            listViewModel.viewActions.collect { onViewAction(it) }
+        }
+
+        lifecycleScope.launchWhenCreated {
+            hingeDevice.layout.collect {
+                listViewModel.handleEvent(WatchListSharedStateEvent.SetWideLayout(it))
             }
         }
     }
 
-    override fun updateWideLayout(wideLayout: HingeDeviceLayout) {
-        super.updateWideLayout(wideLayout)
-        stateViewModel.handleEvent(WatchListSharedStateEvent.SetWideLayout(wideLayout))
-        if (wideLayout.isWideLayout) {
-            if (supportFragmentManager.findFragmentByTag(DetailsEmptyView.tag) == null) {
-                supportFragmentManager.commit {
-                    replace(R.id.details, DetailsEmptyView(), DetailsEmptyView.tag)
-                }
-            }
-        }
+    override fun onResume() {
+        super.onResume()
+
+        AppLog.d("mark updates as viewed.")
+        prefs.isLastUpdatesViewed = true
     }
 
-    protected abstract fun createViewPagerAdapter(): Adapter
-
-    open fun onFilterSelected(filterId: Int) {
-        actionMenu.filterId = filterId
-        updateSubtitle(filterId)
-    }
-
-    private fun updateSubtitle(filterId: Int) {
-        if (filterId == 0) {
-            supportActionBar?.subtitle = ""
-        } else {
-            val titles = resources.getStringArray(R.array.filter_titles)
-            supportActionBar?.subtitle = titles.getOrNull(filterId) ?: ""
-        }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu
-        menuInflater.inflate(menuResource, menu)
-
-        actionMenu.init(menu)
-
-        return super.onCreateOptionsMenu(menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (actionMenu.onItemSelected(item)) {
-            return true
-        }
-        return super.onOptionsItemSelected(item)
-    }
-
-    override fun onAccountSelected(account: Account) {
-        super.onAccountSelected(account)
-
+    private fun upgradeCheck() {
         val upgrade = UpgradeCheck(prefs).result
         if (!upgrade.isNewVersion) {
             return
         }
 
-       Upgrade15500().onUpgrade(upgrade)
+        Upgrade15500().onUpgrade(upgrade)
     }
 
-    override fun onEditorAction(textView: TextView, i: Int, keyEvent: KeyEvent): Boolean {
-        return false
-    }
-
-    override fun openAppDetails(appId: String, rowId: Int, detailsUrl: String?) {
-        if (stateViewModel.viewState.wideLayout.isWideLayout) {
-            supportFragmentManager.commit {
-                add(R.id.details, DetailsFragment.newInstance(appId, detailsUrl ?: "", rowId), DetailsFragment.tag)
-                addToBackStack(DetailsFragment.tag)
+    private fun onNotificationEnabled() {
+        if (prefs.useAutoSync) {
+            lifecycleScope.launchWhenCreated {
+                SyncScheduler(applicationContext)
+                    .schedule(prefs.isRequiresCharging, prefs.isWifiOnly, prefs.updatesFrequency.toLong(), false)
+                    .collect { }
             }
-        } else {
-            DetailsDialog.show(appId, rowId, detailsUrl, supportFragmentManager)
         }
     }
 
-    @Deprecated("Deprecated in Java")
+    private fun onViewAction(action: WatchListSharedStateAction) {
+        when (action) {
+            WatchListSharedStateAction.OnBackPressed -> onBackPressed()
+            is WatchListSharedStateAction.OpenApp -> {
+                val app = action.app
+                if (BuildConfig.DEBUG) {
+                    AppLog.d(app.packageName)
+                }
+                DetailsDialog.show(app.appId, app.rowId, app.detailsUrl, supportFragmentManager)
+            }
+            is WatchListSharedStateAction.ExpandSection -> {}
+            is WatchListSharedStateAction.SearchInStore -> startActivity(MarketSearchActivity.intent(this, "", true))
+            is WatchListSharedStateAction.ImportInstalled -> startActivity(InstalledActivity.intent(true, this))
+            is WatchListSharedStateAction.ShareFromStore -> startActivitySafely(Intent.makeMainActivity(
+                ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity")
+            ))
+            is WatchListSharedStateAction.OnSearch -> startActivity(MarketSearchActivity.intent(this, action.query, true))
+            WatchListSharedStateAction.Dismiss -> finish()
+        }
+    }
+
     override fun onBackPressed() {
-        if (stateViewModel.viewState.wideLayout.isWideLayout && supportFragmentManager.findFragmentByTag(DetailsFragment.tag) != null) {
-            supportFragmentManager.popBackStack(DetailsFragment.tag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-        } else {
-            if (!DetailsDialog.dismiss(supportFragmentManager)) {
+        if (listViewModel.viewState.wideLayout.isWideLayout) {
+            if (listViewModel.viewState.selectedApp != null) {
+                listViewModel.handleEvent(WatchListSharedStateEvent.SelectApp(app = null))
+            } else {
                 super.onBackPressed()
             }
-        }
-    }
-
-    class Adapter(private val factories: List<FragmentContainerFactory>, activity: FragmentActivity) : FragmentStateAdapter(activity) {
-
-        override fun getItemCount(): Int = factories.size
-
-        override fun createFragment(position: Int): Fragment {
-            return factories[position].create()
+        } else if (!DetailsDialog.dismiss(supportFragmentManager)) {
+            super.onBackPressed()
         }
     }
 
