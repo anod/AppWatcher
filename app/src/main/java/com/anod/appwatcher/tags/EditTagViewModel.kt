@@ -72,7 +72,7 @@ class EditTagViewModel(tag: Tag) : BaseFlowViewModel<EditTagState, EditTagEvent,
 
     private fun deleteTag(tag: Tag) {
         viewModelScope.launch {
-            database.tags().delete(tag)
+            TagsTable.Queries.delete(tag, database)
             emitAction(EditTagAction.Dismiss)
         }
     }

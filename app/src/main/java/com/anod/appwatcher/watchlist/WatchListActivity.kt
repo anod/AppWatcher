@@ -30,6 +30,7 @@ import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.navigation.DrawerActivity
 import com.anod.appwatcher.navigation.DrawerViewModel
 import com.anod.appwatcher.search.SearchComposeActivity
+import com.anod.appwatcher.upgrade.Upgrade15500
 import com.anod.appwatcher.upgrade.UpgradeCheck
 import com.anod.appwatcher.utils.EventFlow
 import com.anod.appwatcher.utils.Theme
@@ -229,9 +230,7 @@ abstract class WatchListActivity : DrawerActivity(), TextView.OnEditorActionList
             return
         }
 
-        // SetupInterfaceUpgrade(prefs, this).onUpgrade(upgrade)
-        // UpgradeRefresh(prefs, this, Application.provide(this).appScope).onUpgrade(upgrade)
-        // SettingsUpgrade(prefs, this).onUpgrade(upgrade)
+       Upgrade15500().onUpgrade(upgrade)
     }
 
     override fun onEditorAction(textView: TextView, i: Int, keyEvent: KeyEvent): Boolean {

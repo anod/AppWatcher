@@ -26,8 +26,11 @@ interface TagsTable {
     @Query("SELECT * FROM $table ORDER BY ${Columns.name} COLLATE LOCALIZED ASC")
     suspend fun load(): List<Tag>
 
-    @Delete
-    suspend fun delete(tag: Tag)
+    @Query("SELECT ${BaseColumns._ID} FROM $table")
+    suspend fun loadIds(): List<Int>
+
+    @Query("DELETE FROM $table WHERE ${BaseColumns._ID} = :tagId")
+    suspend fun delete(tagId: Int)
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
     suspend fun update(tag: Tag)
@@ -39,6 +42,13 @@ interface TagsTable {
     suspend fun insert(name: String, color: Int): Long
 
     object Queries {
+        suspend fun delete(tag: Tag, db: AppsDatabase) {
+            return db.withTransaction {
+                db.tags().delete(tag.id)
+                db.appTags().delete(tag.id)
+            }
+        }
+
         suspend fun insert(tag: Tag, db: AppsDatabase): Long {
             // Skip id to apply autoincrement
             val values = ContentValues().apply {

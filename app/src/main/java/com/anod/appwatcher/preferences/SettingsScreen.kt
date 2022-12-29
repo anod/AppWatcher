@@ -202,6 +202,9 @@ fun onSettingsItemClick(prefs: Preferences, item: PreferenceItem, onEvent: (Sett
         "test-notification" -> {
             onEvent(SettingsViewEvent.TestNotification)
         }
+        "db-cleanup" -> {
+            onEvent(SettingsViewEvent.DbCleanup)
+        }
     }
 }
 

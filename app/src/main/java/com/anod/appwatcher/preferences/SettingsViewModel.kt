@@ -7,6 +7,7 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.lifecycle.viewModelScope
 import androidx.work.Operation
 import com.anod.appwatcher.R
 import com.anod.appwatcher.backup.ExportBackupTask
@@ -14,6 +15,7 @@ import com.anod.appwatcher.backup.ImportBackupTask
 import com.anod.appwatcher.backup.gdrive.GDriveSync
 import com.anod.appwatcher.backup.gdrive.UploadServiceContentObserver
 import com.anod.appwatcher.database.AppsDatabase
+import com.anod.appwatcher.database.Cleanup
 import com.anod.appwatcher.sync.SchedulesHistoryActivity
 import com.anod.appwatcher.sync.SyncNotification
 import com.anod.appwatcher.sync.SyncScheduler
@@ -68,6 +70,7 @@ sealed interface SettingsViewEvent {
     class NotificationPermissionResult(val granted: Boolean) : SettingsViewEvent
     object ShowAppSettings : SettingsViewEvent
     object CheckNotificationPermission : SettingsViewEvent
+    object DbCleanup : SettingsViewEvent
 }
 
 sealed interface SettingsViewAction {
@@ -152,6 +155,12 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
                             areNotificationsEnabled = prefs.areNotificationsEnabled,
                             items = preferenceItems(prefs, inProgress = false, playServices, application)
                     )
+                }
+            }
+
+            SettingsViewEvent.DbCleanup -> {
+                viewModelScope.launch {
+                    Cleanup(prefs, database = get()).perform(System.currentTimeMillis())
                 }
             }
         }

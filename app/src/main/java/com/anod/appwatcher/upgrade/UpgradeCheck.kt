@@ -9,6 +9,10 @@ import com.anod.appwatcher.preferences.Preferences
  * @date 08/10/2016.
  */
 
+interface UpgradeTask {
+    fun onUpgrade(upgrade: UpgradeCheck.Result)
+}
+
 class UpgradeCheck(private val preferences: Preferences) {
 
     class Result(val isNewVersion: Boolean, val oldVersionCode: Int)

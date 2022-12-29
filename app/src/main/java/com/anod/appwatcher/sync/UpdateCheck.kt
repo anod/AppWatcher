@@ -160,7 +160,7 @@ class UpdateCheck(
                 AppLog.d("DriveSyncEnabled = false, skipping...")
             }
 
-            performCleanup(preferences, now)
+            Cleanup(preferences, database).performIfNeeded(now)
         }
 
         AppLog.d("Finish::perform()")
@@ -330,15 +330,6 @@ class UpdateCheck(
             }
         } else {
             AppLog.i("No new updates", "UpdateCheck")
-        }
-    }
-
-    private suspend fun performCleanup(pref: Preferences, now: Long) {
-        val cleanupTime = pref.lastCleanupTime
-        if (cleanupTime == -1L || now > DateUtils.DAY_IN_MILLIS + cleanupTime) {
-            AppLog.d("Perform cleanup")
-            database.schedules().clean(now - (30 * DateUtils.DAY_IN_MILLIS))
-            pref.lastCleanupTime = System.currentTimeMillis()
         }
     }
 

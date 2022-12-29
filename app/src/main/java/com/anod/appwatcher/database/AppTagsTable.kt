@@ -30,17 +30,20 @@ interface AppTagsTable {
     @Query("SELECT ${Columns.tagId}, count() as count FROM $table GROUP BY ${Columns.tagId}")
     fun queryCounts(): Flow<List<TagAppsCount>>
 
-//    @Query("SELECT * FROM $table WHERE ${Columns.appId} = :appId AND ${Columns.tagId} = :tagId")
-//    fun appWithTag(appId: String, tagId: Int): AppTag?
-
     @Query("SELECT * FROM $table")
     suspend fun load(): List<AppTag>
+
+    @Query("SELECT DISTINCT ${TableColumns.tagId} FROM $table")
+    suspend fun loadTagIds(): List<Int>
 
     @Query("DELETE FROM $table WHERE ${TableColumns.appId} NOT IN (SELECT ${AppListTable.TableColumns.appId} FROM ${AppListTable.table})")
     suspend fun clean(): Int
 
     @Query("DELETE FROM $table")
     suspend fun delete()
+
+    @Query("DELETE FROM $table WHERE ${Columns.tagId} IN (:tagIds)")
+    suspend fun deleteIds(tagIds: List<Int>)
 
     @Query("DELETE FROM $table WHERE ${Columns.tagId} = :tagId")
     suspend fun delete(tagId: Int)
@@ -76,6 +79,15 @@ interface AppTagsTable {
     }
 
     object Queries {
+        suspend fun clean(db: AppsDatabase) {
+            val appTagIds = db.appTags().loadTagIds().toSet()
+            val tagIds = db.tags().loadIds().toSet()
+            val deletedIds = appTagIds.subtract(tagIds).toList()
+            if (deletedIds.isNotEmpty()) {
+                db.appTags().deleteIds(deletedIds)
+            }
+        }
+
         suspend fun insert(tag: Tag, apps: List<String>, db: AppsDatabase) {
             db.withTransaction {
                 for (appId in apps) {

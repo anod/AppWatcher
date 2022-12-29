@@ -116,7 +116,7 @@ class Preferences(context: Context, private val notificationManager: Notificatio
         set(value) = preferences.edit().putBoolean("show-recently-updated", value).apply()
 
     var uiMode: Int
-        get() = preferences.getInt(NIGHT_MODE, UiModeManager.MODE_NIGHT_NO)
+        get() = preferences.getInt(NIGHT_MODE, UiModeManager.MODE_NIGHT_AUTO)
         set(nightMode) = preferences.edit().putInt(NIGHT_MODE, nightMode).apply()
 
     val appCompatNightMode: Int

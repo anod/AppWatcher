@@ -171,10 +171,14 @@ fun preferenceItems(prefs: Preferences, inProgress: Boolean, playServices: Googl
             )
     ).apply {
         if (BuildConfig.DEBUG) {
-            add(PreferenceItem.Text(
+                add(PreferenceItem.Text(
                     title = "Test notification",
                     key = "test-notification"
-            ))
+                ))
+                add(PreferenceItem.Text(
+                        title = "Db cleanup",
+                        key = "db-cleanup"
+                ))
         }
     }
 }
