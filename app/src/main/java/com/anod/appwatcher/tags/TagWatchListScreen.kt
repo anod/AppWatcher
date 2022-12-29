@@ -79,8 +79,16 @@ fun TagWatchListScreen(screenState: WatchListSharedState, pagingSourceConfig: Wa
             val viewModel: WatchListViewModel = viewModel(key = pageConfig.filterId.toString(), factory = AppsWatchListViewModel.Factory(pageConfig))
             val items = viewModel.pagingData.collectAsLazyPagingItems()
 
-            LaunchedEffect(key1 = screenState.titleFilter, key2 = screenState.sortId) {
-                AppLog.d("TagWatchListScreen: refresh [page=${pageConfig.filterId}] '${screenState.titleFilter}', ${screenState.sortId}")
+            val refreshKey = remember(screenState) {
+                RefreshKey(
+                    titleFilter = screenState.titleFilter,
+                    tagAppsChange = screenState.tagAppsChange,
+                    sortId = screenState.sortId
+                )
+            }
+
+            LaunchedEffect(refreshKey) {
+                AppLog.d("Refresh $refreshKey")
                 items.refresh()
             }
 
@@ -109,3 +117,9 @@ fun TagWatchListScreen(screenState: WatchListSharedState, pagingSourceConfig: Wa
         }
     }
 }
+
+private data class RefreshKey(
+    val titleFilter: String,
+    val sortId: Int,
+    val tagAppsChange: Int,
+)

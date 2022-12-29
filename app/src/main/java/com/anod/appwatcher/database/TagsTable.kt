@@ -20,6 +20,9 @@ interface TagsTable {
     @Query("SELECT * FROM $table ORDER BY ${Columns.name} COLLATE LOCALIZED ASC")
     fun observe(): Flow<List<Tag>>
 
+    @Query("SELECT * FROM $table WHERE ${BaseColumns._ID} = :tagId")
+    fun observeTag(tagId: Int): Flow<Tag?>
+
     @Query("SELECT * FROM $table ORDER BY ${Columns.name} COLLATE LOCALIZED ASC")
     suspend fun load(): List<Tag>
 
