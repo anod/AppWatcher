@@ -105,6 +105,7 @@ class TagWatchListComposeActivity : BaseComposeActivity() {
             is WatchListSharedStateAction.ImportInstalled -> startActivity(InstalledActivity.intent(true, this))
             is WatchListSharedStateAction.ShareFromStore -> startActivitySafely(Intent.makeMainActivity(ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity")))
             is WatchListSharedStateAction.OnSearch -> startActivity(MarketSearchActivity.intent(this, action.query, true))
+            WatchListSharedStateAction.Dismiss -> finish()
         }
     }
 

@@ -65,7 +65,7 @@ fun TagWatchListScreen(screenState: WatchListSharedState, pagingSourceConfig: Wa
                                     text = { Text(text = stringResource(id = R.string.menu_edit)) },
                                     leadingIcon = { Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(id = R.string.menu_edit)) },
                                     onClick = {
-                                        onEvent(WatchListSharedStateEvent.EditTag(screenState.tag))
+                                        onEvent(WatchListSharedStateEvent.EditTag(show = true))
                                         dismiss()
                                     }
                             )
@@ -107,6 +107,13 @@ fun TagWatchListScreen(screenState: WatchListSharedState, pagingSourceConfig: Wa
             AppsTagDialog(
                 tag = screenState.tag,
                 onDismissRequest = { onEvent(WatchListSharedStateEvent.AddAppToTag(show = false)) }
+            )
+        }
+
+        if (screenState.showEditTagDialog) {
+            EditTagDialog(
+                tag = screenState.tag,
+                onDismissRequest = { onEvent(WatchListSharedStateEvent.EditTag(show = false)) }
             )
         }
     }

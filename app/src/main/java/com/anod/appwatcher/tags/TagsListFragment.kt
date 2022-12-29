@@ -79,7 +79,7 @@ class TagsListFragment : Fragment(), View.OnClickListener, KoinComponent {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.add_tag) {
-            EditTagDialog.show(parentFragmentManager, null, Theme(requireActivity(), prefs))
+            EditTagDialogLegacy.show(parentFragmentManager, null, Theme(requireActivity(), prefs))
             return true
         }
         return super.onOptionsItemSelected(item)
@@ -88,7 +88,7 @@ class TagsListFragment : Fragment(), View.OnClickListener, KoinComponent {
     override fun onClick(v: View) {
         val holder = v.tag as TagHolder
         if (viewModel.appInfo.value == null) {
-            EditTagDialog.show(parentFragmentManager, holder.tag, Theme(requireActivity(), prefs))
+            EditTagDialogLegacy.show(parentFragmentManager, holder.tag, Theme(requireActivity(), prefs))
         } else {
             if (holder.name.isSelected) {
                 viewModel.removeAppTag(holder.tag)

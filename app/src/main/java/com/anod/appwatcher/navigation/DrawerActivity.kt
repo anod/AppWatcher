@@ -26,7 +26,7 @@ import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.installed.InstalledActivity
-import com.anod.appwatcher.tags.EditTagDialog
+import com.anod.appwatcher.tags.EditTagDialogLegacy
 import com.anod.appwatcher.tags.TagWatchListComposeActivity
 import com.anod.appwatcher.utils.*
 import com.anod.appwatcher.wishlist.WishListActivity
@@ -169,10 +169,10 @@ abstract class DrawerActivity : ToolbarActivity(), KoinComponent {
         addTag.setActionView(R.layout.drawer_tag_add)
         val addTagButton = addTag.actionView!!.findViewById<View>(R.id.button1)
         addTagButton.setOnClickListener {
-            EditTagDialog.show(supportFragmentManager, null, Theme(this, prefs))
+            EditTagDialogLegacy.show(supportFragmentManager, null, Theme(this, prefs))
         }
         addTag.setOnMenuItemClickListener {
-            EditTagDialog.show(supportFragmentManager, null, Theme(this, prefs))
+            EditTagDialogLegacy.show(supportFragmentManager, null, Theme(this, prefs))
             true
         }
         result.forEach { (tag, count) ->

@@ -1,122 +1,147 @@
 package com.anod.appwatcher.tags
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.view.WindowManager
-import androidx.core.content.res.ResourcesCompat
-import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.viewModels
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.ColorPainter
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.anod.appwatcher.R
+import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.database.entities.Tag
-import com.anod.appwatcher.databinding.DialogEditTagBinding
-import com.anod.appwatcher.utils.Theme
-import com.anod.appwatcher.utils.prefs
-import com.google.android.material.color.DynamicColors
-import info.anodsplace.colorpicker.ColorPickerDialog
-import info.anodsplace.colorpicker.ColorPickerSwatch
-import info.anodsplace.colorpicker.ColorStateDrawable
-import info.anodsplace.framework.app.DialogMessage
-import org.koin.core.component.KoinComponent
+import info.anodsplace.compose.ButtonsPanel
 
-/**
- * @author Alex Gavrishev
- * *
- * @date 14/04/2017.
- */
-class EditTagDialog : DialogFragment(), ColorPickerSwatch.OnColorSelectedListener, KoinComponent {
+@Composable
+fun EditTagDialog(tag: Tag, onDismissRequest: () -> Unit) {
+    val viewModel: EditTagViewModel = viewModel(factory = EditTagViewModel.Factory(tag))
+    val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
 
-    private lateinit var tag: Tag
-
-    private val viewModel: TagsViewModel by viewModels()
-
-    private var _binding: DialogEditTagBinding? = null
-    private val binding get() = _binding!!
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        _binding = DialogEditTagBinding.inflate(inflater, container, false)
-        return binding.root
+    Dialog(onDismissRequest = onDismissRequest) {
+        EditTagScreen(
+            screenState = screenState,
+            onEvent = { event -> viewModel.handleEvent(event) }
+        )
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    LaunchedEffect(key1 = viewModel) {
+        viewModel.viewActions.collect { action ->
+            when (action) {
+                EditTagAction.Dismiss -> onDismissRequest()
+            }
+        }
     }
+}
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        tag = requireArguments().getParcelable("tag") ?: Tag("")
-
-        binding.tagName.setText(tag.name)
-        val colorDrawable = arrayOf(ResourcesCompat.getDrawable(resources, info.anodsplace.colorpicker.R.drawable.color_picker_swatch, null)!!)
-        binding.colorPreview.setImageDrawable(ColorStateDrawable(colorDrawable, tag.color))
-        binding.tagName.requestFocus()
-        dialog?.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
-
-        if (tag.id > 0) {
-            binding.button3.visibility = View.VISIBLE
-        } else {
-            binding.button3.visibility = View.GONE
-        }
-
-        binding.colorPreview.setOnClickListener {
-            val dialog = ColorPickerDialog.newInstance(tag.color, false, activity, Theme(requireActivity(), prefs).themeDialog)
-            dialog.setStyle(STYLE_NORMAL, Theme(requireActivity(), prefs).themeDialogNoActionBar)
-            dialog.setOnColorSelectedListener(this)
-            dialog.show(parentFragmentManager, "color-picker")
-        }
-
-        binding.button1.setOnClickListener {
-            tag = Tag(tag.id, binding.tagName.text.toString().trim { it <= ' ' }, tag.color)
-            viewModel.saveTag(tag)
-            dismiss()
-        }
-
-        binding.button2.setOnClickListener {
-            dismiss()
-        }
-
-        binding.button3.setOnClickListener {
-            DialogMessage(
-                    requireContext(),
-                    R.style.AppTheme_Dialog,
-                    R.string.delete_tag,
-                    getString(R.string.delete_tag_message, tag.name)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun EditTagScreen(screenState: EditTagState, onEvent: (EditTagEvent) -> Unit) {
+    var tagName by remember { mutableStateOf(screenState.tag.name) }
+    var isError by remember { mutableStateOf(false) }
+    Surface {
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                it.setPositiveButton(android.R.string.ok) { _, _ ->
-                    viewModel.deleteTag(tag)
-                    dismiss()
+                ColorIcon(
+                    color = Color(screenState.tag.color),
+                    onClick = { }
+                )
+                TextField(
+                    modifier = Modifier.padding(start = 8.dp),
+                    value = tagName,
+                    onValueChange = { tagName = it },
+                    label = { Text(text = stringResource(id = R.string.tag_name)) },
+                    isError = isError
+                )
+            }
+            ButtonsPanel(
+                actionText = stringResource(id = R.string.save),
+                onDismissRequest = { onEvent(EditTagEvent.Dismiss) },
+                onAction = {
+                    if (tagName.isEmpty()) {
+                        isError = true
+                    } else {
+                        isError = false
+                        onEvent(EditTagEvent.SaveAndDismiss(name = tagName))
+                    }
+                },
+                leadingContent = {
+                    FilledIconButton(
+                        onClick = { onEvent(EditTagEvent.Delete) },
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = stringResource(id = R.string.delete)
+                        )
+                    }
                 }
-                it.setNegativeButton(android.R.string.cancel) { _, _ -> }
-            }.show()
+            )
         }
     }
+}
 
-    override fun onColorSelected(color: Int) {
-        tag = Tag(tag.id, tag.name, color)
+@Composable
+private fun ColorIcon(color: Color, onClick: (Color) -> Unit, modifier: Modifier = Modifier) {
+    Icon(
+        modifier = modifier
+            .size(48.dp)
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outline,
+                shape = CircleShape
+            )
+            .clip(shape = CircleShape)
+            .clickable { onClick(color) },
+        painter = ColorPainter(color),
+        tint = Color.Unspecified,
+        contentDescription = color.toString()
+    )
+}
 
-        val colorDrawable = arrayOf(ResourcesCompat.getDrawable(resources, info.anodsplace.colorpicker.R.drawable.color_picker_swatch, null)!!)
-        binding.colorPreview.setImageDrawable(ColorStateDrawable(colorDrawable, tag.color))
-    }
-
-    companion object {
-        private fun newInstance(tag: Tag?, theme: Theme) = EditTagDialog().apply {
-            arguments = Bundle().apply {
-                if (tag != null) {
-                    putParcelable("tag", tag)
-                }
-            }
-            if (!DynamicColors.isDynamicColorAvailable()) {
-                setStyle(STYLE_NO_TITLE, theme.themeDialog)
-            }
-        }
-
-        fun show(fragmentManager: FragmentManager, tag: Tag?, theme: Theme) {
-            val dialog = newInstance(tag, theme)
-            dialog.show(fragmentManager, "edit-tag-dialog")
-        }
+@Preview
+@Composable
+private fun EditTagScreenPreview() {
+    val tag = Tag("Banana")
+    AppTheme {
+        EditTagScreen(
+            screenState = EditTagState(tag),
+            onEvent = { }
+        )
     }
 }

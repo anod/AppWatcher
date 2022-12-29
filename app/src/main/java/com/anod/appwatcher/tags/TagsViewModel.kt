@@ -31,22 +31,6 @@ class TagsViewModel(application: Application) : AndroidViewModel(application), K
         }
     }
 
-    fun saveTag(tag: Tag) {
-        viewModelScope.launch {
-            if (tag.id > 0) {
-                database.tags().update(tag)
-            } else {
-                TagsTable.Queries.insert(tag, database).toInt()
-            }
-        }
-    }
-
-    fun deleteTag(tag: Tag) {
-        viewModelScope.launch {
-            database.tags().delete(tag)
-        }
-    }
-
     fun removeAppTag(tag: Tag) {
         val app = appInfo.value ?: return
         viewModelScope.launch {

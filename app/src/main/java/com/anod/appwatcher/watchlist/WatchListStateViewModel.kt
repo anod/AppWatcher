@@ -40,7 +40,7 @@ data class WatchListSharedState(
         val wideLayout: HingeDeviceLayout = HingeDeviceLayout(isWideLayout = false, hinge = Rect()),
         val selectedApp: App? = null,
         val showAppTagDialog: Boolean = false,
-        val editTag: Tag? = null,
+        val showEditTagDialog: Boolean = false,
         val tagAppsChange: Int = 0
 )
 
@@ -52,7 +52,7 @@ sealed interface WatchListSharedStateEvent {
     class ListEvent(val event: WatchListEvent) : WatchListSharedStateEvent
     class FilterById(val filterId: Int) : WatchListSharedStateEvent
     class AddAppToTag(val show: Boolean) : WatchListSharedStateEvent
-    class EditTag(val tag: Tag) : WatchListSharedStateEvent
+    class EditTag(val show: Boolean) : WatchListSharedStateEvent
     class OnSearch(val query: String) : WatchListSharedStateEvent
     class SelectApp(val app: App?) : WatchListSharedStateEvent
     class UpdateSyncProgress(val syncProgress: SyncProgress) : WatchListSharedStateEvent
@@ -63,6 +63,7 @@ sealed interface WatchListSharedStateAction {
     object SearchInStore : WatchListSharedStateAction
     object ImportInstalled : WatchListSharedStateAction
     object ShareFromStore : WatchListSharedStateAction
+    object Dismiss : WatchListSharedStateAction
     class ExpandSection(val type: SectionHeader) : WatchListSharedStateAction
     class OpenApp(val app: App, val index: Int) : WatchListSharedStateAction
     class OnSearch(val query: String) : WatchListSharedStateAction
@@ -89,9 +90,12 @@ class WatchListStateViewModel(state: SavedStateHandle) : BaseFlowViewModel<Watch
              viewModelScope.launch {
                 db.tags()
                         .observeTag(viewState.tag.id)
-                        .mapNotNull { it }
                         .collect { tag ->
-                            viewState = viewState.copy(tag = tag)
+                            if (tag == null) {
+                                emitAction(WatchListSharedStateAction.Dismiss)
+                            } else {
+                                viewState = viewState.copy(tag = tag)
+                            }
                         }
             }
 
@@ -128,7 +132,7 @@ class WatchListStateViewModel(state: SavedStateHandle) : BaseFlowViewModel<Watch
             is WatchListSharedStateEvent.FilterById -> {
                 viewState = viewState.copy(filterId = event.filterId)
             }
-            is WatchListSharedStateEvent.EditTag -> viewState = viewState.copy(editTag = event.tag)
+            is WatchListSharedStateEvent.EditTag -> viewState = viewState.copy(showEditTagDialog = event.show)
             is WatchListSharedStateEvent.OnSearch -> emitAction(WatchListSharedStateAction.OnSearch(event.query))
             is WatchListSharedStateEvent.SelectApp -> {
                 viewState = viewState.copy(selectedApp = event.app)
