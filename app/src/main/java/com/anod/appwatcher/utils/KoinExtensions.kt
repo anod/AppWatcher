@@ -25,9 +25,3 @@ val KoinComponent.appScope: CoroutineScope
 
 val KoinComponent.account: Account?
     get() = getKoin().getOrNull()
-
-val KoinComponent.memoryCache: LruCache<String, Any?>
-    get() = get(named("memoryCache"))
-
-val KoinComponent.imageLoader: ImageLoader
-    get() = get()

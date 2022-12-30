@@ -6,11 +6,8 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import com.anod.appwatcher.BuildConfig
@@ -28,7 +25,6 @@ import com.anod.appwatcher.upgrade.UpgradeCheck
 import com.anod.appwatcher.utils.account
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.wishlist.WishListActivity
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.startActivitySafely
 import kotlinx.coroutines.launch
@@ -227,5 +223,10 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
     companion object {
         const val EXTRA_FROM_NOTIFICATION = "extra_noti"
         const val EXTRA_EXPAND_SEARCH = "expand_search"
+
+        const val ARG_FILTER = "filter"
+        const val ARG_SORT = "sort"
+        const val ARG_TAG = "tag"
+        const val ARG_SHOW_ACTION = "showAction"
     }
 }

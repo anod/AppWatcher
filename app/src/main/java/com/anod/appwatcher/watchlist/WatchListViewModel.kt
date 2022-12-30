@@ -1,24 +1,23 @@
 package com.anod.appwatcher.watchlist
 
 import android.content.pm.PackageManager
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import androidx.paging.*
-import com.anod.appwatcher.database.AppListTable
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.PagingSource
+import androidx.paging.cachedIn
+import androidx.paging.insertSeparators
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
-import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.BaseFlowViewModel
-import com.anod.appwatcher.utils.PackageChangedReceiver
-import com.anod.appwatcher.utils.SelectionState
-import info.anodsplace.framework.app.ApplicationContext
+import com.anod.appwatcher.utils.prefs
 import info.anodsplace.framework.content.InstalledApps
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -26,8 +25,6 @@ import org.koin.core.component.inject
  * @author Alex Gavrishev
  * @date 13/04/2018
  */
-
-typealias InstalledPackageRow = Pair<String, Int>
 
 data class WatchListState(
         val pagingSourceConfig: WatchListPagingSource.Config,
@@ -37,10 +34,7 @@ data class WatchListState(
 sealed interface WatchListAction {
     class ItemClick(val app: App, val index: Int) : WatchListAction
     object Reload : WatchListAction
-    object SearchInStore : WatchListAction
     class SectionHeaderClick(val header: SectionHeader) : WatchListAction
-    class Installed(val importMode: Boolean) : WatchListAction
-    object ShareFromStore : WatchListAction
     class EmptyButton(val idx: Int) : WatchListAction
     class ItemLongClick(val app: App, val index: Int) : WatchListAction
 }
@@ -64,15 +58,7 @@ abstract class WatchListViewModel(pagingSourceConfig: WatchListPagingSource.Conf
         const val recentlyInstalledViews = 10
     }
 
-    val context: ApplicationContext
-        get() = getKoin().get()
     val database: AppsDatabase
-        get() = getKoin().get()
-    val prefs: Preferences
-        get() = getKoin().get()
-    private val packageChanged: PackageChangedReceiver
-        get() = getKoin().get()
-    private val recentlyInstalledPackagesLoader: RecentlyInstalledPackagesLoader
         get() = getKoin().get()
     private val packageManager: PackageManager
         get() = getKoin().get()
@@ -86,15 +72,6 @@ abstract class WatchListViewModel(pagingSourceConfig: WatchListPagingSource.Conf
         )
     }
 
-    val changes = AppListTable.Queries.changes(database.apps())
-            .drop(1)
-            .map { (System.currentTimeMillis() / 1000).toInt() }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), initialValue = 0)
-            .filter { it > 0 }
-            .onEach { delay(600) }
-            .flowOn(Dispatchers.Default)
-
-
     protected var pagingSource: FilterablePagingSource? = null
     private var _pagingData: Flow<PagingData<SectionItem>>? = null
     val pagingData: Flow<PagingData<SectionItem>>
@@ -106,16 +83,9 @@ abstract class WatchListViewModel(pagingSourceConfig: WatchListPagingSource.Conf
         }
 
     private lateinit var headerFactory: SectionHeaderFactory
-    val selection = MutableLiveData<Pair<Int, AppViewHolder.Selection>>()
 
     abstract fun createPagingSource(): FilterablePagingSource
     abstract fun createSectionHeaderFactory(): SectionHeaderFactory
-
-    val recentlyInstalledPackages: Flow<List<InstalledPackageRow>> = packageChanged
-            .observer
-            .onStart { emit("") }
-            .map { recentlyInstalledPackagesLoader.load() }
-            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
 
     override fun handleEvent(event: WatchListEvent) {
         when (event) {
@@ -135,27 +105,28 @@ abstract class WatchListViewModel(pagingSourceConfig: WatchListPagingSource.Conf
         }
     }
 
-    fun createPager(): Flow<PagingData<SectionItem>> {
+    private fun createPager(): Flow<PagingData<SectionItem>> {
         headerFactory = createSectionHeaderFactory()
         installedApps.reset()
 
         // When initialLoadSize larger than pageSize it cause a bug
         // where after filter if there is only one pages items are shown multiple times
         return Pager(
-                config = PagingConfig(pageSize = WatchListPagingSource.pageSize, initialLoadSize = WatchListPagingSource.pageSize),
-                initialKey = null,
-                pagingSourceFactory = {
-                    createPagingSource().also {
-                        pagingSource = it
-                    }
+            config = PagingConfig(pageSize = WatchListPagingSource.pageSize, initialLoadSize = WatchListPagingSource.pageSize),
+            initialKey = null,
+            pagingSourceFactory = {
+                createPagingSource().also {
+                    pagingSource = it
                 }
-        ).flow
-                .map { pagingData: PagingData<SectionItem> ->
-                    pagingData.insertSeparators { before, after ->
-                        headerFactory.insertSeparator(before, after)
-                    }
+            }
+        )
+            .flow
+            .map { pagingData: PagingData<SectionItem> ->
+                pagingData.insertSeparators { before, after ->
+                    headerFactory.insertSeparator(before, after)
                 }
-                .cachedIn(viewModelScope)
+            }
+            .cachedIn(viewModelScope)
     }
 }
 

@@ -15,7 +15,6 @@ android {
         targetSdk = 33
         versionCode = 15400
         versionName = "1.5.4"
-        resValue("string", "content_authority", "com.anod.appwatcher")
 
         javaCompileOptions {
             annotationProcessorOptions {
@@ -51,7 +50,6 @@ android {
             versionNameSuffix = "-debug"
             proguardFile(getDefaultProguardFile("proguard-android.txt"))
             proguardFile("../proguard-project.txt")
-            resValue("string", "content_authority", "com.anod.appwatcher.debug")
         }
 
         getByName("release") {
