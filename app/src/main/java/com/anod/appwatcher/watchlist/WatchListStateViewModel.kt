@@ -74,10 +74,9 @@ sealed interface WatchListSharedStateEvent {
 sealed interface WatchListSharedStateAction {
     object OnBackPressed : WatchListSharedStateAction
     object SearchInStore : WatchListSharedStateAction
-    object ImportInstalled : WatchListSharedStateAction
+    class Installed(val importMode: Boolean) : WatchListSharedStateAction
     object ShareFromStore : WatchListSharedStateAction
     object Dismiss : WatchListSharedStateAction
-    class ExpandSection(val type: SectionHeader) : WatchListSharedStateAction
     class OpenApp(val app: App, val index: Int) : WatchListSharedStateAction
     class OnSearch(val query: String) : WatchListSharedStateAction
 }
@@ -186,28 +185,17 @@ class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wid
 
     private fun handleListEvent(listEvent: WatchListEvent) {
         when (listEvent) {
-            is WatchListEvent.ItemClick -> {
-                val app = when (val item = listEvent.item) {
-                    is SectionItem.Header -> {
-                        emitAction(WatchListSharedStateAction.ExpandSection(item.type))
-                        null
-                    }
-                    is SectionItem.App -> item.appListItem.app
-                    is SectionItem.OnDevice -> item.appListItem.app
-                    else -> null
-                }
-                if (app != null) {
-                    if (viewState.wideLayout.isWideLayout) {
-                        viewState = viewState.copy(selectedApp = app)
-                    } else {
-                        emitAction(WatchListSharedStateAction.OpenApp(app, listEvent.index))
-                    }
+            is WatchListEvent.AppClick -> {
+                if (viewState.wideLayout.isWideLayout) {
+                    viewState = viewState.copy(selectedApp = listEvent.app)
+                } else {
+                    emitAction(WatchListSharedStateAction.OpenApp(listEvent.app, listEvent.index))
                 }
             }
             is WatchListEvent.EmptyButton -> {
                 when (listEvent.idx) {
                     1 -> emitAction(WatchListSharedStateAction.SearchInStore)
-                    2 -> emitAction(WatchListSharedStateAction.ImportInstalled)
+                    2 -> emitAction(WatchListSharedStateAction.Installed(importMode = true))
                     3 -> emitAction(WatchListSharedStateAction.ShareFromStore)
                 }
             }
@@ -222,7 +210,13 @@ class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wid
             }
             is WatchListEvent.FilterByTitle -> {}
             WatchListEvent.Reload -> {}
-            is WatchListEvent.ItemLongClick -> {}
+            is WatchListEvent.AppLongClick -> {}
+            is WatchListEvent.SectionHeaderClick -> {
+                when (listEvent.type) {
+                    SectionHeader.RecentlyInstalled -> emitAction(WatchListSharedStateAction.Installed(importMode = false))
+                    else -> { }
+                }
+            }
         }
     }
 

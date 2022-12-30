@@ -93,9 +93,8 @@ class TagWatchListComposeActivity : BaseComposeActivity() {
                 }
                 DetailsDialog.show(app.appId, app.rowId, app.detailsUrl, supportFragmentManager)
             }
-            is WatchListSharedStateAction.ExpandSection -> {}
             is WatchListSharedStateAction.SearchInStore -> startActivity(MarketSearchActivity.intent(this, "", true))
-            is WatchListSharedStateAction.ImportInstalled -> startActivity(InstalledActivity.intent(true, this))
+            is WatchListSharedStateAction.Installed -> startActivity(InstalledActivity.intent(action.importMode, this))
             is WatchListSharedStateAction.ShareFromStore -> startActivitySafely(Intent.makeMainActivity(ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity")))
             is WatchListSharedStateAction.OnSearch -> startActivity(MarketSearchActivity.intent(this, action.query, true))
             WatchListSharedStateAction.Dismiss -> finish()

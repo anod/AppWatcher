@@ -1,6 +1,7 @@
 package com.anod.appwatcher.watchlist
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -13,15 +14,20 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.ArrowRight
 import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -31,6 +37,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.intl.Locale
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.tooling.preview.Preview
@@ -48,15 +55,30 @@ import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.database.entities.Price
 import com.anod.appwatcher.database.entities.generateTitle
+import com.anod.appwatcher.database.entities.packageToApp
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.utils.AppIconLoader
+import com.anod.appwatcher.utils.PackageChangedReceiver
 import com.anod.appwatcher.utils.SelectionState
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.material.fade
+import com.google.accompanist.placeholder.material.placeholder
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.text.Html
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import org.koin.java.KoinJavaComponent.getKoin
+
+private val newLineRegex = Regex("\n+")
+private data class AppItemState(
+    val color: Color,
+    val text: String,
+    val installed: Boolean,
+    val showRecent: Boolean
+)
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -126,8 +148,10 @@ fun WatchListSectionItem(
 ) {
     when (item) {
         is SectionItem.Header -> when (item.type) {
-            is SectionHeader.RecentlyInstalled -> SectionHeader(item.type,
-                onClick = { onEvent(WatchListEvent.ItemClick(item, index)) })
+            is SectionHeader.RecentlyInstalled -> SectionHeader(
+                item.type,
+                onClick = { onEvent(WatchListEvent.SectionHeaderClick(item.type)) }
+            )
 
             else -> SectionHeader(
                 item.type, onClick = null
@@ -138,8 +162,8 @@ fun WatchListSectionItem(
             modifier = modifier,
             item = item.appListItem,
             isLocalApp = item.isLocal,
-            onClick = { onEvent(WatchListEvent.ItemClick(item, index)) },
-            onLongClick = { onEvent(WatchListEvent.ItemLongClick(item, index)) },
+            onClick = { onEvent(WatchListEvent.AppClick(item.appListItem.app, index)) },
+            onLongClick = { onEvent(WatchListEvent.AppLongClick(item.appListItem.app, index)) },
             selection = selection,
             selectionMode = selectionMode,
             installedApps = installedApps,
@@ -150,21 +174,21 @@ fun WatchListSectionItem(
             modifier = modifier,
             item = item.appListItem,
             isLocalApp = true,
-            onClick = { onEvent(WatchListEvent.ItemClick(item, index)) },
-            onLongClick = { onEvent(WatchListEvent.ItemLongClick(item, index)) },
+            onClick = { onEvent(WatchListEvent.AppClick(item.appListItem.app, index)) },
+            onLongClick = { onEvent(WatchListEvent.AppLongClick(item.appListItem.app, index)) },
             selection = selection,
             selectionMode = selectionMode,
             installedApps = installedApps,
             appIconLoader = appIconLoader
         )
 
-        is SectionItem.Recent -> RecentItem()
+        is SectionItem.Recent -> RecentItem(onEvent = onEvent)
         is SectionItem.Empty -> EmptyItem(onEvent = onEvent)
     }
 }
 
 @Composable
-fun SectionHeader(item: SectionHeader, onClick: (() -> Unit)? = null) {
+private fun SectionHeader(item: SectionHeader, onClick: (() -> Unit)? = null) {
     val text = when (item) {
         is SectionHeader.New -> stringResource(R.string.new_updates)
         is SectionHeader.RecentlyUpdated -> stringResource(R.string.recently_updated)
@@ -194,7 +218,8 @@ fun SectionHeader(item: SectionHeader, onClick: (() -> Unit)? = null) {
         ) {
             SectionHeaderText(text = text)
             Icon(
-                imageVector = Icons.Default.ArrowRight,
+                modifier = Modifier.size(20.dp),
+                imageVector = Icons.Default.ArrowForwardIos,
                 contentDescription = text,
                 tint = MaterialTheme.colorScheme.primary
             )
@@ -203,7 +228,7 @@ fun SectionHeader(item: SectionHeader, onClick: (() -> Unit)? = null) {
 }
 
 @Composable
-fun SectionHeaderText(text: String) {
+private fun SectionHeaderText(text: String) {
     Text(
         text = text.toUpperCase(locale = Locale.current),
         maxLines = 1,
@@ -212,14 +237,8 @@ fun SectionHeaderText(text: String) {
     )
 }
 
-private val newLineRegex = Regex("\n+")
-
-data class AppItemState(
-    val color: Color, val text: String, val installed: Boolean, val showRecent: Boolean
-)
-
 @Composable
-fun ChangelogText(text: String, noNewDetails: Boolean) {
+private fun ChangelogText(text: String, noNewDetails: Boolean) {
     Text(
         text = text,
         modifier = Modifier
@@ -234,7 +253,7 @@ fun ChangelogText(text: String, noNewDetails: Boolean) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun AppItem(
+private fun AppItem(
     item: AppListItem,
     isLocalApp: Boolean,
     onClick: (() -> Unit),
@@ -369,7 +388,7 @@ fun AppItem(
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun SelectedIcon(modifier: Modifier, itemSelection: AppViewHolder.Selection) {
+private fun SelectedIcon(modifier: Modifier, itemSelection: AppViewHolder.Selection) {
     AnimatedVisibility(
         modifier = modifier,
         visible = itemSelection == AppViewHolder.Selection.Selected,
@@ -388,7 +407,7 @@ fun SelectedIcon(modifier: Modifier, itemSelection: AppViewHolder.Selection) {
 }
 
 @Composable
-fun Changelog(isLocalApp: Boolean, changesHtml: String, noNewDetails: Boolean) {
+private fun Changelog(isLocalApp: Boolean, changesHtml: String, noNewDetails: Boolean) {
     if (isLocalApp) {
         ChangelogText(text = changesHtml, noNewDetails = noNewDetails)
     } else {
@@ -401,6 +420,221 @@ fun Changelog(isLocalApp: Boolean, changesHtml: String, noNewDetails: Boolean) {
         }
     }
 }
+
+@Composable
+private fun RecentItem(
+    onEvent: (WatchListEvent) -> Unit,
+    packageChangedReceiver: PackageChangedReceiver = getKoin().get(),
+    recentlyInstalledPackagesLoader: RecentlyInstalledPackagesLoader = getKoin().get(),
+    packageManager: PackageManager = getKoin().get(),
+    appIconLoader: AppIconLoader = getKoin().get(),
+) {
+    var loading by remember { mutableStateOf(true) }
+    var recentApps by remember { mutableStateOf(listOf<App>()) }
+    LaunchedEffect(key1 = true) {
+        packageChangedReceiver.observer
+            .onStart { emit("") }
+            .map { recentlyInstalledPackagesLoader.load()
+                .map { (packageName, rowId) ->
+                    packageManager.packageToApp(rowId, packageName)
+                }
+            }
+            .collect {
+                recentApps = it
+                loading = false
+            }
+    }
+
+    RecentItemRow(
+        loading = loading,
+        recentApps = recentApps,
+        onEvent = onEvent,
+        appIconLoader = appIconLoader
+    )
+
+}
+
+@Composable
+private fun RecentItemRow(
+    loading: Boolean,
+    recentApps: List<App>,
+    onEvent: (WatchListEvent) -> Unit,
+    appIconLoader: AppIconLoader = getKoin().get()
+) {
+    val scrollState = rememberScrollState()
+    Row(
+        modifier = Modifier
+            .defaultMinSize(minHeight = 96.dp)
+            .fillMaxWidth()
+            .padding(start = 6.dp, end = 8.dp)
+            .horizontalScroll(scrollState)
+    ) {
+        if (loading) {
+            (0..4).forEach {
+                RecentItemAppCard(
+                    null,
+                    onClick = {},
+                    appIconLoader = appIconLoader
+                )
+            }
+        } else {
+            recentApps.forEachIndexed { index, app ->
+                RecentItemAppCard(
+                    app,
+                    onClick = { onEvent(WatchListEvent.AppClick(app, index)) },
+                    appIconLoader = appIconLoader
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun RecentItemAppCard(app: App?, onClick: (() -> Unit), appIconLoader: AppIconLoader = getKoin().get()) {
+    Card(
+        modifier = Modifier
+            .defaultMinSize(minHeight = 96.dp)
+            .width(96.dp)
+            .padding(start = 2.dp, end = 2.dp, top = 2.dp, bottom = 2.dp)
+            .clickable(enabled = app != null, onClick = onClick)
+    ) {
+        if (app == null) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_app_icon_placeholder),
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .size(56.dp)
+                    .align(Alignment.CenterHorizontally)
+                    .placeholder(
+                        visible = true,
+                        highlight = PlaceholderHighlight.fade(),
+                    )
+            )
+            Text(
+                text = "",
+                maxLines = 2,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 8.dp, end = 8.dp)
+                    .placeholder(
+                        visible = true,
+                        highlight = PlaceholderHighlight.fade(),
+                    )
+                ,
+                textAlign = TextAlign.Center,
+                fontSize = 14.sp,
+                lineHeight = 14.sp,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Spacer(modifier = Modifier
+                .size(20.dp)
+                .padding(start = 8.dp, bottom = 4.dp))
+        } else {
+            val view = LocalView.current
+            val title: String by remember {
+                mutableStateOf(
+                    app.generateTitle(view.resources).toString()
+                )
+            }
+            AppIcon(
+                app = app,
+                contentDescription = title,
+                size = 56.dp,
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .align(Alignment.CenterHorizontally),
+                appIconLoader = appIconLoader
+            )
+            var addNewLine by remember { mutableStateOf(false) }
+            Text(
+                text = if (addNewLine) title + "\n" else title,
+                maxLines = 2,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 8.dp, end = 8.dp)
+                ,
+                textAlign = TextAlign.Center,
+                fontSize = 14.sp,
+                lineHeight = 14.sp,
+                overflow = TextOverflow.Ellipsis,
+                onTextLayout = {
+                    if (it.lineCount < 2) {
+                        addNewLine = true
+                    }
+                }
+            )
+            if (app.rowId > 0) {
+                Icon(
+                    modifier = Modifier
+                        .size(20.dp)
+                        .padding(start = 8.dp, bottom = 4.dp)
+                    ,
+                    imageVector = Icons.Default.Visibility,
+                    contentDescription = stringResource(id = R.string.watched)
+                )
+            } else {
+                Spacer(modifier = Modifier
+                    .size(20.dp)
+                    .padding(start = 8.dp, bottom = 4.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun EmptyItem(
+    onEvent: (WatchListEvent) -> Unit,
+    modifier: Modifier = Modifier,
+    button1Text: @Composable () -> Unit = { Text(text = stringResource(id = R.string.search_for_an_app)) },
+    button2Text: @Composable (() -> Unit)? = { Text(text = stringResource(id = R.string.import_installed)) },
+    button3Text: @Composable (() -> Unit)? = { Text(text = stringResource(id = R.string.share_from_play_store)) },
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Image(painter = painterResource(id = R.drawable.ic_empty_box), contentDescription = null)
+        Text(
+            text = stringResource(id = R.string.watch_list_is_empty),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(top = 24.dp)
+        )
+        Button(
+            onClick = { onEvent(WatchListEvent.EmptyButton(1)) },
+            modifier = Modifier
+                .defaultMinSize(minWidth = 188.dp)
+                .padding(top = 8.dp)
+        ) {
+            button1Text()
+        }
+        if (button2Text != null) {
+            Button(
+                onClick = { onEvent(WatchListEvent.EmptyButton(2)) },
+                modifier = Modifier
+                    .defaultMinSize(minWidth = 188.dp)
+                    .padding(top = 8.dp)
+            ) {
+                button2Text()
+            }
+        }
+        if (button3Text != null) {
+            Button(
+                onClick = { onEvent(WatchListEvent.EmptyButton(3)) },
+                modifier = Modifier
+                    .defaultMinSize(minWidth = 188.dp)
+                    .padding(top = 8.dp)
+            ) {
+                button3Text()
+            }
+        }
+    }
+}
+
 
 private fun getPackageSelection(
     packageName: String, selectionMode: Boolean, selection: SelectionState
@@ -467,65 +701,9 @@ private fun calcAppItemState(
     return AppItemState(color, text, installed, showRecent)
 }
 
-@Composable
-fun RecentItem() {
-    Text(text = "RecentItem")
-}
-
-@Composable
-fun EmptyItem(
-    onEvent: (WatchListEvent) -> Unit,
-    modifier: Modifier = Modifier,
-    button1Text: @Composable () -> Unit = { Text(text = stringResource(id = R.string.search_for_an_app)) },
-    button2Text: @Composable (() -> Unit)? = { Text(text = stringResource(id = R.string.import_installed)) },
-    button3Text: @Composable (() -> Unit)? = { Text(text = stringResource(id = R.string.share_from_play_store)) },
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Image(painter = painterResource(id = R.drawable.ic_empty_box), contentDescription = null)
-        Text(
-            text = stringResource(id = R.string.watch_list_is_empty),
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(top = 24.dp)
-        )
-        Button(
-            onClick = { onEvent(WatchListEvent.EmptyButton(1)) },
-            modifier = Modifier
-                .defaultMinSize(minWidth = 188.dp)
-                .padding(top = 8.dp)
-        ) {
-            button1Text()
-        }
-        if (button2Text != null) {
-            Button(
-                onClick = { onEvent(WatchListEvent.EmptyButton(2)) },
-                modifier = Modifier
-                    .defaultMinSize(minWidth = 188.dp)
-                    .padding(top = 8.dp)
-            ) {
-                button2Text()
-            }
-        }
-        if (button3Text != null) {
-            Button(
-                onClick = { onEvent(WatchListEvent.EmptyButton(3)) },
-                modifier = Modifier
-                    .defaultMinSize(minWidth = 188.dp)
-                    .padding(top = 8.dp)
-            ) {
-                button3Text()
-            }
-        }
-    }
-}
-
 @Preview(uiMode = UI_MODE_NIGHT_YES)
 @Composable
-fun WatchListEmptyPreview() {
+private fun WatchListEmptyPreview() {
     val appIconLoader = AppIconLoader.Simple(
         LocalContext.current, ImageLoader.Builder(LocalContext.current).build()
     )
@@ -577,7 +755,7 @@ fun WatchListEmptyPreview() {
 
 @Preview(uiMode = UI_MODE_NIGHT_YES)
 @Composable
-fun WatchListPreview() {
+private fun WatchListPreview() {
     val appIconLoader = AppIconLoader.Simple(
         LocalContext.current, ImageLoader.Builder(LocalContext.current).build()
     )
@@ -704,6 +882,80 @@ fun WatchListPreview() {
                     )
                 }
             }
+        }
+    }
+}
+
+@Preview(uiMode = UI_MODE_NIGHT_YES)
+@Composable
+private fun WatchListPreviewRecent() {
+    val appIconLoader = AppIconLoader.Simple(
+        LocalContext.current, ImageLoader.Builder(LocalContext.current).build()
+    )
+
+    AppTheme {
+        Surface {
+            RecentItemRow(
+                loading = false,
+                recentApps = listOf(
+                    App(
+                        rowId = -1,
+                        appId = "appId3",
+                        packageName = "package3",
+                        versionNumber = 11223344,
+                        versionName = "very long long version name",
+                        title = "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+                        uploadTime = 0,
+                        uploadDate = "20 Sept, 2017 yo",
+                        appType = "app",
+                        creator = "Banana man",
+                        detailsUrl = "url",
+                        iconUrl = "",
+                        price = Price("", "", 0),
+                        status = 0,
+                        updateTime = 0
+                    ),
+                    App(
+                        rowId = 22,
+                        appId = "appId2",
+                        packageName = "package2",
+                        versionNumber = 11223300,
+                        versionName = "very long long version name",
+                        title = "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+                        uploadTime = 0,
+                        uploadDate = "20 Sept, 2017 yo",
+                        appType = "app",
+                        creator = "Banana man",
+                        detailsUrl = "url",
+                        iconUrl = "",
+                        price = Price("", "", 0),
+                        status = 0,
+                        updateTime = 0
+                    )
+                ),
+                onEvent = { },
+                appIconLoader = appIconLoader
+            )
+        }
+    }
+}
+
+
+@Preview(uiMode = UI_MODE_NIGHT_YES)
+@Composable
+private fun WatchListPreviewRecentLoading() {
+    val appIconLoader = AppIconLoader.Simple(
+        LocalContext.current, ImageLoader.Builder(LocalContext.current).build()
+    )
+
+    AppTheme {
+        Surface {
+            RecentItemRow(
+                loading = true,
+                recentApps = listOf(),
+                onEvent = { },
+                appIconLoader = appIconLoader
+            )
         }
     }
 }

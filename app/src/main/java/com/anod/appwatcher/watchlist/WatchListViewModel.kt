@@ -49,9 +49,10 @@ sealed interface WatchListEvent {
     object Reload : WatchListEvent
     object Refresh : WatchListEvent
     class FilterByTitle(val titleFilter: String, val reload: Boolean) : WatchListEvent
-    class ItemClick(val item: SectionItem, val index: Int) : WatchListEvent
+    class AppClick(val app: App, val index: Int) : WatchListEvent
     class EmptyButton(val idx: Int) : WatchListEvent
-    class ItemLongClick(val item: SectionItem, val index: Int) : WatchListEvent
+    class AppLongClick(val app: App, val index: Int) : WatchListEvent
+    class SectionHeaderClick(val type: SectionHeader) : WatchListEvent
 }
 
 abstract class FilterablePagingSource : PagingSource<Int, SectionItem>() {
@@ -125,27 +126,12 @@ abstract class WatchListViewModel(pagingSourceConfig: WatchListPagingSource.Conf
                     emitAction(WatchListAction.Reload)
                 }
             }
-            is WatchListEvent.ItemClick -> {
-                when (event.item) {
-                    is SectionItem.Header -> emitAction(WatchListAction.SectionHeaderClick(event.item.type))
-                    is SectionItem.App -> emitAction(WatchListAction.ItemClick(event.item.appListItem.app, event.index))
-                    is SectionItem.OnDevice -> emitAction(WatchListAction.ItemClick(event.item.appListItem.app, event.index))
-                    SectionItem.Empty -> {}
-                    SectionItem.Recent -> {}
-                }
-            }
+            is WatchListEvent.AppClick -> emitAction(WatchListAction.ItemClick(event.app, event.index))
             is WatchListEvent.EmptyButton -> emitAction(WatchListAction.EmptyButton(event.idx))
             WatchListEvent.Refresh -> {}
             WatchListEvent.Reload -> emitAction(WatchListAction.Reload)
-            is WatchListEvent.ItemLongClick -> {
-                when (event.item) {
-                    is SectionItem.Header -> {}
-                    is SectionItem.App -> emitAction(WatchListAction.ItemLongClick(event.item.appListItem.app, event.index))
-                    is SectionItem.OnDevice -> emitAction(WatchListAction.ItemLongClick(event.item.appListItem.app, event.index))
-                    SectionItem.Empty -> {}
-                    SectionItem.Recent -> {}
-                }
-            }
+            is WatchListEvent.AppLongClick -> emitAction(WatchListAction.ItemLongClick(event.app, event.index))
+            is WatchListEvent.SectionHeaderClick -> emitAction(WatchListAction.SectionHeaderClick(event.type))
         }
     }
 

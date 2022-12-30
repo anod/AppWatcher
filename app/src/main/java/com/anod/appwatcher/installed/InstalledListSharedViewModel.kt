@@ -106,33 +106,21 @@ class InstalledListSharedViewModel(state: SavedStateHandle) : BaseFlowViewModel<
             is WatchListEvent.EmptyButton -> {}
             is WatchListEvent.FilterByTitle -> {
             }
-            is WatchListEvent.ItemClick -> {
-                val app = when (val item = listEvent.item) {
-                    is SectionItem.App -> item.appListItem.app
-                    is SectionItem.OnDevice -> item.appListItem.app
-                    else -> null
-                }
-                if (app != null) {
-                    if (viewState.selectionMode) {
-                        if (app.rowId == -1) {
-                            togglePackage(app.packageName)
-                        }
+            is WatchListEvent.AppClick -> {
+                if (viewState.selectionMode) {
+                    if (listEvent.app.rowId == -1) {
+                        togglePackage(listEvent.app.packageName)
+                    }
+                } else {
+                    if (viewState.wideLayout.isWideLayout) {
+                        viewState = viewState.copy(selectedApp = listEvent.app)
                     } else {
-                        if (viewState.wideLayout.isWideLayout) {
-                            viewState = viewState.copy(selectedApp = app)
-                        } else {
-                            emitAction(InstalledListSharedAction.OpenApp(app, listEvent.index))
-                        }
+                        emitAction(InstalledListSharedAction.OpenApp(listEvent.app, listEvent.index))
                     }
                 }
             }
-            is WatchListEvent.ItemLongClick -> {
-                val app = when (val item = listEvent.item) {
-                    is SectionItem.App -> item.appListItem.app
-                    is SectionItem.OnDevice -> item.appListItem.app
-                    else -> null
-                }
-                val packageName = if (app?.rowId == -1) app.packageName else null
+            is WatchListEvent.AppLongClick -> {
+                val packageName = if (listEvent.app.rowId == -1) listEvent.app.packageName else null
                 if (viewState.selectionMode) {
                     if (packageName != null) {
                         togglePackage(packageName)
@@ -146,6 +134,7 @@ class InstalledListSharedViewModel(state: SavedStateHandle) : BaseFlowViewModel<
                 viewState = viewState.copy(refreshRequest = viewState.refreshRequest + 1)
             }
             WatchListEvent.Reload -> { }
+            is WatchListEvent.SectionHeaderClick -> { }
         }
     }
 
