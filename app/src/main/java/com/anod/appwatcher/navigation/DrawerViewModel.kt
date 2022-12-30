@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.utils.prefs
+import com.anod.appwatcher.watchlist.TagCountList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import org.koin.core.component.KoinComponent
@@ -17,7 +18,7 @@ import org.koin.core.component.inject
  * @date 18/04/2018
  */
 
-typealias TagCountList = List<Pair<Tag, Int>>
+
 
 class DrawerViewModel(application: Application) : AndroidViewModel(application), KoinComponent {
     private val database: AppsDatabase by inject()

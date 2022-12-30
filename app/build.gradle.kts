@@ -110,7 +110,7 @@ dependencies {
     implementation("com.google.accompanist:accompanist-pager:0.28.0")
     implementation("com.google.accompanist:accompanist-flowlayout:0.28.0")
     implementation("com.google.accompanist:accompanist-swiperefresh:0.28.0")
-
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.28.0")
     // Coil
     implementation("io.coil-kt:coil-base:2.2.2")
     implementation("io.coil-kt:coil-compose-base:2.2.2")

@@ -10,8 +10,6 @@ import info.anodsplace.framework.app.NotificationManager
 import info.anodsplace.graphics.AdaptiveIcon
 
 class Preferences(context: Context, private val notificationManager: NotificationManager) {
-
-
     private val preferences = context.getSharedPreferences(PREFS_NAME, 0)
 
     var account: Account?

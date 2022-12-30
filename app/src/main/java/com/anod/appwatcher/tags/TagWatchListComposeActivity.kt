@@ -34,9 +34,7 @@ class TagWatchListComposeActivity : BaseComposeActivity() {
     val viewModel: WatchListStateViewModel by viewModels(factoryProducer = {
         WatchListStateViewModel.Factory(
             defaultFilterId = Filters.ALL,
-            wideLayout = hingeDevice.layout.value,
-            owner = this,
-            defaultArgs = null
+            wideLayout = hingeDevice.layout.value
         )
     })
 

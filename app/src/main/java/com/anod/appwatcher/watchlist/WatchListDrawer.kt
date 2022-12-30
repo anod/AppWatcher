@@ -3,14 +3,28 @@ package com.anod.appwatcher.watchlist
 import android.accounts.Account
 import android.text.format.DateUtils
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.DismissibleDrawerSheet
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Label
+import androidx.compose.material.icons.outlined.Label
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -23,18 +37,27 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.ColorPainter
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
+import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.utils.isLightColor
 import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WatchListDrawer(mainState: MainViewState, onMainEvent: (MainViewEvent) -> Unit) {
+    val scrollState = rememberScrollState()
     ModalDrawerSheet(
+        modifier = Modifier.verticalScroll(scrollState),
         windowInsets = WindowInsets.navigationBars
     ) {
         DrawerContent(
@@ -48,11 +71,71 @@ fun WatchListDrawer(mainState: MainViewState, onMainEvent: (MainViewEvent) -> Un
 @Composable
 private fun DrawerContent(mainState: MainViewState, onMainEvent: (MainViewEvent) -> Unit) {
 
+    DrawerHeader(
+        mainState = mainState,
+        onMainEvent = onMainEvent
+    )
+
+    mainState.navigationItems.forEach { item ->
+        val title = stringResource(id = item.title)
+        NavigationDrawerItem(
+            icon = { Icon(item.icon, contentDescription = title) },
+            label = { Text(title) },
+            selected = false,
+            onClick = {
+                onMainEvent(MainViewEvent.NavigateTo(item.id))
+            },
+            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+        )
+    }
+
+    Divider(modifier = Modifier
+        .padding(horizontal = 24.dp)
+        .fillMaxWidth()
+    )
+
+    Text(
+        text = stringResource(id = R.string.tags),
+        style = MaterialTheme.typography.titleLarge,
+        modifier = Modifier
+            .padding(horizontal = 24.dp, vertical = 8.dp)
+    )
+
+    mainState.tags.forEach { (tag, count) ->
+        NavigationDrawerItem(
+            icon = { Icon(Icons.Outlined.Label, contentDescription = tag.name) },
+            label = { Text(tag.name) },
+            badge = { TagBadge(Color(tag.color), count) },
+            selected = false,
+            onClick = {
+                onMainEvent(MainViewEvent.NavigateToTag(tag))
+            },
+            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+        )
+    }
+
+    val addTagText = stringResource(id = R.string.menu_add)
+    NavigationDrawerItem(
+        icon = { Icon(Icons.Default.Add, contentDescription = addTagText) },
+        label = { Text(addTagText) },
+        selected = false,
+        onClick = {
+              onMainEvent(MainViewEvent.AddNewTagDialog(show = true))
+        },
+        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+    )
+}
+
+@Composable
+private fun DrawerHeader(mainState: MainViewState, onMainEvent: (MainViewEvent) -> Unit) {
+    val inset = WindowInsets.statusBars.asPaddingValues()
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.primaryContainer)
-            .padding(horizontal = 24.dp, vertical = 12.dp)
+            .padding(horizontal = 24.dp)
+            .padding(top = inset.calculateTopPadding() + 12.dp, bottom = 12.dp)
     ) {
         Text(
             text = stringResource(id = R.string.app_name),
@@ -61,14 +144,22 @@ private fun DrawerContent(mainState: MainViewState, onMainEvent: (MainViewEvent)
         )
         if (mainState.account == null) {
             OutlinedButton(
-                modifier = Modifier.padding(top = 4.dp),
+                modifier = Modifier.padding(top = 12.dp),
                 onClick = {  }
             ) {
                 Text(text = stringResource(id = R.string.choose_an_account))
             }
         } else {
             TextButton(
-                modifier = Modifier.padding(top = 4.dp),
+                modifier = Modifier.padding(top = 8.dp),
+                contentPadding = ButtonDefaults.TextButtonContentPadding.let {
+                    PaddingValues(
+                        start = 0.dp,
+                        top = it.calculateTopPadding(),
+                        end = 0.dp,
+                        bottom = it.calculateBottomPadding()
+                    )
+                },
                 onClick = {  }
             ) {
                 Text(text = mainState.account.name)
@@ -85,24 +176,26 @@ private fun DrawerContent(mainState: MainViewState, onMainEvent: (MainViewEvent)
             )
         }
     }
-    mainState.navigationItems.forEach { item ->
-        val title = stringResource(id = item.title)
-        NavigationDrawerItem(
-            icon = { Icon(item.icon, contentDescription = title) },
-            label = { Text(title) },
-            selected = false,
-            onClick = {
-                onMainEvent(MainViewEvent.NavigateTo(item.id))
-            },
-            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TagBadge(color: Color, count: Int, modifier: Modifier = Modifier) {
+    Badge(
+        modifier
+            .size(24.dp),
+        containerColor = color,
+        contentColor = if (color.isLightColor) Color.Black else Color.White
+    ) {
+        Text(
+            text = if (count > 99) "99+" else "" + count
         )
     }
 }
 
-
 @Preview(showSystemUi = true)
 @Composable
-fun DrawerContentPreviewNoAccount() {
+private fun DrawerContentPreviewNoAccount() {
     AppTheme {
         WatchListDrawer(
             mainState = MainViewState(),
@@ -113,12 +206,17 @@ fun DrawerContentPreviewNoAccount() {
 
 @Preview(showSystemUi = true)
 @Composable
-fun DrawerContentPreviewWithAccount() {
+private fun DrawerContentPreviewWithAccount() {
     AppTheme {
         WatchListDrawer(
             mainState = MainViewState(
                 account = Account("very_long_email_address@example.com", "test"),
-                lastUpdate = System.currentTimeMillis() - TimeUnit.HOURS.toMillis(2)
+                lastUpdate = System.currentTimeMillis() - TimeUnit.HOURS.toMillis(2),
+                tags = listOf(
+                    Pair(Tag("Banana", Color.Yellow.toArgb()), 9),
+                    Pair(Tag("Kiwi", Color.DarkGray.toArgb()), 125),
+                    Pair(Tag("Apple", Color.Red.toArgb()), 0),
+                )
             ),
             onMainEvent = {}
         )

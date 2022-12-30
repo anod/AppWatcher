@@ -14,6 +14,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.core.view.ViewCompat
 import com.anod.appwatcher.preferences.Preferences
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.android.material.color.MaterialColors
 
 private val AppTypography = Typography()
@@ -139,6 +140,7 @@ fun AppTheme(
         theme: Int = Preferences.THEME_DEFAULT,
         darkTheme: Boolean = theme == Preferences.THEME_BLACK || isSystemInDarkTheme(),
         customPrimaryColor: Color? = null,
+        transparentSystemUi: Boolean = false,
         content: @Composable () -> Unit
 ) {
 
@@ -148,7 +150,9 @@ fun AppTheme(
         if (darkTheme) darkTheme(theme, supportsDynamic = false) else LightThemeColors
     }
 
-    var statusBarColor = colorScheme.surface.toArgb()
+
+
+    var statusBarColor = colorScheme.surface
     var isAppearanceLightStatusBars = !darkTheme
     if (customPrimaryColor != null) {
         val roles = MaterialColors.getColorRoles(customPrimaryColor.toArgb(), !darkTheme)
@@ -158,18 +162,21 @@ fun AppTheme(
                 primaryContainer = Color(roles.accentContainer),
                 onPrimaryContainer = Color(roles.onAccentContainer)
         )
-        statusBarColor = colorScheme.primary.toArgb()
-        isAppearanceLightStatusBars = MaterialColors.isColorLight(statusBarColor)
+        statusBarColor = colorScheme.primary
+        isAppearanceLightStatusBars = MaterialColors.isColorLight(statusBarColor.toArgb())
     }
 
-    val view = LocalView.current
-    if (!view.isInEditMode) {
-        SideEffect {
-            (view.context as Activity).window.statusBarColor = statusBarColor
-            (view.context as Activity).window.navigationBarColor = colorScheme.surface.toArgb()
-            ViewCompat.getWindowInsetsController(view)?.isAppearanceLightStatusBars = isAppearanceLightStatusBars
-            ViewCompat.getWindowInsetsController(view)?.isAppearanceLightNavigationBars = isAppearanceLightStatusBars
-        }
+    val systemUI = rememberSystemUiController()
+    if (transparentSystemUi) {
+        systemUI.setSystemBarsColor(
+            Color.Transparent,
+            darkIcons = !darkTheme
+        )
+    } else {
+        systemUI.setSystemBarsColor(
+            statusBarColor,
+            darkIcons = isAppearanceLightStatusBars
+        )
     }
 
     MaterialTheme(

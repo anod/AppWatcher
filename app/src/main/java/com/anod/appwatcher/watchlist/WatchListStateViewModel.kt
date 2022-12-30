@@ -89,10 +89,8 @@ class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wid
 
     class Factory(
         private val defaultFilterId: Int,
-        private val wideLayout: HingeDeviceLayout,
-        owner: SavedStateRegistryOwner,
-        defaultArgs: Bundle?
-    ) : AbstractSavedStateViewModelFactory(owner, defaultArgs) {
+        private val wideLayout: HingeDeviceLayout
+    ) : AbstractSavedStateViewModelFactory() {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(
             key: String,

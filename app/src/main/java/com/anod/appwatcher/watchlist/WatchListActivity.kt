@@ -3,11 +3,14 @@ package com.anod.appwatcher.watchlist
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import com.anod.appwatcher.BuildConfig
@@ -19,11 +22,13 @@ import com.anod.appwatcher.compose.MainDetailScreen
 import com.anod.appwatcher.details.DetailsDialog
 import com.anod.appwatcher.installed.InstalledActivity
 import com.anod.appwatcher.sync.SyncScheduler
+import com.anod.appwatcher.tags.TagWatchListComposeActivity
 import com.anod.appwatcher.upgrade.Upgrade15500
 import com.anod.appwatcher.upgrade.UpgradeCheck
 import com.anod.appwatcher.utils.account
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.wishlist.WishListActivity
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.startActivitySafely
 import kotlinx.coroutines.launch
@@ -34,9 +39,7 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
     private val listViewModel: WatchListStateViewModel by viewModels(factoryProducer = {
         WatchListStateViewModel.Factory(
             defaultFilterId = prefs.defaultMainFilterId,
-            wideLayout = hingeDevice.layout.value,
-            owner = this,
-            defaultArgs = null
+            wideLayout = hingeDevice.layout.value
         )
     })
 
@@ -79,7 +82,8 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
 
         setContent {
             AppTheme(
-                theme = listViewModel.prefs.theme
+                theme = listViewModel.prefs.theme,
+                transparentSystemUi = true
             ) {
                 val mainState by mainViewModel.viewStates.collectAsState(initial = mainViewModel.viewState)
                 val listState by listViewModel.viewStates.collectAsState(initial = listViewModel.viewState)
@@ -196,6 +200,16 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
                     DrawerNavigationItem.Id.Wishlist -> startActivity(WishListActivity.intent(this, account, mainViewModel.authToken.token))
                 }
             }
+            is MainViewAction.NavigateToTag -> startActivity(TagWatchListComposeActivity.createTagIntent(action.tag, this))
+            MainViewAction.RequestNotificationPermission -> { }
+            is MainViewAction.ShowToast -> {
+                if (action.resId == 0) {
+                    Toast.makeText(this, action.text, action.length).show()
+                } else {
+                    Toast.makeText(this, action.resId, action.length).show()
+                }
+            }
+            is MainViewAction.StartActivity -> startActivitySafely(action.intent)
         }
     }
 
