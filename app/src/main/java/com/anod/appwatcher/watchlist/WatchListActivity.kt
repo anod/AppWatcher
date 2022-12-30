@@ -13,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.MarketSearchActivity
 import com.anod.appwatcher.SettingsActivity
+import com.anod.appwatcher.accounts.AccountSelectionDialog
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.compose.MainDetailScreen
@@ -39,6 +40,7 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
             wideLayout = hingeDevice.layout.value
         )
     })
+    private lateinit var accountSelectionDialog: AccountSelectionDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,6 +51,7 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
             return
         }
 
+        accountSelectionDialog = AccountSelectionDialog(this, prefs)
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
 //            stateViewModel.viewStates.map { it.listState }.distinctUntilChanged().collect {
@@ -136,6 +139,13 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
                 listViewModel.handleEvent(WatchListSharedStateEvent.SetWideLayout(it))
             }
         }
+
+        lifecycleScope.launch {
+            accountSelectionDialog.accountSelected.collect { result ->
+                mainViewModel.handleEvent(MainViewEvent.SetAccount(result))
+
+            }
+        }
     }
 
     override fun onResume() {
@@ -185,16 +195,15 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
         }
     }
 
-
     private fun onMainAction(action: MainViewAction) {
         when (action) {
             is MainViewAction.NavigateTo -> {
                 when (action.id) {
-                    DrawerNavigationItem.Id.Add -> startActivity(Intent(this, MarketSearchActivity::class.java))
-                    DrawerNavigationItem.Id.Installed -> startActivity(InstalledActivity.intent(false, this))
-                    DrawerNavigationItem.Id.Refresh -> { }
-                    DrawerNavigationItem.Id.Settings ->  startActivity( Intent(this, SettingsActivity::class.java))
-                    DrawerNavigationItem.Id.Wishlist -> startActivity(WishListActivity.intent(this, account, mainViewModel.authToken.token))
+                    DrawerItem.Id.Add -> startActivity(Intent(this, MarketSearchActivity::class.java))
+                    DrawerItem.Id.Installed -> startActivity(InstalledActivity.intent(false, this))
+                    DrawerItem.Id.Refresh -> { }
+                    DrawerItem.Id.Settings ->  startActivity( Intent(this, SettingsActivity::class.java))
+                    DrawerItem.Id.Wishlist -> startActivity(WishListActivity.intent(this, account, mainViewModel.authToken.token))
                 }
             }
             is MainViewAction.NavigateToTag -> startActivity(TagWatchListComposeActivity.createTagIntent(action.tag, this))
@@ -207,6 +216,7 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
                 }
             }
             is MainViewAction.StartActivity -> startActivitySafely(action.intent)
+            MainViewAction.ChooseAccount -> accountSelectionDialog.show()
         }
     }
 

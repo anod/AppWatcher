@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.lifecycle.viewModelScope
 import com.anod.appwatcher.R
+import com.anod.appwatcher.accounts.AccountSelectionResult
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.database.AppsDatabase
@@ -25,7 +26,7 @@ import org.koin.core.component.inject
 typealias TagCountList = List<Pair<Tag, Int>>
 
 data class MainViewState(
-    val navigationItems: List<DrawerNavigationItem> = drawerNavigationItems,
+    val drawerItems: List<DrawerItem> = com.anod.appwatcher.watchlist.drawerItems,
     val account: Account? = null,
     val lastUpdate: Long = 0L,
     val tags: TagCountList = emptyList(),
@@ -33,14 +34,16 @@ data class MainViewState(
 )
 
 sealed interface MainViewEvent {
+    object ChooseAccount : MainViewEvent
     class AddNewTagDialog(val show: Boolean) : MainViewEvent
-    class NavigateTo(val id: DrawerNavigationItem.Id) : MainViewEvent
-    class SetAccount(val account: Account?) : MainViewEvent
+    class DrawerItemClick(val id: DrawerItem.Id) : MainViewEvent
+    class SetAccount(val result: AccountSelectionResult) : MainViewEvent
     class NavigateToTag(val tag: Tag) : MainViewEvent
 }
 
 sealed interface MainViewAction {
-    class NavigateTo(val id: DrawerNavigationItem.Id) : MainViewAction
+    object ChooseAccount : MainViewAction
+    class NavigateTo(val id: DrawerItem.Id) : MainViewAction
     class ShowToast(@StringRes val resId: Int = 0, val text: String = "", val length: Int = Toast.LENGTH_SHORT) : MainViewAction
     object RequestNotificationPermission : MainViewAction
     class StartActivity(val intent: Intent) : MainViewAction
@@ -72,11 +75,15 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
 
     override fun handleEvent(event: MainViewEvent) {
         when (event) {
-            is MainViewEvent.NavigateTo -> emitAction(MainViewAction.NavigateTo(event.id))
+            is MainViewEvent.DrawerItemClick -> emitAction(MainViewAction.NavigateTo(event.id))
             is MainViewEvent.SetAccount -> {
-                viewState = viewState.copy(account = event.account)
-                if (event.account != null) {
-                    onAccountSelect(event.account)
+                when (event.result) {
+                    AccountSelectionResult.Canceled -> onAccountNotFound("")
+                    is AccountSelectionResult.Error -> onAccountNotFound(event.result.errorMessage)
+                    is AccountSelectionResult.Success -> {
+                        viewState = viewState.copy(account = event.result.account)
+                        onAccountSelect(event.result.account)
+                    }
                 }
             }
 
@@ -85,6 +92,7 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
             }
 
             is MainViewEvent.NavigateToTag -> emitAction(MainViewAction.NavigateToTag(tag = event.tag))
+            MainViewEvent.ChooseAccount -> emitAction(MainViewAction.ChooseAccount)
         }
     }
 
@@ -101,21 +109,32 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
                     }
                 } else {
                     AppLog.e("Error retrieving authentication token")
-                    if (networkConnection.isNetworkAvailable) {
-                        emitAction(MainViewAction.ShowToast(
-                            resId = R.string.failed_gain_access,
-                            length = Toast.LENGTH_LONG
-                        ))
-                    } else {
-                        emitAction(MainViewAction.ShowToast(
-                            resId = R.string.check_connection,
-                            length = Toast.LENGTH_SHORT
-                        ))
-                    }
+                    onAccountNotFound("")
                 }
             } catch (e: AuthTokenStartIntent) {
                 emitAction(MainViewAction.StartActivity(e.intent))
             }
+        }
+    }
+
+    private fun onAccountNotFound(errorMessage: String) {
+        if (networkConnection.isNetworkAvailable) {
+            if (errorMessage.isNotBlank()) {
+                emitAction(MainViewAction.ShowToast(
+                    text = errorMessage,
+                    length = Toast.LENGTH_LONG
+                ))
+            } else {
+                emitAction(MainViewAction.ShowToast(
+                    resId = R.string.failed_gain_access,
+                    length = Toast.LENGTH_LONG
+                ))
+            }
+        } else {
+            emitAction(MainViewAction.ShowToast(
+                resId = R.string.check_connection,
+                length = Toast.LENGTH_SHORT
+            ))
         }
     }
 }

@@ -10,7 +10,7 @@ import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.anod.appwatcher.R
 
-data class DrawerNavigationItem(
+data class DrawerItem(
     val id: Id,
     val icon: ImageVector,
     @StringRes val title: Int
@@ -24,10 +24,10 @@ data class DrawerNavigationItem(
     }
 }
 
-val drawerNavigationItems = listOf(
-    DrawerNavigationItem(id = DrawerNavigationItem.Id.Refresh, icon = Icons.Default.Refresh, title = R.string.navdrawer_item_refresh),
-    DrawerNavigationItem(id = DrawerNavigationItem.Id.Add, icon = Icons.Default.AddCircle, title = R.string.navdrawer_item_add),
-    DrawerNavigationItem(id = DrawerNavigationItem.Id.Installed, icon = Icons.Default.SystemUpdate, title = R.string.installed),
-    DrawerNavigationItem(id = DrawerNavigationItem.Id.Wishlist, icon = Icons.Default.Bookmark, title = R.string.navdrawer_item_wishlist),
-    DrawerNavigationItem(id = DrawerNavigationItem.Id.Settings, icon = Icons.Default.Settings, title = R.string.navdrawer_item_settings),
+val drawerItems = listOf(
+    DrawerItem(id = DrawerItem.Id.Refresh, icon = Icons.Default.Refresh, title = R.string.navdrawer_item_refresh),
+    DrawerItem(id = DrawerItem.Id.Add, icon = Icons.Default.AddCircle, title = R.string.navdrawer_item_add),
+    DrawerItem(id = DrawerItem.Id.Installed, icon = Icons.Default.SystemUpdate, title = R.string.installed),
+    DrawerItem(id = DrawerItem.Id.Wishlist, icon = Icons.Default.Bookmark, title = R.string.navdrawer_item_wishlist),
+    DrawerItem(id = DrawerItem.Id.Settings, icon = Icons.Default.Settings, title = R.string.navdrawer_item_settings),
 )

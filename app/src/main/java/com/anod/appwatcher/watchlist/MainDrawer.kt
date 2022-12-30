@@ -3,26 +3,22 @@ package com.anod.appwatcher.watchlist
 import android.accounts.Account
 import android.text.format.DateUtils
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Label
 import androidx.compose.material.icons.outlined.Label
 import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,13 +33,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.anod.appwatcher.R
@@ -54,10 +47,12 @@ import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WatchListDrawer(mainState: MainViewState, onMainEvent: (MainViewEvent) -> Unit) {
+fun MainDrawer(mainState: MainViewState, onMainEvent: (MainViewEvent) -> Unit) {
     val scrollState = rememberScrollState()
     ModalDrawerSheet(
-        modifier = Modifier.verticalScroll(scrollState),
+        modifier = Modifier
+            .fillMaxHeight()
+            .verticalScroll(scrollState),
         windowInsets = WindowInsets.navigationBars
     ) {
         DrawerContent(
@@ -76,14 +71,14 @@ private fun DrawerContent(mainState: MainViewState, onMainEvent: (MainViewEvent)
         onMainEvent = onMainEvent
     )
 
-    mainState.navigationItems.forEach { item ->
+    mainState.drawerItems.forEach { item ->
         val title = stringResource(id = item.title)
         NavigationDrawerItem(
             icon = { Icon(item.icon, contentDescription = title) },
             label = { Text(title) },
             selected = false,
             onClick = {
-                onMainEvent(MainViewEvent.NavigateTo(item.id))
+                onMainEvent(MainViewEvent.DrawerItemClick(item.id))
             },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )
@@ -142,29 +137,18 @@ private fun DrawerHeader(mainState: MainViewState, onMainEvent: (MainViewEvent) 
             style = MaterialTheme.typography.headlineLarge,
             color = MaterialTheme.colorScheme.primary
         )
-        if (mainState.account == null) {
-            OutlinedButton(
-                modifier = Modifier.padding(top = 12.dp),
-                onClick = {  }
-            ) {
+
+        OutlinedButton(
+            modifier = Modifier.padding(top = 12.dp),
+            onClick = { onMainEvent(MainViewEvent.ChooseAccount) }
+        ) {
+            if (mainState.account == null) {
                 Text(text = stringResource(id = R.string.choose_an_account))
-            }
-        } else {
-            TextButton(
-                modifier = Modifier.padding(top = 8.dp),
-                contentPadding = ButtonDefaults.TextButtonContentPadding.let {
-                    PaddingValues(
-                        start = 0.dp,
-                        top = it.calculateTopPadding(),
-                        end = 0.dp,
-                        bottom = it.calculateBottomPadding()
-                    )
-                },
-                onClick = {  }
-            ) {
+            } else {
                 Text(text = mainState.account.name)
             }
         }
+
         if (mainState.lastUpdate > 0) {
             val context = LocalContext.current
             val relativeTime = remember(mainState.lastUpdate) {
@@ -197,7 +181,7 @@ private fun TagBadge(color: Color, count: Int, modifier: Modifier = Modifier) {
 @Composable
 private fun DrawerContentPreviewNoAccount() {
     AppTheme {
-        WatchListDrawer(
+        MainDrawer(
             mainState = MainViewState(),
             onMainEvent = { }
         )
@@ -208,7 +192,7 @@ private fun DrawerContentPreviewNoAccount() {
 @Composable
 private fun DrawerContentPreviewWithAccount() {
     AppTheme {
-        WatchListDrawer(
+        MainDrawer(
             mainState = MainViewState(
                 account = Account("very_long_email_address@example.com", "test"),
                 lastUpdate = System.currentTimeMillis() - TimeUnit.HOURS.toMillis(2),

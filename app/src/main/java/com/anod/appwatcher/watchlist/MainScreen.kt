@@ -1,7 +1,6 @@
 package com.anod.appwatcher.watchlist
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowRight
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
@@ -41,9 +40,18 @@ fun MainScreen(
     val scope = rememberCoroutineScope()
 
     ModalNavigationDrawer(
-        drawerContent = { WatchListDrawer(
+        drawerContent = { MainDrawer(
             mainState = mainState,
-            onMainEvent = onMainEvent
+            onMainEvent = {
+                scope.launch {
+                    drawerState.close()
+                    if (it is MainViewEvent.DrawerItemClick && it.id == DrawerItem.Id.Refresh) {
+                        onListEvent(WatchListSharedStateEvent.Refresh)
+                    } else {
+                        onMainEvent(it)
+                    }
+                }
+            }
         ) },
         drawerState = drawerState
     ) {
@@ -97,13 +105,19 @@ fun MainScreen(
                         DropdownMenuItem(
                             text = { Text(text = stringResource(id = R.string.menu_refresh)) },
                             leadingIcon = { Icon(imageVector = Icons.Default.Refresh, contentDescription = stringResource(id = R.string.menu_refresh)) },
-                            onClick = { onListEvent(WatchListSharedStateEvent.Refresh) }
+                            onClick = {
+                                onListEvent(WatchListSharedStateEvent.Refresh)
+                                dismiss()
+                            }
                         )
 
                         DropdownMenuItem(
                             text = { Text(text = stringResource(id = R.string.play_store_my_apps)) },
                             leadingIcon = { Icon(imageVector = Icons.Default.Store, contentDescription = stringResource(id = R.string.play_store_my_apps)) },
-                            onClick = { onListEvent(WatchListSharedStateEvent.PlayStoreMyApps) }
+                            onClick = {
+                                onListEvent(WatchListSharedStateEvent.PlayStoreMyApps)
+                                dismiss()
+                            }
                         )
 
                     },
