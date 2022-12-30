@@ -59,6 +59,8 @@ data class WatchListSharedState(
 
 sealed interface WatchListSharedStateEvent {
     object OnBackPressed : WatchListSharedStateEvent
+    object PlayStoreMyApps : WatchListSharedStateEvent
+    object Refresh : WatchListSharedStateEvent
     class ChangeSort(val sortId: Int) : WatchListSharedStateEvent
     class FilterByTitle(val query: String) : WatchListSharedStateEvent
     class SetWideLayout(val layout: HingeDeviceLayout) : WatchListSharedStateEvent
@@ -77,6 +79,7 @@ sealed interface WatchListSharedStateAction {
     class Installed(val importMode: Boolean) : WatchListSharedStateAction
     object ShareFromStore : WatchListSharedStateAction
     object Dismiss : WatchListSharedStateAction
+    object PlayStoreMyApps : WatchListSharedStateAction
     class OpenApp(val app: App, val index: Int) : WatchListSharedStateAction
     class OnSearch(val query: String) : WatchListSharedStateAction
 }
@@ -180,6 +183,8 @@ class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wid
                     viewState.copy(listState = ListState.SyncStopped(updatesCount = event.syncProgress.updatesCount))
                 }
             }
+            WatchListSharedStateEvent.PlayStoreMyApps -> emitAction(WatchListSharedStateAction.PlayStoreMyApps)
+            WatchListSharedStateEvent.Refresh -> refresh()
         }
     }
 
@@ -199,17 +204,8 @@ class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wid
                     3 -> emitAction(WatchListSharedStateAction.ShareFromStore)
                 }
             }
-            WatchListEvent.Refresh -> {
-                val isRefreshing = (viewState.listState is ListState.SyncStarted)
-                if (!isRefreshing) {
-                    val schedule = requestRefresh()
-                    appScope.launch {
-                        schedule.collect { }
-                    }
-                }
-            }
+            WatchListEvent.Refresh -> refresh()
             is WatchListEvent.FilterByTitle -> {}
-            WatchListEvent.Reload -> {}
             is WatchListEvent.AppLongClick -> {}
             is WatchListEvent.SectionHeaderClick -> {
                 when (listEvent.type) {
@@ -220,7 +216,17 @@ class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wid
         }
     }
 
-    fun requestRefresh(): Flow<Operation.State> {
+    private fun refresh() {
+        val isRefreshing = (viewState.listState is ListState.SyncStarted)
+        if (!isRefreshing) {
+            val schedule = requestRefresh()
+            appScope.launch {
+                schedule.collect { }
+            }
+        }
+    }
+
+    private fun requestRefresh(): Flow<Operation.State> {
         AppLog.d("Refresh requested")
         if (!authToken.isFresh) {
             viewState = if (networkConnection.isNetworkAvailable) {

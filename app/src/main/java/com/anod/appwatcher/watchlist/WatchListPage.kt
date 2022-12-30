@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.ArrowRight
@@ -79,6 +80,13 @@ private data class AppItemState(
     val installed: Boolean,
     val showRecent: Boolean
 )
+
+enum class AppItemSelection {
+    None, Disabled, NotSelected, Selected;
+
+    val enabled: Boolean
+        get() = this != None && this != Disabled
+}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -388,10 +396,10 @@ private fun AppItem(
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-private fun SelectedIcon(modifier: Modifier, itemSelection: AppViewHolder.Selection) {
+private fun SelectedIcon(modifier: Modifier, itemSelection: AppItemSelection) {
     AnimatedVisibility(
         modifier = modifier,
-        visible = itemSelection == AppViewHolder.Selection.Selected,
+        visible = itemSelection == AppItemSelection.Selected,
         enter = fadeIn() + scaleIn(),
         exit = fadeOut() + scaleOut(),
         label = "SelectedIconVisibility"
@@ -426,7 +434,6 @@ private fun RecentItem(
     onEvent: (WatchListEvent) -> Unit,
     packageChangedReceiver: PackageChangedReceiver = getKoin().get(),
     recentlyInstalledPackagesLoader: RecentlyInstalledPackagesLoader = getKoin().get(),
-    packageManager: PackageManager = getKoin().get(),
     appIconLoader: AppIconLoader = getKoin().get(),
 ) {
     var loading by remember { mutableStateOf(true) }
@@ -434,11 +441,7 @@ private fun RecentItem(
     LaunchedEffect(key1 = true) {
         packageChangedReceiver.observer
             .onStart { emit("") }
-            .map { recentlyInstalledPackagesLoader.load()
-                .map { (packageName, rowId) ->
-                    packageManager.packageToApp(rowId, packageName)
-                }
-            }
+            .map { recentlyInstalledPackagesLoader.load() }
             .collect {
                 recentApps = it
                 loading = false
@@ -470,9 +473,9 @@ private fun RecentItemRow(
             .horizontalScroll(scrollState)
     ) {
         if (loading) {
-            (0..4).forEach {
+            (0..4).forEach { _ ->
                 RecentItemAppCard(
-                    null,
+                    app = null,
                     onClick = {},
                     appIconLoader = appIconLoader
                 )
@@ -480,7 +483,7 @@ private fun RecentItemRow(
         } else {
             recentApps.forEachIndexed { index, app ->
                 RecentItemAppCard(
-                    app,
+                    app = app,
                     onClick = { onEvent(WatchListEvent.AppClick(app, index)) },
                     appIconLoader = appIconLoader
                 )
@@ -498,6 +501,11 @@ private fun RecentItemAppCard(app: App?, onClick: (() -> Unit), appIconLoader: A
             .padding(start = 2.dp, end = 2.dp, top = 2.dp, bottom = 2.dp)
             .clickable(enabled = app != null, onClick = onClick)
     ) {
+        val view = LocalView.current
+        val title: String by remember(app) {
+            mutableStateOf(app?.generateTitle(view.resources)?.toString() ?: "")
+        }
+        val placeholderColor =  MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
         if (app == null) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_app_icon_placeholder),
@@ -508,36 +516,12 @@ private fun RecentItemAppCard(app: App?, onClick: (() -> Unit), appIconLoader: A
                     .align(Alignment.CenterHorizontally)
                     .placeholder(
                         visible = true,
+                        color = placeholderColor,
+                        shape = CircleShape,
                         highlight = PlaceholderHighlight.fade(),
                     )
             )
-            Text(
-                text = "",
-                maxLines = 2,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 8.dp, end = 8.dp)
-                    .placeholder(
-                        visible = true,
-                        highlight = PlaceholderHighlight.fade(),
-                    )
-                ,
-                textAlign = TextAlign.Center,
-                fontSize = 14.sp,
-                lineHeight = 14.sp,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Spacer(modifier = Modifier
-                .size(20.dp)
-                .padding(start = 8.dp, bottom = 4.dp))
         } else {
-            val view = LocalView.current
-            val title: String by remember {
-                mutableStateOf(
-                    app.generateTitle(view.resources).toString()
-                )
-            }
             AppIcon(
                 app = app,
                 contentDescription = title,
@@ -547,39 +531,38 @@ private fun RecentItemAppCard(app: App?, onClick: (() -> Unit), appIconLoader: A
                     .align(Alignment.CenterHorizontally),
                 appIconLoader = appIconLoader
             )
-            var addNewLine by remember { mutableStateOf(false) }
-            Text(
-                text = if (addNewLine) title + "\n" else title,
-                maxLines = 2,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 8.dp, end = 8.dp)
-                ,
-                textAlign = TextAlign.Center,
-                fontSize = 14.sp,
-                lineHeight = 14.sp,
-                overflow = TextOverflow.Ellipsis,
-                onTextLayout = {
-                    if (it.lineCount < 2) {
-                        addNewLine = true
-                    }
-                }
-            )
-            if (app.rowId > 0) {
-                Icon(
-                    modifier = Modifier
-                        .size(20.dp)
-                        .padding(start = 8.dp, bottom = 4.dp)
-                    ,
-                    imageVector = Icons.Default.Visibility,
-                    contentDescription = stringResource(id = R.string.watched)
+        }
+        Text(
+            text = title + "\n",
+            maxLines = 2,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 8.dp, end = 8.dp, top = 2.dp)
+                .placeholder(
+                    visible = app == null,
+                    color = placeholderColor,
+                    highlight = PlaceholderHighlight.fade(),
                 )
-            } else {
-                Spacer(modifier = Modifier
+            ,
+            textAlign = TextAlign.Center,
+            fontSize = 14.sp,
+            lineHeight = 14.sp,
+            overflow = TextOverflow.Ellipsis
+        )
+        if (app != null && app.rowId > 0) {
+            Icon(
+                modifier = Modifier
                     .size(20.dp)
-                    .padding(start = 8.dp, bottom = 4.dp))
-            }
+                    .padding(start = 8.dp, bottom = 4.dp)
+                ,
+                imageVector = Icons.Default.Visibility,
+                contentDescription = stringResource(id = R.string.watched)
+            )
+        } else {
+            Spacer(modifier = Modifier
+                .size(20.dp)
+                .padding(start = 8.dp, bottom = 4.dp))
         }
     }
 }
@@ -638,10 +621,10 @@ private fun EmptyItem(
 
 private fun getPackageSelection(
     packageName: String, selectionMode: Boolean, selection: SelectionState
-): AppViewHolder.Selection {
+): AppItemSelection {
     return if (selectionMode) {
-        if (selection.contains(packageName)) AppViewHolder.Selection.Selected else AppViewHolder.Selection.NotSelected
-    } else AppViewHolder.Selection.None
+        if (selection.contains(packageName)) AppItemSelection.Selected else AppItemSelection.NotSelected
+    } else AppItemSelection.None
 }
 
 private fun calcAppItemState(

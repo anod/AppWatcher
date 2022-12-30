@@ -1,10 +1,11 @@
 package com.anod.appwatcher.watchlist
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowRight
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Store
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -16,17 +17,15 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import com.anod.appwatcher.R
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.anod.appwatcher.compose.SortDropdownMenu
+import com.anod.appwatcher.compose.SortMenuItem
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,9 +59,7 @@ fun MainScreen(
                     subtitle = subtitle,
                     containerColor = MaterialTheme.colorScheme.surface,
                     contentColor = MaterialTheme.colorScheme.onSurface,
-                    filterTitles = filterPagesTitles,
                     filterQuery = listState.titleFilter,
-                    sortId = listState.sortId,
                     navigationIcon = {
                         Icon(
                             imageVector = Icons.Default.Menu,
@@ -82,6 +79,33 @@ fun MainScreen(
                                 })
                             }
                         }
+                    },
+                    dropdownActions = { dismiss ->
+                        var topBarSortMenu by remember { mutableStateOf(false) }
+                        SortMenuItem(onClick = { topBarSortMenu = true })
+                        SortDropdownMenu(
+                            selectedSortId = listState.sortId,
+                            onChangeSort = { index ->
+                                onListEvent(WatchListSharedStateEvent.ChangeSort(sortId = index))
+                                topBarSortMenu = false
+                                dismiss()
+                            },
+                            expanded = topBarSortMenu,
+                            onDismissRequest = { topBarSortMenu = false }
+                        )
+
+                        DropdownMenuItem(
+                            text = { Text(text = stringResource(id = R.string.menu_refresh)) },
+                            leadingIcon = { Icon(imageVector = Icons.Default.Refresh, contentDescription = stringResource(id = R.string.menu_refresh)) },
+                            onClick = { onListEvent(WatchListSharedStateEvent.Refresh) }
+                        )
+
+                        DropdownMenuItem(
+                            text = { Text(text = stringResource(id = R.string.play_store_my_apps)) },
+                            leadingIcon = { Icon(imageVector = Icons.Default.Store, contentDescription = stringResource(id = R.string.play_store_my_apps)) },
+                            onClick = { onListEvent(WatchListSharedStateEvent.PlayStoreMyApps) }
+                        )
+
                     },
                     onEvent = {
                         if (it is WatchListSharedStateEvent.OnBackPressed) {

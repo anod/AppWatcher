@@ -1,28 +1,19 @@
 package com.anod.appwatcher.compose
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
-import androidx.core.view.ViewCompat
 import com.anod.appwatcher.preferences.Preferences
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.android.material.color.MaterialColors
 
 private val AppTypography = Typography()
-
-private val Gray200 = Color(0xFFeeeeee)
-private val BlueGray500 = Color(0xFF2196F3)
-private val BlueGray800 = Color(0xFF1565C0)
-private val BlueGray900 = Color(0xFF0D47A1)
 val Amber800 = Color(0xFFFF8F00)
 
 private val LightThemeColors = lightColorScheme(
@@ -150,14 +141,12 @@ fun AppTheme(
         if (darkTheme) darkTheme(theme, supportsDynamic = false) else LightThemeColors
     }
 
-
-
     var statusBarColor = colorScheme.surface
     var isAppearanceLightStatusBars = !darkTheme
     if (customPrimaryColor != null) {
         val roles = MaterialColors.getColorRoles(customPrimaryColor.toArgb(), !darkTheme)
         colorScheme = colorScheme.copy(
-                primary = Color(roles.accent), //customPrimaryColor,
+                primary = Color(roles.accent), // customPrimaryColor,
                 onPrimary = Color(roles.onAccent),
                 primaryContainer = Color(roles.accentContainer),
                 onPrimaryContainer = Color(roles.onAccentContainer)

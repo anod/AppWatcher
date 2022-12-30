@@ -133,7 +133,6 @@ class InstalledListSharedViewModel(state: SavedStateHandle) : BaseFlowViewModel<
                 checkAuthToken()
                 viewState = viewState.copy(refreshRequest = viewState.refreshRequest + 1)
             }
-            WatchListEvent.Reload -> { }
             is WatchListEvent.SectionHeaderClick -> { }
         }
     }

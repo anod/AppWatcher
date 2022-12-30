@@ -23,6 +23,7 @@ import com.anod.appwatcher.tags.TagWatchListComposeActivity
 import com.anod.appwatcher.upgrade.Upgrade15500
 import com.anod.appwatcher.upgrade.UpgradeCheck
 import com.anod.appwatcher.utils.account
+import com.anod.appwatcher.utils.forMyApps
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.wishlist.WishListActivity
 import info.anodsplace.applog.AppLog
@@ -180,6 +181,7 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
             ))
             is WatchListSharedStateAction.OnSearch -> startActivity(MarketSearchActivity.intent(this, action.query, true))
             WatchListSharedStateAction.Dismiss -> finish()
+            WatchListSharedStateAction.PlayStoreMyApps -> startActivitySafely(Intent().forMyApps(true, this))
         }
     }
 

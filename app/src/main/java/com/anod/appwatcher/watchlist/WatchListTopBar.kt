@@ -19,23 +19,18 @@ import com.anod.appwatcher.compose.SortMenuItem
 
 @Composable
 fun WatchListTopBar(
-        title: String,
-        subtitle: String?,
-        containerColor: Color,
-        contentColor: Color,
-        filterQuery: String,
-        filterTitles: List<String>,
-        sortId: Int,
-        visibleActions: @Composable () -> Unit,
-        dropdownActions: @Composable (dismiss: () -> Unit) -> Unit = { },
-        navigationIcon: @Composable (() -> Unit)? = null,
-        onEvent: (WatchListSharedStateEvent) -> Unit
+    title: String,
+    subtitle: String?,
+    containerColor: Color,
+    contentColor: Color,
+    filterQuery: String,
+    visibleActions: @Composable () -> Unit,
+    dropdownActions: @Composable ((dismiss: () -> Unit) -> Unit)? = null,
+    navigationIcon: @Composable (() -> Unit)? = null,
+    onEvent: (WatchListSharedStateEvent) -> Unit
 ) {
 
     val showSearchView by remember { mutableStateOf(filterQuery.isNotBlank()) }
-    var topBarMoreMenu by remember { mutableStateOf(false) }
-    var topBarFilterMenu by remember { mutableStateOf(false) }
-    var topBarSortMenu by remember { mutableStateOf(false) }
 
     SearchTopBar(
         title = title,
@@ -50,48 +45,26 @@ fun WatchListTopBar(
         onNavigation = { onEvent(WatchListSharedStateEvent.OnBackPressed) },
         navigationIcon = navigationIcon,
         actions = {
-
             visibleActions()
 
-            IconButton(onClick = {
-                topBarMoreMenu = true
-            }) {
-                Icon(imageVector = Icons.Default.MoreVert, contentDescription = stringResource(id = R.string.more))
-            }
+            if (dropdownActions != null) {
+                var topBarMoreMenu by remember { mutableStateOf(false) }
 
-            DropdownMenu(expanded = topBarMoreMenu, onDismissRequest = { topBarMoreMenu = false }) {
-                dropdownActions(dismiss = { topBarMoreMenu = false })
+                IconButton(onClick = {
+                    topBarMoreMenu = true
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = stringResource(id = R.string.more)
+                    )
+                }
 
-                DropdownMenuItem(
-                        text = { Text(text = stringResource(id = R.string.filter)) },
-                        leadingIcon = { Icon(imageVector = Icons.Default.FlashOn, contentDescription = stringResource(id = R.string.filter)) },
-                        trailingIcon = { Icon(imageVector = Icons.Default.ArrowRight, contentDescription = null) },
-                        onClick = { topBarFilterMenu = true }
-                )
-
-                SortMenuItem(onClick = { topBarSortMenu = true })
-            }
-
-            DropdownMenu(expanded = topBarFilterMenu, onDismissRequest = { topBarFilterMenu = false }) {
-                filterTitles.forEachIndexed { index, title ->
-                    DropdownMenuItem(text = { Text(text = title) }, onClick = {
-                        onEvent(WatchListSharedStateEvent.FilterById(filterId = index))
-                        topBarMoreMenu = false
-                        topBarFilterMenu = false
-                    })
+                DropdownMenu(
+                    expanded = topBarMoreMenu,
+                    onDismissRequest = { topBarMoreMenu = false }) {
+                    dropdownActions(dismiss = { topBarMoreMenu = false })
                 }
             }
-
-            SortDropdownMenu(
-                    selectedSortId = sortId,
-                    onChangeSort = { index ->
-                        onEvent(WatchListSharedStateEvent.ChangeSort(sortId = index))
-                        topBarMoreMenu = false
-                        topBarSortMenu = false
-                    },
-                    expanded = topBarSortMenu,
-                    onDismissRequest = { topBarSortMenu = false }
-            )
         }
     )
 }
@@ -101,35 +74,41 @@ fun WatchListTopBar(
 @Composable
 fun DefaultPreview() {
     AppTheme(
-            customPrimaryColor = Color.Cyan
+        customPrimaryColor = Color.Cyan
     ) {
         Scaffold(
-                topBar = {
-                    WatchListTopBar(
-                            title = "What will happen when title is too long",
-                            subtitle = "What will happen when subtitle is too long",
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary,
-                            filterTitles = listOf(),
-                            filterQuery = "",
-                            sortId = 0,
-                            visibleActions = {
-                                IconButton(onClick = { }) {
-                                    Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(id = R.string.menu_tag_apps))
-                                }
-                            },
-                            dropdownActions = { dismiss ->
-                                DropdownMenuItem(
-                                        text = { Text(text = stringResource(id = R.string.menu_edit)) },
-                                        leadingIcon = { Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(id = R.string.menu_edit)) },
-                                        onClick = {
-                                            dismiss()
-                                        }
+            topBar = {
+                WatchListTopBar(
+                    title = "What will happen when title is too long",
+                    subtitle = "What will happen when subtitle is too long",
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    filterQuery = "",
+                    visibleActions = {
+                        IconButton(onClick = { }) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = stringResource(id = R.string.menu_tag_apps)
+                            )
+                        }
+                    },
+                    dropdownActions = { dismiss ->
+                        DropdownMenuItem(
+                            text = { Text(text = stringResource(id = R.string.menu_edit)) },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = stringResource(id = R.string.menu_edit)
                                 )
                             },
-                            onEvent = { }
-                    )
-                }
+                            onClick = {
+                                dismiss()
+                            }
+                        )
+                    },
+                    onEvent = { }
+                )
+            }
         ) { paddingValues ->
             Box(Modifier.padding(paddingValues)) {
             }

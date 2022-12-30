@@ -33,16 +33,14 @@ data class WatchListState(
 
 sealed interface WatchListAction {
     class ItemClick(val app: App, val index: Int) : WatchListAction
-    object Reload : WatchListAction
     class SectionHeaderClick(val header: SectionHeader) : WatchListAction
     class EmptyButton(val idx: Int) : WatchListAction
     class ItemLongClick(val app: App, val index: Int) : WatchListAction
 }
 
 sealed interface WatchListEvent {
-    object Reload : WatchListEvent
     object Refresh : WatchListEvent
-    class FilterByTitle(val titleFilter: String, val reload: Boolean) : WatchListEvent
+    class FilterByTitle(val titleFilter: String) : WatchListEvent
     class AppClick(val app: App, val index: Int) : WatchListEvent
     class EmptyButton(val idx: Int) : WatchListEvent
     class AppLongClick(val app: App, val index: Int) : WatchListEvent
@@ -92,16 +90,12 @@ abstract class WatchListViewModel(pagingSourceConfig: WatchListPagingSource.Conf
             is WatchListEvent.FilterByTitle -> { // TODO: Not in use in compose implementation
                 viewState = viewState.copy(titleFilter = event.titleFilter)
                 pagingSource?.filterQuery = event.titleFilter
-                if (event.reload) {
-                    emitAction(WatchListAction.Reload)
-                }
             }
             is WatchListEvent.AppClick -> emitAction(WatchListAction.ItemClick(event.app, event.index))
             is WatchListEvent.EmptyButton -> emitAction(WatchListAction.EmptyButton(event.idx))
-            WatchListEvent.Refresh -> {}
-            WatchListEvent.Reload -> emitAction(WatchListAction.Reload)
             is WatchListEvent.AppLongClick -> emitAction(WatchListAction.ItemLongClick(event.app, event.index))
             is WatchListEvent.SectionHeaderClick -> emitAction(WatchListAction.SectionHeaderClick(event.type))
+            WatchListEvent.Refresh -> {}
         }
     }
 
