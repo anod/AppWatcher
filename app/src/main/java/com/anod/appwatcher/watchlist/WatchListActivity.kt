@@ -8,19 +8,22 @@ import androidx.activity.viewModels
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.MarketSearchActivity
+import com.anod.appwatcher.SettingsActivity
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.compose.MainDetailScreen
 import com.anod.appwatcher.details.DetailsDialog
 import com.anod.appwatcher.installed.InstalledActivity
-import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.upgrade.Upgrade15500
 import com.anod.appwatcher.upgrade.UpgradeCheck
+import com.anod.appwatcher.utils.account
 import com.anod.appwatcher.utils.prefs
+import com.anod.appwatcher.wishlist.WishListActivity
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.startActivitySafely
 import kotlinx.coroutines.launch
@@ -37,14 +40,16 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
         )
     })
 
-    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         if (intent?.extras?.containsKey("open_recently_installed") == true) {
             intent!!.extras!!.remove("open_recently_installed")
             startActivity(InstalledActivity.intent(importMode = false, context = this))
+            return
         }
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
 //            stateViewModel.viewStates.map { it.listState }.distinctUntilChanged().collect {
 //                when (it) {
@@ -118,7 +123,11 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
         }
 
         lifecycleScope.launch {
-            listViewModel.viewActions.collect { onViewAction(it) }
+            listViewModel.viewActions.collect { onListAction(it) }
+        }
+
+        lifecycleScope.launch {
+            mainViewModel.viewActions.collect { onMainAction(it) }
         }
 
         lifecycleScope.launchWhenCreated {
@@ -154,7 +163,7 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
         }
     }
 
-    private fun onViewAction(action: WatchListSharedStateAction) {
+    private fun onListAction(action: WatchListSharedStateAction) {
         when (action) {
             WatchListSharedStateAction.OnBackPressed -> onBackPressed()
             is WatchListSharedStateAction.OpenApp -> {
@@ -172,6 +181,21 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
             ))
             is WatchListSharedStateAction.OnSearch -> startActivity(MarketSearchActivity.intent(this, action.query, true))
             WatchListSharedStateAction.Dismiss -> finish()
+        }
+    }
+
+
+    private fun onMainAction(action: MainViewAction) {
+        when (action) {
+            is MainViewAction.NavigateTo -> {
+                when (action.id) {
+                    DrawerNavigationItem.Id.Add -> startActivity(Intent(this, MarketSearchActivity::class.java))
+                    DrawerNavigationItem.Id.Installed -> startActivity(InstalledActivity.intent(false, this))
+                    DrawerNavigationItem.Id.Refresh -> { }
+                    DrawerNavigationItem.Id.Settings ->  startActivity( Intent(this, SettingsActivity::class.java))
+                    DrawerNavigationItem.Id.Wishlist -> startActivity(WishListActivity.intent(this, account, mainViewModel.authToken.token))
+                }
+            }
         }
     }
 
