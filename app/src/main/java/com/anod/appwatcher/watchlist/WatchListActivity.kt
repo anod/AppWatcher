@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.viewModels
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -29,6 +30,9 @@ import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.wishlist.WishListActivity
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.startActivitySafely
+import info.anodsplace.permissions.AppPermission
+import info.anodsplace.permissions.AppPermissions
+import info.anodsplace.permissions.toRequestInput
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 
@@ -41,6 +45,7 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
         )
     })
     private lateinit var accountSelectionDialog: AccountSelectionDialog
+    private lateinit var notificationPermissionRequest: ActivityResultLauncher<AppPermissions.Request.Input>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +57,11 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
         }
 
         accountSelectionDialog = AccountSelectionDialog(this, prefs)
+        notificationPermissionRequest = registerForActivityResult(AppPermissions.Request()) {
+            val enabled = it[AppPermission.PostNotification.value] ?: false
+            mainViewModel.handleEvent(MainViewEvent.NotificationPermissionResult(enabled = enabled))
+        }
+
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
 //            stateViewModel.viewStates.map { it.listState }.distinctUntilChanged().collect {
@@ -122,8 +132,6 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
                     )
                 }
             }
-            
-
         }
 
         lifecycleScope.launch {
@@ -146,6 +154,10 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
 
             }
         }
+
+        if (prefs.account == null) {
+            accountSelectionDialog.show()
+        }
     }
 
     override fun onResume() {
@@ -153,25 +165,6 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
 
         AppLog.d("mark updates as viewed.")
         prefs.isLastUpdatesViewed = true
-    }
-
-    private fun upgradeCheck() {
-        val upgrade = UpgradeCheck(prefs).result
-        if (!upgrade.isNewVersion) {
-            return
-        }
-
-        Upgrade15500().onUpgrade(upgrade)
-    }
-
-    private fun onNotificationEnabled() {
-        if (prefs.useAutoSync) {
-            lifecycleScope.launchWhenCreated {
-                SyncScheduler(applicationContext)
-                    .schedule(prefs.isRequiresCharging, prefs.isWifiOnly, prefs.updatesFrequency.toLong(), false)
-                    .collect { }
-            }
-        }
     }
 
     private fun onListAction(action: WatchListSharedStateAction) {
@@ -207,7 +200,7 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
                 }
             }
             is MainViewAction.NavigateToTag -> startActivity(TagWatchListComposeActivity.createTagIntent(action.tag, this))
-            MainViewAction.RequestNotificationPermission -> { }
+            MainViewAction.RequestNotificationPermission -> notificationPermissionRequest.launch(AppPermission.PostNotification.toRequestInput())
             is MainViewAction.ShowToast -> {
                 if (action.resId == 0) {
                     Toast.makeText(this, action.text, action.length).show()

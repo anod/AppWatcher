@@ -1,9 +1,11 @@
 package com.anod.appwatcher.watchlist
 
 import android.accounts.Account
+import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import androidx.annotation.StringRes
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AccountSelectionResult
@@ -11,6 +13,9 @@ import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.sync.SyncScheduler
+import com.anod.appwatcher.upgrade.Upgrade15500
+import com.anod.appwatcher.upgrade.UpgradeCheck
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.account
 import com.anod.appwatcher.utils.networkConnection
@@ -39,6 +44,7 @@ sealed interface MainViewEvent {
     class DrawerItemClick(val id: DrawerItem.Id) : MainViewEvent
     class SetAccount(val result: AccountSelectionResult) : MainViewEvent
     class NavigateToTag(val tag: Tag) : MainViewEvent
+    class NotificationPermissionResult(val enabled: Boolean) : MainViewEvent
 }
 
 sealed interface MainViewAction {
@@ -52,6 +58,7 @@ sealed interface MainViewAction {
 
 class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAction>(), KoinComponent {
     private val database: AppsDatabase by inject()
+    private val context: Context by inject()
 
     val authToken: AuthTokenBlocking by inject()
 
@@ -93,6 +100,26 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
 
             is MainViewEvent.NavigateToTag -> emitAction(MainViewAction.NavigateToTag(tag = event.tag))
             MainViewEvent.ChooseAccount -> emitAction(MainViewAction.ChooseAccount)
+            is MainViewEvent.NotificationPermissionResult -> onNotificationResult(event.enabled)
+        }
+    }
+
+    private fun onNotificationResult(enabled: Boolean) {
+        if (!enabled && prefs.notificationDisabledToastCount < 3) {
+            emitAction(MainViewAction.ShowToast(
+                resId = R.string.notifications_not_enabled,
+                length = Toast.LENGTH_LONG
+            ))
+            prefs.notificationDisabledToastCount = prefs.notificationDisabledToastCount + 1
+        }
+        if (enabled) {
+            if (prefs.useAutoSync) {
+                viewModelScope.launch {
+                    SyncScheduler(context)
+                        .schedule(prefs.isRequiresCharging, prefs.isWifiOnly, prefs.updatesFrequency.toLong(), false)
+                        .collect { }
+                }
+            }
         }
     }
 
@@ -107,6 +134,7 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
                     if (!prefs.areNotificationsEnabled && prefs.updatesFrequency > 0) {
                         emitAction(MainViewAction.RequestNotificationPermission)
                     }
+                    upgradeCheck()
                 } else {
                     AppLog.e("Error retrieving authentication token")
                     onAccountNotFound("")
@@ -137,4 +165,15 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
             ))
         }
     }
+
+
+    private fun upgradeCheck() {
+        val upgrade = UpgradeCheck(prefs).result
+        if (!upgrade.isNewVersion) {
+            return
+        }
+
+        Upgrade15500().onUpgrade(upgrade)
+    }
+
 }
