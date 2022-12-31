@@ -1,5 +1,7 @@
 package com.anod.appwatcher.tags
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -25,26 +27,34 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.database.entities.Tag
 import info.anodsplace.compose.ButtonsPanel
+import info.anodsplace.compose.ColorDialogContent
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun EditTagDialog(tag: Tag, onDismissRequest: () -> Unit) {
     val viewModel: EditTagViewModel = viewModel(factory = EditTagViewModel.Factory(tag))
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
 
-    Dialog(onDismissRequest = onDismissRequest) {
+    Dialog(
+        onDismissRequest = onDismissRequest,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
         EditTagScreen(
             screenState = screenState,
             onEvent = { event -> viewModel.handleEvent(event) }
@@ -65,9 +75,13 @@ fun EditTagDialog(tag: Tag, onDismissRequest: () -> Unit) {
 private fun EditTagScreen(screenState: EditTagState, onEvent: (EditTagEvent) -> Unit) {
     var tagName by remember { mutableStateOf(screenState.tag.name) }
     var isError by remember { mutableStateOf(false) }
-    Surface {
+    var pickColor: Color? by remember { mutableStateOf(null) }
+    Surface(
+        modifier = Modifier.padding(horizontal = 32.dp)
+    ) {
         Column(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
         ) {
             Row(
                 modifier = Modifier
@@ -77,7 +91,7 @@ private fun EditTagScreen(screenState: EditTagState, onEvent: (EditTagEvent) -> 
             ) {
                 ColorIcon(
                     color = Color(screenState.tag.color),
-                    onClick = { }
+                    onClick = { pickColor = it}
                 )
                 TextField(
                     modifier = Modifier.padding(start = 8.dp),
@@ -85,6 +99,17 @@ private fun EditTagScreen(screenState: EditTagState, onEvent: (EditTagEvent) -> 
                     onValueChange = { tagName = it },
                     label = { Text(text = stringResource(id = R.string.tag_name)) },
                     isError = isError
+                )
+            }
+           AnimatedVisibility(visible = pickColor != null) {
+                ColorDialogContent(
+                    color = pickColor,
+                    onColorChange = {
+                        if (it != null) {
+                            onEvent(EditTagEvent.UpdateColor(it.toArgb()))
+                        }
+                        pickColor = null
+                    }
                 )
             }
             ButtonsPanel(
