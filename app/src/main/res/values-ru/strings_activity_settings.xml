@@ -15,7 +15,6 @@
     <string name="pref_descr_export">Экспорт списка в память</string>
     <string name="pref_title_import">Импорт</string>
     <string name="pref_descr_import">Импорт списка из памяти</string>
-    <string name="pref_title_location">Место</string>
 
     <!-- Exampreferencesings for About -->
     <string name="pref_header_about">О программе</string>

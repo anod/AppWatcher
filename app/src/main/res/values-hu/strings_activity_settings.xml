@@ -15,7 +15,6 @@
     <string name="pref_descr_export">Lista exportálása a helyi tárolóra</string>
     <string name="pref_title_import">Importálás</string>
     <string name="pref_descr_import">Lista exportálása a helyi tárolóból</string>
-    <string name="pref_title_location">Hely</string>
 
     <!-- Exampreferencesings for About -->
     <string name="pref_header_about">Névjegy</string>
@@ -27,9 +26,6 @@
     <string name="pref_header_interface">Kezelőfelület</string>
     <string name="pref_title_theme">Téma</string>
     <string name="pref_descr_theme">Válassz a különböző témák közül</string>
-
-    <string name="pref_export_db" translatable="false">Adatbázis exportálása SD-kártyára</string>
-    <string name="pref_gdrive_upload" translatable="false">Feltöltés</string>
 
     <string name="pref_title_updates_frequency">Új frissítések keresése</string>
 

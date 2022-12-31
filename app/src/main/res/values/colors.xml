@@ -3,15 +3,8 @@
     <color name="alwaysBlack">@android:color/black</color>
     <color name="alwaysWhite">#FFFFFF</color>
 
-    <color name="material_blue_500">#2196F3</color>
     <color name="material_blue_800">#1565C0</color>
-    <color name="material_blue_900">#0D47A1</color>
-    <color name="material_grey_200">#eeeeee</color>
-    <color name="material_grey_500">#9E9E9E</color>
-    <color name="material_grey_700">#616161</color>
-    <color name="material_grey_800_">#424242</color>
     <color name="material_amber_800">#FF8F00</color>
-    <color name="fastscroll_thumb">#64616161</color>
 
     <color name="md_primary">#2196F3</color>,
     <color name="md_onPrimary">#ffffff</color>,
@@ -38,7 +31,6 @@
     <color name="md_outline">#9970787D</color>
 
     <color name="chip_green">#26A69A</color>
-    <color name="chip_pink">#F06292</color>
     <color name="chip_gray">#757F94</color>
     <color name="chip_yellow">#FFD54F</color>
     <color name="chip_blue">#64B5F6</color>

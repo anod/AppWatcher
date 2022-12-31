@@ -30,11 +30,8 @@ class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase
     val creator: TextView? = view.findViewById(R.id.creator)
     private val price: TextView? = view.findViewById(R.id.price)
     private val updateDate: TextView? = view.findViewById(R.id.update_date)
-    private val recentChanges = view.findViewById<TextView?>(R.id.recent_changes)
-    private val newLineRegex = Regex("\n+")
     private val resources = view.resources
     private var app: App? = null
-    private var recentFlag = false
 
     init {
         accentColor = resourceProvider.getColorOfAttribute(com.google.android.material.R.attr.colorPrimary)
@@ -42,9 +39,8 @@ class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase
         warningColor = resourceProvider.getColorOfResource(R.color.material_amber_800)
     }
 
-    fun fillDetails(app: App, recentFlag: Boolean, changeDetails: String, noNewChanges: Boolean, isLocalApp: Boolean) {
+    fun fillDetails(app: App, isLocalApp: Boolean) {
         this.app = app
-        this.recentFlag = recentFlag
         title.text = app.generateTitle(resources)
         creator?.text = app.creator
         val uploadDate = app.uploadDate
@@ -61,42 +57,19 @@ class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase
             this.price?.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stat_communication_stay_primary_portrait, 0, 0, 0)
             this.price?.setTextColor(textColor)
             this.price?.text = resourceProvider.formatVersionText(app.versionName, app.versionNumber, 0)
-            if (changeDetails.isNotBlank()) {
-                this.recentChanges?.isVisible = true
-                this.recentChanges?.alpha = if (noNewChanges) 0.4f else 1.0f
-                this.recentChanges?.text = Html.parse(changeDetails)
-                        .toString()
-                        .replace(newLineRegex, "\n")
-                        .removePrefix(app.versionName + "\n")
-                        .removePrefix(app.versionName + ":\n")
-            } else {
-                this.recentChanges?.isVisible = false
-            }
         } else {
             this.creator?.isVisible = false
-            if (changeDetails.isBlank()) {
-                this.recentChanges?.alpha = 0.4f
-                this.recentChanges?.text = resourceProvider.noRecentChangesText
-            } else {
-                this.recentChanges?.alpha = if (noNewChanges) 0.4f else 1.0f
-                this.recentChanges?.text = Html.parse(changeDetails)
-                        .toString()
-                        .replace(newLineRegex, "\n")
-                        .removePrefix(app.versionName + "\n")
-                        .removePrefix(app.versionName + ":\n")
-            }
-            this.fillWatchAppView(app, recentFlag)
+            this.fillWatchAppView(app)
         }
     }
 
-    private fun fillWatchAppView(app: App, recentFlag: Boolean) {
+    private fun fillWatchAppView(app: App) {
         val versionDetailsTextView = this.price ?: return
 
         // Price field
         val packageInfo = resourceProvider.installedApps.packageInfo(app.packageName)
         when {
             app.versionNumber == 0 -> {
-                this.recentChanges?.visibility = View.GONE
                 versionDetailsTextView.setTextColor(warningColor)
                 versionDetailsTextView.text = resourceProvider.getString(R.string.updates_not_available)
             }
@@ -107,7 +80,7 @@ class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase
                         versionDetailsTextView.setTextColor(warningColor)
                         versionDetailsTextView.text = resourceProvider.formatVersionText(packageInfo.versionName, packageInfo.versionCode, app.versionNumber)
                     }
-                    app.status == AppInfoMetadata.STATUS_UPDATED || recentFlag -> {
+                    app.status == AppInfoMetadata.STATUS_UPDATED -> {
                         versionDetailsTextView.setTextColor(accentColor)
                         versionDetailsTextView.text = resourceProvider.formatVersionText(packageInfo.versionName, packageInfo.versionCode, 0)
                     }
@@ -125,8 +98,8 @@ class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase
                     versionDetailsTextView.text = app.price.text
                 }
 
-                when {
-                    app.status == AppInfoMetadata.STATUS_UPDATED || recentFlag -> {
+                when (app.status) {
+                    AppInfoMetadata.STATUS_UPDATED -> {
                         versionDetailsTextView.setTextColor(accentColor)
                     }
                     else -> {
@@ -135,27 +108,13 @@ class AppDetailsView(view: View, private val resourceProvider: AppViewHolderBase
                 }
             }
         }
-
-        // Recent changes
-        when {
-            app.status == AppInfoMetadata.STATUS_UPDATED || recentFlag -> {
-                this.recentChanges?.visibility = View.VISIBLE
-            }
-            else -> {
-                this.recentChanges?.visibility = View.GONE
-            }
-        }
     }
 
     fun updateAccentColor(@ColorInt color: Int) {
         accentColor = color
         this.app?.let {
-            fillWatchAppView(it, this.recentFlag)
+            fillWatchAppView(it)
         }
     }
 
-    fun placeholder() {
-        title.text = ""
-        creator?.text = ""
-    }
 }

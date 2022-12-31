@@ -2,8 +2,6 @@
 <resources>
 
     <dimen name="icon_size">40dip</dimen>
-    <dimen name="icon_wrapper">56dip</dimen>
-    <dimen name="icon_size_big">56dip</dimen>
 
     <!-- Dialog title height -->
 
@@ -18,21 +16,10 @@
          be either a fraction or a dimension.
     -->
 
-    <dimen name="list_padding_side">8dp</dimen>
-    <dimen name="list_padding_vertical">4dp</dimen>
     <dimen name="textSize">12sp</dimen>
-    <dimen name="activity_horizontal_margin">16dp</dimen>
-    <dimen name="activity_vertical_margin">16dp</dimen>
-    <dimen name="playstore_button_margin_top">114dp</dimen>
-
-    <dimen name="dialog_padding">16dp</dimen>
-    <dimen name="dialog_padding_top_material">18dp</dimen>
 
     <item type="fraction" name="dialog_width_percentage">90%</item>
     <item type="fraction" name="dialog_height_percentage">90%</item>
 
     <dimen name="dialog_min_width_major">90%</dimen>
-    <dimen name="log_message_size">12dp</dimen>
-    <dimen name="list_apps_header_height">48dp</dimen>
-    <dimen name="list_apps_header_button_height">48dp</dimen>
 </resources>

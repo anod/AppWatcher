@@ -262,7 +262,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
     private fun updateAppView(app: App, appIconState: AppIconState) {
         binding.playStoreButton.setOnClickListener(this)
 
-        appDetailsView.fillDetails(app, false, "", false, app.rowId == -1)
+        appDetailsView.fillDetails(app, app.rowId == -1)
         binding.toolbar.title = titleString
         if (appDetailsView.creator?.text?.isNotEmpty() == true) {
             appDetailsView.creator?.isVisible = true
@@ -315,9 +315,6 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
                 } else {
                     viewModel.handleEvent(DetailsScreenEvent.WatchApp)
                 }
-                return true
-            }
-            R.id.menu_add -> {
                 return true
             }
             R.id.menu_uninstall -> {

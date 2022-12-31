@@ -224,17 +224,6 @@
         <item name="postSplashScreenTheme">@null</item>
     </style>
 
-    <style name="AlertDialog" parent="@style/Theme.Material3.DayNight.Dialog.Alert" />
-
     <style name="AppTheme.ActionBar" />
 
-    <style name="AppTheme.PopupMenu" />
-
-    <style name="AppTheme.PopupMenu.LightBackground" parent="@style/Widget.MaterialComponents.PopupMenu.Overflow">
-        <item name="popupMenuBackground">@color/alwaysBlack</item>
-    </style>
-
-    <style name="AppTheme.PopupMenu.DarkBackground" parent="@style/Widget.MaterialComponents.PopupMenu.Overflow">
-        <item name="popupMenuBackground">@color/alwaysBlack</item>
-    </style>
 </resources>
