@@ -15,7 +15,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.SearchTopBar
-import com.anod.appwatcher.compose.SortDropdownMenu
+import com.anod.appwatcher.compose.SortMenuAction
+import com.anod.appwatcher.compose.SortMenuItem
 
 @Composable
 fun InstalledTopBar(
@@ -56,18 +57,11 @@ fun InstalledTopBar(
                         Icon(imageVector = Icons.Default.Ballot, contentDescription = stringResource(id = R.string.import_mode))
                     }
 
-                    IconButton(onClick = { topBarSortMenu = true }) {
-                        Icon(imageVector = Icons.Default.Sort, contentDescription = stringResource(id = R.string.sort))
-                    }
-
-                    SortDropdownMenu(
-                            selectedSortId = sortId,
-                            onChangeSort = { index ->
-                                onEvent(InstalledListSharedEvent.ChangeSort(sortId = index))
-                                topBarSortMenu = false
-                            },
-                            expanded = topBarSortMenu,
-                            onDismissRequest = { topBarSortMenu = false }
+                    SortMenuAction(
+                        selectedSortId = sortId,
+                        onChangeSort = { index ->
+                            onEvent(InstalledListSharedEvent.ChangeSort(sortId = index))
+                        }
                     )
                 }
             }

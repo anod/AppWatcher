@@ -8,14 +8,18 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntRect
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.SearchTopBar
-import com.anod.appwatcher.compose.SortDropdownMenu
-import com.anod.appwatcher.compose.SortMenuItem
+import kotlin.math.roundToInt
 
 @Composable
 fun WatchListTopBar(
@@ -25,13 +29,14 @@ fun WatchListTopBar(
     contentColor: Color,
     filterQuery: String,
     visibleActions: @Composable () -> Unit,
-    dropdownActions: @Composable ((dismiss: () -> Unit) -> Unit)? = null,
+    dropdownActions: @Composable ((dismiss: () -> Unit, barBounds: IntRect) -> Unit)? = null,
     navigationIcon: @Composable (() -> Unit)? = null,
     onEvent: (WatchListSharedStateEvent) -> Unit
 ) {
 
     val showSearchView by remember { mutableStateOf(filterQuery.isNotBlank()) }
 
+    var barBounds : IntRect by remember { mutableStateOf(IntRect(0, 0, 0, 0)) }
     SearchTopBar(
         title = title,
         subtitle = subtitle,
@@ -44,6 +49,13 @@ fun WatchListTopBar(
         onSearchAction = { onEvent(WatchListSharedStateEvent.OnSearch(it)) },
         onNavigation = { onEvent(WatchListSharedStateEvent.OnBackPressed) },
         navigationIcon = navigationIcon,
+        modifier = Modifier.onGloballyPositioned {
+             if (it.isAttached) {
+                 val size = it.size
+                 val position = it.positionInWindow()
+                 barBounds = IntRect(position.x.roundToInt(), position.y.roundToInt(), size.width, size.height)
+             }
+        },
         actions = {
             visibleActions()
 
@@ -59,9 +71,9 @@ fun WatchListTopBar(
 
                 DropdownMenu(
                     expanded = topBarMoreMenu,
-                    onDismissRequest = { topBarMoreMenu = false }
+                    onDismissRequest = { topBarMoreMenu = false },
                 ) {
-                    dropdownActions(dismiss = { topBarMoreMenu = false })
+                    dropdownActions(dismiss = { topBarMoreMenu = false }, barBounds = barBounds)
                 }
             }
         }
@@ -91,7 +103,7 @@ fun DefaultPreview() {
                             )
                         }
                     },
-                    dropdownActions = { dismiss ->
+                    dropdownActions = { dismiss, _ ->
                         DropdownMenuItem(
                             text = { Text(text = stringResource(id = R.string.menu_edit)) },
                             leadingIcon = {

@@ -9,7 +9,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.res.stringResource
 import com.anod.appwatcher.R
-import com.anod.appwatcher.compose.SortDropdownMenu
 import com.anod.appwatcher.compose.SortMenuItem
 import com.anod.appwatcher.watchlist.*
 
@@ -32,7 +31,7 @@ fun TagWatchListScreen(screenState: WatchListSharedState, pagingSourceConfig: Wa
                         Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(id = R.string.menu_tag_apps))
                     }
                 },
-                dropdownActions = { dismiss ->
+                dropdownActions = { dismiss, barBounds ->
                     DropdownMenuItem(
                         text = { Text(text = stringResource(id = R.string.menu_edit)) },
                         leadingIcon = { Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(id = R.string.menu_edit)) },
@@ -60,17 +59,13 @@ fun TagWatchListScreen(screenState: WatchListSharedState, pagingSourceConfig: Wa
                         }
                     }
 
-                    var topBarSortMenu by remember { mutableStateOf(false) }
-                    SortMenuItem(onClick = { topBarSortMenu = true })
-                    SortDropdownMenu(
+                    SortMenuItem(
                         selectedSortId = screenState.sortId,
                         onChangeSort = { index ->
                             onEvent(WatchListSharedStateEvent.ChangeSort(sortId = index))
-                            topBarSortMenu = false
                             dismiss()
                         },
-                        expanded = topBarSortMenu,
-                        onDismissRequest = { topBarSortMenu = false }
+                        barBounds = barBounds
                     )
                 },
                 onEvent = onEvent

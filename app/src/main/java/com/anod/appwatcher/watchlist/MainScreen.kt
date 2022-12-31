@@ -23,7 +23,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import com.anod.appwatcher.R
-import com.anod.appwatcher.compose.SortDropdownMenu
 import com.anod.appwatcher.compose.SortMenuItem
 import kotlinx.coroutines.launch
 
@@ -88,18 +87,14 @@ fun MainScreen(
                             }
                         }
                     },
-                    dropdownActions = { dismiss ->
-                        var topBarSortMenu by remember { mutableStateOf(false) }
-                        SortMenuItem(onClick = { topBarSortMenu = true })
-                        SortDropdownMenu(
+                    dropdownActions = { dismiss, barBounds ->
+                        SortMenuItem(
                             selectedSortId = listState.sortId,
                             onChangeSort = { index ->
                                 onListEvent(WatchListSharedStateEvent.ChangeSort(sortId = index))
-                                topBarSortMenu = false
                                 dismiss()
                             },
-                            expanded = topBarSortMenu,
-                            onDismissRequest = { topBarSortMenu = false }
+                            barBounds = barBounds
                         )
 
                         DropdownMenuItem(

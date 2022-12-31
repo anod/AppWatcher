@@ -28,6 +28,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun SearchTopBar(
     title: String,
+    modifier: Modifier = Modifier,
     subtitle: String? = null,
     containerColor: Color = MaterialTheme.colorScheme.surface,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
@@ -44,6 +45,7 @@ fun SearchTopBar(
     var showSearchView by remember { mutableStateOf(showSearch) }
     var requestFocus by remember { mutableStateOf(initialSearchFocus) }
     TopAppBar(
+        modifier = modifier,
         title = {
             if (showSearchView) {
                 TopBarSearchField(
@@ -102,7 +104,8 @@ fun SearchTopBar(
             }
 
             actions()
-        }, colors = TopAppBarDefaults.smallTopAppBarColors(
+        },
+        colors = TopAppBarDefaults.smallTopAppBarColors(
             containerColor = containerColor,
             titleContentColor = contentColor,
             navigationIconContentColor = contentColor,
