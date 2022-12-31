@@ -11,7 +11,11 @@ import androidx.room.migration.Migration
 import androidx.room.withTransaction
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.anod.appwatcher.BuildConfig
-import com.anod.appwatcher.database.entities.*
+import com.anod.appwatcher.database.entities.App
+import com.anod.appwatcher.database.entities.AppChange
+import com.anod.appwatcher.database.entities.AppTag
+import com.anod.appwatcher.database.entities.Schedule
+import com.anod.appwatcher.database.entities.Tag
 import info.anodsplace.applog.AppLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

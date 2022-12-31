@@ -5,7 +5,11 @@ import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.net.Uri
 import android.provider.BaseColumns
-import androidx.room.*
+import androidx.room.ColumnInfo
+import androidx.room.Embedded
+import androidx.room.Entity
+import androidx.room.Ignore
+import androidx.room.PrimaryKey
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.model.AppInfoMetadata
@@ -15,7 +19,7 @@ import info.anodsplace.framework.content.getAppTitle
 import info.anodsplace.framework.content.getLaunchComponent
 import info.anodsplace.framework.content.getPackageInfoOrNull
 import java.text.DateFormat
-import java.util.*
+import java.util.Date
 
 /**
  * @author Alex Gavrishev

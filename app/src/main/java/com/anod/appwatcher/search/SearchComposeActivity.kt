@@ -2,24 +2,16 @@ package com.anod.appwatcher.search
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
-import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.lifecycleScope
-import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AccountSelectionDialog
 import com.anod.appwatcher.accounts.AccountSelectionResult
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
-import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.tags.TagsListFragment
-import com.anod.appwatcher.utils.Theme
-import info.anodsplace.applog.AppLog
-import info.anodsplace.framework.app.DialogMessage
-import kotlinx.coroutines.launch
 
 open class SearchComposeActivity : BaseComposeActivity() {
     val viewModel: SearchViewModel by viewModels(factoryProducer = { SearchViewModel.Factory(intentToState(intent)) })

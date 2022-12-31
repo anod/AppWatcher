@@ -32,7 +32,14 @@ import com.anod.appwatcher.databinding.FragmentAppChangelogBinding
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.tags.TagSnackbar
-import com.anod.appwatcher.utils.*
+import com.anod.appwatcher.utils.AlphaForegroundColorSpan
+import com.anod.appwatcher.utils.AlphaSpannableString
+import com.anod.appwatcher.utils.StoreIntent
+import com.anod.appwatcher.utils.Theme
+import com.anod.appwatcher.utils.forPlayStore
+import com.anod.appwatcher.utils.networkConnection
+import com.anod.appwatcher.utils.prefs
+import com.anod.appwatcher.utils.wrapCheckStateIcon
 import com.anod.appwatcher.watchlist.AppViewHolderResourceProvider
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.color.ColorRoles

@@ -4,7 +4,12 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.text.util.Linkify
-import android.view.*
+import android.view.ActionMode
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.R
@@ -12,7 +17,7 @@ import com.anod.appwatcher.database.entities.AppChange
 import info.anodsplace.framework.content.startActivitySafely
 import info.anodsplace.framework.text.Html
 import java.net.URLEncoder
-import java.util.*
+import java.util.Locale
 
 
 private fun TextView.fixTextSelection() {

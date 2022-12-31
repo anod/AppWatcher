@@ -8,7 +8,11 @@ import androidx.core.app.NotificationCompat
 import com.anod.appwatcher.R
 import com.anod.appwatcher.SettingsActivity
 import com.anod.appwatcher.sync.SyncNotification
-import com.google.android.gms.auth.api.signin.*
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Scope
 import com.google.android.gms.tasks.Task
@@ -21,7 +25,7 @@ import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.app.NotificationManager
 import info.anodsplace.framework.playservices.GoogleSignInConnect
 import org.koin.java.KoinJavaComponent
-import java.util.*
+import java.util.Collections
 import java.util.concurrent.ExecutionException
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine

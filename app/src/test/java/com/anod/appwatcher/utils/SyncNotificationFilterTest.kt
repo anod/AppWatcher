@@ -3,7 +3,9 @@ package com.anod.appwatcher.utils
 
 import com.anod.appwatcher.sync.SyncNotification
 import com.anod.appwatcher.sync.UpdatedApp
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class SyncNotificationFilterTest {

@@ -12,7 +12,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.AppsDatabase
-import com.anod.appwatcher.database.entities.*
+import com.anod.appwatcher.database.entities.Failed
+import com.anod.appwatcher.database.entities.New
+import com.anod.appwatcher.database.entities.Schedule
+import com.anod.appwatcher.database.entities.Skipped
+import com.anod.appwatcher.database.entities.Success
 import com.anod.appwatcher.databinding.ActivitySchedulesHistoryBinding
 import com.anod.appwatcher.databinding.ListItemScheduleBinding
 import com.anod.appwatcher.utils.Theme
@@ -25,7 +29,8 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 /**
  * @author Alex Gavrishev

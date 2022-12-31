@@ -5,7 +5,8 @@ import com.anod.appwatcher.utils.date.UploadDateParserFactory
 import finsky.api.model.Document
 import info.anodsplace.applog.AppLog
 import java.text.ParseException
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 /**
  * @author alex

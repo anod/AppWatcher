@@ -2,13 +2,9 @@
 package com.anod.appwatcher.utils
 
 import android.os.Bundle
-import androidx.collection.SimpleArrayMap
 import androidx.core.os.bundleOf
-import androidx.lifecycle.MutableLiveData
 import info.anodsplace.ktx.equalsHash
 import info.anodsplace.ktx.hashCodeOf
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
 
 data class SelectionState(
       val defaultSelected: Boolean = false,

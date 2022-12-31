@@ -8,7 +8,7 @@ import info.anodsplace.framework.content.InstalledPackageApp
 import info.anodsplace.framework.content.getInstalledApps
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.util.*
+import java.util.Locale
 
 class InstalledTaskWorker(
         private val packageManager: PackageManager,

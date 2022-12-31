@@ -21,12 +21,9 @@ import com.anod.appwatcher.compose.DeleteNotice
 import com.anod.appwatcher.compose.SearchTopBar
 import com.anod.appwatcher.search.MarketAppItem
 import com.anod.appwatcher.search.RetryButton
-import com.anod.appwatcher.search.SearchActivityAction
-import com.anod.appwatcher.search.SearchViewEvent
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.AppIconLoader
 import finsky.api.model.Document
-import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.InstalledApps
 import kotlinx.coroutines.flow.Flow
 import org.koin.java.KoinJavaComponent

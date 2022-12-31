@@ -12,7 +12,7 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.utils.AppIconLoader
 import com.google.android.material.color.MaterialColors
 import info.anodsplace.framework.content.InstalledApps
-import java.util.*
+import java.util.Locale
 
 /**
  * @author Alex Gavrishev

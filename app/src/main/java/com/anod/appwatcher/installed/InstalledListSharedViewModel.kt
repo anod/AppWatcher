@@ -14,7 +14,6 @@ import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.PackageChangedReceiver
 import com.anod.appwatcher.utils.SelectionState
 import com.anod.appwatcher.utils.getInt
-import com.anod.appwatcher.watchlist.SectionItem
 import com.anod.appwatcher.watchlist.WatchListEvent
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.HingeDeviceLayout

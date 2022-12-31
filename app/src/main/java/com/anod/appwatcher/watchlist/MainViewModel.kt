@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import androidx.annotation.StringRes
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AccountSelectionResult

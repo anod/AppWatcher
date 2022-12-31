@@ -33,7 +33,7 @@ import info.anodsplace.framework.content.startActivitySafely
 import kotlinx.coroutines.launch
 
 class TagWatchListComposeActivity : BaseComposeActivity() {
-    val viewModel: WatchListStateViewModel by viewModels(factoryProducer = {
+    private val viewModel: WatchListStateViewModel by viewModels(factoryProducer = {
         WatchListStateViewModel.Factory(
             defaultFilterId = Filters.ALL,
             wideLayout = hingeDevice.layout.value

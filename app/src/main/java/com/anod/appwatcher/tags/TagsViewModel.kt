@@ -5,10 +5,13 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.anod.appwatcher.database.AppTagsTable
 import com.anod.appwatcher.database.AppsDatabase
-import com.anod.appwatcher.database.TagsTable
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.model.AppInfo
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject

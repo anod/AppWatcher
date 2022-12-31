@@ -6,7 +6,10 @@ import android.content.pm.PackageManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.anod.appwatcher.watchlist.*
+import com.anod.appwatcher.watchlist.FilterablePagingSource
+import com.anod.appwatcher.watchlist.SectionHeaderFactory
+import com.anod.appwatcher.watchlist.WatchListPagingSource
+import com.anod.appwatcher.watchlist.WatchListViewModel
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.parameter.parametersOf

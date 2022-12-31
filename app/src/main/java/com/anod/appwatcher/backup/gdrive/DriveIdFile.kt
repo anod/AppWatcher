@@ -6,7 +6,14 @@ import com.anod.appwatcher.database.AppsDatabase
 import info.anodsplace.applog.AppLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.*
+import java.io.BufferedInputStream
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.FileReader
+import java.io.FileWriter
+import java.io.IOException
+import java.io.Reader
 
 /**
  * @author Alex Gavrishev

@@ -3,7 +3,15 @@ package com.anod.appwatcher.sync
 import android.content.Context
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.map
-import androidx.work.*
+import androidx.work.Constraints
+import androidx.work.Data
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequest
+import androidx.work.Operation
+import androidx.work.PeriodicWorkRequest
+import androidx.work.WorkManager
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import kotlinx.coroutines.flow.Flow

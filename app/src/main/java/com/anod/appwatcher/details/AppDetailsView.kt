@@ -9,7 +9,6 @@ import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.generateTitle
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.watchlist.AppViewHolderBase
-import info.anodsplace.framework.text.Html
 
 /**
  * @author Alex Gavrishev

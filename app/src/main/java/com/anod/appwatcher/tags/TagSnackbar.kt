@@ -3,16 +3,12 @@ package com.anod.appwatcher.tags
 import android.app.Activity
 import android.content.Context
 import android.view.View
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.SnackbarVisuals
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppListFilter
 import com.anod.appwatcher.preferences.Preferences
-import com.anod.appwatcher.utils.Theme
 import com.google.android.material.snackbar.Snackbar
 import info.anodsplace.ktx.hashCodeOf
 

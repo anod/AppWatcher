@@ -1,7 +1,6 @@
 package com.anod.appwatcher.watchlist
 
 import android.content.Context
-import android.content.pm.PackageManager
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -22,13 +21,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForwardIos
-import androidx.compose.material.icons.filled.ArrowRight
 import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -56,7 +52,6 @@ import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.database.entities.Price
 import com.anod.appwatcher.database.entities.generateTitle
-import com.anod.appwatcher.database.entities.packageToApp
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.PackageChangedReceiver

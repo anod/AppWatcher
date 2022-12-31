@@ -4,7 +4,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Ballot
 import androidx.compose.material.icons.filled.Deselect
 import androidx.compose.material.icons.filled.SelectAll
-import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -16,7 +15,6 @@ import androidx.compose.ui.res.stringResource
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.SearchTopBar
 import com.anod.appwatcher.compose.SortMenuAction
-import com.anod.appwatcher.compose.SortMenuItem
 
 @Composable
 fun InstalledTopBar(

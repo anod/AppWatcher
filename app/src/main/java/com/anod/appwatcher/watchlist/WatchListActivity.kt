@@ -21,10 +21,7 @@ import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.compose.MainDetailScreen
 import com.anod.appwatcher.details.DetailsDialog
 import com.anod.appwatcher.installed.InstalledActivity
-import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.tags.TagWatchListComposeActivity
-import com.anod.appwatcher.upgrade.Upgrade15500
-import com.anod.appwatcher.upgrade.UpgradeCheck
 import com.anod.appwatcher.utils.account
 import com.anod.appwatcher.utils.forMyApps
 import com.anod.appwatcher.utils.prefs
@@ -126,7 +123,6 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
         lifecycleScope.launch {
             accountSelectionDialog.accountSelected.collect { result ->
                 mainViewModel.handleEvent(MainViewEvent.SetAccount(result))
-
             }
         }
 

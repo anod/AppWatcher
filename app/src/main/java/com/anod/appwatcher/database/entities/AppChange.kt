@@ -1,7 +1,11 @@
 package com.anod.appwatcher.database.entities
 
-import androidx.room.*
 import android.provider.BaseColumns
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.Ignore
+import androidx.room.Index
+import androidx.room.PrimaryKey
 import com.anod.appwatcher.database.ChangelogTable
 
 /**

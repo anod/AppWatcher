@@ -1,8 +1,8 @@
 package com.anod.appwatcher.database.entities
 
+import android.provider.BaseColumns
 import androidx.room.ColumnInfo
 import androidx.room.PrimaryKey
-import android.provider.BaseColumns
 import com.anod.appwatcher.database.AppListTable
 
 /**

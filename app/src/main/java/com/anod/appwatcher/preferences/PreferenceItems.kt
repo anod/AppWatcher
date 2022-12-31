@@ -6,7 +6,7 @@ import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.R
 import info.anodsplace.compose.PreferenceItem
 import info.anodsplace.framework.playservices.GooglePlayServices
-import java.util.*
+import java.util.Locale
 
 private val appVersion: String
     get() = "%s (%d)".format(Locale.US, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE)
