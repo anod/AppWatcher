@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.runtime.collectAsState
@@ -100,6 +101,14 @@ class TagWatchListComposeActivity : BaseComposeActivity() {
             is WatchListSharedStateAction.OnSearch -> startActivity(MarketSearchActivity.intent(this, action.query, true))
             WatchListSharedStateAction.Dismiss -> finish()
             WatchListSharedStateAction.PlayStoreMyApps -> startActivitySafely(Intent().forMyApps(true, this))
+            WatchListSharedStateAction.ShowAccountsDialog -> { }
+            is WatchListSharedStateAction.ShowToast -> {
+                if (action.resId == 0) {
+                    Toast.makeText(this, action.text, action.length).show()
+                } else {
+                    Toast.makeText(this, action.resId, action.length).show()
+                }
+            }
         }
     }
 

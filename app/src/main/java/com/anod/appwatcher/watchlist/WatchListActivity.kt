@@ -13,6 +13,7 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.MarketSearchActivity
+import com.anod.appwatcher.R
 import com.anod.appwatcher.SettingsActivity
 import com.anod.appwatcher.accounts.AccountSelectionDialog
 import com.anod.appwatcher.compose.AppTheme
@@ -63,32 +64,6 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
         }
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
-
-//            stateViewModel.viewStates.map { it.listState }.distinctUntilChanged().collect {
-//                when (it) {
-//                    is ListState.SyncStarted -> {
-//                        Toast.makeText(this@WatchListActivity, R.string.refresh_scheduled, Toast.LENGTH_SHORT).show()
-//                    }
-//                    is ListState.SyncStopped -> {
-//                        if (it.updatesCount == 0) {
-//                            Toast.makeText(
-//                                    this@WatchListActivity,
-//                                    R.string.no_updates_found,
-//                                    Toast.LENGTH_SHORT
-//                            ).show()
-//                        }
-//                        ViewModelProvider(this@WatchListActivity).get(DrawerViewModel::class.java)
-//                            .refreshLastUpdateTime()
-//                        ListState.SyncStopped
-//                    }
-//                    is ListState.NoNetwork -> {
-//                        Toast.makeText(this@WatchListActivity, R.string.check_connection, Toast.LENGTH_SHORT).show()
-//                    }
-//                    is ListState.ShowAuthDialog -> {
-//                        this@WatchListActivity.showAccountsDialogWithCheck()
-//                    }
-//                }
-//            }
 
         setContent {
             AppTheme(
@@ -185,6 +160,14 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
             is WatchListSharedStateAction.OnSearch -> startActivity(MarketSearchActivity.intent(this, action.query, true))
             WatchListSharedStateAction.Dismiss -> finish()
             WatchListSharedStateAction.PlayStoreMyApps -> startActivitySafely(Intent().forMyApps(true, this))
+            WatchListSharedStateAction.ShowAccountsDialog -> showAccountsDialogWithCheck()
+            is WatchListSharedStateAction.ShowToast -> {
+                if (action.resId == 0) {
+                    Toast.makeText(this, action.text, action.length).show()
+                } else {
+                    Toast.makeText(this, action.resId, action.length).show()
+                }
+            }
         }
     }
 
@@ -211,6 +194,11 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
             is MainViewAction.StartActivity -> startActivitySafely(action.intent)
             MainViewAction.ChooseAccount -> accountSelectionDialog.show()
         }
+    }
+
+    private fun showAccountsDialogWithCheck() {
+        Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
+        accountSelectionDialog.show()
     }
 
     override fun onBackPressed() {

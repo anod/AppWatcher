@@ -2,20 +2,19 @@ package com.anod.appwatcher.watchlist
 
 import android.app.Application
 import android.graphics.Rect
-import android.os.Bundle
+import android.widget.Toast
+import androidx.annotation.StringRes
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.savedstate.SavedStateRegistryOwner
 import androidx.work.Operation
+import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
-import com.anod.appwatcher.database.entities.AppTag
 import com.anod.appwatcher.database.entities.Tag
-import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.tags.AppsTagViewModel
 import com.anod.appwatcher.utils.BaseFlowViewModel
@@ -35,27 +34,17 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.skip
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-
-sealed class ListState {
-    object SyncStarted : ListState()
-    class SyncStopped(val updatesCount: Int) : ListState()
-    object Updated : ListState()
-    object NoNetwork : ListState()
-    object ShowAuthDialog : ListState()
-}
 
 data class WatchListSharedState(
         val tag: Tag,
         val sortId: Int,
         val filterId: Int,
         val titleFilter: String = "",
-        val listState: ListState? = null,
+        val syncProgress: SyncProgress? = null,
         val wideLayout: HingeDeviceLayout = HingeDeviceLayout(isWideLayout = false, hinge = Rect()),
         val selectedApp: App? = null,
         val showAppTagDialog: Boolean = false,
@@ -88,8 +77,10 @@ sealed interface WatchListSharedStateAction {
     object ShareFromStore : WatchListSharedStateAction
     object Dismiss : WatchListSharedStateAction
     object PlayStoreMyApps : WatchListSharedStateAction
+    object ShowAccountsDialog : WatchListSharedStateAction
     class OpenApp(val app: App, val index: Int) : WatchListSharedStateAction
     class OnSearch(val query: String) : WatchListSharedStateAction
+    class ShowToast(@StringRes val resId: Int = 0, val text: String = "", val length: Int = Toast.LENGTH_SHORT) : WatchListSharedStateAction
 }
 
 class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wideLayout: HingeDeviceLayout) : BaseFlowViewModel<WatchListSharedState, WatchListSharedStateEvent, WatchListSharedStateAction>(), KoinComponent {
@@ -169,6 +160,10 @@ class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wid
         }
     }
 
+//                        ViewModelProvider(this@WatchListActivity).get(DrawerViewModel::class.java)
+//                            .refreshLastUpdateTime()
+//                        ListState.SyncStopped
+
     override fun handleEvent(event: WatchListSharedStateEvent) {
         when (event) {
             is WatchListSharedStateEvent.ChangeSort -> {
@@ -197,10 +192,21 @@ class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wid
                 viewState = viewState.copy(selectedApp = event.app)
             }
             is WatchListSharedStateEvent.UpdateSyncProgress -> {
-                viewState = if (event.syncProgress.isRefreshing) {
-                    viewState.copy(listState = ListState.SyncStarted)
+                viewState = viewState.copy(syncProgress = event.syncProgress)
+                if (event.syncProgress.isRefreshing) {
+                    emitAction(WatchListSharedStateAction.ShowToast(
+                        resId = R.string.refresh_scheduled,
+                        length = Toast.LENGTH_SHORT
+                    ))
                 } else {
-                    viewState.copy(listState = ListState.SyncStopped(updatesCount = event.syncProgress.updatesCount))
+                    if (event.syncProgress.updatesCount == 0) {
+                        emitAction(
+                            WatchListSharedStateAction.ShowToast(
+                                resId = R.string.no_updates_found,
+                                length = Toast.LENGTH_SHORT
+                            )
+                        )
+                    }
                 }
             }
             WatchListSharedStateEvent.PlayStoreMyApps -> emitAction(WatchListSharedStateAction.PlayStoreMyApps)
@@ -237,7 +243,7 @@ class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wid
     }
 
     private fun refresh() {
-        val isRefreshing = (viewState.listState is ListState.SyncStarted)
+        val isRefreshing = viewState.syncProgress?.isRefreshing == true
         if (!isRefreshing) {
             val schedule = requestRefresh()
             appScope.launch {
@@ -249,15 +255,19 @@ class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wid
     private fun requestRefresh(): Flow<Operation.State> {
         AppLog.d("Refresh requested")
         if (!authToken.isFresh) {
-            viewState = if (networkConnection.isNetworkAvailable) {
-                viewState.copy(listState = ListState.ShowAuthDialog)
+            if (networkConnection.isNetworkAvailable) {
+                emitAction(WatchListSharedStateAction.ShowAccountsDialog)
             } else {
-                viewState.copy(listState = ListState.NoNetwork)
+                emitAction(WatchListSharedStateAction.ShowToast(
+                    resId = R.string.check_connection,
+                    length = Toast.LENGTH_SHORT
+                ))
             }
+            viewState = viewState.copy(syncProgress = null)
             return flowOf()
         }
 
-        viewState = viewState.copy(listState = ListState.SyncStarted)
+        viewState = viewState.copy(syncProgress = SyncProgress(true, 0))
         return SyncScheduler(application).execute()
     }
 }

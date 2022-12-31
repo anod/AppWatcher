@@ -126,8 +126,6 @@ fun MainScreen(
                         }
                     }
                 )
-
-
             }
         )
     }
