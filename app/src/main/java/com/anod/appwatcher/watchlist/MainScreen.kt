@@ -24,6 +24,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.SortMenuItem
+import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.tags.EditTagDialog
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,19 +41,23 @@ fun MainScreen(
     val scope = rememberCoroutineScope()
 
     ModalNavigationDrawer(
-        drawerContent = { MainDrawer(
-            mainState = mainState,
-            onMainEvent = {
-                scope.launch {
-                    drawerState.close()
-                    if (it is MainViewEvent.DrawerItemClick && it.id == DrawerItem.Id.Refresh) {
-                        onListEvent(WatchListSharedStateEvent.Refresh)
-                    } else {
-                        onMainEvent(it)
+        drawerContent = {
+            MainDrawer(
+                mainState = mainState,
+                onMainEvent = {
+                    scope.launch {
+                        if (it !is MainViewEvent.AddNewTagDialog) {
+                            drawerState.close()
+                        }
+                        if (it is MainViewEvent.DrawerItemClick && it.id == DrawerItem.Id.Refresh) {
+                            onListEvent(WatchListSharedStateEvent.Refresh)
+                        } else {
+                            onMainEvent(it)
+                        }
                     }
                 }
-            }
-        ) },
+            )
+        },
         drawerState = drawerState
     ) {
         WatchListScreen(
@@ -114,7 +120,6 @@ fun MainScreen(
                                 dismiss()
                             }
                         )
-
                     },
                     onEvent = {
                         if (it is WatchListSharedStateEvent.OnBackPressed) {
@@ -127,6 +132,13 @@ fun MainScreen(
                     }
                 )
             }
+        )
+    }
+
+    if (mainState.showNewTagDialog) {
+        EditTagDialog(
+            tag = Tag.empty,
+            onDismissRequest = { onMainEvent(MainViewEvent.AddNewTagDialog(show = false)) }
         )
     }
 }
