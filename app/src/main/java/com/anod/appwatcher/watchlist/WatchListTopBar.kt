@@ -50,9 +50,7 @@ fun WatchListTopBar(
             if (dropdownActions != null) {
                 var topBarMoreMenu by remember { mutableStateOf(false) }
 
-                IconButton(onClick = {
-                    topBarMoreMenu = true
-                }) {
+                IconButton(onClick = { topBarMoreMenu = true }) {
                     Icon(
                         imageVector = Icons.Default.MoreVert,
                         contentDescription = stringResource(id = R.string.more)
@@ -61,7 +59,8 @@ fun WatchListTopBar(
 
                 DropdownMenu(
                     expanded = topBarMoreMenu,
-                    onDismissRequest = { topBarMoreMenu = false }) {
+                    onDismissRequest = { topBarMoreMenu = false }
+                ) {
                     dropdownActions(dismiss = { topBarMoreMenu = false })
                 }
             }

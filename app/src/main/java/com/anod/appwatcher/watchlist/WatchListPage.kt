@@ -279,8 +279,10 @@ private fun AppItem(
     val changesHtml: String by remember {
         if (item.changeDetails?.isNotBlank() == true) {
             mutableStateOf(
-                Html.parse(item.changeDetails).toString().replace(newLineRegex, "\n")
-                    .removePrefix(app.versionName + "\n").removePrefix(app.versionName + ":\n")
+                Html.parse(item.changeDetails).toString().
+                    replace(newLineRegex, "\n")
+                    .removePrefix(app.versionName + "\n")
+                    .removePrefix(app.versionName + ":\n")
             )
         } else mutableStateOf("")
     }

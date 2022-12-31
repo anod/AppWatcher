@@ -73,7 +73,8 @@ fun WatchListScreen(
                 RefreshKey(
                     titleFilter = screenState.titleFilter,
                     tagAppsChange = screenState.tagAppsChange,
-                    sortId = screenState.sortId
+                    sortId = screenState.sortId,
+                    dbAppsChange = screenState.dbAppsChange
                 )
             }
 
@@ -119,4 +120,5 @@ private data class RefreshKey(
     val titleFilter: String,
     val sortId: Int,
     val tagAppsChange: Int,
+    val dbAppsChange: Int,
 )

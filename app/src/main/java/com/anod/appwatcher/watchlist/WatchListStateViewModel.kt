@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.work.Operation
 import com.anod.appwatcher.accounts.AuthTokenBlocking
+import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppTag
@@ -26,10 +27,16 @@ import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.utils.syncProgressFlow
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.HingeDeviceLayout
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.skip
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -54,7 +61,8 @@ data class WatchListSharedState(
         val showAppTagDialog: Boolean = false,
         val showEditTagDialog: Boolean = false,
         val tagAppsChange: Int = 0,
-        val expandSearch: Boolean = false
+        val expandSearch: Boolean = false,
+        val dbAppsChange: Int = 0
 )
 
 sealed interface WatchListSharedStateEvent {
@@ -146,6 +154,18 @@ class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wid
                         viewState = viewState.copy(tagAppsChange = viewState.tagAppsChange + 1)
                     }
             }
+        }
+
+        viewModelScope.launch {
+            AppListTable.Queries.changes(db.apps())
+                .drop(1)
+                .map { (System.currentTimeMillis() / 1000).toInt() }
+                .filter { it > 0 }
+                .onEach { delay(600) }
+                .flowOn(Dispatchers.Default)
+                .collect {
+                    viewState = viewState.copy(dbAppsChange = viewState.dbAppsChange + 1)
+                }
         }
     }
 

@@ -15,12 +15,6 @@ android {
         targetSdk = 33
         versionCode = 15400
         versionName = "1.5.4"
-
-        javaCompileOptions {
-            annotationProcessorOptions {
-                argument("room.incremental", "true")
-            }
-        }
     }
 
     buildFeatures {
