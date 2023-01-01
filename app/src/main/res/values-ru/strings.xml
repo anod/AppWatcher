@@ -203,7 +203,6 @@
     <string name="back">назад</string>
     <string name="schedule_chip_notified">%d уведомлено</string>
     <string name="no_gdrive_account">Нет аккаунта Google Drive, войдите заново</string>
-    <string name="pref_gdrive_upload" translatable="false">Загрузить</string>
     <string name="sort_by_name_asc">Имя &#x2193;</string>
     <string name="sort_by_name_desc">Имя &#x2191;</string>
     <string name="sort_by_date_asc">Дата &#x2193;</string>

@@ -1,6 +1,5 @@
 package com.anod.appwatcher.database
 
-import android.annotation.SuppressLint
 import android.content.ContentProvider
 import android.content.ContentUris
 import android.content.ContentValues
@@ -14,8 +13,7 @@ import com.anod.appwatcher.AppWatcherApplication
 import com.anod.appwatcher.BuildConfig
 import info.anodsplace.applog.AppLog
 
-@SuppressLint("Registered")
-open class DbContentProvider : ContentProvider() {
+class DbContentProvider : ContentProvider() {
 
     companion object {
         const val authority = BuildConfig.APPLICATION_ID

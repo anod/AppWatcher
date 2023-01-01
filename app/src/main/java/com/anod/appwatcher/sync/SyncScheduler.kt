@@ -11,7 +11,9 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequest
 import androidx.work.Operation
 import androidx.work.PeriodicWorkRequest
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
+import androidx.work.await
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import kotlinx.coroutines.flow.Flow

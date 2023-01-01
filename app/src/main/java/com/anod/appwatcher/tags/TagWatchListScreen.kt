@@ -2,22 +2,16 @@ package com.anod.appwatcher.tags
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowRight
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.FlashOn
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import com.anod.appwatcher.R
+import com.anod.appwatcher.compose.FilterMenuItem
 import com.anod.appwatcher.compose.SortMenuItem
 import com.anod.appwatcher.watchlist.WatchListPagingSource
 import com.anod.appwatcher.watchlist.WatchListScreen
@@ -32,7 +26,7 @@ fun TagWatchListScreen(screenState: WatchListSharedState, pagingSourceConfig: Wa
         screenState = screenState,
         pagingSourceConfig = pagingSourceConfig,
         onEvent = onEvent,
-        topBarContent = { subtitle, filterPagesTitles ->
+        topBarContent = { subtitle, filterId ->
             WatchListTopBar(
                 title = screenState.tag.name,
                 subtitle = subtitle,
@@ -54,23 +48,14 @@ fun TagWatchListScreen(screenState: WatchListSharedState, pagingSourceConfig: Wa
                         }
                     )
 
-                    var topBarFilterMenu by remember { mutableStateOf(false) }
-                    DropdownMenuItem(
-                        text = { Text(text = stringResource(id = R.string.filter)) },
-                        leadingIcon = { Icon(imageVector = Icons.Default.FlashOn, contentDescription = stringResource(id = R.string.filter)) },
-                        trailingIcon = { Icon(imageVector = Icons.Default.ArrowRight, contentDescription = null) },
-                        onClick = { topBarFilterMenu = true }
+                    FilterMenuItem(
+                        filterId = filterId,
+                        onFilterChange = { index ->
+                            onEvent(WatchListSharedStateEvent.FilterById(filterId = index))
+                            dismiss()
+                        },
+                        barBounds = barBounds
                     )
-
-                    DropdownMenu(expanded = topBarFilterMenu, onDismissRequest = { topBarFilterMenu = false }) {
-                        filterPagesTitles.forEachIndexed { index, title ->
-                            DropdownMenuItem(text = { Text(text = title) }, onClick = {
-                                onEvent(WatchListSharedStateEvent.FilterById(filterId = index))
-                                topBarFilterMenu = false
-                                dismiss()
-                            })
-                        }
-                    }
 
                     SortMenuItem(
                         selectedSortId = screenState.sortId,

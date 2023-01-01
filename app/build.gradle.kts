@@ -13,8 +13,8 @@ android {
         applicationId = "com.anod.appwatcher"
         minSdk = 27
         targetSdk = 33
-        versionCode = 15400
-        versionName = "1.5.4"
+        versionCode = 15500
+        versionName = "1.5.5"
     }
 
     buildFeatures {
@@ -83,6 +83,7 @@ android {
 
 dependencies {
     // AndroidX
+    implementation("androidx.appcompat:appcompat:1.5.1") // AppCompatActivity
     implementation("androidx.recyclerview:recyclerview:1.2.1")
     implementation("androidx.palette:palette:1.0.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
@@ -110,7 +111,7 @@ dependencies {
     implementation("io.coil-kt:coil-compose-base:2.2.2")
 
     // Google
-    implementation("com.google.android.material:material:1.7.0")
+    implementation("com.google.android.material:material:1.7.0") // Color roles, appbarlayout
     implementation("com.google.android.gms:play-services-oss-licenses:17.0.0")
     implementation("com.google.android.gms:play-services-identity:18.0.1")
     implementation("com.google.android.gms:play-services-auth:20.4.0")

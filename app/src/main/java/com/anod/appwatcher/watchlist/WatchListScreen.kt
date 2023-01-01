@@ -23,14 +23,13 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import info.anodsplace.applog.AppLog
 
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPagerApi::class)
 @Composable
 fun WatchListScreen(
     screenState: WatchListSharedState,
     pagingSourceConfig: WatchListPagingSource.Config,
     onEvent: (WatchListSharedStateEvent) -> Unit,
-    topBarContent: @Composable (String?, List<String>) -> Unit
+    topBarContent: @Composable (subtitle: String?, filterId: Int) -> Unit
 ) {
     var subtitle: String? by remember { mutableStateOf(null) }
     val filterPagesTitles = listOf(
@@ -57,7 +56,7 @@ fun WatchListScreen(
     AppLog.d("Recomposition $screenState")
 
     Scaffold(
-        topBar = { topBarContent(subtitle, filterPagesTitles) }
+        topBar = { topBarContent(subtitle, filterIds[pagerState.currentPage]) }
     ) { paddingValues ->
         HorizontalPager(count = filterPagesTitles.size, state = pagerState, modifier = Modifier.padding(paddingValues)) { pageIndex ->
             val filterId = filterIds[pageIndex]

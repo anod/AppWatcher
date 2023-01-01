@@ -114,9 +114,7 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
         if (enabled) {
             if (prefs.useAutoSync) {
                 viewModelScope.launch {
-                    SyncScheduler(context)
-                        .schedule(prefs.isRequiresCharging, prefs.isWifiOnly, prefs.updatesFrequency.toLong(), false)
-                        .collect { }
+                    scheduleRefresh()
                 }
             }
         }
@@ -133,6 +131,9 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
                     if (!prefs.areNotificationsEnabled && prefs.updatesFrequency > 0) {
                         emitAction(MainViewAction.RequestNotificationPermission)
                     }
+                    if (prefs.useAutoSync) {
+                        scheduleRefresh()
+                    }
                     upgradeCheck()
                 } else {
                     AppLog.e("Error retrieving authentication token")
@@ -142,6 +143,12 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
                 emitAction(MainViewAction.StartActivity(e.intent))
             }
         }
+    }
+
+    private suspend fun scheduleRefresh() {
+        SyncScheduler(context)
+            .schedule(prefs.isRequiresCharging, prefs.isWifiOnly, prefs.updatesFrequency.toLong(), false)
+            .collect { }
     }
 
     private fun onAccountNotFound(errorMessage: String) {

@@ -17,8 +17,9 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.anod.appwatcher.preferences.Preferences
+import com.anod.appwatcher.utils.color.MaterialColors
+import com.anod.appwatcher.utils.isLightColor
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.google.android.material.color.MaterialColors
 
 private val AppTypography = Typography()
 val Amber800 = Color(0xFFFF8F00)
@@ -159,7 +160,7 @@ fun AppTheme(
                 onPrimaryContainer = Color(roles.onAccentContainer)
         )
         statusBarColor = colorScheme.primary
-        isAppearanceLightStatusBars = MaterialColors.isColorLight(statusBarColor.toArgb())
+        isAppearanceLightStatusBars = statusBarColor.isLightColor
     }
 
     val systemUI = rememberSystemUiController()
