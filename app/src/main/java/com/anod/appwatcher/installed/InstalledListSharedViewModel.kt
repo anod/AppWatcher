@@ -14,6 +14,7 @@ import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.PackageChangedReceiver
 import com.anod.appwatcher.utils.SelectionState
 import com.anod.appwatcher.utils.getInt
+import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.WatchListEvent
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.HingeDeviceLayout
@@ -60,7 +61,7 @@ class InstalledListSharedViewModel(state: SavedStateHandle) : BaseFlowViewModel<
     private val packageChanged: PackageChangedReceiver by inject()
     private val authToken: AuthTokenBlocking by inject()
     private val account: Account?
-        get() = getKoin().getOrNull()
+        get() = prefs.account
 
     init {
         viewState = InstalledListSharedState(
