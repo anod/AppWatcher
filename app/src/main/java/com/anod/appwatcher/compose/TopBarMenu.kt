@@ -3,10 +3,10 @@ package com.anod.appwatcher.compose
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowRight
 import androidx.compose.material.icons.filled.FlashOn
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.Sort
-import androidx.compose.material.icons.outlined.FlashOn
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -25,7 +25,25 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.dp
 import com.anod.appwatcher.R
-import com.anod.appwatcher.model.Filters
+
+@Composable
+fun DropdownMenuAction(content: @Composable (dismiss: () -> Unit) -> Unit) {
+    var topBarMoreMenu by remember { mutableStateOf(false) }
+
+    IconButton(onClick = { topBarMoreMenu = true }) {
+        Icon(
+            imageVector = Icons.Default.MoreVert,
+            contentDescription = stringResource(id = R.string.more)
+        )
+    }
+
+    DropdownMenu(
+        expanded = topBarMoreMenu,
+        onDismissRequest = { topBarMoreMenu = false },
+    ) {
+        content(dismiss = { topBarMoreMenu = false })
+    }
+}
 
 @Composable
 fun SortMenuItem(selectedSortId: Int, onChangeSort: (Int) -> Unit, barBounds: IntRect) {

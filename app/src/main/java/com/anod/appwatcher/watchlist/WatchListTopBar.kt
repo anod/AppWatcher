@@ -16,6 +16,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntRect
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
+import com.anod.appwatcher.compose.DropdownMenuAction
 import com.anod.appwatcher.compose.SearchTopBar
 import kotlin.math.roundToInt
 
@@ -58,20 +59,8 @@ fun WatchListTopBar(
             visibleActions()
 
             if (dropdownActions != null) {
-                var topBarMoreMenu by remember { mutableStateOf(false) }
-
-                IconButton(onClick = { topBarMoreMenu = true }) {
-                    Icon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = stringResource(id = R.string.more)
-                    )
-                }
-
-                DropdownMenu(
-                    expanded = topBarMoreMenu,
-                    onDismissRequest = { topBarMoreMenu = false },
-                ) {
-                    dropdownActions(dismiss = { topBarMoreMenu = false }, barBounds = barBounds)
+                DropdownMenuAction { dismiss ->
+                    dropdownActions(dismiss = dismiss, barBounds = barBounds)
                 }
             }
         }

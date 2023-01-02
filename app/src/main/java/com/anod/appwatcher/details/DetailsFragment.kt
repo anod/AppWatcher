@@ -22,7 +22,6 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.AppListTable
@@ -47,16 +46,11 @@ import com.google.android.material.color.MaterialColors
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.anim.RevealAnimatorCompat
 import info.anodsplace.framework.app.addMultiWindowFlags
-import info.anodsplace.framework.content.forAppInfo
-import info.anodsplace.framework.content.forUninstall
 import info.anodsplace.framework.content.startActivitySafely
-import info.anodsplace.graphics.chooseDark
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.math.abs
 
 
@@ -149,8 +143,7 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
                                 binding.header.icon.setImageBitmap(bitmap)
                                 binding.toolbar.logo = appIconState.drawable
                                 binding.toolbar.logo.alpha = 0
-                                val palette = withContext(Dispatchers.Default) { Palette.from(bitmap).generate() }
-                                onPaletteGenerated(palette)
+                                onPaletteGenerated(viewModel.viewState.accentColorRoles)
                             } catch (e: Exception) {
                                 AppLog.e("loadIcon", e)
                                 setDefaultIcon()
@@ -245,9 +238,15 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
                             TagSnackbar.make(view, info, false, requireActivity(), viewModel.prefs).show()
                         }
                     }
-                    is DetailsScreenAction.AuthTokenStartIntent -> {
-                        startActivitySafely(action.intent)
+                    is DetailsScreenAction.StartActivity -> {
+                        val intent = if (action.addMultiWindowFlags){
+                            action.intent.addMultiWindowFlags(requireContext())
+                        } else action.intent
+                        startActivitySafely(intent)
                     }
+
+                    DetailsScreenAction.Dismiss -> requireActivity().onBackPressed()
+                    DetailsScreenAction.Share -> shareApp()
                 }
             }
 
@@ -325,25 +324,21 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
                 return true
             }
             R.id.menu_uninstall -> {
-                val uninstallIntent = Intent().forUninstall(viewModel.appId)
-                startActivity(uninstallIntent)
+                viewModel.handleEvent(DetailsScreenEvent.Uninstall)
                 return true
             }
             R.id.menu_share -> {
-                shareApp()
+                viewModel.handleEvent(DetailsScreenEvent.Share)
                 return true
             }
             R.id.menu_open -> {
-                val launchIntent = requireContext().packageManager.getLaunchIntentForPackage(viewModel.appId)
-                if (launchIntent != null) {
-                    launchIntent.addMultiWindowFlags(requireContext())
-                    startActivitySafely(launchIntent)
-                }
+                viewModel.handleEvent(DetailsScreenEvent.Open)
             }
             R.id.menu_app_info -> {
-                startActivity(Intent().forAppInfo(viewModel.appId, requireContext()))
+                viewModel.handleEvent(DetailsScreenEvent.AppInfo)
             }
         }
+
         if (item.groupId == R.id.menu_group_tags) {
             viewModel.handleEvent(DetailsScreenEvent.UpdateTag(item.itemId, item.isChecked))
         }
@@ -364,13 +359,10 @@ class DetailsFragment : Fragment(), View.OnClickListener, AppBarLayout.OnOffsetC
         builder.startChooser()
     }
 
-    private fun onPaletteGenerated(palette: Palette?) {
+    private fun onPaletteGenerated(roles: ColorRoles?) {
         val context = context ?: return
         val defaultColor = ContextCompat.getColor(context, R.color.md_surface)
-        val darkSwatch = palette?.chooseDark(defaultColor) ?: Palette.Swatch(defaultColor, 0)
-        val colorRoles: ColorRoles = MaterialColors.getColorRoles(darkSwatch.rgb, false)
-
-        viewModel.handleEvent(DetailsScreenEvent.UpdateAccentColor(colorRoles))
+        val colorRoles: ColorRoles = roles ?: MaterialColors.getColorRoles(defaultColor, false)
 
         applyColor(colorRoles.accentContainer)
         animateBackground()

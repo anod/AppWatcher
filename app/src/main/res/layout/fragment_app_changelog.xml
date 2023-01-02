@@ -28,7 +28,7 @@
                 android:id="@+id/background"
                 android:layout_width="wrap_content"
                 android:layout_height="136dp"
-                tools:background="@color/chip_green"
+                tools:background="@color/material_blue_800"
                 app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed"
                 app:layout_collapseMode="parallax"
                 android:background="?attr/colorPrimary" />
