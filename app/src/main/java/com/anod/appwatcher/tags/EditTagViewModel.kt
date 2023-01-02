@@ -15,6 +15,7 @@ import org.koin.core.component.inject
 
 data class EditTagState(
     val tag: Tag,
+    val showPickColor: Boolean = false
 )
 
 sealed interface EditTagEvent {
@@ -22,6 +23,7 @@ sealed interface EditTagEvent {
     class SaveAndDismiss(val name: String) : EditTagEvent
     object Delete : EditTagEvent
     object Dismiss : EditTagEvent
+    class PickColor(val show: Boolean) : EditTagEvent
 }
 
 sealed interface EditTagAction {
@@ -56,6 +58,9 @@ class EditTagViewModel(tag: Tag) : BaseFlowViewModel<EditTagState, EditTagEvent,
                 viewState = viewState.copy(tag = Tag(viewState.tag.id, viewState.tag.name, event.color))
             }
             EditTagEvent.Dismiss -> emitAction(EditTagAction.Dismiss)
+            is EditTagEvent.PickColor -> {
+                viewState = viewState.copy(showPickColor = event.show)
+            }
         }
     }
 
