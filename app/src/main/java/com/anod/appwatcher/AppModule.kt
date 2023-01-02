@@ -60,7 +60,6 @@ fun createAppModule(): Module = module {
     single<LruCache<String, Any?>>(named("memoryCache")) { createLruCache() }
     single { CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate) }
     singleOf(::PackageChangedReceiver)
-    factory { get<Preferences>().account }
     singleOf(::AuthTokenBlocking)
     single {
         ImageLoader.Builder(get())

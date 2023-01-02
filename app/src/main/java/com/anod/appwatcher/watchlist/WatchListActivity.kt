@@ -22,7 +22,6 @@ import com.anod.appwatcher.compose.MainDetailScreen
 import com.anod.appwatcher.details.DetailsDialog
 import com.anod.appwatcher.installed.InstalledActivity
 import com.anod.appwatcher.tags.TagWatchListComposeActivity
-import com.anod.appwatcher.utils.account
 import com.anod.appwatcher.utils.forMyApps
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.wishlist.WishListActivity
@@ -128,6 +127,8 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
 
         if (prefs.account == null) {
             accountSelectionDialog.show()
+        } else {
+            mainViewModel.handleEvent(MainViewEvent.InitAccount(prefs.account!!))
         }
     }
 
@@ -175,7 +176,7 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
                     DrawerItem.Id.Installed -> startActivity(InstalledActivity.intent(false, this))
                     DrawerItem.Id.Refresh -> { }
                     DrawerItem.Id.Settings ->  startActivity( Intent(this, SettingsActivity::class.java))
-                    DrawerItem.Id.Wishlist -> startActivity(WishListActivity.intent(this, account, mainViewModel.authToken.token))
+                    DrawerItem.Id.Wishlist -> startActivity(WishListActivity.intent(this, prefs.account, mainViewModel.authToken.token))
                 }
             }
             is MainViewAction.NavigateToTag -> startActivity(TagWatchListComposeActivity.createTagIntent(action.tag, this))

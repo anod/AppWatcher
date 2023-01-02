@@ -1,6 +1,5 @@
 package com.anod.appwatcher.utils
 
-import android.accounts.Account
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.preferences.Preferences
 import info.anodsplace.framework.net.NetworkConnectivity
@@ -19,6 +18,3 @@ val KoinComponent.networkConnection: NetworkConnectivity
 
 val KoinComponent.appScope: CoroutineScope
     get() = get()
-
-val KoinComponent.account: Account?
-    get() = getKoin().getOrNull()

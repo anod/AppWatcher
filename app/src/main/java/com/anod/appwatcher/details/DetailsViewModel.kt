@@ -20,7 +20,6 @@ import com.anod.appwatcher.database.entities.packageToApp
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.BaseFlowViewModel
-import com.anod.appwatcher.utils.account
 import com.anod.appwatcher.utils.date.UploadDateParserCache
 import com.anod.appwatcher.utils.prefs
 import com.google.android.material.color.ColorRoles
@@ -203,7 +202,7 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
             AppLog.e("onResume", e)
         }
 
-        account?.let { account ->
+        prefs.account?.let { account ->
             viewModelScope.launch {
                 try {
                     if (authToken.refreshToken(account)) {

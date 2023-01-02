@@ -16,7 +16,6 @@ import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.upgrade.Upgrade15500
 import com.anod.appwatcher.upgrade.UpgradeCheck
 import com.anod.appwatcher.utils.BaseFlowViewModel
-import com.anod.appwatcher.utils.account
 import com.anod.appwatcher.utils.networkConnection
 import com.anod.appwatcher.utils.prefs
 import com.google.firebase.crashlytics.FirebaseCrashlytics
@@ -44,6 +43,7 @@ sealed interface MainViewEvent {
     class SetAccount(val result: AccountSelectionResult) : MainViewEvent
     class NavigateToTag(val tag: Tag) : MainViewEvent
     class NotificationPermissionResult(val enabled: Boolean) : MainViewEvent
+    class InitAccount(val account: Account) : MainViewEvent
 }
 
 sealed interface MainViewAction {
@@ -63,7 +63,7 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
 
     init {
         viewState = MainViewState(
-            account = account,
+            account = prefs.account,
             lastUpdate = prefs.lastUpdateTime
         )
 
@@ -100,6 +100,7 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
             is MainViewEvent.NavigateToTag -> emitAction(MainViewAction.NavigateToTag(tag = event.tag))
             MainViewEvent.ChooseAccount -> emitAction(MainViewAction.ChooseAccount)
             is MainViewEvent.NotificationPermissionResult -> onNotificationResult(event.enabled)
+            is MainViewEvent.InitAccount -> onAccountSelect(event.account)
         }
     }
 
