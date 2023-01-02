@@ -1,14 +1,17 @@
 package com.anod.appwatcher.tags
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -44,6 +47,7 @@ import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.database.entities.Tag
 import info.anodsplace.compose.ButtonsPanel
 import info.anodsplace.compose.ColorDialogContent
+import info.anodsplace.compose.ColorInput
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -70,40 +74,21 @@ fun EditTagDialog(tag: Tag, onDismissRequest: () -> Unit) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
-private fun EditTagScreen(screenState: EditTagState, onEvent: (EditTagEvent) -> Unit) {
-    var tagName by remember { mutableStateOf(screenState.tag.name) }
-    var isError by remember { mutableStateOf(false) }
-    var pickColor: Color? by remember { mutableStateOf(null) }
+private fun EditTagScreen(screenState: EditTagState, onEvent: (EditTagEvent) -> Unit, initialPickColor: Color? = null) {
+    var pickColor: Color? by remember { mutableStateOf(initialPickColor) }
     Surface(
         modifier = Modifier.padding(horizontal = 32.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .animateContentSize()
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                ColorIcon(
-                    color = Color(screenState.tag.color),
-                    onClick = { pickColor = it}
-                )
-                TextField(
-                    modifier = Modifier.padding(start = 8.dp),
-                    value = tagName,
-                    onValueChange = { tagName = it },
-                    label = { Text(text = stringResource(id = R.string.tag_name)) },
-                    isError = isError
-                )
-            }
-           AnimatedVisibility(visible = pickColor != null) {
-                ColorDialogContent(
-                    color = pickColor,
+            if (pickColor != null) {
+                ColorChooser(
+                    color = pickColor!!,
                     onColorChange = {
                         if (it != null) {
                             onEvent(EditTagEvent.UpdateColor(it.toArgb()))
@@ -111,30 +96,87 @@ private fun EditTagScreen(screenState: EditTagState, onEvent: (EditTagEvent) -> 
                         pickColor = null
                     }
                 )
+            } else {
+                EditTagContent(
+                    screenState = screenState,
+                    onEvent = onEvent,
+                    onPickColor = { pickColor = it }
+                )
             }
-            ButtonsPanel(
-                actionText = stringResource(id = R.string.save),
-                onDismissRequest = { onEvent(EditTagEvent.Dismiss) },
-                onAction = {
-                    if (tagName.isEmpty()) {
-                        isError = true
-                    } else {
-                        isError = false
-                        onEvent(EditTagEvent.SaveAndDismiss(name = tagName))
-                    }
-                },
-                leadingContent = {
-                    FilledIconButton(
-                        onClick = { onEvent(EditTagEvent.Delete) },
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = stringResource(id = R.string.delete)
-                        )
-                    }
-                }
+        }
+    }
+}
+
+@Composable
+private fun ColorChooser(color: Color, onColorChange: (Color?) -> Unit) {
+    Column(modifier = Modifier.width(240.dp)) {
+        Row {
+            ColorIcon(
+                color = color,
+                onClick = {  }
+            )
+            Spacer(modifier = Modifier.weight(1.0f))
+            ColorInput(
+                color = color,
+                onColorChange = {}
             )
         }
+        ColorDialogContent(
+            color = color,
+            onColorChange = onColorChange,
+            showNone = false
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun EditTagContent(screenState: EditTagState, onEvent: (EditTagEvent) -> Unit, onPickColor: (Color) -> Unit) {
+    var tagName by remember { mutableStateOf(screenState.tag.name) }
+    var isError by remember { mutableStateOf(false) }
+
+    Column {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ColorIcon(
+                color = Color(screenState.tag.color),
+                onClick = { onPickColor(it) }
+            )
+            TextField(
+                modifier = Modifier.padding(start = 8.dp),
+                value = tagName,
+                onValueChange = { tagName = it },
+                label = { Text(text = stringResource(id = R.string.tag_name)) },
+                isError = isError
+            )
+        }
+
+        ButtonsPanel(
+            actionText = stringResource(id = R.string.save),
+            onDismissRequest = { onEvent(EditTagEvent.Dismiss) },
+            onAction = {
+                if (tagName.isEmpty()) {
+                    isError = true
+                } else {
+                    isError = false
+                    onEvent(EditTagEvent.SaveAndDismiss(name = tagName))
+                }
+            },
+            leadingContent = {
+                FilledIconButton(
+                    onClick = { onEvent(EditTagEvent.Delete) },
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = stringResource(id = R.string.delete)
+                    )
+                }
+            }
+        )
     }
 }
 
@@ -163,7 +205,21 @@ private fun EditTagScreenPreview() {
     AppTheme {
         EditTagScreen(
             screenState = EditTagState(tag),
-            onEvent = { }
+            onEvent = { },
+            initialPickColor = null
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun EditTagScreenColorPreview() {
+    val tag = Tag("Banana")
+    AppTheme {
+        EditTagScreen(
+            screenState = EditTagState(tag),
+            onEvent = { },
+            initialPickColor = Color.Red
         )
     }
 }
