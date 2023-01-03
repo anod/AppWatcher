@@ -11,6 +11,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.palette.graphics.Palette
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
+import com.anod.appwatcher.compose.CommonActivityAction
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppTagsTable
 import com.anod.appwatcher.database.AppsDatabase
@@ -87,10 +88,19 @@ data class DetailsScreenState(
 )
 
 sealed interface DetailsScreenAction {
+    class ActivityAction(val action: CommonActivityAction) : DetailsScreenAction
     object Dismiss : DetailsScreenAction
     object Share : DetailsScreenAction
     class WatchAppResult(val result: Int) : DetailsScreenAction
-    class StartActivity(val intent: Intent, val addMultiWindowFlags: Boolean = false) : DetailsScreenAction
+}
+
+private fun startActivityAction(intent: Intent, addMultiWindowFlags: Boolean = false) : DetailsScreenAction.ActivityAction {
+    return DetailsScreenAction.ActivityAction(
+        action = CommonActivityAction.StartActivity(
+            intent = intent,
+            addMultiWindowFlags = addMultiWindowFlags
+        )
+    )
 }
 
 sealed interface DetailsScreenEvent {
@@ -113,6 +123,7 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
             private val argRowId: Int,
             private val argDetailsUrl: String
     ) : ViewModelProvider.Factory {
+        @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             return DetailsViewModel(argAppId, argRowId, argDetailsUrl) as T
         }
@@ -210,7 +221,7 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
             }
 
             DetailsScreenEvent.AppInfo ->
-                emitAction(DetailsScreenAction.StartActivity(
+                emitAction(startActivityAction(
                     intent = Intent().forAppInfo(viewState.appId),
                     addMultiWindowFlags = true
                 ))
@@ -218,15 +229,15 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
             DetailsScreenEvent.Open -> {
                 val launchIntent = packageManager.getLaunchIntentForPackage(viewState.appId)
                 if (launchIntent != null) {
-                    emitAction(DetailsScreenAction.StartActivity(intent = launchIntent, addMultiWindowFlags = true))
+                    emitAction(startActivityAction(intent = launchIntent, addMultiWindowFlags = true))
                 }
             }
             DetailsScreenEvent.Share -> emitAction(DetailsScreenAction.Share)
-            DetailsScreenEvent.Uninstall -> emitAction(DetailsScreenAction.StartActivity(
+            DetailsScreenEvent.Uninstall -> emitAction(startActivityAction(
                 intent = Intent().forUninstall(viewState.appId)
             ))
 
-            DetailsScreenEvent.PlayStore ->  emitAction(DetailsScreenAction.StartActivity(
+            DetailsScreenEvent.PlayStore ->  emitAction(startActivityAction(
                 intent = Intent().forPlayStore(viewState.appId),
                 addMultiWindowFlags = true
             ))
@@ -250,7 +261,7 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
                         loadRemoteChangelog()
                     }
                 } catch (e: AuthTokenStartIntent) {
-                    emitAction(DetailsScreenAction.StartActivity(e.intent, true))
+                    emitAction(startActivityAction(e.intent, addMultiWindowFlags = true))
                 } catch (e: Exception) {
                     AppLog.e("onResume", e)
                 }

@@ -1,6 +1,5 @@
 package com.anod.appwatcher.watchlist
 
-import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -18,15 +17,13 @@ import com.anod.appwatcher.accounts.AccountSelectionDialog
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.compose.MainDetailScreen
+import com.anod.appwatcher.compose.onCommonActivityAction
 import com.anod.appwatcher.details.DetailsDialog
 import com.anod.appwatcher.installed.InstalledActivity
 import com.anod.appwatcher.tags.TagWatchListComposeActivity
-import com.anod.appwatcher.utils.forMyApps
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.wishlist.WishListActivity
 import info.anodsplace.applog.AppLog
-import info.anodsplace.framework.app.addMultiWindowFlags
-import info.anodsplace.framework.content.startActivitySafely
 import info.anodsplace.permissions.AppPermission
 import info.anodsplace.permissions.AppPermissions
 import info.anodsplace.permissions.toRequestInput
@@ -102,16 +99,20 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
                         onListEvent = { listViewModel.handleEvent(it) }
                     )
                     if (listState.selectedApp != null) {
-                        DetailsDialog(appId = listState.selectedApp!!.appId, rowId = listState.selectedApp!!.rowId, detailsUrl = listState.selectedApp!!.detailsUrl ?: "") {
-                            listViewModel.handleEvent(WatchListSharedStateEvent.SelectApp(app = null))
-                        }
+                        DetailsDialog(
+                            appId = listState.selectedApp!!.appId,
+                            rowId = listState.selectedApp!!.rowId,
+                            detailsUrl = listState.selectedApp!!.detailsUrl ?: "",
+                            onDismissRequest = { listViewModel.handleEvent(WatchListSharedStateEvent.SelectApp(app = null)) },
+                            onCommonActivityAction = { onCommonActivityAction(it) }
+                        )
                     }
                 }
             }
         }
 
         lifecycleScope.launch {
-            listViewModel.viewActions.collect { onListAction(it) }
+            listViewModel.viewActions.collect { onCommonActivityAction(it) }
         }
 
         lifecycleScope.launch {
@@ -131,6 +132,7 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
         }
 
         if (prefs.account == null) {
+            Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
             accountSelectionDialog.show()
         } else {
             mainViewModel.handleEvent(MainViewEvent.InitAccount(prefs.account!!))
@@ -142,28 +144,6 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
 
         AppLog.d("mark updates as viewed.")
         prefs.isLastUpdatesViewed = true
-    }
-
-    private fun onListAction(action: WatchListSharedStateAction) {
-        when (action) {
-            WatchListSharedStateAction.OnBackPressed -> onBackPressed()
-            is WatchListSharedStateAction.SearchInStore -> startActivity(MarketSearchActivity.intent(this, "", true))
-            is WatchListSharedStateAction.Installed -> startActivity(InstalledActivity.intent(action.importMode, this))
-            is WatchListSharedStateAction.ShareFromStore -> startActivitySafely(Intent.makeMainActivity(
-                ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity")
-            ))
-            is WatchListSharedStateAction.OnSearch -> startActivity(MarketSearchActivity.intent(this, action.query, true))
-            WatchListSharedStateAction.Dismiss -> finish()
-            WatchListSharedStateAction.PlayStoreMyApps -> startActivitySafely(Intent().forMyApps(true).addMultiWindowFlags(this))
-            WatchListSharedStateAction.ShowAccountsDialog -> showAccountsDialogWithCheck()
-            is WatchListSharedStateAction.ShowToast -> {
-                if (action.resId == 0) {
-                    Toast.makeText(this, action.text, action.length).show()
-                } else {
-                    Toast.makeText(this, action.resId, action.length).show()
-                }
-            }
-        }
     }
 
     private fun onMainAction(action: MainViewAction) {
@@ -179,21 +159,9 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
             }
             is MainViewAction.NavigateToTag -> startActivity(TagWatchListComposeActivity.createTagIntent(action.tag, this))
             MainViewAction.RequestNotificationPermission -> notificationPermissionRequest.launch(AppPermission.PostNotification.toRequestInput())
-            is MainViewAction.ShowToast -> {
-                if (action.resId == 0) {
-                    Toast.makeText(this, action.text, action.length).show()
-                } else {
-                    Toast.makeText(this, action.resId, action.length).show()
-                }
-            }
-            is MainViewAction.StartActivity -> startActivitySafely(action.intent)
             MainViewAction.ChooseAccount -> accountSelectionDialog.show()
+            is MainViewAction.ActivityAction -> onCommonActivityAction(action.action)
         }
-    }
-
-    private fun showAccountsDialogWithCheck() {
-        Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
-        accountSelectionDialog.show()
     }
 
     override fun onBackPressed() {

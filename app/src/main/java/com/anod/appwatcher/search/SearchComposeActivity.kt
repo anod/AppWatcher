@@ -11,7 +11,7 @@ import com.anod.appwatcher.accounts.AccountSelectionDialog
 import com.anod.appwatcher.accounts.AccountSelectionResult
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
-import com.anod.appwatcher.tags.TagsListFragment
+import com.anod.appwatcher.compose.onCommonActivityAction
 
 open class SearchComposeActivity : BaseComposeActivity() {
     val viewModel: SearchViewModel by viewModels(factoryProducer = { SearchViewModel.Factory(intentToState(intent)) })
@@ -35,7 +35,7 @@ open class SearchComposeActivity : BaseComposeActivity() {
                     installedApps = viewModel.installedApps,
                     pagingDataFlow = { viewModel.pagingData },
                     viewActions = viewModel.viewActions,
-                    onActivityAction = { onActivityAction(it) }
+                    onActivityAction = { onCommonActivityAction(it) }
                 )
             }
         }
@@ -53,26 +53,6 @@ open class SearchComposeActivity : BaseComposeActivity() {
         lifecycleScope.launchWhenCreated {
             hingeDevice.layout.collect {
                 viewModel.handleEvent(SearchViewEvent.SetWideLayout(it))
-            }
-        }
-    }
-
-    private fun onActivityAction(action: SearchActivityAction) {
-        when (action) {
-            SearchActivityAction.ShowAccountDialog -> accountSelectionDialog.show()
-            is SearchActivityAction.StartActivity -> {
-                startActivity(action.intent)
-                if (action.finish) {
-                    finish()
-                }
-            }
-            SearchActivityAction.OnBackPressed -> onBackPressed()
-            SearchActivityAction.FinishActivity -> finish()
-            is SearchActivityAction.ShowTagList -> {
-                startActivity(TagsListFragment.intent(this, viewModel.prefs, action.info))
-                if (action.finish) {
-                    finish()
-                }
             }
         }
     }

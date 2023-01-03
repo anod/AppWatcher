@@ -11,6 +11,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.filter
+import com.anod.appwatcher.compose.CommonActivityAction
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.model.AppInfo
@@ -38,11 +39,6 @@ data class WishListState(
         val nameFilter: String = "",
         val watchingPackages: List<String> = emptyList(),
 )
-
-sealed interface WishListActivityAction {
-    class ShowTagList(val info: AppInfo) : WishListActivityAction
-    object OnBackPress : WishListActivityAction
-}
 
 sealed interface WishListAction {
     class ShowTagSnackbar(val info: AppInfo) : WishListAction

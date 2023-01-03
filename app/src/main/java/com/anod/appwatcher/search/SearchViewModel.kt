@@ -17,6 +17,7 @@ import androidx.paging.filter
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
+import com.anod.appwatcher.compose.CommonActivityAction
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.model.AppInfo
@@ -58,14 +59,21 @@ sealed interface SearchActivityAction {
 }
 
 sealed interface SearchViewAction {
-    class StartActivity(val intent: Intent, val finish: Boolean) : SearchViewAction
-    class ShowToast(val message: String, val duration: SnackbarDuration = SnackbarDuration.Short, val finish: Boolean = false) : SearchViewAction
+    class ActivityAction(val action: CommonActivityAction) : SearchViewAction
+    class ShowSnackbar(val message: String, val duration: SnackbarDuration = SnackbarDuration.Short, val finish: Boolean = false) : SearchViewAction
     object ShowAccountDialog : SearchViewAction
     class ShowTagSnackbar(val info: AppInfo, val isShareSource: Boolean) : SearchViewAction
     class AlreadyWatchedNotice(val document: Document) : SearchViewAction
-    object OnBackPressed : SearchViewAction
 }
 
+private fun startActivityAction(intent: Intent, finish: Boolean = false) : SearchViewAction.ActivityAction {
+    return SearchViewAction.ActivityAction(
+        action = CommonActivityAction.StartActivity(
+            intent = intent,
+            finish = finish
+        )
+    )
+}
 
 sealed interface SearchViewEvent {
     object NoAccount : SearchViewEvent
@@ -151,19 +159,19 @@ class SearchViewModel(
             is SearchViewEvent.OnSearchEnter -> onSearchRequest(event.query)
             is SearchViewEvent.AccountSelectError -> onAccountSelectError(event.errorMessage)
             is SearchViewEvent.AccountSelected -> onAccountSelected(event.account)
-            SearchViewEvent.OnBackPressed -> emitAction(SearchViewAction.OnBackPressed)
+            SearchViewEvent.OnBackPressed -> emitAction(SearchViewAction.ActivityAction(CommonActivityAction.OnBackPressed))
         }
     }
 
     private fun onAccountSelectError(errorMessage: String) {
         if (networkConnection.isNetworkAvailable) {
             if (errorMessage.isNotBlank()) {
-                emitAction(SearchViewAction.ShowToast(message = errorMessage, duration = SnackbarDuration.Short, finish = true))
+                emitAction(SearchViewAction.ShowSnackbar(message = errorMessage, duration = SnackbarDuration.Short, finish = true))
             } else {
-                emitAction(SearchViewAction.ShowToast(message = context.getString(R.string.failed_gain_access), duration = SnackbarDuration.Long, finish = true))
+                emitAction(SearchViewAction.ShowSnackbar(message = context.getString(R.string.failed_gain_access), duration = SnackbarDuration.Long, finish = true))
             }
         } else {
-            emitAction(SearchViewAction.ShowToast(message = context.getString(R.string.check_connection), duration = SnackbarDuration.Short, finish = true))
+            emitAction(SearchViewAction.ShowSnackbar(message = context.getString(R.string.check_connection), duration = SnackbarDuration.Short, finish = true))
         }
     }
 
@@ -173,9 +181,9 @@ class SearchViewModel(
             search(query).collect { searchStatus ->
                 viewState = viewState.copy(searchQuery = query, searchStatus = searchStatus)
                 if (searchStatus is SearchStatus.NoNetwork) {
-                    emitAction(SearchViewAction.ShowToast(message = context.getString(R.string.check_connection), duration = SnackbarDuration.Short, finish = true))
+                    emitAction(SearchViewAction.ShowSnackbar(message = context.getString(R.string.check_connection), duration = SnackbarDuration.Short, finish = true))
                 } else if (searchStatus is SearchStatus.Error) {
-                    emitAction(SearchViewAction.ShowToast(message = context.getString(R.string.error_fetching_info), duration = SnackbarDuration.Short, finish = true))
+                    emitAction(SearchViewAction.ShowSnackbar(message = context.getString(R.string.error_fetching_info), duration = SnackbarDuration.Short, finish = true))
                 }
             }
         }
@@ -252,13 +260,13 @@ class SearchViewModel(
             try {
                 if (!authToken.refreshToken(account)) {
                     if (networkConnection.isNetworkAvailable) {
-                        emitAction(SearchViewAction.ShowToast(message = context.getString(R.string.failed_gain_access), duration = SnackbarDuration.Long, finish = true))
+                        emitAction(SearchViewAction.ShowSnackbar(message = context.getString(R.string.failed_gain_access), duration = SnackbarDuration.Long, finish = true))
                     } else {
-                        emitAction(SearchViewAction.ShowToast(message = context.getString(R.string.check_connection), duration = SnackbarDuration.Short, finish = true))
+                        emitAction(SearchViewAction.ShowSnackbar(message = context.getString(R.string.check_connection), duration = SnackbarDuration.Short, finish = true))
                     }
                 }
             } catch (e: AuthTokenStartIntent) {
-                emitAction(SearchViewAction.StartActivity(intent = e.intent, finish = true))
+                emitAction(startActivityAction(intent = e.intent, finish = true))
             }
         }
     }

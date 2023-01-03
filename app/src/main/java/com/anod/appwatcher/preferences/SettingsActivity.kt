@@ -3,7 +3,6 @@ package com.anod.appwatcher.preferences
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -18,10 +17,10 @@ import com.anod.appwatcher.backup.ExportBackupTask
 import com.anod.appwatcher.backup.ImportBackupTask
 import com.anod.appwatcher.backup.gdrive.GDriveSignIn
 import com.anod.appwatcher.compose.BaseComposeActivity
+import com.anod.appwatcher.compose.onCommonActivityAction
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.jakewharton.processphoenix.ProcessPhoenix
 import info.anodsplace.applog.AppLog
-import info.anodsplace.framework.app.addMultiWindowFlags
 import info.anodsplace.permissions.AppPermission
 import info.anodsplace.permissions.AppPermissions
 import info.anodsplace.permissions.toRequestInput
@@ -72,7 +71,6 @@ open class SettingsActivity : BaseComposeActivity(), GDriveSignIn.Listener {
 
     private fun handleUiAction(action: SettingsViewAction) {
         when (action) {
-            SettingsViewAction.OnBackNav -> finish()
             is SettingsViewAction.ExportResult -> onExportResult(action.result)
             is SettingsViewAction.ImportResult -> onImportResult(action.result)
             SettingsViewAction.GDriveSignIn -> gDriveSignIn.signIn()
@@ -88,20 +86,8 @@ open class SettingsActivity : BaseComposeActivity(), GDriveSignIn.Listener {
             SettingsViewAction.Rebirth -> {
                 ProcessPhoenix.triggerRebirth(applicationContext, Intent(applicationContext, AppWatcherActivity::class.java))
             }
-            is SettingsViewAction.ShowToast -> {
-                if (action.resId == 0) {
-                    Toast.makeText(this@SettingsActivity, action.text, action.length).show()
-                } else {
-                    Toast.makeText(this@SettingsActivity, action.resId, action.length).show()
-                }
-            }
-            is SettingsViewAction.StartActivity -> {
-                if (action.addMultiWindowFlags)
-                    startActivity(action.intent.addMultiWindowFlags(this))
-                else
-                    startActivity(action.intent)
-            }
             SettingsViewAction.RequestNotificationPermission -> notificationPermissionRequest.launch(AppPermission.PostNotification.toRequestInput())
+            is SettingsViewAction.ActivityAction -> onCommonActivityAction(action = action.action)
         }
     }
 

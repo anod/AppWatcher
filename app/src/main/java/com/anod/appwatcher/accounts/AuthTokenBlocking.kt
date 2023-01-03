@@ -9,7 +9,6 @@ import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.util.concurrent.TimeUnit
@@ -28,7 +27,6 @@ class AuthTokenBlocking(context: ApplicationContext) {
         get() = token.isNotEmpty() && lastUpdated > 0 && (System.currentTimeMillis() - lastUpdated) < expiration
 
     val tokenState = MutableStateFlow("")
-    val tokenAvailable = tokenState.filter { it.isNotEmpty() }
     val token: String
         get() = tokenState.value
 

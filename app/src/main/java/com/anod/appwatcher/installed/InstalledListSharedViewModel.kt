@@ -1,7 +1,6 @@
 package com.anod.appwatcher.installed
 
 import android.accounts.Account
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Rect
 import androidx.core.os.bundleOf
@@ -9,6 +8,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
+import com.anod.appwatcher.compose.CommonActivityAction
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.PackageChangedReceiver
@@ -49,12 +49,7 @@ sealed interface InstalledListSharedEvent {
     object Import : InstalledListSharedEvent
 }
 
-sealed interface InstalledListSharedAction {
-    object OnBackPressed : InstalledListSharedAction
-    class StartActivity(val intent: Intent) : InstalledListSharedAction
-}
-
-class InstalledListSharedViewModel(state: SavedStateHandle) : BaseFlowViewModel<InstalledListSharedState, InstalledListSharedEvent, InstalledListSharedAction>(), KoinComponent {
+class InstalledListSharedViewModel(state: SavedStateHandle) : BaseFlowViewModel<InstalledListSharedState, InstalledListSharedEvent, CommonActivityAction>(), KoinComponent {
     private val importManager: ImportBulkManager by inject()
     private val packageManager: PackageManager by inject()
     private val packageChanged: PackageChangedReceiver by inject()
@@ -85,7 +80,7 @@ class InstalledListSharedViewModel(state: SavedStateHandle) : BaseFlowViewModel<
                 viewState = viewState.copy(sortId = event.sortId)
             }
             is InstalledListSharedEvent.FilterByTitle -> viewState = viewState.copy(titleFilter = event.query)
-            InstalledListSharedEvent.OnBackPressed -> emitAction(InstalledListSharedAction.OnBackPressed)
+            InstalledListSharedEvent.OnBackPressed -> emitAction(CommonActivityAction.OnBackPressed)
             is InstalledListSharedEvent.SwitchImportMode -> {
                 switchImportMode(event.selectionMode)
             }
@@ -143,7 +138,7 @@ class InstalledListSharedViewModel(state: SavedStateHandle) : BaseFlowViewModel<
                     AppLog.e("Error retrieving token")
                 }
             } catch (e: AuthTokenStartIntent) {
-                emitAction(InstalledListSharedAction.StartActivity(e.intent))
+                emitAction(CommonActivityAction.StartActivity(e.intent))
             } catch (e: Exception) {
                 AppLog.e("onResume", e)
             }

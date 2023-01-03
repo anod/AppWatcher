@@ -28,6 +28,8 @@ import androidx.compose.ui.unit.dp
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
+import com.anod.appwatcher.compose.CommonActivityAction
+import com.anod.appwatcher.compose.onCommonActivityAction
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.Failed
 import com.anod.appwatcher.database.entities.New
@@ -59,7 +61,7 @@ class SchedulesHistoryActivity : BaseComposeActivity(), KoinComponent {
             SchedulesHistoryScreen(
                 schedules = schedules,
                 dateFormat = dateFormat,
-                onBack = { finish() }
+                onActivityAction = { onCommonActivityAction(it) }
             )
         }
     }
@@ -67,14 +69,14 @@ class SchedulesHistoryActivity : BaseComposeActivity(), KoinComponent {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SchedulesHistoryScreen(schedules: List<Schedule>, dateFormat: DateFormat, onBack: () -> Unit) {
+fun SchedulesHistoryScreen(schedules: List<Schedule>, dateFormat: DateFormat, onActivityAction: (CommonActivityAction) -> Unit) {
     AppTheme {
         Surface {
             Column(modifier = Modifier.fillMaxWidth()) {
                 TopAppBar(
                     title = { Text(text = stringResource(id = R.string.refresh_history)) },
                     navigationIcon = {
-                        IconButton(onClick = onBack) {
+                        IconButton(onClick = { onActivityAction(CommonActivityAction.Finish) }) {
                             Icon(
                                 imageVector = Icons.Default.ArrowBack,
                                 contentDescription = stringResource(id = R.string.back)

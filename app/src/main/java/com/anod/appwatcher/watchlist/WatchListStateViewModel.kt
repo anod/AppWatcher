@@ -1,25 +1,29 @@
 package com.anod.appwatcher.watchlist
 
 import android.app.Application
+import android.content.ComponentName
+import android.content.Intent
 import android.graphics.Rect
 import android.widget.Toast
-import androidx.annotation.StringRes
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.work.Operation
+import com.anod.appwatcher.MarketSearchActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenBlocking
+import com.anod.appwatcher.compose.CommonActivityAction
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.installed.InstalledActivity
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.tags.AppsTagViewModel
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.SyncProgress
 import com.anod.appwatcher.utils.appScope
+import com.anod.appwatcher.utils.forMyApps
 import com.anod.appwatcher.utils.getInt
 import com.anod.appwatcher.utils.networkConnection
 import com.anod.appwatcher.utils.prefs
@@ -28,10 +32,9 @@ import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.HingeDeviceLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -70,19 +73,22 @@ sealed interface WatchListSharedStateEvent {
     class UpdateSyncProgress(val syncProgress: SyncProgress) : WatchListSharedStateEvent
 }
 
-sealed interface WatchListSharedStateAction {
-    object OnBackPressed : WatchListSharedStateAction
-    object SearchInStore : WatchListSharedStateAction
-    class Installed(val importMode: Boolean) : WatchListSharedStateAction
-    object ShareFromStore : WatchListSharedStateAction
-    object Dismiss : WatchListSharedStateAction
-    object PlayStoreMyApps : WatchListSharedStateAction
-    object ShowAccountsDialog : WatchListSharedStateAction
-    class OnSearch(val query: String) : WatchListSharedStateAction
-    class ShowToast(@StringRes val resId: Int = 0, val text: String = "", val length: Int = Toast.LENGTH_SHORT) : WatchListSharedStateAction
+private fun startActivityAction(intent: Intent, addMultiWindowFlags: Boolean = false) : CommonActivityAction.StartActivity {
+    return CommonActivityAction.StartActivity(
+        intent = intent,
+        addMultiWindowFlags = addMultiWindowFlags
+    )
 }
 
-class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wideLayout: HingeDeviceLayout) : BaseFlowViewModel<WatchListSharedState, WatchListSharedStateEvent, WatchListSharedStateAction>(), KoinComponent {
+private fun showToastAction(resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT) : CommonActivityAction.ShowToast {
+    return CommonActivityAction.ShowToast(
+        resId = resId,
+        text = text,
+        length = length
+    )
+}
+
+class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wideLayout: HingeDeviceLayout) : BaseFlowViewModel<WatchListSharedState, WatchListSharedStateEvent, CommonActivityAction>(), KoinComponent {
     private val authToken: AuthTokenBlocking by inject()
     private val application: Application by inject()
     private val db: AppsDatabase by inject()
@@ -129,7 +135,7 @@ class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wid
                         .observeTag(viewState.tag.id)
                         .collect { tag ->
                             if (tag == null) {
-                                emitAction(WatchListSharedStateAction.Dismiss)
+                                emitAction(CommonActivityAction.Finish)
                             } else {
                                 viewState = viewState.copy(tag = tag)
                             }
@@ -179,36 +185,33 @@ class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wid
                 if (viewState.wideLayout.isWideLayout && viewState.selectedApp != null) {
                     viewState = viewState.copy(selectedApp = null)
                 } else {
-                    emitAction(WatchListSharedStateAction.OnBackPressed)
+                    emitAction(CommonActivityAction.OnBackPressed)
                 }
             }
             is WatchListSharedStateEvent.FilterById -> {
                 viewState = viewState.copy(filterId = event.filterId)
             }
             is WatchListSharedStateEvent.EditTag -> viewState = viewState.copy(showEditTagDialog = event.show)
-            is WatchListSharedStateEvent.OnSearch -> emitAction(WatchListSharedStateAction.OnSearch(event.query))
+            is WatchListSharedStateEvent.OnSearch -> emitAction(startActivityAction(
+                intent = MarketSearchActivity.intent(application, event.query, true)
+            ))
             is WatchListSharedStateEvent.SelectApp -> {
                 viewState = viewState.copy(selectedApp = event.app)
             }
             is WatchListSharedStateEvent.UpdateSyncProgress -> {
                 viewState = viewState.copy(syncProgress = event.syncProgress)
                 if (event.syncProgress.isRefreshing) {
-                    emitAction(WatchListSharedStateAction.ShowToast(
-                        resId = R.string.refresh_scheduled,
-                        length = Toast.LENGTH_SHORT
-                    ))
+                    emitAction(showToastAction(resId = R.string.refresh_scheduled))
                 } else {
                     if (event.syncProgress.updatesCount == 0) {
-                        emitAction(
-                            WatchListSharedStateAction.ShowToast(
-                                resId = R.string.no_updates_found,
-                                length = Toast.LENGTH_SHORT
-                            )
-                        )
+                        emitAction(showToastAction(resId = R.string.no_updates_found))
                     }
                 }
             }
-            WatchListSharedStateEvent.PlayStoreMyApps -> emitAction(WatchListSharedStateAction.PlayStoreMyApps)
+            WatchListSharedStateEvent.PlayStoreMyApps -> emitAction(startActivityAction(
+                intent = Intent().forMyApps(true),
+                addMultiWindowFlags = true
+            ))
             WatchListSharedStateEvent.Refresh -> refresh()
         }
     }
@@ -220,9 +223,15 @@ class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wid
             }
             is WatchListEvent.EmptyButton -> {
                 when (listEvent.idx) {
-                    1 -> emitAction(WatchListSharedStateAction.SearchInStore)
-                    2 -> emitAction(WatchListSharedStateAction.Installed(importMode = true))
-                    3 -> emitAction(WatchListSharedStateAction.ShareFromStore)
+                    1 -> emitAction(startActivityAction(
+                        intent = MarketSearchActivity.intent(application, "", true)
+                    ))
+                    2 -> emitAction(startActivityAction(
+                        intent = InstalledActivity.intent(importMode = true, application)
+                    ))
+                    3 -> emitAction(startActivityAction(
+                        intent = Intent.makeMainActivity(ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity"))
+                    ))
                 }
             }
             WatchListEvent.Refresh -> refresh()
@@ -230,7 +239,9 @@ class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wid
             is WatchListEvent.AppLongClick -> {}
             is WatchListEvent.SectionHeaderClick -> {
                 when (listEvent.type) {
-                    SectionHeader.RecentlyInstalled -> emitAction(WatchListSharedStateAction.Installed(importMode = false))
+                    SectionHeader.RecentlyInstalled -> emitAction(startActivityAction(
+                        intent = InstalledActivity.intent(importMode = false, application)
+                    ))
                     else -> { }
                 }
             }
@@ -240,29 +251,35 @@ class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wid
     private fun refresh() {
         val isRefreshing = viewState.syncProgress?.isRefreshing == true
         if (!isRefreshing) {
-            val schedule = requestRefresh()
             appScope.launch {
-                schedule.collect { }
+                try {
+                    requestRefresh()
+                } catch (e: Exception) {
+                    if (networkConnection.isNetworkAvailable) {
+                        emitAction(CommonActivityAction.ShowToast(
+                            resId = R.string.failed_gain_access,
+                            length = Toast.LENGTH_SHORT
+                        ))
+                    } else {
+                        emitAction(CommonActivityAction.ShowToast(
+                            resId = R.string.check_connection,
+                            length = Toast.LENGTH_SHORT
+                        ))
+                    }
+                    viewState = viewState.copy(syncProgress = null)
+                }
             }
         }
     }
 
-    private fun requestRefresh(): Flow<Operation.State> {
+    private suspend fun requestRefresh() {
         AppLog.d("Refresh requested")
         if (!authToken.isFresh) {
-            if (networkConnection.isNetworkAvailable) {
-                emitAction(WatchListSharedStateAction.ShowAccountsDialog)
-            } else {
-                emitAction(WatchListSharedStateAction.ShowToast(
-                    resId = R.string.check_connection,
-                    length = Toast.LENGTH_SHORT
-                ))
-            }
-            viewState = viewState.copy(syncProgress = null)
-            return flowOf()
+            val account = prefs.account ?: throw IllegalStateException("account is null")
+            authToken.refreshToken(account)
         }
 
         viewState = viewState.copy(syncProgress = SyncProgress(true, 0))
-        return SyncScheduler(application).execute()
+        SyncScheduler(application).execute().first()
     }
 }

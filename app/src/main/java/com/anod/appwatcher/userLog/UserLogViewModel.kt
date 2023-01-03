@@ -1,6 +1,7 @@
 package com.anod.appwatcher.userLog
 
 import android.content.Intent
+import com.anod.appwatcher.compose.CommonActivityAction
 import com.anod.appwatcher.utils.BaseFlowViewModel
 
 data class UserLogState(
@@ -12,12 +13,7 @@ sealed interface UserLogEvent {
     object Share : UserLogEvent
 }
 
-sealed interface UserLogAction {
-    class StartActivity(val intent: Intent) : UserLogAction
-    object OnBackNav : UserLogAction
-}
-
-class UserLogViewModel : BaseFlowViewModel<UserLogState, UserLogEvent, UserLogAction>() {
+class UserLogViewModel : BaseFlowViewModel<UserLogState, UserLogEvent, CommonActivityAction>() {
     private val userLogger = UserLogger()
 
     init {
@@ -28,8 +24,8 @@ class UserLogViewModel : BaseFlowViewModel<UserLogState, UserLogEvent, UserLogAc
 
     override fun handleEvent(event: UserLogEvent) {
         when (event) {
-            UserLogEvent.OnBackNav -> emitAction(UserLogAction.OnBackNav)
-            UserLogEvent.Share -> emitAction(UserLogAction.StartActivity(intent = Intent().apply {
+            UserLogEvent.OnBackNav -> emitAction(CommonActivityAction.OnBackPressed)
+            UserLogEvent.Share -> emitAction(CommonActivityAction.StartActivity(intent = Intent().apply {
                 action = Intent.ACTION_SEND
                 putExtra(Intent.EXTRA_TITLE, "AppWatcher Log")
                 putExtra(Intent.EXTRA_TEXT, userLogger.content)

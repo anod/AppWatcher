@@ -13,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.compose.MainDetailScreen
+import com.anod.appwatcher.compose.onCommonActivityAction
 import com.anod.appwatcher.details.DetailsDialog
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
@@ -20,7 +21,6 @@ import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.DetailContent
 import com.anod.appwatcher.watchlist.WatchListActivity
 import com.anod.appwatcher.watchlist.WatchListPagingSource
-import info.anodsplace.framework.content.startActivitySafely
 import kotlinx.coroutines.launch
 
 @Keep
@@ -60,25 +60,20 @@ class InstalledActivity : BaseComposeActivity() {
                 } else {
                     InstalledListScreen(screenState = screenState, pagingSourceConfig = pagingSourceConfig) { viewModel.handleEvent(it) }
                     if (screenState.selectedApp != null) {
-                        DetailsDialog(appId = screenState.selectedApp!!.appId, rowId = screenState.selectedApp!!.rowId, detailsUrl = screenState.selectedApp!!.detailsUrl ?: "") {
-                            viewModel.handleEvent(InstalledListSharedEvent.SelectApp(app = null))
-                        }
+                        DetailsDialog(
+                            appId = screenState.selectedApp!!.appId,
+                            rowId = screenState.selectedApp!!.rowId,
+                            detailsUrl = screenState.selectedApp!!.detailsUrl ?: "",
+                            onDismissRequest = { viewModel.handleEvent(InstalledListSharedEvent.SelectApp(app = null)) },
+                            onCommonActivityAction = { onCommonActivityAction(it) }
+                        )
                     }
                 }
             }
         }
 
         lifecycleScope.launch {
-            viewModel.viewActions.collect { onViewAction(it) }
-        }
-    }
-
-    private fun onViewAction(action: InstalledListSharedAction) {
-        when (action) {
-            InstalledListSharedAction.OnBackPressed -> onBackPressed()
-            is InstalledListSharedAction.StartActivity -> {
-                startActivitySafely(action.intent)
-            }
+            viewModel.viewActions.collect { onCommonActivityAction(it) }
         }
     }
 

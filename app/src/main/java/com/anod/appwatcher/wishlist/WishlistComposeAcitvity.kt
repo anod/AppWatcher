@@ -12,7 +12,7 @@ import androidx.compose.runtime.getValue
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
-import com.anod.appwatcher.tags.TagsListFragment
+import com.anod.appwatcher.compose.onCommonActivityAction
 import com.anod.appwatcher.utils.prefs
 import org.koin.core.component.KoinComponent
 
@@ -49,16 +49,9 @@ class WishListActivity : BaseComposeActivity(), KoinComponent {
                     installedApps = viewModel.installedApps,
                     pagingDataFlow = viewModel.pagingData,
                     viewActions = viewModel.viewActions,
-                    onActivityAction = { onActivityAction(it) }
+                    onActivityAction = { onCommonActivityAction(it) }
                 )
             }
-        }
-    }
-
-    private fun onActivityAction(action: WishListActivityAction) {
-        when (action) {
-            WishListActivityAction.OnBackPress -> onBackPressed()
-            is WishListActivityAction.ShowTagList -> startActivity(TagsListFragment.intent(this, viewModel.prefs, action.info))
         }
     }
 

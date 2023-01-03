@@ -10,6 +10,7 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AccountSelectionResult
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
+import com.anod.appwatcher.compose.CommonActivityAction
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.sync.SyncScheduler
@@ -47,12 +48,30 @@ sealed interface MainViewEvent {
 }
 
 sealed interface MainViewAction {
+    class ActivityAction(val action: CommonActivityAction) : MainViewAction
     object ChooseAccount : MainViewAction
     class NavigateTo(val id: DrawerItem.Id) : MainViewAction
-    class ShowToast(@StringRes val resId: Int = 0, val text: String = "", val length: Int = Toast.LENGTH_SHORT) : MainViewAction
     object RequestNotificationPermission : MainViewAction
-    class StartActivity(val intent: Intent) : MainViewAction
     class NavigateToTag(val tag: Tag) : MainViewAction
+}
+
+private fun startActivityAction(intent: Intent, addMultiWindowFlags: Boolean = false) : MainViewAction.ActivityAction {
+    return MainViewAction.ActivityAction(
+        action = CommonActivityAction.StartActivity(
+            intent = intent,
+            addMultiWindowFlags = addMultiWindowFlags
+        )
+    )
+}
+
+private fun showToastAction(@StringRes resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT) : MainViewAction.ActivityAction {
+    return MainViewAction.ActivityAction(
+        action = CommonActivityAction.ShowToast(
+            resId = resId,
+            text = text,
+            length = length
+        )
+    )
 }
 
 class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAction>(), KoinComponent {
@@ -106,7 +125,7 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
 
     private fun onNotificationResult(enabled: Boolean) {
         if (!enabled && prefs.notificationDisabledToastCount < 3) {
-            emitAction(MainViewAction.ShowToast(
+            emitAction(showToastAction(
                 resId = R.string.notifications_not_enabled,
                 length = Toast.LENGTH_LONG
             ))
@@ -141,7 +160,7 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
                     onAccountNotFound("")
                 }
             } catch (e: AuthTokenStartIntent) {
-                emitAction(MainViewAction.StartActivity(e.intent))
+                emitAction(startActivityAction(e.intent))
             }
         }
     }
@@ -155,21 +174,18 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
     private fun onAccountNotFound(errorMessage: String) {
         if (networkConnection.isNetworkAvailable) {
             if (errorMessage.isNotBlank()) {
-                emitAction(MainViewAction.ShowToast(
+                emitAction(showToastAction(
                     text = errorMessage,
                     length = Toast.LENGTH_LONG
                 ))
             } else {
-                emitAction(MainViewAction.ShowToast(
+                emitAction(showToastAction(
                     resId = R.string.failed_gain_access,
                     length = Toast.LENGTH_LONG
                 ))
             }
         } else {
-            emitAction(MainViewAction.ShowToast(
-                resId = R.string.check_connection,
-                length = Toast.LENGTH_SHORT
-            ))
+            emitAction(showToastAction(resId = R.string.check_connection))
         }
     }
 

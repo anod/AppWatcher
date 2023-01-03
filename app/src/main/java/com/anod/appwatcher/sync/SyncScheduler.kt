@@ -11,12 +11,11 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequest
 import androidx.work.Operation
 import androidx.work.PeriodicWorkRequest
-import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import androidx.work.await
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.onEach
 import java.util.concurrent.TimeUnit
 
 /**
@@ -54,14 +53,14 @@ class SyncScheduler(private val context: ApplicationContext) {
         AppLog.i("Schedule sync in ${windowStartSec / 3600} hours (${if (replace) "Replace" else "Keep existing"})", "PeriodicWork")
         return wm.enqueueUniquePeriodicWork(tag, policy, request)
             .state
-            .map {
+            .asFlow()
+            .onEach {
                 when (it) {
                     is Operation.State.SUCCESS -> AppLog.i("Sync scheduled", "PeriodicWork")
                     is Operation.State.IN_PROGRESS -> AppLog.i("Sync schedule in progress", "PeriodicWork")
                     is Operation.State.FAILURE -> AppLog.e("Sync schedule error", "PeriodicWork", it.throwable)
                 }
-                it
-            }.asFlow()
+            }
     }
 
     fun execute(): Flow<Operation.State> {
@@ -83,14 +82,14 @@ class SyncScheduler(private val context: ApplicationContext) {
         AppLog.i("Enqueue update check", "OneTimeWork")
         return wm.enqueueUniqueWork(tagManual, ExistingWorkPolicy.REPLACE, request)
             .state
-            .map {
+            .asFlow()
+            .onEach {
                 when (it) {
                     is Operation.State.SUCCESS -> AppLog.i("Update scheduled", "OneTimeWork")
                     is Operation.State.IN_PROGRESS -> AppLog.i("Update schedule in progress", "OneTimeWork")
                     is Operation.State.FAILURE -> AppLog.e("Update schedule error", "OneTimeWork", it.throwable)
                 }
-                it
-            }.asFlow()
+            }
     }
 
     fun cancel(): Flow<Operation.State> {

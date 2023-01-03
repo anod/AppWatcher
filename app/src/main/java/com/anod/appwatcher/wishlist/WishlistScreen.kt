@@ -17,8 +17,10 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import com.anod.appwatcher.R
+import com.anod.appwatcher.compose.CommonActivityAction
 import com.anod.appwatcher.compose.DeleteNotice
 import com.anod.appwatcher.compose.SearchTopBar
+import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.search.MarketAppItem
 import com.anod.appwatcher.search.RetryButton
 import com.anod.appwatcher.tags.TagSnackbar
@@ -37,7 +39,7 @@ fun WishListScreen(
     installedApps: InstalledApps,
     appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get(),
     viewActions: Flow<WishListAction>,
-    onActivityAction: (WishListActivityAction) -> Unit
+    onActivityAction: (CommonActivityAction) -> Unit
 ) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -91,6 +93,7 @@ fun WishListScreen(
         }
     }
 
+    var showTagList: AppInfo? by remember { mutableStateOf(null) }
     var deleteNoticeDocument: Document? by remember { mutableStateOf(null) }
     LaunchedEffect(key1 = viewActions) {
         viewActions.collect { action ->
@@ -101,10 +104,10 @@ fun WishListScreen(
                 is WishListAction.ShowTagSnackbar -> {
                     val result = snackbarHostState.showSnackbar(TagSnackbar.Visuals(action.info, context))
                     if (result == SnackbarResult.ActionPerformed) {
-                        onActivityAction(WishListActivityAction.ShowTagList(action.info))
+                        showTagList = action.info
                     }
                 }
-                WishListAction.OnBackPress -> onActivityAction(WishListActivityAction.OnBackPress)
+                WishListAction.OnBackPress -> onActivityAction(CommonActivityAction.OnBackPressed)
             }
         }
     }
@@ -117,6 +120,10 @@ fun WishListScreen(
             },
             onDismissRequest = { deleteNoticeDocument = null }
         )
+    }
+
+    if (showTagList != null) {
+        // TODO
     }
 }
 

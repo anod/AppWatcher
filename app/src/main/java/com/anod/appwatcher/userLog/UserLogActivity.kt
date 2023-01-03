@@ -7,7 +7,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.lifecycleScope
 import com.anod.appwatcher.compose.BaseComposeActivity
-import info.anodsplace.framework.content.startActivitySafely
+import com.anod.appwatcher.compose.onCommonActivityAction
 import kotlinx.coroutines.launch
 
 /**
@@ -30,16 +30,7 @@ class UserLogActivity : BaseComposeActivity() {
         }
 
         lifecycleScope.launch {
-            viewModel.viewActions.collect { action ->
-                when (action) {
-                    UserLogAction.OnBackNav -> {
-                        onBackPressedDispatcher.onBackPressed()
-                    }
-                    is UserLogAction.StartActivity -> {
-                        startActivitySafely(action.intent)
-                    }
-                }
-            }
+            viewModel.viewActions.collect { onCommonActivityAction(it) }
         }
     }
 }

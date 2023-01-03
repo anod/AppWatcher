@@ -64,6 +64,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
+import com.anod.appwatcher.compose.CommonActivityAction
 import com.anod.appwatcher.compose.DropdownMenuAction
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppChange
@@ -104,7 +105,7 @@ fun DetailsScreen(appId: String, rowId: Int, detailsUrl: String) {
 }
 
 @Composable
-fun DetailsDialog(appId: String, rowId: Int, detailsUrl: String, onDismissRequest: () -> Unit) {
+fun DetailsDialog(appId: String, rowId: Int, detailsUrl: String, onDismissRequest: () -> Unit, onCommonActivityAction: (action: CommonActivityAction) -> Unit) {
     val viewModel: DetailsViewModel = viewModel(key = "details-$appId-$rowId", factory = DetailsViewModel.Factory(
         argAppId = appId,
         argRowId = rowId,
@@ -137,8 +138,8 @@ fun DetailsDialog(appId: String, rowId: Int, detailsUrl: String, onDismissReques
                     onDismissRequest()
                 }
                 DetailsScreenAction.Share -> {}
-                is DetailsScreenAction.StartActivity -> {}
                 is DetailsScreenAction.WatchAppResult -> {}
+                is DetailsScreenAction.ActivityAction -> onCommonActivityAction(action.action)
             }
         }
     }

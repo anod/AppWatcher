@@ -25,6 +25,7 @@ import androidx.paging.compose.items
 import coil.ImageLoader
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
+import com.anod.appwatcher.compose.CommonActivityAction
 import com.anod.appwatcher.compose.DeleteNotice
 import com.anod.appwatcher.compose.SearchTopBar
 import com.anod.appwatcher.tags.TagSnackbar
@@ -47,7 +48,7 @@ fun SearchResultsScreen(
     installedApps: InstalledApps,
     appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get(),
     viewActions: Flow<SearchViewAction>,
-    onActivityAction: (SearchActivityAction) -> Unit = { }
+    onActivityAction: (CommonActivityAction) -> Unit = { }
 ) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -101,31 +102,31 @@ fun SearchResultsScreen(
         }
     }
 
+    var showTagList: SearchActivityAction.ShowTagList? by remember { mutableStateOf(null) }
     var deleteNoticeDocument: Document? by remember { mutableStateOf(null) }
     LaunchedEffect(key1 = viewActions) {
         viewActions.collect { action ->
             when (action) {
-                SearchViewAction.ShowAccountDialog -> onActivityAction(SearchActivityAction.ShowAccountDialog)
-                is SearchViewAction.ShowToast -> {
+                SearchViewAction.ShowAccountDialog -> onActivityAction(CommonActivityAction.ShowAccountDialog)
+                is SearchViewAction.ShowSnackbar -> {
                     snackbarHostState.showSnackbar(message = action.message, duration = action.duration)
                     if (action.finish) {
-                        onActivityAction(SearchActivityAction.FinishActivity)
+                        onActivityAction(CommonActivityAction.Finish)
                     }
                 }
-                is SearchViewAction.StartActivity -> onActivityAction(SearchActivityAction.StartActivity(action.intent, action.finish))
                 is SearchViewAction.ShowTagSnackbar -> {
                     val finishActivity = action.isShareSource
                     val result = snackbarHostState.showSnackbar(TagSnackbar.Visuals(action.info, context))
                     if (result == SnackbarResult.ActionPerformed) {
-                        onActivityAction(SearchActivityAction.ShowTagList(action.info, finishActivity))
+                        showTagList = SearchActivityAction.ShowTagList(action.info, finishActivity)
                     } else if (finishActivity) {
-                        onActivityAction(SearchActivityAction.FinishActivity)
+                        onActivityAction(CommonActivityAction.Finish)
                     }
                 }
                 is SearchViewAction.AlreadyWatchedNotice -> {
                     deleteNoticeDocument = action.document
                 }
-                SearchViewAction.OnBackPressed -> onActivityAction(SearchActivityAction.OnBackPressed)
+                is SearchViewAction.ActivityAction -> onActivityAction(action.action)
             }
         }
     }
@@ -138,6 +139,10 @@ fun SearchResultsScreen(
             },
             onDismissRequest = { deleteNoticeDocument = null }
         )
+    }
+
+    if (showTagList != null) {
+        // TODO
     }
 }
 
