@@ -30,6 +30,1628 @@ public  final class DocV2 extends
     reviewSnippetsUrl_ = "";
     reviewQuestionsUrl_ = "";
   }
+  public interface AggregateRatingOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:finsky.protos.DocV2.AggregateRating)
+      com.google.protobuf.MessageLiteOrBuilder {
+
+    /**
+     * <code>optional int32 type = 1 [default = 1];</code>
+     * @return Whether the type field is set.
+     */
+    boolean hasType();
+    /**
+     * <code>optional int32 type = 1 [default = 1];</code>
+     * @return The type.
+     */
+    int getType();
+
+    /**
+     * <code>optional float starRating = 2;</code>
+     * @return Whether the starRating field is set.
+     */
+    boolean hasStarRating();
+    /**
+     * <code>optional float starRating = 2;</code>
+     * @return The starRating.
+     */
+    float getStarRating();
+
+    /**
+     * <code>optional uint64 ratingsCount = 3;</code>
+     * @return Whether the ratingsCount field is set.
+     */
+    boolean hasRatingsCount();
+    /**
+     * <code>optional uint64 ratingsCount = 3;</code>
+     * @return The ratingsCount.
+     */
+    long getRatingsCount();
+
+    /**
+     * <code>optional uint64 oneStarRatings = 4;</code>
+     * @return Whether the oneStarRatings field is set.
+     */
+    boolean hasOneStarRatings();
+    /**
+     * <code>optional uint64 oneStarRatings = 4;</code>
+     * @return The oneStarRatings.
+     */
+    long getOneStarRatings();
+
+    /**
+     * <code>optional uint64 twoStarRatings = 5;</code>
+     * @return Whether the twoStarRatings field is set.
+     */
+    boolean hasTwoStarRatings();
+    /**
+     * <code>optional uint64 twoStarRatings = 5;</code>
+     * @return The twoStarRatings.
+     */
+    long getTwoStarRatings();
+
+    /**
+     * <code>optional uint64 threeStarRatings = 6;</code>
+     * @return Whether the threeStarRatings field is set.
+     */
+    boolean hasThreeStarRatings();
+    /**
+     * <code>optional uint64 threeStarRatings = 6;</code>
+     * @return The threeStarRatings.
+     */
+    long getThreeStarRatings();
+
+    /**
+     * <code>optional uint64 fourStarRatings = 7;</code>
+     * @return Whether the fourStarRatings field is set.
+     */
+    boolean hasFourStarRatings();
+    /**
+     * <code>optional uint64 fourStarRatings = 7;</code>
+     * @return The fourStarRatings.
+     */
+    long getFourStarRatings();
+
+    /**
+     * <code>optional uint64 fiveStarRatings = 8;</code>
+     * @return Whether the fiveStarRatings field is set.
+     */
+    boolean hasFiveStarRatings();
+    /**
+     * <code>optional uint64 fiveStarRatings = 8;</code>
+     * @return The fiveStarRatings.
+     */
+    long getFiveStarRatings();
+
+    /**
+     * <code>optional uint64 thumbsUpCount = 9;</code>
+     * @return Whether the thumbsUpCount field is set.
+     */
+    boolean hasThumbsUpCount();
+    /**
+     * <code>optional uint64 thumbsUpCount = 9;</code>
+     * @return The thumbsUpCount.
+     */
+    long getThumbsUpCount();
+
+    /**
+     * <code>optional uint64 thumbsDownCount = 10;</code>
+     * @return Whether the thumbsDownCount field is set.
+     */
+    boolean hasThumbsDownCount();
+    /**
+     * <code>optional uint64 thumbsDownCount = 10;</code>
+     * @return The thumbsDownCount.
+     */
+    long getThumbsDownCount();
+
+    /**
+     * <code>optional uint64 commentCount = 11;</code>
+     * @return Whether the commentCount field is set.
+     */
+    boolean hasCommentCount();
+    /**
+     * <code>optional uint64 commentCount = 11;</code>
+     * @return The commentCount.
+     */
+    long getCommentCount();
+
+    /**
+     * <code>optional double bayesianMeanRating = 12;</code>
+     * @return Whether the bayesianMeanRating field is set.
+     */
+    boolean hasBayesianMeanRating();
+    /**
+     * <code>optional double bayesianMeanRating = 12;</code>
+     * @return The bayesianMeanRating.
+     */
+    double getBayesianMeanRating();
+
+    /**
+     * <pre>
+     *repeated Tip tip = 13;
+     * </pre>
+     *
+     * <code>optional string ratingLabel = 17;</code>
+     * @return Whether the ratingLabel field is set.
+     */
+    boolean hasRatingLabel();
+    /**
+     * <pre>
+     *repeated Tip tip = 13;
+     * </pre>
+     *
+     * <code>optional string ratingLabel = 17;</code>
+     * @return The ratingLabel.
+     */
+    java.lang.String getRatingLabel();
+    /**
+     * <pre>
+     *repeated Tip tip = 13;
+     * </pre>
+     *
+     * <code>optional string ratingLabel = 17;</code>
+     * @return The bytes for ratingLabel.
+     */
+    com.google.protobuf.ByteString
+        getRatingLabelBytes();
+
+    /**
+     * <code>optional string ratingCountLabelAbbreviated = 18;</code>
+     * @return Whether the ratingCountLabelAbbreviated field is set.
+     */
+    boolean hasRatingCountLabelAbbreviated();
+    /**
+     * <code>optional string ratingCountLabelAbbreviated = 18;</code>
+     * @return The ratingCountLabelAbbreviated.
+     */
+    java.lang.String getRatingCountLabelAbbreviated();
+    /**
+     * <code>optional string ratingCountLabelAbbreviated = 18;</code>
+     * @return The bytes for ratingCountLabelAbbreviated.
+     */
+    com.google.protobuf.ByteString
+        getRatingCountLabelAbbreviatedBytes();
+
+    /**
+     * <code>optional string ratingCountLabel = 19;</code>
+     * @return Whether the ratingCountLabel field is set.
+     */
+    boolean hasRatingCountLabel();
+    /**
+     * <code>optional string ratingCountLabel = 19;</code>
+     * @return The ratingCountLabel.
+     */
+    java.lang.String getRatingCountLabel();
+    /**
+     * <code>optional string ratingCountLabel = 19;</code>
+     * @return The bytes for ratingCountLabel.
+     */
+    com.google.protobuf.ByteString
+        getRatingCountLabelBytes();
+  }
+  /**
+   * Protobuf type {@code finsky.protos.DocV2.AggregateRating}
+   */
+  public  static final class AggregateRating extends
+      com.google.protobuf.GeneratedMessageLite<
+          AggregateRating, AggregateRating.Builder> implements
+      // @@protoc_insertion_point(message_implements:finsky.protos.DocV2.AggregateRating)
+      AggregateRatingOrBuilder {
+    private AggregateRating() {
+      type_ = 1;
+      ratingLabel_ = "";
+      ratingCountLabelAbbreviated_ = "";
+      ratingCountLabel_ = "";
+    }
+    private int bitField0_;
+    public static final int TYPE_FIELD_NUMBER = 1;
+    private int type_;
+    /**
+     * <code>optional int32 type = 1 [default = 1];</code>
+     * @return Whether the type field is set.
+     */
+    @java.lang.Override
+    public boolean hasType() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <code>optional int32 type = 1 [default = 1];</code>
+     * @return The type.
+     */
+    @java.lang.Override
+    public int getType() {
+      return type_;
+    }
+    /**
+     * <code>optional int32 type = 1 [default = 1];</code>
+     * @param value The type to set.
+     */
+    private void setType(int value) {
+      bitField0_ |= 0x00000001;
+      type_ = value;
+    }
+    /**
+     * <code>optional int32 type = 1 [default = 1];</code>
+     */
+    private void clearType() {
+      bitField0_ = (bitField0_ & ~0x00000001);
+      type_ = 1;
+    }
+
+    public static final int STARRATING_FIELD_NUMBER = 2;
+    private float starRating_;
+    /**
+     * <code>optional float starRating = 2;</code>
+     * @return Whether the starRating field is set.
+     */
+    @java.lang.Override
+    public boolean hasStarRating() {
+      return ((bitField0_ & 0x00000002) != 0);
+    }
+    /**
+     * <code>optional float starRating = 2;</code>
+     * @return The starRating.
+     */
+    @java.lang.Override
+    public float getStarRating() {
+      return starRating_;
+    }
+    /**
+     * <code>optional float starRating = 2;</code>
+     * @param value The starRating to set.
+     */
+    private void setStarRating(float value) {
+      bitField0_ |= 0x00000002;
+      starRating_ = value;
+    }
+    /**
+     * <code>optional float starRating = 2;</code>
+     */
+    private void clearStarRating() {
+      bitField0_ = (bitField0_ & ~0x00000002);
+      starRating_ = 0F;
+    }
+
+    public static final int RATINGSCOUNT_FIELD_NUMBER = 3;
+    private long ratingsCount_;
+    /**
+     * <code>optional uint64 ratingsCount = 3;</code>
+     * @return Whether the ratingsCount field is set.
+     */
+    @java.lang.Override
+    public boolean hasRatingsCount() {
+      return ((bitField0_ & 0x00000004) != 0);
+    }
+    /**
+     * <code>optional uint64 ratingsCount = 3;</code>
+     * @return The ratingsCount.
+     */
+    @java.lang.Override
+    public long getRatingsCount() {
+      return ratingsCount_;
+    }
+    /**
+     * <code>optional uint64 ratingsCount = 3;</code>
+     * @param value The ratingsCount to set.
+     */
+    private void setRatingsCount(long value) {
+      bitField0_ |= 0x00000004;
+      ratingsCount_ = value;
+    }
+    /**
+     * <code>optional uint64 ratingsCount = 3;</code>
+     */
+    private void clearRatingsCount() {
+      bitField0_ = (bitField0_ & ~0x00000004);
+      ratingsCount_ = 0L;
+    }
+
+    public static final int ONESTARRATINGS_FIELD_NUMBER = 4;
+    private long oneStarRatings_;
+    /**
+     * <code>optional uint64 oneStarRatings = 4;</code>
+     * @return Whether the oneStarRatings field is set.
+     */
+    @java.lang.Override
+    public boolean hasOneStarRatings() {
+      return ((bitField0_ & 0x00000008) != 0);
+    }
+    /**
+     * <code>optional uint64 oneStarRatings = 4;</code>
+     * @return The oneStarRatings.
+     */
+    @java.lang.Override
+    public long getOneStarRatings() {
+      return oneStarRatings_;
+    }
+    /**
+     * <code>optional uint64 oneStarRatings = 4;</code>
+     * @param value The oneStarRatings to set.
+     */
+    private void setOneStarRatings(long value) {
+      bitField0_ |= 0x00000008;
+      oneStarRatings_ = value;
+    }
+    /**
+     * <code>optional uint64 oneStarRatings = 4;</code>
+     */
+    private void clearOneStarRatings() {
+      bitField0_ = (bitField0_ & ~0x00000008);
+      oneStarRatings_ = 0L;
+    }
+
+    public static final int TWOSTARRATINGS_FIELD_NUMBER = 5;
+    private long twoStarRatings_;
+    /**
+     * <code>optional uint64 twoStarRatings = 5;</code>
+     * @return Whether the twoStarRatings field is set.
+     */
+    @java.lang.Override
+    public boolean hasTwoStarRatings() {
+      return ((bitField0_ & 0x00000010) != 0);
+    }
+    /**
+     * <code>optional uint64 twoStarRatings = 5;</code>
+     * @return The twoStarRatings.
+     */
+    @java.lang.Override
+    public long getTwoStarRatings() {
+      return twoStarRatings_;
+    }
+    /**
+     * <code>optional uint64 twoStarRatings = 5;</code>
+     * @param value The twoStarRatings to set.
+     */
+    private void setTwoStarRatings(long value) {
+      bitField0_ |= 0x00000010;
+      twoStarRatings_ = value;
+    }
+    /**
+     * <code>optional uint64 twoStarRatings = 5;</code>
+     */
+    private void clearTwoStarRatings() {
+      bitField0_ = (bitField0_ & ~0x00000010);
+      twoStarRatings_ = 0L;
+    }
+
+    public static final int THREESTARRATINGS_FIELD_NUMBER = 6;
+    private long threeStarRatings_;
+    /**
+     * <code>optional uint64 threeStarRatings = 6;</code>
+     * @return Whether the threeStarRatings field is set.
+     */
+    @java.lang.Override
+    public boolean hasThreeStarRatings() {
+      return ((bitField0_ & 0x00000020) != 0);
+    }
+    /**
+     * <code>optional uint64 threeStarRatings = 6;</code>
+     * @return The threeStarRatings.
+     */
+    @java.lang.Override
+    public long getThreeStarRatings() {
+      return threeStarRatings_;
+    }
+    /**
+     * <code>optional uint64 threeStarRatings = 6;</code>
+     * @param value The threeStarRatings to set.
+     */
+    private void setThreeStarRatings(long value) {
+      bitField0_ |= 0x00000020;
+      threeStarRatings_ = value;
+    }
+    /**
+     * <code>optional uint64 threeStarRatings = 6;</code>
+     */
+    private void clearThreeStarRatings() {
+      bitField0_ = (bitField0_ & ~0x00000020);
+      threeStarRatings_ = 0L;
+    }
+
+    public static final int FOURSTARRATINGS_FIELD_NUMBER = 7;
+    private long fourStarRatings_;
+    /**
+     * <code>optional uint64 fourStarRatings = 7;</code>
+     * @return Whether the fourStarRatings field is set.
+     */
+    @java.lang.Override
+    public boolean hasFourStarRatings() {
+      return ((bitField0_ & 0x00000040) != 0);
+    }
+    /**
+     * <code>optional uint64 fourStarRatings = 7;</code>
+     * @return The fourStarRatings.
+     */
+    @java.lang.Override
+    public long getFourStarRatings() {
+      return fourStarRatings_;
+    }
+    /**
+     * <code>optional uint64 fourStarRatings = 7;</code>
+     * @param value The fourStarRatings to set.
+     */
+    private void setFourStarRatings(long value) {
+      bitField0_ |= 0x00000040;
+      fourStarRatings_ = value;
+    }
+    /**
+     * <code>optional uint64 fourStarRatings = 7;</code>
+     */
+    private void clearFourStarRatings() {
+      bitField0_ = (bitField0_ & ~0x00000040);
+      fourStarRatings_ = 0L;
+    }
+
+    public static final int FIVESTARRATINGS_FIELD_NUMBER = 8;
+    private long fiveStarRatings_;
+    /**
+     * <code>optional uint64 fiveStarRatings = 8;</code>
+     * @return Whether the fiveStarRatings field is set.
+     */
+    @java.lang.Override
+    public boolean hasFiveStarRatings() {
+      return ((bitField0_ & 0x00000080) != 0);
+    }
+    /**
+     * <code>optional uint64 fiveStarRatings = 8;</code>
+     * @return The fiveStarRatings.
+     */
+    @java.lang.Override
+    public long getFiveStarRatings() {
+      return fiveStarRatings_;
+    }
+    /**
+     * <code>optional uint64 fiveStarRatings = 8;</code>
+     * @param value The fiveStarRatings to set.
+     */
+    private void setFiveStarRatings(long value) {
+      bitField0_ |= 0x00000080;
+      fiveStarRatings_ = value;
+    }
+    /**
+     * <code>optional uint64 fiveStarRatings = 8;</code>
+     */
+    private void clearFiveStarRatings() {
+      bitField0_ = (bitField0_ & ~0x00000080);
+      fiveStarRatings_ = 0L;
+    }
+
+    public static final int THUMBSUPCOUNT_FIELD_NUMBER = 9;
+    private long thumbsUpCount_;
+    /**
+     * <code>optional uint64 thumbsUpCount = 9;</code>
+     * @return Whether the thumbsUpCount field is set.
+     */
+    @java.lang.Override
+    public boolean hasThumbsUpCount() {
+      return ((bitField0_ & 0x00000100) != 0);
+    }
+    /**
+     * <code>optional uint64 thumbsUpCount = 9;</code>
+     * @return The thumbsUpCount.
+     */
+    @java.lang.Override
+    public long getThumbsUpCount() {
+      return thumbsUpCount_;
+    }
+    /**
+     * <code>optional uint64 thumbsUpCount = 9;</code>
+     * @param value The thumbsUpCount to set.
+     */
+    private void setThumbsUpCount(long value) {
+      bitField0_ |= 0x00000100;
+      thumbsUpCount_ = value;
+    }
+    /**
+     * <code>optional uint64 thumbsUpCount = 9;</code>
+     */
+    private void clearThumbsUpCount() {
+      bitField0_ = (bitField0_ & ~0x00000100);
+      thumbsUpCount_ = 0L;
+    }
+
+    public static final int THUMBSDOWNCOUNT_FIELD_NUMBER = 10;
+    private long thumbsDownCount_;
+    /**
+     * <code>optional uint64 thumbsDownCount = 10;</code>
+     * @return Whether the thumbsDownCount field is set.
+     */
+    @java.lang.Override
+    public boolean hasThumbsDownCount() {
+      return ((bitField0_ & 0x00000200) != 0);
+    }
+    /**
+     * <code>optional uint64 thumbsDownCount = 10;</code>
+     * @return The thumbsDownCount.
+     */
+    @java.lang.Override
+    public long getThumbsDownCount() {
+      return thumbsDownCount_;
+    }
+    /**
+     * <code>optional uint64 thumbsDownCount = 10;</code>
+     * @param value The thumbsDownCount to set.
+     */
+    private void setThumbsDownCount(long value) {
+      bitField0_ |= 0x00000200;
+      thumbsDownCount_ = value;
+    }
+    /**
+     * <code>optional uint64 thumbsDownCount = 10;</code>
+     */
+    private void clearThumbsDownCount() {
+      bitField0_ = (bitField0_ & ~0x00000200);
+      thumbsDownCount_ = 0L;
+    }
+
+    public static final int COMMENTCOUNT_FIELD_NUMBER = 11;
+    private long commentCount_;
+    /**
+     * <code>optional uint64 commentCount = 11;</code>
+     * @return Whether the commentCount field is set.
+     */
+    @java.lang.Override
+    public boolean hasCommentCount() {
+      return ((bitField0_ & 0x00000400) != 0);
+    }
+    /**
+     * <code>optional uint64 commentCount = 11;</code>
+     * @return The commentCount.
+     */
+    @java.lang.Override
+    public long getCommentCount() {
+      return commentCount_;
+    }
+    /**
+     * <code>optional uint64 commentCount = 11;</code>
+     * @param value The commentCount to set.
+     */
+    private void setCommentCount(long value) {
+      bitField0_ |= 0x00000400;
+      commentCount_ = value;
+    }
+    /**
+     * <code>optional uint64 commentCount = 11;</code>
+     */
+    private void clearCommentCount() {
+      bitField0_ = (bitField0_ & ~0x00000400);
+      commentCount_ = 0L;
+    }
+
+    public static final int BAYESIANMEANRATING_FIELD_NUMBER = 12;
+    private double bayesianMeanRating_;
+    /**
+     * <code>optional double bayesianMeanRating = 12;</code>
+     * @return Whether the bayesianMeanRating field is set.
+     */
+    @java.lang.Override
+    public boolean hasBayesianMeanRating() {
+      return ((bitField0_ & 0x00000800) != 0);
+    }
+    /**
+     * <code>optional double bayesianMeanRating = 12;</code>
+     * @return The bayesianMeanRating.
+     */
+    @java.lang.Override
+    public double getBayesianMeanRating() {
+      return bayesianMeanRating_;
+    }
+    /**
+     * <code>optional double bayesianMeanRating = 12;</code>
+     * @param value The bayesianMeanRating to set.
+     */
+    private void setBayesianMeanRating(double value) {
+      bitField0_ |= 0x00000800;
+      bayesianMeanRating_ = value;
+    }
+    /**
+     * <code>optional double bayesianMeanRating = 12;</code>
+     */
+    private void clearBayesianMeanRating() {
+      bitField0_ = (bitField0_ & ~0x00000800);
+      bayesianMeanRating_ = 0D;
+    }
+
+    public static final int RATINGLABEL_FIELD_NUMBER = 17;
+    private java.lang.String ratingLabel_;
+    /**
+     * <pre>
+     *repeated Tip tip = 13;
+     * </pre>
+     *
+     * <code>optional string ratingLabel = 17;</code>
+     * @return Whether the ratingLabel field is set.
+     */
+    @java.lang.Override
+    public boolean hasRatingLabel() {
+      return ((bitField0_ & 0x00001000) != 0);
+    }
+    /**
+     * <pre>
+     *repeated Tip tip = 13;
+     * </pre>
+     *
+     * <code>optional string ratingLabel = 17;</code>
+     * @return The ratingLabel.
+     */
+    @java.lang.Override
+    public java.lang.String getRatingLabel() {
+      return ratingLabel_;
+    }
+    /**
+     * <pre>
+     *repeated Tip tip = 13;
+     * </pre>
+     *
+     * <code>optional string ratingLabel = 17;</code>
+     * @return The bytes for ratingLabel.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getRatingLabelBytes() {
+      return com.google.protobuf.ByteString.copyFromUtf8(ratingLabel_);
+    }
+    /**
+     * <pre>
+     *repeated Tip tip = 13;
+     * </pre>
+     *
+     * <code>optional string ratingLabel = 17;</code>
+     * @param value The ratingLabel to set.
+     */
+    private void setRatingLabel(
+        java.lang.String value) {
+      java.lang.Class<?> valueClass = value.getClass();
+  bitField0_ |= 0x00001000;
+      ratingLabel_ = value;
+    }
+    /**
+     * <pre>
+     *repeated Tip tip = 13;
+     * </pre>
+     *
+     * <code>optional string ratingLabel = 17;</code>
+     */
+    private void clearRatingLabel() {
+      bitField0_ = (bitField0_ & ~0x00001000);
+      ratingLabel_ = getDefaultInstance().getRatingLabel();
+    }
+    /**
+     * <pre>
+     *repeated Tip tip = 13;
+     * </pre>
+     *
+     * <code>optional string ratingLabel = 17;</code>
+     * @param value The bytes for ratingLabel to set.
+     */
+    private void setRatingLabelBytes(
+        com.google.protobuf.ByteString value) {
+      ratingLabel_ = value.toStringUtf8();
+      bitField0_ |= 0x00001000;
+    }
+
+    public static final int RATINGCOUNTLABELABBREVIATED_FIELD_NUMBER = 18;
+    private java.lang.String ratingCountLabelAbbreviated_;
+    /**
+     * <code>optional string ratingCountLabelAbbreviated = 18;</code>
+     * @return Whether the ratingCountLabelAbbreviated field is set.
+     */
+    @java.lang.Override
+    public boolean hasRatingCountLabelAbbreviated() {
+      return ((bitField0_ & 0x00002000) != 0);
+    }
+    /**
+     * <code>optional string ratingCountLabelAbbreviated = 18;</code>
+     * @return The ratingCountLabelAbbreviated.
+     */
+    @java.lang.Override
+    public java.lang.String getRatingCountLabelAbbreviated() {
+      return ratingCountLabelAbbreviated_;
+    }
+    /**
+     * <code>optional string ratingCountLabelAbbreviated = 18;</code>
+     * @return The bytes for ratingCountLabelAbbreviated.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getRatingCountLabelAbbreviatedBytes() {
+      return com.google.protobuf.ByteString.copyFromUtf8(ratingCountLabelAbbreviated_);
+    }
+    /**
+     * <code>optional string ratingCountLabelAbbreviated = 18;</code>
+     * @param value The ratingCountLabelAbbreviated to set.
+     */
+    private void setRatingCountLabelAbbreviated(
+        java.lang.String value) {
+      java.lang.Class<?> valueClass = value.getClass();
+  bitField0_ |= 0x00002000;
+      ratingCountLabelAbbreviated_ = value;
+    }
+    /**
+     * <code>optional string ratingCountLabelAbbreviated = 18;</code>
+     */
+    private void clearRatingCountLabelAbbreviated() {
+      bitField0_ = (bitField0_ & ~0x00002000);
+      ratingCountLabelAbbreviated_ = getDefaultInstance().getRatingCountLabelAbbreviated();
+    }
+    /**
+     * <code>optional string ratingCountLabelAbbreviated = 18;</code>
+     * @param value The bytes for ratingCountLabelAbbreviated to set.
+     */
+    private void setRatingCountLabelAbbreviatedBytes(
+        com.google.protobuf.ByteString value) {
+      ratingCountLabelAbbreviated_ = value.toStringUtf8();
+      bitField0_ |= 0x00002000;
+    }
+
+    public static final int RATINGCOUNTLABEL_FIELD_NUMBER = 19;
+    private java.lang.String ratingCountLabel_;
+    /**
+     * <code>optional string ratingCountLabel = 19;</code>
+     * @return Whether the ratingCountLabel field is set.
+     */
+    @java.lang.Override
+    public boolean hasRatingCountLabel() {
+      return ((bitField0_ & 0x00004000) != 0);
+    }
+    /**
+     * <code>optional string ratingCountLabel = 19;</code>
+     * @return The ratingCountLabel.
+     */
+    @java.lang.Override
+    public java.lang.String getRatingCountLabel() {
+      return ratingCountLabel_;
+    }
+    /**
+     * <code>optional string ratingCountLabel = 19;</code>
+     * @return The bytes for ratingCountLabel.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getRatingCountLabelBytes() {
+      return com.google.protobuf.ByteString.copyFromUtf8(ratingCountLabel_);
+    }
+    /**
+     * <code>optional string ratingCountLabel = 19;</code>
+     * @param value The ratingCountLabel to set.
+     */
+    private void setRatingCountLabel(
+        java.lang.String value) {
+      java.lang.Class<?> valueClass = value.getClass();
+  bitField0_ |= 0x00004000;
+      ratingCountLabel_ = value;
+    }
+    /**
+     * <code>optional string ratingCountLabel = 19;</code>
+     */
+    private void clearRatingCountLabel() {
+      bitField0_ = (bitField0_ & ~0x00004000);
+      ratingCountLabel_ = getDefaultInstance().getRatingCountLabel();
+    }
+    /**
+     * <code>optional string ratingCountLabel = 19;</code>
+     * @param value The bytes for ratingCountLabel to set.
+     */
+    private void setRatingCountLabelBytes(
+        com.google.protobuf.ByteString value) {
+      ratingCountLabel_ = value.toStringUtf8();
+      bitField0_ |= 0x00004000;
+    }
+
+    public static finsky.protos.DocV2.AggregateRating parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static finsky.protos.DocV2.AggregateRating parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static finsky.protos.DocV2.AggregateRating parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static finsky.protos.DocV2.AggregateRating parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static finsky.protos.DocV2.AggregateRating parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static finsky.protos.DocV2.AggregateRating parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static finsky.protos.DocV2.AggregateRating parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input);
+    }
+    public static finsky.protos.DocV2.AggregateRating parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+    public static finsky.protos.DocV2.AggregateRating parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return parseDelimitedFrom(DEFAULT_INSTANCE, input);
+    }
+    public static finsky.protos.DocV2.AggregateRating parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return parseDelimitedFrom(DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+    public static finsky.protos.DocV2.AggregateRating parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input);
+    }
+    public static finsky.protos.DocV2.AggregateRating parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() {
+      return (Builder) DEFAULT_INSTANCE.createBuilder();
+    }
+    public static Builder newBuilder(finsky.protos.DocV2.AggregateRating prototype) {
+      return (Builder) DEFAULT_INSTANCE.createBuilder(prototype);
+    }
+
+    /**
+     * Protobuf type {@code finsky.protos.DocV2.AggregateRating}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageLite.Builder<
+          finsky.protos.DocV2.AggregateRating, Builder> implements
+        // @@protoc_insertion_point(builder_implements:finsky.protos.DocV2.AggregateRating)
+        finsky.protos.DocV2.AggregateRatingOrBuilder {
+      // Construct using finsky.protos.DocV2.AggregateRating.newBuilder()
+      private Builder() {
+        super(DEFAULT_INSTANCE);
+      }
+
+
+      /**
+       * <code>optional int32 type = 1 [default = 1];</code>
+       * @return Whether the type field is set.
+       */
+      @java.lang.Override
+      public boolean hasType() {
+        return instance.hasType();
+      }
+      /**
+       * <code>optional int32 type = 1 [default = 1];</code>
+       * @return The type.
+       */
+      @java.lang.Override
+      public int getType() {
+        return instance.getType();
+      }
+      /**
+       * <code>optional int32 type = 1 [default = 1];</code>
+       * @param value The type to set.
+       * @return This builder for chaining.
+       */
+      public Builder setType(int value) {
+        copyOnWrite();
+        instance.setType(value);
+        return this;
+      }
+      /**
+       * <code>optional int32 type = 1 [default = 1];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearType() {
+        copyOnWrite();
+        instance.clearType();
+        return this;
+      }
+
+      /**
+       * <code>optional float starRating = 2;</code>
+       * @return Whether the starRating field is set.
+       */
+      @java.lang.Override
+      public boolean hasStarRating() {
+        return instance.hasStarRating();
+      }
+      /**
+       * <code>optional float starRating = 2;</code>
+       * @return The starRating.
+       */
+      @java.lang.Override
+      public float getStarRating() {
+        return instance.getStarRating();
+      }
+      /**
+       * <code>optional float starRating = 2;</code>
+       * @param value The starRating to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStarRating(float value) {
+        copyOnWrite();
+        instance.setStarRating(value);
+        return this;
+      }
+      /**
+       * <code>optional float starRating = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearStarRating() {
+        copyOnWrite();
+        instance.clearStarRating();
+        return this;
+      }
+
+      /**
+       * <code>optional uint64 ratingsCount = 3;</code>
+       * @return Whether the ratingsCount field is set.
+       */
+      @java.lang.Override
+      public boolean hasRatingsCount() {
+        return instance.hasRatingsCount();
+      }
+      /**
+       * <code>optional uint64 ratingsCount = 3;</code>
+       * @return The ratingsCount.
+       */
+      @java.lang.Override
+      public long getRatingsCount() {
+        return instance.getRatingsCount();
+      }
+      /**
+       * <code>optional uint64 ratingsCount = 3;</code>
+       * @param value The ratingsCount to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRatingsCount(long value) {
+        copyOnWrite();
+        instance.setRatingsCount(value);
+        return this;
+      }
+      /**
+       * <code>optional uint64 ratingsCount = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRatingsCount() {
+        copyOnWrite();
+        instance.clearRatingsCount();
+        return this;
+      }
+
+      /**
+       * <code>optional uint64 oneStarRatings = 4;</code>
+       * @return Whether the oneStarRatings field is set.
+       */
+      @java.lang.Override
+      public boolean hasOneStarRatings() {
+        return instance.hasOneStarRatings();
+      }
+      /**
+       * <code>optional uint64 oneStarRatings = 4;</code>
+       * @return The oneStarRatings.
+       */
+      @java.lang.Override
+      public long getOneStarRatings() {
+        return instance.getOneStarRatings();
+      }
+      /**
+       * <code>optional uint64 oneStarRatings = 4;</code>
+       * @param value The oneStarRatings to set.
+       * @return This builder for chaining.
+       */
+      public Builder setOneStarRatings(long value) {
+        copyOnWrite();
+        instance.setOneStarRatings(value);
+        return this;
+      }
+      /**
+       * <code>optional uint64 oneStarRatings = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearOneStarRatings() {
+        copyOnWrite();
+        instance.clearOneStarRatings();
+        return this;
+      }
+
+      /**
+       * <code>optional uint64 twoStarRatings = 5;</code>
+       * @return Whether the twoStarRatings field is set.
+       */
+      @java.lang.Override
+      public boolean hasTwoStarRatings() {
+        return instance.hasTwoStarRatings();
+      }
+      /**
+       * <code>optional uint64 twoStarRatings = 5;</code>
+       * @return The twoStarRatings.
+       */
+      @java.lang.Override
+      public long getTwoStarRatings() {
+        return instance.getTwoStarRatings();
+      }
+      /**
+       * <code>optional uint64 twoStarRatings = 5;</code>
+       * @param value The twoStarRatings to set.
+       * @return This builder for chaining.
+       */
+      public Builder setTwoStarRatings(long value) {
+        copyOnWrite();
+        instance.setTwoStarRatings(value);
+        return this;
+      }
+      /**
+       * <code>optional uint64 twoStarRatings = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearTwoStarRatings() {
+        copyOnWrite();
+        instance.clearTwoStarRatings();
+        return this;
+      }
+
+      /**
+       * <code>optional uint64 threeStarRatings = 6;</code>
+       * @return Whether the threeStarRatings field is set.
+       */
+      @java.lang.Override
+      public boolean hasThreeStarRatings() {
+        return instance.hasThreeStarRatings();
+      }
+      /**
+       * <code>optional uint64 threeStarRatings = 6;</code>
+       * @return The threeStarRatings.
+       */
+      @java.lang.Override
+      public long getThreeStarRatings() {
+        return instance.getThreeStarRatings();
+      }
+      /**
+       * <code>optional uint64 threeStarRatings = 6;</code>
+       * @param value The threeStarRatings to set.
+       * @return This builder for chaining.
+       */
+      public Builder setThreeStarRatings(long value) {
+        copyOnWrite();
+        instance.setThreeStarRatings(value);
+        return this;
+      }
+      /**
+       * <code>optional uint64 threeStarRatings = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearThreeStarRatings() {
+        copyOnWrite();
+        instance.clearThreeStarRatings();
+        return this;
+      }
+
+      /**
+       * <code>optional uint64 fourStarRatings = 7;</code>
+       * @return Whether the fourStarRatings field is set.
+       */
+      @java.lang.Override
+      public boolean hasFourStarRatings() {
+        return instance.hasFourStarRatings();
+      }
+      /**
+       * <code>optional uint64 fourStarRatings = 7;</code>
+       * @return The fourStarRatings.
+       */
+      @java.lang.Override
+      public long getFourStarRatings() {
+        return instance.getFourStarRatings();
+      }
+      /**
+       * <code>optional uint64 fourStarRatings = 7;</code>
+       * @param value The fourStarRatings to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFourStarRatings(long value) {
+        copyOnWrite();
+        instance.setFourStarRatings(value);
+        return this;
+      }
+      /**
+       * <code>optional uint64 fourStarRatings = 7;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearFourStarRatings() {
+        copyOnWrite();
+        instance.clearFourStarRatings();
+        return this;
+      }
+
+      /**
+       * <code>optional uint64 fiveStarRatings = 8;</code>
+       * @return Whether the fiveStarRatings field is set.
+       */
+      @java.lang.Override
+      public boolean hasFiveStarRatings() {
+        return instance.hasFiveStarRatings();
+      }
+      /**
+       * <code>optional uint64 fiveStarRatings = 8;</code>
+       * @return The fiveStarRatings.
+       */
+      @java.lang.Override
+      public long getFiveStarRatings() {
+        return instance.getFiveStarRatings();
+      }
+      /**
+       * <code>optional uint64 fiveStarRatings = 8;</code>
+       * @param value The fiveStarRatings to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFiveStarRatings(long value) {
+        copyOnWrite();
+        instance.setFiveStarRatings(value);
+        return this;
+      }
+      /**
+       * <code>optional uint64 fiveStarRatings = 8;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearFiveStarRatings() {
+        copyOnWrite();
+        instance.clearFiveStarRatings();
+        return this;
+      }
+
+      /**
+       * <code>optional uint64 thumbsUpCount = 9;</code>
+       * @return Whether the thumbsUpCount field is set.
+       */
+      @java.lang.Override
+      public boolean hasThumbsUpCount() {
+        return instance.hasThumbsUpCount();
+      }
+      /**
+       * <code>optional uint64 thumbsUpCount = 9;</code>
+       * @return The thumbsUpCount.
+       */
+      @java.lang.Override
+      public long getThumbsUpCount() {
+        return instance.getThumbsUpCount();
+      }
+      /**
+       * <code>optional uint64 thumbsUpCount = 9;</code>
+       * @param value The thumbsUpCount to set.
+       * @return This builder for chaining.
+       */
+      public Builder setThumbsUpCount(long value) {
+        copyOnWrite();
+        instance.setThumbsUpCount(value);
+        return this;
+      }
+      /**
+       * <code>optional uint64 thumbsUpCount = 9;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearThumbsUpCount() {
+        copyOnWrite();
+        instance.clearThumbsUpCount();
+        return this;
+      }
+
+      /**
+       * <code>optional uint64 thumbsDownCount = 10;</code>
+       * @return Whether the thumbsDownCount field is set.
+       */
+      @java.lang.Override
+      public boolean hasThumbsDownCount() {
+        return instance.hasThumbsDownCount();
+      }
+      /**
+       * <code>optional uint64 thumbsDownCount = 10;</code>
+       * @return The thumbsDownCount.
+       */
+      @java.lang.Override
+      public long getThumbsDownCount() {
+        return instance.getThumbsDownCount();
+      }
+      /**
+       * <code>optional uint64 thumbsDownCount = 10;</code>
+       * @param value The thumbsDownCount to set.
+       * @return This builder for chaining.
+       */
+      public Builder setThumbsDownCount(long value) {
+        copyOnWrite();
+        instance.setThumbsDownCount(value);
+        return this;
+      }
+      /**
+       * <code>optional uint64 thumbsDownCount = 10;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearThumbsDownCount() {
+        copyOnWrite();
+        instance.clearThumbsDownCount();
+        return this;
+      }
+
+      /**
+       * <code>optional uint64 commentCount = 11;</code>
+       * @return Whether the commentCount field is set.
+       */
+      @java.lang.Override
+      public boolean hasCommentCount() {
+        return instance.hasCommentCount();
+      }
+      /**
+       * <code>optional uint64 commentCount = 11;</code>
+       * @return The commentCount.
+       */
+      @java.lang.Override
+      public long getCommentCount() {
+        return instance.getCommentCount();
+      }
+      /**
+       * <code>optional uint64 commentCount = 11;</code>
+       * @param value The commentCount to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCommentCount(long value) {
+        copyOnWrite();
+        instance.setCommentCount(value);
+        return this;
+      }
+      /**
+       * <code>optional uint64 commentCount = 11;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCommentCount() {
+        copyOnWrite();
+        instance.clearCommentCount();
+        return this;
+      }
+
+      /**
+       * <code>optional double bayesianMeanRating = 12;</code>
+       * @return Whether the bayesianMeanRating field is set.
+       */
+      @java.lang.Override
+      public boolean hasBayesianMeanRating() {
+        return instance.hasBayesianMeanRating();
+      }
+      /**
+       * <code>optional double bayesianMeanRating = 12;</code>
+       * @return The bayesianMeanRating.
+       */
+      @java.lang.Override
+      public double getBayesianMeanRating() {
+        return instance.getBayesianMeanRating();
+      }
+      /**
+       * <code>optional double bayesianMeanRating = 12;</code>
+       * @param value The bayesianMeanRating to set.
+       * @return This builder for chaining.
+       */
+      public Builder setBayesianMeanRating(double value) {
+        copyOnWrite();
+        instance.setBayesianMeanRating(value);
+        return this;
+      }
+      /**
+       * <code>optional double bayesianMeanRating = 12;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearBayesianMeanRating() {
+        copyOnWrite();
+        instance.clearBayesianMeanRating();
+        return this;
+      }
+
+      /**
+       * <pre>
+       *repeated Tip tip = 13;
+       * </pre>
+       *
+       * <code>optional string ratingLabel = 17;</code>
+       * @return Whether the ratingLabel field is set.
+       */
+      @java.lang.Override
+      public boolean hasRatingLabel() {
+        return instance.hasRatingLabel();
+      }
+      /**
+       * <pre>
+       *repeated Tip tip = 13;
+       * </pre>
+       *
+       * <code>optional string ratingLabel = 17;</code>
+       * @return The ratingLabel.
+       */
+      @java.lang.Override
+      public java.lang.String getRatingLabel() {
+        return instance.getRatingLabel();
+      }
+      /**
+       * <pre>
+       *repeated Tip tip = 13;
+       * </pre>
+       *
+       * <code>optional string ratingLabel = 17;</code>
+       * @return The bytes for ratingLabel.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString
+          getRatingLabelBytes() {
+        return instance.getRatingLabelBytes();
+      }
+      /**
+       * <pre>
+       *repeated Tip tip = 13;
+       * </pre>
+       *
+       * <code>optional string ratingLabel = 17;</code>
+       * @param value The ratingLabel to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRatingLabel(
+          java.lang.String value) {
+        copyOnWrite();
+        instance.setRatingLabel(value);
+        return this;
+      }
+      /**
+       * <pre>
+       *repeated Tip tip = 13;
+       * </pre>
+       *
+       * <code>optional string ratingLabel = 17;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRatingLabel() {
+        copyOnWrite();
+        instance.clearRatingLabel();
+        return this;
+      }
+      /**
+       * <pre>
+       *repeated Tip tip = 13;
+       * </pre>
+       *
+       * <code>optional string ratingLabel = 17;</code>
+       * @param value The bytes for ratingLabel to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRatingLabelBytes(
+          com.google.protobuf.ByteString value) {
+        copyOnWrite();
+        instance.setRatingLabelBytes(value);
+        return this;
+      }
+
+      /**
+       * <code>optional string ratingCountLabelAbbreviated = 18;</code>
+       * @return Whether the ratingCountLabelAbbreviated field is set.
+       */
+      @java.lang.Override
+      public boolean hasRatingCountLabelAbbreviated() {
+        return instance.hasRatingCountLabelAbbreviated();
+      }
+      /**
+       * <code>optional string ratingCountLabelAbbreviated = 18;</code>
+       * @return The ratingCountLabelAbbreviated.
+       */
+      @java.lang.Override
+      public java.lang.String getRatingCountLabelAbbreviated() {
+        return instance.getRatingCountLabelAbbreviated();
+      }
+      /**
+       * <code>optional string ratingCountLabelAbbreviated = 18;</code>
+       * @return The bytes for ratingCountLabelAbbreviated.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString
+          getRatingCountLabelAbbreviatedBytes() {
+        return instance.getRatingCountLabelAbbreviatedBytes();
+      }
+      /**
+       * <code>optional string ratingCountLabelAbbreviated = 18;</code>
+       * @param value The ratingCountLabelAbbreviated to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRatingCountLabelAbbreviated(
+          java.lang.String value) {
+        copyOnWrite();
+        instance.setRatingCountLabelAbbreviated(value);
+        return this;
+      }
+      /**
+       * <code>optional string ratingCountLabelAbbreviated = 18;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRatingCountLabelAbbreviated() {
+        copyOnWrite();
+        instance.clearRatingCountLabelAbbreviated();
+        return this;
+      }
+      /**
+       * <code>optional string ratingCountLabelAbbreviated = 18;</code>
+       * @param value The bytes for ratingCountLabelAbbreviated to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRatingCountLabelAbbreviatedBytes(
+          com.google.protobuf.ByteString value) {
+        copyOnWrite();
+        instance.setRatingCountLabelAbbreviatedBytes(value);
+        return this;
+      }
+
+      /**
+       * <code>optional string ratingCountLabel = 19;</code>
+       * @return Whether the ratingCountLabel field is set.
+       */
+      @java.lang.Override
+      public boolean hasRatingCountLabel() {
+        return instance.hasRatingCountLabel();
+      }
+      /**
+       * <code>optional string ratingCountLabel = 19;</code>
+       * @return The ratingCountLabel.
+       */
+      @java.lang.Override
+      public java.lang.String getRatingCountLabel() {
+        return instance.getRatingCountLabel();
+      }
+      /**
+       * <code>optional string ratingCountLabel = 19;</code>
+       * @return The bytes for ratingCountLabel.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString
+          getRatingCountLabelBytes() {
+        return instance.getRatingCountLabelBytes();
+      }
+      /**
+       * <code>optional string ratingCountLabel = 19;</code>
+       * @param value The ratingCountLabel to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRatingCountLabel(
+          java.lang.String value) {
+        copyOnWrite();
+        instance.setRatingCountLabel(value);
+        return this;
+      }
+      /**
+       * <code>optional string ratingCountLabel = 19;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRatingCountLabel() {
+        copyOnWrite();
+        instance.clearRatingCountLabel();
+        return this;
+      }
+      /**
+       * <code>optional string ratingCountLabel = 19;</code>
+       * @param value The bytes for ratingCountLabel to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRatingCountLabelBytes(
+          com.google.protobuf.ByteString value) {
+        copyOnWrite();
+        instance.setRatingCountLabelBytes(value);
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:finsky.protos.DocV2.AggregateRating)
+    }
+    @java.lang.Override
+    @java.lang.SuppressWarnings({"unchecked", "fallthrough"})
+    protected final java.lang.Object dynamicMethod(
+        com.google.protobuf.GeneratedMessageLite.MethodToInvoke method,
+        java.lang.Object arg0, java.lang.Object arg1) {
+      switch (method) {
+        case NEW_MUTABLE_INSTANCE: {
+          return new finsky.protos.DocV2.AggregateRating();
+        }
+        case NEW_BUILDER: {
+          return new Builder();
+        }
+        case BUILD_MESSAGE_INFO: {
+            java.lang.Object[] objects = new java.lang.Object[] {
+              "bitField0_",
+              "type_",
+              "starRating_",
+              "ratingsCount_",
+              "oneStarRatings_",
+              "twoStarRatings_",
+              "threeStarRatings_",
+              "fourStarRatings_",
+              "fiveStarRatings_",
+              "thumbsUpCount_",
+              "thumbsDownCount_",
+              "commentCount_",
+              "bayesianMeanRating_",
+              "ratingLabel_",
+              "ratingCountLabelAbbreviated_",
+              "ratingCountLabel_",
+            };
+            java.lang.String info =
+                "\u0001\u000f\u0000\u0001\u0001\u0013\u000f\u0000\u0000\u0000\u0001\u1004\u0000\u0002" +
+                "\u1001\u0001\u0003\u1003\u0002\u0004\u1003\u0003\u0005\u1003\u0004\u0006\u1003\u0005" +
+                "\u0007\u1003\u0006\b\u1003\u0007\t\u1003\b\n\u1003\t\u000b\u1003\n\f\u1000\u000b" +
+                "\u0011\u1008\f\u0012\u1008\r\u0013\u1008\u000e";
+            return newMessageInfo(DEFAULT_INSTANCE, info, objects);
+        }
+        // fall through
+        case GET_DEFAULT_INSTANCE: {
+          return DEFAULT_INSTANCE;
+        }
+        case GET_PARSER: {
+          com.google.protobuf.Parser<finsky.protos.DocV2.AggregateRating> parser = PARSER;
+          if (parser == null) {
+            synchronized (finsky.protos.DocV2.AggregateRating.class) {
+              parser = PARSER;
+              if (parser == null) {
+                parser =
+                    new DefaultInstanceBasedParser<finsky.protos.DocV2.AggregateRating>(
+                        DEFAULT_INSTANCE);
+                PARSER = parser;
+              }
+            }
+          }
+          return parser;
+      }
+      case GET_MEMOIZED_IS_INITIALIZED: {
+        return (byte) 1;
+      }
+      case SET_MEMOIZED_IS_INITIALIZED: {
+        return null;
+      }
+      }
+      throw new UnsupportedOperationException();
+    }
+
+
+    // @@protoc_insertion_point(class_scope:finsky.protos.DocV2.AggregateRating)
+    private static final finsky.protos.DocV2.AggregateRating DEFAULT_INSTANCE;
+    static {
+      AggregateRating defaultInstance = new AggregateRating();
+      // New instances are implicitly immutable so no need to make
+      // immutable.
+      DEFAULT_INSTANCE = defaultInstance;
+      com.google.protobuf.GeneratedMessageLite.registerDefaultInstance(
+        AggregateRating.class, defaultInstance);
+    }
+
+    public static finsky.protos.DocV2.AggregateRating getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static volatile com.google.protobuf.Parser<AggregateRating> PARSER;
+
+    public static com.google.protobuf.Parser<AggregateRating> parser() {
+      return DEFAULT_INSTANCE.getParserForType();
+    }
+  }
+
   private int bitField0_;
   public static final int DOCID_FIELD_NUMBER = 1;
   private java.lang.String docid_;
@@ -467,7 +2089,7 @@ public  final class DocV2 extends
   private com.google.protobuf.Internal.ProtobufList<finsky.protos.Common.Image> image_;
   /**
    * <pre>
-   * optional Availability availability = 9;
+   *optional Availability availability = 9;
    * </pre>
    *
    * <code>repeated .finsky.protos.Common.Image image = 10;</code>
@@ -478,7 +2100,7 @@ public  final class DocV2 extends
   }
   /**
    * <pre>
-   * optional Availability availability = 9;
+   *optional Availability availability = 9;
    * </pre>
    *
    * <code>repeated .finsky.protos.Common.Image image = 10;</code>
@@ -489,7 +2111,7 @@ public  final class DocV2 extends
   }
   /**
    * <pre>
-   * optional Availability availability = 9;
+   *optional Availability availability = 9;
    * </pre>
    *
    * <code>repeated .finsky.protos.Common.Image image = 10;</code>
@@ -500,7 +2122,7 @@ public  final class DocV2 extends
   }
   /**
    * <pre>
-   * optional Availability availability = 9;
+   *optional Availability availability = 9;
    * </pre>
    *
    * <code>repeated .finsky.protos.Common.Image image = 10;</code>
@@ -511,7 +2133,7 @@ public  final class DocV2 extends
   }
   /**
    * <pre>
-   * optional Availability availability = 9;
+   *optional Availability availability = 9;
    * </pre>
    *
    * <code>repeated .finsky.protos.Common.Image image = 10;</code>
@@ -530,7 +2152,7 @@ public  final class DocV2 extends
 
   /**
    * <pre>
-   * optional Availability availability = 9;
+   *optional Availability availability = 9;
    * </pre>
    *
    * <code>repeated .finsky.protos.Common.Image image = 10;</code>
@@ -543,7 +2165,7 @@ public  final class DocV2 extends
   }
   /**
    * <pre>
-   * optional Availability availability = 9;
+   *optional Availability availability = 9;
    * </pre>
    *
    * <code>repeated .finsky.protos.Common.Image image = 10;</code>
@@ -555,7 +2177,7 @@ public  final class DocV2 extends
   }
   /**
    * <pre>
-   * optional Availability availability = 9;
+   *optional Availability availability = 9;
    * </pre>
    *
    * <code>repeated .finsky.protos.Common.Image image = 10;</code>
@@ -568,7 +2190,7 @@ public  final class DocV2 extends
   }
   /**
    * <pre>
-   * optional Availability availability = 9;
+   *optional Availability availability = 9;
    * </pre>
    *
    * <code>repeated .finsky.protos.Common.Image image = 10;</code>
@@ -581,7 +2203,7 @@ public  final class DocV2 extends
   }
   /**
    * <pre>
-   * optional Availability availability = 9;
+   *optional Availability availability = 9;
    * </pre>
    *
    * <code>repeated .finsky.protos.Common.Image image = 10;</code>
@@ -591,7 +2213,7 @@ public  final class DocV2 extends
   }
   /**
    * <pre>
-   * optional Availability availability = 9;
+   *optional Availability availability = 9;
    * </pre>
    *
    * <code>repeated .finsky.protos.Common.Image image = 10;</code>
@@ -787,24 +2409,62 @@ public  final class DocV2 extends
     bitField0_ = (bitField0_ & ~0x00000100);
   }
 
+  public static final int AGGREGATERATING_FIELD_NUMBER = 14;
+  private finsky.protos.DocV2.AggregateRating aggregateRating_;
+  /**
+   * <code>optional .finsky.protos.DocV2.AggregateRating aggregateRating = 14;</code>
+   */
+  @java.lang.Override
+  public boolean hasAggregateRating() {
+    return ((bitField0_ & 0x00000200) != 0);
+  }
+  /**
+   * <code>optional .finsky.protos.DocV2.AggregateRating aggregateRating = 14;</code>
+   */
+  @java.lang.Override
+  public finsky.protos.DocV2.AggregateRating getAggregateRating() {
+    return aggregateRating_ == null ? finsky.protos.DocV2.AggregateRating.getDefaultInstance() : aggregateRating_;
+  }
+  /**
+   * <code>optional .finsky.protos.DocV2.AggregateRating aggregateRating = 14;</code>
+   */
+  private void setAggregateRating(finsky.protos.DocV2.AggregateRating value) {
+    value.getClass();
+  aggregateRating_ = value;
+    bitField0_ |= 0x00000200;
+    }
+  /**
+   * <code>optional .finsky.protos.DocV2.AggregateRating aggregateRating = 14;</code>
+   */
+  @java.lang.SuppressWarnings({"ReferenceEquality"})
+  private void mergeAggregateRating(finsky.protos.DocV2.AggregateRating value) {
+    value.getClass();
+  if (aggregateRating_ != null &&
+        aggregateRating_ != finsky.protos.DocV2.AggregateRating.getDefaultInstance()) {
+      aggregateRating_ =
+        finsky.protos.DocV2.AggregateRating.newBuilder(aggregateRating_).mergeFrom(value).buildPartial();
+    } else {
+      aggregateRating_ = value;
+    }
+    bitField0_ |= 0x00000200;
+  }
+  /**
+   * <code>optional .finsky.protos.DocV2.AggregateRating aggregateRating = 14;</code>
+   */
+  private void clearAggregateRating() {  aggregateRating_ = null;
+    bitField0_ = (bitField0_ & ~0x00000200);
+  }
+
   public static final int RELATEDLINKS_FIELD_NUMBER = 15;
   private finsky.protos.RelatedLinks relatedLinks_;
   /**
-   * <pre>
-   *optional AggregateRating aggregateRating = 14;
-   * </pre>
-   *
    * <code>optional .finsky.protos.RelatedLinks relatedLinks = 15;</code>
    */
   @java.lang.Override
   public boolean hasRelatedLinks() {
-    return ((bitField0_ & 0x00000200) != 0);
+    return ((bitField0_ & 0x00000400) != 0);
   }
   /**
-   * <pre>
-   *optional AggregateRating aggregateRating = 14;
-   * </pre>
-   *
    * <code>optional .finsky.protos.RelatedLinks relatedLinks = 15;</code>
    */
   @java.lang.Override
@@ -812,22 +2472,14 @@ public  final class DocV2 extends
     return relatedLinks_ == null ? finsky.protos.RelatedLinks.getDefaultInstance() : relatedLinks_;
   }
   /**
-   * <pre>
-   *optional AggregateRating aggregateRating = 14;
-   * </pre>
-   *
    * <code>optional .finsky.protos.RelatedLinks relatedLinks = 15;</code>
    */
   private void setRelatedLinks(finsky.protos.RelatedLinks value) {
     value.getClass();
   relatedLinks_ = value;
-    bitField0_ |= 0x00000200;
+    bitField0_ |= 0x00000400;
     }
   /**
-   * <pre>
-   *optional AggregateRating aggregateRating = 14;
-   * </pre>
-   *
    * <code>optional .finsky.protos.RelatedLinks relatedLinks = 15;</code>
    */
   @java.lang.SuppressWarnings({"ReferenceEquality"})
@@ -840,17 +2492,13 @@ public  final class DocV2 extends
     } else {
       relatedLinks_ = value;
     }
-    bitField0_ |= 0x00000200;
+    bitField0_ |= 0x00000400;
   }
   /**
-   * <pre>
-   *optional AggregateRating aggregateRating = 14;
-   * </pre>
-   *
    * <code>optional .finsky.protos.RelatedLinks relatedLinks = 15;</code>
    */
   private void clearRelatedLinks() {  relatedLinks_ = null;
-    bitField0_ = (bitField0_ & ~0x00000200);
+    bitField0_ = (bitField0_ & ~0x00000400);
   }
 
   public static final int DETAILSURL_FIELD_NUMBER = 16;
@@ -861,7 +2509,7 @@ public  final class DocV2 extends
    */
   @java.lang.Override
   public boolean hasDetailsUrl() {
-    return ((bitField0_ & 0x00000400) != 0);
+    return ((bitField0_ & 0x00000800) != 0);
   }
   /**
    * <code>optional string detailsUrl = 16;</code>
@@ -887,14 +2535,14 @@ public  final class DocV2 extends
   private void setDetailsUrl(
       java.lang.String value) {
     java.lang.Class<?> valueClass = value.getClass();
-  bitField0_ |= 0x00000400;
+  bitField0_ |= 0x00000800;
     detailsUrl_ = value;
   }
   /**
    * <code>optional string detailsUrl = 16;</code>
    */
   private void clearDetailsUrl() {
-    bitField0_ = (bitField0_ & ~0x00000400);
+    bitField0_ = (bitField0_ & ~0x00000800);
     detailsUrl_ = getDefaultInstance().getDetailsUrl();
   }
   /**
@@ -904,7 +2552,7 @@ public  final class DocV2 extends
   private void setDetailsUrlBytes(
       com.google.protobuf.ByteString value) {
     detailsUrl_ = value.toStringUtf8();
-    bitField0_ |= 0x00000400;
+    bitField0_ |= 0x00000800;
   }
 
   public static final int SHAREURL_FIELD_NUMBER = 17;
@@ -915,7 +2563,7 @@ public  final class DocV2 extends
    */
   @java.lang.Override
   public boolean hasShareUrl() {
-    return ((bitField0_ & 0x00000800) != 0);
+    return ((bitField0_ & 0x00001000) != 0);
   }
   /**
    * <code>optional string shareUrl = 17;</code>
@@ -941,14 +2589,14 @@ public  final class DocV2 extends
   private void setShareUrl(
       java.lang.String value) {
     java.lang.Class<?> valueClass = value.getClass();
-  bitField0_ |= 0x00000800;
+  bitField0_ |= 0x00001000;
     shareUrl_ = value;
   }
   /**
    * <code>optional string shareUrl = 17;</code>
    */
   private void clearShareUrl() {
-    bitField0_ = (bitField0_ & ~0x00000800);
+    bitField0_ = (bitField0_ & ~0x00001000);
     shareUrl_ = getDefaultInstance().getShareUrl();
   }
   /**
@@ -958,7 +2606,7 @@ public  final class DocV2 extends
   private void setShareUrlBytes(
       com.google.protobuf.ByteString value) {
     shareUrl_ = value.toStringUtf8();
-    bitField0_ |= 0x00000800;
+    bitField0_ |= 0x00001000;
   }
 
   public static final int REVIEWSURL_FIELD_NUMBER = 18;
@@ -969,7 +2617,7 @@ public  final class DocV2 extends
    */
   @java.lang.Override
   public boolean hasReviewsUrl() {
-    return ((bitField0_ & 0x00001000) != 0);
+    return ((bitField0_ & 0x00002000) != 0);
   }
   /**
    * <code>optional string reviewsUrl = 18;</code>
@@ -995,14 +2643,14 @@ public  final class DocV2 extends
   private void setReviewsUrl(
       java.lang.String value) {
     java.lang.Class<?> valueClass = value.getClass();
-  bitField0_ |= 0x00001000;
+  bitField0_ |= 0x00002000;
     reviewsUrl_ = value;
   }
   /**
    * <code>optional string reviewsUrl = 18;</code>
    */
   private void clearReviewsUrl() {
-    bitField0_ = (bitField0_ & ~0x00001000);
+    bitField0_ = (bitField0_ & ~0x00002000);
     reviewsUrl_ = getDefaultInstance().getReviewsUrl();
   }
   /**
@@ -1012,7 +2660,7 @@ public  final class DocV2 extends
   private void setReviewsUrlBytes(
       com.google.protobuf.ByteString value) {
     reviewsUrl_ = value.toStringUtf8();
-    bitField0_ |= 0x00001000;
+    bitField0_ |= 0x00002000;
   }
 
   public static final int BACKENDURL_FIELD_NUMBER = 19;
@@ -1023,7 +2671,7 @@ public  final class DocV2 extends
    */
   @java.lang.Override
   public boolean hasBackendUrl() {
-    return ((bitField0_ & 0x00002000) != 0);
+    return ((bitField0_ & 0x00004000) != 0);
   }
   /**
    * <code>optional string backendUrl = 19;</code>
@@ -1049,14 +2697,14 @@ public  final class DocV2 extends
   private void setBackendUrl(
       java.lang.String value) {
     java.lang.Class<?> valueClass = value.getClass();
-  bitField0_ |= 0x00002000;
+  bitField0_ |= 0x00004000;
     backendUrl_ = value;
   }
   /**
    * <code>optional string backendUrl = 19;</code>
    */
   private void clearBackendUrl() {
-    bitField0_ = (bitField0_ & ~0x00002000);
+    bitField0_ = (bitField0_ & ~0x00004000);
     backendUrl_ = getDefaultInstance().getBackendUrl();
   }
   /**
@@ -1066,7 +2714,7 @@ public  final class DocV2 extends
   private void setBackendUrlBytes(
       com.google.protobuf.ByteString value) {
     backendUrl_ = value.toStringUtf8();
-    bitField0_ |= 0x00002000;
+    bitField0_ |= 0x00004000;
   }
 
   public static final int PURCHASEDETAILSURL_FIELD_NUMBER = 20;
@@ -1077,7 +2725,7 @@ public  final class DocV2 extends
    */
   @java.lang.Override
   public boolean hasPurchaseDetailsUrl() {
-    return ((bitField0_ & 0x00004000) != 0);
+    return ((bitField0_ & 0x00008000) != 0);
   }
   /**
    * <code>optional string purchaseDetailsUrl = 20;</code>
@@ -1103,14 +2751,14 @@ public  final class DocV2 extends
   private void setPurchaseDetailsUrl(
       java.lang.String value) {
     java.lang.Class<?> valueClass = value.getClass();
-  bitField0_ |= 0x00004000;
+  bitField0_ |= 0x00008000;
     purchaseDetailsUrl_ = value;
   }
   /**
    * <code>optional string purchaseDetailsUrl = 20;</code>
    */
   private void clearPurchaseDetailsUrl() {
-    bitField0_ = (bitField0_ & ~0x00004000);
+    bitField0_ = (bitField0_ & ~0x00008000);
     purchaseDetailsUrl_ = getDefaultInstance().getPurchaseDetailsUrl();
   }
   /**
@@ -1120,7 +2768,7 @@ public  final class DocV2 extends
   private void setPurchaseDetailsUrlBytes(
       com.google.protobuf.ByteString value) {
     purchaseDetailsUrl_ = value.toStringUtf8();
-    bitField0_ |= 0x00004000;
+    bitField0_ |= 0x00008000;
   }
 
   public static final int DETAILSREUSABLE_FIELD_NUMBER = 21;
@@ -1131,7 +2779,7 @@ public  final class DocV2 extends
    */
   @java.lang.Override
   public boolean hasDetailsReusable() {
-    return ((bitField0_ & 0x00008000) != 0);
+    return ((bitField0_ & 0x00010000) != 0);
   }
   /**
    * <code>optional bool detailsReusable = 21;</code>
@@ -1146,14 +2794,14 @@ public  final class DocV2 extends
    * @param value The detailsReusable to set.
    */
   private void setDetailsReusable(boolean value) {
-    bitField0_ |= 0x00008000;
+    bitField0_ |= 0x00010000;
     detailsReusable_ = value;
   }
   /**
    * <code>optional bool detailsReusable = 21;</code>
    */
   private void clearDetailsReusable() {
-    bitField0_ = (bitField0_ & ~0x00008000);
+    bitField0_ = (bitField0_ & ~0x00010000);
     detailsReusable_ = false;
   }
 
@@ -1165,7 +2813,7 @@ public  final class DocV2 extends
    */
   @java.lang.Override
   public boolean hasSubtitle() {
-    return ((bitField0_ & 0x00010000) != 0);
+    return ((bitField0_ & 0x00020000) != 0);
   }
   /**
    * <code>optional string subtitle = 22;</code>
@@ -1191,14 +2839,14 @@ public  final class DocV2 extends
   private void setSubtitle(
       java.lang.String value) {
     java.lang.Class<?> valueClass = value.getClass();
-  bitField0_ |= 0x00010000;
+  bitField0_ |= 0x00020000;
     subtitle_ = value;
   }
   /**
    * <code>optional string subtitle = 22;</code>
    */
   private void clearSubtitle() {
-    bitField0_ = (bitField0_ & ~0x00010000);
+    bitField0_ = (bitField0_ & ~0x00020000);
     subtitle_ = getDefaultInstance().getSubtitle();
   }
   /**
@@ -1208,7 +2856,7 @@ public  final class DocV2 extends
   private void setSubtitleBytes(
       com.google.protobuf.ByteString value) {
     subtitle_ = value.toStringUtf8();
-    bitField0_ |= 0x00010000;
+    bitField0_ |= 0x00020000;
   }
 
   public static final int DESCRIPTIONSHORT_FIELD_NUMBER = 27;
@@ -1223,7 +2871,7 @@ public  final class DocV2 extends
    */
   @java.lang.Override
   public boolean hasDescriptionShort() {
-    return ((bitField0_ & 0x00020000) != 0);
+    return ((bitField0_ & 0x00040000) != 0);
   }
   /**
    * <pre>
@@ -1261,7 +2909,7 @@ public  final class DocV2 extends
   private void setDescriptionShort(
       java.lang.String value) {
     java.lang.Class<?> valueClass = value.getClass();
-  bitField0_ |= 0x00020000;
+  bitField0_ |= 0x00040000;
     descriptionShort_ = value;
   }
   /**
@@ -1272,7 +2920,7 @@ public  final class DocV2 extends
    * <code>optional string descriptionShort = 27;</code>
    */
   private void clearDescriptionShort() {
-    bitField0_ = (bitField0_ & ~0x00020000);
+    bitField0_ = (bitField0_ & ~0x00040000);
     descriptionShort_ = getDefaultInstance().getDescriptionShort();
   }
   /**
@@ -1286,7 +2934,7 @@ public  final class DocV2 extends
   private void setDescriptionShortBytes(
       com.google.protobuf.ByteString value) {
     descriptionShort_ = value.toStringUtf8();
-    bitField0_ |= 0x00020000;
+    bitField0_ |= 0x00040000;
   }
 
   public static final int REVIEWSNIPPETSURL_FIELD_NUMBER = 31;
@@ -1297,7 +2945,7 @@ public  final class DocV2 extends
    */
   @java.lang.Override
   public boolean hasReviewSnippetsUrl() {
-    return ((bitField0_ & 0x00040000) != 0);
+    return ((bitField0_ & 0x00080000) != 0);
   }
   /**
    * <code>optional string reviewSnippetsUrl = 31;</code>
@@ -1323,14 +2971,14 @@ public  final class DocV2 extends
   private void setReviewSnippetsUrl(
       java.lang.String value) {
     java.lang.Class<?> valueClass = value.getClass();
-  bitField0_ |= 0x00040000;
+  bitField0_ |= 0x00080000;
     reviewSnippetsUrl_ = value;
   }
   /**
    * <code>optional string reviewSnippetsUrl = 31;</code>
    */
   private void clearReviewSnippetsUrl() {
-    bitField0_ = (bitField0_ & ~0x00040000);
+    bitField0_ = (bitField0_ & ~0x00080000);
     reviewSnippetsUrl_ = getDefaultInstance().getReviewSnippetsUrl();
   }
   /**
@@ -1340,7 +2988,7 @@ public  final class DocV2 extends
   private void setReviewSnippetsUrlBytes(
       com.google.protobuf.ByteString value) {
     reviewSnippetsUrl_ = value.toStringUtf8();
-    bitField0_ |= 0x00040000;
+    bitField0_ |= 0x00080000;
   }
 
   public static final int REVIEWQUESTIONSURL_FIELD_NUMBER = 34;
@@ -1351,7 +2999,7 @@ public  final class DocV2 extends
    */
   @java.lang.Override
   public boolean hasReviewQuestionsUrl() {
-    return ((bitField0_ & 0x00080000) != 0);
+    return ((bitField0_ & 0x00100000) != 0);
   }
   /**
    * <code>optional string reviewQuestionsUrl = 34;</code>
@@ -1377,14 +3025,14 @@ public  final class DocV2 extends
   private void setReviewQuestionsUrl(
       java.lang.String value) {
     java.lang.Class<?> valueClass = value.getClass();
-  bitField0_ |= 0x00080000;
+  bitField0_ |= 0x00100000;
     reviewQuestionsUrl_ = value;
   }
   /**
    * <code>optional string reviewQuestionsUrl = 34;</code>
    */
   private void clearReviewQuestionsUrl() {
-    bitField0_ = (bitField0_ & ~0x00080000);
+    bitField0_ = (bitField0_ & ~0x00100000);
     reviewQuestionsUrl_ = getDefaultInstance().getReviewQuestionsUrl();
   }
   /**
@@ -1394,7 +3042,7 @@ public  final class DocV2 extends
   private void setReviewQuestionsUrlBytes(
       com.google.protobuf.ByteString value) {
     reviewQuestionsUrl_ = value.toStringUtf8();
-    bitField0_ |= 0x00080000;
+    bitField0_ |= 0x00100000;
   }
 
   public static finsky.protos.DocV2 parseFrom(
@@ -1953,7 +3601,7 @@ public  final class DocV2 extends
 
     /**
      * <pre>
-     * optional Availability availability = 9;
+     *optional Availability availability = 9;
      * </pre>
      *
      * <code>repeated .finsky.protos.Common.Image image = 10;</code>
@@ -1965,7 +3613,7 @@ public  final class DocV2 extends
     }
     /**
      * <pre>
-     * optional Availability availability = 9;
+     *optional Availability availability = 9;
      * </pre>
      *
      * <code>repeated .finsky.protos.Common.Image image = 10;</code>
@@ -1975,7 +3623,7 @@ public  final class DocV2 extends
       return instance.getImageCount();
     }/**
      * <pre>
-     * optional Availability availability = 9;
+     *optional Availability availability = 9;
      * </pre>
      *
      * <code>repeated .finsky.protos.Common.Image image = 10;</code>
@@ -1986,7 +3634,7 @@ public  final class DocV2 extends
     }
     /**
      * <pre>
-     * optional Availability availability = 9;
+     *optional Availability availability = 9;
      * </pre>
      *
      * <code>repeated .finsky.protos.Common.Image image = 10;</code>
@@ -1999,7 +3647,7 @@ public  final class DocV2 extends
     }
     /**
      * <pre>
-     * optional Availability availability = 9;
+     *optional Availability availability = 9;
      * </pre>
      *
      * <code>repeated .finsky.protos.Common.Image image = 10;</code>
@@ -2013,7 +3661,7 @@ public  final class DocV2 extends
     }
     /**
      * <pre>
-     * optional Availability availability = 9;
+     *optional Availability availability = 9;
      * </pre>
      *
      * <code>repeated .finsky.protos.Common.Image image = 10;</code>
@@ -2025,7 +3673,7 @@ public  final class DocV2 extends
     }
     /**
      * <pre>
-     * optional Availability availability = 9;
+     *optional Availability availability = 9;
      * </pre>
      *
      * <code>repeated .finsky.protos.Common.Image image = 10;</code>
@@ -2038,7 +3686,7 @@ public  final class DocV2 extends
     }
     /**
      * <pre>
-     * optional Availability availability = 9;
+     *optional Availability availability = 9;
      * </pre>
      *
      * <code>repeated .finsky.protos.Common.Image image = 10;</code>
@@ -2051,7 +3699,7 @@ public  final class DocV2 extends
     }
     /**
      * <pre>
-     * optional Availability availability = 9;
+     *optional Availability availability = 9;
      * </pre>
      *
      * <code>repeated .finsky.protos.Common.Image image = 10;</code>
@@ -2065,7 +3713,7 @@ public  final class DocV2 extends
     }
     /**
      * <pre>
-     * optional Availability availability = 9;
+     *optional Availability availability = 9;
      * </pre>
      *
      * <code>repeated .finsky.protos.Common.Image image = 10;</code>
@@ -2078,7 +3726,7 @@ public  final class DocV2 extends
     }
     /**
      * <pre>
-     * optional Availability availability = 9;
+     *optional Availability availability = 9;
      * </pre>
      *
      * <code>repeated .finsky.protos.Common.Image image = 10;</code>
@@ -2090,7 +3738,7 @@ public  final class DocV2 extends
     }
     /**
      * <pre>
-     * optional Availability availability = 9;
+     *optional Availability availability = 9;
      * </pre>
      *
      * <code>repeated .finsky.protos.Common.Image image = 10;</code>
@@ -2298,10 +3946,53 @@ public  final class DocV2 extends
     }
 
     /**
-     * <pre>
-     *optional AggregateRating aggregateRating = 14;
-     * </pre>
-     *
+     * <code>optional .finsky.protos.DocV2.AggregateRating aggregateRating = 14;</code>
+     */
+    @java.lang.Override
+    public boolean hasAggregateRating() {
+      return instance.hasAggregateRating();
+    }
+    /**
+     * <code>optional .finsky.protos.DocV2.AggregateRating aggregateRating = 14;</code>
+     */
+    @java.lang.Override
+    public finsky.protos.DocV2.AggregateRating getAggregateRating() {
+      return instance.getAggregateRating();
+    }
+    /**
+     * <code>optional .finsky.protos.DocV2.AggregateRating aggregateRating = 14;</code>
+     */
+    public Builder setAggregateRating(finsky.protos.DocV2.AggregateRating value) {
+      copyOnWrite();
+      instance.setAggregateRating(value);
+      return this;
+      }
+    /**
+     * <code>optional .finsky.protos.DocV2.AggregateRating aggregateRating = 14;</code>
+     */
+    public Builder setAggregateRating(
+        finsky.protos.DocV2.AggregateRating.Builder builderForValue) {
+      copyOnWrite();
+      instance.setAggregateRating(builderForValue.build());
+      return this;
+    }
+    /**
+     * <code>optional .finsky.protos.DocV2.AggregateRating aggregateRating = 14;</code>
+     */
+    public Builder mergeAggregateRating(finsky.protos.DocV2.AggregateRating value) {
+      copyOnWrite();
+      instance.mergeAggregateRating(value);
+      return this;
+    }
+    /**
+     * <code>optional .finsky.protos.DocV2.AggregateRating aggregateRating = 14;</code>
+     */
+    public Builder clearAggregateRating() {  copyOnWrite();
+      instance.clearAggregateRating();
+      return this;
+    }
+
+    /**
      * <code>optional .finsky.protos.RelatedLinks relatedLinks = 15;</code>
      */
     @java.lang.Override
@@ -2309,10 +4000,6 @@ public  final class DocV2 extends
       return instance.hasRelatedLinks();
     }
     /**
-     * <pre>
-     *optional AggregateRating aggregateRating = 14;
-     * </pre>
-     *
      * <code>optional .finsky.protos.RelatedLinks relatedLinks = 15;</code>
      */
     @java.lang.Override
@@ -2320,10 +4007,6 @@ public  final class DocV2 extends
       return instance.getRelatedLinks();
     }
     /**
-     * <pre>
-     *optional AggregateRating aggregateRating = 14;
-     * </pre>
-     *
      * <code>optional .finsky.protos.RelatedLinks relatedLinks = 15;</code>
      */
     public Builder setRelatedLinks(finsky.protos.RelatedLinks value) {
@@ -2332,10 +4015,6 @@ public  final class DocV2 extends
       return this;
       }
     /**
-     * <pre>
-     *optional AggregateRating aggregateRating = 14;
-     * </pre>
-     *
      * <code>optional .finsky.protos.RelatedLinks relatedLinks = 15;</code>
      */
     public Builder setRelatedLinks(
@@ -2345,10 +4024,6 @@ public  final class DocV2 extends
       return this;
     }
     /**
-     * <pre>
-     *optional AggregateRating aggregateRating = 14;
-     * </pre>
-     *
      * <code>optional .finsky.protos.RelatedLinks relatedLinks = 15;</code>
      */
     public Builder mergeRelatedLinks(finsky.protos.RelatedLinks value) {
@@ -2357,10 +4032,6 @@ public  final class DocV2 extends
       return this;
     }
     /**
-     * <pre>
-     *optional AggregateRating aggregateRating = 14;
-     * </pre>
-     *
      * <code>optional .finsky.protos.RelatedLinks relatedLinks = 15;</code>
      */
     public Builder clearRelatedLinks() {  copyOnWrite();
@@ -2973,6 +4644,7 @@ public  final class DocV2 extends
             finsky.protos.DocV2.class,
             "containerMetadata_",
             "details_",
+            "aggregateRating_",
             "relatedLinks_",
             "detailsUrl_",
             "shareUrl_",
@@ -2986,12 +4658,12 @@ public  final class DocV2 extends
             "reviewQuestionsUrl_",
           };
           java.lang.String info =
-              "\u0001\u0017\u0000\u0001\u0001\"\u0017\u0000\u0003\u0000\u0001\u1008\u0000\u0002" +
+              "\u0001\u0018\u0000\u0001\u0001\"\u0018\u0000\u0003\u0000\u0001\u1008\u0000\u0002" +
               "\u1008\u0001\u0003\u1004\u0002\u0004\u1004\u0003\u0005\u1008\u0004\u0006\u1008\u0005" +
-              "\u0007\u1008\u0006\b\u001b\n\u001b\u000b\u001b\f\u1009\u0007\r\u1009\b\u000f\u1009" +
-              "\t\u0010\u1008\n\u0011\u1008\u000b\u0012\u1008\f\u0013\u1008\r\u0014\u1008\u000e" +
-              "\u0015\u1007\u000f\u0016\u1008\u0010\u001b\u1008\u0011\u001f\u1008\u0012\"\u1008" +
-              "\u0013";
+              "\u0007\u1008\u0006\b\u001b\n\u001b\u000b\u001b\f\u1009\u0007\r\u1009\b\u000e\u1009" +
+              "\t\u000f\u1009\n\u0010\u1008\u000b\u0011\u1008\f\u0012\u1008\r\u0013\u1008\u000e" +
+              "\u0014\u1008\u000f\u0015\u1007\u0010\u0016\u1008\u0011\u001b\u1008\u0012\u001f\u1008" +
+              "\u0013\"\u1008\u0014";
           return newMessageInfo(DEFAULT_INSTANCE, info, objects);
       }
       // fall through

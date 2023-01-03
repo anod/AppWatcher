@@ -5018,6 +5018,355 @@ public  final class Common extends
     }
   }
 
+  public interface PatchDetailsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:finsky.protos.Common.PatchDetails)
+      com.google.protobuf.MessageLiteOrBuilder {
+
+    /**
+     * <code>optional int32 baseVersionCode = 1;</code>
+     * @return Whether the baseVersionCode field is set.
+     */
+    boolean hasBaseVersionCode();
+    /**
+     * <code>optional int32 baseVersionCode = 1;</code>
+     * @return The baseVersionCode.
+     */
+    int getBaseVersionCode();
+
+    /**
+     * <code>optional int64 size = 2;</code>
+     * @return Whether the size field is set.
+     */
+    boolean hasSize();
+    /**
+     * <code>optional int64 size = 2;</code>
+     * @return The size.
+     */
+    long getSize();
+  }
+  /**
+   * Protobuf type {@code finsky.protos.Common.PatchDetails}
+   */
+  public  static final class PatchDetails extends
+      com.google.protobuf.GeneratedMessageLite<
+          PatchDetails, PatchDetails.Builder> implements
+      // @@protoc_insertion_point(message_implements:finsky.protos.Common.PatchDetails)
+      PatchDetailsOrBuilder {
+    private PatchDetails() {
+    }
+    private int bitField0_;
+    public static final int BASEVERSIONCODE_FIELD_NUMBER = 1;
+    private int baseVersionCode_;
+    /**
+     * <code>optional int32 baseVersionCode = 1;</code>
+     * @return Whether the baseVersionCode field is set.
+     */
+    @java.lang.Override
+    public boolean hasBaseVersionCode() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <code>optional int32 baseVersionCode = 1;</code>
+     * @return The baseVersionCode.
+     */
+    @java.lang.Override
+    public int getBaseVersionCode() {
+      return baseVersionCode_;
+    }
+    /**
+     * <code>optional int32 baseVersionCode = 1;</code>
+     * @param value The baseVersionCode to set.
+     */
+    private void setBaseVersionCode(int value) {
+      bitField0_ |= 0x00000001;
+      baseVersionCode_ = value;
+    }
+    /**
+     * <code>optional int32 baseVersionCode = 1;</code>
+     */
+    private void clearBaseVersionCode() {
+      bitField0_ = (bitField0_ & ~0x00000001);
+      baseVersionCode_ = 0;
+    }
+
+    public static final int SIZE_FIELD_NUMBER = 2;
+    private long size_;
+    /**
+     * <code>optional int64 size = 2;</code>
+     * @return Whether the size field is set.
+     */
+    @java.lang.Override
+    public boolean hasSize() {
+      return ((bitField0_ & 0x00000002) != 0);
+    }
+    /**
+     * <code>optional int64 size = 2;</code>
+     * @return The size.
+     */
+    @java.lang.Override
+    public long getSize() {
+      return size_;
+    }
+    /**
+     * <code>optional int64 size = 2;</code>
+     * @param value The size to set.
+     */
+    private void setSize(long value) {
+      bitField0_ |= 0x00000002;
+      size_ = value;
+    }
+    /**
+     * <code>optional int64 size = 2;</code>
+     */
+    private void clearSize() {
+      bitField0_ = (bitField0_ & ~0x00000002);
+      size_ = 0L;
+    }
+
+    public static finsky.protos.Common.PatchDetails parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static finsky.protos.Common.PatchDetails parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static finsky.protos.Common.PatchDetails parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static finsky.protos.Common.PatchDetails parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static finsky.protos.Common.PatchDetails parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static finsky.protos.Common.PatchDetails parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static finsky.protos.Common.PatchDetails parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input);
+    }
+    public static finsky.protos.Common.PatchDetails parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+    public static finsky.protos.Common.PatchDetails parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return parseDelimitedFrom(DEFAULT_INSTANCE, input);
+    }
+    public static finsky.protos.Common.PatchDetails parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return parseDelimitedFrom(DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+    public static finsky.protos.Common.PatchDetails parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input);
+    }
+    public static finsky.protos.Common.PatchDetails parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() {
+      return (Builder) DEFAULT_INSTANCE.createBuilder();
+    }
+    public static Builder newBuilder(finsky.protos.Common.PatchDetails prototype) {
+      return (Builder) DEFAULT_INSTANCE.createBuilder(prototype);
+    }
+
+    /**
+     * Protobuf type {@code finsky.protos.Common.PatchDetails}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageLite.Builder<
+          finsky.protos.Common.PatchDetails, Builder> implements
+        // @@protoc_insertion_point(builder_implements:finsky.protos.Common.PatchDetails)
+        finsky.protos.Common.PatchDetailsOrBuilder {
+      // Construct using finsky.protos.Common.PatchDetails.newBuilder()
+      private Builder() {
+        super(DEFAULT_INSTANCE);
+      }
+
+
+      /**
+       * <code>optional int32 baseVersionCode = 1;</code>
+       * @return Whether the baseVersionCode field is set.
+       */
+      @java.lang.Override
+      public boolean hasBaseVersionCode() {
+        return instance.hasBaseVersionCode();
+      }
+      /**
+       * <code>optional int32 baseVersionCode = 1;</code>
+       * @return The baseVersionCode.
+       */
+      @java.lang.Override
+      public int getBaseVersionCode() {
+        return instance.getBaseVersionCode();
+      }
+      /**
+       * <code>optional int32 baseVersionCode = 1;</code>
+       * @param value The baseVersionCode to set.
+       * @return This builder for chaining.
+       */
+      public Builder setBaseVersionCode(int value) {
+        copyOnWrite();
+        instance.setBaseVersionCode(value);
+        return this;
+      }
+      /**
+       * <code>optional int32 baseVersionCode = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearBaseVersionCode() {
+        copyOnWrite();
+        instance.clearBaseVersionCode();
+        return this;
+      }
+
+      /**
+       * <code>optional int64 size = 2;</code>
+       * @return Whether the size field is set.
+       */
+      @java.lang.Override
+      public boolean hasSize() {
+        return instance.hasSize();
+      }
+      /**
+       * <code>optional int64 size = 2;</code>
+       * @return The size.
+       */
+      @java.lang.Override
+      public long getSize() {
+        return instance.getSize();
+      }
+      /**
+       * <code>optional int64 size = 2;</code>
+       * @param value The size to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSize(long value) {
+        copyOnWrite();
+        instance.setSize(value);
+        return this;
+      }
+      /**
+       * <code>optional int64 size = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSize() {
+        copyOnWrite();
+        instance.clearSize();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:finsky.protos.Common.PatchDetails)
+    }
+    @java.lang.Override
+    @java.lang.SuppressWarnings({"unchecked", "fallthrough"})
+    protected final java.lang.Object dynamicMethod(
+        com.google.protobuf.GeneratedMessageLite.MethodToInvoke method,
+        java.lang.Object arg0, java.lang.Object arg1) {
+      switch (method) {
+        case NEW_MUTABLE_INSTANCE: {
+          return new finsky.protos.Common.PatchDetails();
+        }
+        case NEW_BUILDER: {
+          return new Builder();
+        }
+        case BUILD_MESSAGE_INFO: {
+            java.lang.Object[] objects = new java.lang.Object[] {
+              "bitField0_",
+              "baseVersionCode_",
+              "size_",
+            };
+            java.lang.String info =
+                "\u0001\u0002\u0000\u0001\u0001\u0002\u0002\u0000\u0000\u0000\u0001\u1004\u0000\u0002" +
+                "\u1002\u0001";
+            return newMessageInfo(DEFAULT_INSTANCE, info, objects);
+        }
+        // fall through
+        case GET_DEFAULT_INSTANCE: {
+          return DEFAULT_INSTANCE;
+        }
+        case GET_PARSER: {
+          com.google.protobuf.Parser<finsky.protos.Common.PatchDetails> parser = PARSER;
+          if (parser == null) {
+            synchronized (finsky.protos.Common.PatchDetails.class) {
+              parser = PARSER;
+              if (parser == null) {
+                parser =
+                    new DefaultInstanceBasedParser<finsky.protos.Common.PatchDetails>(
+                        DEFAULT_INSTANCE);
+                PARSER = parser;
+              }
+            }
+          }
+          return parser;
+      }
+      case GET_MEMOIZED_IS_INITIALIZED: {
+        return (byte) 1;
+      }
+      case SET_MEMOIZED_IS_INITIALIZED: {
+        return null;
+      }
+      }
+      throw new UnsupportedOperationException();
+    }
+
+
+    // @@protoc_insertion_point(class_scope:finsky.protos.Common.PatchDetails)
+    private static final finsky.protos.Common.PatchDetails DEFAULT_INSTANCE;
+    static {
+      PatchDetails defaultInstance = new PatchDetails();
+      // New instances are implicitly immutable so no need to make
+      // immutable.
+      DEFAULT_INSTANCE = defaultInstance;
+      com.google.protobuf.GeneratedMessageLite.registerDefaultInstance(
+        PatchDetails.class, defaultInstance);
+    }
+
+    public static finsky.protos.Common.PatchDetails getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static volatile com.google.protobuf.Parser<PatchDetails> PARSER;
+
+    public static com.google.protobuf.Parser<PatchDetails> parser() {
+      return DEFAULT_INSTANCE.getParserForType();
+    }
+  }
+
   public interface FileMetadataOrBuilder extends
       // @@protoc_insertion_point(interface_extends:finsky.protos.Common.FileMetadata)
       com.google.protobuf.MessageLiteOrBuilder {
@@ -5054,6 +5403,48 @@ public  final class Common extends
      * @return The size.
      */
     long getSize();
+
+    /**
+     * <code>optional string splitId = 4;</code>
+     * @return Whether the splitId field is set.
+     */
+    boolean hasSplitId();
+    /**
+     * <code>optional string splitId = 4;</code>
+     * @return The splitId.
+     */
+    java.lang.String getSplitId();
+    /**
+     * <code>optional string splitId = 4;</code>
+     * @return The bytes for splitId.
+     */
+    com.google.protobuf.ByteString
+        getSplitIdBytes();
+
+    /**
+     * <code>optional int64 compressedSize = 5;</code>
+     * @return Whether the compressedSize field is set.
+     */
+    boolean hasCompressedSize();
+    /**
+     * <code>optional int64 compressedSize = 5;</code>
+     * @return The compressedSize.
+     */
+    long getCompressedSize();
+
+    /**
+     * <code>repeated .finsky.protos.Common.PatchDetails patchDetails = 6;</code>
+     */
+    java.util.List<finsky.protos.Common.PatchDetails> 
+        getPatchDetailsList();
+    /**
+     * <code>repeated .finsky.protos.Common.PatchDetails patchDetails = 6;</code>
+     */
+    finsky.protos.Common.PatchDetails getPatchDetails(int index);
+    /**
+     * <code>repeated .finsky.protos.Common.PatchDetails patchDetails = 6;</code>
+     */
+    int getPatchDetailsCount();
   }
   /**
    * Protobuf type {@code finsky.protos.Common.FileMetadata}
@@ -5064,6 +5455,8 @@ public  final class Common extends
       // @@protoc_insertion_point(message_implements:finsky.protos.Common.FileMetadata)
       FileMetadataOrBuilder {
     private FileMetadata() {
+      splitId_ = "";
+      patchDetails_ = emptyProtobufList();
     }
     private int bitField0_;
     public static final int FILETYPE_FIELD_NUMBER = 1;
@@ -5166,6 +5559,188 @@ public  final class Common extends
     private void clearSize() {
       bitField0_ = (bitField0_ & ~0x00000004);
       size_ = 0L;
+    }
+
+    public static final int SPLITID_FIELD_NUMBER = 4;
+    private java.lang.String splitId_;
+    /**
+     * <code>optional string splitId = 4;</code>
+     * @return Whether the splitId field is set.
+     */
+    @java.lang.Override
+    public boolean hasSplitId() {
+      return ((bitField0_ & 0x00000008) != 0);
+    }
+    /**
+     * <code>optional string splitId = 4;</code>
+     * @return The splitId.
+     */
+    @java.lang.Override
+    public java.lang.String getSplitId() {
+      return splitId_;
+    }
+    /**
+     * <code>optional string splitId = 4;</code>
+     * @return The bytes for splitId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getSplitIdBytes() {
+      return com.google.protobuf.ByteString.copyFromUtf8(splitId_);
+    }
+    /**
+     * <code>optional string splitId = 4;</code>
+     * @param value The splitId to set.
+     */
+    private void setSplitId(
+        java.lang.String value) {
+      java.lang.Class<?> valueClass = value.getClass();
+  bitField0_ |= 0x00000008;
+      splitId_ = value;
+    }
+    /**
+     * <code>optional string splitId = 4;</code>
+     */
+    private void clearSplitId() {
+      bitField0_ = (bitField0_ & ~0x00000008);
+      splitId_ = getDefaultInstance().getSplitId();
+    }
+    /**
+     * <code>optional string splitId = 4;</code>
+     * @param value The bytes for splitId to set.
+     */
+    private void setSplitIdBytes(
+        com.google.protobuf.ByteString value) {
+      splitId_ = value.toStringUtf8();
+      bitField0_ |= 0x00000008;
+    }
+
+    public static final int COMPRESSEDSIZE_FIELD_NUMBER = 5;
+    private long compressedSize_;
+    /**
+     * <code>optional int64 compressedSize = 5;</code>
+     * @return Whether the compressedSize field is set.
+     */
+    @java.lang.Override
+    public boolean hasCompressedSize() {
+      return ((bitField0_ & 0x00000010) != 0);
+    }
+    /**
+     * <code>optional int64 compressedSize = 5;</code>
+     * @return The compressedSize.
+     */
+    @java.lang.Override
+    public long getCompressedSize() {
+      return compressedSize_;
+    }
+    /**
+     * <code>optional int64 compressedSize = 5;</code>
+     * @param value The compressedSize to set.
+     */
+    private void setCompressedSize(long value) {
+      bitField0_ |= 0x00000010;
+      compressedSize_ = value;
+    }
+    /**
+     * <code>optional int64 compressedSize = 5;</code>
+     */
+    private void clearCompressedSize() {
+      bitField0_ = (bitField0_ & ~0x00000010);
+      compressedSize_ = 0L;
+    }
+
+    public static final int PATCHDETAILS_FIELD_NUMBER = 6;
+    private com.google.protobuf.Internal.ProtobufList<finsky.protos.Common.PatchDetails> patchDetails_;
+    /**
+     * <code>repeated .finsky.protos.Common.PatchDetails patchDetails = 6;</code>
+     */
+    @java.lang.Override
+    public java.util.List<finsky.protos.Common.PatchDetails> getPatchDetailsList() {
+      return patchDetails_;
+    }
+    /**
+     * <code>repeated .finsky.protos.Common.PatchDetails patchDetails = 6;</code>
+     */
+    public java.util.List<? extends finsky.protos.Common.PatchDetailsOrBuilder> 
+        getPatchDetailsOrBuilderList() {
+      return patchDetails_;
+    }
+    /**
+     * <code>repeated .finsky.protos.Common.PatchDetails patchDetails = 6;</code>
+     */
+    @java.lang.Override
+    public int getPatchDetailsCount() {
+      return patchDetails_.size();
+    }
+    /**
+     * <code>repeated .finsky.protos.Common.PatchDetails patchDetails = 6;</code>
+     */
+    @java.lang.Override
+    public finsky.protos.Common.PatchDetails getPatchDetails(int index) {
+      return patchDetails_.get(index);
+    }
+    /**
+     * <code>repeated .finsky.protos.Common.PatchDetails patchDetails = 6;</code>
+     */
+    public finsky.protos.Common.PatchDetailsOrBuilder getPatchDetailsOrBuilder(
+        int index) {
+      return patchDetails_.get(index);
+    }
+    private void ensurePatchDetailsIsMutable() {
+      com.google.protobuf.Internal.ProtobufList<finsky.protos.Common.PatchDetails> tmp = patchDetails_;
+      if (!tmp.isModifiable()) {
+        patchDetails_ =
+            com.google.protobuf.GeneratedMessageLite.mutableCopy(tmp);
+       }
+    }
+
+    /**
+     * <code>repeated .finsky.protos.Common.PatchDetails patchDetails = 6;</code>
+     */
+    private void setPatchDetails(
+        int index, finsky.protos.Common.PatchDetails value) {
+      value.getClass();
+  ensurePatchDetailsIsMutable();
+      patchDetails_.set(index, value);
+    }
+    /**
+     * <code>repeated .finsky.protos.Common.PatchDetails patchDetails = 6;</code>
+     */
+    private void addPatchDetails(finsky.protos.Common.PatchDetails value) {
+      value.getClass();
+  ensurePatchDetailsIsMutable();
+      patchDetails_.add(value);
+    }
+    /**
+     * <code>repeated .finsky.protos.Common.PatchDetails patchDetails = 6;</code>
+     */
+    private void addPatchDetails(
+        int index, finsky.protos.Common.PatchDetails value) {
+      value.getClass();
+  ensurePatchDetailsIsMutable();
+      patchDetails_.add(index, value);
+    }
+    /**
+     * <code>repeated .finsky.protos.Common.PatchDetails patchDetails = 6;</code>
+     */
+    private void addAllPatchDetails(
+        java.lang.Iterable<? extends finsky.protos.Common.PatchDetails> values) {
+      ensurePatchDetailsIsMutable();
+      com.google.protobuf.AbstractMessageLite.addAll(
+          values, patchDetails_);
+    }
+    /**
+     * <code>repeated .finsky.protos.Common.PatchDetails patchDetails = 6;</code>
+     */
+    private void clearPatchDetails() {
+      patchDetails_ = emptyProtobufList();
+    }
+    /**
+     * <code>repeated .finsky.protos.Common.PatchDetails patchDetails = 6;</code>
+     */
+    private void removePatchDetails(int index) {
+      ensurePatchDetailsIsMutable();
+      patchDetails_.remove(index);
     }
 
     public static finsky.protos.Common.FileMetadata parseFrom(
@@ -5371,6 +5946,201 @@ public  final class Common extends
         return this;
       }
 
+      /**
+       * <code>optional string splitId = 4;</code>
+       * @return Whether the splitId field is set.
+       */
+      @java.lang.Override
+      public boolean hasSplitId() {
+        return instance.hasSplitId();
+      }
+      /**
+       * <code>optional string splitId = 4;</code>
+       * @return The splitId.
+       */
+      @java.lang.Override
+      public java.lang.String getSplitId() {
+        return instance.getSplitId();
+      }
+      /**
+       * <code>optional string splitId = 4;</code>
+       * @return The bytes for splitId.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString
+          getSplitIdBytes() {
+        return instance.getSplitIdBytes();
+      }
+      /**
+       * <code>optional string splitId = 4;</code>
+       * @param value The splitId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSplitId(
+          java.lang.String value) {
+        copyOnWrite();
+        instance.setSplitId(value);
+        return this;
+      }
+      /**
+       * <code>optional string splitId = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSplitId() {
+        copyOnWrite();
+        instance.clearSplitId();
+        return this;
+      }
+      /**
+       * <code>optional string splitId = 4;</code>
+       * @param value The bytes for splitId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSplitIdBytes(
+          com.google.protobuf.ByteString value) {
+        copyOnWrite();
+        instance.setSplitIdBytes(value);
+        return this;
+      }
+
+      /**
+       * <code>optional int64 compressedSize = 5;</code>
+       * @return Whether the compressedSize field is set.
+       */
+      @java.lang.Override
+      public boolean hasCompressedSize() {
+        return instance.hasCompressedSize();
+      }
+      /**
+       * <code>optional int64 compressedSize = 5;</code>
+       * @return The compressedSize.
+       */
+      @java.lang.Override
+      public long getCompressedSize() {
+        return instance.getCompressedSize();
+      }
+      /**
+       * <code>optional int64 compressedSize = 5;</code>
+       * @param value The compressedSize to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCompressedSize(long value) {
+        copyOnWrite();
+        instance.setCompressedSize(value);
+        return this;
+      }
+      /**
+       * <code>optional int64 compressedSize = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCompressedSize() {
+        copyOnWrite();
+        instance.clearCompressedSize();
+        return this;
+      }
+
+      /**
+       * <code>repeated .finsky.protos.Common.PatchDetails patchDetails = 6;</code>
+       */
+      @java.lang.Override
+      public java.util.List<finsky.protos.Common.PatchDetails> getPatchDetailsList() {
+        return java.util.Collections.unmodifiableList(
+            instance.getPatchDetailsList());
+      }
+      /**
+       * <code>repeated .finsky.protos.Common.PatchDetails patchDetails = 6;</code>
+       */
+      @java.lang.Override
+      public int getPatchDetailsCount() {
+        return instance.getPatchDetailsCount();
+      }/**
+       * <code>repeated .finsky.protos.Common.PatchDetails patchDetails = 6;</code>
+       */
+      @java.lang.Override
+      public finsky.protos.Common.PatchDetails getPatchDetails(int index) {
+        return instance.getPatchDetails(index);
+      }
+      /**
+       * <code>repeated .finsky.protos.Common.PatchDetails patchDetails = 6;</code>
+       */
+      public Builder setPatchDetails(
+          int index, finsky.protos.Common.PatchDetails value) {
+        copyOnWrite();
+        instance.setPatchDetails(index, value);
+        return this;
+      }
+      /**
+       * <code>repeated .finsky.protos.Common.PatchDetails patchDetails = 6;</code>
+       */
+      public Builder setPatchDetails(
+          int index, finsky.protos.Common.PatchDetails.Builder builderForValue) {
+        copyOnWrite();
+        instance.setPatchDetails(index,
+            builderForValue.build());
+        return this;
+      }
+      /**
+       * <code>repeated .finsky.protos.Common.PatchDetails patchDetails = 6;</code>
+       */
+      public Builder addPatchDetails(finsky.protos.Common.PatchDetails value) {
+        copyOnWrite();
+        instance.addPatchDetails(value);
+        return this;
+      }
+      /**
+       * <code>repeated .finsky.protos.Common.PatchDetails patchDetails = 6;</code>
+       */
+      public Builder addPatchDetails(
+          int index, finsky.protos.Common.PatchDetails value) {
+        copyOnWrite();
+        instance.addPatchDetails(index, value);
+        return this;
+      }
+      /**
+       * <code>repeated .finsky.protos.Common.PatchDetails patchDetails = 6;</code>
+       */
+      public Builder addPatchDetails(
+          finsky.protos.Common.PatchDetails.Builder builderForValue) {
+        copyOnWrite();
+        instance.addPatchDetails(builderForValue.build());
+        return this;
+      }
+      /**
+       * <code>repeated .finsky.protos.Common.PatchDetails patchDetails = 6;</code>
+       */
+      public Builder addPatchDetails(
+          int index, finsky.protos.Common.PatchDetails.Builder builderForValue) {
+        copyOnWrite();
+        instance.addPatchDetails(index,
+            builderForValue.build());
+        return this;
+      }
+      /**
+       * <code>repeated .finsky.protos.Common.PatchDetails patchDetails = 6;</code>
+       */
+      public Builder addAllPatchDetails(
+          java.lang.Iterable<? extends finsky.protos.Common.PatchDetails> values) {
+        copyOnWrite();
+        instance.addAllPatchDetails(values);
+        return this;
+      }
+      /**
+       * <code>repeated .finsky.protos.Common.PatchDetails patchDetails = 6;</code>
+       */
+      public Builder clearPatchDetails() {
+        copyOnWrite();
+        instance.clearPatchDetails();
+        return this;
+      }
+      /**
+       * <code>repeated .finsky.protos.Common.PatchDetails patchDetails = 6;</code>
+       */
+      public Builder removePatchDetails(int index) {
+        copyOnWrite();
+        instance.removePatchDetails(index);
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:finsky.protos.Common.FileMetadata)
     }
     @java.lang.Override
@@ -5391,10 +6161,14 @@ public  final class Common extends
               "fileType_",
               "versionCode_",
               "size_",
+              "splitId_",
+              "compressedSize_",
+              "patchDetails_",
+              finsky.protos.Common.PatchDetails.class,
             };
             java.lang.String info =
-                "\u0001\u0003\u0000\u0001\u0001\u0003\u0003\u0000\u0000\u0000\u0001\u1004\u0000\u0002" +
-                "\u1004\u0001\u0003\u1002\u0002";
+                "\u0001\u0006\u0000\u0001\u0001\u0006\u0006\u0000\u0001\u0000\u0001\u1004\u0000\u0002" +
+                "\u1004\u0001\u0003\u1002\u0002\u0004\u1008\u0003\u0005\u1002\u0004\u0006\u001b";
             return newMessageInfo(DEFAULT_INSTANCE, info, objects);
         }
         // fall through

@@ -297,6 +297,17 @@ public interface AppDetailsOrBuilder extends
   boolean getUnstable();
 
   /**
+   * <code>optional bool hasInstantLink = 24;</code>
+   * @return Whether the hasInstantLink field is set.
+   */
+  boolean hasHasInstantLink();
+  /**
+   * <code>optional bool hasInstantLink = 24;</code>
+   * @return The hasInstantLink.
+   */
+  boolean getHasInstantLink();
+
+  /**
    * <code>optional string containsAds = 30;</code>
    * @return Whether the containsAds field is set.
    */
@@ -312,6 +323,17 @@ public interface AppDetailsOrBuilder extends
    */
   com.google.protobuf.ByteString
       getContainsAdsBytes();
+
+  /**
+   * <code>optional int32 targetSdkVersion = 32;</code>
+   * @return Whether the targetSdkVersion field is set.
+   */
+  boolean hasTargetSdkVersion();
+  /**
+   * <code>optional int32 targetSdkVersion = 32;</code>
+   * @return The targetSdkVersion.
+   */
+  int getTargetSdkVersion();
 
   /**
    * <code>optional .finsky.protos.Dependencies dependencies = 34;</code>
@@ -345,4 +367,156 @@ public interface AppDetailsOrBuilder extends
    * @return The earlyAccessInfo.
    */
   finsky.protos.EarlyAccessInfo getEarlyAccessInfo();
+
+  /**
+   * <code>optional .finsky.protos.EditorChoice editorChoice = 41;</code>
+   * @return Whether the editorChoice field is set.
+   */
+  boolean hasEditorChoice();
+  /**
+   * <code>optional .finsky.protos.EditorChoice editorChoice = 41;</code>
+   * @return The editorChoice.
+   */
+  finsky.protos.EditorChoice getEditorChoice();
+
+  /**
+   * <code>optional string instantLink = 43;</code>
+   * @return Whether the instantLink field is set.
+   */
+  boolean hasInstantLink();
+  /**
+   * <code>optional string instantLink = 43;</code>
+   * @return The instantLink.
+   */
+  java.lang.String getInstantLink();
+  /**
+   * <code>optional string instantLink = 43;</code>
+   * @return The bytes for instantLink.
+   */
+  com.google.protobuf.ByteString
+      getInstantLinkBytes();
+
+  /**
+   * <code>optional string developerAddress = 45;</code>
+   * @return Whether the developerAddress field is set.
+   */
+  boolean hasDeveloperAddress();
+  /**
+   * <code>optional string developerAddress = 45;</code>
+   * @return The developerAddress.
+   */
+  java.lang.String getDeveloperAddress();
+  /**
+   * <code>optional string developerAddress = 45;</code>
+   * @return The bytes for developerAddress.
+   */
+  com.google.protobuf.ByteString
+      getDeveloperAddressBytes();
+
+  /**
+   * <code>optional .finsky.protos.Publisher publisher = 46;</code>
+   * @return Whether the publisher field is set.
+   */
+  boolean hasPublisher();
+  /**
+   * <code>optional .finsky.protos.Publisher publisher = 46;</code>
+   * @return The publisher.
+   */
+  finsky.protos.Publisher getPublisher();
+
+  /**
+   * <code>optional string categoryName = 48;</code>
+   * @return Whether the categoryName field is set.
+   */
+  boolean hasCategoryName();
+  /**
+   * <code>optional string categoryName = 48;</code>
+   * @return The categoryName.
+   */
+  java.lang.String getCategoryName();
+  /**
+   * <code>optional string categoryName = 48;</code>
+   * @return The bytes for categoryName.
+   */
+  com.google.protobuf.ByteString
+      getCategoryNameBytes();
+
+  /**
+   * <code>optional int64 downloadCount = 53;</code>
+   * @return Whether the downloadCount field is set.
+   */
+  boolean hasDownloadCount();
+  /**
+   * <code>optional int64 downloadCount = 53;</code>
+   * @return The downloadCount.
+   */
+  long getDownloadCount();
+
+  /**
+   * <code>optional string downloadLabelDisplay = 61;</code>
+   * @return Whether the downloadLabelDisplay field is set.
+   */
+  boolean hasDownloadLabelDisplay();
+  /**
+   * <code>optional string downloadLabelDisplay = 61;</code>
+   * @return The downloadLabelDisplay.
+   */
+  java.lang.String getDownloadLabelDisplay();
+  /**
+   * <code>optional string downloadLabelDisplay = 61;</code>
+   * @return The bytes for downloadLabelDisplay.
+   */
+  com.google.protobuf.ByteString
+      getDownloadLabelDisplayBytes();
+
+  /**
+   * <code>optional string inAppProduct = 67;</code>
+   * @return Whether the inAppProduct field is set.
+   */
+  boolean hasInAppProduct();
+  /**
+   * <code>optional string inAppProduct = 67;</code>
+   * @return The inAppProduct.
+   */
+  java.lang.String getInAppProduct();
+  /**
+   * <code>optional string inAppProduct = 67;</code>
+   * @return The bytes for inAppProduct.
+   */
+  com.google.protobuf.ByteString
+      getInAppProductBytes();
+
+  /**
+   * <code>optional string downloadLabelAbbreviated = 77;</code>
+   * @return Whether the downloadLabelAbbreviated field is set.
+   */
+  boolean hasDownloadLabelAbbreviated();
+  /**
+   * <code>optional string downloadLabelAbbreviated = 77;</code>
+   * @return The downloadLabelAbbreviated.
+   */
+  java.lang.String getDownloadLabelAbbreviated();
+  /**
+   * <code>optional string downloadLabelAbbreviated = 77;</code>
+   * @return The bytes for downloadLabelAbbreviated.
+   */
+  com.google.protobuf.ByteString
+      getDownloadLabelAbbreviatedBytes();
+
+  /**
+   * <code>optional string downloadLabel = 78;</code>
+   * @return Whether the downloadLabel field is set.
+   */
+  boolean hasDownloadLabel();
+  /**
+   * <code>optional string downloadLabel = 78;</code>
+   * @return The downloadLabel.
+   */
+  java.lang.String getDownloadLabel();
+  /**
+   * <code>optional string downloadLabel = 78;</code>
+   * @return The bytes for downloadLabel.
+   */
+  com.google.protobuf.ByteString
+      getDownloadLabelBytes();
 }

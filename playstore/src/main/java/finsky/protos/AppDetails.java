@@ -26,6 +26,13 @@ public  final class AppDetails extends
     file_ = emptyProtobufList();
     appType_ = "";
     containsAds_ = "";
+    instantLink_ = "";
+    developerAddress_ = "";
+    categoryName_ = "";
+    downloadLabelDisplay_ = "";
+    inAppProduct_ = "";
+    downloadLabelAbbreviated_ = "";
+    downloadLabel_ = "";
   }
   private int bitField0_;
   public static final int DEVELOPERNAME_FIELD_NUMBER = 1;
@@ -1016,6 +1023,40 @@ public  final class AppDetails extends
     unstable_ = false;
   }
 
+  public static final int HASINSTANTLINK_FIELD_NUMBER = 24;
+  private boolean hasInstantLink_;
+  /**
+   * <code>optional bool hasInstantLink = 24;</code>
+   * @return Whether the hasInstantLink field is set.
+   */
+  @java.lang.Override
+  public boolean hasHasInstantLink() {
+    return ((bitField0_ & 0x00008000) != 0);
+  }
+  /**
+   * <code>optional bool hasInstantLink = 24;</code>
+   * @return The hasInstantLink.
+   */
+  @java.lang.Override
+  public boolean getHasInstantLink() {
+    return hasInstantLink_;
+  }
+  /**
+   * <code>optional bool hasInstantLink = 24;</code>
+   * @param value The hasInstantLink to set.
+   */
+  private void setHasInstantLink(boolean value) {
+    bitField0_ |= 0x00008000;
+    hasInstantLink_ = value;
+  }
+  /**
+   * <code>optional bool hasInstantLink = 24;</code>
+   */
+  private void clearHasInstantLink() {
+    bitField0_ = (bitField0_ & ~0x00008000);
+    hasInstantLink_ = false;
+  }
+
   public static final int CONTAINSADS_FIELD_NUMBER = 30;
   private java.lang.String containsAds_;
   /**
@@ -1024,7 +1065,7 @@ public  final class AppDetails extends
    */
   @java.lang.Override
   public boolean hasContainsAds() {
-    return ((bitField0_ & 0x00008000) != 0);
+    return ((bitField0_ & 0x00010000) != 0);
   }
   /**
    * <code>optional string containsAds = 30;</code>
@@ -1050,14 +1091,14 @@ public  final class AppDetails extends
   private void setContainsAds(
       java.lang.String value) {
     java.lang.Class<?> valueClass = value.getClass();
-  bitField0_ |= 0x00008000;
+  bitField0_ |= 0x00010000;
     containsAds_ = value;
   }
   /**
    * <code>optional string containsAds = 30;</code>
    */
   private void clearContainsAds() {
-    bitField0_ = (bitField0_ & ~0x00008000);
+    bitField0_ = (bitField0_ & ~0x00010000);
     containsAds_ = getDefaultInstance().getContainsAds();
   }
   /**
@@ -1067,7 +1108,41 @@ public  final class AppDetails extends
   private void setContainsAdsBytes(
       com.google.protobuf.ByteString value) {
     containsAds_ = value.toStringUtf8();
-    bitField0_ |= 0x00008000;
+    bitField0_ |= 0x00010000;
+  }
+
+  public static final int TARGETSDKVERSION_FIELD_NUMBER = 32;
+  private int targetSdkVersion_;
+  /**
+   * <code>optional int32 targetSdkVersion = 32;</code>
+   * @return Whether the targetSdkVersion field is set.
+   */
+  @java.lang.Override
+  public boolean hasTargetSdkVersion() {
+    return ((bitField0_ & 0x00020000) != 0);
+  }
+  /**
+   * <code>optional int32 targetSdkVersion = 32;</code>
+   * @return The targetSdkVersion.
+   */
+  @java.lang.Override
+  public int getTargetSdkVersion() {
+    return targetSdkVersion_;
+  }
+  /**
+   * <code>optional int32 targetSdkVersion = 32;</code>
+   * @param value The targetSdkVersion to set.
+   */
+  private void setTargetSdkVersion(int value) {
+    bitField0_ |= 0x00020000;
+    targetSdkVersion_ = value;
+  }
+  /**
+   * <code>optional int32 targetSdkVersion = 32;</code>
+   */
+  private void clearTargetSdkVersion() {
+    bitField0_ = (bitField0_ & ~0x00020000);
+    targetSdkVersion_ = 0;
   }
 
   public static final int DEPENDENCIES_FIELD_NUMBER = 34;
@@ -1077,7 +1152,7 @@ public  final class AppDetails extends
    */
   @java.lang.Override
   public boolean hasDependencies() {
-    return ((bitField0_ & 0x00010000) != 0);
+    return ((bitField0_ & 0x00040000) != 0);
   }
   /**
    * <code>optional .finsky.protos.Dependencies dependencies = 34;</code>
@@ -1092,7 +1167,7 @@ public  final class AppDetails extends
   private void setDependencies(finsky.protos.Dependencies value) {
     value.getClass();
   dependencies_ = value;
-    bitField0_ |= 0x00010000;
+    bitField0_ |= 0x00040000;
     }
   /**
    * <code>optional .finsky.protos.Dependencies dependencies = 34;</code>
@@ -1107,13 +1182,13 @@ public  final class AppDetails extends
     } else {
       dependencies_ = value;
     }
-    bitField0_ |= 0x00010000;
+    bitField0_ |= 0x00040000;
   }
   /**
    * <code>optional .finsky.protos.Dependencies dependencies = 34;</code>
    */
   private void clearDependencies() {  dependencies_ = null;
-    bitField0_ = (bitField0_ & ~0x00010000);
+    bitField0_ = (bitField0_ & ~0x00040000);
   }
 
   public static final int TESTINGPROGRAMINFO_FIELD_NUMBER = 35;
@@ -1123,7 +1198,7 @@ public  final class AppDetails extends
    */
   @java.lang.Override
   public boolean hasTestingProgramInfo() {
-    return ((bitField0_ & 0x00020000) != 0);
+    return ((bitField0_ & 0x00080000) != 0);
   }
   /**
    * <code>optional .finsky.protos.TestingProgramInfo testingProgramInfo = 35;</code>
@@ -1138,7 +1213,7 @@ public  final class AppDetails extends
   private void setTestingProgramInfo(finsky.protos.TestingProgramInfo value) {
     value.getClass();
   testingProgramInfo_ = value;
-    bitField0_ |= 0x00020000;
+    bitField0_ |= 0x00080000;
     }
   /**
    * <code>optional .finsky.protos.TestingProgramInfo testingProgramInfo = 35;</code>
@@ -1153,13 +1228,13 @@ public  final class AppDetails extends
     } else {
       testingProgramInfo_ = value;
     }
-    bitField0_ |= 0x00020000;
+    bitField0_ |= 0x00080000;
   }
   /**
    * <code>optional .finsky.protos.TestingProgramInfo testingProgramInfo = 35;</code>
    */
   private void clearTestingProgramInfo() {  testingProgramInfo_ = null;
-    bitField0_ = (bitField0_ & ~0x00020000);
+    bitField0_ = (bitField0_ & ~0x00080000);
   }
 
   public static final int EARLYACCESSINFO_FIELD_NUMBER = 36;
@@ -1169,7 +1244,7 @@ public  final class AppDetails extends
    */
   @java.lang.Override
   public boolean hasEarlyAccessInfo() {
-    return ((bitField0_ & 0x00040000) != 0);
+    return ((bitField0_ & 0x00100000) != 0);
   }
   /**
    * <code>optional .finsky.protos.EarlyAccessInfo earlyAccessInfo = 36;</code>
@@ -1184,7 +1259,7 @@ public  final class AppDetails extends
   private void setEarlyAccessInfo(finsky.protos.EarlyAccessInfo value) {
     value.getClass();
   earlyAccessInfo_ = value;
-    bitField0_ |= 0x00040000;
+    bitField0_ |= 0x00100000;
     }
   /**
    * <code>optional .finsky.protos.EarlyAccessInfo earlyAccessInfo = 36;</code>
@@ -1199,13 +1274,517 @@ public  final class AppDetails extends
     } else {
       earlyAccessInfo_ = value;
     }
-    bitField0_ |= 0x00040000;
+    bitField0_ |= 0x00100000;
   }
   /**
    * <code>optional .finsky.protos.EarlyAccessInfo earlyAccessInfo = 36;</code>
    */
   private void clearEarlyAccessInfo() {  earlyAccessInfo_ = null;
-    bitField0_ = (bitField0_ & ~0x00040000);
+    bitField0_ = (bitField0_ & ~0x00100000);
+  }
+
+  public static final int EDITORCHOICE_FIELD_NUMBER = 41;
+  private finsky.protos.EditorChoice editorChoice_;
+  /**
+   * <code>optional .finsky.protos.EditorChoice editorChoice = 41;</code>
+   */
+  @java.lang.Override
+  public boolean hasEditorChoice() {
+    return ((bitField0_ & 0x00200000) != 0);
+  }
+  /**
+   * <code>optional .finsky.protos.EditorChoice editorChoice = 41;</code>
+   */
+  @java.lang.Override
+  public finsky.protos.EditorChoice getEditorChoice() {
+    return editorChoice_ == null ? finsky.protos.EditorChoice.getDefaultInstance() : editorChoice_;
+  }
+  /**
+   * <code>optional .finsky.protos.EditorChoice editorChoice = 41;</code>
+   */
+  private void setEditorChoice(finsky.protos.EditorChoice value) {
+    value.getClass();
+  editorChoice_ = value;
+    bitField0_ |= 0x00200000;
+    }
+  /**
+   * <code>optional .finsky.protos.EditorChoice editorChoice = 41;</code>
+   */
+  @java.lang.SuppressWarnings({"ReferenceEquality"})
+  private void mergeEditorChoice(finsky.protos.EditorChoice value) {
+    value.getClass();
+  if (editorChoice_ != null &&
+        editorChoice_ != finsky.protos.EditorChoice.getDefaultInstance()) {
+      editorChoice_ =
+        finsky.protos.EditorChoice.newBuilder(editorChoice_).mergeFrom(value).buildPartial();
+    } else {
+      editorChoice_ = value;
+    }
+    bitField0_ |= 0x00200000;
+  }
+  /**
+   * <code>optional .finsky.protos.EditorChoice editorChoice = 41;</code>
+   */
+  private void clearEditorChoice() {  editorChoice_ = null;
+    bitField0_ = (bitField0_ & ~0x00200000);
+  }
+
+  public static final int INSTANTLINK_FIELD_NUMBER = 43;
+  private java.lang.String instantLink_;
+  /**
+   * <code>optional string instantLink = 43;</code>
+   * @return Whether the instantLink field is set.
+   */
+  @java.lang.Override
+  public boolean hasInstantLink() {
+    return ((bitField0_ & 0x00400000) != 0);
+  }
+  /**
+   * <code>optional string instantLink = 43;</code>
+   * @return The instantLink.
+   */
+  @java.lang.Override
+  public java.lang.String getInstantLink() {
+    return instantLink_;
+  }
+  /**
+   * <code>optional string instantLink = 43;</code>
+   * @return The bytes for instantLink.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getInstantLinkBytes() {
+    return com.google.protobuf.ByteString.copyFromUtf8(instantLink_);
+  }
+  /**
+   * <code>optional string instantLink = 43;</code>
+   * @param value The instantLink to set.
+   */
+  private void setInstantLink(
+      java.lang.String value) {
+    java.lang.Class<?> valueClass = value.getClass();
+  bitField0_ |= 0x00400000;
+    instantLink_ = value;
+  }
+  /**
+   * <code>optional string instantLink = 43;</code>
+   */
+  private void clearInstantLink() {
+    bitField0_ = (bitField0_ & ~0x00400000);
+    instantLink_ = getDefaultInstance().getInstantLink();
+  }
+  /**
+   * <code>optional string instantLink = 43;</code>
+   * @param value The bytes for instantLink to set.
+   */
+  private void setInstantLinkBytes(
+      com.google.protobuf.ByteString value) {
+    instantLink_ = value.toStringUtf8();
+    bitField0_ |= 0x00400000;
+  }
+
+  public static final int DEVELOPERADDRESS_FIELD_NUMBER = 45;
+  private java.lang.String developerAddress_;
+  /**
+   * <code>optional string developerAddress = 45;</code>
+   * @return Whether the developerAddress field is set.
+   */
+  @java.lang.Override
+  public boolean hasDeveloperAddress() {
+    return ((bitField0_ & 0x00800000) != 0);
+  }
+  /**
+   * <code>optional string developerAddress = 45;</code>
+   * @return The developerAddress.
+   */
+  @java.lang.Override
+  public java.lang.String getDeveloperAddress() {
+    return developerAddress_;
+  }
+  /**
+   * <code>optional string developerAddress = 45;</code>
+   * @return The bytes for developerAddress.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getDeveloperAddressBytes() {
+    return com.google.protobuf.ByteString.copyFromUtf8(developerAddress_);
+  }
+  /**
+   * <code>optional string developerAddress = 45;</code>
+   * @param value The developerAddress to set.
+   */
+  private void setDeveloperAddress(
+      java.lang.String value) {
+    java.lang.Class<?> valueClass = value.getClass();
+  bitField0_ |= 0x00800000;
+    developerAddress_ = value;
+  }
+  /**
+   * <code>optional string developerAddress = 45;</code>
+   */
+  private void clearDeveloperAddress() {
+    bitField0_ = (bitField0_ & ~0x00800000);
+    developerAddress_ = getDefaultInstance().getDeveloperAddress();
+  }
+  /**
+   * <code>optional string developerAddress = 45;</code>
+   * @param value The bytes for developerAddress to set.
+   */
+  private void setDeveloperAddressBytes(
+      com.google.protobuf.ByteString value) {
+    developerAddress_ = value.toStringUtf8();
+    bitField0_ |= 0x00800000;
+  }
+
+  public static final int PUBLISHER_FIELD_NUMBER = 46;
+  private finsky.protos.Publisher publisher_;
+  /**
+   * <code>optional .finsky.protos.Publisher publisher = 46;</code>
+   */
+  @java.lang.Override
+  public boolean hasPublisher() {
+    return ((bitField0_ & 0x01000000) != 0);
+  }
+  /**
+   * <code>optional .finsky.protos.Publisher publisher = 46;</code>
+   */
+  @java.lang.Override
+  public finsky.protos.Publisher getPublisher() {
+    return publisher_ == null ? finsky.protos.Publisher.getDefaultInstance() : publisher_;
+  }
+  /**
+   * <code>optional .finsky.protos.Publisher publisher = 46;</code>
+   */
+  private void setPublisher(finsky.protos.Publisher value) {
+    value.getClass();
+  publisher_ = value;
+    bitField0_ |= 0x01000000;
+    }
+  /**
+   * <code>optional .finsky.protos.Publisher publisher = 46;</code>
+   */
+  @java.lang.SuppressWarnings({"ReferenceEquality"})
+  private void mergePublisher(finsky.protos.Publisher value) {
+    value.getClass();
+  if (publisher_ != null &&
+        publisher_ != finsky.protos.Publisher.getDefaultInstance()) {
+      publisher_ =
+        finsky.protos.Publisher.newBuilder(publisher_).mergeFrom(value).buildPartial();
+    } else {
+      publisher_ = value;
+    }
+    bitField0_ |= 0x01000000;
+  }
+  /**
+   * <code>optional .finsky.protos.Publisher publisher = 46;</code>
+   */
+  private void clearPublisher() {  publisher_ = null;
+    bitField0_ = (bitField0_ & ~0x01000000);
+  }
+
+  public static final int CATEGORYNAME_FIELD_NUMBER = 48;
+  private java.lang.String categoryName_;
+  /**
+   * <code>optional string categoryName = 48;</code>
+   * @return Whether the categoryName field is set.
+   */
+  @java.lang.Override
+  public boolean hasCategoryName() {
+    return ((bitField0_ & 0x02000000) != 0);
+  }
+  /**
+   * <code>optional string categoryName = 48;</code>
+   * @return The categoryName.
+   */
+  @java.lang.Override
+  public java.lang.String getCategoryName() {
+    return categoryName_;
+  }
+  /**
+   * <code>optional string categoryName = 48;</code>
+   * @return The bytes for categoryName.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getCategoryNameBytes() {
+    return com.google.protobuf.ByteString.copyFromUtf8(categoryName_);
+  }
+  /**
+   * <code>optional string categoryName = 48;</code>
+   * @param value The categoryName to set.
+   */
+  private void setCategoryName(
+      java.lang.String value) {
+    java.lang.Class<?> valueClass = value.getClass();
+  bitField0_ |= 0x02000000;
+    categoryName_ = value;
+  }
+  /**
+   * <code>optional string categoryName = 48;</code>
+   */
+  private void clearCategoryName() {
+    bitField0_ = (bitField0_ & ~0x02000000);
+    categoryName_ = getDefaultInstance().getCategoryName();
+  }
+  /**
+   * <code>optional string categoryName = 48;</code>
+   * @param value The bytes for categoryName to set.
+   */
+  private void setCategoryNameBytes(
+      com.google.protobuf.ByteString value) {
+    categoryName_ = value.toStringUtf8();
+    bitField0_ |= 0x02000000;
+  }
+
+  public static final int DOWNLOADCOUNT_FIELD_NUMBER = 53;
+  private long downloadCount_;
+  /**
+   * <code>optional int64 downloadCount = 53;</code>
+   * @return Whether the downloadCount field is set.
+   */
+  @java.lang.Override
+  public boolean hasDownloadCount() {
+    return ((bitField0_ & 0x04000000) != 0);
+  }
+  /**
+   * <code>optional int64 downloadCount = 53;</code>
+   * @return The downloadCount.
+   */
+  @java.lang.Override
+  public long getDownloadCount() {
+    return downloadCount_;
+  }
+  /**
+   * <code>optional int64 downloadCount = 53;</code>
+   * @param value The downloadCount to set.
+   */
+  private void setDownloadCount(long value) {
+    bitField0_ |= 0x04000000;
+    downloadCount_ = value;
+  }
+  /**
+   * <code>optional int64 downloadCount = 53;</code>
+   */
+  private void clearDownloadCount() {
+    bitField0_ = (bitField0_ & ~0x04000000);
+    downloadCount_ = 0L;
+  }
+
+  public static final int DOWNLOADLABELDISPLAY_FIELD_NUMBER = 61;
+  private java.lang.String downloadLabelDisplay_;
+  /**
+   * <code>optional string downloadLabelDisplay = 61;</code>
+   * @return Whether the downloadLabelDisplay field is set.
+   */
+  @java.lang.Override
+  public boolean hasDownloadLabelDisplay() {
+    return ((bitField0_ & 0x08000000) != 0);
+  }
+  /**
+   * <code>optional string downloadLabelDisplay = 61;</code>
+   * @return The downloadLabelDisplay.
+   */
+  @java.lang.Override
+  public java.lang.String getDownloadLabelDisplay() {
+    return downloadLabelDisplay_;
+  }
+  /**
+   * <code>optional string downloadLabelDisplay = 61;</code>
+   * @return The bytes for downloadLabelDisplay.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getDownloadLabelDisplayBytes() {
+    return com.google.protobuf.ByteString.copyFromUtf8(downloadLabelDisplay_);
+  }
+  /**
+   * <code>optional string downloadLabelDisplay = 61;</code>
+   * @param value The downloadLabelDisplay to set.
+   */
+  private void setDownloadLabelDisplay(
+      java.lang.String value) {
+    java.lang.Class<?> valueClass = value.getClass();
+  bitField0_ |= 0x08000000;
+    downloadLabelDisplay_ = value;
+  }
+  /**
+   * <code>optional string downloadLabelDisplay = 61;</code>
+   */
+  private void clearDownloadLabelDisplay() {
+    bitField0_ = (bitField0_ & ~0x08000000);
+    downloadLabelDisplay_ = getDefaultInstance().getDownloadLabelDisplay();
+  }
+  /**
+   * <code>optional string downloadLabelDisplay = 61;</code>
+   * @param value The bytes for downloadLabelDisplay to set.
+   */
+  private void setDownloadLabelDisplayBytes(
+      com.google.protobuf.ByteString value) {
+    downloadLabelDisplay_ = value.toStringUtf8();
+    bitField0_ |= 0x08000000;
+  }
+
+  public static final int INAPPPRODUCT_FIELD_NUMBER = 67;
+  private java.lang.String inAppProduct_;
+  /**
+   * <code>optional string inAppProduct = 67;</code>
+   * @return Whether the inAppProduct field is set.
+   */
+  @java.lang.Override
+  public boolean hasInAppProduct() {
+    return ((bitField0_ & 0x10000000) != 0);
+  }
+  /**
+   * <code>optional string inAppProduct = 67;</code>
+   * @return The inAppProduct.
+   */
+  @java.lang.Override
+  public java.lang.String getInAppProduct() {
+    return inAppProduct_;
+  }
+  /**
+   * <code>optional string inAppProduct = 67;</code>
+   * @return The bytes for inAppProduct.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getInAppProductBytes() {
+    return com.google.protobuf.ByteString.copyFromUtf8(inAppProduct_);
+  }
+  /**
+   * <code>optional string inAppProduct = 67;</code>
+   * @param value The inAppProduct to set.
+   */
+  private void setInAppProduct(
+      java.lang.String value) {
+    java.lang.Class<?> valueClass = value.getClass();
+  bitField0_ |= 0x10000000;
+    inAppProduct_ = value;
+  }
+  /**
+   * <code>optional string inAppProduct = 67;</code>
+   */
+  private void clearInAppProduct() {
+    bitField0_ = (bitField0_ & ~0x10000000);
+    inAppProduct_ = getDefaultInstance().getInAppProduct();
+  }
+  /**
+   * <code>optional string inAppProduct = 67;</code>
+   * @param value The bytes for inAppProduct to set.
+   */
+  private void setInAppProductBytes(
+      com.google.protobuf.ByteString value) {
+    inAppProduct_ = value.toStringUtf8();
+    bitField0_ |= 0x10000000;
+  }
+
+  public static final int DOWNLOADLABELABBREVIATED_FIELD_NUMBER = 77;
+  private java.lang.String downloadLabelAbbreviated_;
+  /**
+   * <code>optional string downloadLabelAbbreviated = 77;</code>
+   * @return Whether the downloadLabelAbbreviated field is set.
+   */
+  @java.lang.Override
+  public boolean hasDownloadLabelAbbreviated() {
+    return ((bitField0_ & 0x20000000) != 0);
+  }
+  /**
+   * <code>optional string downloadLabelAbbreviated = 77;</code>
+   * @return The downloadLabelAbbreviated.
+   */
+  @java.lang.Override
+  public java.lang.String getDownloadLabelAbbreviated() {
+    return downloadLabelAbbreviated_;
+  }
+  /**
+   * <code>optional string downloadLabelAbbreviated = 77;</code>
+   * @return The bytes for downloadLabelAbbreviated.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getDownloadLabelAbbreviatedBytes() {
+    return com.google.protobuf.ByteString.copyFromUtf8(downloadLabelAbbreviated_);
+  }
+  /**
+   * <code>optional string downloadLabelAbbreviated = 77;</code>
+   * @param value The downloadLabelAbbreviated to set.
+   */
+  private void setDownloadLabelAbbreviated(
+      java.lang.String value) {
+    java.lang.Class<?> valueClass = value.getClass();
+  bitField0_ |= 0x20000000;
+    downloadLabelAbbreviated_ = value;
+  }
+  /**
+   * <code>optional string downloadLabelAbbreviated = 77;</code>
+   */
+  private void clearDownloadLabelAbbreviated() {
+    bitField0_ = (bitField0_ & ~0x20000000);
+    downloadLabelAbbreviated_ = getDefaultInstance().getDownloadLabelAbbreviated();
+  }
+  /**
+   * <code>optional string downloadLabelAbbreviated = 77;</code>
+   * @param value The bytes for downloadLabelAbbreviated to set.
+   */
+  private void setDownloadLabelAbbreviatedBytes(
+      com.google.protobuf.ByteString value) {
+    downloadLabelAbbreviated_ = value.toStringUtf8();
+    bitField0_ |= 0x20000000;
+  }
+
+  public static final int DOWNLOADLABEL_FIELD_NUMBER = 78;
+  private java.lang.String downloadLabel_;
+  /**
+   * <code>optional string downloadLabel = 78;</code>
+   * @return Whether the downloadLabel field is set.
+   */
+  @java.lang.Override
+  public boolean hasDownloadLabel() {
+    return ((bitField0_ & 0x40000000) != 0);
+  }
+  /**
+   * <code>optional string downloadLabel = 78;</code>
+   * @return The downloadLabel.
+   */
+  @java.lang.Override
+  public java.lang.String getDownloadLabel() {
+    return downloadLabel_;
+  }
+  /**
+   * <code>optional string downloadLabel = 78;</code>
+   * @return The bytes for downloadLabel.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getDownloadLabelBytes() {
+    return com.google.protobuf.ByteString.copyFromUtf8(downloadLabel_);
+  }
+  /**
+   * <code>optional string downloadLabel = 78;</code>
+   * @param value The downloadLabel to set.
+   */
+  private void setDownloadLabel(
+      java.lang.String value) {
+    java.lang.Class<?> valueClass = value.getClass();
+  bitField0_ |= 0x40000000;
+    downloadLabel_ = value;
+  }
+  /**
+   * <code>optional string downloadLabel = 78;</code>
+   */
+  private void clearDownloadLabel() {
+    bitField0_ = (bitField0_ & ~0x40000000);
+    downloadLabel_ = getDefaultInstance().getDownloadLabel();
+  }
+  /**
+   * <code>optional string downloadLabel = 78;</code>
+   * @param value The bytes for downloadLabel to set.
+   */
+  private void setDownloadLabelBytes(
+      com.google.protobuf.ByteString value) {
+    downloadLabel_ = value.toStringUtf8();
+    bitField0_ |= 0x40000000;
   }
 
   public static finsky.protos.AppDetails parseFrom(
@@ -2340,6 +2919,42 @@ public  final class AppDetails extends
     }
 
     /**
+     * <code>optional bool hasInstantLink = 24;</code>
+     * @return Whether the hasInstantLink field is set.
+     */
+    @java.lang.Override
+    public boolean hasHasInstantLink() {
+      return instance.hasHasInstantLink();
+    }
+    /**
+     * <code>optional bool hasInstantLink = 24;</code>
+     * @return The hasInstantLink.
+     */
+    @java.lang.Override
+    public boolean getHasInstantLink() {
+      return instance.getHasInstantLink();
+    }
+    /**
+     * <code>optional bool hasInstantLink = 24;</code>
+     * @param value The hasInstantLink to set.
+     * @return This builder for chaining.
+     */
+    public Builder setHasInstantLink(boolean value) {
+      copyOnWrite();
+      instance.setHasInstantLink(value);
+      return this;
+    }
+    /**
+     * <code>optional bool hasInstantLink = 24;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearHasInstantLink() {
+      copyOnWrite();
+      instance.clearHasInstantLink();
+      return this;
+    }
+
+    /**
      * <code>optional string containsAds = 30;</code>
      * @return Whether the containsAds field is set.
      */
@@ -2393,6 +3008,42 @@ public  final class AppDetails extends
         com.google.protobuf.ByteString value) {
       copyOnWrite();
       instance.setContainsAdsBytes(value);
+      return this;
+    }
+
+    /**
+     * <code>optional int32 targetSdkVersion = 32;</code>
+     * @return Whether the targetSdkVersion field is set.
+     */
+    @java.lang.Override
+    public boolean hasTargetSdkVersion() {
+      return instance.hasTargetSdkVersion();
+    }
+    /**
+     * <code>optional int32 targetSdkVersion = 32;</code>
+     * @return The targetSdkVersion.
+     */
+    @java.lang.Override
+    public int getTargetSdkVersion() {
+      return instance.getTargetSdkVersion();
+    }
+    /**
+     * <code>optional int32 targetSdkVersion = 32;</code>
+     * @param value The targetSdkVersion to set.
+     * @return This builder for chaining.
+     */
+    public Builder setTargetSdkVersion(int value) {
+      copyOnWrite();
+      instance.setTargetSdkVersion(value);
+      return this;
+    }
+    /**
+     * <code>optional int32 targetSdkVersion = 32;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearTargetSdkVersion() {
+      copyOnWrite();
+      instance.clearTargetSdkVersion();
       return this;
     }
 
@@ -2537,6 +3188,535 @@ public  final class AppDetails extends
       return this;
     }
 
+    /**
+     * <code>optional .finsky.protos.EditorChoice editorChoice = 41;</code>
+     */
+    @java.lang.Override
+    public boolean hasEditorChoice() {
+      return instance.hasEditorChoice();
+    }
+    /**
+     * <code>optional .finsky.protos.EditorChoice editorChoice = 41;</code>
+     */
+    @java.lang.Override
+    public finsky.protos.EditorChoice getEditorChoice() {
+      return instance.getEditorChoice();
+    }
+    /**
+     * <code>optional .finsky.protos.EditorChoice editorChoice = 41;</code>
+     */
+    public Builder setEditorChoice(finsky.protos.EditorChoice value) {
+      copyOnWrite();
+      instance.setEditorChoice(value);
+      return this;
+      }
+    /**
+     * <code>optional .finsky.protos.EditorChoice editorChoice = 41;</code>
+     */
+    public Builder setEditorChoice(
+        finsky.protos.EditorChoice.Builder builderForValue) {
+      copyOnWrite();
+      instance.setEditorChoice(builderForValue.build());
+      return this;
+    }
+    /**
+     * <code>optional .finsky.protos.EditorChoice editorChoice = 41;</code>
+     */
+    public Builder mergeEditorChoice(finsky.protos.EditorChoice value) {
+      copyOnWrite();
+      instance.mergeEditorChoice(value);
+      return this;
+    }
+    /**
+     * <code>optional .finsky.protos.EditorChoice editorChoice = 41;</code>
+     */
+    public Builder clearEditorChoice() {  copyOnWrite();
+      instance.clearEditorChoice();
+      return this;
+    }
+
+    /**
+     * <code>optional string instantLink = 43;</code>
+     * @return Whether the instantLink field is set.
+     */
+    @java.lang.Override
+    public boolean hasInstantLink() {
+      return instance.hasInstantLink();
+    }
+    /**
+     * <code>optional string instantLink = 43;</code>
+     * @return The instantLink.
+     */
+    @java.lang.Override
+    public java.lang.String getInstantLink() {
+      return instance.getInstantLink();
+    }
+    /**
+     * <code>optional string instantLink = 43;</code>
+     * @return The bytes for instantLink.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getInstantLinkBytes() {
+      return instance.getInstantLinkBytes();
+    }
+    /**
+     * <code>optional string instantLink = 43;</code>
+     * @param value The instantLink to set.
+     * @return This builder for chaining.
+     */
+    public Builder setInstantLink(
+        java.lang.String value) {
+      copyOnWrite();
+      instance.setInstantLink(value);
+      return this;
+    }
+    /**
+     * <code>optional string instantLink = 43;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearInstantLink() {
+      copyOnWrite();
+      instance.clearInstantLink();
+      return this;
+    }
+    /**
+     * <code>optional string instantLink = 43;</code>
+     * @param value The bytes for instantLink to set.
+     * @return This builder for chaining.
+     */
+    public Builder setInstantLinkBytes(
+        com.google.protobuf.ByteString value) {
+      copyOnWrite();
+      instance.setInstantLinkBytes(value);
+      return this;
+    }
+
+    /**
+     * <code>optional string developerAddress = 45;</code>
+     * @return Whether the developerAddress field is set.
+     */
+    @java.lang.Override
+    public boolean hasDeveloperAddress() {
+      return instance.hasDeveloperAddress();
+    }
+    /**
+     * <code>optional string developerAddress = 45;</code>
+     * @return The developerAddress.
+     */
+    @java.lang.Override
+    public java.lang.String getDeveloperAddress() {
+      return instance.getDeveloperAddress();
+    }
+    /**
+     * <code>optional string developerAddress = 45;</code>
+     * @return The bytes for developerAddress.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDeveloperAddressBytes() {
+      return instance.getDeveloperAddressBytes();
+    }
+    /**
+     * <code>optional string developerAddress = 45;</code>
+     * @param value The developerAddress to set.
+     * @return This builder for chaining.
+     */
+    public Builder setDeveloperAddress(
+        java.lang.String value) {
+      copyOnWrite();
+      instance.setDeveloperAddress(value);
+      return this;
+    }
+    /**
+     * <code>optional string developerAddress = 45;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearDeveloperAddress() {
+      copyOnWrite();
+      instance.clearDeveloperAddress();
+      return this;
+    }
+    /**
+     * <code>optional string developerAddress = 45;</code>
+     * @param value The bytes for developerAddress to set.
+     * @return This builder for chaining.
+     */
+    public Builder setDeveloperAddressBytes(
+        com.google.protobuf.ByteString value) {
+      copyOnWrite();
+      instance.setDeveloperAddressBytes(value);
+      return this;
+    }
+
+    /**
+     * <code>optional .finsky.protos.Publisher publisher = 46;</code>
+     */
+    @java.lang.Override
+    public boolean hasPublisher() {
+      return instance.hasPublisher();
+    }
+    /**
+     * <code>optional .finsky.protos.Publisher publisher = 46;</code>
+     */
+    @java.lang.Override
+    public finsky.protos.Publisher getPublisher() {
+      return instance.getPublisher();
+    }
+    /**
+     * <code>optional .finsky.protos.Publisher publisher = 46;</code>
+     */
+    public Builder setPublisher(finsky.protos.Publisher value) {
+      copyOnWrite();
+      instance.setPublisher(value);
+      return this;
+      }
+    /**
+     * <code>optional .finsky.protos.Publisher publisher = 46;</code>
+     */
+    public Builder setPublisher(
+        finsky.protos.Publisher.Builder builderForValue) {
+      copyOnWrite();
+      instance.setPublisher(builderForValue.build());
+      return this;
+    }
+    /**
+     * <code>optional .finsky.protos.Publisher publisher = 46;</code>
+     */
+    public Builder mergePublisher(finsky.protos.Publisher value) {
+      copyOnWrite();
+      instance.mergePublisher(value);
+      return this;
+    }
+    /**
+     * <code>optional .finsky.protos.Publisher publisher = 46;</code>
+     */
+    public Builder clearPublisher() {  copyOnWrite();
+      instance.clearPublisher();
+      return this;
+    }
+
+    /**
+     * <code>optional string categoryName = 48;</code>
+     * @return Whether the categoryName field is set.
+     */
+    @java.lang.Override
+    public boolean hasCategoryName() {
+      return instance.hasCategoryName();
+    }
+    /**
+     * <code>optional string categoryName = 48;</code>
+     * @return The categoryName.
+     */
+    @java.lang.Override
+    public java.lang.String getCategoryName() {
+      return instance.getCategoryName();
+    }
+    /**
+     * <code>optional string categoryName = 48;</code>
+     * @return The bytes for categoryName.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCategoryNameBytes() {
+      return instance.getCategoryNameBytes();
+    }
+    /**
+     * <code>optional string categoryName = 48;</code>
+     * @param value The categoryName to set.
+     * @return This builder for chaining.
+     */
+    public Builder setCategoryName(
+        java.lang.String value) {
+      copyOnWrite();
+      instance.setCategoryName(value);
+      return this;
+    }
+    /**
+     * <code>optional string categoryName = 48;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearCategoryName() {
+      copyOnWrite();
+      instance.clearCategoryName();
+      return this;
+    }
+    /**
+     * <code>optional string categoryName = 48;</code>
+     * @param value The bytes for categoryName to set.
+     * @return This builder for chaining.
+     */
+    public Builder setCategoryNameBytes(
+        com.google.protobuf.ByteString value) {
+      copyOnWrite();
+      instance.setCategoryNameBytes(value);
+      return this;
+    }
+
+    /**
+     * <code>optional int64 downloadCount = 53;</code>
+     * @return Whether the downloadCount field is set.
+     */
+    @java.lang.Override
+    public boolean hasDownloadCount() {
+      return instance.hasDownloadCount();
+    }
+    /**
+     * <code>optional int64 downloadCount = 53;</code>
+     * @return The downloadCount.
+     */
+    @java.lang.Override
+    public long getDownloadCount() {
+      return instance.getDownloadCount();
+    }
+    /**
+     * <code>optional int64 downloadCount = 53;</code>
+     * @param value The downloadCount to set.
+     * @return This builder for chaining.
+     */
+    public Builder setDownloadCount(long value) {
+      copyOnWrite();
+      instance.setDownloadCount(value);
+      return this;
+    }
+    /**
+     * <code>optional int64 downloadCount = 53;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearDownloadCount() {
+      copyOnWrite();
+      instance.clearDownloadCount();
+      return this;
+    }
+
+    /**
+     * <code>optional string downloadLabelDisplay = 61;</code>
+     * @return Whether the downloadLabelDisplay field is set.
+     */
+    @java.lang.Override
+    public boolean hasDownloadLabelDisplay() {
+      return instance.hasDownloadLabelDisplay();
+    }
+    /**
+     * <code>optional string downloadLabelDisplay = 61;</code>
+     * @return The downloadLabelDisplay.
+     */
+    @java.lang.Override
+    public java.lang.String getDownloadLabelDisplay() {
+      return instance.getDownloadLabelDisplay();
+    }
+    /**
+     * <code>optional string downloadLabelDisplay = 61;</code>
+     * @return The bytes for downloadLabelDisplay.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDownloadLabelDisplayBytes() {
+      return instance.getDownloadLabelDisplayBytes();
+    }
+    /**
+     * <code>optional string downloadLabelDisplay = 61;</code>
+     * @param value The downloadLabelDisplay to set.
+     * @return This builder for chaining.
+     */
+    public Builder setDownloadLabelDisplay(
+        java.lang.String value) {
+      copyOnWrite();
+      instance.setDownloadLabelDisplay(value);
+      return this;
+    }
+    /**
+     * <code>optional string downloadLabelDisplay = 61;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearDownloadLabelDisplay() {
+      copyOnWrite();
+      instance.clearDownloadLabelDisplay();
+      return this;
+    }
+    /**
+     * <code>optional string downloadLabelDisplay = 61;</code>
+     * @param value The bytes for downloadLabelDisplay to set.
+     * @return This builder for chaining.
+     */
+    public Builder setDownloadLabelDisplayBytes(
+        com.google.protobuf.ByteString value) {
+      copyOnWrite();
+      instance.setDownloadLabelDisplayBytes(value);
+      return this;
+    }
+
+    /**
+     * <code>optional string inAppProduct = 67;</code>
+     * @return Whether the inAppProduct field is set.
+     */
+    @java.lang.Override
+    public boolean hasInAppProduct() {
+      return instance.hasInAppProduct();
+    }
+    /**
+     * <code>optional string inAppProduct = 67;</code>
+     * @return The inAppProduct.
+     */
+    @java.lang.Override
+    public java.lang.String getInAppProduct() {
+      return instance.getInAppProduct();
+    }
+    /**
+     * <code>optional string inAppProduct = 67;</code>
+     * @return The bytes for inAppProduct.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getInAppProductBytes() {
+      return instance.getInAppProductBytes();
+    }
+    /**
+     * <code>optional string inAppProduct = 67;</code>
+     * @param value The inAppProduct to set.
+     * @return This builder for chaining.
+     */
+    public Builder setInAppProduct(
+        java.lang.String value) {
+      copyOnWrite();
+      instance.setInAppProduct(value);
+      return this;
+    }
+    /**
+     * <code>optional string inAppProduct = 67;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearInAppProduct() {
+      copyOnWrite();
+      instance.clearInAppProduct();
+      return this;
+    }
+    /**
+     * <code>optional string inAppProduct = 67;</code>
+     * @param value The bytes for inAppProduct to set.
+     * @return This builder for chaining.
+     */
+    public Builder setInAppProductBytes(
+        com.google.protobuf.ByteString value) {
+      copyOnWrite();
+      instance.setInAppProductBytes(value);
+      return this;
+    }
+
+    /**
+     * <code>optional string downloadLabelAbbreviated = 77;</code>
+     * @return Whether the downloadLabelAbbreviated field is set.
+     */
+    @java.lang.Override
+    public boolean hasDownloadLabelAbbreviated() {
+      return instance.hasDownloadLabelAbbreviated();
+    }
+    /**
+     * <code>optional string downloadLabelAbbreviated = 77;</code>
+     * @return The downloadLabelAbbreviated.
+     */
+    @java.lang.Override
+    public java.lang.String getDownloadLabelAbbreviated() {
+      return instance.getDownloadLabelAbbreviated();
+    }
+    /**
+     * <code>optional string downloadLabelAbbreviated = 77;</code>
+     * @return The bytes for downloadLabelAbbreviated.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDownloadLabelAbbreviatedBytes() {
+      return instance.getDownloadLabelAbbreviatedBytes();
+    }
+    /**
+     * <code>optional string downloadLabelAbbreviated = 77;</code>
+     * @param value The downloadLabelAbbreviated to set.
+     * @return This builder for chaining.
+     */
+    public Builder setDownloadLabelAbbreviated(
+        java.lang.String value) {
+      copyOnWrite();
+      instance.setDownloadLabelAbbreviated(value);
+      return this;
+    }
+    /**
+     * <code>optional string downloadLabelAbbreviated = 77;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearDownloadLabelAbbreviated() {
+      copyOnWrite();
+      instance.clearDownloadLabelAbbreviated();
+      return this;
+    }
+    /**
+     * <code>optional string downloadLabelAbbreviated = 77;</code>
+     * @param value The bytes for downloadLabelAbbreviated to set.
+     * @return This builder for chaining.
+     */
+    public Builder setDownloadLabelAbbreviatedBytes(
+        com.google.protobuf.ByteString value) {
+      copyOnWrite();
+      instance.setDownloadLabelAbbreviatedBytes(value);
+      return this;
+    }
+
+    /**
+     * <code>optional string downloadLabel = 78;</code>
+     * @return Whether the downloadLabel field is set.
+     */
+    @java.lang.Override
+    public boolean hasDownloadLabel() {
+      return instance.hasDownloadLabel();
+    }
+    /**
+     * <code>optional string downloadLabel = 78;</code>
+     * @return The downloadLabel.
+     */
+    @java.lang.Override
+    public java.lang.String getDownloadLabel() {
+      return instance.getDownloadLabel();
+    }
+    /**
+     * <code>optional string downloadLabel = 78;</code>
+     * @return The bytes for downloadLabel.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDownloadLabelBytes() {
+      return instance.getDownloadLabelBytes();
+    }
+    /**
+     * <code>optional string downloadLabel = 78;</code>
+     * @param value The downloadLabel to set.
+     * @return This builder for chaining.
+     */
+    public Builder setDownloadLabel(
+        java.lang.String value) {
+      copyOnWrite();
+      instance.setDownloadLabel(value);
+      return this;
+    }
+    /**
+     * <code>optional string downloadLabel = 78;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearDownloadLabel() {
+      copyOnWrite();
+      instance.clearDownloadLabel();
+      return this;
+    }
+    /**
+     * <code>optional string downloadLabel = 78;</code>
+     * @param value The bytes for downloadLabel to set.
+     * @return This builder for chaining.
+     */
+    public Builder setDownloadLabelBytes(
+        com.google.protobuf.ByteString value) {
+      copyOnWrite();
+      instance.setDownloadLabelBytes(value);
+      return this;
+    }
+
     // @@protoc_insertion_point(builder_scope:finsky.protos.AppDetails)
   }
   @java.lang.Override
@@ -2573,17 +3753,31 @@ public  final class AppDetails extends
             finsky.protos.Common.FileMetadata.class,
             "appType_",
             "unstable_",
+            "hasInstantLink_",
             "containsAds_",
+            "targetSdkVersion_",
             "dependencies_",
             "testingProgramInfo_",
             "earlyAccessInfo_",
+            "editorChoice_",
+            "instantLink_",
+            "developerAddress_",
+            "publisher_",
+            "categoryName_",
+            "downloadCount_",
+            "downloadLabelDisplay_",
+            "inAppProduct_",
+            "downloadLabelAbbreviated_",
+            "downloadLabel_",
           };
           java.lang.String info =
-              "\u0001\u0016\u0000\u0001\u0001$\u0016\u0000\u0003\u0000\u0001\u1008\u0000\u0002\u1004" +
-              "\u0001\u0003\u1004\u0002\u0004\u1008\u0003\u0005\u1008\u0004\u0007\u001a\b\u1004" +
-              "\u0005\t\u1002\u0006\n\u001a\u000b\u1008\u0007\f\u1008\b\r\u1008\t\u000e\u1008\n" +
-              "\u000f\u1008\u000b\u0010\u1008\f\u0011\u001b\u0012\u1008\r\u0015\u1007\u000e\u001e" +
-              "\u1008\u000f\"\u1009\u0010#\u1009\u0011$\u1009\u0012";
+              "\u0001\"\u0000\u0001\u0001N\"\u0000\u0003\u0000\u0001\u1008\u0000\u0002\u1004\u0001" +
+              "\u0003\u1004\u0002\u0004\u1008\u0003\u0005\u1008\u0004\u0007\u001a\b\u1004\u0005" +
+              "\t\u1002\u0006\n\u001a\u000b\u1008\u0007\f\u1008\b\r\u1008\t\u000e\u1008\n\u000f" +
+              "\u1008\u000b\u0010\u1008\f\u0011\u001b\u0012\u1008\r\u0015\u1007\u000e\u0018\u1007" +
+              "\u000f\u001e\u1008\u0010 \u1004\u0011\"\u1009\u0012#\u1009\u0013$\u1009\u0014)\u1009" +
+              "\u0015+\u1008\u0016-\u1008\u0017.\u1009\u00180\u1008\u00195\u1002\u001a=\u1008\u001b" +
+              "C\u1008\u001cM\u1008\u001dN\u1008\u001e";
           return newMessageInfo(DEFAULT_INSTANCE, info, objects);
       }
       // fall through

@@ -60,10 +60,18 @@ message Common
         optional int32 count = 2;
     }
 
+    message PatchDetails {
+        optional int32 baseVersionCode = 1;
+        optional int64 size = 2;
+    }
+
     message FileMetadata {
         optional int32 fileType = 1;
         optional int32 versionCode = 2;
         optional int64 size = 3;
+        optional string splitId = 4;
+        optional int64 compressedSize = 5;
+        repeated PatchDetails patchDetails = 6;
     }
 
 }
@@ -101,10 +109,51 @@ message AppDetails
     repeated Common.FileMetadata file = 17;
     optional string appType = 18;
     optional bool unstable = 21;
+    optional bool hasInstantLink = 24;
     optional string containsAds = 30;
+    optional int32 targetSdkVersion = 32;
     optional Dependencies dependencies = 34;
     optional TestingProgramInfo testingProgramInfo = 35;
     optional EarlyAccessInfo earlyAccessInfo = 36;
+    optional EditorChoice editorChoice = 41;
+    optional string instantLink = 43;
+    optional string developerAddress = 45;
+    optional Publisher publisher = 46;
+    optional string categoryName = 48;
+    optional int64 downloadCount = 53;
+    optional string downloadLabelDisplay = 61;
+    optional string inAppProduct = 67;
+    optional string downloadLabelAbbreviated = 77;
+    optional string downloadLabel = 78;
+}
+
+message StreamLink{
+    optional string url = 1;
+    optional string streamUrl = 2;
+    optional string searchUrl = 3;
+    optional string subCategoryUrl = 5;
+    optional string searchQuery = 11;
+}
+
+message SubStream{
+    optional StreamLink link = 2;
+}
+
+message EditorChoice{
+    repeated string bulletins = 1;
+    optional string description = 2;
+    optional SubStream stream = 3;
+    optional string title = 4;
+    optional string subtitle = 5;
+}
+
+message Publisher{
+    optional PublisherStream publisherStream = 2;
+}
+
+message PublisherStream{
+    optional string moreUrl = 3;
+    optional string query = 11;
 }
 
 message TestingProgramInfo {
@@ -191,12 +240,12 @@ message DocV2
     optional string creator = 6;
     optional string descriptionHtml = 7;
     repeated Common.Offer offer = 8;
-    // optional Availability availability = 9;
+    //optional Availability availability = 9;
     repeated Common.Image image = 10;
     repeated DocV2 child = 11;
     optional Containers.ContainerMetadata containerMetadata = 12;
     optional DocDetails details = 13;
-    //optional AggregateRating aggregateRating = 14;
+    optional AggregateRating aggregateRating = 14;
     optional RelatedLinks relatedLinks = 15;
     optional string detailsUrl = 16;
     optional string shareUrl = 17;
@@ -209,6 +258,26 @@ message DocV2
     optional string descriptionShort = 27;
     optional string reviewSnippetsUrl = 31;
     optional string reviewQuestionsUrl = 34;
+
+    message AggregateRating {
+        optional int32 type = 1[default = 1];
+        optional float starRating = 2;
+        optional uint64 ratingsCount = 3;
+        optional uint64 oneStarRatings = 4;
+        optional uint64 twoStarRatings = 5;
+        optional uint64 threeStarRatings = 6;
+        optional uint64 fourStarRatings = 7;
+        optional uint64 fiveStarRatings = 8;
+        optional uint64 thumbsUpCount = 9;
+        optional uint64 thumbsDownCount = 10;
+        optional uint64 commentCount = 11;
+        optional double bayesianMeanRating = 12;
+        //repeated Tip tip = 13;
+        optional string ratingLabel = 17;
+        optional string ratingCountLabelAbbreviated = 18;
+        optional string ratingCountLabel = 19;
+    }
+
 }
 
 message Details

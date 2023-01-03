@@ -130,7 +130,7 @@ public interface DocV2OrBuilder extends
 
   /**
    * <pre>
-   * optional Availability availability = 9;
+   *optional Availability availability = 9;
    * </pre>
    *
    * <code>repeated .finsky.protos.Common.Image image = 10;</code>
@@ -139,7 +139,7 @@ public interface DocV2OrBuilder extends
       getImageList();
   /**
    * <pre>
-   * optional Availability availability = 9;
+   *optional Availability availability = 9;
    * </pre>
    *
    * <code>repeated .finsky.protos.Common.Image image = 10;</code>
@@ -147,7 +147,7 @@ public interface DocV2OrBuilder extends
   finsky.protos.Common.Image getImage(int index);
   /**
    * <pre>
-   * optional Availability availability = 9;
+   *optional Availability availability = 9;
    * </pre>
    *
    * <code>repeated .finsky.protos.Common.Image image = 10;</code>
@@ -191,19 +191,22 @@ public interface DocV2OrBuilder extends
   finsky.protos.DocDetails getDetails();
 
   /**
-   * <pre>
-   *optional AggregateRating aggregateRating = 14;
-   * </pre>
-   *
+   * <code>optional .finsky.protos.DocV2.AggregateRating aggregateRating = 14;</code>
+   * @return Whether the aggregateRating field is set.
+   */
+  boolean hasAggregateRating();
+  /**
+   * <code>optional .finsky.protos.DocV2.AggregateRating aggregateRating = 14;</code>
+   * @return The aggregateRating.
+   */
+  finsky.protos.DocV2.AggregateRating getAggregateRating();
+
+  /**
    * <code>optional .finsky.protos.RelatedLinks relatedLinks = 15;</code>
    * @return Whether the relatedLinks field is set.
    */
   boolean hasRelatedLinks();
   /**
-   * <pre>
-   *optional AggregateRating aggregateRating = 14;
-   * </pre>
-   *
    * <code>optional .finsky.protos.RelatedLinks relatedLinks = 15;</code>
    * @return The relatedLinks.
    */
