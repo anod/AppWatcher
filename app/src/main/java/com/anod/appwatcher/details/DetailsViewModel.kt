@@ -4,11 +4,13 @@ import android.accounts.Account
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.BitmapDrawable
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.palette.graphics.Palette
+import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.compose.CommonActivityAction
@@ -21,6 +23,7 @@ import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.database.entities.generateTitle
 import com.anod.appwatcher.database.entities.packageToApp
 import com.anod.appwatcher.model.AppInfo
+import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.date.UploadDateParserCache
@@ -85,13 +88,15 @@ data class DetailsScreenState(
         val customPrimaryColor: Int? = null,
         val document: Document? = null,
         val isInstalled: Boolean = false
-)
+) {
+    val isWatched: Boolean
+        get() = app != null && app.status != AppInfoMetadata.STATUS_DELETED
+}
 
 sealed interface DetailsScreenAction {
     class ActivityAction(val action: CommonActivityAction) : DetailsScreenAction
     object Dismiss : DetailsScreenAction
     object Share : DetailsScreenAction
-    class WatchAppResult(val result: Int) : DetailsScreenAction
 }
 
 private fun startActivityAction(intent: Intent, addMultiWindowFlags: Boolean = false) : DetailsScreenAction.ActivityAction {
@@ -103,9 +108,17 @@ private fun startActivityAction(intent: Intent, addMultiWindowFlags: Boolean = f
     )
 }
 
+private fun showToastAction(@StringRes resId: Int): DetailsScreenAction {
+    return DetailsScreenAction.ActivityAction(
+        action = CommonActivityAction.ShowToast(
+            resId = resId
+        )
+    )
+}
+
 sealed interface DetailsScreenEvent {
     class UpdateTag(val tagId: Int, val checked: Boolean) : DetailsScreenEvent
-    object WatchApp : DetailsScreenEvent
+    object WatchAppToggle : DetailsScreenEvent
     object LoadChangelog : DetailsScreenEvent
     object ReloadChangelog : DetailsScreenEvent
     object OnBackPressed : DetailsScreenEvent
@@ -213,7 +226,15 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
     override fun handleEvent(event: DetailsScreenEvent) {
         when (event) {
             is DetailsScreenEvent.UpdateTag -> changeTag(event.tagId, event.checked)
-            DetailsScreenEvent.WatchApp -> watchApp()
+            DetailsScreenEvent.WatchAppToggle -> {
+                if (viewState.isWatched) {
+                    viewModelScope.launch {
+                        database.apps().updateStatus(rowId = viewState.rowId, AppInfoMetadata.STATUS_DELETED)
+                    }
+                } else {
+                    watchApp()
+                }
+            }
             DetailsScreenEvent.LoadChangelog -> loadChangelog()
             DetailsScreenEvent.ReloadChangelog -> {
                 viewState = viewState.copy(changelogState = ChangelogLoadState.Initial)
@@ -309,12 +330,19 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
     private fun watchApp() {
         viewModelScope.launch {
             val document = viewState.document
-            if (document == null) {
-                emitAction(DetailsScreenAction.WatchAppResult(AppListTable.ERROR_INSERT))
+            val result = if (document == null) {
+                AppListTable.ERROR_INSERT
             } else {
                 val info = AppInfo(document, uploadDateParserCache)
-                val result = AppListTable.Queries.insertSafetly(info, database)
-                emitAction(DetailsScreenAction.WatchAppResult(result))
+                AppListTable.Queries.insertSafetly(info, database)
+            }
+            when (result) {
+                AppListTable.ERROR_INSERT -> emitAction(action = showToastAction(resId = R.string.error_insert_app))
+                AppListTable.ERROR_ALREADY_ADDED -> emitAction(action = showToastAction(resId = R.string.app_already_added))
+                else -> {
+                    val info = AppInfo(document!!, uploadDateParserCache)
+                    // TODO: TagSnackbar.make(view, info, false, requireActivity(), viewModel.prefs).show()
+                }
             }
         }
     }

@@ -1,5 +1,7 @@
 package com.anod.appwatcher.details
 
+import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -29,7 +31,11 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -46,12 +52,14 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -61,6 +69,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.core.app.ShareCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
@@ -69,6 +78,7 @@ import com.anod.appwatcher.compose.DropdownMenuAction
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.database.entities.Price
+import com.anod.appwatcher.utils.StoreIntent
 import info.anodsplace.applog.AppLog
 import info.anodsplace.compose.AutoSizeText
 import info.anodsplace.compose.toHtmlAnnotatedString
@@ -131,18 +141,42 @@ fun DetailsDialog(appId: String, rowId: Int, detailsUrl: String, onDismissReques
         }
     }
 
+    val context = LocalContext.current
     LaunchedEffect(key1 = true) {
         viewModel.viewActions.collect { action ->
             when (action) {
                 DetailsScreenAction.Dismiss -> {
                     onDismissRequest()
                 }
-                DetailsScreenAction.Share -> {}
-                is DetailsScreenAction.WatchAppResult -> {}
+                DetailsScreenAction.Share -> {
+                    if (screenState.app != null) {
+                        onCommonActivityAction(
+                            CommonActivityAction.StartActivity(
+                                intent = createAppChooser(
+                                    screenState.app!!,
+                                    screenState.recentChange,
+                                    context
+                                )
+                            )
+                        )
+                    }
+                }
                 is DetailsScreenAction.ActivityAction -> onCommonActivityAction(action.action)
             }
         }
     }
+}
+
+private fun createAppChooser(appInfo: App, recentChange: AppChange, context: Context): Intent {
+    val builder = ShareCompat.IntentBuilder(context)
+
+    val changes = if (recentChange.details.isBlank()) "" else "${recentChange.details}\n\n"
+    val text = context.getString(R.string.share_text, changes, String.format(StoreIntent.URL_WEB_PLAY_STORE, appInfo.packageName))
+
+    builder.setSubject(context.getString(R.string.share_subject, appInfo.title, appInfo.versionName))
+    builder.setText(text)
+    builder.setType("text/plain")
+    return builder.createChooserIntent()
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
@@ -162,11 +196,12 @@ private fun DetailsScreenContent(
     val surfaceColor: Color = if (screenState.customPrimaryColor != null)
         MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
 
-    Scaffold { paddingValues ->
+    Scaffold(
+        modifier = modifier
+    ) { paddingValues ->
         Box(
-            modifier = modifier.padding(paddingValues)
+            modifier = Modifier.padding(paddingValues)
         ) {
-
             AnimatedVisibility(
                 visible = screenState.customPrimaryColor != null,
                 enter = scaleIn(
@@ -276,7 +311,7 @@ private fun DetailsChangelog(screenState: DetailsScreenState) {
             }
         }
     }
-    LazyColumn() {
+    LazyColumn {
         items(changes.size) { i ->
             val change = changes[i]
             Column(
@@ -450,59 +485,90 @@ private fun DetailsTopAppBar(
         },
         actions = {
             IconButton(
-                onClick = { onEvent(DetailsScreenEvent.WatchApp) },
-                enabled = screenState.changelogState is ChangelogLoadState.Complete
+                onClick = { onEvent(DetailsScreenEvent.WatchAppToggle) },
+                enabled = screenState.appLoadingState is AppLoadingState.Loaded
             ) {
                 Icon(
-                    imageVector = Icons.Default.Visibility,
-                    contentDescription = stringResource(id = R.string.menu_add)
-                )
-            }
-            IconButton(onClick = { }) {
-                Icon(
-                    imageVector = Icons.Default.Label,
-                    contentDescription = stringResource(id = R.string.tag)
+                    imageVector = if (screenState.isWatched) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                    contentDescription = stringResource(id = if (screenState.isWatched) R.string.watched else R.string.menu_add)
                 )
             }
 
-            DropdownMenuAction { dismiss ->
-                IconButton(onClick = {
-                    onEvent(DetailsScreenEvent.Share)
-                    dismiss()
-                }) {
+            if (screenState.tagsMenuItems.isNotEmpty()) {
+                var showTagsMenu: Boolean by remember { mutableStateOf(false) }
+                IconButton(onClick = { showTagsMenu = true }) {
                     Icon(
-                        imageVector = Icons.Default.Share,
-                        contentDescription = stringResource(id = R.string.share)
+                        imageVector = Icons.Default.Label,
+                        contentDescription = stringResource(id = R.string.tag)
                     )
                 }
+
+                DropdownMenu(expanded = showTagsMenu, onDismissRequest = { showTagsMenu = false }) {
+                    screenState.tagsMenuItems.forEach { (tag, checked) ->
+                        DropdownMenuItem(
+                            text = { Text(text = tag.name) },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Label,
+                                    contentDescription = tag.name,
+                                    tint = Color(tag.color)
+                                )
+                            },
+                            trailingIcon = {
+                                Checkbox(
+                                    checked = checked,
+                                    onCheckedChange = { onEvent(DetailsScreenEvent.UpdateTag(tag.id, checked)) }
+                                )
+                            },
+                            onClick = { onEvent(DetailsScreenEvent.UpdateTag(tag.id, checked)) }
+                        )
+                    }
+                }
+            }
+
+            DropdownMenuAction { dismiss ->
+                DropdownMenuItem(
+                    text = { Text(text = stringResource(id = R.string.share)) },
+                    leadingIcon = {
+                        Icon(imageVector = Icons.Default.Share, contentDescription = stringResource(id = R.string.share))
+                    },
+                    onClick = {
+                        onEvent(DetailsScreenEvent.Share)
+                        dismiss()
+                    }
+                )
+
                 if (screenState.isInstalled) {
-                    IconButton(onClick = {
-                        onEvent(DetailsScreenEvent.Open)
-                        dismiss()
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.OpenInNew,
-                            contentDescription = stringResource(id = R.string.open)
-                        )
-                    }
-                    IconButton(onClick = {
-                        onEvent(DetailsScreenEvent.Uninstall)
-                        dismiss()
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = stringResource(id = R.string.uninstall)
-                        )
-                    }
-                    IconButton(onClick = {
-                        onEvent(DetailsScreenEvent.AppInfo)
-                        dismiss()
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.Info,
-                            contentDescription = stringResource(id = R.string.app_info)
-                        )
-                    }
+                    DropdownMenuItem(
+                        text = { Text(text = stringResource(id = R.string.open)) },
+                        leadingIcon = {
+                            Icon(imageVector = Icons.Default.OpenInNew, contentDescription = stringResource(id = R.string.open))
+                        },
+                        onClick = {
+                            onEvent(DetailsScreenEvent.Open)
+                            dismiss()
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(text = stringResource(id = R.string.uninstall)) },
+                        leadingIcon = {
+                            Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(id = R.string.uninstall))
+                        },
+                        onClick = {
+                            onEvent(DetailsScreenEvent.Uninstall)
+                            dismiss()
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(text = stringResource(id = R.string.app_info)) },
+                        leadingIcon = {
+                            Icon(imageVector = Icons.Default.Info, contentDescription = stringResource(id = R.string.app_info))
+                        },
+                        onClick = {
+                            onEvent(DetailsScreenEvent.AppInfo)
+                            dismiss()
+                        }
+                    )
                 }
             }
         }
