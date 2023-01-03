@@ -78,7 +78,6 @@ sealed interface WatchListSharedStateAction {
     object Dismiss : WatchListSharedStateAction
     object PlayStoreMyApps : WatchListSharedStateAction
     object ShowAccountsDialog : WatchListSharedStateAction
-    class OpenApp(val app: App, val index: Int) : WatchListSharedStateAction
     class OnSearch(val query: String) : WatchListSharedStateAction
     class ShowToast(@StringRes val resId: Int = 0, val text: String = "", val length: Int = Toast.LENGTH_SHORT) : WatchListSharedStateAction
 }
@@ -217,11 +216,7 @@ class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wid
     private fun handleListEvent(listEvent: WatchListEvent) {
         when (listEvent) {
             is WatchListEvent.AppClick -> {
-                if (viewState.wideLayout.isWideLayout) {
-                    viewState = viewState.copy(selectedApp = listEvent.app)
-                } else {
-                    emitAction(WatchListSharedStateAction.OpenApp(listEvent.app, listEvent.index))
-                }
+                viewState = viewState.copy(selectedApp = listEvent.app)
             }
             is WatchListEvent.EmptyButton -> {
                 when (listEvent.idx) {

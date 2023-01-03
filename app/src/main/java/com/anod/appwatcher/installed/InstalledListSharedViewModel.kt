@@ -51,7 +51,6 @@ sealed interface InstalledListSharedEvent {
 
 sealed interface InstalledListSharedAction {
     object OnBackPressed : InstalledListSharedAction
-    class OpenApp(val app: App, val index: Int) : InstalledListSharedAction
     class StartActivity(val intent: Intent) : InstalledListSharedAction
 }
 
@@ -112,11 +111,7 @@ class InstalledListSharedViewModel(state: SavedStateHandle) : BaseFlowViewModel<
                         togglePackage(listEvent.app.packageName)
                     }
                 } else {
-                    if (viewState.wideLayout.isWideLayout) {
-                        viewState = viewState.copy(selectedApp = listEvent.app)
-                    } else {
-                        emitAction(InstalledListSharedAction.OpenApp(listEvent.app, listEvent.index))
-                    }
+                    viewState = viewState.copy(selectedApp = listEvent.app)
                 }
             }
             is WatchListEvent.AppLongClick -> {

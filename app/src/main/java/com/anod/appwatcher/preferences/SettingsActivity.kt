@@ -21,6 +21,7 @@ import com.anod.appwatcher.compose.BaseComposeActivity
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.jakewharton.processphoenix.ProcessPhoenix
 import info.anodsplace.applog.AppLog
+import info.anodsplace.framework.app.addMultiWindowFlags
 import info.anodsplace.permissions.AppPermission
 import info.anodsplace.permissions.AppPermissions
 import info.anodsplace.permissions.toRequestInput
@@ -94,7 +95,12 @@ open class SettingsActivity : BaseComposeActivity(), GDriveSignIn.Listener {
                     Toast.makeText(this@SettingsActivity, action.resId, action.length).show()
                 }
             }
-            is SettingsViewAction.StartActivity -> startActivity(action.intent)
+            is SettingsViewAction.StartActivity -> {
+                if (action.addMultiWindowFlags)
+                    startActivity(action.intent.addMultiWindowFlags(this))
+                else
+                    startActivity(action.intent)
+            }
             SettingsViewAction.RequestNotificationPermission -> notificationPermissionRequest.launch(AppPermission.PostNotification.toRequestInput())
         }
     }

@@ -11,7 +11,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
-import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.MarketSearchActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.SettingsActivity
@@ -26,6 +25,7 @@ import com.anod.appwatcher.utils.forMyApps
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.wishlist.WishListActivity
 import info.anodsplace.applog.AppLog
+import info.anodsplace.framework.app.addMultiWindowFlags
 import info.anodsplace.framework.content.startActivitySafely
 import info.anodsplace.permissions.AppPermission
 import info.anodsplace.permissions.AppPermissions
@@ -101,6 +101,11 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
                         pagingSourceConfig = pagingSourceConfig,
                         onListEvent = { listViewModel.handleEvent(it) }
                     )
+                    if (listState.selectedApp != null) {
+                        DetailsDialog(appId = listState.selectedApp!!.appId, rowId = listState.selectedApp!!.rowId, detailsUrl = listState.selectedApp!!.detailsUrl ?: "") {
+                            listViewModel.handleEvent(WatchListSharedStateEvent.SelectApp(app = null))
+                        }
+                    }
                 }
             }
         }
@@ -142,13 +147,6 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
     private fun onListAction(action: WatchListSharedStateAction) {
         when (action) {
             WatchListSharedStateAction.OnBackPressed -> onBackPressed()
-            is WatchListSharedStateAction.OpenApp -> {
-                val app = action.app
-                if (BuildConfig.DEBUG) {
-                    AppLog.d(app.packageName)
-                }
-                DetailsDialog.show(app.appId, app.rowId, app.detailsUrl, supportFragmentManager)
-            }
             is WatchListSharedStateAction.SearchInStore -> startActivity(MarketSearchActivity.intent(this, "", true))
             is WatchListSharedStateAction.Installed -> startActivity(InstalledActivity.intent(action.importMode, this))
             is WatchListSharedStateAction.ShareFromStore -> startActivitySafely(Intent.makeMainActivity(
@@ -156,7 +154,7 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
             ))
             is WatchListSharedStateAction.OnSearch -> startActivity(MarketSearchActivity.intent(this, action.query, true))
             WatchListSharedStateAction.Dismiss -> finish()
-            WatchListSharedStateAction.PlayStoreMyApps -> startActivitySafely(Intent().forMyApps(true, this))
+            WatchListSharedStateAction.PlayStoreMyApps -> startActivitySafely(Intent().forMyApps(true).addMultiWindowFlags(this))
             WatchListSharedStateAction.ShowAccountsDialog -> showAccountsDialogWithCheck()
             is WatchListSharedStateAction.ShowToast -> {
                 if (action.resId == 0) {
@@ -205,9 +203,7 @@ abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
             } else {
                 super.onBackPressed()
             }
-        } else if (!DetailsDialog.dismiss(supportFragmentManager)) {
-            super.onBackPressed()
-        }
+        } else super.onBackPressed()
     }
 
     companion object {

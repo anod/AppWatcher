@@ -11,7 +11,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.lifecycleScope
-import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.MarketSearchActivity
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
@@ -27,7 +26,6 @@ import com.anod.appwatcher.watchlist.WatchListPagingSource
 import com.anod.appwatcher.watchlist.WatchListSharedStateAction
 import com.anod.appwatcher.watchlist.WatchListSharedStateEvent
 import com.anod.appwatcher.watchlist.WatchListStateViewModel
-import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.addMultiWindowFlags
 import info.anodsplace.framework.content.startActivitySafely
 import kotlinx.coroutines.launch
@@ -70,6 +68,11 @@ class TagWatchListComposeActivity : BaseComposeActivity() {
                     )
                 } else {
                     TagWatchListScreen(screenState = screenState, pagingSourceConfig = pagingSourceConfig, onEvent = { viewModel.handleEvent(it) })
+                    if (screenState.selectedApp != null) {
+                        DetailsDialog(appId = screenState.selectedApp!!.appId, rowId = screenState.selectedApp!!.rowId, detailsUrl = screenState.selectedApp!!.detailsUrl ?: "") {
+                            viewModel.handleEvent(WatchListSharedStateEvent.SelectApp(app = null))
+                        }
+                    }
                 }
             }
         }
@@ -88,19 +91,12 @@ class TagWatchListComposeActivity : BaseComposeActivity() {
     private fun onViewAction(action: WatchListSharedStateAction) {
         when (action) {
             WatchListSharedStateAction.OnBackPressed -> onBackPressed()
-            is WatchListSharedStateAction.OpenApp -> {
-                val app = action.app
-                if (BuildConfig.DEBUG) {
-                    AppLog.d(app.packageName)
-                }
-                DetailsDialog.show(app.appId, app.rowId, app.detailsUrl, supportFragmentManager)
-            }
             is WatchListSharedStateAction.SearchInStore -> startActivity(MarketSearchActivity.intent(this, "", true))
             is WatchListSharedStateAction.Installed -> startActivity(InstalledActivity.intent(action.importMode, this))
             is WatchListSharedStateAction.ShareFromStore -> startActivitySafely(Intent.makeMainActivity(ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity")))
             is WatchListSharedStateAction.OnSearch -> startActivity(MarketSearchActivity.intent(this, action.query, true))
             WatchListSharedStateAction.Dismiss -> finish()
-            WatchListSharedStateAction.PlayStoreMyApps -> startActivitySafely(Intent().forMyApps(true, this))
+            WatchListSharedStateAction.PlayStoreMyApps -> startActivitySafely(Intent().forMyApps(true).addMultiWindowFlags(this))
             WatchListSharedStateAction.ShowAccountsDialog -> { }
             is WatchListSharedStateAction.ShowToast -> {
                 if (action.resId == 0) {
@@ -119,9 +115,7 @@ class TagWatchListComposeActivity : BaseComposeActivity() {
             } else {
                 super.onBackPressed()
             }
-        } else if (!DetailsDialog.dismiss(supportFragmentManager)) {
-            super.onBackPressed()
-        }
+        } else super.onBackPressed()
     }
 
     companion object {

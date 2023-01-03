@@ -10,6 +10,7 @@ import com.anod.appwatcher.utils.forMyApps
 import com.anod.appwatcher.utils.forPlayStore
 import com.anod.appwatcher.utils.prefs
 import info.anodsplace.framework.app.ApplicationContext
+import info.anodsplace.framework.app.addMultiWindowFlags
 import info.anodsplace.framework.content.startActivitySafely
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
@@ -23,9 +24,9 @@ class NotificationActivity : Activity(), KoinComponent {
         when (intent.getIntExtra(extraActionType, 0)) {
             actionPlayStore -> {
                 val pkg = intent.getStringExtra(extraPackage) ?: ""
-                startActivitySafely(Intent().forPlayStore(pkg, this))
+                startActivitySafely(Intent().forPlayStore(pkg).addMultiWindowFlags(this))
             }
-            actionMyApps -> startActivitySafely(Intent().forMyApps(false, this))
+            actionMyApps -> startActivitySafely(Intent().forMyApps(false).addMultiWindowFlags(this))
             actionMarkViewed -> {
                 prefs.isLastUpdatesViewed = true
             }

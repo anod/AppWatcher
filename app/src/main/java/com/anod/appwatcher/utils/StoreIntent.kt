@@ -1,11 +1,9 @@
 package com.anod.appwatcher.utils
 
 import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import info.anodsplace.framework.app.addMultiWindowFlags
 
 /**
  * @author Alex Gavrishev
@@ -16,15 +14,14 @@ object StoreIntent {
     const val URL_WEB_PLAY_STORE = "https://play.google.com/store/apps/details?id=%s"
 }
 
-fun Intent.forPlayStore(pkg: String, context: Context): Intent {
+fun Intent.forPlayStore(pkg: String): Intent {
     val url = String.format(StoreIntent.URL_PLAY_STORE, pkg)
     this.action = Intent.ACTION_VIEW
     this.data = Uri.parse(url)
-    addMultiWindowFlags(context)
     return this
 }
 
-fun Intent.forMyApps(update: Boolean, context: Context): Intent {
+fun Intent.forMyApps(update: Boolean): Intent {
     action = "com.google.android.finsky.VIEW_MY_DOWNLOADS"
     component = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
         ComponentName(
@@ -38,6 +35,5 @@ fun Intent.forMyApps(update: Boolean, context: Context): Intent {
     if (update) {
         this.putExtra("trigger_update_all", true)
     }
-    addMultiWindowFlags(context)
     return this
 }

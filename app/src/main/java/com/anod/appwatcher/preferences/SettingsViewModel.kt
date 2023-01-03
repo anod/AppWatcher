@@ -75,7 +75,7 @@ sealed interface SettingsViewEvent {
 
 sealed interface SettingsViewAction {
     object OnBackNav : SettingsViewAction
-    class StartActivity(val intent: Intent) : SettingsViewAction
+    class StartActivity(val intent: Intent, val addMultiWindowFlags: Boolean) : SettingsViewAction
     object GDriveSignIn : SettingsViewAction
     object GDriveSignOut : SettingsViewAction
     class GDriveErrorIntent(val intent: Intent) : SettingsViewAction
@@ -125,9 +125,18 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
             SettingsViewEvent.GDriveSyncNow -> gDriveSyncNow()
             is SettingsViewEvent.GDriveSyncToggle -> gDriveSyncToggle(event.checked)
             SettingsViewEvent.OnBackNav -> emitAction(SettingsViewAction.OnBackNav)
-            SettingsViewEvent.OpenRefreshHistory -> emitAction(SettingsViewAction.StartActivity(Intent(application, SchedulesHistoryActivity::class.java)))
-            SettingsViewEvent.OpenUserLog -> emitAction(SettingsViewAction.StartActivity(Intent(application, UserLogActivity::class.java)))
-            SettingsViewEvent.OssLicenses -> emitAction(SettingsViewAction.StartActivity(Intent(application, OssLicensesMenuActivity::class.java)))
+            SettingsViewEvent.OpenRefreshHistory -> emitAction(SettingsViewAction.StartActivity(
+                Intent(application, SchedulesHistoryActivity::class.java),
+                true
+            ))
+            SettingsViewEvent.OpenUserLog -> emitAction(SettingsViewAction.StartActivity(
+                Intent(application, UserLogActivity::class.java),
+                true
+            ))
+            SettingsViewEvent.OssLicenses -> emitAction(SettingsViewAction.StartActivity(
+                Intent(application, OssLicensesMenuActivity::class.java),
+                true
+            ))
             is SettingsViewEvent.SetRecreateFlag -> {
                 val result = setRecreateFlag(event.item, event.enabled)
                 event.update(result)
@@ -147,7 +156,10 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
                         items = preferenceItems(prefs, inProgress = false, playServices, application)
                 )
             }
-            SettingsViewEvent.ShowAppSettings -> emitAction(SettingsViewAction.StartActivity(Intent().forAppInfo(application.packageName, application)))
+            SettingsViewEvent.ShowAppSettings -> emitAction(SettingsViewAction.StartActivity(
+                intent = Intent().forAppInfo(application.packageName),
+                addMultiWindowFlags = true
+            ))
             SettingsViewEvent.CheckNotificationPermission -> {
                 val areNotificationsEnabled = prefs.areNotificationsEnabled
                 if (areNotificationsEnabled != viewState.areNotificationsEnabled) {

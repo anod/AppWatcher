@@ -1,6 +1,5 @@
 package com.anod.appwatcher.watchlist
 
-import android.content.Context
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -45,14 +44,13 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemsIndexed
 import coil.ImageLoader
 import com.anod.appwatcher.R
-import com.anod.appwatcher.compose.Amber800
 import com.anod.appwatcher.compose.AppIcon
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.database.entities.Price
 import com.anod.appwatcher.database.entities.generateTitle
-import com.anod.appwatcher.model.AppInfoMetadata
+import com.anod.appwatcher.details.rememberAppItemState
 import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.PackageChangedReceiver
 import com.anod.appwatcher.utils.SelectionState
@@ -69,12 +67,6 @@ import kotlinx.coroutines.flow.onStart
 import org.koin.java.KoinJavaComponent.getKoin
 
 private val newLineRegex = Regex("\n+")
-private data class AppItemState(
-    val color: Color,
-    val text: String,
-    val installed: Boolean,
-    val showRecent: Boolean
-)
 
 enum class AppItemSelection {
     None, Disabled, NotSelected, Selected;
@@ -268,34 +260,24 @@ private fun AppItem(
     appIconLoader: AppIconLoader = getKoin().get(),
 ) {
     val view = LocalView.current
-    val context = LocalContext.current
     val app = item.app
-    val title: String by remember { mutableStateOf(app.generateTitle(view.resources).toString()) }
+    val title: String by remember { derivedStateOf { app.generateTitle(view.resources).toString() } }
     val changesHtml: String by remember {
-        if (item.changeDetails?.isNotBlank() == true) {
-            mutableStateOf(
-                Html.parse(item.changeDetails).toString().
-                    replace(newLineRegex, "\n")
+        derivedStateOf {
+            if (item.changeDetails?.isNotBlank() == true) {
+                Html.parse(item.changeDetails).toString()
+                    .replace(newLineRegex, "\n")
                     .removePrefix(app.versionName + "\n")
                     .removePrefix(app.versionName + ":\n")
-            )
-        } else mutableStateOf("")
-    }
-    val textColor = MaterialTheme.colorScheme.onSurface
-    val primaryColor = MaterialTheme.colorScheme.primary
-    val packageInfo by remember {
-        mutableStateOf(installedApps.packageInfo(app.packageName))
+            } else ""
+        }
     }
     val itemSelection by remember(app.packageName, selectionMode, selection) {
-        mutableStateOf(getPackageSelection(app.packageName, selectionMode, selection))
+        derivedStateOf { getPackageSelection(app.packageName, selectionMode, selection) }
     }
-    val appItemState by remember {
-        mutableStateOf(
-            calcAppItemState(
-                app, item.recentFlag, textColor, primaryColor, packageInfo, context
-            )
-        )
-    }
+    val appItemState = rememberAppItemState(
+        app, item.recentFlag, installedApps
+    )
 
     Box(modifier = modifier) {
         Row(
@@ -451,7 +433,6 @@ private fun RecentItem(
         onEvent = onEvent,
         appIconLoader = appIconLoader
     )
-
 }
 
 @Composable
@@ -615,70 +596,12 @@ private fun EmptyItem(
     }
 }
 
-
 private fun getPackageSelection(
     packageName: String, selectionMode: Boolean, selection: SelectionState
 ): AppItemSelection {
     return if (selectionMode) {
         if (selection.contains(packageName)) AppItemSelection.Selected else AppItemSelection.NotSelected
     } else AppItemSelection.None
-}
-
-private fun calcAppItemState(
-    app: App,
-    recentFlag: Boolean,
-    textColor: Color,
-    primaryColor: Color,
-    packageInfo: InstalledApps.Info,
-    context: Context
-): AppItemState {
-    var color = textColor
-    var installed = false
-    val text = when {
-        app.versionNumber == 0 -> {
-            color = Amber800
-            context.getString(R.string.updates_not_available)
-        }
-
-        packageInfo.isInstalled -> {
-            installed = true
-            when {
-                app.versionNumber > packageInfo.versionCode -> {
-                    color = Amber800
-                    formatVersionText(
-                        packageInfo.versionName, packageInfo.versionCode, app.versionNumber, context
-                    )
-                }
-
-                app.status == AppInfoMetadata.STATUS_UPDATED || recentFlag -> {
-                    color = primaryColor
-                    formatVersionText(packageInfo.versionName, packageInfo.versionCode, 0, context)
-                }
-
-                else -> {
-                    formatVersionText(packageInfo.versionName, packageInfo.versionCode, 0, context)
-                }
-            }
-        }
-
-        else -> {
-            if (app.status == AppInfoMetadata.STATUS_UPDATED || recentFlag) {
-                color = primaryColor
-            }
-            if (app.price.isFree) {
-                context.getString(R.string.free)
-            } else {
-                app.price.text
-            }
-        }
-    }
-
-    val showRecent = when {
-        app.status == AppInfoMetadata.STATUS_UPDATED || recentFlag -> true
-        else -> false
-    }
-
-    return AppItemState(color, text, installed, showRecent)
 }
 
 @Preview(uiMode = UI_MODE_NIGHT_YES)

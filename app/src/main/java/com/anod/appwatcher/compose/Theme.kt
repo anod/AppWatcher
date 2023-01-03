@@ -139,6 +139,8 @@ fun AppTheme(
         theme: Int = Preferences.THEME_DEFAULT,
         darkTheme: Boolean = theme == Preferences.THEME_BLACK || isSystemInDarkTheme(),
         customPrimaryColor: Color? = null,
+        updateSystemBars: Boolean = true,
+        useSurfaceAsPrimary: Boolean = false,
         transparentSystemUi: Boolean = false,
         content: @Composable () -> Unit
 ) {
@@ -161,19 +163,26 @@ fun AppTheme(
         )
         statusBarColor = colorScheme.primary
         isAppearanceLightStatusBars = statusBarColor.isLightColor
+    } else if (useSurfaceAsPrimary) {
+        colorScheme = colorScheme.copy(
+            primary = colorScheme.surface,
+            // wait for customPrimaryColor to set OnPrimary
+        )
     }
 
-    val systemUI = rememberSystemUiController()
-    if (transparentSystemUi) {
-        systemUI.setSystemBarsColor(
-            Color.Transparent,
-            darkIcons = !darkTheme
-        )
-    } else {
-        systemUI.setSystemBarsColor(
-            statusBarColor,
-            darkIcons = isAppearanceLightStatusBars
-        )
+    if (updateSystemBars) {
+        val systemUI = rememberSystemUiController()
+        if (transparentSystemUi) {
+            systemUI.setStatusBarColor(
+                Color.Transparent,
+                darkIcons = !darkTheme
+            )
+        } else {
+            systemUI.setStatusBarColor(
+                statusBarColor,
+                darkIcons = isAppearanceLightStatusBars
+            )
+        }
     }
 
     MaterialTheme(

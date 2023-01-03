@@ -10,7 +10,6 @@ import androidx.annotation.Keep
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.lifecycleScope
-import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.compose.MainDetailScreen
@@ -21,7 +20,6 @@ import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.DetailContent
 import com.anod.appwatcher.watchlist.WatchListActivity
 import com.anod.appwatcher.watchlist.WatchListPagingSource
-import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.startActivitySafely
 import kotlinx.coroutines.launch
 
@@ -61,6 +59,11 @@ class InstalledActivity : BaseComposeActivity() {
                     )
                 } else {
                     InstalledListScreen(screenState = screenState, pagingSourceConfig = pagingSourceConfig) { viewModel.handleEvent(it) }
+                    if (screenState.selectedApp != null) {
+                        DetailsDialog(appId = screenState.selectedApp!!.appId, rowId = screenState.selectedApp!!.rowId, detailsUrl = screenState.selectedApp!!.detailsUrl ?: "") {
+                            viewModel.handleEvent(InstalledListSharedEvent.SelectApp(app = null))
+                        }
+                    }
                 }
             }
         }
@@ -73,13 +76,6 @@ class InstalledActivity : BaseComposeActivity() {
     private fun onViewAction(action: InstalledListSharedAction) {
         when (action) {
             InstalledListSharedAction.OnBackPressed -> onBackPressed()
-            is InstalledListSharedAction.OpenApp -> {
-                val app = action.app
-                if (BuildConfig.DEBUG) {
-                    AppLog.d(app.packageName)
-                }
-                DetailsDialog.show(app.appId, app.rowId, app.detailsUrl, supportFragmentManager)
-            }
             is InstalledListSharedAction.StartActivity -> {
                 startActivitySafely(action.intent)
             }
@@ -93,9 +89,7 @@ class InstalledActivity : BaseComposeActivity() {
             } else {
                 super.onBackPressed()
             }
-        } else if (!DetailsDialog.dismiss(supportFragmentManager)) {
-            super.onBackPressed()
-        }
+        } else super.onBackPressed()
     }
 
     companion object {
