@@ -16,10 +16,5 @@
          be either a fraction or a dimension.
     -->
 
-    <dimen name="textSize">12sp</dimen>
-
-    <item type="fraction" name="dialog_width_percentage">90%</item>
-    <item type="fraction" name="dialog_height_percentage">90%</item>
-
     <dimen name="dialog_min_width_major">90%</dimen>
 </resources>

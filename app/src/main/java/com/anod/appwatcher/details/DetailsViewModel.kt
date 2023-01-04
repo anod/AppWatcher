@@ -1,6 +1,7 @@
 package com.anod.appwatcher.details
 
 import android.accounts.Account
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.BitmapDrawable
@@ -32,7 +33,6 @@ import com.anod.appwatcher.utils.prefs
 import finsky.api.model.DfeDetails
 import finsky.api.model.Document
 import info.anodsplace.applog.AppLog
-import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.forAppInfo
 import info.anodsplace.framework.content.forUninstall
@@ -142,7 +142,7 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
         }
     }
 
-    private val context: ApplicationContext by inject()
+    private val context: Context by inject()
     private val database: AppsDatabase by inject()
     private val authToken: AuthTokenBlocking by inject()
     private val uploadDateParserCache: UploadDateParserCache by inject()

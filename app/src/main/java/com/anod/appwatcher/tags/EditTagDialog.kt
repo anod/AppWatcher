@@ -45,17 +45,22 @@ import info.anodsplace.compose.ButtonsPanel
 import info.anodsplace.compose.ColorDialogContent
 
 @Composable
-fun EditTagDialog(tag: Tag, onDismissRequest: () -> Unit) {
-    val viewModel: EditTagViewModel = viewModel(factory = EditTagViewModel.Factory(tag))
+fun EditTagDialog(tag: Tag, onDismissRequest: (tagId: Int) -> Unit) {
+    val viewModel: EditTagViewModel = viewModel(key = "tag-${tag.id}", factory = EditTagViewModel.Factory(tag))
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
 
     Dialog(
-        onDismissRequest = onDismissRequest
+        onDismissRequest = { onDismissRequest(screenState.tag.id) }
     ) {
-        EditTagScreen(
-            screenState = screenState,
-            onEvent = { event -> viewModel.handleEvent(event) }
-        )
+        AppTheme(
+            customPrimaryColor = if (screenState.tag.id > 0) Color(screenState.tag.color) else null,
+            updateSystemBars = false
+        ) {
+            EditTagScreen(
+                screenState = screenState,
+                onEvent = { event -> viewModel.handleEvent(event) }
+            )
+        }
     }
 
     if (screenState.showPickColor) {
@@ -76,7 +81,7 @@ fun EditTagDialog(tag: Tag, onDismissRequest: () -> Unit) {
     LaunchedEffect(key1 = viewModel) {
         viewModel.viewActions.collect { action ->
             when (action) {
-                EditTagAction.Dismiss -> onDismissRequest()
+                is EditTagAction.Dismiss -> onDismissRequest(action.tagId)
             }
         }
     }
@@ -128,13 +133,15 @@ private fun EditTagScreen(screenState: EditTagState, onEvent: (EditTagEvent) -> 
                         }
                     },
                     leadingContent = {
-                        FilledIconButton(
-                            onClick = { onEvent(EditTagEvent.Delete) },
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = stringResource(id = R.string.delete)
-                            )
+                        if (screenState.tag.id > 0) {
+                            FilledIconButton(
+                                onClick = { onEvent(EditTagEvent.Delete) },
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = stringResource(id = R.string.delete)
+                                )
+                            }
                         }
                     }
                 )

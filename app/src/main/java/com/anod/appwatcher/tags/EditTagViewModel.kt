@@ -27,7 +27,7 @@ sealed interface EditTagEvent {
 }
 
 sealed interface EditTagAction {
-    object Dismiss : EditTagAction
+    class Dismiss(val tagId: Int) : EditTagAction
 }
 
 class EditTagViewModel(tag: Tag) : BaseFlowViewModel<EditTagState, EditTagEvent, EditTagAction>(), KoinComponent {
@@ -51,34 +51,34 @@ class EditTagViewModel(tag: Tag) : BaseFlowViewModel<EditTagState, EditTagEvent,
         when (event) {
             EditTagEvent.Delete -> { deleteTag(viewState.tag) }
             is EditTagEvent.SaveAndDismiss -> {
-                viewState = viewState.copy(tag = Tag(viewState.tag.id,event.name, viewState.tag.color))
-                saveTag(viewState.tag)
+                saveAndDismiss(Tag(viewState.tag.id, event.name, viewState.tag.color))
             }
             is EditTagEvent.UpdateColor -> {
                 viewState = viewState.copy(tag = Tag(viewState.tag.id, viewState.tag.name, event.color))
             }
-            EditTagEvent.Dismiss -> emitAction(EditTagAction.Dismiss)
+            EditTagEvent.Dismiss -> emitAction(EditTagAction.Dismiss(tagId = viewState.tag.id))
             is EditTagEvent.PickColor -> {
                 viewState = viewState.copy(showPickColor = event.show)
             }
         }
     }
 
-    private fun saveTag(tag: Tag) {
+    private fun saveAndDismiss(tag: Tag) {
         viewModelScope.launch {
             if (tag.id > 0) {
                 database.tags().update(tag)
             } else {
-                TagsTable.Queries.insert(tag, database).toInt()
+                val tagId = TagsTable.Queries.insert(tag, database).toInt()
+                viewState = viewState.copy(tag = Tag(id = tagId, name = tag.name, color = tag.color) )
             }
-            emitAction(EditTagAction.Dismiss)
+            emitAction(EditTagAction.Dismiss(tagId = viewState.tag.id))
         }
     }
 
     private fun deleteTag(tag: Tag) {
         viewModelScope.launch {
             TagsTable.Queries.delete(tag, database)
-            emitAction(EditTagAction.Dismiss)
+            emitAction(EditTagAction.Dismiss(tagId = viewState.tag.id))
         }
     }
 }

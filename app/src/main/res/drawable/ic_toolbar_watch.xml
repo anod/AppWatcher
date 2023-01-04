@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?><!-- Copyright (c) 2020. Alex Gavrishev -->
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/ic_visibility_off_white_24dp" android:state_checked="true" />
-    <item android:drawable="@drawable/ic_visibility_white_24dp" />
-</selector>

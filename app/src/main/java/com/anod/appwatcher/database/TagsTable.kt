@@ -26,6 +26,9 @@ interface TagsTable {
     @Query("SELECT * FROM $table ORDER BY ${Columns.name} COLLATE LOCALIZED ASC")
     suspend fun load(): List<Tag>
 
+    @Query("SELECT * FROM $table WHERE ${BaseColumns._ID} = :tagId")
+    suspend fun loadById(tagId: Int): Tag?
+
     @Query("SELECT ${BaseColumns._ID} FROM $table")
     suspend fun loadIds(): List<Int>
 
