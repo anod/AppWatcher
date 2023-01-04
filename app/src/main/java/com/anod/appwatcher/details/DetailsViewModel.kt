@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.drawable.BitmapDrawable
+import android.net.Uri
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -47,6 +48,8 @@ import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.parameter.parametersOf
+import java.net.URLEncoder
+import java.util.Locale
 
 typealias TagMenuItem = Pair<Tag, Boolean>
 
@@ -128,6 +131,7 @@ sealed interface DetailsScreenEvent {
     object Uninstall : DetailsScreenEvent
     object AppInfo : DetailsScreenEvent
     object PlayStore : DetailsScreenEvent
+    object Translate : DetailsScreenEvent
 }
 
 class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) : BaseFlowViewModel<DetailsScreenState, DetailsScreenEvent, DetailsScreenAction>(), KoinComponent {
@@ -269,6 +273,14 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
                 intent = Intent().forPlayStore(viewState.appId),
                 addMultiWindowFlags = true
             ))
+
+            DetailsScreenEvent.Translate -> {
+                val lang = Locale.getDefault().language
+                val encoded = URLEncoder.encode(viewState.changelogs.firstOrNull()?.details ?: "", "utf-8")
+                emitAction(startActivityAction((Intent(Intent.ACTION_VIEW).apply {
+                    data = Uri.parse("https://translate.google.com/?sl=auto&tl=${lang}&text=${encoded}&op=translate")
+                })))
+            }
         }
     }
 

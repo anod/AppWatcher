@@ -29,7 +29,9 @@ import androidx.compose.material.icons.filled.Label
 import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Shop2
 import androidx.compose.material.icons.filled.Smartphone
+import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
@@ -226,37 +228,10 @@ private fun DetailsScreenContent(
                     screenState = screenState,
                     containerColor = Color.Transparent
                 )
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 16.dp, end = 60.dp, top = 4.dp, bottom = 16.dp),
-                    verticalAlignment = Alignment.Top
-                ) {
-                    if (screenState.isInstalled || screenState.isLocalApp) {
-                        Icon(
-                            imageVector = Icons.Default.Smartphone,
-                            contentDescription = stringResource(id = R.string.installed),
-                            modifier = Modifier
-                                .size(16.dp)
-                                .padding(end = 4.dp)
-                        )
-                    }
-                    if (screenState.app != null) {
-                        val appItemState = rememberAppItemState(
-                            app = screenState.app,
-                            recentFlag = false,
-                            installedApps = installedApps
-                        )
-                        Text(
-                            text = appItemState.text,
-                            color = appItemState.color,
-                            modifier = Modifier.weight(1f),
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                }
+                VersionDetails(
+                    screenState = screenState,
+                    installedApps = installedApps
+                )
 
                 when (screenState.changelogState) {
                     ChangelogLoadState.Initial -> {
@@ -340,32 +315,74 @@ private fun DetailsScreenContent(
 }
 
 @Composable
+fun VersionDetails(screenState: DetailsScreenState, installedApps: InstalledApps) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 60.dp, top = 4.dp, bottom = 16.dp),
+        verticalAlignment = Alignment.Top
+    ) {
+        if (screenState.isInstalled || screenState.isLocalApp) {
+            Icon(
+                imageVector = Icons.Default.Smartphone,
+                contentDescription = stringResource(id = R.string.installed),
+                modifier = Modifier
+                    .size(16.dp)
+                    .padding(end = 4.dp)
+            )
+        }
+        if (screenState.app != null) {
+            val appItemState = rememberAppItemState(
+                app = screenState.app,
+                recentFlag = false,
+                installedApps = installedApps
+            )
+            Text(
+                text = appItemState.text,
+                color = appItemState.color,
+                modifier = Modifier.weight(1f),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+    }
+}
+
+@Composable
 private fun DetailsChangelog(screenState: DetailsScreenState) {
     AppLog.d("Details collecting changelogState $screenState.changelogState")
     LazyColumn {
         items(screenState.changelogs.size) { i ->
             val change = screenState.changelogs[i]
-            Column(
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
-            ) {
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = "${change.versionName} (${change.versionCode})",
-                        modifier = Modifier.weight(1f),
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                    Text(
-                        text = change.uploadDate,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-                SelectionContainer(
-                    modifier = Modifier.padding(top = 8.dp)
+            SelectionContainer {
+                Column(
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
                 ) {
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        Icon(
+                            imageVector = Icons.Default.Shop2,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .size(16.dp)
+                                .padding(end = 4.dp)
+                        )
+                        Text(
+                            text = "${change.versionName} (${change.versionCode})",
+                            modifier = Modifier.weight(1f),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        Text(
+                            text = change.uploadDate,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+
                     val text = if (LocalView.current.isInEditMode) {
                         if (change.details.isEmpty())
                             AnnotatedString(stringResource(id = R.string.no_recent_changes))
@@ -378,6 +395,7 @@ private fun DetailsChangelog(screenState: DetailsScreenState) {
                             change.details.toHtmlAnnotatedString()
                     }
                     Text(
+                        modifier = Modifier.padding(top = 8.dp),
                         text = text,
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -568,6 +586,18 @@ private fun DetailsTopAppBar(
                     },
                     onClick = {
                         onEvent(DetailsScreenEvent.Share)
+                        dismiss()
+                    }
+                )
+
+                DropdownMenuItem(
+                    text = { Text(text = stringResource(id = R.string.translate)) },
+                    enabled = screenState.changelogs.firstOrNull()?.details?.isNotEmpty() == true,
+                    leadingIcon = {
+                        Icon(imageVector = Icons.Default.Translate, contentDescription = stringResource(id = R.string.translate))
+                    },
+                    onClick = {
+                        onEvent(DetailsScreenEvent.Translate)
                         dismiss()
                     }
                 )
