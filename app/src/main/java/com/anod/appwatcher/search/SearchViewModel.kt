@@ -50,14 +50,6 @@ sealed interface SearchStatus {
     data class SearchList(val query: String) : SearchStatus
 }
 
-sealed interface SearchActivityAction {
-    class StartActivity(val intent: Intent, val finish: Boolean) : SearchActivityAction
-    class ShowTagList(val info: AppInfo, val finish: Boolean) : SearchActivityAction
-    object ShowAccountDialog : SearchActivityAction
-    object FinishActivity : SearchActivityAction
-    object OnBackPressed : SearchActivityAction
-}
-
 sealed interface SearchViewAction {
     class ActivityAction(val action: CommonActivityAction) : SearchViewAction
     class ShowSnackbar(val message: String, val duration: SnackbarDuration = SnackbarDuration.Short, val finish: Boolean = false) : SearchViewAction

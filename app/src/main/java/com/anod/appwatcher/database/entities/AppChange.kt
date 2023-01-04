@@ -62,4 +62,8 @@ data class AppChange(
 
     val isEmpty: Boolean
         get() = appId.isEmpty()
+
+    companion object {
+        val empty = AppChange("", 0, "", "", "", false)
+    }
 }

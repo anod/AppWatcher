@@ -4,6 +4,7 @@ import android.accounts.Account
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Resources
 import android.graphics.drawable.BitmapDrawable
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
@@ -21,7 +22,6 @@ import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.database.entities.Tag
-import com.anod.appwatcher.database.entities.generateTitle
 import com.anod.appwatcher.database.entities.packageToApp
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
@@ -50,23 +50,22 @@ import org.koin.core.parameter.parametersOf
 
 typealias TagMenuItem = Pair<Tag, Boolean>
 
-sealed class ChangelogLoadState {
-    object Initial : ChangelogLoadState()
-    object LocalComplete : ChangelogLoadState()
-    class RemoteComplete(val error: Boolean) : ChangelogLoadState()
-    object Complete : ChangelogLoadState()
+sealed interface ChangelogLoadState {
+    object Initial : ChangelogLoadState
+    object RemoteError : ChangelogLoadState
+    object Complete : ChangelogLoadState
 }
 
-sealed class AppLoadingState {
-    object Initial : AppLoadingState()
-    object Loaded : AppLoadingState()
-    object NotFound : AppLoadingState()
+sealed interface AppLoadingState {
+    object Initial : AppLoadingState
+    object Loaded : AppLoadingState
+    object NotFound : AppLoadingState
 }
 
-sealed class AppIconState {
-    object Initial : AppIconState()
-    class Loaded(val drawable: BitmapDrawable) : AppIconState()
-    object Default : AppIconState()
+sealed interface AppIconState {
+    object Initial : AppIconState
+    class Loaded(val drawable: BitmapDrawable) : AppIconState
+    object Default : AppIconState
 }
 
 data class DetailsScreenState(
@@ -81,9 +80,7 @@ data class DetailsScreenState(
         val palette: Palette? = null,
         val account: Account? = null,
         val changelogState: ChangelogLoadState = ChangelogLoadState.Initial,
-        val localChangelog: List<AppChange> = emptyList(),
-        val recentChange: AppChange = AppChange("", 0, "", "", "", false),
-        val errorShown: Boolean = false,
+        val changelogs: List<AppChange> = emptyList(),
         val tagsMenuItems: List<TagMenuItem> = emptyList(),
         val customPrimaryColor: Int? = null,
         val document: Document? = null,
@@ -91,10 +88,14 @@ data class DetailsScreenState(
 ) {
     val isWatched: Boolean
         get() = app != null && app.status != AppInfoMetadata.STATUS_DELETED
+
+    val fetchedRemoteDocument: Boolean
+        get() = document != null
 }
 
 sealed interface DetailsScreenAction {
     class ActivityAction(val action: CommonActivityAction) : DetailsScreenAction
+    class ShowTagSnackbar(val appInfo: AppInfo) : DetailsScreenAction
     object Dismiss : DetailsScreenAction
     object Share : DetailsScreenAction
 }
@@ -171,7 +172,7 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
                             appLoadingState = AppLoadingState.Loaded,
                             app = localApp,
                             appIconState = if (localApp.iconUrl.isEmpty()) AppIconState.Default else viewState.appIconState,
-                            title = localApp.generateTitle(context.resources).toString(),
+                            title = localApp.title,
                             isLocalApp = true
                     )
                     if (localApp.iconUrl.isNotEmpty()) {
@@ -183,7 +184,7 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
                         appLoadingState = if (app == null) AppLoadingState.NotFound else AppLoadingState.Loaded,
                         app = app,
                         appIconState = if (app?.iconUrl?.isNotEmpty() == true) viewState.appIconState else AppIconState.Default,
-                        title = app?.generateTitle(context.resources)?.toString() ?: ""
+                        title = app?.title ?: ""
                     )
                     if (app?.iconUrl?.isNotEmpty() == true) {
                         loadAppIcon(app.iconUrl)
@@ -235,10 +236,16 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
                     watchApp()
                 }
             }
-            DetailsScreenEvent.LoadChangelog -> loadChangelog()
+            DetailsScreenEvent.LoadChangelog -> {
+                viewModelScope.launch {
+                    loadChangelog()
+                }
+            }
             DetailsScreenEvent.ReloadChangelog -> {
                 viewState = viewState.copy(changelogState = ChangelogLoadState.Initial)
-                loadChangelog()
+                viewModelScope.launch {
+                    loadChangelog()
+                }
             }
 
             DetailsScreenEvent.AppInfo ->
@@ -265,54 +272,45 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
         }
     }
 
-    private fun loadChangelog() {
-        try {
-            loadLocalChangelog()
+    private suspend fun loadChangelog() {
+        val localChanges = try {
+            if (viewState.appId.isBlank()) emptyList() else database.changelog().ofApp(viewState.appId)
         } catch (e: Exception) {
-            AppLog.e("onResume", e)
+            AppLog.e("loadChangelog", e)
+            emptyList()
         }
 
-        prefs.account?.let { account ->
-            viewModelScope.launch {
-                try {
-                    if (authToken.refreshToken(account)) {
-                        loadRemoteChangelog()
-                    } else {
-                        AppLog.e("Error retrieving token")
-                        loadRemoteChangelog()
+        val account = prefs.account
+        viewState = viewState.copy(
+            changelogState = if (localChanges.isEmpty() || account == null) ChangelogLoadState.Initial else ChangelogLoadState.Complete,
+            changelogs = localChanges
+        )
+
+        if (account != null) {
+            var loadError = false
+            try {
+                if (authToken.refreshToken(account)) {
+                    try {
+                        val model = detailsEndpoint.start()
+                        onRemoteDetailsFetched(localChanges, model)
+                    } catch (e: Exception) {
+                        loadError = true
+                        AppLog.e("Cannot fetch details for ${viewState.appId}", e)
                     }
-                } catch (e: AuthTokenStartIntent) {
-                    emitAction(startActivityAction(e.intent, addMultiWindowFlags = true))
-                } catch (e: Exception) {
-                    AppLog.e("onResume", e)
+                } else {
+                    loadError = true
+                    AppLog.e("Error retrieving token")
                 }
+            } catch (e: AuthTokenStartIntent) {
+                loadError = true
+                emitAction(startActivityAction(e.intent, addMultiWindowFlags = true))
+            } catch (e: Exception) {
+                loadError = true
+                AppLog.e("loadChangelog", e)
             }
-        }
-    }
 
-    private fun loadLocalChangelog() {
-        if (viewState.appId.isBlank()) {
-            viewState = viewState.copy(changelogState = mergeChangelogState(ChangelogLoadState.LocalComplete))
-            return
-        }
-        viewModelScope.launch {
-            val localChangelog = database.changelog().ofApp(viewState.appId)
-            viewState = viewState.copy(localChangelog = localChangelog, changelogState = mergeChangelogState(ChangelogLoadState.LocalComplete))
-        }
-    }
-
-    private fun loadRemoteChangelog() {
-        if (authToken.token.isBlank()) {
-            viewState = viewState.copy(changelogState = mergeChangelogState(ChangelogLoadState.RemoteComplete(true)))
-        } else {
-            viewModelScope.launch {
-                try {
-                    val model = detailsEndpoint.start()
-                    onDataChanged(model)
-                } catch (e: Exception) {
-                    AppLog.e("Cannot fetch details for ${viewState.appId}", e)
-                    viewState = viewState.copy(changelogState = mergeChangelogState(ChangelogLoadState.RemoteComplete(true)))
-                }
+            if (loadError && viewState.changelogState is ChangelogLoadState.Initial) {
+                viewState = viewState.copy(changelogState = ChangelogLoadState.RemoteError)
             }
         }
     }
@@ -339,53 +337,54 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
             when (result) {
                 AppListTable.ERROR_INSERT -> emitAction(action = showToastAction(resId = R.string.error_insert_app))
                 AppListTable.ERROR_ALREADY_ADDED -> emitAction(action = showToastAction(resId = R.string.app_already_added))
-                else -> {
-                    val info = AppInfo(document!!, uploadDateParserCache)
-                    // TODO: TagSnackbar.make(view, info, false, requireActivity(), viewModel.prefs).show()
-                }
+                else -> emitAction(DetailsScreenAction.ShowTagSnackbar(appInfo = AppInfo(document!!, uploadDateParserCache)))
             }
         }
     }
 
-    private fun onDataChanged(details: DfeDetails) {
+    private fun onRemoteDetailsFetched(localChanges: List<AppChange>, details: DfeDetails) {
         val appDetails = details.document?.appDetails
 
         if (appDetails != null) {
-            val app = viewState.app?.apply {
-                testing = when {
-                    appDetails.testingProgramInfo.subscribed -> 1
-                    appDetails.testingProgramInfo.subscribedAndInstalled -> 2
-                    else -> 0
-                }
+            val recentChange = AppChange(viewState.appId, appDetails.versionCode, appDetails.versionString, appDetails.recentChangesHtml ?: "", appDetails.uploadDate, false)
+            val isBeta = when {
+                appDetails.testingProgramInfo.subscribed -> true
+                appDetails.testingProgramInfo.subscribedAndInstalled -> true
+                else -> false
             }
             viewState = viewState.copy(
-                    app = app,
-                    recentChange = AppChange(viewState.appId, appDetails.versionCode, appDetails.versionString, appDetails.recentChangesHtml
-                            ?: "", appDetails.uploadDate, false),
-                    changelogState = mergeChangelogState(ChangelogLoadState.RemoteComplete(false)),
-                    document = details.document
+                document = details.document,
+                changelogs = mergeChangelogs(localChanges, recentChange),
+                title = generateTitle(context.resources, isBeta)
             )
-        } else {
-            viewState = viewState.copy(changelogState = mergeChangelogState(ChangelogLoadState.RemoteComplete(false)))
         }
     }
 
-    private fun mergeChangelogState(newChangelogState: ChangelogLoadState): ChangelogLoadState {
-        val changelogState = viewState.changelogState
-        return when (newChangelogState) {
-            is ChangelogLoadState.LocalComplete -> if (changelogState is ChangelogLoadState.RemoteComplete || changelogState is ChangelogLoadState.Complete) {
-                ChangelogLoadState.Complete
-            } else {
-                newChangelogState
+    private fun mergeChangelogs(localChanges: List<AppChange>, recentChange: AppChange): List<AppChange> {
+        return when {
+            localChanges.isEmpty() -> {
+                if (!recentChange.isEmpty) {
+                    listOf(recentChange)
+                } else listOf()
             }
-            is ChangelogLoadState.RemoteComplete -> if (changelogState is ChangelogLoadState.LocalComplete || changelogState is ChangelogLoadState.Complete) {
-                return ChangelogLoadState.Complete
-            } else {
-                return newChangelogState
+            localChanges.first().versionCode == recentChange.versionCode -> {
+                listOf(recentChange, *localChanges.subList(1, localChanges.size).toTypedArray())
             }
-            ChangelogLoadState.Complete -> ChangelogLoadState.Complete
-            ChangelogLoadState.Initial -> ChangelogLoadState.Initial
+            else -> {
+                if (recentChange.isEmpty) {
+                    localChanges
+                } else {
+                    listOf(recentChange, *localChanges.toTypedArray())
+                }
+            }
         }
     }
 
+    private fun generateTitle(resources: Resources, isBeta: Boolean): String {
+        var generated = viewState.app?.title ?: ""
+        if (isBeta) {
+            generated += " (" + resources.getString(R.string.beta) + ")"
+        }
+        return generated
+    }
 }

@@ -39,9 +39,13 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -78,18 +82,23 @@ import com.anod.appwatcher.compose.DropdownMenuAction
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.database.entities.Price
+import com.anod.appwatcher.model.AppInfo
+import com.anod.appwatcher.tags.TagSelectionDialog
+import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.StoreIntent
 import info.anodsplace.applog.AppLog
 import info.anodsplace.compose.AutoSizeText
 import info.anodsplace.compose.toHtmlAnnotatedString
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.text.Html
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 private val iconSizeBig = 64.dp
 private val iconSizeSmall = 32.dp
 
 @Composable
-fun DetailsScreen(appId: String, rowId: Int, detailsUrl: String) {
+fun DetailsScreen(appId: String, rowId: Int, detailsUrl: String, onDismissRequest: () -> Unit, onCommonActivityAction: (action: CommonActivityAction) -> Unit) {
     val viewModel: DetailsViewModel = viewModel(factory = DetailsViewModel.Factory(
         argAppId = appId,
         argRowId = rowId,
@@ -109,7 +118,10 @@ fun DetailsScreen(appId: String, rowId: Int, detailsUrl: String) {
             screenState = screenState,
             onEvent = { viewModel.handleEvent(it) },
             installedApps = viewModel.installedApps,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            viewActions = viewModel.viewActions,
+            onDismissRequest = onDismissRequest,
+            onCommonActivityAction = onCommonActivityAction
         )
     }
 }
@@ -134,35 +146,13 @@ fun DetailsDialog(appId: String, rowId: Int, detailsUrl: String, onDismissReques
         Dialog(onDismissRequest = onDismissRequest) {
             DetailsScreenContent(
                 screenState = screenState,
+                viewActions = viewModel.viewActions,
                 onEvent = { viewModel.handleEvent(it) },
+                onCommonActivityAction = { onCommonActivityAction (it) },
                 installedApps = viewModel.installedApps,
+                onDismissRequest = onDismissRequest,
                 modifier = Modifier.fillMaxHeight(fraction = 0.9f)
             )
-        }
-    }
-
-    val context = LocalContext.current
-    LaunchedEffect(key1 = true) {
-        viewModel.viewActions.collect { action ->
-            when (action) {
-                DetailsScreenAction.Dismiss -> {
-                    onDismissRequest()
-                }
-                DetailsScreenAction.Share -> {
-                    if (screenState.app != null) {
-                        onCommonActivityAction(
-                            CommonActivityAction.StartActivity(
-                                intent = createAppChooser(
-                                    screenState.app!!,
-                                    screenState.recentChange,
-                                    context
-                                )
-                            )
-                        )
-                    }
-                }
-                is DetailsScreenAction.ActivityAction -> onCommonActivityAction(action.action)
-            }
         }
     }
 }
@@ -185,7 +175,10 @@ private fun DetailsScreenContent(
     screenState: DetailsScreenState,
     onEvent: (DetailsScreenEvent) -> Unit,
     installedApps: InstalledApps,
-    modifier: Modifier
+    modifier: Modifier,
+    viewActions: Flow<DetailsScreenAction>,
+    onDismissRequest: () -> Unit,
+    onCommonActivityAction: (CommonActivityAction) -> Unit
 ) {
     LaunchedEffect(key1 = true) {
         onEvent(DetailsScreenEvent.LoadChangelog)
@@ -196,8 +189,11 @@ private fun DetailsScreenContent(
     val surfaceColor: Color = if (screenState.customPrimaryColor != null)
         MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
 
+    val snackBarHostState = remember { SnackbarHostState() }
+
     Scaffold(
-        modifier = modifier
+        modifier = modifier,
+        snackbarHost = { SnackbarHost(hostState = snackBarHostState) }
     ) { paddingValues ->
         Box(
             modifier = Modifier.padding(paddingValues)
@@ -262,15 +258,29 @@ private fun DetailsScreenContent(
                     }
                 }
 
-                if (screenState.appLoadingState is AppLoadingState.NotFound) {
-                    Column {
-                        Text(text = stringResource(id = R.string.problem_occurred))
-                        Button(onClick = { }) {
-                            Text(text = stringResource(id = R.string.retry))
+                when (screenState.changelogState) {
+                    ChangelogLoadState.Initial -> {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            contentAlignment = Alignment.TopCenter
+                        ) {
+                            LinearProgressIndicator()
                         }
                     }
-                } else {
-                    DetailsChangelog(screenState = screenState)
+                    ChangelogLoadState.Complete -> DetailsChangelog(screenState = screenState)
+                    ChangelogLoadState.RemoteError -> {
+                        Column(modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(text = stringResource(id = R.string.problem_occurred))
+                            Button(onClick = { onEvent(DetailsScreenEvent.ReloadChangelog) }) {
+                                Text(text = stringResource(id = R.string.retry))
+                            }
+                        }
+                    }
                 }
             }
 
@@ -285,35 +295,56 @@ private fun DetailsScreenContent(
             )
         }
     }
+
+    val context = LocalContext.current
+    var showTagList: AppInfo? by remember { mutableStateOf(null) }
+    LaunchedEffect(key1 = true) {
+        viewActions.collect { action ->
+            when (action) {
+                DetailsScreenAction.Dismiss -> {
+                    onDismissRequest()
+                }
+                DetailsScreenAction.Share -> {
+                    if (screenState.app != null) {
+                        onCommonActivityAction(
+                            CommonActivityAction.StartActivity(
+                                intent = createAppChooser(
+                                    screenState.app,
+                                    screenState.changelogs.firstOrNull() ?: AppChange.empty,
+                                    context
+                                )
+                            )
+                        )
+                    }
+                }
+                is DetailsScreenAction.ActivityAction -> onCommonActivityAction(action.action)
+                is DetailsScreenAction.ShowTagSnackbar -> {
+                    val result = snackBarHostState.showSnackbar(TagSnackbar.Visuals(action.appInfo, context))
+                    if (result == SnackbarResult.ActionPerformed) {
+                        showTagList = action.appInfo
+                    }
+                }
+            }
+        }
+    }
+
+    if (showTagList != null) {
+        TagSelectionDialog(
+            appId = showTagList!!.appId,
+            appTitle = showTagList!!.title,
+            onDismissRequest = {
+                showTagList = null
+            }
+        )
+    }
 }
 
 @Composable
 private fun DetailsChangelog(screenState: DetailsScreenState) {
     AppLog.d("Details collecting changelogState $screenState.changelogState")
-    val changes = remember(screenState.localChangelog, screenState.recentChange) {
-        val localChangelog = screenState.localChangelog
-        val recentChange = screenState.recentChange
-        when {
-            localChangelog.isEmpty() -> {
-                if (!recentChange.isEmpty) {
-                    listOf(recentChange)
-                } else listOf()
-            }
-            localChangelog.first().versionCode == recentChange.versionCode -> {
-                listOf(recentChange, *localChangelog.subList(1, localChangelog.size).toTypedArray())
-            }
-            else -> {
-                if (recentChange.isEmpty) {
-                    localChangelog
-                } else {
-                    listOf(recentChange, *localChangelog.toTypedArray())
-                }
-            }
-        }
-    }
     LazyColumn {
-        items(changes.size) { i ->
-            val change = changes[i]
+        items(screenState.changelogs.size) { i ->
+            val change = screenState.changelogs[i]
             Column(
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
             ) {
@@ -486,7 +517,7 @@ private fun DetailsTopAppBar(
         actions = {
             IconButton(
                 onClick = { onEvent(DetailsScreenEvent.WatchAppToggle) },
-                enabled = screenState.appLoadingState is AppLoadingState.Loaded
+                enabled = screenState.fetchedRemoteDocument
             ) {
                 Icon(
                     imageVector = if (screenState.isWatched) Icons.Default.VisibilityOff else Icons.Default.Visibility,
@@ -496,7 +527,10 @@ private fun DetailsTopAppBar(
 
             if (screenState.tagsMenuItems.isNotEmpty()) {
                 var showTagsMenu: Boolean by remember { mutableStateOf(false) }
-                IconButton(onClick = { showTagsMenu = true }) {
+                IconButton(
+                    onClick = { showTagsMenu = true },
+                    enabled = screenState.fetchedRemoteDocument
+                ) {
                     Icon(
                         imageVector = Icons.Default.Label,
                         contentDescription = stringResource(id = R.string.tag)
@@ -601,7 +635,7 @@ private fun DetailsScreenPreview() {
             updateTime = 0
         ),
         changelogState = ChangelogLoadState.Complete,
-        localChangelog = listOf(
+        changelogs = listOf(
             AppChange(
                 appId = "package2",
                 versionCode = 11223301,
@@ -650,7 +684,10 @@ private fun DetailsScreenPreview() {
             screenState = screenState,
             onEvent = { },
             installedApps = InstalledApps.StaticMap(emptyMap()),
-            modifier = Modifier
+            modifier = Modifier,
+            viewActions = flowOf(),
+            onDismissRequest = { },
+            onCommonActivityAction = { }
         )
     }
 }

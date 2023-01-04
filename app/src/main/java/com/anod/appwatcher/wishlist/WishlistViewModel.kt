@@ -11,7 +11,6 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.filter
-import com.anod.appwatcher.compose.CommonActivityAction
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.model.AppInfo
@@ -42,13 +41,11 @@ data class WishListState(
 
 sealed interface WishListAction {
     class ShowTagSnackbar(val info: AppInfo) : WishListAction
-    class AlreadyWatchedNotice(val document: Document) : WishListAction
     object OnBackPress : WishListAction
 }
 
 sealed interface WishListEvent {
     object OnBackPress : WishListEvent
-    class Delete(val document: Document) : WishListEvent
     class ItemClick(val document: Document) : WishListEvent
     class OnNameFilter(val query: String) : WishListEvent
 }
@@ -56,6 +53,7 @@ sealed interface WishListEvent {
 class WishListViewModel(account: Account?, authToken: String) : BaseFlowViewModel<WishListState, WishListEvent, WishListAction>(), KoinComponent {
 
     class Factory(private val account: Account?, private val authToken: String) : ViewModelProvider.Factory {
+        @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             return WishListViewModel(account, authToken) as T
         }
@@ -100,11 +98,12 @@ class WishListViewModel(account: Account?, authToken: String) : BaseFlowViewMode
 
     override fun handleEvent(event: WishListEvent) {
         when (event) {
-            is WishListEvent.Delete -> delete(event.document)
             is WishListEvent.ItemClick -> {
                 if (viewState.watchingPackages.contains(event.document.appDetails.packageName)) {
-                    emitAction(WishListAction.AlreadyWatchedNotice(event.document))
-                } else add(event.document)
+                    delete(event.document)
+                } else {
+                    add(event.document)
+                }
             }
             WishListEvent.OnBackPress -> emitAction(WishListAction.OnBackPress)
             is WishListEvent.OnNameFilter -> viewState = viewState.copy(nameFilter = event.query)

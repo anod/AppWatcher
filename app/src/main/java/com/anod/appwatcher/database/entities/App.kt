@@ -2,15 +2,12 @@ package com.anod.appwatcher.database.entities
 
 import android.content.ComponentName
 import android.content.pm.PackageManager
-import android.content.res.Resources
 import android.net.Uri
 import android.provider.BaseColumns
 import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
-import androidx.room.Ignore
 import androidx.room.PrimaryKey
-import com.anod.appwatcher.R
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.utils.RealAppIconLoader
@@ -83,9 +80,6 @@ data class App(
         @ColumnInfo(name = AppListTable.Columns.updateTimestamp)
         val updateTime: Long
 ) {
-    @Ignore
-    var testing: Int = 0
-
     private constructor(rowId: Int, packageName: String, versionCode: Int, versionName: String, title: String, iconUrl: String, status: Int, uploadDate: String, uploadTime: Long)
             : this(rowId, packageName, packageName, versionCode, versionName, title, "", iconUrl, status,
             uploadDate, Price("", "", 0), createDetailsUrl(packageName), uploadTime, "", 0)
@@ -118,12 +112,4 @@ data class App(
             return "details?doc=$packageName"
         }
     }
-}
-
-fun App.generateTitle(resources: Resources): CharSequence {
-    var generated = title
-    if (testing != 0) {
-        generated += " (" + resources.getString(R.string.beta) + ")"
-    }
-    return generated
 }

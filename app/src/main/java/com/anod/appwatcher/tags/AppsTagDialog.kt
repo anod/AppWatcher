@@ -19,13 +19,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.Dialog
@@ -38,7 +35,6 @@ import com.anod.appwatcher.compose.SearchTopBar
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Price
 import com.anod.appwatcher.database.entities.Tag
-import com.anod.appwatcher.database.entities.generateTitle
 import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.SelectionState
 import info.anodsplace.compose.ButtonsPanel
@@ -123,20 +119,18 @@ private fun AppRow(
     onEvent: (AppsTagScreenEvent) -> Unit,
     appIconLoader: AppIconLoader = getKoin().get(),
 ) {
-    val view = LocalView.current
-    val title: String by remember { mutableStateOf(app.generateTitle(view.resources).toString()) }
     ListItem(
         modifier = Modifier.clickable(onClick = { onEvent(AppsTagScreenEvent.Toggle(appId = app.appId)) }),
         headlineText = {
             Text(
-                text = title,
+                text = app.title,
                 style = MaterialTheme.typography.bodyLarge
             )
         },
         leadingContent = {
             AppIcon(
                 app = app,
-                contentDescription = title,
+                contentDescription = app.title,
                 appIconLoader = appIconLoader
             )
         },

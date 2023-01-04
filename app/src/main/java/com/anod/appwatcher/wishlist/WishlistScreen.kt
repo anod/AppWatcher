@@ -18,11 +18,11 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.CommonActivityAction
-import com.anod.appwatcher.compose.DeleteNotice
 import com.anod.appwatcher.compose.SearchTopBar
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.search.MarketAppItem
 import com.anod.appwatcher.search.RetryButton
+import com.anod.appwatcher.tags.TagSelectionDialog
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.AppIconLoader
 import finsky.api.model.Document
@@ -94,13 +94,9 @@ fun WishListScreen(
     }
 
     var showTagList: AppInfo? by remember { mutableStateOf(null) }
-    var deleteNoticeDocument: Document? by remember { mutableStateOf(null) }
     LaunchedEffect(key1 = viewActions) {
         viewActions.collect { action ->
             when (action) {
-                is WishListAction.AlreadyWatchedNotice -> {
-                    deleteNoticeDocument = action.document
-                }
                 is WishListAction.ShowTagSnackbar -> {
                     val result = snackbarHostState.showSnackbar(TagSnackbar.Visuals(action.info, context))
                     if (result == SnackbarResult.ActionPerformed) {
@@ -112,18 +108,14 @@ fun WishListScreen(
         }
     }
 
-    if (deleteNoticeDocument != null) {
-        DeleteNotice(
-            onDelete = {
-                onEvent(WishListEvent.Delete(deleteNoticeDocument!!))
-                deleteNoticeDocument = null
-            },
-            onDismissRequest = { deleteNoticeDocument = null }
-        )
-    }
-
     if (showTagList != null) {
-        // TODO
+        TagSelectionDialog(
+            appId = showTagList!!.appId,
+            appTitle = showTagList!!.title,
+            onDismissRequest = {
+                showTagList = null
+            }
+        )
     }
 }
 

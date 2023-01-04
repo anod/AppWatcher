@@ -21,7 +21,6 @@ import com.anod.appwatcher.watchlist.WatchListTopBar
 
 @Composable
 fun TagWatchListScreen(screenState: WatchListSharedState, pagingSourceConfig: WatchListPagingSource.Config, onEvent: (WatchListSharedStateEvent) -> Unit) {
-
     WatchListScreen(
         screenState = screenState,
         pagingSourceConfig = pagingSourceConfig,

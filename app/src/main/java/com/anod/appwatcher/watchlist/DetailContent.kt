@@ -23,7 +23,7 @@ fun DetailContent(app: App?) {
                 Image(painter = painterResource(id = R.drawable.ic_empty_box_smile), contentDescription = null)
             }
         } else {
-            DetailsScreen(appId = app.appId, rowId = app.rowId, detailsUrl = app.detailsUrl ?: "")
+            DetailsScreen(appId = app.appId, rowId = app.rowId, detailsUrl = app.detailsUrl ?: "", onDismissRequest = {}, onCommonActivityAction = {})
         }
     }
 }

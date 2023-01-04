@@ -29,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.intl.Locale
@@ -49,7 +48,6 @@ import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.database.entities.Price
-import com.anod.appwatcher.database.entities.generateTitle
 import com.anod.appwatcher.details.rememberAppItemState
 import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.PackageChangedReceiver
@@ -259,9 +257,7 @@ private fun AppItem(
     selectionMode: Boolean = false,
     appIconLoader: AppIconLoader = getKoin().get(),
 ) {
-    val view = LocalView.current
     val app = item.app
-    val title: String by remember { derivedStateOf { app.generateTitle(view.resources).toString() } }
     val changesHtml: String by remember {
         derivedStateOf {
             if (item.changeDetails?.isNotBlank() == true) {
@@ -293,7 +289,7 @@ private fun AppItem(
                 Box {
                     AppIcon(
                         app = app,
-                        contentDescription = title,
+                        contentDescription = app.title,
                         appIconLoader = appIconLoader
                     )
                     SelectedIcon(
@@ -304,14 +300,14 @@ private fun AppItem(
             } else {
                 AppIcon(
                     app = app,
-                    contentDescription = title,
+                    contentDescription = app.title,
                     appIconLoader = appIconLoader
                 )
             }
             Column(
                 modifier = Modifier.padding(start = 16.dp)
             ) {
-                Text(text = title, style = MaterialTheme.typography.bodyLarge)
+                Text(text = app.title, style = MaterialTheme.typography.bodyLarge)
                 Row(
                     modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top
                 ) {
@@ -479,10 +475,6 @@ private fun RecentItemAppCard(app: App?, onClick: (() -> Unit), appIconLoader: A
             .padding(start = 2.dp, end = 2.dp, top = 2.dp, bottom = 2.dp)
             .clickable(enabled = app != null, onClick = onClick)
     ) {
-        val view = LocalView.current
-        val title: String by remember(app) {
-            mutableStateOf(app?.generateTitle(view.resources)?.toString() ?: "")
-        }
         val placeholderColor =  MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
         if (app == null) {
             Icon(
@@ -502,7 +494,7 @@ private fun RecentItemAppCard(app: App?, onClick: (() -> Unit), appIconLoader: A
         } else {
             AppIcon(
                 app = app,
-                contentDescription = title,
+                contentDescription = app.title,
                 size = 56.dp,
                 modifier = Modifier
                     .padding(top = 8.dp)
@@ -511,7 +503,7 @@ private fun RecentItemAppCard(app: App?, onClick: (() -> Unit), appIconLoader: A
             )
         }
         Text(
-            text = title + "\n",
+            text = app?.title + "\n",
             maxLines = 2,
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier

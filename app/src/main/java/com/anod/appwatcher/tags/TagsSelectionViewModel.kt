@@ -1,5 +1,8 @@
 package com.anod.appwatcher.tags
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Label
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -9,6 +12,8 @@ import com.anod.appwatcher.database.AppTagsTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.utils.BaseFlowViewModel
+import info.anodsplace.compose.CheckBoxItem
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -20,7 +25,7 @@ typealias TagAppItem = Pair<Tag,Boolean>
 data class TagsSelectionState(
     val appId: String,
     val appTitle: String,
-    val items: Map<String, Boolean> = emptyMap(),
+    val items: List<CheckBoxItem> = emptyList(),
     val tags: List<TagAppItem> = emptyList(),
     val showAddTagDialog: Boolean = false
 )
@@ -30,6 +35,7 @@ sealed interface TagSelectionEvent {
     class AddTag(val show: Boolean, val tagId: Int = 0) : TagSelectionEvent
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class TagsSelectionViewModel(appId: String, appTitle: String) : BaseFlowViewModel<TagsSelectionState, TagSelectionEvent, CommonActivityAction>(), KoinComponent {
 
     class Factory(private val appId: String, private val appTitle: String) : ViewModelProvider.Factory {
@@ -56,7 +62,15 @@ class TagsSelectionViewModel(appId: String, appTitle: String) : BaseFlowViewMode
             }.collect { tags ->
                 viewState = viewState.copy(
                     tags = tags,
-                    items = tags.associateBy({ "tag-${it.first.id}" }, { it.second })
+                    items = tags.map { (tag, checked) ->
+                        CheckBoxItem(
+                            key = "tag-${tag.id}",
+                            checked = checked,
+                            title = tag.name,
+                            icon = Icons.Default.Label,
+                            iconTint = Color(tag.color)
+                        )
+                    }
                 )
             }
         }

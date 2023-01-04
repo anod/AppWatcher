@@ -28,6 +28,8 @@ import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.CommonActivityAction
 import com.anod.appwatcher.compose.DeleteNotice
 import com.anod.appwatcher.compose.SearchTopBar
+import com.anod.appwatcher.model.AppInfo
+import com.anod.appwatcher.tags.TagSelectionDialog
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.AppIconLoader
 import finsky.api.model.Document
@@ -102,7 +104,7 @@ fun SearchResultsScreen(
         }
     }
 
-    var showTagList: SearchActivityAction.ShowTagList? by remember { mutableStateOf(null) }
+    var showTagList: Pair<AppInfo, Boolean>? by remember { mutableStateOf(null) }
     var deleteNoticeDocument: Document? by remember { mutableStateOf(null) }
     LaunchedEffect(key1 = viewActions) {
         viewActions.collect { action ->
@@ -118,7 +120,7 @@ fun SearchResultsScreen(
                     val finishActivity = action.isShareSource
                     val result = snackbarHostState.showSnackbar(TagSnackbar.Visuals(action.info, context))
                     if (result == SnackbarResult.ActionPerformed) {
-                        showTagList = SearchActivityAction.ShowTagList(action.info, finishActivity)
+                        showTagList = Pair(action.info, finishActivity)
                     } else if (finishActivity) {
                         onActivityAction(CommonActivityAction.Finish)
                     }
@@ -142,7 +144,17 @@ fun SearchResultsScreen(
     }
 
     if (showTagList != null) {
-        // TODO
+        val (appInfo, finishActivity) = showTagList!!
+        TagSelectionDialog(
+            appId = appInfo.appId,
+            appTitle = appInfo.title,
+            onDismissRequest = {
+                showTagList = null
+                if (finishActivity) {
+                    onActivityAction(CommonActivityAction.Finish)
+                }
+            }
+        )
     }
 }
 
