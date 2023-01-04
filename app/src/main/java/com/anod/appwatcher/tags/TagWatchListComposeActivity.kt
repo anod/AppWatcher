@@ -6,7 +6,9 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.lifecycleScope
 import com.anod.appwatcher.compose.AppTheme
@@ -36,12 +38,15 @@ class TagWatchListComposeActivity : BaseComposeActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
+            val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
+            val customPrimaryColor by remember(screenState) {
+                derivedStateOf { Color(screenState.tag.color) }
+            }
             AppTheme(
-                    customPrimaryColor = Color(viewModel.viewState.tag.color),
+                    customPrimaryColor = customPrimaryColor,
                     theme = viewModel.prefs.theme
             ) {
-                val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
-                
+
                 val pagingSourceConfig = WatchListPagingSource.Config(
                         filterId = screenState.filterId,
                         tagId = if (screenState.tag.isEmpty) null else screenState.tag.id,

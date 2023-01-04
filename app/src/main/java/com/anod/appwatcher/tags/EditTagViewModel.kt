@@ -51,10 +51,11 @@ class EditTagViewModel(tag: Tag) : BaseFlowViewModel<EditTagState, EditTagEvent,
         when (event) {
             EditTagEvent.Delete -> { deleteTag(viewState.tag) }
             is EditTagEvent.SaveAndDismiss -> {
-                saveAndDismiss(Tag(viewState.tag.id, event.name, viewState.tag.color))
+                val tag = viewState.tag.copy(name = event.name)
+                saveAndDismiss(tag)
             }
             is EditTagEvent.UpdateColor -> {
-                viewState = viewState.copy(tag = Tag(viewState.tag.id, viewState.tag.name, event.color))
+                viewState = viewState.copy(tag = viewState.tag.copy(color = event.color))
             }
             EditTagEvent.Dismiss -> emitAction(EditTagAction.Dismiss(tagId = viewState.tag.id))
             is EditTagEvent.PickColor -> {
@@ -69,7 +70,7 @@ class EditTagViewModel(tag: Tag) : BaseFlowViewModel<EditTagState, EditTagEvent,
                 database.tags().update(tag)
             } else {
                 val tagId = TagsTable.Queries.insert(tag, database).toInt()
-                viewState = viewState.copy(tag = Tag(id = tagId, name = tag.name, color = tag.color) )
+                viewState = viewState.copy(tag = tag.copy(id = tagId))
             }
             emitAction(EditTagAction.Dismiss(tagId = viewState.tag.id))
         }

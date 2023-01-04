@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -36,6 +37,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.database.entities.Tag
@@ -77,7 +79,7 @@ private fun DrawerContent(mainState: MainViewState, onMainEvent: (MainViewEvent)
             onClick = {
                 onMainEvent(MainViewEvent.DrawerItemClick(item.id))
             },
-            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding).height(48.dp)
         )
     }
 
@@ -102,7 +104,7 @@ private fun DrawerContent(mainState: MainViewState, onMainEvent: (MainViewEvent)
             onClick = {
                 onMainEvent(MainViewEvent.NavigateToTag(tag))
             },
-            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding).height(48.dp)
         )
     }
 
@@ -169,7 +171,9 @@ private fun TagBadge(color: Color, count: Int, modifier: Modifier = Modifier) {
         contentColor = if (color.isLightColor) Color.Black else Color.White
     ) {
         Text(
-            text = if (count > 99) "99+" else "" + count
+            text = if (count > 99) "99+" else "" + count,
+            fontSize = if (count > 99) 8.sp else 12.sp,
+            maxLines = 1
         )
     }
 }
@@ -194,7 +198,7 @@ private fun DrawerContentPreviewWithAccount() {
                 account = Account("very_long_email_address@example.com", "test"),
                 lastUpdate = System.currentTimeMillis() - TimeUnit.HOURS.toMillis(2),
                 tags = listOf(
-                    Pair(Tag("Banana", Color.Yellow.toArgb()), 9),
+                    Pair(Tag("Banana", Color.Yellow.toArgb()), 90),
                     Pair(Tag("Kiwi", Color.DarkGray.toArgb()), 125),
                     Pair(Tag("Apple", Color.Red.toArgb()), 0),
                 )

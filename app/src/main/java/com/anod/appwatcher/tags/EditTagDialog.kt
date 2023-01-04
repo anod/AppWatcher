@@ -53,7 +53,7 @@ fun EditTagDialog(tag: Tag, onDismissRequest: (tagId: Int) -> Unit) {
         onDismissRequest = { onDismissRequest(screenState.tag.id) }
     ) {
         AppTheme(
-            customPrimaryColor = if (screenState.tag.id > 0) Color(screenState.tag.color) else null,
+            customPrimaryColor = Color(screenState.tag.color),
             updateSystemBars = false
         ) {
             EditTagScreen(

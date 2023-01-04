@@ -1,11 +1,9 @@
 package com.anod.appwatcher.database.entities
 
-import android.graphics.Color
 import android.os.Parcel
 import android.os.Parcelable
 import android.provider.BaseColumns
 import androidx.annotation.ColorInt
-import androidx.core.graphics.ColorUtils
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Ignore
@@ -29,18 +27,7 @@ data class Tag(
         val color: Int) : Parcelable {
 
     val isEmpty: Boolean
-        get() = (id == 0 && name.isEmpty() && color == 0)
-
-    val darkColor: Int
-        get() {
-            val hsv = FloatArray(3)
-            Color.colorToHSV(color, hsv)
-            hsv[2] *= 0.6f
-            return Color.HSVToColor(hsv)
-        }
-
-    val isLightColor: Boolean
-        get() = ColorUtils.calculateLuminance(color) > 0.5
+        get() = id == 0
 
     @Ignore
     constructor(name: String) : this(0, name, DEFAULT_COLOR)
@@ -76,7 +63,7 @@ data class Tag(
 
     companion object {
         const val DEFAULT_COLOR = 0xFF2196F3.toInt()
-        val empty = Tag(0, "", 0)
+        val empty = Tag(0, "", DEFAULT_COLOR)
 
         @JvmField
         val CREATOR: Parcelable.Creator<Tag> = object : Parcelable.Creator<Tag> {
