@@ -10,8 +10,14 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.Amber800
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.model.AppInfoMetadata
-import com.anod.appwatcher.watchlist.formatVersionText
 import info.anodsplace.framework.content.InstalledApps
+
+private fun formatVersionText(versionName: String, versionNumber: Int, newVersionNumber: Int, context: Context): String {
+    if (newVersionNumber > 0) {
+        return context.getString(R.string.version_updated_text, versionName, versionNumber, newVersionNumber)
+    }
+    return context.getString(R.string.version_text, versionName, versionNumber)
+}
 
 data class AppItemState(
     val color: Color,

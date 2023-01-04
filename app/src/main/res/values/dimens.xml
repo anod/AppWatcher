@@ -1,20 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <dimen name="icon_size">40dip</dimen>
-
-    <!-- Dialog title height -->
-
-    <!--
-         The platform's desired minimum size for a dialog's width when it
-         is along the major axis (that is the screen is landscape).  This may
-         be either a fraction or a dimension.
-    -->
-    <!--
-         The platform's desired minimum size for a dialog's width when it
-         is along the minor axis (that is the screen is portrait).  This may
-         be either a fraction or a dimension.
-    -->
-
-    <dimen name="dialog_min_width_major">90%</dimen>
 </resources>

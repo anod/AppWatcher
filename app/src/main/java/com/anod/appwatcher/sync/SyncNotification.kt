@@ -10,8 +10,8 @@ import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.NotificationActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.preferences.Preferences
+import com.anod.appwatcher.utils.color.DynamicColors
 import com.anod.appwatcher.watchlist.WatchListActivity
-import com.google.android.material.color.DynamicColors
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.app.NotificationManager
 import info.anodsplace.framework.text.Html

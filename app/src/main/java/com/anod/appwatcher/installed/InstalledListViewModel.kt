@@ -1,12 +1,10 @@
 // Copyright (c) 2020. Alex Gavrishev
 package com.anod.appwatcher.installed
 
-import android.accounts.Account
 import android.content.pm.PackageManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.FilterablePagingSource
 import com.anod.appwatcher.watchlist.SectionHeaderFactory
 import com.anod.appwatcher.watchlist.WatchListPagingSource
@@ -25,8 +23,6 @@ class InstalledListViewModel(pagingSourceConfig: WatchListPagingSource.Config) :
 
     private val packageManager: PackageManager by inject()
     val changelogAdapter: ChangelogAdapter by inject { parametersOf(viewModelScope) }
-    private val account: Account?
-        get() = prefs.account
 
     var sortId: Int = 0
         set(value) {

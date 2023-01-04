@@ -18,7 +18,6 @@ android {
     }
 
     buildFeatures {
-        viewBinding = true
         compose = true
         buildConfig = true
     }
@@ -84,14 +83,10 @@ android {
 dependencies {
     // AndroidX
     implementation("androidx.appcompat:appcompat:1.5.1") // AppCompatActivity
-    implementation("androidx.recyclerview:recyclerview:1.2.1")
     implementation("androidx.palette:palette:1.0.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.work:work-runtime:2.7.1")
     implementation("androidx.work:work-runtime-ktx:2.7.1")
     implementation("androidx.core:core:1.9.0")
-    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
-    implementation("androidx.fragment:fragment-ktx:1.5.5")
     implementation("androidx.core:core-splashscreen:1.0.0")
 
     implementation("androidx.paging:paging-runtime:3.2.0-alpha03")
@@ -99,7 +94,6 @@ dependencies {
 
     // Compose
     implementation("androidx.activity:activity-compose:1.6.1")
-    implementation("androidx.compose.ui:ui-viewbinding:1.3.2")
     implementation("com.google.accompanist:accompanist-pager:0.28.0")
     implementation("com.google.accompanist:accompanist-flowlayout:0.28.0")
     implementation("com.google.accompanist:accompanist-swiperefresh:0.28.0")
@@ -111,7 +105,6 @@ dependencies {
     implementation("io.coil-kt:coil-compose-base:2.2.2")
 
     // Google
-    implementation("com.google.android.material:material:1.7.0") // Color roles, appbarlayout
     implementation("com.google.android.gms:play-services-oss-licenses:17.0.0")
     implementation("com.google.android.gms:play-services-identity:18.0.1")
     implementation("com.google.android.gms:play-services-auth:20.4.0")
@@ -133,9 +126,7 @@ dependencies {
 
     // ViewModel and LiveData
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
-    implementation("androidx.lifecycle:lifecycle-viewmodel:2.5.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
     kapt("androidx.lifecycle:lifecycle-compiler:2.5.1")
 
     implementation("androidx.room:room-runtime:2.4.3")
@@ -152,7 +143,6 @@ dependencies {
     implementation(project(":lib:applog"))
     implementation(project(":lib:compose"))
     implementation(project(":lib:graphics"))
-    implementation(project(":lib:colorpicker"))
     implementation(project(":lib:framework"))
     implementation(project(":lib:ktx"))
     implementation(project(":lib:permissions"))

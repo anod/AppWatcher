@@ -1,9 +1,6 @@
 package com.anod.appwatcher.compose
 
-import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
-import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import info.anodsplace.framework.app.ApplicationContext

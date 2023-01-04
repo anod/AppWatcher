@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="alwaysBlack">@android:color/black</color>
-    <color name="alwaysWhite">#FFFFFF</color>
-
     <color name="material_blue_800">#1565C0</color>
 
     <color name="md_primary">#2196F3</color>,

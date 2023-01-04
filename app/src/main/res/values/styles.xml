@@ -10,129 +10,6 @@
 
     <style name="AppTheme" />
 
-    <style name="AppTheme.Dialog" parent="@style/Theme.Material3.DayNight.Dialog">
-        <item name="colorOnErrorContainer">@color/md_onErrorContainer</item>
-        <item name="colorOnError">@color/md_onError</item>
-        <item name="colorErrorContainer">@color/md_errorContainer</item>
-        <item name="colorOnTertiaryContainer">@color/md_onTertiaryContainer</item>
-        <item name="colorOnTertiary">@color/md_onTertiary</item>
-        <item name="colorTertiaryContainer">@color/md_tertiaryContainer</item>
-        <item name="colorTertiary">@color/md_tertiary</item>
-        <item name="colorError">@color/md_error</item>
-        <item name="colorOutline">@color/md_outline</item>
-        <item name="colorOnBackground">@color/md_onBackground</item>
-        <item name="android:colorBackground">@color/md_background</item>
-        <item name="colorOnSurfaceVariant">@color/md_onSurfaceVariant</item>
-        <item name="colorOnSurface">@color/md_onSurface</item>
-        <item name="colorSurfaceVariant">@color/md_surfaceVariant</item>
-        <item name="colorSurface">@color/md_surface</item>
-        <item name="colorOnSecondaryContainer">@color/md_onSecondaryContainer</item>
-        <item name="colorOnSecondary">@color/md_onSecondary</item>
-        <item name="colorSecondaryContainer">@color/md_secondaryContainer</item>
-        <item name="colorSecondary">@color/md_secondary</item>
-        <item name="colorOnPrimaryContainer">@color/md_onPrimaryContainer</item>
-        <item name="colorOnPrimary">@color/md_onPrimary</item>
-        <item name="colorPrimaryContainer">@color/md_primaryContainer</item>
-        <item name="colorPrimary">@color/md_primary</item>
-
-        <item name="android:windowBackground">@color/md_background</item>
-
-        <item name="android:windowFrame">@null</item>
-        <item name="android:windowIsFloating">true</item>
-        <item name="android:backgroundDimEnabled">true</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowCloseOnTouchOutside">true</item>
-    </style>
-
-    <style name="AppTheme.Dialog.Black" parent="AppTheme.Dialog">
-        <item name="colorSurface">@color/alwaysBlack</item>
-        <item name="android:colorBackground">@android:color/black</item>
-        <item name="android:colorBackgroundCacheHint">@android:color/black</item>
-        <item name="android:windowBackground">@android:color/black</item>
-        <item name="colorItemBackground">@android:color/black</item>
-    </style>
-
-    <style name="AppTheme.Dialog.NoActionBar" parent="@style/ThemeOverlay.Material3.MaterialAlertDialog">
-        <item name="colorOnErrorContainer">@color/md_onErrorContainer</item>
-        <item name="colorOnError">@color/md_onError</item>
-        <item name="colorErrorContainer">@color/md_errorContainer</item>
-        <item name="colorOnTertiaryContainer">@color/md_onTertiaryContainer</item>
-        <item name="colorOnTertiary">@color/md_onTertiary</item>
-        <item name="colorTertiaryContainer">@color/md_tertiaryContainer</item>
-        <item name="colorTertiary">@color/md_tertiary</item>
-        <item name="colorError">@color/md_error</item>
-        <item name="colorOutline">@color/md_outline</item>
-        <item name="colorOnBackground">@color/md_onBackground</item>
-        <item name="android:colorBackground">@color/md_background</item>
-        <item name="colorOnSurfaceVariant">@color/md_onSurfaceVariant</item>
-        <item name="colorOnSurface">@color/md_onSurface</item>
-        <item name="colorSurfaceVariant">@color/md_surfaceVariant</item>
-        <item name="colorSurface">@color/md_surface</item>
-        <item name="colorOnSecondaryContainer">@color/md_onSecondaryContainer</item>
-        <item name="colorOnSecondary">@color/md_onSecondary</item>
-        <item name="colorSecondaryContainer">@color/md_secondaryContainer</item>
-        <item name="colorSecondary">@color/md_secondary</item>
-        <item name="colorOnPrimaryContainer">@color/md_onPrimaryContainer</item>
-        <item name="colorOnPrimary">@color/md_onPrimary</item>
-        <item name="colorPrimaryContainer">@color/md_primaryContainer</item>
-        <item name="colorPrimary">@color/md_primary</item>
-
-        <item name="android:windowFrame">@null</item>
-        <item name="android:windowIsFloating">true</item>
-        <item name="android:backgroundDimEnabled">true</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowCloseOnTouchOutside">true</item>
-        <item name="android:windowBackground">@color/md_background</item>
-
-        <item name="android:windowMinWidthMajor">@dimen/dialog_min_width_major</item>
-        <item name="android:windowMinWidthMinor">@dimen/dialog_min_width_major</item>
-    </style>
-
-    <style name="AppTheme.Dialog.NoActionBar.Black" parent="@style/Theme.Material3.DayNight.NoActionBar">
-        <item name="colorOnErrorContainer">@color/md_onErrorContainer</item>
-        <item name="colorOnError">@color/md_onError</item>
-        <item name="colorErrorContainer">@color/md_errorContainer</item>
-        <item name="colorOnTertiaryContainer">@color/md_onTertiaryContainer</item>
-        <item name="colorOnTertiary">@color/md_onTertiary</item>
-        <item name="colorTertiaryContainer">@color/md_tertiaryContainer</item>
-        <item name="colorTertiary">@color/md_tertiary</item>
-        <item name="colorError">@color/md_error</item>
-        <item name="colorOutline">@color/md_outline</item>
-        <item name="colorOnBackground">@color/md_onBackground</item>
-        <item name="colorOnSurfaceVariant">@color/md_onSurfaceVariant</item>
-        <item name="colorOnSurface">@color/md_onSurface</item>
-        <item name="colorSurfaceVariant">@color/md_surfaceVariant</item>
-        <item name="colorSurface">@color/alwaysBlack</item>
-        <item name="colorOnSecondaryContainer">@color/md_onSecondaryContainer</item>
-        <item name="colorOnSecondary">@color/md_onSecondary</item>
-        <item name="colorSecondaryContainer">@color/md_secondaryContainer</item>
-        <item name="colorSecondary">@color/md_secondary</item>
-        <item name="colorOnPrimaryContainer">@color/md_onPrimaryContainer</item>
-        <item name="colorOnPrimary">@color/md_onPrimary</item>
-        <item name="colorPrimaryContainer">@color/md_primaryContainer</item>
-        <item name="colorPrimary">@color/md_primary</item>
-
-        <item name="android:colorBackground">@color/alwaysBlack</item>
-        <item name="android:colorBackgroundCacheHint">@color/alwaysBlack</item>
-        <item name="android:windowBackground">@color/alwaysBlack</item>
-        <item name="colorItemBackground">@color/alwaysBlack</item>
-
-        <item name="android:windowFrame">@null</item>
-        <item name="android:windowIsFloating">true</item>
-        <item name="android:backgroundDimEnabled">true</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowCloseOnTouchOutside">true</item>
-
-        <item name="android:windowMinWidthMajor">@dimen/dialog_min_width_major</item>
-        <item name="android:windowMinWidthMinor">@dimen/dialog_min_width_major</item>
-    </style>
-
-    <style name="Widget.App.ActionMode" parent="Widget.AppCompat.ActionMode">
-        <item name="titleTextStyle">?attr/textAppearanceHeadline6</item>
-        <item name="subtitleTextStyle">?attr/textAppearanceSubtitle1</item>
-        <item name="background">?attr/colorPrimary</item>
-    </style>
-
     <style name="AppTheme.Base" parent="@style/Theme.Material3.DayNight.NoActionBar">
         <item name="colorOnErrorContainer">@color/md_onErrorContainer</item>
         <item name="colorOnError">@color/md_onError</item>
@@ -158,64 +35,13 @@
         <item name="colorPrimaryContainer">@color/md_primaryContainer</item>
         <item name="colorPrimary">@color/md_primary</item>
 
-        <item name="android:buttonStyle">@style/BrandButtonStyle</item>
-
-        <item name="colorItemBackground">?android:attr/colorBackground</item>
-        <item name="colorPreferenceBackground">?android:attr/selectableItemBackgroundBorderless
-        </item>
-
         <item name="android:navigationBarColor">?attr/colorSurface</item>
-        <item name="android:windowBackground">?attr/colorItemBackground</item>
         <item name="android:statusBarColor">?attr/colorSurface</item>
-        <item name="android:actionBarTheme">@style/AppTheme.ActionBar</item>
-        <!-- ActionMode -->
-        <item name="windowActionModeOverlay">true</item>
-        <item name="actionModeStyle">@style/Widget.App.ActionMode</item>
-        <item name="actionModeCloseDrawable">@drawable/ic_baseline_close_24</item>
-        <item name="actionBarTheme">@style/ThemeOverlay.Material3.Dark.ActionBar</item>
     </style>
-
-    <style name="BrandButtonStyle" parent="Widget.Material3.Button" />
 
     <style name="AppTheme.Main" parent="AppTheme.Base">
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">?attr/colorSurface</item>
-    </style>
-
-    <style name="AppTheme.Black" parent="AppTheme.Base">
-        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:statusBarColor">@color/alwaysBlack</item>
-
-        <item name="colorOnErrorContainer">@color/md_onErrorContainer</item>
-        <item name="colorOnError">@color/md_onError</item>
-        <item name="colorErrorContainer">@color/md_errorContainer</item>
-        <item name="colorOnTertiaryContainer">@color/md_onTertiaryContainer</item>
-        <item name="colorOnTertiary">@color/md_onTertiary</item>
-        <item name="colorTertiaryContainer">@color/md_tertiaryContainer</item>
-        <item name="colorTertiary">@color/md_tertiary</item>
-        <item name="colorError">@color/md_error</item>
-        <item name="colorOutline">@color/md_outline</item>
-        <item name="colorOnBackground">@color/md_onBackground</item>
-        <item name="android:colorBackground">@color/alwaysBlack</item>
-        <item name="colorOnSurfaceVariant">@color/md_onSurfaceVariant</item>
-        <item name="colorOnSurface">@color/md_onSurface</item>
-        <item name="colorSurfaceVariant">@color/md_surfaceVariant</item>
-        <item name="colorSurface">@color/alwaysBlack</item>
-        <item name="colorOnSecondaryContainer">@color/md_onSecondaryContainer</item>
-        <item name="colorOnSecondary">@color/md_onSecondary</item>
-        <item name="colorSecondaryContainer">@color/md_secondaryContainer</item>
-        <item name="colorSecondary">@color/md_secondary</item>
-        <item name="colorOnPrimaryContainer">@color/md_onPrimaryContainer</item>
-        <item name="colorOnPrimary">@color/md_onPrimary</item>
-        <item name="colorPrimaryContainer">@color/md_primaryContainer</item>
-        <item name="colorPrimary">@color/md_primary</item>
-
-        <item name="colorControlNormal">@color/alwaysWhite</item>
-
-        <item name="android:colorBackgroundCacheHint">@android:color/black</item>
-        <item name="android:windowBackground">@android:color/black</item>
-        <item name="colorItemBackground">@android:color/black</item>
-        <item name="colorPreferenceBackground">@android:color/black</item>
     </style>
 
     <style name="AppTheme.Splash" parent="Theme.SplashScreen.IconBackground">
@@ -223,7 +49,5 @@
         <item name="windowSplashScreenIconBackgroundColor">@color/md_primary</item>
         <item name="postSplashScreenTheme">@null</item>
     </style>
-
-    <style name="AppTheme.ActionBar" />
 
 </resources>
