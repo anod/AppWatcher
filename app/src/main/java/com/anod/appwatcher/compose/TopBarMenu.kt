@@ -1,5 +1,6 @@
 package com.anod.appwatcher.compose
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowRight
 import androidx.compose.material.icons.filled.FlashOn
@@ -88,7 +89,7 @@ private fun SortDropdownMenu(selectedSortId: Int, onChangeSort: (Int) -> Unit, e
         )
         sortTitles.forEachIndexed { index, sortTitle ->
             DropdownMenuItem(
-                text = { Text(text = sortTitle) },
+                text = { Text(text = sortTitle, modifier = Modifier.padding(horizontal = 8.dp)) },
                 leadingIcon = {
                     Icon(
                         imageVector = if (selectedSortId == index) Icons.Default.RadioButtonChecked else Icons.Default.RadioButtonUnchecked,
@@ -124,7 +125,7 @@ fun FilterMenuItem(filterId: Int, onFilterChange: (Int) -> Unit, barBounds: IntR
 
     val density = LocalDensity.current
     val dpOffset = with(density) { DpOffset(x = (barBounds.width - menuItemWidth).toDp(), y = 0.dp) }
-    FilterDropdownMenu(filterId, onFilterChange, topBarFilterMenu, { topBarFilterMenu = false })
+    FilterDropdownMenu(filterId, onFilterChange, topBarFilterMenu, { topBarFilterMenu = false }, offset = dpOffset)
 }
 
 @Composable
@@ -148,7 +149,7 @@ private fun FilterDropdownMenu(filterId: Int, onFilterChange: (Int) -> Unit, exp
     DropdownMenu(expanded = expanded, onDismissRequest = onDismissRequest, offset = offset) {
         filterPagesTitles.forEachIndexed { index, title ->
             DropdownMenuItem(
-                text = { Text(text = title) },
+                text = { Text(text = title, modifier = Modifier.padding(horizontal = 8.dp)) },
                 leadingIcon = {
                     Icon(
                         imageVector = if (filterId == index) Icons.Default.RadioButtonChecked else Icons.Default.RadioButtonUnchecked,

@@ -165,10 +165,6 @@ class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wid
         }
     }
 
-//                        ViewModelProvider(this@WatchListActivity).get(DrawerViewModel::class.java)
-//                            .refreshLastUpdateTime()
-//                        ListState.SyncStopped
-
     override fun handleEvent(event: WatchListSharedStateEvent) {
         when (event) {
             is WatchListSharedStateEvent.ChangeSort -> {

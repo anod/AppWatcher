@@ -367,7 +367,12 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
             viewState = viewState.copy(
                 document = details.document,
                 changelogs = mergeChangelogs(localChanges, recentChange),
+                changelogState = ChangelogLoadState.Complete,
                 title = generateTitle(context.resources, isBeta)
+            )
+        } else {
+            viewState = viewState.copy(
+                changelogState = ChangelogLoadState.Complete,
             )
         }
     }

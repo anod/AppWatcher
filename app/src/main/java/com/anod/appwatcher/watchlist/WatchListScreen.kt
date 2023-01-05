@@ -108,9 +108,15 @@ fun WatchListScreen(
         }
     }
 
+    LaunchedEffect(pagerState.currentPage) {
+        if (screenState.filterId != pagerState.currentPage) {
+            onEvent(WatchListSharedStateEvent.FilterById(filterId = pagerState.currentPage))
+        }
+    }
+
     LaunchedEffect(screenState.filterId) {
         if (screenState.filterId != pagerState.currentPage) {
-            pagerState.scrollToPage(screenState.filterId)
+            pagerState.animateScrollToPage(screenState.filterId)
         }
     }
 }

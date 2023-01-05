@@ -80,6 +80,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.CommonActivityAction
+import com.anod.appwatcher.compose.DeleteNotice
 import com.anod.appwatcher.compose.DropdownMenuAction
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppChange
@@ -162,7 +163,7 @@ fun DetailsDialog(appId: String, rowId: Int, detailsUrl: String, onDismissReques
 private fun createAppChooser(appInfo: App, recentChange: AppChange, context: Context): Intent {
     val builder = ShareCompat.IntentBuilder(context)
 
-    val changes = if (recentChange.details.isBlank()) "" else "${recentChange.details}\n\n"
+    val changes = if (recentChange.details.isBlank()) "" else "${Html.parse(recentChange.details)}\n\n"
     val text = context.getString(R.string.share_text, changes, String.format(StoreIntent.URL_WEB_PLAY_STORE, appInfo.packageName))
 
     builder.setSubject(context.getString(R.string.share_subject, appInfo.title, appInfo.versionName))
@@ -499,6 +500,7 @@ private fun DetailsTopAppBar(
     containerColor: Color = MaterialTheme.colorScheme.primary,
     contentColor: Color = MaterialTheme.colorScheme.onPrimary,
 ) {
+    var showDeleteNotice by remember { mutableStateOf(false) }
     TopAppBar(
         title = {
             if (titleVisibility > 0) {
@@ -534,8 +536,19 @@ private fun DetailsTopAppBar(
         },
         actions = {
             IconButton(
-                onClick = { onEvent(DetailsScreenEvent.WatchAppToggle) },
-                enabled = screenState.fetchedRemoteDocument
+                onClick = {
+                    if (screenState.fetchedRemoteDocument) {
+                        onEvent(DetailsScreenEvent.WatchAppToggle)
+                    } else {
+                        if (screenState.isWatched) {
+                            showDeleteNotice = true
+                        } else {
+                            // SHould show error
+                            onEvent(DetailsScreenEvent.WatchAppToggle)
+                        }
+                    }
+                },
+                enabled = screenState.changelogState is ChangelogLoadState.Complete
             ) {
                 Icon(
                     imageVector = if (screenState.isWatched) Icons.Default.VisibilityOff else Icons.Default.Visibility,
@@ -547,7 +560,7 @@ private fun DetailsTopAppBar(
                 var showTagsMenu: Boolean by remember { mutableStateOf(false) }
                 IconButton(
                     onClick = { showTagsMenu = true },
-                    enabled = screenState.fetchedRemoteDocument
+                    enabled = screenState.isWatched
                 ) {
                     Icon(
                         imageVector = Icons.Default.Label,
@@ -580,7 +593,7 @@ private fun DetailsTopAppBar(
 
             DropdownMenuAction { dismiss ->
                 DropdownMenuItem(
-                    text = { Text(text = stringResource(id = R.string.share)) },
+                    text = { Text(text = stringResource(id = R.string.share), modifier = Modifier.padding(horizontal = 8.dp)) },
                     leadingIcon = {
                         Icon(imageVector = Icons.Default.Share, contentDescription = stringResource(id = R.string.share))
                     },
@@ -591,7 +604,7 @@ private fun DetailsTopAppBar(
                 )
 
                 DropdownMenuItem(
-                    text = { Text(text = stringResource(id = R.string.translate)) },
+                    text = { Text(text = stringResource(id = R.string.translate), modifier = Modifier.padding(horizontal = 8.dp)) },
                     enabled = screenState.changelogs.firstOrNull()?.details?.isNotEmpty() == true,
                     leadingIcon = {
                         Icon(imageVector = Icons.Default.Translate, contentDescription = stringResource(id = R.string.translate))
@@ -604,7 +617,7 @@ private fun DetailsTopAppBar(
 
                 if (screenState.isInstalled) {
                     DropdownMenuItem(
-                        text = { Text(text = stringResource(id = R.string.open)) },
+                        text = { Text(text = stringResource(id = R.string.open), modifier = Modifier.padding(horizontal = 8.dp)) },
                         leadingIcon = {
                             Icon(imageVector = Icons.Default.OpenInNew, contentDescription = stringResource(id = R.string.open))
                         },
@@ -614,7 +627,7 @@ private fun DetailsTopAppBar(
                         }
                     )
                     DropdownMenuItem(
-                        text = { Text(text = stringResource(id = R.string.uninstall)) },
+                        text = { Text(text = stringResource(id = R.string.uninstall), modifier = Modifier.padding(horizontal = 8.dp)) },
                         leadingIcon = {
                             Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(id = R.string.uninstall))
                         },
@@ -624,7 +637,7 @@ private fun DetailsTopAppBar(
                         }
                     )
                     DropdownMenuItem(
-                        text = { Text(text = stringResource(id = R.string.app_info)) },
+                        text = { Text(text = stringResource(id = R.string.app_info), modifier = Modifier.padding(horizontal = 8.dp)) },
                         leadingIcon = {
                             Icon(imageVector = Icons.Default.Info, contentDescription = stringResource(id = R.string.app_info))
                         },
@@ -637,6 +650,13 @@ private fun DetailsTopAppBar(
             }
         }
     )
+
+    if (showDeleteNotice) {
+        DeleteNotice(
+            onDelete = { onEvent(DetailsScreenEvent.WatchAppToggle) },
+            onDismissRequest = { showDeleteNotice = false }
+        )
+    }
 }
 
 @Preview
