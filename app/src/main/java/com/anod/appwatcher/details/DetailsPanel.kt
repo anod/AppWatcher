@@ -438,7 +438,10 @@ private fun VersionInfoCell(text: String, placeholder: Boolean = false) {
         modifier = Modifier
             .defaultMinSize(minWidth = 40.dp)
             .padding(horizontal = 4.dp)
-            .placeholder(visible = placeholder),
+            .placeholder(
+                visible = placeholder,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
+            ),
         style = MaterialTheme.typography.labelMedium,
         textAlign = TextAlign.Center
     )
