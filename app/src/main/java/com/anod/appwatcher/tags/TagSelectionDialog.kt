@@ -25,13 +25,19 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
+import com.anod.appwatcher.compose.rememberViwModeStoreOwner
 import com.anod.appwatcher.database.entities.Tag
 import info.anodsplace.compose.CheckBoxItem
 import info.anodsplace.compose.CheckBoxList
 
 @Composable
 fun TagSelectionDialog(appId: String, appTitle: String, onDismissRequest: () -> Unit) {
-    val viewModel: TagsSelectionViewModel = viewModel(key = appId, factory = TagsSelectionViewModel.Factory(appId, appTitle))
+    val storeOwner = rememberViwModeStoreOwner()
+    val viewModel: TagsSelectionViewModel = viewModel(
+        key = appId,
+        viewModelStoreOwner = storeOwner,
+        factory = TagsSelectionViewModel.Factory(appId, appTitle)
+    )
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
 
     Dialog(

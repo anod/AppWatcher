@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.App
-import com.anod.appwatcher.details.DetailsScreen
+import com.anod.appwatcher.details.DetailsPanel
 
 @Composable
 fun DetailContent(app: App?) {
@@ -23,7 +23,7 @@ fun DetailContent(app: App?) {
                 Image(painter = painterResource(id = R.drawable.ic_empty_box_smile), contentDescription = null)
             }
         } else {
-            DetailsScreen(appId = app.appId, rowId = app.rowId, detailsUrl = app.detailsUrl ?: "", onDismissRequest = {}, onCommonActivityAction = {})
+            DetailsPanel(appId = app.appId, rowId = app.rowId, detailsUrl = app.detailsUrl ?: "", onDismissRequest = {}, onCommonActivityAction = {})
         }
     }
 }

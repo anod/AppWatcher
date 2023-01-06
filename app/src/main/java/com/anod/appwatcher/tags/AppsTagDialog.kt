@@ -32,6 +32,7 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppIcon
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.SearchTopBar
+import com.anod.appwatcher.compose.rememberViwModeStoreOwner
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Price
 import com.anod.appwatcher.database.entities.Tag
@@ -42,7 +43,11 @@ import org.koin.java.KoinJavaComponent.getKoin
 
 @Composable
 fun AppsTagDialog(tag: Tag, onDismissRequest: () -> Unit) {
-    val viewModel: AppsTagViewModel = viewModel(factory = AppsTagViewModel.Factory(tag))
+    val storeOwner = rememberViwModeStoreOwner()
+    val viewModel: AppsTagViewModel = viewModel(
+        viewModelStoreOwner = storeOwner,
+        factory = AppsTagViewModel.Factory(tag)
+    )
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
 
     Dialog(onDismissRequest = onDismissRequest) {

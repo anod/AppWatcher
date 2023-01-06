@@ -39,6 +39,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
+import com.anod.appwatcher.compose.rememberViwModeStoreOwner
 import com.anod.appwatcher.database.entities.Tag
 import info.anodsplace.compose.BottomSheet
 import info.anodsplace.compose.ButtonsPanel
@@ -46,7 +47,12 @@ import info.anodsplace.compose.ColorDialogContent
 
 @Composable
 fun EditTagDialog(tag: Tag, onDismissRequest: (tagId: Int) -> Unit) {
-    val viewModel: EditTagViewModel = viewModel(key = "tag-${tag.id}", factory = EditTagViewModel.Factory(tag))
+    val storeOwner = rememberViwModeStoreOwner()
+    val viewModel: EditTagViewModel = viewModel(
+        key = "tag-${tag.id}",
+        viewModelStoreOwner = storeOwner,
+        factory = EditTagViewModel.Factory(tag)
+    )
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
 
     Dialog(

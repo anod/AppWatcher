@@ -82,6 +82,7 @@ import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.CommonActivityAction
 import com.anod.appwatcher.compose.DeleteNotice
 import com.anod.appwatcher.compose.DropdownMenuAction
+import com.anod.appwatcher.compose.rememberViwModeStoreOwner
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.database.entities.Price
@@ -101,12 +102,17 @@ private val iconSizeBig = 64.dp
 private val iconSizeSmall = 32.dp
 
 @Composable
-fun DetailsScreen(appId: String, rowId: Int, detailsUrl: String, onDismissRequest: () -> Unit, onCommonActivityAction: (action: CommonActivityAction) -> Unit) {
-    val viewModel: DetailsViewModel = viewModel(factory = DetailsViewModel.Factory(
-        argAppId = appId,
-        argRowId = rowId,
-        argDetailsUrl = detailsUrl
-    ))
+fun DetailsPanel(appId: String, rowId: Int, detailsUrl: String, onDismissRequest: () -> Unit, onCommonActivityAction: (action: CommonActivityAction) -> Unit) {
+    val storeOwner = rememberViwModeStoreOwner()
+    val viewModel: DetailsViewModel = viewModel(
+        key = "details-$appId-$rowId",
+        viewModelStoreOwner = storeOwner,
+        factory = DetailsViewModel.Factory(
+            argAppId = appId,
+            argRowId = rowId,
+            argDetailsUrl = detailsUrl
+        )
+    )
 
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
     val customPrimaryColor by remember(screenState.customPrimaryColor) {
@@ -129,13 +135,19 @@ fun DetailsScreen(appId: String, rowId: Int, detailsUrl: String, onDismissReques
     }
 }
 
+
 @Composable
 fun DetailsDialog(appId: String, rowId: Int, detailsUrl: String, onDismissRequest: () -> Unit, onCommonActivityAction: (action: CommonActivityAction) -> Unit) {
-    val viewModel: DetailsViewModel = viewModel(key = "details-$appId-$rowId", factory = DetailsViewModel.Factory(
-        argAppId = appId,
-        argRowId = rowId,
-        argDetailsUrl = detailsUrl
-    ))
+    val storeOwner = rememberViwModeStoreOwner()
+    val viewModel: DetailsViewModel = viewModel(
+        key = "details-$appId-$rowId",
+        viewModelStoreOwner = storeOwner,
+        factory = DetailsViewModel.Factory(
+            argAppId = appId,
+            argRowId = rowId,
+            argDetailsUrl = detailsUrl
+        )
+    )
 
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
     val customPrimaryColor by remember(screenState.customPrimaryColor) {
@@ -352,7 +364,7 @@ fun VersionDetails(screenState: DetailsScreenState, installedApps: InstalledApps
 
 @Composable
 private fun DetailsChangelog(screenState: DetailsScreenState) {
-    AppLog.d("Details collecting changelogState $screenState.changelogState")
+    AppLog.d("Details collecting changelogState ${screenState.changelogState}")
     LazyColumn {
         items(screenState.changelogs.size) { i ->
             val change = screenState.changelogs[i]
