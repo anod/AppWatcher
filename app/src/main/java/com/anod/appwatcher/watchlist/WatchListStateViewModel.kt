@@ -48,6 +48,7 @@ data class WatchListSharedState(
         val filterId: Int,
         val titleFilter: String = "",
         val syncProgress: SyncProgress? = null,
+        val refreshRequest: Int = 0,
         val wideLayout: HingeDeviceLayout = HingeDeviceLayout(isWideLayout = false, hinge = Rect()),
         val selectedApp: App? = null,
         val showAppTagDialog: Boolean = false,
@@ -278,7 +279,10 @@ class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wid
             authToken.refreshToken(account)
         }
 
-        viewState = viewState.copy(syncProgress = SyncProgress(true, 0))
+        viewState = viewState.copy(
+            syncProgress = SyncProgress(true, 0),
+            refreshRequest = viewState.refreshRequest + 1
+        )
         SyncScheduler(application).execute().first()
     }
 }

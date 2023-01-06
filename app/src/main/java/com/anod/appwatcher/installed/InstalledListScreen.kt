@@ -88,13 +88,14 @@ fun InstalledListScreen(
             AppLog.d("Recomposition [${items.hashCode()}] $refreshKey")
 
             WatchListPage(
-                    items = items,
-                    isRefreshing = items.loadState.refresh is LoadState.Loading && (screenState.refreshRequest > 0 || items.itemCount < 1),
-                    enablePullToRefresh = viewModel.prefs.enablePullToRefresh,
-                    selection = screenState.selection,
-                    selectionMode = screenState.selectionMode,
-                    installedApps = viewModel.installedApps,
-                    onEvent = { event -> onEvent(InstalledListSharedEvent.ListEvent(event)) }
+                items = items,
+                isRefreshing = items.loadState.refresh is LoadState.Loading && (screenState.refreshRequest > 0 || items.itemCount < 1),
+                refreshRequest = screenState.refreshRequest,
+                enablePullToRefresh = viewModel.prefs.enablePullToRefresh,
+                selection = screenState.selection,
+                selectionMode = screenState.selectionMode,
+                installedApps = viewModel.installedApps,
+                onEvent = { event -> onEvent(InstalledListSharedEvent.ListEvent(event)) }
             )
         }
     }

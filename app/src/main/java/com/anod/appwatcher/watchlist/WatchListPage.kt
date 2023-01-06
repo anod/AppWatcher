@@ -45,6 +45,7 @@ import coil.ImageLoader
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppIconImage
 import com.anod.appwatcher.compose.AppTheme
+import com.anod.appwatcher.compose.WatchedIcon
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.database.entities.Price
@@ -77,6 +78,7 @@ enum class AppItemSelection {
 @Composable
 fun WatchListPage(
     items: LazyPagingItems<SectionItem>,
+    refreshRequest: Int,
     isRefreshing: Boolean,
     enablePullToRefresh: Boolean,
     installedApps: InstalledApps,
@@ -105,6 +107,7 @@ fun WatchListPage(
                     if (item != null) { // TODO: Preload?
                         WatchListSectionItem(
                             modifier = Modifier.animateItemPlacement(),
+                            refreshRequest = refreshRequest,
                             item = item,
                             index = index,
                             onEvent = onEvent,
@@ -135,6 +138,7 @@ fun WatchListSectionItem(
     onEvent: (WatchListEvent) -> Unit,
     installedApps: InstalledApps,
     modifier: Modifier = Modifier,
+    refreshRequest: Int = 0,
     selection: SelectionState = SelectionState(),
     selectionMode: Boolean = false,
     appIconLoader: AppIconLoader = getKoin().get(),
@@ -175,7 +179,7 @@ fun WatchListSectionItem(
             appIconLoader = appIconLoader
         )
 
-        is SectionItem.Recent -> RecentItem(onEvent = onEvent)
+        is SectionItem.Recent -> RecentItem(onEvent = onEvent, refreshRequest = refreshRequest)
         is SectionItem.Empty -> EmptyItem(onEvent = onEvent)
     }
 }
@@ -407,13 +411,14 @@ private fun Changelog(isLocalApp: Boolean, changesHtml: String, noNewDetails: Bo
 @Composable
 private fun RecentItem(
     onEvent: (WatchListEvent) -> Unit,
+    refreshRequest: Int = 0,
     packageChangedReceiver: PackageChangedReceiver = getKoin().get(),
     recentlyInstalledPackagesLoader: RecentlyInstalledPackagesLoader = getKoin().get(),
     appIconLoader: AppIconLoader = getKoin().get(),
 ) {
     var loading by remember { mutableStateOf(true) }
     var recentApps by remember { mutableStateOf(listOf<App>()) }
-    LaunchedEffect(key1 = true) {
+    LaunchedEffect(key1 = refreshRequest) {
         packageChangedReceiver.observer
             .onStart { emit("") }
             .map { recentlyInstalledPackagesLoader.load() }
@@ -503,12 +508,13 @@ private fun RecentItemAppCard(app: App?, onClick: (() -> Unit), appIconLoader: A
             )
         }
         Text(
-            text = app?.title + "\n",
+            text = app?.title ?: "",
             maxLines = 2,
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 8.dp, end = 8.dp, top = 2.dp)
+                .defaultMinSize(minHeight = 40.dp)
                 .placeholder(
                     visible = app == null,
                     color = placeholderColor,
@@ -517,16 +523,14 @@ private fun RecentItemAppCard(app: App?, onClick: (() -> Unit), appIconLoader: A
             ,
             textAlign = TextAlign.Center,
             fontSize = 14.sp,
-            lineHeight = 14.sp,
             overflow = TextOverflow.Ellipsis
         )
         if (app != null && app.rowId > 0) {
-            Icon(
+            WatchedIcon(
+                unwatch = false,
                 modifier = Modifier
                     .size(20.dp)
-                    .padding(start = 8.dp, bottom = 4.dp)
-                ,
-                imageVector = Icons.Default.Visibility,
+                    .padding(start = 8.dp, bottom = 4.dp),
                 contentDescription = stringResource(id = R.string.watched)
             )
         } else {
@@ -770,9 +774,9 @@ private fun WatchListPreview() {
                         item = item,
                         index = index,
                         onEvent = {},
+                        installedApps = installedApps,
                         selection = selectionState,
                         selectionMode = true,
-                        installedApps = installedApps,
                         appIconLoader = appIconLoader
                     )
                 }
@@ -826,7 +830,41 @@ private fun WatchListPreviewRecent() {
                         price = Price("", "", 0),
                         status = 0,
                         updateTime = 0
-                    )
+                    ),
+                    App(
+                        rowId = 22,
+                        appId = "appId2",
+                        packageName = "package2",
+                        versionNumber = 11223300,
+                        versionName = "Short",
+                        title = "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+                        uploadTime = 0,
+                        uploadDate = "20 Sept, 2017 yo",
+                        appType = "app",
+                        creator = "Banana man",
+                        detailsUrl = "url",
+                        iconUrl = "",
+                        price = Price("", "", 0),
+                        status = 0,
+                        updateTime = 0
+                    ),
+                    App(
+                        rowId = -1,
+                        appId = "appId3",
+                        packageName = "package3",
+                        versionNumber = 11223344,
+                        versionName = "Short",
+                        title = "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+                        uploadTime = 0,
+                        uploadDate = "20 Sept, 2017 yo",
+                        appType = "app",
+                        creator = "Banana man",
+                        detailsUrl = "url",
+                        iconUrl = "",
+                        price = Price("", "", 0),
+                        status = 0,
+                        updateTime = 0
+                    ),
                 ),
                 onEvent = { },
                 appIconLoader = appIconLoader

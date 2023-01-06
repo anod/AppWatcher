@@ -124,10 +124,11 @@ fun StoreVersionSignIcon(modifier: Modifier = Modifier, tint: Color = LocalConte
 }
 
 @Composable
-fun WatchedIcon(isWatched: Boolean) {
+fun WatchedIcon(unwatch: Boolean, modifier: Modifier = Modifier, contentDescription: String? = null) {
     Icon(
-        imageVector = if (isWatched) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-        contentDescription = stringResource(id = if (isWatched) R.string.watched else R.string.menu_add)
+        modifier = modifier,
+        imageVector = if (unwatch) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+        contentDescription = contentDescription ?: stringResource(id = if (unwatch) R.string.watched else R.string.menu_add)
     )
 }
 
@@ -202,8 +203,8 @@ fun IconsResourcesPreview() {
                 { ShareIcon() },
                 { InstalledSignIcon() },
                 { StoreVersionSignIcon() },
-                { WatchedIcon(isWatched = true) },
-                { WatchedIcon(isWatched = false) },
+                { WatchedIcon(unwatch = true) },
+                { WatchedIcon(unwatch = false) },
                 { TagIcon() },
                 { TagIcon(outlined = true) },
                 { OpenAppIcon() },

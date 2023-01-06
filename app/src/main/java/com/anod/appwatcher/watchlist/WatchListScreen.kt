@@ -93,6 +93,7 @@ fun WatchListScreen(
             WatchListPage(
                 items = items,
                 isRefreshing = screenState.syncProgress?.isRefreshing == true,
+                refreshRequest = screenState.refreshRequest,
                 enablePullToRefresh = viewModel.prefs.enablePullToRefresh,
                 installedApps = viewModel.installedApps,
                 onEvent = { event -> onEvent(WatchListSharedStateEvent.ListEvent(event)) }

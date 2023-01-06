@@ -252,11 +252,14 @@ private fun DetailsScreenContent(
                     installedApps = installedApps
                 )
 
+                AppLog.d("Details collecting changelogState ${screenState.changelogState}")
+
                 when (screenState.changelogState) {
                     ChangelogLoadState.Initial -> {
                         Box(
                             modifier = Modifier
-                                .fillMaxSize(),
+                                .fillMaxSize()
+                                .padding(16.dp),
                             contentAlignment = Alignment.TopCenter
                         ) {
                             LinearProgressIndicator()
@@ -466,7 +469,6 @@ private fun HorizontalDivider(
 
 @Composable
 private fun DetailsChangelog(screenState: DetailsState) {
-    AppLog.d("Details collecting changelogState ${screenState.changelogState}")
     LazyColumn {
         items(screenState.changelogs.size) { i ->
             val change = screenState.changelogs[i]
@@ -649,7 +651,7 @@ private fun DetailsTopAppBar(
                 },
                 enabled = screenState.isWatched || screenState.fetchedRemoteDocument
             ) {
-                WatchedIcon(isWatched = screenState.isWatched)
+                WatchedIcon(unwatch = screenState.isWatched)
             }
 
             if (screenState.tagsMenuItems.isNotEmpty()) {
