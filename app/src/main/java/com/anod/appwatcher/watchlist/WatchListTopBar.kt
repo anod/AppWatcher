@@ -3,7 +3,6 @@ package com.anod.appwatcher.watchlist
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -15,8 +14,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntRect
 import com.anod.appwatcher.R
+import com.anod.appwatcher.compose.TagAppIconButton
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.DropdownMenuAction
+import com.anod.appwatcher.compose.EditIcon
 import com.anod.appwatcher.compose.SearchTopBar
 import kotlin.math.roundToInt
 
@@ -27,6 +28,7 @@ fun WatchListTopBar(
     containerColor: Color,
     contentColor: Color,
     filterQuery: String,
+    hideSearchOnNavigation: Boolean,
     visibleActions: @Composable () -> Unit,
     dropdownActions: @Composable ((dismiss: () -> Unit, barBounds: IntRect) -> Unit)? = null,
     navigationIcon: @Composable (() -> Unit)? = null,
@@ -42,6 +44,7 @@ fun WatchListTopBar(
         searchQuery = filterQuery,
         showSearch = showSearchView,
         initialSearchFocus = true,
+        hideSearchOnNavigation = hideSearchOnNavigation,
         containerColor = containerColor,
         contentColor = contentColor,
         onValueChange = { onEvent(WatchListSharedStateEvent.FilterByTitle(query = it)) },
@@ -81,24 +84,15 @@ fun DefaultPreview() {
                     subtitle = "What will happen when subtitle is too long",
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary,
+                    hideSearchOnNavigation = false,
                     filterQuery = "",
                     visibleActions = {
-                        IconButton(onClick = { }) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = stringResource(id = R.string.menu_tag_apps)
-                            )
-                        }
+                        TagAppIconButton(onClick = {})
                     },
                     dropdownActions = { dismiss, _ ->
                         DropdownMenuItem(
                             text = { Text(text = stringResource(id = R.string.menu_edit)) },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.Edit,
-                                    contentDescription = stringResource(id = R.string.menu_edit)
-                                )
-                            },
+                            leadingIcon = { EditIcon() },
                             onClick = {
                                 dismiss()
                             }

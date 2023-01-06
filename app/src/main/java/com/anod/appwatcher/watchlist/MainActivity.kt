@@ -30,7 +30,7 @@ import info.anodsplace.permissions.toRequestInput
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 
-abstract class WatchListActivity : BaseComposeActivity(), KoinComponent {
+abstract class MainActivity : BaseComposeActivity(), KoinComponent {
     private val mainViewModel: MainViewModel by viewModels()
     private val listViewModel: WatchListStateViewModel by viewModels(factoryProducer = {
         WatchListStateViewModel.Factory(

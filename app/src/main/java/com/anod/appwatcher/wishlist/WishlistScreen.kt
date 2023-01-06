@@ -50,7 +50,7 @@ fun WishListScreen(
                 SearchTopBar(
                     title = stringResource(id = R.string.wishlist),
                     searchQuery = screenState.nameFilter,
-                    hideSearchOnBack = false,
+                    hideSearchOnNavigation = false,
                     onNavigation = { onEvent(WishListEvent.OnBackPress) },
                     onValueChange = { onEvent(WishListEvent.OnNameFilter(it)) },
                     onSearchAction = { showSearchView = false },

@@ -6,9 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -20,6 +17,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
+import com.anod.appwatcher.compose.BackArrowIconButton
+import com.anod.appwatcher.compose.ShareIconButton
 import com.anod.appwatcher.preferences.Preferences
 import info.anodsplace.framework.app.NotificationManager
 import org.koin.java.KoinJavaComponent
@@ -36,14 +35,10 @@ fun UserLogScreen(screenState: UserLogState, onEvent: (UserLogEvent) -> Unit, pr
                         CenterAlignedTopAppBar(
                                 title = { Text(text = stringResource(id = R.string.user_log)) },
                                 navigationIcon = {
-                                    IconButton(onClick = { onEvent(UserLogEvent.OnBackNav) }) {
-                                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = stringResource(id = R.string.back))
-                                    }
+                                    BackArrowIconButton(onClick = { onEvent(UserLogEvent.OnBackNav) })
                                 },
                                 actions = {
-                                    IconButton(onClick = { onEvent(UserLogEvent.Share) }) {
-                                        Icon(imageVector = Icons.Default.Share, contentDescription = stringResource(id = R.string.share))
-                                    }
+                                    ShareIconButton(onClick = { onEvent(UserLogEvent.Share) })
                                 },
                         )
                     }
@@ -92,8 +87,8 @@ fun UserLogMessageItem(position: Int, size: Int, message: Message) {
                 color = textColor,
                 textAlign = TextAlign.End,
                 modifier = Modifier
-                        .width(36.dp)
-                        .padding(start = 4.dp, end = 4.dp)
+                    .width(36.dp)
+                    .padding(start = 4.dp, end = 4.dp)
         )
         Text(
                 text = "${message.timestamp} ${message.message}",

@@ -29,7 +29,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.ImageLoader
 import com.anod.appwatcher.R
-import com.anod.appwatcher.compose.AppIcon
+import com.anod.appwatcher.compose.AppIconImage
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.SearchTopBar
 import com.anod.appwatcher.compose.rememberViwModeStoreOwner
@@ -79,7 +79,7 @@ fun AppsTagScreen(
         ) {
             SearchTopBar(
                 title = screenState.tag.name,
-                hideSearchOnBack = false,
+                hideSearchOnNavigation = false,
                 onValueChange = { onEvent(AppsTagScreenEvent.FilterByTitle(it)) },
                 showSearch = true,
                 containerColor = MaterialTheme.colorScheme.primary,
@@ -133,7 +133,7 @@ private fun AppRow(
             )
         },
         leadingContent = {
-            AppIcon(
+            AppIconImage(
                 app = app,
                 contentDescription = app.title,
                 appIconLoader = appIconLoader

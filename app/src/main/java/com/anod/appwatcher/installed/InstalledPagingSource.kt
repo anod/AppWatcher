@@ -13,11 +13,11 @@ import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.util.dayStartAgoMillis
 
 class InstalledPagingSource(
-        override var filterQuery: String,
         private val changelogAdapter: ChangelogAdapter,
         private val packageManager: PackageManager,
         private val database: AppsDatabase,
 ) : FilterablePagingSource() {
+    override var filterQuery: String = ""
     var sortId: Int = 0
     var selectionMode: Boolean = false
 

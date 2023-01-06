@@ -98,8 +98,6 @@ class InstalledListSharedViewModel(state: SavedStateHandle) : BaseFlowViewModel<
     private fun handleListEvent(listEvent: WatchListEvent) {
         when(listEvent) {
             is WatchListEvent.EmptyButton -> {}
-            is WatchListEvent.FilterByTitle -> {
-            }
             is WatchListEvent.AppClick -> {
                 if (viewState.selectionMode) {
                     if (listEvent.app.rowId == -1) {

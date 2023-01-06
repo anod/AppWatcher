@@ -1,17 +1,8 @@
 package com.anod.appwatcher.compose
 
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowRight
-import androidx.compose.material.icons.filled.FlashOn
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.RadioButtonChecked
-import androidx.compose.material.icons.filled.RadioButtonUnchecked
-import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,12 +22,7 @@ import com.anod.appwatcher.R
 fun DropdownMenuAction(content: @Composable (dismiss: () -> Unit) -> Unit) {
     var topBarMoreMenu by remember { mutableStateOf(false) }
 
-    IconButton(onClick = { topBarMoreMenu = true }) {
-        Icon(
-            imageVector = Icons.Default.MoreVert,
-            contentDescription = stringResource(id = R.string.more)
-        )
-    }
+    MoreIconButton(onClick = { topBarMoreMenu = true })
 
     DropdownMenu(
         expanded = topBarMoreMenu,
@@ -52,10 +38,8 @@ fun SortMenuItem(selectedSortId: Int, onChangeSort: (Int) -> Unit, barBounds: In
     var menuItemWidth by remember { mutableStateOf(0) }
     DropdownMenuItem(
         text = { Text(text = stringResource(id = R.string.sort)) },
-        leadingIcon = { Icon(imageVector = Icons.Default.Sort, contentDescription = stringResource(id = R.string.sort)) },
-        trailingIcon = {
-            Icon(imageVector = Icons.Default.ArrowRight, contentDescription = null)
-        },
+        leadingIcon = { SortIcon() },
+        trailingIcon = { ExpandMenuIcon() },
         modifier = Modifier.onGloballyPositioned {
             if (it.isAttached) {
                 menuItemWidth = it.size.width
@@ -72,8 +56,7 @@ fun SortMenuItem(selectedSortId: Int, onChangeSort: (Int) -> Unit, barBounds: In
 @Composable
 fun SortMenuAction(selectedSortId: Int, onChangeSort: (Int) -> Unit) {
     var topBarSortMenu by remember { mutableStateOf(false) }
-    IconButton(onClick = { topBarSortMenu = true }) {
-        Icon(imageVector = Icons.Default.Sort, contentDescription = stringResource(id = R.string.sort))
+    SortIconButton(onClick = { topBarSortMenu = true }) {
         SortDropdownMenu(selectedSortId, onChangeSort, topBarSortMenu, { topBarSortMenu = false })
     }
 }
@@ -91,10 +74,7 @@ private fun SortDropdownMenu(selectedSortId: Int, onChangeSort: (Int) -> Unit, e
             DropdownMenuItem(
                 text = { Text(text = sortTitle, modifier = Modifier.padding(horizontal = 8.dp)) },
                 leadingIcon = {
-                    Icon(
-                        imageVector = if (selectedSortId == index) Icons.Default.RadioButtonChecked else Icons.Default.RadioButtonUnchecked,
-                        contentDescription = null
-                    )
+                    RadioIcon(isChecked = (selectedSortId == index) )
                 },
                 onClick = {
                     onDismissRequest()
@@ -111,10 +91,8 @@ fun FilterMenuItem(filterId: Int, onFilterChange: (Int) -> Unit, barBounds: IntR
     var menuItemWidth by remember { mutableStateOf(0) }
     DropdownMenuItem(
         text = { Text(text = stringResource(id = R.string.filter)) },
-        leadingIcon = { Icon(imageVector = Icons.Default.FlashOn, contentDescription = stringResource(id = R.string.filter)) },
-        trailingIcon = {
-            Icon(imageVector = Icons.Default.ArrowRight, contentDescription = null)
-        },
+        leadingIcon = { FilterIcon() },
+        trailingIcon = { ExpandMenuIcon() },
         modifier = Modifier.onGloballyPositioned {
             if (it.isAttached) {
                 menuItemWidth = it.size.width
@@ -131,8 +109,7 @@ fun FilterMenuItem(filterId: Int, onFilterChange: (Int) -> Unit, barBounds: IntR
 @Composable
 fun FilterMenuAction(filterId: Int, onFilterChange: (Int) -> Unit) {
     var topBarFilterMenu by remember { mutableStateOf(false) }
-    IconButton(onClick = { topBarFilterMenu = true }) {
-        Icon(imageVector = Icons.Default.FlashOn, contentDescription = stringResource(id = R.string.filter))
+    FilterIconButton(onClick = { topBarFilterMenu = true }) {
         FilterDropdownMenu(filterId, onFilterChange, topBarFilterMenu, { topBarFilterMenu = false })
     }
 }
@@ -150,12 +127,7 @@ private fun FilterDropdownMenu(filterId: Int, onFilterChange: (Int) -> Unit, exp
         filterPagesTitles.forEachIndexed { index, title ->
             DropdownMenuItem(
                 text = { Text(text = title, modifier = Modifier.padding(horizontal = 8.dp)) },
-                leadingIcon = {
-                    Icon(
-                        imageVector = if (filterId == index) Icons.Default.RadioButtonChecked else Icons.Default.RadioButtonUnchecked,
-                        contentDescription = null
-                    )
-                },
+                leadingIcon = { RadioIcon(isChecked = (filterId == index)) },
                 onClick = {
                     onDismissRequest()
                     onFilterChange(index)

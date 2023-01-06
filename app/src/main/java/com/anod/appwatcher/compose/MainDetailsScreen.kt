@@ -22,7 +22,7 @@ fun MainDetailScreen(
         detail: @Composable () -> Unit,
 ) {
     Row(
-            modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ) {
         Box(modifier = Modifier
                 .weight(1f)

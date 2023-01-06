@@ -61,7 +61,7 @@ fun SearchResultsScreen(
                 SearchTopBar(
                     title = stringResource(id = R.string.search),
                     showSearch = true,
-                    hideSearchOnBack = false,
+                    hideSearchOnNavigation = false,
                     onValueChange = { onEvent(SearchViewEvent.SearchQueryChange(query = it)) },
                     onSearchAction = { onEvent(SearchViewEvent.OnSearchEnter(it)) },
                     initialSearchFocus = !screenState.initiateSearch,

@@ -17,13 +17,13 @@ import info.anodsplace.framework.content.InstalledApps
 import kotlin.math.max
 
 class WatchListPagingSource(
-        override var filterQuery: String,
         private val config: Config,
         private val prefs: Preferences,
         private val packageManager: PackageManager,
         private val database: AppsDatabase,
         private val installedApps: InstalledApps,
 ) : FilterablePagingSource() {
+    override var filterQuery: String = ""
     private val itemFilter: AppListFilter = createFilter(config.filterId)
 
     data class Config(

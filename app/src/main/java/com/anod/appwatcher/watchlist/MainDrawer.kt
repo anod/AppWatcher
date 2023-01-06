@@ -15,9 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.outlined.Label
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -39,7 +36,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.anod.appwatcher.R
+import com.anod.appwatcher.compose.AddIcon
 import com.anod.appwatcher.compose.AppTheme
+import com.anod.appwatcher.compose.TagIcon
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.utils.isLightColor
 import java.util.concurrent.TimeUnit
@@ -97,7 +96,7 @@ private fun DrawerContent(mainState: MainViewState, onMainEvent: (MainViewEvent)
 
     mainState.tags.forEach { (tag, count) ->
         NavigationDrawerItem(
-            icon = { Icon(Icons.Outlined.Label, contentDescription = tag.name) },
+            icon = {  TagIcon(outlined = true, contentDescription = tag.name) },
             label = { Text(tag.name) },
             badge = { TagBadge(Color(tag.color), count) },
             selected = false,
@@ -108,10 +107,9 @@ private fun DrawerContent(mainState: MainViewState, onMainEvent: (MainViewEvent)
         )
     }
 
-    val addTagText = stringResource(id = R.string.menu_add)
     NavigationDrawerItem(
-        icon = { Icon(Icons.Default.Add, contentDescription = addTagText) },
-        label = { Text(addTagText) },
+        icon = { AddIcon() },
+        label = { Text(text = stringResource(id = R.string.menu_add)) },
         selected = false,
         onClick = {
               onMainEvent(MainViewEvent.AddNewTagDialog(show = true))

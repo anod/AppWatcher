@@ -12,9 +12,15 @@ import com.anod.appwatcher.accounts.AccountSelectionResult
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.compose.onCommonActivityAction
+import info.anodsplace.framework.app.HingeDeviceLayout
+import kotlinx.coroutines.launch
 
 open class SearchComposeActivity : BaseComposeActivity() {
-    val viewModel: SearchViewModel by viewModels(factoryProducer = { SearchViewModel.Factory(intentToState(intent)) })
+    val viewModel: SearchViewModel by viewModels(factoryProducer = {
+        SearchViewModel.Factory(
+            initialState = intentToState(intent, hingeDevice.layout.value),
+        )
+    })
 
     private lateinit var accountSelectionDialog: AccountSelectionDialog
 
@@ -22,7 +28,6 @@ open class SearchComposeActivity : BaseComposeActivity() {
         super.onCreate(savedInstanceState)
 
         accountSelectionDialog = AccountSelectionDialog(this, viewModel.prefs)
-        viewModel.handleEvent(SearchViewEvent.SetWideLayout(hingeDevice.layout.value))
 
         setContent {
             AppTheme(
@@ -40,7 +45,7 @@ open class SearchComposeActivity : BaseComposeActivity() {
             }
         }
 
-        lifecycleScope.launchWhenCreated {
+        lifecycleScope.launch {
             accountSelectionDialog.accountSelected.collect { result ->
                 when (result) {
                     AccountSelectionResult.Canceled -> viewModel.handleEvent(SearchViewEvent.AccountSelectError(errorMessage = ""))
@@ -50,14 +55,15 @@ open class SearchComposeActivity : BaseComposeActivity() {
             }
         }
 
-        lifecycleScope.launchWhenCreated {
+        lifecycleScope.launch {
             hingeDevice.layout.collect {
                 viewModel.handleEvent(SearchViewEvent.SetWideLayout(it))
             }
         }
     }
 
-    private fun intentToState(intent: Intent?) = SearchViewState(
+    private fun intentToState(intent: Intent?, wideLayout: HingeDeviceLayout) = SearchViewState(
+            wideLayout = wideLayout,
             searchQuery = intent?.getStringExtra(EXTRA_KEYWORD) ?: "",
             isPackageSearch = intent?.getBooleanExtra(EXTRA_PACKAGE, false) ?: false,
             initiateSearch = intent?.getBooleanExtra(EXTRA_EXACT, false) ?: false,

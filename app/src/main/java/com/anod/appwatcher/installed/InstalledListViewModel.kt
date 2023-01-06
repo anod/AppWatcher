@@ -34,23 +34,17 @@ class InstalledListViewModel(pagingSourceConfig: WatchListPagingSource.Config) :
             field = value
             (pagingSource as? InstalledPagingSource)?.selectionMode = value
         }
-    var filterQuery: String = ""
-        set(value) {
-            field = value
-            (pagingSource as? InstalledPagingSource)?.filterQuery = value
-        }
 
     override fun createPagingSource(): FilterablePagingSource {
-        val pagingSource =  InstalledPagingSource(
-                viewState.titleFilter,
+        return InstalledPagingSource(
                 changelogAdapter,
                 packageManager,
                 database
-        )
-        pagingSource.sortId = sortId
-        pagingSource.selectionMode = selectionMode
-        pagingSource.filterQuery = filterQuery
-        return pagingSource
+        ).also {
+            it.sortId = sortId
+            it.selectionMode = selectionMode
+            it.filterQuery = filterQuery
+        }
     }
 
     override fun createSectionHeaderFactory() = SectionHeaderFactory.Empty()

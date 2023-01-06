@@ -19,7 +19,7 @@ import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.DetailContent
-import com.anod.appwatcher.watchlist.WatchListActivity
+import com.anod.appwatcher.watchlist.MainActivity
 import com.anod.appwatcher.watchlist.WatchListPagingSource
 import kotlinx.coroutines.launch
 
@@ -90,8 +90,8 @@ class InstalledActivity : BaseComposeActivity() {
     companion object {
         private fun intent(sortId: Int, showImportAction: Boolean, context: Context): Intent {
             return Intent(context, InstalledActivity::class.java).apply {
-                putExtra(WatchListActivity.ARG_SORT, sortId)
-                putExtra(WatchListActivity.ARG_SHOW_ACTION, showImportAction)
+                putExtra(MainActivity.ARG_SORT, sortId)
+                putExtra(MainActivity.ARG_SHOW_ACTION, showImportAction)
             }
         }
 

@@ -3,9 +3,6 @@ package com.anod.appwatcher.compose
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -33,7 +30,7 @@ fun SearchTopBar(
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
     searchQuery: String = "",
     showSearch: Boolean = false,
-    hideSearchOnBack: Boolean = true,
+    hideSearchOnNavigation: Boolean = true,
     initialSearchFocus: Boolean = false,
     onValueChange: (String) -> Unit = { },
     onSearchAction: (String) -> Unit = { },
@@ -69,7 +66,7 @@ fun SearchTopBar(
         navigationIcon = {
             IconButton(onClick = {
                 if (showSearchView) {
-                    if (hideSearchOnBack) {
+                    if (hideSearchOnNavigation) {
                         onValueChange("")
                         showSearchView = false
                     } else {
@@ -82,24 +79,16 @@ fun SearchTopBar(
                 if (navigationIcon != null) {
                     navigationIcon()
                 } else {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = stringResource(id = R.string.back)
-                    )
+                    BackArrowIcon()
                 }
             }
         },
         actions = {
             if (!showSearchView) {
-                IconButton(onClick = {
+                SearchIconButton(onClick = {
                     showSearchView = true
                     requestFocus = true
-                }) {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = stringResource(id = R.string.menu_filter)
-                    )
-                }
+                })
             }
 
             actions()
@@ -131,10 +120,10 @@ fun TopBarSearchField(
 
     TextField(
             modifier = Modifier
-                    .focusRequester(focusRequester)
-                    .onFocusChanged {
-                        AppLog.d("onFocusChanged $it")
-                    },
+                .focusRequester(focusRequester)
+                .onFocusChanged {
+                    AppLog.d("onFocusChanged $it")
+                },
             value = searchValue,
             onValueChange = {
                 searchValue = it
@@ -143,9 +132,7 @@ fun TopBarSearchField(
             placeholder = {
                 Text(text = stringResource(id = R.string.search))
             },
-            leadingIcon = {
-                Icon(imageVector = Icons.Default.Search, contentDescription = stringResource(id = R.string.menu_filter))
-            },
+            leadingIcon = { SearchIcon() },
             keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Search
             ),

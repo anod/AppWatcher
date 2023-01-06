@@ -71,7 +71,7 @@ sealed interface AppIconState {
     object Default : AppIconState
 }
 
-data class DetailsScreenState(
+data class DetailsState(
         val appId: String,
         val rowId: Int,
         val detailsUrl: String,
@@ -96,15 +96,15 @@ data class DetailsScreenState(
         get() = document != null
 }
 
-sealed interface DetailsScreenAction {
-    class ActivityAction(val action: CommonActivityAction) : DetailsScreenAction
-    class ShowTagSnackbar(val appInfo: AppInfo) : DetailsScreenAction
-    object Dismiss : DetailsScreenAction
-    object Share : DetailsScreenAction
+sealed interface DetailsAction {
+    class ActivityAction(val action: CommonActivityAction) : DetailsAction
+    class ShowTagSnackbar(val appInfo: AppInfo) : DetailsAction
+    object Dismiss : DetailsAction
+    object Share : DetailsAction
 }
 
-private fun startActivityAction(intent: Intent, addMultiWindowFlags: Boolean = false) : DetailsScreenAction.ActivityAction {
-    return DetailsScreenAction.ActivityAction(
+private fun startActivityAction(intent: Intent, addMultiWindowFlags: Boolean = false) : DetailsAction.ActivityAction {
+    return DetailsAction.ActivityAction(
         action = CommonActivityAction.StartActivity(
             intent = intent,
             addMultiWindowFlags = addMultiWindowFlags
@@ -112,29 +112,29 @@ private fun startActivityAction(intent: Intent, addMultiWindowFlags: Boolean = f
     )
 }
 
-private fun showToastAction(@StringRes resId: Int): DetailsScreenAction {
-    return DetailsScreenAction.ActivityAction(
+private fun showToastAction(@StringRes resId: Int): DetailsAction {
+    return DetailsAction.ActivityAction(
         action = CommonActivityAction.ShowToast(
             resId = resId
         )
     )
 }
 
-sealed interface DetailsScreenEvent {
-    class UpdateTag(val tagId: Int, val checked: Boolean) : DetailsScreenEvent
-    object WatchAppToggle : DetailsScreenEvent
-    object LoadChangelog : DetailsScreenEvent
-    object ReloadChangelog : DetailsScreenEvent
-    object OnBackPressed : DetailsScreenEvent
-    object Share : DetailsScreenEvent
-    object Open : DetailsScreenEvent
-    object Uninstall : DetailsScreenEvent
-    object AppInfo : DetailsScreenEvent
-    object PlayStore : DetailsScreenEvent
-    object Translate : DetailsScreenEvent
+sealed interface DetailsEvent {
+    class UpdateTag(val tagId: Int, val checked: Boolean) : DetailsEvent
+    object WatchAppToggle : DetailsEvent
+    object LoadChangelog : DetailsEvent
+    object ReloadChangelog : DetailsEvent
+    object OnBackPressed : DetailsEvent
+    object Share : DetailsEvent
+    object Open : DetailsEvent
+    object Uninstall : DetailsEvent
+    object AppInfo : DetailsEvent
+    object PlayStore : DetailsEvent
+    object Translate : DetailsEvent
 }
 
-class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) : BaseFlowViewModel<DetailsScreenState, DetailsScreenEvent, DetailsScreenAction>(), KoinComponent {
+class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) : BaseFlowViewModel<DetailsState, DetailsEvent, DetailsAction>(), KoinComponent {
 
     class Factory(
             private val argAppId: String,
@@ -160,7 +160,7 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
 
     init {
         val isInstalled = installedApps.packageInfo(argAppId).isInstalled
-        viewState = DetailsScreenState(appId = argAppId, rowId = argRowId, detailsUrl = argDetailsUrl, account = prefs.account, isInstalled = isInstalled)
+        viewState = DetailsState(appId = argAppId, rowId = argRowId, detailsUrl = argDetailsUrl, account = prefs.account, isInstalled = isInstalled)
 
         observeApp()
     }
@@ -228,10 +228,10 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
         }
     }
 
-    override fun handleEvent(event: DetailsScreenEvent) {
+    override fun handleEvent(event: DetailsEvent) {
         when (event) {
-            is DetailsScreenEvent.UpdateTag -> changeTag(event.tagId, event.checked)
-            DetailsScreenEvent.WatchAppToggle -> {
+            is DetailsEvent.UpdateTag -> changeTag(event.tagId, event.checked)
+            DetailsEvent.WatchAppToggle -> {
                 if (viewState.isWatched) {
                     viewModelScope.launch {
                         database.apps().updateStatus(rowId = viewState.rowId, AppInfoMetadata.STATUS_DELETED)
@@ -240,41 +240,41 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
                     watchApp()
                 }
             }
-            DetailsScreenEvent.LoadChangelog -> {
+            DetailsEvent.LoadChangelog -> {
                 viewModelScope.launch {
                     loadChangelog()
                 }
             }
-            DetailsScreenEvent.ReloadChangelog -> {
+            DetailsEvent.ReloadChangelog -> {
                 viewState = viewState.copy(changelogState = ChangelogLoadState.Initial)
                 viewModelScope.launch {
                     loadChangelog()
                 }
             }
 
-            DetailsScreenEvent.AppInfo ->
+            DetailsEvent.AppInfo ->
                 emitAction(startActivityAction(
                     intent = Intent().forAppInfo(viewState.appId),
                     addMultiWindowFlags = true
                 ))
-            DetailsScreenEvent.OnBackPressed -> emitAction(DetailsScreenAction.Dismiss)
-            DetailsScreenEvent.Open -> {
+            DetailsEvent.OnBackPressed -> emitAction(DetailsAction.Dismiss)
+            DetailsEvent.Open -> {
                 val launchIntent = packageManager.getLaunchIntentForPackage(viewState.appId)
                 if (launchIntent != null) {
                     emitAction(startActivityAction(intent = launchIntent, addMultiWindowFlags = true))
                 }
             }
-            DetailsScreenEvent.Share -> emitAction(DetailsScreenAction.Share)
-            DetailsScreenEvent.Uninstall -> emitAction(startActivityAction(
+            DetailsEvent.Share -> emitAction(DetailsAction.Share)
+            DetailsEvent.Uninstall -> emitAction(startActivityAction(
                 intent = Intent().forUninstall(viewState.appId)
             ))
 
-            DetailsScreenEvent.PlayStore ->  emitAction(startActivityAction(
+            DetailsEvent.PlayStore ->  emitAction(startActivityAction(
                 intent = Intent().forPlayStore(viewState.appId),
                 addMultiWindowFlags = true
             ))
 
-            DetailsScreenEvent.Translate -> {
+            DetailsEvent.Translate -> {
                 val lang = Locale.getDefault().language
                 val encoded = URLEncoder.encode(viewState.changelogs.firstOrNull()?.details ?: "", "utf-8")
                 emitAction(startActivityAction((Intent(Intent.ACTION_VIEW).apply {
@@ -349,7 +349,7 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
             when (result) {
                 AppListTable.ERROR_INSERT -> emitAction(action = showToastAction(resId = R.string.error_insert_app))
                 AppListTable.ERROR_ALREADY_ADDED -> emitAction(action = showToastAction(resId = R.string.app_already_added))
-                else -> emitAction(DetailsScreenAction.ShowTagSnackbar(appInfo = AppInfo(document!!, uploadDateParserCache)))
+                else -> emitAction(DetailsAction.ShowTagSnackbar(appInfo = AppInfo(document!!, uploadDateParserCache)))
             }
         }
     }

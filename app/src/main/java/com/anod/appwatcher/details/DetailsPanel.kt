@@ -21,19 +21,6 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Label
-import androidx.compose.material.icons.filled.OpenInNew
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Shop2
-import androidx.compose.material.icons.filled.Smartphone
-import androidx.compose.material.icons.filled.Translate
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
@@ -78,10 +65,21 @@ import androidx.compose.ui.window.Dialog
 import androidx.core.app.ShareCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.anod.appwatcher.R
+import com.anod.appwatcher.compose.AppInfoIcon
 import com.anod.appwatcher.compose.AppTheme
+import com.anod.appwatcher.compose.BackArrowIconButton
 import com.anod.appwatcher.compose.CommonActivityAction
 import com.anod.appwatcher.compose.DeleteNotice
 import com.anod.appwatcher.compose.DropdownMenuAction
+import com.anod.appwatcher.compose.InstalledSignIcon
+import com.anod.appwatcher.compose.OpenAppIcon
+import com.anod.appwatcher.compose.PlayStoreAppIcon
+import com.anod.appwatcher.compose.ShareIcon
+import com.anod.appwatcher.compose.StoreVersionSignIcon
+import com.anod.appwatcher.compose.TagIcon
+import com.anod.appwatcher.compose.TranslateIcon
+import com.anod.appwatcher.compose.UninstallIcon
+import com.anod.appwatcher.compose.WatchedIcon
 import com.anod.appwatcher.compose.rememberViwModeStoreOwner
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppChange
@@ -187,16 +185,16 @@ private fun createAppChooser(appInfo: App, recentChange: AppChange, context: Con
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 private fun DetailsScreenContent(
-    screenState: DetailsScreenState,
-    onEvent: (DetailsScreenEvent) -> Unit,
+    screenState: DetailsState,
+    onEvent: (DetailsEvent) -> Unit,
     installedApps: InstalledApps,
     modifier: Modifier,
-    viewActions: Flow<DetailsScreenAction>,
+    viewActions: Flow<DetailsAction>,
     onDismissRequest: () -> Unit,
     onCommonActivityAction: (CommonActivityAction) -> Unit
 ) {
     LaunchedEffect(key1 = true) {
-        onEvent(DetailsScreenEvent.LoadChangelog)
+        onEvent(DetailsEvent.LoadChangelog)
     }
 
     val titleVisibility by remember { mutableStateOf(0.0f) }
@@ -264,7 +262,7 @@ private fun DetailsScreenContent(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(text = stringResource(id = R.string.problem_occurred))
-                            Button(onClick = { onEvent(DetailsScreenEvent.ReloadChangelog) }) {
+                            Button(onClick = { onEvent(DetailsEvent.ReloadChangelog) }) {
                                 Text(text = stringResource(id = R.string.retry))
                             }
                         }
@@ -273,10 +271,8 @@ private fun DetailsScreenContent(
             }
 
             SmallFloatingActionButton(
-                onClick = { onEvent(DetailsScreenEvent.PlayStore) },
-                content = {
-                    Icon(imageVector = Icons.Default.PlayArrow, contentDescription = stringResource(id = R.string.open_play_store))
-                },
+                onClick = { onEvent(DetailsEvent.PlayStore) },
+                content = { PlayStoreAppIcon() },
                 modifier = Modifier
                     .padding(top = 118.dp, end = 16.dp)
                     .align(Alignment.TopEnd)
@@ -289,10 +285,10 @@ private fun DetailsScreenContent(
     LaunchedEffect(key1 = true) {
         viewActions.collect { action ->
             when (action) {
-                DetailsScreenAction.Dismiss -> {
+                DetailsAction.Dismiss -> {
                     onDismissRequest()
                 }
-                DetailsScreenAction.Share -> {
+                DetailsAction.Share -> {
                     if (screenState.app != null) {
                         onCommonActivityAction(
                             CommonActivityAction.StartActivity(
@@ -305,8 +301,8 @@ private fun DetailsScreenContent(
                         )
                     }
                 }
-                is DetailsScreenAction.ActivityAction -> onCommonActivityAction(action.action)
-                is DetailsScreenAction.ShowTagSnackbar -> {
+                is DetailsAction.ActivityAction -> onCommonActivityAction(action.action)
+                is DetailsAction.ShowTagSnackbar -> {
                     val result = snackBarHostState.showSnackbar(TagSnackbar.Visuals(action.appInfo, context))
                     if (result == SnackbarResult.ActionPerformed) {
                         showTagList = action.appInfo
@@ -328,7 +324,7 @@ private fun DetailsScreenContent(
 }
 
 @Composable
-fun VersionDetails(screenState: DetailsScreenState, installedApps: InstalledApps) {
+fun VersionDetails(screenState: DetailsState, installedApps: InstalledApps) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -336,13 +332,9 @@ fun VersionDetails(screenState: DetailsScreenState, installedApps: InstalledApps
         verticalAlignment = Alignment.Top
     ) {
         if (screenState.isInstalled || screenState.isLocalApp) {
-            Icon(
-                imageVector = Icons.Default.Smartphone,
-                contentDescription = stringResource(id = R.string.installed),
-                modifier = Modifier
-                    .size(16.dp)
-                    .padding(end = 4.dp)
-            )
+            InstalledSignIcon(modifier = Modifier
+                .size(16.dp)
+                .padding(end = 4.dp))
         }
         if (screenState.app != null) {
             val appItemState = rememberAppItemState(
@@ -363,7 +355,7 @@ fun VersionDetails(screenState: DetailsScreenState, installedApps: InstalledApps
 }
 
 @Composable
-private fun DetailsChangelog(screenState: DetailsScreenState) {
+private fun DetailsChangelog(screenState: DetailsState) {
     AppLog.d("Details collecting changelogState ${screenState.changelogState}")
     LazyColumn {
         items(screenState.changelogs.size) { i ->
@@ -373,9 +365,7 @@ private fun DetailsChangelog(screenState: DetailsScreenState) {
                     modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
                 ) {
                     Row(modifier = Modifier.fillMaxWidth()) {
-                        Icon(
-                            imageVector = Icons.Default.Shop2,
-                            contentDescription = null,
+                        StoreVersionSignIcon(
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier
                                 .size(16.dp)
@@ -420,7 +410,7 @@ private fun DetailsChangelog(screenState: DetailsScreenState) {
 
 @Composable
 private fun DetailsHeader(
-    screenState: DetailsScreenState,
+    screenState: DetailsState,
     containerColor: Color = MaterialTheme.colorScheme.primary,
     contentColor: Color = MaterialTheme.colorScheme.onPrimary,
 ) {
@@ -507,8 +497,8 @@ private fun DetailsIconApp(bitmap: Bitmap, modifier: Modifier) {
 @Composable
 private fun DetailsTopAppBar(
     titleVisibility: Float,
-    screenState: DetailsScreenState,
-    onEvent: (DetailsScreenEvent) -> Unit,
+    screenState: DetailsState,
+    onEvent: (DetailsEvent) -> Unit,
     containerColor: Color = MaterialTheme.colorScheme.primary,
     contentColor: Color = MaterialTheme.colorScheme.onPrimary,
 ) {
@@ -537,35 +527,25 @@ private fun DetailsTopAppBar(
             actionIconContentColor = contentColor,
         ),
         navigationIcon = {
-            IconButton(onClick = {
-                onEvent(DetailsScreenEvent.OnBackPressed)
-            }) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = stringResource(id = R.string.back)
-                )
-            }
+            BackArrowIconButton(onClick = { onEvent(DetailsEvent.OnBackPressed) })
         },
         actions = {
             IconButton(
                 onClick = {
                     if (screenState.fetchedRemoteDocument) {
-                        onEvent(DetailsScreenEvent.WatchAppToggle)
+                        onEvent(DetailsEvent.WatchAppToggle)
                     } else {
                         if (screenState.isWatched) {
                             showDeleteNotice = true
                         } else {
-                            // SHould show error
-                            onEvent(DetailsScreenEvent.WatchAppToggle)
+                            // Should show error
+                            onEvent(DetailsEvent.WatchAppToggle)
                         }
                     }
                 },
-                enabled = screenState.changelogState is ChangelogLoadState.Complete
+                enabled = screenState.isWatched || screenState.fetchedRemoteDocument
             ) {
-                Icon(
-                    imageVector = if (screenState.isWatched) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                    contentDescription = stringResource(id = if (screenState.isWatched) R.string.watched else R.string.menu_add)
-                )
+                WatchedIcon(isWatched = screenState.isWatched)
             }
 
             if (screenState.tagsMenuItems.isNotEmpty()) {
@@ -574,10 +554,7 @@ private fun DetailsTopAppBar(
                     onClick = { showTagsMenu = true },
                     enabled = screenState.isWatched
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Label,
-                        contentDescription = stringResource(id = R.string.tag)
-                    )
+                    TagIcon()
                 }
 
                 DropdownMenu(expanded = showTagsMenu, onDismissRequest = { showTagsMenu = false }) {
@@ -585,19 +562,15 @@ private fun DetailsTopAppBar(
                         DropdownMenuItem(
                             text = { Text(text = tag.name) },
                             leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.Label,
-                                    contentDescription = tag.name,
-                                    tint = Color(tag.color)
-                                )
+                                TagIcon(tint = Color(tag.color), contentDescription = tag.name)
                             },
                             trailingIcon = {
                                 Checkbox(
                                     checked = checked,
-                                    onCheckedChange = { onEvent(DetailsScreenEvent.UpdateTag(tag.id, checked)) }
+                                    onCheckedChange = { onEvent(DetailsEvent.UpdateTag(tag.id, checked)) }
                                 )
                             },
-                            onClick = { onEvent(DetailsScreenEvent.UpdateTag(tag.id, checked)) }
+                            onClick = { onEvent(DetailsEvent.UpdateTag(tag.id, checked)) }
                         )
                     }
                 }
@@ -606,11 +579,9 @@ private fun DetailsTopAppBar(
             DropdownMenuAction { dismiss ->
                 DropdownMenuItem(
                     text = { Text(text = stringResource(id = R.string.share), modifier = Modifier.padding(horizontal = 8.dp)) },
-                    leadingIcon = {
-                        Icon(imageVector = Icons.Default.Share, contentDescription = stringResource(id = R.string.share))
-                    },
+                    leadingIcon = { ShareIcon() },
                     onClick = {
-                        onEvent(DetailsScreenEvent.Share)
+                        onEvent(DetailsEvent.Share)
                         dismiss()
                     }
                 )
@@ -618,11 +589,9 @@ private fun DetailsTopAppBar(
                 DropdownMenuItem(
                     text = { Text(text = stringResource(id = R.string.translate), modifier = Modifier.padding(horizontal = 8.dp)) },
                     enabled = screenState.changelogs.firstOrNull()?.details?.isNotEmpty() == true,
-                    leadingIcon = {
-                        Icon(imageVector = Icons.Default.Translate, contentDescription = stringResource(id = R.string.translate))
-                    },
+                    leadingIcon = { TranslateIcon() },
                     onClick = {
-                        onEvent(DetailsScreenEvent.Translate)
+                        onEvent(DetailsEvent.Translate)
                         dismiss()
                     }
                 )
@@ -630,31 +599,25 @@ private fun DetailsTopAppBar(
                 if (screenState.isInstalled) {
                     DropdownMenuItem(
                         text = { Text(text = stringResource(id = R.string.open), modifier = Modifier.padding(horizontal = 8.dp)) },
-                        leadingIcon = {
-                            Icon(imageVector = Icons.Default.OpenInNew, contentDescription = stringResource(id = R.string.open))
-                        },
+                        leadingIcon = { OpenAppIcon() },
                         onClick = {
-                            onEvent(DetailsScreenEvent.Open)
+                            onEvent(DetailsEvent.Open)
                             dismiss()
                         }
                     )
                     DropdownMenuItem(
                         text = { Text(text = stringResource(id = R.string.uninstall), modifier = Modifier.padding(horizontal = 8.dp)) },
-                        leadingIcon = {
-                            Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(id = R.string.uninstall))
-                        },
+                        leadingIcon = { UninstallIcon() },
                         onClick = {
-                            onEvent(DetailsScreenEvent.Uninstall)
+                            onEvent(DetailsEvent.Uninstall)
                             dismiss()
                         }
                     )
                     DropdownMenuItem(
                         text = { Text(text = stringResource(id = R.string.app_info), modifier = Modifier.padding(horizontal = 8.dp)) },
-                        leadingIcon = {
-                            Icon(imageVector = Icons.Default.Info, contentDescription = stringResource(id = R.string.app_info))
-                        },
+                        leadingIcon = { AppInfoIcon() },
                         onClick = {
-                            onEvent(DetailsScreenEvent.AppInfo)
+                            onEvent(DetailsEvent.AppInfo)
                             dismiss()
                         }
                     )
@@ -665,7 +628,10 @@ private fun DetailsTopAppBar(
 
     if (showDeleteNotice) {
         DeleteNotice(
-            onDelete = { onEvent(DetailsScreenEvent.WatchAppToggle) },
+            onDelete = {
+                onEvent(DetailsEvent.WatchAppToggle)
+                showDeleteNotice = false
+            },
             onDismissRequest = { showDeleteNotice = false }
         )
     }
@@ -674,7 +640,7 @@ private fun DetailsTopAppBar(
 @Preview
 @Composable
 private fun DetailsScreenPreview() {
-    val screenState = DetailsScreenState(
+    val screenState = DetailsState(
         appId = "test.id",
         title = "Test title long app name",
         rowId = 22,

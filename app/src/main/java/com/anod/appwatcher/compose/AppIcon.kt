@@ -14,11 +14,11 @@ import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.utils.AppIconLoader
 
 @Composable
-fun AppIcon(
+fun AppIconImage(
     app: App,
     contentDescription: String,
-    size: Dp = 40.dp,
     modifier: Modifier = Modifier,
+    size: Dp = 40.dp,
     appIconLoader: AppIconLoader
 ) {
     val imageRequest = remember {

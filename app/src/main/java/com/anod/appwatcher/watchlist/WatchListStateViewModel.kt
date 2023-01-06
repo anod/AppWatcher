@@ -189,7 +189,7 @@ class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wid
             }
             is WatchListSharedStateEvent.EditTag -> viewState = viewState.copy(showEditTagDialog = event.show)
             is WatchListSharedStateEvent.OnSearch -> emitAction(startActivityAction(
-                intent = MarketSearchActivity.intent(application, event.query, true)
+                intent = MarketSearchActivity.intent(application, event.query, true, initiateSearch = true)
             ))
             is WatchListSharedStateEvent.SelectApp -> {
                 viewState = viewState.copy(selectedApp = event.app)
@@ -220,7 +220,11 @@ class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wid
             is WatchListEvent.EmptyButton -> {
                 when (listEvent.idx) {
                     1 -> emitAction(startActivityAction(
-                        intent = MarketSearchActivity.intent(application, "", true)
+                        intent = MarketSearchActivity.intent(
+                            application,
+                            keyword = "",
+                            focus = true,
+                        )
                     ))
                     2 -> emitAction(startActivityAction(
                         intent = InstalledActivity.intent(importMode = true, application)
@@ -231,7 +235,6 @@ class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wid
                 }
             }
             WatchListEvent.Refresh -> refresh()
-            is WatchListEvent.FilterByTitle -> {}
             is WatchListEvent.AppLongClick -> {}
             is WatchListEvent.SectionHeaderClick -> {
                 when (listEvent.type) {

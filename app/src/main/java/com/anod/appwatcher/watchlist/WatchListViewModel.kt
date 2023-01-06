@@ -13,6 +13,7 @@ import androidx.paging.cachedIn
 import androidx.paging.insertSeparators
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
+import com.anod.appwatcher.installed.InstalledPagingSource
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.prefs
 import info.anodsplace.framework.content.InstalledApps
@@ -28,7 +29,6 @@ import org.koin.core.component.inject
 
 data class WatchListState(
         val pagingSourceConfig: WatchListPagingSource.Config,
-        val titleFilter: String,
 )
 
 sealed interface WatchListAction {
@@ -40,7 +40,6 @@ sealed interface WatchListAction {
 
 sealed interface WatchListEvent {
     object Refresh : WatchListEvent
-    class FilterByTitle(val titleFilter: String) : WatchListEvent
     class AppClick(val app: App, val index: Int) : WatchListEvent
     class EmptyButton(val idx: Int) : WatchListEvent
     class AppLongClick(val app: App, val index: Int) : WatchListEvent
@@ -66,9 +65,14 @@ abstract class WatchListViewModel(pagingSourceConfig: WatchListPagingSource.Conf
     init {
         viewState = WatchListState(
                 pagingSourceConfig = pagingSourceConfig,
-                titleFilter = "",
         )
     }
+
+    var filterQuery: String = ""
+        set(value) {
+            field = value
+            (pagingSource as? InstalledPagingSource)?.filterQuery = value
+        }
 
     protected var pagingSource: FilterablePagingSource? = null
     private var _pagingData: Flow<PagingData<SectionItem>>? = null
@@ -87,10 +91,6 @@ abstract class WatchListViewModel(pagingSourceConfig: WatchListPagingSource.Conf
 
     override fun handleEvent(event: WatchListEvent) {
         when (event) {
-            is WatchListEvent.FilterByTitle -> { // TODO: Not in use in compose implementation
-                viewState = viewState.copy(titleFilter = event.titleFilter)
-                pagingSource?.filterQuery = event.titleFilter
-            }
             is WatchListEvent.AppClick -> emitAction(WatchListAction.ItemClick(event.app, event.index))
             is WatchListEvent.EmptyButton -> emitAction(WatchListAction.EmptyButton(event.idx))
             is WatchListEvent.AppLongClick -> emitAction(WatchListAction.ItemLongClick(event.app, event.index))
@@ -133,14 +133,17 @@ class AppsWatchListViewModel(pagingSourceConfig: WatchListPagingSource.Config) :
         }
     }
 
-    override fun createPagingSource() = WatchListPagingSource(
-            filterQuery = viewState.titleFilter,
+    override fun createPagingSource(): WatchListPagingSource {
+       return WatchListPagingSource(
             prefs = prefs,
             config = viewState.pagingSourceConfig,
             packageManager = packageManager,
             database = database,
             installedApps = installedApps
-    )
+        ).also {
+            it.filterQuery = filterQuery
+       }
+    }
 
     override fun createSectionHeaderFactory() = DefaultSectionHeaderFactory(viewState.pagingSourceConfig.showRecentlyUpdated)
 }

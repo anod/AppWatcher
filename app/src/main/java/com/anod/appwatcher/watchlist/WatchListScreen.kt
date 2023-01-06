@@ -58,7 +58,12 @@ fun WatchListScreen(
     Scaffold(
         topBar = { topBarContent(subtitle, filterIds[pagerState.currentPage]) }
     ) { paddingValues ->
-        HorizontalPager(count = filterPagesTitles.size, state = pagerState, modifier = Modifier.padding(paddingValues)) { pageIndex ->
+        HorizontalPager(
+            count = filterPagesTitles.size,
+            state = pagerState,
+            modifier = Modifier.padding(paddingValues),
+            key = { filterIds[it] }
+        ) { pageIndex ->
             val filterId = filterIds[pageIndex]
             val pageConfig = pagingSourceConfig.copy(
                 filterId = filterId,
@@ -66,6 +71,7 @@ fun WatchListScreen(
                 showRecentlyInstalled = if (filterId == Filters.ALL) pagingSourceConfig.showRecentlyInstalled else false,
             )
             val viewModel: WatchListViewModel = viewModel(key = pageConfig.filterId.toString(), factory = AppsWatchListViewModel.Factory(pageConfig))
+            viewModel.filterQuery = screenState.titleFilter
             val items = viewModel.pagingData.collectAsLazyPagingItems()
 
             val refreshKey = remember(screenState) {
@@ -116,7 +122,7 @@ fun WatchListScreen(
 
     LaunchedEffect(screenState.filterId) {
         if (screenState.filterId != pagerState.currentPage) {
-            pagerState.animateScrollToPage(screenState.filterId)
+            pagerState.scrollToPage(screenState.filterId)
         }
     }
 }

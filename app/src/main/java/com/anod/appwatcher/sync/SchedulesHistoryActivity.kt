@@ -7,16 +7,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -27,6 +23,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
+import com.anod.appwatcher.compose.BackArrowIconButton
 import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.compose.CommonActivityAction
 import com.anod.appwatcher.compose.onCommonActivityAction
@@ -73,16 +70,9 @@ fun SchedulesHistoryScreen(schedules: List<Schedule>, dateFormat: DateFormat, on
     AppTheme {
         Surface {
             Column(modifier = Modifier.fillMaxWidth()) {
-                TopAppBar(
+                CenterAlignedTopAppBar(
                     title = { Text(text = stringResource(id = R.string.refresh_history)) },
-                    navigationIcon = {
-                        IconButton(onClick = { onActivityAction(CommonActivityAction.Finish) }) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowBack,
-                                contentDescription = stringResource(id = R.string.back)
-                            )
-                        }
-                    },
+                    navigationIcon = { BackArrowIconButton(onClick = { onActivityAction(CommonActivityAction.Finish) }) },
                 )
                 LazyColumn {
                     items(schedules.size) { index ->

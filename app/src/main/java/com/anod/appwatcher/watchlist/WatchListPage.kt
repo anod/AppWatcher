@@ -43,7 +43,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemsIndexed
 import coil.ImageLoader
 import com.anod.appwatcher.R
-import com.anod.appwatcher.compose.AppIcon
+import com.anod.appwatcher.compose.AppIconImage
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppListItem
@@ -287,7 +287,7 @@ private fun AppItem(
 
             if (selectionMode) {
                 Box {
-                    AppIcon(
+                    AppIconImage(
                         app = app,
                         contentDescription = app.title,
                         appIconLoader = appIconLoader
@@ -298,7 +298,7 @@ private fun AppItem(
                     )
                 }
             } else {
-                AppIcon(
+                AppIconImage(
                     app = app,
                     contentDescription = app.title,
                     appIconLoader = appIconLoader
@@ -492,7 +492,7 @@ private fun RecentItemAppCard(app: App?, onClick: (() -> Unit), appIconLoader: A
                     )
             )
         } else {
-            AppIcon(
+            AppIconImage(
                 app = app,
                 contentDescription = app.title,
                 size = 56.dp,
