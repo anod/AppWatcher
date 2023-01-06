@@ -4,11 +4,15 @@ import android.util.SparseArray
 import finsky.protos.AppDetails
 import finsky.protos.Common
 import finsky.protos.DocV2
+import finsky.protos.DocV2.AggregateRating
 
 data class Document(private val doc: DocV2) {
 
     val appDetails: AppDetails
         get() = this.doc.details.appDetails
+
+    val rating: AggregateRating
+        get() = this.doc.aggregateRating
 
     val title: String
         get() = this.doc.title

@@ -1,10 +1,8 @@
 package com.anod.appwatcher.details
 
 import android.accounts.Account
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.res.Resources
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import androidx.annotation.StringRes
@@ -87,6 +85,7 @@ data class DetailsState(
         val tagsMenuItems: List<TagMenuItem> = emptyList(),
         val customPrimaryColor: Int? = null,
         val document: Document? = null,
+        val remoteCallFinished: Boolean = false,
         val isInstalled: Boolean = false
 ) {
     val isWatched: Boolean
@@ -94,13 +93,36 @@ data class DetailsState(
 
     val fetchedRemoteDocument: Boolean
         get() = document != null
+
+    val versionInfo: AppVersionInfo
+        get() {
+            val appDetails = document?.appDetails
+            requireNotNull(appDetails)
+            return AppVersionInfo(
+                isBeta = when {
+                    appDetails.testingProgramInfo.subscribed -> true
+                    appDetails.testingProgramInfo.subscribedAndInstalled -> true
+                    else -> false
+                },
+                installationSize = appDetails.installationSize,
+                targetSdkVersion = appDetails.targetSdkVersion,
+                ratingLabel = document!!.rating.ratingLabel ?: ""
+            )
+        }
 }
+
+data class AppVersionInfo(
+    val isBeta: Boolean,
+    val installationSize: Long,
+    val targetSdkVersion: Int,
+    val ratingLabel: String,
+)
 
 sealed interface DetailsAction {
     class ActivityAction(val action: CommonActivityAction) : DetailsAction
     class ShowTagSnackbar(val appInfo: AppInfo) : DetailsAction
     object Dismiss : DetailsAction
-    object Share : DetailsAction
+    class Share(val app: App) : DetailsAction
 }
 
 private fun startActivityAction(intent: Intent, addMultiWindowFlags: Boolean = false) : DetailsAction.ActivityAction {
@@ -147,13 +169,11 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
         }
     }
 
-    private val context: Context by inject()
     private val database: AppsDatabase by inject()
     private val authToken: AuthTokenBlocking by inject()
     private val uploadDateParserCache: UploadDateParserCache by inject()
     private val iconLoader: AppIconLoader by inject()
     private val packageManager: PackageManager by inject()
-
     private val detailsEndpoint: DetailsEndpoint by inject { parametersOf(viewState.detailsUrl) }
 
     val installedApps: InstalledApps by lazy { InstalledApps.PackageManager(packageManager) }
@@ -188,7 +208,7 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
                         appLoadingState = if (app == null) AppLoadingState.NotFound else AppLoadingState.Loaded,
                         app = app,
                         appIconState = if (app?.iconUrl?.isNotEmpty() == true) viewState.appIconState else AppIconState.Default,
-                        title = app?.title ?: ""
+                        title = app?.title ?: "",
                     )
                     if (app?.iconUrl?.isNotEmpty() == true) {
                         loadAppIcon(app.iconUrl)
@@ -264,7 +284,9 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
                     emitAction(startActivityAction(intent = launchIntent, addMultiWindowFlags = true))
                 }
             }
-            DetailsEvent.Share -> emitAction(DetailsAction.Share)
+            DetailsEvent.Share -> if (viewState.app != null) {
+                emitAction(DetailsAction.Share(app = viewState.app!!))
+            }
             DetailsEvent.Uninstall -> emitAction(startActivityAction(
                 intent = Intent().forUninstall(viewState.appId)
             ))
@@ -322,7 +344,7 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
             }
 
             if (loadError && viewState.changelogState is ChangelogLoadState.Initial) {
-                viewState = viewState.copy(changelogState = ChangelogLoadState.RemoteError)
+                viewState = viewState.copy(changelogState = ChangelogLoadState.RemoteError, remoteCallFinished = true)
             }
         }
     }
@@ -357,22 +379,19 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
     private fun onRemoteDetailsFetched(localChanges: List<AppChange>, details: DfeDetails) {
         val appDetails = details.document?.appDetails
 
-        if (appDetails != null) {
+        viewState = if (appDetails != null) {
             val recentChange = AppChange(viewState.appId, appDetails.versionCode, appDetails.versionString, appDetails.recentChangesHtml ?: "", appDetails.uploadDate, false)
-            val isBeta = when {
-                appDetails.testingProgramInfo.subscribed -> true
-                appDetails.testingProgramInfo.subscribedAndInstalled -> true
-                else -> false
-            }
-            viewState = viewState.copy(
+            viewState.copy(
                 document = details.document,
                 changelogs = mergeChangelogs(localChanges, recentChange),
                 changelogState = ChangelogLoadState.Complete,
-                title = generateTitle(context.resources, isBeta)
+                title = viewState.app?.title ?: "",
+                remoteCallFinished = true
             )
         } else {
-            viewState = viewState.copy(
+            viewState.copy(
                 changelogState = ChangelogLoadState.Complete,
+                remoteCallFinished = true,
             )
         }
     }
@@ -395,13 +414,5 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
                 }
             }
         }
-    }
-
-    private fun generateTitle(resources: Resources, isBeta: Boolean): String {
-        var generated = viewState.app?.title ?: ""
-        if (isBeta) {
-            generated += " (" + resources.getString(R.string.beta) + ")"
-        }
-        return generated
     }
 }

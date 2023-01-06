@@ -35,7 +35,7 @@ fun rememberAppItemState(
     primaryColor: Color = MaterialTheme.colorScheme.primary
 ): AppItemState {
     val context = LocalContext.current
-    return remember {
+    return remember(app) {
         val packageInfo = installedApps.packageInfo(app.packageName)
         calcAppItemState(
             app, recentFlag, textColor, primaryColor, packageInfo, context
@@ -78,9 +78,7 @@ private fun calcAppItemState(
                     formatVersionText(packageInfo.versionName, packageInfo.versionCode, 0, context)
                 }
             }
-        }
-
-        else -> {
+        } else -> {
             if (app.status == AppInfoMetadata.STATUS_UPDATED || recentFlag) {
                 color = primaryColor
             }

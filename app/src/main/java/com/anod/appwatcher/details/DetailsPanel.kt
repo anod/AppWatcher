@@ -3,15 +3,18 @@ package com.anod.appwatcher.details
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.text.Spannable
+import android.text.format.Formatter
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.scaleIn
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,10 +22,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -50,15 +55,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -88,9 +94,10 @@ import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.tags.TagSelectionDialog
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.StoreIntent
+import com.google.accompanist.placeholder.material.placeholder
 import info.anodsplace.applog.AppLog
 import info.anodsplace.compose.AutoSizeText
-import info.anodsplace.compose.toHtmlAnnotatedString
+import info.anodsplace.compose.toAnnotatedString
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.text.Html
 import kotlinx.coroutines.flow.Flow
@@ -213,11 +220,12 @@ private fun DetailsScreenContent(
         ) {
             AnimatedVisibility(
                 visible = screenState.customPrimaryColor != null,
-                enter = scaleIn(
-                    animationSpec = tween(100, 0, FastOutSlowInEasing),
-                    initialScale = 0f,
-                    transformOrigin = TransformOrigin(0.1f, 0.8f)
-                ),
+                enter = fadeIn(),
+//                enter = scaleIn(
+//                    animationSpec = tween(100, 0, FastOutSlowInEasing),
+//                    initialScale = 0f,
+//                    transformOrigin = TransformOrigin(0.1f, 0.8f)
+//                ),
                 label = "HeaderBackground"
             ) {
                 Box(modifier = Modifier
@@ -288,18 +296,16 @@ private fun DetailsScreenContent(
                 DetailsAction.Dismiss -> {
                     onDismissRequest()
                 }
-                DetailsAction.Share -> {
-                    if (screenState.app != null) {
-                        onCommonActivityAction(
-                            CommonActivityAction.StartActivity(
-                                intent = createAppChooser(
-                                    screenState.app,
-                                    screenState.changelogs.firstOrNull() ?: AppChange.empty,
-                                    context
-                                )
+                is DetailsAction.Share -> {
+                    onCommonActivityAction(
+                        CommonActivityAction.StartActivity(
+                            intent = createAppChooser(
+                                action.app,
+                                screenState.changelogs.firstOrNull() ?: AppChange.empty,
+                                context
                             )
                         )
-                    }
+                    )
                 }
                 is DetailsAction.ActivityAction -> onCommonActivityAction(action.action)
                 is DetailsAction.ShowTagSnackbar -> {
@@ -325,33 +331,137 @@ private fun DetailsScreenContent(
 
 @Composable
 fun VersionDetails(screenState: DetailsState, installedApps: InstalledApps) {
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, end = 60.dp, top = 4.dp, bottom = 16.dp),
-        verticalAlignment = Alignment.Top
+            .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 8.dp),
     ) {
-        if (screenState.isInstalled || screenState.isLocalApp) {
-            InstalledSignIcon(modifier = Modifier
-                .size(16.dp)
-                .padding(end = 4.dp))
-        }
+
         if (screenState.app != null) {
-            val appItemState = rememberAppItemState(
-                app = screenState.app,
-                recentFlag = false,
-                installedApps = installedApps
-            )
-            Text(
-                text = appItemState.text,
-                color = appItemState.color,
-                modifier = Modifier.weight(1f),
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.bodySmall
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(28.dp)
+                    .padding(end = 48.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start
+            ) {
+                val appPrice = screenState.app.price
+                Text(
+                    text = if (appPrice.isFree) stringResource(id = R.string.free) else appPrice.text,
+                    modifier = Modifier
+                        .defaultMinSize(minWidth = 40.dp)
+                        .padding(end = 4.dp),
+                    style = MaterialTheme.typography.labelMedium,
+                    textAlign = TextAlign.Center
+                )
+
+                if (screenState.document != null) {
+                    val versionInfo by remember(screenState.document) {
+                        derivedStateOf {
+                            screenState.versionInfo
+                        }
+                    }
+                    if (versionInfo.isBeta) {
+                        VersionInfoCell(text = stringResource(id = R.string.beta))
+                    }
+                    if (versionInfo.ratingLabel.isNotEmpty()) {
+                        VersionInfoCell(
+                            text = stringResource(
+                                id = R.string.rating_stars,
+                                versionInfo.ratingLabel
+                            )
+                        )
+                    }
+                    if (versionInfo.installationSize > 0) {
+                        VersionInfoCell(
+                            text = Formatter.formatShortFileSize(
+                                LocalContext.current,
+                                versionInfo.installationSize
+                            )
+                        )
+                    }
+                    if (versionInfo.targetSdkVersion > 0) {
+                        VersionInfoCell(text = "SDK ${screenState.document.appDetails.targetSdkVersion}")
+                    }
+                } else {
+                    if (!screenState.remoteCallFinished) {
+                        VersionInfoCell(
+                            text = stringResource(id = R.string.beta),
+                            placeholder = true
+                        )
+                        VersionInfoCell(
+                            text = stringResource(id = R.string.rating_stars, "5.0"),
+                            placeholder = true
+                        )
+                        VersionInfoCell(text = "50 MB", placeholder = true)
+                        VersionInfoCell(text = "SDK 33", placeholder = true)
+                    }
+                }
+            }
+        }
+        Row(
+            verticalAlignment = Alignment.Top,
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            if (screenState.isInstalled || screenState.isLocalApp) {
+                InstalledSignIcon(modifier = Modifier
+                    .size(16.dp)
+                    .padding(end = 4.dp))
+                if (screenState.app != null) {
+                    val appItemState = rememberAppItemState(
+                        app = screenState.app,
+                        recentFlag = false,
+                        installedApps = installedApps
+                    )
+                    Text(
+                        text = appItemState.text,
+                        color = appItemState.color,
+                        modifier = Modifier.weight(1f),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            } else {
+                Spacer(modifier = Modifier.size(16.dp))
+            }
         }
     }
+}
+
+@Composable
+private fun VersionInfoCell(text: String, placeholder: Boolean = false) {
+    HorizontalDivider()
+    Text(
+        text = text,
+        modifier = Modifier
+            .defaultMinSize(minWidth = 40.dp)
+            .padding(horizontal = 4.dp)
+            .placeholder(visible = placeholder),
+        style = MaterialTheme.typography.labelMedium,
+        textAlign = TextAlign.Center
+    )
+}
+
+@Composable
+private fun HorizontalDivider(
+    modifier: Modifier = Modifier,
+    thickness: Dp = DividerDefaults.Thickness,
+    color: Color = DividerDefaults.color,
+) {
+    val targetThickness = if (thickness == Dp.Hairline) {
+        (1f / LocalDensity.current.density).dp
+    } else {
+        thickness
+    }
+    Box(
+        modifier
+            .fillMaxHeight(0.8f)
+            .width(targetThickness)
+            .background(color = color)
+    )
 }
 
 @Composable
@@ -386,16 +496,10 @@ private fun DetailsChangelog(screenState: DetailsState) {
                         )
                     }
 
-                    val text = if (LocalView.current.isInEditMode) {
-                        if (change.details.isEmpty())
-                            AnnotatedString(stringResource(id = R.string.no_recent_changes))
-                        else
-                            AnnotatedString(Html.parse(change.details).toString())
+                    val text = if (change.details.isEmpty()) {
+                        AnnotatedString(stringResource(id = R.string.no_recent_changes))
                     } else {
-                        if (change.details.isEmpty())
-                            AnnotatedString(stringResource(id = R.string.no_recent_changes))
-                        else
-                            change.details.toHtmlAnnotatedString()
+                        (Html.parse(change.details).trim() as Spannable).toAnnotatedString()
                     }
                     Text(
                         modifier = Modifier.padding(top = 8.dp),
