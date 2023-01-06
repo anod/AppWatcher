@@ -161,7 +161,7 @@ fun DetailsDialog(appId: String, rowId: Int, detailsUrl: String, onDismissReques
     AppTheme(
         customPrimaryColor = customPrimaryColor?.let { Color(it) },
         updateSystemBars = false,
-        useSurfaceAsPrimary = true
+        useSurfaceAsPrimary = screenState.appIconState != AppIconState.Default
     ) {
         Dialog(onDismissRequest = onDismissRequest) {
             DetailsScreenContent(
@@ -206,7 +206,8 @@ private fun DetailsScreenContent(
 
     val titleVisibility by remember { mutableStateOf(0.0f) }
 
-    val surfaceColor: Color = if (screenState.customPrimaryColor != null)
+    val appColorAvailable = (screenState.customPrimaryColor != null || screenState.appIconState is AppIconState.Default)
+    val surfaceColor: Color = if (appColorAvailable)
         MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
 
     val snackBarHostState = remember { SnackbarHostState() }
@@ -219,13 +220,8 @@ private fun DetailsScreenContent(
             modifier = Modifier.padding(paddingValues)
         ) {
             AnimatedVisibility(
-                visible = screenState.customPrimaryColor != null,
+                visible = appColorAvailable,
                 enter = fadeIn(),
-//                enter = scaleIn(
-//                    animationSpec = tween(100, 0, FastOutSlowInEasing),
-//                    initialScale = 0f,
-//                    transformOrigin = TransformOrigin(0.1f, 0.8f)
-//                ),
                 label = "HeaderBackground"
             ) {
                 Box(modifier = Modifier

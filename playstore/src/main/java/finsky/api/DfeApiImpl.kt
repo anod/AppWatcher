@@ -2,17 +2,23 @@ package finsky.api
 
 import android.accounts.Account
 import android.content.Context
-import android.net.Uri
-import finsky.protos.ResponseWrapper
 import finsky.protos.Details
+import finsky.protos.ResponseWrapper
 import info.anodsplace.applog.AppLog
 import info.anodsplace.playstore.DeviceInfoProvider
 import kotlinx.coroutines.suspendCancellableCoroutine
-import okhttp3.*
+import okhttp3.CacheControl
+import okhttp3.Call
+import okhttp3.Callback
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
 import java.io.IOException
+import java.net.HttpURLConnection
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -99,6 +105,11 @@ class DfeApiImpl(http: OkHttpClient, private val apiContext: DfeApiContext) : Df
                     response.body?.use { body ->
                         if (!response.isSuccessful) {
                             dfeResponse.parseNetworkError(body.byteStream())
+                            if (response.code == HttpURLConnection.HTTP_NOT_FOUND) {
+                                throw DfeServerError("Not Found")
+                            } else {
+                                throw DfeServerError("Status code ${response.code}")
+                            }
                         } else {
                             val responseWrapper = dfeResponse.parseNetworkResponse(body.byteStream())
                             continuation.resume(responseWrapper)

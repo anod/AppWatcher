@@ -12,6 +12,7 @@ class DfeResponse {
 
     fun parseNetworkError(networkResponse: InputStream) {
         val wrapperAndVerifySignature = this.parseWrapperAndVerifySignature(networkResponse, false)
+        AppLog.e("parseNetworkError $wrapperAndVerifySignature")
         if (wrapperAndVerifySignature != null) {
             this.handleServerCommands(wrapperAndVerifySignature)
         }

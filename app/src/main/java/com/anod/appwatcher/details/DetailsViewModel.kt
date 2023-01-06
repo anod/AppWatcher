@@ -343,8 +343,11 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
                 AppLog.e("loadChangelog", e)
             }
 
-            if (loadError && viewState.changelogState is ChangelogLoadState.Initial) {
-                viewState = viewState.copy(changelogState = ChangelogLoadState.RemoteError, remoteCallFinished = true)
+            if (loadError) {
+                viewState = viewState.copy(
+                    changelogState = if (viewState.changelogState is ChangelogLoadState.Initial) ChangelogLoadState.RemoteError else viewState.changelogState,
+                    remoteCallFinished = true
+                )
             }
         }
     }
