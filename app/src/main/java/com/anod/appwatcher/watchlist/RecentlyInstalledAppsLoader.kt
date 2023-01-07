@@ -8,12 +8,12 @@ import info.anodsplace.framework.content.getRecentlyInstalled
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class RecentlyInstalledPackagesLoader(private val packageManager: PackageManager, private val database: AppsDatabase) {
+class RecentlyInstalledAppsLoader(private val packageManager: PackageManager, private val database: AppsDatabase) {
 
-    suspend fun load(): List<App> {
+    suspend fun load(limit: Int): List<App> {
         val packages = withContext(Dispatchers.Default) {
             packageManager.getRecentlyInstalled()
-                    .take(WatchListViewModel.recentlyInstalledViews)
+                    .take(limit)
                     .map { it.name }
         }
         return if (packages.isNotEmpty()) {

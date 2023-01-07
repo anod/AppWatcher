@@ -51,7 +51,6 @@ import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.database.entities.Price
 import com.anod.appwatcher.details.rememberAppItemState
 import com.anod.appwatcher.utils.AppIconLoader
-import com.anod.appwatcher.utils.PackageChangedReceiver
 import com.anod.appwatcher.utils.SelectionState
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.material.fade
@@ -61,8 +60,6 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.text.Html
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
 import org.koin.java.KoinJavaComponent.getKoin
 
 private val newLineRegex = Regex("\n+")
@@ -78,16 +75,16 @@ enum class AppItemSelection {
 @Composable
 fun WatchListPage(
     items: LazyPagingItems<SectionItem>,
-    refreshRequest: Int,
     isRefreshing: Boolean,
     enablePullToRefresh: Boolean,
     installedApps: InstalledApps,
     onEvent: (WatchListEvent) -> Unit,
     selection: SelectionState = SelectionState(),
-    selectionMode: Boolean = false
+    selectionMode: Boolean = false,
+    recentlyInstalledApps: List<App>? = null,
 ) {
 
-    AppLog.d("Recomposition: WatchListPage [${items.hashCode()}, ${selection.hashCode()}, ${selectionMode}]")
+    AppLog.d("Recomposition: WatchListPage [${items.hashCode()}, ${selection.hashCode()}, ${selectionMode}, ${installedApps.hashCode()}, ${recentlyInstalledApps.hashCode()}]")
 
     val isEmpty = items.loadState.source.refresh is LoadState.NotLoading && items.itemCount < 1
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isRefreshing)
@@ -107,13 +104,13 @@ fun WatchListPage(
                     if (item != null) { // TODO: Preload?
                         WatchListSectionItem(
                             modifier = Modifier.animateItemPlacement(),
-                            refreshRequest = refreshRequest,
                             item = item,
                             index = index,
                             onEvent = onEvent,
                             selection = selection,
                             selectionMode = selectionMode,
-                            installedApps = installedApps
+                            installedApps = installedApps,
+                            recentlyInstalledApps = recentlyInstalledApps
                         )
                     } else {
                         Box(
@@ -138,10 +135,10 @@ fun WatchListSectionItem(
     onEvent: (WatchListEvent) -> Unit,
     installedApps: InstalledApps,
     modifier: Modifier = Modifier,
-    refreshRequest: Int = 0,
     selection: SelectionState = SelectionState(),
     selectionMode: Boolean = false,
     appIconLoader: AppIconLoader = getKoin().get(),
+    recentlyInstalledApps: List<App>? = null,
 ) {
     when (item) {
         is SectionItem.Header -> when (item.type) {
@@ -179,7 +176,7 @@ fun WatchListSectionItem(
             appIconLoader = appIconLoader
         )
 
-        is SectionItem.Recent -> RecentItem(onEvent = onEvent, refreshRequest = refreshRequest)
+        is SectionItem.Recent -> RecentItem(onEvent = onEvent, recentApps = recentlyInstalledApps)
         is SectionItem.Empty -> EmptyItem(onEvent = onEvent)
     }
 }
@@ -410,27 +407,13 @@ private fun Changelog(isLocalApp: Boolean, changesHtml: String, noNewDetails: Bo
 
 @Composable
 private fun RecentItem(
+    recentApps: List<App>? = null,
     onEvent: (WatchListEvent) -> Unit,
-    refreshRequest: Int = 0,
-    packageChangedReceiver: PackageChangedReceiver = getKoin().get(),
-    recentlyInstalledPackagesLoader: RecentlyInstalledPackagesLoader = getKoin().get(),
     appIconLoader: AppIconLoader = getKoin().get(),
 ) {
-    var loading by remember { mutableStateOf(true) }
-    var recentApps by remember { mutableStateOf(listOf<App>()) }
-    LaunchedEffect(key1 = refreshRequest) {
-        packageChangedReceiver.observer
-            .onStart { emit("") }
-            .map { recentlyInstalledPackagesLoader.load() }
-            .collect {
-                recentApps = it
-                loading = false
-            }
-    }
-
     RecentItemRow(
-        loading = loading,
-        recentApps = recentApps,
+        loading = recentApps == null,
+        recentApps = recentApps ?: emptyList(),
         onEvent = onEvent,
         appIconLoader = appIconLoader
     )

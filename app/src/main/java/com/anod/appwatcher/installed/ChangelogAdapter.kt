@@ -24,7 +24,7 @@ class ChangelogAdapter(
     val changelogs = mutableMapOf<String, AppChange?>()
     val updated = MutableSharedFlow<Boolean>(0, extraBufferCapacity = 1)
 
-    suspend fun load(watchingPackages: List<String>, notWatchedPackages: List<InstalledPackage>) {
+    fun load(watchingPackages: List<String>, notWatchedPackages: List<InstalledPackage>) {
         AppLog.d("w: ${watchingPackages.size}, nw: ${notWatchedPackages.size}, existing ${changelogs.keys.size}")
         try {
             job?.cancel()

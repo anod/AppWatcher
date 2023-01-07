@@ -78,7 +78,7 @@ private fun DrawerContent(mainState: MainViewState, onMainEvent: (MainViewEvent)
             onClick = {
                 onMainEvent(MainViewEvent.DrawerItemClick(item.id))
             },
-            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding).height(48.dp)
+            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )
     }
 
@@ -103,7 +103,7 @@ private fun DrawerContent(mainState: MainViewState, onMainEvent: (MainViewEvent)
             onClick = {
                 onMainEvent(MainViewEvent.NavigateToTag(tag))
             },
-            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding).height(48.dp)
+            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding).height(42.dp)
         )
     }
 
@@ -114,7 +114,7 @@ private fun DrawerContent(mainState: MainViewState, onMainEvent: (MainViewEvent)
         onClick = {
               onMainEvent(MainViewEvent.AddNewTagDialog(show = true))
         },
-        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding).height(48.dp)
     )
 }
 

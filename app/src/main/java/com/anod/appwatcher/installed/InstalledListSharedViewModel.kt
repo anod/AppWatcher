@@ -18,6 +18,7 @@ import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.WatchListEvent
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.HingeDeviceLayout
+import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.getInstalledPackagesCodes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,15 +27,16 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 data class InstalledListSharedState(
-        val sortId: Int,
-        val selectionMode: Boolean = false,
-        val titleFilter: String = "",
-        val wideLayout: HingeDeviceLayout = HingeDeviceLayout(isWideLayout = false, hinge = Rect()),
-        val selectedApp: App? = null,
-        val importStatus: ImportStatus = ImportStatus.NotStarted,
-        val selection: SelectionState = SelectionState(),
-        val packageChanged: String = "",
-        val refreshRequest: Int = 0
+    val sortId: Int,
+    val selectionMode: Boolean = false,
+    val titleFilter: String = "",
+    val wideLayout: HingeDeviceLayout = HingeDeviceLayout(isWideLayout = false, hinge = Rect()),
+    val selectedApp: App? = null,
+    val importStatus: ImportStatus = ImportStatus.NotStarted,
+    val selection: SelectionState = SelectionState(),
+    val packageChanged: String = "",
+    val refreshRequest: Int = 0,
+    val enablePullToRefresh: Boolean = false
 )
 
 sealed interface InstalledListSharedEvent {
@@ -57,10 +59,13 @@ class InstalledListSharedViewModel(state: SavedStateHandle) : BaseFlowViewModel<
     private val account: Account?
         get() = prefs.account
 
+    val installedApps = InstalledApps.MemoryCache(InstalledApps.PackageManager(packageManager))
+
     init {
         viewState = InstalledListSharedState(
             sortId = state.getInt("sort"),
-            selectionMode = state["showAction"] ?: false
+            selectionMode = state["showAction"] ?: false,
+            enablePullToRefresh = prefs.enablePullToRefresh
         )
         viewModelScope.launch {
             packageChanged.observer.collect { packageChanged ->
@@ -97,7 +102,6 @@ class InstalledListSharedViewModel(state: SavedStateHandle) : BaseFlowViewModel<
 
     private fun handleListEvent(listEvent: WatchListEvent) {
         when(listEvent) {
-            is WatchListEvent.EmptyButton -> {}
             is WatchListEvent.AppClick -> {
                 if (viewState.selectionMode) {
                     if (listEvent.app.rowId == -1) {
@@ -121,7 +125,7 @@ class InstalledListSharedViewModel(state: SavedStateHandle) : BaseFlowViewModel<
                 checkAuthToken()
                 viewState = viewState.copy(refreshRequest = viewState.refreshRequest + 1)
             }
-            is WatchListEvent.SectionHeaderClick -> { }
+            else -> {}
         }
     }
 

@@ -32,7 +32,7 @@ fun WatchListTopBar(
     visibleActions: @Composable () -> Unit,
     dropdownActions: @Composable ((dismiss: () -> Unit, barBounds: IntRect) -> Unit)? = null,
     navigationIcon: @Composable (() -> Unit)? = null,
-    onEvent: (WatchListSharedStateEvent) -> Unit
+    onEvent: (WatchListEvent) -> Unit
 ) {
 
     val showSearchView by remember { mutableStateOf(filterQuery.isNotBlank()) }
@@ -47,9 +47,9 @@ fun WatchListTopBar(
         hideSearchOnNavigation = hideSearchOnNavigation,
         containerColor = containerColor,
         contentColor = contentColor,
-        onValueChange = { onEvent(WatchListSharedStateEvent.FilterByTitle(query = it)) },
-        onSearchAction = { onEvent(WatchListSharedStateEvent.OnSearch(it)) },
-        onNavigation = { onEvent(WatchListSharedStateEvent.OnBackPressed) },
+        onValueChange = { onEvent(WatchListEvent.FilterByTitle(query = it)) },
+        onSearchAction = { onEvent(WatchListEvent.OnSearch(it)) },
+        onNavigation = { onEvent(WatchListEvent.OnBackPressed) },
         navigationIcon = navigationIcon,
         modifier = Modifier.onGloballyPositioned {
              if (it.isAttached) {

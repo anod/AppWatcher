@@ -13,7 +13,7 @@ import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.PackageChangedReceiver
 import com.anod.appwatcher.utils.RealAppIconLoader
 import com.anod.appwatcher.utils.date.UploadDateParserCache
-import com.anod.appwatcher.watchlist.RecentlyInstalledPackagesLoader
+import com.anod.appwatcher.watchlist.RecentlyInstalledAppsLoader
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.app.NotificationManager
 import info.anodsplace.framework.app.RealNotificationManager
@@ -27,6 +27,7 @@ import kotlinx.coroutines.SupervisorJob
 import okhttp3.OkHttpClient
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.bind
+import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -56,7 +57,7 @@ fun createAppModule(): Module = module {
         bind<AppIconLoader>()
     }
     singleOf(::NetworkConnectivity)
-    singleOf(::RecentlyInstalledPackagesLoader)
+    factoryOf(::RecentlyInstalledAppsLoader)
     single<LruCache<String, Any?>>(named("memoryCache")) { createLruCache() }
     single { CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate) }
     singleOf(::PackageChangedReceiver)

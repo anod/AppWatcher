@@ -2,8 +2,9 @@ package com.anod.appwatcher.compose
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
@@ -21,11 +22,13 @@ fun AppIconImage(
     size: Dp = 40.dp,
     appIconLoader: AppIconLoader
 ) {
-    val imageRequest = remember {
-        mutableStateOf(appIconLoader.request(app.iconUrl))
+    val imageRequest by remember(app.iconUrl) {
+        derivedStateOf {
+            appIconLoader.request(app.iconUrl)
+        }
     }
     AsyncImage(
-        model = imageRequest.value,
+        model = imageRequest,
         contentDescription = contentDescription,
         imageLoader = appIconLoader.coilLoader,
         modifier = modifier.size(size),

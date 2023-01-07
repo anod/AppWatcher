@@ -3,6 +3,7 @@ package com.anod.appwatcher.watchlist
 import android.app.Application
 import android.content.ComponentName
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.widget.Toast
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
@@ -21,6 +22,7 @@ import com.anod.appwatcher.installed.InstalledActivity
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.tags.AppsTagViewModel
 import com.anod.appwatcher.utils.BaseFlowViewModel
+import com.anod.appwatcher.utils.PackageChangedReceiver
 import com.anod.appwatcher.utils.SyncProgress
 import com.anod.appwatcher.utils.appScope
 import com.anod.appwatcher.utils.forMyApps
@@ -30,48 +32,59 @@ import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.utils.syncProgressFlow
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.HingeDeviceLayout
+import info.anodsplace.framework.content.InstalledApps
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 data class WatchListSharedState(
-        val tag: Tag,
-        val sortId: Int,
-        val filterId: Int,
-        val titleFilter: String = "",
-        val syncProgress: SyncProgress? = null,
-        val refreshRequest: Int = 0,
-        val wideLayout: HingeDeviceLayout = HingeDeviceLayout(isWideLayout = false, hinge = Rect()),
-        val selectedApp: App? = null,
-        val showAppTagDialog: Boolean = false,
-        val showEditTagDialog: Boolean = false,
-        val tagAppsChange: Int = 0,
-        val expandSearch: Boolean = false,
-        val dbAppsChange: Int = 0
+    val tag: Tag,
+    val sortId: Int,
+    val filterId: Int,
+    val titleFilter: String = "",
+    val syncProgress: SyncProgress? = null,
+    val wideLayout: HingeDeviceLayout = HingeDeviceLayout(isWideLayout = false, hinge = Rect()),
+    val selectedApp: App? = null,
+    val showAppTagDialog: Boolean = false,
+    val showEditTagDialog: Boolean = false,
+    val tagAppsChange: Int = 0,
+    val expandSearch: Boolean = false,
+    val dbAppsChange: Int = 0,
+    val recentlyInstalledApps: List<App>? = null,
+    val refreshRequest: Int = 0,
+    val enablePullToRefresh: Boolean = false
 )
 
-sealed interface WatchListSharedStateEvent {
-    object OnBackPressed : WatchListSharedStateEvent
-    object PlayStoreMyApps : WatchListSharedStateEvent
-    object Refresh : WatchListSharedStateEvent
-    class ChangeSort(val sortId: Int) : WatchListSharedStateEvent
-    class FilterByTitle(val query: String) : WatchListSharedStateEvent
-    class SetWideLayout(val layout: HingeDeviceLayout) : WatchListSharedStateEvent
-    class ListEvent(val event: WatchListEvent) : WatchListSharedStateEvent
-    class FilterById(val filterId: Int) : WatchListSharedStateEvent
-    class AddAppToTag(val show: Boolean) : WatchListSharedStateEvent
-    class EditTag(val show: Boolean) : WatchListSharedStateEvent
-    class OnSearch(val query: String) : WatchListSharedStateEvent
-    class SelectApp(val app: App?) : WatchListSharedStateEvent
-    class UpdateSyncProgress(val syncProgress: SyncProgress) : WatchListSharedStateEvent
+sealed interface WatchListEvent {
+    object OnBackPressed : WatchListEvent
+    object PlayStoreMyApps : WatchListEvent
+    object Refresh : WatchListEvent
+    class ChangeSort(val sortId: Int) : WatchListEvent
+    class FilterByTitle(val query: String) : WatchListEvent
+    class SetWideLayout(val layout: HingeDeviceLayout) : WatchListEvent
+    class FilterById(val filterId: Int) : WatchListEvent
+    class AddAppToTag(val show: Boolean) : WatchListEvent
+    class EditTag(val show: Boolean) : WatchListEvent
+    class OnSearch(val query: String) : WatchListEvent
+    class SelectApp(val app: App?) : WatchListEvent
+    class UpdateSyncProgress(val syncProgress: SyncProgress) : WatchListEvent
+
+    class AppClick(val app: App, val index: Int) : WatchListEvent
+    class EmptyButton(val idx: Int) : WatchListEvent
+    class AppLongClick(val app: App, val index: Int) : WatchListEvent
+    class SectionHeaderClick(val type: SectionHeader) : WatchListEvent
+
 }
 
 private fun startActivityAction(intent: Intent, addMultiWindowFlags: Boolean = false) : CommonActivityAction.StartActivity {
@@ -89,14 +102,25 @@ private fun showToastAction(resId: Int = 0, text: String = "", length: Int = Toa
     )
 }
 
-class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wideLayout: HingeDeviceLayout) : BaseFlowViewModel<WatchListSharedState, WatchListSharedStateEvent, CommonActivityAction>(), KoinComponent {
+class WatchListStateViewModel(
+    state: SavedStateHandle,
+    defaultFilterId: Int,
+    collectRecentlyInstalledApps: Boolean,
+    wideLayout: HingeDeviceLayout
+) : BaseFlowViewModel<WatchListSharedState, WatchListEvent, CommonActivityAction>(), KoinComponent {
     private val authToken: AuthTokenBlocking by inject()
     private val application: Application by inject()
     private val db: AppsDatabase by inject()
+    private val packageChangedReceiver: PackageChangedReceiver by inject()
+    private val recentlyInstalledAppsLoader: RecentlyInstalledAppsLoader by inject()
+    private val packageManager: PackageManager by inject()
+
+    val installedApps = InstalledApps.MemoryCache(InstalledApps.PackageManager(packageManager))
 
     class Factory(
         private val defaultFilterId: Int,
-        private val wideLayout: HingeDeviceLayout
+        private val wideLayout: HingeDeviceLayout,
+        private val collectRecentlyInstalledApps: Boolean
     ) : AbstractSavedStateViewModelFactory() {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(
@@ -107,7 +131,8 @@ class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wid
             return WatchListStateViewModel(
                 state = handle,
                 defaultFilterId = defaultFilterId,
-                wideLayout = wideLayout
+                wideLayout = wideLayout,
+                collectRecentlyInstalledApps = collectRecentlyInstalledApps
             ) as T
         }
     }
@@ -122,11 +147,12 @@ class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wid
             sortId = prefs.sortIndex,
             filterId = filterId,
             expandSearch = expandSearch,
-            wideLayout = wideLayout
+            wideLayout = wideLayout,
+            enablePullToRefresh = prefs.enablePullToRefresh
         )
         viewModelScope.launch {
             syncProgressFlow(application).collect {
-                handleEvent(WatchListSharedStateEvent.UpdateSyncProgress(syncProgress = it))
+                handleEvent(WatchListEvent.UpdateSyncProgress(syncProgress = it))
             }
         }
 
@@ -164,38 +190,49 @@ class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wid
                     viewState = viewState.copy(dbAppsChange = viewState.dbAppsChange + 1)
                 }
         }
+
+        if (collectRecentlyInstalledApps) {
+            viewModelScope.launch {
+                viewStates.map { it.refreshRequest }
+                    .combine(packageChangedReceiver.observer.onStart { emit("") }) { refreshRequest, packageName -> "$refreshRequest-$packageName" }
+                    .distinctUntilChanged()
+                    .map {
+                        recentlyInstalledAppsLoader.load(limit = 20)
+                    }
+                    .collect {
+                        viewState = viewState.copy(recentlyInstalledApps = it)
+                    }
+            }
+        }
     }
 
-    override fun handleEvent(event: WatchListSharedStateEvent) {
+    override fun handleEvent(event: WatchListEvent) {
         when (event) {
-            is WatchListSharedStateEvent.ChangeSort -> {
+            is WatchListEvent.ChangeSort -> {
                 prefs.sortIndex = event.sortId
                 viewState = viewState.copy(sortId = event.sortId)
             }
-            is WatchListSharedStateEvent.FilterByTitle -> viewState = viewState.copy(titleFilter = event.query)
-            is WatchListSharedStateEvent.SetWideLayout -> viewState = viewState.copy(wideLayout = event.layout)
-            is WatchListSharedStateEvent.ListEvent -> {
-                handleListEvent(event.event)
-            }
-            is WatchListSharedStateEvent.AddAppToTag -> viewState = viewState.copy(showAppTagDialog = event.show)
-            WatchListSharedStateEvent.OnBackPressed -> {
+            is WatchListEvent.FilterByTitle -> viewState = viewState.copy(titleFilter = event.query)
+            is WatchListEvent.SetWideLayout -> viewState = viewState.copy(wideLayout = event.layout)
+            is WatchListEvent.AddAppToTag -> viewState = viewState.copy(showAppTagDialog = event.show)
+            WatchListEvent.OnBackPressed -> {
                 if (viewState.wideLayout.isWideLayout && viewState.selectedApp != null) {
                     viewState = viewState.copy(selectedApp = null)
                 } else {
                     emitAction(CommonActivityAction.OnBackPressed)
                 }
             }
-            is WatchListSharedStateEvent.FilterById -> {
+            is WatchListEvent.FilterById -> {
                 viewState = viewState.copy(filterId = event.filterId)
             }
-            is WatchListSharedStateEvent.EditTag -> viewState = viewState.copy(showEditTagDialog = event.show)
-            is WatchListSharedStateEvent.OnSearch -> emitAction(startActivityAction(
+            is WatchListEvent.EditTag -> viewState = viewState.copy(showEditTagDialog = event.show)
+            is WatchListEvent.OnSearch -> emitAction(startActivityAction(
                 intent = MarketSearchActivity.intent(application, event.query, true, initiateSearch = true)
             ))
-            is WatchListSharedStateEvent.SelectApp -> {
+            is WatchListEvent.SelectApp -> {
                 viewState = viewState.copy(selectedApp = event.app)
             }
-            is WatchListSharedStateEvent.UpdateSyncProgress -> {
+            is WatchListEvent.UpdateSyncProgress -> {
                 viewState = viewState.copy(syncProgress = event.syncProgress)
                 if (event.syncProgress.isRefreshing) {
                     emitAction(showToastAction(resId = R.string.refresh_scheduled))
@@ -205,21 +242,17 @@ class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wid
                     }
                 }
             }
-            WatchListSharedStateEvent.PlayStoreMyApps -> emitAction(startActivityAction(
+            WatchListEvent.PlayStoreMyApps -> emitAction(startActivityAction(
                 intent = Intent().forMyApps(true),
                 addMultiWindowFlags = true
             ))
-            WatchListSharedStateEvent.Refresh -> refresh()
-        }
-    }
-
-    private fun handleListEvent(listEvent: WatchListEvent) {
-        when (listEvent) {
+            WatchListEvent.Refresh -> refresh()
             is WatchListEvent.AppClick -> {
-                viewState = viewState.copy(selectedApp = listEvent.app)
+                viewState = viewState.copy(selectedApp = event.app)
             }
+            is WatchListEvent.AppLongClick -> {}
             is WatchListEvent.EmptyButton -> {
-                when (listEvent.idx) {
+                when (event.idx) {
                     1 -> emitAction(startActivityAction(
                         intent = MarketSearchActivity.intent(
                             application,
@@ -235,10 +268,8 @@ class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wid
                     ))
                 }
             }
-            WatchListEvent.Refresh -> refresh()
-            is WatchListEvent.AppLongClick -> {}
             is WatchListEvent.SectionHeaderClick -> {
-                when (listEvent.type) {
+                when (event.type) {
                     SectionHeader.RecentlyInstalled -> emitAction(startActivityAction(
                         intent = InstalledActivity.intent(importMode = false, application)
                     ))
@@ -283,6 +314,7 @@ class WatchListStateViewModel(state: SavedStateHandle, defaultFilterId: Int, wid
             syncProgress = SyncProgress(true, 0),
             refreshRequest = viewState.refreshRequest + 1
         )
+        installedApps.reset()
         SyncScheduler(application).execute().first()
     }
 }

@@ -38,7 +38,6 @@ class InstalledActivity : BaseComposeActivity() {
             ) {
                 val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
 
-
                 val pagingSourceConfig = WatchListPagingSource.Config(
                         filterId = Filters.ALL,
                         tagId = null,
@@ -51,14 +50,24 @@ class InstalledActivity : BaseComposeActivity() {
                     MainDetailScreen(
                             wideLayout = screenState.wideLayout,
                             main = {
-                                InstalledListScreen(screenState = screenState, pagingSourceConfig = pagingSourceConfig) { viewModel.handleEvent(it) }
+                                InstalledListScreen(
+                                    screenState = screenState,
+                                    pagingSourceConfig = pagingSourceConfig,
+                                    onEvent = { viewModel.handleEvent(it) },
+                                    installedApps = viewModel.installedApps
+                                )
                             },
                             detail = {
                                 DetailContent(app = screenState.selectedApp)
                             }
                     )
                 } else {
-                    InstalledListScreen(screenState = screenState, pagingSourceConfig = pagingSourceConfig) { viewModel.handleEvent(it) }
+                    InstalledListScreen(
+                        screenState = screenState,
+                        pagingSourceConfig = pagingSourceConfig,
+                        onEvent = { viewModel.handleEvent(it) },
+                        installedApps = viewModel.installedApps
+                    )
                     if (screenState.selectedApp != null) {
                         DetailsDialog(
                             appId = screenState.selectedApp!!.appId,

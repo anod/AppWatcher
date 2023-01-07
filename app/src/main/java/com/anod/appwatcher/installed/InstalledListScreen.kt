@@ -12,23 +12,24 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.anod.appwatcher.R
-import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.WatchListPage
 import com.anod.appwatcher.watchlist.WatchListPagingSource
 import info.anodsplace.applog.AppLog
+import info.anodsplace.framework.content.InstalledApps
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InstalledListScreen(
     screenState: InstalledListSharedState,
     pagingSourceConfig: WatchListPagingSource.Config,
-    onEvent: (InstalledListSharedEvent) -> Unit
+    onEvent: (InstalledListSharedEvent) -> Unit,
+    installedApps: InstalledApps
 ) {
     AppLog.d("Recomposition $screenState")
 
@@ -62,13 +63,16 @@ fun InstalledListScreen(
             }
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
-            val viewModel: InstalledListViewModel = viewModel(factory = InstalledListViewModel.Factory(pagingSourceConfig))
-            viewModel.sortId = screenState.sortId
-            viewModel.selectionMode = screenState.selectionMode
-            viewModel.filterQuery = screenState.titleFilter
+            val scope = rememberCoroutineScope()
+            val pagerFactory: InstalledListPagerFactory = remember(pagingSourceConfig, scope) {
+                InstalledListPagerFactory(pagingSourceConfig, scope)
+            }
+            pagerFactory.sortId = screenState.sortId
+            pagerFactory.selectionMode = screenState.selectionMode
+            pagerFactory.filterQuery = screenState.titleFilter
 
-            val items = viewModel.pagingData.collectAsLazyPagingItems()
-            val changelogUpdated by viewModel.changelogAdapter.updated.collectAsState(initial = false)
+            val items = pagerFactory.pagingData.collectAsLazyPagingItems()
+            val changelogUpdated by pagerFactory.changelogAdapter.updated.collectAsState(initial = false)
             val refreshKey = remember(screenState, changelogUpdated) {
                 RefreshKey(
                         changelogUpdated = changelogUpdated,
@@ -90,11 +94,10 @@ fun InstalledListScreen(
             WatchListPage(
                 items = items,
                 isRefreshing = items.loadState.refresh is LoadState.Loading && (screenState.refreshRequest > 0 || items.itemCount < 1),
-                refreshRequest = screenState.refreshRequest,
-                enablePullToRefresh = viewModel.prefs.enablePullToRefresh,
+                enablePullToRefresh = screenState.enablePullToRefresh,
                 selection = screenState.selection,
                 selectionMode = screenState.selectionMode,
-                installedApps = viewModel.installedApps,
+                installedApps = installedApps,
                 onEvent = { event -> onEvent(InstalledListSharedEvent.ListEvent(event)) }
             )
         }

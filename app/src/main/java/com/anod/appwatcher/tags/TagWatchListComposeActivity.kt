@@ -20,8 +20,8 @@ import com.anod.appwatcher.details.DetailsDialog
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.DetailContent
+import com.anod.appwatcher.watchlist.WatchListEvent
 import com.anod.appwatcher.watchlist.WatchListPagingSource
-import com.anod.appwatcher.watchlist.WatchListSharedStateEvent
 import com.anod.appwatcher.watchlist.WatchListStateViewModel
 import info.anodsplace.framework.app.addMultiWindowFlags
 import kotlinx.coroutines.launch
@@ -30,7 +30,8 @@ class TagWatchListComposeActivity : BaseComposeActivity() {
     private val viewModel: WatchListStateViewModel by viewModels(factoryProducer = {
         WatchListStateViewModel.Factory(
             defaultFilterId = Filters.ALL,
-            wideLayout = hingeDevice.layout.value
+            wideLayout = hingeDevice.layout.value,
+            collectRecentlyInstalledApps = false
         )
     })
 
@@ -59,20 +60,30 @@ class TagWatchListComposeActivity : BaseComposeActivity() {
                     MainDetailScreen(
                             wideLayout = screenState.wideLayout,
                             main = {
-                                TagWatchListScreen(screenState = screenState, pagingSourceConfig = pagingSourceConfig, onEvent = { viewModel.handleEvent(it) })
+                                TagWatchListScreen(
+                                    screenState = screenState,
+                                    pagingSourceConfig = pagingSourceConfig,
+                                    onEvent = { viewModel.handleEvent(it) },
+                                    installedApps = viewModel.installedApps
+                                )
                             },
                             detail = {
                                 DetailContent(app = screenState.selectedApp)
                             }
                     )
                 } else {
-                    TagWatchListScreen(screenState = screenState, pagingSourceConfig = pagingSourceConfig, onEvent = { viewModel.handleEvent(it) })
+                    TagWatchListScreen(
+                        screenState = screenState,
+                        pagingSourceConfig = pagingSourceConfig,
+                        onEvent = { viewModel.handleEvent(it) },
+                        installedApps = viewModel.installedApps
+                    )
                     if (screenState.selectedApp != null) {
                         DetailsDialog(
                             appId = screenState.selectedApp!!.appId,
                             rowId = screenState.selectedApp!!.rowId,
                             detailsUrl = screenState.selectedApp!!.detailsUrl ?: "",
-                            onDismissRequest = { viewModel.handleEvent(WatchListSharedStateEvent.SelectApp(app = null)) },
+                            onDismissRequest = { viewModel.handleEvent(WatchListEvent.SelectApp(app = null)) },
                             onCommonActivityAction = { onCommonActivityAction(it) }
                         )
                     }
@@ -86,7 +97,7 @@ class TagWatchListComposeActivity : BaseComposeActivity() {
 
         lifecycleScope.launchWhenCreated {
             hingeDevice.layout.collect {
-                viewModel.handleEvent(WatchListSharedStateEvent.SetWideLayout(it))
+                viewModel.handleEvent(WatchListEvent.SetWideLayout(it))
             }
         }
     }
@@ -94,7 +105,7 @@ class TagWatchListComposeActivity : BaseComposeActivity() {
     override fun onBackPressed() {
         if (viewModel.viewState.wideLayout.isWideLayout) {
             if (viewModel.viewState.selectedApp != null) {
-                viewModel.handleEvent(WatchListSharedStateEvent.SelectApp(app = null))
+                viewModel.handleEvent(WatchListEvent.SelectApp(app = null))
             } else {
                 super.onBackPressed()
             }

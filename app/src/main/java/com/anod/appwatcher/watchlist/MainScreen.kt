@@ -18,6 +18,7 @@ import com.anod.appwatcher.compose.RefreshIcon
 import com.anod.appwatcher.compose.SortMenuItem
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.tags.EditTagDialog
+import info.anodsplace.framework.content.InstalledApps
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,7 +28,8 @@ fun MainScreen(
     onMainEvent: (MainViewEvent) -> Unit,
     listState: WatchListSharedState,
     pagingSourceConfig: WatchListPagingSource.Config,
-    onListEvent: (WatchListSharedStateEvent) -> Unit,
+    onListEvent: (WatchListEvent) -> Unit,
+    installedApps: InstalledApps
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -42,7 +44,7 @@ fun MainScreen(
                             drawerState.close()
                         }
                         if (it is MainViewEvent.DrawerItemClick && it.id == DrawerItem.Id.Refresh) {
-                            onListEvent(WatchListSharedStateEvent.Refresh)
+                            onListEvent(WatchListEvent.Refresh)
                         } else {
                             onMainEvent(it)
                         }
@@ -62,7 +64,7 @@ fun MainScreen(
                     subtitle = subtitle,
                     filterId = filterId,
                     onListEvent = {
-                        if (it is WatchListSharedStateEvent.OnBackPressed) {
+                        if (it is WatchListEvent.OnBackPressed) {
                             scope.launch {
                                 drawerState.open()
                             }
@@ -71,7 +73,8 @@ fun MainScreen(
                         }
                     },
                 )
-            }
+            },
+            installedApps = installedApps
         )
     }
 
@@ -88,7 +91,7 @@ fun MainTopBar(
     listState: WatchListSharedState,
     subtitle: String?,
     filterId: Int,
-    onListEvent: (WatchListSharedStateEvent) -> Unit
+    onListEvent: (WatchListEvent) -> Unit
 ) {
     WatchListTopBar(
         title = stringResource(id = R.string.app_name),
@@ -102,7 +105,7 @@ fun MainTopBar(
             FilterMenuAction(
                 filterId = filterId,
                 onFilterChange = { index ->
-                    onListEvent(WatchListSharedStateEvent.FilterById(filterId = index))
+                    onListEvent(WatchListEvent.FilterById(filterId = index))
                 }
             )
         },
@@ -110,7 +113,7 @@ fun MainTopBar(
             SortMenuItem(
                 selectedSortId = listState.sortId,
                 onChangeSort = { index ->
-                    onListEvent(WatchListSharedStateEvent.ChangeSort(sortId = index))
+                    onListEvent(WatchListEvent.ChangeSort(sortId = index))
                     dismiss()
                 },
                 barBounds = barBounds
@@ -120,7 +123,7 @@ fun MainTopBar(
                 text = { Text(text = stringResource(id = R.string.menu_refresh)) },
                 leadingIcon = { RefreshIcon() },
                 onClick = {
-                    onListEvent(WatchListSharedStateEvent.Refresh)
+                    onListEvent(WatchListEvent.Refresh)
                     dismiss()
                 }
             )
@@ -129,7 +132,7 @@ fun MainTopBar(
                 text = { Text(text = stringResource(id = R.string.play_store_my_apps)) },
                 leadingIcon = { PlayStoreMyAppsIcon() },
                 onClick = {
-                    onListEvent(WatchListSharedStateEvent.PlayStoreMyApps)
+                    onListEvent(WatchListEvent.PlayStoreMyApps)
                     dismiss()
                 }
             )

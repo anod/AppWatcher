@@ -2,27 +2,22 @@
 package com.anod.appwatcher.installed
 
 import android.content.pm.PackageManager
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
+import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.watchlist.FilterablePagingSource
 import com.anod.appwatcher.watchlist.SectionHeaderFactory
+import com.anod.appwatcher.watchlist.WatchListPagerFactory
 import com.anod.appwatcher.watchlist.WatchListPagingSource
-import com.anod.appwatcher.watchlist.WatchListViewModel
+import kotlinx.coroutines.CoroutineScope
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.parameter.parametersOf
 
-class InstalledListViewModel(pagingSourceConfig: WatchListPagingSource.Config) : WatchListViewModel(pagingSourceConfig), KoinComponent {
-
-    class Factory(private val pagingSourceConfig: WatchListPagingSource.Config) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return InstalledListViewModel(pagingSourceConfig) as T
-        }
-    }
+class InstalledListPagerFactory(pagingSourceConfig: WatchListPagingSource.Config, coroutineScope: CoroutineScope) : WatchListPagerFactory(pagingSourceConfig), KoinComponent {
 
     private val packageManager: PackageManager by inject()
-    val changelogAdapter: ChangelogAdapter by inject { parametersOf(viewModelScope) }
+    private val database: AppsDatabase by inject()
+
+    val changelogAdapter: ChangelogAdapter by inject { parametersOf(coroutineScope) }
 
     var sortId: Int = 0
         set(value) {

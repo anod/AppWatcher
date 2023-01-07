@@ -35,7 +35,8 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
     private val listViewModel: WatchListStateViewModel by viewModels(factoryProducer = {
         WatchListStateViewModel.Factory(
             defaultFilterId = prefs.defaultMainFilterId,
-            wideLayout = hingeDevice.layout.value
+            wideLayout = hingeDevice.layout.value,
+            collectRecentlyInstalledApps = prefs.showRecent
         )
     })
     private lateinit var accountSelectionDialog: AccountSelectionDialog
@@ -60,7 +61,7 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
 
         setContent {
             AppTheme(
-                theme = listViewModel.prefs.theme,
+                theme = prefs.theme,
                 transparentSystemUi = true
             ) {
                 val mainState by mainViewModel.viewStates.collectAsState(initial = mainViewModel.viewState)
@@ -69,9 +70,9 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
                 val pagingSourceConfig = WatchListPagingSource.Config(
                     filterId = listState.filterId,
                     tagId = null,
-                    showRecentlyUpdated = listViewModel.prefs.showRecentlyUpdated,
-                    showOnDevice = listViewModel.prefs.showOnDevice,
-                    showRecentlyInstalled = listViewModel.prefs.showRecent
+                    showRecentlyUpdated = prefs.showRecentlyUpdated,
+                    showOnDevice = prefs.showOnDevice,
+                    showRecentlyInstalled = prefs.showRecent
                 )
 
                 if (listState.wideLayout.isWideLayout) {
@@ -83,7 +84,8 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
                                 onMainEvent = { mainViewModel.handleEvent(it) },
                                 listState = listState,
                                 pagingSourceConfig = pagingSourceConfig,
-                                onListEvent = { listViewModel.handleEvent(it) }
+                                onListEvent = { listViewModel.handleEvent(it) },
+                                installedApps = listViewModel.installedApps
                             )
                         },
                         detail = {
@@ -96,14 +98,15 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
                         onMainEvent = { mainViewModel.handleEvent(it) },
                         listState = listState,
                         pagingSourceConfig = pagingSourceConfig,
-                        onListEvent = { listViewModel.handleEvent(it) }
+                        onListEvent = { listViewModel.handleEvent(it) },
+                        installedApps = listViewModel.installedApps
                     )
                     if (listState.selectedApp != null) {
                         DetailsDialog(
                             appId = listState.selectedApp!!.appId,
                             rowId = listState.selectedApp!!.rowId,
                             detailsUrl = listState.selectedApp!!.detailsUrl ?: "",
-                            onDismissRequest = { listViewModel.handleEvent(WatchListSharedStateEvent.SelectApp(app = null)) },
+                            onDismissRequest = { listViewModel.handleEvent(WatchListEvent.SelectApp(app = null)) },
                             onCommonActivityAction = { onCommonActivityAction(it) }
                         )
                     }
@@ -121,7 +124,7 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
 
         lifecycleScope.launchWhenCreated {
             hingeDevice.layout.collect {
-                listViewModel.handleEvent(WatchListSharedStateEvent.SetWideLayout(it))
+                listViewModel.handleEvent(WatchListEvent.SetWideLayout(it))
             }
         }
 
@@ -167,7 +170,7 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
     override fun onBackPressed() {
         if (listViewModel.viewState.wideLayout.isWideLayout) {
             if (listViewModel.viewState.selectedApp != null) {
-                listViewModel.handleEvent(WatchListSharedStateEvent.SelectApp(app = null))
+                listViewModel.handleEvent(WatchListEvent.SelectApp(app = null))
             } else {
                 super.onBackPressed()
             }
