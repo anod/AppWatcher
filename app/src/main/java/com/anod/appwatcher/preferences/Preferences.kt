@@ -4,13 +4,25 @@ import android.accounts.Account
 import android.annotation.SuppressLint
 import android.app.UiModeManager
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
 import com.anod.appwatcher.model.Filters
 import info.anodsplace.framework.app.NotificationManager
 import info.anodsplace.graphics.AdaptiveIcon
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.launch
 
-class Preferences(context: Context, private val notificationManager: NotificationManager) {
+class Preferences(context: Context, private val notificationManager: NotificationManager, private val appScope: CoroutineScope) : SharedPreferences.OnSharedPreferenceChangeListener {
+    private val _changes = MutableSharedFlow<String>()
     private val preferences = context.getSharedPreferences(PREFS_NAME, 0)
+
+    val changes: Flow<String> = _changes
+
+    init {
+        preferences.registerOnSharedPreferenceChangeListener(this)
+    }
 
     var account: Account?
         get() {
@@ -158,7 +170,7 @@ class Preferences(context: Context, private val notificationManager: Notificatio
         const val recentDays: Long = 3
 
         private const val VIEWED = "viewed"
-        private const val LAST_UPDATE_TIME = "last_update_time"
+        const val LAST_UPDATE_TIME = "last_update_time"
         private const val WIFI_ONLY = "wifi_only"
         private const val DEVICE_ID = "device_id"
         private const val ACCOUNT_NAME = "account_name"
@@ -215,6 +227,14 @@ class Preferences(context: Context, private val notificationManager: Notificatio
                 THEME_DEFAULT,
                 THEME_BLACK,
         )
+    }
+
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        if (key != null) {
+            appScope.launch {
+                _changes.emit(key)
+            }
+        }
     }
 
 }

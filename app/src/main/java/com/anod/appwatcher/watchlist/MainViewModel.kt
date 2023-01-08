@@ -13,6 +13,7 @@ import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.compose.CommonActivityAction
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.upgrade.Upgrade15500
 import com.anod.appwatcher.upgrade.UpgradeCheck
@@ -23,6 +24,8 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.util.Hash
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -94,6 +97,15 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
                     result
                 }.collect { tags ->
                     viewState = viewState.copy(tags = tags)
+                }
+        }
+
+        viewModelScope.launch {
+            prefs.changes
+                .filter { it == Preferences.LAST_UPDATE_TIME }
+                .distinctUntilChanged()
+                .collect {
+                    viewState = viewState.copy(lastUpdate = prefs.lastUpdateTime)
                 }
         }
     }

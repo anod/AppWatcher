@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -93,8 +94,8 @@ fun SettingsScreen(screenState: SettingsViewState, onEvent: (SettingsViewEvent) 
                                                     defaultSystemMask = prefs.defaultSystemMask,
                                                     systemMaskName = stringResource(id = R.string.system),
                                                     modifier = Modifier
-                                                            .padding(top = 8.dp)
-                                                            .fillMaxWidth(),
+                                                        .padding(top = 8.dp)
+                                                        .fillMaxWidth(),
                                                     onPathChange = { newPath -> onEvent(SettingsViewEvent.UpdateIconsShape(newPath)) }
                                             )
                                         },
@@ -211,6 +212,7 @@ fun onSettingsItemClick(prefs: Preferences, item: PreferenceItem, onEvent: (Sett
 @Preview(showSystemUi = true, locale = "ru")
 @Composable
 fun PreferencesScreenPreview() {
+    val scope = rememberCoroutineScope()
     val items = listOf(
             PreferenceItem.Category(titleRes = R.string.category_updates),
             PreferenceItem.Pick(
@@ -337,7 +339,7 @@ fun PreferencesScreenPreview() {
                             isProgressVisible = true
                     ),
                     onEvent = { },
-                    prefs = Preferences(context, NotificationManager.NoOp())
+                    prefs = Preferences(context, NotificationManager.NoOp(), scope)
             )
         }
     }

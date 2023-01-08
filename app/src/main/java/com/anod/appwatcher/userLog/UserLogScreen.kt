@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -102,6 +103,7 @@ fun UserLogMessageItem(position: Int, size: Int, message: Message) {
 @Preview
 @Composable
 fun UserLogScreenPreview() {
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
     UserLogScreen(
             screenState = UserLogState(
@@ -138,6 +140,6 @@ fun UserLogScreenPreview() {
                             """.trimIndent().split("\n").map { UserLogMessage.from(it) }
             ),
             onEvent = {},
-            prefs = Preferences(context, NotificationManager.NoOp())
+            prefs = Preferences(context, NotificationManager.NoOp(), scope)
     )
 }
