@@ -145,6 +145,7 @@ private fun showToastAction(@StringRes resId: Int): DetailsAction {
 
 sealed interface DetailsEvent {
     class UpdateTag(val tagId: Int, val checked: Boolean) : DetailsEvent
+    class OpenUrl(val url: String) : DetailsEvent
     object WatchAppToggle : DetailsEvent
     object LoadChangelog : DetailsEvent
     object ReloadChangelog : DetailsEvent
@@ -304,6 +305,10 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
                 emitAction(startActivityAction((Intent(Intent.ACTION_VIEW).apply {
                     data = Uri.parse("https://translate.google.com/?sl=auto&tl=${lang}&text=${encoded}&op=translate")
                 })))
+            }
+
+            is DetailsEvent.OpenUrl -> {
+                emitAction(action = startActivityAction(Intent(Intent.ACTION_VIEW, Uri.parse(event.url))))
             }
         }
     }

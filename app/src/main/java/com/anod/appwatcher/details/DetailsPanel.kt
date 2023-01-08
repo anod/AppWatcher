@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
@@ -34,6 +35,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallFloatingActionButton
@@ -61,6 +63,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -261,7 +264,7 @@ private fun DetailsScreenContent(
                             LinearProgressIndicator()
                         }
                     }
-                    ChangelogLoadState.Complete -> DetailsChangelog(screenState = screenState)
+                    ChangelogLoadState.Complete -> DetailsChangelog(screenState = screenState, onEvent = onEvent)
                     ChangelogLoadState.RemoteError -> {
                         Column(modifier = Modifier
                             .fillMaxWidth()
@@ -466,8 +469,9 @@ private fun HorizontalDivider(
     )
 }
 
+@OptIn(ExperimentalTextApi::class)
 @Composable
-private fun DetailsChangelog(screenState: DetailsState) {
+private fun DetailsChangelog(screenState: DetailsState, onEvent: (DetailsEvent) -> Unit) {
     LazyColumn {
         items(screenState.changelogs.size) { i ->
             val change = screenState.changelogs[i]
@@ -500,12 +504,21 @@ private fun DetailsChangelog(screenState: DetailsState) {
                     val text = if (change.details.isEmpty()) {
                         AnnotatedString(stringResource(id = R.string.no_recent_changes))
                     } else {
-                        (Html.parse(change.details).trim() as Spannable).toAnnotatedString()
+                        val parsed = Html.parse(change.details)
+                        (parsed.trim() as Spannable).toAnnotatedString(linkColor = MaterialTheme.colorScheme.primary)
                     }
-                    Text(
+
+                    ClickableText(
                         modifier = Modifier.padding(top = 8.dp),
                         text = text,
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            color = LocalContentColor.current
+                        ),
+                        onClick = { offset ->
+                            text.getUrlAnnotations(offset, offset).firstOrNull()?.let { annotation ->
+                                onEvent(DetailsEvent.OpenUrl(annotation.item.url))
+                            }
+                        }
                     )
                 }
             }
