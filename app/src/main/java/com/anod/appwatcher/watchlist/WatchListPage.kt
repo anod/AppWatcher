@@ -266,6 +266,7 @@ private fun AppItem(
                     .replace(newLineRegex, "\n")
                     .removePrefix(app.versionName + "\n")
                     .removePrefix(app.versionName + ":\n")
+                    .trim()
             } else ""
         }
     }
@@ -287,6 +288,7 @@ private fun AppItem(
         ) {
 
             if (selectionMode) {
+                val status = selection.getExtra(app.packageName)["status"]
                 Box {
                     AppIconImage(
                         app = app,
@@ -294,8 +296,14 @@ private fun AppItem(
                         appIconLoader = appIconLoader
                     )
                     SelectedIcon(
-                        modifier = Modifier.align(Alignment.BottomEnd),
-                        itemSelection = itemSelection
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .placeholder(
+                                visible = status == "p",
+                                color = MaterialTheme.colorScheme.primary
+                            ),
+                        itemSelection = itemSelection,
+                        tint = if (status == "e") MaterialTheme.colorScheme.error else Color.Unspecified
                     )
                 }
             } else {
@@ -372,7 +380,7 @@ private fun AppItem(
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-private fun SelectedIcon(modifier: Modifier, itemSelection: AppItemSelection) {
+private fun SelectedIcon(modifier: Modifier, itemSelection: AppItemSelection, tint: Color = Color.Unspecified) {
     AnimatedVisibility(
         modifier = modifier,
         visible = itemSelection == AppItemSelection.Selected,
@@ -385,7 +393,7 @@ private fun SelectedIcon(modifier: Modifier, itemSelection: AppItemSelection) {
             modifier = modifier.size(18.dp),
             painter = painterResource(id = R.drawable.ic_check_circle_selected_18dp),
             contentDescription = stringResource(id = coil.compose.base.R.string.selected),
-            tint = Color.Unspecified
+            tint = tint
         )
     }
 }

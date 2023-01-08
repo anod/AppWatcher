@@ -1,15 +1,15 @@
 // Copyright (c) 2020. Alex Gavrishev
 package com.anod.appwatcher.utils
 
-import android.os.Bundle
-import androidx.core.os.bundleOf
 import info.anodsplace.ktx.equalsHash
 import info.anodsplace.ktx.hashCodeOf
 
+typealias SelectionStateKeyExtras = Map<String, String>
+
 data class SelectionState(
       val defaultSelected: Boolean = false,
-      private val extras: Map<String, Bundle> = emptyMap(),
-      private val selectedKeys: Map<String, Boolean> = emptyMap(),
+      val extras: Map<String, SelectionStateKeyExtras> = emptyMap(),
+      val selectedKeys: Map<String, Boolean> = emptyMap(),
       val selectedCount: Int = 0
 ) : Collection<String> {
 
@@ -19,26 +19,22 @@ data class SelectionState(
 
     fun selectAll(select: Boolean): SelectionState = copy(selectedKeys = emptyMap(), defaultSelected = select, selectedCount = 0)
 
-    fun selectKey(key: String, select: Boolean, selectExtra: Bundle = Bundle.EMPTY): SelectionState {
-        val newSelectedKeys = selectedKeys.toMutableMap()
-        newSelectedKeys[key] = select
+    fun selectKey(key: String, select: Boolean, selectExtra: SelectionStateKeyExtras = emptyMap()): SelectionState {
         var newSelectedCount = selectedCount
         if (select) {
             newSelectedCount += 1
-        } else {
+        } else if (selectedKeys.containsKey(key)){
             newSelectedCount -= 1
             if (newSelectedCount < 0) {
                 newSelectedCount = 0
             }
         }
 
-        val allExtras = bundleOf(
-            "hasSelection" to isNotEmpty()
-        )
-        allExtras.putAll(getExtra(key))
-        allExtras.putAll(selectExtra)
+        val newSelectedKeys = selectedKeys.toMutableMap()
+        newSelectedKeys[key] = select
+
         val newExtras = extras.toMutableMap()
-        newExtras[key] = allExtras
+        newExtras[key] = getExtra(key) + selectExtra
         return copy(selectedKeys = newSelectedKeys, selectedCount = newSelectedCount, extras = newExtras, defaultSelected = false)
     }
 
@@ -75,7 +71,7 @@ data class SelectionState(
         return copy(selectedKeys = newSelectedKeys, selectedCount = newSelectedCount, defaultSelected = false)
     }
 
-    fun toggleKey(key: String, selectExtra: Bundle = Bundle.EMPTY): SelectionState {
+    fun toggleKey(key: String, selectExtra: SelectionStateKeyExtras = emptyMap()): SelectionState {
         return if (selectedKeys.containsKey(key)) {
             selectKey(key, !selectedKeys[key]!!, selectExtra)
         } else {
@@ -83,14 +79,35 @@ data class SelectionState(
         }
     }
 
-    private fun getExtra(key: String): Bundle {
+    fun getExtra(key: String): SelectionStateKeyExtras {
         if (extras.containsKey(key)) {
-            return extras[key] ?: Bundle.EMPTY
+            return extras[key] ?: emptyMap()
         }
-        return Bundle.EMPTY
+        return emptyMap()
     }
 
-    fun setExtras(newExtras: Map<String, Bundle>): SelectionState {
+    fun mergeExtras(new: Map<String, SelectionStateKeyExtras>): SelectionState {
+        if (extras.isEmpty()) {
+            return copy(extras = new)
+        }
+        val temp = extras.toMutableMap()
+        new.keys.forEach { newKey ->
+            val newExtra = new[newKey] ?: emptyMap()
+            if (newExtra.isNotEmpty()) {
+                val existingBundle = temp[newKey] ?: emptyMap()
+                if (existingBundle.isEmpty()) {
+                    temp[newKey] = newExtra
+                } else {
+                    temp[newKey] = existingBundle.toMutableMap().apply {
+                        putAll(newExtra)
+                    }
+                }
+            }
+        }
+        return copy(extras = temp)
+    }
+
+    fun setExtras(newExtras: Map<String, SelectionStateKeyExtras>): SelectionState {
         return copy(extras = newExtras)
     }
 
@@ -132,11 +149,19 @@ data class SelectionState(
             selectedKeys = emptyMap()
         )
     }
+
 }
 
 fun SelectionState.filter(selected: Boolean): List<String> {
     return iterator()
         .asSequence()
         .filter { if (selected) contains(it) else !contains(it) }
+        .toList()
+}
+
+fun SelectionState.filterWithExtra(extra: (SelectionStateKeyExtras) -> Boolean): List<String> {
+    return iterator()
+        .asSequence()
+        .filter { key -> extra(getExtra(key)) }
         .toList()
 }

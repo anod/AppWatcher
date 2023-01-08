@@ -35,6 +35,7 @@ import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.forAppInfo
 import info.anodsplace.framework.content.forUninstall
+import info.anodsplace.framework.text.Html
 import info.anodsplace.graphics.chooseDark
 import info.anodsplace.playstore.DetailsEndpoint
 import kotlinx.coroutines.Dispatchers
@@ -298,7 +299,8 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
 
             DetailsEvent.Translate -> {
                 val lang = Locale.getDefault().language
-                val encoded = URLEncoder.encode(viewState.changelogs.firstOrNull()?.details ?: "", "utf-8")
+                val text = viewState.changelogs.firstOrNull()?.details ?: ""
+                val encoded = URLEncoder.encode(Html.parse(text).toString(), "utf-8")
                 emitAction(startActivityAction((Intent(Intent.ACTION_VIEW).apply {
                     data = Uri.parse("https://translate.google.com/?sl=auto&tl=${lang}&text=${encoded}&op=translate")
                 })))

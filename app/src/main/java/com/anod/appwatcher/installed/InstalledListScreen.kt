@@ -26,9 +26,9 @@ import info.anodsplace.framework.content.InstalledApps
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InstalledListScreen(
-    screenState: InstalledListSharedState,
+    screenState: InstalledListState,
     pagingSourceConfig: WatchListPagingSource.Config,
-    onEvent: (InstalledListSharedEvent) -> Unit,
+    onEvent: (InstalledListEvent) -> Unit,
     installedApps: InstalledApps
 ) {
     AppLog.d("Recomposition $screenState")
@@ -57,7 +57,7 @@ fun InstalledListScreen(
                             icon = { if (!enabled) {
                                 CircularProgressIndicator()
                             } },
-                            onClick = { if (enabled) { onEvent(InstalledListSharedEvent.Import) } }
+                            onClick = { if (enabled) { onEvent(InstalledListEvent.Import) } }
                     )
                 }
             }
@@ -98,7 +98,7 @@ fun InstalledListScreen(
                 selection = screenState.selection,
                 selectionMode = screenState.selectionMode,
                 installedApps = installedApps,
-                onEvent = { event -> onEvent(InstalledListSharedEvent.ListEvent(event)) }
+                onEvent = { event -> onEvent(InstalledListEvent.ListEvent(event)) }
             )
         }
     }

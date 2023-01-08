@@ -22,7 +22,7 @@ fun InstalledTopBar(
         filterQuery: String,
         sortId: Int,
         selectionMode: Boolean,
-        onEvent: (InstalledListSharedEvent) -> Unit
+        onEvent: (InstalledListEvent) -> Unit
 ) {
     val showSearchView by remember { mutableStateOf(filterQuery.isNotBlank()) }
     var topBarSortMenu by remember { mutableStateOf(false) }
@@ -32,33 +32,33 @@ fun InstalledTopBar(
             searchQuery = filterQuery,
             showSearch = showSearchView && !selectionMode,
             initialSearchFocus = true,
-            onValueChange = { onEvent(InstalledListSharedEvent.FilterByTitle(query = it)) },
+            onValueChange = { onEvent(InstalledListEvent.FilterByTitle(query = it)) },
             onSearchAction = { },
             onNavigation = {
                 if (selectionMode) {
-                    onEvent(InstalledListSharedEvent.SwitchImportMode(selectionMode = false))
+                    onEvent(InstalledListEvent.SwitchImportMode(selectionMode = false))
                 } else {
-                    onEvent(InstalledListSharedEvent.OnBackPressed)
+                    onEvent(InstalledListEvent.OnBackPressed)
                 }
             },
             actions = {
                 if (selectionMode) {
-                    IconButton(onClick = { onEvent(InstalledListSharedEvent.SetSelection(all = false)) }) {
+                    IconButton(onClick = { onEvent(InstalledListEvent.SetSelection(all = false)) }) {
                         Icon(imageVector = Icons.Default.Deselect, contentDescription = stringResource(id = R.string.none))
                     }
 
-                    IconButton(onClick = { onEvent(InstalledListSharedEvent.SetSelection(all = true)) }) {
+                    IconButton(onClick = { onEvent(InstalledListEvent.SetSelection(all = true)) }) {
                         Icon(imageVector = Icons.Default.SelectAll, contentDescription = stringResource(id = R.string.all))
                     }
                 } else {
-                    IconButton(onClick = { onEvent(InstalledListSharedEvent.SwitchImportMode(selectionMode = true)) }) {
+                    IconButton(onClick = { onEvent(InstalledListEvent.SwitchImportMode(selectionMode = true)) }) {
                         Icon(imageVector = Icons.Default.Ballot, contentDescription = stringResource(id = R.string.import_mode))
                     }
 
                     SortMenuAction(
                         selectedSortId = sortId,
                         onChangeSort = { index ->
-                            onEvent(InstalledListSharedEvent.ChangeSort(sortId = index))
+                            onEvent(InstalledListEvent.ChangeSort(sortId = index))
                         }
                     )
                 }

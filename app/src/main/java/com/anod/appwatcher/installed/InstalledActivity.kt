@@ -25,12 +25,12 @@ import kotlinx.coroutines.launch
 
 @Keep
 class InstalledActivity : BaseComposeActivity() {
-    private val viewModel: InstalledListSharedViewModel by viewModels()
+    private val viewModel: InstalledListViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel.handleEvent(InstalledListSharedEvent.SetWideLayout(hingeDevice.layout.value))
+        viewModel.handleEvent(InstalledListEvent.SetWideLayout(hingeDevice.layout.value))
 
         setContent {
             AppTheme(
@@ -73,7 +73,7 @@ class InstalledActivity : BaseComposeActivity() {
                             appId = screenState.selectedApp!!.appId,
                             rowId = screenState.selectedApp!!.rowId,
                             detailsUrl = screenState.selectedApp!!.detailsUrl ?: "",
-                            onDismissRequest = { viewModel.handleEvent(InstalledListSharedEvent.SelectApp(app = null)) },
+                            onDismissRequest = { viewModel.handleEvent(InstalledListEvent.SelectApp(app = null)) },
                             onCommonActivityAction = { onCommonActivityAction(it) }
                         )
                     }
@@ -89,7 +89,7 @@ class InstalledActivity : BaseComposeActivity() {
     override fun onBackPressed() {
         if (viewModel.viewState.wideLayout.isWideLayout) {
             if (viewModel.viewState.selectedApp != null) {
-                viewModel.handleEvent(InstalledListSharedEvent.SelectApp(app = null))
+                viewModel.handleEvent(InstalledListEvent.SelectApp(app = null))
             } else {
                 super.onBackPressed()
             }
