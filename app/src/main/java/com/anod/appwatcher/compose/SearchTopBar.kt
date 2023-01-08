@@ -76,10 +76,10 @@ fun SearchTopBar(
                     onNavigation()
                 }
             }) {
-                if (navigationIcon != null) {
-                    navigationIcon()
-                } else {
-                    BackArrowIcon()
+                when {
+                    showSearchView -> BackArrowIcon()
+                    navigationIcon != null -> navigationIcon()
+                    else -> BackArrowIcon()
                 }
             }
         },
@@ -133,6 +133,16 @@ fun TopBarSearchField(
                 Text(text = stringResource(id = R.string.search))
             },
             leadingIcon = { SearchIcon() },
+            trailingIcon = {
+                if (searchValue.isNotEmpty()) {
+                    IconButton(onClick = {
+                        searchValue = ""
+                        onValueChange("")
+                    }) {
+                        ClearIcon()
+                    }
+                }
+            },
             keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Search
             ),

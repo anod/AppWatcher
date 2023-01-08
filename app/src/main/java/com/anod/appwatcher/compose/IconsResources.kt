@@ -6,6 +6,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowRight
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FlashOn
@@ -182,6 +183,11 @@ fun PlayStoreMyAppsIcon() {
     Icon(imageVector = Icons.Default.Store, contentDescription = stringResource(id = R.string.play_store_my_apps))
 }
 
+@Composable
+fun ClearIcon() {
+    Icon(imageVector = Icons.Default.Close, contentDescription = stringResource(id = R.string.play_store_my_apps))
+}
+
 @Preview(widthDp = 200)
 @Composable
 fun IconsResourcesPreview() {
@@ -212,6 +218,7 @@ fun IconsResourcesPreview() {
                 { AppInfoIcon() },
                 { OpenDrawerIcon() },
                 { RefreshIcon() },
+                { ClearIcon() }
 
             )
             LazyVerticalGrid(
