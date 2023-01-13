@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.ClickableText
@@ -501,7 +502,7 @@ private fun VersionInfoCell(text: String, placeholder: Boolean = false) {
     Text(
         text = text,
         modifier = Modifier
-            .defaultMinSize(minWidth = 40.dp)
+            .sizeIn(minWidth = 40.dp, maxWidth = 88.dp)
             .padding(horizontal = 4.dp)
             .placeholder(
                 visible = placeholder,
