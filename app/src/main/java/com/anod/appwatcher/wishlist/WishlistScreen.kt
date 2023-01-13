@@ -53,7 +53,7 @@ fun WishListScreen(
                     hideSearchOnNavigation = false,
                     onNavigation = { onEvent(WishListEvent.OnBackPress) },
                     onValueChange = { onEvent(WishListEvent.OnNameFilter(it)) },
-                    onSearchAction = { showSearchView = false },
+                    onSearchSubmit = { showSearchView = false },
                     showSearch = showSearchView
                 )
             }

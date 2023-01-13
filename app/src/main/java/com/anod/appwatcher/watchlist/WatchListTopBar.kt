@@ -14,11 +14,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntRect
 import com.anod.appwatcher.R
-import com.anod.appwatcher.compose.TagAppIconButton
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.DropdownMenuAction
 import com.anod.appwatcher.compose.EditIcon
 import com.anod.appwatcher.compose.SearchTopBar
+import com.anod.appwatcher.compose.TagAppIconButton
 import kotlin.math.roundToInt
 
 @Composable
@@ -48,7 +48,7 @@ fun WatchListTopBar(
         containerColor = containerColor,
         contentColor = contentColor,
         onValueChange = { onEvent(WatchListEvent.FilterByTitle(query = it)) },
-        onSearchAction = { onEvent(WatchListEvent.OnSearch(it)) },
+        onSearchSubmit = { onEvent(WatchListEvent.OnSearch(it)) },
         onNavigation = { onEvent(WatchListEvent.OnBackPressed) },
         navigationIcon = navigationIcon,
         modifier = Modifier.onGloballyPositioned {

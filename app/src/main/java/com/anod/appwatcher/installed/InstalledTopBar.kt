@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.SearchTopBar
@@ -25,7 +24,6 @@ fun InstalledTopBar(
         onEvent: (InstalledListEvent) -> Unit
 ) {
     val showSearchView by remember { mutableStateOf(filterQuery.isNotBlank()) }
-    var topBarSortMenu by remember { mutableStateOf(false) }
 
     SearchTopBar(
             title = title,
@@ -33,7 +31,6 @@ fun InstalledTopBar(
             showSearch = showSearchView && !selectionMode,
             initialSearchFocus = true,
             onValueChange = { onEvent(InstalledListEvent.FilterByTitle(query = it)) },
-            onSearchAction = { },
             onNavigation = {
                 if (selectionMode) {
                     onEvent(InstalledListEvent.SwitchImportMode(selectionMode = false))

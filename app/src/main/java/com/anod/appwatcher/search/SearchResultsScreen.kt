@@ -63,7 +63,7 @@ fun SearchResultsScreen(
                     showSearch = true,
                     hideSearchOnNavigation = false,
                     onValueChange = { onEvent(SearchViewEvent.SearchQueryChange(query = it)) },
-                    onSearchAction = { onEvent(SearchViewEvent.OnSearchEnter(it)) },
+                    onSearchSubmit = { onEvent(SearchViewEvent.OnSearchEnter(it)) },
                     initialSearchFocus = !screenState.initiateSearch,
                     searchQuery = screenState.searchQuery,
                     onNavigation = { onEvent(SearchViewEvent.OnBackPressed) }
