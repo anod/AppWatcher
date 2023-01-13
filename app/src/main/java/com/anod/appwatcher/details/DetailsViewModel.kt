@@ -71,45 +71,30 @@ sealed interface AppIconState {
 }
 
 data class DetailsState(
-        val appId: String,
-        val rowId: Int,
-        val detailsUrl: String,
-        val appLoadingState: AppLoadingState = AppLoadingState.Initial,
-        val app: App? = null,
-        val isLocalApp: Boolean = false,
-        val title: String = "",
-        val appIconState: AppIconState = AppIconState.Initial,
-        val palette: Palette? = null,
-        val account: Account? = null,
-        val changelogState: ChangelogLoadState = ChangelogLoadState.Initial,
-        val changelogs: List<AppChange> = emptyList(),
-        val tagsMenuItems: List<TagMenuItem> = emptyList(),
-        val customPrimaryColor: Int? = null,
-        val document: Document? = null,
-        val remoteCallFinished: Boolean = false,
-        val isInstalled: Boolean = false
+    val appId: String,
+    val rowId: Int,
+    val detailsUrl: String,
+    val appLoadingState: AppLoadingState = AppLoadingState.Initial,
+    val app: App? = null,
+    val isLocalApp: Boolean = false,
+    val title: String = "",
+    val appIconState: AppIconState = AppIconState.Initial,
+    val palette: Palette? = null,
+    val account: Account? = null,
+    val changelogState: ChangelogLoadState = ChangelogLoadState.Initial,
+    val changelogs: List<AppChange> = emptyList(),
+    val tagsMenuItems: List<TagMenuItem> = emptyList(),
+    val customPrimaryColor: Int? = null,
+    val document: Document? = null,
+    val remoteVersionInfo: AppVersionInfo? = null,
+    val remoteCallFinished: Boolean = false,
+    val isInstalled: Boolean = false
 ) {
     val isWatched: Boolean
         get() = app != null && app.status != AppInfoMetadata.STATUS_DELETED
 
     val fetchedRemoteDocument: Boolean
         get() = document != null
-
-    val versionInfo: AppVersionInfo
-        get() {
-            val appDetails = document?.appDetails
-            requireNotNull(appDetails)
-            return AppVersionInfo(
-                isBeta = when {
-                    appDetails.testingProgramInfo.subscribed -> true
-                    appDetails.testingProgramInfo.subscribedAndInstalled -> true
-                    else -> false
-                },
-                installationSize = appDetails.installationSize,
-                targetSdkVersion = appDetails.targetSdkVersion,
-                ratingLabel = document!!.rating.ratingLabel ?: ""
-            )
-        }
 }
 
 data class AppVersionInfo(
@@ -126,7 +111,10 @@ sealed interface DetailsAction {
     class Share(val app: App) : DetailsAction
 }
 
-private fun startActivityAction(intent: Intent, addMultiWindowFlags: Boolean = false) : DetailsAction.ActivityAction {
+private fun startActivityAction(
+    intent: Intent,
+    addMultiWindowFlags: Boolean = false
+): DetailsAction.ActivityAction {
     return DetailsAction.ActivityAction(
         action = CommonActivityAction.StartActivity(
             intent = intent,
@@ -158,12 +146,13 @@ sealed interface DetailsEvent {
     object Translate : DetailsEvent
 }
 
-class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) : BaseFlowViewModel<DetailsState, DetailsEvent, DetailsAction>(), KoinComponent {
+class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
+    BaseFlowViewModel<DetailsState, DetailsEvent, DetailsAction>(), KoinComponent {
 
     class Factory(
-            private val argAppId: String,
-            private val argRowId: Int,
-            private val argDetailsUrl: String
+        private val argAppId: String,
+        private val argRowId: Int,
+        private val argDetailsUrl: String
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
@@ -182,7 +171,13 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
 
     init {
         val isInstalled = installedApps.packageInfo(argAppId).isInstalled
-        viewState = DetailsState(appId = argAppId, rowId = argRowId, detailsUrl = argDetailsUrl, account = prefs.account, isInstalled = isInstalled)
+        viewState = DetailsState(
+            appId = argAppId,
+            rowId = argRowId,
+            detailsUrl = argDetailsUrl,
+            account = prefs.account,
+            isInstalled = isInstalled
+        )
 
         observeApp()
     }
@@ -195,11 +190,11 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
                     AppLog.i("Show details for unwatched ${viewState.appId}", "DetailsView")
                     val localApp = packageManager.packageToApp(-1, viewState.appId)
                     viewState = viewState.copy(
-                            appLoadingState = AppLoadingState.Loaded,
-                            app = localApp,
-                            appIconState = if (localApp.iconUrl.isEmpty()) AppIconState.Default else viewState.appIconState,
-                            title = localApp.title,
-                            isLocalApp = true
+                        appLoadingState = AppLoadingState.Loaded,
+                        app = localApp,
+                        appIconState = if (localApp.iconUrl.isEmpty()) AppIconState.Default else viewState.appIconState,
+                        title = localApp.title,
+                        isLocalApp = true
                     )
                     if (localApp.iconUrl.isNotEmpty()) {
                         loadAppIcon(localApp.iconUrl)
@@ -256,17 +251,20 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
             DetailsEvent.WatchAppToggle -> {
                 if (viewState.isWatched) {
                     viewModelScope.launch {
-                        database.apps().updateStatus(rowId = viewState.rowId, AppInfoMetadata.STATUS_DELETED)
+                        database.apps()
+                            .updateStatus(rowId = viewState.rowId, AppInfoMetadata.STATUS_DELETED)
                     }
                 } else {
                     watchApp()
                 }
             }
+
             DetailsEvent.LoadChangelog -> {
                 viewModelScope.launch {
                     loadChangelog()
                 }
             }
+
             DetailsEvent.ReloadChangelog -> {
                 viewState = viewState.copy(changelogState = ChangelogLoadState.Initial)
                 viewModelScope.launch {
@@ -275,47 +273,70 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
             }
 
             DetailsEvent.AppInfo ->
-                emitAction(startActivityAction(
-                    intent = Intent().forAppInfo(viewState.appId),
-                    addMultiWindowFlags = true
-                ))
+                emitAction(
+                    startActivityAction(
+                        intent = Intent().forAppInfo(viewState.appId),
+                        addMultiWindowFlags = true
+                    )
+                )
+
             DetailsEvent.OnBackPressed -> emitAction(DetailsAction.Dismiss)
             DetailsEvent.Open -> {
                 val launchIntent = packageManager.getLaunchIntentForPackage(viewState.appId)
                 if (launchIntent != null) {
-                    emitAction(startActivityAction(intent = launchIntent, addMultiWindowFlags = true))
+                    emitAction(
+                        startActivityAction(
+                            intent = launchIntent,
+                            addMultiWindowFlags = true
+                        )
+                    )
                 }
             }
+
             DetailsEvent.Share -> if (viewState.app != null) {
                 emitAction(DetailsAction.Share(app = viewState.app!!))
             }
-            DetailsEvent.Uninstall -> emitAction(startActivityAction(
-                intent = Intent().forUninstall(viewState.appId)
-            ))
 
-            DetailsEvent.PlayStore ->  emitAction(startActivityAction(
-                intent = Intent().forPlayStore(viewState.appId),
-                addMultiWindowFlags = true
-            ))
+            DetailsEvent.Uninstall -> emitAction(
+                startActivityAction(
+                    intent = Intent().forUninstall(viewState.appId)
+                )
+            )
+
+            DetailsEvent.PlayStore -> emitAction(
+                startActivityAction(
+                    intent = Intent().forPlayStore(viewState.appId),
+                    addMultiWindowFlags = true
+                )
+            )
 
             DetailsEvent.Translate -> {
                 val lang = Locale.getDefault().language
                 val text = viewState.changelogs.firstOrNull()?.details ?: ""
                 val encoded = URLEncoder.encode(Html.parse(text).toString(), "utf-8")
                 emitAction(startActivityAction((Intent(Intent.ACTION_VIEW).apply {
-                    data = Uri.parse("https://translate.google.com/?sl=auto&tl=${lang}&text=${encoded}&op=translate")
+                    data =
+                        Uri.parse("https://translate.google.com/?sl=auto&tl=${lang}&text=${encoded}&op=translate")
                 })))
             }
 
             is DetailsEvent.OpenUrl -> {
-                emitAction(action = startActivityAction(Intent(Intent.ACTION_VIEW, Uri.parse(event.url))))
+                emitAction(
+                    action = startActivityAction(
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse(event.url)
+                        )
+                    )
+                )
             }
         }
     }
 
     private suspend fun loadChangelog() {
         val localChanges = try {
-            if (viewState.appId.isBlank()) emptyList() else database.changelog().ofApp(viewState.appId)
+            if (viewState.appId.isBlank()) emptyList() else database.changelog()
+                .ofApp(viewState.appId)
         } catch (e: Exception) {
             AppLog.e("loadChangelog", e)
             emptyList()
@@ -381,7 +402,14 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
             when (result) {
                 AppListTable.ERROR_INSERT -> emitAction(action = showToastAction(resId = R.string.error_insert_app))
                 AppListTable.ERROR_ALREADY_ADDED -> emitAction(action = showToastAction(resId = R.string.app_already_added))
-                else -> emitAction(DetailsAction.ShowTagSnackbar(appInfo = AppInfo(document!!, uploadDateParserCache)))
+                else -> emitAction(
+                    DetailsAction.ShowTagSnackbar(
+                        appInfo = AppInfo(
+                            document!!,
+                            uploadDateParserCache
+                        )
+                    )
+                )
             }
         }
     }
@@ -390,13 +418,31 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
         val appDetails = details.document?.appDetails
 
         viewState = if (appDetails != null) {
-            val recentChange = AppChange(viewState.appId, appDetails.versionCode, appDetails.versionString, appDetails.recentChangesHtml ?: "", appDetails.uploadDate, false)
+            val recentChange = AppChange(
+                viewState.appId,
+                appDetails.versionCode,
+                appDetails.versionString,
+                appDetails.recentChangesHtml ?: "",
+                appDetails.uploadDate,
+                false
+            )
+
             viewState.copy(
                 document = details.document,
                 changelogs = mergeChangelogs(localChanges, recentChange),
                 changelogState = ChangelogLoadState.Complete,
                 title = viewState.app?.title ?: "",
-                remoteCallFinished = true
+                remoteCallFinished = true,
+                remoteVersionInfo = AppVersionInfo(
+                    isBeta = when {
+                        appDetails.testingProgramInfo.subscribed -> true
+                        appDetails.testingProgramInfo.subscribedAndInstalled -> true
+                        else -> false
+                    },
+                    installationSize = appDetails.installationSize,
+                    targetSdkVersion = appDetails.targetSdkVersion,
+                    ratingLabel = details.document!!.rating.ratingLabel ?: ""
+                )
             )
         } else {
             viewState.copy(
@@ -406,16 +452,21 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
         }
     }
 
-    private fun mergeChangelogs(localChanges: List<AppChange>, recentChange: AppChange): List<AppChange> {
+    private fun mergeChangelogs(
+        localChanges: List<AppChange>,
+        recentChange: AppChange
+    ): List<AppChange> {
         return when {
             localChanges.isEmpty() -> {
                 if (!recentChange.isEmpty) {
                     listOf(recentChange)
                 } else listOf()
             }
+
             localChanges.first().versionCode == recentChange.versionCode -> {
                 listOf(recentChange, *localChanges.subList(1, localChanges.size).toTypedArray())
             }
+
             else -> {
                 if (recentChange.isEmpty) {
                     localChanges

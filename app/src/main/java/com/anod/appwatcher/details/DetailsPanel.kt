@@ -42,6 +42,7 @@ import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -110,7 +111,13 @@ private val iconSizeBig = 64.dp
 private val iconSizeSmall = 32.dp
 
 @Composable
-fun DetailsPanel(appId: String, rowId: Int, detailsUrl: String, onDismissRequest: () -> Unit, onCommonActivityAction: (action: CommonActivityAction) -> Unit) {
+fun DetailsPanel(
+    appId: String,
+    rowId: Int,
+    detailsUrl: String,
+    onDismissRequest: () -> Unit,
+    onCommonActivityAction: (action: CommonActivityAction) -> Unit
+) {
     val storeOwner = rememberViwModeStoreOwner()
     val viewModel: DetailsViewModel = viewModel(
         key = "details-$appId-$rowId",
@@ -145,7 +152,13 @@ fun DetailsPanel(appId: String, rowId: Int, detailsUrl: String, onDismissRequest
 
 
 @Composable
-fun DetailsDialog(appId: String, rowId: Int, detailsUrl: String, onDismissRequest: () -> Unit, onCommonActivityAction: (action: CommonActivityAction) -> Unit) {
+fun DetailsDialog(
+    appId: String,
+    rowId: Int,
+    detailsUrl: String,
+    onDismissRequest: () -> Unit,
+    onCommonActivityAction: (action: CommonActivityAction) -> Unit
+) {
     val storeOwner = rememberViwModeStoreOwner()
     val viewModel: DetailsViewModel = viewModel(
         key = "details-$appId-$rowId",
@@ -171,7 +184,7 @@ fun DetailsDialog(appId: String, rowId: Int, detailsUrl: String, onDismissReques
                 screenState = screenState,
                 viewActions = viewModel.viewActions,
                 onEvent = { viewModel.handleEvent(it) },
-                onCommonActivityAction = { onCommonActivityAction (it) },
+                onCommonActivityAction = { onCommonActivityAction(it) },
                 installedApps = viewModel.installedApps,
                 onDismissRequest = onDismissRequest,
                 modifier = Modifier.fillMaxHeight(fraction = 0.9f)
@@ -183,10 +196,21 @@ fun DetailsDialog(appId: String, rowId: Int, detailsUrl: String, onDismissReques
 private fun createAppChooser(appInfo: App, recentChange: AppChange, context: Context): Intent {
     val builder = ShareCompat.IntentBuilder(context)
 
-    val changes = if (recentChange.details.isBlank()) "" else "${Html.parse(recentChange.details)}\n\n"
-    val text = context.getString(R.string.share_text, changes, String.format(StoreIntent.URL_WEB_PLAY_STORE, appInfo.packageName))
+    val changes =
+        if (recentChange.details.isBlank()) "" else "${Html.parse(recentChange.details)}\n\n"
+    val text = context.getString(
+        R.string.share_text,
+        changes,
+        String.format(StoreIntent.URL_WEB_PLAY_STORE, appInfo.packageName)
+    )
 
-    builder.setSubject(context.getString(R.string.share_subject, appInfo.title, appInfo.versionName))
+    builder.setSubject(
+        context.getString(
+            R.string.share_subject,
+            appInfo.title,
+            appInfo.versionName
+        )
+    )
     builder.setText(text)
     builder.setType("text/plain")
     return builder.createChooserIntent()
@@ -209,7 +233,8 @@ private fun DetailsScreenContent(
 
     val titleVisibility by remember { mutableStateOf(0.0f) }
 
-    val appColorAvailable = (screenState.customPrimaryColor != null || screenState.appIconState is AppIconState.Default)
+    val appColorAvailable =
+        (screenState.customPrimaryColor != null || screenState.appIconState is AppIconState.Default)
     val surfaceColor: Color = if (appColorAvailable)
         MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
 
@@ -227,11 +252,12 @@ private fun DetailsScreenContent(
                 enter = fadeIn(),
                 label = "HeaderBackground"
             ) {
-                Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .requiredHeight(144.dp) // 60 + 64
-                    .align(Alignment.TopStart)
-                    .background(color = surfaceColor)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .requiredHeight(144.dp) // 60 + 64
+                        .align(Alignment.TopStart)
+                        .background(color = surfaceColor)
                 )
             }
 
@@ -264,11 +290,17 @@ private fun DetailsScreenContent(
                             LinearProgressIndicator()
                         }
                     }
-                    ChangelogLoadState.Complete -> DetailsChangelog(screenState = screenState, onEvent = onEvent)
+
+                    ChangelogLoadState.Complete -> DetailsChangelog(
+                        screenState = screenState,
+                        onEvent = onEvent
+                    )
+
                     ChangelogLoadState.RemoteError -> {
-                        Column(modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(text = stringResource(id = R.string.problem_occurred))
@@ -298,6 +330,7 @@ private fun DetailsScreenContent(
                 DetailsAction.Dismiss -> {
                     onDismissRequest()
                 }
+
                 is DetailsAction.Share -> {
                     onCommonActivityAction(
                         CommonActivityAction.StartActivity(
@@ -309,9 +342,11 @@ private fun DetailsScreenContent(
                         )
                     )
                 }
+
                 is DetailsAction.ActivityAction -> onCommonActivityAction(action.action)
                 is DetailsAction.ShowTagSnackbar -> {
-                    val result = snackBarHostState.showSnackbar(TagSnackbar.Visuals(action.appInfo, context))
+                    val result =
+                        snackBarHostState.showSnackbar(TagSnackbar.Visuals(action.appInfo, context))
                     if (result == SnackbarResult.ActionPerformed) {
                         showTagList = action.appInfo
                     }
@@ -358,12 +393,8 @@ fun VersionDetails(screenState: DetailsState, installedApps: InstalledApps) {
                     textAlign = TextAlign.Center
                 )
 
-                if (screenState.document != null) {
-                    val versionInfo by remember(screenState.document) {
-                        derivedStateOf {
-                            screenState.versionInfo
-                        }
-                    }
+                if (screenState.remoteVersionInfo != null) {
+                    val versionInfo = screenState.remoteVersionInfo
                     if (versionInfo.isBeta) {
                         VersionInfoCell(text = stringResource(id = R.string.beta))
                     }
@@ -384,7 +415,7 @@ fun VersionDetails(screenState: DetailsState, installedApps: InstalledApps) {
                         )
                     }
                     if (versionInfo.targetSdkVersion > 0) {
-                        VersionInfoCell(text = "SDK ${screenState.document.appDetails.targetSdkVersion}")
+                        VersionInfoCell(text = "SDK ${versionInfo.targetSdkVersion}")
                     }
                 } else {
                     if (!screenState.remoteCallFinished) {
@@ -408,9 +439,11 @@ fun VersionDetails(screenState: DetailsState, installedApps: InstalledApps) {
                 .fillMaxWidth()
         ) {
             if (screenState.isInstalled || screenState.isLocalApp) {
-                InstalledSignIcon(modifier = Modifier
-                    .size(16.dp)
-                    .padding(end = 4.dp))
+                InstalledSignIcon(
+                    modifier = Modifier
+                        .size(16.dp)
+                        .padding(end = 4.dp)
+                )
                 if (screenState.app != null) {
                     val appItemState = rememberAppItemState(
                         app = screenState.app,
@@ -515,9 +548,10 @@ private fun DetailsChangelog(screenState: DetailsState, onEvent: (DetailsEvent) 
                             color = LocalContentColor.current
                         ),
                         onClick = { offset ->
-                            text.getUrlAnnotations(offset, offset).firstOrNull()?.let { annotation ->
-                                onEvent(DetailsEvent.OpenUrl(annotation.item.url))
-                            }
+                            text.getUrlAnnotations(offset, offset).firstOrNull()
+                                ?.let { annotation ->
+                                    onEvent(DetailsEvent.OpenUrl(annotation.item.url))
+                                }
                         }
                     )
                 }
@@ -585,7 +619,11 @@ private fun DetailsHeader(
 private fun DetailsAppIcon(appIconState: AppIconState, modifier: Modifier) {
     AppLog.d("Details collecting appIconState $appIconState")
     when (appIconState) {
-        is AppIconState.Loaded -> DetailsIconApp(bitmap = appIconState.drawable.bitmap, modifier = modifier)
+        is AppIconState.Loaded -> DetailsIconApp(
+            bitmap = appIconState.drawable.bitmap,
+            modifier = modifier
+        )
+
         AppIconState.Default -> DetailsIconPlaceHolder(modifier = modifier)
         AppIconState.Initial -> DetailsIconPlaceHolder(modifier = modifier)
     }
@@ -627,7 +665,10 @@ private fun DetailsTopAppBar(
                 Row(
                     modifier = Modifier.alpha(titleVisibility)
                 ) {
-                    DetailsAppIcon(appIconState = screenState.appIconState, modifier = Modifier.size(iconSizeSmall))
+                    DetailsAppIcon(
+                        appIconState = screenState.appIconState,
+                        modifier = Modifier.size(iconSizeSmall)
+                    )
                     Text(
                         text = screenState.title,
                         color = contentColor,
@@ -685,7 +726,14 @@ private fun DetailsTopAppBar(
                             trailingIcon = {
                                 Checkbox(
                                     checked = checked,
-                                    onCheckedChange = { onEvent(DetailsEvent.UpdateTag(tag.id, checked)) }
+                                    onCheckedChange = {
+                                        onEvent(
+                                            DetailsEvent.UpdateTag(
+                                                tag.id,
+                                                checked
+                                            )
+                                        )
+                                    }
                                 )
                             },
                             onClick = { onEvent(DetailsEvent.UpdateTag(tag.id, checked)) }
@@ -696,7 +744,12 @@ private fun DetailsTopAppBar(
 
             DropdownMenuAction { dismiss ->
                 DropdownMenuItem(
-                    text = { Text(text = stringResource(id = R.string.share), modifier = Modifier.padding(horizontal = 8.dp)) },
+                    text = {
+                        Text(
+                            text = stringResource(id = R.string.share),
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
+                    },
                     leadingIcon = { ShareIcon() },
                     onClick = {
                         onEvent(DetailsEvent.Share)
@@ -705,7 +758,12 @@ private fun DetailsTopAppBar(
                 )
 
                 DropdownMenuItem(
-                    text = { Text(text = stringResource(id = R.string.translate), modifier = Modifier.padding(horizontal = 8.dp)) },
+                    text = {
+                        Text(
+                            text = stringResource(id = R.string.translate),
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
+                    },
                     enabled = screenState.changelogs.firstOrNull()?.details?.isNotEmpty() == true,
                     leadingIcon = { TranslateIcon() },
                     onClick = {
@@ -716,7 +774,12 @@ private fun DetailsTopAppBar(
 
                 if (screenState.isInstalled) {
                     DropdownMenuItem(
-                        text = { Text(text = stringResource(id = R.string.open), modifier = Modifier.padding(horizontal = 8.dp)) },
+                        text = {
+                            Text(
+                                text = stringResource(id = R.string.open),
+                                modifier = Modifier.padding(horizontal = 8.dp)
+                            )
+                        },
                         leadingIcon = { OpenAppIcon() },
                         onClick = {
                             onEvent(DetailsEvent.Open)
@@ -724,7 +787,12 @@ private fun DetailsTopAppBar(
                         }
                     )
                     DropdownMenuItem(
-                        text = { Text(text = stringResource(id = R.string.uninstall), modifier = Modifier.padding(horizontal = 8.dp)) },
+                        text = {
+                            Text(
+                                text = stringResource(id = R.string.uninstall),
+                                modifier = Modifier.padding(horizontal = 8.dp)
+                            )
+                        },
                         leadingIcon = { UninstallIcon() },
                         onClick = {
                             onEvent(DetailsEvent.Uninstall)
@@ -732,7 +800,12 @@ private fun DetailsTopAppBar(
                         }
                     )
                     DropdownMenuItem(
-                        text = { Text(text = stringResource(id = R.string.app_info), modifier = Modifier.padding(horizontal = 8.dp)) },
+                        text = {
+                            Text(
+                                text = stringResource(id = R.string.app_info),
+                                modifier = Modifier.padding(horizontal = 8.dp)
+                            )
+                        },
                         leadingIcon = { AppInfoIcon() },
                         onClick = {
                             onEvent(DetailsEvent.AppInfo)
@@ -835,5 +908,51 @@ private fun DetailsScreenPreview() {
             onDismissRequest = { },
             onCommonActivityAction = { }
         )
+    }
+}
+
+@Preview(locale = "ru")
+@Composable
+private fun VersionInfoPreview() {
+    AppTheme(
+        customPrimaryColor = Color.Blue
+    ) {
+        Surface {
+            VersionDetails(
+                screenState = DetailsState(
+                    appId = "test.id",
+                    title = "Test title long app name",
+                    rowId = 22,
+                    detailsUrl = "open",
+                    app = App(
+                        rowId = 22,
+                        appId = "appId2",
+                        packageName = "package2",
+                        versionNumber = 11223300,
+                        versionName = "very long long version name",
+                        title = "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+                        uploadTime = 0,
+                        uploadDate = "20 Sept, 2017 yo",
+                        appType = "app",
+                        creator = "Banana man",
+                        detailsUrl = "url",
+                        iconUrl = "",
+                        price = Price("", "", 0),
+                        status = 0,
+                        updateTime = 0
+                    ),
+                    changelogState = ChangelogLoadState.Complete,
+                    changelogs = listOf(),
+                    appLoadingState = AppLoadingState.Loaded,
+                    remoteVersionInfo = AppVersionInfo(
+                        isBeta = true,
+                        installationSize = 9000000,
+                        targetSdkVersion = 33,
+                        ratingLabel = "5.0"
+                    )
+                ),
+                installedApps = InstalledApps.StaticMap(emptyMap()),
+            )
+        }
     }
 }
