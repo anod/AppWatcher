@@ -6,7 +6,6 @@ import android.graphics.Bitmap
 import android.text.Spannable
 import android.text.format.Formatter
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -20,7 +19,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -46,8 +45,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -57,8 +59,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -100,7 +104,6 @@ import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.StoreIntent
 import com.google.accompanist.placeholder.material.placeholder
 import info.anodsplace.applog.AppLog
-import info.anodsplace.compose.AutoSizeText
 import info.anodsplace.compose.toAnnotatedString
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.text.Html
@@ -216,7 +219,9 @@ private fun createAppChooser(appInfo: App, recentChange: AppChange, context: Con
     return builder.createChooserIntent()
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
+private val headerHeightDp = 80.dp
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DetailsScreenContent(
     screenState: DetailsState,
@@ -231,14 +236,30 @@ private fun DetailsScreenContent(
         onEvent(DetailsEvent.LoadChangelog)
     }
 
-    val titleVisibility by remember { mutableStateOf(0.0f) }
-
     val appColorAvailable =
         (screenState.customPrimaryColor != null || screenState.appIconState is AppIconState.Default)
     val surfaceColor: Color = if (appColorAvailable)
         MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
 
     val snackBarHostState = remember { SnackbarHostState() }
+
+    val topAppBarState = rememberTopAppBarState()
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
+        state = topAppBarState
+    )
+
+    val heightOffsetLimit = with(LocalDensity.current) { -headerHeightDp.toPx() }
+    SideEffect {
+        if (scrollBehavior.state.heightOffsetLimit != heightOffsetLimit) {
+            scrollBehavior.state.heightOffsetLimit = heightOffsetLimit
+        }
+    }
+
+    val actualHeaderHeightDp = LocalDensity.current.run {
+        headerHeightDp + scrollBehavior.state.heightOffset.toDp()
+    }
+
+    val collapsedFraction = scrollBehavior.state.collapsedFraction
 
     Scaffold(
         modifier = modifier,
@@ -255,7 +276,7 @@ private fun DetailsScreenContent(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .requiredHeight(144.dp) // 60 + 64
+                        .height(64.dp + actualHeaderHeightDp)
                         .align(Alignment.TopStart)
                         .background(color = surfaceColor)
                 )
@@ -263,15 +284,19 @@ private fun DetailsScreenContent(
 
             Column {
                 DetailsTopAppBar(
-                    titleVisibility = titleVisibility,
+                    titleVisibility = collapsedFraction,
                     screenState = screenState,
                     onEvent = onEvent,
                     containerColor = Color.Transparent
                 )
-                DetailsHeader(
-                    screenState = screenState,
-                    containerColor = Color.Transparent
-                )
+                if (collapsedFraction < 1.0f) {
+                    DetailsHeader(
+                        screenState = screenState,
+                        alpha = 1.0f - collapsedFraction,
+                        heightDp = actualHeaderHeightDp,
+                        containerColor = Color.Transparent
+                    )
+                }
                 VersionDetails(
                     screenState = screenState,
                     installedApps = installedApps
@@ -293,6 +318,7 @@ private fun DetailsScreenContent(
 
                     ChangelogLoadState.Complete -> DetailsChangelog(
                         screenState = screenState,
+                        scrollBehaviour = scrollBehavior,
                         onEvent = onEvent
                     )
 
@@ -312,13 +338,16 @@ private fun DetailsScreenContent(
                 }
             }
 
-            SmallFloatingActionButton(
-                onClick = { onEvent(DetailsEvent.PlayStore) },
-                content = { PlayStoreAppIcon() },
-                modifier = Modifier
-                    .padding(top = 118.dp, end = 16.dp)
-                    .align(Alignment.TopEnd)
-            )
+            if (collapsedFraction < 0.7f) {
+                SmallFloatingActionButton(
+                    onClick = { onEvent(DetailsEvent.PlayStore) },
+                    content = { PlayStoreAppIcon() },
+                    modifier = Modifier
+                        .alpha(1.0f - collapsedFraction)
+                        .padding(top = 64.dp + actualHeaderHeightDp - 24.dp, end = 16.dp)
+                        .align(Alignment.TopEnd)
+                )
+            }
         }
     }
 
@@ -398,11 +427,11 @@ fun VersionDetails(screenState: DetailsState, installedApps: InstalledApps) {
                     if (versionInfo.isBeta) {
                         VersionInfoCell(text = stringResource(id = R.string.beta))
                     }
-                    if (versionInfo.ratingLabel.isNotEmpty()) {
+                    if (versionInfo.starRating > 0) {
                         VersionInfoCell(
                             text = stringResource(
                                 id = R.string.rating_stars,
-                                versionInfo.ratingLabel
+                                versionInfo.starRating
                             )
                         )
                     }
@@ -424,7 +453,7 @@ fun VersionDetails(screenState: DetailsState, installedApps: InstalledApps) {
                             placeholder = true
                         )
                         VersionInfoCell(
-                            text = stringResource(id = R.string.rating_stars, "5.0"),
+                            text = stringResource(id = R.string.rating_stars, 5.0f),
                             placeholder = true
                         )
                         VersionInfoCell(text = "50 MB", placeholder = true)
@@ -502,10 +531,18 @@ private fun HorizontalDivider(
     )
 }
 
-@OptIn(ExperimentalTextApi::class)
+@OptIn(ExperimentalTextApi::class, ExperimentalMaterial3Api::class)
 @Composable
-private fun DetailsChangelog(screenState: DetailsState, onEvent: (DetailsEvent) -> Unit) {
-    LazyColumn {
+private fun DetailsChangelog(
+    screenState: DetailsState,
+    onEvent: (DetailsEvent) -> Unit,
+    scrollBehaviour: TopAppBarScrollBehavior
+) {
+    LazyColumn(
+        modifier = Modifier
+            .nestedScroll(scrollBehaviour.nestedScrollConnection)
+            .fillMaxSize()
+    ) {
         items(screenState.changelogs.size) { i ->
             val change = screenState.changelogs[i]
             SelectionContainer {
@@ -563,19 +600,23 @@ private fun DetailsChangelog(screenState: DetailsState, onEvent: (DetailsEvent) 
 @Composable
 private fun DetailsHeader(
     screenState: DetailsState,
+    alpha: Float,
+    heightDp: Dp,
     containerColor: Color = MaterialTheme.colorScheme.primary,
     contentColor: Color = MaterialTheme.colorScheme.onPrimary,
 ) {
     Row(
         modifier = Modifier
-            .height(80.dp)
+            .height(heightDp)
+            .clipToBounds()
             .fillMaxWidth()
             .background(color = containerColor)
+            .alpha(alpha)
     ) {
         DetailsAppIcon(
             appIconState = screenState.appIconState,
             modifier = Modifier
-                .size(iconSizeBig)
+                .requiredSize(iconSizeBig)
                 .padding(start = 16.dp)
         )
         SelectionContainer {
@@ -583,13 +624,14 @@ private fun DetailsHeader(
                 modifier = Modifier.padding(start = 8.dp, end = 8.dp)
             ) {
                 if (screenState.app != null) {
-                    AutoSizeText(
+                    Text(
                         text = screenState.title,
                         color = contentColor,
                         style = MaterialTheme.typography.headlineSmall,
-                        maxFontSize = 24.sp,
+                        fontSize = if (screenState.title.length >= 30)
+                            16.sp else 18.sp,
                         maxLines = 1,
-                        // overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis
                     )
                     if (screenState.app.creator.isNotEmpty()) {
                         Text(
@@ -659,9 +701,12 @@ private fun DetailsTopAppBar(
     contentColor: Color = MaterialTheme.colorScheme.onPrimary,
 ) {
     var showDeleteNotice by remember { mutableStateOf(false) }
+    val isTitleVisible by remember(titleVisibility) {
+        derivedStateOf { titleVisibility > 0.0f }
+    }
     TopAppBar(
         title = {
-            if (titleVisibility > 0) {
+            if (isTitleVisible) {
                 Row(
                     modifier = Modifier.alpha(titleVisibility)
                 ) {
@@ -669,13 +714,27 @@ private fun DetailsTopAppBar(
                         appIconState = screenState.appIconState,
                         modifier = Modifier.size(iconSizeSmall)
                     )
-                    Text(
-                        text = screenState.title,
-                        color = contentColor,
-                        style = MaterialTheme.typography.headlineSmall,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    Column(
+                        modifier = Modifier.padding(start = 8.dp)
+                    ) {
+                        val hasUploadDate = screenState.app?.uploadDate?.isNotEmpty() == true
+                        Text(
+                            text = screenState.title,
+                            color = contentColor,
+                            style = MaterialTheme.typography.labelMedium,
+                            maxLines = if (hasUploadDate) 1 else 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        if (screenState.app?.uploadDate?.isNotEmpty() == true) {
+                            Text(
+                                text = screenState.app.uploadDate,
+                                color = contentColor,
+                                style = MaterialTheme.typography.labelSmall,
+                                maxLines = 1,
+                                overflow = TextOverflow.Clip
+                            )
+                        }
+                    }
                 }
             }
         },
@@ -948,7 +1007,7 @@ private fun VersionInfoPreview() {
                         isBeta = true,
                         installationSize = 9000000,
                         targetSdkVersion = 33,
-                        ratingLabel = "5.0"
+                        starRating = 5.0f
                     )
                 ),
                 installedApps = InstalledApps.StaticMap(emptyMap()),

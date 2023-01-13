@@ -101,7 +101,7 @@ data class AppVersionInfo(
     val isBeta: Boolean,
     val installationSize: Long,
     val targetSdkVersion: Int,
-    val ratingLabel: String,
+    val starRating: Float,
 )
 
 sealed interface DetailsAction {
@@ -439,9 +439,9 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
                         appDetails.testingProgramInfo.subscribedAndInstalled -> true
                         else -> false
                     },
-                    installationSize = appDetails.installationSize,
+                    installationSize = appDetails.fileList.firstOrNull()?.compressedSize ?: 0L,
                     targetSdkVersion = appDetails.targetSdkVersion,
-                    ratingLabel = details.document!!.rating.ratingLabel ?: ""
+                    starRating = details.document!!.rating.starRating
                 )
             )
         } else {

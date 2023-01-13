@@ -217,7 +217,7 @@
         <item>Teardrop</item>
     </array>
     <string name="beta">β</string>
-    <string name="rating_stars">%s ★</string>
+    <string name="rating_stars">%.1f ★</string>
     <string name="refresh_history">Refresh history</string>
     <string name="schedule_status_new">New</string>
     <string name="schedule_status_success">Success</string>
