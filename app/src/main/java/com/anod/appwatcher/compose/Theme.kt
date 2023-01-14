@@ -183,6 +183,10 @@ fun AppTheme(
                 darkIcons = isAppearanceLightStatusBars
             )
         }
+        systemUI.setNavigationBarColor(
+            statusBarColor,
+            darkIcons = isAppearanceLightStatusBars
+        )
     }
 
     MaterialTheme(
