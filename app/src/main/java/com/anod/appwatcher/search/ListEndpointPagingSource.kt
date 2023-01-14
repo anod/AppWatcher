@@ -3,15 +3,20 @@ package com.anod.appwatcher.search
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import finsky.api.DfeListType
 import finsky.api.Document
+import finsky.api.toListResponse
+import finsky.protos.ResponseWrapper
 import info.anodsplace.applog.AppLog
-import info.anodsplace.playstore.ListEndpoint
 
-class ListEndpointPagingSource(
-        private val endpoint: ListEndpoint
+abstract class ListEndpointPagingSource(
+    private val listType: DfeListType
 ) : PagingSource<String, Document>() {
 
     private var isFirst = true
+
+    abstract suspend fun execute(nextPageUrl: String) : ResponseWrapper
+
     override suspend fun load(params: LoadParams<String>): LoadResult<String, Document> {
         try {
             if (params.key == null && !isFirst) {
@@ -19,7 +24,7 @@ class ListEndpointPagingSource(
                 return LoadResult.Page(emptyList(), null, null)
             }
             val nextPageUrl = params.key ?: ""
-            val response = endpoint.execute(nextPageUrl = nextPageUrl)
+            val response = execute(nextPageUrl = nextPageUrl).toListResponse(listType)
             isFirst = false
             AppLog.d("ListPagingSource load: [${params.key}] $nextPageUrl")
             return LoadResult.Page(

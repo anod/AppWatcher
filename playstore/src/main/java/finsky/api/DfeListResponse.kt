@@ -7,13 +7,22 @@ import finsky.protos.Payload
 import finsky.protos.ResponseWrapper
 import finsky.protos.Search.SearchResponse
 
-class DfeListResponse(val items: List<Document>, val nextPageUrl: String?)
+data class DfeListResponse(val items: List<Document>, val nextPageUrl: String?)
 
-abstract class DfeList(private val listType: Int) {
+enum class DfeListType {
+    ALL,
+    SEARCH,
+    SIMILAR,
+    RELATED,
+}
 
-    abstract suspend fun execute(): DfeListResponse
+fun ResponseWrapper.toListResponse(listType: DfeListType): DfeListResponse {
+    return DfeList(listType).convert(this)
+}
 
-    protected fun onResponse(responseWrapper: ResponseWrapper): DfeListResponse {
+private class DfeList(private val listType: DfeListType) {
+
+    fun convert(responseWrapper: ResponseWrapper): DfeListResponse {
         val nextPageUrls = mutableListOf<Pair<String, String>>()
         val items = mutableListOf<DocV2>()
         collect(responseWrapper, items, nextPageUrls)
@@ -68,21 +77,18 @@ abstract class DfeList(private val listType: Int) {
     private fun accept(doc: DocV2): Boolean {
         val backendDocId = doc.backendDocid
         return when (listType) {
-            ALL -> {
+            DfeListType.ALL -> {
                 true
             }
-            SEARCH -> {
+            DfeListType.SEARCH -> {
                 backendDocId != null && backendDocId.matches(Regex(".*search.*"))
             }
-            SIMILAR -> {
+            DfeListType.SIMILAR -> {
                 backendDocId != null && backendDocId.matches(Regex("similar_apps"))
             }
-            RELATED -> {
+            DfeListType.RELATED -> {
                 backendDocId != null && backendDocId
                         .matches(Regex("pre_install_users_also_installed"))
-            }
-            else -> {
-                false
             }
         }
     }
@@ -107,10 +113,5 @@ abstract class DfeList(private val listType: Int) {
                 payload.listResponse
             } else ListResponse.getDefaultInstance()
         }
-
-        const val ALL = 0
-        const val SEARCH = 1
-        const val SIMILAR = 2
-        const val RELATED = 3
     }
 }

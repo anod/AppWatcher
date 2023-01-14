@@ -25,21 +25,20 @@ import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.date.UploadDateParserCache
 import com.anod.appwatcher.utils.networkConnection
+import finsky.api.DfeApi
+import finsky.api.DfeListType
 import finsky.api.Document
+import finsky.api.toDocument
 import info.anodsplace.framework.app.HingeDeviceLayout
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.playstore.AppDetailsFilter
-import info.anodsplace.playstore.DetailsEndpoint
-import info.anodsplace.playstore.SearchEndpoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.get
 import org.koin.core.component.inject
-import org.koin.core.parameter.parametersOf
 
 sealed interface SearchStatus {
     object Loading : SearchStatus
@@ -110,13 +109,12 @@ class SearchViewModel(
     val installedApps by lazy { InstalledApps.MemoryCache(InstalledApps.PackageManager(packageManager)) }
     val prefs: Preferences by inject()
 
-    private var endpointDetails: DetailsEndpoint? = null
-    private var endpointSearch: SearchEndpoint? = null
+    private val dfeApi: DfeApi by inject()
+
     private var searchJob: Job? = null
 
     override fun onCleared() {
-        endpointDetails = null
-        endpointSearch = null
+        searchJob?.cancel()
     }
 
     init {
@@ -170,8 +168,9 @@ class SearchViewModel(
     private fun onSearchRequest(query: String) {
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
+            viewState = viewState.copy(searchQuery = query)
             search(query).collect { searchStatus ->
-                viewState = viewState.copy(searchQuery = query, searchStatus = searchStatus)
+                viewState = viewState.copy(searchStatus = searchStatus)
                 if (searchStatus is SearchStatus.NoNetwork) {
                     emitAction(SearchViewAction.ShowSnackbar(message = context.getString(R.string.check_connection), duration = SnackbarDuration.Short, finish = true))
                 } else if (searchStatus is SearchStatus.Error) {
@@ -196,18 +195,11 @@ class SearchViewModel(
                 return@flow
             }
         }
-        endpointSearch = get { parametersOf(query) }
-        if (viewState.isPackageSearch) {
-            val detailsUrl = AppInfo.createDetailsUrl(query)
-            endpointDetails = get { parametersOf(detailsUrl) }
-        }
         emit(SearchStatus.Loading)
-        if (endpointDetails == null) {
-            resetPager()
-            emit(SearchStatus.SearchList(query = query))
-        } else {
+        if (viewState.isPackageSearch) {
             try {
-                val document = endpointDetails!!.execute()
+                val detailsUrl = AppInfo.createDetailsUrl(query)
+                val document = dfeApi.details(detailsUrl).toDocument()
                 if (document != null) {
                     emit(SearchStatus.DetailsAvailable(document))
                 } else {
@@ -222,6 +214,9 @@ class SearchViewModel(
                     emit(SearchStatus.SearchList(query = query))
                 }
             }
+        } else {
+            resetPager()
+            emit(SearchStatus.SearchList(query = query))
         }
     }
 
@@ -239,12 +234,14 @@ class SearchViewModel(
         _pagingData = null
     }
 
-    private fun createPager() = Pager(PagingConfig(pageSize = 10)) { ListEndpointPagingSource(endpointSearch!!) }
-            .flow
-            .cachedIn(viewModelScope)
-            .map {
-                it.filter { d -> AppDetailsFilter.predicate(d) }
-            }
+    private fun createPager() = Pager(PagingConfig(pageSize = 10)) {
+        SearchEndpointPagingSource(dfeApi, viewState.searchQuery)
+    }
+    .flow
+    .cachedIn(viewModelScope)
+    .map {
+        it.filter { d -> AppDetailsFilter.predicate(d) }
+    }
 
     private fun onAccountSelected(account: Account) {
         viewState = viewState.copy(account = account)

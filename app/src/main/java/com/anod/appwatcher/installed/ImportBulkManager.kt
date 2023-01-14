@@ -3,14 +3,15 @@ package com.anod.appwatcher.installed
 
 import androidx.collection.SimpleArrayMap
 import finsky.api.BulkDocId
+import finsky.api.DfeApi
+import finsky.api.filterDocuments
 import info.anodsplace.applog.AppLog
-import info.anodsplace.playstore.BulkDetailsEndpoint
+import info.anodsplace.playstore.AppDetailsFilter
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import org.koin.core.Koin
-import org.koin.core.parameter.parametersOf
 
 sealed interface ImportStatus {
     object NotStarted : ImportStatus
@@ -66,9 +67,11 @@ internal class ImportBulkManager(private val koin: Koin) {
     }
 
     private suspend fun importDetails(docIds: List<BulkDocId>): SimpleArrayMap<String, Int> = withContext(Main) {
-        val endpoint = koin.get<BulkDetailsEndpoint> { parametersOf(docIds) }
+        val dfeApi = koin.get<DfeApi>()
         try {
-            val docs = endpoint.execute().toTypedArray()
+            val docs = dfeApi.details(docIds, includeDetails = true)
+                .filterDocuments(AppDetailsFilter.predicate)
+                .toTypedArray()
             return@withContext importTask.execute(*docs)
         } catch (e: Exception) {
             AppLog.e(e)

@@ -6,7 +6,7 @@ import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
 
 fun createInstalledModule(): Module = module {
-    factory { (viewModelScope: CoroutineScope) -> ChangelogAdapter(viewModelScope, get(), get(), getKoin()) }
+    factory { (viewModelScope: CoroutineScope) -> ChangelogAdapter(viewModelScope, get(), get(), get()) }
     factory { ImportBulkManager(getKoin()) }
     factoryOf(::ImportInstalledTask)
 }

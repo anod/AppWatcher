@@ -14,16 +14,15 @@ import androidx.paging.filter
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.model.AppInfo
-import com.anod.appwatcher.search.ListEndpointPagingSource
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.date.UploadDateParserCache
+import finsky.api.DfeApi
 import finsky.api.Document
 import finsky.api.FilterComposite
 import finsky.api.FilterPredicate
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.playstore.AppDetailsFilter
 import info.anodsplace.playstore.AppNameFilter
-import info.anodsplace.playstore.WishListEndpoint
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -60,7 +59,7 @@ class WishListViewModel(account: Account?, authToken: String) : BaseFlowViewMode
     }
 
     private val database: AppsDatabase by inject()
-    private val endpoint: WishListEndpoint by inject()
+    private val dfeApi: DfeApi by inject()
     private val uploadDateParserCache: UploadDateParserCache by inject()
     private val packageManager: PackageManager by inject()
     val installedApps by lazy { InstalledApps.MemoryCache(InstalledApps.PackageManager(packageManager)) }
@@ -88,7 +87,7 @@ class WishListViewModel(account: Account?, authToken: String) : BaseFlowViewMode
             return _pagingData!!
         }
 
-    private fun createPager() = Pager(PagingConfig(pageSize = 10)) { ListEndpointPagingSource(endpoint) }
+    private fun createPager() = Pager(PagingConfig(pageSize = 10)) { WishListEndpointPagingSource(dfeApi) }
             .flow
             .cachedIn(viewModelScope)
             .combine(viewStates.map { it.nameFilter }.distinctUntilChanged()) { pageData, nameFilter ->

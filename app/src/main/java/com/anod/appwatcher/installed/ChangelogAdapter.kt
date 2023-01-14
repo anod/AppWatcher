@@ -4,21 +4,21 @@ import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.preferences.Preferences
 import finsky.api.BulkDocId
+import finsky.api.DfeApi
+import finsky.api.filterDocuments
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.InstalledPackage
-import info.anodsplace.playstore.BulkDetailsEndpoint
+import info.anodsplace.playstore.AppDetailsFilter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
-import org.koin.core.Koin
-import org.koin.core.parameter.parametersOf
 
 class ChangelogAdapter(
         private val viewModelScope: CoroutineScope,
         private val database: AppsDatabase,
         private val prefs: Preferences,
-        private val koin: Koin
+        private val dfeApi: DfeApi
 ) {
     private var job: Job? = null
     val changelogs = mutableMapOf<String, AppChange?>()
@@ -75,9 +75,9 @@ class ChangelogAdapter(
             AppLog.e("No account selected", "ChangelogAdapter")
             return
         }
-        val endpoint = koin.get<BulkDetailsEndpoint> { parametersOf(docIds) }
         try {
-            val documents = endpoint.execute()
+            val documents = dfeApi.details(docIds, includeDetails = true)
+                .filterDocuments(AppDetailsFilter.predicate)
             documents.associateByTo(changelogs, { it.docId }) {
                 val recentChanges = it.appDetails.recentChangesHtml?.trim() ?: ""
                 AppChange(

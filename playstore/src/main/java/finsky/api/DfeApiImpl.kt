@@ -8,7 +8,6 @@ import finsky.protos.Details.BulkDetailsResponse
 import finsky.protos.Details.DetailsResponse
 import finsky.protos.ResponseWrapper
 import info.anodsplace.applog.AppLog
-import info.anodsplace.playstore.DfeDeviceInfoProvider
 import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.CacheControl
 import okhttp3.Call
@@ -34,14 +33,14 @@ class DfeApiImpl(http: OkHttpClient, private val apiContext: DfeApiContext) : Df
 
     private val http = httpWithCache(http)
 
-    constructor(queue: OkHttpClient, context: Context, account: Account, authToken: String, deviceInfo: DfeDeviceInfoProvider)
-            : this(queue, DfeApiContext(context, account, authToken, deviceInfo))
+    constructor(http: OkHttpClient, context: Context, account: Account, authTokenProvider: DfeAuthTokenProvider, deviceInfoProvider: DfeDeviceInfoProvider)
+            : this(http, DfeApiContext(context, account, authTokenProvider, deviceInfoProvider))
 
-    override suspend fun search(initialQuery: String, nextPageUrl: String): ResponseWrapper {
+    override suspend fun search(query: String, nextPageUrl: String): ResponseWrapper {
         val url = if (nextPageUrl.isEmpty())
                 DfeApi.SEARCH_CHANNEL_URI.toHttpUrl().newBuilder()
                     .addQueryParameter("c", DfeApi.searchBackendId.toString())
-                    .addQueryParameter("q", initialQuery)
+                    .addQueryParameter("q", query)
                     .build().toString()
             else
                 DfeApi.URL_FDFE + "/" + nextPageUrl

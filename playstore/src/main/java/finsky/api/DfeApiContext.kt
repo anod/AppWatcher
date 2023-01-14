@@ -7,12 +7,19 @@ import android.os.Build
 import android.text.TextUtils
 import finsky.config.ContentLevel
 import finsky.utils.NetworkStateChangedReceiver
-import info.anodsplace.playstore.DfeDeviceInfoProvider
-import java.util.*
+import java.util.Locale
 
-class DfeApiContext private constructor(internal val context: Context, val account: Account, private val lastAuthToken: String, deviceId: String,
-                                        locale: Locale, mccmnc: String,
-                                        clientId: String, loggingId: String, filterLevel: Int) {
+class DfeApiContext private constructor(
+    private val context: Context,
+    private val account: Account,
+    private val authTokenProvider: DfeAuthTokenProvider,
+    deviceId: String,
+    locale: Locale,
+    mccmnc: String,
+    clientId: String,
+    loggingId: String,
+    filterLevel: Int
+) {
 
     private val headers: MutableMap<String, String> = mutableMapOf(
             "X-DFE-Device-Id" to deviceId,
@@ -24,16 +31,14 @@ class DfeApiContext private constructor(internal val context: Context, val accou
             "x-dfe-encoded-targets" to "CAESjALBlYEGpgrRAkLwA5IHgAKkCLUBWEDUBTKSAekKmAG6ATKGAS9o8gLdASfcARb7C7gDAQLPBa4DzxPRCLwB2xC2AQGlA54DMCjjC8MCowKtA7AC9AOvDbgC0wHfBlcBxQTLAVGDAxdu9gHlAUyIAhgC5QECxwEHYkJLYgHXCg2hBNwBQE4BYROnAl0y8wKiAoADzQK2AasEyAHeBArIApMCYgnaAmwP6wIxASLNAuYBhgK/Ad0BDhO5AaoBwQMD1wIcB6UBAcUBOgED8wGXAgEH5QGWBANGDgjrAcoBV8kB5QEFHOwCZ5sBlAKQAjjfAgElbI4KkwVwRYQINcwBKtAB3wk2RfoFnALeBvMGGowHEgEBAQTYAQ0ttgFhSlcCAwRrN4DTzwKCu7EDAQEDAgQJCAkBAggEAQIBAQYBAQMFBBUGAwUEBAQDAQ8CAQIDxwEBFgQPJsEBfS8CHAEBCpABDDMXASEKFA8GByI3hAEODBZNCVIBBX8RERgBA4sBGGkUECMIEXBkEQ9qnwHEAoQBBIgBigEZGAsrEwMWBQcBKmUCAiUocxQnLfQEMQ43GIUBjQG0AVlCjgEeJwskECYvW9QBYnoJAQreAXmqAQwDLGSeAQSBAXRQRdQBigHMAgUFCc0BBAFFoAE53wJgNS7OAQ1yqwEgiwM/+wImlwMeQ60ChAZ24wX2Aw8HAQL2AxZznAFVbQEJPAHeBSAQDntVXpsHKxjYAQEhAQcCIAgSHQemAzgBGkaEAQG7AnWnARgBIgKjAhIBARgWD8YLHYABhwGEAsoBAQIBwwEn6wIBOQHbAVLnA0H1AsIBdQETKQSLAbIDSpsBBhI/RDgUK1VF4gKDAgsMCC9cF1EbuQEO9wG3ASrnA98DlwEE6wGHAWIVGdMBBhMSC1ooJAECAoQFtQENBiNZKJ8BMh4YAQQgAlYBIwKQAR0SGyd+iQFdDA/9AUkjBCIqHoACPwQbAxcg3AE9sgHKAgsYsQIlfhtauwEMiAEjeYsBigEDOwErBTcCVAFipAIhMQ1FA54DzgHmAimUBAvsAQc4jAEeDP8DAQK1AWtsOlAKCAKKBBQUAgMBMTJRGgIDygGZAToBAQcBVYQBlwPJAWkIfYkBdw5eMhE03gFGRsECBA89YREcP4kBHCdRBleRATIBCgGdAtICBBJNJQKIAYcBhgEgMpACEcYBBQQCBgQCBAIHBAIEAgUGBAIHBgQBBwYEAgQBBiLUAX5VOSEkH14BAQUDKQGkAXQFBwUEAwICmwHtAoUCBQQCBgcVAisdFAIKAb4BCDoWFChoJoYCGwM9LocBAwERmQEEEgsCRNcBPCG0AQ4BV3EBCV0gFQoFFxqSASoBLB4vCB4DRwgJiwEUCX4E2gEFBgcFBwQCBQYEAz8OJAQDBAEEAwYEH5EBtAMmBzsCAwICAgECE10QDBhVqQEDAgMFAQIJJw5YASEJCiEtOg4KLBQsFAcmJTSdAXoEAQcEAgQBMjMkFitdHqECJwooAwEuGS8FAgIBAwICRhwaAcMBCKMDBQUaUaQBDMUBDCAVbzkFAhYJJBYEAgQDBgU"
     )
 
-    internal val accountName: String
+    val accountName: String
         get() = account.name
 
-    constructor(context: Context, account: Account, authTokenStr: String, deviceInfo: DfeDeviceInfoProvider)
-            : this(context, account, authTokenStr, deviceInfo.deviceId, deviceInfo.simOperator, ContentLevel().dfeValue)
+    constructor(context: Context, account: Account, authTokenProvider: DfeAuthTokenProvider, deviceInfo: DfeDeviceInfoProvider)
+            : this(context, account, authTokenProvider, deviceInfo.deviceId, deviceInfo.simOperator, ContentLevel().dfeValue)
 
-    constructor(context: Context, account: Account, authTokenStr: String, deviceId: String, mccmnc: String, filterLevel: Int) : this(
-            context, account, authTokenStr, deviceId,
-            Locale.getDefault(), mccmnc, CLIENT_ID, "", filterLevel
-    )
+    constructor(context: Context, account: Account, authTokenProvider: DfeAuthTokenProvider, deviceId: String, mccmnc: String, filterLevel: Int)
+            : this(context, account, authTokenProvider, deviceId, Locale.getDefault(), mccmnc, CLIENT_ID, "", filterLevel)
 
     init {
         if (mccmnc.isNotEmpty()) {
@@ -45,10 +50,14 @@ class DfeApiContext private constructor(internal val context: Context, val accou
     }
 
     internal fun createHeaders(): MutableMap<String, String> {
+        val authToken = authTokenProvider.authToken
+        if (authToken.isBlank()) {
+            throw IllegalStateException("Auth token is empty")
+        }
         synchronized(this) {
             val hashMap = this.headers.toMutableMap()
             hashMap["X-DFE-Network-Type"] = NetworkStateChangedReceiver.getCachedNetworkType(context).value.toString()
-            hashMap["Authorization"] = "GoogleLogin auth=$lastAuthToken"
+            hashMap["Authorization"] = "GoogleLogin auth=${authToken}"
             return hashMap
         }
     }

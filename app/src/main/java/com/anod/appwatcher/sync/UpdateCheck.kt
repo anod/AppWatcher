@@ -27,13 +27,15 @@ import com.anod.appwatcher.utils.compareLettersAndDigits
 import com.anod.appwatcher.utils.date.UploadDateParserCache
 import com.anod.appwatcher.utils.extractUploadDate
 import finsky.api.BulkDocId
+import finsky.api.DfeApi
 import finsky.api.Document
+import finsky.api.filterDocuments
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.app.NotificationManager
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.net.NetworkConnectivity
-import info.anodsplace.playstore.BulkDetailsEndpoint
+import info.anodsplace.playstore.AppDetailsFilter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.core.Koin
@@ -183,10 +185,10 @@ class UpdateCheck(
             list.associateBy { it.app.packageName }
         }.forEach { localApps ->
             val docIds = localApps.map { BulkDocId(it.key, it.value.app.versionNumber) }
-            val endpoint = koin.get<BulkDetailsEndpoint> { parametersOf(docIds) }
+            val dfeApi = koin.get<DfeApi>()
             AppLog.d("Sending chunk... $docIds")
             val documents = try {
-                endpoint.execute()
+                dfeApi.details(docIds, includeDetails = true).filterDocuments(AppDetailsFilter.predicate)
             } catch (e: Exception) {
                 AppLog.e("Fetching of bulk updates failed ${e.message ?: ""}", "UpdateCheck")
                 emptyList()

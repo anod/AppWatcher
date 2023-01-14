@@ -22,6 +22,15 @@ enum class PatchFormat(var value: Int) {
     UNKNOWN_5(5);
 }
 
+interface DfeDeviceInfoProvider {
+    val deviceId: String
+    val simOperator: String
+}
+
+interface DfeAuthTokenProvider {
+    val authToken: String
+}
+
 interface DfeApi {
 
     suspend fun search(initialQuery: String, nextPageUrl: String): ResponseWrapper

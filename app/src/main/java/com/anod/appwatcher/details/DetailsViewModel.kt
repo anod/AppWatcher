@@ -31,14 +31,15 @@ import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.date.UploadDateParserCache
 import com.anod.appwatcher.utils.forPlayStore
 import com.anod.appwatcher.utils.prefs
+import finsky.api.DfeApi
 import finsky.api.Document
+import finsky.api.toDocument
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.forAppInfo
 import info.anodsplace.framework.content.forUninstall
 import info.anodsplace.framework.text.Html
 import info.anodsplace.graphics.chooseDark
-import info.anodsplace.playstore.DetailsEndpoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flatMapLatest
@@ -47,7 +48,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import org.koin.core.parameter.parametersOf
 import java.net.URLEncoder
 import java.util.Locale
 
@@ -167,7 +167,7 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
     private val uploadDateParserCache: UploadDateParserCache by inject()
     private val iconLoader: AppIconLoader by inject()
     private val packageManager: PackageManager by inject()
-    private val detailsEndpoint: DetailsEndpoint by inject { parametersOf(viewState.detailsUrl) }
+    private val dfeApi: DfeApi by inject()
 
     val installedApps: InstalledApps by lazy { InstalledApps.PackageManager(packageManager) }
 
@@ -355,7 +355,7 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
             try {
                 if (authToken.refreshToken(account)) {
                     try {
-                        val document = detailsEndpoint.execute()
+                        val document = dfeApi.details(viewState.detailsUrl).toDocument()
                         onRemoteDetailsFetched(localChanges, document)
                     } catch (e: Exception) {
                         loadError = true
