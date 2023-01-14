@@ -4,7 +4,7 @@ import android.os.Parcel
 import android.os.Parcelable
 import com.anod.appwatcher.utils.date.UploadDateParserCache
 import com.anod.appwatcher.utils.extractUploadDate
-import finsky.api.model.Document
+import finsky.api.Document
 
 class AppInfo : AppInfoMetadata, Parcelable {
 

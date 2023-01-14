@@ -17,9 +17,9 @@ import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.search.ListEndpointPagingSource
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.date.UploadDateParserCache
-import finsky.api.model.Document
-import finsky.api.model.FilterComposite
-import finsky.api.model.FilterPredicate
+import finsky.api.Document
+import finsky.api.FilterComposite
+import finsky.api.FilterPredicate
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.playstore.AppDetailsFilter
 import info.anodsplace.playstore.AppNameFilter

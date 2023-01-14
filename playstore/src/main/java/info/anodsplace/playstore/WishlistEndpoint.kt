@@ -3,7 +3,7 @@ package info.anodsplace.playstore
 import android.accounts.Account
 import android.content.Context
 import finsky.api.DfeApi
-import finsky.api.model.DfeWishList
+import finsky.api.DfeWishList
 import okhttp3.OkHttpClient
 
 /**
@@ -13,8 +13,10 @@ import okhttp3.OkHttpClient
 class WishListEndpoint(
         context: Context,
         http: OkHttpClient,
-        deviceInfoProvider: DeviceInfoProvider,
-        account: Account) : ListEndpoint(context, http, deviceInfoProvider, account) {
+        deviceInfoProvider: DfeDeviceInfoProvider,
+        account: Account,
+        authTokenProvider: DfeAuthTokenProvider
+) : ListEndpoint(context, http, deviceInfoProvider, account, authTokenProvider) {
 
     override fun createDfeList(dfeApi: DfeApi, nextPageUrl: String) = DfeWishList(dfeApi, nextPageUrl)
 }

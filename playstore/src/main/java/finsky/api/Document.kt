@@ -1,4 +1,4 @@
-package finsky.api.model
+package finsky.api
 
 import android.util.SparseArray
 import finsky.protos.AppDetails

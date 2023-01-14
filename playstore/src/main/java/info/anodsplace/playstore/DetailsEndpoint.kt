@@ -2,9 +2,7 @@ package info.anodsplace.playstore
 
 import android.accounts.Account
 import android.content.Context
-import finsky.api.model.DfeDetails
-import finsky.api.model.Document
-import finsky.protos.AppDetails
+import finsky.api.Document
 import okhttp3.OkHttpClient
 
 /**
@@ -12,18 +10,23 @@ import okhttp3.OkHttpClient
  * *
  * @date 2015-02-22
  */
-class DetailsEndpoint(context: Context, http: OkHttpClient, deviceInfoProvider: DeviceInfoProvider, account: Account, private val detailsUrl: String)
-    : PlayStoreEndpointBase<DfeDetails>(context, http, deviceInfoProvider, account) {
+class DetailsEndpoint(
+    context: Context,
+    http: OkHttpClient,
+    deviceInfoProvider: DfeDeviceInfoProvider,
+    account: Account,
+    private val authTokenProvider: DfeAuthTokenProvider,
+    private val detailsUrl: String
+) {
+    private val dfeApiProvider = DfeApiProvider(
+        context = context,
+        http = http,
+        deviceInfoProvider = deviceInfoProvider,
+        account = account
+    )
 
-    val appDetails: AppDetails?
-        get() = data?.document?.appDetails
-
-    val document: Document?
-        get() = data?.document
-
-    override fun beforeRequest(data: DfeDetails) {
-        data.detailsUrl = detailsUrl
+    suspend fun execute(): Document? {
+        val response = dfeApiProvider.provide(authToken = authTokenProvider.authToken).details(detailsUrl)
+        return response.docV2?.let { Document(it) }
     }
-
-    override fun createDfeModel(): DfeDetails = DfeDetails(dfeApi)
 }

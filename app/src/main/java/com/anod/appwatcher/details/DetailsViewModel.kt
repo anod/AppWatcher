@@ -1,10 +1,12 @@
 package com.anod.appwatcher.details
 
 import android.accounts.Account
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
+import android.text.format.Formatter
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -29,8 +31,7 @@ import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.date.UploadDateParserCache
 import com.anod.appwatcher.utils.forPlayStore
 import com.anod.appwatcher.utils.prefs
-import finsky.api.model.DfeDetails
-import finsky.api.model.Document
+import finsky.api.Document
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.forAppInfo
@@ -160,6 +161,7 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
         }
     }
 
+    private val context: Context by inject()
     private val database: AppsDatabase by inject()
     private val authToken: AuthTokenBlocking by inject()
     private val uploadDateParserCache: UploadDateParserCache by inject()
@@ -353,8 +355,8 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
             try {
                 if (authToken.refreshToken(account)) {
                     try {
-                        val model = detailsEndpoint.start()
-                        onRemoteDetailsFetched(localChanges, model)
+                        val document = detailsEndpoint.execute()
+                        onRemoteDetailsFetched(localChanges, document)
                     } catch (e: Exception) {
                         loadError = true
                         AppLog.e("Cannot fetch details for ${viewState.appId}", e)
@@ -414,8 +416,8 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
         }
     }
 
-    private fun onRemoteDetailsFetched(localChanges: List<AppChange>, details: DfeDetails) {
-        val appDetails = details.document?.appDetails
+    private fun onRemoteDetailsFetched(localChanges: List<AppChange>, document: Document?) {
+        val appDetails = document?.appDetails
 
         viewState = if (appDetails != null) {
             val recentChange = AppChange(
@@ -428,7 +430,7 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
             )
 
             viewState.copy(
-                document = details.document,
+                document = document,
                 changelogs = mergeChangelogs(localChanges, recentChange),
                 changelogState = ChangelogLoadState.Complete,
                 title = viewState.app?.title ?: "",
@@ -439,9 +441,9 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
                         appDetails.testingProgramInfo.subscribedAndInstalled -> true
                         else -> false
                     },
-                    installationSize = appDetails.fileList.firstOrNull()?.compressedSize ?: 0L,
+                    installationSize = appDetails.fileList.sumOf { it.compressedSize },
                     targetSdkVersion = appDetails.targetSdkVersion,
-                    starRating = details.document!!.rating.starRating
+                    starRating = document.rating.starRating
                 )
             )
         } else {
@@ -449,6 +451,17 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
                 changelogState = ChangelogLoadState.Complete,
                 remoteCallFinished = true,
             )
+        }
+
+        appDetails?.fileList?.forEachIndexed { index, fileMetadata ->
+            AppLog.d("FileList #$index " +
+                    "compressedSize: ${Formatter.formatShortFileSize(context, fileMetadata.compressedSize)} " +
+                    "size: ${Formatter.formatShortFileSize(context, fileMetadata.size)} " +
+                    "metadata: $fileMetadata")
+        }
+
+        viewState.remoteVersionInfo?.installationSize?.also {
+            AppLog.d("FileList Sum compressedSize: ${Formatter.formatShortFileSize(context, it)}")
         }
     }
 

@@ -7,8 +7,7 @@ import android.os.Build
 import android.text.TextUtils
 import finsky.config.ContentLevel
 import finsky.utils.NetworkStateChangedReceiver
-import finsky.utils.NetworkType
-import info.anodsplace.playstore.DeviceInfoProvider
+import info.anodsplace.playstore.DfeDeviceInfoProvider
 import java.util.*
 
 class DfeApiContext private constructor(internal val context: Context, val account: Account, private val lastAuthToken: String, deviceId: String,
@@ -28,7 +27,7 @@ class DfeApiContext private constructor(internal val context: Context, val accou
     internal val accountName: String
         get() = account.name
 
-    constructor(context: Context, account: Account, authTokenStr: String, deviceInfo: DeviceInfoProvider)
+    constructor(context: Context, account: Account, authTokenStr: String, deviceInfo: DfeDeviceInfoProvider)
             : this(context, account, authTokenStr, deviceInfo.deviceId, deviceInfo.simOperator, ContentLevel().dfeValue)
 
     constructor(context: Context, account: Account, authTokenStr: String, deviceId: String, mccmnc: String, filterLevel: Int) : this(

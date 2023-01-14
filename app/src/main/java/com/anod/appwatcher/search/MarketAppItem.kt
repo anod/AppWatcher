@@ -31,7 +31,7 @@ import coil.compose.AsyncImage
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.utils.AppIconLoader
-import finsky.api.model.Document
+import finsky.api.Document
 import finsky.protos.AppDetails
 import finsky.protos.DocDetails
 import finsky.protos.DocV2

@@ -20,7 +20,7 @@ import info.anodsplace.framework.app.RealNotificationManager
 import info.anodsplace.framework.net.NetworkConnectivity
 import info.anodsplace.framework.util.createLruCache
 import info.anodsplace.playstore.DeviceId
-import info.anodsplace.playstore.DeviceInfoProvider
+import info.anodsplace.playstore.DfeDeviceInfoProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -37,12 +37,11 @@ fun createAppModule(): Module = module {
     factory { getSystemService(get(), TelephonyManager::class.java) }
     factory { get<Application>().packageManager }
 
-    factory<DeviceInfoProvider> {
-        object : DeviceInfoProvider {
+    factory<DfeDeviceInfoProvider> {
+        object : DfeDeviceInfoProvider {
             override val deviceId: String = get(named("deviceId"))
             override val simOperator: String = getOrNull<TelephonyManager>()?.simOperator ?: ""
         }
-
     }
 
     singleOf(::UploadDateParserCache)

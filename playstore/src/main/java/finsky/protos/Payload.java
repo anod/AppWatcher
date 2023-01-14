@@ -248,11 +248,56 @@ public  final class Payload extends
     bitField0_ = (bitField0_ & ~0x00000008);
   }
 
+  public static final int DELIVERYRESPONSE_FIELD_NUMBER = 21;
+  private finsky.protos.DeliveryResponse deliveryResponse_;
+  /**
+   * <code>optional .finsky.protos.DeliveryResponse deliveryResponse = 21;</code>
+   */
+  @java.lang.Override
+  public boolean hasDeliveryResponse() {
+    return ((bitField0_ & 0x00000010) != 0);
+  }
+  /**
+   * <code>optional .finsky.protos.DeliveryResponse deliveryResponse = 21;</code>
+   */
+  @java.lang.Override
+  public finsky.protos.DeliveryResponse getDeliveryResponse() {
+    return deliveryResponse_ == null ? finsky.protos.DeliveryResponse.getDefaultInstance() : deliveryResponse_;
+  }
+  /**
+   * <code>optional .finsky.protos.DeliveryResponse deliveryResponse = 21;</code>
+   */
+  private void setDeliveryResponse(finsky.protos.DeliveryResponse value) {
+    value.getClass();
+  deliveryResponse_ = value;
+    bitField0_ |= 0x00000010;
+    }
+  /**
+   * <code>optional .finsky.protos.DeliveryResponse deliveryResponse = 21;</code>
+   */
+  @java.lang.SuppressWarnings({"ReferenceEquality"})
+  private void mergeDeliveryResponse(finsky.protos.DeliveryResponse value) {
+    value.getClass();
+  if (deliveryResponse_ != null &&
+        deliveryResponse_ != finsky.protos.DeliveryResponse.getDefaultInstance()) {
+      deliveryResponse_ =
+        finsky.protos.DeliveryResponse.newBuilder(deliveryResponse_).mergeFrom(value).buildPartial();
+    } else {
+      deliveryResponse_ = value;
+    }
+    bitField0_ |= 0x00000010;
+  }
+  /**
+   * <code>optional .finsky.protos.DeliveryResponse deliveryResponse = 21;</code>
+   */
+  private void clearDeliveryResponse() {  deliveryResponse_ = null;
+    bitField0_ = (bitField0_ & ~0x00000010);
+  }
+
   public static final int TESTINGPROGRAMRESPONSE_FIELD_NUMBER = 80;
   private finsky.protos.TestingProgramResponse testingProgramResponse_;
   /**
    * <pre>
-   *        optional DeliveryResponse deliveryResponse = 21;
    *        optional UploadDeviceConfigResponse uploadDeviceConfigResponse = 25;
    *        optional AndroidCheckinResponse androidCheckinResponse = 26;
    *        optional SearchSuggestResponse searchSuggestResponse = 40;
@@ -262,11 +307,10 @@ public  final class Payload extends
    */
   @java.lang.Override
   public boolean hasTestingProgramResponse() {
-    return ((bitField0_ & 0x00000010) != 0);
+    return ((bitField0_ & 0x00000020) != 0);
   }
   /**
    * <pre>
-   *        optional DeliveryResponse deliveryResponse = 21;
    *        optional UploadDeviceConfigResponse uploadDeviceConfigResponse = 25;
    *        optional AndroidCheckinResponse androidCheckinResponse = 26;
    *        optional SearchSuggestResponse searchSuggestResponse = 40;
@@ -280,7 +324,6 @@ public  final class Payload extends
   }
   /**
    * <pre>
-   *        optional DeliveryResponse deliveryResponse = 21;
    *        optional UploadDeviceConfigResponse uploadDeviceConfigResponse = 25;
    *        optional AndroidCheckinResponse androidCheckinResponse = 26;
    *        optional SearchSuggestResponse searchSuggestResponse = 40;
@@ -291,11 +334,10 @@ public  final class Payload extends
   private void setTestingProgramResponse(finsky.protos.TestingProgramResponse value) {
     value.getClass();
   testingProgramResponse_ = value;
-    bitField0_ |= 0x00000010;
+    bitField0_ |= 0x00000020;
     }
   /**
    * <pre>
-   *        optional DeliveryResponse deliveryResponse = 21;
    *        optional UploadDeviceConfigResponse uploadDeviceConfigResponse = 25;
    *        optional AndroidCheckinResponse androidCheckinResponse = 26;
    *        optional SearchSuggestResponse searchSuggestResponse = 40;
@@ -313,11 +355,10 @@ public  final class Payload extends
     } else {
       testingProgramResponse_ = value;
     }
-    bitField0_ |= 0x00000010;
+    bitField0_ |= 0x00000020;
   }
   /**
    * <pre>
-   *        optional DeliveryResponse deliveryResponse = 21;
    *        optional UploadDeviceConfigResponse uploadDeviceConfigResponse = 25;
    *        optional AndroidCheckinResponse androidCheckinResponse = 26;
    *        optional SearchSuggestResponse searchSuggestResponse = 40;
@@ -326,7 +367,7 @@ public  final class Payload extends
    * <code>optional .finsky.protos.TestingProgramResponse testingProgramResponse = 80;</code>
    */
   private void clearTestingProgramResponse() {  testingProgramResponse_ = null;
-    bitField0_ = (bitField0_ & ~0x00000010);
+    bitField0_ = (bitField0_ & ~0x00000020);
   }
 
   public static finsky.protos.Payload parseFrom(
@@ -673,8 +714,54 @@ public  final class Payload extends
     }
 
     /**
+     * <code>optional .finsky.protos.DeliveryResponse deliveryResponse = 21;</code>
+     */
+    @java.lang.Override
+    public boolean hasDeliveryResponse() {
+      return instance.hasDeliveryResponse();
+    }
+    /**
+     * <code>optional .finsky.protos.DeliveryResponse deliveryResponse = 21;</code>
+     */
+    @java.lang.Override
+    public finsky.protos.DeliveryResponse getDeliveryResponse() {
+      return instance.getDeliveryResponse();
+    }
+    /**
+     * <code>optional .finsky.protos.DeliveryResponse deliveryResponse = 21;</code>
+     */
+    public Builder setDeliveryResponse(finsky.protos.DeliveryResponse value) {
+      copyOnWrite();
+      instance.setDeliveryResponse(value);
+      return this;
+      }
+    /**
+     * <code>optional .finsky.protos.DeliveryResponse deliveryResponse = 21;</code>
+     */
+    public Builder setDeliveryResponse(
+        finsky.protos.DeliveryResponse.Builder builderForValue) {
+      copyOnWrite();
+      instance.setDeliveryResponse(builderForValue.build());
+      return this;
+    }
+    /**
+     * <code>optional .finsky.protos.DeliveryResponse deliveryResponse = 21;</code>
+     */
+    public Builder mergeDeliveryResponse(finsky.protos.DeliveryResponse value) {
+      copyOnWrite();
+      instance.mergeDeliveryResponse(value);
+      return this;
+    }
+    /**
+     * <code>optional .finsky.protos.DeliveryResponse deliveryResponse = 21;</code>
+     */
+    public Builder clearDeliveryResponse() {  copyOnWrite();
+      instance.clearDeliveryResponse();
+      return this;
+    }
+
+    /**
      * <pre>
-     *        optional DeliveryResponse deliveryResponse = 21;
      *        optional UploadDeviceConfigResponse uploadDeviceConfigResponse = 25;
      *        optional AndroidCheckinResponse androidCheckinResponse = 26;
      *        optional SearchSuggestResponse searchSuggestResponse = 40;
@@ -688,7 +775,6 @@ public  final class Payload extends
     }
     /**
      * <pre>
-     *        optional DeliveryResponse deliveryResponse = 21;
      *        optional UploadDeviceConfigResponse uploadDeviceConfigResponse = 25;
      *        optional AndroidCheckinResponse androidCheckinResponse = 26;
      *        optional SearchSuggestResponse searchSuggestResponse = 40;
@@ -702,7 +788,6 @@ public  final class Payload extends
     }
     /**
      * <pre>
-     *        optional DeliveryResponse deliveryResponse = 21;
      *        optional UploadDeviceConfigResponse uploadDeviceConfigResponse = 25;
      *        optional AndroidCheckinResponse androidCheckinResponse = 26;
      *        optional SearchSuggestResponse searchSuggestResponse = 40;
@@ -717,7 +802,6 @@ public  final class Payload extends
       }
     /**
      * <pre>
-     *        optional DeliveryResponse deliveryResponse = 21;
      *        optional UploadDeviceConfigResponse uploadDeviceConfigResponse = 25;
      *        optional AndroidCheckinResponse androidCheckinResponse = 26;
      *        optional SearchSuggestResponse searchSuggestResponse = 40;
@@ -733,7 +817,6 @@ public  final class Payload extends
     }
     /**
      * <pre>
-     *        optional DeliveryResponse deliveryResponse = 21;
      *        optional UploadDeviceConfigResponse uploadDeviceConfigResponse = 25;
      *        optional AndroidCheckinResponse androidCheckinResponse = 26;
      *        optional SearchSuggestResponse searchSuggestResponse = 40;
@@ -748,7 +831,6 @@ public  final class Payload extends
     }
     /**
      * <pre>
-     *        optional DeliveryResponse deliveryResponse = 21;
      *        optional UploadDeviceConfigResponse uploadDeviceConfigResponse = 25;
      *        optional AndroidCheckinResponse androidCheckinResponse = 26;
      *        optional SearchSuggestResponse searchSuggestResponse = 40;
@@ -782,11 +864,12 @@ public  final class Payload extends
             "detailsResponse_",
             "searchResponse_",
             "bulkDetailsResponse_",
+            "deliveryResponse_",
             "testingProgramResponse_",
           };
           java.lang.String info =
-              "\u0001\u0005\u0000\u0001\u0001P\u0005\u0000\u0000\u0000\u0001\u1009\u0000\u0002\u1009" +
-              "\u0001\u0005\u1009\u0002\u0013\u1009\u0003P\u1009\u0004";
+              "\u0001\u0006\u0000\u0001\u0001P\u0006\u0000\u0000\u0000\u0001\u1009\u0000\u0002\u1009" +
+              "\u0001\u0005\u1009\u0002\u0013\u1009\u0003\u0015\u1009\u0004P\u1009\u0005";
           return newMessageInfo(DEFAULT_INSTANCE, info, objects);
       }
       // fall through

@@ -1,6 +1,7 @@
 package info.anodsplace.playstore
 
-import finsky.api.model.FilterPredicate
+import finsky.api.FilterPredicate
+
 
 /**
  * @author Alex Gavrishev

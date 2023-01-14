@@ -1,37 +1,64 @@
 package com.anod.appwatcher
 
 import android.accounts.Account
-import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.preferences.Preferences
+import com.anod.appwatcher.utils.PlaystoreAuthTokenProvider
 import finsky.api.BulkDocId
 import info.anodsplace.playstore.BulkDetailsEndpoint
 import info.anodsplace.playstore.DetailsEndpoint
+import info.anodsplace.playstore.DfeAuthTokenProvider
 import info.anodsplace.playstore.SearchEndpoint
 import info.anodsplace.playstore.WishListEndpoint
 import org.koin.core.module.Module
+import org.koin.core.module.dsl.bind
+import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
 
 fun createPlayStoreModule(): Module = module {
+    factoryOf(::PlaystoreAuthTokenProvider) {
+        bind<DfeAuthTokenProvider>()
+    }
     factory { (docIds: List<BulkDocId>) ->
-        BulkDetailsEndpoint(get(), get(), get(), get<Preferences>().account!!, docIds = docIds).also { it.authToken = get<AuthTokenBlocking>().token }
+        BulkDetailsEndpoint(
+            context = get(),
+            http = get(),
+            deviceInfoProvider = get(),
+            account = get<Preferences>().account!!,
+            authTokenProvider = get(),
+            docIds = docIds,
+        )
     }
 
     factory { (detailsUrl: String) ->
         val account: Account = get<Preferences>().account ?: Account("empty", "empty")
-        DetailsEndpoint(get(), get(), get(), account, detailsUrl).also {
-            it.authToken = get<AuthTokenBlocking>().token
-        }
+        DetailsEndpoint(
+            context = get(),
+            http = get(),
+            deviceInfoProvider = get(),
+            account = account,
+            authTokenProvider = get(),
+            detailsUrl = detailsUrl
+        )
     }
 
     factory { (query: String) ->
-        SearchEndpoint(get(), get(), get(), get<Preferences>().account!!, query).also {
-            it.authToken = get<AuthTokenBlocking>().token
-        }
+        SearchEndpoint(
+            context = get(),
+            http = get(),
+            deviceInfoProvider = get(),
+            account = get<Preferences>().account!!,
+            authTokenProvider = get(),
+            initialQuery = query
+        )
     }
 
     factory {
-        WishListEndpoint(get(), get(), get(), get<Preferences>().account!!).also {
-            it.authToken = get<AuthTokenBlocking>().token
-        }
+        WishListEndpoint(
+            context = get(),
+            http = get(),
+            deviceInfoProvider = get(),
+            account = get<Preferences>().account!!,
+            authTokenProvider = get(),
+        )
     }
 }

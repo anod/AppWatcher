@@ -6,7 +6,7 @@ import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.utils.date.UploadDateParserCache
-import finsky.api.model.Document
+import finsky.api.Document
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

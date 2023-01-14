@@ -27,7 +27,7 @@ import com.anod.appwatcher.utils.compareLettersAndDigits
 import com.anod.appwatcher.utils.date.UploadDateParserCache
 import com.anod.appwatcher.utils.extractUploadDate
 import finsky.api.BulkDocId
-import finsky.api.model.Document
+import finsky.api.Document
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.app.NotificationManager
@@ -185,14 +185,15 @@ class UpdateCheck(
             val docIds = localApps.map { BulkDocId(it.key, it.value.app.versionNumber) }
             val endpoint = koin.get<BulkDetailsEndpoint> { parametersOf(docIds) }
             AppLog.d("Sending chunk... $docIds")
-            try {
-                endpoint.start()
+            val documents = try {
+                endpoint.execute()
             } catch (e: Exception) {
                 AppLog.e("Fetching of bulk updates failed ${e.message ?: ""}", "UpdateCheck")
+                emptyList()
             }
-            unavailable += (docIds.size - endpoint.documents.size)
-            AppLog.i("Sent ${docIds.size}, received ${endpoint.documents.size}", "UpdateCheck")
-            updateApps(endpoint.documents, localApps, updatedApps, lastUpdatesViewed, context.contentResolver, database)
+            unavailable += (docIds.size - documents.size)
+            AppLog.i("Sent ${docIds.size}, received ${documents.size}", "UpdateCheck")
+            updateApps(documents, localApps, updatedApps, lastUpdatesViewed, context.contentResolver, database)
         }
 
         apps.close()

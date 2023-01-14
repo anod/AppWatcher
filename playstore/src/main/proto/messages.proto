@@ -425,6 +425,80 @@ message TestingProgramDetails {
   optional bool unsubscribed = 4;
 }
 
+message AppFileMetadata {
+    optional int32 fileType = 1;
+    optional int32 versionCode = 2;
+    optional int64 size = 3;
+    optional string downloadUrl = 4;
+    optional AndroidAppPatchData patchData = 5;
+    optional int64 compressedSize = 6;
+    optional string compressedDownloadUrl = 7;
+    optional string sha1 = 8;
+}
+
+message EncryptionParams {
+    optional int32 version = 1;
+    optional string encryptionKey = 2;
+    optional string hMacKey = 3;
+}
+
+message HttpCookie {
+    optional string name = 1;
+    optional string value = 2;
+}
+
+message AndroidAppDeliveryData {
+    optional int64 downloadSize = 1;
+    optional string sha1 = 2;
+    optional string downloadUrl = 3;
+    repeated AppFileMetadata additionalFile = 4;
+    repeated HttpCookie downloadAuthCookie = 5;
+    optional bool forwardLocked = 6;
+    optional int64 refundTimeout = 7;
+    optional bool serverInitiated = 8 [default = true];
+    optional int64 postInstallRefundWindowMillis = 9;
+    optional bool immediateStartNeeded = 10;
+    optional AndroidAppPatchData patchData = 11;
+    optional EncryptionParams encryptionParams = 12;
+    optional string compressedDownloadUrl = 13;
+    optional int64 compressedSize = 14;
+    repeated SplitDeliveryData splitDeliveryData = 15;
+    optional int32 installLocation = 16;
+    optional int64 type = 17;
+    optional CompressedAppData compressedAppData = 18;
+    optional string sha256 = 19;
+}
+
+message SplitDeliveryData {
+    optional string name = 1;
+    optional int64 downloadSize = 2;
+    optional int64 compressedSize = 3;
+    optional string sha1 = 4;
+    optional string downloadUrl = 5;
+    optional string compressedDownloadUrl = 6;
+    optional AndroidAppPatchData patchData = 7;
+    optional CompressedAppData compressedAppData = 8;
+    optional string sha256 = 9;
+}
+
+message AndroidAppPatchData {
+    optional int32 baseVersionCode = 1;
+    optional string baseSha1 = 2;
+    optional string downloadUrl = 3;
+    optional int32 patchFormat = 4[default = 1];
+    optional int64 maxPatchSize = 5;
+}
+
+message CompressedAppData{
+    optional int64 type = 1;
+    optional int64 size = 2;
+    optional string downloadUrl = 3;
+}
+
+message DeliveryResponse {
+    optional int32 status = 1[default = 1];
+    optional AndroidAppDeliveryData appDeliveryData = 2;
+}
 
 message Payload {
     optional ListResponse listResponse = 1;
@@ -435,7 +509,7 @@ message Payload {
 //        optional BrowseResponse browseResponse = 7;
 //        optional PurchaseStatusResponse purchaseStatusResponse = 8;
     optional Details.BulkDetailsResponse bulkDetailsResponse = 19;
-//        optional DeliveryResponse deliveryResponse = 21;
+    optional DeliveryResponse deliveryResponse = 21;
 //        optional UploadDeviceConfigResponse uploadDeviceConfigResponse = 25;
 //        optional AndroidCheckinResponse androidCheckinResponse = 26;
 //        optional SearchSuggestResponse searchSuggestResponse = 40;

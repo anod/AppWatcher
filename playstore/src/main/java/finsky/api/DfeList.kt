@@ -1,4 +1,4 @@
-package finsky.api.model
+package finsky.api
 
 import com.google.protobuf.InvalidProtocolBufferException
 import finsky.protos.DocV2
@@ -9,21 +9,17 @@ import finsky.protos.Search.SearchResponse
 
 class DfeListResponse(val items: List<Document>, val nextPageUrl: String?)
 
-abstract class DfeList(private val listType: Int) : DfeModel() {
+abstract class DfeList(private val listType: Int) {
 
-    val count: Int
-        get() = listResponse?.items?.size ?: 0
+    abstract suspend fun execute(): DfeListResponse
 
-    var listResponse: DfeListResponse? = null
-        private set
-
-    override fun onResponse(responseWrapper: ResponseWrapper) {
+    protected fun onResponse(responseWrapper: ResponseWrapper): DfeListResponse {
         val nextPageUrls = mutableListOf<Pair<String, String>>()
         val items = mutableListOf<DocV2>()
         collect(responseWrapper, items, nextPageUrls)
         val docs = items.map { Document(it) }
         val nextPageUrl = nextPageUrls.lastOrNull()?.second
-        this.listResponse = DfeListResponse(docs, nextPageUrl)
+        return DfeListResponse(docs, nextPageUrl)
     }
 
     private fun collect(rw: ResponseWrapper, items: MutableList<DocV2>, nextPageUrls: MutableList<Pair<String, String>>) {
@@ -90,9 +86,6 @@ abstract class DfeList(private val listType: Int) : DfeModel() {
             }
         }
     }
-
-    override val isReady: Boolean
-        get() = this.listResponse != null
 
     companion object {
         private fun payload(responseWrapper: ResponseWrapper?): Payload {

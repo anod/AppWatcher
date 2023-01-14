@@ -3,8 +3,9 @@ package info.anodsplace.playstore
 import android.accounts.Account
 import android.content.Context
 import finsky.api.BulkDocId
-import finsky.api.model.DfeBulkDetails
-import finsky.api.model.Document
+import finsky.api.Document
+import finsky.api.FilterPredicate
+import finsky.protos.Details.BulkDetailsResponse
 import okhttp3.OkHttpClient
 
 /**
@@ -12,15 +13,38 @@ import okhttp3.OkHttpClient
  * *
  * @date 2015-02-22
  */
-class BulkDetailsEndpoint(context: Context, http: OkHttpClient, deviceInfoProvider: DeviceInfoProvider, account: Account, private var docIds: List<BulkDocId>)
-    : PlayStoreEndpointBase<DfeBulkDetails>(context, http, deviceInfoProvider, account) {
+class BulkDetailsEndpoint(
+    context: Context,
+    http: OkHttpClient,
+    deviceInfoProvider: DfeDeviceInfoProvider,
+    account: Account,
+    private val authTokenProvider: DfeAuthTokenProvider,
+    private var docIds: List<BulkDocId>
+) {
+    private val dfeApiProvider = DfeApiProvider(
+        context = context,
+        http = http,
+        deviceInfoProvider = deviceInfoProvider,
+        account = account
+    )
 
-    val documents: List<Document>
-        get() = data?.documents ?: emptyList()
+    suspend fun execute(): List<Document> {
+        val response = dfeApiProvider.provide(authToken = authTokenProvider.authToken).details(docIds, includeDetails = true)
+        return filterDocuments(response, AppDetailsFilter.predicate)
+    }
+}
 
-    override fun beforeRequest(data: DfeBulkDetails) {
-        data.docIds = docIds
+private fun filterDocuments(response: BulkDetailsResponse, filter: FilterPredicate): List<Document> {
+    val list = mutableListOf<Document>()
+    for (i in response.entryList.indices) {
+        response.getEntry(i).doc?.let {
+            list.add(Document(it))
+        }
     }
 
-    override fun createDfeModel() = DfeBulkDetails(dfeApi, AppDetailsFilter.predicate)
+    return if (list.isEmpty()) {
+        list
+    } else {
+        list.filter(filter)
+    }
 }

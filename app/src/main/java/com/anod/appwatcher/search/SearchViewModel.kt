@@ -25,7 +25,7 @@ import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.date.UploadDateParserCache
 import com.anod.appwatcher.utils.networkConnection
-import finsky.api.model.Document
+import finsky.api.Document
 import info.anodsplace.framework.app.HingeDeviceLayout
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.playstore.AppDetailsFilter
@@ -207,9 +207,9 @@ class SearchViewModel(
             emit(SearchStatus.SearchList(query = query))
         } else {
             try {
-                val model = endpointDetails!!.start()
-                if (model.document != null) {
-                    emit(SearchStatus.DetailsAvailable(model.document!!))
+                val document = endpointDetails!!.execute()
+                if (document != null) {
+                    emit(SearchStatus.DetailsAvailable(document))
                 } else {
                     resetPager()
                     emit(SearchStatus.SearchList(query = query))

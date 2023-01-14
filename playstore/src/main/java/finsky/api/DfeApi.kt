@@ -1,5 +1,7 @@
 package finsky.api
 
+import finsky.protos.DeliveryResponse
+import finsky.protos.Details
 import finsky.protos.ResponseWrapper
 
 class BulkDocId(val packageName: String, val versionCode: Int) : Comparable<BulkDocId> {
@@ -12,13 +14,33 @@ class BulkDocId(val packageName: String, val versionCode: Int) : Comparable<Bulk
     }
 }
 
+enum class PatchFormat(var value: Int) {
+    GDIFF(1),
+    GZIPPED_GDIFF(2),
+    GZIPPED_BSDIFF(3),
+    UNKNOWN_4(4),
+    UNKNOWN_5(5);
+}
+
 interface DfeApi {
 
     suspend fun search(initialQuery: String, nextPageUrl: String): ResponseWrapper
 
-    suspend fun details(appDetailsUrl: String): ResponseWrapper
+    suspend fun details(appDetailsUrl: String): Details.DetailsResponse
 
-    suspend fun details(docIds: List<BulkDocId>, includeDetails: Boolean): ResponseWrapper
+    suspend fun details(docIds: List<BulkDocId>, includeDetails: Boolean): Details.BulkDetailsResponse
+
+    suspend fun delivery(
+        docId: String,
+        installedVersionCode: Int = 0,
+        updateVersionCode: Int,
+        offerType: Int,
+        patchFormats: Array<PatchFormat> = arrayOf(
+            PatchFormat.GDIFF,
+            PatchFormat.GZIPPED_GDIFF,
+            PatchFormat.GZIPPED_BSDIFF
+        )
+    ): DeliveryResponse
 
     suspend fun wishlist(nextPageUrl: String): ResponseWrapper
 
@@ -30,9 +52,8 @@ interface DfeApi {
         const val BULK_DETAILS_URI = "${URL_FDFE}/bulkDetails"
         const val LIBRARY_URI = "${URL_FDFE}/library"
         const val PURCHASE_HISTORY_URL = "${URL_FDFE}/purchaseHistory"
-
+        const val DELIVERY_URL = "$URL_FDFE/delivery"
         const val wishlistBackendId = 0
         const val searchBackendId = 3
     }
 }
-

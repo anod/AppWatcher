@@ -3,7 +3,7 @@ package com.anod.appwatcher.search
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import finsky.api.model.Document
+import finsky.api.Document
 import info.anodsplace.applog.AppLog
 import info.anodsplace.playstore.ListEndpoint
 
@@ -18,12 +18,10 @@ class ListEndpointPagingSource(
                 AppLog.d("ListPagingSource load: [${params.key}] null")
                 return LoadResult.Page(emptyList(), null, null)
             }
-            endpoint.nextPageUrl = params.key ?: ""
-            val listModel = endpoint.start()
-            listModel.execute()
-            val response = listModel.listResponse!!
+            val nextPageUrl = params.key ?: ""
+            val response = endpoint.execute(nextPageUrl = nextPageUrl)
             isFirst = false
-            AppLog.d("ListPagingSource load: [${params.key}] ${response.nextPageUrl}")
+            AppLog.d("ListPagingSource load: [${params.key}] $nextPageUrl")
             return LoadResult.Page(
                     data = response.items,
                     prevKey = null, // Only paging forward.

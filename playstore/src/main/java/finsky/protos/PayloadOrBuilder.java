@@ -72,8 +72,18 @@ public interface PayloadOrBuilder extends
   finsky.protos.Details.BulkDetailsResponse getBulkDetailsResponse();
 
   /**
+   * <code>optional .finsky.protos.DeliveryResponse deliveryResponse = 21;</code>
+   * @return Whether the deliveryResponse field is set.
+   */
+  boolean hasDeliveryResponse();
+  /**
+   * <code>optional .finsky.protos.DeliveryResponse deliveryResponse = 21;</code>
+   * @return The deliveryResponse.
+   */
+  finsky.protos.DeliveryResponse getDeliveryResponse();
+
+  /**
    * <pre>
-   *        optional DeliveryResponse deliveryResponse = 21;
    *        optional UploadDeviceConfigResponse uploadDeviceConfigResponse = 25;
    *        optional AndroidCheckinResponse androidCheckinResponse = 26;
    *        optional SearchSuggestResponse searchSuggestResponse = 40;
@@ -85,7 +95,6 @@ public interface PayloadOrBuilder extends
   boolean hasTestingProgramResponse();
   /**
    * <pre>
-   *        optional DeliveryResponse deliveryResponse = 21;
    *        optional UploadDeviceConfigResponse uploadDeviceConfigResponse = 25;
    *        optional AndroidCheckinResponse androidCheckinResponse = 26;
    *        optional SearchSuggestResponse searchSuggestResponse = 40;

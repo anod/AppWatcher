@@ -68,8 +68,7 @@ internal class ImportBulkManager(private val koin: Koin) {
     private suspend fun importDetails(docIds: List<BulkDocId>): SimpleArrayMap<String, Int> = withContext(Main) {
         val endpoint = koin.get<BulkDetailsEndpoint> { parametersOf(docIds) }
         try {
-            val model = endpoint.start()
-            val docs = model.documents.toTypedArray()
+            val docs = endpoint.execute().toTypedArray()
             return@withContext importTask.execute(*docs)
         } catch (e: Exception) {
             AppLog.e(e)

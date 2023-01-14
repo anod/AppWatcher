@@ -2,10 +2,13 @@ package finsky.api
 
 import android.accounts.Account
 import android.content.Context
+import finsky.protos.DeliveryResponse
 import finsky.protos.Details
+import finsky.protos.Details.BulkDetailsResponse
+import finsky.protos.Details.DetailsResponse
 import finsky.protos.ResponseWrapper
 import info.anodsplace.applog.AppLog
-import info.anodsplace.playstore.DeviceInfoProvider
+import info.anodsplace.playstore.DfeDeviceInfoProvider
 import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.CacheControl
 import okhttp3.Call
@@ -31,7 +34,7 @@ class DfeApiImpl(http: OkHttpClient, private val apiContext: DfeApiContext) : Df
 
     private val http = httpWithCache(http)
 
-    constructor(queue: OkHttpClient, context: Context, account: Account, authToken: String, deviceInfo: DeviceInfoProvider)
+    constructor(queue: OkHttpClient, context: Context, account: Account, authToken: String, deviceInfo: DfeDeviceInfoProvider)
             : this(queue, DfeApiContext(context, account, authToken, deviceInfo))
 
     override suspend fun search(initialQuery: String, nextPageUrl: String): ResponseWrapper {
@@ -47,13 +50,14 @@ class DfeApiImpl(http: OkHttpClient, private val apiContext: DfeApiContext) : Df
         return newCall(dfeRequest)
     }
 
-    override suspend fun details(appDetailsUrl: String): ResponseWrapper {
+    override suspend fun details(appDetailsUrl: String): DetailsResponse {
         val cacheKey = DfeCacheKey(DfeApi.URL_FDFE + "/" + appDetailsUrl, apiContext, emptyMap())
         val dfeRequest = createRequest(cacheKey)
-        return newCall(dfeRequest)
+        val responseWrapper = newCall(dfeRequest)
+        return responseWrapper.payload.detailsResponse
     }
 
-    override suspend fun details(docIds: List<BulkDocId>, includeDetails: Boolean): ResponseWrapper {
+    override suspend fun details(docIds: List<BulkDocId>, includeDetails: Boolean): BulkDetailsResponse {
         val bulkDetailsRequest = Details.BulkDetailsRequest.newBuilder()
                 .setIncludeDetails(true)
                 .addAllDocid(docIds.map { it.packageName }.sorted())
@@ -68,7 +72,27 @@ class DfeApiImpl(http: OkHttpClient, private val apiContext: DfeApiContext) : Df
             builder.post(bulkDetailsRequest.toByteArray().toRequestBody("application/x-protobuf".toMediaType()))
         }
 
-        return newCall(dfeRequest)
+        val responseWrapper = newCall(dfeRequest)
+        return responseWrapper.payload.bulkDetailsResponse
+    }
+
+    override suspend fun delivery(
+        docId: String,
+        installedVersionCode: Int,
+        updateVersionCode: Int,
+        offerType: Int,
+        patchFormats: Array<PatchFormat>
+    ): DeliveryResponse {
+        val url = DfeApi.DELIVERY_URL.toHttpUrl().newBuilder()
+            .addQueryParameter("ot", offerType.toString())
+            .addQueryParameter("doc", docId)
+            .addQueryParameter("vc", updateVersionCode.toString())
+            .build().toString()
+
+        val cacheKey = DfeCacheKey(url, apiContext, emptyMap())
+        val dfeRequest = createRequest(cacheKey)
+        val responseWrapper = newCall(dfeRequest)
+        return responseWrapper.payload.deliveryResponse
     }
 
     override suspend fun wishlist(nextPageUrl: String): ResponseWrapper {

@@ -77,8 +77,8 @@ class ChangelogAdapter(
         }
         val endpoint = koin.get<BulkDetailsEndpoint> { parametersOf(docIds) }
         try {
-            endpoint.start()
-            endpoint.documents.associateByTo(changelogs, { it.docId }) {
+            val documents = endpoint.execute()
+            documents.associateByTo(changelogs, { it.docId }) {
                 val recentChanges = it.appDetails.recentChangesHtml?.trim() ?: ""
                 AppChange(
                         appId = it.docId,

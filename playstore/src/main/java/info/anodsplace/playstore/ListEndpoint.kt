@@ -3,8 +3,8 @@ package info.anodsplace.playstore
 import android.accounts.Account
 import android.content.Context
 import finsky.api.DfeApi
-import finsky.api.DfeApiImpl
-import finsky.api.model.*
+import finsky.api.DfeList
+import finsky.api.DfeListResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -14,32 +14,22 @@ import okhttp3.OkHttpClient
  * @date 16/12/2016.
  */
 abstract class ListEndpoint(
-        context: Context,
-        http: OkHttpClient,
-        deviceInfoProvider: DeviceInfoProvider,
-        account: Account
-) : PlayStoreEndpoint {
-    override var authToken = ""
+    context: Context,
+    http: OkHttpClient,
+    deviceInfoProvider: DfeDeviceInfoProvider,
+    account: Account,
+    private val authTokenProvider: DfeAuthTokenProvider
+) {
+    private val dfeApiProvider = DfeApiProvider(
+        context = context,
+        http = http,
+        deviceInfoProvider = deviceInfoProvider,
+        account = account
+    )
 
-    private val dfeApi: DfeApi by lazy {
-        DfeApiImpl(http, context, account, authToken, deviceInfoProvider)
-    }
-
-    open var data: DfeList? = null
-        internal set
-
-    override fun reset() {
-        data = null
-    }
-
-    val count: Int
-        get() = data?.count ?: 0
-
-    var nextPageUrl = ""
-
-    override suspend fun start(): DfeList = withContext(Dispatchers.Main) {
-        data = createDfeList(dfeApi, nextPageUrl)
-        return@withContext data!!
+    suspend fun execute(nextPageUrl: String): DfeListResponse = withContext(Dispatchers.Main) {
+        val defApi = dfeApiProvider.provide(authToken = authTokenProvider.authToken)
+        return@withContext createDfeList(defApi, nextPageUrl).execute()
     }
 
     abstract fun createDfeList(dfeApi: DfeApi, nextPageUrl: String): DfeList

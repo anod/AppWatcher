@@ -32,7 +32,7 @@ import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.tags.TagSelectionDialog
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.AppIconLoader
-import finsky.api.model.Document
+import finsky.api.Document
 import finsky.protos.AppDetails
 import finsky.protos.DocDetails
 import finsky.protos.DocV2
