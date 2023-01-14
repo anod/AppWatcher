@@ -18,6 +18,8 @@ import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.DropdownMenuAction
 import com.anod.appwatcher.compose.EditIcon
 import com.anod.appwatcher.compose.SearchTopBar
+import com.anod.appwatcher.compose.SearchTopBarEvent
+import com.anod.appwatcher.compose.SearchTopBarState
 import com.anod.appwatcher.compose.TagAppIconButton
 import kotlin.math.roundToInt
 
@@ -25,31 +27,43 @@ import kotlin.math.roundToInt
 fun WatchListTopBar(
     title: String,
     subtitle: String?,
+    showSearch: Boolean,
+    filterQuery: String,
     containerColor: Color,
     contentColor: Color,
-    filterQuery: String,
-    hideSearchOnNavigation: Boolean,
     visibleActions: @Composable () -> Unit,
     dropdownActions: @Composable ((dismiss: () -> Unit, barBounds: IntRect) -> Unit)? = null,
     navigationIcon: @Composable (() -> Unit)? = null,
     onEvent: (WatchListEvent) -> Unit
 ) {
 
-    val showSearchView by remember { mutableStateOf(filterQuery.isNotBlank()) }
-
     var barBounds : IntRect by remember { mutableStateOf(IntRect(0, 0, 0, 0)) }
     SearchTopBar(
-        title = title,
-        subtitle = subtitle,
-        searchQuery = filterQuery,
-        showSearch = showSearchView,
-        initialSearchFocus = true,
-        hideSearchOnNavigation = hideSearchOnNavigation,
+        state = SearchTopBarState(
+            title = title,
+            subtitle = subtitle,
+            searchQuery = filterQuery,
+            showSearch = showSearch,
+            initialSearchFocus = true,
+        ),
         containerColor = containerColor,
         contentColor = contentColor,
-        onValueChange = { onEvent(WatchListEvent.FilterByTitle(query = it)) },
-        onSearchSubmit = { onEvent(WatchListEvent.OnSearch(it)) },
-        onNavigation = { onEvent(WatchListEvent.OnBackPressed) },
+        onEvent = { event ->
+            when (event) {
+                SearchTopBarEvent.NavigationAction -> {
+                    onEvent(WatchListEvent.OnBackPressed)
+                }
+                SearchTopBarEvent.SearchAction -> {
+                    onEvent(WatchListEvent.ShowSearch)
+                }
+                is SearchTopBarEvent.SearchChange -> {
+                    onEvent(WatchListEvent.FilterByTitle(query = event.value))
+                }
+                SearchTopBarEvent.SearchSubmit -> {
+                    onEvent(WatchListEvent.SearchSubmit)
+                }
+            }
+        },
         navigationIcon = navigationIcon,
         modifier = Modifier.onGloballyPositioned {
              if (it.isAttached) {
@@ -71,7 +85,7 @@ fun WatchListTopBar(
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Preview(showBackground = false, uiMode = UI_MODE_NIGHT_YES)
 @Composable
 fun DefaultPreview() {
     AppTheme(
@@ -84,8 +98,8 @@ fun DefaultPreview() {
                     subtitle = "What will happen when subtitle is too long",
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary,
-                    hideSearchOnNavigation = false,
                     filterQuery = "",
+                    showSearch = false,
                     visibleActions = {
                         TagAppIconButton(onClick = {})
                     },

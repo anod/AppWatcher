@@ -22,7 +22,7 @@ import kotlinx.coroutines.delay
 
 sealed interface SearchTopBarEvent {
     class SearchChange(val value: String) : SearchTopBarEvent
-    class SearchSubmit(val value: String) : SearchTopBarEvent
+    object SearchSubmit : SearchTopBarEvent
     object SearchAction : SearchTopBarEvent
     object NavigationAction : SearchTopBarEvent
 }
@@ -32,7 +32,6 @@ data class SearchTopBarState(
     val subtitle: String? = null,
     val searchQuery: String = "",
     val showSearch: Boolean = false,
-    val hideSearchOnNavigation: Boolean = true,
     val initialSearchFocus: Boolean = false,
 )
 
@@ -54,11 +53,12 @@ fun SearchTopBar(
     actions: @Composable () -> Unit = { },
 ) {
     var showSearchView by remember { mutableStateOf(showSearch) }
+    var searchQueryValue by remember { mutableStateOf(searchQuery) }
     SearchTopBar(
         state = SearchTopBarState(
             title = title,
             subtitle = subtitle,
-            searchQuery = searchQuery,
+            searchQuery = searchQueryValue,
             showSearch = showSearchView,
             initialSearchFocus = initialSearchFocus
         ),
@@ -85,8 +85,11 @@ fun SearchTopBar(
                 SearchTopBarEvent.SearchAction -> {
                     showSearchView = true
                 }
-                is SearchTopBarEvent.SearchChange -> { onValueChange(event.value) }
-                is SearchTopBarEvent.SearchSubmit -> { onSearchSubmit(event.value) }
+                is SearchTopBarEvent.SearchChange -> {
+                    searchQueryValue = event.value
+                    onValueChange(event.value)
+                }
+                is SearchTopBarEvent.SearchSubmit -> { onSearchSubmit(searchQueryValue) }
             }
         }
     )
@@ -111,7 +114,7 @@ fun SearchTopBar(
                 TopBarSearchField(
                     query = state.searchQuery,
                     onValueChange = { onEvent(SearchTopBarEvent.SearchChange(it)) },
-                    onSubmit = { onEvent(SearchTopBarEvent.SearchSubmit(it)) },
+                    onSubmit = { onEvent(SearchTopBarEvent.SearchSubmit) },
                     requestFocus = requestFocus,
                     contentColor = contentColor,
                     containerColor = containerColor
@@ -179,14 +182,13 @@ fun SearchTopBar(
 fun TopBarSearchField(
     query: String = "",
     onValueChange: (String) -> Unit = { },
-    onSubmit: (String) -> Unit = { },
+    onSubmit: () -> Unit = { },
     containerColor: Color = MaterialTheme.colorScheme.surface,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
     requestFocus: Boolean = false
 ) {
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
-    var searchValue by remember { mutableStateOf(query) }
     val keyboard = LocalSoftwareKeyboardController.current
 
     TextField(
@@ -195,21 +197,15 @@ fun TopBarSearchField(
             .onFocusChanged {
                 AppLog.d("onFocusChanged $it")
             },
-        value = searchValue,
-        onValueChange = {
-            searchValue = it
-            onValueChange(it)
-        },
+        value = query,
+        onValueChange = { onValueChange(it) },
         placeholder = {
             Text(text = stringResource(id = R.string.search))
         },
         leadingIcon = { SearchIcon() },
         trailingIcon = {
-            if (searchValue.isNotEmpty()) {
-                IconButton(onClick = {
-                    searchValue = ""
-                    onValueChange("")
-                }) {
+            if (query.isNotEmpty()) {
+                IconButton(onClick = { onValueChange("") }) {
                     ClearIcon()
                 }
             }
@@ -219,7 +215,7 @@ fun TopBarSearchField(
         ),
         keyboardActions = KeyboardActions(
             onSearch = {
-                onSubmit(searchValue)
+                onSubmit()
                 focusManager.clearFocus()
             }
         ),

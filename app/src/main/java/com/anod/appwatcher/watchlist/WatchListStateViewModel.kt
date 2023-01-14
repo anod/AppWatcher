@@ -53,6 +53,7 @@ data class WatchListSharedState(
     val sortId: Int,
     val filterId: Int,
     val titleFilter: String = "",
+    val showSearch: Boolean = false,
     val syncProgress: SyncProgress? = null,
     val wideLayout: HingeDeviceLayout = HingeDeviceLayout(isWideLayout = false, hinge = Rect()),
     val selectedApp: App? = null,
@@ -70,13 +71,16 @@ sealed interface WatchListEvent {
     object OnBackPressed : WatchListEvent
     object PlayStoreMyApps : WatchListEvent
     object Refresh : WatchListEvent
+
+    object SearchSubmit : WatchListEvent
+    object ShowSearch : WatchListEvent
+
     class ChangeSort(val sortId: Int) : WatchListEvent
     class FilterByTitle(val query: String) : WatchListEvent
     class SetWideLayout(val layout: HingeDeviceLayout) : WatchListEvent
     class FilterById(val filterId: Int) : WatchListEvent
     class AddAppToTag(val show: Boolean) : WatchListEvent
     class EditTag(val show: Boolean) : WatchListEvent
-    class OnSearch(val query: String) : WatchListEvent
     class SelectApp(val app: App?) : WatchListEvent
     class UpdateSyncProgress(val syncProgress: SyncProgress) : WatchListEvent
 
@@ -216,7 +220,9 @@ class WatchListStateViewModel(
             is WatchListEvent.SetWideLayout -> viewState = viewState.copy(wideLayout = event.layout)
             is WatchListEvent.AddAppToTag -> viewState = viewState.copy(showAppTagDialog = event.show)
             WatchListEvent.OnBackPressed -> {
-                if (viewState.wideLayout.isWideLayout && viewState.selectedApp != null) {
+                if (viewState.showSearch) {
+                    viewState = viewState.copy(showSearch = false)
+                } else if (viewState.wideLayout.isWideLayout && viewState.selectedApp != null) {
                     viewState = viewState.copy(selectedApp = null)
                 } else {
                     emitAction(CommonActivityAction.OnBackPressed)
@@ -226,9 +232,15 @@ class WatchListStateViewModel(
                 viewState = viewState.copy(filterId = event.filterId)
             }
             is WatchListEvent.EditTag -> viewState = viewState.copy(showEditTagDialog = event.show)
-            is WatchListEvent.OnSearch -> emitAction(startActivityAction(
-                intent = MarketSearchActivity.intent(application, event.query, true, initiateSearch = true)
-            ))
+            WatchListEvent.ShowSearch -> {
+                viewState = viewState.copy(showSearch = true)
+            }
+            is WatchListEvent.SearchSubmit -> {
+                viewState = viewState.copy(showSearch = false)
+                emitAction(startActivityAction(
+                    intent = MarketSearchActivity.intent(application, viewState.titleFilter, true, initiateSearch = true)
+                ))
+            }
             is WatchListEvent.SelectApp -> {
                 viewState = viewState.copy(selectedApp = event.app)
             }

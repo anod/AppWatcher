@@ -53,7 +53,7 @@ fun TagWatchListTopBar(
         containerColor = MaterialTheme.colorScheme.primary,
         contentColor = MaterialTheme.colorScheme.onPrimary,
         filterQuery = screenState.titleFilter,
-        hideSearchOnNavigation = true,
+        showSearch = screenState.showSearch,
         visibleActions = {
             TagAppIconButton(onClick = { onEvent(WatchListEvent.AddAppToTag(show = true)) })
         },

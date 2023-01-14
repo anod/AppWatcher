@@ -99,7 +99,7 @@ fun MainTopBar(
         containerColor = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onSurface,
         filterQuery = listState.titleFilter,
-        hideSearchOnNavigation = true,
+        showSearch = listState.showSearch,
         navigationIcon = { OpenDrawerIcon() },
         visibleActions = {
             FilterMenuAction(
