@@ -16,7 +16,7 @@ import info.anodsplace.applog.AppLog
 class UploadServiceContentObserver(private val context: Context, private val prefs: Preferences)
     : InvalidationTracker.Observer(AppListTable.table, TagsTable.table, AppTagsTable.table) {
 
-    override fun onInvalidated(tables: MutableSet<String>) {
+    override fun onInvalidated(tables: Set<String>) {
         if (!prefs.isDriveSyncEnabled) {
             return
         }

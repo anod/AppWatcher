@@ -8,17 +8,12 @@ import androidx.sqlite.db.SupportSQLiteOpenHelper
  * @date 21/05/2018
  */
 class DbDataSource(private val db: SupportSQLiteOpenHelper) : SupportSQLiteOpenHelper {
-    override fun getDatabaseName(): String? {
-        return db.databaseName
-    }
-
-    override fun getWritableDatabase(): SupportSQLiteDatabase {
-        return db.writableDatabase
-    }
-
-    override fun getReadableDatabase(): SupportSQLiteDatabase {
-        return db.readableDatabase
-    }
+    override val databaseName: String?
+        get() = db.databaseName
+    override val readableDatabase: SupportSQLiteDatabase
+        get() = db.readableDatabase
+    override val writableDatabase: SupportSQLiteDatabase
+        get() = db.writableDatabase
 
     override fun close() {
         db.close()

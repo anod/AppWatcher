@@ -2,7 +2,6 @@ package com.anod.appwatcher.database
 
 import android.database.Cursor
 import android.provider.BaseColumns
-import androidx.room.util.CursorUtil
 import com.anod.appwatcher.database.entities.AppChange
 import info.anodsplace.framework.database.CursorIterator
 
@@ -25,13 +24,13 @@ class AppChangeCursor(cursor: Cursor?) : CursorIterator<AppChange>(cursor) {
 
     init {
         if (cursor != null) {
-            projection.rowId = CursorUtil.getColumnIndexOrThrow(cursor, BaseColumns._ID)
-            projection.appId = CursorUtil.getColumnIndexOrThrow(cursor, ChangelogTable.Columns.appId)
-            projection.versionNumber = CursorUtil.getColumnIndexOrThrow(cursor, ChangelogTable.Columns.versionCode)
-            projection.versionName = CursorUtil.getColumnIndexOrThrow(cursor, ChangelogTable.Columns.versionName)
-            projection.details = CursorUtil.getColumnIndexOrThrow(cursor, ChangelogTable.Columns.details)
-            projection.uploadDate = CursorUtil.getColumnIndexOrThrow(cursor, ChangelogTable.Columns.uploadDate)
-            projection.noNewDetails = CursorUtil.getColumnIndexOrThrow(cursor, ChangelogTable.Columns.noNewDetails)
+            projection.rowId = cursor.getColumnIndexOrThrow(BaseColumns._ID)
+            projection.appId = cursor.getColumnIndexOrThrow(ChangelogTable.Columns.appId)
+            projection.versionNumber = cursor.getColumnIndexOrThrow(ChangelogTable.Columns.versionCode)
+            projection.versionName = cursor.getColumnIndexOrThrow(ChangelogTable.Columns.versionName)
+            projection.details = cursor.getColumnIndexOrThrow(ChangelogTable.Columns.details)
+            projection.uploadDate = cursor.getColumnIndexOrThrow(ChangelogTable.Columns.uploadDate)
+            projection.noNewDetails = cursor.getColumnIndexOrThrow(ChangelogTable.Columns.noNewDetails)
         }
     }
 

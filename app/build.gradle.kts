@@ -82,7 +82,7 @@ android {
 
 dependencies {
     // AndroidX
-    implementation("androidx.appcompat:appcompat:1.5.1") // AppCompatActivity
+    implementation("androidx.appcompat:appcompat:1.6.0") // AppCompatActivity
     implementation("androidx.palette:palette:1.0.0")
     implementation("androidx.work:work-runtime:2.7.1")
     implementation("androidx.work:work-runtime-ktx:2.7.1")
@@ -122,16 +122,16 @@ dependencies {
     // 3rd party
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
     implementation("com.jakewharton:process-phoenix:2.1.2")
-    implementation("io.insert-koin:koin-core:3.3.0")
+    implementation("io.insert-koin:koin-core:3.3.2")
 
     // ViewModel and LiveData
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1")
     kapt("androidx.lifecycle:lifecycle-compiler:2.5.1")
 
-    implementation("androidx.room:room-runtime:2.4.3")
-    implementation("androidx.room:room-ktx:2.4.3")
-    ksp("androidx.room:room-compiler:2.4.3")
+    implementation("androidx.room:room-runtime:2.5.0")
+    implementation("androidx.room:room-ktx:2.5.0")
+    ksp("androidx.room:room-compiler:2.5.0")
 
     // Kotlin
     implementation(libs.coroutines.core)

@@ -44,41 +44,42 @@ class DbContentProvider : ContentProvider() {
         if (matched == -1) {
             return null
         }
-        val query = Query()
-        query.type = matched
-        val rowId: String
         when (matched) {
             app -> {
-                query.table = AppListTable.table
-                rowId = uri.lastPathSegment ?: "0"
-                query.selection = BaseColumns._ID + "=?"
-                query.selectionArgs = arrayOf(rowId)
-                query.notifyUri = appsUri.buildUpon().appendPath(rowId).build()
-                return query
+                val rowId = uri.lastPathSegment ?: "0"
+                return Query(
+                    type = matched,
+                    table = AppListTable.table,
+                    selection = BaseColumns._ID + "=?",
+                    selectionArgs = arrayOf(rowId),
+                    notifyUri = appsUri.buildUpon().appendPath(rowId).build()
+                )
             }
             changelogVersion -> {
-                query.table = ChangelogTable.table
-                query.selection = ChangelogTable.Columns.appId + "=? AND " + ChangelogTable.Columns.versionCode + "=?"
-                query.selectionArgs = arrayOf(
+                return Query(
+                    type = matched,
+                    table = ChangelogTable.table,
+                    selection = ChangelogTable.Columns.appId + "=? AND " + ChangelogTable.Columns.versionCode + "=?",
+                    selectionArgs = arrayOf(
                         uri.pathSegments[uri.pathSegments.size - 3],
                         uri.lastPathSegment ?: "-1"
+                    ),
+                    notifyUri = changelogUri
                 )
-                query.notifyUri = changelogUri
-                return query
             }
         }
         return null
     }
 
-    private class Query {
-        var type: Int = 0
-        var table: String? = null
-        var selection: String? = null
-        var selectionArgs: Array<String>? = null
-        var notifyUri: Uri? = null
-        var groupBy: String? = null
-        var projection: Array<String>? = null
-    }
+    private class Query(
+        val type: Int,
+        val table: String,
+        val selection: String,
+        val selectionArgs: Array<String>,
+        val notifyUri: Uri? = null,
+        val groupBy: String = "",
+        val projection: Array<String> = emptyArray(),
+    )
 
     override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int {
         throw IllegalArgumentException("Unknown URI $uri")
@@ -95,7 +96,7 @@ class DbContentProvider : ContentProvider() {
         val db = dbSchemaManager.writableDatabase
         val rowId = db.insert(query.table, SQLiteDatabase.CONFLICT_REPLACE, values)
         if (rowId > 0 && query.notifyUri != null) {
-            val noteUri = ContentUris.withAppendedId(query.notifyUri!!, rowId)
+            val noteUri = ContentUris.withAppendedId(query.notifyUri, rowId)
             context!!.contentResolver.notifyChange(noteUri, null)
             return noteUri
         }
@@ -110,7 +111,7 @@ class DbContentProvider : ContentProvider() {
     override fun query(uri: Uri, projection: Array<String>?, selection: String?, selectionArgs: Array<String>?, sortOrder: String?): AppListCursor? {
         var proj = projection
         var sel = selection
-        var selArgs = selectionArgs
+        var selArgs = selectionArgs ?: emptyArray()
         val query = matchQuery(uri) ?: throw IllegalArgumentException("Unknown URI $uri")
 // Using SQLiteQueryBuilder instead of queryApps() method
         val queryBuilder = SQLiteQueryBuilder()
@@ -140,7 +141,7 @@ class DbContentProvider : ContentProvider() {
         val db = dbSchemaManager.writableDatabase
         val count = db.update(query.table, SQLiteDatabase.CONFLICT_REPLACE, values, query.selection, query.selectionArgs)
         if (count > 0 && query.notifyUri != null) {
-            context?.contentResolver?.notifyChange(query.notifyUri!!, null)
+            context?.contentResolver?.notifyChange(query.notifyUri, null)
         }
         return count
     }

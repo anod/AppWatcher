@@ -2,7 +2,6 @@ package com.anod.appwatcher.database
 
 import android.database.Cursor
 import android.provider.BaseColumns
-import androidx.room.util.CursorUtil
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.database.entities.Price
@@ -40,26 +39,26 @@ class AppListItemCursor(cursor: Cursor?) : CursorIterator<AppListItem>(cursor) {
 
     init {
         if (cursor != null) {
-            projection.rowId = CursorUtil.getColumnIndexOrThrow(cursor, BaseColumns._ID)
-            projection.appId = CursorUtil.getColumnIndexOrThrow(cursor, AppListTable.Columns.appId)
-            projection.packageName = CursorUtil.getColumnIndexOrThrow(cursor, AppListTable.Columns.packageName)
-            projection.versionNumber = CursorUtil.getColumnIndexOrThrow(cursor, AppListTable.Columns.versionNumber)
-            projection.versionName = CursorUtil.getColumnIndexOrThrow(cursor, AppListTable.Columns.versionName)
-            projection.title = CursorUtil.getColumnIndexOrThrow(cursor, AppListTable.Columns.title)
-            projection.creator = CursorUtil.getColumnIndexOrThrow(cursor, AppListTable.Columns.creator)
-            projection.iconUrl = CursorUtil.getColumnIndexOrThrow(cursor, AppListTable.Columns.iconUrl)
-            projection.status = CursorUtil.getColumnIndexOrThrow(cursor, AppListTable.Columns.status)
-            projection.uploadDate = CursorUtil.getColumnIndexOrThrow(cursor, AppListTable.Columns.uploadDate)
-            projection.detailsUrl = CursorUtil.getColumnIndexOrThrow(cursor, AppListTable.Columns.detailsUrl)
-            projection.uploadTime = CursorUtil.getColumnIndexOrThrow(cursor, AppListTable.Columns.uploadTimestamp)
-            projection.appType = CursorUtil.getColumnIndexOrThrow(cursor, AppListTable.Columns.appType)
-            projection.refreshTime = CursorUtil.getColumnIndexOrThrow(cursor, AppListTable.Columns.updateTimestamp)
-            projection.priceText = CursorUtil.getColumnIndexOrThrow(cursor, AppListTable.Columns.priceText)
-            projection.priceCurrency = CursorUtil.getColumnIndexOrThrow(cursor, AppListTable.Columns.priceCurrency)
-            projection.priceMicros = CursorUtil.getColumnIndexOrThrow(cursor, AppListTable.Columns.priceMicros)
-            projection.changeDetails = CursorUtil.getColumnIndexOrThrow(cursor, ChangelogTable.Columns.details)
-            projection.newNewDetails = CursorUtil.getColumnIndexOrThrow(cursor, ChangelogTable.Columns.noNewDetails)
-            projection.recentFlag = CursorUtil.getColumnIndexOrThrow(cursor, AppListTable.Columns.recentFlag)
+            projection.rowId = cursor.getColumnIndexOrThrow(BaseColumns._ID)
+            projection.appId = cursor.getColumnIndexOrThrow(AppListTable.Columns.appId)
+            projection.packageName = cursor.getColumnIndexOrThrow(AppListTable.Columns.packageName)
+            projection.versionNumber = cursor.getColumnIndexOrThrow(AppListTable.Columns.versionNumber)
+            projection.versionName = cursor.getColumnIndexOrThrow(AppListTable.Columns.versionName)
+            projection.title = cursor.getColumnIndexOrThrow(AppListTable.Columns.title)
+            projection.creator = cursor.getColumnIndexOrThrow(AppListTable.Columns.creator)
+            projection.iconUrl = cursor.getColumnIndexOrThrow(AppListTable.Columns.iconUrl)
+            projection.status = cursor.getColumnIndexOrThrow(AppListTable.Columns.status)
+            projection.uploadDate = cursor.getColumnIndexOrThrow(AppListTable.Columns.uploadDate)
+            projection.detailsUrl = cursor.getColumnIndexOrThrow(AppListTable.Columns.detailsUrl)
+            projection.uploadTime = cursor.getColumnIndexOrThrow(AppListTable.Columns.uploadTimestamp)
+            projection.appType = cursor.getColumnIndexOrThrow(AppListTable.Columns.appType)
+            projection.refreshTime = cursor.getColumnIndexOrThrow(AppListTable.Columns.updateTimestamp)
+            projection.priceText = cursor.getColumnIndexOrThrow(AppListTable.Columns.priceText)
+            projection.priceCurrency = cursor.getColumnIndexOrThrow(AppListTable.Columns.priceCurrency)
+            projection.priceMicros = cursor.getColumnIndexOrThrow(AppListTable.Columns.priceMicros)
+            projection.changeDetails = cursor.getColumnIndexOrThrow(ChangelogTable.Columns.details)
+            projection.newNewDetails = cursor.getColumnIndexOrThrow(ChangelogTable.Columns.noNewDetails)
+            projection.recentFlag = cursor.getColumnIndexOrThrow(AppListTable.Columns.recentFlag)
         }
     }
 
