@@ -2455,49 +2455,49 @@ public  final class DocV2 extends
     bitField0_ = (bitField0_ & ~0x00000200);
   }
 
-  public static final int RELATEDLINKS_FIELD_NUMBER = 15;
-  private finsky.protos.RelatedLinks relatedLinks_;
+  public static final int ANNOTATIONS_FIELD_NUMBER = 15;
+  private finsky.protos.Annotations annotations_;
   /**
-   * <code>optional .finsky.protos.RelatedLinks relatedLinks = 15;</code>
+   * <code>optional .finsky.protos.Annotations annotations = 15;</code>
    */
   @java.lang.Override
-  public boolean hasRelatedLinks() {
+  public boolean hasAnnotations() {
     return ((bitField0_ & 0x00000400) != 0);
   }
   /**
-   * <code>optional .finsky.protos.RelatedLinks relatedLinks = 15;</code>
+   * <code>optional .finsky.protos.Annotations annotations = 15;</code>
    */
   @java.lang.Override
-  public finsky.protos.RelatedLinks getRelatedLinks() {
-    return relatedLinks_ == null ? finsky.protos.RelatedLinks.getDefaultInstance() : relatedLinks_;
+  public finsky.protos.Annotations getAnnotations() {
+    return annotations_ == null ? finsky.protos.Annotations.getDefaultInstance() : annotations_;
   }
   /**
-   * <code>optional .finsky.protos.RelatedLinks relatedLinks = 15;</code>
+   * <code>optional .finsky.protos.Annotations annotations = 15;</code>
    */
-  private void setRelatedLinks(finsky.protos.RelatedLinks value) {
+  private void setAnnotations(finsky.protos.Annotations value) {
     value.getClass();
-  relatedLinks_ = value;
+  annotations_ = value;
     bitField0_ |= 0x00000400;
     }
   /**
-   * <code>optional .finsky.protos.RelatedLinks relatedLinks = 15;</code>
+   * <code>optional .finsky.protos.Annotations annotations = 15;</code>
    */
   @java.lang.SuppressWarnings({"ReferenceEquality"})
-  private void mergeRelatedLinks(finsky.protos.RelatedLinks value) {
+  private void mergeAnnotations(finsky.protos.Annotations value) {
     value.getClass();
-  if (relatedLinks_ != null &&
-        relatedLinks_ != finsky.protos.RelatedLinks.getDefaultInstance()) {
-      relatedLinks_ =
-        finsky.protos.RelatedLinks.newBuilder(relatedLinks_).mergeFrom(value).buildPartial();
+  if (annotations_ != null &&
+        annotations_ != finsky.protos.Annotations.getDefaultInstance()) {
+      annotations_ =
+        finsky.protos.Annotations.newBuilder(annotations_).mergeFrom(value).buildPartial();
     } else {
-      relatedLinks_ = value;
+      annotations_ = value;
     }
     bitField0_ |= 0x00000400;
   }
   /**
-   * <code>optional .finsky.protos.RelatedLinks relatedLinks = 15;</code>
+   * <code>optional .finsky.protos.Annotations annotations = 15;</code>
    */
-  private void clearRelatedLinks() {  relatedLinks_ = null;
+  private void clearAnnotations() {  annotations_ = null;
     bitField0_ = (bitField0_ & ~0x00000400);
   }
 
@@ -3993,49 +3993,49 @@ public  final class DocV2 extends
     }
 
     /**
-     * <code>optional .finsky.protos.RelatedLinks relatedLinks = 15;</code>
+     * <code>optional .finsky.protos.Annotations annotations = 15;</code>
      */
     @java.lang.Override
-    public boolean hasRelatedLinks() {
-      return instance.hasRelatedLinks();
+    public boolean hasAnnotations() {
+      return instance.hasAnnotations();
     }
     /**
-     * <code>optional .finsky.protos.RelatedLinks relatedLinks = 15;</code>
+     * <code>optional .finsky.protos.Annotations annotations = 15;</code>
      */
     @java.lang.Override
-    public finsky.protos.RelatedLinks getRelatedLinks() {
-      return instance.getRelatedLinks();
+    public finsky.protos.Annotations getAnnotations() {
+      return instance.getAnnotations();
     }
     /**
-     * <code>optional .finsky.protos.RelatedLinks relatedLinks = 15;</code>
+     * <code>optional .finsky.protos.Annotations annotations = 15;</code>
      */
-    public Builder setRelatedLinks(finsky.protos.RelatedLinks value) {
+    public Builder setAnnotations(finsky.protos.Annotations value) {
       copyOnWrite();
-      instance.setRelatedLinks(value);
+      instance.setAnnotations(value);
       return this;
       }
     /**
-     * <code>optional .finsky.protos.RelatedLinks relatedLinks = 15;</code>
+     * <code>optional .finsky.protos.Annotations annotations = 15;</code>
      */
-    public Builder setRelatedLinks(
-        finsky.protos.RelatedLinks.Builder builderForValue) {
+    public Builder setAnnotations(
+        finsky.protos.Annotations.Builder builderForValue) {
       copyOnWrite();
-      instance.setRelatedLinks(builderForValue.build());
+      instance.setAnnotations(builderForValue.build());
       return this;
     }
     /**
-     * <code>optional .finsky.protos.RelatedLinks relatedLinks = 15;</code>
+     * <code>optional .finsky.protos.Annotations annotations = 15;</code>
      */
-    public Builder mergeRelatedLinks(finsky.protos.RelatedLinks value) {
+    public Builder mergeAnnotations(finsky.protos.Annotations value) {
       copyOnWrite();
-      instance.mergeRelatedLinks(value);
+      instance.mergeAnnotations(value);
       return this;
     }
     /**
-     * <code>optional .finsky.protos.RelatedLinks relatedLinks = 15;</code>
+     * <code>optional .finsky.protos.Annotations annotations = 15;</code>
      */
-    public Builder clearRelatedLinks() {  copyOnWrite();
-      instance.clearRelatedLinks();
+    public Builder clearAnnotations() {  copyOnWrite();
+      instance.clearAnnotations();
       return this;
     }
 
@@ -4645,7 +4645,7 @@ public  final class DocV2 extends
             "containerMetadata_",
             "details_",
             "aggregateRating_",
-            "relatedLinks_",
+            "annotations_",
             "detailsUrl_",
             "shareUrl_",
             "reviewsUrl_",

@@ -202,15 +202,15 @@ public interface DocV2OrBuilder extends
   finsky.protos.DocV2.AggregateRating getAggregateRating();
 
   /**
-   * <code>optional .finsky.protos.RelatedLinks relatedLinks = 15;</code>
-   * @return Whether the relatedLinks field is set.
+   * <code>optional .finsky.protos.Annotations annotations = 15;</code>
+   * @return Whether the annotations field is set.
    */
-  boolean hasRelatedLinks();
+  boolean hasAnnotations();
   /**
-   * <code>optional .finsky.protos.RelatedLinks relatedLinks = 15;</code>
-   * @return The relatedLinks.
+   * <code>optional .finsky.protos.Annotations annotations = 15;</code>
+   * @return The annotations.
    */
-  finsky.protos.RelatedLinks getRelatedLinks();
+  finsky.protos.Annotations getAnnotations();
 
   /**
    * <code>optional string detailsUrl = 16;</code>

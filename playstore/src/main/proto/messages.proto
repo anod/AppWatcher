@@ -161,7 +161,7 @@ message TestingProgramInfo {
     optional bool subscribedAndInstalled = 3;
     optional string email = 5;
     optional string displayName = 7;
-    optional Image image = 6;
+    optional Common.Image image = 6;
 }
 
 message EarlyAccessInfo {
@@ -195,25 +195,44 @@ message DocDetails
 //    optional TvEpisodeDetails tvEpisodeDetails = 11;
 }
 
-message RelatedLink {
-  optional string label = 1;
-  optional string url1 = 2;
-  optional string url2 = 3;
+message SectionMetaData {
+    optional string header = 1;
+    optional string listUrl = 2;
+    optional string browseUrl = 3;
+    optional string description = 4;
 }
 
-message RelatedLinksUnknown2 {
-  optional string homeUrl = 2;
-  optional string nextPageUrl = 3;
+message ResolvedLink {
+    optional string detailsUrl = 1;
+    optional string browseUrl = 2;
+    optional string searchUrl = 3;
+//    optional DirectPurchase directPurchase = 4;
+    optional string homeUrl = 5;
+//    optional RedeemGiftCard redeemGiftCard = 6;
+    optional bytes serverLogsCookie = 7;
+//    optional DocId DocId = 8;
+    optional string wishlistUrl = 9;
+    optional int32 backend = 10;
+    optional string query = 11;
+    optional string myAccountUrl = 12;
+//    optional HelpCenter helpCenter = 13;
 }
 
-message RelatedLinksUnknown1 {
-  optional RelatedLinksUnknown2 unknown2 = 2;
+message AnnotationLink {
+    optional string uri = 1;
+    optional ResolvedLink resolvedLink = 2;
+    optional int32 uriBackend = 3;
 }
 
-message Rated {
-  optional string label = 1;
-  optional Image image = 2;
-  optional string learnMoreHtmlLink = 4;
+message Badge {
+    optional string major = 1;
+    optional Common.Image image = 2;
+    optional string minor = 3;
+    optional string minorHtml = 4;
+    // optional SubBadge subBadge = 6;
+    optional StreamLink link = 7;
+    optional string description = 8;
+    optional SubStream stream = 12;
 }
 
 message CategoryInfo {
@@ -221,14 +240,54 @@ message CategoryInfo {
   optional string appCategory = 2;
 }
 
-message RelatedLinks {
-  optional RelatedLinksUnknown1 unknown1 = 10;
-  optional string privacyPolicyUrl = 18;
-  optional RelatedLink youMightAlsoLike = 24;
-  optional Rated rated = 29;
-  repeated RelatedLink relatedLinks = 34;
-  optional CategoryInfo categoryInfo = 53;
+message Annotations {
+    optional SectionMetaData sectionRelated = 1;
+    optional SectionMetaData sectionMoreBy = 2;
+//    repeated Warning warning = 4;
+    optional SectionMetaData sectionBodyOfWork = 5;
+    optional SectionMetaData sectionCoreContent = 6;
+//    optional OverlayMetaData overlayMetaData = 7;
+    repeated Badge badgeForCreator = 8;
+    repeated Badge infoBadge = 9;
+    optional AnnotationLink annotationLink = 10;
+    optional SectionMetaData sectionCrossSell = 11;
+    optional SectionMetaData sectionRelatedItemType = 12;
+//    repeated PromotedDoc promotedDoc = 13;
+    optional string offerNote = 14;
+    optional string privacyPolicyUrl = 18;
+//    optional SuggestionReasons suggestion_reasons = 19;
+//    optional Warning optimalDeviceClassWarning = 20;
+//    repeated BadgeContainer badgeContainer = 21;
+    optional SectionMetaData sectionSuggestForRating = 22;
+    optional SectionMetaData sectionPurchaseCrossSell = 24;
+//    repeated OverflowLink overflowLink = 25;
+    optional string attributionHtml = 27;
+    optional PurchaseHistoryDetails purchaseHistoryDetails = 28;
+    optional Badge badgeForLegacyRating = 29;
+//    repeated VoucherInfo voucherInfo = 30;
+    optional SectionMetaData sectionFeaturedApps = 32;
+    repeated SectionMetaData detailsPageCluster = 34;
+//    optional VideoAnnotations videoAnnotations = 35;
+    optional SectionMetaData sectionPurchaseRelatedTopics = 36;
+//    optional MySubscriptionDetails mySubscriptionDetails = 37;
+//    optional MyRewardDetails myRewardDetails = 38;
+    repeated Badge featureBadge = 39;
+//    optional Snippet snippet = 42;
+    optional string downloadsLabel = 48;
+    optional Badge badgeForRating = 50;
+    optional CategoryInfo categoryInfo = 53;
+//    optional EditorReason reasons = 60;
+//    optional Stream topChartStream = 65;
+    optional string categoryName = 66;
+//    repeated Chip chip = 71;
+    repeated Badge displayBadge = 72;
+    optional string liveStreamUrl = 80;
+    optional string promotionStreamUrl = 85;
+//    optional OverlayMetaData overlayMetaDataExtra = 91;
+//    optional SectionImage sectionImage = 94;
+    optional SubStream categoryStream = 97;
 }
+
 
 message DocV2
 {
@@ -246,7 +305,7 @@ message DocV2
     optional Containers.ContainerMetadata containerMetadata = 12;
     optional DocDetails details = 13;
     optional AggregateRating aggregateRating = 14;
-    optional RelatedLinks relatedLinks = 15;
+    optional Annotations annotations = 15;
     optional string detailsUrl = 16;
     optional string shareUrl = 17;
     optional string reviewsUrl = 18;
@@ -402,7 +461,16 @@ message ResponseMessages
 
 message Bucket
 {
-
+    optional bool multiCorpus = 2;
+    optional string title = 3;
+    optional string iconUrl = 4;
+    optional string fullContentsUrl = 5;
+    optional double relevance = 6;
+    optional int64 estimatedResults = 7;
+    optional string analyticsCookie = 8;
+    optional string fullContentsListUrl = 9;
+    optional string nextPageUrl = 10;
+    optional bool ordered = 11;
 }
 
 message ListResponse
@@ -500,6 +568,16 @@ message DeliveryResponse {
     optional AndroidAppDeliveryData appDeliveryData = 2;
 }
 
+message PurchaseHistoryDetails {
+    optional int64 purchaseTimestampMillis = 2;
+    optional string purchaseDetailsHtml = 3;
+    optional Common.Offer offer = 5;
+    optional string purchaseStatus = 6;
+    optional string titleBylineHtml = 7;
+    optional bytes clientRefundContext = 8;
+    optional Common.Image purchaseDetailsImage = 9;
+}
+
 message Payload {
     optional ListResponse listResponse = 1;
     optional Details.DetailsResponse detailsResponse = 2;
@@ -536,23 +614,4 @@ message EncodedTargets {
     optional int32 version = 1;
     repeated int64 supportedTarget = 2;
     repeated int64 otherTarget = 3;
-}
-
-message Image {
-  optional int32 imageType = 1;
-  optional group Dimension = 2 {
-    optional int32 width = 3;
-    optional int32 height = 4;
-  }
-  optional string imageUrl = 5;
-  optional string altTextLocalized = 6;
-  optional string secureUrl = 7;
-  optional int32 positionInSequence = 8;
-  optional bool supportsFifeUrlOptions = 9;
-  optional group Citation = 10 {
-    optional string titleLocalized = 11;
-    optional string url = 12;
-  }
-  optional string color = 15;
-  optional int32 screenshotSetNumber = 21;
 }

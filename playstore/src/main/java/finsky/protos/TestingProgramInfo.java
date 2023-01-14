@@ -193,46 +193,46 @@ public  final class TestingProgramInfo extends
   }
 
   public static final int IMAGE_FIELD_NUMBER = 6;
-  private finsky.protos.Image image_;
+  private finsky.protos.Common.Image image_;
   /**
-   * <code>optional .finsky.protos.Image image = 6;</code>
+   * <code>optional .finsky.protos.Common.Image image = 6;</code>
    */
   @java.lang.Override
   public boolean hasImage() {
     return ((bitField0_ & 0x00000010) != 0);
   }
   /**
-   * <code>optional .finsky.protos.Image image = 6;</code>
+   * <code>optional .finsky.protos.Common.Image image = 6;</code>
    */
   @java.lang.Override
-  public finsky.protos.Image getImage() {
-    return image_ == null ? finsky.protos.Image.getDefaultInstance() : image_;
+  public finsky.protos.Common.Image getImage() {
+    return image_ == null ? finsky.protos.Common.Image.getDefaultInstance() : image_;
   }
   /**
-   * <code>optional .finsky.protos.Image image = 6;</code>
+   * <code>optional .finsky.protos.Common.Image image = 6;</code>
    */
-  private void setImage(finsky.protos.Image value) {
+  private void setImage(finsky.protos.Common.Image value) {
     value.getClass();
   image_ = value;
     bitField0_ |= 0x00000010;
     }
   /**
-   * <code>optional .finsky.protos.Image image = 6;</code>
+   * <code>optional .finsky.protos.Common.Image image = 6;</code>
    */
   @java.lang.SuppressWarnings({"ReferenceEquality"})
-  private void mergeImage(finsky.protos.Image value) {
+  private void mergeImage(finsky.protos.Common.Image value) {
     value.getClass();
   if (image_ != null &&
-        image_ != finsky.protos.Image.getDefaultInstance()) {
+        image_ != finsky.protos.Common.Image.getDefaultInstance()) {
       image_ =
-        finsky.protos.Image.newBuilder(image_).mergeFrom(value).buildPartial();
+        finsky.protos.Common.Image.newBuilder(image_).mergeFrom(value).buildPartial();
     } else {
       image_ = value;
     }
     bitField0_ |= 0x00000010;
   }
   /**
-   * <code>optional .finsky.protos.Image image = 6;</code>
+   * <code>optional .finsky.protos.Common.Image image = 6;</code>
    */
   private void clearImage() {  image_ = null;
     bitField0_ = (bitField0_ & ~0x00000010);
@@ -520,46 +520,46 @@ public  final class TestingProgramInfo extends
     }
 
     /**
-     * <code>optional .finsky.protos.Image image = 6;</code>
+     * <code>optional .finsky.protos.Common.Image image = 6;</code>
      */
     @java.lang.Override
     public boolean hasImage() {
       return instance.hasImage();
     }
     /**
-     * <code>optional .finsky.protos.Image image = 6;</code>
+     * <code>optional .finsky.protos.Common.Image image = 6;</code>
      */
     @java.lang.Override
-    public finsky.protos.Image getImage() {
+    public finsky.protos.Common.Image getImage() {
       return instance.getImage();
     }
     /**
-     * <code>optional .finsky.protos.Image image = 6;</code>
+     * <code>optional .finsky.protos.Common.Image image = 6;</code>
      */
-    public Builder setImage(finsky.protos.Image value) {
+    public Builder setImage(finsky.protos.Common.Image value) {
       copyOnWrite();
       instance.setImage(value);
       return this;
       }
     /**
-     * <code>optional .finsky.protos.Image image = 6;</code>
+     * <code>optional .finsky.protos.Common.Image image = 6;</code>
      */
     public Builder setImage(
-        finsky.protos.Image.Builder builderForValue) {
+        finsky.protos.Common.Image.Builder builderForValue) {
       copyOnWrite();
       instance.setImage(builderForValue.build());
       return this;
     }
     /**
-     * <code>optional .finsky.protos.Image image = 6;</code>
+     * <code>optional .finsky.protos.Common.Image image = 6;</code>
      */
-    public Builder mergeImage(finsky.protos.Image value) {
+    public Builder mergeImage(finsky.protos.Common.Image value) {
       copyOnWrite();
       instance.mergeImage(value);
       return this;
     }
     /**
-     * <code>optional .finsky.protos.Image image = 6;</code>
+     * <code>optional .finsky.protos.Common.Image image = 6;</code>
      */
     public Builder clearImage() {  copyOnWrite();
       instance.clearImage();

@@ -66,6 +66,23 @@ private class DfeList(private val listType: DfeListType) {
                     nextPageUrls.add(Pair(doc.title ?: "", doc.containerMetadata.nextPageUrl))
                 }
             }
+            7 -> {
+                if (doc.hasContainerMetadata() && doc.containerMetadata.nextPageUrl.isNotBlank()) {
+                    nextPageUrls.add(Pair(doc.title ?: "", doc.containerMetadata.nextPageUrl))
+                }
+                if (doc.hasAnnotations()
+                    && doc.annotations.hasPurchaseHistoryDetails()
+                    && doc.annotations.purchaseHistoryDetails.hasPurchaseStatus()
+                ) {
+                    return
+                }
+
+                for (docV2 in doc.childList) {
+                    if (docV2.docType == 1) {
+                        items.add(docV2)
+                    }
+                }
+            }
             else -> {
                 for (child in doc.childList) {
                     append(child, items, nextPageUrls)

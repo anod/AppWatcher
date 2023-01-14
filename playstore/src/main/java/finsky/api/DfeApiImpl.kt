@@ -105,8 +105,12 @@ class DfeApiImpl(http: OkHttpClient, private val apiContext: DfeApiContext) : Df
         return newCall(dfeRequest)
     }
 
-    override suspend fun purchaseHistory(url: String, offset: Int): ResponseWrapper {
-        val cacheKey = DfeCacheKey(DfeApi.PURCHASE_HISTORY_URL, apiContext, emptyMap())
+    override suspend fun purchaseHistory(nextPageUrl: String): ResponseWrapper {
+        val url = if (nextPageUrl.isEmpty())
+            DfeApi.PURCHASE_HISTORY_URL
+        else
+            DfeApi.URL_FDFE + "/" + nextPageUrl
+        val cacheKey = DfeCacheKey(url, apiContext, emptyMap())
         val dfeRequest = createRequest(cacheKey)
         return newCall(dfeRequest)
     }

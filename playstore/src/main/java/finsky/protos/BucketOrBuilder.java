@@ -6,4 +6,150 @@ package finsky.protos;
 public interface BucketOrBuilder extends
     // @@protoc_insertion_point(interface_extends:finsky.protos.Bucket)
     com.google.protobuf.MessageLiteOrBuilder {
+
+  /**
+   * <code>optional bool multiCorpus = 2;</code>
+   * @return Whether the multiCorpus field is set.
+   */
+  boolean hasMultiCorpus();
+  /**
+   * <code>optional bool multiCorpus = 2;</code>
+   * @return The multiCorpus.
+   */
+  boolean getMultiCorpus();
+
+  /**
+   * <code>optional string title = 3;</code>
+   * @return Whether the title field is set.
+   */
+  boolean hasTitle();
+  /**
+   * <code>optional string title = 3;</code>
+   * @return The title.
+   */
+  java.lang.String getTitle();
+  /**
+   * <code>optional string title = 3;</code>
+   * @return The bytes for title.
+   */
+  com.google.protobuf.ByteString
+      getTitleBytes();
+
+  /**
+   * <code>optional string iconUrl = 4;</code>
+   * @return Whether the iconUrl field is set.
+   */
+  boolean hasIconUrl();
+  /**
+   * <code>optional string iconUrl = 4;</code>
+   * @return The iconUrl.
+   */
+  java.lang.String getIconUrl();
+  /**
+   * <code>optional string iconUrl = 4;</code>
+   * @return The bytes for iconUrl.
+   */
+  com.google.protobuf.ByteString
+      getIconUrlBytes();
+
+  /**
+   * <code>optional string fullContentsUrl = 5;</code>
+   * @return Whether the fullContentsUrl field is set.
+   */
+  boolean hasFullContentsUrl();
+  /**
+   * <code>optional string fullContentsUrl = 5;</code>
+   * @return The fullContentsUrl.
+   */
+  java.lang.String getFullContentsUrl();
+  /**
+   * <code>optional string fullContentsUrl = 5;</code>
+   * @return The bytes for fullContentsUrl.
+   */
+  com.google.protobuf.ByteString
+      getFullContentsUrlBytes();
+
+  /**
+   * <code>optional double relevance = 6;</code>
+   * @return Whether the relevance field is set.
+   */
+  boolean hasRelevance();
+  /**
+   * <code>optional double relevance = 6;</code>
+   * @return The relevance.
+   */
+  double getRelevance();
+
+  /**
+   * <code>optional int64 estimatedResults = 7;</code>
+   * @return Whether the estimatedResults field is set.
+   */
+  boolean hasEstimatedResults();
+  /**
+   * <code>optional int64 estimatedResults = 7;</code>
+   * @return The estimatedResults.
+   */
+  long getEstimatedResults();
+
+  /**
+   * <code>optional string analyticsCookie = 8;</code>
+   * @return Whether the analyticsCookie field is set.
+   */
+  boolean hasAnalyticsCookie();
+  /**
+   * <code>optional string analyticsCookie = 8;</code>
+   * @return The analyticsCookie.
+   */
+  java.lang.String getAnalyticsCookie();
+  /**
+   * <code>optional string analyticsCookie = 8;</code>
+   * @return The bytes for analyticsCookie.
+   */
+  com.google.protobuf.ByteString
+      getAnalyticsCookieBytes();
+
+  /**
+   * <code>optional string fullContentsListUrl = 9;</code>
+   * @return Whether the fullContentsListUrl field is set.
+   */
+  boolean hasFullContentsListUrl();
+  /**
+   * <code>optional string fullContentsListUrl = 9;</code>
+   * @return The fullContentsListUrl.
+   */
+  java.lang.String getFullContentsListUrl();
+  /**
+   * <code>optional string fullContentsListUrl = 9;</code>
+   * @return The bytes for fullContentsListUrl.
+   */
+  com.google.protobuf.ByteString
+      getFullContentsListUrlBytes();
+
+  /**
+   * <code>optional string nextPageUrl = 10;</code>
+   * @return Whether the nextPageUrl field is set.
+   */
+  boolean hasNextPageUrl();
+  /**
+   * <code>optional string nextPageUrl = 10;</code>
+   * @return The nextPageUrl.
+   */
+  java.lang.String getNextPageUrl();
+  /**
+   * <code>optional string nextPageUrl = 10;</code>
+   * @return The bytes for nextPageUrl.
+   */
+  com.google.protobuf.ByteString
+      getNextPageUrlBytes();
+
+  /**
+   * <code>optional bool ordered = 11;</code>
+   * @return Whether the ordered field is set.
+   */
+  boolean hasOrdered();
+  /**
+   * <code>optional bool ordered = 11;</code>
+   * @return The ordered.
+   */
+  boolean getOrdered();
 }

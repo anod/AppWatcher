@@ -64,13 +64,13 @@ public interface TestingProgramInfoOrBuilder extends
       getDisplayNameBytes();
 
   /**
-   * <code>optional .finsky.protos.Image image = 6;</code>
+   * <code>optional .finsky.protos.Common.Image image = 6;</code>
    * @return Whether the image field is set.
    */
   boolean hasImage();
   /**
-   * <code>optional .finsky.protos.Image image = 6;</code>
+   * <code>optional .finsky.protos.Common.Image image = 6;</code>
    * @return The image.
    */
-  finsky.protos.Image getImage();
+  finsky.protos.Common.Image getImage();
 }

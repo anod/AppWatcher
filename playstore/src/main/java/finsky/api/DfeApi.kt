@@ -53,7 +53,7 @@ interface DfeApi {
 
     suspend fun wishlist(nextPageUrl: String): ResponseWrapper
 
-    suspend fun purchaseHistory(url: String, offset: Int): ResponseWrapper
+    suspend fun purchaseHistory(nextPageUrl: String): ResponseWrapper
 
     companion object {
         const val URL_FDFE = "https://android.clients.google.com/fdfe"

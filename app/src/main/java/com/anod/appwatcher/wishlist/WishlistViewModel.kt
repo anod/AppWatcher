@@ -87,13 +87,15 @@ class WishListViewModel(account: Account?, authToken: String) : BaseFlowViewMode
             return _pagingData!!
         }
 
-    private fun createPager() = Pager(PagingConfig(pageSize = 10)) { WishListEndpointPagingSource(dfeApi) }
-            .flow
-            .cachedIn(viewModelScope)
-            .combine(viewStates.map { it.nameFilter }.distinctUntilChanged()) { pageData, nameFilter ->
-                val predicate = predicate(nameFilter)
-                pageData.filter { d -> predicate(d) }
-            }
+    private fun createPager() = Pager(PagingConfig(pageSize = 10)) {
+       WishListEndpointPagingSource(dfeApi)
+    }
+    .flow
+    .cachedIn(viewModelScope)
+    .combine(viewStates.map { it.nameFilter }.distinctUntilChanged()) { pageData, nameFilter ->
+        val predicate = predicate(nameFilter)
+        pageData.filter { d -> predicate(d) }
+    }
 
     override fun handleEvent(event: WishListEvent) {
         when (event) {
