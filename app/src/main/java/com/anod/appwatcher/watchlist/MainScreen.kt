@@ -1,14 +1,12 @@
 package com.anod.appwatcher.watchlist
 
-import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.stringResource
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.FilterMenuAction
@@ -19,7 +17,6 @@ import com.anod.appwatcher.compose.SortMenuItem
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.tags.EditTagDialog
 import info.anodsplace.framework.content.InstalledApps
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,25 +26,21 @@ fun MainScreen(
     listState: WatchListSharedState,
     pagingSourceConfig: WatchListPagingSource.Config,
     onListEvent: (WatchListEvent) -> Unit,
-    installedApps: InstalledApps
+    installedApps: InstalledApps,
+    drawerState: DrawerState
 ) {
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
-
     ModalNavigationDrawer(
         drawerContent = {
             MainDrawer(
                 mainState = mainState,
                 onMainEvent = {
-                    scope.launch {
-                        if (it !is MainViewEvent.AddNewTagDialog) {
-                            drawerState.close()
-                        }
-                        if (it is MainViewEvent.DrawerItemClick && it.id == DrawerItem.Id.Refresh) {
-                            onListEvent(WatchListEvent.Refresh)
-                        } else {
-                            onMainEvent(it)
-                        }
+                    if (it !is MainViewEvent.AddNewTagDialog) {
+                        onMainEvent(MainViewEvent.DrawerState(isOpen = false))
+                    }
+                    if (it is MainViewEvent.DrawerItemClick && it.id == DrawerItem.Id.Refresh) {
+                        onListEvent(WatchListEvent.Refresh)
+                    } else {
+                        onMainEvent(it)
                     }
                 }
             )
@@ -64,10 +57,8 @@ fun MainScreen(
                     subtitle = subtitle,
                     filterId = filterId,
                     onListEvent = {
-                        if (it is WatchListEvent.OnBackPressed) {
-                            scope.launch {
-                                drawerState.open()
-                            }
+                        if (it is WatchListEvent.NavigationButton) {
+                            onMainEvent(MainViewEvent.DrawerState(isOpen = true))
                         } else {
                             onListEvent(it)
                         }

@@ -51,7 +51,7 @@ fun WatchListTopBar(
         onEvent = { event ->
             when (event) {
                 SearchTopBarEvent.NavigationAction -> {
-                    onEvent(WatchListEvent.OnBackPressed)
+                    onEvent(WatchListEvent.NavigationButton)
                 }
                 SearchTopBarEvent.SearchAction -> {
                     onEvent(WatchListEvent.ShowSearch)

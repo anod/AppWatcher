@@ -86,16 +86,6 @@ class InstalledActivity : BaseComposeActivity() {
         }
     }
 
-    override fun onBackPressed() {
-        if (viewModel.viewState.wideLayout.isWideLayout) {
-            if (viewModel.viewState.selectedApp != null) {
-                viewModel.handleEvent(InstalledListEvent.SelectApp(app = null))
-            } else {
-                super.onBackPressed()
-            }
-        } else super.onBackPressed()
-    }
-
     companion object {
         private fun intent(sortId: Int, showImportAction: Boolean, context: Context): Intent {
             return Intent(context, InstalledActivity::class.java).apply {

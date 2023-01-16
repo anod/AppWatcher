@@ -8,7 +8,6 @@ import info.anodsplace.framework.content.startActivitySafely
 
 sealed interface CommonActivityAction {
     object Finish : CommonActivityAction
-    object OnBackPressed : CommonActivityAction
     class ShowToast(@StringRes val resId: Int = 0, val text: String = "", val length: Int = Toast.LENGTH_SHORT) : CommonActivityAction
     class StartActivity(val intent: Intent, val addMultiWindowFlags: Boolean = false, val finish: Boolean = false) : CommonActivityAction
     object ShowAccountDialog : CommonActivityAction
@@ -16,7 +15,6 @@ sealed interface CommonActivityAction {
 
 fun Activity.onCommonActivityAction(action: CommonActivityAction) {
     when (action) {
-        CommonActivityAction.OnBackPressed -> onBackPressed()
         is CommonActivityAction.ShowToast -> {
             if (action.resId == 0) {
                 Toast.makeText(this, action.text, action.length).show()

@@ -37,7 +37,8 @@ data class MainViewState(
     val account: Account? = null,
     val lastUpdate: Long = 0L,
     val tags: TagCountList = emptyList(),
-    val showNewTagDialog: Boolean = false
+    val showNewTagDialog: Boolean = false,
+    val isDrawerOpen: Boolean = false
 )
 
 sealed interface MainViewEvent {
@@ -48,6 +49,7 @@ sealed interface MainViewEvent {
     class NavigateToTag(val tag: Tag) : MainViewEvent
     class NotificationPermissionResult(val enabled: Boolean) : MainViewEvent
     class InitAccount(val account: Account) : MainViewEvent
+    class DrawerState(val isOpen: Boolean) : MainViewEvent
 }
 
 sealed interface MainViewAction {
@@ -56,6 +58,7 @@ sealed interface MainViewAction {
     class NavigateTo(val id: DrawerItem.Id) : MainViewAction
     object RequestNotificationPermission : MainViewAction
     class NavigateToTag(val tag: Tag) : MainViewAction
+    class DrawerState(val isOpen: Boolean) : MainViewAction
 }
 
 private fun startActivityAction(intent: Intent, addMultiWindowFlags: Boolean = false) : MainViewAction.ActivityAction {
@@ -132,6 +135,10 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
             MainViewEvent.ChooseAccount -> emitAction(MainViewAction.ChooseAccount)
             is MainViewEvent.NotificationPermissionResult -> onNotificationResult(event.enabled)
             is MainViewEvent.InitAccount -> onAccountSelect(event.account)
+            is MainViewEvent.DrawerState -> {
+                viewState = viewState.copy(isDrawerOpen = event.isOpen)
+                emitAction(MainViewAction.DrawerState(isOpen = event.isOpen))
+            }
         }
     }
 

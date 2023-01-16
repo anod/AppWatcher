@@ -26,7 +26,6 @@ import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.date.UploadDateParserCache
 import com.anod.appwatcher.utils.networkConnection
 import finsky.api.DfeApi
-import finsky.api.DfeListType
 import finsky.api.Document
 import finsky.api.toDocument
 import info.anodsplace.framework.app.HingeDeviceLayout
@@ -149,8 +148,12 @@ class SearchViewModel(
             is SearchViewEvent.OnSearchEnter -> onSearchRequest(event.query)
             is SearchViewEvent.AccountSelectError -> onAccountSelectError(event.errorMessage)
             is SearchViewEvent.AccountSelected -> onAccountSelected(event.account)
-            SearchViewEvent.OnBackPressed -> emitAction(SearchViewAction.ActivityAction(CommonActivityAction.OnBackPressed))
+            SearchViewEvent.OnBackPressed -> onBackPressed()
         }
+    }
+
+    private fun onBackPressed() {
+        emitAction(SearchViewAction.ActivityAction(CommonActivityAction.Finish))
     }
 
     private fun onAccountSelectError(errorMessage: String) {

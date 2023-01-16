@@ -103,7 +103,7 @@ fun WishListScreen(
                         showTagList = action.info
                     }
                 }
-                WishListAction.OnBackPress -> onActivityAction(CommonActivityAction.OnBackPressed)
+                is WishListAction.ActivityAction -> onActivityAction(action.action)
             }
         }
     }

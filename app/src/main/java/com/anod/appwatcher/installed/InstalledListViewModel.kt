@@ -85,7 +85,7 @@ class InstalledListViewModel(state: SavedStateHandle) : BaseFlowViewModel<Instal
                 viewState = viewState.copy(sortId = event.sortId)
             }
             is InstalledListEvent.FilterByTitle -> viewState = viewState.copy(titleFilter = event.query)
-            InstalledListEvent.OnBackPressed -> emitAction(CommonActivityAction.OnBackPressed)
+            InstalledListEvent.OnBackPressed -> onBackPressed()
             is InstalledListEvent.SwitchImportMode -> {
                 switchImportMode(event.selectionMode)
             }
@@ -98,6 +98,16 @@ class InstalledListViewModel(state: SavedStateHandle) : BaseFlowViewModel<Instal
 
             InstalledListEvent.Import -> import()
         }
+    }
+
+    private fun onBackPressed() {
+        if (viewState.wideLayout.isWideLayout) {
+            if (viewState.selectedApp != null) {
+                handleEvent(InstalledListEvent.SelectApp(app = null))
+            } else {
+                emitAction(CommonActivityAction.Finish)
+            }
+        } else emitAction(CommonActivityAction.Finish)
     }
 
     private fun handleListEvent(listEvent: WatchListEvent) {

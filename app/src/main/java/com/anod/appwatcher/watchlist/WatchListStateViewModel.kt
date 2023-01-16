@@ -68,7 +68,7 @@ data class WatchListSharedState(
 )
 
 sealed interface WatchListEvent {
-    object OnBackPressed : WatchListEvent
+    object NavigationButton : WatchListEvent
     object PlayStoreMyApps : WatchListEvent
     object Refresh : WatchListEvent
 
@@ -219,13 +219,13 @@ class WatchListStateViewModel(
             is WatchListEvent.FilterByTitle -> viewState = viewState.copy(titleFilter = event.query)
             is WatchListEvent.SetWideLayout -> viewState = viewState.copy(wideLayout = event.layout)
             is WatchListEvent.AddAppToTag -> viewState = viewState.copy(showAppTagDialog = event.show)
-            WatchListEvent.OnBackPressed -> {
+            WatchListEvent.NavigationButton -> {
                 if (viewState.showSearch) {
                     viewState = viewState.copy(showSearch = false)
                 } else if (viewState.wideLayout.isWideLayout && viewState.selectedApp != null) {
                     viewState = viewState.copy(selectedApp = null)
                 } else {
-                    emitAction(CommonActivityAction.OnBackPressed)
+                    emitAction(CommonActivityAction.Finish)
                 }
             }
             is WatchListEvent.FilterById -> {

@@ -24,7 +24,7 @@ class UserLogViewModel : BaseFlowViewModel<UserLogState, UserLogEvent, CommonAct
 
     override fun handleEvent(event: UserLogEvent) {
         when (event) {
-            UserLogEvent.OnBackNav -> emitAction(CommonActivityAction.OnBackPressed)
+            UserLogEvent.OnBackNav -> emitAction(CommonActivityAction.Finish)
             UserLogEvent.Share -> emitAction(CommonActivityAction.StartActivity(intent = Intent().apply {
                 action = Intent.ACTION_SEND
                 putExtra(Intent.EXTRA_TITLE, "AppWatcher Log")

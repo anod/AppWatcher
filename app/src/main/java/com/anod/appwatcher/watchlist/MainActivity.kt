@@ -3,9 +3,14 @@ package com.anod.appwatcher.watchlist
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.viewModels
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.core.view.WindowCompat
@@ -42,6 +47,7 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
     private lateinit var accountSelectionDialog: AccountSelectionDialog
     private lateinit var notificationPermissionRequest: ActivityResultLauncher<AppPermissions.Request.Input>
 
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -59,6 +65,16 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (mainViewModel.viewState.isDrawerOpen) {
+                    mainViewModel.handleEvent(MainViewEvent.DrawerState(isOpen = false))
+                } else {
+                    listViewModel.handleEvent(WatchListEvent.NavigationButton)
+                }
+            }
+        })
+
         setContent {
             AppTheme(
                 theme = prefs.theme,
@@ -75,12 +91,16 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
                     showRecentlyInstalled = prefs.showRecent
                 )
 
+                val drawerValue = if (mainState.isDrawerOpen) DrawerValue.Open else DrawerValue.Closed
+                val drawerState = rememberDrawerState(initialValue = drawerValue)
+
                 if (listState.wideLayout.isWideLayout) {
                     MainDetailScreen(
                         wideLayout = listState.wideLayout,
                         main = {
                             MainScreen(
                                 mainState = mainState,
+                                drawerState = drawerState,
                                 onMainEvent = { mainViewModel.handleEvent(it) },
                                 listState = listState,
                                 pagingSourceConfig = pagingSourceConfig,
@@ -95,6 +115,7 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
                 } else {
                     MainScreen(
                         mainState = mainState,
+                        drawerState = drawerState,
                         onMainEvent = { mainViewModel.handleEvent(it) },
                         listState = listState,
                         pagingSourceConfig = pagingSourceConfig,
@@ -111,15 +132,23 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
                         )
                     }
                 }
+
+                LaunchedEffect(true) {
+                    mainViewModel.viewActions.collect { action ->
+                        if (action is MainViewAction.DrawerState) {
+                            if (action.isOpen) {
+                                drawerState.open()
+                            } else {
+                                drawerState.close()
+                            }
+                        } else onMainAction(action)
+                    }
+                }
             }
         }
 
         lifecycleScope.launch {
             listViewModel.viewActions.collect { onCommonActivityAction(it) }
-        }
-
-        lifecycleScope.launch {
-            mainViewModel.viewActions.collect { onMainAction(it) }
         }
 
         lifecycleScope.launchWhenCreated {
@@ -164,17 +193,8 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
             MainViewAction.RequestNotificationPermission -> notificationPermissionRequest.launch(AppPermission.PostNotification.toRequestInput())
             MainViewAction.ChooseAccount -> accountSelectionDialog.show()
             is MainViewAction.ActivityAction -> onCommonActivityAction(action.action)
+            is MainViewAction.DrawerState -> { }
         }
-    }
-
-    override fun onBackPressed() {
-        if (listViewModel.viewState.wideLayout.isWideLayout) {
-            if (listViewModel.viewState.selectedApp != null) {
-                listViewModel.handleEvent(WatchListEvent.SelectApp(app = null))
-            } else {
-                super.onBackPressed()
-            }
-        } else super.onBackPressed()
     }
 
     companion object {

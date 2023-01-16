@@ -11,6 +11,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.filter
+import com.anod.appwatcher.compose.CommonActivityAction
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.model.AppInfo
@@ -40,7 +41,7 @@ data class WishListState(
 
 sealed interface WishListAction {
     class ShowTagSnackbar(val info: AppInfo) : WishListAction
-    object OnBackPress : WishListAction
+    class ActivityAction(val action: CommonActivityAction) : WishListAction
 }
 
 sealed interface WishListEvent {
@@ -106,7 +107,7 @@ class WishListViewModel(account: Account?, authToken: String) : BaseFlowViewMode
                     add(event.document)
                 }
             }
-            WishListEvent.OnBackPress -> emitAction(WishListAction.OnBackPress)
+            WishListEvent.OnBackPress -> emitAction(WishListAction.ActivityAction(CommonActivityAction.Finish))
             is WishListEvent.OnNameFilter -> viewState = viewState.copy(nameFilter = event.query)
         }
     }
