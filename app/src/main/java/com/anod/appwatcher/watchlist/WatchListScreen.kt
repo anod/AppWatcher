@@ -18,8 +18,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.Filters
-import com.anod.appwatcher.tags.AppsTagDialog
-import com.anod.appwatcher.tags.EditTagDialog
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
@@ -119,20 +117,6 @@ fun WatchListScreen(
                 installedApps = installedApps,
                 onEvent = { event -> onEvent(event) },
                 recentlyInstalledApps = screenState.recentlyInstalledApps
-            )
-        }
-
-        if (screenState.showAppTagDialog) {
-            AppsTagDialog(
-                tag = screenState.tag,
-                onDismissRequest = { onEvent(WatchListEvent.AddAppToTag(show = false)) }
-            )
-        }
-
-        if (screenState.showEditTagDialog) {
-            EditTagDialog(
-                tag = screenState.tag,
-                onDismissRequest = { onEvent(WatchListEvent.EditTag(show = false)) }
             )
         }
     }

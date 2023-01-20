@@ -90,6 +90,20 @@ class TagWatchListComposeActivity : BaseComposeActivity() {
                         )
                     }
                 }
+
+                if (screenState.showAppTagDialog) {
+                    AppsTagDialog(
+                        tag = screenState.tag,
+                        onDismissRequest = { viewModel.handleEvent(WatchListEvent.AddAppToTag(show = false)) }
+                    )
+                }
+
+                if (screenState.showEditTagDialog) {
+                    EditTagDialog(
+                        tag = screenState.tag,
+                        onDismissRequest = { viewModel.handleEvent(WatchListEvent.EditTag(show = false)) }
+                    )
+                }
             }
         }
 

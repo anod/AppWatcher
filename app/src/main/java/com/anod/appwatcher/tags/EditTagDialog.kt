@@ -55,32 +55,30 @@ fun EditTagDialog(tag: Tag, onDismissRequest: (tagId: Int) -> Unit) {
     )
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
 
-    Dialog(
-        onDismissRequest = { onDismissRequest(screenState.tag.id) }
+    AppTheme(
+        customPrimaryColor = Color(screenState.tag.color),
+        updateSystemBars = false
     ) {
-        AppTheme(
-            customPrimaryColor = Color(screenState.tag.color),
-            updateSystemBars = false
-        ) {
+        Dialog(onDismissRequest = { onDismissRequest(screenState.tag.id) }) {
             EditTagScreen(
                 screenState = screenState,
                 onEvent = { event -> viewModel.handleEvent(event) }
             )
         }
-    }
 
-    if (screenState.showPickColor) {
-        BottomSheet(
-            onDismissRequest = { viewModel.handleEvent(EditTagEvent.PickColor(show = false)) }
-        ) {
-            ColorChooser(
-                color = Color(screenState.tag.color),
-                onColorChange = {
-                    if (it != null) {
-                        viewModel.handleEvent(EditTagEvent.UpdateColor(it.toArgb()))
-                    }
-                },
-            )
+        if (screenState.showPickColor) {
+            BottomSheet(
+                onDismissRequest = { viewModel.handleEvent(EditTagEvent.PickColor(show = false)) }
+            ) {
+                ColorChooser(
+                    color = Color(screenState.tag.color),
+                    onColorChange = {
+                        if (it != null) {
+                            viewModel.handleEvent(EditTagEvent.UpdateColor(it.toArgb()))
+                        }
+                    },
+                )
+            }
         }
     }
 
