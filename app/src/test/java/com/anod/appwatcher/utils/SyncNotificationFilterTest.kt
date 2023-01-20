@@ -102,6 +102,7 @@ class SyncNotificationFilterTest {
             uploadDate = "100",
             recentChanges = "",
             installedVersionCode = installedVersionCode,
-            isNewUpdate = false
-    ).apply { this.noNewDetails = noNewDetails }
+            isNewUpdate = false,
+            noNewDetails = noNewDetails
+    )
 }
