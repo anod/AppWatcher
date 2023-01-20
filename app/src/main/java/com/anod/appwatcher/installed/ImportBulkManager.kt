@@ -70,7 +70,7 @@ internal class ImportBulkManager(private val koin: Koin) {
         val dfeApi = koin.get<DfeApi>()
         try {
             val docs = dfeApi.details(docIds, includeDetails = true)
-                .filterDocuments(AppDetailsFilter.predicate)
+                .filterDocuments(AppDetailsFilter.hasAppDetails)
                 .toTypedArray()
             return@withContext importTask.execute(*docs)
         } catch (e: Exception) {

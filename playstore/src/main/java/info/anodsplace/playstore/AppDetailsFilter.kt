@@ -10,19 +10,22 @@ import finsky.api.FilterPredicate
  */
 
 object AppDetailsFilter {
-    val predicate: FilterPredicate = {
+    val hasAppDetails: FilterPredicate = {
         it?.appDetails?.packageName?.isNotEmpty() ?: false
     }
 }
 
 class AppNameFilter(private val query: String) {
-    val predicate: FilterPredicate = {
+    val containsQuery: FilterPredicate = {
         it?.title?.contains(query, true) ?: false
     }
 }
 
 object PaidHistoryFilter {
-    val predicate: FilterPredicate = {
+    val hasPrice: FilterPredicate = {
         it?.purchaseOffer?.micros?.let { micros -> micros > 0 } ?: false
+    }
+    val noPurchaseStatus: FilterPredicate = {
+        it?.purchaseStatus.isNullOrEmpty()
     }
 }

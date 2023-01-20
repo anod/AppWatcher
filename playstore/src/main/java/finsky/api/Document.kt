@@ -48,6 +48,9 @@ data class Document(private val doc: DocV2) {
     val purchaseTimestampMillis: Long?
         get() = this.doc.annotations?.purchaseHistoryDetails?.purchaseTimestampMillis
 
+    val purchaseStatus: String?
+        get() = this.doc.annotations?.purchaseHistoryDetails?.purchaseStatus
+    
     val iconUrl: String?
         get() {
             val images = this.imageTypeMap.get(4) ?: return null

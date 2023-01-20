@@ -241,7 +241,7 @@ class SearchViewModel(
     .cachedIn(viewModelScope)
     .map {
         it
-            .filter { d -> AppDetailsFilter.predicate(d) }
+            .filter { d -> AppDetailsFilter.hasAppDetails(d) }
             .map { d -> App(d, uploadDateParserCache) }
     }
 

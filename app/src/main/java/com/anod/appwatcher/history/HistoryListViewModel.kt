@@ -149,11 +149,15 @@ class HistoryListViewModel(account: Account?, authToken: String, wideLayout: Hin
 
     private fun predicate(nameFilter: String): FilterPredicate {
         if (nameFilter.isBlank()) {
-            return PaidHistoryFilter.predicate
+            return FilterComposite(listOf(
+                PaidHistoryFilter.hasPrice,
+                PaidHistoryFilter.noPurchaseStatus
+            )).predicate
         }
         return FilterComposite(listOf(
-            PaidHistoryFilter.predicate,
-            AppNameFilter(nameFilter).predicate
+            PaidHistoryFilter.hasPrice,
+            PaidHistoryFilter.noPurchaseStatus,
+            AppNameFilter(nameFilter).containsQuery
         )).predicate
     }
 }

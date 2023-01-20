@@ -123,11 +123,11 @@ class WishListViewModel(account: Account?, authToken: String, wideLayout: HingeD
 
     private fun predicate(nameFilter: String): FilterPredicate {
         if (nameFilter.isBlank()) {
-            return AppDetailsFilter.predicate
+            return AppDetailsFilter.hasAppDetails
         }
         return FilterComposite(listOf(
-                AppDetailsFilter.predicate,
-                AppNameFilter(nameFilter).predicate
+                AppDetailsFilter.hasAppDetails,
+                AppNameFilter(nameFilter).containsQuery
         )).predicate
     }
 }

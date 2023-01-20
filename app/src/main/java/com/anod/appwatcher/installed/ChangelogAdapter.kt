@@ -77,7 +77,7 @@ class ChangelogAdapter(
         }
         try {
             val documents = dfeApi.details(docIds, includeDetails = true)
-                .filterDocuments(AppDetailsFilter.predicate)
+                .filterDocuments(AppDetailsFilter.hasAppDetails)
             documents.associateByTo(changelogs, { it.docId }) {
                 val recentChanges = it.appDetails.recentChangesHtml?.trim() ?: ""
                 AppChange(

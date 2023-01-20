@@ -186,7 +186,7 @@ class UpdateCheck(
             val dfeApi = koin.get<DfeApi>()
             AppLog.d("Sending chunk... $docIds")
             val documents = try {
-                dfeApi.details(docIds, includeDetails = true).filterDocuments(AppDetailsFilter.predicate)
+                dfeApi.details(docIds, includeDetails = true).filterDocuments(AppDetailsFilter.hasAppDetails)
             } catch (e: Exception) {
                 AppLog.e("Fetching of bulk updates failed ${e.message ?: ""}", "UpdateCheck")
                 emptyList()
