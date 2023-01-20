@@ -2,14 +2,15 @@ package com.anod.appwatcher.database
 
 import android.database.Cursor
 import android.provider.BaseColumns
+import com.anod.appwatcher.database.entities.App
+import com.anod.appwatcher.database.entities.Price
 
-import com.anod.appwatcher.model.AppInfo
 import info.anodsplace.framework.database.CursorIterator
 
 /**
  * @author alex
  */
-class AppListCursor(cursor: Cursor?) : CursorIterator<AppInfo>(cursor) {
+class AppListCursor(cursor: Cursor?) : CursorIterator<App>(cursor) {
 
     private class Projection {
         var rowId = 0
@@ -58,26 +59,28 @@ class AppListCursor(cursor: Cursor?) : CursorIterator<AppInfo>(cursor) {
     }
 
 
-    override val current: AppInfo
-        get() = AppInfo(
-            getInt(projection.rowId),
-            getString(projection.appId),
-            getString(projection.packageName),
-            getInt(projection.versionNumber),
-            getString(projection.versionName),
-            getString(projection.title),
-            getString(projection.creator),
-            getString(projection.iconUrl),
-            getInt(projection.status),
-            getString(projection.uploadDate),
-            getString(projection.priceText),
-            getString(projection.priceCurrency),
-            getInt(projection.priceMicros),
-            getString(projection.detailsUrl),
-            getLong(projection.uploadTime),
-            getString(projection.appType),
-            getLong(projection.refreshTime),
-            getInt(projection.recentFlag) == 1
+    override val current: App
+        get() = App(
+            rowId = getInt(projection.rowId),
+            appId = getString(projection.appId),
+            packageName = getString(projection.packageName),
+            versionNumber = getInt(projection.versionNumber),
+            versionName = getString(projection.versionName),
+            title = getString(projection.title),
+            creator = getString(projection.creator),
+            iconUrl = getString(projection.iconUrl),
+            status = getInt(projection.status),
+            uploadDate = getString(projection.uploadDate),
+            price = Price(
+                text = getString(projection.priceText),
+                cur = getString(projection.priceCurrency),
+                micros = getInt(projection.priceMicros),
+            ),
+            detailsUrl = getString(projection.detailsUrl),
+            uploadTime = getLong(projection.uploadTime),
+            appType = getString(projection.appType),
+            updateTime = getLong(projection.refreshTime),
+            recentFlag = getInt(projection.recentFlag) == 1
         )
 
 }

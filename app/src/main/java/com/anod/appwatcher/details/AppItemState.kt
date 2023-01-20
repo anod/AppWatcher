@@ -9,7 +9,6 @@ import androidx.compose.ui.platform.LocalContext
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.Amber800
 import com.anod.appwatcher.database.entities.App
-import com.anod.appwatcher.model.AppInfoMetadata
 import info.anodsplace.framework.content.InstalledApps
 
 private fun formatVersionText(versionName: String, versionNumber: Int, newVersionNumber: Int, context: Context): String {
@@ -69,7 +68,7 @@ private fun calcAppItemState(
                     )
                 }
 
-                app.status == AppInfoMetadata.STATUS_UPDATED || recentFlag -> {
+                app.status == App.STATUS_UPDATED || recentFlag -> {
                     color = primaryColor
                     formatVersionText(packageInfo.versionName, packageInfo.versionCode, 0, context)
                 }
@@ -79,7 +78,7 @@ private fun calcAppItemState(
                 }
             }
         } else -> {
-            if (app.status == AppInfoMetadata.STATUS_UPDATED || recentFlag) {
+            if (app.status == App.STATUS_UPDATED || recentFlag) {
                 color = primaryColor
             }
             if (app.price.isFree) {
@@ -91,7 +90,7 @@ private fun calcAppItemState(
     }
 
     val showRecent = when {
-        app.status == AppInfoMetadata.STATUS_UPDATED || recentFlag -> true
+        app.status == App.STATUS_UPDATED || recentFlag -> true
         else -> false
     }
 

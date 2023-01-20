@@ -19,13 +19,12 @@ import androidx.paging.compose.items
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.CommonActivityAction
 import com.anod.appwatcher.compose.SearchTopBar
-import com.anod.appwatcher.model.AppInfo
+import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.search.MarketAppItem
 import com.anod.appwatcher.search.RetryButton
 import com.anod.appwatcher.tags.TagSelectionDialog
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.AppIconLoader
-import finsky.api.Document
 import info.anodsplace.framework.content.InstalledApps
 import kotlinx.coroutines.flow.Flow
 import org.koin.java.KoinJavaComponent
@@ -34,7 +33,7 @@ import org.koin.java.KoinJavaComponent
 @Composable
 fun WishListScreen(
     screenState: WishListState,
-    pagingDataFlow: Flow<PagingData<Document>>,
+    pagingDataFlow: Flow<PagingData<App>>,
     onEvent: (WishListEvent) -> Unit,
     installedApps: InstalledApps,
     appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get(),
@@ -93,7 +92,7 @@ fun WishListScreen(
         }
     }
 
-    var showTagList: AppInfo? by remember { mutableStateOf(null) }
+    var showTagList: App? by remember { mutableStateOf(null) }
     LaunchedEffect(key1 = viewActions) {
         viewActions.collect { action ->
             when (action) {
@@ -120,7 +119,7 @@ fun WishListScreen(
 }
 
 @Composable
-fun WishlistResults(items: LazyPagingItems<Document>, screenState: WishListState, onEvent: (WishListEvent) -> Unit, installedApps: InstalledApps, appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get()) {
+fun WishlistResults(items: LazyPagingItems<App>, screenState: WishListState, onEvent: (WishListEvent) -> Unit, installedApps: InstalledApps, appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get()) {
     LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -129,19 +128,19 @@ fun WishlistResults(items: LazyPagingItems<Document>, screenState: WishListState
         items(
                 items = items,
                 key = { item -> item.hashCode() }
-        ) { document ->
-            if (document != null) { // TODO: Preload?
-                val packageName = document.appDetails.packageName
+        ) { app ->
+            if (app != null) { // TODO: Preload?
+                val packageName = app.packageName
                 val isWatched = remember(packageName, screenState.watchingPackages) {
                     screenState.watchingPackages.contains(packageName)
                 }
                 val packageInfo = remember { installedApps.packageInfo(packageName) }
                 MarketAppItem(
-                        document = document,
-                        onClick = { onEvent(WishListEvent.ItemClick(document)) },
-                        isWatched = isWatched,
-                        isInstalled = packageInfo.isInstalled,
-                        appIconLoader = appIconLoader
+                    app = app,
+                    onClick = { onEvent(WishListEvent.SelectApp(app)) },
+                    isWatched = isWatched,
+                    isInstalled = packageInfo.isInstalled,
+                    appIconLoader = appIconLoader
                 )
             } else {
                 Box(modifier = Modifier

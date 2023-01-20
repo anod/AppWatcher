@@ -14,13 +14,13 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.filter
+import androidx.paging.map
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.compose.CommonActivityAction
-import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
-import com.anod.appwatcher.model.AppInfo
+import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.date.UploadDateParserCache
@@ -41,7 +41,7 @@ import org.koin.core.component.inject
 
 sealed interface SearchStatus {
     object Loading : SearchStatus
-    data class DetailsAvailable(val document: Document) : SearchStatus
+    data class DetailsAvailable(val app: App) : SearchStatus
     data class NoResults(val query: String) : SearchStatus
     data class NoNetwork(val query: String) : SearchStatus
     data class Error(val query: String) : SearchStatus
@@ -52,7 +52,7 @@ sealed interface SearchViewAction {
     class ActivityAction(val action: CommonActivityAction) : SearchViewAction
     class ShowSnackbar(val message: String, val duration: SnackbarDuration = SnackbarDuration.Short, val finish: Boolean = false) : SearchViewAction
     object ShowAccountDialog : SearchViewAction
-    class ShowTagSnackbar(val info: AppInfo, val isShareSource: Boolean) : SearchViewAction
+    class ShowTagSnackbar(val info: App, val isShareSource: Boolean) : SearchViewAction
     class AlreadyWatchedNotice(val document: Document) : SearchViewAction
 }
 
@@ -68,26 +68,26 @@ private fun startActivityAction(intent: Intent, finish: Boolean = false) : Searc
 sealed interface SearchViewEvent {
     object NoAccount : SearchViewEvent
     object OnBackPressed : SearchViewEvent
-    class Delete(val document: Document) : SearchViewEvent
-    class ItemClick(val document: Document) : SearchViewEvent
     class SetWideLayout(val wideLayout: HingeDeviceLayout) : SearchViewEvent
     class SearchQueryChange(val query: String) : SearchViewEvent
     class OnSearchEnter(val query: String) : SearchViewEvent
     class AccountSelectError(val errorMessage: String) : SearchViewEvent
     class AccountSelected(val account: Account) : SearchViewEvent
+    class SelectApp(val app: App) : SearchViewEvent
 }
 
 data class SearchViewState(
-        val searchQuery: String = "",
-        val isShareSource: Boolean = false,
-        val hasFocus: Boolean = false,
-        val initiateSearch: Boolean = false,
-        val isPackageSearch: Boolean = false,
-        val authenticated: Boolean = false,
-        val account: Account? = null,
-        val searchStatus: SearchStatus = SearchStatus.Loading,
-        val watchingPackages: List<String> = emptyList(),
-        val wideLayout: HingeDeviceLayout = HingeDeviceLayout(),
+    val searchQuery: String = "",
+    val isShareSource: Boolean = false,
+    val hasFocus: Boolean = false,
+    val initiateSearch: Boolean = false,
+    val isPackageSearch: Boolean = false,
+    val authenticated: Boolean = false,
+    val account: Account? = null,
+    val searchStatus: SearchStatus = SearchStatus.Loading,
+    val watchingPackages: List<String> = emptyList(),
+    val wideLayout: HingeDeviceLayout = HingeDeviceLayout(),
+    val selectedApp: App? = null
 )
 
 class SearchViewModel(
@@ -118,8 +118,8 @@ class SearchViewModel(
 
     init {
         viewState = initialState.copy(
-                account = prefs.account,
-                searchStatus = if (initialState.searchQuery.isNotEmpty() && initialState.initiateSearch) SearchStatus.Loading else SearchStatus.NoResults(query = "")
+            account = prefs.account,
+            searchStatus = if (initialState.searchQuery.isNotEmpty() && initialState.initiateSearch) SearchStatus.Loading else SearchStatus.NoResults(query = ""),
         )
         if (prefs.account == null) {
             handleEvent(SearchViewEvent.NoAccount)
@@ -136,12 +136,6 @@ class SearchViewModel(
 
     override fun handleEvent(event: SearchViewEvent) {
         when (event) {
-            is SearchViewEvent.ItemClick -> {
-                if (viewState.watchingPackages.contains(event.document.appDetails.packageName)) {
-                    emitAction(SearchViewAction.AlreadyWatchedNotice(event.document))
-                } else add(event.document)
-            }
-            is SearchViewEvent.Delete -> delete(event.document)
             SearchViewEvent.NoAccount -> emitAction(SearchViewAction.ShowAccountDialog)
             is SearchViewEvent.SetWideLayout -> viewState = viewState.copy(wideLayout = event.wideLayout)
             is SearchViewEvent.SearchQueryChange -> viewState = viewState.copy(searchQuery = event.query)
@@ -149,6 +143,9 @@ class SearchViewModel(
             is SearchViewEvent.AccountSelectError -> onAccountSelectError(event.errorMessage)
             is SearchViewEvent.AccountSelected -> onAccountSelected(event.account)
             SearchViewEvent.OnBackPressed -> onBackPressed()
+            is SearchViewEvent.SelectApp -> {
+                viewState = viewState.copy(selectedApp = event.app)
+            }
         }
     }
 
@@ -201,10 +198,10 @@ class SearchViewModel(
         emit(SearchStatus.Loading)
         if (viewState.isPackageSearch) {
             try {
-                val detailsUrl = AppInfo.createDetailsUrl(query)
+                val detailsUrl = App.createDetailsUrl(query)
                 val document = dfeApi.details(detailsUrl).toDocument()
                 if (document != null) {
-                    emit(SearchStatus.DetailsAvailable(document))
+                    emit(SearchStatus.DetailsAvailable(app = App(document, uploadDateParserCache)))
                 } else {
                     resetPager()
                     emit(SearchStatus.SearchList(query = query))
@@ -223,8 +220,8 @@ class SearchViewModel(
         }
     }
 
-    private var _pagingData: Flow<PagingData<Document>>? = null
-    val pagingData: Flow<PagingData<Document>>
+    private var _pagingData: Flow<PagingData<App>>? = null
+    val pagingData: Flow<PagingData<App>>
         get() {
             if (_pagingData == null) {
                 _pagingData = createPager()
@@ -243,7 +240,9 @@ class SearchViewModel(
     .flow
     .cachedIn(viewModelScope)
     .map {
-        it.filter { d -> AppDetailsFilter.predicate(d) }
+        it
+            .filter { d -> AppDetailsFilter.predicate(d) }
+            .map { d -> App(d, uploadDateParserCache) }
     }
 
     private fun onAccountSelected(account: Account) {
@@ -259,23 +258,6 @@ class SearchViewModel(
                 }
             } catch (e: AuthTokenStartIntent) {
                 emitAction(startActivityAction(intent = e.intent, finish = true))
-            }
-        }
-    }
-
-    private fun delete(document: Document) {
-        viewModelScope.launch {
-            val info = AppInfo(document, uploadDateParserCache)
-            AppListTable.Queries.delete(info.appId, database)
-        }
-    }
-
-    private fun add(document: Document) {
-        viewModelScope.launch {
-            val info = AppInfo(document, uploadDateParserCache)
-            val result = AppListTable.Queries.insertSafetly(info, database)
-            if (result != AppListTable.ERROR_INSERT) {
-                emitAction(SearchViewAction.ShowTagSnackbar(info = info, isShareSource = viewState.isShareSource))
             }
         }
     }

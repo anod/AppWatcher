@@ -12,8 +12,6 @@ import androidx.room.withTransaction
 import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
 import com.anod.appwatcher.database.entities.*
-import com.anod.appwatcher.model.AppInfo
-import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.preferences.Preferences
 import info.anodsplace.framework.util.chunked
 import info.anodsplace.framework.util.dayStartAgoMillis
@@ -47,7 +45,7 @@ interface AppListTable {
 
     @Suppress("FunctionName")
     @Query("SELECT ${BaseColumns._ID}, ${Columns.packageName} FROM $table " +
-            "WHERE ${Columns.packageName} IN (:packageNames) AND ${Columns.status} != ${AppInfoMetadata.STATUS_DELETED}")
+            "WHERE ${Columns.packageName} IN (:packageNames) AND ${Columns.status} != ${App.STATUS_DELETED}")
     suspend fun _loadRowIds(packageNames: List<String>): List<PackageRowPair>
 
     suspend fun loadRowIds(packageNames: List<String>): List<PackageRowPair> {
@@ -55,17 +53,17 @@ interface AppListTable {
     }
 
     @Query("SELECT ${BaseColumns._ID}, ${Columns.packageName} FROM $table WHERE " +
-            "${Columns.status} != ${AppInfoMetadata.STATUS_DELETED}")
+            "${Columns.status} != ${App.STATUS_DELETED}")
     fun observePackages(): Flow<List<PackageRowPair>>
 
     @Query("SELECT ${BaseColumns._ID}, ${Columns.packageName} FROM $table WHERE " +
-            "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${AppInfoMetadata.STATUS_DELETED} ELSE ${Columns.status} >= ${AppInfoMetadata.STATUS_NORMAL} END")
+            "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${App.STATUS_DELETED} ELSE ${Columns.status} >= ${App.STATUS_NORMAL} END")
     suspend fun loadPackages(includeDeleted: Boolean): List<PackageRowPair>
 
     @Query("SELECT $table.*, " +
             "CASE WHEN ${Columns.updateTimestamp} > :recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
             "FROM $table WHERE " +
-            "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${AppInfoMetadata.STATUS_DELETED} ELSE ${Columns.status} >= ${AppInfoMetadata.STATUS_NORMAL} END ")
+            "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${App.STATUS_DELETED} ELSE ${Columns.status} >= ${App.STATUS_NORMAL} END ")
     fun load(includeDeleted: Boolean, recentTime: Long): Cursor
 
     @Query("SELECT $table.*, ${ChangelogTable.TableColumns.details}, ${ChangelogTable.TableColumns.noNewDetails}, " +
@@ -75,15 +73,15 @@ interface AppListTable {
             "${TableColumns.appId} == ${ChangelogTable.TableColumns.appId} " +
             "AND ${TableColumns.versionNumber} == ${ChangelogTable.TableColumns.versionCode} " +
             "WHERE " +
-            "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${AppInfoMetadata.STATUS_DELETED} ELSE ${Columns.status} >= ${AppInfoMetadata.STATUS_NORMAL} END ")
+            "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${App.STATUS_DELETED} ELSE ${Columns.status} >= ${App.STATUS_NORMAL} END ")
     fun loadAppList(includeDeleted: Boolean, recentTime: Long): Cursor
 
     @Query("SELECT COUNT(${BaseColumns._ID}) " +
             "FROM $table WHERE " +
-            "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${AppInfoMetadata.STATUS_DELETED} ELSE ${Columns.status} >= ${AppInfoMetadata.STATUS_NORMAL} END ")
+            "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${App.STATUS_DELETED} ELSE ${Columns.status} >= ${App.STATUS_NORMAL} END ")
     suspend fun count(includeDeleted: Boolean): Int
 
-    @Query("DELETE FROM $table WHERE ${Columns.status} == ${AppInfoMetadata.STATUS_DELETED}")
+    @Query("DELETE FROM $table WHERE ${Columns.status} == ${App.STATUS_DELETED}")
     suspend fun cleanDeleted(): Int
 
     @Query("DELETE FROM $table")
@@ -170,7 +168,7 @@ interface AppListTable {
             return Pair(sql, selection.second)
         }
 
-        suspend fun insert(app: AppInfo, db: AppsDatabase): Long = withContext(Dispatchers.IO) {
+        suspend fun insert(app: App, db: AppsDatabase): Long = withContext(Dispatchers.IO) {
             // Skip id to apply autoincrement
             return@withContext db.runInTransaction(Callable {
                 db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, app.contentValues)
@@ -204,7 +202,7 @@ interface AppListTable {
             val args = ArrayList<String>(5)
 
             selc.add(Columns.status + " != ?")
-            args.add(AppInfoMetadata.STATUS_DELETED.toString())
+            args.add(App.STATUS_DELETED.toString())
 
             if (tagId != null) {
                 selc.add(AppTagsTable.TableColumns.tagId + " = ?")
@@ -225,7 +223,7 @@ interface AppListTable {
             return Pair(selc.joinToString(" AND "), args.toTypedArray())
         }
 
-        suspend fun insertSafetly(app: AppInfo, db: AppsDatabase): Int {
+        suspend fun insertSafetly(app: App, db: AppsDatabase): Int {
             val found = db.apps().loadApp(app.appId)
             if (found == null) {
                 val rowId = insert(app, db)
@@ -235,8 +233,8 @@ interface AppListTable {
                     ERROR_INSERT
                 }
             } else {
-                if (found.status == AppInfoMetadata.STATUS_DELETED) {
-                    db.apps().updateStatus(found.rowId, AppInfoMetadata.STATUS_NORMAL)
+                if (found.status == App.STATUS_DELETED) {
+                    db.apps().updateStatus(found.rowId, App.STATUS_NORMAL)
                     return found.rowId
                 }
             }
@@ -313,7 +311,7 @@ interface AppListTable {
     }
 }
 
-val AppInfo.contentValues: ContentValues
+val App.contentValues: ContentValues
     get() = ContentValues().apply {
         if (rowId > 0) {
             put(BaseColumns._ID, rowId)
@@ -327,9 +325,9 @@ val AppInfo.contentValues: ContentValues
         put(AppListTable.Columns.status, status)
         put(AppListTable.Columns.uploadDate, uploadDate)
 
-        put(AppListTable.Columns.priceText, priceText)
-        put(AppListTable.Columns.priceCurrency, priceCur)
-        put(AppListTable.Columns.priceMicros, priceMicros)
+        put(AppListTable.Columns.priceText, price.text)
+        put(AppListTable.Columns.priceCurrency, price.cur)
+        put(AppListTable.Columns.priceMicros, price.micros)
 
         put(AppListTable.Columns.detailsUrl, detailsUrl)
 

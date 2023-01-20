@@ -30,7 +30,9 @@ import coil.ImageLoader
 import coil.compose.AsyncImage
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
+import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.utils.AppIconLoader
+import com.anod.appwatcher.utils.date.UploadDateParserCache
 import finsky.api.Document
 import finsky.protos.AppDetails
 import finsky.protos.DocDetails
@@ -38,7 +40,7 @@ import finsky.protos.DocV2
 import org.koin.java.KoinJavaComponent
 
 @Composable
-fun MarketAppItem(document: Document, onClick: () -> Unit, isWatched: Boolean, isInstalled: Boolean, appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get()) {
+fun MarketAppItem(app: App, onClick: () -> Unit, isWatched: Boolean, isInstalled: Boolean, appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get()) {
     Box()
     {
         Row(
@@ -50,11 +52,11 @@ fun MarketAppItem(document: Document, onClick: () -> Unit, isWatched: Boolean, i
         ) {
 
             val imageRequest = remember {
-                mutableStateOf(appIconLoader.request(document.iconUrl ?: ""))
+                mutableStateOf(appIconLoader.request(app.iconUrl ?: ""))
             }
             AsyncImage(
                     model = imageRequest.value,
-                    contentDescription = document.title,
+                    contentDescription = app.title,
                     imageLoader = appIconLoader.coilLoader,
                     modifier = Modifier
                             .size(40.dp)
@@ -65,9 +67,9 @@ fun MarketAppItem(document: Document, onClick: () -> Unit, isWatched: Boolean, i
             Column(
                     modifier = Modifier.padding(start = 16.dp)
             ) {
-                Text(text = document.title, style = MaterialTheme.typography.bodyLarge)
+                Text(text = app.title, style = MaterialTheme.typography.bodyLarge)
                 Text(
-                        text = document.creator,
+                        text = app.creator,
                         maxLines = 1,
                         style = MaterialTheme.typography.bodySmall
                 )
@@ -76,7 +78,7 @@ fun MarketAppItem(document: Document, onClick: () -> Unit, isWatched: Boolean, i
                         verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                            text = document.appDetails.uploadDate,
+                            text = app.uploadDate,
                             maxLines = 1,
                             modifier = Modifier.weight(1f),
                             overflow = TextOverflow.Ellipsis,
@@ -91,12 +93,12 @@ fun MarketAppItem(document: Document, onClick: () -> Unit, isWatched: Boolean, i
                         )
                     } else {
                         val context = LocalContext.current
-                        val offerText by remember(document.offer) {
+                        val offerText by remember(app.price) {
                             mutableStateOf(
                                     when {
-                                        document.offer.offerType == 0 -> ""
-                                        document.offer.micros.toInt() == 0 -> context.getString(R.string.free)
-                                        else -> document.offer.formattedAmount
+                                        app.price.micros == null -> ""
+                                        app.price.micros == 0 -> context.getString(R.string.free)
+                                        else -> app.price.text
                                     })
                         }
                         if (offerText.isNotEmpty()) {
@@ -144,12 +146,13 @@ fun MarketAppItemPreview() {
                 build()
             }
     )
+    val app = App(doc, UploadDateParserCache())
     AppTheme {
         Column {
-            MarketAppItem(document = doc, onClick = { }, isWatched = true, isInstalled = true, appIconLoader = appIconLoader)
-            MarketAppItem(document = doc, onClick = { }, isWatched = false, isInstalled = true, appIconLoader = appIconLoader)
-            MarketAppItem(document = doc, onClick = { }, isWatched = true, isInstalled = false, appIconLoader = appIconLoader)
-            MarketAppItem(document = doc, onClick = { }, isWatched = false, isInstalled = false, appIconLoader = appIconLoader)
+            MarketAppItem(app = app, onClick = { }, isWatched = true, isInstalled = true, appIconLoader = appIconLoader)
+            MarketAppItem(app = app, onClick = { }, isWatched = false, isInstalled = true, appIconLoader = appIconLoader)
+            MarketAppItem(app = app, onClick = { }, isWatched = true, isInstalled = false, appIconLoader = appIconLoader)
+            MarketAppItem(app = app, onClick = { }, isWatched = false, isInstalled = false, appIconLoader = appIconLoader)
         }
     }
 }

@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarVisuals
 import com.anod.appwatcher.R
-import com.anod.appwatcher.model.AppInfo
+import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.model.AppListFilter
 import info.anodsplace.ktx.hashCodeOf
 
@@ -26,7 +26,7 @@ object TagSnackbar {
         override fun hashCode(): Int = hashCodeOf(message, actionLabel, duration, withDismissAction)
         override fun equals(other: Any?): Boolean = (other as? AppListFilter.Installed)?.hashCode() == hashCode()
 
-        constructor(info: AppInfo, context: Context) : this(
+        constructor(info: App, context: Context) : this(
             message = context.getString(R.string.app_stored, info.title),
             actionLabel = context.getString(R.string.action_tag, GREEN_BOOK)
         )

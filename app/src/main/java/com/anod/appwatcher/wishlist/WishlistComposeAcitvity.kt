@@ -12,8 +12,11 @@ import androidx.compose.runtime.getValue
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
+import com.anod.appwatcher.compose.MainDetailScreen
 import com.anod.appwatcher.compose.onCommonActivityAction
+import com.anod.appwatcher.details.DetailsDialog
 import com.anod.appwatcher.utils.prefs
+import com.anod.appwatcher.watchlist.DetailContent
 import org.koin.core.component.KoinComponent
 
 /**
@@ -25,8 +28,9 @@ class WishListActivity : BaseComposeActivity(), KoinComponent {
 
     private val viewModel: WishListViewModel by viewModels(factoryProducer = {
         WishListViewModel.Factory(
-                account = intent.extras?.getParcelable(EXTRA_ACCOUNT),
-                authToken = intent.extras?.getString(EXTRA_AUTH_TOKEN) ?: ""
+            account = intent.extras?.getParcelable(EXTRA_ACCOUNT),
+            authToken = intent.extras?.getString(EXTRA_AUTH_TOKEN) ?: "",
+            wideLayout = hingeDevice.layout.value,
         )
     })
 
@@ -43,14 +47,42 @@ class WishListActivity : BaseComposeActivity(), KoinComponent {
                     theme = viewModel.prefs.theme
             ) {
                 val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
-                WishListScreen(
-                    screenState = screenState,
-                    onEvent = { viewModel.handleEvent(it) },
-                    installedApps = viewModel.installedApps,
-                    pagingDataFlow = viewModel.pagingData,
-                    viewActions = viewModel.viewActions,
-                    onActivityAction = { onCommonActivityAction(it) }
-                )
+                if (screenState.wideLayout.isWideLayout) {
+                    MainDetailScreen(
+                        wideLayout = screenState.wideLayout,
+                        main = {
+                            WishListScreen(
+                                screenState = screenState,
+                                onEvent = { viewModel.handleEvent(it) },
+                                installedApps = viewModel.installedApps,
+                                pagingDataFlow = viewModel.pagingData,
+                                viewActions = viewModel.viewActions,
+                                onActivityAction = { onCommonActivityAction(it) }
+                            )
+                        },
+                        detail = {
+                            DetailContent(app = screenState.selectedApp)
+                        }
+                    )
+                } else {
+                    WishListScreen(
+                        screenState = screenState,
+                        onEvent = { viewModel.handleEvent(it) },
+                        installedApps = viewModel.installedApps,
+                        pagingDataFlow = viewModel.pagingData,
+                        viewActions = viewModel.viewActions,
+                        onActivityAction = { onCommonActivityAction(it) }
+                    )
+                    if (screenState.selectedApp != null) {
+                        DetailsDialog(
+                            appId = screenState.selectedApp!!.appId,
+                            rowId = screenState.selectedApp!!.rowId,
+                            detailsUrl = screenState.selectedApp!!.detailsUrl ?: "",
+                            onDismissRequest = { viewModel.handleEvent(WishListEvent.SelectApp(app = null)) },
+                            onCommonActivityAction = { onCommonActivityAction(it) }
+                        )
+                    }
+                }
             }
         }
     }

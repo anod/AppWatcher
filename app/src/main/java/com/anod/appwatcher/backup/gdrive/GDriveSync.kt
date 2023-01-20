@@ -7,8 +7,8 @@ import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppTagsTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.TagsTable
+import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Tag
-import com.anod.appwatcher.model.AppInfo
 import com.google.android.gms.auth.UserRecoverableAuthException
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import info.anodsplace.applog.AppLog
@@ -83,7 +83,7 @@ class GDriveSync(private val googleAccount: GoogleSignInAccount, private val con
         val tagApps = mutableMapOf<String, MutableList<String>>()
 
         jsonReader.read(driveBufferedReader, object : DbJsonReader.OnReadListener {
-            override suspend fun onAppRead(app: AppInfo, tags: List<String>) {
+            override suspend fun onAppRead(app: App, tags: List<String>) {
                 AppLog.d("[GDrive] Read app: " + app.packageName)
                 if (!currentIds.containsKey(app.packageName)) {
                     AppListTable.Queries.insert(app, db)

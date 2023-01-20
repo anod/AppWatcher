@@ -1,8 +1,8 @@
 package com.anod.appwatcher.backup
 
+import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppTag
 import com.anod.appwatcher.database.entities.Tag
-import com.anod.appwatcher.model.AppInfo
 import info.anodsplace.framework.json.JsonReader
 import info.anodsplace.framework.json.JsonToken
 import kotlinx.coroutines.Dispatchers
@@ -17,10 +17,10 @@ import java.io.Reader
  */
 class DbJsonReader {
 
-    internal class Container(val apps: List<AppInfo>, val tags: List<Tag>, val appTags: List<AppTag>)
+    internal class Container(val apps: List<App>, val tags: List<Tag>, val appTags: List<AppTag>)
 
     interface OnReadListener {
-        suspend fun onAppRead(app: AppInfo, tags: List<String>)
+        suspend fun onAppRead(app: App, tags: List<String>)
         suspend fun onTagRead(tag: Tag)
         suspend fun onFinish(appsRead: Int, tagsRead: Int)
     }
@@ -59,12 +59,12 @@ class DbJsonReader {
     internal suspend fun read(reader: Reader): Container = withContext(Dispatchers.IO) {
         val jsonReader = JsonReader(reader)
 
-        val apps = mutableListOf<AppInfo>()
+        val apps = mutableListOf<App>()
         val tagList = mutableListOf<Tag>()
         val appsTags = mutableMapOf<String, List<String>>()
 
         val listener = object : OnReadListener {
-            override suspend fun onAppRead(app: AppInfo, tags: List<String>) {
+            override suspend fun onAppRead(app: App, tags: List<String>) {
                 apps.add(app)
                 appsTags[app.appId] = tags
             }

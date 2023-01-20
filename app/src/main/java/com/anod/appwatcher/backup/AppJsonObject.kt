@@ -1,9 +1,9 @@
 package com.anod.appwatcher.backup
 
-import android.text.TextUtils
 import com.anod.appwatcher.database.AppListTable
+import com.anod.appwatcher.database.entities.App
+import com.anod.appwatcher.database.entities.Price
 import com.anod.appwatcher.database.entities.Tag
-import com.anod.appwatcher.model.AppInfo
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.json.JsonReader
 import info.anodsplace.framework.json.JsonToken
@@ -13,18 +13,18 @@ import info.anodsplace.framework.json.JsonWriter
  * @author Alex Gavrishev
  * @date 27/06/2017
  */
-class AppJsonObject(val app: AppInfo?, val tags: List<String>) {
+class AppJsonObject(val app: App?, val tags: List<String>) {
 
-    constructor(app: AppInfo, tags: List<Tag>, writer: JsonWriter) : this(app, tags.map { it.name }) {
+    constructor(app: App, tags: List<Tag>, writer: JsonWriter) : this(app, tags.map { it.name }) {
         write(app, tags, writer)
     }
 
     constructor(reader: JsonReader): this(read(reader))
 
-    constructor(params: Pair<AppInfo?, List<String>>): this(params.first, params.second)
+    constructor(params: Pair<App?, List<String>>): this(params.first, params.second)
 
     companion object {
-        fun write(app: AppInfo, tags: List<Tag>, writer: JsonWriter) {
+        fun write(app: App, tags: List<Tag>, writer: JsonWriter) {
             AppLog.d("Write app: " + app.appId)
             writer.beginObject()
             writer.name("id").value(app.appId)
@@ -51,7 +51,7 @@ class AppJsonObject(val app: AppInfo?, val tags: List<String>) {
             writer.endObject()
         }
 
-        fun read(reader: JsonReader): Pair<AppInfo?, List<String>> {
+        fun read(reader: JsonReader): Pair<App?, List<String>> {
             var appId: String? = null
             var pname: String? = null
             var versionName = ""
@@ -116,21 +116,43 @@ class AppJsonObject(val app: AppInfo?, val tags: List<String>) {
             }
             reader.endObject()
             if (appId != null && pname != null) {
-                val info = AppInfo(0, appId, pname, versionNumber, versionName,
-                        title, creator, iconUrl, status, uploadDate, null, null, null,
-                        detailsUrl, uploadTime, appType, refreshTime, uploadTime > recentTime)
+                val info = App(
+                    rowId = 0,
+                    appId = appId,
+                    packageName = pname,
+                    versionNumber = versionNumber,
+                    versionName = versionName,
+                    title = title,
+                    creator = creator,
+                    iconUrl = iconUrl,
+                    status = status,
+                    uploadDate = uploadDate,
+                    price = Price(
+                        text = "",
+                        cur = "",
+                        micros = null
+                    ),
+                    detailsUrl = detailsUrl,
+                    uploadTime = uploadTime,
+                    appType = appType,
+                    updateTime = refreshTime,
+                    recentFlag = uploadTime > recentTime
+                )
                 onUpgrade(info)
                 return Pair(info, tags)
             }
             return Pair(null, listOf())
         }
 
-        private fun onUpgrade(info: AppInfo) {
-            if (TextUtils.isEmpty(info.detailsUrl)) {
+        private fun onUpgrade(info: App): App {
+            if (info.detailsUrl.isNullOrBlank()) {
                 val packageName = info.packageName
-                info.appId = packageName
-                info.detailsUrl = AppInfo.createDetailsUrl(packageName)
+                return info.copy(
+                    appId = packageName,
+                    detailsUrl = App.createDetailsUrl(packageName)
+                )
             }
+            return info
         }
     }
 }

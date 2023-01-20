@@ -20,8 +20,6 @@ import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.database.entities.Schedule
-import com.anod.appwatcher.model.AppInfo
-import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.compareLettersAndDigits
 import com.anod.appwatcher.utils.date.UploadDateParserCache
@@ -229,8 +227,7 @@ class UpdateCheck(
                         marketApp.appDetails.uploadDate,
                         noNewDetails).contentValues)
                 if (updatedApp != null) {
-                    updatedApp.noNewDetails = noNewDetails
-                    updatedApps.add(updatedApp)
+                    updatedApps.add(updatedApp.copy(noNewDetails = noNewDetails))
                 }
             }
         }
@@ -260,11 +257,11 @@ class UpdateCheck(
             localApps.values.forEach {
                 val app = it.app
                 if (fetched[app.appId] == null) {
-                    if (app.status == AppInfoMetadata.STATUS_UPDATED) {
+                    if (app.status == App.STATUS_UPDATED) {
                         AppLog.d("Set not fetched app as viewed")
                         statusBatch.add(contentValuesOf(
                                 BaseColumns._ID to app.rowId,
-                                AppListTable.Columns.status to AppInfoMetadata.STATUS_NORMAL
+                                AppListTable.Columns.status to App.STATUS_NORMAL
                         ))
                     }
                 }
@@ -284,7 +281,7 @@ class UpdateCheck(
 
         if (appDetails.versionCode > localApp.versionNumber) {
             AppLog.d("New version found [" + appDetails.versionCode + "]")
-            val newApp = AppInfo(localApp.rowId, AppInfoMetadata.STATUS_UPDATED, marketApp, uploadDateParserCache)
+            val newApp = App(localApp.rowId, App.STATUS_UPDATED, marketApp, uploadDateParserCache)
             val installedInfo = installedAppsProvider.packageInfo(appDetails.packageName)
             val recentChanges = appDetails.recentChangesHtml ?: ""
             return Pair(newApp.contentValues, UpdatedApp(newApp, recentChanges, installedInfo.versionCode, true))
@@ -293,10 +290,10 @@ class UpdateCheck(
         val values = ContentValues()
         var updatedApp: UpdatedApp? = null
         //Mark updated app as normal
-        if (localApp.status == AppInfoMetadata.STATUS_UPDATED && lastUpdatesViewed) {
+        if (localApp.status == App.STATUS_UPDATED && lastUpdatesViewed) {
             AppLog.d("Set ${localApp.appId} update as viewed")
-            values.put(AppListTable.Columns.status, AppInfoMetadata.STATUS_NORMAL)
-        } else if (localApp.status == AppInfoMetadata.STATUS_UPDATED) {
+            values.put(AppListTable.Columns.status, App.STATUS_NORMAL)
+        } else if (localApp.status == App.STATUS_UPDATED) {
             // Application was previously updated
             val installedInfo = installedAppsProvider.packageInfo(appDetails.packageName)
             val recentChanges = appDetails.recentChangesHtml ?: ""

@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.Lifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.Filters
@@ -21,6 +22,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import info.anodsplace.applog.AppLog
+import info.anodsplace.compose.LifecycleEffect
 import info.anodsplace.framework.content.InstalledApps
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPagerApi::class)
@@ -93,6 +95,16 @@ fun WatchListScreen(
             LaunchedEffect(refreshKey) {
                 AppLog.d("Refresh $refreshKey")
                 items.refresh()
+            }
+
+            LifecycleEffect { event ->
+                when (event) {
+                    Lifecycle.Event.ON_RESUME -> {
+                        AppLog.d("ON_RESUME $refreshKey")
+                        items.refresh()
+                    }
+                    else -> { }
+                }
             }
 
             AppLog.d("HorizontalPager Recomposition [page=${pageConfig.filterId}] ${items.hashCode()}")

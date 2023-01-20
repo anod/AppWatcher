@@ -24,8 +24,6 @@ import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.database.entities.packageToApp
-import com.anod.appwatcher.model.AppInfo
-import com.anod.appwatcher.model.AppInfoMetadata
 import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.date.UploadDateParserCache
@@ -92,7 +90,7 @@ data class DetailsState(
     val isInstalled: Boolean = false
 ) {
     val isWatched: Boolean
-        get() = app != null && app.status != AppInfoMetadata.STATUS_DELETED
+        get() = app != null && app.status != App.STATUS_DELETED
 
     val fetchedRemoteDocument: Boolean
         get() = document != null
@@ -107,7 +105,7 @@ data class AppVersionInfo(
 
 sealed interface DetailsAction {
     class ActivityAction(val action: CommonActivityAction) : DetailsAction
-    class ShowTagSnackbar(val appInfo: AppInfo) : DetailsAction
+    class ShowTagSnackbar(val appInfo: App) : DetailsAction
     object Dismiss : DetailsAction
     class Share(val app: App) : DetailsAction
 }
@@ -142,7 +140,7 @@ sealed interface DetailsEvent {
     object Share : DetailsEvent
     object Open : DetailsEvent
     object Uninstall : DetailsEvent
-    object AppInfo : DetailsEvent
+    object App : DetailsEvent
     object PlayStore : DetailsEvent
     object Translate : DetailsEvent
 }
@@ -254,7 +252,7 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
                 if (viewState.isWatched) {
                     viewModelScope.launch {
                         database.apps()
-                            .updateStatus(rowId = viewState.rowId, AppInfoMetadata.STATUS_DELETED)
+                            .updateStatus(rowId = viewState.rowId, App.STATUS_DELETED)
                     }
                 } else {
                     watchApp()
@@ -274,7 +272,7 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
                 }
             }
 
-            DetailsEvent.AppInfo ->
+            DetailsEvent.App ->
                 emitAction(
                     startActivityAction(
                         intent = Intent().forAppInfo(viewState.appId),
@@ -398,7 +396,7 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
             val result = if (document == null) {
                 AppListTable.ERROR_INSERT
             } else {
-                val info = AppInfo(document, uploadDateParserCache)
+                val info = App(document, uploadDateParserCache)
                 AppListTable.Queries.insertSafetly(info, database)
             }
             when (result) {
@@ -406,7 +404,7 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
                 AppListTable.ERROR_ALREADY_ADDED -> emitAction(action = showToastAction(resId = R.string.app_already_added))
                 else -> emitAction(
                     DetailsAction.ShowTagSnackbar(
-                        appInfo = AppInfo(
+                        appInfo = App(
                             document!!,
                             uploadDateParserCache
                         )

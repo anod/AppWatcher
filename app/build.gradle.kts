@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     kotlin("android")
     kotlin("kapt")
+    id("kotlin-parcelize")
     id("com.google.devtools.ksp").version("1.7.20-1.0.7")
     id("com.google.android.gms.oss-licenses-plugin")
 }

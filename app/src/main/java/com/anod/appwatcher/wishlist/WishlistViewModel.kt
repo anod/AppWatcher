@@ -11,16 +11,16 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.filter
+import androidx.paging.map
 import com.anod.appwatcher.compose.CommonActivityAction
-import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
-import com.anod.appwatcher.model.AppInfo
+import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.date.UploadDateParserCache
 import finsky.api.DfeApi
-import finsky.api.Document
 import finsky.api.FilterComposite
 import finsky.api.FilterPredicate
+import info.anodsplace.framework.app.HingeDeviceLayout
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.playstore.AppDetailsFilter
 import info.anodsplace.playstore.AppNameFilter
@@ -33,29 +33,35 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 data class WishListState(
-        val account: Account? = null,
-        val authToken: String = "",
-        val nameFilter: String = "",
-        val watchingPackages: List<String> = emptyList(),
+    val account: Account? = null,
+    val authToken: String = "",
+    val nameFilter: String = "",
+    val watchingPackages: List<String> = emptyList(),
+    val wideLayout: HingeDeviceLayout = HingeDeviceLayout(),
+    val selectedApp: App? = null,
 )
 
 sealed interface WishListAction {
-    class ShowTagSnackbar(val info: AppInfo) : WishListAction
+    class ShowTagSnackbar(val info: App) : WishListAction
     class ActivityAction(val action: CommonActivityAction) : WishListAction
 }
 
 sealed interface WishListEvent {
     object OnBackPress : WishListEvent
-    class ItemClick(val document: Document) : WishListEvent
     class OnNameFilter(val query: String) : WishListEvent
+    class SelectApp(val app: App?) : WishListEvent
 }
 
-class WishListViewModel(account: Account?, authToken: String) : BaseFlowViewModel<WishListState, WishListEvent, WishListAction>(), KoinComponent {
+class WishListViewModel(account: Account?, authToken: String, wideLayout: HingeDeviceLayout) : BaseFlowViewModel<WishListState, WishListEvent, WishListAction>(), KoinComponent {
 
-    class Factory(private val account: Account?, private val authToken: String) : ViewModelProvider.Factory {
+    class Factory(
+        private val account: Account?,
+        private val authToken: String,
+        private val wideLayout: HingeDeviceLayout
+    ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            return WishListViewModel(account, authToken) as T
+            return WishListViewModel(account, authToken, wideLayout) as T
         }
     }
 
@@ -67,8 +73,9 @@ class WishListViewModel(account: Account?, authToken: String) : BaseFlowViewMode
 
     init {
         viewState = WishListState(
-                account = account,
-                authToken = authToken
+            account = account,
+            authToken = authToken,
+            wideLayout = wideLayout
         )
         viewModelScope.launch {
             database.apps().observePackages().map { list ->
@@ -79,8 +86,8 @@ class WishListViewModel(account: Account?, authToken: String) : BaseFlowViewMode
         }
     }
 
-    private var _pagingData: Flow<PagingData<Document>>? = null
-    val pagingData: Flow<PagingData<Document>>
+    private var _pagingData: Flow<PagingData<App>>? = null
+    val pagingData: Flow<PagingData<App>>
         get() {
             if (_pagingData == null) {
                 _pagingData = createPager()
@@ -95,20 +102,18 @@ class WishListViewModel(account: Account?, authToken: String) : BaseFlowViewMode
     .cachedIn(viewModelScope)
     .combine(viewStates.map { it.nameFilter }.distinctUntilChanged()) { pageData, nameFilter ->
         val predicate = predicate(nameFilter)
-        pageData.filter { d -> predicate(d) }
+        pageData
+            .filter { d -> predicate(d) }
+            .map { d -> App(d, uploadDateParserCache) }
     }
 
     override fun handleEvent(event: WishListEvent) {
         when (event) {
-            is WishListEvent.ItemClick -> {
-                if (viewState.watchingPackages.contains(event.document.appDetails.packageName)) {
-                    delete(event.document)
-                } else {
-                    add(event.document)
-                }
-            }
             WishListEvent.OnBackPress -> emitAction(WishListAction.ActivityAction(CommonActivityAction.Finish))
             is WishListEvent.OnNameFilter -> viewState = viewState.copy(nameFilter = event.query)
+            is WishListEvent.SelectApp -> {
+                viewState = viewState.copy(selectedApp = event.app)
+            }
         }
     }
 
@@ -120,22 +125,5 @@ class WishListViewModel(account: Account?, authToken: String) : BaseFlowViewMode
                 AppDetailsFilter.predicate,
                 AppNameFilter(nameFilter).predicate
         )).predicate
-    }
-
-    private fun delete(document: Document) {
-        viewModelScope.launch {
-            val info = AppInfo(document, uploadDateParserCache)
-            AppListTable.Queries.delete(info.appId, database)
-        }
-    }
-
-    private fun add(document: Document) {
-        viewModelScope.launch {
-            val info = AppInfo(document, uploadDateParserCache)
-            val result = AppListTable.Queries.insertSafetly(info, database)
-            if (result != AppListTable.ERROR_INSERT) {
-                emitAction(WishListAction.ShowTagSnackbar(info = info))
-            }
-        }
     }
 }

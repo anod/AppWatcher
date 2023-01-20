@@ -99,7 +99,6 @@ import com.anod.appwatcher.compose.rememberViwModeStoreOwner
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.database.entities.Price
-import com.anod.appwatcher.model.AppInfo
 import com.anod.appwatcher.tags.TagSelectionDialog
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.StoreIntent
@@ -353,7 +352,7 @@ private fun DetailsScreenContent(
     }
 
     val context = LocalContext.current
-    var showTagList: AppInfo? by remember { mutableStateOf(null) }
+    var showTagList: App? by remember { mutableStateOf(null) }
     LaunchedEffect(key1 = true) {
         viewActions.collect { action ->
             when (action) {
@@ -868,7 +867,7 @@ private fun DetailsTopAppBar(
                         },
                         leadingIcon = { AppInfoIcon() },
                         onClick = {
-                            onEvent(DetailsEvent.AppInfo)
+                            onEvent(DetailsEvent.App)
                             dismiss()
                         }
                     )

@@ -1,6 +1,6 @@
 package com.anod.appwatcher.watchlist
 
-import com.anod.appwatcher.model.AppInfoMetadata
+import com.anod.appwatcher.database.entities.App
 
 /**
  * @author Alex Gavrishev
@@ -32,7 +32,7 @@ class DefaultSectionHeaderFactory(
                 is SectionItem.App -> {
                     val appListItem = after.appListItem
                     val status = appListItem.app.status
-                    if (status == AppInfoMetadata.STATUS_UPDATED) {
+                    if (status == App.STATUS_UPDATED) {
                         return SectionItem.Header(SectionHeader.New)
                     }
                     if (showRecentlyUpdated && appListItem.recentFlag) {
@@ -53,7 +53,7 @@ class DefaultSectionHeaderFactory(
                 is SectionItem.App -> {
                     val appListItem = after.appListItem
                     val status = appListItem.app.status
-                    if (status == AppInfoMetadata.STATUS_UPDATED) {
+                    if (status == App.STATUS_UPDATED) {
                         return SectionItem.Header(SectionHeader.New)
                     }
                     if (showRecentlyUpdated && appListItem.recentFlag) {
@@ -74,8 +74,8 @@ class DefaultSectionHeaderFactory(
                     val beforeItem = before.appListItem
                     val afterItem = after.appListItem
                     if (
-                            beforeItem.app.status == AppInfoMetadata.STATUS_UPDATED
-                            && afterItem.app.status == AppInfoMetadata.STATUS_NORMAL
+                            beforeItem.app.status == App.STATUS_UPDATED
+                            && afterItem.app.status == App.STATUS_NORMAL
                     ) {
                         if (showRecentlyUpdated && afterItem.recentFlag) {
                             return SectionItem.Header(SectionHeader.RecentlyUpdated)
@@ -83,8 +83,8 @@ class DefaultSectionHeaderFactory(
                         return SectionItem.Header(SectionHeader.Watching)
                     } else if (
                             showRecentlyUpdated
-                            && beforeItem.app.status == AppInfoMetadata.STATUS_NORMAL
-                            && afterItem.app.status == AppInfoMetadata.STATUS_NORMAL
+                            && beforeItem.app.status == App.STATUS_NORMAL
+                            && afterItem.app.status == App.STATUS_NORMAL
                     ) {
                         if (beforeItem.recentFlag && !afterItem.recentFlag) {
                             return SectionItem.Header(SectionHeader.Watching)

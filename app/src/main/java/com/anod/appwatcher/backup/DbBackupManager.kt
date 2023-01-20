@@ -101,7 +101,7 @@ class DbBackupManager(private val context: ApplicationContext, private val db: A
                 db.apps().insert(
                         app.appId, app.packageName, app.versionNumber, app.versionName, app.title,
                         app.creator, app.iconUrl, app.status, app.uploadDate,
-                        app.priceText, app.priceCur, app.priceMicros,
+                        app.price.text, app.price.cur, app.price.micros,
                         app.detailsUrl, app.uploadTime, app.appType, app.updateTime
                 )
             }
