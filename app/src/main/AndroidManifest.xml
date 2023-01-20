@@ -66,6 +66,10 @@
             android:label="@string/refresh_history" />
 
         <activity
+            android:name=".history.HistoryListActivity"
+            android:label="@string/purchase_history" />
+
+        <activity
             android:name=".AppWatcherActivity"
             android:clearTaskOnLaunch="true"
             android:resizeableActivity="true"

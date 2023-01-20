@@ -107,7 +107,7 @@ class DfeApiImpl(http: OkHttpClient, private val apiContext: DfeApiContext) : Df
 
     override suspend fun purchaseHistory(nextPageUrl: String): ResponseWrapper {
         val url = if (nextPageUrl.isEmpty())
-            DfeApi.PURCHASE_HISTORY_URL
+            DfeApi.PURCHASE_HISTORY_URL + "?o=0"
         else
             DfeApi.URL_FDFE + "/" + nextPageUrl
         val cacheKey = DfeCacheKey(url, apiContext, emptyMap())

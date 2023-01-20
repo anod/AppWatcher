@@ -211,7 +211,6 @@
         <item>Kör</item>
         <item>Csepp</item>
     </array>
-    <string name="beta">β</string>
     <string name="refresh_history">Keresési előzmények</string>
     <string name="schedule_status_new">Új</string>
     <string name="schedule_status_success">Sikeres</string>

@@ -68,11 +68,13 @@ fun MarketAppItem(app: App, onClick: () -> Unit, isWatched: Boolean, isInstalled
                     modifier = Modifier.padding(start = 16.dp)
             ) {
                 Text(text = app.title, style = MaterialTheme.typography.bodyLarge)
-                Text(
+                if (app.creator.isNotEmpty()) {
+                    Text(
                         text = app.creator,
                         maxLines = 1,
                         style = MaterialTheme.typography.bodySmall
-                )
+                    )
+                }
                 Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically

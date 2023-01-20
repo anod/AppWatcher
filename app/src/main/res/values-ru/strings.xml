@@ -174,7 +174,6 @@
     <string name="tags_list_is_empty">"Список тегов пуст"</string>
     <string name="watched">"Отслеживается"</string>
     <string name="tag_color">"Цвет тэга"</string>
-    <string name="beta">"β"</string>
     <string name="refresh_history">"История проверок"</string>
     <string name="schedule_status_new">"Новый"</string>
     <string name="schedule_status_success">"Успех"</string>
@@ -195,7 +194,8 @@
     <string name="more">Больше</string>
     <string name="import_mode">Режим импорта</string>
     <string name="none">Ничего</string>
-    <string name="all_selected">Все</string>
+  <string name="system">Система</string>
+  <string name="all_selected">Все</string>
     <string name="number_selected">%d выбрано</string>
     <string name="menu_edit">Изменить</string>
     <string name="menu_tag_apps">Добавить Тэг</string>
@@ -208,4 +208,7 @@
     <string name="sort_by_date_asc">Дата &#x2193;</string>
     <string name="sort_by_date_desc">Дата &#x2191;</string>
     <string name="notifications_not_enabled">Уведомления отключены, необходимо включить в настройках уведомплений для автоматической проверки</string>
+  <string name="menu">Меню</string>
+  <string name="purchase_history">История покупок</string>
+  <string name="navdrawer_item_purchases">Покупки</string>
 </resources>

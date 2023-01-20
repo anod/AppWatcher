@@ -23,6 +23,9 @@ data class Document(private val doc: DocV2) {
     val backend: Int
         get() = this.doc.backendId
 
+    val docType: Int
+        get() = this.doc.docType
+
     val detailsUrl: String
         get() = if (this.doc.detailsUrl == null) "" else this.doc.detailsUrl
 
@@ -38,6 +41,12 @@ data class Document(private val doc: DocV2) {
             }
             return offer!!
         }
+
+    val purchaseOffer: Common.Offer?
+        get() = this.doc.annotations?.purchaseHistoryDetails?.offer
+
+    val purchaseTimestampMillis: Long?
+        get() = this.doc.annotations?.purchaseHistoryDetails?.purchaseTimestampMillis
 
     val iconUrl: String?
         get() {

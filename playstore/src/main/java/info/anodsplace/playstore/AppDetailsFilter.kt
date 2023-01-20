@@ -20,3 +20,9 @@ class AppNameFilter(private val query: String) {
         it?.title?.contains(query, true) ?: false
     }
 }
+
+object PaidHistoryFilter {
+    val predicate: FilterPredicate = {
+        it?.purchaseOffer?.micros?.let { micros -> micros > 0 } ?: false
+    }
+}

@@ -25,6 +25,7 @@ import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.compose.MainDetailScreen
 import com.anod.appwatcher.compose.onCommonActivityAction
 import com.anod.appwatcher.details.DetailsDialog
+import com.anod.appwatcher.history.HistoryListActivity
 import com.anod.appwatcher.installed.InstalledActivity
 import com.anod.appwatcher.tags.TagWatchListComposeActivity
 import com.anod.appwatcher.utils.prefs
@@ -190,6 +191,7 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
                     DrawerItem.Id.Refresh -> { }
                     DrawerItem.Id.Settings ->  startActivity( Intent(this, SettingsActivity::class.java))
                     DrawerItem.Id.Wishlist -> startActivity(WishListActivity.intent(this, prefs.account, mainViewModel.authToken.token))
+                    DrawerItem.Id.Purchases -> startActivity(HistoryListActivity.intent(this, prefs.account, mainViewModel.authToken.token))
                 }
             }
             is MainViewAction.NavigateToTag -> startActivity(TagWatchListComposeActivity.createTagIntent(action.tag, this))

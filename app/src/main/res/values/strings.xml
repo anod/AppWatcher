@@ -114,6 +114,7 @@
     <string name="noti_action_update">Update</string>
     <string name="play_store_my_apps">Play Store: My Apps</string>
     <string name="navdrawer_item_wishlist">Wishlist</string>
+    <string name="navdrawer_item_purchases">Purchases</string>
     <string name="wishlist">Wishlist</string>
     <string name="add_new_tag">Enter tag name…</string>
     <string name="tags">Tags</string>
@@ -216,8 +217,8 @@
         <item>Circle</item>
         <item>Teardrop</item>
     </array>
-    <string name="beta">β</string>
-    <string name="rating_stars">%.1f ★</string>
+    <string name="beta" translatable="false">β</string>
+    <string name="rating_stars" translatable="false">%.1f ★</string>
     <string name="refresh_history">Refresh history</string>
     <string name="schedule_status_new">New</string>
     <string name="schedule_status_success">Success</string>
@@ -242,4 +243,5 @@
     <string name="system">System</string>
     <string name="all_selected">All selected</string>
     <string name="menu">Menu</string>
+    <string name="purchase_history">Purchase history</string>
 </resources>
