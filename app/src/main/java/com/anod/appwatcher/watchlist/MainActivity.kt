@@ -55,6 +55,7 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
         if (intent?.extras?.containsKey("open_recently_installed") == true) {
             intent!!.extras!!.remove("open_recently_installed")
             startActivity(InstalledActivity.intent(importMode = false, context = this))
+            finish()
             return
         }
 

@@ -60,7 +60,6 @@ data class WatchListSharedState(
     val showAppTagDialog: Boolean = false,
     val showEditTagDialog: Boolean = false,
     val tagAppsChange: Int = 0,
-    val expandSearch: Boolean = false,
     val dbAppsChange: Int = 0,
     val recentlyInstalledApps: List<App>? = null,
     val refreshRequest: Int = 0,
@@ -150,7 +149,7 @@ class WatchListStateViewModel(
             tag = state[AppsTagViewModel.EXTRA_TAG] ?: Tag.empty,
             sortId = prefs.sortIndex,
             filterId = filterId,
-            expandSearch = expandSearch,
+            showSearch = expandSearch,
             wideLayout = wideLayout,
             enablePullToRefresh = prefs.enablePullToRefresh
         )
