@@ -108,7 +108,7 @@ dependencies {
     // Google
     implementation("com.google.android.gms:play-services-oss-licenses:17.0.0")
     implementation("com.google.android.gms:play-services-identity:18.0.1")
-    implementation("com.google.android.gms:play-services-auth:20.4.0")
+    implementation("com.google.android.gms:play-services-auth:20.4.1")
 
     implementation("com.google.api-client:google-api-client:1.33.0")
     implementation("com.google.api-client:google-api-client-android:1.33.0")
@@ -118,7 +118,7 @@ dependencies {
     }
 
     implementation("com.google.firebase:firebase-analytics:21.2.0")
-    implementation("com.google.firebase:firebase-crashlytics:18.3.2")
+    implementation("com.google.firebase:firebase-crashlytics:18.3.3")
 
     // 3rd party
     implementation("com.squareup.okhttp3:okhttp:4.10.0")

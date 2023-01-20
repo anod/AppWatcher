@@ -20,6 +20,5 @@ include(
         ":lib:graphics",
         ":lib:framework",
         ":lib:ktx",
-        ":lib:colorpicker",
         ":lib:permissions"
 )
