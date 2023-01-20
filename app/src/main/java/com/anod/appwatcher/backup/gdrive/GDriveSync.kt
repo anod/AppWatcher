@@ -64,8 +64,9 @@ class GDriveSync(private val googleAccount: GoogleSignInAccount, private val con
         AppLog.d("Clean locally deleted apps")
         // Clean deleted
         val numRows = db.apps().cleanDeleted()
-        db.appTags().clean()
-        AppLog.i("Cleaned $numRows locally deleted apps", "GDriveSync")
+        val numTags = db.appTags().clean()
+        AppTagsTable.Queries.clean(db)
+        AppLog.i("Cleaned $numRows locally deleted apps, $numTags tags", "GDriveSync")
     }
 
     @Throws(Exception::class)

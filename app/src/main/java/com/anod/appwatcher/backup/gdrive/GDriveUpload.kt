@@ -2,6 +2,7 @@ package com.anod.appwatcher.backup.gdrive
 
 import android.text.format.Formatter
 import com.anod.appwatcher.backup.DbJsonWriter
+import com.anod.appwatcher.database.AppTagsTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import info.anodsplace.applog.AppLog
@@ -46,6 +47,7 @@ class GDriveUpload(private val googleAccount: GoogleSignInAccount, private val c
         // Clean deleted
         val numRows = db.apps().cleanDeleted()
         val numTags = db.appTags().clean()
+        AppTagsTable.Queries.clean(db)
         AppLog.i("Cleaned $numRows locally deleted apps, $numTags tags", "GDriveUpload")
     }
 
