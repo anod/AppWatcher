@@ -14,8 +14,8 @@ android {
         applicationId = "com.anod.appwatcher"
         minSdk = 27
         targetSdk = 33
-        versionCode = 15500
-        versionName = "1.5.5"
+        versionCode = 16000
+        versionName = "1.6.0"
     }
 
     buildFeatures {

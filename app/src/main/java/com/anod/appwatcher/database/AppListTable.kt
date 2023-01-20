@@ -73,8 +73,14 @@ interface AppListTable {
             "${TableColumns.appId} == ${ChangelogTable.TableColumns.appId} " +
             "AND ${TableColumns.versionNumber} == ${ChangelogTable.TableColumns.versionCode} " +
             "WHERE " +
-            "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${App.STATUS_DELETED} ELSE ${Columns.status} >= ${App.STATUS_NORMAL} END ")
-    fun loadAppList(includeDeleted: Boolean, recentTime: Long): Cursor
+            "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${App.STATUS_DELETED} ELSE ${Columns.status} >= ${App.STATUS_NORMAL} END " +
+            "ORDER BY " +
+            "CASE WHEN :sortId = 0 THEN ${Columns.title} COLLATE NOCASE END ASC, " +
+            "CASE WHEN :sortId = 1 THEN ${Columns.title} COLLATE NOCASE END DESC, " +
+            "CASE WHEN :sortId = 2 THEN ${Columns.uploadTimestamp} END ASC, " +
+            "CASE WHEN :sortId = 3 THEN ${Columns.uploadTimestamp} END DESC "
+    )
+    fun loadAppList(includeDeleted: Boolean, sortId: Int, recentTime: Long): Cursor
 
     @Query("SELECT COUNT(${BaseColumns._ID}) " +
             "FROM $table WHERE " +
@@ -129,8 +135,8 @@ interface AppListTable {
             return@withContext AppListCursor(cursor)
         }
 
-        suspend fun loadAppList(includeDeleted: Boolean, table: AppListTable): AppListItemCursor = withContext(Dispatchers.IO) {
-            val cursor = table.loadAppList(includeDeleted, recentTime)
+        suspend fun loadAppList(includeDeleted: Boolean, sortId: Int, table: AppListTable): AppListItemCursor = withContext(Dispatchers.IO) {
+            val cursor = table.loadAppList(includeDeleted, sortId, recentTime)
             return@withContext AppListItemCursor(cursor)
         }
 
@@ -147,7 +153,7 @@ interface AppListTable {
             return table.observe(SimpleSQLiteQuery(query.first, query.second))
         }
 
-        suspend fun loadAppList(sortId: Int, orderByRecentlyUpdated: Boolean, tagId: Int?, titleFilter: String, offset: SqlOffset, table: AppListTable): List<AppListItem> {
+        suspend fun loadAppList(sortId: Int, orderByRecentlyUpdated: Boolean, tagId: Int?, titleFilter: String, offset: SqlOffset?, table: AppListTable): List<AppListItem> {
             val query = createAppsListQuery(sortId, orderByRecentlyUpdated, tagId, titleFilter, offset)
             return table.load(SimpleSQLiteQuery(query.first, query.second))
         }

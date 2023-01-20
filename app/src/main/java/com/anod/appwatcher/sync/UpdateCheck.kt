@@ -169,8 +169,8 @@ class UpdateCheck(
 
     @Throws(RemoteException::class)
     private suspend fun doSync(lastUpdatesViewed: Boolean): SyncResult {
-
-        val apps = AppListTable.Queries.loadAppList(false, database.apps())
+        val sortId = preferences.sortIndex
+        val apps = AppListTable.Queries.loadAppList(false, sortId, database.apps())
         if (apps.isEmpty) {
             apps.close()
             AppLog.i("Sync finished: no apps", "UpdateCheck")
