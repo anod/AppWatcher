@@ -11,7 +11,10 @@ import com.anod.appwatcher.accounts.AccountSelectionDialog
 import com.anod.appwatcher.accounts.AccountSelectionResult
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
+import com.anod.appwatcher.compose.MainDetailScreen
 import com.anod.appwatcher.compose.onCommonActivityAction
+import com.anod.appwatcher.details.DetailsDialog
+import com.anod.appwatcher.watchlist.DetailContent
 import info.anodsplace.framework.app.HingeDeviceLayout
 import kotlinx.coroutines.launch
 
@@ -34,14 +37,40 @@ open class SearchComposeActivity : BaseComposeActivity() {
                     theme = viewModel.prefs.theme
             ) {
                 val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
-                SearchResultsScreen(
-                    screenState = screenState,
-                    onEvent = { viewModel.handleEvent(it) },
-                    installedApps = viewModel.installedApps,
-                    pagingDataFlow = { viewModel.pagingData },
-                    viewActions = viewModel.viewActions,
-                    onActivityAction = { onCommonActivityAction(it) }
-                )
+                if (screenState.wideLayout.isWideLayout) {
+                    MainDetailScreen(
+                        wideLayout = screenState.wideLayout,
+                        main = {
+                            SearchResultsScreen(
+                                screenState = screenState,
+                                onEvent = { viewModel.handleEvent(it) },
+                                installedApps = viewModel.installedApps,
+                                pagingDataFlow = { viewModel.pagingData },
+                                viewActions = viewModel.viewActions,
+                                onActivityAction = { onCommonActivityAction(it) }
+                            )
+                        },
+                        detail = {
+                            DetailContent(app = screenState.selectedApp)
+                        }
+                    )
+                } else {
+                    SearchResultsScreen(
+                        screenState = screenState,
+                        onEvent = { viewModel.handleEvent(it) },
+                        installedApps = viewModel.installedApps,
+                        pagingDataFlow = { viewModel.pagingData },
+                        viewActions = viewModel.viewActions,
+                        onActivityAction = { onCommonActivityAction(it) }
+                    )
+                    if (screenState.selectedApp != null) {
+                        DetailsDialog(
+                            app = screenState.selectedApp!!,
+                            onDismissRequest = { viewModel.handleEvent(SearchViewEvent.SelectApp(app = null)) },
+                            onCommonActivityAction = { onCommonActivityAction(it) }
+                        )
+                    }
+                }
             }
         }
 

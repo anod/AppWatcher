@@ -150,7 +150,7 @@ data class App(
     )
 
     constructor(doc: Document, uploadDateParserCache: UploadDateParserCache) : this(
-        rowId = 0,
+        rowId = -1,
         status = STATUS_NORMAL,
         doc = doc,
         uploadDateParserCache = uploadDateParserCache
@@ -165,7 +165,7 @@ data class App(
         title = doc.title,
         versionNumber = doc.appDetails.versionCode,
         versionName = doc.appDetails.versionString ?: "",
-        creator = doc.appDetails.developerName ?: "",
+        creator = if (doc.appDetails.developerName.isNullOrBlank()) doc.creator else doc.appDetails.developerName,
         uploadDate = doc.appDetails.uploadDate ?: "",
         appType = doc.appDetails.appType ?: "",
         price = doc.offer.let { offer ->

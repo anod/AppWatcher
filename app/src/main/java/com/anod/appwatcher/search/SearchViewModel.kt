@@ -73,7 +73,7 @@ sealed interface SearchViewEvent {
     class OnSearchEnter(val query: String) : SearchViewEvent
     class AccountSelectError(val errorMessage: String) : SearchViewEvent
     class AccountSelected(val account: Account) : SearchViewEvent
-    class SelectApp(val app: App) : SearchViewEvent
+    class SelectApp(val app: App?) : SearchViewEvent
 }
 
 data class SearchViewState(

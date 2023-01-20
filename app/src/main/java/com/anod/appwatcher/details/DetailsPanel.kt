@@ -115,21 +115,15 @@ private val iconSizeSmall = 32.dp
 
 @Composable
 fun DetailsPanel(
-    appId: String,
-    rowId: Int,
-    detailsUrl: String,
+    app: App,
     onDismissRequest: () -> Unit,
     onCommonActivityAction: (action: CommonActivityAction) -> Unit
 ) {
     val storeOwner = rememberViwModeStoreOwner()
     val viewModel: DetailsViewModel = viewModel(
-        key = "details-$appId-$rowId",
+        key = "details-${app.appId}-${app.rowId}",
         viewModelStoreOwner = storeOwner,
-        factory = DetailsViewModel.Factory(
-            argAppId = appId,
-            argRowId = rowId,
-            argDetailsUrl = detailsUrl
-        )
+        factory = DetailsViewModel.Factory(argApp = app)
     )
 
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
@@ -156,21 +150,15 @@ fun DetailsPanel(
 
 @Composable
 fun DetailsDialog(
-    appId: String,
-    rowId: Int,
-    detailsUrl: String,
+    app: App,
     onDismissRequest: () -> Unit,
     onCommonActivityAction: (action: CommonActivityAction) -> Unit
 ) {
     val storeOwner = rememberViwModeStoreOwner()
     val viewModel: DetailsViewModel = viewModel(
-        key = "details-$appId-$rowId",
+        key = "details-${app.appId}-${app.rowId}",
         viewModelStoreOwner = storeOwner,
-        factory = DetailsViewModel.Factory(
-            argAppId = appId,
-            argRowId = rowId,
-            argDetailsUrl = detailsUrl
-        )
+        factory = DetailsViewModel.Factory(argApp = app)
     )
 
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)

@@ -23,7 +23,6 @@ import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.database.entities.Tag
-import com.anod.appwatcher.database.entities.packageToApp
 import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.date.UploadDateParserCache
@@ -90,7 +89,7 @@ data class DetailsState(
     val isInstalled: Boolean = false
 ) {
     val isWatched: Boolean
-        get() = app != null && app.status != App.STATUS_DELETED
+        get() = app != null && app.status != App.STATUS_DELETED && app.rowId > 0
 
     val fetchedRemoteDocument: Boolean
         get() = document != null
@@ -145,17 +144,15 @@ sealed interface DetailsEvent {
     object Translate : DetailsEvent
 }
 
-class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
+class DetailsViewModel(app: App) :
     BaseFlowViewModel<DetailsState, DetailsEvent, DetailsAction>(), KoinComponent {
 
     class Factory(
-        private val argAppId: String,
-        private val argRowId: Int,
-        private val argDetailsUrl: String
+        private val argApp: App
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            return DetailsViewModel(argAppId, argRowId, argDetailsUrl) as T
+            return DetailsViewModel(argApp) as T
         }
     }
 
@@ -170,15 +167,22 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
     val installedApps: InstalledApps by lazy { InstalledApps.PackageManager(packageManager) }
 
     init {
-        val isInstalled = installedApps.packageInfo(argAppId).isInstalled
+        val isInstalled = installedApps.packageInfo(app.packageName).isInstalled
         viewState = DetailsState(
-            appId = argAppId,
-            rowId = argRowId,
-            detailsUrl = argDetailsUrl,
+            appId = app.appId,
+            rowId = app.rowId,
+            detailsUrl = app.detailsUrl ?: App.createDetailsUrl(app.packageName),
+            app = app,
+            appIconState = if (app.iconUrl.isEmpty()) AppIconState.Default else AppIconState.Initial,
+            title = app.title,
             account = prefs.account,
-            isInstalled = isInstalled
+            isInstalled = isInstalled,
+            isLocalApp = app.rowId == -1
         )
 
+        if (app.iconUrl.isNotEmpty()) {
+            loadAppIcon(app.iconUrl)
+        }
         observeApp()
     }
 
@@ -186,30 +190,18 @@ class DetailsViewModel(argAppId: String, argRowId: Int, argDetailsUrl: String) :
     fun observeApp() {
         viewModelScope.launch {
             database.apps().observeApp(viewState.appId).collect { app ->
-                if (app == null && viewState.rowId == -1) {
+                viewState = if (app == null && viewState.rowId == -1) {
                     AppLog.i("Show details for unwatched ${viewState.appId}", "DetailsView")
-                    val localApp = packageManager.packageToApp(-1, viewState.appId)
-                    viewState = viewState.copy(
+                    viewState.copy(
                         appLoadingState = AppLoadingState.Loaded,
-                        app = localApp,
-                        appIconState = if (localApp.iconUrl.isEmpty()) AppIconState.Default else viewState.appIconState,
-                        title = localApp.title,
-                        isLocalApp = true
                     )
-                    if (localApp.iconUrl.isNotEmpty()) {
-                        loadAppIcon(localApp.iconUrl)
-                    }
                 } else {
                     AppLog.i("Show details for watched ${viewState.appId}", "DetailsView")
-                    viewState = viewState.copy(
+                    viewState.copy(
                         appLoadingState = if (app == null) AppLoadingState.NotFound else AppLoadingState.Loaded,
                         app = app,
-                        appIconState = if (app?.iconUrl?.isNotEmpty() == true) viewState.appIconState else AppIconState.Default,
-                        title = app?.title ?: "",
+                        rowId = app?.rowId ?: -1
                     )
-                    if (app?.iconUrl?.isNotEmpty() == true) {
-                        loadAppIcon(app.iconUrl)
-                    }
                 }
             }
         }

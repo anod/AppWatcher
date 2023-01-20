@@ -80,9 +80,7 @@ class TagWatchListComposeActivity : BaseComposeActivity() {
                     )
                     if (screenState.selectedApp != null) {
                         DetailsDialog(
-                            appId = screenState.selectedApp!!.appId,
-                            rowId = screenState.selectedApp!!.rowId,
-                            detailsUrl = screenState.selectedApp!!.detailsUrl ?: "",
+                            app = screenState.selectedApp!!,
                             onDismissRequest = { viewModel.handleEvent(WatchListEvent.SelectApp(app = null)) },
                             onCommonActivityAction = { onCommonActivityAction(it) }
                         )

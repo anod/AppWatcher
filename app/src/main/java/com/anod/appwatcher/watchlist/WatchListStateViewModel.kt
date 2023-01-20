@@ -221,7 +221,7 @@ class WatchListStateViewModel(
             is WatchListEvent.AddAppToTag -> viewState = viewState.copy(showAppTagDialog = event.show)
             WatchListEvent.NavigationButton -> {
                 if (viewState.showSearch) {
-                    viewState = viewState.copy(showSearch = false)
+                    viewState = viewState.copy(showSearch = false, titleFilter = "")
                 } else if (viewState.wideLayout.isWideLayout && viewState.selectedApp != null) {
                     viewState = viewState.copy(selectedApp = null)
                 } else {
@@ -236,7 +236,7 @@ class WatchListStateViewModel(
                 viewState = viewState.copy(showSearch = true)
             }
             is WatchListEvent.SearchSubmit -> {
-                viewState = viewState.copy(showSearch = false)
+                viewState = viewState.copy(showSearch = false, titleFilter = "")
                 emitAction(startActivityAction(
                     intent = MarketSearchActivity.intent(application, viewState.titleFilter, true, initiateSearch = true)
                 ))

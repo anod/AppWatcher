@@ -51,11 +51,11 @@ fun MarketAppItem(app: App, onClick: () -> Unit, isWatched: Boolean, isInstalled
                         .heightIn(min = 68.dp)
         ) {
 
-            val imageRequest = remember {
-                mutableStateOf(appIconLoader.request(app.iconUrl ?: ""))
+            val imageRequest = remember(app.iconUrl) {
+                appIconLoader.request(app.iconUrl)
             }
             AsyncImage(
-                    model = imageRequest.value,
+                    model = imageRequest,
                     contentDescription = app.title,
                     imageLoader = appIconLoader.coilLoader,
                     modifier = Modifier

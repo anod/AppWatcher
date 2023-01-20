@@ -93,6 +93,17 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
 
                 val drawerValue = if (mainState.isDrawerOpen) DrawerValue.Open else DrawerValue.Closed
                 val drawerState = rememberDrawerState(initialValue = drawerValue)
+                LaunchedEffect(true) {
+                    mainViewModel.viewActions.collect { action ->
+                        if (action is MainViewAction.DrawerState) {
+                            if (action.isOpen) {
+                                drawerState.open()
+                            } else {
+                                drawerState.close()
+                            }
+                        } else onMainAction(action)
+                    }
+                }
 
                 if (listState.wideLayout.isWideLayout) {
                     MainDetailScreen(
@@ -124,24 +135,10 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
                     )
                     if (listState.selectedApp != null) {
                         DetailsDialog(
-                            appId = listState.selectedApp!!.appId,
-                            rowId = listState.selectedApp!!.rowId,
-                            detailsUrl = listState.selectedApp!!.detailsUrl ?: "",
+                            app = listState.selectedApp!!,
                             onDismissRequest = { listViewModel.handleEvent(WatchListEvent.SelectApp(app = null)) },
                             onCommonActivityAction = { onCommonActivityAction(it) }
                         )
-                    }
-                }
-
-                LaunchedEffect(true) {
-                    mainViewModel.viewActions.collect { action ->
-                        if (action is MainViewAction.DrawerState) {
-                            if (action.isOpen) {
-                                drawerState.open()
-                            } else {
-                                drawerState.close()
-                            }
-                        } else onMainAction(action)
                     }
                 }
             }
