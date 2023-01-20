@@ -1,6 +1,8 @@
 package com.anod.appwatcher.watchlist
 
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -59,7 +61,8 @@ fun WatchListScreen(
     AppLog.d("Recomposition ${screenState.hashCode()}")
 
     Scaffold(
-        topBar = { topBarContent(subtitle, filterIds[pagerState.currentPage]) }
+        topBar = { topBarContent(subtitle, filterIds[pagerState.currentPage]) },
+        contentWindowInsets = WindowInsets.statusBars
     ) { paddingValues ->
         HorizontalPager(
             count = filterPagesTitles.size,

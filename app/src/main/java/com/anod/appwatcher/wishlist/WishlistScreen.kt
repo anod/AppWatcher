@@ -45,22 +45,23 @@ fun WishListScreen(
     var showSearchView by remember { mutableStateOf(false) }
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-            topBar = {
-                SearchTopBar(
-                    title = stringResource(id = R.string.wishlist),
-                    searchQuery = screenState.nameFilter,
-                    hideSearchOnNavigation = false,
-                    onNavigation = { onEvent(WishListEvent.OnBackPress) },
-                    onValueChange = { onEvent(WishListEvent.OnNameFilter(it)) },
-                    onSearchSubmit = { showSearchView = false },
-                    showSearch = showSearchView
-                )
-            }
+        topBar = {
+            SearchTopBar(
+                title = stringResource(id = R.string.wishlist),
+                searchQuery = screenState.nameFilter,
+                hideSearchOnNavigation = false,
+                onNavigation = { onEvent(WishListEvent.OnBackPress) },
+                onValueChange = { onEvent(WishListEvent.OnNameFilter(it)) },
+                onSearchSubmit = { showSearchView = false },
+                showSearch = showSearchView
+            )
+        },
+        contentWindowInsets = WindowInsets.statusBars
     ) { paddingValues ->
         Box(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize(),
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize(),
         ) {
             val items = pagingDataFlow.collectAsLazyPagingItems()
             when (items.loadState.refresh) {
@@ -121,9 +122,9 @@ fun WishListScreen(
 @Composable
 fun WishlistResults(items: LazyPagingItems<App>, screenState: WishListState, onEvent: (WishListEvent) -> Unit, installedApps: InstalledApps, appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get()) {
     LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 16.dp),
+        modifier = Modifier
+            .fillMaxSize(),
+        contentPadding = WindowInsets.navigationBars.asPaddingValues()
     ) {
         items(
                 items = items,

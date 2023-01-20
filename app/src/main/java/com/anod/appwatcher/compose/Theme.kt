@@ -136,13 +136,13 @@ fun darkTheme(theme: Int, supportsDynamic: Boolean): ColorScheme {
 
 @Composable
 fun AppTheme(
-        theme: Int = Preferences.THEME_DEFAULT,
-        darkTheme: Boolean = theme == Preferences.THEME_BLACK || isSystemInDarkTheme(),
-        customPrimaryColor: Color? = null,
-        updateSystemBars: Boolean = true,
-        useSurfaceAsPrimary: Boolean = false,
-        transparentSystemUi: Boolean = false,
-        content: @Composable () -> Unit
+    theme: Int = Preferences.THEME_DEFAULT,
+    darkTheme: Boolean = theme == Preferences.THEME_BLACK || isSystemInDarkTheme(),
+    customPrimaryColor: Color? = null,
+    updateSystemBars: Boolean = true,
+    useSurfaceAsPrimary: Boolean = false,
+    transparentSystemUi: Boolean = false,
+    content: @Composable () -> Unit
 ) {
 
     var colorScheme = if (supportsDynamic()) {
@@ -184,8 +184,8 @@ fun AppTheme(
             )
         }
         systemUI.setNavigationBarColor(
-            statusBarColor,
-            darkIcons = isAppearanceLightStatusBars
+            Color.Transparent,//colorScheme.surface,
+            darkIcons = !darkTheme
         )
     }
 

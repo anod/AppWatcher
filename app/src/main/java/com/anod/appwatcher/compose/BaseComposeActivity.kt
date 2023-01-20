@@ -3,6 +3,7 @@ package com.anod.appwatcher.compose
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.view.WindowCompat
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.app.HingeDevice
 
@@ -14,5 +15,6 @@ abstract class BaseComposeActivity : AppCompatActivity() {
         AppCompatDelegate.setDefaultNightMode(app.appCompatNightMode)
         hingeDevice = HingeDevice.create(this)
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
     }
 }

@@ -154,6 +154,9 @@ class WatchListStateViewModel(
             wideLayout = wideLayout,
             enablePullToRefresh = prefs.enablePullToRefresh
         )
+
+        AppLog.d("Initial state: viewState")
+
         viewModelScope.launch {
             syncProgressFlow(application).collect {
                 handleEvent(WatchListEvent.UpdateSyncProgress(syncProgress = it))
@@ -163,14 +166,14 @@ class WatchListStateViewModel(
         if (!viewState.tag.isEmpty) {
              viewModelScope.launch {
                 db.tags()
-                        .observeTag(viewState.tag.id)
-                        .collect { tag ->
-                            if (tag == null) {
-                                emitAction(CommonActivityAction.Finish)
-                            } else {
-                                viewState = viewState.copy(tag = tag)
-                            }
+                    .observeTag(viewState.tag.id)
+                    .collect { tag ->
+                        if (tag == null) {
+                            emitAction(CommonActivityAction.Finish)
+                        } else {
+                            viewState = viewState.copy(tag = tag)
                         }
+                    }
             }
 
             viewModelScope.launch {
@@ -197,8 +200,8 @@ class WatchListStateViewModel(
 
         if (collectRecentlyInstalledApps) {
             viewModelScope.launch {
-                viewStates.map { it.refreshRequest }
-                    .combine(packageChangedReceiver.observer.onStart { emit("") }) { refreshRequest, packageName -> "$refreshRequest-$packageName" }
+                viewStates.map { "${it.refreshRequest}-${it.dbAppsChange}" }
+                    .combine(packageChangedReceiver.observer.onStart { emit("") }) { viewStateChange, packageName -> "$viewStateChange-$packageName" }
                     .distinctUntilChanged()
                     .map {
                         recentlyInstalledAppsLoader.load(limit = 20)

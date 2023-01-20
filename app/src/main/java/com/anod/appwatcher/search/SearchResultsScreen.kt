@@ -68,7 +68,8 @@ fun SearchResultsScreen(
                     searchQuery = screenState.searchQuery,
                     onNavigation = { onEvent(SearchViewEvent.OnBackPressed) }
                 )
-            }
+            },
+        contentWindowInsets = WindowInsets.statusBars
     ) { paddingValues ->
         val searchStatus = screenState.searchStatus
         Box(

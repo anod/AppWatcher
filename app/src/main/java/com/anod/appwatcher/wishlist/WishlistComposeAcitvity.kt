@@ -44,7 +44,7 @@ class WishListActivity : BaseComposeActivity(), KoinComponent {
 
         setContent {
             AppTheme(
-                    theme = viewModel.prefs.theme
+                theme = viewModel.prefs.theme
             ) {
                 val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
                 if (screenState.wideLayout.isWideLayout) {

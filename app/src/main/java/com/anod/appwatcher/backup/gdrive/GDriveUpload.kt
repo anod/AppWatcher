@@ -45,8 +45,8 @@ class GDriveUpload(private val googleAccount: GoogleSignInAccount, private val c
         AppLog.d("[GDrive] Clean locally deleted apps ")
         // Clean deleted
         val numRows = db.apps().cleanDeleted()
-        db.appTags().clean()
-        AppLog.i("Cleaned $numRows locally deleted apps", "GDriveUpload")
+        val numTags = db.appTags().clean()
+        AppLog.i("Cleaned $numRows locally deleted apps, $numTags tags", "GDriveUpload")
     }
 
     companion object {

@@ -13,8 +13,9 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.core.view.WindowCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.anod.appwatcher.MarketSearchActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.SettingsActivity
@@ -63,8 +64,6 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
             mainViewModel.handleEvent(MainViewEvent.NotificationPermissionResult(enabled = enabled))
         }
 
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (mainViewModel.viewState.isDrawerOpen) {
@@ -94,14 +93,16 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
                 val drawerValue = if (mainState.isDrawerOpen) DrawerValue.Open else DrawerValue.Closed
                 val drawerState = rememberDrawerState(initialValue = drawerValue)
                 LaunchedEffect(true) {
-                    mainViewModel.viewActions.collect { action ->
-                        if (action is MainViewAction.DrawerState) {
-                            if (action.isOpen) {
-                                drawerState.open()
-                            } else {
-                                drawerState.close()
-                            }
-                        } else onMainAction(action)
+                    repeatOnLifecycle(state = Lifecycle.State.RESUMED) {
+                        mainViewModel.viewActions.collect { action ->
+                            if (action is MainViewAction.DrawerState) {
+                                if (action.isOpen) {
+                                    drawerState.open()
+                                } else {
+                                    drawerState.close()
+                                }
+                            } else onMainAction(action)
+                        }
                     }
                 }
 

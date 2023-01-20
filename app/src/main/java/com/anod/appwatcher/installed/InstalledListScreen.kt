@@ -1,7 +1,9 @@
 package com.anod.appwatcher.installed
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -34,33 +36,34 @@ fun InstalledListScreen(
     AppLog.d("Recomposition $screenState")
 
     Scaffold(
-            topBar = {
-                InstalledTopBar(
-                        title = if (screenState.selectionMode)
-                                if (screenState.selection.defaultSelected)
-                                    stringResource(id = R.string.all_selected, screenState.selection.selectedCount)
-                                else
-                                    stringResource(id = R.string.number_selected, screenState.selection.selectedCount)
+        topBar = {
+            InstalledTopBar(
+                    title = if (screenState.selectionMode)
+                            if (screenState.selection.defaultSelected)
+                                stringResource(id = R.string.all_selected, screenState.selection.selectedCount)
                             else
-                                stringResource(id = R.string.installed),
-                        selectionMode = screenState.selectionMode,
-                        filterQuery = screenState.titleFilter,
-                        sortId = screenState.sortId,
-                        onEvent = onEvent
+                                stringResource(id = R.string.number_selected, screenState.selection.selectedCount)
+                        else
+                            stringResource(id = R.string.installed),
+                    selectionMode = screenState.selectionMode,
+                    filterQuery = screenState.titleFilter,
+                    sortId = screenState.sortId,
+                    onEvent = onEvent
+            )
+        },
+        floatingActionButton = {
+            if (screenState.selectionMode) {
+                val enabled = screenState.importStatus is ImportStatus.NotStarted || screenState.importStatus is ImportStatus.Finished
+                ExtendedFloatingActionButton(
+                        text = { if (enabled) { Text(text = stringResource(id = R.string.import_action)) } },
+                        icon = { if (!enabled) {
+                            CircularProgressIndicator()
+                        } },
+                        onClick = { if (enabled) { onEvent(InstalledListEvent.Import) } }
                 )
-            },
-            floatingActionButton = {
-                if (screenState.selectionMode) {
-                    val enabled = screenState.importStatus is ImportStatus.NotStarted || screenState.importStatus is ImportStatus.Finished
-                    ExtendedFloatingActionButton(
-                            text = { if (enabled) { Text(text = stringResource(id = R.string.import_action)) } },
-                            icon = { if (!enabled) {
-                                CircularProgressIndicator()
-                            } },
-                            onClick = { if (enabled) { onEvent(InstalledListEvent.Import) } }
-                    )
-                }
             }
+        },
+        contentWindowInsets = WindowInsets.statusBars
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
             val scope = rememberCoroutineScope()

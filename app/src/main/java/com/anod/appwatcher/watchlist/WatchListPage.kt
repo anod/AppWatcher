@@ -86,6 +86,7 @@ fun WatchListPage(
 
     AppLog.d("Recomposition: WatchListPage [${items.hashCode()}, ${selection.hashCode()}, ${selectionMode}, ${installedApps.hashCode()}, ${recentlyInstalledApps.hashCode()}]")
 
+
     val isEmpty = items.loadState.source.refresh is LoadState.NotLoading && items.itemCount < 1
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isRefreshing)
     SwipeRefresh(modifier = Modifier.fillMaxSize(),
@@ -93,7 +94,9 @@ fun WatchListPage(
         swipeEnabled = enablePullToRefresh,
         onRefresh = { onEvent(WatchListEvent.Refresh) }) {
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize(),
+            contentPadding = WindowInsets.navigationBars.asPaddingValues()
         ) {
             if (isEmpty) {
                 item {
