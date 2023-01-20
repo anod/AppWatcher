@@ -696,6 +696,7 @@ private fun DetailsTopAppBar(
         derivedStateOf { titleVisibility > 0.0f }
     }
     TopAppBar(
+        windowInsets = WindowInsets(0),
         title = {
             if (isTitleVisible) {
                 Row(

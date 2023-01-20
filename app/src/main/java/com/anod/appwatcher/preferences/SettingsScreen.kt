@@ -6,11 +6,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
@@ -56,97 +54,93 @@ fun SettingsScreen(screenState: SettingsViewState, onEvent: (SettingsViewEvent) 
         }
     }
 
-    AppTheme(
-            theme = prefs.theme
-    ) {
-        Surface {
-            Scaffold(
-                    topBar = {
-                        CenterAlignedTopAppBar(
-                                title = { Text(text = stringResource(id = R.string.navdrawer_item_settings)) },
-                                navigationIcon = {
-                                    IconButton(onClick = { onEvent(SettingsViewEvent.OnBackNav) }) {
-                                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = stringResource(id = R.string.back))
-                                    }
-                                },
-                                actions = {
-                                    if (screenState.isProgressVisible) {
-                                        CircularProgressIndicator(
-                                                modifier = Modifier
-                                                        .size(32.dp),
-                                                color = MaterialTheme.colorScheme.tertiary
-                                        )
-                                    }
-                                },
-                        )
-                    },
-            ) { contentPadding ->
-                PreferencesScreen(
-                        modifier = Modifier.padding(contentPadding),
-                        preferences = screenState.items,
-                        placeholder = { item, _ ->
-                            when (item.key) {
-                                "icon-style" -> Preference(
-                                        item,
-                                        secondary = {
-                                            IconShapeSelector(
-                                                    pathMasks = stringArrayResource(id = R.array.adaptive_icon_style_paths_values),
-                                                    names = stringArrayResource(id = R.array.adaptive_icon_style_names),
-                                                    selected = prefs.iconShape,
-                                                    defaultSystemMask = prefs.defaultSystemMask,
-                                                    systemMaskName = stringResource(id = R.string.system),
-                                                    modifier = Modifier
-                                                        .padding(top = 8.dp)
-                                                        .fillMaxWidth(),
-                                                    onPathChange = { newPath -> onEvent(SettingsViewEvent.UpdateIconsShape(newPath)) }
-                                            )
-                                        },
-                                        onClick = { })
-                                "update_frequency" -> {
-                                    if (!screenState.areNotificationsEnabled) {
-                                        Column(modifier = Modifier
-                                                .padding(top = 16.dp)
-                                                .border(width = 1.dp, color = MaterialTheme.colorScheme.primary, shape = MaterialTheme.shapes.medium)
-                                                .background(MaterialTheme.colorScheme.primaryContainer),
-                                                horizontalAlignment = Alignment.CenterHorizontally
-                                        ) {
-                                            Text(
-                                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                                                    text = stringResource(R.string.notifications_not_enabled),
-                                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                                    textAlign = TextAlign.Center,
-                                                    style = MaterialTheme.typography.bodyLarge
-                                            )
-                                            Button(
-                                                    modifier = Modifier.padding(all = 4.dp),
-                                                    onClick = { onEvent(SettingsViewEvent.NotificationPermissionRequest) }
-                                            ) {
-                                                Text(text = stringResource(R.string.allow))
-                                            }
-                                        }
-
-                                    }
+    Surface {
+        Scaffold(
+                topBar = {
+                    CenterAlignedTopAppBar(
+                            title = { Text(text = stringResource(id = R.string.navdrawer_item_settings)) },
+                            navigationIcon = {
+                                IconButton(onClick = { onEvent(SettingsViewEvent.OnBackNav) }) {
+                                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = stringResource(id = R.string.back))
                                 }
-                                else -> {}
-                            }
-                        },
-                        onClick = { item ->
-                            when (item.key) {
-                                "export" -> exportDocumentRequest.launch(
-                                        CreateDocument.Args(
-                                                "appwatcher-" + DbBackupManager.generateFileName(),
-                                                Uri.parse(DbBackupManager.defaultBackupDir.absolutePath),
+                            },
+                            actions = {
+                                if (screenState.isProgressVisible) {
+                                    CircularProgressIndicator(
+                                            modifier = Modifier
+                                                    .size(32.dp),
+                                            color = MaterialTheme.colorScheme.tertiary
+                                    )
+                                }
+                            },
+                    )
+                },
+        ) { contentPadding ->
+            PreferencesScreen(
+                    modifier = Modifier.padding(contentPadding),
+                    preferences = screenState.items,
+                    placeholder = { item, _ ->
+                        when (item.key) {
+                            "icon-style" -> Preference(
+                                    item,
+                                    secondary = {
+                                        IconShapeSelector(
+                                                pathMasks = stringArrayResource(id = R.array.adaptive_icon_style_paths_values),
+                                                names = stringArrayResource(id = R.array.adaptive_icon_style_names),
+                                                selected = prefs.iconShape,
+                                                defaultSystemMask = prefs.defaultSystemMask,
+                                                systemMaskName = stringResource(id = R.string.system),
+                                                modifier = Modifier
+                                                    .padding(top = 8.dp)
+                                                    .fillMaxWidth(),
+                                                onPathChange = { newPath -> onEvent(SettingsViewEvent.UpdateIconsShape(newPath)) }
                                         )
-                                )
-                                "import" -> importDocumentRequest.launch(arrayOf("application/json", "text/plain", "*/*"))
-                                "licenses" -> onEvent(SettingsViewEvent.OssLicenses)
-                                "user-log" -> onEvent(SettingsViewEvent.OpenUserLog)
-                                "refresh-history" -> onEvent(SettingsViewEvent.OpenRefreshHistory)
-                                else -> onSettingsItemClick(prefs, item, onEvent)
+                                    },
+                                    onClick = { })
+                            "update_frequency" -> {
+                                if (!screenState.areNotificationsEnabled) {
+                                    Column(modifier = Modifier
+                                            .padding(top = 16.dp)
+                                            .border(width = 1.dp, color = MaterialTheme.colorScheme.primary, shape = MaterialTheme.shapes.medium)
+                                            .background(MaterialTheme.colorScheme.primaryContainer),
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Text(
+                                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                                                text = stringResource(R.string.notifications_not_enabled),
+                                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                                textAlign = TextAlign.Center,
+                                                style = MaterialTheme.typography.bodyLarge
+                                        )
+                                        Button(
+                                                modifier = Modifier.padding(all = 4.dp),
+                                                onClick = { onEvent(SettingsViewEvent.NotificationPermissionRequest) }
+                                        ) {
+                                            Text(text = stringResource(R.string.allow))
+                                        }
+                                    }
+
+                                }
                             }
+                            else -> {}
                         }
-                )
-            }
+                    },
+                    onClick = { item ->
+                        when (item.key) {
+                            "export" -> exportDocumentRequest.launch(
+                                    CreateDocument.Args(
+                                            "appwatcher-" + DbBackupManager.generateFileName(),
+                                            Uri.parse(DbBackupManager.defaultBackupDir.absolutePath),
+                                    )
+                            )
+                            "import" -> importDocumentRequest.launch(arrayOf("application/json", "text/plain", "*/*"))
+                            "licenses" -> onEvent(SettingsViewEvent.OssLicenses)
+                            "user-log" -> onEvent(SettingsViewEvent.OpenUserLog)
+                            "refresh-history" -> onEvent(SettingsViewEvent.OpenRefreshHistory)
+                            else -> onSettingsItemClick(prefs, item, onEvent)
+                        }
+                    }
+            )
         }
     }
 }

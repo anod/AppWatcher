@@ -121,7 +121,11 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
                             )
                         },
                         detail = {
-                            DetailContent(app = listState.selectedApp)
+                            DetailContent(
+                                app = listState.selectedApp,
+                                onDismissRequest = { listViewModel.handleEvent(WatchListEvent.SelectApp(app = null)) },
+                                onCommonActivityAction = { onCommonActivityAction(it) }
+                            )
                         }
                     )
                 } else {

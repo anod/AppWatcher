@@ -7,8 +7,18 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -16,8 +26,11 @@ import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.backup.ExportBackupTask
 import com.anod.appwatcher.backup.ImportBackupTask
 import com.anod.appwatcher.backup.gdrive.GDriveSignIn
+import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
+import com.anod.appwatcher.compose.MainDetailScreen
 import com.anod.appwatcher.compose.onCommonActivityAction
+import com.anod.appwatcher.utils.prefs
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.jakewharton.processphoenix.ProcessPhoenix
 import info.anodsplace.applog.AppLog
@@ -36,6 +49,9 @@ open class SettingsActivity : BaseComposeActivity(), GDriveSignIn.Listener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        viewModel.handleEvent(SettingsViewEvent.SetWideLayout(hingeDevice.layout.value))
+
         gDriveErrorIntentRequest = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { }
         notificationPermissionRequest = registerForActivityResult(AppPermissions.Request()) {
             val enabled = it[AppPermission.PostNotification.value] ?: false
@@ -46,12 +62,42 @@ open class SettingsActivity : BaseComposeActivity(), GDriveSignIn.Listener {
         }
 
         setContent {
-            val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
+            AppTheme(
+                theme = viewModel.prefs.theme
+            ) {
+                val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
 
-            SettingsScreen(
-                    screenState = screenState,
-                    onEvent = { viewModel.handleEvent(it) }
-            )
+                if (screenState.wideLayout.isWideLayout) {
+                    MainDetailScreen(
+                        wideLayout = screenState.wideLayout,
+                        main = {
+                            SettingsScreen(
+                                screenState = screenState,
+                                onEvent = { viewModel.handleEvent(it) }
+                            )
+                        },
+                        detail = {
+                            Surface {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Settings,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(128.dp),
+                                    )
+                                }
+                            }
+                        }
+                    )
+                } else {
+                    SettingsScreen(
+                        screenState = screenState,
+                        onEvent = { viewModel.handleEvent(it) }
+                    )
+                }
+            }
         }
 
         lifecycleScope.launch {
@@ -60,6 +106,12 @@ open class SettingsActivity : BaseComposeActivity(), GDriveSignIn.Listener {
                     AppLog.d("Action collected $action")
                     handleUiAction(action)
                 }
+            }
+        }
+
+        lifecycleScope.launchWhenCreated {
+            hingeDevice.layout.collect {
+                viewModel.handleEvent(SettingsViewEvent.SetWideLayout(it))
             }
         }
     }

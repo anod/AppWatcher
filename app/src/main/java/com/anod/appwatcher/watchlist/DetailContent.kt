@@ -9,12 +9,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import com.anod.appwatcher.R
+import com.anod.appwatcher.compose.CommonActivityAction
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.details.DetailsPanel
 
 @Composable
-fun DetailContent(app: App?) {
-    Surface {
+fun DetailContent(
+    app: App?,
+    onDismissRequest: () -> Unit,
+    onCommonActivityAction: (action: CommonActivityAction) -> Unit
+) {
+    Surface() {
         if (app == null) {
             Box(
                     modifier = Modifier.fillMaxSize(),
@@ -23,7 +28,11 @@ fun DetailContent(app: App?) {
                 Image(painter = painterResource(id = R.drawable.ic_empty_box_smile), contentDescription = null)
             }
         } else {
-            DetailsPanel(app = app, onDismissRequest = {}, onCommonActivityAction = {})
+            DetailsPanel(
+                app = app,
+                onDismissRequest = onDismissRequest,
+                onCommonActivityAction = onCommonActivityAction
+            )
         }
     }
 }

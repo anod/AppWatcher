@@ -58,7 +58,11 @@ class InstalledActivity : BaseComposeActivity() {
                                 )
                             },
                             detail = {
-                                DetailContent(app = screenState.selectedApp)
+                                DetailContent(
+                                    app = screenState.selectedApp,
+                                    onDismissRequest = { viewModel.handleEvent(InstalledListEvent.SelectApp(app = null)) },
+                                    onCommonActivityAction = { onCommonActivityAction(it) }
+                                )
                             }
                     )
                 } else {
@@ -81,6 +85,12 @@ class InstalledActivity : BaseComposeActivity() {
 
         lifecycleScope.launch {
             viewModel.viewActions.collect { onCommonActivityAction(it) }
+        }
+
+        lifecycleScope.launchWhenCreated {
+            hingeDevice.layout.collect {
+                viewModel.handleEvent(InstalledListEvent.SetWideLayout(it))
+            }
         }
     }
 

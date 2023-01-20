@@ -68,7 +68,11 @@ class TagWatchListComposeActivity : BaseComposeActivity() {
                                 )
                             },
                             detail = {
-                                DetailContent(app = screenState.selectedApp)
+                                DetailContent(
+                                    app = screenState.selectedApp,
+                                    onDismissRequest = { viewModel.handleEvent(WatchListEvent.SelectApp(app = null)) },
+                                    onCommonActivityAction = { onCommonActivityAction(it) }
+                                )
                             }
                     )
                 } else {

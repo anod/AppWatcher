@@ -51,8 +51,8 @@ fun MainDetailScreen() {
     AppTheme {
         MainDetailScreen(
                 wideLayout = HingeDeviceLayout(isWideLayout = true, hinge = Rect(0, 0, 80, 0)),
-                main = { DetailContent(app = null) },
-                detail = { DetailContent(app = null) },
+                main = { DetailContent(app = null, onDismissRequest = {}, onCommonActivityAction = {}) },
+                detail = { DetailContent(app = null, onDismissRequest = {}, onCommonActivityAction = {}) },
         )
     }
 }

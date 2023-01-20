@@ -50,6 +50,7 @@ sealed interface WishListEvent {
     object OnBackPress : WishListEvent
     class OnNameFilter(val query: String) : WishListEvent
     class SelectApp(val app: App?) : WishListEvent
+    class SetWideLayout(val wideLayout: HingeDeviceLayout) : WishListEvent
 }
 
 class WishListViewModel(account: Account?, authToken: String, wideLayout: HingeDeviceLayout) : BaseFlowViewModel<WishListState, WishListEvent, WishListAction>(), KoinComponent {
@@ -113,6 +114,9 @@ class WishListViewModel(account: Account?, authToken: String, wideLayout: HingeD
             is WishListEvent.OnNameFilter -> viewState = viewState.copy(nameFilter = event.query)
             is WishListEvent.SelectApp -> {
                 viewState = viewState.copy(selectedApp = event.app)
+            }
+            is WishListEvent.SetWideLayout -> {
+                viewState = viewState.copy(wideLayout = event.wideLayout)
             }
         }
     }

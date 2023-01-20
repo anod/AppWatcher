@@ -29,6 +29,7 @@ import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import info.anodsplace.applog.AppLog
 import info.anodsplace.compose.PreferenceItem
 import info.anodsplace.framework.app.ApplicationContext
+import info.anodsplace.framework.app.HingeDeviceLayout
 import info.anodsplace.framework.app.NotificationManager
 import info.anodsplace.framework.content.forAppInfo
 import info.anodsplace.framework.playservices.GooglePlayServices
@@ -44,10 +45,11 @@ import org.koin.core.component.inject
 import org.koin.core.parameter.parametersOf
 
 data class SettingsViewState(
-        val items: List<PreferenceItem>,
-        val isProgressVisible: Boolean = false,
-        val recreateWatchlistOnBack: Boolean = false,
-        val areNotificationsEnabled: Boolean = false
+    val items: List<PreferenceItem>,
+    val isProgressVisible: Boolean = false,
+    val recreateWatchlistOnBack: Boolean = false,
+    val areNotificationsEnabled: Boolean = false,
+    val wideLayout: HingeDeviceLayout = HingeDeviceLayout()
 )
 
 sealed interface SettingsViewEvent {
@@ -68,6 +70,7 @@ sealed interface SettingsViewEvent {
     class GDriveLoginResult(val isSuccess: Boolean, val errorCode: Int) : SettingsViewEvent
     object NotificationPermissionRequest : SettingsViewEvent
     class NotificationPermissionResult(val granted: Boolean) : SettingsViewEvent
+    class SetWideLayout(val wideLayout: HingeDeviceLayout) : SettingsViewEvent
     object ShowAppSettings : SettingsViewEvent
     object CheckNotificationPermission : SettingsViewEvent
     object DbCleanup : SettingsViewEvent
@@ -192,6 +195,10 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
                 viewModelScope.launch {
                     Cleanup(prefs, database = get()).perform(System.currentTimeMillis())
                 }
+            }
+
+            is SettingsViewEvent.SetWideLayout -> {
+                viewState = viewState.copy(wideLayout = event.wideLayout)
             }
         }
     }
