@@ -211,7 +211,7 @@ fun SearchResultsPage(items: LazyPagingItems<App>, screenState: SearchViewState,
     ) {
         items(
                 items = items,
-                key = { item -> item.hashCode() }
+                // key = { item -> item.hashCode() }
         ) { app ->
             if (app != null) { // TODO: Preload?
                 val packageName = app.packageName

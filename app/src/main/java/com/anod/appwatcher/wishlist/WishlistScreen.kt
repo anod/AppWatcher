@@ -128,7 +128,7 @@ fun WishlistResults(items: LazyPagingItems<App>, screenState: WishListState, onE
     ) {
         items(
                 items = items,
-                key = { item -> item.hashCode() }
+                // key = { item -> item.hashCode() }
         ) { app ->
             if (app != null) { // TODO: Preload?
                 val packageName = app.packageName
