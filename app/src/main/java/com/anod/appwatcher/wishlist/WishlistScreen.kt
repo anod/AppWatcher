@@ -44,7 +44,12 @@ fun WishListScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var showSearchView by remember { mutableStateOf(false) }
     Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.padding(WindowInsets.navigationBars.asPaddingValues())
+            )
+        },
         topBar = {
             SearchTopBar(
                 title = stringResource(id = R.string.wishlist),
