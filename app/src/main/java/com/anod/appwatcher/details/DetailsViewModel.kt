@@ -106,7 +106,7 @@ sealed interface DetailsAction {
     class ActivityAction(val action: CommonActivityAction) : DetailsAction
     class ShowTagSnackbar(val appInfo: App) : DetailsAction
     object Dismiss : DetailsAction
-    class Share(val app: App) : DetailsAction
+    class Share(val app: App, val recentChange: AppChange) : DetailsAction
 }
 
 private fun startActivityAction(
@@ -286,7 +286,12 @@ class DetailsViewModel(app: App) :
             }
 
             DetailsEvent.Share -> if (viewState.app != null) {
-                emitAction(DetailsAction.Share(app = viewState.app!!))
+                emitAction(
+                    DetailsAction.Share(
+                        app = viewState.app!!,
+                        recentChange = viewState.changelogs.firstOrNull() ?: AppChange.empty
+                    )
+                )
             }
 
             DetailsEvent.Uninstall -> emitAction(

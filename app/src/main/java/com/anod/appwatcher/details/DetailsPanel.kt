@@ -356,7 +356,7 @@ private fun DetailsScreenContent(
                         CommonActivityAction.StartActivity(
                             intent = createAppChooser(
                                 action.app,
-                                screenState.changelogs.firstOrNull() ?: AppChange.empty,
+                                action.recentChange,
                                 context
                             )
                         )
