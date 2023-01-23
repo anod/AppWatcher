@@ -47,7 +47,8 @@ open class SearchComposeActivity : BaseComposeActivity() {
                                 installedApps = viewModel.installedApps,
                                 pagingDataFlow = { viewModel.pagingData },
                                 viewActions = viewModel.viewActions,
-                                onActivityAction = { onCommonActivityAction(it) }
+                                onActivityAction = { onCommonActivityAction(it) },
+                                onShowAccountDialog = { accountSelectionDialog.show() }
                             )
                         },
                         detail = {
@@ -65,7 +66,8 @@ open class SearchComposeActivity : BaseComposeActivity() {
                         installedApps = viewModel.installedApps,
                         pagingDataFlow = { viewModel.pagingData },
                         viewActions = viewModel.viewActions,
-                        onActivityAction = { onCommonActivityAction(it) }
+                        onActivityAction = { onCommonActivityAction(it) },
+                        onShowAccountDialog = { accountSelectionDialog.show() }
                     )
                     if (screenState.selectedApp != null) {
                         DetailsDialog(
@@ -96,12 +98,12 @@ open class SearchComposeActivity : BaseComposeActivity() {
     }
 
     private fun intentToState(intent: Intent?, wideLayout: HingeDeviceLayout) = SearchViewState(
-            wideLayout = wideLayout,
-            searchQuery = intent?.getStringExtra(EXTRA_KEYWORD) ?: "",
-            isPackageSearch = intent?.getBooleanExtra(EXTRA_PACKAGE, false) ?: false,
-            initiateSearch = intent?.getBooleanExtra(EXTRA_EXACT, false) ?: false,
-            isShareSource = intent?.getBooleanExtra(EXTRA_SHARE, false) ?: false,
-            hasFocus = intent?.getBooleanExtra(EXTRA_FOCUS, false) ?: false
+        wideLayout = wideLayout,
+        searchQuery = intent?.getStringExtra(EXTRA_KEYWORD) ?: "",
+        isPackageSearch = intent?.getBooleanExtra(EXTRA_PACKAGE, false) ?: false,
+        initiateSearch = intent?.getBooleanExtra(EXTRA_EXACT, false) ?: false,
+        isShareSource = intent?.getBooleanExtra(EXTRA_SHARE, false) ?: false,
+        hasFocus = intent?.getBooleanExtra(EXTRA_FOCUS, false) ?: false
     )
 
     companion object {

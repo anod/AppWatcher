@@ -172,9 +172,21 @@ class SearchViewModel(
             search(query).collect { searchStatus ->
                 viewState = viewState.copy(searchStatus = searchStatus)
                 if (searchStatus is SearchStatus.NoNetwork) {
-                    emitAction(SearchViewAction.ShowSnackbar(message = context.getString(R.string.check_connection), duration = SnackbarDuration.Short, finish = true))
+                    emitAction(
+                        SearchViewAction.ShowSnackbar(
+                            message = context.getString(R.string.check_connection),
+                            duration = SnackbarDuration.Short,
+                            finish = false
+                        )
+                    )
                 } else if (searchStatus is SearchStatus.Error) {
-                    emitAction(SearchViewAction.ShowSnackbar(message = context.getString(R.string.error_fetching_info), duration = SnackbarDuration.Short, finish = true))
+                    emitAction(
+                        SearchViewAction.ShowSnackbar(
+                            message = context.getString(R.string.error_fetching_info),
+                            duration = SnackbarDuration.Short,
+                            finish = false
+                        )
+                    )
                 }
             }
         }

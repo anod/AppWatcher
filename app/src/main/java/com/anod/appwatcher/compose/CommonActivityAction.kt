@@ -10,7 +10,6 @@ sealed interface CommonActivityAction {
     object Finish : CommonActivityAction
     class ShowToast(@StringRes val resId: Int = 0, val text: String = "", val length: Int = Toast.LENGTH_SHORT) : CommonActivityAction
     class StartActivity(val intent: Intent, val addMultiWindowFlags: Boolean = false, val finish: Boolean = false) : CommonActivityAction
-    object ShowAccountDialog : CommonActivityAction
 }
 
 fun Activity.onCommonActivityAction(action: CommonActivityAction) {
@@ -33,6 +32,5 @@ fun Activity.onCommonActivityAction(action: CommonActivityAction) {
             }
         }
         CommonActivityAction.Finish -> finish()
-        CommonActivityAction.ShowAccountDialog -> throw IllegalAccessException("ShowAccountDialog not implemented")
     }
 }

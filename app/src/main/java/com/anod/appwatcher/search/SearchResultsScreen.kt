@@ -50,25 +50,31 @@ fun SearchResultsScreen(
     installedApps: InstalledApps,
     appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get(),
     viewActions: Flow<SearchViewAction>,
-    onActivityAction: (CommonActivityAction) -> Unit = { }
+    onActivityAction: (CommonActivityAction) -> Unit = { },
+    onShowAccountDialog: () -> Unit = { }
 ) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
-            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-            topBar = {
-                SearchTopBar(
-                    title = stringResource(id = R.string.search),
-                    showSearch = true,
-                    hideSearchOnNavigation = false,
-                    onValueChange = { onEvent(SearchViewEvent.SearchQueryChange(query = it)) },
-                    onSearchSubmit = { onEvent(SearchViewEvent.OnSearchEnter(it)) },
-                    initialSearchFocus = !screenState.initiateSearch,
-                    searchQuery = screenState.searchQuery,
-                    onNavigation = { onEvent(SearchViewEvent.OnBackPressed) }
-                )
-            },
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.padding(WindowInsets.navigationBars.asPaddingValues())
+            )
+        },
+        topBar = {
+            SearchTopBar(
+                title = stringResource(id = R.string.search),
+                showSearch = true,
+                hideSearchOnNavigation = false,
+                onValueChange = { onEvent(SearchViewEvent.SearchQueryChange(query = it)) },
+                onSearchSubmit = { onEvent(SearchViewEvent.OnSearchEnter(it)) },
+                initialSearchFocus = !screenState.initiateSearch,
+                searchQuery = screenState.searchQuery,
+                onNavigation = { onEvent(SearchViewEvent.OnBackPressed) }
+            )
+        },
         contentWindowInsets = WindowInsets.statusBars
     ) { paddingValues ->
         val searchStatus = screenState.searchStatus
@@ -110,9 +116,12 @@ fun SearchResultsScreen(
     LaunchedEffect(key1 = viewActions) {
         viewActions.collect { action ->
             when (action) {
-                SearchViewAction.ShowAccountDialog -> onActivityAction(CommonActivityAction.ShowAccountDialog)
+                SearchViewAction.ShowAccountDialog -> onShowAccountDialog()
                 is SearchViewAction.ShowSnackbar -> {
-                    snackbarHostState.showSnackbar(message = action.message, duration = action.duration)
+                    snackbarHostState.showSnackbar(
+                        message = action.message,
+                        duration = action.duration
+                    )
                     if (action.finish) {
                         onActivityAction(CommonActivityAction.Finish)
                     }
