@@ -28,60 +28,50 @@ object UploadDateParserFactory {
     private val pt_BR = Locale("pt", "BR")
 
     fun create(locale: Locale): List<DateFormat> {
+        val defaultParsers = listOf(
+            SimpleDateFormat("d MMM. yyyy", locale),
+            SimpleDateFormat("d MMM yyyy", locale),
+            DateFormat.getDateInstance(DateFormat.MEDIUM, locale),
+            CustomMonthDateFormat(EN_SHORT_MONTHS, order = ORDER_DMY),
+            CustomMonthDateFormat(ES_SHORT_MONTHS, order = ORDER_DMY),
+            CustomMonthDateFormat(US_SHORT_MONTHS, order = ORDER_DMY),
+            CustomMonthDateFormat(EN_SHORT_MONTHS, order = ORDER_MDY),
+            SimpleDateFormat("dd-MMM-yyyy", locale),
+            SimpleDateFormat("dd/MM/yyyy", locale),
+            SimpleDateFormat("MMM d, yyyy", locale),
+            // en_CA
+            SimpleDateFormat("MMM dd, yyyy", locale),
+            SimpleDateFormat("MMM. dd, yyyy", locale)
+        )
         val lang = locale.language
         return when {
             lang == ru_ALL.language -> listOf(
-                    CustomMonthDateFormat(RU_SHORT_MONTHS, order = ORDER_DMY),
-                    SimpleDateFormat("d MMM. yyyy", locale),
-                    SimpleDateFormat("d MMM yyyy", locale),
-                    DateFormat.getDateInstance(DateFormat.MEDIUM, locale),
-            )
+                CustomMonthDateFormat(RU_SHORT_MONTHS, order = ORDER_DMY),
+            ) + defaultParsers
 
             lang == sv_ALL.language -> listOf(
-                    CustomMonthDateFormat(SV_SHORT_MONTHS, order = ORDER_DMY),
-                    SimpleDateFormat("d MMM. yyyy", locale),
-                    SimpleDateFormat("d MMM yyyy", locale),
-                    DateFormat.getDateInstance(DateFormat.MEDIUM, locale),
-            )
+                CustomMonthDateFormat(SV_SHORT_MONTHS, order = ORDER_DMY),
+            ) + defaultParsers
 
             locale == fr_CA -> listOf(
-                    CustomMonthDateFormat(FR_CA_SHORT_MONTHS, order = ORDER_DMY),
-                    SimpleDateFormat("d MMM. yyyy", locale),
-                    SimpleDateFormat("d MMM yyyy", locale),
-                    DateFormat.getDateInstance(DateFormat.MEDIUM, locale),
-            )
+                CustomMonthDateFormat(FR_CA_SHORT_MONTHS, order = ORDER_DMY),
+            ) + defaultParsers
 
             lang == de_ALL.language -> listOf(
-                    SimpleDateFormat("dd.M.yyyy", locale),
-                    DateFormat.getDateInstance(DateFormat.MEDIUM, locale),
-            )
+                SimpleDateFormat("dd.M.yyyy", locale),
+            ) + defaultParsers
 
             lang == hu_ALL.language -> listOf(
-                    SimpleDateFormat("yyyy. MMM d.", locale),
-                    DateFormat.getDateInstance(DateFormat.MEDIUM, locale),
-            )
+                SimpleDateFormat("yyyy. MMM d.", locale),
+            ) + defaultParsers
 
             locale == pt_BR -> listOf(
-                    SimpleDateFormat("dd 'de' MMM. 'de' yyyy", locale),
-                    SimpleDateFormat("dd 'de' MMM 'de' yyyy", locale),
-                    DateFormat.getDateInstance(DateFormat.MEDIUM, locale),
-            )
+                SimpleDateFormat("dd 'de' MMM. 'de' yyyy", locale),
+                SimpleDateFormat("dd 'de' MMM 'de' yyyy", locale),
+                CustomMonthDateFormat(ES_SHORT_MONTHS, order = ORDER_DMY, clean = "de "),
+            ) + defaultParsers
 
-            else -> listOf(
-                    SimpleDateFormat("d MMM. yyyy", locale),
-                    SimpleDateFormat("d MMM yyyy", locale),
-                    DateFormat.getDateInstance(DateFormat.MEDIUM, locale),
-                    CustomMonthDateFormat(EN_SHORT_MONTHS, order = ORDER_DMY),
-                    CustomMonthDateFormat(ES_SHORT_MONTHS, order = ORDER_DMY),
-                    CustomMonthDateFormat(US_SHORT_MONTHS, order = ORDER_DMY),
-                    CustomMonthDateFormat(EN_SHORT_MONTHS, order = ORDER_MDY),
-                    SimpleDateFormat("dd-MMM-yyyy", locale),
-                    SimpleDateFormat("dd/MM/yyyy", locale),
-                    SimpleDateFormat("MMM d, yyyy", locale),
-                    // en_CA
-                    SimpleDateFormat("MMM dd, yyyy", locale),
-                    SimpleDateFormat("MMM. dd, yyyy", locale)
-            )
+            else -> defaultParsers
         }
 
     }
