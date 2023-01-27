@@ -18,7 +18,7 @@ import java.util.*
  * @date 03/03/2017.
  */
 
-class AppDetailsUploadDateTest {
+class UploadDateParserFactoryTest {
 
     @Test
     @Throws(ParseException::class)
@@ -33,6 +33,7 @@ class AppDetailsUploadDateTest {
 
             DateDesc("bg_GB", "3.01.2023 г.", "2023-01-03"),
             DateDesc("bg_GB", "20.01.2023 г.", "2023-01-20"),
+            DateDesc("bg_GB", "16.01.2023 г.", "2023-01-16"),
 
             DateDesc("nl_BE", "23 mrt. 2018", "2018-03-23"),
 

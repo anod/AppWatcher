@@ -7,6 +7,7 @@ import info.anodsplace.applog.AppLog
 import java.text.ParseException
 import java.util.Date
 import java.util.Locale
+import kotlin.text.Typography.nbsp
 
 /**
  * @author alex
@@ -20,10 +21,14 @@ fun Document.extractUploadDate(cache: UploadDateParserCache, locale: Locale = Lo
     return date.time
 }
 
-fun extractUploadDate(uploadDate: String, locale: Locale, cache: UploadDateParserCache): Date? {
-    if (uploadDate.isBlank()) {
+fun extractUploadDate(input: String, locale: Locale, cache: UploadDateParserCache): Date? {
+    if (input.isBlank()) {
         return null
     }
+
+    val uploadDate = input
+        .replace('\u202F', ' ')
+        .replace(nbsp, ' ')
 
     var date: Date? = null
 
