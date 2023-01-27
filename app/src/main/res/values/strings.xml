@@ -244,4 +244,6 @@
     <string name="all_selected">All selected</string>
     <string name="menu">Menu</string>
     <string name="purchase_history">Purchase history</string>
+    <string name="android_version">Android version</string>
+    <string name="target_sdk">Target SDK\n</string>
 </resources>

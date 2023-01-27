@@ -25,6 +25,7 @@ import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.BaseFlowViewModel
+import com.anod.appwatcher.utils.androidVersions
 import com.anod.appwatcher.utils.date.UploadDateParserCache
 import com.anod.appwatcher.utils.forPlayStore
 import com.anod.appwatcher.utils.prefs
@@ -100,7 +101,10 @@ data class AppVersionInfo(
     val installationSize: Long,
     val targetSdkVersion: Int,
     val starRating: Float,
-)
+) {
+    val androidVersion: String? = androidVersions[targetSdkVersion]
+}
+
 
 sealed interface DetailsAction {
     class ActivityAction(val action: CommonActivityAction) : DetailsAction

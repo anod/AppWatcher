@@ -1,0 +1,40 @@
+package com.anod.appwatcher.utils
+
+import android.os.Build
+
+val androidVersions = mapOf(
+    Build.VERSION_CODES.BASE to "1.0",
+    Build.VERSION_CODES.BASE_1_1 to "1.1",
+    Build.VERSION_CODES.CUPCAKE to "1.5",
+    Build.VERSION_CODES.DONUT to "1.6",
+    Build.VERSION_CODES.ECLAIR to "2.0",
+    Build.VERSION_CODES.ECLAIR_0_1 to "2.0",
+    Build.VERSION_CODES.ECLAIR_MR1 to "2.1",
+    Build.VERSION_CODES.FROYO to "2.2",
+    Build.VERSION_CODES.GINGERBREAD to "2.3",
+    Build.VERSION_CODES.GINGERBREAD_MR1 to "2.3",
+    Build.VERSION_CODES.HONEYCOMB to "3.0",
+    Build.VERSION_CODES.HONEYCOMB_MR1 to "3.1",
+    Build.VERSION_CODES.HONEYCOMB_MR2 to "3.2",
+    Build.VERSION_CODES.ICE_CREAM_SANDWICH to "4.0",
+    Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1 to "4.0",
+    Build.VERSION_CODES.JELLY_BEAN to "4.1",
+    Build.VERSION_CODES.JELLY_BEAN_MR1 to "4.2",
+    Build.VERSION_CODES.JELLY_BEAN_MR2 to "4.3",
+    Build.VERSION_CODES.KITKAT to "4.4",
+    Build.VERSION_CODES.KITKAT_WATCH to "4.4",
+    Build.VERSION_CODES.LOLLIPOP to "5.0",
+    Build.VERSION_CODES.LOLLIPOP_MR1 to "5.1",
+    Build.VERSION_CODES.M to "6.0",
+    Build.VERSION_CODES.N to "7.0",
+    Build.VERSION_CODES.N_MR1 to "7.1",
+    Build.VERSION_CODES.O to "8.0",
+    Build.VERSION_CODES.O_MR1 to "8.1",
+    Build.VERSION_CODES.P to "9.0",
+    Build.VERSION_CODES.Q to "10",
+    Build.VERSION_CODES.R to "11",
+    Build.VERSION_CODES.S to "12",
+    Build.VERSION_CODES.S_V2 to "12",
+    Build.VERSION_CODES.TIRAMISU to "13",
+    34 to "14"
+)

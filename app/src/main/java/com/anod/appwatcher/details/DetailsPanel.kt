@@ -8,6 +8,7 @@ import android.text.format.Formatter
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +29,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Android
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DividerDefaults
@@ -65,11 +68,13 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.style.TextAlign
@@ -435,7 +440,37 @@ fun VersionDetails(screenState: DetailsState, installedApps: InstalledApps) {
                         )
                     }
                     if (versionInfo.targetSdkVersion > 0) {
-                        VersionInfoCell(text = "SDK ${versionInfo.targetSdkVersion}")
+                        var showSdk by remember(key1 = versionInfo) { mutableStateOf(false) }
+                        if (versionInfo.androidVersion == null || showSdk) {
+                            VersionInfoCell(
+                                text = "SDK ${versionInfo.targetSdkVersion}",
+                                modifier = Modifier.clickable(
+                                    enabled = versionInfo.androidVersion != null,
+                                    onClickLabel = stringResource(id = R.string.android_version),
+                                    role = Role.Switch,
+                                    onClick = { showSdk = false }
+                                )
+                            )
+                        } else {
+                            VersionInfoCell(
+                                text = versionInfo.androidVersion,
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Android,
+                                        contentDescription = null,
+                                        modifier = Modifier
+                                            .padding(start = 2.dp, end = 2.dp)
+                                            .size(18.dp)
+                                    )
+                                },
+                                modifier = Modifier.clickable(
+                                    enabled = true,
+                                    onClickLabel = stringResource(id = R.string.target_sdk),
+                                    role = Role.Switch,
+                                    onClick = { showSdk = true }
+                                )
+                            )
+                        }
                     }
                 } else {
                     if (!screenState.remoteCallFinished) {
@@ -487,20 +522,46 @@ fun VersionDetails(screenState: DetailsState, installedApps: InstalledApps) {
 }
 
 @Composable
-private fun VersionInfoCell(text: String, placeholder: Boolean = false) {
+private fun VersionInfoCell(
+    text: String,
+    modifier: Modifier = Modifier,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    placeholder: Boolean = false
+) {
     HorizontalDivider()
-    Text(
-        text = text,
-        modifier = Modifier
-            .sizeIn(minWidth = 40.dp, maxWidth = 88.dp)
-            .padding(horizontal = 4.dp)
-            .placeholder(
-                visible = placeholder,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
-            ),
-        style = MaterialTheme.typography.labelMedium,
-        textAlign = TextAlign.Center
-    )
+    if (leadingIcon != null) {
+        Row(
+            modifier = modifier
+                .sizeIn(minWidth = 40.dp, maxWidth = 88.dp)
+                .padding(horizontal = 4.dp)
+                .placeholder(
+                    visible = placeholder,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
+                ),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            leadingIcon()
+            Text(
+                text = text,
+                style = MaterialTheme.typography.labelMedium,
+                modifier = Modifier.padding(start = 4.dp)
+            )
+        }
+    } else {
+        Text(
+            text = text,
+            modifier = modifier
+                .sizeIn(minWidth = 40.dp, maxWidth = 88.dp)
+                .padding(horizontal = 4.dp)
+                .placeholder(
+                    visible = placeholder,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
+                ),
+            style = MaterialTheme.typography.labelMedium,
+            textAlign = TextAlign.Center
+        )
+    }
 }
 
 @Composable
@@ -570,7 +631,9 @@ private fun DetailsChangelog(
                     }
 
                     ClickableText(
-                        modifier = Modifier.padding(top = 8.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp),
                         text = text,
                         style = MaterialTheme.typography.bodyMedium.copy(
                             color = LocalContentColor.current
@@ -612,7 +675,9 @@ private fun DetailsHeader(
         )
         SelectionContainer {
             Column(
-                modifier = Modifier.padding(start = 8.dp, end = 8.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 8.dp, end = 8.dp)
             ) {
                 if (screenState.app != null) {
                     Text(
@@ -622,7 +687,9 @@ private fun DetailsHeader(
                         fontSize = if (screenState.title.length >= 30)
                             16.sp else 18.sp,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier.fillMaxWidth()
                     )
                     if (screenState.app.creator.isNotEmpty()) {
                         Text(
@@ -945,7 +1012,8 @@ private fun DetailsScreenPreview() {
                 noNewDetails = true
             )
         ),
-        appLoadingState = AppLoadingState.Loaded
+        appLoadingState = AppLoadingState.Loaded,
+        customPrimaryColor = Color.Blue.toArgb()
     )
     AppTheme(
         customPrimaryColor = Color.Blue
