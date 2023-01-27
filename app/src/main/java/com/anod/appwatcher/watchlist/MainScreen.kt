@@ -58,7 +58,11 @@ fun MainScreen(
                     filterId = filterId,
                     onListEvent = {
                         if (it is WatchListEvent.NavigationButton) {
-                            onMainEvent(MainViewEvent.DrawerState(isOpen = true))
+                            if (listState.showSearch) {
+                                onListEvent(WatchListEvent.ShowSearch(show = false))
+                            } else {
+                                onMainEvent(MainViewEvent.DrawerState(isOpen = true))
+                            }
                         } else {
                             onListEvent(it)
                         }

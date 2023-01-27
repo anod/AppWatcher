@@ -36,7 +36,6 @@ fun WatchListTopBar(
     navigationIcon: @Composable (() -> Unit)? = null,
     onEvent: (WatchListEvent) -> Unit
 ) {
-
     var barBounds : IntRect by remember { mutableStateOf(IntRect(0, 0, 0, 0)) }
     SearchTopBar(
         state = SearchTopBarState(
@@ -54,7 +53,7 @@ fun WatchListTopBar(
                     onEvent(WatchListEvent.NavigationButton)
                 }
                 SearchTopBarEvent.SearchAction -> {
-                    onEvent(WatchListEvent.ShowSearch)
+                    onEvent(WatchListEvent.ShowSearch(show = true))
                 }
                 is SearchTopBarEvent.SearchChange -> {
                     onEvent(WatchListEvent.FilterByTitle(query = event.value))

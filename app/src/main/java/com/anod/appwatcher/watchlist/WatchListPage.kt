@@ -86,7 +86,6 @@ fun WatchListPage(
 
     AppLog.d("Recomposition: WatchListPage [${items.hashCode()}, ${selection.hashCode()}, ${selectionMode}, ${installedApps.hashCode()}, ${recentlyInstalledApps.hashCode()}]")
 
-
     val isEmpty = items.loadState.source.refresh is LoadState.NotLoading && items.itemCount < 1
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isRefreshing)
     SwipeRefresh(modifier = Modifier.fillMaxSize(),
