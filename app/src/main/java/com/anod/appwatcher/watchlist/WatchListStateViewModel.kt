@@ -238,12 +238,13 @@ class WatchListStateViewModel(
             }
 
             is WatchListEvent.SearchSubmit -> {
+                val query = viewState.titleFilter
                 viewState = viewState.copy(showSearch = false, titleFilter = "")
                 emitAction(
                     startActivityAction(
                         intent = MarketSearchActivity.intent(
                             application,
-                            viewState.titleFilter,
+                            query,
                             true,
                             initiateSearch = true
                         )
