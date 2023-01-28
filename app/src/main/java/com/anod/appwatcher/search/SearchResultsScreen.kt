@@ -21,7 +21,7 @@ import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.items
+import androidx.paging.compose.itemsIndexed
 import coil.ImageLoader
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
@@ -218,10 +218,10 @@ fun SearchResultsPage(items: LazyPagingItems<App>, screenState: SearchViewState,
                 .fillMaxSize()
                 .padding(top = 16.dp),
     ) {
-        items(
-                items = items,
-                // key = { item -> item.hashCode() }
-        ) { app ->
+        itemsIndexed(
+            items = items,
+            key = { index, item -> "search-$index-${item.hashCode()}" }
+        ) { _, app ->
             if (app != null) { // TODO: Preload?
                 val packageName = app.packageName
                 val isWatched = remember(packageName, screenState.watchingPackages) {

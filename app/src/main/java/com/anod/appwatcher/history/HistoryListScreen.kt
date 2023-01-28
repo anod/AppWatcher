@@ -15,7 +15,7 @@ import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.items
+import androidx.paging.compose.itemsIndexed
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.CommonActivityAction
 import com.anod.appwatcher.compose.SearchTopBar
@@ -70,11 +70,7 @@ fun HistoryListScreen(
         ) {
             val items = pagingDataFlow.collectAsLazyPagingItems()
             when (items.loadState.refresh) {
-                is LoadState.Loading -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
-                }
+                is LoadState.Loading -> ListLoadProgress()
                 is LoadState.Error -> {
                     RetryButton(onRetryClick = {
                         items.refresh()
@@ -83,7 +79,11 @@ fun HistoryListScreen(
                 is LoadState.NotLoading -> {
                     val isEmpty = items.itemCount < 1
                     if (isEmpty) {
-                        HistoryListEmpty()
+                        if (items.loadState.append is LoadState.Loading) {
+                            ListLoadProgress()
+                        } else {
+                            HistoryListEmpty()
+                        }
                     } else {
                         HistoryListResults(
                                 items = items,
@@ -125,16 +125,29 @@ fun HistoryListScreen(
 }
 
 @Composable
-fun HistoryListResults(items: LazyPagingItems<App>, screenState: HistoryListState, onEvent: (HistoryListEvent) -> Unit, installedApps: InstalledApps, appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get()) {
+private fun ListLoadProgress() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator()
+    }
+}
+
+@Composable
+fun HistoryListResults(
+    items: LazyPagingItems<App>,
+    screenState: HistoryListState,
+    onEvent: (HistoryListEvent) -> Unit,
+    installedApps: InstalledApps,
+    appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get()
+) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize(),
         contentPadding = WindowInsets.navigationBars.asPaddingValues()
     ) {
-        items(
-                items = items,
-                // key = { item -> item.hashCode() }
-        ) { app ->
+        itemsIndexed(
+            items = items,
+            key = { index, item -> "history-$index-${item.hashCode()}" }
+        ) { _, app ->
             if (app != null) { // TODO: Preload?
                 val packageName = app.packageName
                 val isWatched = remember(packageName, screenState.watchingPackages) {

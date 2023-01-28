@@ -33,8 +33,6 @@ fun InstalledListScreen(
     onEvent: (InstalledListEvent) -> Unit,
     installedApps: InstalledApps
 ) {
-    AppLog.d("Recomposition $screenState")
-
     Scaffold(
         topBar = {
             InstalledTopBar(
@@ -92,8 +90,6 @@ fun InstalledListScreen(
                 items.refresh()
             }
 
-            AppLog.d("Recomposition [${items.hashCode()}] $refreshKey")
-
             WatchListPage(
                 items = items,
                 isRefreshing = items.loadState.refresh is LoadState.Loading && (screenState.refreshRequest > 0 || items.itemCount < 1),
@@ -101,7 +97,8 @@ fun InstalledListScreen(
                 selection = screenState.selection,
                 selectionMode = screenState.selectionMode,
                 installedApps = installedApps,
-                onEvent = { event -> onEvent(InstalledListEvent.ListEvent(event)) }
+                onEvent = { event -> onEvent(InstalledListEvent.ListEvent(event)) },
+                listContext = "installed"
             )
         }
     }

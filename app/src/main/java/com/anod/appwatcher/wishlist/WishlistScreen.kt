@@ -15,7 +15,7 @@ import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.items
+import androidx.paging.compose.itemsIndexed
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.CommonActivityAction
 import com.anod.appwatcher.compose.SearchTopBar
@@ -131,10 +131,10 @@ fun WishlistResults(items: LazyPagingItems<App>, screenState: WishListState, onE
             .fillMaxSize(),
         contentPadding = WindowInsets.navigationBars.asPaddingValues()
     ) {
-        items(
-                items = items,
-                // key = { item -> item.hashCode() }
-        ) { app ->
+        itemsIndexed(
+            items = items,
+            key = { index, item -> "wishlist-$index-${item.hashCode()}" }
+        ) { _, app ->
             if (app != null) { // TODO: Preload?
                 val packageName = app.packageName
                 val isWatched = remember(packageName, screenState.watchingPackages) {

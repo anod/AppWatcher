@@ -57,7 +57,6 @@ import com.google.accompanist.placeholder.material.fade
 import com.google.accompanist.placeholder.material.placeholder
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
-import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.text.Html
 import org.koin.java.KoinJavaComponent.getKoin
@@ -78,14 +77,12 @@ fun WatchListPage(
     isRefreshing: Boolean,
     enablePullToRefresh: Boolean,
     installedApps: InstalledApps,
+    listContext: String,
     onEvent: (WatchListEvent) -> Unit,
     selection: SelectionState = SelectionState(),
     selectionMode: Boolean = false,
     recentlyInstalledApps: List<App>? = null,
 ) {
-
-    AppLog.d("Recomposition: WatchListPage [${items.hashCode()}, ${selection.hashCode()}, ${selectionMode}, ${installedApps.hashCode()}, ${recentlyInstalledApps.hashCode()}]")
-
     val isEmpty = items.loadState.source.refresh is LoadState.NotLoading && items.itemCount < 1
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isRefreshing)
     SwipeRefresh(modifier = Modifier.fillMaxSize(),
@@ -102,7 +99,7 @@ fun WatchListPage(
                     EmptyItem(onEvent = onEvent, modifier = Modifier.padding(top = 128.dp))
                 }
             } else {
-                itemsIndexed(items = items, key = { _, item -> item.hashCode() }) { index, item ->
+                itemsIndexed(items = items, key = { index, item -> "$listContext-$index-${item.hashCode()}" }) { index, item ->
                     if (item != null) { // TODO: Preload?
                         WatchListSectionItem(
                             modifier = Modifier.animateItemPlacement(),

@@ -98,41 +98,51 @@ class HistoryListViewModel(account: Account?, authToken: String, wideLayout: Hin
             return _pagingData!!
         }
 
-    private fun createPager() = Pager(PagingConfig(pageSize = 17)) {
-       HistoryEndpointPagingSource(dfeApi)
+    private fun createPager() = Pager(
+        PagingConfig(
+            pageSize = 17,
+            enablePlaceholders = false,
+            initialLoadSize = 17,
+            prefetchDistance = 17 * 2,
+            maxSize = 204
+        )
+    ) {
+        HistoryEndpointPagingSource(dfeApi)
     }
-    .flow
-    .cachedIn(viewModelScope)
-    .combine(viewStates.map { it.nameFilter }.distinctUntilChanged()) { pageData, nameFilter ->
-        val predicate = predicate(nameFilter)
-        pageData
-            .filter { d -> predicate(d) }
-            .map { d -> App(
-                rowId = 0,
-                appId = d.docId,
-                packageName = d.docId,
-                versionNumber = 0,
-                versionName = "",
-                title = d.title,
-                creator = "",
-                iconUrl = d.iconUrl ?: "",
-                status = App.STATUS_NORMAL,
-                uploadDate = d.purchaseTimestampMillis?.let { timestamp ->
-                    dateFormat.format(Date(timestamp))
-                } ?: "",
-                price = d.purchaseOffer?.let { offer ->
-                    Price(
-                        text = offer.formattedAmount ?: "",
-                        cur = offer.currencyCode ?: "",
-                        micros = offer.micros.toInt()
+        .flow
+        .cachedIn(viewModelScope)
+        .combine(viewStates.map { it.nameFilter }.distinctUntilChanged()) { pageData, nameFilter ->
+            val predicate = predicate(nameFilter)
+            pageData
+                .filter { d -> predicate(d) }
+                .map { d ->
+                    App(
+                        rowId = 0,
+                        appId = d.docId,
+                        packageName = d.docId,
+                        versionNumber = 0,
+                        versionName = "",
+                        title = d.title,
+                        creator = "",
+                        iconUrl = d.iconUrl ?: "",
+                        status = App.STATUS_NORMAL,
+                        uploadDate = d.purchaseTimestampMillis?.let { timestamp ->
+                            dateFormat.format(Date(timestamp))
+                        } ?: "",
+                        price = d.purchaseOffer?.let { offer ->
+                            Price(
+                                text = offer.formattedAmount ?: "",
+                                cur = offer.currencyCode ?: "",
+                                micros = offer.micros.toInt()
+                            )
+                        } ?: Price("", "", 0),
+                        detailsUrl = d.detailsUrl,
+                        uploadTime = d.purchaseTimestampMillis ?: 0L,
+                        appType = "",
+                        updateTime = System.currentTimeMillis(),
                     )
-                } ?: Price("", "", 0),
-                detailsUrl = d.detailsUrl,
-                uploadTime = d.purchaseTimestampMillis ?: 0L,
-                appType = "",
-                updateTime = System.currentTimeMillis(),
-            ) }
-    }
+                }
+        }
 
     override fun handleEvent(event: HistoryListEvent) {
         when (event) {

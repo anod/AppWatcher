@@ -246,16 +246,24 @@ class SearchViewModel(
         _pagingData = null
     }
 
-    private fun createPager() = Pager(PagingConfig(pageSize = 10)) {
+    private fun createPager() = Pager(
+        PagingConfig(
+            pageSize = 10,
+            enablePlaceholders = false,
+            initialLoadSize = 10,
+            prefetchDistance = 10 * 2,
+            maxSize = 200
+        )
+    ) {
         SearchEndpointPagingSource(dfeApi, viewState.searchQuery)
     }
-    .flow
-    .cachedIn(viewModelScope)
-    .map {
-        it
-            .filter { d -> AppDetailsFilter.hasAppDetails(d) }
-            .map { d -> App(d, uploadDateParserCache) }
-    }
+        .flow
+        .cachedIn(viewModelScope)
+        .map {
+            it
+                .filter { d -> AppDetailsFilter.hasAppDetails(d) }
+                .map { d -> App(d, uploadDateParserCache) }
+        }
 
     private fun onAccountSelected(account: Account) {
         viewState = viewState.copy(account = account)

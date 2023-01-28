@@ -96,17 +96,25 @@ class WishListViewModel(account: Account?, authToken: String, wideLayout: HingeD
             return _pagingData!!
         }
 
-    private fun createPager() = Pager(PagingConfig(pageSize = 10)) {
-       WishListEndpointPagingSource(dfeApi)
+    private fun createPager() = Pager(
+        PagingConfig(
+            pageSize = 10,
+            enablePlaceholders = false,
+            initialLoadSize = 10,
+            prefetchDistance = 10 * 2,
+            maxSize = 200
+        )
+    ) {
+        WishListEndpointPagingSource(dfeApi)
     }
-    .flow
-    .cachedIn(viewModelScope)
-    .combine(viewStates.map { it.nameFilter }.distinctUntilChanged()) { pageData, nameFilter ->
-        val predicate = predicate(nameFilter)
-        pageData
-            .filter { d -> predicate(d) }
-            .map { d -> App(d, uploadDateParserCache) }
-    }
+        .flow
+        .cachedIn(viewModelScope)
+        .combine(viewStates.map { it.nameFilter }.distinctUntilChanged()) { pageData, nameFilter ->
+            val predicate = predicate(nameFilter)
+            pageData
+                .filter { d -> predicate(d) }
+                .map { d -> App(d, uploadDateParserCache) }
+        }
 
     override fun handleEvent(event: WishListEvent) {
         when (event) {

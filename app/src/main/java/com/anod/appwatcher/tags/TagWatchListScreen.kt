@@ -36,7 +36,8 @@ fun TagWatchListScreen(
                 onEvent = onEvent,
             )
         },
-        installedApps = installedApps
+        installedApps = installedApps,
+        listContext = "tag-${screenState.tag.id}"
     )
 }
 

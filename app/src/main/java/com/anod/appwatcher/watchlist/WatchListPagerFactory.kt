@@ -46,7 +46,12 @@ abstract class WatchListPagerFactory(val pagingSourceConfig: WatchListPagingSour
         // When initialLoadSize larger than pageSize it cause a bug
         // where after filter if there is only one pages items are shown multiple times
         return Pager(
-            config = PagingConfig(pageSize = WatchListPagingSource.pageSize, initialLoadSize = WatchListPagingSource.pageSize),
+            config = PagingConfig(
+                pageSize = WatchListPagingSource.pageSize,
+                enablePlaceholders = false,
+                initialLoadSize = WatchListPagingSource.pageSize,
+                maxSize = 1000
+            ),
             initialKey = null,
             pagingSourceFactory = {
                 createPagingSource().also {

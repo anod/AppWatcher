@@ -69,7 +69,8 @@ fun MainScreen(
                     },
                 )
             },
-            installedApps = installedApps
+            installedApps = installedApps,
+            listContext = "main"
         )
     }
 

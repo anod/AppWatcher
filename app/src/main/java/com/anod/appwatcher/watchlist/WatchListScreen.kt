@@ -32,6 +32,7 @@ fun WatchListScreen(
     pagingSourceConfig: WatchListPagingSource.Config,
     onEvent: (WatchListEvent) -> Unit,
     topBarContent: @Composable (subtitle: String?, filterId: Int) -> Unit,
+    listContext: String,
     installedApps: InstalledApps
 ) {
     var subtitle: String? by remember { mutableStateOf(null) }
@@ -55,8 +56,6 @@ fun WatchListScreen(
     } else {
         null
     }
-
-    AppLog.d("Recomposition ${screenState.hashCode()}")
 
     Scaffold(
         topBar = { topBarContent(subtitle, filterIds[pagerState.currentPage]) },
@@ -108,15 +107,14 @@ fun WatchListScreen(
                 }
             }
 
-            AppLog.d("HorizontalPager Recomposition [page=${pageConfig.filterId}] ${items.hashCode()}")
-
             WatchListPage(
                 items = items,
                 isRefreshing = screenState.syncProgress?.isRefreshing == true,
                 enablePullToRefresh = screenState.enablePullToRefresh,
                 installedApps = installedApps,
                 onEvent = { event -> onEvent(event) },
-                recentlyInstalledApps = screenState.recentlyInstalledApps
+                recentlyInstalledApps = screenState.recentlyInstalledApps,
+                listContext = "$listContext-filterId-$filterId"
             )
         }
     }
