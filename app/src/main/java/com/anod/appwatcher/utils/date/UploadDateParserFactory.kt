@@ -19,6 +19,7 @@ object UploadDateParserFactory {
     private val US_SHORT_MONTHS = arrayOf("ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic")
     private val FR_CA_SHORT_MONTHS = arrayOf("janv", "févr", "mars", "avr", "mai", "juin", "juill", "août", "sept", "oct", "nov", "déc")
     private val EN_SHORT_MONTHS = arrayOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec")
+    private val EN_SHORT_ALT_MONTHS = arrayOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
     private val ru_ALL = Locale("ru", "")
     private val sv_ALL = Locale("sv", "")
@@ -36,6 +37,7 @@ object UploadDateParserFactory {
             CustomMonthDateFormat(ES_SHORT_MONTHS, order = ORDER_DMY),
             CustomMonthDateFormat(US_SHORT_MONTHS, order = ORDER_DMY),
             CustomMonthDateFormat(EN_SHORT_MONTHS, order = ORDER_MDY),
+            CustomMonthDateFormat(EN_SHORT_ALT_MONTHS, order = ORDER_MDY),
             SimpleDateFormat("dd-MMM-yyyy", locale),
             SimpleDateFormat("dd/MM/yyyy", locale),
             SimpleDateFormat("MMM d, yyyy", locale),

@@ -198,13 +198,17 @@ class SearchViewModel(
             return@flow
         }
         if (!authToken.isFresh) {
-            if (!authToken.refreshToken(prefs.account!!)) {
-                if (!networkConnection.isNetworkAvailable) {
-                    emit(SearchStatus.NoNetwork(query = query))
-                } else {
-                    emit(SearchStatus.Error(query = query))
+            try {
+                if (!authToken.refreshToken(prefs.account!!)) {
+                    if (!networkConnection.isNetworkAvailable) {
+                        emit(SearchStatus.NoNetwork(query = query))
+                    } else {
+                        emit(SearchStatus.Error(query = query))
+                    }
+                    return@flow
                 }
-                return@flow
+            } catch (e: AuthTokenStartIntent) {
+                emitAction(startActivityAction(e.intent))
             }
         }
         emit(SearchStatus.Loading)

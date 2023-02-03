@@ -28,6 +28,7 @@ class UploadDateParserFactoryTest {
 
         val dates = listOf(
             DateDesc("en_CA", "Sept 1, 2020", "2020-09-01"),
+            DateDesc("en_CA", "Sep 1, 2019", "2019-09-01"),
             DateDesc("ru_RU", "8 сент. 2021 г.", "2021-09-08"),
             DateDesc("ru_RU", "22 нояб. 2021 г.", "2021-11-22"),
 
