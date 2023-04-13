@@ -66,7 +66,7 @@ fun InstalledListScreen(
         Box(modifier = Modifier.padding(paddingValues)) {
             val scope = rememberCoroutineScope()
             val pagerFactory: InstalledListPagerFactory = remember(pagingSourceConfig, scope) {
-                InstalledListPagerFactory(pagingSourceConfig, scope)
+                InstalledListPagerFactory(pagingSourceConfig, scope, installedApps)
             }
             pagerFactory.sortId = screenState.sortId
             pagerFactory.selectionMode = screenState.selectionMode
@@ -96,7 +96,6 @@ fun InstalledListScreen(
                 enablePullToRefresh = screenState.enablePullToRefresh,
                 selection = screenState.selection,
                 selectionMode = screenState.selectionMode,
-                installedApps = installedApps,
                 onEvent = { event -> onEvent(InstalledListEvent.ListEvent(event)) },
                 listContext = "installed"
             )

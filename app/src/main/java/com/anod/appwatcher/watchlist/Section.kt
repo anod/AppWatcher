@@ -2,6 +2,8 @@
 package com.anod.appwatcher.watchlist
 
 import com.anod.appwatcher.database.entities.AppListItem
+import com.anod.appwatcher.database.entities.cleanChangeHtml
+import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.ktx.hashCodeOf
 
 sealed interface SectionHeader {
@@ -48,7 +50,9 @@ sealed interface SectionItem {
         }
     }
 
-    class App(val appListItem: AppListItem, val isLocal: Boolean) : SectionItem {
+    class App(val appListItem: AppListItem, val isLocal: Boolean, val packageInfo: InstalledApps.Info) : SectionItem {
+        val changesHtml: String = appListItem.cleanChangeHtml()
+
         override fun hashCode(): Int {
             return hashCodeOf("SectionItem.App", appListItem, isLocal)
         }
@@ -59,7 +63,9 @@ sealed interface SectionItem {
         }
     }
 
-    class OnDevice(val appListItem: AppListItem, var showSelection: Boolean) : SectionItem {
+    class OnDevice(val appListItem: AppListItem, var showSelection: Boolean, val packageInfo: InstalledApps.Info) : SectionItem {
+        val changesHtml: String = appListItem.cleanChangeHtml()
+
         override fun hashCode(): Int {
             return hashCodeOf("SectionItem.OnDevice", appListItem, showSelection)
         }

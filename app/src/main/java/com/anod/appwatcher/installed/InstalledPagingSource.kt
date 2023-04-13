@@ -10,12 +10,14 @@ import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.watchlist.FilterablePagingSource
 import com.anod.appwatcher.watchlist.SectionItem
 import info.anodsplace.applog.AppLog
+import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.util.dayStartAgoMillis
 
 class InstalledPagingSource(
-        private val changelogAdapter: ChangelogAdapter,
-        private val packageManager: PackageManager,
-        private val database: AppsDatabase,
+    private val changelogAdapter: ChangelogAdapter,
+    private val packageManager: PackageManager,
+    private val database: AppsDatabase,
+    private val installedApps: InstalledApps,
 ) : FilterablePagingSource() {
     override var filterQuery: String = ""
     var sortId: Int = 0
@@ -48,12 +50,16 @@ class InstalledPagingSource(
                 }
                 .map { app ->
                     val appChange = changelogAdapter.changelogs[app.appId]
-                    SectionItem.OnDevice(AppListItem(
+                    SectionItem.OnDevice(
+                        appListItem = AppListItem(
                             app = app,
                             changeDetails = appChange?.details ?: "",
                             noNewDetails = false,
                             recentFlag = false
-                    ), selectionMode)
+                        ),
+                        showSelection = selectionMode,
+                        packageInfo = installedApps.packageInfo(app.packageName)
+                    )
                 }.toList()
 
 

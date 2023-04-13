@@ -57,11 +57,17 @@ class WatchListPagingSource(
         }
 
         val data = AppListTable.Queries.loadAppList(
-                sortId, config.showRecentlyUpdated, config.tagId, filterQuery, SqlOffset(offset, limit), database.apps()
+            sortId, config.showRecentlyUpdated, config.tagId, filterQuery, SqlOffset(offset, limit), database.apps()
         )
         val filtered = data.filter { !itemFilter.filterRecord(it) }
 
-        items.addAll(filtered.map { SectionItem.App(it, false) })
+        items.addAll(filtered.map {
+            SectionItem.App(
+                appListItem = it,
+                isLocal = false,
+                packageInfo = installedApps.packageInfo(it.app.packageName)
+            )
+        })
 
         if (filtered.isEmpty()) {
             if (params.key != null && config.showOnDevice) {
@@ -69,12 +75,18 @@ class WatchListPagingSource(
                 val allInstalledPackageNames = installed.map { it.pkg.name }
                 val watchingPackages = database.apps().loadRowIds(allInstalledPackageNames).associateBy({ it.packageName }, { it.rowId })
                 allInstalledPackageNames
-                        .asSequence()
-                        .filterNot { watchingPackages.containsKey(it) }
-                        .map { packageManager.packageToApp(-1, it) }
+                    .asSequence()
+                    .filterNot { watchingPackages.containsKey(it) }
+                    .map { packageManager.packageToApp(-1, it) }
                         .map { app -> AppListItem(app, "", noNewDetails = false, recentFlag = false) }
                         .forEach { item ->
-                            items.add(SectionItem.OnDevice(item, false))
+                            items.add(
+                                SectionItem.OnDevice(
+                                    appListItem = item,
+                                    showSelection = false,
+                                    packageInfo = installedApps.packageInfo(item.app.packageName)
+                                )
+                            )
                         }
             } else if (offset == 0 && data.isEmpty() && items.firstOrNull() is SectionItem.Recent) {
                 items.add(SectionItem.Empty)

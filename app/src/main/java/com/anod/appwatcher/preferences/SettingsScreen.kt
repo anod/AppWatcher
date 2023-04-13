@@ -30,6 +30,7 @@ import info.anodsplace.compose.IconShapeSelector
 import info.anodsplace.compose.Preference
 import info.anodsplace.compose.PreferenceItem
 import info.anodsplace.compose.PreferencesScreen
+import info.anodsplace.compose.key
 import info.anodsplace.framework.app.NotificationManager
 import info.anodsplace.framework.content.CreateDocument
 import org.koin.java.KoinJavaComponent

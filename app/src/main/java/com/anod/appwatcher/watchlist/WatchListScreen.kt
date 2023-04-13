@@ -1,8 +1,11 @@
 package com.anod.appwatcher.watchlist
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -18,14 +21,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.Filters
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.rememberPagerState
 import info.anodsplace.applog.AppLog
 import info.anodsplace.compose.LifecycleEffect
 import info.anodsplace.framework.content.InstalledApps
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalPagerApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun WatchListScreen(
     screenState: WatchListSharedState,
@@ -62,7 +62,7 @@ fun WatchListScreen(
         contentWindowInsets = WindowInsets.statusBars
     ) { paddingValues ->
         HorizontalPager(
-            count = filterPagesTitles.size,
+            pageCount = filterPagesTitles.size,
             state = pagerState,
             modifier = Modifier.padding(paddingValues),
             key = { filterIds[it] }
@@ -111,7 +111,6 @@ fun WatchListScreen(
                 items = items,
                 isRefreshing = screenState.syncProgress?.isRefreshing == true,
                 enablePullToRefresh = screenState.enablePullToRefresh,
-                installedApps = installedApps,
                 onEvent = { event -> onEvent(event) },
                 recentlyInstalledApps = screenState.recentlyInstalledApps,
                 listContext = "$listContext-filterId-$filterId"

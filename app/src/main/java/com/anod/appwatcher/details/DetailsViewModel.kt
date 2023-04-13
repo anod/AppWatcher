@@ -87,7 +87,7 @@ data class DetailsState(
     val document: Document? = null,
     val remoteVersionInfo: AppVersionInfo? = null,
     val remoteCallFinished: Boolean = false,
-    val isInstalled: Boolean = false
+    val packageInfo: InstalledApps.Info = InstalledApps.Info(0, ""),
 ) {
     val isWatched: Boolean
         get() = app != null && app.status != App.STATUS_DELETED && app.rowId > 0
@@ -168,10 +168,9 @@ class DetailsViewModel(app: App) :
     private val packageManager: PackageManager by inject()
     private val dfeApi: DfeApi by inject()
 
-    val installedApps: InstalledApps by lazy { InstalledApps.PackageManager(packageManager) }
+    val installedApps: InstalledApps = InstalledApps.PackageManager(packageManager)
 
     init {
-        val isInstalled = installedApps.packageInfo(app.packageName).isInstalled
         viewState = DetailsState(
             appId = app.appId,
             rowId = app.rowId,
@@ -180,8 +179,8 @@ class DetailsViewModel(app: App) :
             appIconState = if (app.iconUrl.isEmpty()) AppIconState.Default else AppIconState.Initial,
             title = app.title,
             account = prefs.account,
-            isInstalled = isInstalled,
-            isLocalApp = app.rowId == -1
+            isLocalApp = app.rowId == -1,
+            packageInfo = installedApps.packageInfo(app.packageName)
         )
 
         if (app.iconUrl.isNotEmpty()) {

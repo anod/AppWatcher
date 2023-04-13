@@ -112,7 +112,6 @@ import com.anod.appwatcher.utils.StoreIntent
 import com.google.accompanist.placeholder.material.placeholder
 import info.anodsplace.applog.AppLog
 import info.anodsplace.compose.toAnnotatedString
-import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.text.Html
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -145,7 +144,6 @@ fun DetailsPanel(
         DetailsScreenContent(
             screenState = screenState,
             onEvent = { viewModel.handleEvent(it) },
-            installedApps = viewModel.installedApps,
             modifier = Modifier.fillMaxSize(),
             viewActions = viewModel.viewActions,
             onDismissRequest = onDismissRequest,
@@ -183,7 +181,6 @@ fun DetailsDialog(
                 viewActions = viewModel.viewActions,
                 onEvent = { viewModel.handleEvent(it) },
                 onCommonActivityAction = { onCommonActivityAction(it) },
-                installedApps = viewModel.installedApps,
                 onDismissRequest = onDismissRequest,
                 modifier = Modifier.fillMaxHeight(fraction = 0.9f)
             )
@@ -221,7 +218,6 @@ private val headerHeightDp = 80.dp
 private fun DetailsScreenContent(
     screenState: DetailsState,
     onEvent: (DetailsEvent) -> Unit,
-    installedApps: InstalledApps,
     modifier: Modifier,
     viewActions: Flow<DetailsAction>,
     onDismissRequest: () -> Unit,
@@ -293,10 +289,7 @@ private fun DetailsScreenContent(
                         containerColor = Color.Transparent
                     )
                 }
-                VersionDetails(
-                    screenState = screenState,
-                    installedApps = installedApps
-                )
+                VersionDetails(screenState = screenState)
 
                 AppLog.d("Details collecting changelogState ${screenState.changelogState}")
 
@@ -392,7 +385,7 @@ private fun DetailsScreenContent(
 }
 
 @Composable
-fun VersionDetails(screenState: DetailsState, installedApps: InstalledApps) {
+fun VersionDetails(screenState: DetailsState) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -493,7 +486,7 @@ fun VersionDetails(screenState: DetailsState, installedApps: InstalledApps) {
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            if (screenState.isInstalled || screenState.isLocalApp) {
+            if (screenState.packageInfo.isInstalled || screenState.isLocalApp) {
                 InstalledSignIcon(
                     modifier = Modifier
                         .size(16.dp)
@@ -503,7 +496,7 @@ fun VersionDetails(screenState: DetailsState, installedApps: InstalledApps) {
                     val appItemState = rememberAppItemState(
                         app = screenState.app,
                         recentFlag = false,
-                        installedApps = installedApps
+                        packageInfo = screenState.packageInfo
                     )
                     Text(
                         text = appItemState.text,
@@ -890,7 +883,7 @@ private fun DetailsTopAppBar(
                     }
                 )
 
-                if (screenState.isInstalled) {
+                if (screenState.packageInfo.isInstalled) {
                     DropdownMenuItem(
                         text = {
                             Text(
@@ -1021,7 +1014,6 @@ private fun DetailsScreenPreview() {
         DetailsScreenContent(
             screenState = screenState,
             onEvent = { },
-            installedApps = InstalledApps.StaticMap(emptyMap()),
             modifier = Modifier,
             viewActions = flowOf(),
             onDismissRequest = { },
@@ -1069,8 +1061,7 @@ private fun VersionInfoPreview() {
                         targetSdkVersion = 33,
                         starRating = 5.0f
                     )
-                ),
-                installedApps = InstalledApps.StaticMap(emptyMap()),
+                )
             )
         }
     }

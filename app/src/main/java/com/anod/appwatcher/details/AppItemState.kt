@@ -29,13 +29,12 @@ data class AppItemState(
 fun rememberAppItemState(
     app: App,
     recentFlag: Boolean,
-    installedApps: InstalledApps,
+    packageInfo: InstalledApps.Info,
     textColor: Color = MaterialTheme.colorScheme.onSurface,
     primaryColor: Color = MaterialTheme.colorScheme.primary
 ): AppItemState {
     val context = LocalContext.current
     return remember(app) {
-        val packageInfo = installedApps.packageInfo(app.packageName)
         calcAppItemState(
             app, recentFlag, textColor, primaryColor, packageInfo, context
         )

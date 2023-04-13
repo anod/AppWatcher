@@ -18,6 +18,7 @@ import com.anod.appwatcher.compose.onCommonActivityAction
 import com.anod.appwatcher.details.DetailsDialog
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.DetailContent
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 
 /**
@@ -89,7 +90,7 @@ class WishListActivity : BaseComposeActivity(), KoinComponent {
             }
         }
 
-        lifecycleScope.launchWhenCreated {
+        lifecycleScope.launch {
             hingeDevice.layout.collect {
                 viewModel.handleEvent(WishListEvent.SetWideLayout(it))
             }

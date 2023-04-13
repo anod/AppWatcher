@@ -4,6 +4,9 @@ import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.ChangelogTable
+import info.anodsplace.framework.text.Html
+
+private val newLineRegex = Regex("\n+")
 
 /**
  * @author Alex Gavrishev
@@ -22,3 +25,13 @@ data class AppListItem(
     @ColumnInfo(name = AppListTable.Columns.recentFlag)
     val recentFlag: Boolean
 )
+
+fun AppListItem.cleanChangeHtml(): String {
+    return if (changeDetails?.isNotBlank() == true) {
+        Html.parse(changeDetails).toString()
+            .replace(newLineRegex, "\n")
+            .removePrefix(app.versionName + "\n")
+            .removePrefix(app.versionName + ":\n")
+            .trim()
+    } else ""
+}

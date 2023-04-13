@@ -7,12 +7,17 @@ import com.anod.appwatcher.watchlist.FilterablePagingSource
 import com.anod.appwatcher.watchlist.SectionHeaderFactory
 import com.anod.appwatcher.watchlist.WatchListPagerFactory
 import com.anod.appwatcher.watchlist.WatchListPagingSource
+import info.anodsplace.framework.content.InstalledApps
 import kotlinx.coroutines.CoroutineScope
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.parameter.parametersOf
 
-class InstalledListPagerFactory(pagingSourceConfig: WatchListPagingSource.Config, coroutineScope: CoroutineScope) : WatchListPagerFactory(pagingSourceConfig), KoinComponent {
+class InstalledListPagerFactory(
+    pagingSourceConfig: WatchListPagingSource.Config,
+    coroutineScope: CoroutineScope,
+    private val installedApps: InstalledApps
+) : WatchListPagerFactory(pagingSourceConfig), KoinComponent {
 
     private val packageManager: PackageManager by inject()
     private val database: AppsDatabase by inject()
@@ -32,9 +37,10 @@ class InstalledListPagerFactory(pagingSourceConfig: WatchListPagingSource.Config
 
     override fun createPagingSource(): FilterablePagingSource {
         return InstalledPagingSource(
-                changelogAdapter,
-                packageManager,
-                database
+            changelogAdapter,
+            packageManager,
+            database,
+            installedApps
         ).also {
             it.sortId = sortId
             it.selectionMode = selectionMode

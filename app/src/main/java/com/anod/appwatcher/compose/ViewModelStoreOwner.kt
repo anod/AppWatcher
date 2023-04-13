@@ -9,12 +9,13 @@ import androidx.lifecycle.ViewModelStoreOwner
 
 class ComposableViewModelStoreOwner : ViewModelStoreOwner {
     private var store: ViewModelStore? = null
-    override fun getViewModelStore(): ViewModelStore {
-        if (store == null) {
-            store = ViewModelStore()
+    override val viewModelStore: ViewModelStore
+        get() {
+            if (store == null) {
+                store = ViewModelStore()
+            }
+            return store!!
         }
-        return store!!
-    }
 }
 
 @Composable

@@ -58,10 +58,8 @@ import com.google.accompanist.placeholder.material.placeholder
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import info.anodsplace.framework.content.InstalledApps
-import info.anodsplace.framework.text.Html
 import org.koin.java.KoinJavaComponent.getKoin
 
-private val newLineRegex = Regex("\n+")
 
 enum class AppItemSelection {
     None, Disabled, NotSelected, Selected;
@@ -76,7 +74,6 @@ fun WatchListPage(
     items: LazyPagingItems<SectionItem>,
     isRefreshing: Boolean,
     enablePullToRefresh: Boolean,
-    installedApps: InstalledApps,
     listContext: String,
     onEvent: (WatchListEvent) -> Unit,
     selection: SelectionState = SelectionState(),
@@ -85,6 +82,7 @@ fun WatchListPage(
 ) {
     val isEmpty = items.loadState.source.refresh is LoadState.NotLoading && items.itemCount < 1
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isRefreshing)
+
     SwipeRefresh(modifier = Modifier.fillMaxSize(),
         state = swipeRefreshState,
         swipeEnabled = enablePullToRefresh,
@@ -108,7 +106,6 @@ fun WatchListPage(
                             onEvent = onEvent,
                             selection = selection,
                             selectionMode = selectionMode,
-                            installedApps = installedApps,
                             recentlyInstalledApps = recentlyInstalledApps
                         )
                     } else {
@@ -132,7 +129,6 @@ fun WatchListSectionItem(
     item: SectionItem,
     index: Int,
     onEvent: (WatchListEvent) -> Unit,
-    installedApps: InstalledApps,
     modifier: Modifier = Modifier,
     selection: SelectionState = SelectionState(),
     selectionMode: Boolean = false,
@@ -154,24 +150,26 @@ fun WatchListSectionItem(
         is SectionItem.App -> AppItem(
             modifier = modifier,
             item = item.appListItem,
+            changesHtml = item.changesHtml,
             isLocalApp = item.isLocal,
             onClick = { onEvent(WatchListEvent.AppClick(item.appListItem.app, index)) },
             onLongClick = { onEvent(WatchListEvent.AppLongClick(item.appListItem.app, index)) },
             selection = selection,
             selectionMode = selectionMode,
-            installedApps = installedApps,
+            packageInfo = item.packageInfo,
             appIconLoader = appIconLoader
         )
 
         is SectionItem.OnDevice -> AppItem(
             modifier = modifier,
             item = item.appListItem,
+            changesHtml = item.changesHtml,
             isLocalApp = true,
             onClick = { onEvent(WatchListEvent.AppClick(item.appListItem.app, index)) },
             onLongClick = { onEvent(WatchListEvent.AppLongClick(item.appListItem.app, index)) },
             selection = selection,
             selectionMode = selectionMode,
-            installedApps = installedApps,
+            packageInfo = item.packageInfo,
             appIconLoader = appIconLoader
         )
 
@@ -248,32 +246,22 @@ private fun ChangelogText(text: String, noNewDetails: Boolean) {
 @Composable
 private fun AppItem(
     item: AppListItem,
+    changesHtml: String,
     isLocalApp: Boolean,
     onClick: (() -> Unit),
     onLongClick: (() -> Unit),
-    installedApps: InstalledApps,
+    packageInfo: InstalledApps.Info,
     modifier: Modifier = Modifier,
     selection: SelectionState = SelectionState(),
     selectionMode: Boolean = false,
     appIconLoader: AppIconLoader = getKoin().get(),
 ) {
     val app = item.app
-    val changesHtml: String by remember {
-        derivedStateOf {
-            if (item.changeDetails?.isNotBlank() == true) {
-                Html.parse(item.changeDetails).toString()
-                    .replace(newLineRegex, "\n")
-                    .removePrefix(app.versionName + "\n")
-                    .removePrefix(app.versionName + ":\n")
-                    .trim()
-            } else ""
-        }
-    }
     val itemSelection by remember(app.packageName, selectionMode, selection) {
         derivedStateOf { getPackageSelection(app.packageName, selectionMode, selection) }
     }
     val appItemState = rememberAppItemState(
-        app, item.recentFlag, installedApps
+        app, item.recentFlag, packageInfo
     )
 
     Box(modifier = modifier) {
@@ -596,7 +584,6 @@ private fun WatchListEmptyPreview() {
     val appIconLoader = AppIconLoader.Simple(
         LocalContext.current, ImageLoader.Builder(LocalContext.current).build()
     )
-    val installedApps = InstalledApps.StaticMap(mapOf())
     val items = listOf(SectionItem.Empty)
 
     AppTheme(
@@ -633,7 +620,6 @@ private fun WatchListEmptyPreview() {
                         item = item,
                         index = index,
                         onEvent = {},
-                        installedApps = installedApps,
                         appIconLoader = appIconLoader
                     )
                 }
@@ -648,15 +634,7 @@ private fun WatchListPreview() {
     val appIconLoader = AppIconLoader.Simple(
         LocalContext.current, ImageLoader.Builder(LocalContext.current).build()
     )
-    val installedApps = InstalledApps.StaticMap(
-        mapOf(
-            "package2" to InstalledApps.Info(
-                versionName = "very long long version name consectetur adipiscing elit",
-                versionCode = 11223300
-            ),
-            "package3" to InstalledApps.Info(versionName = "version name", versionCode = 11223300)
-        )
-    )
+
     val items = listOf(
         SectionItem.Header(type = SectionHeader.RecentlyUpdated), SectionItem.App(
             AppListItem(
@@ -680,7 +658,9 @@ private fun WatchListPreview() {
                 changeDetails = "Nunc aliquam egestas diam, id bibendum massa. Duis vitae lorem nunc. Integer eu elit urna. Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
                 noNewDetails = true,
                 recentFlag = true
-            ), isLocal = false
+            ),
+            isLocal = false,
+            packageInfo = InstalledApps.Info(0, "")
         ), SectionItem.App(
             AppListItem(
                 app = App(
@@ -703,7 +683,9 @@ private fun WatchListPreview() {
                 changeDetails = "Nunc aliquam egestas diam, id bibendum massa. Duis vitae lorem nunc. Integer eu elit urna. Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
                 noNewDetails = true,
                 recentFlag = true
-            ), isLocal = true
+            ),
+            isLocal = true,
+            packageInfo = InstalledApps.Info(0, "")
         ), SectionItem.App(
             AppListItem(
                 app = App(
@@ -726,7 +708,12 @@ private fun WatchListPreview() {
                 changeDetails = "Nunc aliquam egestas diam, id bibendum massa. Duis vitae lorem nunc. Integer eu elit urna. Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
                 noNewDetails = false,
                 recentFlag = true
-            ), isLocal = true
+            ),
+            isLocal = true,
+            packageInfo = InstalledApps.Info(
+                versionName = "very long long version name consectetur adipiscing elit",
+                versionCode = 11223300
+            )
         ), SectionItem.App(
             AppListItem(
                 app = App(
@@ -749,7 +736,9 @@ private fun WatchListPreview() {
                 changeDetails = "Nunc aliquam egestas diam, id bibendum massa. Duis vitae lorem nunc. Integer eu elit urna. Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
                 noNewDetails = false,
                 recentFlag = true
-            ), isLocal = false
+            ),
+            isLocal = false,
+            packageInfo = InstalledApps.Info(versionName = "version name", versionCode = 11223300)
         )
     )
     val selectionState = SelectionState()
@@ -764,7 +753,6 @@ private fun WatchListPreview() {
                         item = item,
                         index = index,
                         onEvent = {},
-                        installedApps = installedApps,
                         selection = selectionState,
                         selectionMode = true,
                         appIconLoader = appIconLoader
