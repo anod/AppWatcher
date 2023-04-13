@@ -3,14 +3,6 @@ plugins {
     kotlin("android")
 }
 
-repositories {
-    mavenCentral()
-    maven(url = "https://jitpack.io")
-    maven(url = "https://oss.sonatype.org/content/repositories/snapshots/")
-    maven(url = "https://maven.google.com")
-    google()
-}
-
 android {
     compileSdk = 33
 
@@ -40,7 +32,7 @@ dependencies {
 
     implementation(project(":lib:applog"))
     implementation(project(":lib:framework"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.7.20")
+    implementation(libs.coroutines.core)
+    implementation(libs.coroutines.android)
+    implementation(libs.kotlin.stdlib)
 }
