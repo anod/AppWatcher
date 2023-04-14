@@ -12,26 +12,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: set up JDK 11
-      uses: actions/setup-java@v1
-      with:
-        java-version: 17
+      - uses: actions/checkout@v3
 
-    - name: Required files
-      run: echo $GOOGLE_SERVICES_JSON > app/google-services.json
-      env:
-        GOOGLE_SERVICES_JSON: ${{ secrets.GoogleServicesJson }}
+      - name: set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: 17
 
-    - name: Checkout submodule  
-      run: git submodule update --init --recursive
-      
-    - name: Unit Test
-      run: ./gradlew testDebugUnitTest
-      continue-on-error: true # Allow steps to continue even with test failures
+      - name: Required files
+        run: echo $GOOGLE_SERVICES_JSON > app/google-services.json
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GoogleServicesJson }}
 
-    - name: Publish test result
-      uses: actions/upload-artifact@v1.0.0
-      with:
-        name: TestResults
-        path: app/build/reports/tests/testDebugUnitTest/
+      - name: Checkout submodule
+        run: git submodule update --init --recursive
+
+      - name: Unit Test
+        run: ./gradlew testDebugUnitTest
+        continue-on-error: true # Allow steps to continue even with test failures
+
+      - name: Publish test result
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: TestResults
+          path: app/build/reports/tests/testDebugUnitTest/
