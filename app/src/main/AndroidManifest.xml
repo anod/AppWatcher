@@ -42,6 +42,9 @@
         android:theme="@style/AppTheme.Main"
         android:localeConfig="@xml/locales_config"
         tools:ignore="GoogleAppIndexingWarning">
+
+        <profileable android:shell="true" />
+
         <activity
             android:name=".ShareRecieverActivity"
             android:label="@string/add_to_appwatcher"

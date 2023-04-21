@@ -43,14 +43,21 @@ android {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
             proguardFile(getDefaultProguardFile("proguard-android.txt"))
-            proguardFile("../proguard-project.txt")
+            proguardFile("proguard-project.txt")
         }
-
         getByName("release") {
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFile(getDefaultProguardFile("proguard-android.txt"))
-            proguardFile("../proguard-project.txt")
+            proguardFile("proguard-project.pro")
             signingConfig = signingConfigs.getByName("release")
+        }
+        create("benchmark") {
+            initWith(buildTypes.getByName("release"))
+            matchingFallbacks += listOf("release")
+            proguardFiles("benchmark-rules.pro")
+            signingConfig = signingConfigs.getByName("debug")
+            isDebuggable = false
         }
     }
 

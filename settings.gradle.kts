@@ -34,5 +34,6 @@ include(
     ":lib:graphics",
     ":lib:framework",
     ":lib:ktx",
-    ":lib:permissions"
+    ":lib:permissions",
+    ":macrobenchmark"
 )
