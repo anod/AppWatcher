@@ -21,6 +21,7 @@ import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.compose.CommonActivityAction
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
+import com.anod.appwatcher.database.observePackages
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.date.UploadDateParserCache
@@ -33,6 +34,8 @@ import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.playstore.AppDetailsFilter
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -41,7 +44,7 @@ import org.koin.core.component.inject
 
 sealed interface SearchStatus {
     object Loading : SearchStatus
-    data class DetailsAvailable(val app: App) : SearchStatus
+    data class DetailsAvailable(val listItem: ListItem) : SearchStatus
     data class NoResults(val query: String) : SearchStatus
     data class NoNetwork(val query: String) : SearchStatus
     data class Error(val query: String) : SearchStatus
@@ -85,7 +88,6 @@ data class SearchViewState(
     val authenticated: Boolean = false,
     val account: Account? = null,
     val searchStatus: SearchStatus = SearchStatus.Loading,
-    val watchingPackages: List<String> = emptyList(),
     val wideLayout: HingeDeviceLayout = HingeDeviceLayout(),
     val selectedApp: App? = null
 )
@@ -95,6 +97,7 @@ class SearchViewModel(
 ) : BaseFlowViewModel<SearchViewState, SearchViewEvent, SearchViewAction>(), KoinComponent {
 
     class Factory(private val initialState: SearchViewState) : ViewModelProvider.Factory {
+        @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             return SearchViewModel(initialState) as T
         }
@@ -105,7 +108,7 @@ class SearchViewModel(
     private val authToken: AuthTokenBlocking by inject()
     private val uploadDateParserCache: UploadDateParserCache by inject()
     private val packageManager: PackageManager by inject()
-    val installedApps by lazy { InstalledApps.MemoryCache(InstalledApps.PackageManager(packageManager)) }
+    private val installedApps by lazy { InstalledApps.MemoryCache(InstalledApps.PackageManager(packageManager)) }
     val prefs: Preferences by inject()
 
     private val dfeApi: DfeApi by inject()
@@ -124,11 +127,7 @@ class SearchViewModel(
         if (prefs.account == null) {
             handleEvent(SearchViewEvent.NoAccount)
         }
-        viewModelScope.launch {
-            database.apps().observePackages().collect { list ->
-                viewState = viewState.copy(watchingPackages = list.map { it.packageName })
-            }
-        }
+
         if (initialState.searchQuery.isNotEmpty() && initialState.initiateSearch) {
             handleEvent(SearchViewEvent.OnSearchEnter(initialState.searchQuery))
         }
@@ -217,7 +216,15 @@ class SearchViewModel(
                 val detailsUrl = App.createDetailsUrl(query)
                 val document = dfeApi.details(detailsUrl).toDocument()
                 if (document != null) {
-                    emit(SearchStatus.DetailsAvailable(app = App(document, uploadDateParserCache)))
+                    emit(
+                        SearchStatus.DetailsAvailable(
+                            listItem = ListItem(
+                                document = document,
+                                installedInfo = installedApps.packageInfo(document.docId),
+                                app = App(document, uploadDateParserCache)
+                            )
+                        )
+                    )
                 } else {
                     resetPager()
                     emit(SearchStatus.SearchList(query = query))
@@ -236,8 +243,8 @@ class SearchViewModel(
         }
     }
 
-    private var _pagingData: Flow<PagingData<App>>? = null
-    val pagingData: Flow<PagingData<App>>
+    private var _pagingData: Flow<PagingData<ListItem>>? = null
+    val pagingData: Flow<PagingData<ListItem>>
         get() {
             if (_pagingData == null) {
                 _pagingData = createPager()
@@ -259,15 +266,19 @@ class SearchViewModel(
             maxSize = 200
         )
     ) {
-        SearchEndpointPagingSource(dfeApi, viewState.searchQuery)
+        SearchEndpointPagingSource(
+            dfeApi = dfeApi,
+            searchQuery = viewState.searchQuery,
+            installedApps = installedApps,
+            uploadDateParserCache = uploadDateParserCache,
+        )
     }
         .flow
         .cachedIn(viewModelScope)
-        .map {
-            it
-                .filter { d -> AppDetailsFilter.hasAppDetails(d) }
-                .map { d -> App(d, uploadDateParserCache) }
-        }
+        .map { it.filter { li -> AppDetailsFilter.hasAppDetails(li.document) } }
+        .combine(
+            flow = database.apps().observePackages().distinctUntilChanged()
+        ) { pageData, watchingPackages -> pageData.updateRowId(watchingPackages) }
 
     private fun onAccountSelected(account: Account) {
         viewState = viewState.copy(account = account)
@@ -283,6 +294,17 @@ class SearchViewModel(
             } catch (e: AuthTokenStartIntent) {
                 emitAction(startActivityAction(intent = e.intent, finish = true))
             }
+        }
+    }
+}
+
+fun PagingData<ListItem>.updateRowId(watchingPackages: Map<String, Int>): PagingData<ListItem> {
+    return map { listItem ->
+        val watchingPackageRowId = watchingPackages[listItem.app.packageName]
+        if (watchingPackageRowId != null && listItem.app.rowId != watchingPackageRowId) {
+            listItem.copy(app = listItem.app.copy(rowId = watchingPackageRowId))
+        } else {
+            listItem
         }
     }
 }

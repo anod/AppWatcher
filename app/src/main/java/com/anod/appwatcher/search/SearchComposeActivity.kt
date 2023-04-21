@@ -44,7 +44,6 @@ open class SearchComposeActivity : BaseComposeActivity() {
                             SearchResultsScreen(
                                 screenState = screenState,
                                 onEvent = { viewModel.handleEvent(it) },
-                                installedApps = viewModel.installedApps,
                                 pagingDataFlow = { viewModel.pagingData },
                                 viewActions = viewModel.viewActions,
                                 onActivityAction = { onCommonActivityAction(it) },
@@ -63,7 +62,6 @@ open class SearchComposeActivity : BaseComposeActivity() {
                     SearchResultsScreen(
                         screenState = screenState,
                         onEvent = { viewModel.handleEvent(it) },
-                        installedApps = viewModel.installedApps,
                         pagingDataFlow = { viewModel.pagingData },
                         viewActions = viewModel.viewActions,
                         onActivityAction = { onCommonActivityAction(it) },

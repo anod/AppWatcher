@@ -20,12 +20,12 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.CommonActivityAction
 import com.anod.appwatcher.compose.SearchTopBar
 import com.anod.appwatcher.database.entities.App
+import com.anod.appwatcher.search.ListItem
 import com.anod.appwatcher.search.MarketAppItem
 import com.anod.appwatcher.search.RetryButton
 import com.anod.appwatcher.tags.TagSelectionDialog
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.AppIconLoader
-import info.anodsplace.framework.content.InstalledApps
 import kotlinx.coroutines.flow.Flow
 import org.koin.java.KoinJavaComponent
 
@@ -33,9 +33,8 @@ import org.koin.java.KoinJavaComponent
 @Composable
 fun WishListScreen(
     screenState: WishListState,
-    pagingDataFlow: Flow<PagingData<App>>,
+    pagingDataFlow: Flow<PagingData<ListItem>>,
     onEvent: (WishListEvent) -> Unit,
-    installedApps: InstalledApps,
     appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get(),
     viewActions: Flow<WishListAction>,
     onActivityAction: (CommonActivityAction) -> Unit
@@ -86,11 +85,9 @@ fun WishListScreen(
                         WishlistEmpty()
                     } else {
                         WishlistResults(
-                                items = items,
-                                screenState = screenState,
-                                onEvent = onEvent,
-                                installedApps = installedApps,
-                                appIconLoader = appIconLoader
+                            items = items,
+                            onEvent = onEvent,
+                            appIconLoader = appIconLoader
                         )
                     }
                 }
@@ -125,7 +122,11 @@ fun WishListScreen(
 }
 
 @Composable
-fun WishlistResults(items: LazyPagingItems<App>, screenState: WishListState, onEvent: (WishListEvent) -> Unit, installedApps: InstalledApps, appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get()) {
+fun WishlistResults(
+    items: LazyPagingItems<ListItem>,
+    onEvent: (WishListEvent) -> Unit,
+    appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get()
+) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize(),
@@ -134,25 +135,22 @@ fun WishlistResults(items: LazyPagingItems<App>, screenState: WishListState, onE
         itemsIndexed(
             items = items,
             key = { index, item -> "wishlist-$index-${item.hashCode()}" }
-        ) { _, app ->
-            if (app != null) { // TODO: Preload?
-                val packageName = app.packageName
-                val isWatched = remember(packageName, screenState.watchingPackages) {
-                    screenState.watchingPackages.contains(packageName)
-                }
-                val packageInfo = remember { installedApps.packageInfo(packageName) }
+        ) { _, item ->
+            if (item != null) {
                 MarketAppItem(
-                    app = app,
-                    onClick = { onEvent(WishListEvent.SelectApp(app)) },
-                    isWatched = isWatched,
-                    isInstalled = packageInfo.isInstalled,
+                    app = item.app,
+                    onClick = { onEvent(WishListEvent.SelectApp(item.app)) },
+                    isWatched = item.isWatched,
+                    isInstalled = item.isInstalled,
                     appIconLoader = appIconLoader
                 )
             } else {
-                Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp)
-                    .background(MaterialTheme.colorScheme.inverseOnSurface))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .background(MaterialTheme.colorScheme.inverseOnSurface)
+                )
 
             }
         }

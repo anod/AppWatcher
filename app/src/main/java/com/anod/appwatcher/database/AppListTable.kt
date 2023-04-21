@@ -17,6 +17,7 @@ import info.anodsplace.framework.util.chunked
 import info.anodsplace.framework.util.dayStartAgoMillis
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.util.concurrent.Callable
 
@@ -44,26 +45,34 @@ interface AppListTable {
     suspend fun loadAppRow(rowId: Int): App?
 
     @Suppress("FunctionName")
-    @Query("SELECT ${BaseColumns._ID}, ${Columns.packageName} FROM $table " +
-            "WHERE ${Columns.packageName} IN (:packageNames) AND ${Columns.status} != ${App.STATUS_DELETED}")
+    @Query(
+        "SELECT ${BaseColumns._ID}, ${Columns.packageName} FROM $table " +
+                "WHERE ${Columns.packageName} IN (:packageNames) AND ${Columns.status} != ${App.STATUS_DELETED}"
+    )
     suspend fun _loadRowIds(packageNames: List<String>): List<PackageRowPair>
 
     suspend fun loadRowIds(packageNames: List<String>): List<PackageRowPair> {
         return packageNames.chunked({ _loadRowIds(it) })
     }
 
-    @Query("SELECT ${BaseColumns._ID}, ${Columns.packageName} FROM $table WHERE " +
-            "${Columns.status} != ${App.STATUS_DELETED}")
-    fun observePackages(): Flow<List<PackageRowPair>>
+    @Query(
+        "SELECT ${BaseColumns._ID}, ${Columns.packageName} FROM $table WHERE " +
+                "${Columns.status} != ${App.STATUS_DELETED}"
+    )
+    fun observePackagesList(): Flow<List<PackageRowPair>>
 
-    @Query("SELECT ${BaseColumns._ID}, ${Columns.packageName} FROM $table WHERE " +
-            "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${App.STATUS_DELETED} ELSE ${Columns.status} >= ${App.STATUS_NORMAL} END")
+    @Query(
+        "SELECT ${BaseColumns._ID}, ${Columns.packageName} FROM $table WHERE " +
+                "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${App.STATUS_DELETED} ELSE ${Columns.status} >= ${App.STATUS_NORMAL} END"
+    )
     suspend fun loadPackages(includeDeleted: Boolean): List<PackageRowPair>
 
-    @Query("SELECT $table.*, " +
-            "CASE WHEN ${Columns.updateTimestamp} > :recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
-            "FROM $table WHERE " +
-            "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${App.STATUS_DELETED} ELSE ${Columns.status} >= ${App.STATUS_NORMAL} END ")
+    @Query(
+        "SELECT $table.*, " +
+                "CASE WHEN ${Columns.updateTimestamp} > :recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
+                "FROM $table WHERE " +
+                "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${App.STATUS_DELETED} ELSE ${Columns.status} >= ${App.STATUS_NORMAL} END "
+    )
     fun load(includeDeleted: Boolean, recentTime: Long): Cursor
 
     @Query("SELECT $table.*, ${ChangelogTable.TableColumns.details}, ${ChangelogTable.TableColumns.noNewDetails}, " +
@@ -293,28 +302,33 @@ interface AppListTable {
 
         private fun projection(recentTime: Long): Array<String> {
             return arrayOf(
-                    TableColumns._ID,
-                    TableColumns.appId,
-                    Columns.packageName,
-                    Columns.versionNumber,
-                    Columns.versionName,
-                    Columns.title,
-                    Columns.creator,
-                    Columns.status,
-                    Columns.uploadTimestamp,
-                    Columns.priceText,
-                    Columns.priceCurrency,
-                    Columns.priceMicros,
-                    Columns.uploadDate,
-                    Columns.detailsUrl,
-                    Columns.iconUrl,
-                    Columns.appType,
-                    Columns.updateTimestamp,
-                    "case " +
-                            "when ${Columns.updateTimestamp} > $recentTime then 1 " +
-                            "else 0 end ${Columns.recentFlag}")
+                TableColumns._ID,
+                TableColumns.appId,
+                Columns.packageName,
+                Columns.versionNumber,
+                Columns.versionName,
+                Columns.title,
+                Columns.creator,
+                Columns.status,
+                Columns.uploadTimestamp,
+                Columns.priceText,
+                Columns.priceCurrency,
+                Columns.priceMicros,
+                Columns.uploadDate,
+                Columns.detailsUrl,
+                Columns.iconUrl,
+                Columns.appType,
+                Columns.updateTimestamp,
+                "case " +
+                        "when ${Columns.updateTimestamp} > $recentTime then 1 " +
+                        "else 0 end ${Columns.recentFlag}"
+            )
         }
     }
+}
+
+fun AppListTable.observePackages(): Flow<Map<String, Int>> = observePackagesList().map { list ->
+    list.associateBy({ it.packageName }, { it.rowId })
 }
 
 val App.contentValues: ContentValues

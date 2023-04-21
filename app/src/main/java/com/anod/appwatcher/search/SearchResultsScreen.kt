@@ -45,9 +45,8 @@ import org.koin.java.KoinJavaComponent
 @Composable
 fun SearchResultsScreen(
     screenState: SearchViewState,
-    pagingDataFlow: () -> Flow<PagingData<App>>,
+    pagingDataFlow: () -> Flow<PagingData<ListItem>>,
     onEvent: (SearchViewEvent) -> Unit,
-    installedApps: InstalledApps,
     appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get(),
     viewActions: Flow<SearchViewAction>,
     onActivityAction: (CommonActivityAction) -> Unit = { },
@@ -89,7 +88,7 @@ fun SearchResultsScreen(
                     CircularProgressIndicator()
                 }
                 is SearchStatus.DetailsAvailable -> {
-                    SearchSingleResult(searchStatus.app, screenState = screenState, onEvent = onEvent, installedApps = installedApps, appIconLoader = appIconLoader)
+                    SearchSingleResult(searchStatus.listItem, onEvent = onEvent, appIconLoader = appIconLoader)
                 }
                 is SearchStatus.Error -> RetryButton(onRetryClick = { onEvent(SearchViewEvent.OnSearchEnter(searchStatus.query)) })
                 is SearchStatus.NoNetwork -> RetryButton(onRetryClick = { onEvent(SearchViewEvent.OnSearchEnter(searchStatus.query)) })
@@ -104,7 +103,7 @@ fun SearchResultsScreen(
                     } else if (isEmpty) {
                         EmptyResult(query = searchStatus.query)
                     } else {
-                        SearchResultsPage(items = items, screenState = screenState, onEvent = onEvent, installedApps = installedApps, appIconLoader = appIconLoader)
+                        SearchResultsPage(items = items, onEvent = onEvent, appIconLoader = appIconLoader)
                     }
                 }
             }
@@ -196,50 +195,46 @@ fun RetryButton(onRetryClick: () -> Unit, fillMaxSize: Boolean = false) {
 }
 
 @Composable
-fun SearchSingleResult(app: App, screenState: SearchViewState, onEvent: (SearchViewEvent) -> Unit, installedApps: InstalledApps, appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get()) {
-    val packageName = app.packageName
-    val isWatched = remember(packageName, screenState.watchingPackages) {
-        screenState.watchingPackages.contains(packageName)
-    }
-    val packageInfo = remember { installedApps.packageInfo(packageName) }
+fun SearchSingleResult(listItem: ListItem, onEvent: (SearchViewEvent) -> Unit, appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get()) {
     MarketAppItem(
-            app = app,
-            onClick = { onEvent(SearchViewEvent.SelectApp(app)) },
-            isWatched = isWatched,
-            isInstalled = packageInfo.isInstalled,
-            appIconLoader = appIconLoader
+        app = listItem.app,
+        onClick = { onEvent(SearchViewEvent.SelectApp(listItem.app)) },
+        isWatched = listItem.isWatched,
+        isInstalled = listItem.isInstalled,
+        appIconLoader = appIconLoader
     )
 }
 
 @Composable
-fun SearchResultsPage(items: LazyPagingItems<App>, screenState: SearchViewState, onEvent: (SearchViewEvent) -> Unit, installedApps: InstalledApps, appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get()) {
+fun SearchResultsPage(
+    items: LazyPagingItems<ListItem>,
+    onEvent: (SearchViewEvent) -> Unit,
+    appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get()
+) {
     LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 16.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 16.dp),
     ) {
         itemsIndexed(
             items = items,
             key = { index, item -> "search-$index-${item.hashCode()}" }
-        ) { _, app ->
-            if (app != null) { // TODO: Preload?
-                val packageName = app.packageName
-                val isWatched = remember(packageName, screenState.watchingPackages) {
-                    screenState.watchingPackages.contains(packageName)
-                }
-                val packageInfo = remember { installedApps.packageInfo(packageName) }
+        ) { _, item ->
+            if (item != null) { // TODO: Preload?
                 MarketAppItem(
-                    app = app,
-                    onClick = { onEvent(SearchViewEvent.SelectApp(app = app)) },
-                    isWatched = isWatched,
-                    isInstalled = packageInfo.isInstalled,
+                    app = item.app,
+                    onClick = { onEvent(SearchViewEvent.SelectApp(app = item.app)) },
+                    isWatched = item.isWatched,
+                    isInstalled = item.isInstalled,
                     appIconLoader = appIconLoader
                 )
             } else {
-                Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp)
-                    .background(MaterialTheme.colorScheme.inverseOnSurface))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .background(MaterialTheme.colorScheme.inverseOnSurface)
+                )
 
             }
         }
@@ -258,7 +253,6 @@ fun LoadingStatePreview() {
             screenState = SearchViewState(searchStatus = SearchStatus.Loading),
             pagingDataFlow = { flowOf() },
             onEvent = { },
-            installedApps = InstalledApps.StaticMap(emptyMap()),
             appIconLoader = appIconLoader,
             viewActions = flowOf()
         )
@@ -277,7 +271,6 @@ fun EmptyStatePreview() {
             screenState = SearchViewState(searchStatus = SearchStatus.NoResults(query = "")),
             pagingDataFlow = { flowOf() },
             onEvent = { },
-            installedApps = InstalledApps.StaticMap(emptyMap()),
             appIconLoader = appIconLoader,
             viewActions = flowOf()
         )
@@ -296,7 +289,6 @@ fun RetryStatePreview() {
             screenState = SearchViewState(searchStatus = SearchStatus.Error("")),
             pagingDataFlow = { flowOf() },
             onEvent = { },
-            installedApps = InstalledApps.StaticMap(emptyMap()),
             appIconLoader = appIconLoader,
             viewActions = flowOf()
         )
@@ -329,12 +321,17 @@ fun SearchSingleResultPreview() {
     val app = App(doc, UploadDateParserCache())
     AppTheme {
         SearchResultsScreen(
-            screenState = SearchViewState(searchQuery = "info.anodsplace.appwatcher", searchStatus = SearchStatus.DetailsAvailable(app = app)),
+            screenState = SearchViewState(
+                searchQuery = "info.anodsplace.appwatcher", searchStatus = SearchStatus.DetailsAvailable(
+                    listItem = ListItem(
+                        document = doc,
+                        app = app,
+                        installedInfo = InstalledApps.Info(versionCode = 15000, versionName = "1.5.0")
+                    )
+                )
+            ),
             pagingDataFlow = { flowOf() },
             onEvent = { },
-            installedApps = InstalledApps.StaticMap(mapOf(
-                    "info.anodsplace.appwatcher" to InstalledApps.Info(versionCode = 15000, versionName = "1.5.0")
-            )),
             appIconLoader = appIconLoader,
             viewActions = flowOf()
         )

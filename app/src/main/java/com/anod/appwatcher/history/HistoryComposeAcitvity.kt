@@ -55,7 +55,6 @@ class HistoryListActivity : BaseComposeActivity(), KoinComponent {
                             HistoryListScreen(
                                 screenState = screenState,
                                 onEvent = { viewModel.handleEvent(it) },
-                                installedApps = viewModel.installedApps,
                                 pagingDataFlow = viewModel.pagingData,
                                 viewActions = viewModel.viewActions,
                                 onActivityAction = { onCommonActivityAction(it) }
@@ -73,7 +72,6 @@ class HistoryListActivity : BaseComposeActivity(), KoinComponent {
                     HistoryListScreen(
                         screenState = screenState,
                         onEvent = { viewModel.handleEvent(it) },
-                        installedApps = viewModel.installedApps,
                         pagingDataFlow = viewModel.pagingData,
                         viewActions = viewModel.viewActions,
                         onActivityAction = { onCommonActivityAction(it) }

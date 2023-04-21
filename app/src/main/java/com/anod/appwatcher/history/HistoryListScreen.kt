@@ -20,12 +20,12 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.CommonActivityAction
 import com.anod.appwatcher.compose.SearchTopBar
 import com.anod.appwatcher.database.entities.App
+import com.anod.appwatcher.search.ListItem
 import com.anod.appwatcher.search.MarketAppItem
 import com.anod.appwatcher.search.RetryButton
 import com.anod.appwatcher.tags.TagSelectionDialog
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.AppIconLoader
-import info.anodsplace.framework.content.InstalledApps
 import kotlinx.coroutines.flow.Flow
 import org.koin.java.KoinJavaComponent
 
@@ -33,9 +33,8 @@ import org.koin.java.KoinJavaComponent
 @Composable
 fun HistoryListScreen(
     screenState: HistoryListState,
-    pagingDataFlow: Flow<PagingData<App>>,
+    pagingDataFlow: Flow<PagingData<ListItem>>,
     onEvent: (HistoryListEvent) -> Unit,
-    installedApps: InstalledApps,
     appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get(),
     viewActions: Flow<HistoryListAction>,
     onActivityAction: (CommonActivityAction) -> Unit
@@ -87,9 +86,7 @@ fun HistoryListScreen(
                     } else {
                         HistoryListResults(
                                 items = items,
-                                screenState = screenState,
                                 onEvent = onEvent,
-                                installedApps = installedApps,
                                 appIconLoader = appIconLoader
                         )
                     }
@@ -133,10 +130,8 @@ private fun ListLoadProgress() {
 
 @Composable
 fun HistoryListResults(
-    items: LazyPagingItems<App>,
-    screenState: HistoryListState,
+    items: LazyPagingItems<ListItem>,
     onEvent: (HistoryListEvent) -> Unit,
-    installedApps: InstalledApps,
     appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get()
 ) {
     LazyColumn(
@@ -147,25 +142,22 @@ fun HistoryListResults(
         itemsIndexed(
             items = items,
             key = { index, item -> "history-$index-${item.hashCode()}" }
-        ) { _, app ->
-            if (app != null) { // TODO: Preload?
-                val packageName = app.packageName
-                val isWatched = remember(packageName, screenState.watchingPackages) {
-                    screenState.watchingPackages.contains(packageName)
-                }
-                val packageInfo = remember { installedApps.packageInfo(packageName) }
+        ) { _, item ->
+            if (item != null) {
                 MarketAppItem(
-                    app = app,
-                    onClick = { onEvent(HistoryListEvent.SelectApp(app)) },
-                    isWatched = isWatched,
-                    isInstalled = packageInfo.isInstalled,
+                    app = item.app,
+                    onClick = { onEvent(HistoryListEvent.SelectApp(item.app)) },
+                    isWatched = item.isWatched,
+                    isInstalled = item.isInstalled,
                     appIconLoader = appIconLoader
                 )
             } else {
-                Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp)
-                    .background(MaterialTheme.colorScheme.inverseOnSurface))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .background(MaterialTheme.colorScheme.inverseOnSurface)
+                )
 
             }
         }

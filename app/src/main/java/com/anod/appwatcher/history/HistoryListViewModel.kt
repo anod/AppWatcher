@@ -11,11 +11,12 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.filter
-import androidx.paging.map
 import com.anod.appwatcher.compose.CommonActivityAction
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
-import com.anod.appwatcher.database.entities.Price
+import com.anod.appwatcher.database.observePackages
+import com.anod.appwatcher.search.ListItem
+import com.anod.appwatcher.search.updateRowId
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import finsky.api.DfeApi
 import finsky.api.FilterComposite
@@ -28,17 +29,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import java.text.DateFormat
-import java.util.Date
 
 data class HistoryListState(
     val account: Account? = null,
     val authToken: String = "",
     val nameFilter: String = "",
-    val watchingPackages: List<String> = emptyList(),
     val wideLayout: HingeDeviceLayout = HingeDeviceLayout(),
     val selectedApp: App? = null,
 )
@@ -70,9 +67,8 @@ class HistoryListViewModel(account: Account?, authToken: String, wideLayout: Hin
 
     private val database: AppsDatabase by inject()
     private val dfeApi: DfeApi by inject()
-    private val dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM)
     private val packageManager: PackageManager by inject()
-    val installedApps by lazy { InstalledApps.MemoryCache(InstalledApps.PackageManager(packageManager)) }
+    private val installedApps by lazy { InstalledApps.MemoryCache(InstalledApps.PackageManager(packageManager)) }
 
     init {
         viewState = HistoryListState(
@@ -80,17 +76,10 @@ class HistoryListViewModel(account: Account?, authToken: String, wideLayout: Hin
             authToken = authToken,
             wideLayout = wideLayout
         )
-        viewModelScope.launch {
-            database.apps().observePackages().map { list ->
-                list.map { it.packageName }
-            }.collect {
-                viewState = viewState.copy(watchingPackages = it)
-            }
-        }
     }
 
-    private var _pagingData: Flow<PagingData<App>>? = null
-    val pagingData: Flow<PagingData<App>>
+    private var _pagingData: Flow<PagingData<ListItem>>? = null
+    val pagingData: Flow<PagingData<ListItem>>
         get() {
             if (_pagingData == null) {
                 _pagingData = createPager()
@@ -107,42 +96,21 @@ class HistoryListViewModel(account: Account?, authToken: String, wideLayout: Hin
             maxSize = 204
         )
     ) {
-        HistoryEndpointPagingSource(dfeApi)
+        HistoryEndpointPagingSource(
+            dfeApi = dfeApi,
+            installedApps = installedApps,
+        )
     }
         .flow
         .cachedIn(viewModelScope)
-        .combine(viewStates.map { it.nameFilter }.distinctUntilChanged()) { pageData, nameFilter ->
+        .combine(
+            flow = viewStates.map { it.nameFilter }.distinctUntilChanged(),
+        ) { pageData, nameFilter ->
             val predicate = predicate(nameFilter)
-            pageData
-                .filter { d -> predicate(d) }
-                .map { d ->
-                    App(
-                        rowId = 0,
-                        appId = d.docId,
-                        packageName = d.docId,
-                        versionNumber = 0,
-                        versionName = "",
-                        title = d.title,
-                        creator = "",
-                        iconUrl = d.iconUrl ?: "",
-                        status = App.STATUS_NORMAL,
-                        uploadDate = d.purchaseTimestampMillis?.let { timestamp ->
-                            dateFormat.format(Date(timestamp))
-                        } ?: "",
-                        price = d.purchaseOffer?.let { offer ->
-                            Price(
-                                text = offer.formattedAmount ?: "",
-                                cur = offer.currencyCode ?: "",
-                                micros = offer.micros.toInt()
-                            )
-                        } ?: Price("", "", 0),
-                        detailsUrl = d.detailsUrl,
-                        uploadTime = d.purchaseTimestampMillis ?: 0L,
-                        appType = "",
-                        updateTime = System.currentTimeMillis(),
-                    )
-                }
-        }
+            pageData.filter { li -> predicate(li.document) }
+        }.combine(
+            flow = database.apps().observePackages().distinctUntilChanged()
+        ) { pageData, watchingPackages -> pageData.updateRowId(watchingPackages) }
 
     override fun handleEvent(event: HistoryListEvent) {
         when (event) {

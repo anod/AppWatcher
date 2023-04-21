@@ -431,7 +431,8 @@ class DetailsViewModel(app: App) :
                 document = document,
                 changelogs = mergeChangelogs(localChanges, recentChange),
                 changelogState = ChangelogLoadState.Complete,
-                title = viewState.app?.title ?: "",
+                app = if (viewState.rowId == -1) App(document, uploadDateParserCache) else viewState.app,
+                title = viewState.app?.title ?: viewState.title,
                 remoteCallFinished = true,
                 remoteVersionInfo = AppVersionInfo(
                     isBeta = when {
