@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.RemoteException
 import android.provider.BaseColumns
-import android.text.TextUtils
 import android.text.format.DateUtils
 import androidx.core.content.contentValuesOf
 import androidx.work.Data
@@ -299,11 +298,8 @@ class UpdateCheck(
             val recentChanges = appDetails.recentChangesHtml ?: ""
             updatedApp = UpdatedApp(localApp, recentChanges, installedInfo.versionCode, false)
         }
-        //Refresh app icon if it wasn't fetched previously
-        fillMissingData(marketApp, localApp, values)
-        if (values.size() > 0) {
-            values.put(BaseColumns._ID, localApp.rowId)
-        }
+        //Refresh app info with latest fetcheda
+        updateLocalApp(marketApp, localApp, values)
         return Pair(values, updatedApp)
     }
 
@@ -369,13 +365,13 @@ class UpdateCheck(
         }
     }
 
-    private fun fillMissingData(marketApp: Document, localApp: App, values: ContentValues) {
-        val refreshTime = marketApp.extractUploadDate(uploadDateParserCache)
-        values.put(AppListTable.Columns.uploadTimestamp, refreshTime)
+    private fun updateLocalApp(marketApp: Document, localApp: App, values: ContentValues) {
+        val uploadTime = marketApp.extractUploadDate(uploadDateParserCache)
+        values.put(BaseColumns._ID, localApp.rowId)
+        values.put(AppListTable.Columns.uploadTimestamp, uploadTime)
         values.put(AppListTable.Columns.uploadDate, marketApp.appDetails.uploadDate)
-        if (TextUtils.isEmpty(localApp.versionName)) {
-            values.put(AppListTable.Columns.versionName, marketApp.appDetails.versionString)
-        }
+        values.put(AppListTable.Columns.versionName, marketApp.appDetails.versionString)
+        values.put(AppListTable.Columns.versionNumber, marketApp.appDetails.versionCode)
 
         if (marketApp.appDetails.appType != localApp.appType) {
             values.put(AppListTable.Columns.appType, marketApp.appDetails.appType)
@@ -391,9 +387,7 @@ class UpdateCheck(
         if (localApp.price.micros != offer.micros.toInt()) {
             values.put(AppListTable.Columns.priceMicros, offer.micros)
         }
-
-        val iconUrl = marketApp.iconUrl
-        if (!TextUtils.isEmpty(iconUrl)) {
+        if (!marketApp.iconUrl.isNullOrEmpty()) {
             values.put(AppListTable.Columns.iconUrl, marketApp.iconUrl)
         }
     }
