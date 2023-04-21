@@ -3,7 +3,7 @@ plugins {
     kotlin("android")
     kotlin("kapt")
     id("kotlin-parcelize")
-    id("com.google.devtools.ksp").version("1.8.10-1.0.9")
+    id("com.google.devtools.ksp").version("1.8.20-1.0.11")
     id("com.google.android.gms.oss-licenses-plugin")
 }
 
@@ -14,8 +14,8 @@ android {
         applicationId = "com.anod.appwatcher"
         minSdk = 27
         targetSdk = 33
-        versionCode = 16004
-        versionName = "1.6.0"
+        versionCode = 16100
+        versionName = "1.6.1"
     }
 
     buildFeatures {
@@ -76,7 +76,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.4"
+        kotlinCompilerExtensionVersion = "1.4.6"
     }
     namespace = "com.anod.appwatcher"
 }
@@ -97,13 +97,13 @@ dependencies {
     implementation("androidx.work:work-runtime:2.8.1")
     implementation("androidx.work:work-runtime-ktx:2.8.1")
     implementation("androidx.core:core:1.10.0")
-    implementation("androidx.core:core-splashscreen:1.0.0")
+    implementation("androidx.core:core-splashscreen:1.0.1")
 
     implementation("androidx.paging:paging-runtime:3.2.0-alpha04")
     implementation("androidx.paging:paging-compose:1.0.0-alpha18")
 
     // Compose
-    implementation("androidx.activity:activity-compose:1.7.0")
+    implementation("androidx.activity:activity-compose:1.7.1")
     implementation("androidx.compose.runtime:runtime-tracing:1.0.0-alpha03")
     implementation("com.google.accompanist:accompanist-flowlayout:0.30.0")
     implementation("com.google.accompanist:accompanist-swiperefresh:0.28.0")
@@ -111,11 +111,11 @@ dependencies {
     implementation("com.google.accompanist:accompanist-placeholder-material:0.28.0")
 
     // Coil
-    implementation("io.coil-kt:coil-base:2.2.2")
-    implementation("io.coil-kt:coil-compose-base:2.2.2")
+    implementation("io.coil-kt:coil-base:2.3.0")
+    implementation("io.coil-kt:coil-compose-base:2.3.0")
 
     // Google
-    implementation("com.google.android.gms:play-services-oss-licenses:17.0.0")
+    implementation("com.google.android.gms:play-services-oss-licenses:17.0.1")
     implementation("com.google.android.gms:play-services-identity:18.0.1")
     implementation("com.google.android.gms:play-services-auth:20.4.1")
 
@@ -132,7 +132,7 @@ dependencies {
     // 3rd party
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
     implementation("com.jakewharton:process-phoenix:2.1.2")
-    implementation("io.insert-koin:koin-core:3.3.2")
+    implementation("io.insert-koin:koin-core:3.4.0")
 
     // ViewModel and LiveData
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")

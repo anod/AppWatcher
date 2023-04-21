@@ -40,8 +40,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.itemsIndexed
 import coil.ImageLoader
+import coil.compose.AsyncImage
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppIconImage
 import com.anod.appwatcher.compose.AppTheme
@@ -52,8 +52,6 @@ import com.anod.appwatcher.database.entities.Price
 import com.anod.appwatcher.details.rememberAppItemState
 import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.SelectionState
-import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.material.fade
 import com.google.accompanist.placeholder.material.placeholder
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -82,7 +80,7 @@ fun WatchListPage(
 ) {
     val isEmpty = items.loadState.source.refresh is LoadState.NotLoading && items.itemCount < 1
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isRefreshing)
-
+    val recentlyInstalledAppsHashCode = remember(recentlyInstalledApps) { recentlyInstalledApps?.hashCode() ?: 0 }
     SwipeRefresh(modifier = Modifier.fillMaxSize(),
         state = swipeRefreshState,
         swipeEnabled = enablePullToRefresh,
@@ -93,11 +91,31 @@ fun WatchListPage(
             contentPadding = WindowInsets.navigationBars.asPaddingValues()
         ) {
             if (isEmpty) {
-                item {
+                item(contentType = "empty-state") {
                     EmptyItem(onEvent = onEvent, modifier = Modifier.padding(top = 128.dp))
                 }
             } else {
-                itemsIndexed(items = items, key = { index, item -> "$listContext-$index-${item.hashCode()}" }) { index, item ->
+                items(
+                    count = items.itemCount,
+                    key = { index ->
+                        when (val item = items.peek(index)) {
+                            null -> "null-$index"
+                            is SectionItem.Recent -> "$listContext-${item.sectionKey}-$recentlyInstalledAppsHashCode"
+                            else -> "$listContext-${item.sectionKey}"
+                        }
+                    },
+                    contentType = { index ->
+                        when (items.peek(index)) {
+                            null -> null
+                            is SectionItem.Recent -> "recent"
+                            is SectionItem.App -> "watched-app"
+                            is SectionItem.OnDevice -> "ondevice-app"
+                            is SectionItem.Header -> "header"
+                            is SectionItem.Empty -> "loader"
+                        }
+                    }
+                ) { index ->
+                    val item = items[index]
                     if (item != null) { // TODO: Preload?
                         WatchListSectionItem(
                             modifier = Modifier.animateItemPlacement(),
@@ -325,10 +343,7 @@ private fun AppItem(
                                 .padding(end = 4.dp)
                         )
                     }
-//                    val versionText: String by remember {
-//                        mutableStateOf(formatVersionText(app.versionName, app.versionNumber, 0, context))
-//                    }
-//                    VersionText(text = versionText, color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f))
+
                     Text(
                         text = appItemState.text,
                         color = appItemState.color,
@@ -429,11 +444,13 @@ private fun RecentItemRow(
             .padding(start = 6.dp, end = 8.dp)
             .horizontalScroll(scrollState)
     ) {
+        val placeholderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
         if (loading) {
             (0..4).forEach { _ ->
                 RecentItemAppCard(
                     app = null,
                     onClick = {},
+                    placeholderColor = placeholderColor,
                     appIconLoader = appIconLoader
                 )
             }
@@ -442,6 +459,7 @@ private fun RecentItemRow(
                 RecentItemAppCard(
                     app = app,
                     onClick = { onEvent(WatchListEvent.AppClick(app, index)) },
+                    placeholderColor = placeholderColor,
                     appIconLoader = appIconLoader
                 )
             }
@@ -450,28 +468,28 @@ private fun RecentItemRow(
 }
 
 @Composable
-private fun RecentItemAppCard(app: App?, onClick: (() -> Unit), appIconLoader: AppIconLoader = getKoin().get()) {
+private fun RecentItemAppCard(app: App?, onClick: (() -> Unit), placeholderColor: Color, appIconLoader: AppIconLoader = getKoin().get()) {
     Card(
         modifier = Modifier
-            .defaultMinSize(minHeight = 96.dp)
+            .defaultMinSize(minHeight = 116.dp)
             .width(96.dp)
             .padding(start = 2.dp, end = 2.dp, top = 2.dp, bottom = 2.dp)
             .clickable(enabled = app != null, onClick = onClick)
     ) {
-        val placeholderColor =  MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
         if (app == null) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_app_icon_placeholder),
-                contentDescription = null,
+            AsyncImage(
+                model = R.drawable.ic_app_icon_placeholder,
+                contentDescription = "",
+                imageLoader = appIconLoader.coilLoader,
                 modifier = Modifier
                     .padding(top = 8.dp)
-                    .size(56.dp)
                     .align(Alignment.CenterHorizontally)
+                    .size(56.dp)
                     .placeholder(
                         visible = true,
                         color = placeholderColor,
                         shape = CircleShape,
-                        highlight = PlaceholderHighlight.fade(),
+//                        highlight = PlaceholderHighlight.fade(),
                     )
             )
         } else {
@@ -492,13 +510,13 @@ private fun RecentItemAppCard(app: App?, onClick: (() -> Unit), appIconLoader: A
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 8.dp, end = 8.dp, top = 2.dp)
+                .align(Alignment.CenterHorizontally)
                 .defaultMinSize(minHeight = 40.dp)
                 .placeholder(
                     visible = app == null,
                     color = placeholderColor,
-                    highlight = PlaceholderHighlight.fade(),
-                )
-            ,
+                    //   highlight = PlaceholderHighlight.fade(),
+                ),
             textAlign = TextAlign.Center,
             fontSize = 14.sp,
             overflow = TextOverflow.Ellipsis
@@ -512,9 +530,11 @@ private fun RecentItemAppCard(app: App?, onClick: (() -> Unit), appIconLoader: A
                 contentDescription = stringResource(id = R.string.watched)
             )
         } else {
-            Spacer(modifier = Modifier
-                .size(20.dp)
-                .padding(start = 8.dp, bottom = 4.dp))
+            Box(
+                modifier = Modifier
+                    .size(20.dp)
+                    .padding(start = 8.dp, bottom = 4.dp)
+            )
         }
     }
 }
