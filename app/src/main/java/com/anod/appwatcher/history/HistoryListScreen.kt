@@ -141,7 +141,7 @@ fun HistoryListResults(
     ) {
         itemsIndexed(
             items = items,
-            key = { index, item -> "history-$index-${item.hashCode()}" }
+            key = { _, item -> "history-${item.stableKey}" }
         ) { _, item ->
             if (item != null) {
                 MarketAppItem(
@@ -158,7 +158,6 @@ fun HistoryListResults(
                         .height(48.dp)
                         .background(MaterialTheme.colorScheme.inverseOnSurface)
                 )
-
             }
         }
     }

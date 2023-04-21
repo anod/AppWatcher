@@ -134,7 +134,7 @@ fun WishlistResults(
     ) {
         itemsIndexed(
             items = items,
-            key = { index, item -> "wishlist-$index-${item.hashCode()}" }
+            key = { _, item -> "wishlist-${item.stableKey}" }
         ) { _, item ->
             if (item != null) {
                 MarketAppItem(

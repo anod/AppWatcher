@@ -19,6 +19,7 @@ data class ListItem(
     val isInstalled = installedInfo.isInstalled
     val isWatched: Boolean
         get() = app.rowId > -1
+    val stableKey = hashCode()
 }
 
 abstract class ListEndpointPagingSource(

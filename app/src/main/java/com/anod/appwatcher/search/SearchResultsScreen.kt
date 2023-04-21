@@ -218,7 +218,7 @@ fun SearchResultsPage(
     ) {
         itemsIndexed(
             items = items,
-            key = { index, item -> "search-$index-${item.hashCode()}" }
+            key = { _, item -> "search-${item.stableKey}" }
         ) { _, item ->
             if (item != null) { // TODO: Preload?
                 MarketAppItem(
