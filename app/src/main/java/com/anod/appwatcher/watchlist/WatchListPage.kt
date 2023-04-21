@@ -105,14 +105,7 @@ fun WatchListPage(
                         }
                     },
                     contentType = { index ->
-                        when (items.peek(index)) {
-                            null -> null
-                            is SectionItem.Recent -> "recent"
-                            is SectionItem.App -> "watched-app"
-                            is SectionItem.OnDevice -> "ondevice-app"
-                            is SectionItem.Header -> "header"
-                            is SectionItem.Empty -> "loader"
-                        }
+                        items.peek(index)?.contentType
                     }
                 ) { index ->
                     val item = items[index]

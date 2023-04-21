@@ -17,9 +17,11 @@ sealed interface SectionHeader {
 sealed interface SectionItem {
     override fun hashCode(): Int
     val sectionKey: Int
+    val contentType: String
 
     class Header(val type: SectionHeader) : SectionItem {
         override val sectionKey = hashCode()
+        override val contentType = "Header"
         override fun hashCode(): Int {
             return hashCodeOf("SectionItem.Header", type)
         }
@@ -32,6 +34,7 @@ sealed interface SectionItem {
 
     object Recent : SectionItem {
         override val sectionKey = hashCode()
+        override val contentType = "Recent"
         override fun hashCode(): Int {
             return hashCodeOf("SectionItem.Recent")
         }
@@ -44,6 +47,7 @@ sealed interface SectionItem {
 
     object Empty : SectionItem {
         override val sectionKey = hashCode()
+        override val contentType = "Empty"
         override fun hashCode(): Int {
             return hashCodeOf("SectionItem.Empty")
         }
@@ -56,6 +60,7 @@ sealed interface SectionItem {
 
     class App(val appListItem: AppListItem, val isLocal: Boolean, val packageInfo: InstalledApps.Info) : SectionItem {
         override val sectionKey = hashCode()
+        override val contentType = "App"
         val changesHtml: String = appListItem.cleanChangeHtml()
 
         override fun hashCode(): Int {
@@ -70,6 +75,7 @@ sealed interface SectionItem {
 
     class OnDevice(val appListItem: AppListItem, var showSelection: Boolean, val packageInfo: InstalledApps.Info) : SectionItem {
         override val sectionKey = hashCode()
+        override val contentType = "OnDevice"
         val changesHtml: String = appListItem.cleanChangeHtml()
 
         override fun hashCode(): Int {
