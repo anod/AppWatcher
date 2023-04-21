@@ -174,7 +174,7 @@ class DetailsViewModel(app: App) :
         viewState = DetailsState(
             appId = app.appId,
             rowId = app.rowId,
-            detailsUrl = app.detailsUrl ?: App.createDetailsUrl(app.packageName),
+            detailsUrl = if (app.detailsUrl.isNullOrEmpty()) App.createDetailsUrl(app.packageName) else app.detailsUrl,
             app = app,
             appIconState = if (app.iconUrl.isEmpty()) AppIconState.Default else AppIconState.Initial,
             title = app.title,
@@ -357,7 +357,7 @@ class DetailsViewModel(app: App) :
                         onRemoteDetailsFetched(localChanges, document)
                     } catch (e: Exception) {
                         loadError = true
-                        AppLog.e("Cannot fetch details for ${viewState.appId}", e)
+                        AppLog.e("Cannot fetch details for ${viewState.appId} , detailsUrl: ${viewState.detailsUrl}", e)
                     }
                 } else {
                     loadError = true
