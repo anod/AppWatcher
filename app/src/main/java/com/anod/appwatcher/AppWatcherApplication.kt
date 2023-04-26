@@ -88,15 +88,13 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
 
     override fun onLogException(tr: Throwable) {
 
-        if (isNetworkError(tr) && !networkConnection.isNetworkAvailable) {
+        if (isNetworkError(tr) || tr is kotlinx.coroutines.CancellationException) {
             // Ignore
             return
         }
 
         if (get<Preferences>().collectCrashReports) {
-            if (tr !is kotlinx.coroutines.CancellationException) {
-                FirebaseCrashlytics.getInstance().recordException(tr)
-            }
+            FirebaseCrashlytics.getInstance().recordException(tr)
         }
     }
 
