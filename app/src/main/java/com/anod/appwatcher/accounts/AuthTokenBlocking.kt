@@ -15,6 +15,17 @@ import java.util.concurrent.TimeUnit
 
 class AuthTokenStartIntent(val intent: Intent) : RuntimeException("getAuthToken finished with intent: $intent")
 
+sealed interface CheckTokenError {
+    class Unknown(val e: Exception) : CheckTokenError
+    class RequiresInteraction(val intent: Intent) : CheckTokenError
+    object NoToken : CheckTokenError
+}
+
+sealed interface CheckTokenResult {
+    object Success : CheckTokenResult
+    class Error(val error: CheckTokenError) : CheckTokenResult
+}
+
 class AuthTokenBlocking(context: ApplicationContext) {
 
     companion object {
@@ -23,7 +34,7 @@ class AuthTokenBlocking(context: ApplicationContext) {
         private val expiration = TimeUnit.MINUTES.toMillis(5L)
     }
 
-    val isFresh: Boolean
+    private val isFresh: Boolean
         get() = token.isNotEmpty() && lastUpdated > 0 && (System.currentTimeMillis() - lastUpdated) < expiration
 
     val tokenState = MutableStateFlow("")
@@ -32,6 +43,24 @@ class AuthTokenBlocking(context: ApplicationContext) {
 
     private val accountManager: AccountManager = AccountManager.get(context.actual)
     private var lastUpdated = 0L
+
+    suspend fun checkToken(account: Account): CheckTokenResult {
+        if (isFresh) {
+            return CheckTokenResult.Success
+        }
+        return try {
+            if (!refreshToken(account)) {
+                AppLog.e("Error retrieving token")
+                CheckTokenResult.Error(CheckTokenError.NoToken)
+            }
+            CheckTokenResult.Success
+        } catch (e: AuthTokenStartIntent) {
+            CheckTokenResult.Error(CheckTokenError.RequiresInteraction(e.intent))
+        } catch (e: Exception) {
+            AppLog.e("onResume", e)
+            CheckTokenResult.Error(CheckTokenError.Unknown(e))
+        }
+    }
 
     suspend fun refreshToken(account: Account): Boolean = withContext(Dispatchers.Main) {
         tokenState.value = retrieve(account)

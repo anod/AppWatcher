@@ -325,9 +325,9 @@ class WatchListStateViewModel(
 
     private suspend fun requestRefresh() {
         AppLog.d("Refresh requested")
-        if (!authToken.isFresh) {
-            val account = prefs.account ?: throw IllegalStateException("account is null")
-            authToken.refreshToken(account)
+        val account = prefs.account ?: throw IllegalStateException("account is null")
+        if (authToken.checkToken(account) is Error) {
+            throw IllegalStateException("auth token is invalid")
         }
 
         viewState = viewState.copy(

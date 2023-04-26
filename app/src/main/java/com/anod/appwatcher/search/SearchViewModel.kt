@@ -18,6 +18,8 @@ import androidx.paging.map
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
+import com.anod.appwatcher.accounts.CheckTokenError
+import com.anod.appwatcher.accounts.CheckTokenResult
 import com.anod.appwatcher.compose.CommonActivityAction
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
@@ -196,21 +198,19 @@ class SearchViewModel(
             emit(SearchStatus.Error(query = query))
             return@flow
         }
-        if (!authToken.isFresh) {
-            try {
-                if (!authToken.refreshToken(prefs.account!!)) {
-                    if (!networkConnection.isNetworkAvailable) {
-                        emit(SearchStatus.NoNetwork(query = query))
-                    } else {
-                        emit(SearchStatus.Error(query = query))
-                    }
-                    return@flow
-                }
-            } catch (e: AuthTokenStartIntent) {
-                emitAction(startActivityAction(e.intent))
+        val checkTokenResult = authToken.checkToken(prefs.account!!)
+        if (checkTokenResult is CheckTokenResult.Error) {
+            if (checkTokenResult.error is CheckTokenError.RequiresInteraction) {
+                emitAction(startActivityAction(checkTokenResult.error.intent))
+            } else if (!networkConnection.isNetworkAvailable) {
+                emit(SearchStatus.NoNetwork(query = query))
+            } else {
+                emit(SearchStatus.Error(query = query))
             }
+            return@flow
+        } else {
+            emit(SearchStatus.Loading)
         }
-        emit(SearchStatus.Loading)
         if (viewState.isPackageSearch) {
             try {
                 val detailsUrl = App.createDetailsUrl(query)

@@ -3,10 +3,13 @@ package com.anod.appwatcher.installed
 import android.accounts.Account
 import android.content.pm.PackageManager
 import android.graphics.Rect
+import android.widget.Toast
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenBlocking
-import com.anod.appwatcher.accounts.AuthTokenStartIntent
+import com.anod.appwatcher.accounts.CheckTokenError
+import com.anod.appwatcher.accounts.CheckTokenResult
 import com.anod.appwatcher.compose.CommonActivityAction
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.utils.BaseFlowViewModel
@@ -14,9 +17,9 @@ import com.anod.appwatcher.utils.PackageChangedReceiver
 import com.anod.appwatcher.utils.SelectionState
 import com.anod.appwatcher.utils.filterWithExtra
 import com.anod.appwatcher.utils.getInt
+import com.anod.appwatcher.utils.networkConnection
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.WatchListEvent
-import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.HingeDeviceLayout
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.getInstalledPackagesCodes
@@ -48,7 +51,9 @@ sealed interface InstalledListEvent {
     class SwitchImportMode(val selectionMode: Boolean) : InstalledListEvent
     class SetSelection(val all: Boolean) : InstalledListEvent
     class SelectApp(val app: App?) : InstalledListEvent
+    class AuthTokenError(val error: CheckTokenError) : InstalledListEvent
     object Import : InstalledListEvent
+    object NoAccount : InstalledListEvent
 }
 
 class InstalledListViewModel(state: SavedStateHandle) : BaseFlowViewModel<InstalledListState, InstalledListEvent, CommonActivityAction>(), KoinComponent {
@@ -74,7 +79,9 @@ class InstalledListViewModel(state: SavedStateHandle) : BaseFlowViewModel<Instal
                 }
             }
         }
-        checkAuthToken()
+        viewModelScope.launch {
+            checkAuthToken()
+        }
     }
 
     override fun handleEvent(event: InstalledListEvent) {
@@ -89,14 +96,43 @@ class InstalledListViewModel(state: SavedStateHandle) : BaseFlowViewModel<Instal
             is InstalledListEvent.SwitchImportMode -> {
                 switchImportMode(event.selectionMode)
             }
+
             is InstalledListEvent.SetSelection -> {
                 viewState = viewState.copy(selection = viewState.selection.selectAll(event.all))
             }
+
             is InstalledListEvent.SelectApp -> {
                 viewState = viewState.copy(selectedApp = event.app)
             }
 
             InstalledListEvent.Import -> import()
+            is InstalledListEvent.AuthTokenError -> {
+                if (event.error is CheckTokenError.RequiresInteraction) {
+                    emitAction(CommonActivityAction.StartActivity(event.error.intent))
+                } else {
+                    tokenErrorToast()
+                }
+            }
+
+            InstalledListEvent.NoAccount -> tokenErrorToast()
+        }
+    }
+
+    private fun tokenErrorToast() {
+        if (networkConnection.isNetworkAvailable) {
+            emitAction(
+                CommonActivityAction.ShowToast(
+                    resId = R.string.failed_gain_access,
+                    length = Toast.LENGTH_SHORT
+                )
+            )
+        } else {
+            emitAction(
+                CommonActivityAction.ShowToast(
+                    resId = R.string.check_connection,
+                    length = Toast.LENGTH_SHORT
+                )
+            )
         }
     }
 
@@ -132,27 +168,29 @@ class InstalledListViewModel(state: SavedStateHandle) : BaseFlowViewModel<Instal
                 }
             }
             WatchListEvent.Refresh -> {
-                checkAuthToken()
-                viewState = viewState.copy(refreshRequest = viewState.refreshRequest + 1)
+                viewModelScope.launch {
+                    if (checkAuthToken()) {
+                        viewState = viewState.copy(refreshRequest = viewState.refreshRequest + 1)
+                    }
+                }
             }
+
             else -> {}
         }
     }
 
-    private fun checkAuthToken() {
-        if (authToken.isFresh) {
-            return
-        }
-        val account = this.account ?: return
-        viewModelScope.launch {
-            try {
-                if (!authToken.refreshToken(account)) {
-                    AppLog.e("Error retrieving token")
+    private suspend fun checkAuthToken(): Boolean {
+        return if (account == null) {
+            handleEvent(InstalledListEvent.NoAccount)
+            false
+        } else {
+            when (val result = authToken.checkToken(account!!)) {
+                is CheckTokenResult.Error -> {
+                    handleEvent(InstalledListEvent.AuthTokenError(result.error))
+                    false
                 }
-            } catch (e: AuthTokenStartIntent) {
-                emitAction(CommonActivityAction.StartActivity(e.intent))
-            } catch (e: Exception) {
-                AppLog.e("onResume", e)
+
+                CheckTokenResult.Success -> true
             }
         }
     }
@@ -178,13 +216,17 @@ class InstalledListViewModel(state: SavedStateHandle) : BaseFlowViewModel<Instal
         viewModelScope.launch {
             val packages = withContext(Dispatchers.Default) {
                 packageManager.getInstalledPackagesCodes()
-                        .associateBy({ it.name }) { it.versionCode }
+                    .associateBy({ it.name }) { it.versionCode }
             }
 
             packages.forEach { (packageName, versionCode) ->
                 if (viewState.selection.contains(packageName)) {
                     importManager.addPackage(packageName, versionCode)
                 }
+            }
+
+            if (!checkAuthToken()) {
+                return@launch
             }
 
             importManager.start().collect { status ->
@@ -194,6 +236,7 @@ class InstalledListViewModel(state: SavedStateHandle) : BaseFlowViewModel<Instal
                         val newExtras = status.docIds.associateBy({ it }, { mapOf("status" to importStatusProgress) })
                         viewState = viewState.copy(importStatus = status, selection = selection.setExtras(newExtras))
                     }
+
                     is ImportStatus.Progress -> {
                         val statusExtras = status.docIds.associateBy({ it }) { packageName ->
                             val resultCode = status.result.get(packageName)
