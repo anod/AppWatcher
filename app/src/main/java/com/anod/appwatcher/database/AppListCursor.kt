@@ -29,7 +29,7 @@ class AppListCursor(cursor: Cursor?) : CursorIterator<App>(cursor) {
         var detailsUrl = 13
         var iconUrl = 14
         var appType = 15
-        var refreshTime = 16
+        var syncTime = 16
         var recentFlag = 17
     }
 
@@ -50,7 +50,7 @@ class AppListCursor(cursor: Cursor?) : CursorIterator<App>(cursor) {
             projection.detailsUrl = cursor.getColumnIndexOrThrow(AppListTable.Columns.detailsUrl)
             projection.uploadTime = cursor.getColumnIndexOrThrow(AppListTable.Columns.uploadTimestamp)
             projection.appType = cursor.getColumnIndexOrThrow(AppListTable.Columns.appType)
-            projection.refreshTime = cursor.getColumnIndexOrThrow(AppListTable.Columns.updateTimestamp)
+            projection.syncTime = cursor.getColumnIndexOrThrow(AppListTable.Columns.syncTimestamp)
             projection.priceText = cursor.getColumnIndexOrThrow(AppListTable.Columns.priceText)
             projection.priceCurrency = cursor.getColumnIndexOrThrow(AppListTable.Columns.priceCurrency)
             projection.priceMicros = cursor.getColumnIndexOrThrow(AppListTable.Columns.priceMicros)
@@ -79,7 +79,7 @@ class AppListCursor(cursor: Cursor?) : CursorIterator<App>(cursor) {
             detailsUrl = getString(projection.detailsUrl),
             uploadTime = getLong(projection.uploadTime),
             appType = getString(projection.appType),
-            updateTime = getLong(projection.refreshTime),
+            syncTime = getLong(projection.syncTime),
             recentFlag = getInt(projection.recentFlag) == 1
         )
 

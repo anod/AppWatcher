@@ -27,8 +27,7 @@ import java.util.Date
  */
 
 fun PackageManager.packageToApp(rowId: Int, packageName: String): App {
-    val packageInfo = this.getPackageInfoOrNull(packageName)
-            ?: return App.fromLocalPackage(rowId, packageName, 0, 0, "", "", null)
+    val packageInfo = this.getPackageInfoOrNull(packageName) ?: return App.fromLocalPackage(rowId, packageName, 0, 0, "", "", null)
     val launchComponent = this.getLaunchComponent(packageName)
     val appTitle = this.getAppTitle(packageInfo)
     return App.fromLocalPackage(rowId, packageName, packageInfo.lastUpdateTime, packageInfo.versionCode, packageInfo.versionName ?: "", appTitle, launchComponent)
@@ -36,54 +35,37 @@ fun PackageManager.packageToApp(rowId: Int, packageName: String): App {
 
 @Entity(tableName = AppListTable.table)
 data class App(
-        @PrimaryKey
-        @ColumnInfo(name = BaseColumns._ID)
-        val rowId: Int,
+    @PrimaryKey @ColumnInfo(name = BaseColumns._ID) val rowId: Int,
 
-        @ColumnInfo(name = AppListTable.Columns.appId)
-        val appId: String,
+    @ColumnInfo(name = AppListTable.Columns.appId) val appId: String,
 
-        @ColumnInfo(name = AppListTable.Columns.packageName)
-        val packageName: String,
+    @ColumnInfo(name = AppListTable.Columns.packageName) val packageName: String,
 
-        @ColumnInfo(name = AppListTable.Columns.versionNumber)
-        val versionNumber: Int,
+    @ColumnInfo(name = AppListTable.Columns.versionNumber) val versionNumber: Int,
 
-        @ColumnInfo(name = AppListTable.Columns.versionName)
-        val versionName: String,
+    @ColumnInfo(name = AppListTable.Columns.versionName) val versionName: String,
 
-        @ColumnInfo(name = AppListTable.Columns.title)
-        val title: String,
+    @ColumnInfo(name = AppListTable.Columns.title) val title: String,
 
-        @ColumnInfo(name = AppListTable.Columns.creator)
-        val creator: String,
+    @ColumnInfo(name = AppListTable.Columns.creator) val creator: String,
 
-        @ColumnInfo(name = AppListTable.Columns.iconUrl)
-        val iconUrl: String,
+    @ColumnInfo(name = AppListTable.Columns.iconUrl) val iconUrl: String,
 
-        @ColumnInfo(name = AppListTable.Columns.status)
-        val status: Int,
+    @ColumnInfo(name = AppListTable.Columns.status) val status: Int,
 
-        @ColumnInfo(name = AppListTable.Columns.uploadDate)
-        val uploadDate: String,
+    @ColumnInfo(name = AppListTable.Columns.uploadDate) val uploadDate: String,
 
-        @Embedded
-        val price: Price,
+    @Embedded val price: Price,
 
-        @ColumnInfo(name = AppListTable.Columns.detailsUrl)
-        val detailsUrl: String?,
+    @ColumnInfo(name = AppListTable.Columns.detailsUrl) val detailsUrl: String?,
 
-        @ColumnInfo(name = AppListTable.Columns.uploadTimestamp)
-        val uploadTime: Long,
+    @ColumnInfo(name = AppListTable.Columns.uploadTimestamp) val uploadTime: Long,
 
-        @ColumnInfo(name = AppListTable.Columns.appType)
-        val appType: String,
+    @ColumnInfo(name = AppListTable.Columns.appType) val appType: String,
 
-        @ColumnInfo(name = AppListTable.Columns.updateTimestamp)
-        val updateTime: Long,
+    @ColumnInfo(name = AppListTable.Columns.syncTimestamp) val syncTime: Long,
 
-        @Ignore
-        val recentFlag: Boolean
+    @Ignore val recentFlag: Boolean
 ) {
     constructor(
         rowId: Int,
@@ -100,7 +82,7 @@ data class App(
         detailsUrl: String?,
         uploadTime: Long,
         appType: String,
-        updateTime: Long,
+        syncTime: Long,
     ) : this(
         rowId = rowId,
         appId = appId,
@@ -116,20 +98,12 @@ data class App(
         detailsUrl = detailsUrl,
         uploadTime = uploadTime,
         appType = appType,
-        updateTime = updateTime,
+        syncTime = syncTime,
         recentFlag = false
     )
 
     private constructor(
-        rowId: Int,
-        packageName: String,
-        versionCode: Int,
-        versionName: String,
-        title: String,
-        iconUrl: String,
-        status: Int,
-        uploadDate: String,
-        uploadTime: Long
+        rowId: Int, packageName: String, versionCode: Int, versionName: String, title: String, iconUrl: String, status: Int, uploadDate: String, uploadTime: Long, syncTime: Long
     ) : this(
         rowId = rowId,
         appId = packageName,
@@ -145,18 +119,17 @@ data class App(
         detailsUrl = createDetailsUrl(packageName),
         uploadTime = uploadTime,
         appType = "",
-        updateTime = 0,
+        syncTime = syncTime,
         recentFlag = false
     )
 
-    constructor(doc: Document, uploadDateParserCache: UploadDateParserCache) : this(
-        rowId = -1,
-        status = STATUS_NORMAL,
-        doc = doc,
-        uploadDateParserCache = uploadDateParserCache
+    constructor(doc: Document, uploadDateParserCache: UploadDateParserCache) : this(doc, doc.extractUploadDate(uploadDateParserCache))
+
+    private constructor(doc: Document, parsedUploadTime: Long) : this(
+        rowId = -1, status = STATUS_NORMAL, doc = doc, uploadTime = parsedUploadTime, syncTime = if (parsedUploadTime > 0) parsedUploadTime else System.currentTimeMillis()
     )
 
-    constructor(rowId: Int, status: Int, doc: Document, uploadDateParserCache: UploadDateParserCache) : this(
+    constructor(rowId: Int, status: Int, doc: Document, uploadTime: Long, syncTime: Long) : this(
         rowId = rowId,
         appId = doc.docId,
         status = status,
@@ -170,14 +143,12 @@ data class App(
         appType = doc.appDetails.appType ?: "",
         price = doc.offer.let { offer ->
             Price(
-                text = offer.formattedAmount ?: "",
-                cur = offer.currencyCode ?: "",
-                micros = offer.micros.toInt()
+                text = offer.formattedAmount ?: "", cur = offer.currencyCode ?: "", micros = offer.micros.toInt()
             )
         },
         iconUrl = doc.iconUrl ?: "",
-        uploadTime = doc.extractUploadDate(uploadDateParserCache),
-        updateTime = System.currentTimeMillis(),
+        uploadTime = uploadTime,
+        syncTime = syncTime,
         recentFlag = true
     )
 
@@ -187,9 +158,7 @@ data class App(
         const val STATUS_DELETED = 2
 
         fun fromInstalledPackage(rowId: Int, installed: InstalledPackageApp): App = fromLocalPackage(
-                rowId,
-                installed.pkg.name, installed.pkg.updateTime, installed.pkg.versionCode, installed.pkg.versionName,
-                installed.title, installed.launchComponent
+            rowId, installed.pkg.name, installed.pkg.updateTime, installed.pkg.versionCode, installed.pkg.versionName, installed.title, installed.launchComponent
         )
 
         fun fromLocalPackage(rowId: Int, packageName: String, uploadTime: Long, versionCode: Int, versionName: String, appTitle: String, launchComponent: ComponentName?): App {
@@ -202,10 +171,17 @@ data class App(
             val dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM)
             val lastUpdate = dateFormat.format(Date(uploadTime))
 
-            return App(rowId,
-                    packageName, versionCode, versionName,
-                    appTitle, iconUrl, STATUS_DELETED,
-                    lastUpdate, uploadTime
+            return App(
+                rowId = rowId,
+                packageName = packageName,
+                versionCode = versionCode,
+                versionName = versionName,
+                title = appTitle,
+                iconUrl = iconUrl,
+                status = STATUS_DELETED,
+                uploadDate = lastUpdate,
+                uploadTime = uploadTime,
+                syncTime = uploadTime
             )
         }
 

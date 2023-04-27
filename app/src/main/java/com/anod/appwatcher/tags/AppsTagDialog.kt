@@ -177,7 +177,7 @@ private fun AppsTagScreenPreview() {
                         iconUrl = "",
                         price = Price("", "", 0),
                         status = 0,
-                        updateTime = 0
+                        syncTime = 0
                     )
                 )
             ),

@@ -13,7 +13,6 @@ import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
 import com.anod.appwatcher.database.entities.*
 import com.anod.appwatcher.preferences.Preferences
-import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.util.chunked
 import info.anodsplace.framework.util.dayStartAgoMillis
 import kotlinx.coroutines.Dispatchers
@@ -70,7 +69,7 @@ interface AppListTable {
 
     @Query(
         "SELECT $table.*, " +
-                "CASE WHEN ${Columns.updateTimestamp} > :recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
+                "CASE WHEN ${Columns.syncTimestamp} > :recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
                 "FROM $table WHERE " +
                 "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${App.STATUS_DELETED} ELSE ${Columns.status} >= ${App.STATUS_NORMAL} END "
     )
@@ -78,7 +77,7 @@ interface AppListTable {
 
     @Query(
         "SELECT $table.*, ${ChangelogTable.TableColumns.details}, ${ChangelogTable.TableColumns.noNewDetails}, " +
-                "CASE WHEN ${Columns.updateTimestamp} > :recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
+                "CASE WHEN ${Columns.syncTimestamp} > :recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
                 "FROM $table " +
                 "LEFT JOIN ${ChangelogTable.table} ON " +
                 "${TableColumns.appId} == ${ChangelogTable.TableColumns.appId} " +
@@ -128,7 +127,7 @@ interface AppListTable {
                 "${Columns.detailsUrl}," +
                 "${Columns.uploadTimestamp}," +
                 "${Columns.appType}," +
-                "${Columns.updateTimestamp}) VALUES (" +
+                "${Columns.syncTimestamp}) VALUES (" +
                 ":appId, :packageName, :versionNumber, :versionName, :title, " +
                 ":creator, :iconUrl, :status, :uploadDate, " +
                 ":priceText, :priceCurrency, :priceMicros, " +
@@ -184,8 +183,7 @@ interface AppListTable {
             titleFilter: String,
             table: AppListTable
         ): Flow<List<AppListItem>> {
-            val query =
-                createAppsListQuery(sortId, orderByRecentlyUpdated, tagId, titleFilter, null)
+            val query = createAppsListQuery(sortId, orderByRecentlyUpdated, tagId, titleFilter, null)
             return table.observe(SimpleSQLiteQuery(query.first, query.second))
         }
 
@@ -197,8 +195,7 @@ interface AppListTable {
             offset: SqlOffset?,
             table: AppListTable
         ): List<AppListItem> {
-            val query =
-                createAppsListQuery(sortId, orderByRecentlyUpdated, tagId, titleFilter, offset)
+            val query = createAppsListQuery(sortId, orderByRecentlyUpdated, tagId, titleFilter, offset)
             return table.load(SimpleSQLiteQuery(query.first, query.second))
         }
 
@@ -213,11 +210,9 @@ interface AppListTable {
             val rangeSql = if (offset == null) "" else " LIMIT ? OFFSET ? "
             val selection = createSelection(tagId, titleFilter, offset)
 
-            AppLog.i("Recent time: $recentTime")
-
             val sql =
                 "SELECT $table.*, ${ChangelogTable.TableColumns.details}, ${ChangelogTable.TableColumns.noNewDetails}, " +
-                        "CASE WHEN ${Columns.updateTimestamp} > $recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
+                        "CASE WHEN ${Columns.syncTimestamp} > $recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
                         "FROM $tables " +
                         "LEFT JOIN ${ChangelogTable.table} ON " +
                         "${TableColumns.appId} == ${ChangelogTable.TableColumns.appId} " +
@@ -332,7 +327,7 @@ interface AppListTable {
             const val uploadDate = "upload_date"
             const val detailsUrl = "details_url"
             const val appType = "app_type"
-            const val updateTimestamp = "sync_version"
+            const val syncTimestamp = "sync_version"
             const val recentFlag = "recent_flag"
         }
     }
@@ -352,34 +347,6 @@ interface AppListTable {
 
         val recentTime: Long
             get() = dayStartAgoMillis(days = Preferences.recentDays)
-
-        val projection: Array<String>
-            get() = projection(recentTime)
-
-        private fun projection(recentTime: Long): Array<String> {
-            return arrayOf(
-                TableColumns._ID,
-                TableColumns.appId,
-                Columns.packageName,
-                Columns.versionNumber,
-                Columns.versionName,
-                Columns.title,
-                Columns.creator,
-                Columns.status,
-                Columns.uploadTimestamp,
-                Columns.priceText,
-                Columns.priceCurrency,
-                Columns.priceMicros,
-                Columns.uploadDate,
-                Columns.detailsUrl,
-                Columns.iconUrl,
-                Columns.appType,
-                Columns.updateTimestamp,
-                "case " +
-                        "when ${Columns.updateTimestamp} > $recentTime then 1 " +
-                        "else 0 end ${Columns.recentFlag}"
-            )
-        }
     }
 }
 
@@ -411,5 +378,5 @@ val App.contentValues: ContentValues
         put(AppListTable.Columns.uploadTimestamp, uploadTime)
 
         put(AppListTable.Columns.appType, appType)
-        put(AppListTable.Columns.updateTimestamp, updateTime)
+        put(AppListTable.Columns.syncTimestamp, syncTime)
     }

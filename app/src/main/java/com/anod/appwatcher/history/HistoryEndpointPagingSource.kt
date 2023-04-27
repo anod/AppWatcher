@@ -41,7 +41,7 @@ class HistoryEndpointPagingSource(
             detailsUrl = d.detailsUrl,
             uploadTime = d.purchaseTimestampMillis ?: 0L,
             appType = "",
-            updateTime = System.currentTimeMillis(),
+            syncTime = System.currentTimeMillis(),
         )
     }
 ) {

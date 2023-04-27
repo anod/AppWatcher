@@ -52,7 +52,7 @@ class AppListItemCursor(cursor: Cursor?) : CursorIterator<AppListItem>(cursor) {
             projection.detailsUrl = cursor.getColumnIndexOrThrow(AppListTable.Columns.detailsUrl)
             projection.uploadTime = cursor.getColumnIndexOrThrow(AppListTable.Columns.uploadTimestamp)
             projection.appType = cursor.getColumnIndexOrThrow(AppListTable.Columns.appType)
-            projection.refreshTime = cursor.getColumnIndexOrThrow(AppListTable.Columns.updateTimestamp)
+            projection.refreshTime = cursor.getColumnIndexOrThrow(AppListTable.Columns.syncTimestamp)
             projection.priceText = cursor.getColumnIndexOrThrow(AppListTable.Columns.priceText)
             projection.priceCurrency = cursor.getColumnIndexOrThrow(AppListTable.Columns.priceCurrency)
             projection.priceMicros = cursor.getColumnIndexOrThrow(AppListTable.Columns.priceMicros)
@@ -65,25 +65,25 @@ class AppListItemCursor(cursor: Cursor?) : CursorIterator<AppListItem>(cursor) {
     override val current: AppListItem
         get() = AppListItem(
                 app = App(
-                        rowId = getInt(projection.rowId),
-                        appId = getString(projection.appId),
-                        packageName = getString(projection.packageName),
-                        versionNumber = getInt(projection.versionNumber),
-                        versionName = getString(projection.versionName),
-                        title = getString(projection.title),
-                        creator = getString(projection.creator),
-                        iconUrl = getString(projection.iconUrl),
-                        status = getInt(projection.status),
-                        uploadDate = getString(projection.uploadDate),
-                        price = Price(
-                                getString(projection.priceText),
-                                getString(projection.priceCurrency),
-                                getInt(projection.priceMicros)
-                        ),
-                        detailsUrl = getString(projection.detailsUrl),
-                        uploadTime = getLong(projection.uploadTime),
-                        appType = getString(projection.appType),
-                        updateTime = getLong(projection.refreshTime)
+                    rowId = getInt(projection.rowId),
+                    appId = getString(projection.appId),
+                    packageName = getString(projection.packageName),
+                    versionNumber = getInt(projection.versionNumber),
+                    versionName = getString(projection.versionName),
+                    title = getString(projection.title),
+                    creator = getString(projection.creator),
+                    iconUrl = getString(projection.iconUrl),
+                    status = getInt(projection.status),
+                    uploadDate = getString(projection.uploadDate),
+                    price = Price(
+                        getString(projection.priceText),
+                        getString(projection.priceCurrency),
+                        getInt(projection.priceMicros)
+                    ),
+                    detailsUrl = getString(projection.detailsUrl),
+                    uploadTime = getLong(projection.uploadTime),
+                    appType = getString(projection.appType),
+                    syncTime = getLong(projection.refreshTime)
                 ),
                 changeDetails = getString(projection.changeDetails, ""),
                 noNewDetails = getInt(projection.newNewDetails) == 1,

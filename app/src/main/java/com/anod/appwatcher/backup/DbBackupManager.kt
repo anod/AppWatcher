@@ -99,10 +99,10 @@ class DbBackupManager(private val context: ApplicationContext, private val db: A
 
             result.apps.forEach { app ->
                 db.apps().insert(
-                        app.appId, app.packageName, app.versionNumber, app.versionName, app.title,
-                        app.creator, app.iconUrl, app.status, app.uploadDate,
-                        app.price.text, app.price.cur, app.price.micros,
-                        app.detailsUrl, app.uploadTime, app.appType, app.updateTime
+                    app.appId, app.packageName, app.versionNumber, app.versionName, app.title,
+                    app.creator, app.iconUrl, app.status, app.uploadDate,
+                    app.price.text, app.price.cur, app.price.micros,
+                    app.detailsUrl, app.uploadTime, app.appType, app.syncTime
                 )
             }
 

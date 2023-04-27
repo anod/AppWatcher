@@ -666,7 +666,7 @@ private fun WatchListPreview() {
                     iconUrl = "",
                     price = Price("", "", 0),
                     status = 0,
-                    updateTime = 0
+                    syncTime = 0
                 ),
                 changeDetails = "Nunc aliquam egestas diam, id bibendum massa. Duis vitae lorem nunc. Integer eu elit urna. Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
                 noNewDetails = true,
@@ -691,7 +691,7 @@ private fun WatchListPreview() {
                     iconUrl = "",
                     price = Price("", "", 0),
                     status = 0,
-                    updateTime = 0
+                    syncTime = 0
                 ),
                 changeDetails = "Nunc aliquam egestas diam, id bibendum massa. Duis vitae lorem nunc. Integer eu elit urna. Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
                 noNewDetails = true,
@@ -716,7 +716,7 @@ private fun WatchListPreview() {
                     iconUrl = "",
                     price = Price("", "", 0),
                     status = 0,
-                    updateTime = 0
+                    syncTime = 0
                 ),
                 changeDetails = "Nunc aliquam egestas diam, id bibendum massa. Duis vitae lorem nunc. Integer eu elit urna. Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
                 noNewDetails = false,
@@ -744,7 +744,7 @@ private fun WatchListPreview() {
                     iconUrl = "",
                     price = Price("", "", 0),
                     status = 0,
-                    updateTime = 0
+                    syncTime = 0
                 ),
                 changeDetails = "Nunc aliquam egestas diam, id bibendum massa. Duis vitae lorem nunc. Integer eu elit urna. Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
                 noNewDetails = false,
@@ -803,7 +803,7 @@ private fun WatchListPreviewRecent() {
                         iconUrl = "",
                         price = Price("", "", 0),
                         status = 0,
-                        updateTime = 0
+                        syncTime = 0
                     ),
                     App(
                         rowId = 22,
@@ -820,7 +820,7 @@ private fun WatchListPreviewRecent() {
                         iconUrl = "",
                         price = Price("", "", 0),
                         status = 0,
-                        updateTime = 0
+                        syncTime = 0
                     ),
                     App(
                         rowId = 22,
@@ -837,7 +837,7 @@ private fun WatchListPreviewRecent() {
                         iconUrl = "",
                         price = Price("", "", 0),
                         status = 0,
-                        updateTime = 0
+                        syncTime = 0
                     ),
                     App(
                         rowId = -1,
@@ -854,7 +854,7 @@ private fun WatchListPreviewRecent() {
                         iconUrl = "",
                         price = Price("", "", 0),
                         status = 0,
-                        updateTime = 0
+                        syncTime = 0
                     ),
                 ),
                 onEvent = { },

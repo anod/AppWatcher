@@ -962,7 +962,7 @@ private fun DetailsScreenPreview() {
             iconUrl = "",
             price = Price("", "", 0),
             status = 0,
-            updateTime = 0
+            syncTime = 0
         ),
         changelogState = ChangelogLoadState.Complete,
         changelogs = listOf(
@@ -1050,7 +1050,7 @@ private fun VersionInfoPreview() {
                         iconUrl = "",
                         price = Price("", "", 0),
                         status = 0,
-                        updateTime = 0
+                        syncTime = 0
                     ),
                     changelogState = ChangelogLoadState.Complete,
                     changelogs = listOf(),

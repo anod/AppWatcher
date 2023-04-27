@@ -39,7 +39,7 @@ class AppJsonObject(val app: App?, val tags: List<String>) {
             writer.name("iconUrl").value(app.iconUrl)
             writer.name("uploadTime").value(app.uploadTime)
             writer.name("appType").value(app.appType)
-            writer.name("refreshTimestamp").value(app.updateTime)
+            writer.name("refreshTimestamp").value(app.syncTime)
 
             val tagsWriter = writer.name("tags")
             tagsWriter.beginArray()
@@ -135,7 +135,7 @@ class AppJsonObject(val app: App?, val tags: List<String>) {
                     detailsUrl = detailsUrl,
                     uploadTime = uploadTime,
                     appType = appType,
-                    updateTime = refreshTime,
+                    syncTime = refreshTime,
                     recentFlag = uploadTime > recentTime
                 )
                 onUpgrade(info)

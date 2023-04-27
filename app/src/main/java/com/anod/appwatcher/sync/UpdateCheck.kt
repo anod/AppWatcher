@@ -274,13 +274,20 @@ class UpdateCheck(
         }
     }
 
-    private fun updateApp(marketApp: Document, localItem: AppListItem, lastUpdatesViewed: Boolean): Pair<ContentValues, UpdatedApp?> {
-        val appDetails = marketApp.appDetails
+    private fun updateApp(marketDoc: Document, localItem: AppListItem, lastUpdatesViewed: Boolean): Pair<ContentValues, UpdatedApp?> {
+        val appDetails = marketDoc.appDetails
         val localApp = localItem.app
 
         if (appDetails.versionCode > localApp.versionNumber) {
             AppLog.d("New version found [" + appDetails.versionCode + "]")
-            val newApp = App(localApp.rowId, App.STATUS_UPDATED, marketApp, uploadDateParserCache)
+            val uploadTime = marketDoc.extractUploadDate(uploadDateParserCache)
+            val newApp = App(
+                rowId = localApp.rowId,
+                status = App.STATUS_UPDATED,
+                doc = marketDoc,
+                uploadTime = uploadTime,
+                syncTime = if (uploadTime > 0) uploadTime else System.currentTimeMillis(),
+            )
             val installedInfo = installedAppsProvider.packageInfo(appDetails.packageName)
             val recentChanges = appDetails.recentChangesHtml ?: ""
             return Pair(newApp.contentValues, UpdatedApp(newApp, recentChanges, installedInfo.versionCode, true))
@@ -298,8 +305,8 @@ class UpdateCheck(
             val recentChanges = appDetails.recentChangesHtml ?: ""
             updatedApp = UpdatedApp(localApp, recentChanges, installedInfo.versionCode, false)
         }
-        //Refresh app info with latest fetcheda
-        updateLocalApp(marketApp, localApp, values)
+        //Refresh app info with latest fetched
+        updateLocalApp(marketDoc, localApp, values)
         return Pair(values, updatedApp)
     }
 
