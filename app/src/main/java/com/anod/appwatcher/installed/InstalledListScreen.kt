@@ -2,6 +2,8 @@ package com.anod.appwatcher.installed
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.CircularProgressIndicator
@@ -53,11 +55,12 @@ fun InstalledListScreen(
             if (screenState.selectionMode) {
                 val enabled = screenState.importStatus is ImportStatus.NotStarted || screenState.importStatus is ImportStatus.Finished
                 ExtendedFloatingActionButton(
-                        text = { if (enabled) { Text(text = stringResource(id = R.string.import_action)) } },
-                        icon = { if (!enabled) {
-                            CircularProgressIndicator()
-                        } },
-                        onClick = { if (enabled) { onEvent(InstalledListEvent.Import) } }
+                    modifier = Modifier.padding(WindowInsets.navigationBars.asPaddingValues()),
+                    text = { if (enabled) { Text(text = stringResource(id = R.string.import_action)) } },
+                    icon = { if (!enabled) {
+                        CircularProgressIndicator()
+                    } },
+                    onClick = { if (enabled) { onEvent(InstalledListEvent.Import) } }
                 )
             }
         },

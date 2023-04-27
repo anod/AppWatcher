@@ -93,7 +93,7 @@ fun WatchListScreen(
             }
 
             LaunchedEffect(refreshKey) {
-                AppLog.d("Refresh $refreshKey")
+                AppLog.d("Refresh RefreshKey:$refreshKey")
                 items.refresh()
             }
 
@@ -113,7 +113,7 @@ fun WatchListScreen(
                 enablePullToRefresh = screenState.enablePullToRefresh,
                 onEvent = { event -> onEvent(event) },
                 recentlyInstalledApps = screenState.recentlyInstalledApps,
-                listContext = "$listContext-filterId-$filterId"
+                listContext = "$listContext-rr:${screenState.refreshRequest}-f:$filterId-rk:$refreshKey"
             )
         }
     }
@@ -135,5 +135,7 @@ private data class RefreshKey(
     val titleFilter: String,
     val sortId: Int,
     val tagAppsChange: Int,
-    val dbAppsChange: Int,
-)
+    val dbAppsChange: Int
+) {
+    override fun toString() = "$titleFilter-$sortId-$tagAppsChange-$dbAppsChange"
+}

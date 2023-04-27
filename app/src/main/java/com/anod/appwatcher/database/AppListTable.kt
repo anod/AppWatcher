@@ -13,6 +13,7 @@ import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
 import com.anod.appwatcher.database.entities.*
 import com.anod.appwatcher.preferences.Preferences
+import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.util.chunked
 import info.anodsplace.framework.util.dayStartAgoMillis
 import kotlinx.coroutines.Dispatchers
@@ -75,25 +76,28 @@ interface AppListTable {
     )
     fun load(includeDeleted: Boolean, recentTime: Long): Cursor
 
-    @Query("SELECT $table.*, ${ChangelogTable.TableColumns.details}, ${ChangelogTable.TableColumns.noNewDetails}, " +
-            "CASE WHEN ${Columns.updateTimestamp} > :recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
-            "FROM $table " +
-            "LEFT JOIN ${ChangelogTable.table} ON " +
-            "${TableColumns.appId} == ${ChangelogTable.TableColumns.appId} " +
-            "AND ${TableColumns.versionNumber} == ${ChangelogTable.TableColumns.versionCode} " +
-            "WHERE " +
-            "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${App.STATUS_DELETED} ELSE ${Columns.status} >= ${App.STATUS_NORMAL} END " +
-            "ORDER BY " +
-            "CASE WHEN :sortId = 0 THEN ${Columns.title} COLLATE NOCASE END ASC, " +
-            "CASE WHEN :sortId = 1 THEN ${Columns.title} COLLATE NOCASE END DESC, " +
-            "CASE WHEN :sortId = 2 THEN ${Columns.uploadTimestamp} END ASC, " +
-            "CASE WHEN :sortId = 3 THEN ${Columns.uploadTimestamp} END DESC "
+    @Query(
+        "SELECT $table.*, ${ChangelogTable.TableColumns.details}, ${ChangelogTable.TableColumns.noNewDetails}, " +
+                "CASE WHEN ${Columns.updateTimestamp} > :recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
+                "FROM $table " +
+                "LEFT JOIN ${ChangelogTable.table} ON " +
+                "${TableColumns.appId} == ${ChangelogTable.TableColumns.appId} " +
+                "AND ${TableColumns.versionNumber} == ${ChangelogTable.TableColumns.versionCode} " +
+                "WHERE " +
+                "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${App.STATUS_DELETED} ELSE ${Columns.status} >= ${App.STATUS_NORMAL} END " +
+                "ORDER BY " +
+                "CASE WHEN :sortId = 0 THEN ${Columns.title} COLLATE NOCASE END ASC, " +
+                "CASE WHEN :sortId = 1 THEN ${Columns.title} COLLATE NOCASE END DESC, " +
+                "CASE WHEN :sortId = 2 THEN ${Columns.uploadTimestamp} END ASC, " +
+                "CASE WHEN :sortId = 3 THEN ${Columns.uploadTimestamp} END DESC "
     )
     fun loadAppList(includeDeleted: Boolean, sortId: Int, recentTime: Long): Cursor
 
-    @Query("SELECT COUNT(${BaseColumns._ID}) " +
-            "FROM $table WHERE " +
-            "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${App.STATUS_DELETED} ELSE ${Columns.status} >= ${App.STATUS_NORMAL} END ")
+    @Query(
+        "SELECT COUNT(${BaseColumns._ID}) " +
+                "FROM $table WHERE " +
+                "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${App.STATUS_DELETED} ELSE ${Columns.status} >= ${App.STATUS_NORMAL} END "
+    )
     suspend fun count(includeDeleted: Boolean): Int
 
     @Query("DELETE FROM $table WHERE ${Columns.status} == ${App.STATUS_DELETED}")
@@ -105,100 +109,148 @@ interface AppListTable {
     @Query("UPDATE $table SET ${Columns.status} = :status WHERE ${BaseColumns._ID} = :rowId")
     suspend fun updateStatus(rowId: Int, status: Int): Int
 
-    @Query("INSERT INTO $table (" +
-            "${Columns.appId}," +
-            "${Columns.packageName}," +
-            "${Columns.versionNumber}," +
-            "${Columns.versionName}," +
-            "${Columns.title}," +
-            "${Columns.creator}," +
-            "${Columns.iconUrl}," +
-            "${Columns.status}," +
-            "${Columns.uploadDate}," +
+    @Query(
+        "INSERT INTO $table (" +
+                "${Columns.appId}," +
+                "${Columns.packageName}," +
+                "${Columns.versionNumber}," +
+                "${Columns.versionName}," +
+                "${Columns.title}," +
+                "${Columns.creator}," +
+                "${Columns.iconUrl}," +
+                "${Columns.status}," +
+                "${Columns.uploadDate}," +
 
-            "${Columns.priceText}," +
-            "${Columns.priceCurrency}," +
-            "${Columns.priceMicros}," +
+                "${Columns.priceText}," +
+                "${Columns.priceCurrency}," +
+                "${Columns.priceMicros}," +
 
-            "${Columns.detailsUrl}," +
-            "${Columns.uploadTimestamp}," +
-            "${Columns.appType}," +
-            "${Columns.updateTimestamp}) VALUES (" +
-            ":appId, :packageName, :versionNumber, :versionName, :title, " +
-            ":creator, :iconUrl, :status, :uploadDate, " +
-            ":priceText, :priceCurrency, :priceMicros, " +
-            ":detailsUrl, :uploadTime, :appType, :updateTime" +
-            ")")
+                "${Columns.detailsUrl}," +
+                "${Columns.uploadTimestamp}," +
+                "${Columns.appType}," +
+                "${Columns.updateTimestamp}) VALUES (" +
+                ":appId, :packageName, :versionNumber, :versionName, :title, " +
+                ":creator, :iconUrl, :status, :uploadDate, " +
+                ":priceText, :priceCurrency, :priceMicros, " +
+                ":detailsUrl, :uploadTime, :appType, :updateTime" +
+                ")"
+    )
 
     suspend fun insert(
-            appId: String, packageName: String, versionNumber: Int, versionName: String, title: String,
-            creator: String, iconUrl: String, status: Int, uploadDate: String,
-            priceText: String, priceCurrency: String, priceMicros: Int?,
-            detailsUrl: String?, uploadTime: Long, appType: String, updateTime: Long
+        appId: String, packageName: String, versionNumber: Int, versionName: String, title: String,
+        creator: String, iconUrl: String, status: Int, uploadDate: String,
+        priceText: String, priceCurrency: String, priceMicros: Int?,
+        detailsUrl: String?, uploadTime: Long, appType: String, updateTime: Long
     ): Long
 
     object Queries {
 
-        suspend fun load(includeDeleted: Boolean, table: AppListTable): AppListCursor = withContext(Dispatchers.IO) {
-            val cursor = table.load(includeDeleted, recentTime)
-            return@withContext AppListCursor(cursor)
-        }
+        suspend fun load(includeDeleted: Boolean, table: AppListTable): AppListCursor =
+            withContext(Dispatchers.IO) {
+                val cursor = table.load(includeDeleted, recentTime)
+                return@withContext AppListCursor(cursor)
+            }
 
-        suspend fun loadAppList(includeDeleted: Boolean, sortId: Int, table: AppListTable): AppListItemCursor = withContext(Dispatchers.IO) {
+        suspend fun loadAppList(
+            includeDeleted: Boolean,
+            sortId: Int,
+            table: AppListTable
+        ): AppListItemCursor = withContext(Dispatchers.IO) {
             val cursor = table.loadAppList(includeDeleted, sortId, recentTime)
             return@withContext AppListItemCursor(cursor)
         }
 
-        fun loadAppList(sortId: Int, titleFilter: String, table: AppListTable): Flow<List<AppListItem>> {
+        fun loadAppList(
+            sortId: Int,
+            titleFilter: String,
+            table: AppListTable
+        ): Flow<List<AppListItem>> {
             return loadAppList(sortId, false, null, titleFilter, table)
         }
 
         fun changes(table: AppListTable): Flow<List<Int>> {
-            return table.observeRows(SimpleSQLiteQuery("SELECT ${BaseColumns._ID} FROM ${AppListTable.table} LIMIT 1", emptyArray()))
+            return table.observeRows(
+                SimpleSQLiteQuery(
+                    "SELECT ${BaseColumns._ID} FROM ${AppListTable.table} LIMIT 1",
+                    emptyArray()
+                )
+            )
         }
 
-        private fun loadAppList(sortId: Int, orderByRecentlyUpdated: Boolean, tagId: Int?, titleFilter: String, table: AppListTable): Flow<List<AppListItem>> {
-            val query = createAppsListQuery(sortId, orderByRecentlyUpdated, tagId, titleFilter, null)
+        private fun loadAppList(
+            sortId: Int,
+            orderByRecentlyUpdated: Boolean,
+            tagId: Int?,
+            titleFilter: String,
+            table: AppListTable
+        ): Flow<List<AppListItem>> {
+            val query =
+                createAppsListQuery(sortId, orderByRecentlyUpdated, tagId, titleFilter, null)
             return table.observe(SimpleSQLiteQuery(query.first, query.second))
         }
 
-        suspend fun loadAppList(sortId: Int, orderByRecentlyUpdated: Boolean, tagId: Int?, titleFilter: String, offset: SqlOffset?, table: AppListTable): List<AppListItem> {
-            val query = createAppsListQuery(sortId, orderByRecentlyUpdated, tagId, titleFilter, offset)
+        suspend fun loadAppList(
+            sortId: Int,
+            orderByRecentlyUpdated: Boolean,
+            tagId: Int?,
+            titleFilter: String,
+            offset: SqlOffset?,
+            table: AppListTable
+        ): List<AppListItem> {
+            val query =
+                createAppsListQuery(sortId, orderByRecentlyUpdated, tagId, titleFilter, offset)
             return table.load(SimpleSQLiteQuery(query.first, query.second))
         }
 
-        private fun createAppsListQuery(sortId: Int, orderByRecentlyUpdated: Boolean, tagId: Int?, titleFilter: String, offset: SqlOffset?): Pair<String, Array<String>> {
+        private fun createAppsListQuery(
+            sortId: Int,
+            orderByRecentlyUpdated: Boolean,
+            tagId: Int?,
+            titleFilter: String,
+            offset: SqlOffset?
+        ): Pair<String, Array<String>> {
             val tables = if (tagId == null) table else AppTagsTable.table + ", " + table
             val rangeSql = if (offset == null) "" else " LIMIT ? OFFSET ? "
             val selection = createSelection(tagId, titleFilter, offset)
 
-            val sql = "SELECT $table.*, ${ChangelogTable.TableColumns.details}, ${ChangelogTable.TableColumns.noNewDetails}, " +
-                    "CASE WHEN ${Columns.updateTimestamp} > $recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
-                    "FROM $tables " +
-                    "LEFT JOIN ${ChangelogTable.table} ON " +
-                    "${TableColumns.appId} == ${ChangelogTable.TableColumns.appId} " +
-                    "AND ${TableColumns.versionNumber} == ${ChangelogTable.TableColumns.versionCode} " +
-                    "WHERE ${selection.first} " +
-                    "ORDER BY ${createSortOrder(sortId, orderByRecentlyUpdated)} $rangeSql"
+            AppLog.i("Recent time: $recentTime")
+
+            val sql =
+                "SELECT $table.*, ${ChangelogTable.TableColumns.details}, ${ChangelogTable.TableColumns.noNewDetails}, " +
+                        "CASE WHEN ${Columns.updateTimestamp} > $recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
+                        "FROM $tables " +
+                        "LEFT JOIN ${ChangelogTable.table} ON " +
+                        "${TableColumns.appId} == ${ChangelogTable.TableColumns.appId} " +
+                        "AND ${TableColumns.versionNumber} == ${ChangelogTable.TableColumns.versionCode} " +
+                        "WHERE ${selection.first} " +
+                        "ORDER BY ${createSortOrder(sortId, orderByRecentlyUpdated)} $rangeSql"
             return Pair(sql, selection.second)
         }
 
         suspend fun insert(app: App, db: AppsDatabase): Long = withContext(Dispatchers.IO) {
             // Skip id to apply autoincrement
             return@withContext db.runInTransaction(Callable {
-                db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, app.contentValues)
+                db.openHelper.writableDatabase.insert(
+                    table,
+                    SQLiteDatabase.CONFLICT_REPLACE,
+                    app.contentValues
+                )
             })
         }
 
         suspend fun delete(appId: String, db: AppsDatabase): Int {
             return db.withTransaction {
-                return@withTransaction db.openHelper.writableDatabase.delete(table, "${Columns.appId} = ?", arrayOf(appId))
+                return@withTransaction db.openHelper.writableDatabase.delete(
+                    table,
+                    "${Columns.appId} = ?",
+                    arrayOf(appId)
+                )
             }
         }
 
         private fun createSortOrder(sortId: Int, orderByRecentlyUpdated: Boolean): String {
             val filter = mutableListOf(
-                    Columns.status + " DESC"
+                Columns.status + " DESC"
             )
             if (orderByRecentlyUpdated) {
                 filter.add(Columns.recentFlag + " DESC")
@@ -212,7 +264,11 @@ interface AppListTable {
             return filter.joinToString(", ")
         }
 
-        private fun createSelection(tagId: Int?, titleFilter: String, offset: SqlOffset?): Pair<String, Array<String>> {
+        private fun createSelection(
+            tagId: Int?,
+            titleFilter: String,
+            offset: SqlOffset?
+        ): Pair<String, Array<String>> {
             val selc = ArrayList<String>(3)
             val args = ArrayList<String>(5)
 
