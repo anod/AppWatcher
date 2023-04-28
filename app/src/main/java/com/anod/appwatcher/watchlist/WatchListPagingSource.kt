@@ -27,11 +27,11 @@ class WatchListPagingSource(
     private val itemFilter: AppListFilter = createFilter(config.filterId)
 
     data class Config(
-            val filterId: Int,
-            val tagId: Int?,
-            val showRecentlyUpdated: Boolean,
-            val showOnDevice: Boolean,
-            val showRecentlyInstalled: Boolean,
+        val filterId: Int,
+        val tagId: Int?,
+        val showRecentlyDiscovered: Boolean,
+        val showOnDevice: Boolean,
+        val showRecentlyInstalled: Boolean,
     )
 
     private fun createFilter(filterId: Int): AppListFilter {
@@ -57,7 +57,7 @@ class WatchListPagingSource(
         }
 
         val data = AppListTable.Queries.loadAppList(
-            sortId, config.showRecentlyUpdated, config.tagId, filterQuery, SqlOffset(offset, limit), database.apps()
+            sortId, config.showRecentlyDiscovered, config.tagId, filterQuery, SqlOffset(offset, limit), database.apps()
         )
         val filtered = data.filter { !itemFilter.filterRecord(it) }
 

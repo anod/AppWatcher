@@ -193,7 +193,7 @@ fun WatchListSectionItem(
 private fun SectionHeader(item: SectionHeader, onClick: (() -> Unit)? = null) {
     val text = when (item) {
         is SectionHeader.New -> stringResource(R.string.new_updates)
-        is SectionHeader.RecentlyUpdated -> stringResource(R.string.recently_updated)
+        is SectionHeader.RecentlyDiscovered -> stringResource(R.string.recently_discovered)
         is SectionHeader.Watching -> stringResource(R.string.watching)
         is SectionHeader.RecentlyInstalled -> stringResource(R.string.recently_installed)
         is SectionHeader.OnDevice -> stringResource(R.string.downloaded)
@@ -649,7 +649,7 @@ private fun WatchListPreview() {
     )
 
     val items = listOf(
-        SectionItem.Header(type = SectionHeader.RecentlyUpdated), SectionItem.App(
+        SectionItem.Header(type = SectionHeader.RecentlyDiscovered), SectionItem.App(
             AppListItem(
                 app = App(
                     rowId = -1,

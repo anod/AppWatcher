@@ -286,7 +286,7 @@ class UpdateCheck(
                 status = App.STATUS_UPDATED,
                 doc = marketDoc,
                 uploadTime = uploadTime,
-                syncTime = if (uploadTime > 0) uploadTime else System.currentTimeMillis(),
+                syncTime = System.currentTimeMillis(),
             )
             val installedInfo = installedAppsProvider.packageInfo(appDetails.packageName)
             val recentChanges = appDetails.recentChangesHtml ?: ""

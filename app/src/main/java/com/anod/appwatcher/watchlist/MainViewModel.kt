@@ -15,7 +15,6 @@ import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.sync.SyncScheduler
-import com.anod.appwatcher.upgrade.Upgrade15500
 import com.anod.appwatcher.upgrade.UpgradeCheck
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.networkConnection
@@ -210,12 +209,14 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
 
 
     private fun upgradeCheck() {
-        val upgrade = UpgradeCheck(prefs).result
-        if (!upgrade.isNewVersion) {
+        val result = UpgradeCheck(prefs).result
+        if (!result.isNewVersion) {
             return
         }
 
-        Upgrade15500().onUpgrade(upgrade)
+        UpgradeCheck.upgrades.forEach { upgrade ->
+            upgrade.onUpgrade(result)
+        }
     }
 
 }

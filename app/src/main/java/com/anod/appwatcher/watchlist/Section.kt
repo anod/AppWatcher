@@ -8,7 +8,7 @@ import info.anodsplace.ktx.hashCodeOf
 
 sealed interface SectionHeader {
     object New : SectionHeader
-    object RecentlyUpdated : SectionHeader
+    object RecentlyDiscovered : SectionHeader
     object Watching : SectionHeader
     object RecentlyInstalled : SectionHeader
     object OnDevice : SectionHeader

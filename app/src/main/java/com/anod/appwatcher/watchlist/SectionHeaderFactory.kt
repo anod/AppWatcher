@@ -16,7 +16,7 @@ interface SectionHeaderFactory {
 }
 
 class DefaultSectionHeaderFactory(
-        private var showRecentlyUpdated: Boolean
+    private var showRecentlyDiscovered: Boolean
 ) : SectionHeaderFactory {
 
     override fun insertSeparator(before: SectionItem?, after: SectionItem?): SectionItem.Header? {
@@ -35,8 +35,8 @@ class DefaultSectionHeaderFactory(
                     if (status == App.STATUS_UPDATED) {
                         return SectionItem.Header(SectionHeader.New)
                     }
-                    if (showRecentlyUpdated && appListItem.recentFlag) {
-                        return SectionItem.Header(SectionHeader.RecentlyUpdated)
+                    if (showRecentlyDiscovered && appListItem.recentFlag) {
+                        return SectionItem.Header(SectionHeader.RecentlyDiscovered)
                     }
                     return SectionItem.Header(SectionHeader.Watching)
                 }
@@ -56,8 +56,8 @@ class DefaultSectionHeaderFactory(
                     if (status == App.STATUS_UPDATED) {
                         return SectionItem.Header(SectionHeader.New)
                     }
-                    if (showRecentlyUpdated && appListItem.recentFlag) {
-                        return SectionItem.Header(SectionHeader.RecentlyUpdated)
+                    if (showRecentlyDiscovered && appListItem.recentFlag) {
+                        return SectionItem.Header(SectionHeader.RecentlyDiscovered)
                     }
                     return SectionItem.Header(SectionHeader.Watching)
                 }
@@ -77,12 +77,12 @@ class DefaultSectionHeaderFactory(
                             beforeItem.app.status == App.STATUS_UPDATED
                             && afterItem.app.status == App.STATUS_NORMAL
                     ) {
-                        if (showRecentlyUpdated && afterItem.recentFlag) {
-                            return SectionItem.Header(SectionHeader.RecentlyUpdated)
+                        if (showRecentlyDiscovered && afterItem.recentFlag) {
+                            return SectionItem.Header(SectionHeader.RecentlyDiscovered)
                         }
                         return SectionItem.Header(SectionHeader.Watching)
                     } else if (
-                            showRecentlyUpdated
+                        showRecentlyDiscovered
                             && beforeItem.app.status == App.STATUS_NORMAL
                             && afterItem.app.status == App.STATUS_NORMAL
                     ) {

@@ -126,7 +126,11 @@ data class App(
     constructor(doc: Document, uploadDateParserCache: UploadDateParserCache) : this(doc, doc.extractUploadDate(uploadDateParserCache))
 
     private constructor(doc: Document, parsedUploadTime: Long) : this(
-        rowId = -1, status = STATUS_NORMAL, doc = doc, uploadTime = parsedUploadTime, syncTime = if (parsedUploadTime > 0) parsedUploadTime else System.currentTimeMillis()
+        rowId = -1,
+        status = STATUS_NORMAL,
+        doc = doc,
+        uploadTime = parsedUploadTime,
+        syncTime = if (parsedUploadTime > 0) parsedUploadTime else System.currentTimeMillis()
     )
 
     constructor(rowId: Int, status: Int, doc: Document, uploadTime: Long, syncTime: Long) : this(

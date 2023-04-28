@@ -115,9 +115,13 @@ import info.anodsplace.compose.toAnnotatedString
 import info.anodsplace.framework.text.Html
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import java.text.DateFormat
+import java.util.Date
 
 private val iconSizeBig = 64.dp
 private val iconSizeSmall = 32.dp
+
+private val dateFormat: DateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
 
 @Composable
 fun DetailsPanel(
@@ -694,13 +698,35 @@ private fun DetailsHeader(
                         )
                     }
                     if (screenState.app.uploadDate.isNotEmpty()) {
-                        Text(
-                            text = screenState.app.uploadDate,
-                            color = contentColor,
-                            style = MaterialTheme.typography.labelMedium,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                        var showDiscoverDate by remember(key1 = screenState.app) { mutableStateOf(false) }
+                        if (showDiscoverDate) {
+                            Text(
+                                text = dateFormat.format(Date(screenState.app.syncTime)),
+                                color = contentColor,
+                                style = MaterialTheme.typography.labelMedium,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.clickable(
+                                    onClickLabel = stringResource(id = R.string.last_update),
+                                    role = Role.Switch,
+                                    onClick = { showDiscoverDate = false }
+                                )
+                            )
+                        } else {
+                            Text(
+                                text = screenState.app.uploadDate,
+                                color = contentColor,
+                                style = MaterialTheme.typography.labelMedium,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.clickable(
+                                    enabled = screenState.app.syncTime > 0,
+                                    onClickLabel = stringResource(id = R.string.discovered_date),
+                                    role = Role.Switch,
+                                    onClick = { showDiscoverDate = true }
+                                )
+                            )
+                        }
                     }
                 }
             }

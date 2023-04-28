@@ -101,9 +101,9 @@ fun SettingsScreen(screenState: SettingsViewState, onEvent: (SettingsViewEvent) 
                             "update_frequency" -> {
                                 if (!screenState.areNotificationsEnabled) {
                                     Column(modifier = Modifier
-                                            .padding(top = 16.dp)
-                                            .border(width = 1.dp, color = MaterialTheme.colorScheme.primary, shape = MaterialTheme.shapes.medium)
-                                            .background(MaterialTheme.colorScheme.primaryContainer),
+                                        .padding(top = 16.dp)
+                                        .border(width = 1.dp, color = MaterialTheme.colorScheme.primary, shape = MaterialTheme.shapes.medium)
+                                        .background(MaterialTheme.colorScheme.primaryContainer),
                                             horizontalAlignment = Alignment.CenterHorizontally
                                     ) {
                                         Text(
@@ -186,7 +186,7 @@ fun onSettingsItemClick(prefs: Preferences, item: PreferenceItem, onEvent: (Sett
             onEvent(SettingsViewEvent.SetRecreateFlag(item, prefs.showOnDevice) { prefs.showOnDevice = it })
         }
         "show-recently-updated" -> {
-            onEvent(SettingsViewEvent.SetRecreateFlag(item, prefs.showRecentlyUpdated) { prefs.showRecentlyUpdated = it })
+            onEvent(SettingsViewEvent.SetRecreateFlag(item, prefs.showRecentlyDiscovered) { prefs.showRecentlyDiscovered = it })
         }
         "default-filter" -> {
             prefs.defaultMainFilterId = (item as PreferenceItem.Pick).value.toInt()

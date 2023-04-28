@@ -31,4 +31,10 @@ class UpgradeCheck(private val preferences: Preferences) {
             }
             return Result(false, code)
         }
+
+    companion object {
+        val upgrades = listOf(
+            Upgrade15500()
+        )
+    }
 }

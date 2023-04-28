@@ -27,5 +27,5 @@ class AppsWatchListPagerFactory(
     }
 
     override fun createSectionHeaderFactory() =
-        DefaultSectionHeaderFactory(pagingSourceConfig.showRecentlyUpdated)
+        DefaultSectionHeaderFactory(pagingSourceConfig.showRecentlyDiscovered)
 }

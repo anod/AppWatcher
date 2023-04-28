@@ -53,7 +53,7 @@
     <string name="import_export">Importálás</string>
     <string name="export_path" translatable="false">/sdcard/data/com.anod.appwatcher/backup/</string>
     <string name="new_updates">Új frissítések</string>
-    <string name="recently_updated">Mostanában frissítve</string>
+    <string name="recently_discovered">Mostanában frissítve</string>
     <string name="watching">Figyelés</string>
     <string name="menu_filter">Keresés</string>
     <string name="choose_an_account">Válassz egy fiókot</string>
@@ -146,8 +146,8 @@
     <string name="pref_show_recent_descr">A mostanában telepítettek mutatása egy sávban a főlapon</string>
     <string name="pref_show_ondevice_title">Az eszközön lévők</string>
     <string name="pref_show_ondevice_descr">Az eszközön lévők mutatása a főlapon</string>
-    <string name="pref_show_recently_updated_title">A mostanában frissítettek</string>
-    <string name="pref_show_recently_updated_descr">A mostanában frissítettek mutatása egy sávban a főlapon</string>
+    <string name="pref_show_recently_discovered_title">A mostanában frissítettek</string>
+    <string name="pref_show_recently_discovered_descr">A mostanában frissítettek mutatása egy sávban a főlapon</string>
     <string name="log">Alkalmazás napló</string>
     <string name="user_log">Alkalmazás napló</string>
     <string name="refresh_gdrive_mesage">A Google Drive-fiók frissítése upgrade után</string>

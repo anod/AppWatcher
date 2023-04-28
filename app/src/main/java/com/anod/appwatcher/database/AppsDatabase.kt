@@ -57,7 +57,7 @@ abstract class AppsDatabase : RoomDatabase() {
     }
 
     companion object {
-        const val version = 18
+        const val version = 19
         val dbName = if (BuildConfig.DEBUG) "app_watcher.db" else "app_watcher"
 
         private val MIGRATION_17_18 = object : Migration(17, 18) {
@@ -169,51 +169,71 @@ abstract class AppsDatabase : RoomDatabase() {
                         "SELECT _id, app_id, package, ver_num, ver_name, title, creator," +
                         "iconUrl, status, upload_date, details_url, update_date, app_type," +
                         "sync_version, price_text, price_currency, price_micros " +
-                        "FROM app_list")
+                        "FROM app_list"
+                )
                 database.execSQL("DROP TABLE app_list")
                 database.execSQL("ALTER TABLE app_list_temp RENAME TO app_list")
 
                 database.execSQL("UPDATE changelog SET upload_date = '' WHERE upload_date IS NULL")
-                database.execSQL("CREATE TABLE IF NOT EXISTS `changelog_temp` (" +
-                        "`_id` INTEGER NOT NULL, " +
-                        "`app_id` TEXT NOT NULL, " +
-                        "`code` INTEGER NOT NULL, " +
-                        "`name` TEXT NOT NULL, " +
-                        "`details` TEXT NOT NULL, " +
-                        "`upload_date` TEXT NOT NULL, PRIMARY KEY(`_id`))")
-                database.execSQL("INSERT INTO changelog_temp (_id, app_id, code, name, details, upload_date)" +
-                        " SELECT _id, app_id, code, name, details, upload_date FROM changelog")
+                database.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `changelog_temp` (" +
+                            "`_id` INTEGER NOT NULL, " +
+                            "`app_id` TEXT NOT NULL, " +
+                            "`code` INTEGER NOT NULL, " +
+                            "`name` TEXT NOT NULL, " +
+                            "`details` TEXT NOT NULL, " +
+                            "`upload_date` TEXT NOT NULL, PRIMARY KEY(`_id`))"
+                )
+                database.execSQL(
+                    "INSERT INTO changelog_temp (_id, app_id, code, name, details, upload_date)" +
+                            " SELECT _id, app_id, code, name, details, upload_date FROM changelog"
+                )
                 database.execSQL("DROP TABLE changelog")
                 database.execSQL("ALTER TABLE changelog_temp RENAME TO changelog")
                 database.execSQL("CREATE UNIQUE INDEX `index_changelog_app_id_code` ON `changelog` (`app_id`, `code`)")
 
-                database.execSQL("CREATE TABLE IF NOT EXISTS `app_tags_temp` (" +
-                        "`_id` INTEGER NOT NULL, " +
-                        "`app_id` TEXT NOT NULL, " +
-                        "`tags_id` INTEGER NOT NULL, PRIMARY KEY(`_id`))")
+                database.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `app_tags_temp` (" +
+                            "`_id` INTEGER NOT NULL, " +
+                            "`app_id` TEXT NOT NULL, " +
+                            "`tags_id` INTEGER NOT NULL, PRIMARY KEY(`_id`))"
+                )
                 database.execSQL("INSERT INTO app_tags_temp (_id, app_id, tags_id) SELECT _id, app_id, tags_id FROM app_tags")
                 database.execSQL("DROP TABLE app_tags")
                 database.execSQL("ALTER TABLE app_tags_temp RENAME TO app_tags")
 
-                database.execSQL("CREATE TABLE IF NOT EXISTS `tags_temp` (" +
-                        "`_id` INTEGER NOT NULL, " +
-                        "`name` TEXT NOT NULL, " +
-                        "`color` INTEGER NOT NULL, PRIMARY KEY(`_id`))")
+                database.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `tags_temp` (" +
+                            "`_id` INTEGER NOT NULL, " +
+                            "`name` TEXT NOT NULL, " +
+                            "`color` INTEGER NOT NULL, PRIMARY KEY(`_id`))"
+                )
                 database.execSQL("INSERT INTO tags_temp (_id, name, color) SELECT _id, name, color FROM tags")
                 database.execSQL("DROP TABLE tags")
                 database.execSQL("ALTER TABLE tags_temp RENAME TO tags")
             }
         }
 
+        private val MIGRATION_18_19 = object : Migration(18, 19) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                try {
+                    database.execSQL("UPDATE apps_list SET sync_version = IFF(update_date > 0, update_date, sync_version)")
+                } catch (e: Exception) {
+                    AppLog.e(e)
+                }
+            }
+        }
+
         val migrations: Array<Migration> = arrayOf(
-                MIGRATION_9_11,
-                MIGRATION_11_12,
-                MIGRATION_12_13,
-                MIGRATION_13_14,
-                MIGRATION_14_15,
-                MIGRATION_15_16,
-                MIGRATION_16_17,
-                MIGRATION_17_18
+            MIGRATION_9_11,
+            MIGRATION_11_12,
+            MIGRATION_12_13,
+            MIGRATION_13_14,
+            MIGRATION_14_15,
+            MIGRATION_15_16,
+            MIGRATION_16_17,
+            MIGRATION_17_18,
+            MIGRATION_18_19
         )
     }
 }

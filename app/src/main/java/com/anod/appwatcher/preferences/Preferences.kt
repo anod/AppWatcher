@@ -121,7 +121,7 @@ class Preferences(context: Context, private val notificationManager: Notificatio
         get() = preferences.getBoolean("show-on-device", false)
         set(value) = preferences.edit().putBoolean("show-on-device", value).apply()
 
-    var showRecentlyUpdated: Boolean
+    var showRecentlyDiscovered: Boolean
         get() = preferences.getBoolean("show-recently-updated", true)
         set(value) = preferences.edit().putBoolean("show-recently-updated", value).apply()
 
@@ -167,7 +167,7 @@ class Preferences(context: Context, private val notificationManager: Notificatio
     }
 
     companion object {
-        const val recentDays: Long = 3
+        const val recentDays: Long = 2
 
         private const val VIEWED = "viewed"
         const val LAST_UPDATE_TIME = "last_update_time"

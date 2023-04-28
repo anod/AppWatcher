@@ -189,19 +189,19 @@ interface AppListTable {
 
         suspend fun loadAppList(
             sortId: Int,
-            orderByRecentlyUpdated: Boolean,
+            orderByRecentlyDiscovered: Boolean,
             tagId: Int?,
             titleFilter: String,
             offset: SqlOffset?,
             table: AppListTable
         ): List<AppListItem> {
-            val query = createAppsListQuery(sortId, orderByRecentlyUpdated, tagId, titleFilter, offset)
+            val query = createAppsListQuery(sortId, orderByRecentlyDiscovered, tagId, titleFilter, offset)
             return table.load(SimpleSQLiteQuery(query.first, query.second))
         }
 
         private fun createAppsListQuery(
             sortId: Int,
-            orderByRecentlyUpdated: Boolean,
+            orderByRecentlyDiscovered: Boolean,
             tagId: Int?,
             titleFilter: String,
             offset: SqlOffset?
@@ -218,7 +218,7 @@ interface AppListTable {
                         "${TableColumns.appId} == ${ChangelogTable.TableColumns.appId} " +
                         "AND ${TableColumns.versionNumber} == ${ChangelogTable.TableColumns.versionCode} " +
                         "WHERE ${selection.first} " +
-                        "ORDER BY ${createSortOrder(sortId, orderByRecentlyUpdated)} $rangeSql"
+                        "ORDER BY ${createSortOrder(sortId, orderByRecentlyDiscovered)} $rangeSql"
             return Pair(sql, selection.second)
         }
 

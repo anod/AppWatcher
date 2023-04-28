@@ -39,11 +39,11 @@ class InstalledActivity : BaseComposeActivity() {
                 val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
 
                 val pagingSourceConfig = WatchListPagingSource.Config(
-                        filterId = Filters.ALL,
-                        tagId = null,
-                        showRecentlyUpdated = false,
-                        showOnDevice = true,
-                        showRecentlyInstalled = false
+                    filterId = Filters.ALL,
+                    tagId = null,
+                    showRecentlyDiscovered = false,
+                    showOnDevice = true,
+                    showRecentlyInstalled = false
                 )
 
                 if (screenState.wideLayout.isWideLayout) {

@@ -122,9 +122,9 @@ fun preferenceItems(prefs: Preferences, inProgress: Boolean, playServices: Googl
                     key = "show-on-device"
             ),
             PreferenceItem.Switch(
-                    checked = prefs.showRecentlyUpdated,
-                    titleRes = R.string.pref_show_recently_updated_title,
-                    summaryRes = R.string.pref_show_recently_updated_descr,
+                    checked = prefs.showRecentlyDiscovered,
+                    titleRes = R.string.pref_show_recently_discovered_title,
+                    summaryRes = R.string.pref_show_recently_discovered_descr,
                     key = "show-recently-updated"
             ),
             PreferenceItem.Pick(

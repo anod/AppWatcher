@@ -53,7 +53,7 @@
     <string name="import_export">Import</string>
     <string name="export_path" translatable="false">/sdcard/data/com.anod.appwatcher/backup/</string>
     <string name="new_updates">New updates</string>
-    <string name="recently_updated">Recently updated</string>
+    <string name="recently_discovered">Recently discovered</string>
     <string name="watching">Watching</string>
     <string name="menu_filter">Search</string>
     <string name="choose_an_account">Choose an account</string>
@@ -147,8 +147,8 @@
     <string name="pref_show_recent_descr">Show recently installed section in the main view</string>
     <string name="pref_show_ondevice_title">Show On device</string>
     <string name="pref_show_ondevice_descr">Show On device section in the main view</string>
-    <string name="pref_show_recently_updated_title">Show recently updated</string>
-    <string name="pref_show_recently_updated_descr">Show a section with recently updated apps for several days</string>
+    <string name="pref_show_recently_discovered_title">Show recently discovered</string>
+    <string name="pref_show_recently_discovered_descr">Show a section with recently discovered updates of apps for several days</string>
     <string name="log">App log</string>
     <string name="user_log">App log</string>
     <string name="refresh_gdrive_mesage">Refreshing Google Drive account after upgrade</string>
@@ -246,4 +246,5 @@
     <string name="purchase_history">Purchase history</string>
     <string name="android_version">Android version</string>
     <string name="target_sdk">Target SDK\n</string>
+    <string name="discovered_date">Discovered date</string>
 </resources>

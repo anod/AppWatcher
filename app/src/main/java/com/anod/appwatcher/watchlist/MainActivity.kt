@@ -87,7 +87,7 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
                 val pagingSourceConfig = WatchListPagingSource.Config(
                     filterId = listState.filterId,
                     tagId = null,
-                    showRecentlyUpdated = prefs.showRecentlyUpdated,
+                    showRecentlyDiscovered = prefs.showRecentlyDiscovered,
                     showOnDevice = prefs.showOnDevice,
                     showRecentlyInstalled = prefs.showRecent
                 )
