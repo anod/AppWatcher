@@ -2,6 +2,7 @@ package com.anod.appwatcher.tags
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Label
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -22,6 +23,7 @@ import org.koin.core.component.inject
 
 typealias TagAppItem = Pair<Tag,Boolean>
 
+@Immutable
 data class TagsSelectionState(
     val appId: String,
     val appTitle: String,

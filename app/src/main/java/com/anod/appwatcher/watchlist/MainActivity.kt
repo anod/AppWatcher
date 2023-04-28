@@ -115,10 +115,10 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
                             MainScreen(
                                 mainState = mainState,
                                 drawerState = drawerState,
-                                onMainEvent = { mainViewModel.handleEvent(it) },
+                                onMainEvent = mainViewModel::handleEvent,
                                 listState = listState,
                                 pagingSourceConfig = pagingSourceConfig,
-                                onListEvent = { listViewModel.handleEvent(it) },
+                                onListEvent = listViewModel::handleEvent,
                                 installedApps = listViewModel.installedApps
                             )
                         },
@@ -134,10 +134,10 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
                     MainScreen(
                         mainState = mainState,
                         drawerState = drawerState,
-                        onMainEvent = { mainViewModel.handleEvent(it) },
+                        onMainEvent = mainViewModel::handleEvent,
                         listState = listState,
                         pagingSourceConfig = pagingSourceConfig,
-                        onListEvent = { listViewModel.handleEvent(it) },
+                        onListEvent = listViewModel::handleEvent,
                         installedApps = listViewModel.installedApps
                     )
                     if (listState.selectedApp != null) {

@@ -1,6 +1,7 @@
 // Copyright (c) 2020. Alex Gavrishev
 package com.anod.appwatcher.watchlist
 
+import androidx.compose.runtime.Immutable
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.database.entities.cleanChangeHtml
 import info.anodsplace.framework.content.InstalledApps
@@ -19,6 +20,7 @@ sealed interface SectionItem {
     val sectionKey: String
     val contentType: String
 
+    @Immutable
     class Header(val type: SectionHeader) : SectionItem {
         override val sectionKey = "header:${hashCode()}"
         override val contentType = "Header"
@@ -58,6 +60,7 @@ sealed interface SectionItem {
         }
     }
 
+    @Immutable
     class App(val appListItem: AppListItem, val isLocal: Boolean, val packageInfo: InstalledApps.Info) : SectionItem {
         override val sectionKey = "app-${appListItem.app.rowId}:${hashCode()}"
         override val contentType = "App"
@@ -73,6 +76,7 @@ sealed interface SectionItem {
         }
     }
 
+    @Immutable
     class OnDevice(val appListItem: AppListItem, var showSelection: Boolean, val packageInfo: InstalledApps.Info) : SectionItem {
         override val sectionKey = "ondevice-{appListItem.app.rowId}:${hashCode()}"
         override val contentType = "OnDevice"

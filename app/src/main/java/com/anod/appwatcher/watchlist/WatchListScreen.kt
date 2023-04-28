@@ -111,7 +111,7 @@ fun WatchListScreen(
                 items = items,
                 isRefreshing = screenState.syncProgress?.isRefreshing == true,
                 enablePullToRefresh = screenState.enablePullToRefresh,
-                onEvent = { event -> onEvent(event) },
+                onEvent = onEvent,
                 recentlyInstalledApps = screenState.recentlyInstalledApps,
                 listContext = "$listContext-rr:${screenState.refreshRequest}-f:$filterId-rk:$refreshKey"
             )

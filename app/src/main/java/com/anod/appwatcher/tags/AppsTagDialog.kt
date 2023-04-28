@@ -53,7 +53,7 @@ fun AppsTagDialog(tag: Tag, onDismissRequest: () -> Unit) {
     Dialog(onDismissRequest = onDismissRequest) {
         AppsTagScreen(
             screenState = screenState,
-            onEvent = { event -> viewModel.handleEvent(event) }
+            onEvent = viewModel::handleEvent
         )
     }
 

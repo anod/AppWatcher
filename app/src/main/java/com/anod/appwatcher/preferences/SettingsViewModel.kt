@@ -7,6 +7,7 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.viewModelScope
 import androidx.work.Operation
 import com.anod.appwatcher.R
@@ -44,6 +45,7 @@ import org.koin.core.component.get
 import org.koin.core.component.inject
 import org.koin.core.parameter.parametersOf
 
+@Immutable
 data class SettingsViewState(
     val items: List<PreferenceItem>,
     val isProgressVisible: Boolean = false,

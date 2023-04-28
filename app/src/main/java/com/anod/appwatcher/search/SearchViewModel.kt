@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.compose.material3.SnackbarDuration
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -81,6 +82,7 @@ sealed interface SearchViewEvent {
     class SelectApp(val app: App?) : SearchViewEvent
 }
 
+@Immutable
 data class SearchViewState(
     val searchQuery: String = "",
     val isShareSource: Boolean = false,

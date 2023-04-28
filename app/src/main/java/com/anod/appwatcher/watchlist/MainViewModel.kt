@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import androidx.annotation.StringRes
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.viewModelScope
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AccountSelectionResult
@@ -31,6 +32,7 @@ import org.koin.core.component.inject
 
 typealias TagCountList = List<Pair<Tag, Int>>
 
+@Immutable
 data class MainViewState(
     val drawerItems: List<DrawerItem> = com.anod.appwatcher.watchlist.drawerItems,
     val account: Account? = null,

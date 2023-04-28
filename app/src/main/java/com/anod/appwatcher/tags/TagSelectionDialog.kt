@@ -52,7 +52,7 @@ fun TagSelectionDialog(appId: String, appTitle: String, onDismissRequest: () -> 
     ) {
         TagSelectionScreen(
             screenState = screenState,
-            onEvent = { event -> viewModel.handleEvent(event) },
+            onEvent = viewModel::handleEvent,
             onDismissRequest = onDismissRequest
         )
     }

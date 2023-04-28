@@ -1,16 +1,18 @@
 // Copyright (c) 2020. Alex Gavrishev
 package com.anod.appwatcher.utils
 
+import androidx.compose.runtime.Immutable
 import info.anodsplace.ktx.equalsHash
 import info.anodsplace.ktx.hashCodeOf
 
 typealias SelectionStateKeyExtras = Map<String, String>
 
+@Immutable
 data class SelectionState(
-      val defaultSelected: Boolean = false,
-      val extras: Map<String, SelectionStateKeyExtras> = emptyMap(),
-      val selectedKeys: Map<String, Boolean> = emptyMap(),
-      val selectedCount: Int = 0
+    val defaultSelected: Boolean = false,
+    val extras: Map<String, SelectionStateKeyExtras> = emptyMap(),
+    val selectedKeys: Map<String, Boolean> = emptyMap(),
+    val selectedCount: Int = 0
 ) : Collection<String> {
 
     override fun hashCode(): Int = hashCodeOf(defaultSelected, extras, selectedKeys, selectedCount)

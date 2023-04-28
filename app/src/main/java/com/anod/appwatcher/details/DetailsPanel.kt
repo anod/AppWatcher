@@ -147,7 +147,7 @@ fun DetailsPanel(
     ) {
         DetailsScreenContent(
             screenState = screenState,
-            onEvent = { viewModel.handleEvent(it) },
+            onEvent = viewModel::handleEvent,
             modifier = Modifier.fillMaxSize(),
             viewActions = viewModel.viewActions,
             onDismissRequest = onDismissRequest,
@@ -183,7 +183,7 @@ fun DetailsDialog(
             DetailsScreenContent(
                 screenState = screenState,
                 viewActions = viewModel.viewActions,
-                onEvent = { viewModel.handleEvent(it) },
+                onEvent = viewModel::handleEvent,
                 onCommonActivityAction = { onCommonActivityAction(it) },
                 onDismissRequest = onDismissRequest,
                 modifier = Modifier.fillMaxHeight(fraction = 0.9f)

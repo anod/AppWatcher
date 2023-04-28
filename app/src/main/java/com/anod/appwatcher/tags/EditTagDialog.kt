@@ -62,7 +62,7 @@ fun EditTagDialog(tag: Tag, onDismissRequest: (tagId: Int) -> Unit) {
         Dialog(onDismissRequest = { onDismissRequest(screenState.tag.id) }) {
             EditTagScreen(
                 screenState = screenState,
-                onEvent = { event -> viewModel.handleEvent(event) }
+                onEvent = viewModel::handleEvent
             )
         }
 

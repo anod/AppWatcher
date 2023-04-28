@@ -1,5 +1,6 @@
 package com.anod.appwatcher.tags
 
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -20,11 +21,12 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+@Immutable
 data class AppsTagScreenState(
-        val tag: Tag,
-        val titleFilter: String = "",
-        val apps: List<App> = emptyList(),
-        val selection: SelectionState = SelectionState()
+    val tag: Tag,
+    val titleFilter: String = "",
+    val apps: List<App> = emptyList(),
+    val selection: SelectionState = SelectionState()
 )
 
 sealed interface AppsTagScreenEvent {

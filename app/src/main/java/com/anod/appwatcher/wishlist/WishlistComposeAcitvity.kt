@@ -55,7 +55,7 @@ class WishListActivity : BaseComposeActivity(), KoinComponent {
                         main = {
                             WishListScreen(
                                 screenState = screenState,
-                                onEvent = { viewModel.handleEvent(it) },
+                                onEvent = viewModel::handleEvent,
                                 pagingDataFlow = viewModel.pagingData,
                                 viewActions = viewModel.viewActions,
                                 onActivityAction = { onCommonActivityAction(it) }
@@ -72,7 +72,7 @@ class WishListActivity : BaseComposeActivity(), KoinComponent {
                 } else {
                     WishListScreen(
                         screenState = screenState,
-                        onEvent = { viewModel.handleEvent(it) },
+                        onEvent = viewModel::handleEvent,
                         pagingDataFlow = viewModel.pagingData,
                         viewActions = viewModel.viewActions,
                         onActivityAction = { onCommonActivityAction(it) }

@@ -8,6 +8,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.text.format.Formatter
 import androidx.annotation.StringRes
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -69,6 +70,7 @@ sealed interface AppIconState {
     object Default : AppIconState
 }
 
+@Immutable
 data class DetailsState(
     val appId: String,
     val rowId: Int,
@@ -96,6 +98,7 @@ data class DetailsState(
         get() = document != null
 }
 
+@Immutable
 data class AppVersionInfo(
     val isBeta: Boolean,
     val installationSize: Long,
@@ -104,7 +107,6 @@ data class AppVersionInfo(
 ) {
     val androidVersion: String? = androidVersions[targetSdkVersion]
 }
-
 
 sealed interface DetailsAction {
     class ActivityAction(val action: CommonActivityAction) : DetailsAction

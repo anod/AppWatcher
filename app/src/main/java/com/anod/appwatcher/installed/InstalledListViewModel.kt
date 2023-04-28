@@ -4,6 +4,7 @@ import android.accounts.Account
 import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.widget.Toast
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.anod.appwatcher.R
@@ -29,6 +30,7 @@ import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+@Immutable
 data class InstalledListState(
     val sortId: Int,
     val selectionMode: Boolean = false,

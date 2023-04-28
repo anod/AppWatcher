@@ -1,11 +1,13 @@
 package com.anod.appwatcher.userLog
 
 import android.content.Intent
+import androidx.compose.runtime.Immutable
 import com.anod.appwatcher.compose.CommonActivityAction
 import com.anod.appwatcher.utils.BaseFlowViewModel
 
+@Immutable
 data class UserLogState(
-        val messages: List<Message> = emptyList()
+    val messages: List<Message> = emptyList()
 )
 
 sealed interface UserLogEvent {

@@ -216,11 +216,7 @@ abstract class AppsDatabase : RoomDatabase() {
 
         private val MIGRATION_18_19 = object : Migration(18, 19) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                try {
-                    database.execSQL("UPDATE apps_list SET sync_version = IFF(update_date > 0, update_date, sync_version)")
-                } catch (e: Exception) {
-                    AppLog.e(e)
-                }
+                AppLog.d("Migrated db from 18 to 19")
             }
         }
 

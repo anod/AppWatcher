@@ -2,6 +2,7 @@ package com.anod.appwatcher.history
 
 import android.accounts.Account
 import android.content.pm.PackageManager
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -32,6 +33,7 @@ import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+@Immutable
 data class HistoryListState(
     val account: Account? = null,
     val authToken: String = "",

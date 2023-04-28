@@ -2,6 +2,7 @@
 package com.anod.appwatcher.watchlist
 
 import android.content.pm.PackageManager
+import androidx.compose.runtime.Immutable
 import androidx.paging.PagingState
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
@@ -26,6 +27,7 @@ class WatchListPagingSource(
     override var filterQuery: String = ""
     private val itemFilter: AppListFilter = createFilter(config.filterId)
 
+    @Immutable
     data class Config(
         val filterId: Int,
         val tagId: Int?,

@@ -25,7 +25,7 @@ class UserLogActivity : BaseComposeActivity() {
 
             UserLogScreen(
                     screenState = screenState,
-                    onEvent = { viewModel.handleEvent(it) }
+                    onEvent = viewModel::handleEvent
             )
         }
 

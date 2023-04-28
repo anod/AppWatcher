@@ -53,7 +53,7 @@ class InstalledActivity : BaseComposeActivity() {
                                 InstalledListScreen(
                                     screenState = screenState,
                                     pagingSourceConfig = pagingSourceConfig,
-                                    onEvent = { viewModel.handleEvent(it) },
+                                    onEvent = viewModel::handleEvent,
                                     installedApps = viewModel.installedApps
                                 )
                             },
@@ -69,7 +69,7 @@ class InstalledActivity : BaseComposeActivity() {
                     InstalledListScreen(
                         screenState = screenState,
                         pagingSourceConfig = pagingSourceConfig,
-                        onEvent = { viewModel.handleEvent(it) },
+                        onEvent = viewModel::handleEvent,
                         installedApps = viewModel.installedApps
                     )
                     if (screenState.selectedApp != null) {

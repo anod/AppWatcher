@@ -73,7 +73,7 @@ open class SettingsActivity : BaseComposeActivity(), GDriveSignIn.Listener {
                         main = {
                             SettingsScreen(
                                 screenState = screenState,
-                                onEvent = { viewModel.handleEvent(it) }
+                                onEvent = viewModel::handleEvent
                             )
                         },
                         detail = {
@@ -94,7 +94,7 @@ open class SettingsActivity : BaseComposeActivity(), GDriveSignIn.Listener {
                 } else {
                     SettingsScreen(
                         screenState = screenState,
-                        onEvent = { viewModel.handleEvent(it) }
+                        onEvent = viewModel::handleEvent
                     )
                 }
             }

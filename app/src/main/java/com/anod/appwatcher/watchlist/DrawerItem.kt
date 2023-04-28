@@ -8,9 +8,11 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SystemUpdate
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.anod.appwatcher.R
 
+@Immutable
 data class DrawerItem(
     val id: Id,
     val icon: ImageVector,
