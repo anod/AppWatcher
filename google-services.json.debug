@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "1051401061041",
+    "project_id": "canvas-hybrid-424",
+    "storage_bucket": "canvas-hybrid-424.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1051401061041:android:5da63e02a5e2f6d6",
+        "android_client_info": {
+          "package_name": "com.anod.appwatcher.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1051401061041-vccquvrsn74geh4i6khiog21mi90a86i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBO--M24fDO2EE1CycJ_mgs-DdFRUOyxzA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1051401061041-p7sslh33370vuaslnunjdankarb7si34.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
