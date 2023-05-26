@@ -83,7 +83,6 @@ fun WatchListTopBar(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = false, uiMode = UI_MODE_NIGHT_YES)
 @Composable
 fun DefaultPreview() {

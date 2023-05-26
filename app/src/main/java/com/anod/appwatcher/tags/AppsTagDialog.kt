@@ -8,7 +8,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Deselect
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -116,7 +115,6 @@ fun AppsTagScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AppRow(
     app: App,
@@ -126,7 +124,7 @@ private fun AppRow(
 ) {
     ListItem(
         modifier = Modifier.clickable(onClick = { onEvent(AppsTagScreenEvent.Toggle(appId = app.appId)) }),
-        headlineText = {
+        headlineContent = {
             Text(
                 text = app.title,
                 style = MaterialTheme.typography.bodyLarge

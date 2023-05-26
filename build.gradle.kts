@@ -1,14 +1,12 @@
 buildscript {
     dependencies {
-        classpath("com.google.gms:google-services:4.3.15")
-        classpath("com.google.android.gms:oss-licenses-plugin:0.10.6")
-        classpath("com.google.firebase:firebase-crashlytics-gradle:2.9.5")
+        classpath(libs.google.services)
+        classpath(libs.oss.licenses.plugin)
+        classpath(libs.firebase.crashlytics.gradle)
     }
 }
 
 plugins {
-    id("com.android.application") version "8.1.0-alpha11" apply false
-    id("com.android.library") version "8.1.0-alpha11" apply false
-    id("com.android.test") version "8.1.0-alpha11" apply false
-    alias(libs.plugins.kotlin.plugin) apply false
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.kotlin) apply false
 }

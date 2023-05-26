@@ -27,7 +27,6 @@ import com.anod.appwatcher.watchlist.WatchListPagingSource
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.InstalledApps
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InstalledListScreen(
     screenState: InstalledListState,

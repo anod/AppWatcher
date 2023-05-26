@@ -180,7 +180,6 @@ private fun ScheduleRow(schedule: Schedule, dateFormat: DateFormat) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ScheduleChip(text: String, color: Color) {
     SuggestionChip(

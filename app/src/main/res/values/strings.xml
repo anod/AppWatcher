@@ -247,4 +247,5 @@
     <string name="android_version">Android version</string>
     <string name="target_sdk">Target SDK\n</string>
     <string name="discovered_date">Discovered date</string>
+    <string name="selected">Selected</string>
 </resources>

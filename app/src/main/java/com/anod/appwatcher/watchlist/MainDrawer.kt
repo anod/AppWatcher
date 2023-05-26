@@ -43,7 +43,6 @@ import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.utils.isLightColor
 import java.util.concurrent.TimeUnit
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainDrawer(mainState: MainViewState, onMainEvent: (MainViewEvent) -> Unit) {
     val scrollState = rememberScrollState()
@@ -60,7 +59,6 @@ fun MainDrawer(mainState: MainViewState, onMainEvent: (MainViewEvent) -> Unit) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DrawerContent(mainState: MainViewState, onMainEvent: (MainViewEvent) -> Unit) {
 

@@ -2,7 +2,6 @@ package com.anod.appwatcher.watchlist
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -13,7 +12,21 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
@@ -22,8 +35,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -40,6 +62,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.itemContentType
+import androidx.paging.compose.itemKey
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import com.anod.appwatcher.R
@@ -97,16 +121,13 @@ fun WatchListPage(
             } else {
                 items(
                     count = items.itemCount,
-                    key = { index ->
-                        when (val item = items.peek(index)) {
-                            null -> "null-$index"
-                            is SectionItem.Recent -> "$listContext-${item.sectionKey}-$recentlyInstalledAppsHashCode"
-                            else -> "$listContext-${item.sectionKey}"
+                    key = items.itemKey {
+                        when (it) {
+                            is SectionItem.Recent -> "$listContext-${it.sectionKey}-$recentlyInstalledAppsHashCode"
+                            else -> "$listContext-${it.sectionKey}"
                         }
                     },
-                    contentType = { index ->
-                        items.peek(index)?.contentType
-                    }
+                    contentType = items.itemContentType { it.contentType }
                 ) { index ->
                     val item = items[index]
                     if (item != null) { // TODO: Preload?
@@ -126,7 +147,6 @@ fun WatchListPage(
                                 .height(48.dp)
                                 .background(MaterialTheme.colorScheme.inverseOnSurface)
                         )
-
                     }
                 }
             }
@@ -373,7 +393,6 @@ private fun AppItem(
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun SelectedIcon(modifier: Modifier, itemSelection: AppItemSelection, tint: Color = Color.Unspecified) {
     AnimatedVisibility(
@@ -387,7 +406,7 @@ private fun SelectedIcon(modifier: Modifier, itemSelection: AppItemSelection, ti
         Icon(
             modifier = modifier.size(18.dp),
             painter = painterResource(id = R.drawable.ic_check_circle_selected_18dp),
-            contentDescription = stringResource(id = coil.compose.base.R.string.selected),
+            contentDescription = stringResource(id = R.string.selected),
             tint = tint
         )
     }

@@ -8,7 +8,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.viewModels
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -49,7 +48,6 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
     private lateinit var accountSelectionDialog: AccountSelectionDialog
     private lateinit var notificationPermissionRequest: ActivityResultLauncher<AppPermissions.Request.Input>
 
-    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

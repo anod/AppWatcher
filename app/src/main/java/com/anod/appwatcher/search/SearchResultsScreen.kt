@@ -41,7 +41,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import org.koin.java.KoinJavaComponent
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchResultsScreen(
     screenState: SearchViewState,

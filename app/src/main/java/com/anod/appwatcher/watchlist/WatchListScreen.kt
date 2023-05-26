@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,7 +24,7 @@ import info.anodsplace.applog.AppLog
 import info.anodsplace.compose.LifecycleEffect
 import info.anodsplace.framework.content.InstalledApps
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun WatchListScreen(
     screenState: WatchListSharedState,
@@ -50,7 +49,11 @@ fun WatchListScreen(
         Filters.UPDATABLE
     )
 
-    val pagerState = rememberPagerState(initialPage = screenState.filterId)
+    val pagerState = rememberPagerState(
+        initialPage = screenState.filterId,
+        initialPageOffsetFraction = 0f,
+        pageCount = { filterPagesTitles.size }
+    )
     subtitle = if (pagerState.currentPage > 0) {
         filterPagesTitles[pagerState.currentPage]
     } else {
@@ -62,7 +65,6 @@ fun WatchListScreen(
         contentWindowInsets = WindowInsets.statusBars
     ) { paddingValues ->
         HorizontalPager(
-            pageCount = filterPagesTitles.size,
             state = pagerState,
             modifier = Modifier.padding(paddingValues),
             key = { filterIds[it] }

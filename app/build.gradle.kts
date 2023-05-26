@@ -3,7 +3,7 @@ plugins {
     kotlin("android")
     kotlin("kapt")
     id("kotlin-parcelize")
-    id("com.google.devtools.ksp").version("1.8.20-1.0.11")
+    id("com.google.devtools.ksp").version("1.8.21-1.0.11")
     id("com.google.android.gms.oss-licenses-plugin")
 }
 
@@ -83,7 +83,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.6"
+        kotlinCompilerExtensionVersion = "1.4.7"
     }
     namespace = "com.anod.appwatcher"
 }
@@ -99,63 +99,63 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java) {
 
 dependencies {
     // AndroidX
-    implementation("androidx.appcompat:appcompat:1.6.1") // AppCompatActivity
-    implementation("androidx.palette:palette:1.0.0")
-    implementation("androidx.work:work-runtime:2.8.1")
-    implementation("androidx.work:work-runtime-ktx:2.8.1")
-    implementation("androidx.core:core:1.10.0")
-    implementation("androidx.core:core-splashscreen:1.0.1")
+    implementation(libs.androidx.appcompat) // AppCompatActivity
+    implementation(libs.androidx.palette)
+    implementation(libs.work.runtime)
+    implementation(libs.work.runtime.ktx)
+    implementation(libs.androidx.core)
+    implementation(libs.androidx.core.splashscreen)
 
-    implementation("androidx.paging:paging-runtime:3.2.0-alpha04")
-    implementation("androidx.paging:paging-compose:1.0.0-alpha18")
+    implementation(libs.paging.runtime)
+    implementation(libs.paging.compose)
 
     // Compose
-    implementation("androidx.activity:activity-compose:1.7.1")
-    implementation("androidx.compose.runtime:runtime-tracing:1.0.0-alpha03")
-    implementation("com.google.accompanist:accompanist-flowlayout:0.30.0")
-    implementation("com.google.accompanist:accompanist-swiperefresh:0.28.0")
-    implementation("com.google.accompanist:accompanist-systemuicontroller:0.28.0")
-    implementation("com.google.accompanist:accompanist-placeholder-material:0.28.0")
+    implementation(libs.activity.compose)
+    implementation(libs.runtime.tracing)
+    implementation(libs.accompanist.flowlayout)
+    implementation(libs.accompanist.swiperefresh)
+    implementation(libs.accompanist.systemuicontroller)
+    implementation(libs.accompanist.placeholder.material)
 
     // Coil
-    implementation("io.coil-kt:coil-base:2.3.0")
-    implementation("io.coil-kt:coil-compose-base:2.3.0")
+    implementation(libs.coil.base)
+    implementation(libs.coil.compose.base)
 
     // Google
-    implementation("com.google.android.gms:play-services-oss-licenses:17.0.1")
-    implementation("com.google.android.gms:play-services-identity:18.0.1")
-    implementation("com.google.android.gms:play-services-auth:20.4.1")
+    implementation(libs.play.services.oss.licenses)
+    implementation(libs.play.services.identity)
+    implementation(libs.play.services.auth)
 
-    implementation("com.google.api-client:google-api-client:1.33.0")
-    implementation("com.google.api-client:google-api-client-android:1.33.0")
-    implementation("com.google.apis:google-api-services-drive:v3-rev20211107-1.32.1") {
+    implementation(libs.google.api.client)
+    implementation(libs.google.api.client.android)
+    implementation("com.google.apis:google-api-services-drive:v3-rev20230520-2.0.0") {
         exclude(group = "org.apache.httpcomponents")
         exclude(group = "commons-logging")
     }
 
-    implementation("com.google.firebase:firebase-analytics:21.2.2")
-    implementation("com.google.firebase:firebase-crashlytics:18.3.6")
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.crashlytics)
 
     // 3rd party
-    implementation("com.squareup.okhttp3:okhttp:4.10.0")
-    implementation("com.jakewharton:process-phoenix:2.1.2")
-    implementation("io.insert-koin:koin-core:3.4.0")
+    implementation(libs.okhttp)
+    implementation(libs.process.phoenix)
+    implementation(libs.koin.core)
 
     // ViewModel and LiveData
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
-    implementation("androidx.lifecycle:lifecycle-common-java8:2.6.1")
+    implementation(libs.lifecycle.viewmodel.ktx)
+    implementation(libs.lifecycle.viewmodel.compose)
+    implementation(libs.lifecycle.common.java8)
 
-    implementation("androidx.room:room-runtime:2.5.1")
-    implementation("androidx.room:room-ktx:2.5.1")
-    ksp("androidx.room:room-compiler:2.5.1")
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
 
     // Kotlin
     implementation(libs.coroutines.core)
     implementation(libs.coroutines.android)
     implementation(libs.kotlin.stdlib)
 
-    testImplementation("junit:junit:4.13.2")
+    testImplementation(libs.junit)
 
     implementation(project(":lib:applog"))
     implementation(project(":lib:compose"))
@@ -165,7 +165,7 @@ dependencies {
     implementation(project(":lib:permissions"))
     implementation(project(":playstore"))
 
-    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.10")
+    debugImplementation(libs.leakcanary.android)
 }
 
 // ADD THIS AT THE BOTTOM

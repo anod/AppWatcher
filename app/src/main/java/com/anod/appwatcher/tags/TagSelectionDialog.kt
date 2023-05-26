@@ -35,7 +35,7 @@ import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.rememberViwModeStoreOwner
 import com.anod.appwatcher.database.entities.Tag
 import info.anodsplace.compose.CheckBoxItem
-import info.anodsplace.compose.CheckBoxList
+import info.anodsplace.compose.CheckBoxLazyList
 
 @Composable
 fun TagSelectionDialog(appId: String, appTitle: String, onDismissRequest: () -> Unit) {
@@ -89,7 +89,9 @@ fun TagSelectionScreen(screenState: TagsSelectionState, onEvent: (TagSelectionEv
             )
             if (screenState.items.isEmpty()) {
                 Column(
-                    modifier = Modifier.fillMaxSize().padding(16.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -108,7 +110,7 @@ fun TagSelectionScreen(screenState: TagsSelectionState, onEvent: (TagSelectionEv
                     }
                 }
             } else {
-                CheckBoxList(
+                CheckBoxLazyList(
                     items = screenState.items,
                     modifier = Modifier.padding(end = 16.dp),
                     onCheckedChange = { item ->

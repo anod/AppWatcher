@@ -2,7 +2,6 @@ package com.anod.appwatcher.watchlist
 
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Text
@@ -18,7 +17,6 @@ import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.tags.EditTagDialog
 import info.anodsplace.framework.content.InstalledApps
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     mainState: MainViewState,
