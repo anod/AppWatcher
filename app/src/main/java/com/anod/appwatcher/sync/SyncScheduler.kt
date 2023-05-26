@@ -30,7 +30,7 @@ class SyncScheduler(private val context: ApplicationContext) {
 
     constructor(context: Context) : this(ApplicationContext(context))
 
-    fun schedule(requiresCharging: Boolean, requiresWifi: Boolean, windowStartSec: Long, replace: Boolean): Flow<Operation.State> {
+    fun schedule(requiresCharging: Boolean, requiresWifi: Boolean, windowStartSec: Long, update: Boolean): Flow<Operation.State> {
         val constraints: Constraints = Constraints.Builder().apply {
             setRequiresCharging(requiresCharging)
             if (requiresWifi) {
@@ -41,16 +41,16 @@ class SyncScheduler(private val context: ApplicationContext) {
         }.build()
 
         val request: PeriodicWorkRequest =
-                PeriodicWorkRequest.Builder(SyncWorker::class.java, windowStartSec, TimeUnit.SECONDS, PeriodicWorkRequest.MIN_PERIODIC_FLEX_MILLIS, TimeUnit.MILLISECONDS)
-                        .setInputData(Data.EMPTY)
-                        .setConstraints(constraints)
-                        .build()
+            PeriodicWorkRequest.Builder(SyncWorker::class.java, windowStartSec, TimeUnit.SECONDS, PeriodicWorkRequest.MIN_PERIODIC_FLEX_MILLIS, TimeUnit.MILLISECONDS)
+                .setInputData(Data.EMPTY)
+                .setConstraints(constraints)
+                .build()
 
-        val policy = if (replace)
-            ExistingPeriodicWorkPolicy.REPLACE
+        val policy = if (update)
+            ExistingPeriodicWorkPolicy.UPDATE
         else
             ExistingPeriodicWorkPolicy.KEEP
-        AppLog.i("Schedule sync in ${windowStartSec / 3600} hours (${if (replace) "Replace" else "Keep existing"})", "PeriodicWork")
+        AppLog.i("Schedule sync in ${windowStartSec / 3600} hours (${if (update) "Update" else "Keep existing"})", "PeriodicWork")
         return wm.enqueueUniquePeriodicWork(tag, policy, request)
             .state
             .asFlow()

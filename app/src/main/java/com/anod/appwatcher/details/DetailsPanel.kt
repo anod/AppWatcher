@@ -816,7 +816,7 @@ private fun DetailsTopAppBar(
                 }
             }
         },
-        colors = TopAppBarDefaults.smallTopAppBarColors(
+        colors = TopAppBarDefaults.topAppBarColors(
             containerColor = containerColor,
             titleContentColor = contentColor,
             navigationIconContentColor = contentColor,

@@ -1,9 +1,25 @@
 package com.anod.appwatcher.search
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -21,7 +37,7 @@ import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemsIndexed
+import androidx.paging.compose.itemKey
 import coil.ImageLoader
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
@@ -215,10 +231,11 @@ fun SearchResultsPage(
             .fillMaxSize()
             .padding(top = 16.dp),
     ) {
-        itemsIndexed(
-            items = items,
-            key = { _, item -> "search-${item.stableKey}" }
-        ) { _, item ->
+        items(
+            count = items.itemCount,
+            key = items.itemKey { "search-${it.stableKey}" }
+        ) { index ->
+            val item = items[index]
             if (item != null) { // TODO: Preload?
                 MarketAppItem(
                     app = item.app,
@@ -234,7 +251,6 @@ fun SearchResultsPage(
                         .height(48.dp)
                         .background(MaterialTheme.colorScheme.inverseOnSurface)
                 )
-
             }
         }
     }

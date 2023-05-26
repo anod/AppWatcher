@@ -179,7 +179,7 @@ fun SearchTopBar(
 
             actions()
         },
-        colors = TopAppBarDefaults.smallTopAppBarColors(
+        colors = TopAppBarDefaults.topAppBarColors(
             containerColor = containerColor,
             titleContentColor = contentColor,
             navigationIconContentColor = contentColor,
@@ -189,7 +189,7 @@ fun SearchTopBar(
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun TopBarSearchField(
     query: String = "",

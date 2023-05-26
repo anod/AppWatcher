@@ -6,6 +6,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -35,7 +36,7 @@ fun DropdownMenuAction(content: @Composable (dismiss: () -> Unit) -> Unit) {
 @Composable
 fun SortMenuItem(selectedSortId: Int, onChangeSort: (Int) -> Unit, barBounds: IntRect) {
     var topBarSortMenu by remember { mutableStateOf(false) }
-    var menuItemWidth by remember { mutableStateOf(0) }
+    var menuItemWidth by remember { mutableIntStateOf(0) }
     DropdownMenuItem(
         text = { Text(text = stringResource(id = R.string.sort)) },
         leadingIcon = { SortIcon() },
@@ -88,7 +89,7 @@ private fun SortDropdownMenu(selectedSortId: Int, onChangeSort: (Int) -> Unit, e
 @Composable
 fun FilterMenuItem(filterId: Int, onFilterChange: (Int) -> Unit, barBounds: IntRect) {
     var topBarFilterMenu by remember { mutableStateOf(false) }
-    var menuItemWidth by remember { mutableStateOf(0) }
+    var menuItemWidth by remember { mutableIntStateOf(0) }
     DropdownMenuItem(
         text = { Text(text = stringResource(id = R.string.filter)) },
         leadingIcon = { FilterIcon() },

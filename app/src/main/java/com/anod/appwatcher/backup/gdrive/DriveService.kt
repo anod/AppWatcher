@@ -1,6 +1,4 @@
 // Copyright (c) 2019. Alex Gavrishev
-@file:Suppress("BlockingMethodInNonBlockingContext")
-
 package com.anod.appwatcher.backup.gdrive
 
 import android.content.Intent
