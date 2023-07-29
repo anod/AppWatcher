@@ -9,6 +9,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -130,10 +131,11 @@ fun DetailsPanel(
     onCommonActivityAction: (action: CommonActivityAction) -> Unit
 ) {
     val storeOwner = rememberViwModeStoreOwner()
+    val isSystemInDarkTheme = isSystemInDarkTheme()
     val viewModel: DetailsViewModel = viewModel(
         key = "details-${app.appId}-${app.rowId}",
         viewModelStoreOwner = storeOwner,
-        factory = DetailsViewModel.Factory(argApp = app)
+        factory = DetailsViewModel.Factory(argApp = app, isSystemInDarkTheme = isSystemInDarkTheme)
     )
 
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
@@ -164,10 +166,11 @@ fun DetailsDialog(
     onCommonActivityAction: (action: CommonActivityAction) -> Unit
 ) {
     val storeOwner = rememberViwModeStoreOwner()
+    val isSystemInDarkTheme = isSystemInDarkTheme()
     val viewModel: DetailsViewModel = viewModel(
         key = "details-${app.appId}-${app.rowId}",
         viewModelStoreOwner = storeOwner,
-        factory = DetailsViewModel.Factory(argApp = app)
+        factory = DetailsViewModel.Factory(argApp = app, isSystemInDarkTheme = isSystemInDarkTheme)
     )
 
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)

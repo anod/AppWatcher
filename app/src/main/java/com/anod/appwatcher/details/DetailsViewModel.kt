@@ -8,7 +8,10 @@ import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.text.format.Formatter
 import androidx.annotation.StringRes
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -90,6 +93,7 @@ data class DetailsState(
     val remoteVersionInfo: AppVersionInfo? = null,
     val remoteCallFinished: Boolean = false,
     val packageInfo: InstalledApps.Info = InstalledApps.Info(0, ""),
+    val isSystemInDarkTheme: Boolean = false
 ) {
     val isWatched: Boolean
         get() = app != null && app.status != App.STATUS_DELETED && app.rowId > 0
@@ -150,15 +154,21 @@ sealed interface DetailsEvent {
     object Translate : DetailsEvent
 }
 
-class DetailsViewModel(app: App) :
-    BaseFlowViewModel<DetailsState, DetailsEvent, DetailsAction>(), KoinComponent {
+class DetailsViewModel(
+    app: App,
+    isSystemInDarkTheme: Boolean
+): BaseFlowViewModel<DetailsState, DetailsEvent, DetailsAction>(), KoinComponent {
 
     class Factory(
-        private val argApp: App
+        private val argApp: App,
+        private val isSystemInDarkTheme: Boolean
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            return DetailsViewModel(argApp) as T
+            return DetailsViewModel(
+                argApp,
+                isSystemInDarkTheme
+            ) as T
         }
     }
 
@@ -182,7 +192,8 @@ class DetailsViewModel(app: App) :
             title = app.title,
             account = prefs.account,
             isLocalApp = app.rowId == -1,
-            packageInfo = installedApps.packageInfo(app.packageName)
+            packageInfo = installedApps.packageInfo(app.packageName),
+            isSystemInDarkTheme = isSystemInDarkTheme
         )
 
         if (app.iconUrl.isNotEmpty()) {
@@ -237,7 +248,7 @@ class DetailsViewModel(app: App) :
             }
             viewState = viewState.copy(
                 appIconState = AppIconState.Loaded(drawable = drawable),
-                customPrimaryColor = customPrimaryColor
+                customPrimaryColor = customPrimaryColor ?: if (viewState.isSystemInDarkTheme) Color.Black.toArgb() else Color.White.toArgb()
             )
         }
     }
