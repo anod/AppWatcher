@@ -16,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.anod.appwatcher.R
@@ -66,7 +67,9 @@ fun WatchListScreen(
     ) { paddingValues ->
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier.padding(paddingValues),
+            modifier = Modifier
+                .padding(paddingValues)
+                .padding(start = 1.dp, end = 1.dp),
             key = { filterIds[it] }
         ) { pageIndex ->
             val filterId = remember(pageIndex) { filterIds[pageIndex] }

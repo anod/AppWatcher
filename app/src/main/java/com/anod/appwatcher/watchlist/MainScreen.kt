@@ -43,6 +43,7 @@ fun MainScreen(
                 }
             )
         },
+        gesturesEnabled = true,
         drawerState = drawerState
     ) {
         WatchListScreen(
