@@ -110,8 +110,8 @@ import com.anod.appwatcher.database.entities.Price
 import com.anod.appwatcher.tags.TagSelectionDialog
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.StoreIntent
-import com.google.accompanist.placeholder.material.placeholder
 import info.anodsplace.applog.AppLog
+import info.anodsplace.compose.placeholder
 import info.anodsplace.compose.toAnnotatedString
 import info.anodsplace.framework.text.Html
 import kotlinx.coroutines.flow.Flow
@@ -536,7 +536,8 @@ private fun VersionInfoCell(
                 .padding(horizontal = 4.dp)
                 .placeholder(
                     visible = placeholder,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
+                    shape = MaterialTheme.shapes.small
                 ),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
@@ -556,7 +557,8 @@ private fun VersionInfoCell(
                 .padding(horizontal = 4.dp)
                 .placeholder(
                     visible = placeholder,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
+                    shape = MaterialTheme.shapes.small
                 ),
             style = MaterialTheme.typography.labelMedium,
             textAlign = TextAlign.Center

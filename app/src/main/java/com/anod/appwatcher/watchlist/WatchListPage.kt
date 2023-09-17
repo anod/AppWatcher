@@ -76,9 +76,9 @@ import com.anod.appwatcher.database.entities.Price
 import com.anod.appwatcher.details.rememberAppItemState
 import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.SelectionState
-import com.google.accompanist.placeholder.material.placeholder
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import info.anodsplace.compose.placeholder
 import info.anodsplace.framework.content.InstalledApps
 import org.koin.java.KoinJavaComponent.getKoin
 
@@ -152,7 +152,6 @@ fun WatchListPage(
             }
         }
     }
-
 }
 
 @Composable
@@ -318,7 +317,8 @@ private fun AppItem(
                             .align(Alignment.BottomEnd)
                             .placeholder(
                                 visible = status == "p",
-                                color = MaterialTheme.colorScheme.primary
+                                color = MaterialTheme.colorScheme.primary,
+                                shape = MaterialTheme.shapes.small
                             ),
                         itemSelection = itemSelection,
                         tint = if (status == "e") MaterialTheme.colorScheme.error else Color.Unspecified
@@ -527,7 +527,7 @@ private fun RecentItemAppCard(app: App?, onClick: (() -> Unit), placeholderColor
                 .placeholder(
                     visible = app == null,
                     color = placeholderColor,
-                    //   highlight = PlaceholderHighlight.fade(),
+                    shape = MaterialTheme.shapes.small
                 ),
             textAlign = TextAlign.Center,
             fontSize = 14.sp,

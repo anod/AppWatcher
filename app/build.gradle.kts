@@ -3,12 +3,12 @@ plugins {
     kotlin("android")
     kotlin("kapt")
     id("kotlin-parcelize")
-    id("com.google.devtools.ksp").version("1.8.21-1.0.11")
+    id("com.google.devtools.ksp").version("1.9.10-1.0.13")
     id("com.google.android.gms.oss-licenses-plugin")
 }
 
 android {
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.anod.appwatcher"
@@ -83,7 +83,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.7"
+        kotlinCompilerExtensionVersion = "1.5.3"
     }
     namespace = "com.anod.appwatcher"
 }
@@ -112,10 +112,7 @@ dependencies {
     // Compose
     implementation(libs.activity.compose)
     implementation(libs.runtime.tracing)
-    implementation(libs.accompanist.flowlayout)
     implementation(libs.accompanist.swiperefresh)
-    implementation(libs.accompanist.systemuicontroller)
-    implementation(libs.accompanist.placeholder.material)
 
     // Coil
     implementation(libs.coil.base)

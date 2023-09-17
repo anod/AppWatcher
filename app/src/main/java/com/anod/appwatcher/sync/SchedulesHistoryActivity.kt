@@ -3,7 +3,10 @@ package com.anod.appwatcher.sync
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -34,7 +37,6 @@ import com.anod.appwatcher.database.entities.Schedule
 import com.anod.appwatcher.database.entities.Skipped
 import com.anod.appwatcher.database.entities.Success
 import com.anod.appwatcher.utils.isLightColor
-import com.google.accompanist.flowlayout.FlowRow
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.text.DateFormat
@@ -87,6 +89,7 @@ fun SchedulesHistoryScreen(schedules: List<Schedule>, dateFormat: DateFormat, on
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ScheduleRow(schedule: Schedule, dateFormat: DateFormat) {
     val range = remember(schedule) {
@@ -111,7 +114,7 @@ private fun ScheduleRow(schedule: Schedule, dateFormat: DateFormat) {
     Column(Modifier.padding(16.dp)) {
         Text(text = range)
         FlowRow(
-            mainAxisSpacing = 8.dp
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             ScheduleChip(
                 text = when (result) {

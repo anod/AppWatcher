@@ -1,6 +1,8 @@
 package com.anod.appwatcher.compose
 
 import android.os.Build
+import android.view.Window
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
@@ -15,11 +17,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogWindowProvider
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.color.MaterialColors
 import com.anod.appwatcher.utils.isLightColor
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import info.anodsplace.framework.app.CustomThemeColor
+import info.anodsplace.framework.app.CustomThemeColors
+import info.anodsplace.framework.app.WindowCustomTheme
+import info.anodsplace.framework.app.findActivity
+import info.anodsplace.framework.app.findWindow
 
 private val AppTypography = Typography()
 val Amber800 = Color(0xFFFF8F00)
@@ -120,6 +128,7 @@ val AppShapes = Shapes(
 
 fun supportsDynamic(): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 
+@RequiresApi(Build.VERSION_CODES.S)
 @Composable
 fun darkTheme(theme: Int, supportsDynamic: Boolean): ColorScheme {
     return if (theme == Preferences.THEME_BLACK) {
@@ -171,22 +180,21 @@ fun AppTheme(
     }
 
     if (updateSystemBars) {
-        val systemUI = rememberSystemUiController()
         if (transparentSystemUi) {
-            systemUI.setStatusBarColor(
-                Color.Transparent,
-                darkIcons = !darkTheme
+            setSystemUiColors(
+                statusBarColor = Color.Transparent,
+                statusBarDarkIcons = !darkTheme,
+                navigationBarColor = Color.Transparent,
+                navigationBarDarkIcons = !darkTheme
             )
         } else {
-            systemUI.setStatusBarColor(
-                statusBarColor,
-                darkIcons = isAppearanceLightStatusBars
+            setSystemUiColors(
+                statusBarColor = statusBarColor,
+                statusBarDarkIcons = isAppearanceLightStatusBars,
+                navigationBarColor = Color.Transparent,
+                navigationBarDarkIcons = !darkTheme
             )
         }
-        systemUI.setNavigationBarColor(
-            Color.Transparent,//colorScheme.surface,
-            darkIcons = !darkTheme
-        )
     }
 
     MaterialTheme(
@@ -196,3 +204,35 @@ fun AppTheme(
             content = content
     )
 }
+
+@Composable
+fun setSystemUiColors(
+    statusBarColor: Color,
+    statusBarDarkIcons: Boolean,
+    navigationBarColor: Color,
+    navigationBarDarkIcons: Boolean
+): Boolean {
+    val window = findWindow() ?: return false
+    val activity = LocalContext.current.findActivity()
+    WindowCustomTheme.apply(
+        themeColors = CustomThemeColors(
+            statusBarColor = CustomThemeColor(
+                colorInt = statusBarColor.toArgb(),
+                isLight = statusBarDarkIcons
+            ),
+            navigationBarColor = CustomThemeColor(
+                colorInt = navigationBarColor.toArgb(),
+                isLight = navigationBarDarkIcons
+            )
+        ),
+        window = window,
+        activity = activity
+    )
+    return true
+}
+
+
+@Composable
+private fun findWindow(): Window? =
+    (LocalView.current.parent as? DialogWindowProvider)?.window
+        ?: LocalView.current.context.findWindow()

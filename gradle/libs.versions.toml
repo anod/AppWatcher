@@ -1,33 +1,30 @@
 [versions]
-accompanist-placeholder-material = "0.28.0"
-accompanist-systemuicontroller = "0.28.0"
-accompanist-swiperefresh = "0.28.0"
-accompanist-flowlayout = "0.30.0"
+accompanist-swiperefresh = "0.32.0"
 activity-compose = "1.7.2"
-agp = "8.2.0-alpha14"
+agp = "8.2.0-beta04"
 appcompat = "1.6.1"
 coil = "2.4.0"
 collection = "1.2.0"
 core-splashscreen = "1.0.1"
-core = "1.10.1"
-firebase-crashlytics = "18.4.0"
+core = "1.12.0"
+firebase-crashlytics = "18.4.3"
 firebase-analytics = "21.3.0"
-firebase-crashlytics-gradle = "2.9.7"
+firebase-crashlytics-gradle = "2.9.9"
 google-api-client-android = "2.2.0"
 google-api-client = "2.2.0"
-google-services = "4.3.15"
+google-services = "4.4.0"
 junit = "4.13.2"
-koin-core = "3.4.0"
-kotlin = "1.8.21"
-coroutines = "1.7.1"
+koin-core = "3.5.0"
+kotlin = "1.9.10"
+coroutines = "1.7.3"
 leakcanary-android = "2.11"
-lifecycle = "2.6.1"
+lifecycle = "2.6.2"
 okhttp = "4.11.0"
 oss-licenses-plugin = "0.10.6"
-paging-compose = "3.2.0"
-paging-runtime = "3.2.0"
+paging-compose = "3.2.1"
+paging-runtime = "3.2.1"
 palette = "1.0.0"
-play-services-auth = "20.6.0"
+play-services-auth = "20.7.0"
 play-services-identity = "18.0.1"
 play-services-oss-licenses = "17.0.1"
 process-phoenix = "2.1.2"
@@ -38,10 +35,7 @@ runtime-tracing = "1.0.0-alpha03"
 work-runtime = "2.8.1"
 
 [libraries]
-accompanist-placeholder-material = { module = "com.google.accompanist:accompanist-placeholder-material", version.ref = "accompanist-placeholder-material" }
-accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist-systemuicontroller" }
 accompanist-swiperefresh = { module = "com.google.accompanist:accompanist-swiperefresh", version.ref = "accompanist-swiperefresh" }
-accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanist-flowlayout" }
 
 activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
 
