@@ -20,7 +20,6 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import com.google.api.client.http.HttpRequestInitializer
 import com.google.api.services.drive.DriveScopes
 import info.anodsplace.applog.AppLog
-import info.anodsplace.framework.app.ActivityListener
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.app.NotificationManager
 import info.anodsplace.framework.playservices.GoogleSignInConnect
@@ -43,7 +42,11 @@ internal fun createCredentials(context: Context, googleAccount: GoogleSignInAcco
             .setSelectedAccount(googleAccount.account)
 }
 
-class GDriveSignIn(private val activity: Activity, private val listener: Listener) : ActivityListener.ResultListener {
+interface ResultListener {
+    fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
+}
+
+class GDriveSignIn(private val activity: Activity, private val listener: Listener) : ResultListener {
 
     private val driveConnect by lazy { GoogleSignInConnect(activity, createGDriveSignInOptions()) }
 
