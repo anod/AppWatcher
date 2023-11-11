@@ -14,6 +14,7 @@ import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.SelectionState
 import com.anod.appwatcher.utils.filter
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -30,21 +31,22 @@ data class AppsTagScreenState(
 )
 
 sealed interface AppsTagScreenEvent {
-    object Import : AppsTagScreenEvent
-    object Dismiss : AppsTagScreenEvent
+    data object Import : AppsTagScreenEvent
+    data object Dismiss : AppsTagScreenEvent
     class FilterByTitle(val query: String) : AppsTagScreenEvent
     class Toggle(val appId: String) : AppsTagScreenEvent
     class SetSelection(val all: Boolean) : AppsTagScreenEvent
 }
 
 sealed interface AppsTagScreenAction {
-    object Dismiss : AppsTagScreenAction
+    data object Dismiss : AppsTagScreenAction
 }
 
 /**
  * @author Alex Gavrishev
  * @date 19/04/2016.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class AppsTagViewModel(tag: Tag) : BaseFlowViewModel<AppsTagScreenState, AppsTagScreenEvent, AppsTagScreenAction>(), KoinComponent {
 
     class Factory(private val tag: Tag) : ViewModelProvider.Factory {
@@ -99,9 +101,4 @@ class AppsTagViewModel(tag: Tag) : BaseFlowViewModel<AppsTagScreenState, AppsTag
             emitAction(AppsTagScreenAction.Dismiss)
         }
     }
-
-    companion object {
-        const val EXTRA_TAG = "extra_tag"
-    }
-
 }

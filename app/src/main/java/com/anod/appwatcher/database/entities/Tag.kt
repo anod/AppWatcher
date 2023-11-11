@@ -1,6 +1,5 @@
 package com.anod.appwatcher.database.entities
 
-import android.os.Parcel
 import android.os.Parcelable
 import android.provider.BaseColumns
 import androidx.annotation.ColorInt
@@ -10,12 +9,14 @@ import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.anod.appwatcher.database.TagsTable
 import info.anodsplace.ktx.hashCodeOf
+import kotlinx.parcelize.Parcelize
 
 /**
  * @author Alex Gavrishev
  * @date 10/03/2017
  */
 @Entity(tableName = TagsTable.table)
+@Parcelize
 data class Tag(
         @PrimaryKey
         @ColumnInfo(name = BaseColumns._ID)
@@ -35,12 +36,6 @@ data class Tag(
     @Ignore
     constructor(name: String, @ColorInt color: Int) : this(0, name, color)
 
-    internal constructor(source: Parcel) : this(
-            source.readInt(),
-            source.readString()!!,
-            source.readInt()
-    )
-
     override fun equals(other: Any?): Boolean {
         if (other !is Tag) return false
         return when {
@@ -51,29 +46,10 @@ data class Tag(
         }
     }
 
-    override fun describeContents(): Int = 0
-
-    override fun writeToParcel(dest: Parcel, flags: Int) {
-        dest.writeInt(this.id)
-        dest.writeString(this.name)
-        dest.writeInt(this.color)
-    }
-
     override fun hashCode() = hashCodeOf(name, color)
 
     companion object {
         const val DEFAULT_COLOR = 0xFF2196F3.toInt()
         val empty = Tag(0, "", DEFAULT_COLOR)
-
-        @JvmField
-        val CREATOR: Parcelable.Creator<Tag> = object : Parcelable.Creator<Tag> {
-            override fun createFromParcel(source: Parcel): Tag {
-                return Tag(source)
-            }
-
-            override fun newArray(size: Int): Array<Tag> {
-                return emptyArray()
-            }
-        }
     }
 }

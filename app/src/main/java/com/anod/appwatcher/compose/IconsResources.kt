@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Label
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.OpenInNew
+import androidx.compose.material.icons.filled.Pin
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
@@ -25,6 +26,7 @@ import androidx.compose.material.icons.filled.Shop2
 import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material.icons.filled.Store
+import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -93,6 +95,11 @@ fun BackArrowIcon() {
 @Composable
 fun EditIcon() {
     Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(id = R.string.menu_edit))
+}
+
+@Composable
+fun PinShortcutIcon() {
+    Icon(imageVector = Icons.Default.TouchApp, contentDescription = stringResource(id = R.string.pin_shortcut))
 }
 
 @Composable
@@ -218,8 +225,8 @@ fun IconsResourcesPreview() {
                 { AppInfoIcon() },
                 { OpenDrawerIcon() },
                 { RefreshIcon() },
-                { ClearIcon() }
-
+                { ClearIcon() },
+                { PinShortcutIcon() }
             )
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = 20.dp),

@@ -1,5 +1,6 @@
 package com.anod.appwatcher.watchlist
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -12,6 +13,7 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.core.os.bundleOf
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -23,6 +25,7 @@ import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.compose.MainDetailScreen
 import com.anod.appwatcher.compose.onCommonActivityAction
+import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.details.DetailsDialog
 import com.anod.appwatcher.history.HistoryListActivity
 import com.anod.appwatcher.installed.InstalledActivity
@@ -51,11 +54,26 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (intent?.extras?.containsKey("open_recently_installed") == true) {
+        val extras = intent?.extras ?: bundleOf()
+        if (extras.containsKey("open_recently_installed")) {
             intent!!.extras!!.remove("open_recently_installed")
             startActivity(InstalledActivity.intent(importMode = false, context = this))
             finish()
             return
+        }
+
+        if (extras.containsKey(WatchListStateViewModel.EXTRA_TAG_ID)) {
+            val extraTagId = extras.getInt(WatchListStateViewModel.EXTRA_TAG_ID)
+            intent!!.extras!!.remove(WatchListStateViewModel.EXTRA_TAG_ID)
+            startActivity(TagWatchListComposeActivity.createTagIntent(
+                tag = Tag(
+                    id = extraTagId,
+                    name = "",
+                    color = extras.getInt(WatchListStateViewModel.EXTRA_TAG_COLOR)
+                ),
+                context = this
+            ))
+            // Do not finish and return to support back action
         }
 
         accountSelectionDialog = AccountSelectionDialog(this, prefs)
@@ -153,9 +171,11 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
             listViewModel.viewActions.collect { onCommonActivityAction(it) }
         }
 
-        lifecycleScope.launchWhenCreated {
-            hingeDevice.layout.collect {
-                listViewModel.handleEvent(WatchListEvent.SetWideLayout(it))
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
+                hingeDevice.layout.collect {
+                    listViewModel.handleEvent(WatchListEvent.SetWideLayout(it))
+                }
             }
         }
 

@@ -102,7 +102,6 @@
             android:resizeableActivity="true"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:label="@string/preferences" />
-        <activity android:name="info.anodsplace.framework.app.FragmentToolbarActivity" />
 
         <activity
             android:name=".installed.InstalledActivity"

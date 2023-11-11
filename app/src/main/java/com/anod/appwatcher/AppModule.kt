@@ -1,6 +1,7 @@
 package com.anod.appwatcher
 
 import android.app.Application
+import android.content.pm.ShortcutManager
 import android.telephony.TelephonyManager
 import android.util.LruCache
 import androidx.core.content.ContextCompat.getSystemService
@@ -18,6 +19,7 @@ import finsky.api.DfeDeviceInfoProvider
 import info.anodsplace.framework.app.ApplicationContext
 import info.anodsplace.framework.app.NotificationManager
 import info.anodsplace.framework.app.RealNotificationManager
+import info.anodsplace.framework.content.PinShortcutManager
 import info.anodsplace.framework.net.NetworkConnectivity
 import info.anodsplace.framework.util.createLruCache
 import info.anodsplace.playstore.DeviceId
@@ -35,6 +37,11 @@ import org.koin.dsl.module
 fun createAppModule(): Module = module {
     single(named("deviceId")) { DeviceId(get()).load() }
     factory { getSystemService(get(), TelephonyManager::class.java) }
+    factory { PinShortcutManager(
+            context = get(),
+            androidShortcuts = getSystemService(get(), ShortcutManager::class.java)!!
+        )
+    }
     factory { get<Application>().packageManager }
 
     factory<DfeDeviceInfoProvider> {

@@ -8,6 +8,7 @@ import androidx.compose.ui.res.stringResource
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.EditIcon
 import com.anod.appwatcher.compose.FilterMenuItem
+import com.anod.appwatcher.compose.PinShortcutIcon
 import com.anod.appwatcher.compose.SortMenuItem
 import com.anod.appwatcher.compose.TagAppIconButton
 import com.anod.appwatcher.watchlist.WatchListEvent
@@ -85,6 +86,17 @@ fun TagWatchListTopBar(
                 },
                 barBounds = barBounds
             )
+
+            if (screenState.isRequestPinShortcutSupported) {
+                DropdownMenuItem(
+                    text = { Text(text = stringResource(id = R.string.pin_shortcut)) },
+                    leadingIcon = { PinShortcutIcon() },
+                    onClick = {
+                        onEvent(WatchListEvent.PinTagShortcut)
+                        dismiss()
+                    }
+                )
+            }
         },
         onEvent = onEvent
     )

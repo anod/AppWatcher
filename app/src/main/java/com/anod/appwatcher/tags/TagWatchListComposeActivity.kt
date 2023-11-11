@@ -10,7 +10,9 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.compose.MainDetailScreen
@@ -20,6 +22,7 @@ import com.anod.appwatcher.details.DetailsDialog
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.DetailContent
+import com.anod.appwatcher.watchlist.MainActivity
 import com.anod.appwatcher.watchlist.WatchListEvent
 import com.anod.appwatcher.watchlist.WatchListPagingSource
 import com.anod.appwatcher.watchlist.WatchListStateViewModel
@@ -111,13 +114,16 @@ class TagWatchListComposeActivity : BaseComposeActivity() {
             viewModel.viewActions.collect { onCommonActivityAction(it) }
         }
 
-        lifecycleScope.launchWhenCreated {
-            hingeDevice.layout.collect {
-                viewModel.handleEvent(WatchListEvent.SetWideLayout(it))
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
+                hingeDevice.layout.collect {
+                    viewModel.handleEvent(WatchListEvent.SetWideLayout(it))
+                }
             }
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (viewModel.viewState.wideLayout.isWideLayout) {
             if (viewModel.viewState.selectedApp != null) {
@@ -130,7 +136,7 @@ class TagWatchListComposeActivity : BaseComposeActivity() {
 
     companion object {
         fun createTagIntent(tag: Tag, context: Context) = Intent(context, TagWatchListComposeActivity::class.java).apply {
-            putExtra(AppsTagViewModel.EXTRA_TAG, tag)
+            putExtra(WatchListStateViewModel.EXTRA_TAG, tag)
             addMultiWindowFlags(context)
         }
     }
