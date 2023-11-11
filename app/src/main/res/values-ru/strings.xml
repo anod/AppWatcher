@@ -211,4 +211,10 @@
   <string name="menu">Меню</string>
   <string name="purchase_history">История покупок</string>
   <string name="navdrawer_item_purchases">Покупки</string>
+    <string name="android_version">Версия Android</string>
+  <string name="target_sdk">Версия SDK</string>
+  <string name="discovered_date">Дата обнаружения</string>
+  <string name="selected">Выбрано</string>
+  <string name="pin_shortcut">Закрепить ярлык</string>
+  <string name="unable_pin_shortcut">Не удалось закрепить ярлык</string>
 </resources>
