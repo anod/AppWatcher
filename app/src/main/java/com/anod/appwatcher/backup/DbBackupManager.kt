@@ -111,7 +111,11 @@ class DbBackupManager(private val context: ApplicationContext, private val db: A
             }
 
             result.appTags.forEach { appTag ->
-                db.appTags().insert(appTag.appId, appTag.tagId)
+                try {
+                    db.appTags().insert(appTag.appId, appTag.tagId)
+                } catch (e: Throwable) {
+                    AppLog.e(Throwable("Cannot import app '${appTag.appId}' tag '${appTag.tagId}'", e))
+                }
             }
             return@withTransaction RESULT_OK
         }

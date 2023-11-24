@@ -1,6 +1,5 @@
 package com.anod.appwatcher.watchlist
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -17,6 +16,7 @@ import androidx.core.os.bundleOf
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.MarketSearchActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.SettingsActivity
@@ -30,6 +30,7 @@ import com.anod.appwatcher.details.DetailsDialog
 import com.anod.appwatcher.history.HistoryListActivity
 import com.anod.appwatcher.installed.InstalledActivity
 import com.anod.appwatcher.tags.TagWatchListComposeActivity
+import com.anod.appwatcher.utils.getIntentFlags
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.wishlist.WishListActivity
 import info.anodsplace.applog.AppLog
@@ -55,6 +56,9 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
         super.onCreate(savedInstanceState)
 
         val extras = intent?.extras ?: bundleOf()
+        if (BuildConfig.DEBUG) {
+            AppLog.d("Intent flags: ${getIntentFlags(intent?.flags ?: 0).joinToString()}")
+        }
         if (extras.containsKey("open_recently_installed")) {
             intent!!.extras!!.remove("open_recently_installed")
             startActivity(InstalledActivity.intent(importMode = false, context = this))
