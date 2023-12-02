@@ -9,12 +9,10 @@ class BaselineProfileGenerator {
     val baselineProfileRule = BaselineProfileRule()
 
     @Test
-    fun startup() = baselineProfileRule.collectBaselineProfile(
+    fun startup(): Unit = baselineProfileRule.collect(
         packageName = "com.anod.appwatcher",
         profileBlock = {
             startActivityAndWait()
-
-            
         }
     )
 }

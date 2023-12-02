@@ -3,7 +3,7 @@ plugins {
     kotlin("android")
     kotlin("kapt")
     id("kotlin-parcelize")
-    id("com.google.devtools.ksp").version("1.9.10-1.0.13")
+    id("com.google.devtools.ksp").version("1.9.20-1.0.14")
     id("com.google.android.gms.oss-licenses-plugin")
 }
 
@@ -83,7 +83,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.3"
+        kotlinCompilerExtensionVersion = "1.5.5"
     }
     namespace = "com.anod.appwatcher"
 }

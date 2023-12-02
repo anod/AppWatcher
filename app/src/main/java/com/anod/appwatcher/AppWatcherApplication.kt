@@ -32,6 +32,10 @@ import java.net.UnknownHostException
 
 class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstance, Configuration.Provider, KoinComponent {
 
+    override val workManagerConfiguration = Configuration.Builder().apply {
+        setMinimumLoggingLevel(android.util.Log.DEBUG)
+    }.build()
+
     override val appCompatNightMode: Int
         get() = get<Preferences>().appCompatNightMode
 
@@ -111,10 +115,6 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
             FirebaseCrashlytics.getInstance().log("$priority/$tag: $msg")
         }
     }
-
-    override fun getWorkManagerConfiguration() = Configuration.Builder().apply {
-        setMinimumLoggingLevel(android.util.Log.DEBUG)
-    }.build()
 }
 
 class LifecycleCallbacks : Application.ActivityLifecycleCallbacks {
