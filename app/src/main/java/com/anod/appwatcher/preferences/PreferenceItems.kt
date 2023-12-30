@@ -5,7 +5,7 @@ import android.text.format.DateUtils
 import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.R
 import info.anodsplace.compose.PreferenceItem
-import info.anodsplace.framework.playservices.GooglePlayServices
+import info.anodsplace.playservices.GooglePlayServices
 import java.util.Locale
 
 private val appVersion: String

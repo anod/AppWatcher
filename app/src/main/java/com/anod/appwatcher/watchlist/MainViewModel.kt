@@ -22,7 +22,7 @@ import com.anod.appwatcher.utils.networkConnection
 import com.anod.appwatcher.utils.prefs
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import info.anodsplace.applog.AppLog
-import info.anodsplace.framework.util.Hash
+import info.anodsplace.ktx.Hash
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter

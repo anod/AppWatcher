@@ -9,7 +9,7 @@ import com.anod.appwatcher.sync.SyncNotification
 import com.anod.appwatcher.utils.forMyApps
 import com.anod.appwatcher.utils.forPlayStore
 import com.anod.appwatcher.utils.prefs
-import info.anodsplace.framework.app.ApplicationContext
+import info.anodsplace.context.ApplicationContext
 import info.anodsplace.framework.app.addMultiWindowFlags
 import info.anodsplace.framework.content.startActivitySafely
 import org.koin.core.component.KoinComponent
@@ -19,7 +19,7 @@ class NotificationActivity : Activity(), KoinComponent {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val sn = SyncNotification(ApplicationContext(this), get())
+        val sn = SyncNotification(info.anodsplace.context.ApplicationContext(this), get())
         sn.cancel()
         when (intent.getIntExtra(extraActionType, 0)) {
             actionPlayStore -> {

@@ -7,14 +7,14 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
 import com.anod.appwatcher.model.Filters
-import info.anodsplace.framework.app.NotificationManager
+import info.anodsplace.notification.NotificationManager
 import info.anodsplace.graphics.AdaptiveIcon
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 
-class Preferences(context: Context, private val notificationManager: NotificationManager, private val appScope: CoroutineScope) : SharedPreferences.OnSharedPreferenceChangeListener {
+class Preferences(context: Context, private val notificationManager: info.anodsplace.notification.NotificationManager, private val appScope: CoroutineScope) : SharedPreferences.OnSharedPreferenceChangeListener {
     private val _changes = MutableSharedFlow<String>()
     private val preferences = context.getSharedPreferences(PREFS_NAME, 0)
 

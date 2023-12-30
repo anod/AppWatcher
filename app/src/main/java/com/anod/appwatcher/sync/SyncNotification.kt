@@ -12,8 +12,8 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.color.DynamicColors
 import com.anod.appwatcher.watchlist.MainActivity
-import info.anodsplace.framework.app.ApplicationContext
-import info.anodsplace.framework.app.NotificationManager
+import info.anodsplace.context.ApplicationContext
+import info.anodsplace.notification.NotificationManager
 import info.anodsplace.framework.text.Html
 
 /**
@@ -21,7 +21,7 @@ import info.anodsplace.framework.text.Html
  * *
  * @date 2014-09-24
  */
-class SyncNotification(private val context: ApplicationContext, private val notificationManager: NotificationManager) {
+class SyncNotification(private val context: info.anodsplace.context.ApplicationContext, private val notificationManager: info.anodsplace.notification.NotificationManager) {
 
     companion object {
         internal const val syncNotificationId = 1
@@ -64,15 +64,15 @@ class SyncNotification(private val context: ApplicationContext, private val noti
     }
 
     fun createChannels() {
-        val updates = NotificationChannel(updatesChannelId, context.getString(R.string.channel_app_updates), NotificationManager.IMPORTANCE_DEFAULT)
+        val updates = NotificationChannel(updatesChannelId, context.getString(R.string.channel_app_updates), info.anodsplace.notification.NotificationManager.IMPORTANCE_DEFAULT)
         updates.description = context.getString(R.string.channel_updates_description)
         updates.setShowBadge(true)
 
-        val prices = NotificationChannel(pricesChannelId, context.getString(R.string.channel_prices), NotificationManager.IMPORTANCE_DEFAULT)
+        val prices = NotificationChannel(pricesChannelId, context.getString(R.string.channel_prices), info.anodsplace.notification.NotificationManager.IMPORTANCE_DEFAULT)
         prices.description = context.getString(R.string.channel_prices_description)
         prices.setShowBadge(true)
 
-        val authentication = NotificationChannel(authenticationId, context.getString(R.string.channel_authentication), NotificationManager.IMPORTANCE_DEFAULT)
+        val authentication = NotificationChannel(authenticationId, context.getString(R.string.channel_authentication), info.anodsplace.notification.NotificationManager.IMPORTANCE_DEFAULT)
         prices.description = context.getString(R.string.channel_authentication_description)
         prices.setShowBadge(true)
         notificationManager.createNotificationChannels(listOf(updates, prices, authentication))

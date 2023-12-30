@@ -29,11 +29,11 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import info.anodsplace.applog.AppLog
 import info.anodsplace.compose.PreferenceItem
-import info.anodsplace.framework.app.ApplicationContext
+import info.anodsplace.context.ApplicationContext
 import info.anodsplace.framework.app.HingeDeviceLayout
-import info.anodsplace.framework.app.NotificationManager
+import info.anodsplace.notification.NotificationManager
 import info.anodsplace.framework.content.forAppInfo
-import info.anodsplace.framework.playservices.GooglePlayServices
+import info.anodsplace.playservices.GooglePlayServices
 import info.anodsplace.permissions.AppPermission
 import info.anodsplace.permissions.AppPermissions
 import kotlinx.coroutines.CoroutineScope

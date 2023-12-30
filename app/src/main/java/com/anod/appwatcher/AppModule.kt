@@ -16,12 +16,12 @@ import com.anod.appwatcher.utils.RealAppIconLoader
 import com.anod.appwatcher.utils.date.UploadDateParserCache
 import com.anod.appwatcher.watchlist.RecentlyInstalledAppsLoader
 import finsky.api.DfeDeviceInfoProvider
-import info.anodsplace.framework.app.ApplicationContext
-import info.anodsplace.framework.app.NotificationManager
-import info.anodsplace.framework.app.RealNotificationManager
+import info.anodsplace.context.ApplicationContext
+import info.anodsplace.notification.NotificationManager
+import info.anodsplace.notification.RealNotificationManager
 import info.anodsplace.framework.content.PinShortcutManager
 import info.anodsplace.framework.net.NetworkConnectivity
-import info.anodsplace.framework.util.createLruCache
+import info.anodsplace.ktx.createLruCache
 import info.anodsplace.playstore.DeviceId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

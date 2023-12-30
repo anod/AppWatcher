@@ -21,7 +21,7 @@ import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BackArrowIconButton
 import com.anod.appwatcher.compose.ShareIconButton
 import com.anod.appwatcher.preferences.Preferences
-import info.anodsplace.framework.app.NotificationManager
+import info.anodsplace.notification.NotificationManager
 import org.koin.java.KoinJavaComponent
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -140,6 +140,6 @@ fun UserLogScreenPreview() {
                             """.trimIndent().split("\n").map { UserLogMessage.from(it) }
             ),
             onEvent = {},
-            prefs = Preferences(context, NotificationManager.NoOp(), scope)
+            prefs = Preferences(context, info.anodsplace.notification.NotificationManager.NoOp(), scope)
     )
 }

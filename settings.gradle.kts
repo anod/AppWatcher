@@ -20,8 +20,11 @@ include(
     ":lib:applog",
     ":lib:compose",
     ":lib:graphics",
+    ":lib:context",
+    ":lib:notification",
     ":lib:framework",
     ":lib:ktx",
     ":lib:permissions",
+    ":lib:playservices",
     ":macrobenchmark"
 )

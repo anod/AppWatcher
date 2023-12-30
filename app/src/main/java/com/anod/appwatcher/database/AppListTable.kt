@@ -13,8 +13,8 @@ import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
 import com.anod.appwatcher.database.entities.*
 import com.anod.appwatcher.preferences.Preferences
-import info.anodsplace.framework.util.chunked
-import info.anodsplace.framework.util.dayStartAgoMillis
+import info.anodsplace.ktx.chunked
+import info.anodsplace.ktx.dayStartAgoMillis
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

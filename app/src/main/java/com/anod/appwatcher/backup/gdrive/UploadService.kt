@@ -15,7 +15,7 @@ import com.anod.appwatcher.SettingsActivity
 import com.anod.appwatcher.utils.prefs
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import info.anodsplace.applog.AppLog
-import info.anodsplace.framework.app.ApplicationContext
+import info.anodsplace.context.ApplicationContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.parameter.parametersOf
@@ -73,7 +73,8 @@ class UploadService(appContext: Context, params: WorkerParameters) : CoroutineWo
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 }
                 GDriveSignIn.showResolutionNotification(
-                        PendingIntent.getActivity(applicationContext, 0, settingActivity, PendingIntent.FLAG_IMMUTABLE), ApplicationContext(applicationContext)
+                        PendingIntent.getActivity(applicationContext, 0, settingActivity, PendingIntent.FLAG_IMMUTABLE),
+                    info.anodsplace.context.ApplicationContext(applicationContext)
                 )
             }
             return Result.failure()

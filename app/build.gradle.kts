@@ -1,9 +1,8 @@
 plugins {
-    id("com.android.application")
-    kotlin("android")
-    kotlin("kapt")
-    id("kotlin-parcelize")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin)
     alias(libs.plugins.ksp)
+    id("kotlin-parcelize")
     id("com.google.android.gms.oss-licenses-plugin")
 }
 
@@ -103,8 +102,10 @@ dependencies {
     implementation(libs.androidx.palette)
     implementation(libs.work.runtime)
     implementation(libs.work.runtime.ktx)
-    implementation(libs.androidx.core)
+    implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core.splashscreen)
+
+    implementation(libs.material)
 
     implementation(libs.paging.runtime)
     implementation(libs.paging.compose)
@@ -156,7 +157,10 @@ dependencies {
     implementation(project(":lib:applog"))
     implementation(project(":lib:compose"))
     implementation(project(":lib:graphics"))
+    implementation(project(":lib:context"))
+    implementation(project(":lib:notification"))
     implementation(project(":lib:framework"))
+    implementation(project(":lib:playservices"))
     implementation(project(":lib:ktx"))
     implementation(project(":lib:permissions"))
     implementation(project(":playstore"))

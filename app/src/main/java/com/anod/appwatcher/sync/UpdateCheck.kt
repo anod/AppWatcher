@@ -28,8 +28,8 @@ import finsky.api.DfeApi
 import finsky.api.Document
 import finsky.api.filterDocuments
 import info.anodsplace.applog.AppLog
-import info.anodsplace.framework.app.ApplicationContext
-import info.anodsplace.framework.app.NotificationManager
+import info.anodsplace.context.ApplicationContext
+import info.anodsplace.notification.NotificationManager
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.net.NetworkConnectivity
 import info.anodsplace.playstore.AppDetailsFilter
@@ -45,15 +45,15 @@ import java.util.*
  */
 
 class UpdateCheck(
-        private val context: ApplicationContext,
-        private val packageManager: PackageManager,
-        private val notificationManager: NotificationManager,
-        private val database: AppsDatabase,
-        private val preferences: Preferences,
-        private val networkConnection: NetworkConnectivity,
-        private val authToken: AuthTokenBlocking,
-        private val uploadDateParserCache: UploadDateParserCache,
-        private val koin: Koin
+    private val context: info.anodsplace.context.ApplicationContext,
+    private val packageManager: PackageManager,
+    private val notificationManager: info.anodsplace.notification.NotificationManager,
+    private val database: AppsDatabase,
+    private val preferences: Preferences,
+    private val networkConnection: NetworkConnectivity,
+    private val authToken: AuthTokenBlocking,
+    private val uploadDateParserCache: UploadDateParserCache,
+    private val koin: Koin
 ) {
 
     class SyncResult(

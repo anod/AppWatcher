@@ -13,7 +13,7 @@ import androidx.work.Operation
 import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
 import info.anodsplace.applog.AppLog
-import info.anodsplace.framework.app.ApplicationContext
+import info.anodsplace.context.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onEach
 import java.util.concurrent.TimeUnit
@@ -24,11 +24,11 @@ import java.util.concurrent.TimeUnit
  * @date 27/05/2016.
  */
 
-class SyncScheduler(private val context: ApplicationContext) {
+class SyncScheduler(private val context: info.anodsplace.context.ApplicationContext) {
     private val wm: WorkManager
         get() = WorkManager.getInstance(context.actual)
 
-    constructor(context: Context) : this(ApplicationContext(context))
+    constructor(context: Context) : this(info.anodsplace.context.ApplicationContext(context))
 
     fun schedule(requiresCharging: Boolean, requiresWifi: Boolean, windowStartSec: Long, update: Boolean): Flow<Operation.State> {
         val constraints: Constraints = Constraints.Builder().apply {

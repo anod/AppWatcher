@@ -11,7 +11,7 @@ import com.anod.appwatcher.watchlist.FilterablePagingSource
 import com.anod.appwatcher.watchlist.SectionItem
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.InstalledApps
-import info.anodsplace.framework.util.dayStartAgoMillis
+import info.anodsplace.ktx.dayStartAgoMillis
 
 class InstalledPagingSource(
     private val changelogAdapter: ChangelogAdapter,

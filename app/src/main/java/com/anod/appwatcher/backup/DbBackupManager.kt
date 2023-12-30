@@ -5,7 +5,7 @@ import android.os.Environment
 import androidx.room.withTransaction
 import com.anod.appwatcher.database.AppsDatabase
 import info.anodsplace.applog.AppLog
-import info.anodsplace.framework.app.ApplicationContext
+import info.anodsplace.context.ApplicationContext
 import info.anodsplace.framework.json.MalformedJsonException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
@@ -29,7 +29,7 @@ import java.util.Locale
 
  * @author alex
  */
-class DbBackupManager(private val context: ApplicationContext, private val db: AppsDatabase) {
+class DbBackupManager(private val context: info.anodsplace.context.ApplicationContext, private val db: AppsDatabase) {
 
     internal suspend fun doExport(destUri: Uri): Int = withContext(Dispatchers.IO) {
         val outputStream: OutputStream?

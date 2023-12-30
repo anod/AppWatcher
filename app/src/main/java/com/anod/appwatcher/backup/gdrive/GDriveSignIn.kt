@@ -20,9 +20,9 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import com.google.api.client.http.HttpRequestInitializer
 import com.google.api.services.drive.DriveScopes
 import info.anodsplace.applog.AppLog
-import info.anodsplace.framework.app.ApplicationContext
-import info.anodsplace.framework.app.NotificationManager
-import info.anodsplace.framework.playservices.GoogleSignInConnect
+import info.anodsplace.context.ApplicationContext
+import info.anodsplace.notification.NotificationManager
+import info.anodsplace.playservices.GoogleSignInConnect
 import org.koin.java.KoinJavaComponent
 import java.util.Collections
 import java.util.concurrent.ExecutionException

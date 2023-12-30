@@ -31,7 +31,7 @@ import info.anodsplace.compose.Preference
 import info.anodsplace.compose.PreferenceItem
 import info.anodsplace.compose.PreferencesScreen
 import info.anodsplace.compose.key
-import info.anodsplace.framework.app.NotificationManager
+import info.anodsplace.notification.NotificationManager
 import info.anodsplace.framework.content.CreateDocument
 import org.koin.java.KoinJavaComponent
 
@@ -336,7 +336,7 @@ fun PreferencesScreenPreview() {
                             isProgressVisible = true
                     ),
                     onEvent = { },
-                    prefs = Preferences(context, NotificationManager.NoOp(), scope)
+                    prefs = Preferences(context, info.anodsplace.notification.NotificationManager.NoOp(), scope)
             )
         }
     }

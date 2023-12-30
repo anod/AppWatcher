@@ -6,7 +6,7 @@ import com.anod.appwatcher.database.AppTagsTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import info.anodsplace.applog.AppLog
-import info.anodsplace.framework.app.ApplicationContext
+import info.anodsplace.context.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -16,7 +16,7 @@ import kotlinx.coroutines.withContext
  * @author Alex Gavrishev
  * @date 26/06/2017
  */
-class GDriveUpload(private val googleAccount: GoogleSignInAccount, private val context: ApplicationContext, private val database: AppsDatabase) {
+class GDriveUpload(private val googleAccount: GoogleSignInAccount, private val context: info.anodsplace.context.ApplicationContext, private val database: AppsDatabase) {
 
     @Throws(Exception::class)
     suspend fun doUploadInBackground() {

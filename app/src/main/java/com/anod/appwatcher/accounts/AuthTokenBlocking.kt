@@ -6,7 +6,7 @@ import android.accounts.AuthenticatorException
 import android.accounts.OperationCanceledException
 import android.content.Intent
 import info.anodsplace.applog.AppLog
-import info.anodsplace.framework.app.ApplicationContext
+import info.anodsplace.context.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
@@ -26,7 +26,7 @@ sealed interface CheckTokenResult {
     class Error(val error: CheckTokenError) : CheckTokenResult
 }
 
-class AuthTokenBlocking(context: ApplicationContext) {
+class AuthTokenBlocking(context: info.anodsplace.context.ApplicationContext) {
 
     companion object {
         private const val AUTH_TOKEN_TYPE = "androidmarket"

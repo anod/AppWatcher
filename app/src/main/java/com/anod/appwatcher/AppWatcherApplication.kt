@@ -19,10 +19,7 @@ import com.anod.appwatcher.utils.networkConnection
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import finsky.api.DfeError
 import info.anodsplace.applog.AppLog
-import info.anodsplace.framework.app.ApplicationContext
-import info.anodsplace.framework.app.ApplicationInstance
-import info.anodsplace.framework.app.CustomThemeActivity
-import info.anodsplace.framework.app.WindowCustomTheme
+import info.anodsplace.context.ApplicationInstance
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.context.startKoin
@@ -86,8 +83,7 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
         }
 
         AppCompatDelegate.setDefaultNightMode(prefs.appCompatNightMode)
-        SyncNotification(ApplicationContext(this), get()).createChannels()
-        registerActivityLifecycleCallbacks(LifecycleCallbacks())
+        SyncNotification(info.anodsplace.context.ApplicationContext(this), get()).createChannels()
     }
 
     override fun onLogException(tr: Throwable) {
@@ -113,27 +109,6 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
         override fun println(priority: Int, tag: String, msg: String) {
             super.println(priority, tag, msg)
             FirebaseCrashlytics.getInstance().log("$priority/$tag: $msg")
-        }
-    }
-}
-
-class LifecycleCallbacks : Application.ActivityLifecycleCallbacks {
-    override fun onActivityPaused(activity: Activity) {}
-    override fun onActivityResumed(activity: Activity) {}
-    override fun onActivityStarted(activity: Activity) {}
-    override fun onActivityDestroyed(activity: Activity) {}
-    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
-    override fun onActivityStopped(activity: Activity) {}
-
-    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
-        if (activity is CustomThemeActivity) {
-            val themeRes = activity.themeRes
-            if (themeRes > 0) {
-                if (activity.themeColors.available) {
-                    WindowCustomTheme.apply(activity.themeColors, activity.window, activity)
-                }
-                activity.setTheme(themeRes)
-            }
         }
     }
 }

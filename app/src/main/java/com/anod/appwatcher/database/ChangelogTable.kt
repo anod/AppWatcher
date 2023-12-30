@@ -6,7 +6,7 @@ import android.provider.BaseColumns
 import androidx.room.Dao
 import androidx.room.Query
 import com.anod.appwatcher.database.entities.AppChange
-import info.anodsplace.framework.util.chunked
+import info.anodsplace.ktx.chunked
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
