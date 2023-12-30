@@ -5,6 +5,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Build
+import androidx.core.content.ContextCompat
 import com.anod.appwatcher.sync.UpdateCheck
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
@@ -29,7 +31,13 @@ fun syncProgressFlow(application: Application): Flow<SyncProgress> = callbackFlo
         addAction(UpdateCheck.syncProgress)
         addAction(UpdateCheck.syncStop)
     }
-    application.registerReceiver(syncFinishedReceiver, filter)
+
+    ContextCompat.registerReceiver(
+        application,
+        syncFinishedReceiver,
+        filter,
+        ContextCompat.RECEIVER_NOT_EXPORTED
+    )
 
     awaitClose {
         application.unregisterReceiver(syncFinishedReceiver)

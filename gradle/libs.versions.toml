@@ -1,7 +1,7 @@
 [versions]
-accompanist-swiperefresh = "0.32.0"
 activity-compose = "1.8.2"
 agp = "8.2.0"
+ksp = "1.9.21-1.0.16"
 androidx-junit = "1.1.5"
 appcompat = "1.6.1"
 benchmark-macro-junit4 = "1.2.2"
@@ -39,10 +39,7 @@ uiautomator = "2.2.0"
 work-runtime = "2.9.0"
 
 [libraries]
-accompanist-swiperefresh = { module = "com.google.accompanist:accompanist-swiperefresh", version.ref = "accompanist-swiperefresh" }
-
-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
-
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
 androidx-benchmark-macro-junit4 = { module = "androidx.benchmark:benchmark-macro-junit4", version.ref = "benchmark-macro-junit4" }
 androidx-collection = { module = "androidx.collection:collection", version.ref = "collection" }
 androidx-collection-ktx = { module = "androidx.collection:collection-ktx", version.ref = "collection" }
@@ -99,3 +96,4 @@ work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "w
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

@@ -3,7 +3,7 @@ plugins {
     kotlin("android")
     kotlin("kapt")
     id("kotlin-parcelize")
-    id("com.google.devtools.ksp").version("1.9.21-1.0.16")
+    alias(libs.plugins.ksp)
     id("com.google.android.gms.oss-licenses-plugin")
 }
 
@@ -110,9 +110,8 @@ dependencies {
     implementation(libs.paging.compose)
 
     // Compose
-    implementation(libs.activity.compose)
+    implementation(libs.androidx.activity.compose)
     implementation(libs.runtime.tracing)
-    implementation(libs.accompanist.swiperefresh)
 
     // Coil
     implementation(libs.coil.base)

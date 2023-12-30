@@ -69,6 +69,7 @@ data class WatchListSharedState(
     val filterId: Int,
     val titleFilter: String = "",
     val showSearch: Boolean = false,
+    val initialRefreshing: Boolean = false,
     val syncProgress: SyncProgress? = null,
     val wideLayout: HingeDeviceLayout = HingeDeviceLayout(isWideLayout = false, hinge = Rect()),
     val selectedApp: App? = null,

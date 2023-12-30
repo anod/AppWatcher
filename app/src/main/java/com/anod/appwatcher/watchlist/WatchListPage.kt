@@ -38,11 +38,17 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -50,7 +56,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.intl.Locale
@@ -76,12 +84,10 @@ import com.anod.appwatcher.database.entities.Price
 import com.anod.appwatcher.details.rememberAppItemState
 import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.SelectionState
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import info.anodsplace.applog.AppLog
 import info.anodsplace.compose.placeholder
 import info.anodsplace.framework.content.InstalledApps
 import org.koin.java.KoinJavaComponent.getKoin
-
 
 enum class AppItemSelection {
     None, Disabled, NotSelected, Selected;
@@ -90,7 +96,7 @@ enum class AppItemSelection {
         get() = this != None && this != Disabled
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun WatchListPage(
     items: LazyPagingItems<SectionItem>,
@@ -103,15 +109,29 @@ fun WatchListPage(
     recentlyInstalledApps: List<App>? = null,
 ) {
     val isEmpty = items.loadState.source.refresh is LoadState.NotLoading && items.itemCount < 1
-    val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isRefreshing)
+    val pullRefreshState = rememberPullToRefreshState(enabled = { enablePullToRefresh })
+
+    AppLog.d("[ALEX] pullRefreshState.isRefreshing: ${pullRefreshState.isRefreshing}, isRefreshing: $isRefreshing")
+    if (pullRefreshState.isRefreshing) {
+        LaunchedEffect(true) {
+            onEvent(WatchListEvent.Refresh)
+        }
+    }
+
+    if (isRefreshing && !pullRefreshState.isRefreshing)  {
+        LaunchedEffect(true) {
+            pullRefreshState.startRefresh()
+        }
+    } else if (!isRefreshing && pullRefreshState.isRefreshing) {
+        LaunchedEffect(true) {
+            pullRefreshState.endRefresh()
+        }
+    }
+
     val recentlyInstalledAppsHashCode = remember(recentlyInstalledApps) { recentlyInstalledApps?.hashCode() ?: 0 }
-    SwipeRefresh(modifier = Modifier.fillMaxSize(),
-        state = swipeRefreshState,
-        swipeEnabled = enablePullToRefresh,
-        onRefresh = { onEvent(WatchListEvent.Refresh) }) {
+    Box(Modifier.nestedScroll(pullRefreshState.nestedScrollConnection)) {
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
             contentPadding = WindowInsets.navigationBars.asPaddingValues()
         ) {
             if (isEmpty) {
@@ -151,6 +171,10 @@ fun WatchListPage(
                 }
             }
         }
+        PullToRefreshContainer(
+            modifier = Modifier.align(Alignment.TopCenter),
+            state = pullRefreshState
+        )
     }
 }
 
