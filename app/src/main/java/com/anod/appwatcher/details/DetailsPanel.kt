@@ -91,7 +91,6 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppInfoIcon
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BackArrowIconButton
-import com.anod.appwatcher.compose.CommonActivityAction
 import com.anod.appwatcher.compose.DeleteNotice
 import com.anod.appwatcher.compose.DropdownMenuAction
 import com.anod.appwatcher.compose.InstalledSignIcon
@@ -113,6 +112,7 @@ import com.anod.appwatcher.utils.StoreIntent
 import info.anodsplace.applog.AppLog
 import info.anodsplace.compose.placeholder
 import info.anodsplace.compose.toAnnotatedString
+import info.anodsplace.framework.content.CommonActivityAction
 import info.anodsplace.framework.text.Html
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf

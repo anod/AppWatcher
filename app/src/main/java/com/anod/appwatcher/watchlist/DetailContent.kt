@@ -9,7 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import com.anod.appwatcher.R
-import com.anod.appwatcher.compose.CommonActivityAction
+import info.anodsplace.framework.content.CommonActivityAction
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.details.DetailsPanel
 

@@ -7,7 +7,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.lifecycleScope
 import com.anod.appwatcher.compose.BaseComposeActivity
-import com.anod.appwatcher.compose.onCommonActivityAction
+import info.anodsplace.framework.content.onCommonActivityAction
 import kotlinx.coroutines.launch
 
 /**

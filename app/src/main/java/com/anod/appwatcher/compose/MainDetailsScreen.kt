@@ -47,7 +47,7 @@ fun MainDetailScreen(
 
 @Preview(device = Devices.FOLDABLE)
 @Composable
-fun MainDetailScreen() {
+fun MainDetailScreenPreview() {
     AppTheme {
         MainDetailScreen(
                 wideLayout = HingeDeviceLayout(isWideLayout = true, hinge = Rect(0, 0, 80, 0)),

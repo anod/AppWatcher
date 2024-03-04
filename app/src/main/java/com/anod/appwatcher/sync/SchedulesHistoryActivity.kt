@@ -28,8 +28,8 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BackArrowIconButton
 import com.anod.appwatcher.compose.BaseComposeActivity
-import com.anod.appwatcher.compose.CommonActivityAction
-import com.anod.appwatcher.compose.onCommonActivityAction
+import info.anodsplace.framework.content.CommonActivityAction
+import info.anodsplace.framework.content.onCommonActivityAction
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.Failed
 import com.anod.appwatcher.database.entities.New

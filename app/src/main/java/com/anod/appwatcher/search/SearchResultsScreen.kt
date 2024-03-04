@@ -41,7 +41,7 @@ import androidx.paging.compose.itemKey
 import coil.ImageLoader
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
-import com.anod.appwatcher.compose.CommonActivityAction
+import info.anodsplace.framework.content.CommonActivityAction
 import com.anod.appwatcher.compose.SearchTopBar
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.tags.TagSelectionDialog

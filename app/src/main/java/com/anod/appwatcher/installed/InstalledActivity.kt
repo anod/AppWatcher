@@ -15,7 +15,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.compose.MainDetailScreen
-import com.anod.appwatcher.compose.onCommonActivityAction
+import info.anodsplace.framework.content.onCommonActivityAction
 import com.anod.appwatcher.details.DetailsDialog
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences

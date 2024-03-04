@@ -22,7 +22,7 @@ import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.MarketSearchActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenBlocking
-import com.anod.appwatcher.compose.CommonActivityAction
+import info.anodsplace.framework.content.CommonActivityAction
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App

@@ -2,7 +2,7 @@ package com.anod.appwatcher.userLog
 
 import android.content.Intent
 import androidx.compose.runtime.Immutable
-import com.anod.appwatcher.compose.CommonActivityAction
+import info.anodsplace.framework.content.CommonActivityAction
 import com.anod.appwatcher.utils.BaseFlowViewModel
 
 @Immutable

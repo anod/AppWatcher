@@ -188,8 +188,6 @@ fun SearchTopBar(
     )
 }
 
-
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun TopBarSearchField(
     query: String = "",

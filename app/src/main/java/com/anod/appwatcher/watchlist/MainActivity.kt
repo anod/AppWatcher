@@ -24,7 +24,7 @@ import com.anod.appwatcher.accounts.AccountSelectionDialog
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.compose.MainDetailScreen
-import com.anod.appwatcher.compose.onCommonActivityAction
+import info.anodsplace.framework.content.onCommonActivityAction
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.details.DetailsDialog
 import com.anod.appwatcher.history.HistoryListActivity
