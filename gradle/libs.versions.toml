@@ -1,6 +1,7 @@
 [versions]
 activity-compose = "1.8.2"
 agp = "8.3.0"
+annotation = "1.7.1"
 ksp = "1.9.22-1.0.17"
 androidx-junit = "1.1.5"
 appcompat = "1.6.1"
@@ -39,11 +40,15 @@ room-ktx = "2.6.1"
 room-runtime = "2.6.1"
 runtime-tracing = "1.0.0-beta01"
 uiautomator = "2.3.0"
+window = "1.2.0"
 work-runtime = "2.9.0"
 material = "1.11.0"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
+androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activity-compose" }
+androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 androidx-benchmark-macro-junit4 = { module = "androidx.benchmark:benchmark-macro-junit4", version.ref = "benchmark-macro-junit4" }
 androidx-collection = { module = "androidx.collection:collection", version.ref = "collection" }
 androidx-collection-ktx = { module = "androidx.collection:collection-ktx", version.ref = "collection" }
@@ -62,12 +67,13 @@ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = 
 androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso-core" }
 androidx-junit = { module = "androidx.test.ext:junit", version.ref = "androidx-junit" }
 androidx-palette = { module = "androidx.palette:palette", version.ref = "palette" }
-androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+androidx-palette-ktx = { module = "androidx.palette:palette-ktx", version.ref = "palette" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room-compiler" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room-ktx" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room-runtime" }
 
 androidx-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "uiautomator" }
+androidx-window = { module = "androidx.window:window", version.ref = "window" }
 coil-compose-base = { module = "io.coil-kt:coil-compose-base", version.ref = "coil" }
 coil-base = { module = "io.coil-kt:coil-base", version.ref = "coil" }
 
