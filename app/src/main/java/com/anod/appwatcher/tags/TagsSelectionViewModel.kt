@@ -1,6 +1,7 @@
 package com.anod.appwatcher.tags
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.filled.Label
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
@@ -69,7 +70,7 @@ class TagsSelectionViewModel(appId: String, appTitle: String) : BaseFlowViewMode
                             key = "tag-${tag.id}",
                             checked = checked,
                             title = tag.name,
-                            icon = Icons.Default.Label,
+                            icon = Icons.AutoMirrored.Filled.Label,
                             iconTint = Color(tag.color)
                         )
                     }

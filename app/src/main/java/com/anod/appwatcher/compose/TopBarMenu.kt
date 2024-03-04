@@ -29,7 +29,7 @@ fun DropdownMenuAction(content: @Composable (dismiss: () -> Unit) -> Unit) {
         expanded = topBarMoreMenu,
         onDismissRequest = { topBarMoreMenu = false },
     ) {
-        content(dismiss = { topBarMoreMenu = false })
+        content { topBarMoreMenu = false }
     }
 }
 

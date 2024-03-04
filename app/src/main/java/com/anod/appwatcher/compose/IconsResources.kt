@@ -3,6 +3,12 @@ package com.anod.appwatcher.compose
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowRight
+import androidx.compose.material.icons.automirrored.filled.Label
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.automirrored.filled.Sort
+import androidx.compose.material.icons.automirrored.outlined.Label
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowRight
@@ -45,7 +51,7 @@ import com.anod.appwatcher.R
 
 @Composable
 fun SortIcon() {
-    Icon(imageVector = Icons.Default.Sort, contentDescription = stringResource(id = R.string.sort))
+    Icon(imageVector = Icons.AutoMirrored.Filled.Sort, contentDescription = stringResource(id = R.string.sort))
 }
 
 @Composable
@@ -73,7 +79,7 @@ fun MoreMenuIcon() {
 
 @Composable
 fun ExpandMenuIcon() {
-    Icon(imageVector = Icons.Default.ArrowRight, contentDescription = null)
+    Icon(imageVector = Icons.AutoMirrored.Filled.ArrowRight, contentDescription = null)
 }
 
 @Composable
@@ -87,7 +93,7 @@ fun SearchIcon() {
 @Composable
 fun BackArrowIcon() {
     Icon(
-        imageVector = Icons.Default.ArrowBack,
+        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
         contentDescription = stringResource(id = R.string.back)
     )
 }
@@ -149,7 +155,7 @@ fun TagIcon(
 ) {
     Icon(
         modifier = modifier,
-        imageVector = if (outlined) Icons.Outlined.Label else Icons.Default.Label,
+        imageVector = if (outlined) Icons.AutoMirrored.Outlined.Label else Icons.AutoMirrored.Filled.Label,
         contentDescription = contentDescription ?: stringResource(id = R.string.tag),
         tint = tint
     )
@@ -162,7 +168,7 @@ fun TranslateIcon() {
 
 @Composable
 fun OpenAppIcon() {
-    Icon(imageVector = Icons.Default.OpenInNew, contentDescription = stringResource(id = R.string.open))
+    Icon(imageVector = Icons.AutoMirrored.Filled.OpenInNew, contentDescription = stringResource(id = R.string.open))
 }
 
 @Composable

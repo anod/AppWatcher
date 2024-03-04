@@ -76,7 +76,7 @@ fun WatchListTopBar(
 
             if (dropdownActions != null) {
                 DropdownMenuAction { dismiss ->
-                    dropdownActions(dismiss = dismiss, barBounds = barBounds)
+                    dropdownActions(dismiss, barBounds)
                 }
             }
         }

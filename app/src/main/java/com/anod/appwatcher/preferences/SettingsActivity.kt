@@ -109,9 +109,11 @@ open class SettingsActivity : BaseComposeActivity(), GDriveSignIn.Listener {
             }
         }
 
-        lifecycleScope.launchWhenCreated {
-            hingeDevice.layout.collect {
-                viewModel.handleEvent(SettingsViewEvent.SetWideLayout(it))
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
+                hingeDevice.layout.collect {
+                    viewModel.handleEvent(SettingsViewEvent.SetWideLayout(it))
+                }
             }
         }
     }
@@ -167,6 +169,7 @@ open class SettingsActivity : BaseComposeActivity(), GDriveSignIn.Listener {
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         super.onBackPressed()
         if (viewModel.viewState.recreateWatchlistOnBack) {
@@ -174,6 +177,7 @@ open class SettingsActivity : BaseComposeActivity(), GDriveSignIn.Listener {
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         gDriveSignIn.onActivityResult(requestCode, resultCode, data)
         super.onActivityResult(requestCode, resultCode, data)

@@ -9,7 +9,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
@@ -18,6 +20,7 @@ import com.anod.appwatcher.compose.onCommonActivityAction
 import com.anod.appwatcher.details.DetailsDialog
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.DetailContent
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 
 /**
@@ -87,9 +90,11 @@ class HistoryListActivity : BaseComposeActivity(), KoinComponent {
             }
         }
 
-        lifecycleScope.launchWhenCreated {
-            hingeDevice.layout.collect {
-                viewModel.handleEvent(HistoryListEvent.SetWideLayout(it))
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
+                hingeDevice.layout.collect {
+                    viewModel.handleEvent(HistoryListEvent.SetWideLayout(it))
+                }
             }
         }
     }

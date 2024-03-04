@@ -9,7 +9,9 @@ import androidx.activity.viewModels
 import androidx.annotation.Keep
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.compose.MainDetailScreen
@@ -87,9 +89,11 @@ class InstalledActivity : BaseComposeActivity() {
             viewModel.viewActions.collect { onCommonActivityAction(it) }
         }
 
-        lifecycleScope.launchWhenCreated {
-            hingeDevice.layout.collect {
-                viewModel.handleEvent(InstalledListEvent.SetWideLayout(it))
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
+                hingeDevice.layout.collect {
+                    viewModel.handleEvent(InstalledListEvent.SetWideLayout(it))
+                }
             }
         }
     }

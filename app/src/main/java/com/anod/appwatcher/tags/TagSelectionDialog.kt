@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Label
@@ -76,7 +78,7 @@ fun TagSelectionScreen(screenState: TagsSelectionState, onEvent: (TagSelectionEv
                 },
                 navigationIcon = {
                     IconButton(onClick = onDismissRequest) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = stringResource(id = R.string.back))
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(id = R.string.back))
                     }
                 },
                 actions = {
@@ -135,7 +137,7 @@ fun TagSelectionScreen(screenState: TagsSelectionState, onEvent: (TagSelectionEv
 
 @Preview
 @Composable
-private fun TagSelectionScreen() {
+private fun TagSelectionScreenPreview() {
     AppTheme {
         TagSelectionScreen(
             screenState = TagsSelectionState(
@@ -146,14 +148,14 @@ private fun TagSelectionScreen() {
                         key = "tag-1",
                         checked = false,
                         title = "Tag #1",
-                        icon = Icons.Default.Label,
+                        icon = Icons.AutoMirrored.Filled.Label,
                         iconTint = Color.Red
                     ),
                     CheckBoxItem(
                         key = "tag-2",
                         checked = true,
                         title = "Tag #2",
-                        icon = Icons.Default.Label,
+                        icon = Icons.AutoMirrored.Filled.Label,
                         iconTint = Color.Yellow
                     )
                 )
