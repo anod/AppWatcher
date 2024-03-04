@@ -36,11 +36,11 @@ class DfeApiImpl(http: OkHttpClient, private val apiContext: DfeApiContext) : Df
     constructor(http: OkHttpClient, context: Context, account: Account, authTokenProvider: DfeAuthTokenProvider, deviceInfoProvider: DfeDeviceInfoProvider)
             : this(http, DfeApiContext(context, account, authTokenProvider, deviceInfoProvider))
 
-    override suspend fun search(query: String, nextPageUrl: String): ResponseWrapper {
+    override suspend fun search(initialQuery: String, nextPageUrl: String): ResponseWrapper {
         val url = if (nextPageUrl.isEmpty())
                 DfeApi.SEARCH_CHANNEL_URI.toHttpUrl().newBuilder()
                     .addQueryParameter("c", DfeApi.searchBackendId.toString())
-                    .addQueryParameter("q", query)
+                    .addQueryParameter("q", initialQuery)
                     .build().toString()
             else
                 DfeApi.URL_FDFE + "/" + nextPageUrl
