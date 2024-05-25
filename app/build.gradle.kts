@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.compose.compiler)
     id("kotlin-parcelize")
     id("com.google.android.gms.oss-licenses-plugin")
 }
@@ -81,9 +82,6 @@ android {
         }
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.androidx.compose.compiler.get().version
-    }
     namespace = "com.anod.appwatcher"
 }
 
@@ -92,9 +90,9 @@ kotlin {
     jvmToolchain(17)
 }
 
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java) {
-    kotlinOptions.jvmTarget = "11"
-}
+//tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java) {
+//    kotlinOptions.jvmTarget = "11"
+//}
 
 dependencies {
     // AndroidX
