@@ -13,9 +13,9 @@ android {
     defaultConfig {
         applicationId = "com.anod.appwatcher"
         minSdk = 27
-        targetSdk = 33
-        versionCode = 16301
-        versionName = "1.6.3"
+        targetSdk = 34
+        versionCode = 16400
+        versionName = "1.6.4"
     }
 
     buildFeatures {
