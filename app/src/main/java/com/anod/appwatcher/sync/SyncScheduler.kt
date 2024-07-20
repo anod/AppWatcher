@@ -13,7 +13,6 @@ import androidx.work.Operation
 import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
 import info.anodsplace.applog.AppLog
-import info.anodsplace.context.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onEach
 import java.util.concurrent.TimeUnit
@@ -51,7 +50,7 @@ class SyncScheduler(private val context: info.anodsplace.context.ApplicationCont
         else
             ExistingPeriodicWorkPolicy.KEEP
         AppLog.i("Schedule sync in ${windowStartSec / 3600} hours (${if (update) "Update" else "Keep existing"})", "PeriodicWork")
-        return wm.enqueueUniquePeriodicWork(tag, policy, request)
+        return wm.enqueueUniquePeriodicWork(TAG, policy, request)
             .state
             .asFlow()
             .onEach {
@@ -73,14 +72,14 @@ class SyncScheduler(private val context: info.anodsplace.context.ApplicationCont
         val request: OneTimeWorkRequest = OneTimeWorkRequest.Builder(SyncWorker::class.java)
             .setInputData(
                 Data.Builder()
-                    .putBoolean(UpdateCheck.extrasManual, true)
+                    .putBoolean(UpdateCheck.EXTRAS_MANUAL, true)
                     .build()
             )
                 .setConstraints(constraints)
                 .build()
 
         AppLog.i("Enqueue update check", "OneTimeWork")
-        return wm.enqueueUniqueWork(tagManual, ExistingWorkPolicy.REPLACE, request)
+        return wm.enqueueUniqueWork(TAG_MANUAL, ExistingWorkPolicy.REPLACE, request)
             .state
             .asFlow()
             .onEach {
@@ -94,7 +93,7 @@ class SyncScheduler(private val context: info.anodsplace.context.ApplicationCont
 
     fun cancel(): Flow<Operation.State> {
         AppLog.i("Cancel scheduled sync", "SyncSchedule")
-        return wm.cancelUniqueWork(tag)
+        return wm.cancelUniqueWork(TAG)
             .state
             .map {
                 when (it) {
@@ -107,7 +106,7 @@ class SyncScheduler(private val context: info.anodsplace.context.ApplicationCont
     }
 
     companion object {
-        private const val tag = "AppRefresh"
-        private const val tagManual = "AppRefreshManual"
+        private const val TAG = "AppRefresh"
+        private const val TAG_MANUAL = "AppRefreshManual"
     }
 }

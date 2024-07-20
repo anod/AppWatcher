@@ -28,8 +28,6 @@ import finsky.api.DfeApi
 import finsky.api.Document
 import finsky.api.filterDocuments
 import info.anodsplace.applog.AppLog
-import info.anodsplace.context.ApplicationContext
-import info.anodsplace.notification.NotificationManager
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.net.NetworkConnectivity
 import info.anodsplace.playstore.AppDetailsFilter
@@ -64,19 +62,19 @@ class UpdateCheck(
     )
 
     companion object {
-        private const val oneSecInMillis = 1000
-        private const val bulkSize = 20
-        internal const val extrasManual = "manual"
+        private const val ONE_SEC_IN_MILLIS = 1000
+        private const val BULK_SIZE = 20
+        internal const val EXTRAS_MANUAL = "manual"
 
-        const val syncStop = "com.anod.appwatcher.sync.start"
-        const val syncProgress = "com.anod.appwatcher.sync.progress"
-        const val extrasUpdatesCount = "extra_updates_count"
+        const val SYNC_STOP = "com.anod.appwatcher.sync.start"
+        const val SYNC_PROGRESS = "com.anod.appwatcher.sync.progress"
+        const val EXTRA_UPDATES_COUNT = "extra_updates_count"
     }
 
     private val installedAppsProvider = InstalledApps.PackageManager(packageManager)
 
     suspend fun perform(extras: Data): Int = withContext(Dispatchers.Default) {
-        val manualSync = extras.getBoolean(extrasManual, false)
+        val manualSync = extras.getBoolean(EXTRAS_MANUAL, false)
         AppLog.i("Perform ${if (manualSync) "manual" else "scheduled"} sync", "UpdateCheck")
         val schedule = Schedule(manualSync)
 
@@ -95,7 +93,7 @@ class UpdateCheck(
                 return@withContext -1
             }
             val updateTime = preferences.lastUpdateTime
-            if (updateTime != (-1).toLong() && System.currentTimeMillis() - updateTime < oneSecInMillis) {
+            if (updateTime != (-1).toLong() && System.currentTimeMillis() - updateTime < ONE_SEC_IN_MILLIS) {
                 SchedulesTable.Queries.save(schedule.finish(Schedule.statusSkippedMinTime), database)
                 AppLog.i("Last update less than second, skipping...", "UpdateCheck")
                 return@withContext -1
@@ -112,7 +110,9 @@ class UpdateCheck(
         }
 
         //Broadcast progress intent
-        val startIntent = Intent(syncProgress)
+        val startIntent = Intent(SYNC_PROGRESS).apply {
+            `package` = context.actual.packageName
+        }
         context.sendBroadcast(startIntent)
 
         val lastUpdatesViewed = preferences.isLastUpdatesViewed
@@ -178,7 +178,7 @@ class UpdateCheck(
 
         val updatedApps = mutableListOf<UpdatedApp>()
         var unavailable = 0
-        apps.chunked(bulkSize) { list ->
+        apps.chunked(BULK_SIZE) { list ->
             list.associateBy { it.app.packageName }
         }.forEach { localApps ->
             val docIds = localApps.map { BulkDocId(it.key, it.value.app.versionNumber) }

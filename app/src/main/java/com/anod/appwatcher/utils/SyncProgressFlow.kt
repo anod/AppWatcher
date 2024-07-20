@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.Build
 import androidx.core.content.ContextCompat
 import com.anod.appwatcher.sync.UpdateCheck
 import kotlinx.coroutines.channels.awaitClose
@@ -19,17 +18,17 @@ fun syncProgressFlow(application: Application): Flow<SyncProgress> = callbackFlo
     val syncFinishedReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             when (intent.action) {
-                UpdateCheck.syncProgress -> trySendBlocking(SyncProgress(true, 0))
-                UpdateCheck.syncStop ->  {
-                    val updatesCount = intent.getIntExtra(UpdateCheck.extrasUpdatesCount, 0)
+                UpdateCheck.SYNC_PROGRESS -> trySendBlocking(SyncProgress(true, 0))
+                UpdateCheck.SYNC_STOP ->  {
+                    val updatesCount = intent.getIntExtra(UpdateCheck.EXTRA_UPDATES_COUNT, 0)
                     trySendBlocking(SyncProgress(false, updatesCount))
                 }
             }
         }
     }
     val filter = IntentFilter().apply {
-        addAction(UpdateCheck.syncProgress)
-        addAction(UpdateCheck.syncStop)
+        addAction(UpdateCheck.SYNC_PROGRESS)
+        addAction(UpdateCheck.SYNC_STOP)
     }
 
     ContextCompat.registerReceiver(

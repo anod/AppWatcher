@@ -16,8 +16,10 @@ class SyncWorker(appContext: Context, workerParams: WorkerParameters) : Coroutin
         val syncAdapter = get<UpdateCheck>()
         val result = syncAdapter.perform(inputData)
 
-        val finishIntent = Intent(UpdateCheck.syncStop)
-        finishIntent.putExtra(UpdateCheck.extrasUpdatesCount, result)
+        val finishIntent = Intent(UpdateCheck.SYNC_STOP).apply {
+            `package` = applicationContext.packageName
+        }
+        finishIntent.putExtra(UpdateCheck.EXTRA_UPDATES_COUNT, result)
         applicationContext.sendBroadcast(finishIntent)
 
         return Result.success()
