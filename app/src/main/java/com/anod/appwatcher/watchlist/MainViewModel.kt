@@ -43,7 +43,7 @@ data class MainViewState(
 )
 
 sealed interface MainViewEvent {
-    object ChooseAccount : MainViewEvent
+    data object ChooseAccount : MainViewEvent
     class AddNewTagDialog(val show: Boolean) : MainViewEvent
     class DrawerItemClick(val id: DrawerItem.Id) : MainViewEvent
     class SetAccount(val result: AccountSelectionResult) : MainViewEvent
@@ -55,9 +55,9 @@ sealed interface MainViewEvent {
 
 sealed interface MainViewAction {
     class ActivityAction(val action: CommonActivityAction) : MainViewAction
-    object ChooseAccount : MainViewAction
+    data object ChooseAccount : MainViewAction
     class NavigateTo(val id: DrawerItem.Id) : MainViewAction
-    object RequestNotificationPermission : MainViewAction
+    data object RequestNotificationPermission : MainViewAction
     class NavigateToTag(val tag: Tag) : MainViewAction
     class DrawerState(val isOpen: Boolean) : MainViewAction
 }
@@ -95,10 +95,17 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
 
         viewModelScope.launch {
             database.appTags().queryCounts()
-                .combine(database.tags().observe()) { counts, tags ->
+                .combine(
+                    flow = database.tags().observe()
+                ) { counts, tags ->
                     val tagCounts: Map<Int, Int> = counts.associate { Pair(it.tagId, it.count) }
+                    val emptyCount = tagCounts[Tag.empty.id] ?: 0
                     val result: TagCountList = tags.map { Pair(it, tagCounts[it.id] ?: 0) }
-                    result
+                    if (tags.isNotEmpty() && emptyCount > 0) {
+                        result.toMutableList().also {
+                            it.add(0, Pair(Tag.empty, emptyCount) )
+                        }
+                    } else result
                 }.collect { tags ->
                     viewState = viewState.copy(tags = tags)
                 }

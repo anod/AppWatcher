@@ -124,6 +124,7 @@
     <string name="save">Save</string>
     <string name="delete">Delete</string>
     <string name="tag">Tag</string>
+    <string name="untagged">Untagged</string>
     <string name="action_tag">%s Tag</string>
     <string name="tag_app">Tag %1s</string>
     <string name="google_drive_sync_failed">Google Drive sync failed.</string>

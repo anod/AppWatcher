@@ -97,8 +97,8 @@ private fun DrawerContent(mainState: MainViewState, onMainEvent: (MainViewEvent)
     mainState.tags.forEach { (tag, count) ->
         NavigationDrawerItem(
             icon = {  TagIcon(outlined = true, contentDescription = tag.name) },
-            label = { Text(tag.name) },
-            badge = { TagBadge(Color(tag.color), count) },
+            label = { Text(if (tag.isEmpty) stringResource(R.string.untagged) else tag.name) },
+            badge = { TagBadge(if (tag.isEmpty) MaterialTheme.colorScheme.primaryContainer else Color(tag.color), count) },
             selected = false,
             onClick = {
                 onMainEvent(MainViewEvent.NavigateToTag(tag))
@@ -159,7 +159,6 @@ private fun DrawerHeader(mainState: MainViewState, onMainEvent: (MainViewEvent) 
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TagBadge(color: Color, count: Int, modifier: Modifier = Modifier) {
     Badge(

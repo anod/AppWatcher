@@ -57,7 +57,7 @@ sealed interface SearchStatus {
 sealed interface SearchViewAction {
     class ActivityAction(val action: CommonActivityAction) : SearchViewAction
     class ShowSnackbar(val message: String, val duration: SnackbarDuration = SnackbarDuration.Short, val finish: Boolean = false) : SearchViewAction
-    object ShowAccountDialog : SearchViewAction
+    data object ShowAccountDialog : SearchViewAction
     class ShowTagSnackbar(val info: App, val isShareSource: Boolean) : SearchViewAction
     class AlreadyWatchedNotice(val document: Document) : SearchViewAction
 }

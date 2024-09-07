@@ -25,7 +25,6 @@ import info.anodsplace.applog.AppLog
 import info.anodsplace.compose.LifecycleEffect
 import info.anodsplace.framework.content.InstalledApps
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun WatchListScreen(
     screenState: WatchListSharedState,

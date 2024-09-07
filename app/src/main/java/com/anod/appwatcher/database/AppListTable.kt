@@ -206,19 +206,23 @@ interface AppListTable {
             titleFilter: String,
             offset: SqlOffset?
         ): Pair<String, Array<String>> {
-            val tables = if (tagId == null) table else AppTagsTable.table + ", " + table
+            val appTagsTable = when (tagId) {
+                null -> ""
+                Tag.empty.id -> "LEFT JOIN ${AppTagsTable.table} ON ${AppTagsTable.TableColumns.appId} = ${TableColumns.appId} "
+                else -> "INNER JOIN ${AppTagsTable.table} ON ${AppTagsTable.TableColumns.appId} = ${TableColumns.appId} "
+            }
             val rangeSql = if (offset == null) "" else " LIMIT ? OFFSET ? "
             val selection = createSelection(tagId, titleFilter, offset)
 
             val sql =
                 "SELECT $table.*, ${ChangelogTable.TableColumns.details}, ${ChangelogTable.TableColumns.noNewDetails}, " +
                         "CASE WHEN ${Columns.syncTimestamp} > $recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
-                        "FROM $tables " +
-                        "LEFT JOIN ${ChangelogTable.table} ON " +
-                        "${TableColumns.appId} == ${ChangelogTable.TableColumns.appId} " +
+                        "FROM $table " + appTagsTable +
+                        "LEFT JOIN ${ChangelogTable.table} ON ${TableColumns.appId} == ${ChangelogTable.TableColumns.appId} " +
                         "AND ${TableColumns.versionNumber} == ${ChangelogTable.TableColumns.versionCode} " +
                         "WHERE ${selection.first} " +
-                        "ORDER BY ${createSortOrder(sortId, orderByRecentlyDiscovered)} $rangeSql"
+                        "ORDER BY ${createSortOrder(sortId, orderByRecentlyDiscovered)} " +
+                        rangeSql
             return Pair(sql, selection.second)
         }
 
@@ -271,12 +275,15 @@ interface AppListTable {
             args.add(App.STATUS_DELETED.toString())
 
             if (tagId != null) {
-                selc.add(AppTagsTable.TableColumns.tagId + " = ?")
-                args.add(tagId.toString())
-                selc.add(AppTagsTable.TableColumns.appId + " = " + TableColumns.appId)
+                if (tagId == Tag.empty.id) {
+                    selc.add(AppTagsTable.TableColumns.tagId + " IS NULL")
+                } else {
+                    selc.add(AppTagsTable.TableColumns.tagId + " = ?")
+                    args.add(tagId.toString())
+                }
             }
 
-            if (!TextUtils.isEmpty(titleFilter)) {
+            if (titleFilter.isNotEmpty()) {
                 selc.add(Columns.title + " LIKE ?")
                 args.add("%$titleFilter%")
             }

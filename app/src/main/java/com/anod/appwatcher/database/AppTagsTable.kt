@@ -27,7 +27,9 @@ interface AppTagsTable {
     @Query("SELECT * FROM $table WHERE ${Columns.appId} = :appId")
     fun forApp(appId: String): Flow<List<AppTag>>
 
-    @Query("SELECT ${Columns.tagId}, count() as count FROM $table GROUP BY ${Columns.tagId}")
+    @Query("SELECT IFNULL(tags_id, 0) AS tags_id, count() as count FROM app_list l " +
+            "LEFT JOIN app_tags t ON l.app_id = t.app_id " +
+            "GROUP BY tags_id")
     fun queryCounts(): Flow<List<TagAppsCount>>
 
     @Query("SELECT * FROM $table")
@@ -67,15 +69,8 @@ interface AppTagsTable {
         const val tagId = "$table.tags_id"
     }
 
-    object Projection {
-        const val _ID = 0
-        const val appId = 1
-        const val tagId = 2
-    }
-
     companion object {
         const val table = "app_tags"
-        val projection = arrayOf(TableColumns._ID, TableColumns.appId, TableColumns.tagId)
     }
 
     object Queries {

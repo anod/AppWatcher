@@ -53,7 +53,7 @@ class TagWatchListComposeActivity : BaseComposeActivity() {
 
                 val pagingSourceConfig = WatchListPagingSource.Config(
                     filterId = screenState.filterId,
-                    tagId = if (screenState.tag.isEmpty) null else screenState.tag.id,
+                    tagId = screenState.tag.id,
                     showRecentlyDiscovered = viewModel.prefs.showRecentlyDiscovered,
                     showOnDevice = false,
                     showRecentlyInstalled = false

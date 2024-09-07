@@ -50,24 +50,28 @@ fun TagWatchListTopBar(
     onEvent: (WatchListEvent) -> Unit,
 ) {
     WatchListTopBar(
-        title = screenState.tag.name,
+        title = if (screenState.tag.isEmpty) stringResource(R.string.untagged) else screenState.tag.name,
         subtitle = subtitle,
         containerColor = MaterialTheme.colorScheme.primary,
         contentColor = MaterialTheme.colorScheme.onPrimary,
         filterQuery = screenState.titleFilter,
         showSearch = screenState.showSearch,
         visibleActions = {
-            TagAppIconButton(onClick = { onEvent(WatchListEvent.AddAppToTag(show = true)) })
+            if (!screenState.tag.isEmpty) {
+                TagAppIconButton(onClick = { onEvent(WatchListEvent.AddAppToTag(show = true)) })
+            }
         },
         dropdownActions = { dismiss, barBounds ->
-            DropdownMenuItem(
-                text = { Text(text = stringResource(id = R.string.menu_edit)) },
-                leadingIcon = { EditIcon() },
-                onClick = {
-                    onEvent(WatchListEvent.EditTag(show = true))
-                    dismiss()
-                }
-            )
+            if (!screenState.tag.isEmpty) {
+                DropdownMenuItem(
+                    text = { Text(text = stringResource(id = R.string.menu_edit)) },
+                    leadingIcon = { EditIcon() },
+                    onClick = {
+                        onEvent(WatchListEvent.EditTag(show = true))
+                        dismiss()
+                    }
+                )
+            }
 
             FilterMenuItem(
                 filterId = filterId,

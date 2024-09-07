@@ -123,6 +123,7 @@
     <string name="save">Mentés</string>
     <string name="delete">Törlés</string>
     <string name="tag">Címke</string>
+    <string name="untagged">Címke nélküli</string>
     <string name="action_tag">%s címke</string>
     <string name="tag_app">Címke %1s</string>
     <string name="google_drive_sync_failed">A Google Drive szinkronizálás sikertelen.</string>

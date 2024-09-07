@@ -107,6 +107,7 @@
     <string name="save">Сохранить</string>
     <string name="delete">Удалить</string>
     <string name="tag">Тэг</string>
+    <string name="untagged">Без тэга</string>
     <string name="action_tag">%s Тэг</string>
     <string name="tag_app">Таг %1s</string>
     <string name="google_drive_sync_failed">Ошибка синхронизации Google Drive</string>

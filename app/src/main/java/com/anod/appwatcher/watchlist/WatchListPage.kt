@@ -111,7 +111,7 @@ fun WatchListPage(
     val isEmpty = items.loadState.source.refresh is LoadState.NotLoading && items.itemCount < 1
     val pullRefreshState = rememberPullToRefreshState()
     val recentlyInstalledAppsHashCode = remember(recentlyInstalledApps) { recentlyInstalledApps?.hashCode() ?: 0 }
-    AppLog.d("isRefreshing: ${isRefreshing}, enablePullToRefresh: ${enablePullToRefresh}")
+    AppLog.d("isRefreshing: ${isRefreshing}, enablePullToRefresh: $enablePullToRefresh")
     Box(Modifier
         .pullToRefresh(
             isRefreshing = isRefreshing,
