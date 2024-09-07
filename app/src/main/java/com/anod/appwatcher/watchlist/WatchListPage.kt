@@ -38,16 +38,15 @@ import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
-import androidx.compose.material3.pulltorefresh.PullToRefreshState
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
+import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -60,7 +59,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.intl.Locale
@@ -98,7 +96,7 @@ enum class AppItemSelection {
         get() = this != None && this != Disabled
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WatchListPage(
     items: LazyPagingItems<SectionItem>,
@@ -111,27 +109,18 @@ fun WatchListPage(
     recentlyInstalledApps: List<App>? = null,
 ) {
     val isEmpty = items.loadState.source.refresh is LoadState.NotLoading && items.itemCount < 1
-    val pullRefreshState = rememberPullToRefreshState(enabled = { enablePullToRefresh })
-
-    AppLog.d("[ALEX] pullRefreshState.isRefreshing: ${pullRefreshState.isRefreshing}, isRefreshing: $isRefreshing")
-    if (pullRefreshState.isRefreshing) {
-        LaunchedEffect(true) {
-            onEvent(WatchListEvent.Refresh)
-        }
-    }
-
-    if (isRefreshing && !pullRefreshState.isRefreshing)  {
-        LaunchedEffect(true) {
-            pullRefreshState.startRefresh()
-        }
-    } else if (!isRefreshing && pullRefreshState.isRefreshing) {
-        LaunchedEffect(true) {
-            pullRefreshState.endRefresh()
-        }
-    }
-
+    val pullRefreshState = rememberPullToRefreshState()
     val recentlyInstalledAppsHashCode = remember(recentlyInstalledApps) { recentlyInstalledApps?.hashCode() ?: 0 }
-    Box(Modifier.nestedScroll(pullRefreshState.nestedScrollConnection)) {
+    AppLog.d("isRefreshing: ${isRefreshing}, enablePullToRefresh: ${enablePullToRefresh}")
+    Box(Modifier
+        .pullToRefresh(
+            isRefreshing = isRefreshing,
+            state = pullRefreshState,
+            enabled = enablePullToRefresh,
+            onRefresh = { onEvent(WatchListEvent.Refresh) }
+        ),
+        contentAlignment = Alignment.TopStart
+    ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = WindowInsets.navigationBars.asPaddingValues()
@@ -154,7 +143,7 @@ fun WatchListPage(
                     val item = items[index]
                     if (item != null) { // TODO: Preload?
                         WatchListSectionItem(
-                            modifier = Modifier.animateItemPlacement(),
+                            modifier = Modifier.animateItem(),
                             item = item,
                             index = index,
                             onEvent = onEvent,
@@ -173,8 +162,9 @@ fun WatchListPage(
                 }
             }
         }
-        PullToRefreshContainer(
+        Indicator(
             modifier = Modifier.align(Alignment.TopCenter),
+            isRefreshing = isRefreshing,
             state = pullRefreshState
         )
     }
