@@ -78,6 +78,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -641,9 +642,13 @@ private fun DetailsChangelog(
                             color = LocalContentColor.current
                         ),
                         onClick = { offset ->
-                            text.getUrlAnnotations(offset, offset).firstOrNull()
+                            text.getLinkAnnotations(offset, offset)
+                                .firstOrNull()
                                 ?.let { annotation ->
-                                    onEvent(DetailsEvent.OpenUrl(annotation.item.url))
+                                    annotation.item as? LinkAnnotation.Url
+                                }
+                                ?.also { item ->
+                                    onEvent(DetailsEvent.OpenUrl(item.url))
                                 }
                         }
                     )

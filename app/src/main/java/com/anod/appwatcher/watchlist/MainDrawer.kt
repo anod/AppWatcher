@@ -46,17 +46,15 @@ import java.util.concurrent.TimeUnit
 
 @Composable
 fun MainDrawer(mainState: MainViewState, onMainEvent: (MainViewEvent) -> Unit) {
-    val scrollState = rememberScrollState()
     ModalDrawerSheet(
-        modifier = Modifier
-            .fillMaxHeight()
-            .verticalScroll(scrollState),
         windowInsets = WindowInsets.navigationBars
     ) {
-        DrawerContent(
-            mainState = mainState,
-            onMainEvent = onMainEvent
-        )
+        Column(Modifier. verticalScroll(rememberScrollState())) {
+            DrawerContent(
+                mainState = mainState,
+                onMainEvent = onMainEvent
+            )
+        }
     }
 }
 
