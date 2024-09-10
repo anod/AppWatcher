@@ -4,6 +4,7 @@ import android.net.Uri
 import android.os.Environment
 import androidx.room.withTransaction
 import com.anod.appwatcher.database.AppsDatabase
+import com.anod.appwatcher.database.entities.AppTag
 import info.anodsplace.applog.AppLog
 import info.anodsplace.context.ApplicationContext
 import info.anodsplace.framework.json.MalformedJsonException
@@ -110,7 +111,15 @@ class DbBackupManager(private val context: info.anodsplace.context.ApplicationCo
                 db.tags().insert(tag.name, tag.color)
             }
 
-            result.appTags.forEach { appTag ->
+            val namedTags = db.tags().load().associateBy { it.name }
+            val appTagList = mutableListOf<AppTag>()
+            result.appTags.forEach { (appId, tags) ->
+                tags.forEach { tag ->
+                    namedTags[tag]?.let { appTagList.add(AppTag(appId, it.id)) }
+                }
+            }
+
+            appTagList.forEach { appTag ->
                 try {
                     db.appTags().insert(appTag.appId, appTag.tagId)
                 } catch (e: Throwable) {

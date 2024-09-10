@@ -17,7 +17,7 @@ import java.io.Reader
  */
 class DbJsonReader {
 
-    internal class Container(val apps: List<App>, val tags: List<Tag>, val appTags: List<AppTag>)
+    internal class Container(val apps: List<App>, val tags: List<Tag>, val appTags: Map<String, List<String>>)
 
     interface OnReadListener {
         suspend fun onAppRead(app: App, tags: List<String>)
@@ -83,7 +83,7 @@ class DbJsonReader {
             reader.close()
             listener.onFinish(-1, -1)
 
-            return@withContext Container(apps, tagList, listOf())
+            return@withContext Container(apps, tagList, mapOf())
         }
 
         jsonReader.beginObject()
@@ -99,15 +99,7 @@ class DbJsonReader {
         reader.close()
         listener.onFinish(-1, -1)
 
-        val namedTags = tagList.associateBy { it.name }
-        val appTagList = mutableListOf<AppTag>()
-        appsTags.forEach { (appId, tags) ->
-            tags.forEach { tag ->
-                namedTags[tag]?.let { appTagList.add(AppTag(appId, it.id)) }
-            }
-        }
-
-        return@withContext Container(apps, tagList, appTagList)
+        return@withContext Container(apps, tagList, appsTags)
     }
 
     @Throws(IOException::class)
