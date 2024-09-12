@@ -36,5 +36,6 @@ val androidVersions = mapOf(
     Build.VERSION_CODES.S to "12",
     Build.VERSION_CODES.S_V2 to "12",
     Build.VERSION_CODES.TIRAMISU to "13",
-    34 to "14"
+    Build.VERSION_CODES.UPSIDE_DOWN_CAKE to "14",
+    35 to "15"
 )
