@@ -93,13 +93,14 @@ private fun DrawerContent(mainState: MainViewState, onMainEvent: (MainViewEvent)
     )
 
     mainState.tags.forEach { (tag, count) ->
+        val renderedTag = if (tag.isEmpty) tag.copy(name = stringResource(R.string.untagged), color =  MaterialTheme.colorScheme.primaryContainer.toArgb()) else tag
         NavigationDrawerItem(
-            icon = {  TagIcon(outlined = true, contentDescription = tag.name) },
-            label = { Text(if (tag.isEmpty) stringResource(R.string.untagged) else tag.name) },
-            badge = { TagBadge(if (tag.isEmpty) MaterialTheme.colorScheme.primaryContainer else Color(tag.color), count) },
+            icon = { TagIcon(outlined = true, contentDescription = renderedTag.name) },
+            label = { Text(renderedTag.name) },
+            badge = { TagBadge(Color(tag.color), count) },
             selected = false,
             onClick = {
-                onMainEvent(MainViewEvent.NavigateToTag(tag))
+                onMainEvent(MainViewEvent.NavigateToTag(renderedTag))
             },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding).height(42.dp)
         )
