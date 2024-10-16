@@ -34,5 +34,4 @@ dependencies {
     implementation(project(":lib:framework"))
     implementation(libs.coroutines.core)
     implementation(libs.coroutines.android)
-    implementation(libs.kotlin.stdlib)
 }
