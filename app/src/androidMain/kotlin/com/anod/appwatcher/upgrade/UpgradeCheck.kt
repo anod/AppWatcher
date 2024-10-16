@@ -1,0 +1,40 @@
+package com.anod.appwatcher.upgrade
+
+import com.anod.appwatcher.BuildConfig
+import com.anod.appwatcher.preferences.Preferences
+
+/**
+ * @author Alex Gavrishev
+ * *
+ * @date 08/10/2016.
+ */
+
+interface UpgradeTask {
+    fun onUpgrade(upgrade: UpgradeCheck.Result)
+}
+
+class UpgradeCheck(private val androidPreferences: Preferences) {
+
+    class Result(val isNewVersion: Boolean, val oldVersionCode: Int)
+
+    val result: Result
+        get() {
+            val code = androidPreferences.versionCode
+            if (code == 0) {
+                androidPreferences.versionCode = BuildConfig.VERSION_CODE
+                return Result(false, 0)
+            }
+
+            if (code < BuildConfig.VERSION_CODE) {
+                androidPreferences.versionCode = BuildConfig.VERSION_CODE
+                return Result(true, code)
+            }
+            return Result(false, code)
+        }
+
+    companion object {
+        val upgrades = listOf(
+            Upgrade15500()
+        )
+    }
+}
