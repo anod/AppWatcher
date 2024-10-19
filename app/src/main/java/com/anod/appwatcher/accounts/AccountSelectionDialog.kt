@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 
 sealed interface AccountSelectionResult {
     class Success(val account: Account) : AccountSelectionResult
-    object Canceled : AccountSelectionResult
+    data object Canceled : AccountSelectionResult
     class Error(val errorMessage: String) : AccountSelectionResult
 }
 
@@ -31,17 +31,11 @@ class AccountSelectionDialog(
         onActivityResult(result.resultCode, result.data)
     }
 
-    var account: Account?
-        get() = preferences.account
-        set(value) {
-            preferences.account = value
-        }
-
     val accountSelected = MutableSharedFlow<AccountSelectionResult>()
 
     fun show() {
         val intent = AccountManager.newChooseAccountIntent(
-                account,
+                preferences.account?.toAndroidAccount(),
                 null,
                 arrayOf(AuthTokenBlocking.ACCOUNT_TYPE),
                 null,
@@ -64,18 +58,15 @@ class AccountSelectionDialog(
             val type = data.extras?.getString(AccountManager.KEY_ACCOUNT_TYPE, "") ?: ""
             if (name.isNotBlank() && type.isNotBlank()) {
                 val account = Account(name, type)
-                this.preferences.account = account
                 activity.lifecycleScope.launch {
                     accountSelected.emit(AccountSelectionResult.Success(account))
                 }
                 return
             }
         }
-        if (this.preferences.account == null) {
-            val errorMessage = data?.extras?.getString(AccountManager.KEY_ERROR_MESSAGE, "") ?: ""
-            activity.lifecycleScope.launch {
-                accountSelected.emit(AccountSelectionResult.Error(errorMessage))
-            }
+        val errorMessage = data?.extras?.getString(AccountManager.KEY_ERROR_MESSAGE, null)
+        activity.lifecycleScope.launch {
+            accountSelected.emit(AccountSelectionResult.Error(errorMessage ?: "Cannot retrieve account"))
         }
     }
 }

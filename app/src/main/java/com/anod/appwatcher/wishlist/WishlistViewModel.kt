@@ -12,6 +12,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.filter
+import com.anod.appwatcher.accounts.AuthAccount
 import info.anodsplace.framework.content.CommonActivityAction
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
@@ -36,8 +37,6 @@ import org.koin.core.component.inject
 
 @Immutable
 data class WishListState(
-    val account: Account? = null,
-    val authToken: String = "",
     val nameFilter: String = "",
     val wideLayout: HingeDeviceLayout = HingeDeviceLayout(),
     val selectedApp: App? = null,
@@ -55,16 +54,14 @@ sealed interface WishListEvent {
     class SetWideLayout(val wideLayout: HingeDeviceLayout) : WishListEvent
 }
 
-class WishListViewModel(account: Account?, authToken: String, wideLayout: HingeDeviceLayout) : BaseFlowViewModel<WishListState, WishListEvent, WishListAction>(), KoinComponent {
+class WishListViewModel(wideLayout: HingeDeviceLayout) : BaseFlowViewModel<WishListState, WishListEvent, WishListAction>(), KoinComponent {
 
     class Factory(
-        private val account: Account?,
-        private val authToken: String,
         private val wideLayout: HingeDeviceLayout
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            return WishListViewModel(account, authToken, wideLayout) as T
+            return WishListViewModel(wideLayout) as T
         }
     }
 
@@ -73,11 +70,11 @@ class WishListViewModel(account: Account?, authToken: String, wideLayout: HingeD
     private val uploadDateParserCache: UploadDateParserCache by inject()
     private val packageManager: PackageManager by inject()
     private val installedApps by lazy { InstalledApps.MemoryCache(InstalledApps.PackageManager(packageManager)) }
+    val authenticated: Boolean
+        get() = dfeApi.authenticated
 
     init {
         viewState = WishListState(
-            account = account,
-            authToken = authToken,
             wideLayout = wideLayout
         )
     }

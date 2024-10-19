@@ -328,33 +328,54 @@ public interface DocV2OrBuilder extends
       getSubtitleBytes();
 
   /**
-   * <pre>
-   * optional Unknown25 unknown25 = 25;
-   * </pre>
-   *
-   * <code>optional string descriptionShort = 27;</code>
-   * @return Whether the descriptionShort field is set.
+   * <code>optional .finsky.protos.AppInfo appInfo = 25;</code>
+   * @return Whether the appInfo field is set.
    */
-  boolean hasDescriptionShort();
+  boolean hasAppInfo();
   /**
-   * <pre>
-   * optional Unknown25 unknown25 = 25;
-   * </pre>
-   *
-   * <code>optional string descriptionShort = 27;</code>
-   * @return The descriptionShort.
+   * <code>optional .finsky.protos.AppInfo appInfo = 25;</code>
+   * @return The appInfo.
    */
-  java.lang.String getDescriptionShort();
+  finsky.protos.AppInfo getAppInfo();
+
   /**
-   * <pre>
-   * optional Unknown25 unknown25 = 25;
-   * </pre>
-   *
-   * <code>optional string descriptionShort = 27;</code>
-   * @return The bytes for descriptionShort.
+   * <code>optional bool mature = 26;</code>
+   * @return Whether the mature field is set.
+   */
+  boolean hasMature();
+  /**
+   * <code>optional bool mature = 26;</code>
+   * @return The mature.
+   */
+  boolean getMature();
+
+  /**
+   * <code>optional string promotionalDescription = 27;</code>
+   * @return Whether the promotionalDescription field is set.
+   */
+  boolean hasPromotionalDescription();
+  /**
+   * <code>optional string promotionalDescription = 27;</code>
+   * @return The promotionalDescription.
+   */
+  java.lang.String getPromotionalDescription();
+  /**
+   * <code>optional string promotionalDescription = 27;</code>
+   * @return The bytes for promotionalDescription.
    */
   com.google.protobuf.ByteString
-      getDescriptionShortBytes();
+      getPromotionalDescriptionBytes();
+
+  /**
+   * <code>optional bool availableForPreregistration = 29;</code>
+   * @return Whether the availableForPreregistration field is set.
+   */
+  boolean hasAvailableForPreregistration();
+  /**
+   * <code>optional bool availableForPreregistration = 29;</code>
+   * @return The availableForPreregistration.
+   */
+  boolean getAvailableForPreregistration();
 
   /**
    * <code>optional string reviewSnippetsUrl = 31;</code>
@@ -374,6 +395,28 @@ public interface DocV2OrBuilder extends
       getReviewSnippetsUrlBytes();
 
   /**
+   * <code>optional bool forceShareability = 32;</code>
+   * @return Whether the forceShareability field is set.
+   */
+  boolean hasForceShareability();
+  /**
+   * <code>optional bool forceShareability = 32;</code>
+   * @return The forceShareability.
+   */
+  boolean getForceShareability();
+
+  /**
+   * <code>optional bool useWishlistAsPrimaryAction = 33;</code>
+   * @return Whether the useWishlistAsPrimaryAction field is set.
+   */
+  boolean hasUseWishlistAsPrimaryAction();
+  /**
+   * <code>optional bool useWishlistAsPrimaryAction = 33;</code>
+   * @return The useWishlistAsPrimaryAction.
+   */
+  boolean getUseWishlistAsPrimaryAction();
+
+  /**
    * <code>optional string reviewQuestionsUrl = 34;</code>
    * @return Whether the reviewQuestionsUrl field is set.
    */
@@ -389,4 +432,21 @@ public interface DocV2OrBuilder extends
    */
   com.google.protobuf.ByteString
       getReviewQuestionsUrlBytes();
+
+  /**
+   * <code>optional string reviewSummaryUrl = 39;</code>
+   * @return Whether the reviewSummaryUrl field is set.
+   */
+  boolean hasReviewSummaryUrl();
+  /**
+   * <code>optional string reviewSummaryUrl = 39;</code>
+   * @return The reviewSummaryUrl.
+   */
+  java.lang.String getReviewSummaryUrl();
+  /**
+   * <code>optional string reviewSummaryUrl = 39;</code>
+   * @return The bytes for reviewSummaryUrl.
+   */
+  com.google.protobuf.ByteString
+      getReviewSummaryUrlBytes();
 }

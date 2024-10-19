@@ -11,6 +11,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.lifecycleScope
 import com.anod.appwatcher.R
+import com.anod.appwatcher.accounts.AuthAccount
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.compose.MainDetailScreen
@@ -30,15 +31,13 @@ class WishListActivity : BaseComposeActivity(), KoinComponent {
 
     private val viewModel: WishListViewModel by viewModels(factoryProducer = {
         WishListViewModel.Factory(
-            account = intent.extras?.getParcelable(EXTRA_ACCOUNT),
-            authToken = intent.extras?.getString(EXTRA_AUTH_TOKEN) ?: "",
             wideLayout = hingeDevice.layout.value,
         )
     })
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (viewModel.viewState.account == null || viewModel.viewState.authToken.isEmpty()) {
+        if (!viewModel.authenticated) {
             Toast.makeText(this, R.string.choose_an_account, Toast.LENGTH_SHORT).show()
             finish()
             return
@@ -96,12 +95,6 @@ class WishListActivity : BaseComposeActivity(), KoinComponent {
     }
 
     companion object {
-        const val EXTRA_ACCOUNT = "extra_account"
-        const val EXTRA_AUTH_TOKEN = "extra_auth_token"
-
-        fun intent(context: Context, account: Account?, authToken: String?): Intent = Intent(context, WishListActivity::class.java).apply {
-            putExtra(EXTRA_ACCOUNT, account)
-            putExtra(EXTRA_AUTH_TOKEN, authToken)
-        }
+        fun intent(context: Context): Intent = Intent(context, WishListActivity::class.java)
     }
 }

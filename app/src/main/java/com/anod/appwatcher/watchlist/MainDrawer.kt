@@ -37,6 +37,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.anod.appwatcher.R
+import com.anod.appwatcher.accounts.AuthAccount
 import com.anod.appwatcher.compose.AddIcon
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.TagIcon
@@ -191,7 +192,7 @@ private fun DrawerContentPreviewWithAccount() {
     AppTheme {
         MainDrawer(
             mainState = MainViewState(
-                account = Account("very_long_email_address@example.com", "test"),
+                account = AuthAccount("very_long_email_address@example.com", "test", "", ""),
                 lastUpdate = System.currentTimeMillis() - TimeUnit.HOURS.toMillis(2),
                 tags = listOf(
                     Pair(Tag("Banana", Color.Yellow.toArgb()), 90),

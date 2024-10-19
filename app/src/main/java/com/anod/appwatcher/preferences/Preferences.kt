@@ -1,11 +1,11 @@
 package com.anod.appwatcher.preferences
 
-import android.accounts.Account
 import android.annotation.SuppressLint
 import android.app.UiModeManager
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
+import com.anod.appwatcher.accounts.AuthAccount
 import com.anod.appwatcher.model.Filters
 import info.anodsplace.notification.NotificationManager
 import info.anodsplace.graphics.AdaptiveIcon
@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 
-class Preferences(context: Context, private val notificationManager: info.anodsplace.notification.NotificationManager, private val appScope: CoroutineScope) : SharedPreferences.OnSharedPreferenceChangeListener {
+class Preferences(context: Context, private val notificationManager: NotificationManager, private val appScope: CoroutineScope) : SharedPreferences.OnSharedPreferenceChangeListener {
     private val _changes = MutableSharedFlow<String>()
     private val preferences = context.getSharedPreferences(PREFS_NAME, 0)
 
@@ -24,20 +24,31 @@ class Preferences(context: Context, private val notificationManager: info.anodsp
         preferences.registerOnSharedPreferenceChangeListener(this)
     }
 
-    var account: Account?
+    var account: AuthAccount?
         get() {
             val name = preferences.getString(ACCOUNT_NAME, null) ?: return null
-            val type = preferences.getString(ACCOUNT_TYPE, null)
-            return Account(name, type)
+            val type = preferences.getString(ACCOUNT_TYPE, null) ?: return null
+            val gfsId = preferences.getString(GFS_ID, "") ?: ""
+            val gfsToken = preferences.getString(GFS_TOKEN, "") ?: ""
+            return AuthAccount(
+                name = name,
+                type = type,
+                gfsId = gfsId,
+                deviceCheckInConsistencyToken = gfsToken
+            )
         }
         set(value) {
             val editor = preferences.edit()
             if (value == null) {
                 editor.remove(ACCOUNT_NAME)
                 editor.remove(ACCOUNT_TYPE)
+                editor.remove(GFS_ID)
+                editor.remove(GFS_TOKEN)
             } else {
                 editor.putString(ACCOUNT_NAME, value.name)
                 editor.putString(ACCOUNT_TYPE, value.type)
+                editor.putString(GFS_ID, value.gfsId)
+                editor.putString(GFS_TOKEN, value.deviceCheckInConsistencyToken)
             }
             editor.apply()
         }
@@ -172,7 +183,8 @@ class Preferences(context: Context, private val notificationManager: info.anodsp
         private const val VIEWED = "viewed"
         const val LAST_UPDATE_TIME = "last_update_time"
         private const val WIFI_ONLY = "wifi_only"
-        private const val DEVICE_ID = "device_id"
+        private const val GFS_ID = "gfs_id"
+        private const val GFS_TOKEN = "gfs_token"
         private const val ACCOUNT_NAME = "account_name"
         private const val ACCOUNT_TYPE = "account_type"
         private const val SORT_INDEX = "sort_index"

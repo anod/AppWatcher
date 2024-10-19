@@ -112,6 +112,17 @@ public  final class Search extends
     boolean getFullPageReplaced();
 
     /**
+     * <code>optional bool containsSnow = 9;</code>
+     * @return Whether the containsSnow field is set.
+     */
+    boolean hasContainsSnow();
+    /**
+     * <code>optional bool containsSnow = 9;</code>
+     * @return The containsSnow.
+     */
+    boolean getContainsSnow();
+
+    /**
      * <code>optional string nextPageUrl = 10;</code>
      * @return Whether the nextPageUrl field is set.
      */
@@ -524,6 +535,40 @@ public  final class Search extends
       fullPageReplaced_ = false;
     }
 
+    public static final int CONTAINSSNOW_FIELD_NUMBER = 9;
+    private boolean containsSnow_;
+    /**
+     * <code>optional bool containsSnow = 9;</code>
+     * @return Whether the containsSnow field is set.
+     */
+    @java.lang.Override
+    public boolean hasContainsSnow() {
+      return ((bitField0_ & 0x00000010) != 0);
+    }
+    /**
+     * <code>optional bool containsSnow = 9;</code>
+     * @return The containsSnow.
+     */
+    @java.lang.Override
+    public boolean getContainsSnow() {
+      return containsSnow_;
+    }
+    /**
+     * <code>optional bool containsSnow = 9;</code>
+     * @param value The containsSnow to set.
+     */
+    private void setContainsSnow(boolean value) {
+      bitField0_ |= 0x00000010;
+      containsSnow_ = value;
+    }
+    /**
+     * <code>optional bool containsSnow = 9;</code>
+     */
+    private void clearContainsSnow() {
+      bitField0_ = (bitField0_ & ~0x00000010);
+      containsSnow_ = false;
+    }
+
     public static final int NEXTPAGEURL_FIELD_NUMBER = 10;
     private java.lang.String nextPageUrl_;
     /**
@@ -532,7 +577,7 @@ public  final class Search extends
      */
     @java.lang.Override
     public boolean hasNextPageUrl() {
-      return ((bitField0_ & 0x00000010) != 0);
+      return ((bitField0_ & 0x00000020) != 0);
     }
     /**
      * <code>optional string nextPageUrl = 10;</code>
@@ -558,14 +603,14 @@ public  final class Search extends
     private void setNextPageUrl(
         java.lang.String value) {
       java.lang.Class<?> valueClass = value.getClass();
-  bitField0_ |= 0x00000010;
+  bitField0_ |= 0x00000020;
       nextPageUrl_ = value;
     }
     /**
      * <code>optional string nextPageUrl = 10;</code>
      */
     private void clearNextPageUrl() {
-      bitField0_ = (bitField0_ & ~0x00000010);
+      bitField0_ = (bitField0_ & ~0x00000020);
       nextPageUrl_ = getDefaultInstance().getNextPageUrl();
     }
     /**
@@ -575,7 +620,7 @@ public  final class Search extends
     private void setNextPageUrlBytes(
         com.google.protobuf.ByteString value) {
       nextPageUrl_ = value.toStringUtf8();
-      bitField0_ |= 0x00000010;
+      bitField0_ |= 0x00000020;
     }
 
     public static finsky.protos.Search.SearchResponse parseFrom(
@@ -1082,6 +1127,42 @@ public  final class Search extends
       }
 
       /**
+       * <code>optional bool containsSnow = 9;</code>
+       * @return Whether the containsSnow field is set.
+       */
+      @java.lang.Override
+      public boolean hasContainsSnow() {
+        return instance.hasContainsSnow();
+      }
+      /**
+       * <code>optional bool containsSnow = 9;</code>
+       * @return The containsSnow.
+       */
+      @java.lang.Override
+      public boolean getContainsSnow() {
+        return instance.getContainsSnow();
+      }
+      /**
+       * <code>optional bool containsSnow = 9;</code>
+       * @param value The containsSnow to set.
+       * @return This builder for chaining.
+       */
+      public Builder setContainsSnow(boolean value) {
+        copyOnWrite();
+        instance.setContainsSnow(value);
+        return this;
+      }
+      /**
+       * <code>optional bool containsSnow = 9;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearContainsSnow() {
+        copyOnWrite();
+        instance.clearContainsSnow();
+        return this;
+      }
+
+      /**
        * <code>optional string nextPageUrl = 10;</code>
        * @return Whether the nextPageUrl field is set.
        */
@@ -1163,11 +1244,12 @@ public  final class Search extends
               "doc_",
               finsky.protos.DocV2.class,
               "fullPageReplaced_",
+              "containsSnow_",
               "nextPageUrl_",
             };
             java.lang.String info =
-                "\u0001\u0007\u0000\u0001\u0001\n\u0007\u0000\u0002\u0000\u0001\u1008\u0000\u0002" +
-                "\u1008\u0001\u0003\u1007\u0002\u0004\u001b\u0005\u001b\b\u1007\u0003\n\u1008\u0004" +
+                "\u0001\b\u0000\u0001\u0001\n\b\u0000\u0002\u0000\u0001\u1008\u0000\u0002\u1008\u0001" +
+                "\u0003\u1007\u0002\u0004\u001b\u0005\u001b\b\u1007\u0003\t\u1007\u0004\n\u1008\u0005" +
                 "";
             return newMessageInfo(DEFAULT_INSTANCE, info, objects);
         }

@@ -28,9 +28,10 @@ public  final class DocV2 extends
     backendUrl_ = "";
     purchaseDetailsUrl_ = "";
     subtitle_ = "";
-    descriptionShort_ = "";
+    promotionalDescription_ = "";
     reviewSnippetsUrl_ = "";
     reviewQuestionsUrl_ = "";
+    reviewSummaryUrl_ = "";
   }
   public interface AggregateRatingOrBuilder extends
       // @@protoc_insertion_point(interface_extends:finsky.protos.DocV2.AggregateRating)
@@ -2863,82 +2864,172 @@ public  final class DocV2 extends
     bitField0_ |= 0x00020000;
   }
 
-  public static final int DESCRIPTIONSHORT_FIELD_NUMBER = 27;
-  private java.lang.String descriptionShort_;
+  public static final int APPINFO_FIELD_NUMBER = 25;
+  private finsky.protos.AppInfo appInfo_;
   /**
-   * <pre>
-   * optional Unknown25 unknown25 = 25;
-   * </pre>
-   *
-   * <code>optional string descriptionShort = 27;</code>
-   * @return Whether the descriptionShort field is set.
+   * <code>optional .finsky.protos.AppInfo appInfo = 25;</code>
    */
   @java.lang.Override
-  public boolean hasDescriptionShort() {
+  public boolean hasAppInfo() {
     return ((bitField0_ & 0x00040000) != 0);
   }
   /**
-   * <pre>
-   * optional Unknown25 unknown25 = 25;
-   * </pre>
-   *
-   * <code>optional string descriptionShort = 27;</code>
-   * @return The descriptionShort.
+   * <code>optional .finsky.protos.AppInfo appInfo = 25;</code>
    */
   @java.lang.Override
-  public java.lang.String getDescriptionShort() {
-    return descriptionShort_;
+  public finsky.protos.AppInfo getAppInfo() {
+    return appInfo_ == null ? finsky.protos.AppInfo.getDefaultInstance() : appInfo_;
   }
   /**
-   * <pre>
-   * optional Unknown25 unknown25 = 25;
-   * </pre>
-   *
-   * <code>optional string descriptionShort = 27;</code>
-   * @return The bytes for descriptionShort.
+   * <code>optional .finsky.protos.AppInfo appInfo = 25;</code>
+   */
+  private void setAppInfo(finsky.protos.AppInfo value) {
+    value.getClass();
+  appInfo_ = value;
+    bitField0_ |= 0x00040000;
+    }
+  /**
+   * <code>optional .finsky.protos.AppInfo appInfo = 25;</code>
+   */
+  @java.lang.SuppressWarnings({"ReferenceEquality"})
+  private void mergeAppInfo(finsky.protos.AppInfo value) {
+    value.getClass();
+  if (appInfo_ != null &&
+        appInfo_ != finsky.protos.AppInfo.getDefaultInstance()) {
+      appInfo_ =
+        finsky.protos.AppInfo.newBuilder(appInfo_).mergeFrom(value).buildPartial();
+    } else {
+      appInfo_ = value;
+    }
+    bitField0_ |= 0x00040000;
+  }
+  /**
+   * <code>optional .finsky.protos.AppInfo appInfo = 25;</code>
+   */
+  private void clearAppInfo() {  appInfo_ = null;
+    bitField0_ = (bitField0_ & ~0x00040000);
+  }
+
+  public static final int MATURE_FIELD_NUMBER = 26;
+  private boolean mature_;
+  /**
+   * <code>optional bool mature = 26;</code>
+   * @return Whether the mature field is set.
+   */
+  @java.lang.Override
+  public boolean hasMature() {
+    return ((bitField0_ & 0x00080000) != 0);
+  }
+  /**
+   * <code>optional bool mature = 26;</code>
+   * @return The mature.
+   */
+  @java.lang.Override
+  public boolean getMature() {
+    return mature_;
+  }
+  /**
+   * <code>optional bool mature = 26;</code>
+   * @param value The mature to set.
+   */
+  private void setMature(boolean value) {
+    bitField0_ |= 0x00080000;
+    mature_ = value;
+  }
+  /**
+   * <code>optional bool mature = 26;</code>
+   */
+  private void clearMature() {
+    bitField0_ = (bitField0_ & ~0x00080000);
+    mature_ = false;
+  }
+
+  public static final int PROMOTIONALDESCRIPTION_FIELD_NUMBER = 27;
+  private java.lang.String promotionalDescription_;
+  /**
+   * <code>optional string promotionalDescription = 27;</code>
+   * @return Whether the promotionalDescription field is set.
+   */
+  @java.lang.Override
+  public boolean hasPromotionalDescription() {
+    return ((bitField0_ & 0x00100000) != 0);
+  }
+  /**
+   * <code>optional string promotionalDescription = 27;</code>
+   * @return The promotionalDescription.
+   */
+  @java.lang.Override
+  public java.lang.String getPromotionalDescription() {
+    return promotionalDescription_;
+  }
+  /**
+   * <code>optional string promotionalDescription = 27;</code>
+   * @return The bytes for promotionalDescription.
    */
   @java.lang.Override
   public com.google.protobuf.ByteString
-      getDescriptionShortBytes() {
-    return com.google.protobuf.ByteString.copyFromUtf8(descriptionShort_);
+      getPromotionalDescriptionBytes() {
+    return com.google.protobuf.ByteString.copyFromUtf8(promotionalDescription_);
   }
   /**
-   * <pre>
-   * optional Unknown25 unknown25 = 25;
-   * </pre>
-   *
-   * <code>optional string descriptionShort = 27;</code>
-   * @param value The descriptionShort to set.
+   * <code>optional string promotionalDescription = 27;</code>
+   * @param value The promotionalDescription to set.
    */
-  private void setDescriptionShort(
+  private void setPromotionalDescription(
       java.lang.String value) {
     java.lang.Class<?> valueClass = value.getClass();
-  bitField0_ |= 0x00040000;
-    descriptionShort_ = value;
+  bitField0_ |= 0x00100000;
+    promotionalDescription_ = value;
   }
   /**
-   * <pre>
-   * optional Unknown25 unknown25 = 25;
-   * </pre>
-   *
-   * <code>optional string descriptionShort = 27;</code>
+   * <code>optional string promotionalDescription = 27;</code>
    */
-  private void clearDescriptionShort() {
-    bitField0_ = (bitField0_ & ~0x00040000);
-    descriptionShort_ = getDefaultInstance().getDescriptionShort();
+  private void clearPromotionalDescription() {
+    bitField0_ = (bitField0_ & ~0x00100000);
+    promotionalDescription_ = getDefaultInstance().getPromotionalDescription();
   }
   /**
-   * <pre>
-   * optional Unknown25 unknown25 = 25;
-   * </pre>
-   *
-   * <code>optional string descriptionShort = 27;</code>
-   * @param value The bytes for descriptionShort to set.
+   * <code>optional string promotionalDescription = 27;</code>
+   * @param value The bytes for promotionalDescription to set.
    */
-  private void setDescriptionShortBytes(
+  private void setPromotionalDescriptionBytes(
       com.google.protobuf.ByteString value) {
-    descriptionShort_ = value.toStringUtf8();
-    bitField0_ |= 0x00040000;
+    promotionalDescription_ = value.toStringUtf8();
+    bitField0_ |= 0x00100000;
+  }
+
+  public static final int AVAILABLEFORPREREGISTRATION_FIELD_NUMBER = 29;
+  private boolean availableForPreregistration_;
+  /**
+   * <code>optional bool availableForPreregistration = 29;</code>
+   * @return Whether the availableForPreregistration field is set.
+   */
+  @java.lang.Override
+  public boolean hasAvailableForPreregistration() {
+    return ((bitField0_ & 0x00200000) != 0);
+  }
+  /**
+   * <code>optional bool availableForPreregistration = 29;</code>
+   * @return The availableForPreregistration.
+   */
+  @java.lang.Override
+  public boolean getAvailableForPreregistration() {
+    return availableForPreregistration_;
+  }
+  /**
+   * <code>optional bool availableForPreregistration = 29;</code>
+   * @param value The availableForPreregistration to set.
+   */
+  private void setAvailableForPreregistration(boolean value) {
+    bitField0_ |= 0x00200000;
+    availableForPreregistration_ = value;
+  }
+  /**
+   * <code>optional bool availableForPreregistration = 29;</code>
+   */
+  private void clearAvailableForPreregistration() {
+    bitField0_ = (bitField0_ & ~0x00200000);
+    availableForPreregistration_ = false;
   }
 
   public static final int REVIEWSNIPPETSURL_FIELD_NUMBER = 31;
@@ -2949,7 +3040,7 @@ public  final class DocV2 extends
    */
   @java.lang.Override
   public boolean hasReviewSnippetsUrl() {
-    return ((bitField0_ & 0x00080000) != 0);
+    return ((bitField0_ & 0x00400000) != 0);
   }
   /**
    * <code>optional string reviewSnippetsUrl = 31;</code>
@@ -2975,14 +3066,14 @@ public  final class DocV2 extends
   private void setReviewSnippetsUrl(
       java.lang.String value) {
     java.lang.Class<?> valueClass = value.getClass();
-  bitField0_ |= 0x00080000;
+  bitField0_ |= 0x00400000;
     reviewSnippetsUrl_ = value;
   }
   /**
    * <code>optional string reviewSnippetsUrl = 31;</code>
    */
   private void clearReviewSnippetsUrl() {
-    bitField0_ = (bitField0_ & ~0x00080000);
+    bitField0_ = (bitField0_ & ~0x00400000);
     reviewSnippetsUrl_ = getDefaultInstance().getReviewSnippetsUrl();
   }
   /**
@@ -2992,7 +3083,75 @@ public  final class DocV2 extends
   private void setReviewSnippetsUrlBytes(
       com.google.protobuf.ByteString value) {
     reviewSnippetsUrl_ = value.toStringUtf8();
-    bitField0_ |= 0x00080000;
+    bitField0_ |= 0x00400000;
+  }
+
+  public static final int FORCESHAREABILITY_FIELD_NUMBER = 32;
+  private boolean forceShareability_;
+  /**
+   * <code>optional bool forceShareability = 32;</code>
+   * @return Whether the forceShareability field is set.
+   */
+  @java.lang.Override
+  public boolean hasForceShareability() {
+    return ((bitField0_ & 0x00800000) != 0);
+  }
+  /**
+   * <code>optional bool forceShareability = 32;</code>
+   * @return The forceShareability.
+   */
+  @java.lang.Override
+  public boolean getForceShareability() {
+    return forceShareability_;
+  }
+  /**
+   * <code>optional bool forceShareability = 32;</code>
+   * @param value The forceShareability to set.
+   */
+  private void setForceShareability(boolean value) {
+    bitField0_ |= 0x00800000;
+    forceShareability_ = value;
+  }
+  /**
+   * <code>optional bool forceShareability = 32;</code>
+   */
+  private void clearForceShareability() {
+    bitField0_ = (bitField0_ & ~0x00800000);
+    forceShareability_ = false;
+  }
+
+  public static final int USEWISHLISTASPRIMARYACTION_FIELD_NUMBER = 33;
+  private boolean useWishlistAsPrimaryAction_;
+  /**
+   * <code>optional bool useWishlistAsPrimaryAction = 33;</code>
+   * @return Whether the useWishlistAsPrimaryAction field is set.
+   */
+  @java.lang.Override
+  public boolean hasUseWishlistAsPrimaryAction() {
+    return ((bitField0_ & 0x01000000) != 0);
+  }
+  /**
+   * <code>optional bool useWishlistAsPrimaryAction = 33;</code>
+   * @return The useWishlistAsPrimaryAction.
+   */
+  @java.lang.Override
+  public boolean getUseWishlistAsPrimaryAction() {
+    return useWishlistAsPrimaryAction_;
+  }
+  /**
+   * <code>optional bool useWishlistAsPrimaryAction = 33;</code>
+   * @param value The useWishlistAsPrimaryAction to set.
+   */
+  private void setUseWishlistAsPrimaryAction(boolean value) {
+    bitField0_ |= 0x01000000;
+    useWishlistAsPrimaryAction_ = value;
+  }
+  /**
+   * <code>optional bool useWishlistAsPrimaryAction = 33;</code>
+   */
+  private void clearUseWishlistAsPrimaryAction() {
+    bitField0_ = (bitField0_ & ~0x01000000);
+    useWishlistAsPrimaryAction_ = false;
   }
 
   public static final int REVIEWQUESTIONSURL_FIELD_NUMBER = 34;
@@ -3003,7 +3162,7 @@ public  final class DocV2 extends
    */
   @java.lang.Override
   public boolean hasReviewQuestionsUrl() {
-    return ((bitField0_ & 0x00100000) != 0);
+    return ((bitField0_ & 0x02000000) != 0);
   }
   /**
    * <code>optional string reviewQuestionsUrl = 34;</code>
@@ -3029,14 +3188,14 @@ public  final class DocV2 extends
   private void setReviewQuestionsUrl(
       java.lang.String value) {
     java.lang.Class<?> valueClass = value.getClass();
-  bitField0_ |= 0x00100000;
+  bitField0_ |= 0x02000000;
     reviewQuestionsUrl_ = value;
   }
   /**
    * <code>optional string reviewQuestionsUrl = 34;</code>
    */
   private void clearReviewQuestionsUrl() {
-    bitField0_ = (bitField0_ & ~0x00100000);
+    bitField0_ = (bitField0_ & ~0x02000000);
     reviewQuestionsUrl_ = getDefaultInstance().getReviewQuestionsUrl();
   }
   /**
@@ -3046,7 +3205,61 @@ public  final class DocV2 extends
   private void setReviewQuestionsUrlBytes(
       com.google.protobuf.ByteString value) {
     reviewQuestionsUrl_ = value.toStringUtf8();
-    bitField0_ |= 0x00100000;
+    bitField0_ |= 0x02000000;
+  }
+
+  public static final int REVIEWSUMMARYURL_FIELD_NUMBER = 39;
+  private java.lang.String reviewSummaryUrl_;
+  /**
+   * <code>optional string reviewSummaryUrl = 39;</code>
+   * @return Whether the reviewSummaryUrl field is set.
+   */
+  @java.lang.Override
+  public boolean hasReviewSummaryUrl() {
+    return ((bitField0_ & 0x04000000) != 0);
+  }
+  /**
+   * <code>optional string reviewSummaryUrl = 39;</code>
+   * @return The reviewSummaryUrl.
+   */
+  @java.lang.Override
+  public java.lang.String getReviewSummaryUrl() {
+    return reviewSummaryUrl_;
+  }
+  /**
+   * <code>optional string reviewSummaryUrl = 39;</code>
+   * @return The bytes for reviewSummaryUrl.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getReviewSummaryUrlBytes() {
+    return com.google.protobuf.ByteString.copyFromUtf8(reviewSummaryUrl_);
+  }
+  /**
+   * <code>optional string reviewSummaryUrl = 39;</code>
+   * @param value The reviewSummaryUrl to set.
+   */
+  private void setReviewSummaryUrl(
+      java.lang.String value) {
+    java.lang.Class<?> valueClass = value.getClass();
+  bitField0_ |= 0x04000000;
+    reviewSummaryUrl_ = value;
+  }
+  /**
+   * <code>optional string reviewSummaryUrl = 39;</code>
+   */
+  private void clearReviewSummaryUrl() {
+    bitField0_ = (bitField0_ & ~0x04000000);
+    reviewSummaryUrl_ = getDefaultInstance().getReviewSummaryUrl();
+  }
+  /**
+   * <code>optional string reviewSummaryUrl = 39;</code>
+   * @param value The bytes for reviewSummaryUrl to set.
+   */
+  private void setReviewSummaryUrlBytes(
+      com.google.protobuf.ByteString value) {
+    reviewSummaryUrl_ = value.toStringUtf8();
+    bitField0_ |= 0x04000000;
   }
 
   public static finsky.protos.DocV2 parseFrom(
@@ -4424,83 +4637,178 @@ public  final class DocV2 extends
     }
 
     /**
-     * <pre>
-     * optional Unknown25 unknown25 = 25;
-     * </pre>
-     *
-     * <code>optional string descriptionShort = 27;</code>
-     * @return Whether the descriptionShort field is set.
+     * <code>optional .finsky.protos.AppInfo appInfo = 25;</code>
      */
     @java.lang.Override
-    public boolean hasDescriptionShort() {
-      return instance.hasDescriptionShort();
+    public boolean hasAppInfo() {
+      return instance.hasAppInfo();
     }
     /**
-     * <pre>
-     * optional Unknown25 unknown25 = 25;
-     * </pre>
-     *
-     * <code>optional string descriptionShort = 27;</code>
-     * @return The descriptionShort.
+     * <code>optional .finsky.protos.AppInfo appInfo = 25;</code>
      */
     @java.lang.Override
-    public java.lang.String getDescriptionShort() {
-      return instance.getDescriptionShort();
+    public finsky.protos.AppInfo getAppInfo() {
+      return instance.getAppInfo();
     }
     /**
-     * <pre>
-     * optional Unknown25 unknown25 = 25;
-     * </pre>
-     *
-     * <code>optional string descriptionShort = 27;</code>
-     * @return The bytes for descriptionShort.
+     * <code>optional .finsky.protos.AppInfo appInfo = 25;</code>
+     */
+    public Builder setAppInfo(finsky.protos.AppInfo value) {
+      copyOnWrite();
+      instance.setAppInfo(value);
+      return this;
+      }
+    /**
+     * <code>optional .finsky.protos.AppInfo appInfo = 25;</code>
+     */
+    public Builder setAppInfo(
+        finsky.protos.AppInfo.Builder builderForValue) {
+      copyOnWrite();
+      instance.setAppInfo(builderForValue.build());
+      return this;
+    }
+    /**
+     * <code>optional .finsky.protos.AppInfo appInfo = 25;</code>
+     */
+    public Builder mergeAppInfo(finsky.protos.AppInfo value) {
+      copyOnWrite();
+      instance.mergeAppInfo(value);
+      return this;
+    }
+    /**
+     * <code>optional .finsky.protos.AppInfo appInfo = 25;</code>
+     */
+    public Builder clearAppInfo() {  copyOnWrite();
+      instance.clearAppInfo();
+      return this;
+    }
+
+    /**
+     * <code>optional bool mature = 26;</code>
+     * @return Whether the mature field is set.
+     */
+    @java.lang.Override
+    public boolean hasMature() {
+      return instance.hasMature();
+    }
+    /**
+     * <code>optional bool mature = 26;</code>
+     * @return The mature.
+     */
+    @java.lang.Override
+    public boolean getMature() {
+      return instance.getMature();
+    }
+    /**
+     * <code>optional bool mature = 26;</code>
+     * @param value The mature to set.
+     * @return This builder for chaining.
+     */
+    public Builder setMature(boolean value) {
+      copyOnWrite();
+      instance.setMature(value);
+      return this;
+    }
+    /**
+     * <code>optional bool mature = 26;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearMature() {
+      copyOnWrite();
+      instance.clearMature();
+      return this;
+    }
+
+    /**
+     * <code>optional string promotionalDescription = 27;</code>
+     * @return Whether the promotionalDescription field is set.
+     */
+    @java.lang.Override
+    public boolean hasPromotionalDescription() {
+      return instance.hasPromotionalDescription();
+    }
+    /**
+     * <code>optional string promotionalDescription = 27;</code>
+     * @return The promotionalDescription.
+     */
+    @java.lang.Override
+    public java.lang.String getPromotionalDescription() {
+      return instance.getPromotionalDescription();
+    }
+    /**
+     * <code>optional string promotionalDescription = 27;</code>
+     * @return The bytes for promotionalDescription.
      */
     @java.lang.Override
     public com.google.protobuf.ByteString
-        getDescriptionShortBytes() {
-      return instance.getDescriptionShortBytes();
+        getPromotionalDescriptionBytes() {
+      return instance.getPromotionalDescriptionBytes();
     }
     /**
-     * <pre>
-     * optional Unknown25 unknown25 = 25;
-     * </pre>
-     *
-     * <code>optional string descriptionShort = 27;</code>
-     * @param value The descriptionShort to set.
+     * <code>optional string promotionalDescription = 27;</code>
+     * @param value The promotionalDescription to set.
      * @return This builder for chaining.
      */
-    public Builder setDescriptionShort(
+    public Builder setPromotionalDescription(
         java.lang.String value) {
       copyOnWrite();
-      instance.setDescriptionShort(value);
+      instance.setPromotionalDescription(value);
       return this;
     }
     /**
-     * <pre>
-     * optional Unknown25 unknown25 = 25;
-     * </pre>
-     *
-     * <code>optional string descriptionShort = 27;</code>
+     * <code>optional string promotionalDescription = 27;</code>
      * @return This builder for chaining.
      */
-    public Builder clearDescriptionShort() {
+    public Builder clearPromotionalDescription() {
       copyOnWrite();
-      instance.clearDescriptionShort();
+      instance.clearPromotionalDescription();
       return this;
     }
     /**
-     * <pre>
-     * optional Unknown25 unknown25 = 25;
-     * </pre>
-     *
-     * <code>optional string descriptionShort = 27;</code>
-     * @param value The bytes for descriptionShort to set.
+     * <code>optional string promotionalDescription = 27;</code>
+     * @param value The bytes for promotionalDescription to set.
      * @return This builder for chaining.
      */
-    public Builder setDescriptionShortBytes(
+    public Builder setPromotionalDescriptionBytes(
         com.google.protobuf.ByteString value) {
       copyOnWrite();
-      instance.setDescriptionShortBytes(value);
+      instance.setPromotionalDescriptionBytes(value);
+      return this;
+    }
+
+    /**
+     * <code>optional bool availableForPreregistration = 29;</code>
+     * @return Whether the availableForPreregistration field is set.
+     */
+    @java.lang.Override
+    public boolean hasAvailableForPreregistration() {
+      return instance.hasAvailableForPreregistration();
+    }
+    /**
+     * <code>optional bool availableForPreregistration = 29;</code>
+     * @return The availableForPreregistration.
+     */
+    @java.lang.Override
+    public boolean getAvailableForPreregistration() {
+      return instance.getAvailableForPreregistration();
+    }
+    /**
+     * <code>optional bool availableForPreregistration = 29;</code>
+     * @param value The availableForPreregistration to set.
+     * @return This builder for chaining.
+     */
+    public Builder setAvailableForPreregistration(boolean value) {
+      copyOnWrite();
+      instance.setAvailableForPreregistration(value);
+      return this;
+    }
+    /**
+     * <code>optional bool availableForPreregistration = 29;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearAvailableForPreregistration() {
+      copyOnWrite();
+      instance.clearAvailableForPreregistration();
       return this;
     }
 
@@ -4562,6 +4870,78 @@ public  final class DocV2 extends
     }
 
     /**
+     * <code>optional bool forceShareability = 32;</code>
+     * @return Whether the forceShareability field is set.
+     */
+    @java.lang.Override
+    public boolean hasForceShareability() {
+      return instance.hasForceShareability();
+    }
+    /**
+     * <code>optional bool forceShareability = 32;</code>
+     * @return The forceShareability.
+     */
+    @java.lang.Override
+    public boolean getForceShareability() {
+      return instance.getForceShareability();
+    }
+    /**
+     * <code>optional bool forceShareability = 32;</code>
+     * @param value The forceShareability to set.
+     * @return This builder for chaining.
+     */
+    public Builder setForceShareability(boolean value) {
+      copyOnWrite();
+      instance.setForceShareability(value);
+      return this;
+    }
+    /**
+     * <code>optional bool forceShareability = 32;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearForceShareability() {
+      copyOnWrite();
+      instance.clearForceShareability();
+      return this;
+    }
+
+    /**
+     * <code>optional bool useWishlistAsPrimaryAction = 33;</code>
+     * @return Whether the useWishlistAsPrimaryAction field is set.
+     */
+    @java.lang.Override
+    public boolean hasUseWishlistAsPrimaryAction() {
+      return instance.hasUseWishlistAsPrimaryAction();
+    }
+    /**
+     * <code>optional bool useWishlistAsPrimaryAction = 33;</code>
+     * @return The useWishlistAsPrimaryAction.
+     */
+    @java.lang.Override
+    public boolean getUseWishlistAsPrimaryAction() {
+      return instance.getUseWishlistAsPrimaryAction();
+    }
+    /**
+     * <code>optional bool useWishlistAsPrimaryAction = 33;</code>
+     * @param value The useWishlistAsPrimaryAction to set.
+     * @return This builder for chaining.
+     */
+    public Builder setUseWishlistAsPrimaryAction(boolean value) {
+      copyOnWrite();
+      instance.setUseWishlistAsPrimaryAction(value);
+      return this;
+    }
+    /**
+     * <code>optional bool useWishlistAsPrimaryAction = 33;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearUseWishlistAsPrimaryAction() {
+      copyOnWrite();
+      instance.clearUseWishlistAsPrimaryAction();
+      return this;
+    }
+
+    /**
      * <code>optional string reviewQuestionsUrl = 34;</code>
      * @return Whether the reviewQuestionsUrl field is set.
      */
@@ -4618,6 +4998,63 @@ public  final class DocV2 extends
       return this;
     }
 
+    /**
+     * <code>optional string reviewSummaryUrl = 39;</code>
+     * @return Whether the reviewSummaryUrl field is set.
+     */
+    @java.lang.Override
+    public boolean hasReviewSummaryUrl() {
+      return instance.hasReviewSummaryUrl();
+    }
+    /**
+     * <code>optional string reviewSummaryUrl = 39;</code>
+     * @return The reviewSummaryUrl.
+     */
+    @java.lang.Override
+    public java.lang.String getReviewSummaryUrl() {
+      return instance.getReviewSummaryUrl();
+    }
+    /**
+     * <code>optional string reviewSummaryUrl = 39;</code>
+     * @return The bytes for reviewSummaryUrl.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getReviewSummaryUrlBytes() {
+      return instance.getReviewSummaryUrlBytes();
+    }
+    /**
+     * <code>optional string reviewSummaryUrl = 39;</code>
+     * @param value The reviewSummaryUrl to set.
+     * @return This builder for chaining.
+     */
+    public Builder setReviewSummaryUrl(
+        java.lang.String value) {
+      copyOnWrite();
+      instance.setReviewSummaryUrl(value);
+      return this;
+    }
+    /**
+     * <code>optional string reviewSummaryUrl = 39;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearReviewSummaryUrl() {
+      copyOnWrite();
+      instance.clearReviewSummaryUrl();
+      return this;
+    }
+    /**
+     * <code>optional string reviewSummaryUrl = 39;</code>
+     * @param value The bytes for reviewSummaryUrl to set.
+     * @return This builder for chaining.
+     */
+    public Builder setReviewSummaryUrlBytes(
+        com.google.protobuf.ByteString value) {
+      copyOnWrite();
+      instance.setReviewSummaryUrlBytes(value);
+      return this;
+    }
+
     // @@protoc_insertion_point(builder_scope:finsky.protos.DocV2)
   }
   @java.lang.Override
@@ -4659,17 +5096,24 @@ public  final class DocV2 extends
             "purchaseDetailsUrl_",
             "detailsReusable_",
             "subtitle_",
-            "descriptionShort_",
+            "appInfo_",
+            "mature_",
+            "promotionalDescription_",
+            "availableForPreregistration_",
             "reviewSnippetsUrl_",
+            "forceShareability_",
+            "useWishlistAsPrimaryAction_",
             "reviewQuestionsUrl_",
+            "reviewSummaryUrl_",
           };
           java.lang.String info =
-              "\u0001\u0018\u0000\u0001\u0001\"\u0018\u0000\u0003\u0000\u0001\u1008\u0000\u0002" +
+              "\u0001\u001e\u0000\u0001\u0001\'\u001e\u0000\u0003\u0000\u0001\u1008\u0000\u0002" +
               "\u1008\u0001\u0003\u1004\u0002\u0004\u1004\u0003\u0005\u1008\u0004\u0006\u1008\u0005" +
               "\u0007\u1008\u0006\b\u001b\n\u001b\u000b\u001b\f\u1009\u0007\r\u1009\b\u000e\u1009" +
               "\t\u000f\u1009\n\u0010\u1008\u000b\u0011\u1008\f\u0012\u1008\r\u0013\u1008\u000e" +
-              "\u0014\u1008\u000f\u0015\u1007\u0010\u0016\u1008\u0011\u001b\u1008\u0012\u001f\u1008" +
-              "\u0013\"\u1008\u0014";
+              "\u0014\u1008\u000f\u0015\u1007\u0010\u0016\u1008\u0011\u0019\u1009\u0012\u001a\u1007" +
+              "\u0013\u001b\u1008\u0014\u001d\u1007\u0015\u001f\u1008\u0016 \u1007\u0017!\u1007" +
+              "\u0018\"\u1008\u0019\'\u1008\u001a";
           return newMessageInfo(DEFAULT_INSTANCE, info, objects);
       }
       // fall through

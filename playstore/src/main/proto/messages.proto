@@ -5,234 +5,234 @@ option java_multiple_files = true;
 
 message Common
 {
-    message Image {
-        optional int32 imageType = 1;
-        optional group Dimension = 2 {
-            optional int32 width = 3;
-            optional int32 height = 4;
-        }
-        optional string imageUrl = 5;
-        optional string altTextLocalized = 6;
-        optional string secureUrl = 7;
-        optional int32 positionInSequence = 8;
-        optional bool supportsFifeUrlOptions = 9;
-        optional group Citation = 10 {
-            optional string titleLocalized = 11;
-            optional string url = 12;
-        }
-        optional string color = 15;
+  message Image {
+    optional int32 imageType = 1;
+    optional group Dimension = 2 {
+      optional int32 width = 3;
+      optional int32 height = 4;
+    }
+    optional string imageUrl = 5;
+    optional string altTextLocalized = 6;
+    optional string secureUrl = 7;
+    optional int32 positionInSequence = 8;
+    optional bool supportsFifeUrlOptions = 9;
+    optional group Citation = 10 {
+      optional string titleLocalized = 11;
+      optional string url = 12;
+    }
+    optional string color = 15;
+  }
+
+  message Offer {
+    enum TYPE
+    {
+      TYPE_1 = 1;
     }
 
-    message Offer {
-        enum TYPE
-        {
-            TYPE_1 = 1;
-        }
+    optional int64 micros = 1;
+    optional string currencyCode = 2;
+    optional string formattedAmount = 3;
+    repeated Offer convertedPrice = 4;
+    optional bool checkoutFlowRequired = 5;
+    optional int64 fullPriceMicros = 6;
+    optional string formattedFullAmount = 7;
+    optional int32 offerType = 8;
+    optional RentalTerms rentalTerms = 9;
+    optional int64 onSaleDate = 10;
+    repeated string promotionLabel = 11;
+    optional SubscriptionTerms subscriptionTerms = 12;
+    optional string formattedName = 13;
+    optional string formattedDescription = 14;
+  }
 
-        optional int64 micros = 1;
-        optional string currencyCode = 2;
-        optional string formattedAmount = 3;
-        repeated Offer convertedPrice = 4;
-        optional bool checkoutFlowRequired = 5;
-        optional int64 fullPriceMicros = 6;
-        optional string formattedFullAmount = 7;
-        optional int32 offerType = 8;
-        optional RentalTerms rentalTerms = 9;
-        optional int64 onSaleDate = 10;
-        repeated string promotionLabel = 11;
-        optional SubscriptionTerms subscriptionTerms = 12;
-        optional string formattedName = 13;
-        optional string formattedDescription = 14;
-    }
+  message RentalTerms {
+    optional int32 grantPeriodSeconds = 1;
+    optional int32 activatePeriodSeconds = 2;
+  }
 
-    message RentalTerms {
-        optional int32 grantPeriodSeconds = 1;
-        optional int32 activatePeriodSeconds = 2;
-    }
+  message SubscriptionTerms {
+    optional TimePeriod recurringPeriod = 1;
+    optional TimePeriod trialPeriod = 2;
+  }
 
-    message SubscriptionTerms {
-        optional TimePeriod recurringPeriod = 1;
-        optional TimePeriod trialPeriod = 2;
-    }
+  message TimePeriod {
+    optional int32 unit = 1;
+    optional int32 count = 2;
+  }
 
-    message TimePeriod {
-        optional int32 unit = 1;
-        optional int32 count = 2;
-    }
+  message PatchDetails {
+    optional int32 baseVersionCode = 1;
+    optional int64 size = 2;
+  }
 
-    message PatchDetails {
-        optional int32 baseVersionCode = 1;
-        optional int64 size = 2;
-    }
-
-    message FileMetadata {
-        optional int32 fileType = 1;
-        optional int32 versionCode = 2;
-        optional int64 size = 3;
-        optional string splitId = 4;
-        optional int64 compressedSize = 5;
-        repeated PatchDetails patchDetails = 6;
-    }
+  message FileMetadata {
+    optional int32 fileType = 1;
+    optional int32 versionCode = 2;
+    optional int64 size = 3;
+    optional string splitId = 4;
+    optional int64 compressedSize = 5;
+    repeated PatchDetails patchDetails = 6;
+  }
 
 }
 
 message Containers
 {
-    message ContainerMetadata
-    {
-        optional string browseUrl = 1;
-        optional string nextPageUrl = 2;
-        optional double relevance = 3;
-        optional int64 estimatedResults = 4;
-        optional string analyticsCookie = 5;
-        optional bool ordered = 6;
-    }
+  message ContainerMetadata
+  {
+    optional string browseUrl = 1;
+    optional string nextPageUrl = 2;
+    optional double relevance = 3;
+    optional int64 estimatedResults = 4;
+    optional string analyticsCookie = 5;
+    optional bool ordered = 6;
+  }
 }
 
 message AppDetails
 {
-    optional string developerName = 1;
-    optional int32 majorVersionNumber = 2;
-    optional int32 versionCode = 3;
-    optional string versionString = 4;
-    optional string title = 5;
-    repeated string appCategory = 7;
-    optional int32 contentRating = 8;
-    optional int64 installationSize = 9;
-    repeated string permission = 10;
-    optional string developerEmail = 11;
-    optional string developerWebsite = 12;
-    optional string numDownloads = 13;
-    optional string packageName = 14;
-    optional string recentChangesHtml = 15;
-    optional string uploadDate = 16;
-    repeated Common.FileMetadata file = 17;
-    optional string appType = 18;
-    optional bool unstable = 21;
-    optional bool hasInstantLink = 24;
-    optional string containsAds = 30;
-    optional int32 targetSdkVersion = 32;
-    optional Dependencies dependencies = 34;
-    optional TestingProgramInfo testingProgramInfo = 35;
-    optional EarlyAccessInfo earlyAccessInfo = 36;
-    optional EditorChoice editorChoice = 41;
-    optional string instantLink = 43;
-    optional string developerAddress = 45;
-    optional Publisher publisher = 46;
-    optional string categoryName = 48;
-    optional int64 downloadCount = 53;
-    optional string downloadLabelDisplay = 61;
-    optional string inAppProduct = 67;
-    optional string downloadLabelAbbreviated = 77;
-    optional string downloadLabel = 78;
+  optional string developerName = 1;
+  optional int32 majorVersionNumber = 2;
+  optional int32 versionCode = 3;
+  optional string versionString = 4;
+  optional string title = 5;
+  repeated string appCategory = 7;
+  optional int32 contentRating = 8;
+  optional int64 installationSize = 9;
+  repeated string permission = 10;
+  optional string developerEmail = 11;
+  optional string developerWebsite = 12;
+  optional string numDownloads = 13;
+  optional string packageName = 14;
+  optional string recentChangesHtml = 15;
+  optional string uploadDate = 16;
+  repeated Common.FileMetadata file = 17;
+  optional string appType = 18;
+  optional bool unstable = 21;
+  optional bool hasInstantLink = 24;
+  optional string containsAds = 30;
+  optional int32 targetSdkVersion = 32;
+  optional Dependencies dependencies = 34;
+  optional TestingProgramInfo testingProgramInfo = 35;
+  optional EarlyAccessInfo earlyAccessInfo = 36;
+  optional EditorChoice editorChoice = 41;
+  optional string instantLink = 43;
+  optional string developerAddress = 45;
+  optional Publisher publisher = 46;
+  optional string categoryName = 48;
+  optional int64 downloadCount = 53;
+  optional string downloadLabelDisplay = 61;
+  optional string inAppProduct = 67;
+  optional string downloadLabelAbbreviated = 77;
+  optional string downloadLabel = 78;
 }
 
 message StreamLink{
-    optional string url = 1;
-    optional string streamUrl = 2;
-    optional string searchUrl = 3;
-    optional string subCategoryUrl = 5;
-    optional string searchQuery = 11;
+  optional string url = 1;
+  optional string streamUrl = 2;
+  optional string searchUrl = 3;
+  optional string subCategoryUrl = 5;
+  optional string searchQuery = 11;
 }
 
 message SubStream{
-    optional StreamLink link = 2;
+  optional StreamLink link = 2;
 }
 
 message EditorChoice{
-    repeated string bulletins = 1;
-    optional string description = 2;
-    optional SubStream stream = 3;
-    optional string title = 4;
-    optional string subtitle = 5;
+  repeated string bulletins = 1;
+  optional string description = 2;
+  optional SubStream stream = 3;
+  optional string title = 4;
+  optional string subtitle = 5;
 }
 
 message Publisher{
-    optional PublisherStream publisherStream = 2;
+  optional PublisherStream publisherStream = 2;
 }
 
 message PublisherStream{
-    optional string moreUrl = 3;
-    optional string query = 11;
+  optional string moreUrl = 3;
+  optional string query = 11;
 }
 
 message TestingProgramInfo {
-    optional bool subscribed = 2;
-    optional bool subscribedAndInstalled = 3;
-    optional string email = 5;
-    optional string displayName = 7;
-    optional Common.Image image = 6;
+  optional bool subscribed = 2;
+  optional bool subscribedAndInstalled = 3;
+  optional string email = 5;
+  optional string displayName = 7;
+  optional Common.Image image = 6;
 }
 
 message EarlyAccessInfo {
-    optional string email = 3;
+  optional string email = 3;
 }
 
 message Dependencies {
-    optional int32 unknown1 = 1;
-    optional int64 unknown2 = 2;
-    repeated Dependency dependency = 3;
-    optional int32 unknown3 = 4;
+  optional int32 unknown1 = 1;
+  optional int64 unknown2 = 2;
+  repeated Dependency dependency = 3;
+  optional int32 unknown3 = 4;
 }
 message Dependency {
-    optional string packageName = 1;
-    optional int32 version = 2;
-    optional int32 unknown4 = 4;
+  optional string packageName = 1;
+  optional int32 version = 2;
+  optional int32 unknown4 = 4;
 }
 
 message DocDetails
 {
-    optional AppDetails appDetails = 1;
-//    optional AlbumDetails albumDetails = 2;
-//    optional ArtistDetails artistDetails = 3;
-//    optional SongDetails songDetails = 4;
-//    optional BookDetails bookDetails = 5;
-//    optional VideoDetails videoDetails = 6;
-//    optional SubscriptionDetails subscriptionDetails = 7;
-//    optional MagazineDetails magazineDetails = 8;
-//    optional TvShowDetails tvShowDetails = 9;
-//    optional TvSeasonDetails tvSeasonDetails = 10;
-//    optional TvEpisodeDetails tvEpisodeDetails = 11;
+  optional AppDetails appDetails = 1;
+  //    optional AlbumDetails albumDetails = 2;
+  //    optional ArtistDetails artistDetails = 3;
+  //    optional SongDetails songDetails = 4;
+  //    optional BookDetails bookDetails = 5;
+  //    optional VideoDetails videoDetails = 6;
+  //    optional SubscriptionDetails subscriptionDetails = 7;
+  //    optional MagazineDetails magazineDetails = 8;
+  //    optional TvShowDetails tvShowDetails = 9;
+  //    optional TvSeasonDetails tvSeasonDetails = 10;
+  //    optional TvEpisodeDetails tvEpisodeDetails = 11;
 }
 
 message SectionMetaData {
-    optional string header = 1;
-    optional string listUrl = 2;
-    optional string browseUrl = 3;
-    optional string description = 4;
+  optional string header = 1;
+  optional string listUrl = 2;
+  optional string browseUrl = 3;
+  optional string description = 4;
 }
 
 message ResolvedLink {
-    optional string detailsUrl = 1;
-    optional string browseUrl = 2;
-    optional string searchUrl = 3;
-//    optional DirectPurchase directPurchase = 4;
-    optional string homeUrl = 5;
-//    optional RedeemGiftCard redeemGiftCard = 6;
-    optional bytes serverLogsCookie = 7;
-//    optional DocId DocId = 8;
-    optional string wishlistUrl = 9;
-    optional int32 backend = 10;
-    optional string query = 11;
-    optional string myAccountUrl = 12;
-//    optional HelpCenter helpCenter = 13;
+  optional string detailsUrl = 1;
+  optional string browseUrl = 2;
+  optional string searchUrl = 3;
+  //    optional DirectPurchase directPurchase = 4;
+  optional string homeUrl = 5;
+  //    optional RedeemGiftCard redeemGiftCard = 6;
+  optional bytes serverLogsCookie = 7;
+  //    optional DocId DocId = 8;
+  optional string wishlistUrl = 9;
+  optional int32 backend = 10;
+  optional string query = 11;
+  optional string myAccountUrl = 12;
+  //    optional HelpCenter helpCenter = 13;
 }
 
 message AnnotationLink {
-    optional string uri = 1;
-    optional ResolvedLink resolvedLink = 2;
-    optional int32 uriBackend = 3;
+  optional string uri = 1;
+  optional ResolvedLink resolvedLink = 2;
+  optional int32 uriBackend = 3;
 }
 
 message Badge {
-    optional string major = 1;
-    optional Common.Image image = 2;
-    optional string minor = 3;
-    optional string minorHtml = 4;
-    // optional SubBadge subBadge = 6;
-    optional StreamLink link = 7;
-    optional string description = 8;
-    optional SubStream stream = 12;
+  optional string major = 1;
+  optional Common.Image image = 2;
+  optional string minor = 3;
+  optional string minorHtml = 4;
+  // optional SubBadge subBadge = 6;
+  optional StreamLink link = 7;
+  optional string description = 8;
+  optional SubStream stream = 12;
 }
 
 message CategoryInfo {
@@ -241,242 +241,262 @@ message CategoryInfo {
 }
 
 message Annotations {
-    optional SectionMetaData sectionRelated = 1;
-    optional SectionMetaData sectionMoreBy = 2;
-//    repeated Warning warning = 4;
-    optional SectionMetaData sectionBodyOfWork = 5;
-    optional SectionMetaData sectionCoreContent = 6;
-//    optional OverlayMetaData overlayMetaData = 7;
-    repeated Badge badgeForCreator = 8;
-    repeated Badge infoBadge = 9;
-    optional AnnotationLink annotationLink = 10;
-    optional SectionMetaData sectionCrossSell = 11;
-    optional SectionMetaData sectionRelatedItemType = 12;
-//    repeated PromotedDoc promotedDoc = 13;
-    optional string offerNote = 14;
-    optional string privacyPolicyUrl = 18;
-//    optional SuggestionReasons suggestion_reasons = 19;
-//    optional Warning optimalDeviceClassWarning = 20;
-//    repeated BadgeContainer badgeContainer = 21;
-    optional SectionMetaData sectionSuggestForRating = 22;
-    optional SectionMetaData sectionPurchaseCrossSell = 24;
-//    repeated OverflowLink overflowLink = 25;
-    optional string attributionHtml = 27;
-    optional PurchaseHistoryDetails purchaseHistoryDetails = 28;
-    optional Badge badgeForLegacyRating = 29;
-//    repeated VoucherInfo voucherInfo = 30;
-    optional SectionMetaData sectionFeaturedApps = 32;
-    repeated SectionMetaData detailsPageCluster = 34;
-//    optional VideoAnnotations videoAnnotations = 35;
-    optional SectionMetaData sectionPurchaseRelatedTopics = 36;
-//    optional MySubscriptionDetails mySubscriptionDetails = 37;
-//    optional MyRewardDetails myRewardDetails = 38;
-    repeated Badge featureBadge = 39;
-//    optional Snippet snippet = 42;
-    optional string downloadsLabel = 48;
-    optional Badge badgeForRating = 50;
-    optional CategoryInfo categoryInfo = 53;
-//    optional EditorReason reasons = 60;
-//    optional Stream topChartStream = 65;
-    optional string categoryName = 66;
-//    repeated Chip chip = 71;
-    repeated Badge displayBadge = 72;
-    optional string liveStreamUrl = 80;
-    optional string promotionStreamUrl = 85;
-//    optional OverlayMetaData overlayMetaDataExtra = 91;
-//    optional SectionImage sectionImage = 94;
-    optional SubStream categoryStream = 97;
+  optional SectionMetaData sectionRelated = 1;
+  optional SectionMetaData sectionMoreBy = 2;
+  //    repeated Warning warning = 4;
+  optional SectionMetaData sectionBodyOfWork = 5;
+  optional SectionMetaData sectionCoreContent = 6;
+  //    optional OverlayMetaData overlayMetaData = 7;
+  repeated Badge badgeForCreator = 8;
+  repeated Badge infoBadge = 9;
+  optional AnnotationLink annotationLink = 10;
+  optional SectionMetaData sectionCrossSell = 11;
+  optional SectionMetaData sectionRelatedItemType = 12;
+  //    repeated PromotedDoc promotedDoc = 13;
+  optional string offerNote = 14;
+  optional string privacyPolicyUrl = 18;
+  //    optional SuggestionReasons suggestion_reasons = 19;
+  //    optional Warning optimalDeviceClassWarning = 20;
+  //    repeated BadgeContainer badgeContainer = 21;
+  optional SectionMetaData sectionSuggestForRating = 22;
+  optional SectionMetaData sectionPurchaseCrossSell = 24;
+  //    repeated OverflowLink overflowLink = 25;
+  optional string attributionHtml = 27;
+  optional PurchaseHistoryDetails purchaseHistoryDetails = 28;
+  optional Badge badgeForLegacyRating = 29;
+  //    repeated VoucherInfo voucherInfo = 30;
+  optional SectionMetaData sectionFeaturedApps = 32;
+  repeated SectionMetaData detailsPageCluster = 34;
+  //    optional VideoAnnotations videoAnnotations = 35;
+  optional SectionMetaData sectionPurchaseRelatedTopics = 36;
+  //    optional MySubscriptionDetails mySubscriptionDetails = 37;
+  //    optional MyRewardDetails myRewardDetails = 38;
+  repeated Badge featureBadge = 39;
+  //    optional Snippet snippet = 42;
+  optional string downloadsLabel = 48;
+  optional Badge badgeForRating = 50;
+  optional CategoryInfo categoryInfo = 53;
+  //    optional EditorReason reasons = 60;
+  //    optional Stream topChartStream = 65;
+  optional string categoryName = 66;
+  //    repeated Chip chip = 71;
+  repeated Badge displayBadge = 72;
+  optional string liveStreamUrl = 80;
+  optional string promotionStreamUrl = 85;
+  //    optional OverlayMetaData overlayMetaDataExtra = 91;
+  //    optional SectionImage sectionImage = 94;
+  optional SubStream categoryStream = 97;
 }
 
 
-message DocV2
-{
-    optional string docid = 1;
-    optional string backendDocid = 2;
-    optional int32 docType = 3;
-    optional int32 backendId = 4;
-    optional string title = 5;
-    optional string creator = 6;
-    optional string descriptionHtml = 7;
-    repeated Common.Offer offer = 8;
-    //optional Availability availability = 9;
-    repeated Common.Image image = 10;
-    repeated DocV2 child = 11;
-    optional Containers.ContainerMetadata containerMetadata = 12;
-    optional DocDetails details = 13;
-    optional AggregateRating aggregateRating = 14;
-    optional Annotations annotations = 15;
-    optional string detailsUrl = 16;
-    optional string shareUrl = 17;
-    optional string reviewsUrl = 18;
-    optional string backendUrl = 19;
-    optional string purchaseDetailsUrl = 20;
-    optional bool detailsReusable = 21;
-    optional string subtitle = 22;
-    //optional Unknown25 unknown25 = 25;
-    optional string descriptionShort = 27;
-    optional string reviewSnippetsUrl = 31;
-    optional string reviewQuestionsUrl = 34;
+message DocV2 {
+  optional string docid = 1;
+  optional string backendDocid = 2;
+  optional int32 docType = 3;
+  optional int32 backendId = 4;
+  optional string title = 5;
+  optional string creator = 6;
+  optional string descriptionHtml = 7;
+  repeated Common.Offer offer = 8;
+  //optional Availability availability = 9;
+  repeated Common.Image image = 10;
+  repeated DocV2 child = 11;
+  optional Containers.ContainerMetadata containerMetadata = 12;
+  optional DocDetails details = 13;
+  optional AggregateRating aggregateRating = 14;
+  optional Annotations annotations = 15;
+  optional string detailsUrl = 16;
+  optional string shareUrl = 17;
+  optional string reviewsUrl = 18;
+  optional string backendUrl = 19;
+  optional string purchaseDetailsUrl = 20;
+  optional bool detailsReusable = 21;
+  optional string subtitle = 22;
+  optional AppInfo appInfo = 25;
+  optional bool mature = 26;
+  optional string promotionalDescription = 27;
+  optional bool availableForPreregistration = 29;
+  optional string reviewSnippetsUrl = 31;
+  optional bool forceShareability = 32;
+  optional bool useWishlistAsPrimaryAction = 33;
+  optional string reviewQuestionsUrl = 34;
+  optional string reviewSummaryUrl = 39;
 
-    message AggregateRating {
-        optional int32 type = 1[default = 1];
-        optional float starRating = 2;
-        optional uint64 ratingsCount = 3;
-        optional uint64 oneStarRatings = 4;
-        optional uint64 twoStarRatings = 5;
-        optional uint64 threeStarRatings = 6;
-        optional uint64 fourStarRatings = 7;
-        optional uint64 fiveStarRatings = 8;
-        optional uint64 thumbsUpCount = 9;
-        optional uint64 thumbsDownCount = 10;
-        optional uint64 commentCount = 11;
-        optional double bayesianMeanRating = 12;
-        //repeated Tip tip = 13;
-        optional string ratingLabel = 17;
-        optional string ratingCountLabelAbbreviated = 18;
-        optional string ratingCountLabel = 19;
-    }
-
+  message AggregateRating {
+    optional int32 type = 1[default = 1];
+    optional float starRating = 2;
+    optional uint64 ratingsCount = 3;
+    optional uint64 oneStarRatings = 4;
+    optional uint64 twoStarRatings = 5;
+    optional uint64 threeStarRatings = 6;
+    optional uint64 fourStarRatings = 7;
+    optional uint64 fiveStarRatings = 8;
+    optional uint64 thumbsUpCount = 9;
+    optional uint64 thumbsDownCount = 10;
+    optional uint64 commentCount = 11;
+    optional double bayesianMeanRating = 12;
+    //repeated Tip tip = 13;
+    optional string ratingLabel = 17;
+    optional string ratingCountLabelAbbreviated = 18;
+    optional string ratingCountLabel = 19;
+  }
 }
+
+message AppInfo {
+  optional string title = 1;
+  repeated AppInfo.AppInfoSection section = 2;
+
+  message AppInfoSection {
+    optional string label = 1;
+    optional AppInfo.AppInfoContainer container = 3;
+  }
+
+  message AppInfoContainer {
+    optional Common.Image image = 1;
+    optional string description = 2;
+  }
+}
+
+
+
+
 
 message Details
 {
-    message DetailsResponse
-    {
-        //optional DocV1 docV1 = 1;
-        //optional string analyticsCookie = 2;
-        //optional Review userReview = 3;
-        optional DocV2 docV2 = 4;
-        optional string footerHtml = 5;
-    }
+  message DetailsResponse
+  {
+    //optional DocV1 docV1 = 1;
+    //optional string analyticsCookie = 2;
+    //optional Review userReview = 3;
+    optional DocV2 docV2 = 4;
+    optional string footerHtml = 5;
+  }
 
-    message BulkDetailsEntry
-    {
-        optional DocV2 doc = 1;
-    }
+  message BulkDetailsEntry
+  {
+    optional DocV2 doc = 1;
+  }
 
-    message BulkDetailsResponse
-    {
-        repeated BulkDetailsEntry entry = 1;
-    }
+  message BulkDetailsResponse
+  {
+    repeated BulkDetailsEntry entry = 1;
+  }
 
-    message BulkDetailsRequestDocProperties
-    {
-    }
+  message BulkDetailsRequestDocProperties
+  {
+  }
 
-    message BulkDetailsRequestDoc
-    {
-        required string docid = 1;
-        required int32 versionCode = 2;
-        required int32 num2 = 3;
-        required BulkDetailsRequestDocProperties properties = 7;
-    }
+  message BulkDetailsRequestDoc
+  {
+    required string docid = 1;
+    required int32 versionCode = 2;
+    required int32 num2 = 3;
+    required BulkDetailsRequestDocProperties properties = 7;
+  }
 
-    message BulkDetailsRequest
-    {
-        repeated string docid = 1;
-        optional bool includeChildDocs = 2;
-        required bool includeDetails = 3;
-        repeated BulkDetailsRequestDoc docs = 8;
-    }
+  message BulkDetailsRequest
+  {
+    repeated string docid = 1;
+    optional bool includeChildDocs = 2;
+    required bool includeDetails = 3;
+    repeated BulkDetailsRequestDoc docs = 8;
+  }
 }
 
-message Search
-{
-    message SearchResponse
-    {
-        optional string originalQuery = 1;
-        optional string suggestedQuery = 2;
-        optional bool aggregateQuery = 3;
-        repeated Bucket bucket = 4;
-        repeated DocV2 doc = 5;
-        //repeated RelatedSearch relatedSearch = 6;
-        optional bool fullPageReplaced = 8;
-        optional string nextPageUrl = 10;
-    }
+message Search {
+  message SearchResponse {
+    optional string originalQuery = 1;
+    optional string suggestedQuery = 2;
+    optional bool aggregateQuery = 3;
+    repeated Bucket bucket = 4;
+    repeated DocV2 doc = 5;
+    //repeated RelatedSearch relatedSearch = 6;
+    optional bool fullPageReplaced = 8;
+    optional bool containsSnow = 9;
+    optional string nextPageUrl = 10;
+  }
 }
 
 message LibraryUpdateProto
 {
-    message ClientLibraryState
+  message ClientLibraryState
+  {
+    required int32 corpus = 1;
+    optional bytes serverToken = 2;
+    required int64 hashCodeSum = 3;
+    required int32 librarySize = 4;
+    required string libraryId = 5;
+  }
+
+  message LibraryAppDetails
+  {
+
+  }
+
+  message LibraryMutation
+  {
+
+  }
+
+  message LibraryUpdate
+  {
+    enum Status
     {
-        required int32 corpus = 1;
-        optional bytes serverToken = 2;
-        required int64 hashCodeSum = 3;
-        required int32 librarySize = 4;
-        required string libraryId = 5;
+      LIBRARY_UPDATE_STATUS_1 = 1;
     }
-
-    message LibraryAppDetails
-    {
-
-    }
-
-    message LibraryMutation
-    {
-
-    }
-
-    message LibraryUpdate
-    {
-        enum Status
-        {
-            LIBRARY_UPDATE_STATUS_1 = 1;
-        }
-        optional Status status = 1;
-        optional int32 corpus = 2;
-        optional bytes serverToken = 3;
-        repeated LibraryUpdateProto.LibraryMutation mutation = 4;
-        optional bool hasMore = 5;
-        optional string libraryId = 6;
-    }
+    optional Status status = 1;
+    optional int32 corpus = 2;
+    optional bytes serverToken = 3;
+    repeated LibraryUpdateProto.LibraryMutation mutation = 4;
+    optional bool hasMore = 5;
+    optional string libraryId = 6;
+  }
 }
 
 message LibraryReplicationRequest
 {
-    repeated LibraryUpdateProto.ClientLibraryState libraryState = 1;
-    optional int32 libraryMutationVersion = 2;
+  repeated LibraryUpdateProto.ClientLibraryState libraryState = 1;
+  optional int32 libraryMutationVersion = 2;
 }
 
 message LibraryReplicationResponse
 {
-    repeated LibraryUpdateProto.LibraryUpdate update = 1;
-    repeated string autoAcquireFreeAppIfHigherVersionAvailableTag = 2;
+  repeated LibraryUpdateProto.LibraryUpdate update = 1;
+  repeated string autoAcquireFreeAppIfHigherVersionAvailableTag = 2;
 }
 
 message ResponseMessages
 {
-    message ServerCommands
-    {
-        optional bool clearCache = 1;
-        optional string displayErrorMessage = 2;
-        optional string logErrorStacktrace = 3;
-    }
+  message ServerCommands
+  {
+    optional bool clearCache = 1;
+    optional string displayErrorMessage = 2;
+    optional string logErrorStacktrace = 3;
+  }
 
-    message ServerMetadata
-    {
-        optional int64 latencyMillis = 1;
-    }
+  message ServerMetadata
+  {
+    optional int64 latencyMillis = 1;
+  }
 }
 
 message Bucket
 {
-    optional bool multiCorpus = 2;
-    optional string title = 3;
-    optional string iconUrl = 4;
-    optional string fullContentsUrl = 5;
-    optional double relevance = 6;
-    optional int64 estimatedResults = 7;
-    optional string analyticsCookie = 8;
-    optional string fullContentsListUrl = 9;
-    optional string nextPageUrl = 10;
-    optional bool ordered = 11;
+  optional bool multiCorpus = 2;
+  optional string title = 3;
+  optional string iconUrl = 4;
+  optional string fullContentsUrl = 5;
+  optional double relevance = 6;
+  optional int64 estimatedResults = 7;
+  optional string analyticsCookie = 8;
+  optional string fullContentsListUrl = 9;
+  optional string nextPageUrl = 10;
+  optional bool ordered = 11;
 }
 
-message ListResponse
-{
-    repeated Bucket bucket = 1;
-    repeated DocV2 doc =2;
+message ListResponse {
+  repeated Bucket bucket = 1;
+  repeated DocV2 doc = 2;
 }
 
 message TestingProgramResponse {
@@ -494,254 +514,254 @@ message TestingProgramDetails {
 }
 
 message AppFileMetadata {
-    optional int32 fileType = 1;
-    optional int32 versionCode = 2;
-    optional int64 size = 3;
-    optional string downloadUrl = 4;
-    optional AndroidAppPatchData patchData = 5;
-    optional int64 compressedSize = 6;
-    optional string compressedDownloadUrl = 7;
-    optional string sha1 = 8;
+  optional int32 fileType = 1;
+  optional int32 versionCode = 2;
+  optional int64 size = 3;
+  optional string downloadUrl = 4;
+  optional AndroidAppPatchData patchData = 5;
+  optional int64 compressedSize = 6;
+  optional string compressedDownloadUrl = 7;
+  optional string sha1 = 8;
 }
 
 message EncryptionParams {
-    optional int32 version = 1;
-    optional string encryptionKey = 2;
-    optional string hMacKey = 3;
+  optional int32 version = 1;
+  optional string encryptionKey = 2;
+  optional string hMacKey = 3;
 }
 
 message HttpCookie {
-    optional string name = 1;
-    optional string value = 2;
+  optional string name = 1;
+  optional string value = 2;
 }
 
 message AndroidAppDeliveryData {
-    optional int64 downloadSize = 1;
-    optional string sha1 = 2;
-    optional string downloadUrl = 3;
-    repeated AppFileMetadata additionalFile = 4;
-    repeated HttpCookie downloadAuthCookie = 5;
-    optional bool forwardLocked = 6;
-    optional int64 refundTimeout = 7;
-    optional bool serverInitiated = 8 [default = true];
-    optional int64 postInstallRefundWindowMillis = 9;
-    optional bool immediateStartNeeded = 10;
-    optional AndroidAppPatchData patchData = 11;
-    optional EncryptionParams encryptionParams = 12;
-    optional string compressedDownloadUrl = 13;
-    optional int64 compressedSize = 14;
-    repeated SplitDeliveryData splitDeliveryData = 15;
-    optional int32 installLocation = 16;
-    optional int64 type = 17;
-    optional CompressedAppData compressedAppData = 18;
-    optional string sha256 = 19;
+  optional int64 downloadSize = 1;
+  optional string sha1 = 2;
+  optional string downloadUrl = 3;
+  repeated AppFileMetadata additionalFile = 4;
+  repeated HttpCookie downloadAuthCookie = 5;
+  optional bool forwardLocked = 6;
+  optional int64 refundTimeout = 7;
+  optional bool serverInitiated = 8 [default = true];
+  optional int64 postInstallRefundWindowMillis = 9;
+  optional bool immediateStartNeeded = 10;
+  optional AndroidAppPatchData patchData = 11;
+  optional EncryptionParams encryptionParams = 12;
+  optional string compressedDownloadUrl = 13;
+  optional int64 compressedSize = 14;
+  repeated SplitDeliveryData splitDeliveryData = 15;
+  optional int32 installLocation = 16;
+  optional int64 type = 17;
+  optional CompressedAppData compressedAppData = 18;
+  optional string sha256 = 19;
 }
 
 message SplitDeliveryData {
-    optional string name = 1;
-    optional int64 downloadSize = 2;
-    optional int64 compressedSize = 3;
-    optional string sha1 = 4;
-    optional string downloadUrl = 5;
-    optional string compressedDownloadUrl = 6;
-    optional AndroidAppPatchData patchData = 7;
-    optional CompressedAppData compressedAppData = 8;
-    optional string sha256 = 9;
+  optional string name = 1;
+  optional int64 downloadSize = 2;
+  optional int64 compressedSize = 3;
+  optional string sha1 = 4;
+  optional string downloadUrl = 5;
+  optional string compressedDownloadUrl = 6;
+  optional AndroidAppPatchData patchData = 7;
+  optional CompressedAppData compressedAppData = 8;
+  optional string sha256 = 9;
 }
 
 message AndroidAppPatchData {
-    optional int32 baseVersionCode = 1;
-    optional string baseSha1 = 2;
-    optional string downloadUrl = 3;
-    optional int32 patchFormat = 4[default = 1];
-    optional int64 maxPatchSize = 5;
+  optional int32 baseVersionCode = 1;
+  optional string baseSha1 = 2;
+  optional string downloadUrl = 3;
+  optional int32 patchFormat = 4[default = 1];
+  optional int64 maxPatchSize = 5;
 }
 
 message CompressedAppData{
-    optional int64 type = 1;
-    optional int64 size = 2;
-    optional string downloadUrl = 3;
+  optional int64 type = 1;
+  optional int64 size = 2;
+  optional string downloadUrl = 3;
 }
 
 message DeliveryResponse {
-    optional int32 status = 1[default = 1];
-    optional AndroidAppDeliveryData appDeliveryData = 2;
+  optional int32 status = 1[default = 1];
+  optional AndroidAppDeliveryData appDeliveryData = 2;
 }
 
 message PurchaseHistoryDetails {
-    optional int64 purchaseTimestampMillis = 2;
-    optional string purchaseDetailsHtml = 3;
-    optional Common.Offer offer = 5;
-    optional string purchaseStatus = 6;
-    optional string titleBylineHtml = 7;
-    optional bytes clientRefundContext = 8;
-    optional Common.Image purchaseDetailsImage = 9;
+  optional int64 purchaseTimestampMillis = 2;
+  optional string purchaseDetailsHtml = 3;
+  optional Common.Offer offer = 5;
+  optional string purchaseStatus = 6;
+  optional string titleBylineHtml = 7;
+  optional bytes clientRefundContext = 8;
+  optional Common.Image purchaseDetailsImage = 9;
 }
 
 message Payload {
-    optional ListResponse listResponse = 1;
-    optional Details.DetailsResponse detailsResponse = 2;
-//        optional ReviewResponse reviewResponse = 3;
-//        optional BuyResponse buyResponse = 4;
-    optional Search.SearchResponse searchResponse = 5;
-//        optional BrowseResponse browseResponse = 7;
-//        optional PurchaseStatusResponse purchaseStatusResponse = 8;
-    optional Details.BulkDetailsResponse bulkDetailsResponse = 19;
-    optional DeliveryResponse deliveryResponse = 21;
-//        optional UploadDeviceConfigResponse uploadDeviceConfigResponse = 25;
-    optional AndroidCheckinResponse androidCheckinResponse = 26;
-//        optional SearchSuggestResponse searchSuggestResponse = 40;
-    optional TestingProgramResponse testingProgramResponse = 80;
+  optional ListResponse listResponse = 1;
+  optional Details.DetailsResponse detailsResponse = 2;
+  //        optional ReviewResponse reviewResponse = 3;
+  //        optional BuyResponse buyResponse = 4;
+  optional Search.SearchResponse searchResponse = 5;
+  //        optional BrowseResponse browseResponse = 7;
+  //        optional PurchaseStatusResponse purchaseStatusResponse = 8;
+  optional Details.BulkDetailsResponse bulkDetailsResponse = 19;
+  optional DeliveryResponse deliveryResponse = 21;
+  //        optional UploadDeviceConfigResponse uploadDeviceConfigResponse = 25;
+  optional AndroidCheckinResponse androidCheckinResponse = 26;
+  //        optional SearchSuggestResponse searchSuggestResponse = 40;
+  optional TestingProgramResponse testingProgramResponse = 80;
 }
 
 message PreFetch {
-    optional string url = 1;
-    optional ResponseWrapper response = 2;
-    optional string etag = 3;
-    optional int64 ttl = 4;
-    optional int64 softTtl = 5;
+  optional string url = 1;
+  optional ResponseWrapper response = 2;
+  optional string etag = 3;
+  optional int64 ttl = 4;
+  optional int64 softTtl = 5;
 }
 
 message ResponseWrapper {
-    optional Payload payload = 1;
-    optional ResponseMessages.ServerCommands commands = 2;
-    repeated PreFetch preFetch = 3;
-    // repeated Notification notification = 4;
-    optional ResponseMessages.ServerMetadata serverMetadata = 5;
+  optional Payload payload = 1;
+  optional ResponseMessages.ServerCommands commands = 2;
+  repeated PreFetch preFetch = 3;
+  // repeated Notification notification = 4;
+  optional ResponseMessages.ServerMetadata serverMetadata = 5;
 }
 
 message EncodedTargets {
-    optional int32 version = 1;
-    repeated int64 supportedTarget = 2;
-    repeated int64 otherTarget = 3;
+  optional int32 version = 1;
+  repeated int64 supportedTarget = 2;
+  repeated int64 otherTarget = 3;
 }
 
 message AndroidCheckinRequest {
-    optional string imei = 1;
-    optional int64 id = 2[default = 0];
-    optional string digest = 3;
-    optional AndroidCheckinProto checkin = 4;
-    optional string desiredBuild = 5;
-    optional string locale = 6;
-    optional int64 loggingId = 7;
-    optional string marketCheckin = 8;
-    repeated string macAddr = 9;
-    optional string meid = 10;
-    repeated string accountCookie = 11;
-    optional string timeZone = 12;
-    optional fixed64 securityToken = 13;
-    optional int32 version = 14;
-    repeated string otaCert = 15;
-    optional string serialNumber = 16;
-    optional string esn = 17;
-    optional DeviceConfigurationProto deviceConfiguration = 18;
-    repeated string macAddrType = 19;
-    optional int32 fragment = 20;
-    optional string userName = 21;
-    optional int32 userSerialNumber = 22;
+  optional string imei = 1;
+  optional int64 id = 2[default = 0];
+  optional string digest = 3;
+  optional AndroidCheckinProto checkin = 4;
+  optional string desiredBuild = 5;
+  optional string locale = 6;
+  optional int64 loggingId = 7;
+  optional string marketCheckin = 8;
+  repeated string macAddr = 9;
+  optional string meid = 10;
+  repeated string accountCookie = 11;
+  optional string timeZone = 12;
+  optional fixed64 securityToken = 13;
+  optional int32 version = 14;
+  repeated string otaCert = 15;
+  optional string serialNumber = 16;
+  optional string esn = 17;
+  optional DeviceConfigurationProto deviceConfiguration = 18;
+  repeated string macAddrType = 19;
+  optional int32 fragment = 20;
+  optional string userName = 21;
+  optional int32 userSerialNumber = 22;
 }
 
 message DeviceConfigurationProto {
-    optional int32 touchScreen = 1;
-    optional int32 keyboard = 2;
-    optional int32 navigation = 3;
-    optional int32 screenLayout = 4;
-    optional bool hasHardKeyboard = 5;
-    optional bool hasFiveWayNavigation = 6;
-    optional int32 screenDensity = 7;
-    optional int32 glEsVersion = 8;
-    repeated string systemSharedLibrary = 9;
-    repeated string systemAvailableFeature = 10;
-    repeated string nativePlatform = 11;
-    optional int32 screenWidth = 12;
-    optional int32 screenHeight = 13;
-    repeated string systemSupportedLocale = 14;
-    repeated string glExtension = 15;
-    optional int32 deviceClass = 16;
-    optional int32 maxApkDownloadSizeMb = 17[default = 50];
-    optional int32 smallestScreenWidthDP = 18;
-    optional int32 lowRamDevice = 19[default = 0];
-    optional int64 totalMemoryBytes = 20[default = 8354971648];
-    optional int32 maxNumOf_CPUCores = 21[default = 8];
-    repeated DeviceFeature deviceFeature = 26;
-    optional int32 unknown28 = 28[default = 0];
-    optional int32 unknown30 = 30[default = 4];
+  optional int32 touchScreen = 1;
+  optional int32 keyboard = 2;
+  optional int32 navigation = 3;
+  optional int32 screenLayout = 4;
+  optional bool hasHardKeyboard = 5;
+  optional bool hasFiveWayNavigation = 6;
+  optional int32 screenDensity = 7;
+  optional int32 glEsVersion = 8;
+  repeated string systemSharedLibrary = 9;
+  repeated string systemAvailableFeature = 10;
+  repeated string nativePlatform = 11;
+  optional int32 screenWidth = 12;
+  optional int32 screenHeight = 13;
+  repeated string systemSupportedLocale = 14;
+  repeated string glExtension = 15;
+  optional int32 deviceClass = 16;
+  optional int32 maxApkDownloadSizeMb = 17[default = 50];
+  optional int32 smallestScreenWidthDP = 18;
+  optional int32 lowRamDevice = 19[default = 0];
+  optional int64 totalMemoryBytes = 20[default = 8354971648];
+  optional int32 maxNumOf_CPUCores = 21[default = 8];
+  repeated DeviceFeature deviceFeature = 26;
+  optional int32 unknown28 = 28[default = 0];
+  optional int32 unknown30 = 30[default = 4];
 }
 
 message DeviceFeature{
-    optional string name = 1;
-    optional int32 value = 2;
+  optional string name = 1;
+  optional int32 value = 2;
 }
 
 
 message AndroidCheckinProto {
-    optional AndroidBuildProto build = 1;
-    optional int64 lastCheckinMsec = 2;
-    repeated AndroidEventProto event = 3;
-    repeated AndroidStatisticProto stat = 4;
-    repeated string requestedGroup = 5;
-    optional string cellOperator = 6;
-    optional string simOperator = 7;
-    optional string roaming = 8;
-    optional int32 userNumber = 9;
+  optional AndroidBuildProto build = 1;
+  optional int64 lastCheckinMsec = 2;
+  repeated AndroidEventProto event = 3;
+  repeated AndroidStatisticProto stat = 4;
+  repeated string requestedGroup = 5;
+  optional string cellOperator = 6;
+  optional string simOperator = 7;
+  optional string roaming = 8;
+  optional int32 userNumber = 9;
 }
 
 
 message AndroidBuildProto {
-    optional string id = 1;
-    optional string product = 2;
-    optional string carrier = 3;
-    optional string radio = 4;
-    optional string bootloader = 5;
-    optional string client = 6;
-    optional int64 timestamp = 7;
-    optional int32 googleServices = 8;
-    optional string device = 9;
-    optional int32 sdkVersion = 10;
-    optional string model = 11;
-    optional string manufacturer = 12;
-    optional string buildProduct = 13;
-    optional bool otaInstalled = 14;
+  optional string id = 1;
+  optional string product = 2;
+  optional string carrier = 3;
+  optional string radio = 4;
+  optional string bootloader = 5;
+  optional string client = 6;
+  optional int64 timestamp = 7;
+  optional int32 googleServices = 8;
+  optional string device = 9;
+  optional int32 sdkVersion = 10;
+  optional string model = 11;
+  optional string manufacturer = 12;
+  optional string buildProduct = 13;
+  optional bool otaInstalled = 14;
 }
 
 message AndroidEventProto {
-    optional string tag = 1;
-    optional string value = 2;
-    optional int64 timeMsec = 3;
+  optional string tag = 1;
+  optional string value = 2;
+  optional int64 timeMsec = 3;
 }
 
 message AndroidStatisticProto {
-    optional string tag = 1;
-    optional int32 count = 2;
-    optional float sum = 3;
+  optional string tag = 1;
+  optional int32 count = 2;
+  optional float sum = 3;
 }
 
 message AndroidCheckinResponse {
-    optional bool statsOk = 1;
-    repeated AndroidIntentProto intent = 2;
-    optional int64 timeMsec = 3;
-    optional string digest = 4;
-    repeated GservicesSetting setting = 5;
-    optional bool marketOk = 6;
-    optional fixed64 androidId = 7;
-    optional fixed64 securityToken = 8;
-    optional bool settingsDiff = 9;
-    repeated string deleteSetting = 10;
-    optional string deviceCheckinConsistencyToken = 12;
+  optional bool statsOk = 1;
+  repeated AndroidIntentProto intent = 2;
+  optional int64 timeMsec = 3;
+  optional string digest = 4;
+  repeated GservicesSetting setting = 5;
+  optional bool marketOk = 6;
+  optional fixed64 androidId = 7;
+  optional fixed64 securityToken = 8;
+  optional bool settingsDiff = 9;
+  repeated string deleteSetting = 10;
+  optional string deviceCheckinConsistencyToken = 12;
 }
 
 message AndroidIntentProto {
-    optional string action = 1;
-    optional string dataUri = 2;
-    optional string mimeType = 3;
-    optional string javaClass = 4;
-    repeated group Extra = 5 {
-        optional string name = 6;
-        optional string value = 7;
-    }
+  optional string action = 1;
+  optional string dataUri = 2;
+  optional string mimeType = 3;
+  optional string javaClass = 4;
+  repeated group Extra = 5 {
+    optional string name = 6;
+    optional string value = 7;
+  }
 }
 
 message GservicesSetting {
-    optional bytes name = 1;
-    optional bytes value = 2;
+  optional bytes name = 1;
+  optional bytes value = 2;
 }

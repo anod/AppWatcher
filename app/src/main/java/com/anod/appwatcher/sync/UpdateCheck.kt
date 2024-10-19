@@ -12,6 +12,7 @@ import androidx.core.content.contentValuesOf
 import androidx.work.Data
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
+import com.anod.appwatcher.accounts.toAndroidAccount
 import com.anod.appwatcher.backup.gdrive.GDriveSilentSignIn
 import com.anod.appwatcher.backup.gdrive.GDriveSync
 import com.anod.appwatcher.database.*
@@ -78,7 +79,7 @@ class UpdateCheck(
         AppLog.i("Perform ${if (manualSync) "manual" else "scheduled"} sync", "UpdateCheck")
         val schedule = Schedule(manualSync)
 
-        val account = preferences.account
+        val account = preferences.account?.toAndroidAccount()
         if (account == null) {
             AppLog.w("No active account, skipping sync...", "UpdateCheck")
             SchedulesTable.Queries.save(schedule.finish(Schedule.statusFailedNoAccount), database)

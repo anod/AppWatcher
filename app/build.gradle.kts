@@ -3,12 +3,13 @@ plugins {
     alias(libs.plugins.kotlin)
     alias(libs.plugins.ksp)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.room)
     id("kotlin-parcelize")
     id("com.google.android.gms.oss-licenses-plugin")
 }
 
 android {
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.anod.appwatcher"
@@ -82,6 +83,10 @@ android {
         }
     }
 
+    room {
+        schemaDirectory("$projectDir/schemas")
+    }
+
     namespace = "com.anod.appwatcher"
 }
 
@@ -89,10 +94,6 @@ android {
 kotlin {
     jvmToolchain(17)
 }
-
-//tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java) {
-//    kotlinOptions.jvmTarget = "11"
-//}
 
 dependencies {
     // AndroidX

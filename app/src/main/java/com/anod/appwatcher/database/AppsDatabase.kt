@@ -27,7 +27,7 @@ import kotlinx.coroutines.withContext
 @Database(
         entities = [(App::class), (AppChange::class), (AppTag::class), (Tag::class), (Schedule::class)],
         version = AppsDatabase.version,
-        exportSchema = false)
+        exportSchema = true)
 abstract class AppsDatabase : RoomDatabase() {
 
     abstract fun apps(): AppListTable

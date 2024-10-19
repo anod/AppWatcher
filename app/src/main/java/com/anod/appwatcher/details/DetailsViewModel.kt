@@ -20,6 +20,7 @@ import androidx.palette.graphics.Palette
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
+import com.anod.appwatcher.accounts.toAndroidAccount
 import info.anodsplace.framework.content.CommonActivityAction
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppTagsTable
@@ -84,7 +85,6 @@ data class DetailsState(
     val title: String = "",
     val appIconState: AppIconState = AppIconState.Initial,
     val palette: Palette? = null,
-    val account: Account? = null,
     val changelogState: ChangelogLoadState = ChangelogLoadState.Initial,
     val changelogs: List<AppChange> = emptyList(),
     val tagsMenuItems: List<TagMenuItem> = emptyList(),
@@ -190,7 +190,6 @@ class DetailsViewModel(
             app = app,
             appIconState = if (app.iconUrl.isEmpty()) AppIconState.Default else AppIconState.Initial,
             title = app.title,
-            account = prefs.account,
             isLocalApp = app.rowId == -1,
             packageInfo = installedApps.packageInfo(app.packageName),
             isSystemInDarkTheme = isSystemInDarkTheme
@@ -355,7 +354,7 @@ class DetailsViewModel(
             emptyList()
         }
 
-        val account = prefs.account
+        val account = prefs.account?.toAndroidAccount()
         viewState = viewState.copy(
             changelogState = if (localChanges.isEmpty() || account == null) ChangelogLoadState.Initial else ChangelogLoadState.Complete,
             changelogs = localChanges

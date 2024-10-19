@@ -48,22 +48,20 @@ sealed interface HistoryListAction {
 }
 
 sealed interface HistoryListEvent {
-    object OnBackPress : HistoryListEvent
+    data object OnBackPress : HistoryListEvent
     class OnNameFilter(val query: String) : HistoryListEvent
     class SelectApp(val app: App?) : HistoryListEvent
     class SetWideLayout(val wideLayout: HingeDeviceLayout) : HistoryListEvent
 }
 
-class HistoryListViewModel(account: Account?, authToken: String, wideLayout: HingeDeviceLayout) : BaseFlowViewModel<HistoryListState, HistoryListEvent, HistoryListAction>(), KoinComponent {
+class HistoryListViewModel(wideLayout: HingeDeviceLayout) : BaseFlowViewModel<HistoryListState, HistoryListEvent, HistoryListAction>(), KoinComponent {
 
     class Factory(
-        private val account: Account?,
-        private val authToken: String,
         private val wideLayout: HingeDeviceLayout
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            return HistoryListViewModel(account, authToken, wideLayout) as T
+            return HistoryListViewModel(wideLayout) as T
         }
     }
 
@@ -71,11 +69,11 @@ class HistoryListViewModel(account: Account?, authToken: String, wideLayout: Hin
     private val dfeApi: DfeApi by inject()
     private val packageManager: PackageManager by inject()
     private val installedApps by lazy { InstalledApps.MemoryCache(InstalledApps.PackageManager(packageManager)) }
+    val authenticated: Boolean
+        get() = dfeApi.authenticated
 
     init {
         viewState = HistoryListState(
-            account = account,
-            authToken = authToken,
             wideLayout = wideLayout
         )
     }

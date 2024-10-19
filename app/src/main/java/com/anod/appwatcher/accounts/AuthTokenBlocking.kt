@@ -26,7 +26,7 @@ sealed interface CheckTokenResult {
     class Error(val error: CheckTokenError) : CheckTokenResult
 }
 
-class AuthTokenBlocking(context: info.anodsplace.context.ApplicationContext) {
+class AuthTokenBlocking(context: ApplicationContext) {
 
     companion object {
         private const val AUTH_TOKEN_TYPE = "androidmarket"
@@ -90,11 +90,7 @@ class AuthTokenBlocking(context: info.anodsplace.context.ApplicationContext) {
         try {
             token = getAuthToken(acc)
         } catch (e: Exception) {
-            if (e is AuthTokenStartIntent) {
-                throw e
-            } else {
-                AppLog.e(e)
-            }
+            throw e
         }
         return@withContext token
     }

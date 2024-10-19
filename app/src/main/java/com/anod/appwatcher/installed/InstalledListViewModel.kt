@@ -11,6 +11,7 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.CheckTokenError
 import com.anod.appwatcher.accounts.CheckTokenResult
+import com.anod.appwatcher.accounts.toAndroidAccount
 import info.anodsplace.framework.content.CommonActivityAction
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.utils.BaseFlowViewModel
@@ -63,8 +64,6 @@ class InstalledListViewModel(state: SavedStateHandle) : BaseFlowViewModel<Instal
     private val packageManager: PackageManager by inject()
     private val packageChanged: PackageChangedReceiver by inject()
     private val authToken: AuthTokenBlocking by inject()
-    private val account: Account?
-        get() = prefs.account
 
     val installedApps = InstalledApps.MemoryCache(InstalledApps.PackageManager(packageManager))
 
@@ -182,11 +181,12 @@ class InstalledListViewModel(state: SavedStateHandle) : BaseFlowViewModel<Instal
     }
 
     private suspend fun checkAuthToken(): Boolean {
+        val account = prefs.account?.toAndroidAccount()
         return if (account == null) {
             handleEvent(InstalledListEvent.NoAccount)
             false
         } else {
-            when (val result = authToken.checkToken(account!!)) {
+            when (val result = authToken.checkToken(account)) {
                 is CheckTokenResult.Error -> {
                     handleEvent(InstalledListEvent.AuthTokenError(result.error))
                     false

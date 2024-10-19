@@ -5,16 +5,12 @@ import android.content.Context
 import android.net.Uri
 import android.provider.Settings.Secure
 
-class DeviceId(private val context: Context) {
+class AndroidDeviceId(private val context: Context) {
     private val GSERVICES = Uri.parse("content://com.google.android.gsf.gservices")
 
     fun load(): String {
-        var deviceId = ""
-        if (deviceId.isNotEmpty()) {
-            return deviceId
-        }
         val cr = context.applicationContext.contentResolver
-        deviceId = queryDeviceId(cr)
+        val deviceId = queryDeviceId(cr)
 
         if (deviceId.isEmpty()) {
             return Secure.getString(cr, Secure.ANDROID_ID)
@@ -34,7 +30,7 @@ class DeviceId(private val context: Context) {
             if (androidId.isNotEmpty()) {
                 str = java.lang.Long.toHexString(androidId.toLong())
             }
-        } catch (localNumberFormatException: NumberFormatException) { }
+        } catch (_: NumberFormatException) { }
 
         cursor.close()
         return str

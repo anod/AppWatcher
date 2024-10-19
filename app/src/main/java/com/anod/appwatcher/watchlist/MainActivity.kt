@@ -21,6 +21,7 @@ import com.anod.appwatcher.MarketSearchActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.SettingsActivity
 import com.anod.appwatcher.accounts.AccountSelectionDialog
+import com.anod.appwatcher.accounts.toAndroidAccount
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.compose.MainDetailScreen
@@ -189,11 +190,12 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
             }
         }
 
-        if (prefs.account == null) {
+        val account = prefs.account?.toAndroidAccount()
+        if (account == null) {
             Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
             accountSelectionDialog.show()
         } else {
-            mainViewModel.handleEvent(MainViewEvent.InitAccount(prefs.account!!))
+            mainViewModel.handleEvent(MainViewEvent.InitAccount(account))
         }
     }
 
@@ -212,8 +214,8 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
                     DrawerItem.Id.Installed -> startActivity(InstalledActivity.intent(false, this))
                     DrawerItem.Id.Refresh -> { }
                     DrawerItem.Id.Settings ->  startActivity( Intent(this, SettingsActivity::class.java))
-                    DrawerItem.Id.Wishlist -> startActivity(WishListActivity.intent(this, prefs.account, mainViewModel.authToken.token))
-                    DrawerItem.Id.Purchases -> startActivity(HistoryListActivity.intent(this, prefs.account, mainViewModel.authToken.token))
+                    DrawerItem.Id.Wishlist -> startActivity(WishListActivity.intent(this))
+                    DrawerItem.Id.Purchases -> startActivity(HistoryListActivity.intent(this))
                 }
             }
             is MainViewAction.NavigateToTag -> startActivity(TagWatchListComposeActivity.createTagIntent(action.tag, this))

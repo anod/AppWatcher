@@ -17,10 +17,12 @@ import androidx.paging.cachedIn
 import androidx.paging.filter
 import androidx.paging.map
 import com.anod.appwatcher.R
+import com.anod.appwatcher.accounts.AuthAccountInitializer
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.accounts.CheckTokenError
 import com.anod.appwatcher.accounts.CheckTokenResult
+import com.anod.appwatcher.accounts.toAndroidAccount
 import info.anodsplace.framework.content.CommonActivityAction
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
@@ -46,7 +48,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 sealed interface SearchStatus {
-    object Loading : SearchStatus
+    data object Loading : SearchStatus
     data class DetailsAvailable(val listItem: ListItem) : SearchStatus
     data class NoResults(val query: String) : SearchStatus
     data class NoNetwork(val query: String) : SearchStatus
@@ -72,8 +74,8 @@ private fun startActivityAction(intent: Intent, finish: Boolean = false) : Searc
 }
 
 sealed interface SearchViewEvent {
-    object NoAccount : SearchViewEvent
-    object OnBackPressed : SearchViewEvent
+    data object NoAccount : SearchViewEvent
+    data object OnBackPressed : SearchViewEvent
     class SetWideLayout(val wideLayout: HingeDeviceLayout) : SearchViewEvent
     class SearchQueryChange(val query: String) : SearchViewEvent
     class OnSearchEnter(val query: String) : SearchViewEvent
@@ -90,7 +92,6 @@ data class SearchViewState(
     val initiateSearch: Boolean = false,
     val isPackageSearch: Boolean = false,
     val authenticated: Boolean = false,
-    val account: Account? = null,
     val searchStatus: SearchStatus = SearchStatus.Loading,
     val wideLayout: HingeDeviceLayout = HingeDeviceLayout(),
     val selectedApp: App? = null
@@ -113,6 +114,7 @@ class SearchViewModel(
     private val uploadDateParserCache: UploadDateParserCache by inject()
     private val packageManager: PackageManager by inject()
     private val installedApps by lazy { InstalledApps.MemoryCache(InstalledApps.PackageManager(packageManager)) }
+    private val accountInitializer: AuthAccountInitializer by inject()
     val prefs: Preferences by inject()
 
     private val dfeApi: DfeApi by inject()
@@ -125,7 +127,6 @@ class SearchViewModel(
 
     init {
         viewState = initialState.copy(
-            account = prefs.account,
             searchStatus = if (initialState.searchQuery.isNotEmpty() && initialState.initiateSearch) SearchStatus.Loading else SearchStatus.NoResults(query = ""),
         )
         if (prefs.account == null) {
@@ -196,11 +197,12 @@ class SearchViewModel(
     }
 
     private fun search(query: String): Flow<SearchStatus> = flow {
-        if (prefs.account == null) {
+        val account = prefs.account?.toAndroidAccount()
+        if (account == null) {
             emit(SearchStatus.Error(query = query))
             return@flow
         }
-        val checkTokenResult = authToken.checkToken(prefs.account!!)
+        val checkTokenResult = authToken.checkToken(account)
         if (checkTokenResult is CheckTokenResult.Error) {
             if (checkTokenResult.error is CheckTokenError.RequiresInteraction) {
                 emitAction(startActivityAction(checkTokenResult.error.intent))
@@ -283,18 +285,17 @@ class SearchViewModel(
         ) { pageData, watchingPackages -> pageData.updateRowId(watchingPackages) }
 
     private fun onAccountSelected(account: Account) {
-        viewState = viewState.copy(account = account)
         viewModelScope.launch {
             try {
-                if (!authToken.refreshToken(account)) {
-                    if (networkConnection.isNetworkAvailable) {
-                        emitAction(SearchViewAction.ShowSnackbar(message = context.getString(R.string.failed_gain_access), duration = SnackbarDuration.Long, finish = true))
-                    } else {
-                        emitAction(SearchViewAction.ShowSnackbar(message = context.getString(R.string.check_connection), duration = SnackbarDuration.Short, finish = true))
-                    }
-                }
+                accountInitializer.initialize(account)
             } catch (e: AuthTokenStartIntent) {
                 emitAction(startActivityAction(intent = e.intent, finish = true))
+            } catch (e: Exception) {
+                if (networkConnection.isNetworkAvailable) {
+                    emitAction(SearchViewAction.ShowSnackbar(message = context.getString(R.string.failed_gain_access), duration = SnackbarDuration.Long, finish = true))
+                } else {
+                    emitAction(SearchViewAction.ShowSnackbar(message = context.getString(R.string.check_connection), duration = SnackbarDuration.Short, finish = true))
+                }
             }
         }
     }

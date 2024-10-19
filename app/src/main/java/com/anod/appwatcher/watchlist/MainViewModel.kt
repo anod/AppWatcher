@@ -9,6 +9,8 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.viewModelScope
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AccountSelectionResult
+import com.anod.appwatcher.accounts.AuthAccount
+import com.anod.appwatcher.accounts.AuthAccountInitializer
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import info.anodsplace.framework.content.CommonActivityAction
@@ -20,6 +22,7 @@ import com.anod.appwatcher.upgrade.UpgradeCheck
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.networkConnection
 import com.anod.appwatcher.utils.prefs
+import com.google.android.gms.auth.api.Auth
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import info.anodsplace.applog.AppLog
 import info.anodsplace.ktx.Hash
@@ -35,7 +38,7 @@ typealias TagCountList = List<Pair<Tag, Int>>
 @Immutable
 data class MainViewState(
     val drawerItems: List<DrawerItem> = com.anod.appwatcher.watchlist.drawerItems,
-    val account: Account? = null,
+    val account: AuthAccount? = null,
     val lastUpdate: Long = 0L,
     val tags: TagCountList = emptyList(),
     val showNewTagDialog: Boolean = false,
@@ -84,7 +87,7 @@ private fun showToastAction(@StringRes resId: Int = 0, text: String = "", length
 class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAction>(), KoinComponent {
     private val database: AppsDatabase by inject()
     private val context: Context by inject()
-
+    private val authAccountInitializer: AuthAccountInitializer by inject()
     val authToken: AuthTokenBlocking by inject()
 
     init {
@@ -129,7 +132,6 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
                     AccountSelectionResult.Canceled -> onAccountNotFound("")
                     is AccountSelectionResult.Error -> onAccountNotFound(event.result.errorMessage)
                     is AccountSelectionResult.Success -> {
-                        viewState = viewState.copy(account = event.result.account)
                         onAccountSelect(event.result.account)
                     }
                 }
@@ -169,25 +171,26 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
 
     private fun onAccountSelect(account: Account) {
         val collectReports = prefs.collectCrashReports
+        val initializer = authAccountInitializer
         viewModelScope.launch {
             try {
-                if (authToken.refreshToken(account)) {
-                    if (collectReports) {
-                        FirebaseCrashlytics.getInstance().setUserId(Hash.sha256(account.name).encoded)
-                    }
-                    if (!prefs.areNotificationsEnabled && prefs.updatesFrequency > 0) {
-                        emitAction(MainViewAction.RequestNotificationPermission)
-                    }
-                    if (prefs.useAutoSync) {
-                        scheduleRefresh()
-                    }
-                    upgradeCheck()
-                } else {
-                    AppLog.e("Error retrieving authentication token")
-                    onAccountNotFound("")
+                val authAccount = initializer.initialize(account)
+                viewState = viewState.copy(account = authAccount)
+                if (collectReports) {
+                    FirebaseCrashlytics.getInstance().setUserId(Hash.sha256(account.name).encoded)
                 }
+                if (!prefs.areNotificationsEnabled && prefs.updatesFrequency > 0) {
+                    emitAction(MainViewAction.RequestNotificationPermission)
+                }
+                if (prefs.useAutoSync) {
+                    scheduleRefresh()
+                }
+                upgradeCheck()
             } catch (e: AuthTokenStartIntent) {
                 emitAction(startActivityAction(e.intent))
+            } catch (e: Exception) {
+                AppLog.e("Error retrieving authentication token")
+                onAccountNotFound("")
             }
         }
     }

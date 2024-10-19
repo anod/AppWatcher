@@ -22,6 +22,7 @@ import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.MarketSearchActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenBlocking
+import com.anod.appwatcher.accounts.toAndroidAccount
 import info.anodsplace.framework.content.CommonActivityAction
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
@@ -389,7 +390,7 @@ class WatchListStateViewModel(
     private suspend fun requestRefresh() {
         AppLog.d("Refresh requested")
         val account = prefs.account ?: throw IllegalStateException("account is null")
-        if (authToken.checkToken(account) is Error) {
+        if (authToken.checkToken(account.toAndroidAccount()) is Error) {
             throw IllegalStateException("auth token is invalid")
         }
 

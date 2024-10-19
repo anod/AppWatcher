@@ -6,11 +6,13 @@ import android.telephony.TelephonyManager
 import android.util.LruCache
 import androidx.core.content.ContextCompat.getSystemService
 import coil.ImageLoader
+import com.anod.appwatcher.accounts.AuthAccountInitializer
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.backup.gdrive.UploadServiceContentObserver
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.sync.UpdateCheck
 import com.anod.appwatcher.utils.AppIconLoader
+import com.anod.appwatcher.utils.DeviceInfoProvider
 import com.anod.appwatcher.utils.PackageChangedReceiver
 import com.anod.appwatcher.utils.RealAppIconLoader
 import com.anod.appwatcher.utils.date.UploadDateParserCache
@@ -22,7 +24,6 @@ import info.anodsplace.notification.RealNotificationManager
 import info.anodsplace.framework.content.PinShortcutManager
 import info.anodsplace.framework.net.NetworkConnectivity
 import info.anodsplace.ktx.createLruCache
-import info.anodsplace.playstore.DeviceId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -32,10 +33,10 @@ import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.qualifier.named
+import org.koin.dsl.bind
 import org.koin.dsl.module
 
 fun createAppModule(): Module = module {
-    single(named("deviceId")) { DeviceId(get()).load() }
     factory { getSystemService(get(), TelephonyManager::class.java) }
     factory { PinShortcutManager(
             context = get(),
@@ -43,14 +44,7 @@ fun createAppModule(): Module = module {
         )
     }
     factory { get<Application>().packageManager }
-
-    factory<DfeDeviceInfoProvider> {
-        object : DfeDeviceInfoProvider {
-            override val deviceId: String = get(named("deviceId"))
-            override val simOperator: String = getOrNull<TelephonyManager>()?.simOperator ?: ""
-        }
-    }
-
+    singleOf(::AuthAccountInitializer)
     singleOf(::UploadDateParserCache)
     singleOf(::ApplicationContext)
     singleOf(::RealNotificationManager) {

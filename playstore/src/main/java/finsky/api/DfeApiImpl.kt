@@ -1,7 +1,10 @@
 package finsky.api
 
-import android.accounts.Account
 import android.content.Context
+import com.google.protobuf.MessageLite
+import finsky.api.DfeApi.Companion.URL_CHECK_IN
+import finsky.api.utils.checkinRequest
+import finsky.protos.AndroidCheckinResponse
 import finsky.protos.DeliveryResponse
 import finsky.protos.Details
 import finsky.protos.Details.BulkDetailsResponse
@@ -20,6 +23,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import java.io.IOException
+import java.io.InputStream
 import java.net.HttpURLConnection
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
@@ -33,14 +37,18 @@ class DfeApiImpl(http: OkHttpClient, private val apiContext: DfeApiContext) : Df
 
     private val http = httpWithCache(http)
 
-    constructor(http: OkHttpClient, context: Context, account: Account, authTokenProvider: DfeAuthTokenProvider, deviceInfoProvider: DfeDeviceInfoProvider)
-            : this(http, DfeApiContext(context, account, authTokenProvider, deviceInfoProvider))
+    override val authenticated: Boolean
+        get() = apiContext.hasAuth
+
+    constructor(http: OkHttpClient, context: Context, authTokenProvider: DfeAuthProvider, deviceInfoProvider: DfeDeviceInfoProvider)
+            : this(http, DfeApiContext(context, authTokenProvider, deviceInfoProvider))
 
     override suspend fun search(initialQuery: String, nextPageUrl: String): ResponseWrapper {
         val url = if (nextPageUrl.isEmpty())
                 DfeApi.SEARCH_CHANNEL_URI.toHttpUrl().newBuilder()
                     .addQueryParameter("c", DfeApi.searchBackendId.toString())
                     .addQueryParameter("q", initialQuery)
+                    .addQueryParameter("ksm", "1")
                     .build().toString()
             else
                 DfeApi.URL_FDFE + "/" + nextPageUrl
@@ -115,8 +123,29 @@ class DfeApiImpl(http: OkHttpClient, private val apiContext: DfeApiContext) : Df
         return newCall(dfeRequest)
     }
 
-    private suspend fun newCall(dfeRequest: Request): ResponseWrapper = suspendCancellableCoroutine { continuation ->
-        val dfeResponse = DfeResponse()
+    override suspend fun checkIn(): AndroidCheckinResponse {
+        val checkin = checkinRequest(
+            timeToReport = System.currentTimeMillis() / 1000,
+            deviceInfo = apiContext.deviceInfo
+        )
+        val dfeRequest = Request.Builder()
+            .url(URL_CHECK_IN)
+            .apply {
+                post(checkin.toByteArray().toRequestBody("application/x-protobuf".toMediaType()))
+                apiContext.createAuthHeaders().forEach {
+                    addHeader(it.key, it.value)
+                }
+                addHeader("Host", "android.clients.google.com")
+                addHeader("Content-Type", "application/x-protobuffer")
+            }.build()
+        return newCall(dfeRequest) { AndroidCheckinResponse.parseFrom(it) }
+    }
+
+    private suspend fun newCall(dfeRequest: Request): ResponseWrapper {
+        return newCall(dfeRequest) { DfeResponse().parseNetworkResponse(it) }
+    }
+
+    private suspend fun <R: MessageLite> newCall(dfeRequest: Request, responseParser: (InputStream) -> R): R = suspendCancellableCoroutine { continuation ->
         val call =  http.newCall(dfeRequest)
 
         call.enqueue(object : Callback {
@@ -131,15 +160,15 @@ class DfeApiImpl(http: OkHttpClient, private val apiContext: DfeApiContext) : Df
                 try {
                     response.body?.use { body ->
                         if (!response.isSuccessful) {
-                            dfeResponse.parseNetworkError(body.byteStream())
+                            DfeResponse().parseNetworkError(body.byteStream())
                             if (response.code == HttpURLConnection.HTTP_NOT_FOUND) {
                                 throw DfeServerError("Not Found")
                             } else {
                                 throw DfeServerError("Status code ${response.code}")
                             }
                         } else {
-                            val responseWrapper = dfeResponse.parseNetworkResponse(body.byteStream())
-                            continuation.resume(responseWrapper)
+                            val parsed = responseParser(body.byteStream())
+                            continuation.resume(parsed)
                         }
                     } ?: throw DfeError("Empty body $response")
                 } catch (e: Throwable) {
@@ -160,7 +189,7 @@ class DfeApiImpl(http: OkHttpClient, private val apiContext: DfeApiContext) : Df
                     } else {
                         customizer(this)
                     }
-                    apiContext.createHeaders().forEach { entry ->
+                    apiContext.createDefaultHeaders().forEach { entry ->
                         addHeader(entry.key, entry.value)
                     }
                 }
