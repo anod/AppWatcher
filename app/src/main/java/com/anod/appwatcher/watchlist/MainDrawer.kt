@@ -192,7 +192,7 @@ private fun DrawerContentPreviewWithAccount() {
     AppTheme {
         MainDrawer(
             mainState = MainViewState(
-                account = AuthAccount("very_long_email_address@example.com", "test", "", ""),
+                account = AuthAccount("very_long_email_address@example.com", "test", "", "", ""),
                 lastUpdate = System.currentTimeMillis() - TimeUnit.HOURS.toMillis(2),
                 tags = listOf(
                     Pair(Tag("Banana", Color.Yellow.toArgb()), 90),

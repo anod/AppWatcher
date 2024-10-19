@@ -12,12 +12,10 @@ import com.anod.appwatcher.backup.gdrive.UploadServiceContentObserver
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.sync.UpdateCheck
 import com.anod.appwatcher.utils.AppIconLoader
-import com.anod.appwatcher.utils.DeviceInfoProvider
 import com.anod.appwatcher.utils.PackageChangedReceiver
 import com.anod.appwatcher.utils.RealAppIconLoader
 import com.anod.appwatcher.utils.date.UploadDateParserCache
 import com.anod.appwatcher.watchlist.RecentlyInstalledAppsLoader
-import finsky.api.DfeDeviceInfoProvider
 import info.anodsplace.context.ApplicationContext
 import info.anodsplace.notification.NotificationManager
 import info.anodsplace.notification.RealNotificationManager
@@ -33,7 +31,6 @@ import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.qualifier.named
-import org.koin.dsl.bind
 import org.koin.dsl.module
 
 fun createAppModule(): Module = module {
@@ -75,7 +72,7 @@ fun createAppModule(): Module = module {
                 packageManager = get(),
                 notificationManager = get(),
                 database = get(),
-                authToken = get(),
+                authAccount = get(),
                 networkConnection = get(),
                 preferences = get(),
                 uploadDateParserCache = get(),

@@ -30,11 +30,13 @@ class Preferences(context: Context, private val notificationManager: Notificatio
             val type = preferences.getString(ACCOUNT_TYPE, null) ?: return null
             val gfsId = preferences.getString(GFS_ID, "") ?: ""
             val gfsToken = preferences.getString(GFS_TOKEN, "") ?: ""
+            val deviceConfig = preferences.getString(DEVICE_CONFIG, "") ?: ""
             return AuthAccount(
                 name = name,
                 type = type,
                 gfsId = gfsId,
-                deviceCheckInConsistencyToken = gfsToken
+                gfsIdToken = gfsToken,
+                deviceConfig = deviceConfig
             )
         }
         set(value) {
@@ -44,11 +46,13 @@ class Preferences(context: Context, private val notificationManager: Notificatio
                 editor.remove(ACCOUNT_TYPE)
                 editor.remove(GFS_ID)
                 editor.remove(GFS_TOKEN)
+                editor.remove(DEVICE_CONFIG)
             } else {
                 editor.putString(ACCOUNT_NAME, value.name)
                 editor.putString(ACCOUNT_TYPE, value.type)
                 editor.putString(GFS_ID, value.gfsId)
-                editor.putString(GFS_TOKEN, value.deviceCheckInConsistencyToken)
+                editor.putString(GFS_TOKEN, value.gfsIdToken)
+                editor.putString(DEVICE_CONFIG, value.deviceConfig)
             }
             editor.apply()
         }
@@ -185,6 +189,7 @@ class Preferences(context: Context, private val notificationManager: Notificatio
         private const val WIFI_ONLY = "wifi_only"
         private const val GFS_ID = "gfs_id"
         private const val GFS_TOKEN = "gfs_token"
+        private const val DEVICE_CONFIG = "device_config"
         private const val ACCOUNT_NAME = "account_name"
         private const val ACCOUNT_TYPE = "account_type"
         private const val SORT_INDEX = "sort_index"

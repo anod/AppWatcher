@@ -11,9 +11,11 @@ class PlaystoreAuthTokenProvider(
     override val gfsId: String
         get() = preferences.account?.gfsId ?: ""
     override val gfsToken: String
-        get() = preferences.account?.deviceCheckInConsistencyToken ?: ""
+        get() = preferences.account?.gfsIdToken ?: ""
     override val authToken: String
         get() = authTokenBlocking.token
     override val accountName: String
         get() = preferences.account?.name ?: ""
+    override val deviceConfigToken: String
+        get() = preferences.account?.deviceConfig ?: ""
 }

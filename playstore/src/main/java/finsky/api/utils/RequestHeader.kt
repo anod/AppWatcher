@@ -21,7 +21,7 @@ fun DfeDeviceInfoProvider.makeUserAgentString(): String {
         "platformVersionRelease" to a(build.releaseVersion),
         "model" to a(build.model),
         "buildId" to a(build.id),
-        "isWideScreen" to configuration.isWideScreen.toString(),
+        "isWideScreen" to if (configuration.isWideScreen) "true" else "false",
         "supportedAbis" to a(build.abis)
     )
 

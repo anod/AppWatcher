@@ -54,7 +54,7 @@ private fun DfeDeviceBuild.toProto(
     it.googleServices = gsfVersion
 }.build()
 
-private fun DfeDeviceConfiguration.toProto(abis: Array<String>): DeviceConfigurationProto = DeviceConfigurationProto.newBuilder().apply {
+fun DfeDeviceConfiguration.toProto(abis: Array<String>): DeviceConfigurationProto = DeviceConfigurationProto.newBuilder().apply {
     setTouchScreen(touchScreen)
     setKeyboard(keyboard)
     setNavigation(navigation)

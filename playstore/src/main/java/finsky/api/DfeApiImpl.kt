@@ -4,12 +4,15 @@ import android.content.Context
 import com.google.protobuf.MessageLite
 import finsky.api.DfeApi.Companion.URL_CHECK_IN
 import finsky.api.utils.checkinRequest
+import finsky.api.utils.toProto
 import finsky.protos.AndroidCheckinResponse
 import finsky.protos.DeliveryResponse
 import finsky.protos.Details
 import finsky.protos.Details.BulkDetailsResponse
 import finsky.protos.Details.DetailsResponse
 import finsky.protos.ResponseWrapper
+import finsky.protos.UploadDeviceConfigRequest
+import finsky.protos.UploadDeviceConfigResponse
 import info.anodsplace.applog.AppLog
 import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.CacheControl
@@ -25,7 +28,6 @@ import okhttp3.Response
 import java.io.IOException
 import java.io.InputStream
 import java.net.HttpURLConnection
-import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -33,9 +35,7 @@ import kotlin.coroutines.resumeWithException
  * @author alex
  * @date 2015-02-15
  */
-class DfeApiImpl(http: OkHttpClient, private val apiContext: DfeApiContext) : DfeApi {
-
-    private val http = httpWithCache(http)
+class DfeApiImpl(private val http: OkHttpClient, private val apiContext: DfeApiContext) : DfeApi {
 
     override val authenticated: Boolean
         get() = apiContext.hasAuth
@@ -52,14 +52,12 @@ class DfeApiImpl(http: OkHttpClient, private val apiContext: DfeApiContext) : Df
                     .build().toString()
             else
                 DfeApi.URL_FDFE + "/" + nextPageUrl
-        val cacheKey = DfeCacheKey(url, apiContext, emptyMap())
-        val dfeRequest = createRequest(cacheKey)
+        val dfeRequest = createRequest(url)
         return newCall(dfeRequest)
     }
 
     override suspend fun details(appDetailsUrl: String): DetailsResponse {
-        val cacheKey = DfeCacheKey(DfeApi.URL_FDFE + "/" + appDetailsUrl, apiContext, emptyMap())
-        val dfeRequest = createRequest(cacheKey)
+        val dfeRequest = createRequest(DfeApi.URL_FDFE + "/" + appDetailsUrl)
         val responseWrapper = newCall(dfeRequest)
         return responseWrapper.payload.detailsResponse
     }
@@ -70,12 +68,7 @@ class DfeApiImpl(http: OkHttpClient, private val apiContext: DfeApiContext) : Df
                 .addAllDocid(docIds.map { it.packageName }.sorted())
                 .build()
 
-        val cacheKey = DfeCacheKey(
-                DfeApi.BULK_DETAILS_URI, apiContext,
-                mapOf("docidhash" to computeDocumentIdHash(bulkDetailsRequest))
-        )
-
-        val dfeRequest = createRequest(cacheKey) { builder ->
+        val dfeRequest = createRequest(DfeApi.BULK_DETAILS_URI) { builder ->
             builder.post(bulkDetailsRequest.toByteArray().toRequestBody("application/x-protobuf".toMediaType()))
         }
 
@@ -96,8 +89,7 @@ class DfeApiImpl(http: OkHttpClient, private val apiContext: DfeApiContext) : Df
             .addQueryParameter("vc", updateVersionCode.toString())
             .build().toString()
 
-        val cacheKey = DfeCacheKey(url, apiContext, emptyMap())
-        val dfeRequest = createRequest(cacheKey)
+        val dfeRequest = createRequest(url)
         val responseWrapper = newCall(dfeRequest)
         return responseWrapper.payload.deliveryResponse
     }
@@ -108,8 +100,7 @@ class DfeApiImpl(http: OkHttpClient, private val apiContext: DfeApiContext) : Df
                 createLibraryUrl(DfeApi.wishlistBackendId, libraryId, 7, null)
             else
                 DfeApi.URL_FDFE + "/" + nextPageUrl
-        val cacheKey = DfeCacheKey(url, apiContext, emptyMap())
-        val dfeRequest = createRequest(cacheKey)
+        val dfeRequest = createRequest(url)
         return newCall(dfeRequest)
     }
 
@@ -118,8 +109,7 @@ class DfeApiImpl(http: OkHttpClient, private val apiContext: DfeApiContext) : Df
             DfeApi.PURCHASE_HISTORY_URL + "?o=0"
         else
             DfeApi.URL_FDFE + "/" + nextPageUrl
-        val cacheKey = DfeCacheKey(url, apiContext, emptyMap())
-        val dfeRequest = createRequest(cacheKey)
+        val dfeRequest = createRequest(url)
         return newCall(dfeRequest)
     }
 
@@ -139,6 +129,18 @@ class DfeApiImpl(http: OkHttpClient, private val apiContext: DfeApiContext) : Df
                 addHeader("Content-Type", "application/x-protobuffer")
             }.build()
         return newCall(dfeRequest) { AndroidCheckinResponse.parseFrom(it) }
+    }
+
+    override suspend fun uploadDeviceConfig(): UploadDeviceConfigResponse {
+        val request = UploadDeviceConfigRequest.newBuilder()
+            .setDeviceConfiguration(apiContext.deviceInfo.configuration.toProto(apiContext.deviceInfo.build.abis))
+            .build()
+
+        val dfeRequest = createRequest(DfeApi.URL_UPLOAD_DEVICE_CONFIG) { builder ->
+            builder.post(request.toByteArray().toRequestBody("application/x-protobuf".toMediaType()))
+        }
+        val response = newCall(dfeRequest)
+        return response.payload.uploadDeviceConfigResponse
     }
 
     private suspend fun newCall(dfeRequest: Request): ResponseWrapper {
@@ -180,9 +182,9 @@ class DfeApiImpl(http: OkHttpClient, private val apiContext: DfeApiContext) : Df
         continuation.invokeOnCancellation { call.cancel() }
     }
 
-    private fun createRequest(cacheKey: DfeCacheKey, customizer: ((Request.Builder) -> Unit)? = null): Request {
+    private fun createRequest(url: String, customizer: ((Request.Builder) -> Unit)? = null): Request {
         return Request.Builder()
-                .url(cacheKey.cacheUrl)
+                .url(url)
                 .apply {
                     if (customizer == null) {
                         get()
@@ -193,63 +195,7 @@ class DfeApiImpl(http: OkHttpClient, private val apiContext: DfeApiContext) : Df
                         addHeader(entry.key, entry.value)
                     }
                 }
-                .tag(DfeCacheKey::class.java, cacheKey)
                 .build()
-    }
-
-    class CacheInterceptor : Interceptor {
-        override fun intercept(chain: Interceptor.Chain): Response {
-            val request = chain.request()
-            val cacheKey = request.tag(DfeCacheKey::class.java)
-            if (chain.call().isCanceled()) {
-                return chain.proceed(request)
-            }
-            return if (cacheKey != null) {
-                val networkRequest = request.newBuilder().url(cacheKey.networkUrl).build()
-                val networkResponse = chain.proceed(networkRequest)
-                val cacheControl = parseCacheHeaders(networkResponse)
-                networkResponse.newBuilder().request(
-                    request.newBuilder()
-                            .url(cacheKey.cacheUrl)
-                            .cacheControl(cacheControl)
-                    .build()
-                ).build()
-            } else {
-                chain.proceed(request)
-            }
-        }
-
-        private fun parseCacheHeaders(networkResponse: Response): CacheControl {
-            val networkCacheControl = networkResponse.cacheControl
-            val cacheControlBuilder = CacheControl.Builder()
-            val currentTimeMillis = System.currentTimeMillis()
-            try {
-                val softTtl = networkResponse.headers["X-DFE-Soft-TTL"]?.toLongOrNull()
-                val stale = if (softTtl == null) 0 else TimeUnit.MILLISECONDS.toSeconds(currentTimeMillis + softTtl).toInt()
-                if (stale > 0) {
-                    cacheControlBuilder.maxStale(stale, TimeUnit.SECONDS)
-                } else {
-                    if (networkCacheControl.maxStaleSeconds > 0) {
-                        cacheControlBuilder.maxStale(networkCacheControl.maxStaleSeconds, TimeUnit.SECONDS)
-                    }
-                }
-                val hardTtl = networkResponse.headers["X-DFE-Hard-TTL"]?.toLongOrNull()
-                val maxAge = if (hardTtl == null) 0 else TimeUnit.MILLISECONDS.toSeconds(currentTimeMillis + hardTtl).toInt()
-                if (maxAge > 0) {
-                    cacheControlBuilder.maxAge(maxAge, TimeUnit.SECONDS)
-                } else {
-                    if (networkCacheControl.maxAgeSeconds > 0) {
-                        cacheControlBuilder.maxAge(networkCacheControl.maxAgeSeconds, TimeUnit.SECONDS)
-                    }
-                }
-            } catch (ex: NumberFormatException) {
-                AppLog.e("Invalid TTL: ${networkResponse.headers}", ex)
-                cacheControlBuilder.maxStale(networkCacheControl.maxStaleSeconds, TimeUnit.SECONDS)
-                cacheControlBuilder.maxAge(networkCacheControl.maxAgeSeconds, TimeUnit.SECONDS)
-            }
-
-            return cacheControlBuilder.build()
-        }
     }
 
     private fun createLibraryUrl(c: Int, libraryId: String, dt: Int, serverToken: ByteArray?): String {
@@ -262,19 +208,5 @@ class DfeApiImpl(http: OkHttpClient, private val apiContext: DfeApiContext) : Df
             builder.addQueryParameter("st", DfeUtils.base64Encode(serverToken))
         }
         return builder.build().toString()
-    }
-
-    companion object {
-        private fun httpWithCache(http: OkHttpClient): OkHttpClient {
-            return http.newBuilder().addNetworkInterceptor(CacheInterceptor()).build()
-        }
-
-        private fun computeDocumentIdHash(request: Details.BulkDetailsRequest): String {
-            var n = 0L
-            for (item in request.docidList) {
-                n = 31L * n + item.hashCode()
-            }
-            return n.toString()
-        }
     }
 }

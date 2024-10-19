@@ -362,6 +362,52 @@ public  final class Payload extends
     bitField0_ = (bitField0_ & ~0x00000020);
   }
 
+  public static final int UPLOADDEVICECONFIGRESPONSE_FIELD_NUMBER = 28;
+  private finsky.protos.UploadDeviceConfigResponse uploadDeviceConfigResponse_;
+  /**
+   * <code>optional .finsky.protos.UploadDeviceConfigResponse uploadDeviceConfigResponse = 28;</code>
+   */
+  @java.lang.Override
+  public boolean hasUploadDeviceConfigResponse() {
+    return ((bitField0_ & 0x00000040) != 0);
+  }
+  /**
+   * <code>optional .finsky.protos.UploadDeviceConfigResponse uploadDeviceConfigResponse = 28;</code>
+   */
+  @java.lang.Override
+  public finsky.protos.UploadDeviceConfigResponse getUploadDeviceConfigResponse() {
+    return uploadDeviceConfigResponse_ == null ? finsky.protos.UploadDeviceConfigResponse.getDefaultInstance() : uploadDeviceConfigResponse_;
+  }
+  /**
+   * <code>optional .finsky.protos.UploadDeviceConfigResponse uploadDeviceConfigResponse = 28;</code>
+   */
+  private void setUploadDeviceConfigResponse(finsky.protos.UploadDeviceConfigResponse value) {
+    value.getClass();
+  uploadDeviceConfigResponse_ = value;
+    bitField0_ |= 0x00000040;
+    }
+  /**
+   * <code>optional .finsky.protos.UploadDeviceConfigResponse uploadDeviceConfigResponse = 28;</code>
+   */
+  @java.lang.SuppressWarnings({"ReferenceEquality"})
+  private void mergeUploadDeviceConfigResponse(finsky.protos.UploadDeviceConfigResponse value) {
+    value.getClass();
+  if (uploadDeviceConfigResponse_ != null &&
+        uploadDeviceConfigResponse_ != finsky.protos.UploadDeviceConfigResponse.getDefaultInstance()) {
+      uploadDeviceConfigResponse_ =
+        finsky.protos.UploadDeviceConfigResponse.newBuilder(uploadDeviceConfigResponse_).mergeFrom(value).buildPartial();
+    } else {
+      uploadDeviceConfigResponse_ = value;
+    }
+    bitField0_ |= 0x00000040;
+  }
+  /**
+   * <code>optional .finsky.protos.UploadDeviceConfigResponse uploadDeviceConfigResponse = 28;</code>
+   */
+  private void clearUploadDeviceConfigResponse() {  uploadDeviceConfigResponse_ = null;
+    bitField0_ = (bitField0_ & ~0x00000040);
+  }
+
   public static final int TESTINGPROGRAMRESPONSE_FIELD_NUMBER = 80;
   private finsky.protos.TestingProgramResponse testingProgramResponse_;
   /**
@@ -373,7 +419,7 @@ public  final class Payload extends
    */
   @java.lang.Override
   public boolean hasTestingProgramResponse() {
-    return ((bitField0_ & 0x00000040) != 0);
+    return ((bitField0_ & 0x00000080) != 0);
   }
   /**
    * <pre>
@@ -396,7 +442,7 @@ public  final class Payload extends
   private void setTestingProgramResponse(finsky.protos.TestingProgramResponse value) {
     value.getClass();
   testingProgramResponse_ = value;
-    bitField0_ |= 0x00000040;
+    bitField0_ |= 0x00000080;
     }
   /**
    * <pre>
@@ -415,7 +461,7 @@ public  final class Payload extends
     } else {
       testingProgramResponse_ = value;
     }
-    bitField0_ |= 0x00000040;
+    bitField0_ |= 0x00000080;
   }
   /**
    * <pre>
@@ -425,7 +471,7 @@ public  final class Payload extends
    * <code>optional .finsky.protos.TestingProgramResponse testingProgramResponse = 80;</code>
    */
   private void clearTestingProgramResponse() {  testingProgramResponse_ = null;
-    bitField0_ = (bitField0_ & ~0x00000040);
+    bitField0_ = (bitField0_ & ~0x00000080);
   }
 
   public static finsky.protos.Payload parseFrom(
@@ -892,6 +938,53 @@ public  final class Payload extends
     }
 
     /**
+     * <code>optional .finsky.protos.UploadDeviceConfigResponse uploadDeviceConfigResponse = 28;</code>
+     */
+    @java.lang.Override
+    public boolean hasUploadDeviceConfigResponse() {
+      return instance.hasUploadDeviceConfigResponse();
+    }
+    /**
+     * <code>optional .finsky.protos.UploadDeviceConfigResponse uploadDeviceConfigResponse = 28;</code>
+     */
+    @java.lang.Override
+    public finsky.protos.UploadDeviceConfigResponse getUploadDeviceConfigResponse() {
+      return instance.getUploadDeviceConfigResponse();
+    }
+    /**
+     * <code>optional .finsky.protos.UploadDeviceConfigResponse uploadDeviceConfigResponse = 28;</code>
+     */
+    public Builder setUploadDeviceConfigResponse(finsky.protos.UploadDeviceConfigResponse value) {
+      copyOnWrite();
+      instance.setUploadDeviceConfigResponse(value);
+      return this;
+      }
+    /**
+     * <code>optional .finsky.protos.UploadDeviceConfigResponse uploadDeviceConfigResponse = 28;</code>
+     */
+    public Builder setUploadDeviceConfigResponse(
+        finsky.protos.UploadDeviceConfigResponse.Builder builderForValue) {
+      copyOnWrite();
+      instance.setUploadDeviceConfigResponse(builderForValue.build());
+      return this;
+    }
+    /**
+     * <code>optional .finsky.protos.UploadDeviceConfigResponse uploadDeviceConfigResponse = 28;</code>
+     */
+    public Builder mergeUploadDeviceConfigResponse(finsky.protos.UploadDeviceConfigResponse value) {
+      copyOnWrite();
+      instance.mergeUploadDeviceConfigResponse(value);
+      return this;
+    }
+    /**
+     * <code>optional .finsky.protos.UploadDeviceConfigResponse uploadDeviceConfigResponse = 28;</code>
+     */
+    public Builder clearUploadDeviceConfigResponse() {  copyOnWrite();
+      instance.clearUploadDeviceConfigResponse();
+      return this;
+    }
+
+    /**
      * <pre>
      * optional SearchSuggestResponse searchSuggestResponse = 40;
      * </pre>
@@ -985,12 +1078,13 @@ public  final class Payload extends
             "bulkDetailsResponse_",
             "deliveryResponse_",
             "androidCheckinResponse_",
+            "uploadDeviceConfigResponse_",
             "testingProgramResponse_",
           };
           java.lang.String info =
-              "\u0001\u0007\u0000\u0001\u0001P\u0007\u0000\u0000\u0000\u0001\u1009\u0000\u0002\u1009" +
-              "\u0001\u0005\u1009\u0002\u0013\u1009\u0003\u0015\u1009\u0004\u001a\u1009\u0005P\u1009" +
-              "\u0006";
+              "\u0001\b\u0000\u0001\u0001P\b\u0000\u0000\u0000\u0001\u1009\u0000\u0002\u1009\u0001" +
+              "\u0005\u1009\u0002\u0013\u1009\u0003\u0015\u1009\u0004\u001a\u1009\u0005\u001c\u1009" +
+              "\u0006P\u1009\u0007";
           return newMessageInfo(DEFAULT_INSTANCE, info, objects);
       }
       // fall through

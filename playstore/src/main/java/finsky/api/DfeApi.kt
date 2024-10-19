@@ -4,6 +4,7 @@ import finsky.protos.AndroidCheckinResponse
 import finsky.protos.DeliveryResponse
 import finsky.protos.Details
 import finsky.protos.ResponseWrapper
+import finsky.protos.UploadDeviceConfigResponse
 
 class BulkDocId(val packageName: String, val versionCode: Int) : Comparable<BulkDocId> {
     override fun compareTo(other: BulkDocId): Int {
@@ -86,6 +87,7 @@ interface DfeAuthProvider {
     val gfsToken: String
     val authToken: String
     val accountName: String
+    val deviceConfigToken: String
 }
 
 interface DfeApi {
@@ -115,6 +117,8 @@ interface DfeApi {
 
     suspend fun checkIn(): AndroidCheckinResponse
 
+    suspend fun uploadDeviceConfig(): UploadDeviceConfigResponse
+
     companion object {
         const val URL_BASE = "https://android.clients.google.com"
         const val URL_FDFE = "$URL_BASE/fdfe"
@@ -124,6 +128,7 @@ interface DfeApi {
         const val PURCHASE_HISTORY_URL = "${URL_FDFE}/purchaseHistory"
         const val DELIVERY_URL = "$URL_FDFE/delivery"
         const val URL_CHECK_IN = "$URL_BASE/checkin"
+        const val URL_UPLOAD_DEVICE_CONFIG = "$URL_FDFE/uploadDeviceConfig"
         const val wishlistBackendId = 0
         const val searchBackendId = 3
     }

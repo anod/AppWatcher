@@ -104,6 +104,17 @@ public interface PayloadOrBuilder extends
   finsky.protos.AndroidCheckinResponse getAndroidCheckinResponse();
 
   /**
+   * <code>optional .finsky.protos.UploadDeviceConfigResponse uploadDeviceConfigResponse = 28;</code>
+   * @return Whether the uploadDeviceConfigResponse field is set.
+   */
+  boolean hasUploadDeviceConfigResponse();
+  /**
+   * <code>optional .finsky.protos.UploadDeviceConfigResponse uploadDeviceConfigResponse = 28;</code>
+   * @return The uploadDeviceConfigResponse.
+   */
+  finsky.protos.UploadDeviceConfigResponse getUploadDeviceConfigResponse();
+
+  /**
    * <pre>
    * optional SearchSuggestResponse searchSuggestResponse = 40;
    * </pre>

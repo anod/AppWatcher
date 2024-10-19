@@ -9,16 +9,18 @@ data class AuthAccount(
     val name: String,
     val type: String,
     val gfsId: String,
-    val deviceCheckInConsistencyToken: String
+    val gfsIdToken: String,
+    val deviceConfig: String
 ) : Parcelable
 
 data class GfsIdResult(val gfsId: String, val token: String)
 
-fun AuthAccount(androidAccount: Account, gfsIdResult: GfsIdResult) = AuthAccount(
+fun AuthAccount(androidAccount: Account, gfsIdResult: GfsIdResult, deviceConfig: String) = AuthAccount(
     name = androidAccount.name,
     type = androidAccount.type,
     gfsId = gfsIdResult.gfsId,
-    deviceCheckInConsistencyToken = gfsIdResult.token
+    gfsIdToken = gfsIdResult.token,
+    deviceConfig = deviceConfig
 )
 
 fun AuthAccount.toAndroidAccount() = Account(name, type)

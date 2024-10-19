@@ -357,10 +357,6 @@ message AppInfo {
   }
 }
 
-
-
-
-
 message Details
 {
   message DetailsResponse
@@ -610,6 +606,7 @@ message Payload {
   optional DeliveryResponse deliveryResponse = 21;
   //        optional UploadDeviceConfigResponse uploadDeviceConfigResponse = 25;
   optional AndroidCheckinResponse androidCheckinResponse = 26;
+  optional UploadDeviceConfigResponse uploadDeviceConfigResponse = 28;
   //        optional SearchSuggestResponse searchSuggestResponse = 40;
   optional TestingProgramResponse testingProgramResponse = 80;
 }
@@ -764,4 +761,14 @@ message AndroidIntentProto {
 message GservicesSetting {
   optional bytes name = 1;
   optional bytes value = 2;
+}
+
+message UploadDeviceConfigRequest {
+  optional DeviceConfigurationProto deviceConfiguration = 1;
+  optional string manufacturer = 2;
+  optional string gcmRegistrationId = 3;
+}
+
+message UploadDeviceConfigResponse {
+  optional string uploadDeviceConfigToken = 1;
 }

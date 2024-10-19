@@ -10,7 +10,7 @@ import android.provider.BaseColumns
 import android.text.format.DateUtils
 import androidx.core.content.contentValuesOf
 import androidx.work.Data
-import com.anod.appwatcher.accounts.AuthTokenBlocking
+import com.anod.appwatcher.accounts.AuthAccountInitializer
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.accounts.toAndroidAccount
 import com.anod.appwatcher.backup.gdrive.GDriveSilentSignIn
@@ -50,7 +50,7 @@ class UpdateCheck(
     private val database: AppsDatabase,
     private val preferences: Preferences,
     private val networkConnection: NetworkConnectivity,
-    private val authToken: AuthTokenBlocking,
+    private val authAccount: AuthAccountInitializer,
     private val uploadDateParserCache: UploadDateParserCache,
     private val koin: Koin
 ) {
@@ -79,7 +79,7 @@ class UpdateCheck(
         AppLog.i("Perform ${if (manualSync) "manual" else "scheduled"} sync", "UpdateCheck")
         val schedule = Schedule(manualSync)
 
-        val account = preferences.account?.toAndroidAccount()
+        val account = preferences.account
         if (account == null) {
             AppLog.w("No active account, skipping sync...", "UpdateCheck")
             SchedulesTable.Queries.save(schedule.finish(Schedule.statusFailedNoAccount), database)
@@ -103,7 +103,7 @@ class UpdateCheck(
 
         AppLog.i("Perform synchronization", "UpdateCheck")
 
-        val refreshed = refreshAuthToken(account)
+        val refreshed = refreshAuthToken()
         if (!refreshed) {
             SchedulesTable.Queries.save(schedule.finish(Schedule.statusFailedNoToken), database)
             AppLog.e("Cannot receive access token")
@@ -361,9 +361,10 @@ class UpdateCheck(
         }
     }
 
-    private suspend fun refreshAuthToken(account: Account): Boolean {
+    private suspend fun refreshAuthToken(): Boolean {
         return try {
-            authToken.refreshToken(account)
+            authAccount.refresh()
+            true
         } catch (e: AuthTokenStartIntent) {
             AppLog.e("AuthToken: require interactive sing in")
             false
