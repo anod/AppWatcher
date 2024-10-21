@@ -58,7 +58,7 @@ class AuthTokenBlocking(context: ApplicationContext) {
         }
     }
 
-    private suspend fun refreshToken(account: Account): CheckTokenResult = withContext(Dispatchers.Main) {
+    suspend fun refreshToken(account: Account): CheckTokenResult = withContext(Dispatchers.Main) {
         val (token, invalidated) = retrieve(account)
         tokenState.value = token
         if (tokenState.value.isEmpty()) {

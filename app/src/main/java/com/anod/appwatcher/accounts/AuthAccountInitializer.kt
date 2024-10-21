@@ -15,7 +15,7 @@ class AuthAccountInitializer(
 ) {
     suspend fun initialize(account: Account): AuthAccount {
         val existingAccount = preferences.account
-        val tokenResult = authToken.checkToken(account)
+        val tokenResult = authToken.refreshToken(account)
         val isNewAccount = existingAccount?.name != account.name
         var gfsIdResult: GfsIdResult? = if (isNewAccount) null else existingAccount?.toGfsResult()
         var deviceConfigToken: String? = if (isNewAccount) null else existingAccount?.deviceConfig
@@ -35,7 +35,7 @@ class AuthAccountInitializer(
     suspend fun refresh() {
         val account = preferences.account ?: throw IllegalStateException("Account should not be null")
         val androidAccount = account.toAndroidAccount()
-        val tokenResult = authToken.checkToken(androidAccount)
+        val tokenResult = authToken.refreshToken(androidAccount)
         if (needToRetrieveGfsId(account, androidAccount, tokenResult)) {
             val gfsIdResult = retrieveGsfId()
             val deviceConfigToken = dfeApi.uploadDeviceConfig().uploadDeviceConfigToken

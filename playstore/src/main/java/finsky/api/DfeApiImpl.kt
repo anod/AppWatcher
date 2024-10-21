@@ -48,7 +48,7 @@ class DfeApiImpl(private val http: OkHttpClient, private val apiContext: DfeApiC
                 DfeApi.SEARCH_CHANNEL_URI.toHttpUrl().newBuilder()
                     .addQueryParameter("c", DfeApi.searchBackendId.toString())
                     .addQueryParameter("q", initialQuery)
-                    .addQueryParameter("ksm", "1")
+//                    .addQueryParameter("ksm", "1")
                     .build().toString()
             else
                 DfeApi.URL_FDFE + "/" + nextPageUrl
