@@ -20,6 +20,7 @@ import androidx.palette.graphics.Palette
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
+import com.anod.appwatcher.accounts.CheckTokenResult
 import com.anod.appwatcher.accounts.toAndroidAccount
 import info.anodsplace.framework.content.CommonActivityAction
 import com.anod.appwatcher.database.AppListTable
@@ -363,7 +364,7 @@ class DetailsViewModel(
         if (account != null) {
             var loadError = false
             try {
-                if (authToken.refreshToken(account)) {
+                if (authToken.checkToken(account) is CheckTokenResult.Success) {
                     try {
                         val document = dfeApi.details(viewState.detailsUrl).toDocument()
                         onRemoteDetailsFetched(localChanges, document)

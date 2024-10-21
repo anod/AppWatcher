@@ -24,3 +24,5 @@ fun AuthAccount(androidAccount: Account, gfsIdResult: GfsIdResult, deviceConfig:
 )
 
 fun AuthAccount.toAndroidAccount() = Account(name, type)
+
+fun AuthAccount.toGfsResult() = GfsIdResult(gfsId, gfsIdToken)

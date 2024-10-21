@@ -14,23 +14,29 @@ class AuthAccountInitializer(
     private val dfeApi: DfeApi
 ) {
     suspend fun initialize(account: Account): AuthAccount {
-        authToken.refreshToken(account)
         val existingAccount = preferences.account
-        if (existingAccount == null || needToRetrieveGfsId(existingAccount, account)) {
-            val gfsIdResult = retrieveGsfId()
-            val deviceConfigToken = dfeApi.uploadDeviceConfig().uploadDeviceConfigToken
-            val authAccount = AuthAccount(account, gfsIdResult, deviceConfigToken)
-            preferences.account = authAccount
-            return authAccount
+        val tokenResult = authToken.checkToken(account)
+        val isNewAccount = existingAccount?.name != account.name
+        var gfsIdResult: GfsIdResult? = if (isNewAccount) null else existingAccount?.toGfsResult()
+        var deviceConfigToken: String? = if (isNewAccount) null else existingAccount?.deviceConfig
+        if (needToRetrieveGfsId(existingAccount, account, tokenResult)) {
+            gfsIdResult = retrieveGsfId()
+            deviceConfigToken = dfeApi.uploadDeviceConfig().uploadDeviceConfigToken
         }
-        return existingAccount
+        val authAccount = AuthAccount(
+            account,
+            gfsIdResult ?: GfsIdResult("", ""),
+            deviceConfigToken ?: ""
+        )
+        preferences.account = authAccount
+        return authAccount
     }
 
     suspend fun refresh() {
         val account = preferences.account ?: throw IllegalStateException("Account should not be null")
         val androidAccount = account.toAndroidAccount()
-        authToken.refreshToken(androidAccount)
-        if (needToRetrieveGfsId(account, androidAccount)) {
+        val tokenResult = authToken.checkToken(androidAccount)
+        if (needToRetrieveGfsId(account, androidAccount, tokenResult)) {
             val gfsIdResult = retrieveGsfId()
             val deviceConfigToken = dfeApi.uploadDeviceConfig().uploadDeviceConfigToken
             val authAccount = AuthAccount(androidAccount, gfsIdResult, deviceConfigToken)
@@ -38,19 +44,25 @@ class AuthAccountInitializer(
         }
     }
 
-    private suspend fun needToRetrieveGfsId(existingAccount: AuthAccount, newAccount: Account): Boolean {
+    private suspend fun needToRetrieveGfsId(existingAccount: AuthAccount?, newAccount: Account, tokenResult: CheckTokenResult): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
             return false
         }
-        return existingAccount.deviceConfig.isEmpty()
+        val tokenInvalidated = if (tokenResult is CheckTokenResult.Success) tokenResult.invalidated else false
+        return existingAccount == null
+                || existingAccount.deviceConfig.isEmpty()
                 || existingAccount.name != newAccount.name
-                || !validate()
+                || tokenInvalidated
+                || canRequest()
     }
 
-    private suspend fun validate(): Boolean {
+    private suspend fun canRequest(): Boolean {
+        if (preferences.account == null) {
+            return false
+        }
         return try {
-            val app = dfeApi.details("details?doc=com.android.chrome").toDocument()
-            val result = app?.appDetails?.packageName == "com.android.chrome"
+            val app = dfeApi.details("details?doc=com.anod.appwatcher").toDocument()
+            val result = app?.appDetails?.packageName == "com.anod.appwatcher"
             AppLog.d("Auth verification result: $result")
             result
         } catch (e: Exception) {

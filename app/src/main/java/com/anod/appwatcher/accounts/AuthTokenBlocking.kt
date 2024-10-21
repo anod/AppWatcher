@@ -22,7 +22,7 @@ sealed interface CheckTokenError {
 }
 
 sealed interface CheckTokenResult {
-    object Success : CheckTokenResult
+    class Success(val invalidated: Boolean) : CheckTokenResult
     class Error(val error: CheckTokenError) : CheckTokenResult
 }
 
@@ -46,14 +46,10 @@ class AuthTokenBlocking(context: ApplicationContext) {
 
     suspend fun checkToken(account: Account): CheckTokenResult {
         if (isFresh) {
-            return CheckTokenResult.Success
+            return CheckTokenResult.Success(invalidated = false)
         }
         return try {
-            if (!refreshToken(account)) {
-                AppLog.e("Error retrieving token")
-                CheckTokenResult.Error(CheckTokenError.NoToken)
-            }
-            CheckTokenResult.Success
+            return refreshToken(account)
         } catch (e: AuthTokenStartIntent) {
             CheckTokenResult.Error(CheckTokenError.RequiresInteraction(e.intent))
         } catch (e: Exception) {
@@ -62,17 +58,20 @@ class AuthTokenBlocking(context: ApplicationContext) {
         }
     }
 
-    suspend fun refreshToken(account: Account): Boolean = withContext(Dispatchers.Main) {
-        tokenState.value = retrieve(account)
+    private suspend fun refreshToken(account: Account): CheckTokenResult = withContext(Dispatchers.Main) {
+        val (token, invalidated) = retrieve(account)
+        tokenState.value = token
         if (tokenState.value.isEmpty()) {
-            return@withContext false
+            AppLog.e("Error retrieving token")
+            return@withContext CheckTokenResult.Error(CheckTokenError.NoToken)
         }
         lastUpdated = System.currentTimeMillis()
-        return@withContext true
+        return@withContext CheckTokenResult.Success(invalidated = invalidated)
     }
 
-    private suspend fun retrieve(acc: Account): String = withContext(Dispatchers.IO) {
+    private suspend fun retrieve(acc: Account): Pair<String, Boolean> = withContext(Dispatchers.IO) {
         var token = ""
+        var invalidated = false
         try {
             token = getAuthToken(acc)
         } catch (e: Exception) {
@@ -84,6 +83,7 @@ class AuthTokenBlocking(context: ApplicationContext) {
         }
 
         if (token.isNotEmpty()) {
+            invalidated = true
             accountManager.invalidateAuthToken(ACCOUNT_TYPE, token)
         }
 
@@ -92,7 +92,7 @@ class AuthTokenBlocking(context: ApplicationContext) {
         } catch (e: Exception) {
             throw e
         }
-        return@withContext token
+        return@withContext Pair(token, invalidated)
     }
 
     @Throws(AuthenticatorException::class, OperationCanceledException::class, IOException::class)

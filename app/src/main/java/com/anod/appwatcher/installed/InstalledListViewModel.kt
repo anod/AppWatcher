@@ -192,7 +192,7 @@ class InstalledListViewModel(state: SavedStateHandle) : BaseFlowViewModel<Instal
                     false
                 }
 
-                CheckTokenResult.Success -> true
+                is CheckTokenResult.Success -> true
             }
         }
     }
