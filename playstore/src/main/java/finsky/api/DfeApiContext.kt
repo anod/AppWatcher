@@ -3,7 +3,6 @@ package finsky.api
 import android.content.Context
 import finsky.api.utils.CLIENT_ID
 import finsky.api.utils.makeUserAgentString
-import finsky.config.ContentLevel
 import finsky.utils.NetworkStateChangedReceiver
 
 class DfeApiContext private constructor(
@@ -67,7 +66,7 @@ class DfeApiContext private constructor(
     fun createAuthHeaders(): MutableMap<String, String> {
         return mutableMapOf(
             "app" to "com.google.android.gms",
-            "User-Agent" to deviceInfo.makeUserAgentString(),
+            "User-Agent" to "GoogleAuth/1.4 (${deviceInfo.build.device} ${deviceInfo.build.id})",
         ).apply {
             if (authTokenProvider.gfsId.isNotEmpty()) {
                 this["device"] = authTokenProvider.gfsId

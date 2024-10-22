@@ -9,13 +9,14 @@ import finsky.protos.AndroidCheckinRequest
 import finsky.protos.DeviceConfigurationProto
 import finsky.protos.DeviceFeature
 
-fun checkinRequest(timeToReport: Long, deviceInfo: DfeDeviceInfoProvider) = AndroidCheckinRequest.newBuilder().apply {
-    id = 0
-    checkin = deviceInfo.toCheckInProto(timeToReport)
-    locale = ""
-    timeZone = ""
-    version = 3
-    deviceConfiguration = deviceInfo.configuration.toProto(deviceInfo.build.abis)
+fun checkinRequest(timeToReport: Long, deviceInfo: DfeDeviceInfoProvider) = AndroidCheckinRequest.newBuilder().also {
+    it.id = 0
+    it.checkin = deviceInfo.toCheckInProto(timeToReport)
+    it.locale = deviceInfo.locale.description
+    it.timeZone = deviceInfo.timeZone
+    it.version = 3
+    it.deviceConfiguration = deviceInfo.configuration.toProto(deviceInfo.build.abis)
+    it.fragment = 0
 }.build()
 
 private fun DfeDeviceInfoProvider.toCheckInProto(timeToReport: Long) = AndroidCheckinProto.newBuilder().also {
@@ -54,29 +55,29 @@ private fun DfeDeviceBuild.toProto(
     it.googleServices = gsfVersion
 }.build()
 
-fun DfeDeviceConfiguration.toProto(abis: Array<String>): DeviceConfigurationProto = DeviceConfigurationProto.newBuilder().apply {
-    setTouchScreen(touchScreen)
-    setKeyboard(keyboard)
-    setNavigation(navigation)
-    setScreenLayout(screenLayout)
-    setHasHardKeyboard(hasHardKeyboard)
-    setHasFiveWayNavigation(hasFiveWayNavigation)
-    setLowRamDevice(lowRamDevice)
-    setMaxNumOfCPUCores(maxNumOfCPUCores)
-    setTotalMemoryBytes(totalMemoryBytes)
-    setDeviceClass(deviceClass)
-    setScreenDensity(screenDensity)
-    setScreenWidth(screenWidth)
-    setScreenHeight(screenHeight)
-    addAllNativePlatform(abis.toList())
-    addAllSystemSharedLibrary(sharedLibraries)
-    addAllSystemAvailableFeature(features)
-    addAllSystemSupportedLocale(locales)
-    setGlEsVersion(glEsVersion)
-    addAllGlExtension(glExtensions)
-    addAllDeviceFeature(features.map {
+fun DfeDeviceConfiguration.toProto(abis: Array<String>): DeviceConfigurationProto = DeviceConfigurationProto.newBuilder().also {
+    it.setTouchScreen(touchScreen)
+    it.setKeyboard(keyboard)
+    it.setNavigation(navigation)
+    it.setScreenLayout(screenLayout)
+    it.setHasHardKeyboard(hasHardKeyboard)
+    it.setHasFiveWayNavigation(hasFiveWayNavigation)
+    it.setLowRamDevice(lowRamDevice)
+    it.setMaxNumOfCPUCores(maxNumOfCPUCores)
+    it.setTotalMemoryBytes(totalMemoryBytes)
+    it.setDeviceClass(deviceClass)
+    it.setScreenDensity(screenDensity)
+    it.setScreenWidth(screenWidth)
+    it.setScreenHeight(screenHeight)
+    it.addAllNativePlatform(abis.toList())
+    it.addAllSystemSharedLibrary(sharedLibraries)
+    it.addAllSystemAvailableFeature(features)
+    it.addAllSystemSupportedLocale(locales)
+    it.setGlEsVersion(glEsVersion)
+    it.addAllGlExtension(glExtensions)
+    it. addAllDeviceFeature(features.map { feature ->
         DeviceFeature.newBuilder().apply {
-            name = it
+            name = feature
             value = 0
         }.build()
     })

@@ -3,10 +3,9 @@ package com.anod.appwatcher.utils
 import android.app.ActivityManager
 import android.content.Context
 import android.content.res.Configuration
+import android.opengl.EGL14
+import android.opengl.GLES20
 import android.os.Build
-import androidx.core.content.pm.PackageInfoCompat
-import com.anod.appwatcher.preferences.Preferences
-import com.google.android.gms.common.util.ClientLibraryUtils.getPackageInfo
 import finsky.api.DfeDeviceBuild
 import finsky.api.DfeDeviceConfiguration
 import finsky.api.DfeDeviceInfoProvider
@@ -14,8 +13,13 @@ import finsky.api.DfeLocale
 import finsky.api.utils.GFS_VERSION_CODE
 import finsky.api.utils.PLAY_VERSION_CODE
 import finsky.api.utils.PLAY_VERSION_NAME
+import info.anodsplace.applog.AppLog
 import info.anodsplace.playstore.AndroidDeviceId
 import java.util.Locale
+import javax.microedition.khronos.egl.EGL10
+import javax.microedition.khronos.egl.EGLConfig
+import javax.microedition.khronos.egl.EGLContext
+import javax.microedition.khronos.egl.EGLDisplay
 
 class DeviceConfiguration(
     private val context: Context
@@ -23,7 +27,9 @@ class DeviceConfiguration(
     private val metrics = context.resources.displayMetrics
     private val config = context.resources.configuration
     private val activityManager: ActivityManager? = context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
-
+    private val glExtensionsList: List<String> by lazy {
+        getGLExtensionsWithEGL()
+    }
     override val touchScreen: Int
         get() = config.touchscreen
     override val keyboard: Int
@@ -61,7 +67,7 @@ class DeviceConfiguration(
     override val glEsVersion: Int
         get() = activityManager?.deviceConfigurationInfo?.reqGlEsVersion ?: 0
     override val glExtensions: List<String>
-        get() = emptyList()
+        get() = glExtensionsList
     override val isWideScreen: Boolean = false
 }
 
@@ -127,4 +133,75 @@ class DeviceInfoProvider(
         get() = playVersion.first
     override val playVersionName: String
         get() = playVersion.second
+}
+
+private fun getGLExtensionsWithEGL(): List<String> {
+
+    // Step 3: Choose an EGLConfig
+    val attribList = intArrayOf(
+        EGL10.EGL_RED_SIZE, 8,
+        EGL10.EGL_GREEN_SIZE, 8,
+        EGL10.EGL_BLUE_SIZE, 8,
+        EGL10.EGL_RENDERABLE_TYPE, EGL14.EGL_OPENGL_ES2_BIT,
+        EGL10.EGL_NONE
+    )
+    val numConfig = IntArray(1)
+    var extensions: List<String> = emptyList()
+    runInGlContext { egl, display ->
+        if (egl.eglGetConfigs(display, null, 0, numConfig)) {
+            val configs = arrayOfNulls<EGLConfig>(numConfig[0])
+            egl.eglChooseConfig(display, attribList, configs, numConfig[0], numConfig)
+
+            // Step 4: Create an OpenGL ES 2.0 context
+            val attrib_list = intArrayOf(EGL14.EGL_CONTEXT_CLIENT_VERSION, 2, EGL10.EGL_NONE)
+            val context = egl.eglCreateContext(display, configs[0], EGL10.EGL_NO_CONTEXT, attrib_list)
+
+            // Step 5: Create a 1x1 pixel surface to make the context current
+            val surfaceAttribs = intArrayOf(EGL10.EGL_WIDTH, 1, EGL10.EGL_HEIGHT, 1, EGL10.EGL_NONE)
+            val surface = egl.eglCreatePbufferSurface(display, configs[0], surfaceAttribs)
+
+            // Step 6: Make the context current
+            egl.eglMakeCurrent(display, surface, surface, context)
+
+            // Step 7: Now that the OpenGL context is active, query for the extensions
+            val extensionsString = GLES20.glGetString(GLES20.GL_EXTENSIONS)
+            extensions = extensionsString?.split(" ") ?: emptyList()
+
+            // Step 8: Cleanup: Destroy context and terminate EGL
+            egl.eglDestroySurface(display, surface)
+            egl.eglDestroyContext(display, context)
+        }
+    }
+
+    // Return the list of extensions
+    return extensions
+}
+
+private fun runInGlContext(action: (egl: EGL10, display: EGLDisplay) -> Unit) {
+    var egl: EGL10? = null
+    var display: EGLDisplay? = null
+    try {
+        // Step 1: Initialize the EGL display connection
+        egl = (EGLContext.getEGL() as EGL10)
+        display = egl.eglGetDisplay(EGL10.EGL_DEFAULT_DISPLAY)
+
+        // Step 2: Initialize the EGL display
+        val version = IntArray(2)
+        egl.eglInitialize(display, version)
+
+        action(egl, display)
+
+        egl.eglTerminate(display)
+        egl = null
+        display = null
+    } catch (e: Exception) {
+        AppLog.e("runOnGLThread exception ${e.message}")
+        try {
+            if (egl != null && display != null) {
+                egl.eglTerminate(display)
+            }
+        } catch (e: Exception) {
+            AppLog.e("runOnGLThread terminater ${e.message}")
+        }
+    }
 }

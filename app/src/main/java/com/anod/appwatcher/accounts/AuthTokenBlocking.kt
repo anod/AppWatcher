@@ -70,29 +70,28 @@ class AuthTokenBlocking(context: ApplicationContext) {
     }
 
     private suspend fun retrieve(acc: Account): Pair<String, Boolean> = withContext(Dispatchers.IO) {
-        var token = ""
-        var invalidated = false
-        try {
-            token = getAuthToken(acc)
+        val current = try {
+             getAuthToken(acc)
         } catch (e: Exception) {
             if (e is AuthTokenStartIntent) {
                 throw e
             } else {
                 AppLog.e(e)
+                ""
             }
         }
 
-        if (token.isNotEmpty()) {
-            invalidated = true
-            accountManager.invalidateAuthToken(ACCOUNT_TYPE, token)
+        if (current.isNotEmpty()) {
+            accountManager.invalidateAuthToken(ACCOUNT_TYPE, current)
         }
 
-        try {
-            token = getAuthToken(acc)
+        val newToken = try {
+            getAuthToken(acc)
         } catch (e: Exception) {
             throw e
         }
-        return@withContext Pair(token, invalidated)
+        return@withContext Pair(newToken, current != newToken)
+
     }
 
     @Throws(AuthenticatorException::class, OperationCanceledException::class, IOException::class)
