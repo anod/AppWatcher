@@ -15,13 +15,29 @@ class AuthAccountInitializer(
 ) {
     suspend fun initialize(account: Account): AuthAccount {
         val existingAccount = preferences.account
-        val tokenResult = authToken.refreshToken(account)
+        val tokenResult = try {
+            authToken.refreshToken(account)
+        } catch (e: Exception) {
+            AppLog.d("Exception during token refresh. Persisting account anyway, ${e.message}")
+            preferences.account = AuthAccount(account, GfsIdResult("", ""), "")
+            throw e
+        }
         val isNewAccount = existingAccount?.name != account.name
         var gfsIdResult: GfsIdResult? = if (isNewAccount) null else existingAccount?.toGfsResult()
         var deviceConfigToken: String? = if (isNewAccount) null else existingAccount?.deviceConfig
         if (needToRetrieveGfsId(existingAccount, account, tokenResult)) {
-            gfsIdResult = retrieveGsfId()
-            deviceConfigToken = dfeApi.uploadDeviceConfig().uploadDeviceConfigToken
+            gfsIdResult = try {
+                retrieveGsfId()
+            } catch (e: Exception) {
+                AppLog.e("Unable to generate gfs Id ${e.message}")
+                GfsIdResult("", "")
+            }
+            deviceConfigToken = try {
+                dfeApi.uploadDeviceConfig().uploadDeviceConfigToken
+            } catch (e: Exception) {
+                AppLog.e("Unable to upload device config ${e.message}")
+                ""
+            }
         }
         val authAccount = AuthAccount(
             account,
@@ -53,7 +69,7 @@ class AuthAccountInitializer(
                 || existingAccount.deviceConfig.isEmpty()
                 || existingAccount.name != newAccount.name
                 || tokenInvalidated
-                || canRequest()
+                || !canRequest()
     }
 
     private suspend fun canRequest(): Boolean {

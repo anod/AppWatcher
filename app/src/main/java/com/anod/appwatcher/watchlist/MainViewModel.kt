@@ -13,6 +13,7 @@ import com.anod.appwatcher.accounts.AuthAccount
 import com.anod.appwatcher.accounts.AuthAccountInitializer
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
+import com.anod.appwatcher.accounts.toAndroidAccount
 import info.anodsplace.framework.content.CommonActivityAction
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.Tag
@@ -22,7 +23,6 @@ import com.anod.appwatcher.upgrade.UpgradeCheck
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.networkConnection
 import com.anod.appwatcher.utils.prefs
-import com.google.android.gms.auth.api.Auth
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import info.anodsplace.applog.AppLog
 import info.anodsplace.ktx.Hash
@@ -42,7 +42,8 @@ data class MainViewState(
     val lastUpdate: Long = 0L,
     val tags: TagCountList = emptyList(),
     val showNewTagDialog: Boolean = false,
-    val isDrawerOpen: Boolean = false
+    val isDrawerOpen: Boolean = false,
+    val accountInitializedRetries: Int = 2
 )
 
 sealed interface MainViewEvent {
@@ -52,7 +53,7 @@ sealed interface MainViewEvent {
     class SetAccount(val result: AccountSelectionResult) : MainViewEvent
     class NavigateToTag(val tag: Tag) : MainViewEvent
     class NotificationPermissionResult(val enabled: Boolean) : MainViewEvent
-    class InitAccount(val account: Account) : MainViewEvent
+    data object InitAccount : MainViewEvent
     class DrawerState(val isOpen: Boolean) : MainViewEvent
 }
 
@@ -93,6 +94,7 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
     init {
         viewState = MainViewState(
             account = prefs.account,
+            accountInitializedRetries = 2,
             lastUpdate = prefs.lastUpdateTime
         )
 
@@ -129,7 +131,9 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
             is MainViewEvent.DrawerItemClick -> emitAction(MainViewAction.NavigateTo(event.id))
             is MainViewEvent.SetAccount -> {
                 when (event.result) {
-                    AccountSelectionResult.Canceled -> onAccountNotFound("")
+                    AccountSelectionResult.Canceled -> if (viewState.account == null) {
+                        onAccountNotFound("")
+                    }
                     is AccountSelectionResult.Error -> onAccountNotFound(event.result.errorMessage)
                     is AccountSelectionResult.Success -> {
                         onAccountSelect(event.result.account)
@@ -144,12 +148,20 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
             is MainViewEvent.NavigateToTag -> emitAction(MainViewAction.NavigateToTag(tag = event.tag))
             MainViewEvent.ChooseAccount -> emitAction(MainViewAction.ChooseAccount)
             is MainViewEvent.NotificationPermissionResult -> onNotificationResult(event.enabled)
-            is MainViewEvent.InitAccount -> onAccountSelect(event.account)
+            is MainViewEvent.InitAccount -> initAccount()
             is MainViewEvent.DrawerState -> {
                 viewState = viewState.copy(isDrawerOpen = event.isOpen)
                 emitAction(MainViewAction.DrawerState(isOpen = event.isOpen))
             }
         }
+    }
+
+    private fun initAccount() {
+        if (viewState.accountInitializedRetries < 1) {
+            return
+        }
+        val account =  prefs.account?.toAndroidAccount() ?: return
+        onAccountSelect(account)
     }
 
     private fun onNotificationResult(enabled: Boolean) {
@@ -175,7 +187,7 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
         viewModelScope.launch {
             try {
                 val authAccount = initializer.initialize(account)
-                viewState = viewState.copy(account = authAccount)
+                viewState = viewState.copy(account = authAccount, accountInitializedRetries = 0)
                 if (collectReports) {
                     FirebaseCrashlytics.getInstance().setUserId(Hash.sha256(account.name).encoded)
                 }
@@ -187,9 +199,11 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
                 }
                 upgradeCheck()
             } catch (e: AuthTokenStartIntent) {
+                viewState = viewState.copy(account = prefs.account, accountInitializedRetries = viewState.accountInitializedRetries - 1)
                 emitAction(startActivityAction(e.intent))
             } catch (e: Exception) {
-                AppLog.e("Error retrieving authentication token")
+                viewState = viewState.copy(account = prefs.account, accountInitializedRetries = viewState.accountInitializedRetries - 1)
+                AppLog.e("Error retrieving authentication token ${e.message}")
                 onAccountNotFound("")
             }
         }

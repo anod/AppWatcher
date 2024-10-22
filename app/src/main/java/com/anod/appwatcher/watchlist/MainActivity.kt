@@ -194,14 +194,13 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
         if (account == null) {
             Toast.makeText(this, R.string.failed_gain_access, Toast.LENGTH_LONG).show()
             accountSelectionDialog.show()
-        } else {
-            mainViewModel.handleEvent(MainViewEvent.InitAccount(account))
         }
     }
 
     override fun onResume() {
         super.onResume()
 
+        mainViewModel.handleEvent(MainViewEvent.InitAccount)
         AppLog.d("mark updates as viewed.")
         prefs.isLastUpdatesViewed = true
     }
