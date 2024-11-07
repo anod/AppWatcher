@@ -28,8 +28,8 @@ interface AppTagsTable {
     fun forApp(appId: String): Flow<List<AppTag>>
 
     @Query("SELECT IFNULL(tags_id, 0) AS tags_id, count() as count FROM app_list l " +
-            "LEFT JOIN app_tags t ON l.app_id = t.app_id " +
-            "GROUP BY tags_id")
+        "LEFT JOIN app_tags t ON l.app_id = t.app_id " +
+        "GROUP BY tags_id")
     fun queryCounts(): Flow<List<TagAppsCount>>
 
     @Query("SELECT * FROM $table")
@@ -55,7 +55,7 @@ interface AppTagsTable {
 
     @Query("INSERT INTO $table (${Columns.appId}, ${Columns.tagId}) VALUES (:appId, :tagId)")
     suspend fun insert(appId: String, tagId: Int): Long
-    
+
     class Columns : BaseColumns {
         companion object {
             const val appId = "app_id"
@@ -114,7 +114,6 @@ interface AppTagsTable {
                 }
             }
         }
-
     }
 }
 

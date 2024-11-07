@@ -64,29 +64,29 @@ class AppListItemCursor(cursor: Cursor?) : CursorIterator<AppListItem>(cursor) {
 
     override val current: AppListItem
         get() = AppListItem(
-                app = App(
-                    rowId = getInt(projection.rowId),
-                    appId = getString(projection.appId),
-                    packageName = getString(projection.packageName),
-                    versionNumber = getInt(projection.versionNumber),
-                    versionName = getString(projection.versionName),
-                    title = getString(projection.title),
-                    creator = getString(projection.creator),
-                    iconUrl = getString(projection.iconUrl),
-                    status = getInt(projection.status),
-                    uploadDate = getString(projection.uploadDate),
-                    price = Price(
-                        getString(projection.priceText),
-                        getString(projection.priceCurrency),
-                        getInt(projection.priceMicros)
-                    ),
-                    detailsUrl = getString(projection.detailsUrl),
-                    uploadTime = getLong(projection.uploadTime),
-                    appType = getString(projection.appType),
-                    syncTime = getLong(projection.refreshTime)
+            app = App(
+                rowId = getInt(projection.rowId),
+                appId = getString(projection.appId),
+                packageName = getString(projection.packageName),
+                versionNumber = getInt(projection.versionNumber),
+                versionName = getString(projection.versionName),
+                title = getString(projection.title),
+                creator = getString(projection.creator),
+                iconUrl = getString(projection.iconUrl),
+                status = getInt(projection.status),
+                uploadDate = getString(projection.uploadDate),
+                price = Price(
+                    getString(projection.priceText),
+                    getString(projection.priceCurrency),
+                    getInt(projection.priceMicros)
                 ),
-                changeDetails = getString(projection.changeDetails, ""),
-                noNewDetails = getInt(projection.newNewDetails) == 1,
-                recentFlag = getInt(projection.recentFlag) == 1
+                detailsUrl = getString(projection.detailsUrl),
+                uploadTime = getLong(projection.uploadTime),
+                appType = getString(projection.appType),
+                syncTime = getLong(projection.refreshTime)
+            ),
+            changeDetails = getString(projection.changeDetails, ""),
+            noNewDetails = getInt(projection.newNewDetails) == 1,
+            recentFlag = getInt(projection.recentFlag) == 1
         )
 }

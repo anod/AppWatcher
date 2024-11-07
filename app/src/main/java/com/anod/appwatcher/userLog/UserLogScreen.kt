@@ -28,25 +28,25 @@ import org.koin.java.KoinJavaComponent
 @Composable
 fun UserLogScreen(screenState: UserLogState, onEvent: (UserLogEvent) -> Unit, prefs: Preferences = KoinJavaComponent.getKoin().get()) {
     AppTheme(
-            theme = prefs.theme
+        theme = prefs.theme
     ) {
         Surface {
             Scaffold(
-                    topBar = {
-                        CenterAlignedTopAppBar(
-                                title = { Text(text = stringResource(id = R.string.user_log)) },
-                                navigationIcon = {
-                                    BackArrowIconButton(onClick = { onEvent(UserLogEvent.OnBackNav) })
-                                },
-                                actions = {
-                                    ShareIconButton(onClick = { onEvent(UserLogEvent.Share) })
-                                },
-                        )
-                    }
+                topBar = {
+                    CenterAlignedTopAppBar(
+                        title = { Text(text = stringResource(id = R.string.user_log)) },
+                        navigationIcon = {
+                            BackArrowIconButton(onClick = { onEvent(UserLogEvent.OnBackNav) })
+                        },
+                        actions = {
+                            ShareIconButton(onClick = { onEvent(UserLogEvent.Share) })
+                        },
+                    )
+                }
             ) { contentPadding ->
                 UserLogMessages(
-                        messages = screenState.messages,
-                        contentPadding = contentPadding
+                    messages = screenState.messages,
+                    contentPadding = contentPadding
                 )
             }
         }
@@ -54,15 +54,11 @@ fun UserLogScreen(screenState: UserLogState, onEvent: (UserLogEvent) -> Unit, pr
 }
 
 @Composable
-fun UserLogMessages(
-        messages: List<Message>,
-        modifier: Modifier = Modifier,
-        contentPadding: PaddingValues = PaddingValues(0.dp),
-) {
+fun UserLogMessages(messages: List<Message>, modifier: Modifier = Modifier, contentPadding: PaddingValues = PaddingValues(0.dp),) {
     LazyColumn(
-            modifier = modifier,
-            contentPadding = contentPadding,
-            reverseLayout = true
+        modifier = modifier,
+        contentPadding = contentPadding,
+        reverseLayout = true
     ) {
         items(messages.size) { idx ->
             UserLogMessageItem(position = idx, size = messages.size, message = messages[idx])
@@ -79,36 +75,36 @@ fun UserLogMessageItem(position: Int, size: Int, message: Message) {
         MaterialTheme.colorScheme.onSurface
     }
     Row(
-            modifier = Modifier.padding(start = 8.dp, end = 8.dp)
+        modifier = Modifier.padding(start = 8.dp, end = 8.dp)
     ) {
         Text(
-                text = "${size - position}",
-                fontSize = fontSize,
-                style = MaterialTheme.typography.labelSmall,
-                color = textColor,
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .width(36.dp)
-                    .padding(start = 4.dp, end = 4.dp)
+            text = "${size - position}",
+            fontSize = fontSize,
+            style = MaterialTheme.typography.labelSmall,
+            color = textColor,
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(36.dp)
+                .padding(start = 4.dp, end = 4.dp)
         )
         Text(
-                text = "${message.timestamp} ${message.message}",
-                fontSize = fontSize,
-                style = MaterialTheme.typography.labelSmall,
-                color = textColor
+            text = "${message.timestamp} ${message.message}",
+            fontSize = fontSize,
+            style = MaterialTheme.typography.labelSmall,
+            color = textColor
         )
     }
 }
 
 @Preview
 @Composable
-fun UserLogScreenPreview() {
+private fun UserLogScreenPreview() {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     UserLogScreen(
-            screenState = UserLogState(
-                    messages =
-                    """
+        screenState = UserLogState(
+            messages =
+            """
 10-05 22:43:10.892 V/DeviceStatisticsService( 2919): chargerType=1 batteryLevel=100 totalBatteryCapacity=4654800
 10-05 22:43:10.893 D/DeviceInfoHidlClient( 2919): isRadioOn()=true
 10-05 22:43:10.893 I/DeviceInfoHidlClient( 2919): isPowerInfoNeverSent=false batteryLevel=100 batteryLevelIndex=3 chargingMode=1 totalCapacity=4654800 powerSaveMode=false
@@ -137,9 +133,9 @@ fun UserLogScreenPreview() {
 10-05 22:44:09.137 D/DataSyncManager( 2982): onReceive: level = 100 batteryStatus = 2
 10-05 22:44:09.138 D/QtiCarrierConfigHelper( 2861): WARNING, no carrier configs on phone Id: 1
 10-05 22:44:09.141 D/KeyguardUpdateMonitor( 2562): handleBatteryUpdate
-                            """.trimIndent().split("\n").map { UserLogMessage.from(it) }
-            ),
-            onEvent = {},
-            prefs = Preferences(context, info.anodsplace.notification.NotificationManager.NoOp(), scope)
+            """.trimIndent().split("\n").map { UserLogMessage.from(it) }
+        ),
+        onEvent = {},
+        prefs = Preferences(context, info.anodsplace.notification.NotificationManager.NoOp(), scope)
     )
 }

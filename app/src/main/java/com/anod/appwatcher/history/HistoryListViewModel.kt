@@ -12,7 +12,6 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.filter
-import info.anodsplace.framework.content.CommonActivityAction
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.observePackages
@@ -23,6 +22,7 @@ import finsky.api.DfeApi
 import finsky.api.FilterComposite
 import finsky.api.FilterPredicate
 import info.anodsplace.framework.app.HingeDeviceLayout
+import info.anodsplace.framework.content.CommonActivityAction
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.playstore.AppNameFilter
 import info.anodsplace.playstore.PaidHistoryFilter

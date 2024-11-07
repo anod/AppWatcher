@@ -44,12 +44,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -57,7 +55,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -90,7 +87,10 @@ import info.anodsplace.framework.content.InstalledApps
 import org.koin.java.KoinJavaComponent.getKoin
 
 enum class AppItemSelection {
-    None, Disabled, NotSelected, Selected;
+    None,
+    Disabled,
+    NotSelected,
+    Selected;
 
     val enabled: Boolean
         get() = this != None && this != Disabled
@@ -111,7 +111,7 @@ fun WatchListPage(
     val isEmpty = items.loadState.source.refresh is LoadState.NotLoading && items.itemCount < 1
     val pullRefreshState = rememberPullToRefreshState()
     val recentlyInstalledAppsHashCode = remember(recentlyInstalledApps) { recentlyInstalledApps?.hashCode() ?: 0 }
-    AppLog.d("isRefreshing: ${isRefreshing}, enablePullToRefresh: $enablePullToRefresh")
+    AppLog.d("isRefreshing: $isRefreshing, enablePullToRefresh: $enablePullToRefresh")
     Box(Modifier
         .pullToRefresh(
             isRefreshing = isRefreshing,
@@ -319,7 +319,6 @@ private fun AppItem(
                 .heightIn(min = 68.dp)
                 .padding(top = 8.dp, bottom = 8.dp, start = 16.dp, end = 16.dp)
         ) {
-
             if (selectionMode) {
                 val status = selection.getExtra(app.packageName)["status"]
                 Box {
@@ -410,7 +409,7 @@ private fun AppItem(
 }
 
 @Composable
-private fun SelectedIcon(modifier: Modifier, itemSelection: AppItemSelection, tint: Color = Color.Unspecified) {
+private fun SelectedIcon(modifier: Modifier = Modifier, itemSelection: AppItemSelection, tint: Color = Color.Unspecified) {
     AnimatedVisibility(
         modifier = modifier,
         visible = itemSelection == AppItemSelection.Selected,
@@ -444,11 +443,7 @@ private fun Changelog(isLocalApp: Boolean, changesHtml: String, noNewDetails: Bo
 }
 
 @Composable
-private fun RecentItem(
-    recentApps: List<App>? = null,
-    onEvent: (WatchListEvent) -> Unit,
-    appIconLoader: AppIconLoader = getKoin().get(),
-) {
+private fun RecentItem(recentApps: List<App>? = null, onEvent: (WatchListEvent) -> Unit, appIconLoader: AppIconLoader = getKoin().get(),) {
     RecentItemRow(
         loading = recentApps == null,
         recentApps = recentApps ?: emptyList(),
@@ -496,7 +491,12 @@ private fun RecentItemRow(
 }
 
 @Composable
-private fun RecentItemAppCard(app: App?, onClick: (() -> Unit), placeholderColor: Color, appIconLoader: AppIconLoader = getKoin().get()) {
+private fun RecentItemAppCard(
+    app: App?,
+    onClick: (() -> Unit),
+    placeholderColor: Color,
+    appIconLoader: AppIconLoader = getKoin().get()
+) {
     Card(
         modifier = Modifier
             .defaultMinSize(minHeight = 116.dp)
@@ -618,12 +618,12 @@ private fun EmptyItem(
     }
 }
 
-private fun getPackageSelection(
-    packageName: String, selectionMode: Boolean, selection: SelectionState
-): AppItemSelection {
+private fun getPackageSelection(packageName: String, selectionMode: Boolean, selection: SelectionState): AppItemSelection {
     return if (selectionMode) {
         if (selection.contains(packageName)) AppItemSelection.Selected else AppItemSelection.NotSelected
-    } else AppItemSelection.None
+    } else {
+        AppItemSelection.None
+    }
 }
 
 @Preview(uiMode = UI_MODE_NIGHT_YES)
@@ -898,7 +898,6 @@ private fun WatchListPreviewRecent() {
         }
     }
 }
-
 
 @Preview(uiMode = UI_MODE_NIGHT_YES)
 @Composable

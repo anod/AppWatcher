@@ -65,13 +65,8 @@ fun AppsTagDialog(tag: Tag, onDismissRequest: () -> Unit) {
     }
 }
 
-
 @Composable
-fun AppsTagScreen(
-    screenState: AppsTagScreenState,
-    onEvent: (AppsTagScreenEvent) -> Unit,
-    appIconLoader: AppIconLoader = getKoin().get(),
-) {
+fun AppsTagScreen(screenState: AppsTagScreenState, onEvent: (AppsTagScreenEvent) -> Unit, appIconLoader: AppIconLoader = getKoin().get(),) {
     Surface {
         Column(
             modifier = Modifier.fillMaxSize()

@@ -6,7 +6,6 @@ import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 
-
 class ComposableViewModelStoreOwner : ViewModelStoreOwner {
     private var store: ViewModelStore? = null
     override val viewModelStore: ViewModelStore
@@ -19,7 +18,7 @@ class ComposableViewModelStoreOwner : ViewModelStoreOwner {
 }
 
 @Composable
-fun rememberViwModeStoreOwner() : ViewModelStoreOwner {
+fun rememberViwModeStoreOwner(): ViewModelStoreOwner {
     val owner = remember { ComposableViewModelStoreOwner() }
     DisposableEffect(key1 = owner) {
         onDispose {

@@ -23,15 +23,17 @@ fun Intent.forPlayStore(pkg: String): Intent {
 
 fun Intent.forMyApps(update: Boolean): Intent {
     action = "com.google.android.finsky.VIEW_MY_DOWNLOADS"
-    component = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+    component = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         ComponentName(
-                "com.android.vending",
-                "com.android.vending.AssetBrowserActivity"
+            "com.android.vending",
+            "com.android.vending.AssetBrowserActivity"
         )
-    else ComponentName(
+    } else {
+        ComponentName(
             "com.android.vending",
             "com.google.android.finsky.activities.MainActivity"
-    )
+        )
+    }
     if (update) {
         this.putExtra("trigger_update_all", true)
     }

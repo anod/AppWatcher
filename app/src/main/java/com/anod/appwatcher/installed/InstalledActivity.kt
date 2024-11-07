@@ -15,7 +15,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.compose.MainDetailScreen
-import info.anodsplace.framework.content.onCommonActivityAction
 import com.anod.appwatcher.details.DetailsDialog
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
@@ -23,6 +22,7 @@ import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.DetailContent
 import com.anod.appwatcher.watchlist.MainActivity
 import com.anod.appwatcher.watchlist.WatchListPagingSource
+import info.anodsplace.framework.content.onCommonActivityAction
 import kotlinx.coroutines.launch
 
 @Keep
@@ -36,7 +36,7 @@ class InstalledActivity : BaseComposeActivity() {
 
         setContent {
             AppTheme(
-                    theme = viewModel.prefs.theme
+                theme = viewModel.prefs.theme
             ) {
                 val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
 
@@ -50,22 +50,22 @@ class InstalledActivity : BaseComposeActivity() {
 
                 if (screenState.wideLayout.isWideLayout) {
                     MainDetailScreen(
-                            wideLayout = screenState.wideLayout,
-                            main = {
-                                InstalledListScreen(
-                                    screenState = screenState,
-                                    pagingSourceConfig = pagingSourceConfig,
-                                    onEvent = viewModel::handleEvent,
-                                    installedApps = viewModel.installedApps
-                                )
-                            },
-                            detail = {
-                                DetailContent(
-                                    app = screenState.selectedApp,
-                                    onDismissRequest = { viewModel.handleEvent(InstalledListEvent.SelectApp(app = null)) },
-                                    onCommonActivityAction = { onCommonActivityAction(it) }
-                                )
-                            }
+                        wideLayout = screenState.wideLayout,
+                        main = {
+                            InstalledListScreen(
+                                screenState = screenState,
+                                pagingSourceConfig = pagingSourceConfig,
+                                onEvent = viewModel::handleEvent,
+                                installedApps = viewModel.installedApps
+                            )
+                        },
+                        detail = {
+                            DetailContent(
+                                app = screenState.selectedApp,
+                                onDismissRequest = { viewModel.handleEvent(InstalledListEvent.SelectApp(app = null)) },
+                                onCommonActivityAction = { onCommonActivityAction(it) }
+                            )
+                        }
                     )
                 } else {
                     InstalledListScreen(
@@ -107,9 +107,9 @@ class InstalledActivity : BaseComposeActivity() {
         }
 
         fun intent(importMode: Boolean, context: Context) = intent(
-                if (importMode) Preferences.SORT_NAME_ASC else Preferences.SORT_DATE_DESC,
-                importMode,
-                context
+            if (importMode) Preferences.SORT_NAME_ASC else Preferences.SORT_DATE_DESC,
+            importMode,
+            context
         )
     }
 }

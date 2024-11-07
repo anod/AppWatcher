@@ -66,7 +66,7 @@ class AppsTagViewModel(tag: Tag) : BaseFlowViewModel<AppsTagScreenState, AppsTag
                 .flatMapLatest { titleFilter ->
                     val appsTable = database.apps()
                     AppListTable.Queries.loadAppList(Preferences.SORT_NAME_ASC, titleFilter, appsTable)
-                 }
+                }
                 .collect { apps ->
                     viewState = viewState.copy(apps = apps.map { it.app })
                 }
@@ -94,9 +94,11 @@ class AppsTagViewModel(tag: Tag) : BaseFlowViewModel<AppsTagScreenState, AppsTag
 
     private fun import() {
         viewModelScope.launch {
-            val appIds = if (viewState.selection.defaultSelected)
+            val appIds = if (viewState.selection.defaultSelected) {
                 viewState.apps.map { it.appId }
-            else viewState.selection.filter(selected = true)
+            } else {
+                viewState.selection.filter(selected = true)
+            }
             AppTagsTable.Queries.assignAppsToTag(appIds, viewState.tag.id, database)
             emitAction(AppsTagScreenAction.Dismiss)
         }

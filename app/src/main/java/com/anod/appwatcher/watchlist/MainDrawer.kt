@@ -46,7 +46,7 @@ fun MainDrawer(mainState: MainViewState, onMainEvent: (MainViewEvent) -> Unit) {
     ModalDrawerSheet(
         windowInsets = WindowInsets.navigationBars
     ) {
-        Column(Modifier. verticalScroll(rememberScrollState())) {
+        Column(Modifier.verticalScroll(rememberScrollState())) {
             DrawerContent(
                 mainState = mainState,
                 onMainEvent = onMainEvent
@@ -57,7 +57,6 @@ fun MainDrawer(mainState: MainViewState, onMainEvent: (MainViewEvent) -> Unit) {
 
 @Composable
 private fun DrawerContent(mainState: MainViewState, onMainEvent: (MainViewEvent) -> Unit) {
-
     DrawerHeader(
         mainState = mainState,
         onMainEvent = onMainEvent
@@ -90,7 +89,7 @@ private fun DrawerContent(mainState: MainViewState, onMainEvent: (MainViewEvent)
     )
 
     mainState.tags.forEach { (tag, count) ->
-        val renderedTag = if (tag.isEmpty) tag.copy(name = stringResource(R.string.untagged), color =  MaterialTheme.colorScheme.primaryContainer.toArgb()) else tag
+        val renderedTag = if (tag.isEmpty) tag.copy(name = stringResource(R.string.untagged), color = MaterialTheme.colorScheme.primaryContainer.toArgb()) else tag
         NavigationDrawerItem(
             icon = { TagIcon(outlined = true, contentDescription = renderedTag.name) },
             label = { Text(renderedTag.name) },
@@ -108,7 +107,7 @@ private fun DrawerContent(mainState: MainViewState, onMainEvent: (MainViewEvent)
         label = { Text(text = stringResource(id = R.string.menu_add)) },
         selected = false,
         onClick = {
-              onMainEvent(MainViewEvent.AddNewTagDialog(show = true))
+            onMainEvent(MainViewEvent.AddNewTagDialog(show = true))
         },
         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding).height(48.dp)
     )

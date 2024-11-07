@@ -44,10 +44,10 @@ class NotificationActivity : Activity(), KoinComponent {
         const val actionMarkViewed = 4
 
         fun intent(uri: Uri, type: Int, context: Context) = Intent(context, NotificationActivity::class.java)
-                .apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    data = uri
-                    putExtra(extraActionType, type)
-                }
+            .apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                data = uri
+                putExtra(extraActionType, type)
+            }
     }
 }

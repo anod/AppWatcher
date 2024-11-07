@@ -19,7 +19,7 @@ fun syncProgressFlow(application: Application): Flow<SyncProgress> = callbackFlo
         override fun onReceive(context: Context, intent: Intent) {
             when (intent.action) {
                 UpdateCheck.SYNC_PROGRESS -> trySendBlocking(SyncProgress(true, 0))
-                UpdateCheck.SYNC_STOP ->  {
+                UpdateCheck.SYNC_STOP -> {
                     val updatesCount = intent.getIntExtra(UpdateCheck.EXTRA_UPDATES_COUNT, 0)
                     trySendBlocking(SyncProgress(false, updatesCount))
                 }

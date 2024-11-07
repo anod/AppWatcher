@@ -16,43 +16,38 @@ import com.anod.appwatcher.watchlist.DetailContent
 import info.anodsplace.framework.app.HingeDeviceLayout
 
 @Composable
-fun MainDetailScreen(
-        wideLayout: HingeDeviceLayout,
-        main: @Composable () -> Unit,
-        detail: @Composable () -> Unit,
-) {
+fun MainDetailScreen(wideLayout: HingeDeviceLayout, main: @Composable () -> Unit, detail: @Composable () -> Unit,) {
     Row(
         modifier = Modifier.fillMaxSize()
     ) {
         Box(modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight()) {
+            .weight(1f)
+            .fillMaxHeight()) {
             main()
         }
         val hingeWidth = wideLayout.hinge.width()
         if (hingeWidth > 0) {
             val widthInDp = with(LocalDensity.current) { hingeWidth.toDp() }
             Spacer(modifier = Modifier
-                    .width(widthInDp)
-                    .fillMaxHeight())
+                .width(widthInDp)
+                .fillMaxHeight())
         }
         Box(modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight()) {
+            .weight(1f)
+            .fillMaxHeight()) {
             detail()
         }
     }
 }
 
-
 @Preview(device = Devices.FOLDABLE)
 @Composable
-fun MainDetailScreenPreview() {
+private fun MainDetailScreenPreview() {
     AppTheme {
         MainDetailScreen(
-                wideLayout = HingeDeviceLayout(isWideLayout = true, hinge = Rect(0, 0, 80, 0)),
-                main = { DetailContent(app = null, onDismissRequest = {}, onCommonActivityAction = {}) },
-                detail = { DetailContent(app = null, onDismissRequest = {}, onCommonActivityAction = {}) },
+            wideLayout = HingeDeviceLayout(isWideLayout = true, hinge = Rect(0, 0, 80, 0)),
+            main = { DetailContent(app = null, onDismissRequest = {}, onCommonActivityAction = {}) },
+            detail = { DetailContent(app = null, onDismissRequest = {}, onCommonActivityAction = {}) },
         )
     }
 }

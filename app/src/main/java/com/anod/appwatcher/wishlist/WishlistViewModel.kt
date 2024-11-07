@@ -1,6 +1,5 @@
 package com.anod.appwatcher.wishlist
 
-import android.accounts.Account
 import android.content.pm.PackageManager
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
@@ -12,8 +11,6 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.filter
-import com.anod.appwatcher.accounts.AuthAccount
-import info.anodsplace.framework.content.CommonActivityAction
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.observePackages
@@ -25,6 +22,7 @@ import finsky.api.DfeApi
 import finsky.api.FilterComposite
 import finsky.api.FilterPredicate
 import info.anodsplace.framework.app.HingeDeviceLayout
+import info.anodsplace.framework.content.CommonActivityAction
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.playstore.AppDetailsFilter
 import info.anodsplace.playstore.AppNameFilter
@@ -115,7 +113,6 @@ class WishListViewModel(wideLayout: HingeDeviceLayout) : BaseFlowViewModel<WishL
             flow = database.apps().observePackages()
         ) { pageData, watchedPackages -> pageData.updateRowId(watchedPackages) }
 
-
     override fun handleEvent(event: WishListEvent) {
         when (event) {
             WishListEvent.OnBackPress -> emitAction(WishListAction.ActivityAction(CommonActivityAction.Finish))
@@ -135,8 +132,8 @@ class WishListViewModel(wideLayout: HingeDeviceLayout) : BaseFlowViewModel<WishL
             return AppDetailsFilter.hasAppDetails
         }
         return FilterComposite(listOf(
-                AppDetailsFilter.hasAppDetails,
-                AppNameFilter(nameFilter).containsQuery
+            AppDetailsFilter.hasAppDetails,
+            AppNameFilter(nameFilter).containsQuery
         )).predicate
     }
 }

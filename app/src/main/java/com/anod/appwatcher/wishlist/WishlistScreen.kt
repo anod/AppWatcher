@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -37,7 +36,6 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.anod.appwatcher.R
-import info.anodsplace.framework.content.CommonActivityAction
 import com.anod.appwatcher.compose.SearchTopBar
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.search.ListItem
@@ -46,6 +44,7 @@ import com.anod.appwatcher.search.RetryButton
 import com.anod.appwatcher.tags.TagSelectionDialog
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.AppIconLoader
+import info.anodsplace.framework.content.CommonActivityAction
 import kotlinx.coroutines.flow.Flow
 import org.koin.java.KoinJavaComponent
 
@@ -141,11 +140,7 @@ fun WishListScreen(
 }
 
 @Composable
-fun WishlistResults(
-    items: LazyPagingItems<ListItem>,
-    onEvent: (WishListEvent) -> Unit,
-    appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get()
-) {
+fun WishlistResults(items: LazyPagingItems<ListItem>, onEvent: (WishListEvent) -> Unit, appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get()) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize(),
@@ -171,7 +166,6 @@ fun WishlistResults(
                         .height(48.dp)
                         .background(MaterialTheme.colorScheme.inverseOnSurface)
                 )
-
             }
         }
     }
@@ -180,14 +174,14 @@ fun WishlistResults(
 @Composable
 fun WishlistEmpty() {
     Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(start = 32.dp, end = 32.dp),
-            contentAlignment = Alignment.Center
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(start = 32.dp, end = 32.dp),
+        contentAlignment = Alignment.Center
     ) {
         Text(
-                text = stringResource(R.string.wish_list_is_empty),
-                textAlign = TextAlign.Center
+            text = stringResource(R.string.wish_list_is_empty),
+            textAlign = TextAlign.Center
         )
     }
 }

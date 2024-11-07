@@ -7,8 +7,8 @@ import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
 import com.anod.appwatcher.accounts.AuthAccount
 import com.anod.appwatcher.model.Filters
-import info.anodsplace.notification.NotificationManager
 import info.anodsplace.graphics.AdaptiveIcon
+import info.anodsplace.notification.NotificationManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -168,6 +168,7 @@ class Preferences(context: Context, private val notificationManager: Notificatio
 
     var collectCrashReports: Boolean
         get() = preferences.getBoolean("crash-reports", true)
+
         @SuppressLint("ApplySharedPref")
         set(value) {
             preferences.edit().putBoolean("crash-reports", value).commit()
@@ -216,33 +217,33 @@ class Preferences(context: Context, private val notificationManager: Notificatio
         const val THEME_BLACK = 1
 
         private val themesCombined = arrayOf(
-                "${UiModeManager.MODE_NIGHT_AUTO}-$THEME_DEFAULT",
-                "${UiModeManager.MODE_NIGHT_AUTO}-$THEME_BLACK",
-                "${UiModeManager.MODE_NIGHT_NO}-$THEME_DEFAULT",
-                "${UiModeManager.MODE_NIGHT_YES}-$THEME_DEFAULT",
-                "${UiModeManager.MODE_NIGHT_YES}-$THEME_BLACK",
+            "${UiModeManager.MODE_NIGHT_AUTO}-$THEME_DEFAULT",
+            "${UiModeManager.MODE_NIGHT_AUTO}-$THEME_BLACK",
+            "${UiModeManager.MODE_NIGHT_NO}-$THEME_DEFAULT",
+            "${UiModeManager.MODE_NIGHT_YES}-$THEME_DEFAULT",
+            "${UiModeManager.MODE_NIGHT_YES}-$THEME_BLACK",
         )
 
         private val uiModes = arrayOf(
-                UiModeManager.MODE_NIGHT_AUTO,
-                UiModeManager.MODE_NIGHT_AUTO,
-                UiModeManager.MODE_NIGHT_NO,
-                UiModeManager.MODE_NIGHT_YES,
-                UiModeManager.MODE_NIGHT_YES,
+            UiModeManager.MODE_NIGHT_AUTO,
+            UiModeManager.MODE_NIGHT_AUTO,
+            UiModeManager.MODE_NIGHT_NO,
+            UiModeManager.MODE_NIGHT_YES,
+            UiModeManager.MODE_NIGHT_YES,
         )
 
         private val uiModeMap = mapOf(
-                UiModeManager.MODE_NIGHT_AUTO to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
-                UiModeManager.MODE_NIGHT_NO to AppCompatDelegate.MODE_NIGHT_NO,
-                UiModeManager.MODE_NIGHT_YES to AppCompatDelegate.MODE_NIGHT_YES
+            UiModeManager.MODE_NIGHT_AUTO to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+            UiModeManager.MODE_NIGHT_NO to AppCompatDelegate.MODE_NIGHT_NO,
+            UiModeManager.MODE_NIGHT_YES to AppCompatDelegate.MODE_NIGHT_YES
         )
 
         private val themeIds = arrayOf(
-                THEME_DEFAULT,
-                THEME_BLACK,
-                THEME_DEFAULT,
-                THEME_DEFAULT,
-                THEME_BLACK,
+            THEME_DEFAULT,
+            THEME_BLACK,
+            THEME_DEFAULT,
+            THEME_DEFAULT,
+            THEME_BLACK,
         )
     }
 
@@ -253,5 +254,4 @@ class Preferences(context: Context, private val notificationManager: Notificatio
             }
         }
     }
-
 }

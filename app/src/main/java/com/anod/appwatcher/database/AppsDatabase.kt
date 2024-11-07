@@ -25,9 +25,9 @@ import kotlinx.coroutines.withContext
  * @date 21/05/2018
  */
 @Database(
-        entities = [(App::class), (AppChange::class), (AppTag::class), (Tag::class), (Schedule::class)],
-        version = AppsDatabase.version,
-        exportSchema = true)
+    entities = [(App::class), (AppChange::class), (AppTag::class), (Tag::class), (Schedule::class)],
+    version = AppsDatabase.version,
+    exportSchema = true)
 abstract class AppsDatabase : RoomDatabase() {
 
     abstract fun apps(): AppListTable
@@ -69,15 +69,15 @@ abstract class AppsDatabase : RoomDatabase() {
         private val MIGRATION_16_17 = object : Migration(16, 17) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("CREATE TABLE IF NOT EXISTS `${SchedulesTable.table}` (" +
-                        "`_id` INTEGER NOT NULL, " +
-                        "`start` INTEGER NOT NULL, " +
-                        "`finish` INTEGER NOT NULL, " +
-                        "`result` INTEGER NOT NULL, " +
-                        "`reason` INTEGER NOT NULL, " +
-                        "`checked` INTEGER NOT NULL, " +
-                        "`found` INTEGER NOT NULL, " +
-                        "`unavailable` INTEGER NOT NULL, " +
-                        "PRIMARY KEY(`_id`))")
+                    "`_id` INTEGER NOT NULL, " +
+                    "`start` INTEGER NOT NULL, " +
+                    "`finish` INTEGER NOT NULL, " +
+                    "`result` INTEGER NOT NULL, " +
+                    "`reason` INTEGER NOT NULL, " +
+                    "`checked` INTEGER NOT NULL, " +
+                    "`found` INTEGER NOT NULL, " +
+                    "`unavailable` INTEGER NOT NULL, " +
+                    "PRIMARY KEY(`_id`))")
             }
         }
 
@@ -90,9 +90,9 @@ abstract class AppsDatabase : RoomDatabase() {
         private val MIGRATION_14_15 = object : Migration(14, 15) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("DELETE FROM app_tags WHERE _ID NOT IN ( " +
-                        "SELECT MAX(_ID) " +
-                        "FROM app_tags " +
-                        "GROUP BY app_id, tags_id)")
+                    "SELECT MAX(_ID) " +
+                    "FROM app_tags " +
+                    "GROUP BY app_id, tags_id)")
                 database.execSQL("CREATE UNIQUE INDEX `index_app_tags_app_id_tags_id` ON `app_tags` (`app_id`, `tags_id`)")
             }
         }
@@ -100,12 +100,12 @@ abstract class AppsDatabase : RoomDatabase() {
         private val MIGRATION_9_11 = object : Migration(9, 11) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("CREATE TABLE IF NOT EXISTS `changelog` (" +
-                        "`_id` INTEGER NOT NULL, " +
-                        "`app_id` TEXT NOT NULL, " +
-                        "`code` INTEGER NOT NULL, " +
-                        "`name` TEXT NOT NULL, " +
-                        "`details` TEXT NOT NULL, " +
-                        "`upload_date` TEXT NOT NULL, PRIMARY KEY(`_id`))")
+                    "`_id` INTEGER NOT NULL, " +
+                    "`app_id` TEXT NOT NULL, " +
+                    "`code` INTEGER NOT NULL, " +
+                    "`name` TEXT NOT NULL, " +
+                    "`details` TEXT NOT NULL, " +
+                    "`upload_date` TEXT NOT NULL, PRIMARY KEY(`_id`))")
             }
         }
 
@@ -145,31 +145,31 @@ abstract class AppsDatabase : RoomDatabase() {
                 database.execSQL("UPDATE app_list SET price_micros = 0 WHERE price_micros IS NULL")
                 database.execSQL("UPDATE app_list SET sync_version = 0 WHERE sync_version IS NULL")
                 database.execSQL("CREATE TABLE IF NOT EXISTS `app_list_temp` " +
-                        "(`_id` INTEGER NOT NULL, " +
-                        "`app_id` TEXT NOT NULL, " +
-                        "`package` TEXT NOT NULL, " +
-                        "`ver_num` INTEGER NOT NULL, " +
-                        "`ver_name` TEXT NOT NULL, " +
-                        "`title` TEXT NOT NULL, " +
-                        "`creator` TEXT NOT NULL, " +
-                        "`iconUrl` TEXT NOT NULL, " +
-                        "`status` INTEGER NOT NULL, " +
-                        "`upload_date` TEXT NOT NULL, " +
-                        "`details_url` TEXT, " +
-                        "`update_date` INTEGER NOT NULL, " +
-                        "`app_type` TEXT NOT NULL, " +
-                        "`sync_version` INTEGER NOT NULL, " +
-                        "`price_text` TEXT NOT NULL, " +
-                        "`price_currency` TEXT NOT NULL, " +
-                        "`price_micros` INTEGER, PRIMARY KEY(`_id`))")
+                    "(`_id` INTEGER NOT NULL, " +
+                    "`app_id` TEXT NOT NULL, " +
+                    "`package` TEXT NOT NULL, " +
+                    "`ver_num` INTEGER NOT NULL, " +
+                    "`ver_name` TEXT NOT NULL, " +
+                    "`title` TEXT NOT NULL, " +
+                    "`creator` TEXT NOT NULL, " +
+                    "`iconUrl` TEXT NOT NULL, " +
+                    "`status` INTEGER NOT NULL, " +
+                    "`upload_date` TEXT NOT NULL, " +
+                    "`details_url` TEXT, " +
+                    "`update_date` INTEGER NOT NULL, " +
+                    "`app_type` TEXT NOT NULL, " +
+                    "`sync_version` INTEGER NOT NULL, " +
+                    "`price_text` TEXT NOT NULL, " +
+                    "`price_currency` TEXT NOT NULL, " +
+                    "`price_micros` INTEGER, PRIMARY KEY(`_id`))")
                 database.execSQL("INSERT INTO app_list_temp (" +
-                        "_id, app_id, package, ver_num, ver_name, title, creator," +
-                        "iconUrl, status, upload_date, details_url, update_date, app_type," +
-                        "sync_version, price_text, price_currency, price_micros) " +
-                        "SELECT _id, app_id, package, ver_num, ver_name, title, creator," +
-                        "iconUrl, status, upload_date, details_url, update_date, app_type," +
-                        "sync_version, price_text, price_currency, price_micros " +
-                        "FROM app_list"
+                    "_id, app_id, package, ver_num, ver_name, title, creator," +
+                    "iconUrl, status, upload_date, details_url, update_date, app_type," +
+                    "sync_version, price_text, price_currency, price_micros) " +
+                    "SELECT _id, app_id, package, ver_num, ver_name, title, creator," +
+                    "iconUrl, status, upload_date, details_url, update_date, app_type," +
+                    "sync_version, price_text, price_currency, price_micros " +
+                    "FROM app_list"
                 )
                 database.execSQL("DROP TABLE app_list")
                 database.execSQL("ALTER TABLE app_list_temp RENAME TO app_list")
@@ -177,16 +177,16 @@ abstract class AppsDatabase : RoomDatabase() {
                 database.execSQL("UPDATE changelog SET upload_date = '' WHERE upload_date IS NULL")
                 database.execSQL(
                     "CREATE TABLE IF NOT EXISTS `changelog_temp` (" +
-                            "`_id` INTEGER NOT NULL, " +
-                            "`app_id` TEXT NOT NULL, " +
-                            "`code` INTEGER NOT NULL, " +
-                            "`name` TEXT NOT NULL, " +
-                            "`details` TEXT NOT NULL, " +
-                            "`upload_date` TEXT NOT NULL, PRIMARY KEY(`_id`))"
+                        "`_id` INTEGER NOT NULL, " +
+                        "`app_id` TEXT NOT NULL, " +
+                        "`code` INTEGER NOT NULL, " +
+                        "`name` TEXT NOT NULL, " +
+                        "`details` TEXT NOT NULL, " +
+                        "`upload_date` TEXT NOT NULL, PRIMARY KEY(`_id`))"
                 )
                 database.execSQL(
                     "INSERT INTO changelog_temp (_id, app_id, code, name, details, upload_date)" +
-                            " SELECT _id, app_id, code, name, details, upload_date FROM changelog"
+                        " SELECT _id, app_id, code, name, details, upload_date FROM changelog"
                 )
                 database.execSQL("DROP TABLE changelog")
                 database.execSQL("ALTER TABLE changelog_temp RENAME TO changelog")
@@ -194,9 +194,9 @@ abstract class AppsDatabase : RoomDatabase() {
 
                 database.execSQL(
                     "CREATE TABLE IF NOT EXISTS `app_tags_temp` (" +
-                            "`_id` INTEGER NOT NULL, " +
-                            "`app_id` TEXT NOT NULL, " +
-                            "`tags_id` INTEGER NOT NULL, PRIMARY KEY(`_id`))"
+                        "`_id` INTEGER NOT NULL, " +
+                        "`app_id` TEXT NOT NULL, " +
+                        "`tags_id` INTEGER NOT NULL, PRIMARY KEY(`_id`))"
                 )
                 database.execSQL("INSERT INTO app_tags_temp (_id, app_id, tags_id) SELECT _id, app_id, tags_id FROM app_tags")
                 database.execSQL("DROP TABLE app_tags")
@@ -204,9 +204,9 @@ abstract class AppsDatabase : RoomDatabase() {
 
                 database.execSQL(
                     "CREATE TABLE IF NOT EXISTS `tags_temp` (" +
-                            "`_id` INTEGER NOT NULL, " +
-                            "`name` TEXT NOT NULL, " +
-                            "`color` INTEGER NOT NULL, PRIMARY KEY(`_id`))"
+                        "`_id` INTEGER NOT NULL, " +
+                        "`name` TEXT NOT NULL, " +
+                        "`color` INTEGER NOT NULL, PRIMARY KEY(`_id`))"
                 )
                 database.execSQL("INSERT INTO tags_temp (_id, name, color) SELECT _id, name, color FROM tags")
                 database.execSQL("DROP TABLE tags")

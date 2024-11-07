@@ -18,11 +18,11 @@ import info.anodsplace.framework.content.InstalledApps
 import kotlin.math.max
 
 class WatchListPagingSource(
-        private val config: Config,
-        private val prefs: Preferences,
-        private val packageManager: PackageManager,
-        private val database: AppsDatabase,
-        private val installedApps: InstalledApps,
+    private val config: Config,
+    private val prefs: Preferences,
+    private val packageManager: PackageManager,
+    private val database: AppsDatabase,
+    private val installedApps: InstalledApps,
 ) : FilterablePagingSource() {
     override var filterQuery: String = ""
     private val itemFilter: AppListFilter = createFilter(config.filterId)
@@ -80,16 +80,16 @@ class WatchListPagingSource(
                     .asSequence()
                     .filterNot { watchingPackages.containsKey(it) }
                     .map { packageManager.packageToApp(-1, it) }
-                        .map { app -> AppListItem(app, "", noNewDetails = false, recentFlag = false) }
-                        .forEach { item ->
-                            items.add(
-                                SectionItem.OnDevice(
-                                    appListItem = item,
-                                    showSelection = false,
-                                    packageInfo = installedApps.packageInfo(item.app.packageName)
-                                )
+                    .map { app -> AppListItem(app, "", noNewDetails = false, recentFlag = false) }
+                    .forEach { item ->
+                        items.add(
+                            SectionItem.OnDevice(
+                                appListItem = item,
+                                showSelection = false,
+                                packageInfo = installedApps.packageInfo(item.app.packageName)
                             )
-                        }
+                        )
+                    }
             } else if (offset == 0 && data.isEmpty() && items.firstOrNull() is SectionItem.Recent) {
                 items.add(SectionItem.Empty)
             }
@@ -102,9 +102,9 @@ class WatchListPagingSource(
             else -> offset - params.loadSize
         }
         val page = LoadResult.Page(
-                data = items,
-                prevKey = prevKey,
-                nextKey = if (data.isEmpty()) null else offset + params.loadSize
+            data = items,
+            prevKey = prevKey,
+            nextKey = if (data.isEmpty()) null else offset + params.loadSize
         )
         AppLog.d("Page prevKey=${page.prevKey} nextKey=${page.nextKey}, Params: Key=${params.key}")
         return page

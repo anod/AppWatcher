@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.Label
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.OpenInNew
-import androidx.compose.material.icons.filled.Pin
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
@@ -47,7 +46,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.anod.appwatcher.R
-
 
 @Composable
 fun SortIcon() {
@@ -203,7 +201,7 @@ fun ClearIcon() {
 
 @Preview(widthDp = 200)
 @Composable
-fun IconsResourcesPreview() {
+private fun IconsResourcesPreview() {
     AppTheme {
         Surface {
             val icons = listOf<@Composable () -> Unit>(

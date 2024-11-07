@@ -13,9 +13,9 @@ import androidx.work.Operation
 import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
 import info.anodsplace.applog.AppLog
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onEach
-import java.util.concurrent.TimeUnit
 
 /**
  * @author Alex Gavrishev
@@ -29,7 +29,12 @@ class SyncScheduler(private val context: info.anodsplace.context.ApplicationCont
 
     constructor(context: Context) : this(info.anodsplace.context.ApplicationContext(context))
 
-    fun schedule(requiresCharging: Boolean, requiresWifi: Boolean, windowStartSec: Long, update: Boolean): Flow<Operation.State> {
+    fun schedule(
+        requiresCharging: Boolean,
+        requiresWifi: Boolean,
+        windowStartSec: Long,
+        update: Boolean
+    ): Flow<Operation.State> {
         val constraints: Constraints = Constraints.Builder().apply {
             setRequiresCharging(requiresCharging)
             if (requiresWifi) {
@@ -45,10 +50,11 @@ class SyncScheduler(private val context: info.anodsplace.context.ApplicationCont
                 .setConstraints(constraints)
                 .build()
 
-        val policy = if (update)
+        val policy = if (update) {
             ExistingPeriodicWorkPolicy.UPDATE
-        else
+        } else {
             ExistingPeriodicWorkPolicy.KEEP
+        }
         AppLog.i("Schedule sync in ${windowStartSec / 3600} hours (${if (update) "Update" else "Keep existing"})", "PeriodicWork")
         return wm.enqueueUniquePeriodicWork(TAG, policy, request)
             .state
@@ -75,8 +81,8 @@ class SyncScheduler(private val context: info.anodsplace.context.ApplicationCont
                     .putBoolean(UpdateCheck.EXTRAS_MANUAL, true)
                     .build()
             )
-                .setConstraints(constraints)
-                .build()
+            .setConstraints(constraints)
+            .build()
 
         AppLog.i("Enqueue update check", "OneTimeWork")
         return wm.enqueueUniqueWork(TAG_MANUAL, ExistingWorkPolicy.REPLACE, request)

@@ -18,14 +18,15 @@ import kotlinx.parcelize.Parcelize
 @Entity(tableName = TagsTable.table)
 @Parcelize
 data class Tag(
-        @PrimaryKey
-        @ColumnInfo(name = BaseColumns._ID)
-        val id: Int,
-        @ColumnInfo(name = TagsTable.Columns.name)
-        val name: String,
-        @ColumnInfo(name = TagsTable.Columns.color)
-        @ColorInt
-        val color: Int) : Parcelable {
+    @PrimaryKey
+    @ColumnInfo(name = BaseColumns._ID)
+    val id: Int,
+    @ColumnInfo(name = TagsTable.Columns.name)
+    val name: String,
+    @ColumnInfo(name = TagsTable.Columns.color)
+    @ColorInt
+    val color: Int
+) : Parcelable {
 
     val isEmpty: Boolean
         get() = id == 0

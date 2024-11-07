@@ -9,12 +9,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import info.anodsplace.framework.content.CommonActivityAction
 import com.anod.appwatcher.database.AppTagsTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import info.anodsplace.compose.CheckBoxItem
+import info.anodsplace.framework.content.CommonActivityAction
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-typealias TagAppItem = Pair<Tag,Boolean>
+typealias TagAppItem = Pair<Tag, Boolean>
 
 @Immutable
 data class TagsSelectionState(

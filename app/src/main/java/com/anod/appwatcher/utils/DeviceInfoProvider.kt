@@ -136,7 +136,6 @@ class DeviceInfoProvider(
 }
 
 private fun getGLExtensionsWithEGL(): List<String> {
-
     // Step 3: Choose an EGLConfig
     val attribList = intArrayOf(
         EGL10.EGL_RED_SIZE, 8,

@@ -25,9 +25,9 @@ interface ChangelogTable {
     fun all(): Cursor
 
     @Query("SELECT * FROM $table " +
-            "WHERE ${Columns.versionCode} = (" +
-            "SELECT MAX(${Columns.versionCode}) FROM $table WHERE ${Columns.versionCode} < :versionCode AND ${Columns.appId} == :appId" +
-            ") LIMIT 1")
+        "WHERE ${Columns.versionCode} = (" +
+        "SELECT MAX(${Columns.versionCode}) FROM $table WHERE ${Columns.versionCode} < :versionCode AND ${Columns.appId} == :appId" +
+        ") LIMIT 1")
     suspend fun findPrevious(versionCode: Int, appId: String): AppChange?
 
     @Query("UPDATE $table SET ${Columns.noNewDetails} = 0")
@@ -35,10 +35,10 @@ interface ChangelogTable {
 
     @Suppress("FunctionName")
     @Query("SELECT l.* FROM changelog l " +
-            "INNER JOIN (" +
-            "SELECT app_id, MAX(code) as latestCode FROM changelog GROUP BY app_id" +
-            ") r ON l.app_id = r.app_id AND l.code = r.latestCode " +
-            "WHERE l.app_id IN (:appIds)")
+        "INNER JOIN (" +
+        "SELECT app_id, MAX(code) as latestCode FROM changelog GROUP BY app_id" +
+        ") r ON l.app_id = r.app_id AND l.code = r.latestCode " +
+        "WHERE l.app_id IN (:appIds)")
     suspend fun _load(appIds: List<String>): List<AppChange>
 
     suspend fun load(appIds: List<String>): List<AppChange> {

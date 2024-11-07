@@ -36,7 +36,6 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.anod.appwatcher.R
-import info.anodsplace.framework.content.CommonActivityAction
 import com.anod.appwatcher.compose.SearchTopBar
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.search.ListItem
@@ -45,6 +44,7 @@ import com.anod.appwatcher.search.RetryButton
 import com.anod.appwatcher.tags.TagSelectionDialog
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.AppIconLoader
+import info.anodsplace.framework.content.CommonActivityAction
 import kotlinx.coroutines.flow.Flow
 import org.koin.java.KoinJavaComponent
 
@@ -103,9 +103,9 @@ fun HistoryListScreen(
                         }
                     } else {
                         HistoryListResults(
-                                items = items,
-                                onEvent = onEvent,
-                                appIconLoader = appIconLoader
+                            items = items,
+                            onEvent = onEvent,
+                            appIconLoader = appIconLoader
                         )
                     }
                 }
@@ -147,11 +147,7 @@ private fun ListLoadProgress() {
 }
 
 @Composable
-fun HistoryListResults(
-    items: LazyPagingItems<ListItem>,
-    onEvent: (HistoryListEvent) -> Unit,
-    appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get()
-) {
+fun HistoryListResults(items: LazyPagingItems<ListItem>, onEvent: (HistoryListEvent) -> Unit, appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get()) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize(),
@@ -185,14 +181,14 @@ fun HistoryListResults(
 @Composable
 fun HistoryListEmpty() {
     Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(start = 32.dp, end = 32.dp),
-            contentAlignment = Alignment.Center
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(start = 32.dp, end = 32.dp),
+        contentAlignment = Alignment.Center
     ) {
         Text(
-                text = stringResource(R.string.wish_list_is_empty),
-                textAlign = TextAlign.Center
+            text = stringResource(R.string.wish_list_is_empty),
+            textAlign = TextAlign.Center
         )
     }
 }

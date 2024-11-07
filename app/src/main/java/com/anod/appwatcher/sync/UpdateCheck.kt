@@ -1,6 +1,5 @@
 package com.anod.appwatcher.sync
 
-import android.accounts.Account
 import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Intent
@@ -12,7 +11,6 @@ import androidx.core.content.contentValuesOf
 import androidx.work.Data
 import com.anod.appwatcher.accounts.AuthAccountInitializer
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
-import com.anod.appwatcher.accounts.toAndroidAccount
 import com.anod.appwatcher.backup.gdrive.GDriveSilentSignIn
 import com.anod.appwatcher.backup.gdrive.GDriveSync
 import com.anod.appwatcher.database.*
@@ -32,11 +30,11 @@ import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.net.NetworkConnectivity
 import info.anodsplace.playstore.AppDetailsFilter
+import java.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.core.Koin
 import org.koin.core.parameter.parametersOf
-import java.util.*
 
 /**
  *  @author alex
@@ -56,10 +54,10 @@ class UpdateCheck(
 ) {
 
     class SyncResult(
-            val success: Boolean,
-            val updates: List<UpdatedApp>,
-            val checked: Int,
-            val unavailable: Int
+        val success: Boolean,
+        val updates: List<UpdatedApp>,
+        val checked: Int,
+        val unavailable: Int
     )
 
     companion object {
@@ -110,7 +108,7 @@ class UpdateCheck(
             return@withContext -1
         }
 
-        //Broadcast progress intent
+        // Broadcast progress intent
         val startIntent = Intent(SYNC_PROGRESS).apply {
             `package` = context.actual.packageName
         }
@@ -144,9 +142,9 @@ class UpdateCheck(
         preferences.lastUpdateTime = now
 
         if (!manualSync
-                && updatedApps.isNotEmpty()
-                && (updatedApps.firstOrNull { it.isNewUpdate } != null)
-                && lastUpdatesViewed) {
+            && updatedApps.isNotEmpty()
+            && (updatedApps.firstOrNull { it.isNewUpdate } != null)
+            && lastUpdatesViewed) {
             preferences.isLastUpdatesViewed = false
         }
 
@@ -201,7 +199,14 @@ class UpdateCheck(
         return SyncResult(true, updatedApps, apps.count, unavailable)
     }
 
-    private suspend fun updateApps(documents: List<Document>, localApps: Map<String, AppListItem>, updatedApps: MutableList<UpdatedApp>, lastUpdatesViewed: Boolean, contentResolver: ContentResolver, db: AppsDatabase) {
+    private suspend fun updateApps(
+        documents: List<Document>,
+        localApps: Map<String, AppListItem>,
+        updatedApps: MutableList<UpdatedApp>,
+        lastUpdatesViewed: Boolean,
+        contentResolver: ContentResolver,
+        db: AppsDatabase
+    ) {
         val fetched = mutableMapOf<String, Boolean>()
         val batch = mutableListOf<ContentValues>()
         val changelog = mutableListOf<ContentValues>()
@@ -215,17 +220,18 @@ class UpdateCheck(
                 }
                 val isNewVersion = marketApp.appDetails.versionCode > localItem.app.versionNumber
                 val recentChanges = marketApp.appDetails.recentChangesHtml?.trim() ?: ""
-                val noNewDetails = if (isNewVersion)
+                val noNewDetails = if (isNewVersion) {
                     recentChanges.compareLettersAndDigits(localItem.changeDetails)
-                else
+                } else {
                     localItem.noNewDetails
+                }
                 changelog.add(AppChange(
-                        docId,
-                        marketApp.appDetails.versionCode,
-                        marketApp.appDetails.versionString,
-                        recentChanges,
-                        marketApp.appDetails.uploadDate,
-                        noNewDetails).contentValues)
+                    docId,
+                    marketApp.appDetails.versionCode,
+                    marketApp.appDetails.versionString,
+                    recentChanges,
+                    marketApp.appDetails.uploadDate,
+                    noNewDetails).contentValues)
                 if (updatedApp != null) {
                     updatedApps.add(updatedApp.copy(noNewDetails = noNewDetails))
                 }
@@ -242,12 +248,12 @@ class UpdateCheck(
         if (changelog.isNotEmpty()) {
             db.applyBatchInsert(contentResolver, changelog) {
                 DbContentProvider.changelogUri
-                        .buildUpon()
-                        .appendPath("apps")
-                        .appendPath(it.getAsString(ChangelogTable.Columns.appId))
-                        .appendPath("v")
-                        .appendPath(it.getAsString(ChangelogTable.Columns.versionCode))
-                        .build()
+                    .buildUpon()
+                    .appendPath("apps")
+                    .appendPath(it.getAsString(ChangelogTable.Columns.appId))
+                    .appendPath("v")
+                    .appendPath(it.getAsString(ChangelogTable.Columns.versionCode))
+                    .build()
             }
         }
 
@@ -260,8 +266,8 @@ class UpdateCheck(
                     if (app.status == App.STATUS_UPDATED) {
                         AppLog.d("Set not fetched app as viewed")
                         statusBatch.add(contentValuesOf(
-                                BaseColumns._ID to app.rowId,
-                                AppListTable.Columns.status to App.STATUS_NORMAL
+                            BaseColumns._ID to app.rowId,
+                            AppListTable.Columns.status to App.STATUS_NORMAL
                         ))
                     }
                 }
@@ -296,7 +302,7 @@ class UpdateCheck(
 
         val values = ContentValues()
         var updatedApp: UpdatedApp? = null
-        //Mark updated app as normal
+        // Mark updated app as normal
         if (localApp.status == App.STATUS_UPDATED && lastUpdatesViewed) {
             AppLog.d("Set ${localApp.appId} update as viewed")
             values.put(AppListTable.Columns.status, App.STATUS_NORMAL)
@@ -306,7 +312,7 @@ class UpdateCheck(
             val recentChanges = appDetails.recentChangesHtml ?: ""
             updatedApp = UpdatedApp(localApp, recentChanges, installedInfo.versionCode, false)
         }
-        //Refresh app info with latest fetched
+        // Refresh app info with latest fetched
         updateLocalApp(marketDoc, localApp, values)
         return Pair(values, updatedApp)
     }

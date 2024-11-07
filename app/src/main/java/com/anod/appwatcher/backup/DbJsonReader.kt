@@ -1,14 +1,13 @@
 package com.anod.appwatcher.backup
 
 import com.anod.appwatcher.database.entities.App
-import com.anod.appwatcher.database.entities.AppTag
 import com.anod.appwatcher.database.entities.Tag
 import info.anodsplace.framework.json.JsonReader
 import info.anodsplace.framework.json.JsonToken
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.io.Reader
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * @author alex
@@ -74,7 +73,6 @@ class DbJsonReader {
             }
 
             override suspend fun onFinish(appsRead: Int, tagsRead: Int) {}
-
         }
 
         // Old format
@@ -116,7 +114,6 @@ class DbJsonReader {
         jsonReader.endArray()
         return count
     }
-
 
     @Throws(IOException::class)
     private suspend fun readApps(jsonReader: JsonReader, listener: OnReadListener): Int {

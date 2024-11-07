@@ -115,10 +115,10 @@ import info.anodsplace.compose.placeholder
 import info.anodsplace.compose.toAnnotatedString
 import info.anodsplace.framework.content.CommonActivityAction
 import info.anodsplace.framework.text.Html
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 import java.text.DateFormat
 import java.util.Date
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 private val iconSizeBig = 64.dp
 private val iconSizeSmall = 32.dp
@@ -126,11 +126,7 @@ private val iconSizeSmall = 32.dp
 private val dateFormat: DateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
 
 @Composable
-fun DetailsPanel(
-    app: App,
-    onDismissRequest: () -> Unit,
-    onCommonActivityAction: (action: CommonActivityAction) -> Unit
-) {
+fun DetailsPanel(app: App, onDismissRequest: () -> Unit, onCommonActivityAction: (action: CommonActivityAction) -> Unit) {
     val storeOwner = rememberViwModeStoreOwner()
     val isSystemInDarkTheme = isSystemInDarkTheme()
     val viewModel: DetailsViewModel = viewModel(
@@ -159,13 +155,8 @@ fun DetailsPanel(
     }
 }
 
-
 @Composable
-fun DetailsDialog(
-    app: App,
-    onDismissRequest: () -> Unit,
-    onCommonActivityAction: (action: CommonActivityAction) -> Unit
-) {
+fun DetailsDialog(app: App, onDismissRequest: () -> Unit, onCommonActivityAction: (action: CommonActivityAction) -> Unit) {
     val storeOwner = rememberViwModeStoreOwner()
     val isSystemInDarkTheme = isSystemInDarkTheme()
     val viewModel: DetailsViewModel = viewModel(
@@ -226,7 +217,7 @@ private val headerHeightDp = 80.dp
 private fun DetailsScreenContent(
     screenState: DetailsState,
     onEvent: (DetailsEvent) -> Unit,
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     viewActions: Flow<DetailsAction>,
     onDismissRequest: () -> Unit,
     onCommonActivityAction: (CommonActivityAction) -> Unit
@@ -237,8 +228,11 @@ private fun DetailsScreenContent(
 
     val appColorAvailable =
         (screenState.customPrimaryColor != null || screenState.appIconState is AppIconState.Default)
-    val surfaceColor: Color = if (appColorAvailable)
-        MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
+    val surfaceColor: Color = if (appColorAvailable) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.surface
+    }
 
     val snackBarHostState = remember { SnackbarHostState() }
 
@@ -399,7 +393,6 @@ fun VersionDetails(screenState: DetailsState) {
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 8.dp),
     ) {
-
         if (screenState.app != null) {
             Row(
                 modifier = Modifier
@@ -568,11 +561,7 @@ private fun VersionInfoCell(
 }
 
 @Composable
-private fun HorizontalDivider(
-    modifier: Modifier = Modifier,
-    thickness: Dp = DividerDefaults.Thickness,
-    color: Color = DividerDefaults.color,
-) {
+private fun HorizontalDivider(modifier: Modifier = Modifier, thickness: Dp = DividerDefaults.Thickness, color: Color = DividerDefaults.color,) {
     val targetThickness = if (thickness == Dp.Hairline) {
         (1f / LocalDensity.current.density).dp
     } else {
@@ -588,11 +577,7 @@ private fun HorizontalDivider(
 
 @OptIn(ExperimentalTextApi::class, ExperimentalMaterial3Api::class)
 @Composable
-private fun DetailsChangelog(
-    screenState: DetailsState,
-    onEvent: (DetailsEvent) -> Unit,
-    scrollBehaviour: TopAppBarScrollBehavior
-) {
+private fun DetailsChangelog(screenState: DetailsState, onEvent: (DetailsEvent) -> Unit, scrollBehaviour: TopAppBarScrollBehavior) {
     LazyColumn(
         modifier = Modifier
             .nestedScroll(scrollBehaviour.nestedScrollConnection)
@@ -691,8 +676,11 @@ private fun DetailsHeader(
                         text = screenState.title,
                         color = contentColor,
                         style = MaterialTheme.typography.headlineSmall,
-                        fontSize = if (screenState.title.length >= 30)
-                            16.sp else 18.sp,
+                        fontSize = if (screenState.title.length >= 30) {
+                            16.sp
+                        } else {
+                            18.sp
+                        },
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.Start,
@@ -745,7 +733,7 @@ private fun DetailsHeader(
 }
 
 @Composable
-private fun DetailsAppIcon(appIconState: AppIconState, modifier: Modifier) {
+private fun DetailsAppIcon(appIconState: AppIconState, modifier: Modifier = Modifier) {
     AppLog.d("Details collecting appIconState $appIconState")
     when (appIconState) {
         is AppIconState.Loaded -> DetailsIconApp(
@@ -759,7 +747,7 @@ private fun DetailsAppIcon(appIconState: AppIconState, modifier: Modifier) {
 }
 
 @Composable
-private fun DetailsIconPlaceHolder(modifier: Modifier) {
+private fun DetailsIconPlaceHolder(modifier: Modifier = Modifier) {
     Icon(
         painter = painterResource(id = R.drawable.ic_app_icon_placeholder),
         contentDescription = null,
@@ -769,7 +757,7 @@ private fun DetailsIconPlaceHolder(modifier: Modifier) {
 }
 
 @Composable
-private fun DetailsIconApp(bitmap: Bitmap, modifier: Modifier) {
+private fun DetailsIconApp(bitmap: Bitmap, modifier: Modifier = Modifier) {
     Icon(
         bitmap = bitmap.asImageBitmap(),
         contentDescription = null,

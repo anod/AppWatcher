@@ -4,7 +4,6 @@ import android.database.Cursor
 import android.provider.BaseColumns
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Price
-
 import info.anodsplace.framework.database.CursorIterator
 
 /**
@@ -58,7 +57,6 @@ class AppListCursor(cursor: Cursor?) : CursorIterator<App>(cursor) {
         }
     }
 
-
     override val current: App
         get() = App(
             rowId = getInt(projection.rowId),
@@ -82,5 +80,4 @@ class AppListCursor(cursor: Cursor?) : CursorIterator<App>(cursor) {
             syncTime = getLong(projection.syncTime),
             recentFlag = getInt(projection.recentFlag) == 1
         )
-
 }

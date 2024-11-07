@@ -23,7 +23,6 @@ import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.accounts.CheckTokenError
 import com.anod.appwatcher.accounts.CheckTokenResult
 import com.anod.appwatcher.accounts.toAndroidAccount
-import info.anodsplace.framework.content.CommonActivityAction
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.observePackages
@@ -35,6 +34,7 @@ import finsky.api.DfeApi
 import finsky.api.Document
 import finsky.api.toDocument
 import info.anodsplace.framework.app.HingeDeviceLayout
+import info.anodsplace.framework.content.CommonActivityAction
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.playstore.AppDetailsFilter
 import kotlinx.coroutines.Job
@@ -64,7 +64,7 @@ sealed interface SearchViewAction {
     class AlreadyWatchedNotice(val document: Document) : SearchViewAction
 }
 
-private fun startActivityAction(intent: Intent, finish: Boolean = false) : SearchViewAction.ActivityAction {
+private fun startActivityAction(intent: Intent, finish: Boolean = false): SearchViewAction.ActivityAction {
     return SearchViewAction.ActivityAction(
         action = CommonActivityAction.StartActivity(
             intent = intent,
@@ -98,7 +98,7 @@ data class SearchViewState(
 )
 
 class SearchViewModel(
-        initialState: SearchViewState
+    initialState: SearchViewState
 ) : BaseFlowViewModel<SearchViewState, SearchViewEvent, SearchViewAction>(), KoinComponent {
 
     class Factory(private val initialState: SearchViewState) : ViewModelProvider.Factory {

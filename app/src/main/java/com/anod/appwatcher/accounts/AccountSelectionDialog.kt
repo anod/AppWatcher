@@ -23,8 +23,8 @@ sealed interface AccountSelectionResult {
  * @date 9/17/13
  */
 class AccountSelectionDialog(
-        private val activity: AppCompatActivity,
-        private val preferences: Preferences
+    private val activity: AppCompatActivity,
+    private val preferences: Preferences
 ) {
 
     private val chooseAccount = activity.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -35,13 +35,13 @@ class AccountSelectionDialog(
 
     fun show() {
         val intent = AccountManager.newChooseAccountIntent(
-                preferences.account?.toAndroidAccount(),
-                null,
-                arrayOf(AuthTokenBlocking.ACCOUNT_TYPE),
-                null,
-                null,
-                null,
-                null)
+            preferences.account?.toAndroidAccount(),
+            null,
+            arrayOf(AuthTokenBlocking.ACCOUNT_TYPE),
+            null,
+            null,
+            null,
+            null)
         chooseAccount.launch(intent)
     }
 

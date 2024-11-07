@@ -12,13 +12,12 @@ import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.drive.Drive
 import com.google.api.services.drive.model.File
 import com.google.api.services.drive.model.FileList
-import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.concurrent.Executors
-
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.withContext
 
 sealed class GDriveSpace(val name: String) {
     object Drive : GDriveSpace("drive")
@@ -28,13 +27,13 @@ sealed class GDriveSpace(val name: String) {
 
 class DriveService(private val service: Drive) {
     constructor(credential: HttpRequestInitializer, appName: String)
-            : this(createService(credential, appName))
+        : this(createService(credential, appName))
 
     companion object {
         private fun createService(credential: HttpRequestInitializer, appName: String): Drive {
             return Drive.Builder(NetHttpTransport(), GsonFactory.getDefaultInstance(), credential)
-                    .setApplicationName(appName)
-                    .build()
+                .setApplicationName(appName)
+                .build()
         }
 
         fun extractUserRecoverableException(e: Exception): UserRecoverableAuthException? {
@@ -54,11 +53,11 @@ class DriveService(private val service: Drive) {
     suspend fun createFile(name: String, mimeType: String, space: GDriveSpace): String = withContext(dispatcher) {
         val metadata = File()
 //                .setSpaces(listOf(space.name))
-                .setParents(listOf(space.name))
-                .setMimeType(mimeType)
-                .setName(name)
+            .setParents(listOf(space.name))
+            .setMimeType(mimeType)
+            .setName(name)
         val googleFile = service.files().create(metadata).execute()
-                ?: throw IOException("Null result when requesting file creation.")
+            ?: throw IOException("Null result when requesting file creation.")
         return@withContext googleFile.id
     }
 
@@ -85,8 +84,8 @@ class DriveService(private val service: Drive) {
      */
     suspend fun saveFile(fileId: String, contentType: String, content: InputStream): Any? = withContext(dispatcher) {
         service.files()
-                .update(fileId, File(), InputStreamContent(contentType, content))
-                .execute()
+            .update(fileId, File(), InputStreamContent(contentType, content))
+            .execute()
     }
 
     /**
@@ -98,15 +97,20 @@ class DriveService(private val service: Drive) {
      * request Drive Full Scope in the [Google
      * Developer's Console](https://play.google.com/apps/publish) and be submitted to Google for verification.
      */
-    suspend fun queryAppDataFiles(orderBy: String, mimeType: String, name: String, space: GDriveSpace): FileList = withContext(dispatcher) {
+    suspend fun queryAppDataFiles(
+        orderBy: String,
+        mimeType: String,
+        name: String,
+        space: GDriveSpace
+    ): FileList = withContext(dispatcher) {
         val query = "mimeType = '$mimeType' and name = '$name'"
         return@withContext service
-                .files()
-                .list()
-                .setOrderBy(orderBy)
-                .setQ(query)
-                .setSpaces(space.name)
-                .execute()
+            .files()
+            .list()
+            .setOrderBy(orderBy)
+            .setQ(query)
+            .setSpaces(space.name)
+            .execute()
     }
 
     /**
@@ -150,5 +154,4 @@ class DriveService(private val service: Drive) {
 //            Pair.create<String?, String?>(name, content)
 //        })
 //    }
-
 }

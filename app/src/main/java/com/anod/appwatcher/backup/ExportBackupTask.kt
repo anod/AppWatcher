@@ -16,19 +16,19 @@ class ExportBackupTask(private val dbBackupManager: DbBackupManager) {
         fun showFinishToast(ctx: Context, result: Int) {
             when (result) {
                 DbBackupManager.RESULT_OK -> Toast.makeText(
-                        ctx,
-                        R.string.export_done,
-                        Toast.LENGTH_SHORT
+                    ctx,
+                    R.string.export_done,
+                    Toast.LENGTH_SHORT
                 ).show()
                 DbBackupManager.ERROR_STORAGE_NOT_AVAILABLE -> Toast.makeText(
-                        ctx,
-                        R.string.external_storage_not_available,
-                        Toast.LENGTH_SHORT
+                    ctx,
+                    R.string.external_storage_not_available,
+                    Toast.LENGTH_SHORT
                 ).show()
                 DbBackupManager.ERROR_FILE_WRITE -> Toast.makeText(
-                        ctx,
-                        R.string.failed_to_write_file,
-                        Toast.LENGTH_SHORT
+                    ctx,
+                    R.string.failed_to_write_file,
+                    Toast.LENGTH_SHORT
                 ).show()
             }
         }

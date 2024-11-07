@@ -13,29 +13,30 @@ import com.anod.appwatcher.database.ChangelogTable
  * @date 02/09/2017
  */
 @Entity(tableName = ChangelogTable.table,
-        indices = [(Index(
-                value = arrayOf(ChangelogTable.Columns.appId, ChangelogTable.Columns.versionCode),
-                unique = true))])
+    indices = [(Index(
+        value = arrayOf(ChangelogTable.Columns.appId, ChangelogTable.Columns.versionCode),
+        unique = true))])
 data class AppChange(
-        @PrimaryKey
-        @ColumnInfo(name = BaseColumns._ID)
-        val id: Int,
-        @ColumnInfo(name = ChangelogTable.Columns.appId)
-        val appId: String,
-        @ColumnInfo(name = ChangelogTable.Columns.versionCode)
-        val versionCode: Int,
-        @ColumnInfo(name = ChangelogTable.Columns.versionName)
-        val versionName: String,
-        @ColumnInfo(name = ChangelogTable.Columns.details)
-        val details: String,
-        @ColumnInfo(name = ChangelogTable.Columns.uploadDate)
-        val uploadDate: String,
-        @ColumnInfo(name = ChangelogTable.Columns.noNewDetails)
-        val noNewDetails: Boolean) {
+    @PrimaryKey
+    @ColumnInfo(name = BaseColumns._ID)
+    val id: Int,
+    @ColumnInfo(name = ChangelogTable.Columns.appId)
+    val appId: String,
+    @ColumnInfo(name = ChangelogTable.Columns.versionCode)
+    val versionCode: Int,
+    @ColumnInfo(name = ChangelogTable.Columns.versionName)
+    val versionName: String,
+    @ColumnInfo(name = ChangelogTable.Columns.details)
+    val details: String,
+    @ColumnInfo(name = ChangelogTable.Columns.uploadDate)
+    val uploadDate: String,
+    @ColumnInfo(name = ChangelogTable.Columns.noNewDetails)
+    val noNewDetails: Boolean
+) {
 
     @Ignore
-    constructor(appId: String, versionCode: Int, versionName: String, details: String, uploadDate: String, noNewDetails: Boolean)
-        : this(0, appId, versionCode, versionName, details, uploadDate, noNewDetails)
+    constructor(appId: String, versionCode: Int, versionName: String, details: String, uploadDate: String, noNewDetails: Boolean) :
+        this(0, appId, versionCode, versionName, details, uploadDate, noNewDetails)
 
     override fun equals(other: Any?): Boolean {
         if (other !is AppChange) return false

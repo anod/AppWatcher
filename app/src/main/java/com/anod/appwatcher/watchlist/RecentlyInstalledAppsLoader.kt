@@ -13,8 +13,8 @@ class RecentlyInstalledAppsLoader(private val packageManager: PackageManager, pr
     suspend fun load(limit: Int): List<App> {
         val packages = withContext(Dispatchers.Default) {
             packageManager.getRecentlyInstalled()
-                    .take(limit)
-                    .map { it.name }
+                .take(limit)
+                .map { it.name }
         }
         return if (packages.isNotEmpty()) {
             val watchingPackages = database.apps().loadRowIds(packages).associateBy({ it.packageName }, { it.rowId })

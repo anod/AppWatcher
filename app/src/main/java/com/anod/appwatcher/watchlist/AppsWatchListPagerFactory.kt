@@ -15,17 +15,16 @@ class AppsWatchListPagerFactory(
     private val packageManager: PackageManager by inject()
 
     override fun createPagingSource(): WatchListPagingSource {
-       return WatchListPagingSource(
-           prefs = prefs,
-           config = pagingSourceConfig,
-           packageManager = packageManager,
-           database = database,
-           installedApps = installedApps
-       ).also {
+        return WatchListPagingSource(
+            prefs = prefs,
+            config = pagingSourceConfig,
+            packageManager = packageManager,
+            database = database,
+            installedApps = installedApps
+        ).also {
             it.filterQuery = filterQuery
-       }
+        }
     }
 
-    override fun createSectionHeaderFactory() =
-        DefaultSectionHeaderFactory(pagingSourceConfig.showRecentlyDiscovered)
+    override fun createSectionHeaderFactory() = DefaultSectionHeaderFactory(pagingSourceConfig.showRecentlyDiscovered)
 }

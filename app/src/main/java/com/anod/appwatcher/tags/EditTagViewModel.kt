@@ -51,7 +51,9 @@ class EditTagViewModel(tag: Tag) : BaseFlowViewModel<EditTagState, EditTagEvent,
 
     override fun handleEvent(event: EditTagEvent) {
         when (event) {
-            EditTagEvent.Delete -> { deleteTag(viewState.tag) }
+            EditTagEvent.Delete -> {
+                deleteTag(viewState.tag)
+            }
             is EditTagEvent.SaveAndDismiss -> {
                 val tag = viewState.tag.copy(name = event.name)
                 saveAndDismiss(tag)

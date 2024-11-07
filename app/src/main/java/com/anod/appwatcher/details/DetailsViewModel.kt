@@ -42,6 +42,8 @@ import info.anodsplace.framework.content.forAppInfo
 import info.anodsplace.framework.content.forUninstall
 import info.anodsplace.framework.text.Html
 import info.anodsplace.graphics.chooseDark
+import java.net.URLEncoder
+import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flatMapLatest
@@ -50,8 +52,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import java.net.URLEncoder
-import java.util.Locale
 
 typealias TagMenuItem = Pair<Tag, Boolean>
 
@@ -118,10 +118,7 @@ sealed interface DetailsAction {
     class Share(val app: App, val recentChange: AppChange) : DetailsAction
 }
 
-private fun startActivityAction(
-    intent: Intent,
-    addMultiWindowFlags: Boolean = false
-): DetailsAction.ActivityAction {
+private fun startActivityAction(intent: Intent, addMultiWindowFlags: Boolean = false): DetailsAction.ActivityAction {
     return DetailsAction.ActivityAction(
         action = CommonActivityAction.StartActivity(
             intent = intent,
@@ -327,7 +324,7 @@ class DetailsViewModel(
                 val encoded = URLEncoder.encode(Html.parse(text).toString(), "utf-8")
                 emitAction(startActivityAction((Intent(Intent.ACTION_VIEW).apply {
                     data =
-                        Uri.parse("https://translate.google.com/?sl=auto&tl=${lang}&text=${encoded}&op=translate")
+                        Uri.parse("https://translate.google.com/?sl=auto&tl=$lang&text=$encoded&op=translate")
                 })))
             }
 
@@ -346,8 +343,12 @@ class DetailsViewModel(
 
     private suspend fun loadChangelog() {
         val localChanges = try {
-            if (viewState.appId.isBlank()) emptyList() else database.changelog()
-                .ofApp(viewState.appId)
+            if (viewState.appId.isBlank()) {
+                emptyList()
+            } else {
+                database.changelog()
+                    .ofApp(viewState.appId)
+            }
         } catch (e: Exception) {
             AppLog.e("loadChangelog", e)
             emptyList()
@@ -465,9 +466,9 @@ class DetailsViewModel(
 
         appDetails?.fileList?.forEachIndexed { index, fileMetadata ->
             AppLog.d("FileList #$index " +
-                    "compressedSize: ${Formatter.formatShortFileSize(context, fileMetadata.compressedSize)} " +
-                    "size: ${Formatter.formatShortFileSize(context, fileMetadata.size)} " +
-                    "metadata: $fileMetadata")
+                "compressedSize: ${Formatter.formatShortFileSize(context, fileMetadata.compressedSize)} " +
+                "size: ${Formatter.formatShortFileSize(context, fileMetadata.size)} " +
+                "metadata: $fileMetadata")
         }
 
         viewState.remoteVersionInfo?.installationSize?.also {
@@ -475,15 +476,14 @@ class DetailsViewModel(
         }
     }
 
-    private fun mergeChangelogs(
-        localChanges: List<AppChange>,
-        recentChange: AppChange
-    ): List<AppChange> {
+    private fun mergeChangelogs(localChanges: List<AppChange>, recentChange: AppChange): List<AppChange> {
         return when {
             localChanges.isEmpty() -> {
                 if (!recentChange.isEmpty) {
                     listOf(recentChange)
-                } else listOf()
+                } else {
+                    listOf()
+                }
             }
 
             localChanges.first().versionCode == recentChange.versionCode -> {

@@ -15,11 +15,7 @@ internal class CustomMonthDateFormat(
     private val clean: String = ""
 ) : DateFormat() {
 
-    override fun format(
-        date: Date,
-        toAppendTo: StringBuffer,
-        fieldPosition: FieldPosition
-    ): StringBuffer {
+    override fun format(date: Date, toAppendTo: StringBuffer, fieldPosition: FieldPosition): StringBuffer {
         val cal = Calendar.getInstance()
         cal.time = date
         val monthIdx = cal.get(Calendar.MONTH)
@@ -117,10 +113,10 @@ internal class CustomMonthDateFormat(
         val ORDER_MDY = arrayOf(STATE.MONTH, STATE.DAY, STATE.YEAR)
 
         val stopChar = mapOf(
-                ' ' to true,
-                ',' to true,
-                '.' to true,
-                '-' to true
+            ' ' to true,
+            ',' to true,
+            '.' to true,
+            '-' to true
         )
 
         enum class STATE {

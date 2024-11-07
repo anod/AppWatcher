@@ -22,7 +22,12 @@ class ImportInstalledTask(private val database: AppsDatabase, private val upload
         return@withContext result
     }
 
-    private suspend fun addSync(info: App, packages: List<String>, apps: AppListTable, db: AppsDatabase): Int = withContext(Dispatchers.IO) {
+    private suspend fun addSync(
+        info: App,
+        packages: List<String>,
+        apps: AppListTable,
+        db: AppsDatabase
+    ): Int = withContext(Dispatchers.IO) {
         if (packages.contains(info.packageName)) {
             return@withContext RESULT_OK
         }

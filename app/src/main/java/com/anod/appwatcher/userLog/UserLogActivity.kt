@@ -24,8 +24,8 @@ class UserLogActivity : BaseComposeActivity() {
             val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
 
             UserLogScreen(
-                    screenState = screenState,
-                    onEvent = viewModel::handleEvent
+                screenState = screenState,
+                onEvent = viewModel::handleEvent
             )
         }
 

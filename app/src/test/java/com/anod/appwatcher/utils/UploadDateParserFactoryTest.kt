@@ -1,16 +1,15 @@
 package com.anod.appwatcher.utils
 
-
 import android.util.Log
 import com.anod.appwatcher.utils.date.UploadDateParserCache
 import com.anod.appwatcher.utils.date.UploadDateParserFactory
 import info.anodsplace.applog.AppLog
-import org.junit.Assert.assertEquals
-import org.junit.Assert.fail
-import org.junit.Test
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.fail
+import org.junit.Test
 
 /**
  * @author Alex Gavrishev
@@ -114,7 +113,8 @@ class UploadDateParserFactoryTest {
         }
     }
 
-    private inner class DateDesc @Throws(ParseException::class)
+    private inner class DateDesc
+    @Throws(ParseException::class)
     constructor(locale: String, val date: String, val expected: String) {
         val locale: Locale = Locale(locale.substring(0, 2), locale.substring(3, 5))
     }

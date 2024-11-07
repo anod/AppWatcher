@@ -15,7 +15,6 @@ import com.anod.appwatcher.backup.ExportBackupTask
 import com.anod.appwatcher.backup.ImportBackupTask
 import com.anod.appwatcher.backup.gdrive.GDriveSync
 import com.anod.appwatcher.backup.gdrive.UploadServiceContentObserver
-import info.anodsplace.framework.content.CommonActivityAction
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.Cleanup
 import com.anod.appwatcher.sync.SchedulesHistoryActivity
@@ -31,11 +30,12 @@ import info.anodsplace.applog.AppLog
 import info.anodsplace.compose.PreferenceItem
 import info.anodsplace.context.ApplicationContext
 import info.anodsplace.framework.app.HingeDeviceLayout
-import info.anodsplace.notification.NotificationManager
+import info.anodsplace.framework.content.CommonActivityAction
 import info.anodsplace.framework.content.forAppInfo
-import info.anodsplace.playservices.GooglePlayServices
+import info.anodsplace.notification.NotificationManager
 import info.anodsplace.permissions.AppPermission
 import info.anodsplace.permissions.AppPermissions
+import info.anodsplace.playservices.GooglePlayServices
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -92,7 +92,7 @@ sealed interface SettingsViewAction {
 
 private val finishAction = SettingsViewAction.ActivityAction(CommonActivityAction.Finish)
 
-private fun startActivityAction(intent: Intent, addMultiWindowFlags: Boolean = false) : SettingsViewAction.ActivityAction {
+private fun startActivityAction(intent: Intent, addMultiWindowFlags: Boolean = false): SettingsViewAction.ActivityAction {
     return SettingsViewAction.ActivityAction(
         action = CommonActivityAction.StartActivity(
             intent = intent,
@@ -101,7 +101,7 @@ private fun startActivityAction(intent: Intent, addMultiWindowFlags: Boolean = f
     )
 }
 
-private fun showToastAction(@StringRes resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT) : SettingsViewAction.ActivityAction {
+private fun showToastAction(@StringRes resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT): SettingsViewAction.ActivityAction {
     return SettingsViewAction.ActivityAction(
         action = CommonActivityAction.ShowToast(
             resId = resId,
@@ -120,8 +120,8 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
 
     init {
         viewState = SettingsViewState(
-                items = preferenceItems(prefs, false, playServices, application),
-                areNotificationsEnabled = notificationManager.areNotificationsEnabled
+            items = preferenceItems(prefs, false, playServices, application),
+            areNotificationsEnabled = notificationManager.areNotificationsEnabled
         )
     }
 
@@ -175,8 +175,8 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
             }
             is SettingsViewEvent.NotificationPermissionResult -> {
                 viewState = viewState.copy(
-                        areNotificationsEnabled = prefs.areNotificationsEnabled,
-                        items = preferenceItems(prefs, inProgress = false, playServices, application)
+                    areNotificationsEnabled = prefs.areNotificationsEnabled,
+                    items = preferenceItems(prefs, inProgress = false, playServices, application)
                 )
             }
             SettingsViewEvent.ShowAppSettings -> emitAction(startActivityAction(
@@ -187,8 +187,8 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
                 val areNotificationsEnabled = prefs.areNotificationsEnabled
                 if (areNotificationsEnabled != viewState.areNotificationsEnabled) {
                     viewState = viewState.copy(
-                            areNotificationsEnabled = prefs.areNotificationsEnabled,
-                            items = preferenceItems(prefs, inProgress = false, playServices, application)
+                        areNotificationsEnabled = prefs.areNotificationsEnabled,
+                        items = preferenceItems(prefs, inProgress = false, playServices, application)
                     )
                 }
             }
@@ -221,15 +221,15 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
         if (checked) {
             prefs.isDriveSyncEnabled = true
             viewState = viewState.copy(
-                    isProgressVisible = true,
-                    items = preferenceItems(prefs, inProgress = true, playServices, application)
+                isProgressVisible = true,
+                items = preferenceItems(prefs, inProgress = true, playServices, application)
             )
             emitAction(SettingsViewAction.GDriveSignIn)
         } else {
             prefs.isDriveSyncEnabled = false
             viewState = viewState.copy(
-                    isProgressVisible = false,
-                    items = preferenceItems(prefs, inProgress = false, playServices, application)
+                isProgressVisible = false,
+                items = preferenceItems(prefs, inProgress = false, playServices, application)
             )
             emitAction(SettingsViewAction.GDriveSignOut)
         }
@@ -246,8 +246,8 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
                     gDriveSync.doSync()
                     prefs.lastDriveSyncTime = System.currentTimeMillis()
                     viewState = viewState.copy(
-                            isProgressVisible = false,
-                            items = preferenceItems(prefs, inProgress = false, playServices, application)
+                        isProgressVisible = false,
+                        items = preferenceItems(prefs, inProgress = false, playServices, application)
                     )
                     emitAction(showToastAction(resId = R.string.sync_finish))
                 } catch (e: Exception) {
@@ -274,15 +274,15 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
             invalidationTracker.addObserver(observer)
             emitAction(showToastAction(resId = R.string.gdrive_connected))
             viewState = viewState.copy(
-                    isProgressVisible = false,
-                    items = preferenceItems(prefs, inProgress = false, playServices, application)
+                isProgressVisible = false,
+                items = preferenceItems(prefs, inProgress = false, playServices, application)
             )
         } else {
             prefs.isDriveSyncEnabled = false
             emitAction(showToastAction(text = "Drive login error $errorCode"))
             viewState = viewState.copy(
-                    isProgressVisible = false,
-                    items = preferenceItems(prefs, inProgress = false, playServices, application)
+                isProgressVisible = false,
+                items = preferenceItems(prefs, inProgress = false, playServices, application)
             )
         }
     }
@@ -296,14 +296,14 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
 
         appScope.launch {
             viewState = viewState.copy(
-                    items = preferenceItems(prefs, inProgress = viewState.isProgressVisible, playServices, application)
+                items = preferenceItems(prefs, inProgress = viewState.isProgressVisible, playServices, application)
             )
             if (useAutoSync) {
                 SyncScheduler(context).schedule(
-                        prefs.isRequiresCharging,
-                        prefs.isWifiOnly,
-                        prefs.updatesFrequency.toLong(),
-                        true
+                    prefs.isRequiresCharging,
+                    prefs.isWifiOnly,
+                    prefs.updatesFrequency.toLong(),
+                    true
                 ).first { it !is Operation.State.IN_PROGRESS }
             } else {
                 SyncScheduler(context).cancel().first { it !is Operation.State.IN_PROGRESS }
@@ -355,16 +355,16 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
 
     private fun testNotification() {
         SyncNotification(ApplicationContext(context), get()).show(listOf(
-                UpdatedApp(
-                        packageName = "com.anod.appwatcher",
-                        title = "Test",
-                        installedVersionCode = 25,
-                        isNewUpdate = true,
-                        recentChanges = "Test notification",
-                        uploadDate = "Now",
-                        uploadTime = System.currentTimeMillis(),
-                        versionNumber = 27,
-                )
+            UpdatedApp(
+                packageName = "com.anod.appwatcher",
+                title = "Test",
+                installedVersionCode = 25,
+                isNewUpdate = true,
+                recentChanges = "Test notification",
+                uploadDate = "Now",
+                uploadTime = System.currentTimeMillis(),
+                versionNumber = 27,
+            )
         ))
     }
 }

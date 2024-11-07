@@ -66,10 +66,10 @@ class AuthAccountInitializer(
         }
         val tokenInvalidated = if (tokenResult is CheckTokenResult.Success) tokenResult.invalidated else false
         return existingAccount == null
-                || existingAccount.deviceConfig.isEmpty()
-                || existingAccount.name != newAccount.name
-                || tokenInvalidated
-                || !canRequest()
+            || existingAccount.deviceConfig.isEmpty()
+            || existingAccount.name != newAccount.name
+            || tokenInvalidated
+            || !canRequest()
     }
 
     private suspend fun canRequest(): Boolean {

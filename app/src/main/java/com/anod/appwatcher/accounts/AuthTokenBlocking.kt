@@ -7,11 +7,11 @@ import android.accounts.OperationCanceledException
 import android.content.Intent
 import info.anodsplace.applog.AppLog
 import info.anodsplace.context.ApplicationContext
+import java.io.IOException
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
-import java.io.IOException
-import java.util.concurrent.TimeUnit
 
 class AuthTokenStartIntent(val intent: Intent) : RuntimeException("getAuthToken finished with intent: $intent")
 
@@ -71,7 +71,7 @@ class AuthTokenBlocking(context: ApplicationContext) {
 
     private suspend fun retrieve(acc: Account): Pair<String, Boolean> = withContext(Dispatchers.IO) {
         val current = try {
-             getAuthToken(acc)
+            getAuthToken(acc)
         } catch (e: Exception) {
             if (e is AuthTokenStartIntent) {
                 throw e
@@ -91,7 +91,6 @@ class AuthTokenBlocking(context: ApplicationContext) {
             throw e
         }
         return@withContext Pair(newToken, current != newToken)
-
     }
 
     @Throws(AuthenticatorException::class, OperationCanceledException::class, IOException::class)

@@ -65,11 +65,11 @@ fun WatchListTopBar(
         },
         navigationIcon = navigationIcon,
         modifier = Modifier.onGloballyPositioned {
-             if (it.isAttached) {
-                 val size = it.size
-                 val position = it.positionInWindow()
-                 barBounds = IntRect(position.x.roundToInt(), position.y.roundToInt(), size.width, size.height)
-             }
+            if (it.isAttached) {
+                val size = it.size
+                val position = it.positionInWindow()
+                barBounds = IntRect(position.x.roundToInt(), position.y.roundToInt(), size.width, size.height)
+            }
         },
         actions = {
             visibleActions()
@@ -85,7 +85,7 @@ fun WatchListTopBar(
 
 @Preview(showBackground = false, uiMode = UI_MODE_NIGHT_YES)
 @Composable
-fun DefaultPreview() {
+private fun DefaultPreview() {
     AppTheme(
         customPrimaryColor = Color.Cyan
     ) {

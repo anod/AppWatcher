@@ -2,8 +2,8 @@ package com.anod.appwatcher.userLog
 
 import android.content.Intent
 import androidx.compose.runtime.Immutable
-import info.anodsplace.framework.content.CommonActivityAction
 import com.anod.appwatcher.utils.BaseFlowViewModel
+import info.anodsplace.framework.content.CommonActivityAction
 
 @Immutable
 data class UserLogState(
@@ -20,7 +20,7 @@ class UserLogViewModel : BaseFlowViewModel<UserLogState, UserLogEvent, CommonAct
 
     init {
         viewState = UserLogState(
-                messages = userLogger.messages
+            messages = userLogger.messages
         )
     }
 

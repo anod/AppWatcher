@@ -103,7 +103,16 @@ data class App(
     )
 
     private constructor(
-        rowId: Int, packageName: String, versionCode: Int, versionName: String, title: String, iconUrl: String, status: Int, uploadDate: String, uploadTime: Long, syncTime: Long
+        rowId: Int,
+        packageName: String,
+        versionCode: Int,
+        versionName: String,
+        title: String,
+        iconUrl: String,
+        status: Int,
+        uploadDate: String,
+        uploadTime: Long,
+        syncTime: Long
     ) : this(
         rowId = rowId,
         appId = packageName,
@@ -165,7 +174,15 @@ data class App(
             rowId, installed.pkg.name, installed.pkg.updateTime, installed.pkg.versionCode, installed.pkg.versionName, installed.title, installed.launchComponent
         )
 
-        fun fromLocalPackage(rowId: Int, packageName: String, uploadTime: Long, versionCode: Int, versionName: String, appTitle: String, launchComponent: ComponentName?): App {
+        fun fromLocalPackage(
+            rowId: Int,
+            packageName: String,
+            uploadTime: Long,
+            versionCode: Int,
+            versionName: String,
+            appTitle: String,
+            launchComponent: ComponentName?
+        ): App {
             val iconUrl: String = if (launchComponent != null) {
                 Uri.fromParts(RealAppIconLoader.SCHEME, launchComponent.flattenToShortString(), null).toString()
             } else {

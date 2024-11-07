@@ -82,9 +82,11 @@ fun TagSelectionScreen(screenState: TagsSelectionState, onEvent: (TagSelectionEv
                     }
                 },
                 actions = {
-                    IconButton(onClick = { onEvent(TagSelectionEvent.AddTag(
-                        show = true
-                    )) }) {
+                    IconButton(onClick = {
+                        onEvent(TagSelectionEvent.AddTag(
+                            show = true
+                        ))
+                    }) {
                         Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(id = R.string.menu_add))
                     }
                 }
@@ -103,7 +105,7 @@ fun TagSelectionScreen(screenState: TagsSelectionState, onEvent: (TagSelectionEv
                         modifier = Modifier.padding(top = 24.dp)
                     )
                     Button(
-                        onClick = { onEvent(TagSelectionEvent.AddTag(show = true))  },
+                        onClick = { onEvent(TagSelectionEvent.AddTag(show = true)) },
                         modifier = Modifier
                             .defaultMinSize(minWidth = 188.dp)
                             .padding(top = 8.dp)

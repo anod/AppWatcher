@@ -11,7 +11,12 @@ import com.anod.appwatcher.compose.Amber800
 import com.anod.appwatcher.database.entities.App
 import info.anodsplace.framework.content.InstalledApps
 
-private fun formatVersionText(versionName: String, versionNumber: Int, newVersionNumber: Int, context: Context): String {
+private fun formatVersionText(
+    versionName: String,
+    versionNumber: Int,
+    newVersionNumber: Int,
+    context: Context
+): String {
     if (newVersionNumber > 0) {
         return context.getString(R.string.version_updated_text, versionName, versionNumber, newVersionNumber)
     }

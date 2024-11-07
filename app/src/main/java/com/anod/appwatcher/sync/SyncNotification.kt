@@ -13,8 +13,8 @@ import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.color.DynamicColors
 import com.anod.appwatcher.watchlist.MainActivity
 import info.anodsplace.context.ApplicationContext
-import info.anodsplace.notification.NotificationManager
 import info.anodsplace.framework.text.Html
+import info.anodsplace.notification.NotificationManager
 
 /**
  * @author alex
@@ -32,12 +32,13 @@ class SyncNotification(private val context: info.anodsplace.context.ApplicationC
     }
 
     class Filter(
-            private val filterInstalled: Boolean,
-            private val filterInstalledUpToDate: Boolean,
-            private val filterNoChanges: Boolean) {
+        private val filterInstalled: Boolean,
+        private val filterInstalledUpToDate: Boolean,
+        private val filterNoChanges: Boolean
+    ) {
 
         constructor(prefs: Preferences)
-                : this(!prefs.isNotifyInstalled, !prefs.isNotifyInstalledUpToDate, !prefs.isNotifyNoChanges)
+            : this(!prefs.isNotifyInstalled, !prefs.isNotifyInstalledUpToDate, !prefs.isNotifyNoChanges)
 
         val hasFilters: Boolean
             get() = (filterInstalled || filterInstalledUpToDate || filterNoChanges)
@@ -79,7 +80,6 @@ class SyncNotification(private val context: info.anodsplace.context.ApplicationC
     }
 
     fun show(updatedApps: List<UpdatedApp>) {
-
         val sorted = updatedApps.sortedWith(compareBy({ it.isNewUpdate }, { it.title }))
 
         val notification = this.create(sorted)
@@ -103,12 +103,12 @@ class SyncNotification(private val context: info.anodsplace.context.ApplicationC
 
         val builder = NotificationCompat.Builder(context.actual, updatesChannelId)
         builder
-                .setAutoCancel(true)
-                .setSmallIcon(R.drawable.ic_notification)
-                .setContentTitle(title)
-                .setContentText(text)
-                .setContentIntent(contentIntent)
-                .setTicker(title)
+            .setAutoCancel(true)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(title)
+            .setContentText(text)
+            .setContentIntent(contentIntent)
+            .setTicker(title)
 
         if (!DynamicColors.isDynamicColorAvailable()) {
             builder.color = context.getColor(R.color.material_blue_800)
@@ -126,63 +126,62 @@ class SyncNotification(private val context: info.anodsplace.context.ApplicationC
 
     private fun addMultipleExtraInfo(updatedApps: List<UpdatedApp>, builder: NotificationCompat.Builder) {
         updatedApps.firstOrNull { it.installedVersionCode > 0 && it.versionNumber > it.installedVersionCode }
-                ?: return
+            ?: return
 
         val bigText = updatedApps.joinToString(",\n") { it.title }
         builder.setStyle(NotificationCompat.BigTextStyle().bigText(bigText))
 
         val updateIntent = NotificationActivity.intent(
-                Uri.parse("com.anod.appwatcher://play/myapps/1"),
-                NotificationActivity.actionMyApps,
-                context.actual)
+            Uri.parse("com.anod.appwatcher://play/myapps/1"),
+            NotificationActivity.actionMyApps,
+            context.actual)
         builder.addAction(R.drawable.ic_system_update_alt_white_24dp, context.getString(R.string.noti_action_update),
-                PendingIntent.getActivity(context.actual, 0, updateIntent, PendingIntent.FLAG_IMMUTABLE)
+            PendingIntent.getActivity(context.actual, 0, updateIntent, PendingIntent.FLAG_IMMUTABLE)
         )
 
         val readIntent = NotificationActivity.intent(
-                Uri.parse("com.anod.appwatcher://dismiss/"),
-                NotificationActivity.actionDismiss,
-                context.actual
+            Uri.parse("com.anod.appwatcher://dismiss/"),
+            NotificationActivity.actionDismiss,
+            context.actual
         )
         builder.addAction(R.drawable.ic_clear_white_24dp, context.getString(R.string.dismiss),
-                PendingIntent.getActivity(context.actual, 0, readIntent, PendingIntent.FLAG_IMMUTABLE)
+            PendingIntent.getActivity(context.actual, 0, readIntent, PendingIntent.FLAG_IMMUTABLE)
         )
     }
 
     private fun addSingleExtraInfo(update: UpdatedApp, builder: NotificationCompat.Builder) {
-
         val changes = update.recentChanges.ifBlank { context.getString(R.string.no_recent_changes) }
 
         builder.setContentText(Html.parse(changes))
         builder.setStyle(NotificationCompat.BigTextStyle().bigText(Html.parse(changes)))
 
         val playIntent = NotificationActivity.intent(
-                Uri.parse("com.anod.appwatcher://play/" + update.packageName),
-                NotificationActivity.actionPlayStore,
-                context.actual).also {
+            Uri.parse("com.anod.appwatcher://play/" + update.packageName),
+            NotificationActivity.actionPlayStore,
+            context.actual).also {
             it.putExtra(NotificationActivity.extraPackage, update.packageName)
         }
 
         builder.addAction(R.drawable.ic_play_arrow_white_24dp, context.getString(R.string.store),
-                PendingIntent.getActivity(context.actual, 0, playIntent, PendingIntent.FLAG_IMMUTABLE)
+            PendingIntent.getActivity(context.actual, 0, playIntent, PendingIntent.FLAG_IMMUTABLE)
         )
 
         if (update.installedVersionCode > 0) {
             val updateIntent = NotificationActivity.intent(
-                    Uri.parse("com.anod.appwatcher://play/myapps/1"),
-                    NotificationActivity.actionMyApps,
-                    context.actual)
+                Uri.parse("com.anod.appwatcher://play/myapps/1"),
+                NotificationActivity.actionMyApps,
+                context.actual)
             builder.addAction(R.drawable.ic_system_update_alt_white_24dp, context.getString(R.string.noti_action_update),
-                    PendingIntent.getActivity(context.actual, 0, updateIntent, PendingIntent.FLAG_IMMUTABLE)
+                PendingIntent.getActivity(context.actual, 0, updateIntent, PendingIntent.FLAG_IMMUTABLE)
             )
         }
 
         val readIntent = NotificationActivity.intent(
-                Uri.parse("com.anod.appwatcher://viewed/"),
-                NotificationActivity.actionMarkViewed,
-                context.actual)
+            Uri.parse("com.anod.appwatcher://viewed/"),
+            NotificationActivity.actionMarkViewed,
+            context.actual)
         builder.addAction(R.drawable.ic_clear_white_24dp, context.getString(R.string.dismiss),
-                PendingIntent.getActivity(context.actual, 0, readIntent, PendingIntent.FLAG_IMMUTABLE)
+            PendingIntent.getActivity(context.actual, 0, readIntent, PendingIntent.FLAG_IMMUTABLE)
         )
     }
 
@@ -193,14 +192,14 @@ class SyncNotification(private val context: info.anodsplace.context.ApplicationC
         }
         if (count > 2) {
             return context.getString(
-                    R.string.notification_2_apps_more,
-                    apps[0].title,
-                    apps[1].title
+                R.string.notification_2_apps_more,
+                apps[0].title,
+                apps[1].title
             )
         }
         return context.getString(R.string.notification_2_apps,
-                apps[0].title,
-                apps[1].title
+            apps[0].title,
+            apps[1].title
         )
     }
 
@@ -214,5 +213,4 @@ class SyncNotification(private val context: info.anodsplace.context.ApplicationC
         }
         return title
     }
-
 }

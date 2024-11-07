@@ -36,13 +36,12 @@ class AppChangeCursor(cursor: Cursor?) : CursorIterator<AppChange>(cursor) {
 
     override val current: AppChange
         get() = AppChange(
-                id = getInt(projection.rowId),
-                appId = getString(projection.appId),
-                versionCode = getInt(projection.versionNumber),
-                versionName = getString(projection.versionName),
-                details = getString(projection.details),
-                uploadDate = getString(projection.uploadDate),
-                noNewDetails = getInt(projection.noNewDetails) == 1
+            id = getInt(projection.rowId),
+            appId = getString(projection.appId),
+            versionCode = getInt(projection.versionNumber),
+            versionName = getString(projection.versionName),
+            details = getString(projection.details),
+            uploadDate = getString(projection.uploadDate),
+            noNewDetails = getInt(projection.noNewDetails) == 1
         )
-
 }

@@ -84,9 +84,9 @@ class RealAppIconLoader(context: Context, private val prefs: Preferences, overri
 
             val source = icon.toByteArray() ?: return null
             return SourceResult(
-                    source = ImageSource(Buffer().apply { write(source) }, options.context),
-                    mimeType = null,
-                    dataSource = DataSource.DISK
+                source = ImageSource(Buffer().apply { write(source) }, options.context),
+                mimeType = null,
+                dataSource = DataSource.DISK
             )
         }
     }

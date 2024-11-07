@@ -6,10 +6,10 @@ import android.database.sqlite.SQLiteDatabase
 import android.provider.BaseColumns
 import androidx.room.*
 import com.anod.appwatcher.database.entities.Schedule
+import java.util.concurrent.Callable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
-import java.util.concurrent.Callable
 
 @Dao
 interface SchedulesTable {
@@ -43,7 +43,6 @@ interface SchedulesTable {
             })
         }
     }
-
 
     class Columns : BaseColumns {
         companion object {

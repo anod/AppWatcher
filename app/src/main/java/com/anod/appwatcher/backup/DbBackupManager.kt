@@ -8,10 +8,6 @@ import com.anod.appwatcher.database.entities.AppTag
 import info.anodsplace.applog.AppLog
 import info.anodsplace.context.ApplicationContext
 import info.anodsplace.framework.json.MalformedJsonException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.File
@@ -24,6 +20,10 @@ import java.io.OutputStreamWriter
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 
 /**
  * Serialize and deserialize app info list into/from JSON file
@@ -36,7 +36,7 @@ class DbBackupManager(private val context: info.anodsplace.context.ApplicationCo
         val outputStream: OutputStream?
         try {
             outputStream = context.contentResolver.openOutputStream(destUri)
-                    ?: return@withContext ERROR_FILE_WRITE
+                ?: return@withContext ERROR_FILE_WRITE
             if (!writeDb(outputStream)) {
                 return@withContext ERROR_FILE_WRITE
             }

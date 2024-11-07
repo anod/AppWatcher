@@ -25,7 +25,7 @@ data class SelectionState(
         var newSelectedCount = selectedCount
         if (select) {
             newSelectedCount += 1
-        } else if (selectedKeys.containsKey(key)){
+        } else if (selectedKeys.containsKey(key)) {
             newSelectedCount -= 1
             if (newSelectedCount < 0) {
                 newSelectedCount = 0
@@ -151,7 +151,6 @@ data class SelectionState(
             selectedKeys = emptyMap()
         )
     }
-
 }
 
 fun SelectionState.filter(selected: Boolean): List<String> {

@@ -29,11 +29,11 @@ import com.anod.appwatcher.backup.gdrive.GDriveSignIn
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.compose.MainDetailScreen
-import info.anodsplace.framework.content.onCommonActivityAction
 import com.anod.appwatcher.utils.prefs
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.jakewharton.processphoenix.ProcessPhoenix
 import info.anodsplace.applog.AppLog
+import info.anodsplace.framework.content.onCommonActivityAction
 import info.anodsplace.permissions.AppPermission
 import info.anodsplace.permissions.AppPermissions
 import info.anodsplace.permissions.toRequestInput

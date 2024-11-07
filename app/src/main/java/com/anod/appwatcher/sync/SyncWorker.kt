@@ -10,7 +10,6 @@ import org.koin.core.component.get
 
 class SyncWorker(appContext: Context, workerParams: WorkerParameters) : CoroutineWorker(appContext, workerParams), KoinComponent {
     override suspend fun doWork(): Result {
-
         AppLog.d("Scheduled call executed. Id: $id")
 
         val syncAdapter = get<UpdateCheck>()

@@ -12,10 +12,10 @@ import com.anod.appwatcher.accounts.AccountSelectionResult
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.compose.MainDetailScreen
-import info.anodsplace.framework.content.onCommonActivityAction
 import com.anod.appwatcher.details.DetailsDialog
 import com.anod.appwatcher.watchlist.DetailContent
 import info.anodsplace.framework.app.HingeDeviceLayout
+import info.anodsplace.framework.content.onCommonActivityAction
 import kotlinx.coroutines.launch
 
 open class SearchComposeActivity : BaseComposeActivity() {
@@ -34,7 +34,7 @@ open class SearchComposeActivity : BaseComposeActivity() {
 
         setContent {
             AppTheme(
-                    theme = viewModel.prefs.theme
+                theme = viewModel.prefs.theme
             ) {
                 val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
                 if (screenState.wideLayout.isWideLayout) {

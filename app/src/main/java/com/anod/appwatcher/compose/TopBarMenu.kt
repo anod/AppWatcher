@@ -46,7 +46,7 @@ fun SortMenuItem(selectedSortId: Int, onChangeSort: (Int) -> Unit, barBounds: In
                 menuItemWidth = it.size.width
             }
         },
-        onClick = {  topBarSortMenu = true },
+        onClick = { topBarSortMenu = true },
     )
 
     val density = LocalDensity.current
@@ -63,7 +63,13 @@ fun SortMenuAction(selectedSortId: Int, onChangeSort: (Int) -> Unit) {
 }
 
 @Composable
-private fun SortDropdownMenu(selectedSortId: Int, onChangeSort: (Int) -> Unit, expanded: Boolean, onDismissRequest: () -> Unit, offset: DpOffset = DpOffset(0.dp, 0.dp)) {
+private fun SortDropdownMenu(
+    selectedSortId: Int,
+    onChangeSort: (Int) -> Unit,
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    offset: DpOffset = DpOffset(0.dp, 0.dp)
+) {
     DropdownMenu(expanded = expanded, onDismissRequest = onDismissRequest, offset = offset) {
         val sortTitles = listOf(
             stringResource(id = R.string.sort_by_name_asc),
@@ -75,7 +81,7 @@ private fun SortDropdownMenu(selectedSortId: Int, onChangeSort: (Int) -> Unit, e
             DropdownMenuItem(
                 text = { Text(text = sortTitle, modifier = Modifier.padding(horizontal = 8.dp)) },
                 leadingIcon = {
-                    RadioIcon(isChecked = (selectedSortId == index) )
+                    RadioIcon(isChecked = (selectedSortId == index))
                 },
                 onClick = {
                     onDismissRequest()
@@ -116,7 +122,13 @@ fun FilterMenuAction(filterId: Int, onFilterChange: (Int) -> Unit) {
 }
 
 @Composable
-private fun FilterDropdownMenu(filterId: Int, onFilterChange: (Int) -> Unit, expanded: Boolean, onDismissRequest: () -> Unit, offset: DpOffset = DpOffset(0.dp, 0.dp)) {
+private fun FilterDropdownMenu(
+    filterId: Int,
+    onFilterChange: (Int) -> Unit,
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    offset: DpOffset = DpOffset(0.dp, 0.dp)
+) {
     val filterPagesTitles = listOf(
         stringResource(id = R.string.tab_all),
         stringResource(id = R.string.tab_installed),

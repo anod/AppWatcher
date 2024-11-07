@@ -25,7 +25,6 @@ import com.anod.appwatcher.accounts.toAndroidAccount
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.compose.MainDetailScreen
-import info.anodsplace.framework.content.onCommonActivityAction
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.details.DetailsDialog
 import com.anod.appwatcher.history.HistoryListActivity
@@ -35,6 +34,7 @@ import com.anod.appwatcher.utils.getIntentFlags
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.wishlist.WishListActivity
 import info.anodsplace.applog.AppLog
+import info.anodsplace.framework.content.onCommonActivityAction
 import info.anodsplace.permissions.AppPermission
 import info.anodsplace.permissions.AppPermissions
 import info.anodsplace.permissions.toRequestInput
@@ -124,7 +124,9 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
                                 } else {
                                     drawerState.close()
                                 }
-                            } else onMainAction(action)
+                            } else {
+                                onMainAction(action)
+                            }
                         }
                     }
                 }
@@ -212,7 +214,7 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
                     DrawerItem.Id.Add -> startActivity(Intent(this, MarketSearchActivity::class.java))
                     DrawerItem.Id.Installed -> startActivity(InstalledActivity.intent(false, this))
                     DrawerItem.Id.Refresh -> { }
-                    DrawerItem.Id.Settings ->  startActivity( Intent(this, SettingsActivity::class.java))
+                    DrawerItem.Id.Settings -> startActivity(Intent(this, SettingsActivity::class.java))
                     DrawerItem.Id.Wishlist -> startActivity(WishListActivity.intent(this))
                     DrawerItem.Id.Purchases -> startActivity(HistoryListActivity.intent(this))
                 }

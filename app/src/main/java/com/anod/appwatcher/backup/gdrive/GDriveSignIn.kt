@@ -23,23 +23,23 @@ import info.anodsplace.applog.AppLog
 import info.anodsplace.context.ApplicationContext
 import info.anodsplace.notification.NotificationManager
 import info.anodsplace.playservices.GoogleSignInConnect
-import org.koin.java.KoinJavaComponent
 import java.util.Collections
 import java.util.concurrent.ExecutionException
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import org.koin.java.KoinJavaComponent
 
 internal fun createGDriveSignInOptions(): GoogleSignInOptions {
     return GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestScopes(Scope(DriveScopes.DRIVE_APPDATA))
-            .requestEmail()
-            .build()
+        .requestScopes(Scope(DriveScopes.DRIVE_APPDATA))
+        .requestEmail()
+        .build()
 }
 
 internal fun createCredentials(context: Context, googleAccount: GoogleSignInAccount): HttpRequestInitializer {
     return GoogleAccountCredential
-            .usingOAuth2(context, Collections.singleton(DriveScopes.DRIVE_APPDATA))
-            .setSelectedAccount(googleAccount.account)
+        .usingOAuth2(context, Collections.singleton(DriveScopes.DRIVE_APPDATA))
+        .setSelectedAccount(googleAccount.account)
 }
 
 interface ResultListener {
@@ -121,7 +121,6 @@ class GDriveSignIn(private val activity: Activity, private val listener: Listene
             AppLog.e(e)
             listener.onGDriveLoginError(e.statusCode)
         }
-
     }
 }
 
@@ -144,7 +143,7 @@ class GDriveSilentSignIn(private val context: ApplicationContext) {
                 val settingActivity = Intent(context.actual, SettingsActivity::class.java)
                 settingActivity.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 GDriveSignIn.showResolutionNotification(
-                        PendingIntent.getActivity(context.actual, 0, settingActivity, PendingIntent.FLAG_IMMUTABLE), context)
+                    PendingIntent.getActivity(context.actual, 0, settingActivity, PendingIntent.FLAG_IMMUTABLE), context)
             }
             throw Exception("Google drive account is null", e)
         } catch (e: ExecutionException) {

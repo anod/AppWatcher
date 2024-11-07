@@ -10,9 +10,10 @@ import com.anod.appwatcher.database.AppListTable
  * @date 26/05/2018
  */
 data class PackageRowPair(
-        @PrimaryKey
-        @ColumnInfo(name = BaseColumns._ID)
-        val rowId: Int,
+    @PrimaryKey
+    @ColumnInfo(name = BaseColumns._ID)
+    val rowId: Int,
 
-        @ColumnInfo(name = AppListTable.Columns.packageName)
-        val packageName: String)
+    @ColumnInfo(name = AppListTable.Columns.packageName)
+    val packageName: String
+)

@@ -40,33 +40,33 @@ class InstalledPagingSource(
         }
 
         val items: List<SectionItem> = installed
-                .asSequence()
-                .mapNotNull {
-                    val rowId = watchingPackages[it.pkg.name] ?: -1
-                    if (selectionMode && rowId >= 0)
-                        null
-                    else
-                        App.fromInstalledPackage(rowId, it)
+            .asSequence()
+            .mapNotNull {
+                val rowId = watchingPackages[it.pkg.name] ?: -1
+                if (selectionMode && rowId >= 0) {
+                    null
+                } else {
+                    App.fromInstalledPackage(rowId, it)
                 }
-                .map { app ->
-                    val appChange = changelogAdapter.changelogs[app.appId]
-                    SectionItem.OnDevice(
-                        appListItem = AppListItem(
-                            app = app,
-                            changeDetails = appChange?.details ?: "",
-                            noNewDetails = false,
-                            recentFlag = false
-                        ),
-                        showSelection = selectionMode,
-                        packageInfo = installedApps.packageInfo(app.packageName)
-                    )
-                }.toList()
-
+            }
+            .map { app ->
+                val appChange = changelogAdapter.changelogs[app.appId]
+                SectionItem.OnDevice(
+                    appListItem = AppListItem(
+                        app = app,
+                        changeDetails = appChange?.details ?: "",
+                        noNewDetails = false,
+                        recentFlag = false
+                    ),
+                    showSelection = selectionMode,
+                    packageInfo = installedApps.packageInfo(app.packageName)
+                )
+            }.toList()
 
         return LoadResult.Page(
-                data = items,
-                prevKey = null,
-                nextKey = null
+            data = items,
+            prevKey = null,
+            nextKey = null
         )
     }
 

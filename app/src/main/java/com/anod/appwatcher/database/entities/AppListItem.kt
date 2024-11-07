@@ -33,5 +33,7 @@ fun AppListItem.cleanChangeHtml(): String {
             .removePrefix(app.versionName + "\n")
             .removePrefix(app.versionName + ":\n")
             .trim()
-    } else ""
+    } else {
+        ""
+    }
 }

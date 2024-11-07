@@ -108,7 +108,13 @@ class DbContentProvider : ContentProvider() {
         return false
     }
 
-    override fun query(uri: Uri, projection: Array<String>?, selection: String?, selectionArgs: Array<String>?, sortOrder: String?): AppListCursor? {
+    override fun query(
+        uri: Uri,
+        projection: Array<String>?,
+        selection: String?,
+        selectionArgs: Array<String>?,
+        sortOrder: String?
+    ): AppListCursor? {
         var proj = projection
         var sel = selection
         var selArgs = selectionArgs ?: emptyArray()
@@ -134,7 +140,12 @@ class DbContentProvider : ContentProvider() {
         return AppListCursor(cursor)
     }
 
-    override fun update(uri: Uri, values: ContentValues?, selection: String?, selectionArgs: Array<String>?): Int {
+    override fun update(
+        uri: Uri,
+        values: ContentValues?,
+        selection: String?,
+        selectionArgs: Array<String>?
+    ): Int {
         val query = matchQuery(uri) ?: throw IllegalArgumentException("Unknown URI $uri")
         require(!(values == null || values.size() == 0)) { "Values cannot be empty" }
 

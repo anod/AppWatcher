@@ -16,10 +16,10 @@ import com.anod.appwatcher.utils.prefs
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import info.anodsplace.applog.AppLog
 import info.anodsplace.context.ApplicationContext
+import java.util.concurrent.TimeUnit
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.parameter.parametersOf
-import java.util.concurrent.TimeUnit
 
 /**
  * @author Alex Gavrishev
@@ -32,7 +32,6 @@ class UploadService(appContext: Context, params: WorkerParameters) : CoroutineWo
         private const val tag = "GDriveUpload"
 
         fun schedule(requiresWifi: Boolean, requiresCharging: Boolean, context: Context) {
-
             val constraints: Constraints = Constraints.Builder().apply {
                 setRequiresCharging(requiresCharging)
                 if (requiresWifi) {
@@ -43,11 +42,11 @@ class UploadService(appContext: Context, params: WorkerParameters) : CoroutineWo
             }.build()
 
             val request: OneTimeWorkRequest =
-                    OneTimeWorkRequest.Builder(UploadService::class.java)
-                            .setInputData(Data.EMPTY)
-                            .setConstraints(constraints)
-                            .setInitialDelay(windowStartDelaySeconds, TimeUnit.SECONDS)
-                            .build()
+                OneTimeWorkRequest.Builder(UploadService::class.java)
+                    .setInputData(Data.EMPTY)
+                    .setConstraints(constraints)
+                    .setInitialDelay(windowStartDelaySeconds, TimeUnit.SECONDS)
+                    .build()
 
             WorkManager.getInstance(context).enqueueUniqueWork(tag, ExistingWorkPolicy.REPLACE, request)
         }
@@ -73,7 +72,7 @@ class UploadService(appContext: Context, params: WorkerParameters) : CoroutineWo
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 }
                 GDriveSignIn.showResolutionNotification(
-                        PendingIntent.getActivity(applicationContext, 0, settingActivity, PendingIntent.FLAG_IMMUTABLE),
+                    PendingIntent.getActivity(applicationContext, 0, settingActivity, PendingIntent.FLAG_IMMUTABLE),
                     info.anodsplace.context.ApplicationContext(applicationContext)
                 )
             }

@@ -11,14 +11,15 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 data class Price(
-        @ColumnInfo(name = AppListTable.Columns.priceText)
-        val text: String,
+    @ColumnInfo(name = AppListTable.Columns.priceText)
+    val text: String,
 
-        @ColumnInfo(name = AppListTable.Columns.priceCurrency)
-        val cur: String,
+    @ColumnInfo(name = AppListTable.Columns.priceCurrency)
+    val cur: String,
 
-        @ColumnInfo(name = AppListTable.Columns.priceMicros)
-        val micros: Int?) : Parcelable {
+    @ColumnInfo(name = AppListTable.Columns.priceMicros)
+    val micros: Int?
+) : Parcelable {
 
     val isFree: Boolean
         get() = micros == 0 || micros == null

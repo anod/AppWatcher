@@ -4,7 +4,6 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.provider.BaseColumns
-import android.text.TextUtils
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.RawQuery
@@ -15,11 +14,11 @@ import com.anod.appwatcher.database.entities.*
 import com.anod.appwatcher.preferences.Preferences
 import info.anodsplace.ktx.chunked
 import info.anodsplace.ktx.dayStartAgoMillis
+import java.util.concurrent.Callable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import java.util.concurrent.Callable
 
 class SqlOffset(val offset: Int, val limit: Int)
 
@@ -47,7 +46,7 @@ interface AppListTable {
     @Suppress("FunctionName")
     @Query(
         "SELECT ${BaseColumns._ID}, ${Columns.packageName} FROM $table " +
-                "WHERE ${Columns.packageName} IN (:packageNames) AND ${Columns.status} != ${App.STATUS_DELETED}"
+            "WHERE ${Columns.packageName} IN (:packageNames) AND ${Columns.status} != ${App.STATUS_DELETED}"
     )
     suspend fun _loadRowIds(packageNames: List<String>): List<PackageRowPair>
 
@@ -57,45 +56,45 @@ interface AppListTable {
 
     @Query(
         "SELECT ${BaseColumns._ID}, ${Columns.packageName} FROM $table WHERE " +
-                "${Columns.status} != ${App.STATUS_DELETED}"
+            "${Columns.status} != ${App.STATUS_DELETED}"
     )
     fun observePackagesList(): Flow<List<PackageRowPair>>
 
     @Query(
         "SELECT ${BaseColumns._ID}, ${Columns.packageName} FROM $table WHERE " +
-                "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${App.STATUS_DELETED} ELSE ${Columns.status} >= ${App.STATUS_NORMAL} END"
+            "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${App.STATUS_DELETED} ELSE ${Columns.status} >= ${App.STATUS_NORMAL} END"
     )
     suspend fun loadPackages(includeDeleted: Boolean): List<PackageRowPair>
 
     @Query(
         "SELECT $table.*, " +
-                "CASE WHEN ${Columns.syncTimestamp} > :recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
-                "FROM $table WHERE " +
-                "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${App.STATUS_DELETED} ELSE ${Columns.status} >= ${App.STATUS_NORMAL} END "
+            "CASE WHEN ${Columns.syncTimestamp} > :recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
+            "FROM $table WHERE " +
+            "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${App.STATUS_DELETED} ELSE ${Columns.status} >= ${App.STATUS_NORMAL} END "
     )
     fun load(includeDeleted: Boolean, recentTime: Long): Cursor
 
     @Query(
         "SELECT $table.*, ${ChangelogTable.TableColumns.details}, ${ChangelogTable.TableColumns.noNewDetails}, " +
-                "CASE WHEN ${Columns.syncTimestamp} > :recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
-                "FROM $table " +
-                "LEFT JOIN ${ChangelogTable.table} ON " +
-                "${TableColumns.appId} == ${ChangelogTable.TableColumns.appId} " +
-                "AND ${TableColumns.versionNumber} == ${ChangelogTable.TableColumns.versionCode} " +
-                "WHERE " +
-                "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${App.STATUS_DELETED} ELSE ${Columns.status} >= ${App.STATUS_NORMAL} END " +
-                "ORDER BY " +
-                "CASE WHEN :sortId = 0 THEN ${Columns.title} COLLATE NOCASE END ASC, " +
-                "CASE WHEN :sortId = 1 THEN ${Columns.title} COLLATE NOCASE END DESC, " +
-                "CASE WHEN :sortId = 2 THEN ${Columns.uploadTimestamp} END ASC, " +
-                "CASE WHEN :sortId = 3 THEN ${Columns.uploadTimestamp} END DESC "
+            "CASE WHEN ${Columns.syncTimestamp} > :recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
+            "FROM $table " +
+            "LEFT JOIN ${ChangelogTable.table} ON " +
+            "${TableColumns.appId} == ${ChangelogTable.TableColumns.appId} " +
+            "AND ${TableColumns.versionNumber} == ${ChangelogTable.TableColumns.versionCode} " +
+            "WHERE " +
+            "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${App.STATUS_DELETED} ELSE ${Columns.status} >= ${App.STATUS_NORMAL} END " +
+            "ORDER BY " +
+            "CASE WHEN :sortId = 0 THEN ${Columns.title} COLLATE NOCASE END ASC, " +
+            "CASE WHEN :sortId = 1 THEN ${Columns.title} COLLATE NOCASE END DESC, " +
+            "CASE WHEN :sortId = 2 THEN ${Columns.uploadTimestamp} END ASC, " +
+            "CASE WHEN :sortId = 3 THEN ${Columns.uploadTimestamp} END DESC "
     )
     fun loadAppList(includeDeleted: Boolean, sortId: Int, recentTime: Long): Cursor
 
     @Query(
         "SELECT COUNT(${BaseColumns._ID}) " +
-                "FROM $table WHERE " +
-                "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${App.STATUS_DELETED} ELSE ${Columns.status} >= ${App.STATUS_NORMAL} END "
+            "FROM $table WHERE " +
+            "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${App.STATUS_DELETED} ELSE ${Columns.status} >= ${App.STATUS_NORMAL} END "
     )
     suspend fun count(includeDeleted: Boolean): Int
 
@@ -110,60 +109,60 @@ interface AppListTable {
 
     @Query(
         "INSERT INTO $table (" +
-                "${Columns.appId}," +
-                "${Columns.packageName}," +
-                "${Columns.versionNumber}," +
-                "${Columns.versionName}," +
-                "${Columns.title}," +
-                "${Columns.creator}," +
-                "${Columns.iconUrl}," +
-                "${Columns.status}," +
-                "${Columns.uploadDate}," +
-
-                "${Columns.priceText}," +
-                "${Columns.priceCurrency}," +
-                "${Columns.priceMicros}," +
-
-                "${Columns.detailsUrl}," +
-                "${Columns.uploadTimestamp}," +
-                "${Columns.appType}," +
-                "${Columns.syncTimestamp}) VALUES (" +
-                ":appId, :packageName, :versionNumber, :versionName, :title, " +
-                ":creator, :iconUrl, :status, :uploadDate, " +
-                ":priceText, :priceCurrency, :priceMicros, " +
-                ":detailsUrl, :uploadTime, :appType, :updateTime" +
-                ")"
+            "${Columns.appId}," +
+            "${Columns.packageName}," +
+            "${Columns.versionNumber}," +
+            "${Columns.versionName}," +
+            "${Columns.title}," +
+            "${Columns.creator}," +
+            "${Columns.iconUrl}," +
+            "${Columns.status}," +
+            "${Columns.uploadDate}," +
+            "${Columns.priceText}," +
+            "${Columns.priceCurrency}," +
+            "${Columns.priceMicros}," +
+            "${Columns.detailsUrl}," +
+            "${Columns.uploadTimestamp}," +
+            "${Columns.appType}," +
+            "${Columns.syncTimestamp}) VALUES (" +
+            ":appId, :packageName, :versionNumber, :versionName, :title, " +
+            ":creator, :iconUrl, :status, :uploadDate, " +
+            ":priceText, :priceCurrency, :priceMicros, " +
+            ":detailsUrl, :uploadTime, :appType, :updateTime" +
+            ")"
     )
-
     suspend fun insert(
-        appId: String, packageName: String, versionNumber: Int, versionName: String, title: String,
-        creator: String, iconUrl: String, status: Int, uploadDate: String,
-        priceText: String, priceCurrency: String, priceMicros: Int?,
-        detailsUrl: String?, uploadTime: Long, appType: String, updateTime: Long
+        appId: String,
+        packageName: String,
+        versionNumber: Int,
+        versionName: String,
+        title: String,
+        creator: String,
+        iconUrl: String,
+        status: Int,
+        uploadDate: String,
+        priceText: String,
+        priceCurrency: String,
+        priceMicros: Int?,
+        detailsUrl: String?,
+        uploadTime: Long,
+        appType: String,
+        updateTime: Long
     ): Long
 
     object Queries {
 
-        suspend fun load(includeDeleted: Boolean, table: AppListTable): AppListCursor =
-            withContext(Dispatchers.IO) {
-                val cursor = table.load(includeDeleted, recentTime)
-                return@withContext AppListCursor(cursor)
-            }
+        suspend fun load(includeDeleted: Boolean, table: AppListTable): AppListCursor = withContext(Dispatchers.IO) {
+            val cursor = table.load(includeDeleted, recentTime)
+            return@withContext AppListCursor(cursor)
+        }
 
-        suspend fun loadAppList(
-            includeDeleted: Boolean,
-            sortId: Int,
-            table: AppListTable
-        ): AppListItemCursor = withContext(Dispatchers.IO) {
+        suspend fun loadAppList(includeDeleted: Boolean, sortId: Int, table: AppListTable): AppListItemCursor = withContext(Dispatchers.IO) {
             val cursor = table.loadAppList(includeDeleted, sortId, recentTime)
             return@withContext AppListItemCursor(cursor)
         }
 
-        fun loadAppList(
-            sortId: Int,
-            titleFilter: String,
-            table: AppListTable
-        ): Flow<List<AppListItem>> {
+        fun loadAppList(sortId: Int, titleFilter: String, table: AppListTable): Flow<List<AppListItem>> {
             return loadAppList(sortId, false, null, titleFilter, table)
         }
 
@@ -216,13 +215,13 @@ interface AppListTable {
 
             val sql =
                 "SELECT $table.*, ${ChangelogTable.TableColumns.details}, ${ChangelogTable.TableColumns.noNewDetails}, " +
-                        "CASE WHEN ${Columns.syncTimestamp} > $recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
-                        "FROM $table " + appTagsTable +
-                        "LEFT JOIN ${ChangelogTable.table} ON ${TableColumns.appId} == ${ChangelogTable.TableColumns.appId} " +
-                        "AND ${TableColumns.versionNumber} == ${ChangelogTable.TableColumns.versionCode} " +
-                        "WHERE ${selection.first} " +
-                        "ORDER BY ${createSortOrder(sortId, orderByRecentlyDiscovered)} " +
-                        rangeSql
+                    "CASE WHEN ${Columns.syncTimestamp} > $recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
+                    "FROM $table " + appTagsTable +
+                    "LEFT JOIN ${ChangelogTable.table} ON ${TableColumns.appId} == ${ChangelogTable.TableColumns.appId} " +
+                    "AND ${TableColumns.versionNumber} == ${ChangelogTable.TableColumns.versionCode} " +
+                    "WHERE ${selection.first} " +
+                    "ORDER BY ${createSortOrder(sortId, orderByRecentlyDiscovered)} " +
+                    rangeSql
             return Pair(sql, selection.second)
         }
 
@@ -263,11 +262,7 @@ interface AppListTable {
             return filter.joinToString(", ")
         }
 
-        private fun createSelection(
-            tagId: Int?,
-            titleFilter: String,
-            offset: SqlOffset?
-        ): Pair<String, Array<String>> {
+        private fun createSelection(tagId: Int?, titleFilter: String, offset: SqlOffset?): Pair<String, Array<String>> {
             val selc = ArrayList<String>(3)
             val args = ArrayList<String>(5)
 
@@ -314,7 +309,6 @@ interface AppListTable {
             return ERROR_ALREADY_ADDED
         }
     }
-
 
     class Columns : BaseColumns {
         companion object {

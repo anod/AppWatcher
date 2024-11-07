@@ -36,17 +36,19 @@ fun InstalledListScreen(
     Scaffold(
         topBar = {
             InstalledTopBar(
-                    title = if (screenState.selectionMode)
-                            if (screenState.selection.defaultSelected)
-                                stringResource(id = R.string.all_selected, screenState.selection.selectedCount)
-                            else
-                                stringResource(id = R.string.number_selected, screenState.selection.selectedCount)
-                        else
-                            stringResource(id = R.string.installed),
-                    selectionMode = screenState.selectionMode,
-                    filterQuery = screenState.titleFilter,
-                    sortId = screenState.sortId,
-                    onEvent = onEvent
+                title = if (screenState.selectionMode) {
+                    if (screenState.selection.defaultSelected) {
+                        stringResource(id = R.string.all_selected, screenState.selection.selectedCount)
+                    } else {
+                        stringResource(id = R.string.number_selected, screenState.selection.selectedCount)
+                    }
+                } else {
+                    stringResource(id = R.string.installed)
+                },
+                selectionMode = screenState.selectionMode,
+                filterQuery = screenState.titleFilter,
+                sortId = screenState.sortId,
+                onEvent = onEvent
             )
         },
         floatingActionButton = {
@@ -54,11 +56,21 @@ fun InstalledListScreen(
                 val enabled = screenState.importStatus is ImportStatus.NotStarted || screenState.importStatus is ImportStatus.Finished
                 ExtendedFloatingActionButton(
                     modifier = Modifier.padding(WindowInsets.navigationBars.asPaddingValues()),
-                    text = { if (enabled) { Text(text = stringResource(id = R.string.import_action)) } },
-                    icon = { if (!enabled) {
-                        CircularProgressIndicator()
-                    } },
-                    onClick = { if (enabled) { onEvent(InstalledListEvent.Import) } }
+                    text = {
+                        if (enabled) {
+                            Text(text = stringResource(id = R.string.import_action))
+                        }
+                    },
+                    icon = {
+                        if (!enabled) {
+                            CircularProgressIndicator()
+                        }
+                    },
+                    onClick = {
+                        if (enabled) {
+                            onEvent(InstalledListEvent.Import)
+                        }
+                    }
                 )
             }
         },
@@ -77,12 +89,12 @@ fun InstalledListScreen(
             val changelogUpdated by pagerFactory.changelogAdapter.updated.collectAsState(initial = false)
             val refreshKey = remember(screenState, changelogUpdated) {
                 RefreshKey(
-                        changelogUpdated = changelogUpdated,
-                        refreshRequest = screenState.refreshRequest,
-                        packageChanged = screenState.packageChanged,
-                        titleFilter = screenState.titleFilter,
-                        selectionMode = screenState.selectionMode,
-                        sortId = screenState.sortId
+                    changelogUpdated = changelogUpdated,
+                    refreshRequest = screenState.refreshRequest,
+                    packageChanged = screenState.packageChanged,
+                    titleFilter = screenState.titleFilter,
+                    selectionMode = screenState.selectionMode,
+                    sortId = screenState.sortId
                 )
             }
 
@@ -105,11 +117,10 @@ fun InstalledListScreen(
 }
 
 private data class RefreshKey(
-        val changelogUpdated: Boolean,
-        val refreshRequest: Int,
-        val packageChanged: String,
-        val titleFilter: String,
-        val selectionMode: Boolean,
-        val sortId: Int
+    val changelogUpdated: Boolean,
+    val refreshRequest: Int,
+    val packageChanged: String,
+    val titleFilter: String,
+    val selectionMode: Boolean,
+    val sortId: Int
 )
-

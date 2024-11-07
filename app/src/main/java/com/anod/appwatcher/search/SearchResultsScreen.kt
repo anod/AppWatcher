@@ -41,7 +41,6 @@ import androidx.paging.compose.itemKey
 import coil.ImageLoader
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
-import info.anodsplace.framework.content.CommonActivityAction
 import com.anod.appwatcher.compose.SearchTopBar
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.tags.TagSelectionDialog
@@ -52,6 +51,7 @@ import finsky.api.Document
 import finsky.protos.AppDetails
 import finsky.protos.DocDetails
 import finsky.protos.DocV2
+import info.anodsplace.framework.content.CommonActivityAction
 import info.anodsplace.framework.content.InstalledApps
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -93,10 +93,10 @@ fun SearchResultsScreen(
     ) { paddingValues ->
         val searchStatus = screenState.searchStatus
         Box(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize(),
-                contentAlignment = if (searchStatus is SearchStatus.DetailsAvailable || searchStatus is SearchStatus.SearchList) Alignment.TopStart else Alignment.Center
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize(),
+            contentAlignment = if (searchStatus is SearchStatus.DetailsAvailable || searchStatus is SearchStatus.SearchList) Alignment.TopStart else Alignment.Center
         ) {
             when (searchStatus) {
                 SearchStatus.Loading -> {
@@ -172,19 +172,17 @@ fun SearchResultsScreen(
     }
 }
 
-
-
 @Composable
 fun EmptyResult(query: String) {
     Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(start = 32.dp, end = 32.dp),
-            contentAlignment = Alignment.Center
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(start = 32.dp, end = 32.dp),
+        contentAlignment = Alignment.Center
     ) {
         Text(
-                text = if (query.isNotEmpty()) stringResource(R.string.no_result_found, query) else stringResource(R.string.search_for_app),
-                textAlign = TextAlign.Center
+            text = if (query.isNotEmpty()) stringResource(R.string.no_result_found, query) else stringResource(R.string.search_for_app),
+            textAlign = TextAlign.Center
         )
     }
 }
@@ -192,16 +190,16 @@ fun EmptyResult(query: String) {
 @Composable
 fun RetryButton(onRetryClick: () -> Unit, fillMaxSize: Boolean = false) {
     Column(
-            modifier = Modifier
-                .apply {
-                    if (fillMaxSize) fillMaxSize()
-                }
-                .padding(start = 32.dp, end = 32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier
+            .apply {
+                if (fillMaxSize) fillMaxSize()
+            }
+            .padding(start = 32.dp, end = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-                text = stringResource(id = R.string.problem_occurred),
-                textAlign = TextAlign.Center
+            text = stringResource(id = R.string.problem_occurred),
+            textAlign = TextAlign.Center
         )
         Button(onClick = onRetryClick) {
             Text(text = stringResource(id = R.string.retry))
@@ -221,11 +219,7 @@ fun SearchSingleResult(listItem: ListItem, onEvent: (SearchViewEvent) -> Unit, a
 }
 
 @Composable
-fun SearchResultsPage(
-    items: LazyPagingItems<ListItem>,
-    onEvent: (SearchViewEvent) -> Unit,
-    appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get()
-) {
+fun SearchResultsPage(items: LazyPagingItems<ListItem>, onEvent: (SearchViewEvent) -> Unit, appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get()) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -258,10 +252,10 @@ fun SearchResultsPage(
 
 @Composable
 @Preview
-fun LoadingStatePreview() {
+private fun LoadingStatePreview() {
     val appIconLoader = AppIconLoader.Simple(
-            LocalContext.current,
-            ImageLoader.Builder(LocalContext.current).build()
+        LocalContext.current,
+        ImageLoader.Builder(LocalContext.current).build()
     )
     AppTheme {
         SearchResultsScreen(
@@ -276,10 +270,10 @@ fun LoadingStatePreview() {
 
 @Composable
 @Preview
-fun EmptyStatePreview() {
+private fun EmptyStatePreview() {
     val appIconLoader = AppIconLoader.Simple(
-            LocalContext.current,
-            ImageLoader.Builder(LocalContext.current).build()
+        LocalContext.current,
+        ImageLoader.Builder(LocalContext.current).build()
     )
     AppTheme {
         SearchResultsScreen(
@@ -294,10 +288,10 @@ fun EmptyStatePreview() {
 
 @Composable
 @Preview
-fun RetryStatePreview() {
+private fun RetryStatePreview() {
     val appIconLoader = AppIconLoader.Simple(
-            LocalContext.current,
-            ImageLoader.Builder(LocalContext.current).build()
+        LocalContext.current,
+        ImageLoader.Builder(LocalContext.current).build()
     )
     AppTheme {
         SearchResultsScreen(
@@ -310,28 +304,27 @@ fun RetryStatePreview() {
     }
 }
 
-
 @Composable
 @Preview
-fun SearchSingleResultPreview() {
+private fun SearchSingleResultPreview() {
     val appIconLoader = AppIconLoader.Simple(
-            LocalContext.current,
-            ImageLoader.Builder(LocalContext.current).build()
+        LocalContext.current,
+        ImageLoader.Builder(LocalContext.current).build()
     )
     val doc = Document(
-            doc = DocV2.newBuilder().run {
-                title = "App Watcher"
-                creator = "Me"
-                details = DocDetails.newBuilder().run {
-                    appDetails = AppDetails.newBuilder().run {
-                        uploadDate = "25 Aug 2022"
-                        packageName = "info.anodsplace.appwatcher"
-                        build()
-                    }
+        doc = DocV2.newBuilder().run {
+            title = "App Watcher"
+            creator = "Me"
+            details = DocDetails.newBuilder().run {
+                appDetails = AppDetails.newBuilder().run {
+                    uploadDate = "25 Aug 2022"
+                    packageName = "info.anodsplace.appwatcher"
                     build()
                 }
                 build()
             }
+            build()
+        }
     )
     val app = App(doc, UploadDateParserCache())
     AppTheme {

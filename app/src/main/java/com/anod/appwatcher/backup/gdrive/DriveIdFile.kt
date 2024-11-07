@@ -4,8 +4,6 @@ import android.content.Context
 import com.anod.appwatcher.backup.DbJsonWriter
 import com.anod.appwatcher.database.AppsDatabase
 import info.anodsplace.applog.AppLog
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileInputStream
@@ -14,18 +12,21 @@ import java.io.FileReader
 import java.io.FileWriter
 import java.io.IOException
 import java.io.Reader
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * @author Alex Gavrishev
  * @date 26/06/2017
  */
 class DriveIdFile(
-        private val file: FileDescription,
-        private val driveClient: DriveService,
-        private val tempDir: File) {
+    private val file: FileDescription,
+    private val driveClient: DriveService,
+    private val tempDir: File
+) {
 
     constructor(file: FileDescription, driveClient: DriveService, context: Context)
-            : this(file, driveClient, context.cacheDir)
+        : this(file, driveClient, context.cacheDir)
 
     interface FileDescription {
         val fileName: String
@@ -40,10 +41,10 @@ class DriveIdFile(
         }
 
         val list = driveClient.queryAppDataFiles(
-                orderBy = "quotaBytesUsed desc",
-                mimeType = file.mimeType,
-                name = file.fileName,
-                space = GDriveSpace.AppData
+            orderBy = "quotaBytesUsed desc",
+            mimeType = file.mimeType,
+            name = file.fileName,
+            space = GDriveSpace.AppData
         )
         if (list.isEmpty() || list.files.isEmpty()) {
             AppLog.i("File not found " + file.fileName, "DriveIdFile")
@@ -58,9 +59,9 @@ class DriveIdFile(
         AppLog.i("Create a new file", "DriveIdFile")
 
         driveId = driveClient.createFile(
-                name = file.fileName,
-                mimeType = file.mimeType,
-                space = GDriveSpace.AppData)
+            name = file.fileName,
+            mimeType = file.mimeType,
+            space = GDriveSpace.AppData)
     }
 
     suspend fun write(writer: DbJsonWriter, db: AppsDatabase): Long = withContext(Dispatchers.IO) {

@@ -28,8 +28,6 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BackArrowIconButton
 import com.anod.appwatcher.compose.BaseComposeActivity
-import info.anodsplace.framework.content.CommonActivityAction
-import info.anodsplace.framework.content.onCommonActivityAction
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.Failed
 import com.anod.appwatcher.database.entities.New
@@ -37,12 +35,14 @@ import com.anod.appwatcher.database.entities.Schedule
 import com.anod.appwatcher.database.entities.Skipped
 import com.anod.appwatcher.database.entities.Success
 import com.anod.appwatcher.utils.isLightColor
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import info.anodsplace.framework.content.CommonActivityAction
+import info.anodsplace.framework.content.onCommonActivityAction
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 /**
  * @author Alex Gavrishev
@@ -187,7 +187,7 @@ private fun ScheduleRow(schedule: Schedule, dateFormat: DateFormat) {
 private fun ScheduleChip(text: String, color: Color) {
     SuggestionChip(
         label = { Text(text = text) },
-        onClick = {  },
+        onClick = { },
         colors = SuggestionChipDefaults.suggestionChipColors(
             containerColor = color,
             labelColor = if (color.isLightColor) Color.Black else Color.White

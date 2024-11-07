@@ -58,5 +58,4 @@ interface AppListFilter {
         override fun hashCode(): Int = hashCodeOf(filterId)
         override fun equals(other: Any?): Boolean = (other as? Installed)?.hashCode() == hashCode()
     }
-
 }

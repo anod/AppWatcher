@@ -17,11 +17,11 @@ import com.anod.appwatcher.utils.RealAppIconLoader
 import com.anod.appwatcher.utils.date.UploadDateParserCache
 import com.anod.appwatcher.watchlist.RecentlyInstalledAppsLoader
 import info.anodsplace.context.ApplicationContext
-import info.anodsplace.notification.NotificationManager
-import info.anodsplace.notification.RealNotificationManager
 import info.anodsplace.framework.content.PinShortcutManager
 import info.anodsplace.framework.net.NetworkConnectivity
 import info.anodsplace.ktx.createLruCache
+import info.anodsplace.notification.NotificationManager
+import info.anodsplace.notification.RealNotificationManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -35,7 +35,8 @@ import org.koin.dsl.module
 
 fun createAppModule(): Module = module {
     factory { getSystemService(get(), TelephonyManager::class.java) }
-    factory { PinShortcutManager(
+    factory {
+        PinShortcutManager(
             context = get(),
             androidShortcuts = getSystemService(get(), ShortcutManager::class.java)!!
         )
@@ -61,23 +62,22 @@ fun createAppModule(): Module = module {
     singleOf(::AuthTokenBlocking)
     single {
         ImageLoader.Builder(get())
-                .components {
-                    add(RealAppIconLoader.PackageIconFetcher.Factory(get()))
-                }
-                .build()
+            .components {
+                add(RealAppIconLoader.PackageIconFetcher.Factory(get()))
+            }
+            .build()
     }
     factory {
         UpdateCheck(
-                context = get(),
-                packageManager = get(),
-                notificationManager = get(),
-                database = get(),
-                authAccount = get(),
-                networkConnection = get(),
-                preferences = get(),
-                uploadDateParserCache = get(),
-                koin = getKoin()
+            context = get(),
+            packageManager = get(),
+            notificationManager = get(),
+            database = get(),
+            authAccount = get(),
+            networkConnection = get(),
+            preferences = get(),
+            uploadDateParserCache = get(),
+            koin = getKoin()
         )
     }
-
 }

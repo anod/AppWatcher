@@ -16,17 +16,16 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.compose.MainDetailScreen
-import info.anodsplace.framework.content.onCommonActivityAction
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.details.DetailsDialog
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.DetailContent
-import com.anod.appwatcher.watchlist.MainActivity
 import com.anod.appwatcher.watchlist.WatchListEvent
 import com.anod.appwatcher.watchlist.WatchListPagingSource
 import com.anod.appwatcher.watchlist.WatchListStateViewModel
 import info.anodsplace.framework.app.addMultiWindowFlags
+import info.anodsplace.framework.content.onCommonActivityAction
 import kotlinx.coroutines.launch
 
 class TagWatchListComposeActivity : BaseComposeActivity() {
@@ -47,10 +46,9 @@ class TagWatchListComposeActivity : BaseComposeActivity() {
                 derivedStateOf { Color(screenState.tag.color) }
             }
             AppTheme(
-                    customPrimaryColor = customPrimaryColor,
-                    theme = viewModel.prefs.theme
+                customPrimaryColor = customPrimaryColor,
+                theme = viewModel.prefs.theme
             ) {
-
                 val pagingSourceConfig = WatchListPagingSource.Config(
                     filterId = screenState.filterId,
                     tagId = screenState.tag.id,
@@ -61,22 +59,22 @@ class TagWatchListComposeActivity : BaseComposeActivity() {
 
                 if (screenState.wideLayout.isWideLayout) {
                     MainDetailScreen(
-                            wideLayout = screenState.wideLayout,
-                            main = {
-                                TagWatchListScreen(
-                                    screenState = screenState,
-                                    pagingSourceConfig = pagingSourceConfig,
-                                    onEvent = viewModel::handleEvent,
-                                    installedApps = viewModel.installedApps
-                                )
-                            },
-                            detail = {
-                                DetailContent(
-                                    app = screenState.selectedApp,
-                                    onDismissRequest = { viewModel.handleEvent(WatchListEvent.SelectApp(app = null)) },
-                                    onCommonActivityAction = { onCommonActivityAction(it) }
-                                )
-                            }
+                        wideLayout = screenState.wideLayout,
+                        main = {
+                            TagWatchListScreen(
+                                screenState = screenState,
+                                pagingSourceConfig = pagingSourceConfig,
+                                onEvent = viewModel::handleEvent,
+                                installedApps = viewModel.installedApps
+                            )
+                        },
+                        detail = {
+                            DetailContent(
+                                app = screenState.selectedApp,
+                                onDismissRequest = { viewModel.handleEvent(WatchListEvent.SelectApp(app = null)) },
+                                onCommonActivityAction = { onCommonActivityAction(it) }
+                            )
+                        }
                     )
                 } else {
                     TagWatchListScreen(
@@ -131,7 +129,9 @@ class TagWatchListComposeActivity : BaseComposeActivity() {
             } else {
                 super.onBackPressed()
             }
-        } else super.onBackPressed()
+        } else {
+            super.onBackPressed()
+        }
     }
 
     companion object {

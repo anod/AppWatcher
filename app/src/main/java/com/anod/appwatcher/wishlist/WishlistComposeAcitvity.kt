@@ -1,6 +1,5 @@
 package com.anod.appwatcher.wishlist
 
-import android.accounts.Account
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -11,14 +10,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.lifecycleScope
 import com.anod.appwatcher.R
-import com.anod.appwatcher.accounts.AuthAccount
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.compose.MainDetailScreen
-import info.anodsplace.framework.content.onCommonActivityAction
 import com.anod.appwatcher.details.DetailsDialog
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.DetailContent
+import info.anodsplace.framework.content.onCommonActivityAction
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 

@@ -6,14 +6,15 @@ import info.anodsplace.framework.content.AppTitleComparator
 import info.anodsplace.framework.content.AppUpdateTimeComparator
 import info.anodsplace.framework.content.InstalledPackageApp
 import info.anodsplace.framework.content.getInstalledApps
+import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.util.Locale
 
 class InstalledTaskWorker(
-        private val packageManager: PackageManager,
-        private val sortId: Int,
-        private val titleFilter: String) {
+    private val packageManager: PackageManager,
+    private val sortId: Int,
+    private val titleFilter: String
+) {
 
     suspend fun run(): List<InstalledPackageApp> = withContext(Dispatchers.Default) {
         val installedPackages = packageManager.getInstalledApps().toMutableList()

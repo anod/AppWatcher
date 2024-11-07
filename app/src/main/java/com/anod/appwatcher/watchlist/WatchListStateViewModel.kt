@@ -11,8 +11,6 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.widget.Toast
 import androidx.compose.runtime.Immutable
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
@@ -23,7 +21,6 @@ import com.anod.appwatcher.MarketSearchActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.toAndroidAccount
-import info.anodsplace.framework.content.CommonActivityAction
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
@@ -37,12 +34,12 @@ import com.anod.appwatcher.utils.appScope
 import com.anod.appwatcher.utils.color.MaterialColors
 import com.anod.appwatcher.utils.forMyApps
 import com.anod.appwatcher.utils.getInt
-import com.anod.appwatcher.utils.isLightColor
 import com.anod.appwatcher.utils.networkConnection
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.utils.syncProgressFlow
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.HingeDeviceLayout
+import info.anodsplace.framework.content.CommonActivityAction
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.PinShortcut
 import info.anodsplace.framework.content.PinShortcutManager
@@ -108,14 +105,14 @@ sealed interface WatchListEvent {
     class SectionHeaderClick(val type: SectionHeader) : WatchListEvent
 }
 
-private fun startActivityAction(intent: Intent, addMultiWindowFlags: Boolean = false) : CommonActivityAction.StartActivity {
+private fun startActivityAction(intent: Intent, addMultiWindowFlags: Boolean = false): CommonActivityAction.StartActivity {
     return CommonActivityAction.StartActivity(
         intent = intent,
         addMultiWindowFlags = addMultiWindowFlags
     )
 }
 
-private fun showToastAction(resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT) : CommonActivityAction.ShowToast {
+private fun showToastAction(resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT): CommonActivityAction.ShowToast {
     return CommonActivityAction.ShowToast(
         resId = resId,
         text = text,
@@ -151,11 +148,7 @@ class WatchListStateViewModel(
         private val collectRecentlyInstalledApps: Boolean
     ) : AbstractSavedStateViewModelFactory() {
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(
-            key: String,
-            modelClass: Class<T>,
-            handle: SavedStateHandle
-        ): T {
+        override fun <T : ViewModel> create(key: String, modelClass: Class<T>, handle: SavedStateHandle): T {
             return WatchListStateViewModel(
                 state = handle,
                 defaultFilterId = defaultFilterId,
@@ -173,7 +166,9 @@ class WatchListStateViewModel(
         val tag: Tag = if (extraTag == null) {
             val extraTagId: Int = state[EXTRA_TAG_ID] ?: 0
             if (extraTagId != 0) Tag(extraTagId, "", state[EXTRA_TAG_COLOR] ?: Tag.DEFAULT_COLOR) else Tag.empty
-        } else extraTag
+        } else {
+            extraTag
+        }
         viewState = WatchListSharedState(
             tag = tag,
             sortId = prefs.sortIndex,
@@ -193,7 +188,7 @@ class WatchListStateViewModel(
         }
 
         if (!viewState.tag.isEmpty) {
-             viewModelScope.launch {
+            viewModelScope.launch {
                 db.tags()
                     .observeTag(viewState.tag.id)
                     .collect { tag ->

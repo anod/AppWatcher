@@ -67,4 +67,3 @@ abstract class WatchListPagerFactory(val pagingSourceConfig: WatchListPagingSour
             }
     }
 }
-

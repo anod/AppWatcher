@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -48,8 +47,7 @@ fun MarketAppItem(
     isInstalled: Boolean,
     appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get()
 ) {
-    Box()
-    {
+    Box {
         Row(
             modifier = Modifier
                 .clickable(enabled = true, onClick = onClick)
@@ -57,7 +55,6 @@ fun MarketAppItem(
                 .padding(top = 8.dp, bottom = 8.dp, start = 16.dp, end = 16.dp)
                 .heightIn(min = 68.dp)
         ) {
-
             val imageRequest = remember(app.iconUrl) {
                 appIconLoader.request(app.iconUrl)
             }
@@ -125,10 +122,9 @@ fun MarketAppItem(
     }
 }
 
-
 @Composable
 @Preview(showBackground = true, showSystemUi = true)
-fun MarketAppItemPreview() {
+private fun MarketAppItemPreview() {
     val appIconLoader = AppIconLoader.Simple(
         LocalContext.current, ImageLoader.Builder(LocalContext.current).build()
     )

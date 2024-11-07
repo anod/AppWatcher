@@ -40,17 +40,21 @@ object MaterialColors {
      * @param isLightTheme Whether the input is light themed or not, true if light theme is enabled.
      */
     fun getColorRoles(@ColorInt color: Int, isLightTheme: Boolean): ColorRoles {
-        return if (isLightTheme) ColorRoles(
-            getColorRole(color, TONE_ACCENT_LIGHT),
-            getColorRole(color, TONE_ON_ACCENT_LIGHT),
-            getColorRole(color, TONE_ACCENT_CONTAINER_LIGHT),
-            getColorRole(color, TONE_ON_ACCENT_CONTAINER_LIGHT)
-        ) else ColorRoles(
-            getColorRole(color, TONE_ACCENT_DARK),
-            getColorRole(color, TONE_ON_ACCENT_DARK),
-            getColorRole(color, TONE_ACCENT_CONTAINER_DARK),
-            getColorRole(color, TONE_ON_ACCENT_CONTAINER_DARK)
-        )
+        return if (isLightTheme) {
+            ColorRoles(
+                getColorRole(color, TONE_ACCENT_LIGHT),
+                getColorRole(color, TONE_ON_ACCENT_LIGHT),
+                getColorRole(color, TONE_ACCENT_CONTAINER_LIGHT),
+                getColorRole(color, TONE_ON_ACCENT_CONTAINER_LIGHT)
+            )
+        } else {
+            ColorRoles(
+                getColorRole(color, TONE_ACCENT_DARK),
+                getColorRole(color, TONE_ON_ACCENT_DARK),
+                getColorRole(color, TONE_ACCENT_CONTAINER_DARK),
+                getColorRole(color, TONE_ON_ACCENT_CONTAINER_DARK)
+            )
+        }
     }
 
     @ColorInt

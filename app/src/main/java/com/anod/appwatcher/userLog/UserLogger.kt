@@ -15,9 +15,10 @@ interface Message {
 }
 
 data class UserLogMessage(
-        override val timestamp: String,
-        override val message: String,
-        override val level: Int) : Message {
+    override val timestamp: String,
+    override val message: String,
+    override val level: Int
+) : Message {
 
     companion object {
         fun from(logcatLine: String): UserLogMessage {

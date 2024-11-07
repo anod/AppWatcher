@@ -14,7 +14,6 @@ import com.anod.appwatcher.accounts.AuthAccountInitializer
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.accounts.toAndroidAccount
-import info.anodsplace.framework.content.CommonActivityAction
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.preferences.Preferences
@@ -25,6 +24,7 @@ import com.anod.appwatcher.utils.networkConnection
 import com.anod.appwatcher.utils.prefs
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import info.anodsplace.applog.AppLog
+import info.anodsplace.framework.content.CommonActivityAction
 import info.anodsplace.ktx.Hash
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -66,7 +66,7 @@ sealed interface MainViewAction {
     class DrawerState(val isOpen: Boolean) : MainViewAction
 }
 
-private fun startActivityAction(intent: Intent, addMultiWindowFlags: Boolean = false) : MainViewAction.ActivityAction {
+private fun startActivityAction(intent: Intent, addMultiWindowFlags: Boolean = false): MainViewAction.ActivityAction {
     return MainViewAction.ActivityAction(
         action = CommonActivityAction.StartActivity(
             intent = intent,
@@ -75,7 +75,7 @@ private fun startActivityAction(intent: Intent, addMultiWindowFlags: Boolean = f
     )
 }
 
-private fun showToastAction(@StringRes resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT) : MainViewAction.ActivityAction {
+private fun showToastAction(@StringRes resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT): MainViewAction.ActivityAction {
     return MainViewAction.ActivityAction(
         action = CommonActivityAction.ShowToast(
             resId = resId,
@@ -108,9 +108,11 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
                     val result: TagCountList = tags.map { Pair(it, tagCounts[it.id] ?: 0) }
                     if (tags.isNotEmpty() && emptyCount > 0) {
                         result.toMutableList().also {
-                            it.add(0, Pair(Tag.empty, emptyCount) )
+                            it.add(0, Pair(Tag.empty, emptyCount))
                         }
-                    } else result
+                    } else {
+                        result
+                    }
                 }.collect { tags ->
                     viewState = viewState.copy(tags = tags)
                 }
@@ -160,7 +162,7 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
         if (viewState.accountInitializedRetries < 1) {
             return
         }
-        val account =  prefs.account?.toAndroidAccount() ?: return
+        val account = prefs.account?.toAndroidAccount() ?: return
         onAccountSelect(account)
     }
 
@@ -233,7 +235,6 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
         }
     }
 
-
     private fun upgradeCheck() {
         val result = UpgradeCheck(prefs).result
         if (!result.isNewVersion) {
@@ -244,5 +245,4 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
             upgrade.onUpgrade(result)
         }
     }
-
 }

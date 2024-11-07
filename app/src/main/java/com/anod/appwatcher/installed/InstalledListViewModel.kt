@@ -1,6 +1,5 @@
 package com.anod.appwatcher.installed
 
-import android.accounts.Account
 import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.widget.Toast
@@ -12,7 +11,6 @@ import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.CheckTokenError
 import com.anod.appwatcher.accounts.CheckTokenResult
 import com.anod.appwatcher.accounts.toAndroidAccount
-import info.anodsplace.framework.content.CommonActivityAction
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.PackageChangedReceiver
@@ -23,6 +21,7 @@ import com.anod.appwatcher.utils.networkConnection
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.WatchListEvent
 import info.anodsplace.framework.app.HingeDeviceLayout
+import info.anodsplace.framework.content.CommonActivityAction
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.getInstalledPackagesCodes
 import kotlinx.coroutines.Dispatchers
@@ -144,11 +143,13 @@ class InstalledListViewModel(state: SavedStateHandle) : BaseFlowViewModel<Instal
             } else {
                 emitAction(CommonActivityAction.Finish)
             }
-        } else emitAction(CommonActivityAction.Finish)
+        } else {
+            emitAction(CommonActivityAction.Finish)
+        }
     }
 
     private fun handleListEvent(listEvent: WatchListEvent) {
-        when(listEvent) {
+        when (listEvent) {
             is WatchListEvent.AppClick -> {
                 if (viewState.selectionMode) {
                     if (listEvent.app.rowId == -1) {

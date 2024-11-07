@@ -15,5 +15,4 @@ object LogCat {
             process.destroy()
         }
     }
-
 }
