@@ -22,6 +22,8 @@ google-services = "4.4.2"
 junit = "4.13.2"
 koin-core = "4.0.0"
 kotlin = "2.0.21"
+ktlint-gradle = "12.1.1"
+ktlint-compose = "0.4.3"
 coroutines = "1.9.0"
 leakcanary-android = "2.11"
 lifecycle = "2.8.6"
@@ -86,6 +88,7 @@ google-services = { module = "com.google.gms:google-services", version.ref = "go
 junit = { module = "junit:junit", version.ref = "junit" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin-core" }
 kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
+ktlint-compose = { group = "io.nlopez.compose.rules", name = "ktlint", version.ref = "ktlint-compose" }
 
 leakcanary-android = { module = "com.squareup.leakcanary:leakcanary-android", version.ref = "leakcanary-android" }
 
@@ -118,3 +121,4 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 room = { id = "androidx.room", version.ref = "room" }
+ktlint-gradle = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint-gradle" }

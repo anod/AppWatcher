@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.room)
+    alias(libs.plugins.ktlint.gradle)
     id("kotlin-parcelize")
     id("com.google.android.gms.oss-licenses-plugin")
 }
@@ -96,6 +97,7 @@ kotlin {
 }
 
 dependencies {
+    ktlintRuleset(libs.ktlint.compose)
     // AndroidX
     implementation(libs.androidx.appcompat) // AppCompatActivity
     implementation(libs.androidx.palette)

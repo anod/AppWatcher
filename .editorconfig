@@ -1,0 +1,24 @@
+[*]
+charset = utf-8
+end_of_line = lf
+indent_size = 4
+indent_style = space
+insert_final_newline = false
+max_line_length = 100
+tab_width = 4
+ij_continuation_indent_size = 8
+ij_formatter_off_tag = @formatter:off
+ij_formatter_on_tag = @formatter:on
+ij_formatter_tags_enabled = true
+ij_smart_tabs = false
+ij_visual_guides = unset
+ij_wrap_on_typing = false
+
+[*.{kt,kts}]
+max_line_length = 200
+ktlint_code_style = android_studio
+ktlint_function_naming_ignore_when_annotated_with=Composable
+ktlint_standard_trailing-comma-on-call-site = disabled
+ktlint_standard_trailing-comma-on-declaration-site = disabled
+ktlint_standard_wrapping = disabled
+ktlint_standard_argument-list-wrapping = disabled

@@ -1,6 +1,5 @@
 package com.anod.appwatcher.details
 
-import android.accounts.Account
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -8,7 +7,6 @@ import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.text.format.Formatter
 import androidx.annotation.StringRes
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -22,7 +20,6 @@ import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.accounts.CheckTokenResult
 import com.anod.appwatcher.accounts.toAndroidAccount
-import info.anodsplace.framework.content.CommonActivityAction
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppTagsTable
 import com.anod.appwatcher.database.AppsDatabase
@@ -39,6 +36,7 @@ import finsky.api.DfeApi
 import finsky.api.Document
 import finsky.api.toDocument
 import info.anodsplace.applog.AppLog
+import info.anodsplace.framework.content.CommonActivityAction
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.forAppInfo
 import info.anodsplace.framework.content.forUninstall
